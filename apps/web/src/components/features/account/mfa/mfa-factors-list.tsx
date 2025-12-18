@@ -6,8 +6,11 @@
 'use client';
 
 import { listMFAFactors, type MFAFactor, unenrollMFAFactor } from '@heyclaude/web-runtime/auth/mfa';
-import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
-import { useLoggedAsync, useIsMounted, useBoolean } from '@heyclaude/web-runtime/hooks';
+import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/supabase/browser';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
+import { useIsMounted } from '@heyclaude/web-runtime/hooks/use-is-mounted';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { AlertTriangle, CheckCircle, Loader2, Shield, Trash } from '@heyclaude/web-runtime/icons';
 import {
   errorToasts,
@@ -205,7 +208,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
                     <p>Phone: {factor.phone}</p>
                   ) : null}
                   <p className="text-xs">
-                    Added: {new Date(factor.created_at).toLocaleDateString()}
+                    Added: {formatDate(factor.created_at)}
                   </p>
                 </div>
               </div>

@@ -29,7 +29,7 @@ import {
   CommandShortcut,
 } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useMemo } from 'react';
-import { useBoolean } from '../../hooks/index.ts';
+import { useBoolean } from '../../hooks/use-boolean.ts';
 
 import { useSearchContext } from '../context/search-provider';
 

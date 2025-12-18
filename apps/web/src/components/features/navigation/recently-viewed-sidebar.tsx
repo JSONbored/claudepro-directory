@@ -29,9 +29,9 @@ import {
   type RecentlyViewedItem,
   useRecentlyViewed,
   getCategoryRoute,
-} from '@heyclaude/web-runtime/hooks';
-import { getCategoryConfig } from '@heyclaude/web-runtime/data';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
+} from '@heyclaude/web-runtime/hooks/use-recently-viewed';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { ChevronDown, ChevronUp, Clock, Trash, X } from '@heyclaude/web-runtime/icons';
 import {
   cn,
@@ -43,7 +43,7 @@ import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { memo, type MouseEvent } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 // =============================================================================
 // ITEM COMPONENT
@@ -79,7 +79,10 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
   else if (diffHours < 24) timeAgo = `${diffHours}h ago`;
   else if (diffDays === 1) timeAgo = 'Yesterday';
   else if (diffDays < 7) timeAgo = `${diffDays}d ago`;
-  else timeAgo = viewedDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  else {
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    timeAgo = `${monthNames[viewedDate.getUTCMonth()]} ${viewedDate.getUTCDate()}`;
+  }
 
   return (
     <motion.div

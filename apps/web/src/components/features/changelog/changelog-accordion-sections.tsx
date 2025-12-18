@@ -18,7 +18,7 @@ import {
   cn,
 } from '@heyclaude/web-runtime/ui';
 import { memo, useState, useEffect } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 import { SanitizedHTML } from './sanitized-html';
 

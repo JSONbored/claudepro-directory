@@ -6,7 +6,7 @@
  * - Serializers (error formatting)
  * - Formatters (log structure)
  * - Base context (environment, service info)
- * - Timestamp format
+ * - Timestamp handling (disabled by default - platforms add timestamps automatically)
  * - Log levels
  * - Transport configuration (for external log services)
  * 
@@ -657,7 +657,7 @@ export interface PinoConfigOptions {
    *     return {
    *       operation: bindings.operation,
    *       userId: bindings.userId,
-   *       timestamp: Date.now()
+   *       // Timestamps disabled by default (platforms add them)
    *     };
    *   }
    * });
@@ -944,21 +944,35 @@ export interface PinoConfigOptions {
   /**
    * Timestamp formatter function
    * 
-   * @default pino.stdTimeFunctions.isoTime (ISO 8601 format)
+   * @default false (timestamps disabled - platforms add them automatically)
    * 
    * @remarks
-   * Set to `false` to disable timestamps entirely.
-   * Use `pino.stdTimeFunctions.epochTime` for Unix epoch (milliseconds).
-   * Use `pino.stdTimeFunctions.isoTime` for ISO 8601 (recommended for external services).
-   * Use `pino.stdTimeFunctions.isoTimeNano` for nanosecond precision (overkill for most cases).
+   * **Timestamps are disabled by default** because:
+   * - Vercel automatically adds ingestion timestamps to all logs
+   * - Axiom automatically adds ingestion timestamps to all logs
+   * - Datadog and other platforms also add ingestion timestamps
+   * - Application-level timestamps can cause clock skew/timezone issues
+   * - Eliminates Date.now() calls (prevents Next.js build-time errors)
    * 
-   * **Performance:** Timestamp generation is very fast (minimal overhead).
+   * **Best Practice:** Let the logging platform handle timestamps.
+   * They have accurate, synchronized clocks and handle timezones correctly.
+   * 
+   * **If you need application-level timestamps** (rare):
+   * - Use `pino.stdTimeFunctions.epochTime` for Unix epoch (milliseconds)
+   * - Use `pino.stdTimeFunctions.isoTime` for ISO 8601
+   * - Use `pino.stdTimeFunctions.isoTimeNano` for nanosecond precision
+   * 
+   * **Performance:** Timestamp generation is fast, but disabling eliminates Date.now() calls entirely.
    * 
    * @example
    * ```typescript
+   * // Default: No timestamps (platform adds them)
+   * const logger = createLogger();
+   * 
+   * // Custom: Enable timestamps (rarely needed)
    * import { stdTimeFunctions } from 'pino';
    * const logger = createLogger({
-   *   timestamp: stdTimeFunctions.epochTime // Unix timestamp
+   *   timestamp: stdTimeFunctions.isoTime
    * });
    * ```
    * 
@@ -1795,7 +1809,10 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
     // Core Configuration
     level: options?.level ?? (loggerVerbose ? 'debug' : 'info'),
     base: baseContext,
-    timestamp: options?.timestamp ?? pino.stdTimeFunctions.isoTime,
+    // Timestamps disabled by default - logging platforms (Vercel, Axiom, etc.) add them automatically
+    // This eliminates Date.now() calls entirely and follows best practices
+    // Users can override with options?.timestamp if they need application-level timestamps
+    timestamp: options?.timestamp ?? false,
 
     // Redaction
     redact: redactConfig,

@@ -37,8 +37,6 @@ const NEXT_PUBLIC_ENV_VARS: EnvRecord = {
   NEXT_PUBLIC_APP_URL: process.env['NEXT_PUBLIC_APP_URL'],
   // Edge functions
   NEXT_PUBLIC_FLUX_STATION_URL: process.env['NEXT_PUBLIC_FLUX_STATION_URL'],
-  // Vercel platform
-  NEXT_PUBLIC_VERCEL_PROJECT_ID: process.env['NEXT_PUBLIC_VERCEL_PROJECT_ID'],
   // Logging (for client-side logger config)
   NEXT_PUBLIC_LOGGER_CONSOLE: process.env['NEXT_PUBLIC_LOGGER_CONSOLE'],
   NEXT_PUBLIC_LOGGER_VERBOSE: process.env['NEXT_PUBLIC_LOGGER_VERBOSE'],

@@ -22,14 +22,15 @@
  * - Responsive design
  */
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { generatePageMetadata, getChangelogEntryBySlug } from '@heyclaude/web-runtime/data';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getChangelogEntryBySlug } from '@heyclaude/web-runtime/data/changelog';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Breadcrumbs, NavLink, Separator } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import { type Metadata } from 'next';
-import { cacheLife } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 
@@ -52,6 +53,7 @@ import ChangelogEntryLoading from './loading';
  * @see STATIC_GENERATION_LIMITS
  */
 export async function generateStaticParams() {
+  'use cache';
   // Import shared constant for consistency across changelog pages
   const { STATIC_GENERATION_LIMITS } = await import('@heyclaude/web-runtime/data/config/constants');
 
@@ -65,7 +67,7 @@ export async function generateStaticParams() {
   try {
     // OPTIMIZATION: Use Prisma directly to get only slugs needed for static generation
     // This avoids unnecessary RPC function calls and data processing
-    const { getPublishedChangelogSlugs } = await import('@heyclaude/web-runtime/data');
+    const { getPublishedChangelogSlugs } = await import('@heyclaude/web-runtime/data/changelog');
     const limit = Math.max(0, STATIC_GENERATION_LIMITS.changelog);
     const slugs = await getPublishedChangelogSlugs(limit);
     const params = (slugs ?? []).map((slug) => ({ slug }));
@@ -115,7 +117,15 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
+  'use cache';
   const { slug } = await params;
+  
+  // Dynamic route - metadata changes when changelog entry changes
+  // Use long cache with content-based invalidation
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTag('seo-metadata');
+  cacheTag(`seo-metadata-changelog-${slug}`);
+  cacheTag(`changelog-${slug}`); // Invalidated when changelog entry changes
 
   // Create request-scoped child logger
   const metadataLogger = logger.child({

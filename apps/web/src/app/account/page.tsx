@@ -1,10 +1,8 @@
 import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
-import { ensureStringArray } from '@heyclaude/web-runtime/core';
-import {
-  generatePageMetadata,
-  getAccountDashboardBundle,
-  getAuthenticatedUser,
-} from '@heyclaude/web-runtime/data';
+import { ensureStringArray } from '@heyclaude/web-runtime/utils/content-helpers';
+import { getAccountDashboardBundle } from '@heyclaude/web-runtime/data/account';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getContentDetailCore } from '@heyclaude/web-runtime/data/content/detail';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
@@ -23,7 +21,6 @@ import {
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { SignInButton } from '@/src/components/core/auth/sign-in-button';
@@ -47,9 +44,7 @@ import Loading from './loading';
  */
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   return generatePageMetadata('/account');
 }
 
@@ -71,6 +66,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AccountDashboard() {
   'use cache: private';
   cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
+
+  // Defer to request time before using non-deterministic operations (Date.now())
+  const { connection } = await import('next/server');
+  await connection();
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
@@ -175,10 +174,6 @@ function DashboardHeaderAndStats({
   bundleData: NonNullable<Awaited<ReturnType<typeof getAccountDashboardBundle>>>;
   userLogger: ReturnType<typeof logger.child>;
 }) {
-  // Calculate timestamp - safe to use Date.now() here because parent function uses 'use cache: private'
-  // which ensures this runs at request time, not during prerendering
-  const currentTimestamp = Date.now();
-
   const dashboardData = bundleData.dashboard;
   const libraryData = bundleData.library;
 
@@ -213,13 +208,9 @@ function DashboardHeaderAndStats({
 
   const { bookmark_count, profile } = dashboardData;
   const bookmarkCount = bookmark_count;
-  // Calculate account age in days - use timestamp calculated at request time (after connection())
-  // to ensure purity
-  const accountAge = profile?.created_at
-    ? Math.floor(
-        (currentTimestamp - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24)
-      )
-    : 0;
+  // Account age is now calculated in database using SQL (eliminates Date.now() usage)
+  // Type assertion needed because account_age is added at service layer, not in database composite type
+  const accountAge = (profile as { account_age?: number } | null)?.account_age ?? 0;
 
   const bookmarks = (libraryData?.bookmarks ?? []).filter(
     (bookmark) => bookmark.content_slug !== null && bookmark.content_type !== null

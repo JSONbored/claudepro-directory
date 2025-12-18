@@ -25,17 +25,16 @@
 
 import 'server-only';
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import {
-  createApiOptionsHandler,
+  createOptionsHandler as createApiOptionsHandler,
   createFormatHandlerRoute,
-  feedQuerySchema,
-  getOnlyCorsHeaders,
-  getVersionedRoute,
-  xmlResponse,
   type FormatHandlerConfig,
   type RouteHandlerContext,
-} from '@heyclaude/web-runtime/server';
+} from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getOnlyCorsHeaders, xmlResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { feedQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 
 const FEED_LIMIT = 50;
 

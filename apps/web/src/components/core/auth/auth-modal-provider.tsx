@@ -18,7 +18,9 @@
  */
 
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
-import { useBoolean, useIsClient, useTimeout } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
+import { useTimeout } from '@heyclaude/web-runtime/hooks/use-timeout';
 
 import { AuthModal } from './auth-modal';
 

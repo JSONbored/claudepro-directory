@@ -17,6 +17,7 @@
  * @see {@link ../logging/server | Server Logging Barrel} - Server-side logging utilities
  */
 
+import { normalizeError as normalizeErrorImpl } from '@heyclaude/shared-runtime';
 import { logger, type LogContextValue } from './logger.ts';
 
 type LoggerContext = Record<string, LogContextValue>;
@@ -45,25 +46,20 @@ function sanitizeContext(context: ContextInput): LoggerContext | undefined {
  * - **Client components**: Import from {@link ../logging/client | Client Logging Barrel}
  * - **Server components**: Import from {@link ../logging/server | Server Logging Barrel}
  * 
- * @param error - Unknown error value (Error, string, object, etc.)
+ * **Implementation:**
+ * - Re-exports `normalizeError` from `@heyclaude/shared-runtime`
+ * - Provides full PostgrestError handling and proper error normalization
+ * 
+ * @param error - Unknown error value (Error, string, object, PostgrestError, etc.)
  * @param fallbackMessage - Fallback message if error cannot be converted
  * @returns Normalized Error object
  * 
  * @see {@link ../logging/client | Client Logging Barrel} - Client-side logging utilities
  * @see {@link ../logging/server | Server Logging Barrel} - Server-side logging utilities
+ * @see {@link @heyclaude/shared-runtime | Shared Runtime} - Full implementation
  */
 export function normalizeError(error: unknown, fallbackMessage = 'Unknown error'): Error {
-  if (error instanceof Error) {
-    return error;
-  }
-  if (typeof error === 'string') {
-    return new Error(error);
-  }
-  try {
-    return new Error(JSON.stringify(error));
-  } catch {
-    return new Error(fallbackMessage);
-  }
+  return normalizeErrorImpl(error, fallbackMessage);
 }
 
 export function logActionFailure(

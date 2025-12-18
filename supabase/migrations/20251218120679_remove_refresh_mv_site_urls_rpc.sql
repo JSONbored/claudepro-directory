@@ -1,0 +1,22 @@
+-- Migration: Remove refresh_mv_site_urls RPC function
+-- Version: 20251218120679
+-- Applied via: Supabase MCP
+-- Date: 2025-12-18
+--
+-- Description: Remove refresh_mv_site_urls RPC function - not found in codebase
+--
+-- This function refreshed the mv_site_urls materialized view.
+-- Function signature: refresh_mv_site_urls()
+--
+-- Verification:
+-- - Not found in packages/data-layer/src/services/ (no service method calls)
+-- - Not found in packages/web-runtime/src/data/ (no data fetching calls)
+-- - Not found in packages/web-runtime/src/actions/ (no action calls)
+-- - Not found in apps/web/src/app/ (no page usage)
+-- - Not found in apps/edge/ (no edge function usage)
+--
+-- Note: Materialized view refreshes are likely handled by triggers or pg_cron
+--
+-- Safe to remove: No codebase references found
+
+DROP FUNCTION IF EXISTS public.refresh_mv_site_urls();

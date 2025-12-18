@@ -2,7 +2,7 @@
 
 import { VALID_PROVIDERS } from '@heyclaude/web-runtime/auth/oauth-providers';
 import { ensureString } from '@heyclaude/web-runtime/data/utils';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { useEffect, useMemo, useState } from 'react';
 

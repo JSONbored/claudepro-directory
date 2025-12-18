@@ -8,7 +8,8 @@
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { type JobStatus } from '@heyclaude/web-runtime/ui/constants';
 import { toggleJobStatus } from '@heyclaude/web-runtime/actions/toggle-job-status';
-import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
 import { Pause, Play } from '@heyclaude/web-runtime/icons';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, Button } from '@heyclaude/web-runtime/ui';

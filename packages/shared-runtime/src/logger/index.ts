@@ -48,15 +48,13 @@
  *    reqLogger.info({ section: 'data-loading' }, 'Loading data');
  *    ```
  * 
- * 3. **Custom Logger Instances (Special Cases)**
+ * 3. **Custom Logger Instances (Rare Cases)**
  *    - Use `createLogger()` to create NEW logger instances with custom config
- *    - Use cases: different service names, cache-safe logging, custom levels
+ *    - Use cases: enabling timestamps (if needed), custom levels
  *    ```typescript
- *    // Cache-safe logger (no timestamps - for cached components)
- *    const cacheLogger = createLogger({ timestamp: false });
- *    
- *    // Custom service logger
- *    const serviceLogger = createLogger({ service: 'my-service' });
+ *    // Enable timestamps (rarely needed - platforms add them automatically)
+ *    import { stdTimeFunctions } from 'pino';
+ *    const loggerWithTimestamps = createLogger({ timestamp: stdTimeFunctions.isoTime });
  *    ```
  * 
  * **Important Distinctions:**
@@ -171,10 +169,12 @@ function createVercelCompatibleDestination(): pino.DestinationStream | undefined
  * 
  * **When to Use `createLogger()`:**
  * 
- * ✅ **ONLY for cache-safe logging** (cached components that can't use Date.now())
+ * ✅ **Rarely needed** - The default logger already has timestamps disabled (platforms add them)
+ *    - Only use if you need to enable application-level timestamps (rare)
  *    ```typescript
- *    // For cached Next.js components
- *    const cacheLogger = createLogger({ timestamp: false });
+ *    // Enable timestamps (rarely needed)
+ *    import { stdTimeFunctions } from 'pino';
+ *    const loggerWithTimestamps = createLogger({ timestamp: stdTimeFunctions.isoTime });
  *    ```
  * 
  * **When NOT to Use `createLogger()`:**
@@ -194,17 +194,15 @@ function createVercelCompatibleDestination(): pino.DestinationStream | undefined
  * **Examples:**
  * 
  * ```typescript
- * // ✅ CORRECT: Cache-safe logger for cached components
- * import { createLogger, normalizeError } from '@heyclaude/shared-runtime/logger';
- * 
- * const cacheLogger = createLogger({ timestamp: false });
+ * // ✅ CORRECT: Use default logger (timestamps already disabled)
+ * import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
  * 
  * export default async function CachedPage() {
  *   try {
  *     // ...
  *   } catch (error) {
  *     const normalized = normalizeError(error, 'Page failed');
- *     cacheLogger.error({ err: normalized }, 'Page failed');
+ *     logger.error({ err: normalized }, 'Page failed');
  *   }
  * }
  * ```
@@ -217,7 +215,7 @@ function createVercelCompatibleDestination(): pino.DestinationStream | undefined
  * const reqLogger = logger.child({ operation: 'MyPage', route: '/my-page' });
  * ```
  * 
- * @param {Parameters<typeof createPinoConfig>[0]} options - Optional Pino configuration overrides. **Only use `{ timestamp: false }` for cache-safe logging.**
+ * @param {Parameters<typeof createPinoConfig>[0]} options - Optional Pino configuration overrides. **Timestamps are disabled by default (platforms add them). Only enable if you need application-level timestamps.**
  * @param {pino.DestinationStream} [destination] - Optional Pino destination stream (e.g., `pino.destination()` or `pino.multistream()`); when provided it is passed directly to `pino(config, destination)`.
  * @returns {pino.Logger} A Pino logger instance configured with the provided options and destination (or the module's default/vercel-compatible destination when `destination` is not supplied).
  *
@@ -399,7 +397,7 @@ export function createLogger(
  * 
  * **When NOT to Use:**
  * - ❌ Request-scoped logging → Use `logger.child({ context })` instead
- * - ❌ Cache-safe logging → Use `createLogger({ timestamp: false })` instead
+ * - ❌ Cache-safe logging → Default logger is already cache-safe (timestamps disabled)
  * - ❌ Custom service names → Use `createLogger({ service: 'name' })` instead
  * 
  * **Basic Usage:**
@@ -834,23 +832,21 @@ export function normalizeError(error: unknown, fallbackMessage = 'Unknown error'
  * }
  * ```
  * 
- * **Pattern 4: Cached Components (Cache-Safe Logging)**
+ * **Pattern 4: Cached Components (Default Logger is Cache-Safe)**
  * 
- * Use `createLogger({ timestamp: false })` to avoid Date.now() in cached components:
+ * The default logger already has timestamps disabled, so it's safe for cached components:
  * 
  * ```typescript
- * import { createLogger, normalizeError } from '@heyclaude/shared-runtime/logger';
+ * import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
  * 
- * // Create cache-safe logger (no timestamps)
- * const cacheLogger = createLogger({ timestamp: false });
- * 
+ * // Default logger is cache-safe (no timestamps, no Date.now() calls)
  * export default async function CachedPage() {
  *   try {
  *     const data = await fetchData();
  *     return <div>{data}</div>;
  *   } catch (error) {
  *     const normalized = normalizeError(error, 'Page failed');
- *     cacheLogger.error({ err: normalized }, 'Page failed');
+ *     logger.error({ err: normalized }, 'Page failed');
  *     throw normalized;
  *   }
  * }

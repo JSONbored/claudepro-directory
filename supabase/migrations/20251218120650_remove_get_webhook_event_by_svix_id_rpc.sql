@@ -1,0 +1,23 @@
+-- Migration: Remove get_webhook_event_by_svix_id RPC function
+-- Version: 20251218120650
+-- Applied via: Supabase MCP
+-- Date: 2025-12-18
+--
+-- Description: Remove get_webhook_event_by_svix_id RPC function - converted to Prisma direct query
+--
+-- This function was a simple SELECT with WHERE filters:
+--   SELECT id FROM webhook_events WHERE svix_id = p_svix_id AND source = p_source
+--
+-- The service now uses Prisma directly in MiscService.getWebhookEventBySvixId():
+--   prisma.webhook_events.findFirst({
+--     where: {
+--       svix_id: args.p_svix_id,
+--       source: args.p_source as webhook_source,
+--     },
+--     select: { id: true },
+--   })
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/misc.ts: Converted getWebhookEventBySvixId() to use Prisma
+
+DROP FUNCTION IF EXISTS public.get_webhook_event_by_svix_id(text, text);

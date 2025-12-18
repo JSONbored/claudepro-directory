@@ -2,12 +2,12 @@
  * Create Company Page - Standalone company creation flow
  */
 
-import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { connection } from 'next/server';
 import { lazy, Suspense } from 'react';
 
 import Loading from './loading';
@@ -34,9 +34,7 @@ const CompanyForm = lazy(() =>
  * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   return generatePageMetadata('/account/companies/new');
 }
 

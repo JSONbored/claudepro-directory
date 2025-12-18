@@ -1,22 +1,19 @@
-'use server';
+import 'server-only';
 
 import { type GetHomepageOptimizedReturns } from '@heyclaude/database-types/postgres-types';
 
-import { createCachedDataFunction, generateResourceTags } from '../cached-data-factory.ts';
+import { createDataFunction } from '../cached-data-factory.ts';
 
 /**
  * Get homepage data
- * Uses 'use cache' to cache homepage data. This data is public and same for all users.
+ * Simple data fetching function - pages control caching with 'use cache' directive
  */
-export const getHomepageData = createCachedDataFunction<
+export const getHomepageData = createDataFunction<
   readonly string[],
   GetHomepageOptimizedReturns | null
 >({
   serviceKey: 'content',
   methodName: 'getHomepageOptimized',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
-  cacheTags: () => generateResourceTags('homepage', undefined, ['content', 'trending']),
   module: 'data/content/homepage',
   operation: 'getHomepageData',
   transformArgs: (categoryIds) => ({

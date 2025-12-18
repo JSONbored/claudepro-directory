@@ -17,10 +17,10 @@ import { extractCodeBlocksFromMarkdown, type ExtractedCodeBlock } from '@heyclau
 import {
   ensureStringArray,
   getMetadata,
-  isValidCategory,
-  transformMcpConfigForDisplay,
-} from '@heyclaude/web-runtime/core';
-import { getCategoryConfig } from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/utils/content-helpers';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { transformMcpConfigForDisplay } from '@heyclaude/web-runtime/content';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   type ContentItem,
@@ -32,6 +32,7 @@ import { getDisplayTitle, getViewTransitionName } from '@heyclaude/web-runtime/u
 import { Suspense } from 'react';
 
 import { TabbedDetailLayout } from '@/src/components/content/detail-tabs/tabbed-detail-layout';
+import type { SerializableActionType } from '@/src/components/content/detail-page/detail-header-actions';
 import dynamic from 'next/dynamic';
 
 // Lazy load large components to reduce initial bundle size
@@ -1032,12 +1033,27 @@ export async function UnifiedDetailPage({
     );
   }
 
-  // Extract only serializable fields from config for client components
-  // The icon field is a React component and cannot be serialized
-  // TabbedDetailLayout requires UnifiedCategoryConfig but only uses typeName and sections
-  // Since TabbedDetailLayout is a client component, we pass the full config
-  // but the icon will be ignored during serialization (Next.js handles this)
-  const serializableConfig = config;
+  // ARCHITECTURAL FIX: Extract only the serializable data TabbedDetailLayout actually needs
+  // TabbedDetailLayout is a client component, so we can only pass serializable props
+  // It only uses: typeName (string) and sections (plain object)
+  // We don't pass the entire config (which contains React components and functions)
+  const tabbedLayoutConfig: {
+    typeName: string;
+    sections: {
+      description: boolean;
+      features: boolean;
+      installation: boolean;
+      use_cases: boolean;
+      configuration: boolean;
+      security: boolean;
+      troubleshooting: boolean;
+      examples: boolean;
+      requirements: boolean;
+    };
+  } = {
+    typeName: config.typeName,
+    sections: config.sections,
+  };
 
   // Check if we should use tabbed layout
   const configuredTabs = config.detailPage?.tabs;
@@ -1064,8 +1080,21 @@ export async function UnifiedDetailPage({
         <DetailHeader
           displayTitle={displayTitle}
           item={item}
-          // Pass full config - DetailHeader is a server component and can accept the full UnifiedCategoryConfig
-          config={config}
+          // ARCHITECTURAL FIX: Only pass serializable data DetailHeader actually needs
+          // Convert primary_action_type to SerializableActionType (they're compatible)
+          config={{
+            typeName: config.typeName,
+            primaryAction: {
+              label: config.primaryAction.label,
+              type: config.primaryAction.type as SerializableActionType,
+            },
+            ...(config.secondaryActions && {
+              secondaryActions: config.secondaryActions.map((action) => ({
+                label: action.label,
+                type: action.type as SerializableActionType,
+              })),
+            }),
+          }}
         />
         {viewCountPromise ? (
           <Suspense
@@ -1092,8 +1121,7 @@ export async function UnifiedDetailPage({
             <div className="lg:col-span-2">
               <TabbedDetailLayout
                 item={item}
-                // Type narrowing: serializableConfig is compatible subset of config
-          config={serializableConfig}
+                config={tabbedLayoutConfig}
                 tabs={configuredTabs}
                 sectionData={sectionData}
                 relatedItems={relatedItems}
@@ -1167,8 +1195,21 @@ export async function UnifiedDetailPage({
       <DetailHeader
         displayTitle={displayTitle}
         item={item}
-        // Pass full config - DetailHeader is a server component and can accept the full UnifiedCategoryConfig
-        config={config}
+        // ARCHITECTURAL FIX: Only pass serializable data DetailHeader actually needs
+        // Convert primary_action_type to SerializableActionType (they're compatible)
+        config={{
+          typeName: config.typeName,
+          primaryAction: {
+            label: config.primaryAction.label,
+            type: config.primaryAction.type as SerializableActionType,
+          },
+          ...(config.secondaryActions && {
+            secondaryActions: config.secondaryActions.map((action) => ({
+              label: action.label,
+              type: action.type as SerializableActionType,
+            })),
+          }),
+        }}
       />
 
       {/* Metadata - Stream view count if promise provided */}

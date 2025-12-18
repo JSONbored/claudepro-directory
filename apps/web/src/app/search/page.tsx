@@ -5,13 +5,13 @@
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import { type content_category } from '@heyclaude/data-layer/prisma';
 import { type SearchContentOptimizedArgs } from '@heyclaude/database-types/postgres-types';
-import { type SearchFilters } from '@heyclaude/web-runtime/core';
+import type { SearchFilters } from '@heyclaude/web-runtime/types/app.schema';
 import {
   generatePageMetadata,
-  getHomepageCategoryIds,
-  getHomepageData,
-  getSearchFacets,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/seo';
+import { getHomepageCategoryIds } from '@heyclaude/web-runtime/data/config/category';
+import { getHomepageData } from '@heyclaude/web-runtime/data/content/homepage';
+import { getSearchFacets } from '@heyclaude/web-runtime/data/search/facets';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
 import { type Metadata } from 'next';
@@ -110,6 +110,7 @@ interface SearchPageProperties {
  * @see generatePageMetadata
  */
 export async function generateMetadata({ searchParams }: SearchPageProperties): Promise<Metadata> {
+  // Note: Cannot use 'use cache' with searchParams - they're dynamic request data
   const resolvedParameters = await searchParams;
   const query = resolvedParameters.q ?? '';
 

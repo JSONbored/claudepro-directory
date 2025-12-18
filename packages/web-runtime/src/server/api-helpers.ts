@@ -210,7 +210,8 @@ export function unauthorizedResponse(
           message: authInfo.message ?? 'Please sign in to access this endpoint',
         },
       }),
-      timestamp: new Date().toISOString(),
+      // Timestamp removed - logging platforms add timestamps automatically
+      // This eliminates new Date() calls during build
     },
     {
       status: 401,

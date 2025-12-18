@@ -2,14 +2,15 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
-import { useLoggedAsync, useButtonSuccess } from '@heyclaude/web-runtime/hooks';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
+import { useButtonSuccess } from '@heyclaude/web-runtime/hooks/use-copy-to-clipboard';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, Button } from '@heyclaude/web-runtime/ui';
 import { DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { Check, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 interface ContentActionButtonProps extends ButtonStyleProps {
   action: (content: string) => Promise<void>;

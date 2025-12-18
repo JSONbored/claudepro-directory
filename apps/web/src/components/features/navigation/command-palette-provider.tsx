@@ -1,7 +1,7 @@
 'use client';
 
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { createContext, useContext, useMemo } from 'react';
 
 interface CommandPaletteContextValue {

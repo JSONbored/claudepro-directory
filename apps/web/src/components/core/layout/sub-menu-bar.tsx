@@ -11,7 +11,7 @@
  */
 
 import type { content_category } from '@heyclaude/data-layer/prisma';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { Bookmark, Search } from '@heyclaude/web-runtime/icons';
 import { Breadcrumbs, Button, cn } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';

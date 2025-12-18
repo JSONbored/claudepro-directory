@@ -15,7 +15,8 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useMemo, useEffect, useLayoutEffect, useId, useState, useCallback, useRef } from 'react';
-import { useBoolean, useDebounceCallback } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useDebounceCallback } from '@heyclaude/web-runtime/hooks/use-debounce-callback';
 
 type NavigationMenuItem = {
   path: string;

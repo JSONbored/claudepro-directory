@@ -6,8 +6,9 @@
  * Enhanced with mobile swipe gestures for improved touch UX
  */
 
-import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
-import { usePulse, useIsClient } from '@heyclaude/web-runtime/hooks';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
+import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
+import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
 import { type TabbedDetailLayoutProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn, Tabs, TabsContent, TabsList, TabsTrigger, LayoutGroup } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';

@@ -7,10 +7,9 @@
 // - DATABASE_URL: Transaction mode (port 6543) via Shared Connection Pooler
 // - DIRECT_URL: Session mode (port 5432) via Shared Pooler for migrations/introspection
 
-// Load .env.local first, then fallback to .env
-import { config } from 'dotenv';
-config({ path: '.env.local' });
-config(); // Load .env as fallback
+// Infisical injects secrets as environment variables automatically.
+// For local development, run Prisma commands with: infisical run --env=dev -- <command>
+// This file does NOT load .env files - all secrets must come from Infisical.
 
 import { defineConfig, env } from 'prisma/config';
 

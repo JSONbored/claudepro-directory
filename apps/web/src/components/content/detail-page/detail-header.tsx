@@ -3,15 +3,12 @@
  */
 
 import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
-import {
-  type ContentItem,
-  type UnifiedCategoryConfig,
-} from '@heyclaude/web-runtime/types/component.types';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { type ContentItem } from '@heyclaude/web-runtime/types/component.types';
 
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import type { SerializableAction, SerializableActionType } from './detail-header-actions';
+import type { SerializableAction } from './detail-header-actions';
 
 // Dynamic import for DetailHeaderActions (917 lines) - lazy load for code splitting
 const DetailHeaderActions = dynamic(
@@ -20,7 +17,14 @@ const DetailHeaderActions = dynamic(
 );
 
 export interface DetailHeaderProps {
-  config: UnifiedCategoryConfig;
+  // ARCHITECTURAL FIX: Only pass serializable data, not entire config
+  // DetailHeader only needs: typeName, primaryAction, secondaryActions
+  // We don't pass the entire config (which contains React components and functions)
+  config: {
+    typeName: string;
+    primaryAction: SerializableAction;
+    secondaryActions?: SerializableAction[];
+  };
   displayTitle: string;
   item:
     | ContentItem
@@ -49,37 +53,9 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
     ('configuration' in item && typeof item['configuration'] === 'object' && item['configuration'] !== null)
   );
 
-  // Extract serializable action data - database stores { label, type } only
-  // Cast to SerializableAction to ensure type safety
-  // Type narrowing: primaryAction is already SerializableAction from config
-  const primaryAction: SerializableAction = (typeof config.primaryAction === 'object' && config.primaryAction !== null && 'type' in config.primaryAction)
-    ? (config.primaryAction satisfies SerializableAction)
-    : {
-    label: 'Deploy',
-    type: 'deploy',
-  };
-  // Type narrowing: secondaryActions needs type narrowing from string to SerializableActionType
-  const secondaryActions: SerializableAction[] | undefined = Array.isArray(config.secondaryActions)
-    ? config.secondaryActions
-        .filter((action): action is SerializableAction => {
-          const validTypes: SerializableActionType[] = [
-            'copy_command',
-            'copy_script',
-            'custom',
-            'deploy',
-            'download',
-            'github_link',
-            'info',
-            'notification',
-            'scroll',
-          ];
-          return typeof action === 'object' && action !== null && 'type' in action && 'label' in action && validTypes.includes(action.type as SerializableActionType);
-        })
-        .map((action) => ({
-          label: action.label,
-          type: action.type as SerializableActionType,
-        }))
-    : undefined;
+  // Config already provides properly typed SerializableAction (no transformation needed)
+  const primaryAction = config.primaryAction;
+  const secondaryActions = config.secondaryActions;
 
   return (
     <div className={`border-border bg-code/50 border-b backdrop-blur-sm`}>

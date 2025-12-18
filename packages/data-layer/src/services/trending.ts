@@ -25,7 +25,6 @@ import type {
   GetTrendingMetricsWithContentReturns,
 } from '@heyclaude/database-types/postgres-types';
 import type { contentModel } from '@heyclaude/database-types/prisma/models';
-import type { content_category } from '@heyclaude/data-layer/prisma';
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
 import { withSmartCache } from '../utils/request-cache.ts';
@@ -84,40 +83,37 @@ export class TrendingService extends BasePrismaService {
       'getRecentContent',
       'getRecentContent',
       async () => {
-        // Calculate date threshold (p_days ago)
-        const daysAgo = p_days ? new Date(Date.now() - p_days * 24 * 60 * 60 * 1000) : null;
-        
-        // Build where clause
-        const where: {
-          category?: content_category;
-          date_added?: { gte: Date };
-        } = {};
+        // Use database SQL INTERVAL for date calculation (eliminates Date.now() call)
+        // More efficient: database handles date arithmetic natively
+        // Build where clause using raw SQL for date filtering
+        let query = `
+          SELECT *
+          FROM public.content
+          WHERE 1=1
+        `;
+        const params: unknown[] = [];
+        let paramIndex = 1;
         
         // Category filter (if provided)
         if (p_category) {
-          where.category = p_category as content_category;
+          query += ` AND category = $${paramIndex}::public.content_category`;
+          params.push(p_category);
+          paramIndex++;
         }
         
-        // Date filter (if p_days provided)
-        if (daysAgo) {
-          where.date_added = { gte: daysAgo };
+        // Date filter (if p_days provided) - using SQL INTERVAL
+        if (p_days) {
+          query += ` AND date_added >= NOW() - INTERVAL '${p_days} days'`;
         }
-
-        // Calculate limit with bounds (1-100, default 20)
-        const limit = Math.min(Math.max(p_limit ?? 20, 1), 100);
-
-        // Prisma doesn't support nulls: 'last' directly, so we use simple desc
-        // The database will handle null ordering based on its default behavior
-        const content = await prisma.content.findMany({
-          where,
-          orderBy: [
-            { date_added: 'desc' },
-            { created_at: 'desc' },
-          ],
-          take: limit,
-        });
-
-        return content;
+        
+        query += ` ORDER BY date_added DESC LIMIT $${paramIndex}::integer`;
+        params.push(p_limit);
+        
+        // Execute raw SQL query
+        const results = await prisma.$queryRawUnsafe<contentModel[]>(query, ...params);
+        
+        // Return results (already filtered and ordered by database)
+        return results;
       },
       args
     );

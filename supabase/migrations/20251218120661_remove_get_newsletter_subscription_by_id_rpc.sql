@@ -1,0 +1,20 @@
+-- Migration: Remove get_newsletter_subscription_by_id RPC function
+-- Version: 20251218120661
+-- Applied via: Supabase MCP
+-- Date: 2025-12-18
+--
+-- Description: Remove get_newsletter_subscription_by_id RPC function - not found in codebase
+--
+-- This function returned a newsletter subscription by ID.
+-- Function signature: get_newsletter_subscription_by_id(p_id uuid)
+--
+-- Verification:
+-- - Not found in packages/data-layer/src/services/ (no service method calls)
+-- - Not found in packages/web-runtime/src/data/ (no data fetching calls)
+-- - Not found in packages/web-runtime/src/actions/ (no action calls)
+-- - Not found in apps/web/src/app/ (no page usage)
+-- - Not found in apps/edge/ (no edge function usage)
+--
+-- Safe to remove: No codebase references found
+
+DROP FUNCTION IF EXISTS public.get_newsletter_subscription_by_id(uuid);

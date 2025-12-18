@@ -9,11 +9,12 @@
  * Extracts search logic from HomePageClient so it can be shared at page level.
  */
 
-import { SearchProvider, useSearchAPI } from '@heyclaude/web-runtime/search';
+import { SearchProvider } from '@heyclaude/web-runtime/search/context/search-provider';
+import { useSearchAPI } from '@heyclaude/web-runtime/search/hooks/use-search-api';
 import { logClientInfo, logClientError } from '@heyclaude/web-runtime/logging/client';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import type { FilterState } from '@heyclaude/web-runtime/types/component.types';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
 import { useCallback, type ReactNode } from 'react';
 
 interface HomepageSearchProviderProps {

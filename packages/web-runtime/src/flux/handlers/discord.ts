@@ -11,7 +11,7 @@ import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { logger, createWebAppContextWithId } from '../../logging/server';
 import { createErrorResponse } from '../../utils/error-handler';
-import { inngest } from '../../inngest';
+import { inngest } from '../../inngest/client';
 
 // CORS headers for Discord routes
 const DISCORD_CORS_HEADERS = {

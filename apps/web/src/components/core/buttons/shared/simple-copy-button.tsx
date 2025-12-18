@@ -1,13 +1,14 @@
 'use client';
 
-import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
+import { getTimeoutConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, Button } from '@heyclaude/web-runtime/ui';
 // COLORS removed - using direct Tailwind utilities
 import { Check, Copy } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useTimeout } from '@heyclaude/web-runtime/hooks/use-timeout';
 
 interface SimpleCopyButtonProps extends ButtonStyleProps {
   ariaLabel?: string;

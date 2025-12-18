@@ -20,14 +20,13 @@
 
 import 'server-only';
 import {
-  changelogFormatSchema,
-  createApiOptionsHandler,
+  createOptionsHandler as createApiOptionsHandler,
   createCachedApiRoute,
-  getOnlyCorsHeaders,
-  getVersionedRoute,
-  textResponse,
   type RouteHandlerContext,
-} from '@heyclaude/web-runtime/server';
+} from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getOnlyCorsHeaders, textResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { changelogFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import { z } from 'zod';
 
 /**

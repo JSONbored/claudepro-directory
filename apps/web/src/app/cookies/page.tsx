@@ -1,9 +1,9 @@
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { getLastUpdatedDate } from '@heyclaude/web-runtime/data/utils';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import { cacheLife } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 import { Suspense } from 'react';
 
 import CookiesLoading from './loading';
@@ -20,6 +20,13 @@ import CookiesLoading from './loading';
  */
 
 export async function generateMetadata(): Promise<Metadata> {
+  'use cache';
+  // Static route - metadata never changes, use very long cache (30 days)
+  // Generated once at build time, cached forever (or until manual invalidation)
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTag('seo-metadata-static');
+  cacheTag('seo-metadata-cookies');
+  
   return generatePageMetadata('/cookies');
 }
 

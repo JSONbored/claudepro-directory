@@ -11,7 +11,7 @@ import {
   type GetRecentContentReturns,
   type GetTrendingMetricsWithContentReturns,
 } from '@heyclaude/database-types/postgres-types';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import {
   type DisplayableContent,
   type HomepageContentItem,
@@ -48,7 +48,9 @@ export function toHomepageContentItem(input: {
   title?: null | string;
   viewCount?: null | number;
 }): HomepageContentItem {
-  const timestamp = input.created_at ?? input.date_added ?? new Date().toISOString();
+  // Use static fallback timestamp instead of new Date() (build-time safe)
+  // If both created_at and date_added are missing, use epoch timestamp
+  const timestamp = input.created_at ?? input.date_added ?? '1970-01-01T00:00:00.000Z';
 
   return {
     author: input.author ?? 'Community',
@@ -148,8 +150,9 @@ export function mapRecentContent(
     return toHomepageContentItem({
       author: row.author ?? 'Community',
       category: validCategory,
-      created_at: row.created_at ?? new Date().toISOString(),
-      date_added: row.created_at ?? new Date().toISOString(),
+      // Use static fallback timestamp instead of new Date() (build-time safe)
+      created_at: row.created_at ?? '1970-01-01T00:00:00.000Z',
+      date_added: row.created_at ?? '1970-01-01T00:00:00.000Z',
       description: row.description ?? '',
       featuredRank: index + 1,
       slug: row.slug ?? '',

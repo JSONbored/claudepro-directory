@@ -7,8 +7,9 @@
  * Displays client information, requested scopes, and handles approve/deny actions.
  */
 
-import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
-import { useBoolean, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/supabase/browser';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
 import { Button, cn, UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { AlertCircle, CheckCircle2, ExternalLink, Shield, XCircle } from 'lucide-react';
 import Link from 'next/link';

@@ -1,8 +1,8 @@
 import {
   generatePageMetadata,
-  getAuthenticatedUser,
-  getUserIdentitiesData,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getUserIdentitiesData } from '@heyclaude/web-runtime/data/account';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   Card,
@@ -13,7 +13,6 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { SignInButton } from '@/src/components/core/auth/sign-in-button';
@@ -38,9 +37,7 @@ const ROUTE = '/account/connected-accounts';
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   return generatePageMetadata(ROUTE);
 }
 

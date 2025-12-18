@@ -165,9 +165,18 @@ const crudHandlers = createCrudActionHandlers<
         name: 'onJobCreated',
         handler: async (result, args, ctx) => {
           const { onJobCreated } = await import('./hooks/job-hooks.ts');
-          const hookResult = await onJobCreated(result as CreateJobWithPaymentReturns, ctx, args);
-          // Hook returns enriched result with checkoutUrl - cast to match return type
-          return hookResult as unknown as CreateJobWithPaymentReturns;
+          // onJobCreated hook enriches the result with checkoutUrl (stored separately, not in return type)
+          // The hook accepts a partial result and processes payment/events, but doesn't change the return structure
+          // result is already CreateJobWithPaymentReturns from the RPC call
+          // Use 'unknown' first to avoid unsafe type assertions when passing to hook
+          await onJobCreated(
+            result as unknown as { job_id: string | null; requires_payment: boolean | null; slug?: string | null },
+            ctx,
+            args
+          );
+          // Return original result - hook processes side effects but doesn't modify the return value
+          // CreateJobWithPaymentReturns structure is: { success, job_id, company_id, payment_amount, requires_payment, tier, plan }
+          return result;
         },
       },
     ],

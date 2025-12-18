@@ -9,7 +9,10 @@
  * - Strict validation (whitelist approach)
  * - Sanitization (removes credentials, normalizes URLs)
  * - Type-safe with explicit return types
+ * - Uses shared-runtime utilities for validation (validateEmail)
  */
+
+import { validateEmail } from '@heyclaude/shared-runtime';
 
 /**
  * Validate and sanitize external website URL for safe use in href attributes.
@@ -84,9 +87,12 @@ export function getSafeExternalUrl(url: null | string | undefined): null | strin
  * Validate and sanitize email address for safe use in mailto links.
  * Returns safe mailto URL or null if email is invalid.
  *
+ * Uses `validateEmail()` from `@heyclaude/shared-runtime/validate-email` for comprehensive
+ * RFC 5322 validation and security checks, ensuring consistent email validation across the codebase.
+ *
  * @param email - The input email to validate; may be `null` or `undefined`.
  * @returns A safe `mailto:` URL string when the input is a valid email, `null` otherwise.
- *   Email is validated against RFC 5322 (simplified), normalized to lowercase, and encoded
+ *   Email is validated against RFC 5322, normalized to lowercase, and encoded
  *   in the mailto URL to prevent injection attacks.
  *
  * @example
@@ -101,33 +107,21 @@ export function getSafeExternalUrl(url: null | string | undefined): null | strin
 export function getSafeMailtoUrl(email: null | string | undefined): null | string {
   if (!email || typeof email !== 'string') return null;
 
-  // Trim and normalize
-  const trimmed = email.trim();
-  if (trimmed.length === 0) return null;
+  // Use shared-runtime validateEmail for comprehensive validation
+  // This ensures consistent email validation across the codebase
+  const validation = validateEmail(email, { required: true });
 
-  // Basic email format validation (RFC 5322 simplified)
-  // Prevents injection attacks while allowing valid emails
-  const emailRegex =
-    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  if (!validation.valid || !validation.normalized) {
+    return null;
+  }
 
-  // Validate format
-  if (!emailRegex.test(trimmed)) return null;
-
-  // Security checks: reject dangerous patterns
-  // Prevent null bytes
-  if (trimmed.includes('\0')) return null;
-  // Prevent path traversal attempts
-  if (trimmed.includes('..') || trimmed.includes('//')) return null;
-  // Prevent protocol injection (javascript:, data:, etc.)
-  if (/^(javascript|data|vbscript|file):/i.test(trimmed)) return null;
-
-  // Normalize to lowercase
-  const normalized = trimmed.toLowerCase();
-
-  // Limit length (RFC 5321: max 254 characters)
-  if (normalized.length > 254) return null;
+  // Additional security check: prevent protocol injection (javascript:, data:, etc.)
+  // This is a defense-in-depth measure (validateEmail already handles most cases)
+  if (/^(javascript|data|vbscript|file):/i.test(validation.normalized)) {
+    return null;
+  }
 
   // Encode email in mailto URL to prevent injection
   // encodeURIComponent handles special characters safely
-  return `mailto:${encodeURIComponent(normalized)}`;
+  return `mailto:${encodeURIComponent(validation.normalized)}`;
 }

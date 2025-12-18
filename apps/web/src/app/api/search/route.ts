@@ -35,21 +35,17 @@ import {
 import { type jobsModel } from '@heyclaude/database-types/prisma/models';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { type Json } from '@heyclaude/data-layer/prisma';
-import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
-import {
-  createApiOptionsHandler,
-  createApiRoute,
-  enqueuePulseEventServer,
-  getVersionedRoute,
-  getWithAuthCorsHeaders,
-  jsonResponse,
-  searchQuerySchema,
-} from '@heyclaude/web-runtime/server';
+import { VALID_CATEGORIES } from '@heyclaude/web-runtime/utils/category-validation';
+import { createOptionsHandler as createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getWithAuthCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { searchQuerySchema } from '@heyclaude/web-runtime/api/schemas';
+import { enqueuePulseEventServer } from '@heyclaude/web-runtime/pulse';
 import { cacheLife } from 'next/cache';
 
 // OPTIMIZATION: Use SearchService methods instead of separate helper files
 import { SearchService } from '@heyclaude/data-layer';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 
 // Use Prisma model type instead of excluded composite type
 type Jobs = jobsModel;

@@ -8,7 +8,8 @@
 import type { public_usersModel } from '@heyclaude/data-layer/prisma';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { refreshProfileFromOAuth, updateProfile } from '@heyclaude/web-runtime/actions/user';
-import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
 import {
   extractFirstFieldFromTuple,
   isPostgresTupleString,
@@ -38,6 +39,15 @@ type ProfileData = Pick<
   | 'username'
 >;
 
+// Optional URL schema - accepts empty string or valid URL
+// Defined locally to avoid client/server boundary issues
+const optionalUrlSchema = z
+  .string()
+  .refine((val) => val === '' || z.string().url().safeParse(val).success, {
+    message: 'Must be a valid URL',
+  })
+  .optional();
+
 const profileFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
   // Username validation is handled by database constraint (users_username_format_check)
@@ -46,18 +56,8 @@ const profileFormSchema = z.object({
   username: z.string().optional(),
   bio: z.string().max(500).optional(),
   work: z.string().max(100).optional(),
-  website: z
-    .string()
-    .refine((val) => val === '' || z.string().url().safeParse(val).success, {
-      message: 'Must be a valid URL',
-    })
-    .optional(),
-  social_x_link: z
-    .string()
-    .refine((val) => val === '' || z.string().url().safeParse(val).success, {
-      message: 'Must be a valid URL',
-    })
-    .optional(),
+  website: optionalUrlSchema,
+  social_x_link: optionalUrlSchema,
   interests: z.array(z.string()).max(10).optional(),
   public: z.boolean(),
   follow_email: z.boolean(),
@@ -128,8 +128,8 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
       username: profile.username ?? undefined,
       bio: typeof profile.bio === 'string' ? profile.bio : '',
       work: typeof profile.work === 'string' ? profile.work : '',
-      website: typeof profile.website === 'string' ? profile.website : '',
-      social_x_link: typeof profile.social_x_link === 'string' ? profile.social_x_link : '',
+      website: typeof profile['website'] === 'string' ? profile['website'] : '',
+      social_x_link: typeof profile['social_x_link'] === 'string' ? profile['social_x_link'] : '',
       interests: Array.isArray(profile.interests) ? profile.interests : [],
       public: typeof profile.profile_public === 'boolean' ? profile.profile_public : true,
       follow_email: typeof profile.follow_email === 'boolean' ? profile.follow_email : true,
@@ -166,8 +166,8 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
               ...(data.username && { username: data.username }),
               bio: data.bio || '',
               work: data.work || '',
-              website: data.website || '',
-              social_x_link: data.social_x_link || '',
+              website: data['website'] || '',
+              social_x_link: data['social_x_link'] || '',
               interests: data.interests,
               profile_public: data.public,
               follow_email: data.follow_email,
@@ -273,8 +273,8 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         value={watch('website') || ''}
         onChange={(e) => setValue('website', e.target.value, { shouldDirty: true })}
         placeholder="https://yourwebsite.com"
-        error={!!errors.website}
-        {...(errors.website?.message && { errorMessage: errors.website.message })}
+        error={!!errors['website']}
+        {...(errors['website']?.message && { errorMessage: errors['website'].message })}
       />
 
       <FormField
@@ -284,8 +284,8 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         value={watch('social_x_link') || ''}
         onChange={(e) => setValue('social_x_link', e.target.value, { shouldDirty: true })}
         placeholder="https://x.com/yourhandle"
-        error={!!errors.social_x_link}
-        {...(errors.social_x_link?.message && { errorMessage: errors.social_x_link.message })}
+        error={!!errors['social_x_link']}
+        {...(errors['social_x_link']?.message && { errorMessage: errors['social_x_link'].message })}
       />
 
       <ListItemManager

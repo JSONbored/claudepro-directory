@@ -39,7 +39,7 @@ import {
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { memo, useMemo } from 'react';
-import { getCategoryConfigs, getCategoryStatsConfig } from '@heyclaude/web-runtime/data';
+import { getCategoryConfigs, getCategoryStatsConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import Link from 'next/link';
 

@@ -10,7 +10,7 @@
  * @module apps/web/src/components/features/home/homepage-search-wrapper
  */
 
-import { AnimatedSearchBar } from '@heyclaude/web-runtime/search';
+import { AnimatedSearchBar } from '@heyclaude/web-runtime/search/components/animated-search-bar';
 import { useHeroSearchConnection } from './hero-search-connection';
 import { useCallback } from 'react';
 

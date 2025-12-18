@@ -7,7 +7,7 @@ import { subscribeViaOAuthAction } from '@heyclaude/web-runtime/actions/newslett
 import { refreshProfileFromOAuthServer } from '@heyclaude/web-runtime/actions/user';
 import { SECURITY_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseServerClient } from '@heyclaude/web-runtime/server';
+import { createSupabaseServerClient } from '@heyclaude/web-runtime/supabase/server';
 import { validateNextParameter } from '@heyclaude/web-runtime/utils/auth-redirect';
 import { type NextRequest, NextResponse } from 'next/server';
 

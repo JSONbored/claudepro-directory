@@ -2,18 +2,18 @@
 
 import type { newsletter_source } from '@heyclaude/data-layer/prisma';
 import { getAppSettings, getNewsletterConfig } from '@heyclaude/web-runtime/config/static-configs';
-import {
-  ensureStringArray,
-  logUnhandledPromise,
-  NEWSLETTER_CTA_CONFIG,
-} from '@heyclaude/web-runtime/core';
+import { ensureStringArray } from '@heyclaude/web-runtime/utils/content-helpers';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
+import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/config/marketing-client';
 import { ensureNumber } from '@heyclaude/web-runtime/data/utils';
-import { useLoggedAsync, useTimeout, useLocalStorage } from '@heyclaude/web-runtime/hooks';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
+import { useTimeout } from '@heyclaude/web-runtime/hooks/use-timeout';
+import { useLocalStorage } from '@heyclaude/web-runtime/hooks/use-local-storage';
 import { Mail, X } from '@heyclaude/web-runtime/icons';
 import { Button, cn } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 import { NewsletterForm } from './newsletter-form';
 

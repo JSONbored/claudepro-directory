@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { SPRING, DURATION } from '../../design-system/index.ts';
 import { LayoutGroup } from './motion/layout-group.tsx';
 import { cn } from '../utils.ts';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '../../hooks/use-boolean.ts';
 import * as React from 'react';
 
 const Collapsible = ({ children, ...props }: React.ComponentProps<typeof CollapsiblePrimitive.Root>) => (

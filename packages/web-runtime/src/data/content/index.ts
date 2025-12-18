@@ -7,25 +7,19 @@ import {
   type GetTrendingContentReturns,
   type GetTrendingMetricsWithContentReturns,
 } from '@heyclaude/database-types/postgres-types';
-import { cacheLife, cacheTag } from 'next/cache';
-
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { logger } from '../../logger.ts';
 import { QUERY_LIMITS } from '../config/constants.ts';
-import { createCachedDataFunction, generateContentTags, generateResourceTags } from '../cached-data-factory.ts';
+import { createDataFunction } from '../cached-data-factory.ts';
 import { getService } from '../service-factory.ts';
 
 /**
  * Get content by category
- * Uses 'use cache' to cache content lists. This data is public and same for all users.
- * Content lists change periodically, so we use the 'long' cacheLife profile.
+ * Simple data fetching function - pages control caching with 'use cache' directive
  */
-export const getContentByCategory = createCachedDataFunction<content_category, EnrichedContentItem[]>({
+export const getContentByCategory = createDataFunction<content_category, EnrichedContentItem[]>({
   serviceKey: 'content',
   methodName: 'getEnrichedContentList',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: (category) => generateContentTags(category),
   module: 'data/content/index',
   operation: 'getContentByCategory',
   transformArgs: (category) => ({
@@ -35,29 +29,22 @@ export const getContentByCategory = createCachedDataFunction<content_category, E
   }),
   onError: () => [], // Return empty array on error
   logContext: (category, result) => ({
-    cacheStatus: 'miss',
-    cacheType: 'nextjs-cache-components',
     category,
     count: Array.isArray(result) ? result.length : 0,
     dbCall: true,
-    note: 'Function execution = cache miss. No logs = cache hit (function skipped by Next.js)',
   }),
 });
 
 /**
  * Get content by slug
- * Uses 'use cache' to cache content details. This data is public and same for all users.
- * Content details change periodically, so we use the 'medium' cacheLife profile.
+ * Simple data fetching function - pages control caching with 'use cache' directive
  */
-export const getContentBySlug = createCachedDataFunction<
+export const getContentBySlug = createDataFunction<
   { category: content_category; slug: string },
   EnrichedContentItem | null
 >({
   serviceKey: 'content',
   methodName: 'getEnrichedContentList',
-  cacheMode: 'public',
-  cacheLife: 'medium', // 1hr stale, 15min revalidate, 1 day expire - optimized for SEO
-  cacheTags: (args) => generateContentTags(args.category, args.slug),
   module: 'data/content/index',
   operation: 'getContentBySlug',
   transformArgs: (args) => ({
@@ -93,34 +80,17 @@ function groupItemsByCategory(
 
 /**
  * Batch fetch content items by slugs (optimized for collections)
- * Uses 'use cache' to cache content details. This data is public and same for all users.
+ * Simple data fetching function - pages control caching with 'use cache' directive
  * OPTIMIZATION: Fetches multiple items in a single RPC call instead of N+1 queries.
  */
 export async function getContentBatchBySlugs(
   items: Array<{ category: content_category; slug: string }>
 ): Promise<Map<string, EnrichedContentItem>> {
-  'use cache';
-
   if (items.length === 0) {
     return new Map();
   }
 
   const itemsByCategory = groupItemsByCategory(items);
-
-  // Configure cache
-  cacheLife('medium'); // 1hr stale, 15min revalidate, 1 day expire - optimized for SEO
-
-  // Apply cache tags for all categories and slugs
-  for (const [category, slugs] of itemsByCategory.entries()) {
-    for (const tag of generateContentTags(category)) {
-      cacheTag(tag);
-    }
-    for (const slug of slugs) {
-      for (const tag of generateContentTags(category, slug)) {
-        cacheTag(tag);
-      }
-    }
-  }
 
   try {
     const service = await getService('content');
@@ -160,15 +130,12 @@ export async function getContentBatchBySlugs(
 
 /**
  * Get content count for a category
- * Uses 'use cache' to cache content counts. This data is public and same for all users.
+ * Simple data fetching function - pages control caching with 'use cache' directive
  * Uses optimized getContentPaginatedSlim with window function for better performance.
  */
-export const getContentCount = createCachedDataFunction<content_category | undefined, number>({
+export const getContentCount = createDataFunction<content_category | undefined, number>({
   serviceKey: 'content',
   methodName: 'getContentPaginatedSlim',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: (category) => generateContentTags(category),
   module: 'data/content/index',
   operation: 'getContentCount',
   transformArgs: (category) => ({
@@ -196,18 +163,14 @@ export async function getConfigurationCount(): Promise<number> {
 
 /**
  * Get trending content
- * Uses 'use cache' to cache trending content. This data is public and same for all users.
- * Trending content changes periodically, so we use the 'long' cacheLife profile.
+ * Simple data fetching function - pages control caching with 'use cache' directive
  */
-export const getTrendingContent = createCachedDataFunction<
+export const getTrendingContent = createDataFunction<
   { category?: content_category; limit?: number },
   GetTrendingContentReturns
 >({
   serviceKey: 'trending',
   methodName: 'getTrendingContent',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: (args) => generateContentTags(args.category, undefined, ['trending']),
   module: 'data/content/index',
   operation: 'getTrendingContent',
   transformArgs: (args) => ({
@@ -241,23 +204,14 @@ interface TrendingPageDataResult {
 
 /**
  * Get trending page data (trending metrics, popular, and recent content)
- * Uses 'use cache' to cache trending page data. This data is public and same for all users.
+ * Simple data fetching function - pages control caching with 'use cache' directive
  * @param parameters
  */
 export async function getTrendingPageData(
   parameters: TrendingPageParameters = {}
 ): Promise<TrendingPageDataResult> {
-  'use cache';
-
   const { category = null, limit = 12 } = parameters;
   const safeLimit = Math.min(Math.max(limit, 1), 100);
-
-  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
-  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  const tags = generateResourceTags('trending', undefined, ['trending-page']);
-  for (const tag of tags) {
-    cacheTag(tag);
-  }
 
   try {
     const trendingService = await getService('trending');

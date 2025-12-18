@@ -29,20 +29,12 @@ import {
   getNumberProperty,
   getStringProperty,
 } from '@heyclaude/shared-runtime';
-import { inngest } from '@heyclaude/web-runtime/inngest';
+import { inngest } from '@heyclaude/web-runtime/inngest/client';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
-import {
-  createApiOptionsHandler,
-  createApiRoute,
-  createFormatHandlerRoute,
-  getOnlyCorsHeaders,
-  getVersionedRoute,
-  jsonResponse,
-  sitemapFormatSchema,
-  xmlResponse,
-  type FormatHandlerConfig,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/server';
+import { createOptionsHandler as createApiOptionsHandler, createApiRoute, createFormatHandlerRoute, type FormatHandlerConfig, type RouteHandlerContext } from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getOnlyCorsHeaders, jsonResponse, xmlResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { sitemapFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import { z } from 'zod';
 
 const INDEXNOW_API_KEY = getEnvVar('INDEXNOW_API_KEY');

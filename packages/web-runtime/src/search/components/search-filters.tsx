@@ -19,8 +19,8 @@
 
 import type { content_category } from '@heyclaude/data-layer/prisma';
 import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
-import { getCategoryConfig } from '@heyclaude/web-runtime/data';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import {
   UnifiedBadge,

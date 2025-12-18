@@ -1,6 +1,6 @@
-'use server';
+import 'server-only';
 
-import { createCachedDataFunction, generateResourceTags } from './cached-data-factory.ts';
+import { createDataFunction } from './cached-data-factory.ts';
 
 // Service returns transformed array matching RPC structure
 interface ContactCommandResult {
@@ -23,12 +23,9 @@ export type ContactCommandsRow = ContactCommandResult | null;
  * Uses 'use cache' to cache contact commands. This data is public and same for all users.
  * Contact commands change periodically, so we use the 'long' cacheLife profile.
  */
-export const fetchContactCommands = createCachedDataFunction<void, ContactCommandsRow>({
+export const fetchContactCommands = createDataFunction<void, ContactCommandsRow>({
   serviceKey: 'misc',
   methodName: 'getContactCommands',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: () => generateResourceTags('contact'),
   module: 'data/contact',
   operation: 'fetchContactCommands',
   normalizeResult: (result) => {

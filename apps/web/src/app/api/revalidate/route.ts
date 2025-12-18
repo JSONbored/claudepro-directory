@@ -30,14 +30,9 @@
  */
 import 'server-only';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import {
-  createApiOptionsHandler,
-  createApiRoute,
-  getOnlyCorsHeaders,
-  getVersionedRoute,
-  jsonResponse,
-  unauthorizedResponse,
-} from '@heyclaude/web-runtime/server';
+import { createOptionsHandler as createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getOnlyCorsHeaders, jsonResponse, unauthorizedResponse } from '@heyclaude/web-runtime/server/api-helpers';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 

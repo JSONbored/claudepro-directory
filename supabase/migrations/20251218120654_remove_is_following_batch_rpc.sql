@@ -1,0 +1,22 @@
+-- Migration: Remove is_following_batch RPC function
+-- Version: 20251218120654
+-- Applied via: Supabase MCP
+-- Date: 2025-12-18
+--
+-- Description: Remove is_following_batch RPC function - converted to Prisma direct query
+--
+-- This function processed a UUID array and did EXISTS checks for each user.
+-- The service now uses Prisma directly in AccountService.isFollowingBatch():
+--   prisma.followers.findMany({
+--     where: {
+--       follower_id: p_follower_id,
+--       following_id: { in: p_followed_user_ids },
+--     },
+--     select: { following_id: true },
+--   })
+--   // Build set and map results
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/account.ts: Converted isFollowingBatch() to use Prisma
+
+DROP FUNCTION IF EXISTS public.is_following_batch(uuid, uuid[]);

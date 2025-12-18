@@ -7,11 +7,13 @@
 
 import type { newsletter_source } from '@heyclaude/data-layer/prisma';
 import { getNewsletterConfigValue } from '@heyclaude/web-runtime/config/static-configs';
-import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
 import { ensureNumber } from '@heyclaude/web-runtime/data/utils';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
-import { useLoggedAsync, useBoolean, useSessionStorage } from '@heyclaude/web-runtime/hooks';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useSessionStorage } from '@heyclaude/web-runtime/hooks/use-session-storage';
 import { motion, useScroll } from 'motion/react';
 import { useEffect, useState } from 'react';
 

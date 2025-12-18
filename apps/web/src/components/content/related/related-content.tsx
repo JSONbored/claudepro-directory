@@ -6,12 +6,15 @@
 
 import type { RelatedContentItem } from '@heyclaude/database-types/postgres-types';
 import type { content_category } from '@heyclaude/data-layer/prisma';
-import { getContentItemUrl, isValidCategory } from '@heyclaude/web-runtime/core';
-import { getRelatedContent } from '@heyclaude/web-runtime/data';
+import { getContentItemUrl } from '@heyclaude/web-runtime/content';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { getRelatedContent } from '@heyclaude/web-runtime/data/content/related';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { UnifiedBadge, UnifiedCardGrid, BaseCard, deepEqual, cn } from '@heyclaude/web-runtime/ui';
-import { useIsClient, useIsMounted, useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
+import { useIsMounted } from '@heyclaude/web-runtime/hooks/use-is-mounted';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { useEffect, useState, useRef } from 'react';
 
 // Use the new composite type from @heyclaude/data-layer

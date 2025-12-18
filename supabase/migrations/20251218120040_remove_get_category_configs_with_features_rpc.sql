@@ -1,0 +1,13 @@
+-- Migration: Remove unused get_category_configs_with_features RPC
+-- Version: 20251218120038
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-18
+--
+-- Description: Remove get_category_configs_with_features RPC function - Converted to Prisma
+-- ContentService.getCategoryConfigs now uses Prisma directly (line 261), RPC no longer called.
+-- Edge function comment mentions RPC but code actually calls contentService.getCategoryConfigs() which uses Prisma.
+--
+-- Function signature: get_category_configs_with_features()
+-- Related: ContentService.getCategoryConfigs uses Prisma queries instead
+
+DROP FUNCTION IF EXISTS public.get_category_configs_with_features();

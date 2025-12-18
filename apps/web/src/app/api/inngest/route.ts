@@ -14,8 +14,9 @@ import {
   GET as inngestGET,
   POST as inngestPOST,
   PUT as inngestPUT,
-} from '@heyclaude/web-runtime/inngest';
-import { createApiOptionsHandler, createApiRoute, getVersionedRoute } from '@heyclaude/web-runtime/server';
+} from '@heyclaude/web-runtime/inngest/serve';
+import { createOptionsHandler as createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { connection } from 'next/server';
 
 // Shared Inngest handler (all methods follow same pattern)

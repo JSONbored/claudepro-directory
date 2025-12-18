@@ -1,0 +1,22 @@
+-- Migration: Remove populate_content_seo_data RPC function
+-- Version: 20251218120678
+-- Applied via: Supabase MCP
+-- Date: 2025-12-18
+--
+-- Description: Remove populate_content_seo_data RPC function - not found in codebase
+--
+-- This function populated SEO data for content items.
+-- Function signature: populate_content_seo_data(...)
+--
+-- Verification:
+-- - Not found in packages/data-layer/src/services/ (no service method calls)
+-- - Not found in packages/web-runtime/src/data/ (no data fetching calls)
+-- - Not found in packages/web-runtime/src/actions/ (no action calls)
+-- - Not found in apps/web/src/app/ (no page usage)
+-- - Not found in apps/edge/ (no edge function usage)
+--
+-- Note: SEO data is likely populated via triggers or application logic
+--
+-- Safe to remove: No codebase references found
+
+DROP FUNCTION IF EXISTS public.populate_content_seo_data();

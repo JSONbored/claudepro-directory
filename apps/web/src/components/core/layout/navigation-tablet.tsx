@@ -24,10 +24,12 @@ import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { Fragment, useEffect, useState } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
-import { getSocialLinks, logUnhandledPromise, getCategoryFromHref, getIconBackgroundClass } from '@heyclaude/web-runtime/core';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { getSocialLinks } from '@heyclaude/web-runtime/config/marketing-client';
+import { getCategoryFromHref, getIconBackgroundClass } from '@heyclaude/web-runtime/utils/navigation-helpers';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
+import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';

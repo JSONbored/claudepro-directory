@@ -1,5 +1,6 @@
 import { type GetCommunityDirectoryReturns } from '@heyclaude/database-types/postgres-types';
-import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runtime/data';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getCommunityDirectory } from '@heyclaude/web-runtime/data/community';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
@@ -20,6 +21,7 @@ import { ProfileSearchClient } from '@/src/components/features/community/profile
  * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
+  'use cache';
   return generatePageMetadata('/community/directory');
 }
 

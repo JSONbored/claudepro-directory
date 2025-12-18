@@ -17,7 +17,8 @@
 
 import type { bookmarksModel, user_collectionsModel } from '@heyclaude/data-layer/prisma';
 import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions/collections-crud';
-import { useAuthenticatedUser, useFormSubmit } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import { useFormSubmit } from '@heyclaude/web-runtime/hooks/use-form-submit';
 import {
   toasts,
   UnifiedBadge,

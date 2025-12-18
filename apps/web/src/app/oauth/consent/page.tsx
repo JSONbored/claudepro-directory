@@ -14,9 +14,10 @@
  * 6. Redirect back to client with authorization code or error
  */
 
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseServerClient, getAuthenticatedUser } from '@heyclaude/web-runtime/server';
+import { createSupabaseServerClient } from '@heyclaude/web-runtime/supabase/server';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
@@ -40,7 +41,7 @@ import { OAuthConsentClient } from './oauth-consent-client';
  * @returns The Next.js page `Metadata` object for the "/oauth/consent" route.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  await connection();
+  'use cache';
   return await generatePageMetadata('/oauth/consent');
 }
 

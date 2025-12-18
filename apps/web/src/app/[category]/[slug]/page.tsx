@@ -9,14 +9,13 @@ import { type content_category, type contentModel } from '@heyclaude/data-layer/
 import { type EnrichedContentItem } from '@heyclaude/database-types/postgres-types';
 import { getDeploymentEnv } from '@heyclaude/shared-runtime/platform';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
-import { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { ensureStringArray } from '@heyclaude/web-runtime/utils/content-helpers';
+import { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks/use-recently-viewed';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import {
-  generatePageMetadata,
-  getCategoryConfig,
-  getRelatedContent,
-} from '@heyclaude/web-runtime/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
+import { getRelatedContent } from '@heyclaude/web-runtime/data/content/related';
 import {
   getContentAnalytics,
   getContentDetailCore,
@@ -53,6 +52,7 @@ const UnifiedDetailPage = lazy(() =>
  * @see getContentByCategory
  */
 export async function generateStaticParams() {
+  'use cache';
   // Dynamic imports only for data modules (category/content)
   // Note: Server logging utilities are statically imported at the top of the file
   // since this is a server component and can safely import server-only code
@@ -294,6 +294,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ category: string; slug: string }>;
 }): Promise<Metadata> {
+  'use cache';
   const { category, slug } = await params;
 
   if (!isValidCategory(category)) {

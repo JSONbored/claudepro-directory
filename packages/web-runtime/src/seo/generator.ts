@@ -20,6 +20,12 @@ interface MetadataContext {
  * Resolves route parameters, fetches SEO metadata from the database RPC,
  * and builds a Next.js Metadata object.
  * 
+ * **Build-Time Optimization:**
+ * - This function is called from `generateMetadata()` which uses `'use cache'`
+ * - During build: RPC call executes (deterministic - uses stored database data)
+ * - At runtime: Uses cached result from Next.js cache (no RPC call if cache valid)
+ * - No `connection()` needed: RPC is STABLE and request cache skips Date.now() during build
+ * 
  * @param route - Route pattern (e.g., '/changelog/:slug' or '/changelog/[slug]')
  * @param context - Optional context with params to resolve route
  * @returns Next.js Metadata object
@@ -40,7 +46,12 @@ export async function generatePageMetadata(
     }
   }
 
-  // Fetch metadata from RPC (build-time cached)
+  // Fetch metadata from RPC (build-time cached, deterministic)
+  // During build: RPC executes (deterministic - uses stored database data), result cached by Next.js 'use cache'
+  // At runtime: Uses cached result (no RPC call if cache valid)
+  // Request cache skips Date.now() during build (via isBuildTime() check), so this is safe
+  // Note: Next.js may still require connection() before database calls, but we can't use it in 'use cache' context
+  // The RPC is STABLE (deterministic), so it should work at build time
   const seoData = await getSEOMetadata(resolvedRoute);
 
   const canonicalUrl = buildCanonicalUrl(resolvedRoute);

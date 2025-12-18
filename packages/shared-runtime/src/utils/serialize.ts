@@ -47,6 +47,28 @@ export function serializeReplacer(_key: string, value: unknown): unknown {
     return undefined;
   }
 
+  // Remove React components (have $$typeof property)
+  // This prevents "Functions cannot be passed directly to Client Components" errors
+  if (value && typeof value === 'object' && '$$typeof' in value) {
+    return undefined;
+  }
+
+  // Remove objects with render functions (React components)
+  if (value && typeof value === 'object' && typeof (value as { render?: unknown }).render === 'function') {
+    return undefined;
+  }
+
+  // Remove objects with displayName and render (React components)
+  if (
+    value &&
+    typeof value === 'object' &&
+    'displayName' in value &&
+    'render' in value &&
+    typeof (value as { render?: unknown }).render === 'function'
+  ) {
+    return undefined;
+  }
+
   // Return other values as-is (JSON.stringify handles most cases)
   return value;
 }

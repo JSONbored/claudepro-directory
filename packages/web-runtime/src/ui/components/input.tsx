@@ -5,7 +5,7 @@ import { cn } from '../utils.ts';
 import { motion } from 'motion/react';
 import * as React from 'react';
 import { forwardRef } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '../../hooks/use-boolean.ts';
 
 export interface InputProps extends React.ComponentProps<'input'> {
   error?: boolean;

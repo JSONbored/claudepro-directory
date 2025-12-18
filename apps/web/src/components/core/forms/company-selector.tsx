@@ -19,7 +19,8 @@ import {
 import { getFormDataString } from '@heyclaude/shared-runtime';
 import { Building2, Plus, Search } from 'lucide-react';
 import { useCallback, useEffect, useId, useRef, useState, useTransition } from 'react';
-import { useBoolean, useDebounceValue } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useDebounceValue } from '@heyclaude/web-runtime/hooks/use-debounce-value';
 
 type Company = Pick<
   companiesModel,

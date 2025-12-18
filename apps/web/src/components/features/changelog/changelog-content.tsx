@@ -20,7 +20,8 @@
 
 import type { changelogModel, changelog_category, contentModel } from '@heyclaude/data-layer/prisma';
 import { ChangelogCategory } from '@heyclaude/data-layer/prisma';
-import { parseChangelogChanges } from '@heyclaude/web-runtime/data';
+import { parseChangelogChanges } from '@heyclaude/web-runtime/data/changelog.shared';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import {
   Plus,
   GitCompare,
@@ -314,11 +315,7 @@ export const ChangelogContent = memo(
             dateTime={entry.release_date instanceof Date ? entry.release_date.toISOString() : entry.release_date}
             className="text-muted-foreground text-sm leading-relaxed"
           >
-            {(entry.release_date instanceof Date ? entry.release_date : new Date(entry.release_date)).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
+            {formatDate(entry.release_date instanceof Date ? entry.release_date : entry.release_date, 'long')}
           </time>
         </header>
 

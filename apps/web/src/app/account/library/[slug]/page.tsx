@@ -1,9 +1,6 @@
-import {
-  generatePageMetadata,
-  getAuthenticatedUser,
-  getCollectionDetail,
-  getUserCompleteData,
-} from '@heyclaude/web-runtime/data';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getCollectionDetail, getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -21,7 +18,6 @@ import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { CollectionItemManager } from '@/src/components/core/domain/collection-items-editor';
@@ -50,9 +46,7 @@ interface CollectionPageProperties {
  * @see {@link https://nextjs.org/docs/app/api-reference/functions/generate-metadata | Next.js generateMetadata}
  */
 export async function generateMetadata({ params }: CollectionPageProperties): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   const { slug } = await params;
   return generatePageMetadata('/account/library/:slug', { params: { slug } });
 }

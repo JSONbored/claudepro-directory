@@ -8,7 +8,7 @@
  */
 
 import type { newsletter_source } from '@heyclaude/data-layer/prisma';
-import { useNewsletter } from '@heyclaude/web-runtime/hooks';
+import { useNewsletter } from '@heyclaude/web-runtime/hooks/use-newsletter';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { ArrowRight, Loader2, Mail } from '@heyclaude/web-runtime/icons';
 import { cn, SimpleCopyButton } from '@heyclaude/web-runtime/ui';

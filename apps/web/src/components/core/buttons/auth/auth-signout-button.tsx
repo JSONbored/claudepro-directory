@@ -6,12 +6,12 @@
  */
 
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/supabase/browser';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { LogOut } from '@heyclaude/web-runtime/icons';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, Button } from '@heyclaude/web-runtime/ui';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 

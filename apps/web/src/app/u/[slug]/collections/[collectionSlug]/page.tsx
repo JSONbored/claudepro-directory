@@ -4,12 +4,10 @@
  */
 
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
-import { type CollectionDetailData } from '@heyclaude/web-runtime/data';
-import {
-  generatePageMetadata,
-  getAuthenticatedUser,
-  getPublicCollectionDetail,
-} from '@heyclaude/web-runtime/data';
+import { type CollectionDetailData } from '@heyclaude/web-runtime/data/community';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getPublicCollectionDetail } from '@heyclaude/web-runtime/data/community';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {

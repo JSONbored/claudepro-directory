@@ -44,7 +44,7 @@ export interface TernaryDarkModeOptions {
  * - ✅ User preference systems - Remember theme choices across browser sessions
  * - ✅ Multi-tenant applications - Consistent theme management across different environments
  * - ✅ Developer tools - Provide theme options that match user's development environment
- * - ❌ For simple light/dark toggles - `useDarkMode` or `useToggle` are simpler
+ * - ❌ For simple light/dark toggles - `useDarkMode` or `useBoolean` are simpler
  *
  * **Features:**
  * - Three modes: 'light', 'dark', 'system'

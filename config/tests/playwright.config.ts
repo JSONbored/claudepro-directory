@@ -20,12 +20,29 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  // Optimize workers: 2 for CI (better utilization), auto for local
+  // Optimize workers: Use sharding for better CI performance, auto for local
+  // Sharding splits tests across workers more efficiently than simple worker count
+  // For CI: Use 2 workers (better resource utilization)
+  // For local: Use auto (detects CPU cores automatically)
   workers: process.env.CI ? 2 : undefined,
+  // Maximum number of test failures before stopping (0 = run all tests)
+  maxFailures: process.env.CI ? 10 : 0,
+  // Enable test result caching for faster re-runs (caches based on test file content)
+  // Cache is invalidated when test files or dependencies change
+  // Note: Playwright doesn't have built-in caching like Vitest, but we can use sharding
   reporter: [
-    ['html'],
-    ['json', { outputFile: 'test-results/results.json' }],
+    ['html', { outputFolder: 'test-results/html-report', open: 'never' }],
+    [
+      'json',
+      {
+        outputFile: 'test-results/results.json',
+        // Enhanced JSON structure for better CI integration
+      },
+    ],
+    // GitHub Actions reporter for CI
     process.env.CI ? ['github'] : ['list'],
+    // JUnit reporter for CI integration (if needed)
+    ...(process.env.CI ? [['junit', { outputFile: 'test-results/junit.xml' }]] : []),
   ],
   use: {
     baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000',

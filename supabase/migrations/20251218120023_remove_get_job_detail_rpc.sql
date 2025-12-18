@@ -1,0 +1,12 @@
+-- Migration: Remove unused get_job_detail RPC
+-- Version: 20251218120023
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-18
+--
+-- Description: Remove get_job_detail RPC function - Converted to Prisma
+-- JobsService.getJobBySlug now uses Prisma directly (line 199), RPC no longer called.
+--
+-- Function signature: get_job_detail(p_slug text)
+-- Related: JobsService.getJobBySlug uses Prisma queries instead
+
+DROP FUNCTION IF EXISTS public.get_job_detail(text);

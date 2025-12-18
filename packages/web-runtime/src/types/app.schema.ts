@@ -4,6 +4,7 @@
 
 import { slugString } from '@heyclaude/shared-runtime';
 import { z } from 'zod';
+import type { SearchContentOptimizedArgs } from '@heyclaude/database-types/postgres-types';
 
 export type PageProps = {
   params?: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -45,4 +46,8 @@ export type RelatedGuide = {
   title: string;
   slug: string;
   category: string;
+};
+
+export type SearchFilters = Partial<SearchContentOptimizedArgs> & {
+  sort?: 'relevance' | 'popularity' | 'newest' | 'alphabetical';
 };

@@ -5,9 +5,9 @@
 import { type UserCompaniesCompany } from '@heyclaude/database-types/postgres-types';
 import {
   generatePageMetadata,
-  getAuthenticatedUser,
-  getUserCompanyById,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getUserCompanyById } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -22,7 +22,6 @@ import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { connection } from 'next/server';
 import { lazy, Suspense } from 'react';
 
 import Loading from './loading';
@@ -46,9 +45,7 @@ const CompanyForm = lazy(() =>
  */
 
 export async function generateMetadata({ params }: EditCompanyPageProperties): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   const { id } = await params;
   return generatePageMetadata('/account/companies/:id/edit', { params: { id } });
 }

@@ -12,11 +12,26 @@ export interface ExtractedCodeBlock {
 }
 
 /**
- * Extracts all code blocks from markdown text
- * Handles both fenced code blocks (```language) and indented code blocks
+ * Extract all code blocks from markdown text.
  * 
- * @param markdown - The markdown text to parse
- * @returns Array of extracted code blocks with metadata
+ * Parses markdown content to find fenced code blocks (```language\ncode\n```)
+ * and extracts them with their language, code content, and surrounding context.
+ * Also handles cases where the entire content is code-like without markdown formatting.
+ * 
+ * @param markdown - The markdown text to parse (may be pure code without markdown)
+ * @returns Array of extracted code blocks with metadata:
+ *   - `code`: The code content (trimmed)
+ *   - `language`: The language identifier (defaults to 'text' if not specified)
+ *   - `index`: Zero-based index of the code block
+ *   - `markdownBefore`: Optional markdown text before this code block
+ *   - `markdownAfter`: Optional markdown text after this code block
+ * 
+ * @example
+ * ```ts
+ * const markdown = `# Title\n\n\`\`\`typescript\nconst x = 1;\n\`\`\`\n\nMore text`;
+ * const blocks = extractCodeBlocksFromMarkdown(markdown);
+ * // Returns: [{ code: 'const x = 1;', language: 'typescript', index: 0, markdownBefore: '# Title', markdownAfter: 'More text' }]
+ * ```
  */
 export function extractCodeBlocksFromMarkdown(markdown: string): ExtractedCodeBlock[] {
   if (!markdown || typeof markdown !== 'string') {

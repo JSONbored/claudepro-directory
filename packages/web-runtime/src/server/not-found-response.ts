@@ -32,7 +32,8 @@ export function notFoundResponse(
         code: ApiErrorCode.NOT_FOUND,
         message: message || defaultMessage,
       },
-      timestamp: new Date().toISOString(),
+      // Timestamp removed - logging platforms add timestamps automatically
+      // This eliminates new Date() calls during build
     },
     {
       status: 404,

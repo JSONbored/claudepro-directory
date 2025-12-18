@@ -292,7 +292,7 @@ export class ContentService extends BasePrismaService {
 
         // Transform to match RPC return type structure (CategoryConfigWithFeatures[])
         // The RPC extracts features from sections JSON and builds a composite type
-        const transformed = configs.map((config) => {
+        const transformed = configs.map((config: (typeof configs)[number]) => {
           // Extract sections JSON (default structure if missing)
           const sections =
             typeof config.sections === 'object' && config.sections !== null && !Array.isArray(config.sections)
@@ -607,7 +607,7 @@ export class ContentService extends BasePrismaService {
 
         // Transform to match RPC return type structure (ContentTemplatesResult)
         // The RPC extracts some fields from template_data JSON, we do the same here
-        const transformedTemplates: ContentTemplatesItem[] = templates.map((template) => {
+        const transformedTemplates: ContentTemplatesItem[] = templates.map((template: (typeof templates)[number]) => {
           const templateData = template.template_data;
           const templateDataObj = 
             typeof templateData === 'object' && templateData !== null && !Array.isArray(templateData)
@@ -915,13 +915,13 @@ export class ContentService extends BasePrismaService {
           // Fetch related content for each item (polymorphic relationship via content_type + content_slug)
           if (items.length > 0) {
             // Build array of unique content lookups
-            const contentLookups = items.map((item) => ({
+            const contentLookups = items.map((item: (typeof items)[number]) => ({
               slug: item.content_slug,
               category: item.content_type,
             }));
 
             // OPTIMIZATION: Fetch all related content in parallel (already optimized)
-            const relatedContentPromises = contentLookups.map((lookup) =>
+            const relatedContentPromises = contentLookups.map((lookup: (typeof contentLookups)[number]) =>
               prisma.content.findUnique({
                 where: {
                   slug_category: {
@@ -940,7 +940,7 @@ export class ContentService extends BasePrismaService {
             const relatedContent = await Promise.all(relatedContentPromises);
 
             // Map items to collection_items with related content
-            collectionItems = items.map((item, index) => ({
+            collectionItems = items.map((item: (typeof items)[number], index: number) => ({
               id: item.id,
               collection_id: item.collection_id,
               content_type: item.content_type,

@@ -26,7 +26,7 @@ import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 
 import { logClientErrorBoundary, logClientWarn } from '../../utils/client-logger.ts';
 import { usePulse } from '../../hooks/use-pulse.ts';
-import { useCopyToClipboard } from '../../hooks/index.ts';
+import { useCopyToClipboard } from '../../hooks/use-copy-to-clipboard.ts';
 // Removed deprecated responsive utility - using direct Tailwind classes
 import { Copy, Check, AlertCircle, RefreshCw } from '../../icons.tsx';
 import { Button } from './button.tsx';
@@ -41,7 +41,7 @@ import { SPRING } from '../../design-system/index.ts';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useCallback, useEffect } from 'react';
-import { useBoolean } from '../../hooks/index.ts';
+import { useBoolean } from '../../hooks/use-boolean.ts';
 
 /**
  * Link configuration for error fallback navigation

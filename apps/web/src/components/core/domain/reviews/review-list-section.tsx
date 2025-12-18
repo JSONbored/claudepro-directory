@@ -6,9 +6,11 @@ import type { GetReviewsWithStatsReturns } from '@heyclaude/database-types/postg
 import { deleteReview } from '@heyclaude/web-runtime/actions/reviews-crud';
 import { getReviewsWithStats } from '@heyclaude/web-runtime/actions/content';
 import { markReviewHelpful } from '@heyclaude/web-runtime/actions/mark-review-helpful';
-import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
 import { formatDistanceToNow } from '@heyclaude/web-runtime/data/utils';
-import { useAuthenticatedUser, useIsMounted, useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import { useIsMounted } from '@heyclaude/web-runtime/hooks/use-is-mounted';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { Edit, Star, ThumbsUp, Trash } from '@heyclaude/web-runtime/icons';
 import { type ReviewSectionProps } from '@heyclaude/web-runtime/types/component.types';

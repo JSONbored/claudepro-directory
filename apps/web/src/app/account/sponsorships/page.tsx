@@ -1,9 +1,10 @@
 import { type GetUserCompleteDataReturns } from '@heyclaude/database-types/postgres-types';
 import {
   generatePageMetadata,
-  getAuthenticatedUser,
-  getUserCompleteData,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -19,7 +20,6 @@ import {
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { SignInButton } from '@/src/components/core/auth/sign-in-button';
@@ -39,9 +39,7 @@ import Loading from './loading';
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   return generatePageMetadata('/account/sponsorships');
 }
 
@@ -340,8 +338,8 @@ async function SponsorshipsPageContent({
                       {sponsorship.content_type} - ID: {sponsorship.content_id}
                     </CardTitle>
                     <CardDescription>
-                      {new Date(sponsorship.start_date).toLocaleDateString()} -{' '}
-                      {new Date(sponsorship.end_date).toLocaleDateString()}
+                      {formatDate(sponsorship.start_date)} -{' '}
+                      {formatDate(sponsorship.end_date)}
                     </CardDescription>
                   </div>
                   <Button asChild size="sm" variant="outline">

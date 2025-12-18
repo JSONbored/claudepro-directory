@@ -67,6 +67,8 @@ export const DATE_CONFIG = {
   currentYear: 2025,
   currentMonth: 'November',
   lastReviewed: '2025-11-28',
+  /** Last updated date for legal pages (cookies, privacy, terms) - formatted as "Month Day, Year" */
+  lastUpdatedDate: 'November 15, 2025',
   claudeModels: {
     opus: 'Claude Opus 4.1',
     sonnet: 'Claude Sonnet 4.5',

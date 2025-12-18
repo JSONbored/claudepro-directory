@@ -7,10 +7,10 @@ import { ContentCategory, SubmissionType } from '@heyclaude/data-layer/prisma';
 import { type content_category, type submission_type } from '@heyclaude/data-layer/prisma';
 import {
   generatePageMetadata,
-  getContentTemplates,
-  getSubmissionDashboard,
-  getSubmissionFormFields,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/seo';
+import { getContentTemplates } from '@heyclaude/web-runtime/data/content/templates';
+import { getSubmissionDashboard } from '@heyclaude/web-runtime/data/account';
+import { getSubmissionFormFields } from '@heyclaude/web-runtime/data/forms/submission-form-fields';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type SubmissionFormConfig } from '@heyclaude/web-runtime/types/component.types';
@@ -170,7 +170,7 @@ function isValidRecentSubmission(submission: unknown): submission is {
  * @see import('next').Metadata
  */
 export async function generateMetadata(): Promise<Metadata> {
-  await connection(); // Still needed for generatePageMetadata if it uses Date.now()
+  'use cache';
   return generatePageMetadata('/submit');
 }
 

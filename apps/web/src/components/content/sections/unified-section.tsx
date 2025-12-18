@@ -1,9 +1,9 @@
 'use client';
 
 import type { content_category } from '@heyclaude/data-layer/prisma';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import {
   Bookmark,
@@ -36,7 +36,7 @@ import {
 import { motion } from 'motion/react';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { useIsClient } from '@heyclaude/web-runtime/hooks';
+import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
 
 import dynamic from 'next/dynamic';
 

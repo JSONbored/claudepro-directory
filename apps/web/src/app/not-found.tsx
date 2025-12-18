@@ -1,9 +1,10 @@
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { type Metadata } from 'next';
 
 import { NotFoundEmpty } from '@/src/components/primitives/feedback/empty-state';
 
 export async function generateMetadata(): Promise<Metadata> {
+  'use cache';
   return generatePageMetadata('/404');
 }
 

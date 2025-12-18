@@ -17,7 +17,7 @@ import type {
 } from '../../types/component.types.ts';
 import { createErrorBoundaryFallback } from '../../client/error-handler.ts';
 // Removed deprecated responsive utility - using direct Tailwind classes
-import { useCopyToClipboard } from '../../hooks/index.ts';
+import { useCopyToClipboard } from '../../hooks/use-copy-to-clipboard.ts';
 import { Button } from './button.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card.tsx';
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
@@ -26,7 +26,7 @@ import { SPRING } from '../../design-system/index.ts';
 import { motion } from 'motion/react';
 import { useCallback } from 'react';
 import type { ComponentType } from 'react';
-import { useBoolean } from '../../hooks/index.ts';
+import { useBoolean } from '../../hooks/use-boolean.ts';
 import Link from 'next/link';
 import { ROUTES } from '@heyclaude/shared-runtime';
 

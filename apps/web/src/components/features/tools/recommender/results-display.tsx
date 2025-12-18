@@ -15,10 +15,12 @@ import type {
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import type { GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
 import { addBookmarkBatch } from '@heyclaude/web-runtime/actions/user';
-import { getContentItemUrl, isValidCategory, sanitizeSlug } from '@heyclaude/web-runtime/core';
-import { getCategoryConfig } from '@heyclaude/web-runtime/data';
+import { getContentItemUrl, sanitizeSlug } from '@heyclaude/web-runtime/content';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { useAuthenticatedUser, useSafeAction } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import { useSafeAction } from '@heyclaude/web-runtime/hooks/use-safe-action';
 import {
   ArrowRight,
   Award,
@@ -58,7 +60,7 @@ import {
   toasts,
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { usePathname } from 'next/navigation';
 import { useCallback, useState } from 'react';
 

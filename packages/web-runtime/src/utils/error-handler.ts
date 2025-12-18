@@ -83,7 +83,7 @@ export async function createErrorResponse(
           message: 'Validation failed',
           details: formatZodError(error),
         },
-        timestamp: new Date().toISOString(),
+        // Timestamp removed - logging platforms add timestamps automatically
       },
       { status: statusCode }
     );
@@ -116,7 +116,7 @@ export async function createErrorResponse(
         message: isDevelopment ? errorMessage : 'An unexpected error occurred',
         ...(isDevelopment && { details: sanitizeError(error) }),
       },
-      timestamp: new Date().toISOString(),
+      // Timestamp removed - logging platforms add timestamps automatically
       ...(isDevelopment && normalized.stack && { stack: normalized.stack }),
     },
     {

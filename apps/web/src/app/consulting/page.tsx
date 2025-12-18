@@ -7,9 +7,10 @@
  * findings and implementation recommendations.
  */
 
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife, cacheTag } from 'next/cache';
 import { lazy, Suspense } from 'react';
 
 import Loading from './loading';
@@ -34,6 +35,13 @@ const ConsultingClient = lazy(() =>
  */
 
 export async function generateMetadata(): Promise<Metadata> {
+  'use cache';
+  // Static route - metadata never changes, use very long cache (30 days)
+  // Generated once at build time, cached forever (or until manual invalidation)
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTag('seo-metadata-static');
+  cacheTag('seo-metadata-consulting');
+  
   return generatePageMetadata('/consulting');
 }
 

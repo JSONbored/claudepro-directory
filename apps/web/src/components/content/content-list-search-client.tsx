@@ -10,14 +10,12 @@
  */
 
 import type { content_category } from '@heyclaude/data-layer/prisma';
-import {
-  SearchProvider,
-  SearchBar,
-  SearchResults,
-  SearchFilters,
-  useSearchAPI,
-} from '@heyclaude/web-runtime/search';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { SearchProvider } from '@heyclaude/web-runtime/search/context/search-provider';
+import { SearchBar } from '@heyclaude/web-runtime/search/components/search-bar';
+import { SearchResults } from '@heyclaude/web-runtime/search/components/search-results';
+import { SearchFilters } from '@heyclaude/web-runtime/search/components/search-filters';
+import { useSearchAPI } from '@heyclaude/web-runtime/search/hooks/use-search-api';
+import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
 import type { FilterState } from '@heyclaude/web-runtime/types/component.types';
 import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
 import { Suspense, useCallback } from 'react';

@@ -1,5 +1,6 @@
-import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/core';
-import { generatePageMetadata, getCompaniesList } from '@heyclaude/web-runtime/data';
+import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/utils/url-safety';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getCompaniesList } from '@heyclaude/web-runtime/data/companies';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   Briefcase,
@@ -42,6 +43,7 @@ import Loading from './loading';
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  'use cache';
   return await generatePageMetadata('/companies');
 }
 

@@ -1,11 +1,12 @@
 'use client';
 
 import type { content_category } from '@heyclaude/data-layer/prisma';
-import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
+import { getTimeoutConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
 import { Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
-import { useDebounceValue, useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useDebounceValue } from '@heyclaude/web-runtime/hooks/use-debounce-value';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 

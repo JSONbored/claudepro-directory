@@ -34,7 +34,7 @@
  */
 
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { isValidCategory, type UnifiedCategoryConfig } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { getContentByCategory } from '@heyclaude/web-runtime/data/content';
@@ -93,6 +93,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ category: string }>;
 }): Promise<Metadata> {
+  'use cache';
   const { category } = await params;
 
   // Validate category and load config
@@ -103,14 +104,10 @@ export async function generateMetadata({
     });
   }
 
-  // Type narrowing: after isValidCategory check, we know category is a valid enum value
-  const typedCategory = category;
-
-  const categoryConfig = getCategoryConfig(typedCategory);
-
+  // Don't pass categoryConfig to generatePageMetadata - it contains functions (badge text functions)
+  // that can't be serialized. generatePageMetadata only needs the route and params.
   return generatePageMetadata('/:category', {
     category,
-    categoryConfig: categoryConfig ?? undefined,
     params: { category },
   });
 }
@@ -179,12 +176,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     notFound();
   }
 
-  // Get icon name from component by finding it in ICON_NAME_MAP
-  // Reverse lookup: find the key in ICON_NAME_MAP that has the same component reference
-  const iconName = getIconNameFromComponent(config.icon);
-
   // OPTIMIZATION: Fetch content once at page level to avoid duplicate calls
   // Both CategoryBadges and CategoryPageContent need the same data
+  // Fetch items FIRST (needed for badge processing)
   let items: Awaited<ReturnType<typeof getContentByCategory>> = [];
   let hadError = false;
   try {
@@ -213,6 +207,28 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     );
   }
 
+  // ARCHITECTURAL FIX: Extract only the serializable data components actually need
+  // Instead of passing entire config (with React components/functions), we extract:
+  // - Only the specific props each component needs
+  // - All props are already serializable (strings, numbers, plain objects)
+  // - No serialization workarounds needed
+  
+  // Get icon name from component (for CategoryHeroShell)
+  const iconName = getIconNameFromComponent(config.icon);
+
+  // Process badge text functions (for CategoryBadges)
+  // Badge text can be a function that takes item count, so we evaluate it here
+  const processedBadges: Array<{ icon?: string; text: string }> = config.listPage.badges.map((badge) => {
+    const itemsLength = items?.length ?? 0;
+    const processed: { icon?: string; text: string } = {
+      text: typeof badge.text === 'function' ? badge.text(itemsLength) : badge.text,
+    };
+    if (badge.icon) {
+      processed.icon = badge.icon;
+    }
+    return processed;
+  });
+
   // PPR Optimization: Static shell (hero with config) renders immediately
   // Dynamic content (badges + items list) streams in Suspense
   // Items are loaded once and passed to both components
@@ -226,11 +242,15 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
         title={config.pluralTitle}
       >
         {/* CRITICAL: No Suspense above the fold - data is already fetched, prevents blank states from being cached */}
-        <CategoryBadges config={config} items={items} />
+        <CategoryBadges badges={processedBadges} pluralTitle={config.pluralTitle} items={items} />
       </CategoryHeroShell>
 
       {/* CRITICAL: No Suspense above the fold - data is already fetched, prevents blank states from being cached */}
-      <CategoryPageContent category={typedCategory} config={config} />
+      <CategoryPageContent 
+        category={typedCategory} 
+        pluralTitle={config.pluralTitle}
+        searchPlaceholder={config.listPage.searchPlaceholder}
+      />
     </div>
   );
 }
@@ -348,42 +368,33 @@ function CategoryHeroShell({
  * @see ICON_NAME_MAP
  */
 function CategoryBadges({
-  config,
+  badges,
+  pluralTitle,
   items,
 }: {
-  config: UnifiedCategoryConfig<content_category>;
+  // ARCHITECTURAL FIX: Only pass what's needed, not entire config
+  // All props are serializable (no React components, no functions)
+  badges: Array<{ icon?: string; text: string }>;
+  pluralTitle: string;
   items: Awaited<ReturnType<typeof getContentByCategory>>;
 }) {
   // OPTIMIZATION: Items are now passed as prop from parent (fetched once at page level)
   // This eliminates duplicate getContentByCategory() calls
 
-  // Process badges (handle dynamic count badges)
-  const badges = config.listPage.badges.map((badge) => {
-    const itemsLength = items?.length ?? 0;
-    const processed: { icon?: string; text: string } = {
-      text: typeof badge.text === 'function' ? badge.text(itemsLength) : badge.text,
-    };
-
-    if ('icon' in badge && badge.icon) {
-      processed.icon = badge.icon;
-    }
-
-    return processed;
-  });
-
+  // Badges are already processed by parent (functions evaluated, all strings)
   // Fallback badges if none configured
   const displayBadges =
     badges.length > 0
       ? badges
       : [
-          { icon: 'sparkles', text: `${items?.length ?? 0} ${config.pluralTitle} Available` },
+          { icon: 'sparkles', text: `${items?.length ?? 0} ${pluralTitle} Available` },
           { text: 'Community Driven' },
           { text: 'Production Ready' },
         ];
 
   return (
     <ul className="flex list-none flex-wrap justify-center gap-1">
-      {displayBadges.map((badge, idx) => (
+      {displayBadges.map((badge: { icon?: string; text: string }, idx: number) => (
         <li key={badge.text || `badge-${idx}`}>
           <UnifiedBadge style={idx === 0 ? 'secondary' : 'outline'} variant="base">
             {badge.icon && typeof badge.icon === 'string'
@@ -423,17 +434,21 @@ function CategoryBadges({
  */
 function CategoryPageContent({
   category,
-  config,
+  pluralTitle,
+  searchPlaceholder,
 }: {
   category: content_category;
-  config: UnifiedCategoryConfig<content_category>;
+  // ARCHITECTURAL FIX: Only pass what's needed, not entire config
+  // All props are serializable (no React components, no functions)
+  pluralTitle: string;
+  searchPlaceholder: string;
   // Note: items prop removed - CategoryPageSearchClient uses search API, not direct items
 }) {
   return (
     <>
       {/* Content section - Full width like homepage, sidebar on the side */}
       <section
-        aria-label={`${config.pluralTitle} content and search`}
+        aria-label={`${pluralTitle} content and search`}
         className="container mx-auto px-4 py-12"
       >
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_18rem]">
@@ -441,7 +456,7 @@ function CategoryPageContent({
           <div className="min-w-0">
             <CategoryPageSearchClient
               category={category}
-              searchPlaceholder={config.listPage.searchPlaceholder}
+              searchPlaceholder={searchPlaceholder}
             />
           </div>
 

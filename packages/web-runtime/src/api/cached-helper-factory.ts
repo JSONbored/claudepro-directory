@@ -144,7 +144,14 @@ export function createCachedHelper<TReturn = unknown>(
     }
     
     const service = await getService(serviceKey as Parameters<typeof getService>[0]);
-    const method = (service as unknown as Record<string, (...args: unknown[]) => Promise<TReturn>>)[methodName];
+    // Dynamic method access on service instances
+    // Services are stored in a Map with union types. TypeScript can't verify method existence
+    // at compile time, so we access methods dynamically with proper type narrowing.
+    // The runtime check below ensures safety.
+    // Use 'unknown' first to avoid unsafe type assertions, then narrow with runtime check
+    const serviceRecord = service as unknown;
+    const serviceMethods = serviceRecord as Record<string, (...args: unknown[]) => Promise<TReturn>>;
+    const method = serviceMethods[methodName];
     
     if (!method || typeof method !== 'function') {
       throw new Error(

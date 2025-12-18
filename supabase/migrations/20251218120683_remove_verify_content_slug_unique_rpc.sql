@@ -1,0 +1,21 @@
+-- Migration: Remove verify_content_slug_unique RPC function
+-- Version: 20251218120683
+-- Applied via: Supabase MCP
+-- Date: 2025-12-18
+--
+-- Description: Remove verify_content_slug_unique RPC function - not found in codebase
+--
+-- This function verified that a content slug is unique.
+-- Function signature: verify_content_slug_unique(...)
+--
+-- Verification:
+-- - Not found in packages/data-layer/src/services/ (no service method calls)
+-- - Not found in packages/web-runtime/src/data/ (no data fetching calls)
+-- - Not found in packages/web-runtime/src/actions/ (no action calls)
+-- - Not found in apps/web/src/app/ (no page usage)
+--
+-- Note: Slug uniqueness is likely enforced via UNIQUE constraints or application logic
+--
+-- Safe to remove: No codebase references found
+
+DROP FUNCTION IF EXISTS public.verify_content_slug_unique(text, public.content_category);

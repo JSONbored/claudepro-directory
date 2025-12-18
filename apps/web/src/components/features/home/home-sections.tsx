@@ -4,12 +4,11 @@
 
 import type { content_category } from '@heyclaude/data-layer/prisma';
 import { getHomepageConfigBundle } from '@heyclaude/web-runtime/config/static-configs';
-import { trackMissingData, isValidCategory } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { trackMissingData } from '@heyclaude/web-runtime/utils/homepage-error-tracking';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
-import {
-  SearchResults,
-  useSearchContext,
-} from '@heyclaude/web-runtime/search';
+import { SearchResults } from '@heyclaude/web-runtime/search/components/search-results';
+import { useSearchContext } from '@heyclaude/web-runtime/search/context/search-provider';
 import {
   type DisplayableContent,
   type HomePageClientProps,
@@ -22,7 +21,7 @@ import {
   LazyFeaturedSections,
   LazyAllContentSection,
 } from '@/src/components/features/home/lazy-home-sections';
-import { getCategoryConfigs } from '@heyclaude/web-runtime/data';
+import { getCategoryConfigs } from '@heyclaude/web-runtime/data/config/category';
 
 /**
  * Inner component that uses search context

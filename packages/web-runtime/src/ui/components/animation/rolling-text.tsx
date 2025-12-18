@@ -16,7 +16,9 @@
 
 import { SPRING, STAGGER } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
-import { useBoolean, useInterval, useTimeout } from '../../../hooks/index.ts';
+import { useBoolean } from '../../../hooks/use-boolean.ts';
+import { useInterval } from '../../../hooks/use-interval.ts';
+import { useTimeout } from '../../../hooks/use-timeout.ts';
 import { motion, type Transition, useInView } from 'motion/react';
 import * as React from 'react';
 

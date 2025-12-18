@@ -16,7 +16,9 @@ import {
   type SavedSearchPreset,
 } from '@heyclaude/web-runtime/types/component.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useBoolean, useDebounceCallback, useLocalStorage } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useDebounceCallback } from '@heyclaude/web-runtime/hooks/use-debounce-callback';
+import { useLocalStorage } from '@heyclaude/web-runtime/hooks/use-local-storage';
 
 const STORAGE_PREFIX = 'saved-search-presets:v1:';
 const PRESET_LIMIT = 5;

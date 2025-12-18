@@ -12,7 +12,7 @@
  * @module components/features/community/contributors-sidebar
  */
 
-import { sanitizeSlug } from '@heyclaude/web-runtime/core';
+import { sanitizeSlug } from '@heyclaude/web-runtime/content';
 import { Award, Medal, TrendingUp } from '@heyclaude/web-runtime/icons';
 import {
   UnifiedBadge,

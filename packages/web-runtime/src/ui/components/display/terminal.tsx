@@ -2,7 +2,9 @@
 
 import { DURATION } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
-import { useBoolean, useInterval, useTimeout } from '../../../hooks/index.ts';
+import { useBoolean } from '../../../hooks/use-boolean.ts';
+import { useInterval } from '../../../hooks/use-interval.ts';
+import { useTimeout } from '../../../hooks/use-timeout.ts';
 import { type MotionProps, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 

@@ -28,7 +28,7 @@ import {
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'motion/react';
 import { frame } from 'motion';
 import { useEffect, useRef, useMemo } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '../../hooks/use-boolean.ts';
 
 import { useSearchContext } from '../context/search-provider';
 import { SearchBar } from './search-bar';

@@ -22,7 +22,7 @@ import { cn } from '../../utils.ts';
 import { SPRING } from '../../../design-system/index.ts';
 import { useReducedMotion, usePageInView } from '../../../hooks/motion/index.ts';
 import { useSpring } from '../../../hooks/motion/index.ts';
-import { useTimeout } from '../../../hooks/index.ts';
+import { useTimeout } from '../../../hooks/use-timeout.ts';
 import * as React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
 

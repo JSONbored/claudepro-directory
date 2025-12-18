@@ -43,7 +43,6 @@ import type { LucideIcon } from '../icons.tsx';
 import type { ReactNode } from 'react';
 import type {
   TabConfig,
-  UnifiedCategoryConfig,
 } from '../types/category.ts';
 
 // Re-export category types
@@ -830,7 +829,22 @@ export interface TabbedDetailLayoutProps {
   item:
     | contentModel
     | (GetContentDetailCompleteReturns['content'] & contentModel);
-  config: UnifiedCategoryConfig<content_category>;
+  // ARCHITECTURAL FIX: Only pass serializable data, not entire config
+  // TabbedDetailLayout only needs typeName and sections (no React components, no functions)
+  config: {
+    typeName: string;
+    sections: {
+      description: boolean;
+      features: boolean;
+      installation: boolean;
+      use_cases: boolean;
+      configuration: boolean;
+      security: boolean;
+      troubleshooting: boolean;
+      examples: boolean;
+      requirements: boolean;
+    };
+  };
   tabs: ReadonlyArray<TabConfig>;
   sectionData: ProcessedSectionData;
   relatedItems?:

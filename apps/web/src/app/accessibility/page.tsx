@@ -1,10 +1,9 @@
-import { getContactChannels } from '@heyclaude/web-runtime/core';
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { getContactChannels } from '@heyclaude/web-runtime/config/marketing-client';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
-import { connection } from 'next/server';
 
 /**
  * Cache Components: Page uses request-time rendering with caching.
@@ -23,9 +22,7 @@ import { connection } from 'next/server';
  * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // generatePageMetadata internally uses Date.now() via getSEOMetadata
-  // connection() defers to request time for non-deterministic operations
-  await connection();
+  'use cache';
   return await generatePageMetadata('/accessibility');
 }
 

@@ -65,7 +65,8 @@ import {
   type RefObject,
 } from 'react';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { useOnClickOutside, useScrollLock } from '@heyclaude/web-runtime/hooks';
+import { useOnClickOutside } from '@heyclaude/web-runtime/hooks/use-on-click-outside';
+import { useScrollLock } from '@heyclaude/web-runtime/hooks/use-scroll-lock';
 
 type DialogStackContextType = {
   activeIndex: number;

@@ -25,16 +25,14 @@
 
 import 'server-only';
 import {
-  createApiOptionsHandler,
+  createOptionsHandler as createApiOptionsHandler,
   createFormatHandlerRoute,
-  getOnlyCorsHeaders,
-  getVersionedRoute,
-  jsonResponse,
-  sitewideFormatSchema,
-  textResponse,
   type FormatHandlerConfig,
   type RouteHandlerContext,
-} from '@heyclaude/web-runtime/server';
+} from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getOnlyCorsHeaders, jsonResponse, textResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { sitewideFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import { z } from 'zod';
 
 type SitewideFormat = 'json' | 'readme' | 'llms-txt' | 'llms';

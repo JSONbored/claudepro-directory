@@ -8,12 +8,9 @@
  */
 
 import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
-import {
-  ensureStringArray,
-  formatCopyCount,
-  formatViewCount,
-  getSocialLinks,
-} from '@heyclaude/web-runtime/core';
+import { ensureStringArray } from '@heyclaude/web-runtime/utils/content-helpers';
+import { formatCopyCount, formatViewCount } from '@heyclaude/web-runtime/content';
+import { getSocialLinks } from '@heyclaude/web-runtime/config/marketing-client';
 import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { Calendar, Copy, Eye, Tag, User } from '@heyclaude/web-runtime/icons';
 import { type ContentItem } from '@heyclaude/web-runtime/types/component.types';

@@ -19,19 +19,18 @@
 
 import 'server-only';
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { isValidCategory, VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import {
-  categoryContentFormatSchema,
-  createApiOptionsHandler,
+  createOptionsHandler as createApiOptionsHandler,
   createFormatHandlerRoute,
-  getOnlyCorsHeaders,
-  getVersionedRoute,
-  jsonResponse,
-  notFoundResponse,
-  textResponse,
   type FormatHandlerConfig,
   type RouteHandlerContext,
-} from '@heyclaude/web-runtime/server';
+} from '@heyclaude/web-runtime/api/route-factory';
+import { VALID_CATEGORIES } from '@heyclaude/web-runtime/utils/category-validation';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getOnlyCorsHeaders, jsonResponse, textResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { notFoundResponse } from '@heyclaude/web-runtime/server/not-found-response';
+import { categoryContentFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import { z } from 'zod';
 
 type CategoryFormat = 'json' | 'llms-category';

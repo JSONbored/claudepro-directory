@@ -5,8 +5,9 @@
  * Extracted from UserProfileCard to eliminate duplication
  */
 
-import { logUnhandledPromise, getSafeExternalUrl } from '@heyclaude/web-runtime/core';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
+import { getSafeExternalUrl } from '@heyclaude/web-runtime/utils/url-safety';
+import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
 import { ExternalLink } from '@heyclaude/web-runtime/icons';
 import { Button } from '@heyclaude/web-runtime/ui';
 

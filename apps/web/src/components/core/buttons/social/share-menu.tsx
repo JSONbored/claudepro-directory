@@ -11,8 +11,8 @@
  * - UTM tracking parameters
  */
 
-import { type SharePlatform } from '@heyclaude/web-runtime/core';
-import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
+import { type SharePlatform } from '@heyclaude/web-runtime/client/share';
+import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks/use-copy-to-clipboard';
 import { ChevronDown, Copy, Linkedin, Mail, Share2, Twitter } from '@heyclaude/web-runtime/icons';
 import {
   Button,

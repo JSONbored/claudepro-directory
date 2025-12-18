@@ -1,0 +1,22 @@
+-- Migration: Remove is_bookmarked_batch RPC function
+-- Version: 20251218120652
+-- Applied via: Supabase MCP
+-- Date: 2025-12-18
+--
+-- Description: Remove is_bookmarked_batch RPC function - converted to Prisma direct query
+--
+-- This function processed a JSONB array and did EXISTS checks for each item.
+-- The service now uses Prisma directly in AccountService.isBookmarkedBatch():
+--   prisma.bookmarks.findMany({
+--     where: {
+--       user_id: args.p_user_id,
+--       OR: whereConditions, // Array of { content_type, content_slug } conditions
+--     },
+--     select: { content_type: true, content_slug: true },
+--   })
+--   // Build set and map results
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/account.ts: Converted isBookmarkedBatch() to use Prisma
+
+DROP FUNCTION IF EXISTS public.is_bookmarked_batch(uuid, jsonb);

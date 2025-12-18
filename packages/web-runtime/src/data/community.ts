@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 import {
   type CommunityDirectoryUser,
   type GetCommunityDirectoryReturns,
@@ -8,9 +8,10 @@ import {
 } from '@heyclaude/database-types/postgres-types';
 
 import { normalizeError } from '../errors.ts';
-import { logger, pulseUserSearch } from '../index.ts';
+import { logger } from '../logger.ts';
+import { pulseUserSearch } from '../pulse.ts';
 
-import { createCachedDataFunction, generateResourceTags } from './cached-data-factory.ts';
+import { createDataFunction } from './cached-data-factory.ts';
 
 const DEFAULT_DIRECTORY_LIMIT = 100;
 
@@ -19,15 +20,12 @@ const DEFAULT_DIRECTORY_LIMIT = 100;
  * Uses 'use cache' to cache search results. Query and limit become part of the cache key.
  * Follows architectural strategy: data layer -> database RPC -> DB
  */
-const searchUsersUnified = createCachedDataFunction<
+const searchUsersUnified = createDataFunction<
   { query: string; limit: number },
   CommunityDirectoryUser[]
 >({
   serviceKey: 'search',
   methodName: 'searchUnified',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: () => generateResourceTags('community', undefined, ['user-search']),
   module: 'data/community',
   operation: 'searchUsersUnified',
   transformArgs: (args) =>
@@ -62,15 +60,12 @@ export type CollectionDetailData = GetUserCollectionDetailReturns;
  * Uses 'use cache' to cache directory listings. This data is public and same for all users.
  * Community directory changes periodically, so we use the 'long' cacheLife profile.
  */
-const getCommunityDirectoryRpc = createCachedDataFunction<
+const getCommunityDirectoryRpc = createDataFunction<
   number,
   GetCommunityDirectoryReturns | null
 >({
   serviceKey: 'misc', // Consolidated: CommunityService methods moved to MiscService
   methodName: 'getCommunityDirectory',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: () => generateResourceTags('community', undefined, ['users']),
   module: 'data/community',
   operation: 'getCommunityDirectoryRpc',
   transformArgs: (limit) => ({ p_limit: limit }),
@@ -146,21 +141,12 @@ export async function getCommunityDirectory(options: {
  * - Per-user cache keys (slug and viewerId in cache tag)
  * - Not prerendered (runs at request time)
  */
-export const getPublicUserProfile = createCachedDataFunction<
+export const getPublicUserProfile = createDataFunction<
   { slug: string; viewerId?: string },
   GetUserProfileReturns | null
 >({
   serviceKey: 'misc', // Consolidated: CommunityService methods moved to MiscService
   methodName: 'getUserProfile',
-  cacheMode: 'private',
-  cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
-  cacheTags: (input) => {
-    const tags = [`user-profile-${input.slug}`];
-    if (input.viewerId) {
-      tags.push(`user-profile-viewer-${input.viewerId}`);
-    }
-    return tags;
-  },
   module: 'data/community',
   operation: 'getPublicUserProfile',
   transformArgs: (input) => ({
@@ -186,21 +172,12 @@ export const getPublicUserProfile = createCachedDataFunction<
  * - Per-user cache keys (userSlug, collectionSlug, and viewerId in cache tag)
  * - Not prerendered (runs at request time)
  */
-export const getPublicCollectionDetail = createCachedDataFunction<
+export const getPublicCollectionDetail = createDataFunction<
   { collectionSlug: string; userSlug: string; viewerId?: string },
   CollectionDetailData | null
 >({
   serviceKey: 'misc', // Consolidated: CommunityService methods moved to MiscService
   methodName: 'getUserCollectionDetail',
-  cacheMode: 'private',
-  cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
-  cacheTags: (input) => {
-    const tags = [`user-collection-${input.userSlug}-${input.collectionSlug}`];
-    if (input.viewerId) {
-      tags.push(`user-collection-viewer-${input.viewerId}`);
-    }
-    return tags;
-  },
   module: 'data/community',
   operation: 'getPublicCollectionDetail',
   transformArgs: (input) => ({

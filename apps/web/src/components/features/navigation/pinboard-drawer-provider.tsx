@@ -1,6 +1,8 @@
 'use client';
 
-import { usePulse, useBoolean, useIsClient } from '@heyclaude/web-runtime/hooks';
+import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
 import { logClientWarn, logClientInfo, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import { createContext, useCallback, useContext, useMemo } from 'react';

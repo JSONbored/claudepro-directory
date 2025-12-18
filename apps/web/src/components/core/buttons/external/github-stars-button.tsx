@@ -5,9 +5,10 @@
  * Displays and links to GitHub repository with star count
  */
 
-import { getSocialLinks, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { getSocialLinks } from '@heyclaude/web-runtime/config/marketing-client';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
 import { Github } from '@heyclaude/web-runtime/icons';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn, Button } from '@heyclaude/web-runtime/ui';

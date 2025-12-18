@@ -9,10 +9,15 @@ import { useCallback, useState } from 'react';
  * (`setTrue`, `setFalse`, `toggle`) that prevent unnecessary re-renders when
  * passed to child components.
  *
+ * **Supports both object and array destructuring patterns:**
+ * - Object pattern: `const { value, setTrue, setFalse, toggle } = useBoolean();`
+ * - Array pattern: `const [value, toggle] = useBoolean();` (useState-like)
+ *
  * **When to use:**
  * - ✅ When you need boolean state with helper methods (setTrue, setFalse, toggle)
  * - ✅ When passing boolean setters to child components (memoized prevents re-renders)
  * - ✅ For modal dialogs, dropdowns, feature toggles, loading states
+ * - ✅ When you prefer useState-like array pattern
  * - ❌ For simple flags only the parent uses - `useState` is fine
  *
  * **Performance:**
@@ -21,15 +26,26 @@ import { useCallback, useState } from 'react';
  * - More efficient than inline arrow functions like `onClick={() => setIsOpen(true)}`
  *
  * @param defaultValue - Initial boolean value (default: `false`)
- * @returns Object with `value`, `setValue`, `setTrue`, `setFalse`, and `toggle` methods
+ * @returns Object with `value`, `setValue`, `setTrue`, `setFalse`, and `toggle` methods.
+ *          Also supports array destructuring: `[value, toggle, setValue]`
  *
  * @example
  * ```tsx
- * // Modal dialog
+ * // Object pattern - Modal dialog
  * const { value: isOpen, setTrue: openModal, setFalse: closeModal } = useBoolean();
  *
  * <button onClick={openModal}>Open</button>
  * {isOpen && <Modal onClose={closeModal} />}
+ * ```
+ *
+ * @example
+ * ```tsx
+ * // Array pattern - useState-like (replaces useToggle)
+ * const [isOpen, toggleOpen] = useBoolean();
+ *
+ * <button onClick={toggleOpen}>
+ *   {isOpen ? 'Close' : 'Open'}
+ * </button>
  * ```
  *
  * @example
@@ -69,11 +85,37 @@ export function useBoolean(defaultValue: boolean = false) {
     setValue((prev) => !prev);
   }, []);
 
-  return {
+  // Create result object that supports both object and array destructuring
+  const result = {
     value,
     setValue,
     setTrue,
     setFalse,
     toggle,
-  } as const;
+    // Support array destructuring pattern (useState-like)
+    // This allows: const [value, toggle] = useBoolean();
+    // TypeScript will infer the tuple type from the array
+    0: value,
+    1: toggle,
+    2: setValue,
+    length: 3,
+    [Symbol.iterator]: function* () {
+      yield value;
+      yield toggle;
+      yield setValue;
+    },
+  } as {
+    value: boolean;
+    setValue: React.Dispatch<React.SetStateAction<boolean>>;
+    setTrue: () => void;
+    setFalse: () => void;
+    toggle: () => void;
+    0: boolean;
+    1: () => void;
+    2: React.Dispatch<React.SetStateAction<boolean>>;
+    length: 3;
+    [Symbol.iterator]: () => Generator<boolean | (() => void) | React.Dispatch<React.SetStateAction<boolean>>, void, unknown>;
+  } & [boolean, () => void, React.Dispatch<React.SetStateAction<boolean>>];
+
+  return result;
 }

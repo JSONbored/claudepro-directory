@@ -40,7 +40,7 @@ import { LazySection } from '@/src/components/core/infra/scroll-animated-section
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { useEffect } from 'react';
 import { cn } from '@heyclaude/web-runtime/ui';
 import {

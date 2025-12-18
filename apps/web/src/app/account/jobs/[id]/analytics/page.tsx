@@ -4,9 +4,9 @@
 
 import {
   generatePageMetadata,
-  getAuthenticatedUser,
-  getUserJobById,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getUserJobById } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
@@ -25,7 +25,6 @@ import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
@@ -85,9 +84,7 @@ function getStatusColor(status: JobStatus): string {
  * @see JobAnalyticsPage
  */
 export async function generateMetadata({ params }: JobAnalyticsPageProperties): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   const { id } = await params;
   return generatePageMetadata('/account/jobs/:id/analytics', { params: { id } });
 }

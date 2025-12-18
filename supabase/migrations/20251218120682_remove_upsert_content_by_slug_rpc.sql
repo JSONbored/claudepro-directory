@@ -1,0 +1,21 @@
+-- Migration: Remove upsert_content_by_slug RPC function
+-- Version: 20251218120682
+-- Applied via: Supabase MCP
+-- Date: 2025-12-18
+--
+-- Description: Remove upsert_content_by_slug RPC function - not found in codebase
+--
+-- This function upserted content by slug.
+-- Function signature: upsert_content_by_slug(p_slug text, p_category content_category, p_title text, p_description text, p_metadata jsonb, p_tags text[], p_source text)
+--
+-- Verification:
+-- - Not found in packages/data-layer/src/services/ (no service method calls)
+-- - Not found in packages/web-runtime/src/data/ (no data fetching calls)
+-- - Not found in packages/web-runtime/src/actions/ (no action calls)
+-- - Not found in apps/web/src/app/ (no page usage)
+--
+-- Note: Content upserts are likely handled via Prisma or other RPCs
+--
+-- Safe to remove: No codebase references found
+
+DROP FUNCTION IF EXISTS public.upsert_content_by_slug(text, public.content_category, text, text, jsonb, text[], text);

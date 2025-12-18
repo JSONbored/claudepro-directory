@@ -1,0 +1,22 @@
+-- Migration: Remove get_all_tags_with_counts RPC function
+-- Version: 20251218120667
+-- Applied via: Supabase MCP
+-- Date: 2025-12-18
+--
+-- Description: Remove get_all_tags_with_counts RPC function - not found in codebase
+--
+-- This function returned all unique tags with usage counts and categories.
+-- Function signature: get_all_tags_with_counts(p_min_count integer, p_limit integer)
+-- Returns: TABLE with tag, usage_count, categories
+-- Comment says "Used for /tags index page" but no such page found
+--
+-- Verification:
+-- - Not found in packages/data-layer/src/services/ (no service method calls)
+-- - Not found in packages/web-runtime/src/data/ (no data fetching calls)
+-- - Not found in packages/web-runtime/src/actions/ (no action calls)
+-- - Not found in apps/web/src/app/ (no page usage)
+-- - Comment mentions "/tags/[tag] pages" but no such routes found
+--
+-- Safe to remove: No codebase references found
+
+DROP FUNCTION IF EXISTS public.get_all_tags_with_counts(integer, integer);

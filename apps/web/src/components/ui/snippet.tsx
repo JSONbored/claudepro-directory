@@ -42,7 +42,8 @@ import {
   type ReactElement,
 } from 'react';
 import { Button, Tabs, TabsContent, TabsList, TabsTrigger, cn } from '@heyclaude/web-runtime/ui';
-import { useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useTimeout } from '@heyclaude/web-runtime/hooks/use-timeout';
 
 export type SnippetProps = ComponentProps<typeof Tabs>;
 

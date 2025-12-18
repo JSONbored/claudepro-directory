@@ -27,7 +27,7 @@ import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion, useScroll } from 'motion/react';
 import { useSpring } from '@heyclaude/web-runtime/hooks/motion';
 import { useEffect, useState } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 export interface ReadProgressProps {
   /**

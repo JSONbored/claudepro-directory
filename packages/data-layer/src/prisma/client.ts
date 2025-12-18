@@ -43,18 +43,32 @@ export const prisma =
   globalForPrisma.prisma ??
   (() => {
     // Get DATABASE_URL from environment (transaction mode, port 6543)
-    const connectionString = requireEnvVar(
+    let connectionString = requireEnvVar(
       'DATABASE_URL',
       'DATABASE_URL is required for Prisma Client. Set it in your environment variables.'
     );
 
+    // Parse and normalize connection string for SSL configuration
+    // Remove sslmode from connection string to avoid conflicts with Pool SSL config
+    // We'll handle SSL via Pool config instead of connection string params
+    // Note: URL constructor doesn't support postgresql:// protocol, so we parse manually
+    const urlMatch = connectionString.match(/^(postgresql:\/\/[^?]+)(\?.*)?$/);
+    if (urlMatch && urlMatch[1]) {
+      const baseUrl = urlMatch[1];
+      const queryString = urlMatch[2] || '';
+      const params = new URLSearchParams(queryString.replace(/^\?/, ''));
+      params.delete('sslmode'); // Remove sslmode - we handle SSL via Pool config
+      const newQuery = params.toString();
+      connectionString = newQuery ? `${baseUrl}?${newQuery}` : baseUrl;
+    }
+
     // Create pg Pool for connection pooling with SSL configuration
-    // Supabase requires SSL connections for security
+    // Supabase ALWAYS requires SSL connections, even in development/build
+    // Supabase uses self-signed certificates, so we must set rejectUnauthorized: false
+    // This is safe because we're connecting to Supabase's managed database
     const pool = new Pool({
       connectionString,
-      ssl: process.env['NODE_ENV'] === 'production' || connectionString.includes('sslmode=require')
-        ? { rejectUnauthorized: false } // Supabase uses self-signed certificates
-        : undefined, // Allow non-SSL in development if connection string doesn't require it
+      ssl: { rejectUnauthorized: false }, // Always enable SSL for Supabase (required for all connections)
     });
 
     // Create Prisma adapter with pg Pool

@@ -1,5 +1,11 @@
 import type { content_category } from '@heyclaude/data-layer/prisma';
 
+/**
+ * Category display name mappings
+ * 
+ * Maps content category enum values to user-friendly display names and descriptions.
+ * Used for page titles, meta descriptions, and UI labels.
+ */
 const CATEGORY_DISPLAY_NAMES: Record<
   content_category,
   { pluralTitle: string; description: string }
@@ -50,6 +56,24 @@ const CATEGORY_DISPLAY_NAMES: Record<
   },
 };
 
+/**
+ * Get display name and description for a content category.
+ * 
+ * Returns user-friendly plural title and description for a given content category.
+ * Falls back to the category enum value if no mapping exists.
+ * 
+ * @param category - Content category enum value
+ * @returns Object with `pluralTitle` (e.g., "AI Agents") and `description` (e.g., "Browse specialized AI agents...")
+ * 
+ * @example
+ * ```ts
+ * getCategoryDisplayName('agents')
+ * // Returns: { pluralTitle: 'AI Agents', description: 'Browse specialized AI agents...' }
+ * 
+ * getCategoryDisplayName('unknown-category')
+ * // Returns: { pluralTitle: 'unknown-category', description: 'Content category' }
+ * ```
+ */
 export function getCategoryDisplayName(
   category: content_category
 ): { pluralTitle: string; description: string } {

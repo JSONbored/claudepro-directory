@@ -8,6 +8,25 @@ import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import { Card, CardContent } from '@heyclaude/web-runtime/ui';
 
+/**
+ * Format date using UTC methods for deterministic output (prevents hydration mismatches)
+ * This ensures server and client produce identical formatted dates
+ */
+function formatActivityDate(dateString: string): string {
+  try {
+    const date = new Date(dateString);
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth(); // 0-11
+    const day = date.getUTCDate();
+    
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    return `${monthNames[month]} ${day}, ${year}`;
+  } catch {
+    return dateString;
+  }
+}
+
 type Activity = UserActivityTimelineItem;
 
 interface ActivityTimelineProps {
@@ -16,8 +35,21 @@ interface ActivityTimelineProps {
 }
 
 const ACTIVITY_CONFIG = {
-  submission: { icon: GitPullRequest, label: 'Submitted' },
+  submission: { label: 'Submitted' },
 } as const;
+
+/**
+ * Get the icon component for an activity type
+ * Uses a function instead of storing components directly to avoid serialization issues
+ */
+function getActivityIcon(type: string) {
+  switch (type) {
+    case 'submission':
+      return GitPullRequest;
+    default:
+      return null;
+  }
+}
 
 export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
   const displayActivities = limit ? activities.slice(0, limit) : activities;
@@ -59,7 +91,7 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
             return null;
           }
 
-          const Icon = config.icon;
+          const Icon = getActivityIcon(activity.type);
 
           // Determine title based on activity type (only submissions exist)
           let title = '';
@@ -73,18 +105,14 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
           return (
             <Card key={activity.id} className="hover:bg-accent/5 transition-colors">
               <CardContent className="flex items-start gap-2 p-4">
-                <Icon className="text-muted-foreground mt-1 h-5 w-5 shrink-0" />
+                {Icon && <Icon className="text-muted-foreground mt-1 h-5 w-5 shrink-0" />}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm">
                     <span className="text-muted-foreground">{config.label}</span>{' '}
                     <span className="font-medium">{title}</span>
                   </p>
                   <p className="text-muted-foreground mt-1 text-xs">
-                    {new Date(activity.created_at).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
+                    {formatActivityDate(activity.created_at)}
                   </p>
                 </div>
               </CardContent>

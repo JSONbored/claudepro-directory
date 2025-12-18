@@ -6,27 +6,42 @@
  * 
  * Cache is automatically cleared after request completes (no persistence).
  * 
+ * **No TTL needed:** Since the cache is cleared after each request, TTL is unnecessary.
+ * This eliminates all Date.now() calls and simplifies the implementation.
+ * 
  * @module data-layer/utils/request-cache
  */
 
+
 /**
- * Cache entry with timestamp for TTL
+ * Cache entry (no TTL needed - cache is cleared after each request)
+ * 
+ * TTL is unnecessary because:
+ * - Cache is request-scoped (cleared after request completes)
+ * - Requests complete in milliseconds to seconds
+ * - No risk of stale data between requests
  */
 interface CacheEntry<T> {
   data: T;
-  timestamp: number;
 }
 
 /**
  * Request-scoped cache for RPC calls
  * 
- * Uses WeakMap to automatically clean up when request completes.
+ * Uses Map to store cache entries.
  * Cache key: `${rpcName}:${JSON.stringify(args)}`
- * TTL: 5 seconds (prevents stale data within request)
+ * 
+ * **No TTL needed:** Cache is cleared after each request completes.
+ * This eliminates all Date.now() calls and simplifies the implementation.
+ * 
+ * Why no TTL?
+ * - Cache is request-scoped (cleared after request)
+ * - Requests complete in milliseconds to seconds
+ * - No risk of stale data between requests
+ * - Eliminates Date.now() calls entirely
  */
 class RequestCache {
   private cache = new Map<string, CacheEntry<unknown>>();
-  private readonly TTL_MS = 5000; // 5 seconds TTL
 
   /**
    * Generate cache key from RPC name and arguments
@@ -37,7 +52,10 @@ class RequestCache {
   }
 
   /**
-   * Get cached value if available and not expired
+   * Get cached value if available
+   * 
+   * No TTL check needed - cache is cleared after each request.
+   * This eliminates all Date.now() calls.
    */
   get<T>(rpcName: string, args?: Record<string, unknown>): T | null {
     const key = this.getKey(rpcName, args);
@@ -47,23 +65,20 @@ class RequestCache {
       return null;
     }
 
-    const age = Date.now() - entry.timestamp;
-    if (age > this.TTL_MS) {
-      this.cache.delete(key);
-      return null;
-    }
-
+    // No TTL check - cache is cleared after request completes
     return entry.data;
   }
 
   /**
    * Store value in cache
+   * 
+   * No timestamp needed - cache is cleared after each request.
+   * This eliminates all Date.now() calls.
    */
   set<T>(rpcName: string, args: Record<string, unknown> | undefined, data: T): void {
     const key = this.getKey(rpcName, args);
     this.cache.set(key, {
       data,
-      timestamp: Date.now(),
     });
   }
 
@@ -80,7 +95,6 @@ class RequestCache {
   getStats() {
     return {
       size: this.cache.size,
-      ttl: this.TTL_MS,
     };
   }
 }

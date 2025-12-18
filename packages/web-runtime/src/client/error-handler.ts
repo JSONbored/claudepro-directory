@@ -2,10 +2,7 @@
 
 import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 
-import {
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
+import { logClientErrorBoundary, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { createWebAppContextWithIdClient } from '@heyclaude/web-runtime/logging/client';
 
 type ErrorResponse = {
@@ -60,7 +57,16 @@ export function createErrorBoundaryFallback(
     });
     
     // Use structured logging instead of console.error
-    logger.error({ err: normalized, ...logContext }, 'React error boundary caught error');
+    logClientErrorBoundary(
+      'React error boundary caught error',
+      normalized,
+      route,
+      errorInfo.componentStack || '',
+      {
+        errorType,
+        ...logContext,
+      }
+    );
     
     return {
       success: false,
@@ -74,15 +80,17 @@ export function createErrorBoundaryFallback(
     // Fallback error handling - still try to log
     const normalized = normalizeError(fallbackError, 'Error boundary fallback failed');
     try {
-      const logContext = createWebAppContextWithIdClient(
-        typeof window !== 'undefined' ? window.location.pathname : 'unknown',
-        'ReactErrorBoundary',
+      const fallbackRoute = typeof window !== 'undefined' ? window.location.pathname : 'unknown';
+      logClientErrorBoundary(
+        'Error boundary fallback handler failed',
+        normalized,
+        fallbackRoute,
+        '',
         {
           errorBoundary: true,
           fallbackError: true,
         }
       );
-      logger.error({ err: normalized, ...logContext }, 'Error boundary fallback handler failed');
     } catch {
       // Last resort - if even logging fails, just return error response
     }

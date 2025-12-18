@@ -24,15 +24,10 @@ import 'server-only';
 
 import { type GetSearchSuggestionsFormattedArgs } from '@heyclaude/database-types/postgres-types';
 // OPTIMIZATION: Removed unused imports - factory handles errors automatically
-import {
-  createApiOptionsHandler,
-  createCachedApiRoute,
-  getVersionedRoute,
-  getWithAuthCorsHeaders,
-  jsonResponse,
-  searchAutocompleteQuerySchema,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/server';
+import { createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext } from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getWithAuthCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { searchAutocompleteQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 
 /**
  * GET /api/search/autocomplete - Get search autocomplete suggestions

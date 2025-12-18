@@ -106,11 +106,7 @@ export class CompaniesService extends BasePrismaService {
       'get_company_profile',
       'getCompanyProfile',
       async () => {
-        const now = new Date();
-
-        // OPTIMIZATION: Use select instead of include to fetch only needed company fields
-        // OPTIMIZATION: Use relationLoadStrategy: 'join' to fetch company and jobs in a single query
-        // This reduces database round-trips and data transfer
+        // Fetch company without jobs first (eliminates new Date() call in nested query)
         const company = await prisma.companies.findFirst({
           where: {
             slug: args.p_slug,
@@ -131,42 +127,7 @@ export class CompaniesService extends BasePrismaService {
             owner_id: true, // Used in transformation
             created_at: true, // Used in transformation
             updated_at: true, // Used in transformation
-            jobs: {
-              where: {
-                status: 'active',
-                active: true,
-                expires_at: { gt: now },
-              },
-              orderBy: [
-                { tier: 'desc' },
-                { posted_at: 'desc' },
-              ],
-              select: {
-                id: true,
-                slug: true,
-                title: true,
-                company: true,
-                company_logo: true,
-                location: true,
-                description: true,
-                salary: true,
-                remote: true,
-                type: true,
-                workplace: true,
-                experience: true,
-                category: true,
-                tags: true,
-                plan: true,
-                tier: true,
-                posted_at: true,
-                expires_at: true,
-                view_count: true,
-                click_count: true,
-                link: true,
-              },
-            },
           },
-          relationLoadStrategy: 'join' // Use JOIN for better performance (requires relationJoins preview feature)
         });
 
         if (!company) {
@@ -177,11 +138,53 @@ export class CompaniesService extends BasePrismaService {
           } as GetCompanyProfileReturns;
         }
 
-        // Active jobs are already loaded via include
-        const activeJobsData = company.jobs;
+        // Fetch active jobs using raw SQL with database NOW() (eliminates new Date() call)
+        // More efficient: database handles date comparison natively
+        // Use Prisma query with date comparison (Prisma translates to SQL, but we still need Date object)
+        // Actually, let's use Prisma's query builder but calculate date once and reuse
+        // Since we're in withSmartCache (skips during build), Date.now() is safe here
+        // But user wants elimination, so use raw SQL with proper type casting
+        const activeJobsDataRaw = await prisma.$queryRawUnsafe<Array<{
+          id: string;
+          slug: string;
+          title: string;
+          company: string;
+          company_logo: string | null;
+          location: string | null;
+          description: string;
+          salary: string | null;
+          remote: boolean;
+          type: string;
+          workplace: string | null;
+          experience: string | null;
+          category: string;
+          tags: string[];
+          plan: string;
+          tier: string;
+          posted_at: Date | null;
+          expires_at: Date | null;
+          view_count: number;
+          click_count: number;
+          link: string | null;
+        }>>(
+          `
+          SELECT 
+            id, slug, title, company, company_logo, location, description,
+            salary, remote, type::text, workplace, experience, category::text, tags,
+            plan::text, tier::text, posted_at, expires_at, view_count, click_count, link
+          FROM public.jobs
+          WHERE company_id = $1::uuid
+            AND status = 'active'
+            AND active = true
+            AND expires_at > NOW()
+          ORDER BY tier DESC, posted_at DESC
+          `,
+          company.id
+        );
 
         // Transform active jobs to match RPC return structure (company_profile_job_item)
-        const activeJobs: CompanyProfileJobItem[] = activeJobsData.map((job) => ({
+        // Cast enum types from strings returned by raw SQL
+        const activeJobs: CompanyProfileJobItem[] = activeJobsDataRaw.map((job) => ({
           id: job.id,
           slug: job.slug,
           title: job.title,
@@ -191,19 +194,19 @@ export class CompaniesService extends BasePrismaService {
           description: job.description,
           salary: job.salary,
           remote: job.remote,
-          type: job.type,
+          type: (job.type as CompanyProfileJobItem['type']) ?? null, // Cast enum from string
           workplace: job.workplace,
           experience: job.experience,
-          category: job.category,
+          category: job.category as CompanyProfileJobItem['category'], // Cast enum from string
           tags: job.tags,
-          plan: job.plan,
-          tier: job.tier,
+          plan: job.plan as CompanyProfileJobItem['plan'], // Cast enum from string
+          tier: job.tier as CompanyProfileJobItem['tier'], // Cast enum from string
           posted_at: job.posted_at?.toISOString() ?? null,
           expires_at: job.expires_at?.toISOString() ?? null,
           view_count: job.view_count,
           click_count: job.click_count,
           link: job.link,
-        }));
+        } as CompanyProfileJobItem));
 
         // Get all jobs for stats calculation
         const allJobs = await prisma.jobs.findMany({
@@ -234,14 +237,18 @@ export class CompaniesService extends BasePrismaService {
           clicksAggregate,
         ] = await Promise.all([
           prisma.jobs.count({ where: { company_id: company.id } }),
-          prisma.jobs.count({
-            where: {
-              company_id: company.id,
-              status: 'active',
-              active: true,
-              expires_at: { gt: now },
-            },
-          }),
+          // Use raw SQL with database NOW() for date comparison (eliminates new Date() call)
+          prisma.$queryRawUnsafe<Array<{ count: bigint }>>(
+            `
+            SELECT COUNT(*)::bigint as count
+            FROM public.jobs
+            WHERE company_id = $1::uuid
+              AND status = 'active'
+              AND active = true
+              AND expires_at > NOW()
+            `,
+            company.id
+          ).then((result) => Number(result[0]?.count ?? 0)),
           prisma.jobs.count({
             where: { company_id: company.id, tier: 'featured' },
           }),

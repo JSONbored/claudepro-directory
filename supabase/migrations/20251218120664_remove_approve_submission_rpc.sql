@@ -1,0 +1,21 @@
+-- Migration: Remove approve_submission RPC function
+-- Version: 20251218120664
+-- Applied via: Supabase MCP
+-- Date: 2025-12-18
+--
+-- Description: Remove approve_submission RPC function - not found in codebase
+--
+-- This function approved a content submission (admin-only).
+-- Function signature: approve_submission(p_submission_id uuid)
+-- Requires: Admin role (checked via is_admin())
+--
+-- Verification:
+-- - Not found in packages/web-runtime/src/actions/ (no action calls)
+-- - Not found in packages/data-layer/src/services/ (no service method calls)
+-- - Not found in apps/web/src/app/ (no page usage)
+--
+-- Note: reject_submission RPC might still be used (verify separately)
+--
+-- Safe to remove: No codebase references found
+
+DROP FUNCTION IF EXISTS public.approve_submission(uuid);

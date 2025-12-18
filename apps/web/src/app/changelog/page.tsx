@@ -23,7 +23,8 @@
  */
 
 import { type changelogModel } from '@heyclaude/data-layer/prisma';
-import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getChangelogOverview } from '@heyclaude/web-runtime/data/changelog';
 import { APP_CONFIG, QUERY_LIMITS } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
@@ -47,6 +48,7 @@ import { ChangelogTimelineView } from '@/src/components/features/changelog/chang
  * @see APP_CONFIG
  */
 export async function generateMetadata(): Promise<Metadata> {
+  'use cache';
   // Create request-scoped child logger
   const metadataLogger = logger.child({
     module: 'apps/web/src/app/changelog',

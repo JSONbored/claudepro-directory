@@ -3,7 +3,7 @@
  * Uses edge function for syntax highlighting (cached, fast)
  */
 
-import { highlightCodeEdge } from '@heyclaude/web-runtime/data';
+import { highlightCodeEdge } from '@heyclaude/web-runtime/edge/transform';
 import { Zap } from '@heyclaude/web-runtime/icons';
 import { type StepByStepGuideProps } from '@heyclaude/web-runtime/types/component.types';
 import {

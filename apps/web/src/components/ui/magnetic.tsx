@@ -35,7 +35,8 @@ import {
   useSpring,
   type SpringOptions,
 } from 'motion/react';
-import { useMediaQuery, useIsClient } from '@heyclaude/web-runtime/hooks';
+import { useMediaQuery } from '@heyclaude/web-runtime/hooks/use-media-query';
+import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
  
 type MagneticProps = {
   children: React.ReactElement;

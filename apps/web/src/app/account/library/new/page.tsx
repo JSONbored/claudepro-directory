@@ -1,8 +1,8 @@
 import {
   generatePageMetadata,
-  getAuthenticatedUser,
-  getUserBookmarksForCollections,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getUserBookmarksForCollections } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
@@ -11,7 +11,6 @@ import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
@@ -34,9 +33,7 @@ import Loading from './loading';
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   return generatePageMetadata('/account/library/new');
 }
 
@@ -98,7 +95,6 @@ async function NewCollectionPageContent({
     reqLogger.warn(
       {
         section: 'data-fetch',
-        timestamp: new Date().toISOString(),
       },
       'NewCollectionPage: unauthenticated access attempt'
     );

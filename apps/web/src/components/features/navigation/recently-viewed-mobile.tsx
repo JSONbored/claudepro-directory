@@ -1,6 +1,7 @@
 'use client';
 
-import { useRecentlyViewed, getCategoryRoute, useLocalStorage } from '@heyclaude/web-runtime/hooks';
+import { useRecentlyViewed, getCategoryRoute } from '@heyclaude/web-runtime/hooks/use-recently-viewed';
+import { useLocalStorage } from '@heyclaude/web-runtime/hooks/use-local-storage';
 import { Clock, Trash, X } from '@heyclaude/web-runtime/icons';
 import {
   Button,
@@ -11,7 +12,7 @@ import {
   SheetTitle,
   cn,
 } from '@heyclaude/web-runtime/ui';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import Link from 'next/link';
 import { useEffect } from 'react';
 

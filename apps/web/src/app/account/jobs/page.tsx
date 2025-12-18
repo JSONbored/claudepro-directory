@@ -1,12 +1,10 @@
 import { type job_plan, type job_tier, type jobsModel } from '@heyclaude/data-layer/prisma';
 import { type GetUserCompleteDataReturns } from '@heyclaude/database-types/postgres-types';
-import { type JobBillingSummaryEntry } from '@heyclaude/web-runtime/data';
-import {
-  generatePageMetadata,
-  getAuthenticatedUser,
-  getJobBillingSummaries,
-  getUserCompleteData,
-} from '@heyclaude/web-runtime/data';
+import { type JobBillingSummaryEntry } from '@heyclaude/web-runtime/data/payments';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getJobBillingSummaries } from '@heyclaude/web-runtime/data/payments';
+import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
 import {
@@ -35,7 +33,6 @@ import { type JobStatus } from '@heyclaude/web-runtime/ui/constants';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { SignInButton } from '@/src/components/core/auth/sign-in-button';
@@ -176,9 +173,7 @@ function getStatusColor(status: JobStatus): string {
  * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   return generatePageMetadata('/account/jobs');
 }
 
@@ -230,7 +225,6 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
     reqLogger.warn(
       {
         section: 'data-fetch',
-        timestamp: new Date().toISOString(),
       },
       'MyJobsPage: unauthenticated access attempt detected'
     );

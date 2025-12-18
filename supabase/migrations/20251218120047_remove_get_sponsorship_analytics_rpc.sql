@@ -1,0 +1,13 @@
+-- Migration: Remove unused get_sponsorship_analytics RPC
+-- Version: 20251218120047
+-- Applied via: Supabase MCP
+-- Date: 2025-12-18
+--
+-- Description: Remove get_sponsorship_analytics RPC function - Converted to Prisma
+-- AccountService.getSponsorshipAnalytics now uses Prisma directly (line 572), RPC no longer called.
+-- The RPC was doing complex date series generation and aggregations, which we replicate with Prisma queries.
+--
+-- Function signature: get_sponsorship_analytics(p_sponsorship_id uuid, p_user_id uuid)
+-- Related: AccountService.getSponsorshipAnalytics uses Prisma queries instead
+
+DROP FUNCTION IF EXISTS public.get_sponsorship_analytics(uuid, uuid);

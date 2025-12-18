@@ -1,9 +1,8 @@
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
-import { cacheLife } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { connection } from 'next/server';
 
 /**
  * Dynamic Rendering Required
@@ -25,10 +24,13 @@ const TARGET_ROUTE = '/account/library';
  * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   // Use target route metadata since this redirects there
+  // Static redirect route - metadata never changes
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTag('seo-metadata-static');
+  cacheTag('seo-metadata-account-library');
+  
   return generatePageMetadata(TARGET_ROUTE);
 }
 

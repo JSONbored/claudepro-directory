@@ -95,20 +95,34 @@ export class AccountService extends BasePrismaService {
    */
   async getAccountDashboard(
     args: GetAccountDashboardArgs
-  ): Promise<GetAccountDashboardReturns> {
+  ): Promise<GetAccountDashboardReturns & { profile: (GetAccountDashboardReturns['profile'] & { account_age?: number }) | null }> {
     return withSmartCache(
       'getAccountDashboard',
       'getAccountDashboard',
       async () => {
-        const user = await prisma.public_users.findUnique({
-          where: { id: args.p_user_id },
-          select: {
-            bookmark_count: true,
-            name: true,
-            tier: true,
-            created_at: true,
-          },
-        });
+        // Use raw SQL to calculate account_age in database (eliminates Date.now() usage)
+        // Calculate account age using PostgreSQL date functions (database-native, most efficient)
+        const result = await prisma.$queryRawUnsafe<Array<{
+          bookmark_count: number | null;
+          name: string | null;
+          tier: string | null;
+          created_at: Date;
+          account_age: number;
+        }>>(
+          `
+          SELECT 
+            bookmark_count,
+            name,
+            tier,
+            created_at,
+            EXTRACT(DAY FROM (NOW() - created_at))::integer AS account_age
+          FROM public.users
+          WHERE id = $1::uuid
+          `,
+          args.p_user_id
+        );
+
+        const user = result[0];
 
         // Return empty state if user not found (matching RPC behavior)
         if (!user) {
@@ -116,21 +130,23 @@ export class AccountService extends BasePrismaService {
             bookmark_count: 0,
             profile: {
               name: null,
-              tier: 'free',
-              created_at: new Date().toISOString(),
-            },
-          };
+              tier: 'free' as GetAccountDashboardReturns['profile'] extends { tier: infer T } ? T : never,
+              created_at: null, // Use null instead of current date for empty state
+              account_age: 0,
+            } as GetAccountDashboardReturns['profile'] & { account_age: number },
+          } as GetAccountDashboardReturns & { profile: (GetAccountDashboardReturns['profile'] & { account_age: number }) | null };
         }
 
-        // Transform to match RPC return structure (AccountDashboardResult)
+        // Transform to match RPC return structure (AccountDashboardResult) with account_age
         return {
           bookmark_count: user.bookmark_count ?? 0,
           profile: {
             name: user.name,
-            tier: user.tier ?? 'free',
+            tier: (user.tier ?? 'free') as GetAccountDashboardReturns['profile'] extends { tier: infer T } ? T : never,
             created_at: user.created_at.toISOString(),
-          },
-        };
+            account_age: user.account_age,
+          } as GetAccountDashboardReturns['profile'] & { account_age: number },
+        } as GetAccountDashboardReturns & { profile: (GetAccountDashboardReturns['profile'] & { account_age: number }) | null };
       },
       args
     );
@@ -350,10 +366,18 @@ export class AccountService extends BasePrismaService {
             updated_at: submission.updated_at.toISOString(),
             merged_at: submission.merged_at?.toISOString() ?? null,
           })),
-          companies: companies.length > 0 ? companies as unknown as Record<string, unknown> : null,
-          // Note: job_billing_summary is a view, not a Prisma relation
-          // For now, return jobs without billing summary (can be added later with raw SQL if needed)
-          jobs: jobs.length > 0 ? jobs as unknown as Record<string, unknown> : null,
+          // Type assertion required: UserDashboardResult.companies is Record<string, unknown> | null
+          // because the RPC returns JSONB (jsonb_agg). Prisma returns companies[], which needs to be
+          // converted to match the JSONB structure. The actual usage expects an array-like structure
+          // that can be parsed, so we cast the array to match the expected JSONB format.
+          // TODO: Improve database type generation to properly type JSONB arrays
+          companies: companies.length > 0 ? (companies as unknown as Record<string, unknown>) : null,
+          // Type assertion required: UserDashboardResult.jobs is Record<string, unknown> | null
+          // because the RPC returns JSONB (jsonb_agg). Prisma returns jobs[], which needs to be
+          // converted to match the JSONB structure. Note: job_billing_summary is a view, not a Prisma
+          // relation, so billing summary is not included (can be added later with raw SQL if needed).
+          // TODO: Improve database type generation to properly type JSONB arrays
+          jobs: jobs.length > 0 ? (jobs as unknown as Record<string, unknown>) : null,
         };
       },
       args
@@ -609,15 +633,10 @@ export class AccountService extends BasePrismaService {
           };
         }
 
-        // Calculate date range (last 30 days from today)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const thirtyDaysAgo = new Date(today);
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29); // 29 days ago + today = 30 days
-
+        // Use database NOW() and INTERVAL for date range (eliminates new Date() calls)
+        // More efficient: database handles date arithmetic natively
         // OPTIMIZATION: Use groupBy with raw SQL for date grouping instead of fetching all records
         // This is more efficient for large datasets and reduces data transfer
-        // Note: Prisma groupBy doesn't support DATE() function directly, so we use $queryRawUnsafe
         const [impressionsGrouped, clicksGrouped] = await Promise.all([
           prisma.$queryRawUnsafe<Array<{ date: string; count: bigint }>>(
             `
@@ -627,14 +646,12 @@ export class AccountService extends BasePrismaService {
             FROM public.user_interactions
             WHERE interaction_type = 'sponsored_impression'
               AND content_slug = $1
-              AND created_at >= $2
-              AND created_at <= $3
+              AND created_at >= DATE_TRUNC('day', NOW() - INTERVAL '29 days')
+              AND created_at <= DATE_TRUNC('day', NOW())
             GROUP BY DATE(created_at)
             ORDER BY date ASC
             `,
-            args.p_sponsorship_id,
-            thirtyDaysAgo,
-            today
+            args.p_sponsorship_id
           ),
           prisma.$queryRawUnsafe<Array<{ date: string; count: bigint }>>(
             `
@@ -644,14 +661,12 @@ export class AccountService extends BasePrismaService {
             FROM public.user_interactions
             WHERE interaction_type = 'sponsored_click'
               AND content_slug = $1
-              AND created_at >= $2
-              AND created_at <= $3
+              AND created_at >= DATE_TRUNC('day', NOW() - INTERVAL '29 days')
+              AND created_at <= DATE_TRUNC('day', NOW())
             GROUP BY DATE(created_at)
             ORDER BY date ASC
             `,
-            args.p_sponsorship_id,
-            thirtyDaysAgo,
-            today
+            args.p_sponsorship_id
           ),
         ]);
 
@@ -675,31 +690,36 @@ export class AccountService extends BasePrismaService {
           });
         }
 
-        // Generate all dates in the last 30 days and build daily_stats array
+        // Generate all dates in the last 30 days using database (eliminates new Date() loop)
+        // Use database to generate date range
+        const dateRangeResult = await prisma.$queryRawUnsafe<Array<{ date: string }>>(
+          `
+          SELECT (DATE_TRUNC('day', NOW()) - (i::text || ' days')::interval)::date::text as date
+          FROM generate_series(0, 29) AS i
+          ORDER BY date ASC
+          `
+        );
         const dailyStats: Array<{
           date: string | null;
           impressions: number | null;
           clicks: number | null;
-        }> = [];
-        for (let i = 29; i >= 0; i--) {
-          const date = new Date(today);
-          date.setDate(date.getDate() - i);
-          const dateKey = date.toISOString().split('T')[0]!;
-          const stats = dailyStatsMap.get(dateKey) || { impressions: 0, clicks: 0 };
-          dailyStats.push({
-            date: dateKey,
+        }> = dateRangeResult.map((row) => {
+          const stats = dailyStatsMap.get(row.date) || { impressions: 0, clicks: 0 };
+          return {
+            date: row.date,
             impressions: stats.impressions,
             clicks: stats.clicks,
-          });
-        }
+          };
+        });
 
-        // Calculate computed metrics
-        const startDate = new Date(sponsorship.start_date);
-        startDate.setHours(0, 0, 0, 0);
-        const daysActive = Math.max(
-          0,
-          Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+        // Calculate computed metrics using database date calculation (eliminates new Date() calls)
+        const daysActiveResult = await prisma.$queryRawUnsafe<Array<{ days_active: number }>>(
+          `
+          SELECT GREATEST(0, EXTRACT(DAY FROM (DATE_TRUNC('day', NOW()) - DATE_TRUNC('day', $1::date)))::integer) as days_active
+          `,
+          sponsorship.start_date
         );
+        const daysActive = daysActiveResult[0]?.days_active ?? 0;
 
         const impressionCount = sponsorship.impression_count ?? 0;
         const clickCount = sponsorship.click_count ?? 0;
@@ -856,8 +876,18 @@ export class AccountService extends BasePrismaService {
           where: { user_id: args.p_user_id },
           orderBy: { created_at: 'desc' },
         });
-        // GetUserSponsorshipsReturns is unknown[], cast through unknown first to avoid type errors
-        return sponsorships as unknown as GetUserSponsorshipsReturns;
+        // Transform Prisma results to match RPC return format
+        // RPC returns dates as ISO strings, but Prisma returns Date objects
+        // Convert Date fields to ISO strings to match expected return type
+        const transformed = sponsorships.map((sponsorship) => ({
+          ...sponsorship,
+          created_at: sponsorship.created_at.toISOString(),
+          updated_at: sponsorship.updated_at.toISOString(),
+          start_date: sponsorship.start_date.toISOString(),
+          end_date: sponsorship.end_date.toISOString(),
+        })) satisfies GetUserSponsorshipsReturns;
+        
+        return transformed;
       },
       args
     );
@@ -882,23 +912,23 @@ export class AccountService extends BasePrismaService {
         const recentLimit = args.p_recent_limit ?? 5;
         const contributorsLimit = args.p_contributors_limit ?? 5;
 
-        // Calculate week start for "merged this week" filter
-        const weekStart = new Date();
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Start of current week (Sunday)
-        weekStart.setHours(0, 0, 0, 0);
-
+        // Use database DATE_TRUNC for week start (eliminates new Date() call)
+        // More efficient: database handles date calculations natively
         // Fetch stats, recent merged submissions, and top contributors in parallel
-        const [totalCount, pendingCount, mergedThisWeekCount, recentMerged, topContributors] = await Promise.all([
+        const [totalCount, pendingCount, mergedThisWeekCountResult, recentMerged, topContributors] = await Promise.all([
           prisma.content_submissions.count(),
           prisma.content_submissions.count({
             where: { status: 'pending' },
           }),
-          prisma.content_submissions.count({
-            where: {
-              status: 'approved', // RPC SQL uses 'approved'::submission_status
-              created_at: { gte: weekStart },
-            },
-          }),
+          // Use raw SQL with DATE_TRUNC for week start calculation
+          prisma.$queryRawUnsafe<Array<{ count: bigint }>>(
+            `
+            SELECT COUNT(*)::bigint as count
+            FROM public.content_submissions
+            WHERE status = 'approved'
+              AND created_at >= DATE_TRUNC('week', NOW())
+            `
+          ).then((result) => Number(result[0]?.count ?? 0)),
           prisma.content_submissions.findMany({
             where: { 
               status: 'merged', // RPC SQL uses 'approved'::submission_status, but Prisma enum value is 'merged'
@@ -966,7 +996,7 @@ export class AccountService extends BasePrismaService {
           stats: {
             total: totalCount,
             pending: pendingCount,
-            merged_this_week: mergedThisWeekCount,
+            merged_this_week: mergedThisWeekCountResult,
           },
           recent: recentMerged.map((submission) => {
             const user = submission.submitter_id ? usersMap.get(submission.submitter_id) : null;
@@ -1374,6 +1404,16 @@ export class AccountService extends BasePrismaService {
     );
   }
 
+  /**
+   * Get user complete data
+   * 
+   * OPTIMIZATION: Uses Prisma directly by calling individual service methods instead of RPC.
+   * The RPC was calling other RPCs (get_user_settings, get_user_identities, etc.) which have
+   * all been converted to Prisma. This method now calls the Prisma-based service methods directly.
+   * 
+   * @param args - Arguments with p_user_id, p_activity_limit, p_activity_offset, p_activity_type
+   * @returns User complete data matching RPC return structure
+   */
   async getUserCompleteData(
     args: GetUserCompleteDataArgs
   ): Promise<GetUserCompleteDataReturns> {
@@ -1384,11 +1424,48 @@ export class AccountService extends BasePrismaService {
       'get_user_complete_data',
       'getUserCompleteData',
       async () => {
-        return this.callRpc<GetUserCompleteDataReturns>(
-          'get_user_complete_data',
-          args,
-          { methodName: 'getUserCompleteData', useCache: false } // Disable callRpc cache since we use withSmartCache
-        );
+        // Call all individual service methods in parallel (they all use Prisma directly)
+        const [
+          accountDashboard,
+          userDashboard,
+          userSettings,
+          activitySummary,
+          activityTimeline,
+          userLibrary,
+          userIdentities,
+          sponsorships,
+        ] = await Promise.all([
+          this.getAccountDashboard({ p_user_id: args.p_user_id }),
+          this.getUserDashboard({ p_user_id: args.p_user_id }),
+          this.getUserSettings({ p_user_id: args.p_user_id }),
+          this.getUserActivitySummary({ p_user_id: args.p_user_id }),
+          this.getUserActivityTimeline({
+            p_user_id: args.p_user_id,
+            ...(args.p_activity_type ? { p_type: args.p_activity_type } : {}),
+            p_limit: args.p_activity_limit ?? 20,
+            p_offset: args.p_activity_offset ?? 0,
+          }),
+          this.getUserLibrary({ p_user_id: args.p_user_id }),
+          this.getUserIdentities({ p_user_id: args.p_user_id }),
+          this.getUserSponsorships({ p_user_id: args.p_user_id }),
+        ]);
+
+        // Build the composite result matching the RPC return structure
+        return {
+          account_dashboard: accountDashboard,
+          user_dashboard: userDashboard,
+          user_settings: userSettings,
+          activity_summary: activitySummary,
+          activity_timeline: activityTimeline,
+          user_library: userLibrary,
+          user_identities: userIdentities,
+          // Type assertion required: GetUserCompleteDataReturns['sponsorships'] is unknown[] | null
+          // because the database type generator couldn't determine the exact structure.
+          // getUserSponsorships() returns GetUserSponsorshipsReturns (unknown[]), which matches
+          // the expected type structure, but TypeScript can't verify this without the assertion.
+          // TODO: Improve database type generation to properly type sponsored_content in composite types
+          sponsorships: sponsorships as GetUserCompleteDataReturns['sponsorships'],
+        };
       },
       args
     );

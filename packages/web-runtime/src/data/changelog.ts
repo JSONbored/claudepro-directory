@@ -8,7 +8,7 @@ import {
   type GetChangelogOverviewReturns,
 } from '@heyclaude/database-types/postgres-types';
 
-import { createCachedDataFunction, generateResourceTags } from './cached-data-factory.ts';
+import { createDataFunction } from './cached-data-factory.ts';
 import { QUERY_LIMITS } from './config/constants.ts';
 import './changelog.shared.ts';
 
@@ -37,7 +37,7 @@ function createEmptyOverview(limit: number, offset = 0): GetChangelogOverviewRet
  * Get changelog overview
  * Uses 'use cache' to cache changelog overview. This data is public and same for all users.
  */
-export const getChangelogOverview = createCachedDataFunction<
+export const getChangelogOverview = createDataFunction<
   {
     category?: changelog_category;
     featuredOnly?: boolean;
@@ -49,15 +49,6 @@ export const getChangelogOverview = createCachedDataFunction<
 >({
   serviceKey: 'changelog',
   methodName: 'getChangelogOverview',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: (options) => {
-    const tags = generateResourceTags('changelog');
-    if (options.category) {
-      tags.push(`changelog-category-${options.category}`);
-    }
-    return tags;
-  },
   module: 'data/changelog',
   operation: 'getChangelogOverview',
   transformArgs: (options) => ({
@@ -82,12 +73,9 @@ export const getChangelogOverview = createCachedDataFunction<
  * Uses 'use cache' to cache changelog entries. This data is public and same for all users.
  * Changelog entries change periodically, so we use the 'long' cacheLife profile.
  */
-export const getChangelogEntryBySlug = createCachedDataFunction<string, changelogModel | null>({
+export const getChangelogEntryBySlug = createDataFunction<string, changelogModel | null>({
   serviceKey: 'changelog',
   methodName: 'getChangelogDetail',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: (slug) => generateResourceTags('changelog', slug),
   module: 'data/changelog',
   operation: 'getChangelogEntryBySlug',
   transformArgs: (slug) => ({ p_slug: slug }),
@@ -134,7 +122,10 @@ export const getChangelogEntryBySlug = createCachedDataFunction<string, changelo
       og_type: null,
       published: entry.published ?? false,
       raw_content: entry.raw_content ?? '',
-      release_date: entry.release_date ? new Date(entry.release_date) : new Date(),
+      // Use release_date if provided, otherwise fallback to created_at (eliminates new Date() call)
+      release_date: entry.release_date 
+        ? new Date(entry.release_date) 
+        : (entry.created_at ? new Date(entry.created_at) : new Date('1970-01-01')), // Fixed epoch fallback if both missing
       robots_follow: null,
       robots_index: null,
       seo_description: null,
@@ -192,12 +183,9 @@ export async function getChangelog(): Promise<{
  * OPTIMIZATION: Uses Prisma directly instead of RPC for better performance.
  * Only fetches slugs needed for generateStaticParams, avoiding unnecessary data processing.
  */
-export const getPublishedChangelogSlugs = createCachedDataFunction<number, string[]>({
+export const getPublishedChangelogSlugs = createDataFunction<number, string[]>({
   serviceKey: 'changelog',
   methodName: 'getPublishedChangelogSlugs',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
-  cacheTags: () => generateResourceTags('changelog', undefined, ['changelog-slugs']),
   module: 'data/changelog',
   operation: 'getPublishedChangelogSlugs',
   onError: () => [], // Return empty array on error

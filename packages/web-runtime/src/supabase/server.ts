@@ -23,14 +23,16 @@ export async function createSupabaseServerClient(): Promise<SupabaseServerClient
   if (!supabaseUrl) {
     throw new Error(
       'Missing NEXT_PUBLIC_SUPABASE_URL environment variable. ' +
-      'Please ensure your .env.local file contains NEXT_PUBLIC_SUPABASE_URL.'
+      'Please ensure Infisical dev environment contains NEXT_PUBLIC_SUPABASE_URL, ' +
+      'or set it in your environment variables.'
     );
   }
 
   if (!supabaseAnonKey) {
     throw new Error(
       'Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable. ' +
-      'Please ensure your .env.local file contains NEXT_PUBLIC_SUPABASE_ANON_KEY.'
+      'Please ensure Infisical dev environment contains NEXT_PUBLIC_SUPABASE_ANON_KEY, ' +
+      'or set it in your environment variables.'
     );
   }
 

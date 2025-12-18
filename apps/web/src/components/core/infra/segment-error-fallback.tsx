@@ -8,12 +8,12 @@ import {
   CardHeader,
   CardTitle
 } from '@heyclaude/web-runtime/ui';
-import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
+import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks/use-copy-to-clipboard';
 import { Copy, Check, AlertCircle, RefreshCw } from '@heyclaude/web-runtime/icons';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 /**
  * CRITICAL: Direct reference to process.env.NODE_ENV

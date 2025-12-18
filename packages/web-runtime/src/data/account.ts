@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { type IsBookmarkedBatchReturns, type IsFollowingBatchReturns } from '@heyclaude/data-layer';
 import {
@@ -23,10 +23,10 @@ import { z } from 'zod';
 
 import { getAuthenticatedUserFromClient } from '../auth/get-authenticated-user.ts';
 import { normalizeError } from '../errors.ts';
-import { logger } from '../index.ts';
+import { logger } from '../logger.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
 
-import { createCachedDataFunction } from './cached-data-factory.ts';
+import { createDataFunction } from './cached-data-factory.ts';
 import { getService } from './service-factory.ts';
 
 const USER_TIER_VALUES = Object.values(UserTier) as readonly user_tier[];
@@ -141,10 +141,7 @@ export async function getUserCompleteData(
     activityType?: null | string;
   }
 ): Promise<GetUserCompleteDataReturns | null> {
-  'use cache: private';
-  const { cacheLife, cacheTag } = await import('next/cache');
-  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
-  cacheTag(`user-complete-data-${userId}`);
+  // Simple data fetching function - pages control caching with 'use cache' directive
 
   const reqLogger = logger.child({
     module: 'data/account',
@@ -247,15 +244,12 @@ export async function getCollectionDetail(
   userId: string,
   slug: string
 ): Promise<GetCollectionDetailWithItemsReturns | null> {
-  const cachedFn = createCachedDataFunction<
+  const cachedFn = createDataFunction<
     { userId: string; slug: string },
     GetCollectionDetailWithItemsReturns | null
   >({
     serviceKey: 'account',
     methodName: 'getCollectionDetailWithItems',
-    cacheMode: 'private',
-    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
-    cacheTags: (args) => [`user-collection-${args.userId}-${args.slug}`],
     module: 'data/account',
     operation: 'getCollectionDetail',
     transformArgs: (args) => ({
@@ -313,15 +307,12 @@ export async function getSponsorshipAnalytics(
   userId: string,
   sponsorshipId: string
 ): Promise<GetSponsorshipAnalyticsReturns | null> {
-  const cachedFn = createCachedDataFunction<
+  const cachedFn = createDataFunction<
     { userId: string; sponsorshipId: string },
     GetSponsorshipAnalyticsReturns | null
   >({
     serviceKey: 'account',
     methodName: 'getSponsorshipAnalytics',
-    cacheMode: 'private',
-    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
-    cacheTags: (args) => [`user-sponsorship-analytics-${args.userId}-${args.sponsorshipId}`],
     module: 'data/account',
     operation: 'getSponsorshipAnalytics',
     transformArgs: (args) => ({
@@ -361,17 +352,12 @@ export async function getSubmissionDashboard(
   recentLimit = 5,
   contributorsLimit = 5
 ): Promise<GetSubmissionDashboardReturns | null> {
-  const cachedFn = createCachedDataFunction<
+  const cachedFn = createDataFunction<
     { recentLimit: number; contributorsLimit: number },
     GetSubmissionDashboardReturns | null
   >({
     serviceKey: 'account',
     methodName: 'getSubmissionDashboard',
-    cacheMode: 'private',
-    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
-    cacheTags: (args) => [
-      `submission-dashboard-${args.recentLimit}-${args.contributorsLimit}`,
-    ],
     module: 'data/account',
     operation: 'getSubmissionDashboard',
     transformArgs: (args) => ({
@@ -451,19 +437,12 @@ export async function isBookmarked(input: {
   content_type: content_category;
   userId: string;
 }): Promise<boolean> {
-  const cachedFn = createCachedDataFunction<
+  const cachedFn = createDataFunction<
     { content_slug: string; content_type: content_category; userId: string },
     boolean
   >({
     serviceKey: 'account',
     methodName: 'isBookmarked',
-    cacheMode: 'private',
-    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
-    cacheTags: (input) => [
-      'user-bookmarks',
-      `user-${input.userId}`,
-      `content-${input.content_slug}`,
-    ],
     module: 'data/account',
     operation: 'isBookmarked',
     transformArgs: (input) => ({
@@ -497,15 +476,12 @@ export async function isFollowing(input: {
   followerId: string;
   followingId: string;
 }): Promise<boolean> {
-  const cachedFn = createCachedDataFunction<
+  const cachedFn = createDataFunction<
     { followerId: string; followingId: string },
     boolean
   >({
     serviceKey: 'account',
     methodName: 'isFollowing',
-    cacheMode: 'private',
-    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
-    cacheTags: (input) => ['users', `user-${input.followerId}`, `user-${input.followingId}`],
     module: 'data/account',
     operation: 'isFollowing',
     transformArgs: (input) => ({
@@ -540,7 +516,7 @@ export async function isBookmarkedBatch(input: {
   }>;
   userId: string;
 }): Promise<IsBookmarkedBatchReturns> {
-  const cachedFn = createCachedDataFunction<
+  const cachedFn = createDataFunction<
     {
       items: Array<{
         content_slug: string;
@@ -552,18 +528,6 @@ export async function isBookmarkedBatch(input: {
   >({
     serviceKey: 'account',
     methodName: 'isBookmarkedBatch',
-    cacheMode: 'private',
-    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
-    cacheTags: (input) => {
-      const tags = ['user-bookmarks', `user-${input.userId}`];
-      // Include sorted item keys in cache tag for proper cache key generation
-      const itemKey = input.items
-        .map((i) => `${i.content_type}:${i.content_slug}`)
-        .toSorted()
-        .join(',');
-      tags.push(`bookmark-batch-${itemKey}`);
-      return tags;
-    },
     module: 'data/account',
     operation: 'isBookmarkedBatch',
     transformArgs: (input) => ({
@@ -594,21 +558,12 @@ export async function isFollowingBatch(input: {
   followedUserIds: string[];
   followerId: string;
 }): Promise<IsFollowingBatchReturns> {
-  const cachedFn = createCachedDataFunction<
+  const cachedFn = createDataFunction<
     { followedUserIds: string[]; followerId: string },
     IsFollowingBatchReturns
   >({
     serviceKey: 'account',
     methodName: 'isFollowingBatch',
-    cacheMode: 'private',
-    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
-    cacheTags: (input) => {
-      const tags = ['users', `user-${input.followerId}`];
-      // Include sorted user IDs in cache tag for proper cache key generation
-      const userIdsKey = [...input.followedUserIds].toSorted().join(',');
-      tags.push(`follow-batch-${userIdsKey}`);
-      return tags;
-    },
     module: 'data/account',
     operation: 'isFollowingBatch',
     transformArgs: (input) => ({
@@ -643,13 +598,7 @@ export async function getAccountDashboardBundle(
   userId: string,
   categoryIds?: readonly string[]
 ): Promise<AccountDashboardBundle> {
-  'use cache: private';
-  const { cacheLife, cacheTag } = await import('next/cache');
-  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
-  cacheTag(`user-dashboard-bundle-${userId}`);
-  if (categoryIds) {
-    cacheTag(`dashboard-bundle-categories-${categoryIds.join(',')}`);
-  }
+  // Simple data fetching function - pages control caching with 'use cache' directive
 
   // Lazy import to avoid circular dependencies
   const { getHomepageData } = await import('./content/homepage.ts');

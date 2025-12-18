@@ -3,39 +3,10 @@
  * Uses anonymous client for static/ISR pages
  * Database-first: Uses generated types directly from @heyclaude/database-types
  * Edge caching: Static config-controlled TTL for global cache
- */
-
-import type { announcementsModel } from '@heyclaude/data-layer/prisma';
-import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { getActiveAnnouncement as fetchActiveAnnouncement } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
-import { applyAnnouncementsCacheTags } from '@heyclaude/web-runtime/data';
-
-/**
- * Get active announcement from database
- *
- * Uses 'use cache' to cache active announcement with cacheLife profile.
- * This data is public and same for all users, so it can be cached at build time.
  * 
- * Returns Prisma announcements type with Date objects. Client components should
- * convert Date objects to strings if needed for serialization.
+ * NOTE: This file now just re-exports the factory-created function.
+ * Error handling and caching are handled by the factory function itself.
  */
-export async function getActiveAnnouncement(): Promise<announcementsModel | null> {
-  'use cache';
-  // Use 'hours' profile: 1hr stale, 15min revalidate, 1 day expire
-  cacheLife('medium');
-  applyAnnouncementsCacheTags();
 
-  try {
-    return await fetchActiveAnnouncement();
-  } catch (error) {
-    logger.error(
-      {
-        err: normalizeError(error, 'Failed to load announcement'),
-        source: 'AnnouncementBanner',
-      },
-      'Failed to load announcement'
-    );
-    return null;
-  }
-}
+// Re-export the factory-created function - it already has error handling and caching
+export { getActiveAnnouncement } from '@heyclaude/web-runtime/data/announcements';

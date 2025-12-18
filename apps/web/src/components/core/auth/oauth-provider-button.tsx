@@ -4,14 +4,14 @@
 
 'use client';
 
-import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
+import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/supabase/browser';
 import { DiscordBrandIcon, GithubBrandIcon, GoogleBrandIcon } from '@heyclaude/web-runtime/icons';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { MICROINTERACTIONS, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { useCallback } from 'react';
 
 interface OAuthProviderButtonProps {

@@ -6,9 +6,10 @@
 
 import type { contentModel } from '@heyclaude/data-layer/prisma';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
-import { isValidInternalPath, getSafeExternalUrl } from '@heyclaude/web-runtime/core';
+import { getSafeExternalUrl } from '@heyclaude/web-runtime/utils/url-safety';
+import { isValidInternalPath } from '@heyclaude/web-runtime/utils/url-validation';
 import React, { Suspense, useEffect, useState } from 'react';
-import { useIsClient } from '@heyclaude/web-runtime/hooks';
+import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
 
 import { Checklist } from '@/src/components/content/checklist';
 import dynamic from 'next/dynamic';

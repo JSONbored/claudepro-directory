@@ -201,6 +201,29 @@ export const booleanQuerySchema = z
   .describe('Boolean query parameter (true/false)');
 
 /**
+ * Optional URL schema - accepts empty string or valid URL
+ * 
+ * Validates that a string is either empty or a valid URL.
+ * Useful for optional URL fields in forms (website, social links, etc.).
+ * 
+ * @example
+ * ```ts
+ * const schema = z.object({ website: optionalUrlSchema });
+ * ```
+ */
+export const optionalUrlSchema = z
+  .string()
+  .refine((val) => val === '' || z.string().url().safeParse(val).success, {
+    message: 'Must be a valid URL',
+  })
+  .optional()
+  .describe('Optional URL field (empty string or valid URL)')
+  .meta({
+    description: 'Optional URL field (empty string or valid URL)',
+    example: 'https://example.com',
+  });
+
+/**
  * Sort order schema for content searches
  */
 export const sortSchema = z

@@ -1,0 +1,12 @@
+-- Migration: Remove unused get_jobs_count RPC
+-- Version: 20251218120026
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-18
+--
+-- Description: Remove get_jobs_count RPC function - Converted to Prisma
+-- JobsService.getJobsCount now uses Prisma directly (line 419), RPC no longer called.
+--
+-- Function signature: get_jobs_count()
+-- Related: JobsService.getJobsCount uses Prisma queries instead
+
+DROP FUNCTION IF EXISTS public.get_jobs_count();

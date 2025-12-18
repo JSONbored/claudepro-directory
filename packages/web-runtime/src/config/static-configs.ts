@@ -29,24 +29,27 @@ import { mapComponentCardConfig } from '../utils/component-card-config.ts';
 // =============================================================================
 
 /** Legacy app settings shape for backward compatibility */
-// Date values are computed lazily to prevent hydration mismatches between server and client
-const getCurrentDate = () => new Date();
+// Date values use static config to prevent build-time new Date() calls
+// These are updated at deploy time in unified-config.ts
+import { DATE_CONFIG } from './unified-config.ts';
+
 const APP_SETTINGS_COMPAT = {
   'newsletter.excluded_pages': NEWSLETTER_BEHAVIOR.excluded_pages,
   'hooks.infinite_scroll.batch_size': INFINITE_SCROLL_CONFIG.batch_size,
   'queue.pulse.batch_size': 100,
   'hooks.infinite_scroll.threshold': INFINITE_SCROLL_CONFIG.threshold,
   get 'date.current_month'() {
-    return getCurrentDate().toISOString().slice(0, 7);
+    // Extract month from DATE_CONFIG.currentDate (format: 'YYYY-MM-DD')
+    return DATE_CONFIG.currentDate.slice(0, 7);
   },
   get 'date.current_year'() {
-    return getCurrentDate().getFullYear();
+    return DATE_CONFIG.currentYear;
   },
   get 'date.current_date'() {
-    return getCurrentDate().toISOString().split('T')[0];
+    return DATE_CONFIG.currentDate;
   },
   get 'date.last_reviewed'() {
-    return getCurrentDate().toISOString().split('T')[0];
+    return DATE_CONFIG.lastReviewed;
   },
 } as const;
 

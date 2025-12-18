@@ -1,0 +1,22 @@
+-- Migration: Remove test_enriched_content_list_minimal RPC function
+-- Version: 20251218120681
+-- Applied via: Supabase MCP
+-- Date: 2025-12-18
+--
+-- Description: Remove test_enriched_content_list_minimal RPC function - not found in codebase
+--
+-- This function appears to be a test/debug function for enriched content lists.
+-- Function signature: test_enriched_content_list_minimal(...)
+--
+-- Verification:
+-- - Not found in packages/data-layer/src/services/ (no service method calls)
+-- - Not found in packages/web-runtime/src/data/ (no data fetching calls)
+-- - Not found in packages/web-runtime/src/actions/ (no action calls)
+-- - Not found in apps/web/src/app/ (no page usage)
+-- - Not found in test files
+--
+-- Note: Test functions should not be in production database
+--
+-- Safe to remove: No codebase references found, appears to be test-only
+
+DROP FUNCTION IF EXISTS public.test_enriched_content_list_minimal(public.content_category);

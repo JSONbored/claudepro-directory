@@ -1,8 +1,8 @@
 import {
   generatePageMetadata,
-  getAuthenticatedUser,
-  getCollectionDetail,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getCollectionDetail } from '@heyclaude/web-runtime/data/account';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
@@ -10,7 +10,6 @@ import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
@@ -39,9 +38,7 @@ interface EditCollectionPageProperties {
 export async function generateMetadata({
   params,
 }: EditCollectionPageProperties): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   const { slug } = await params;
   return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }

@@ -12,7 +12,8 @@
 import type { DisplayableContent, FilterState } from '@heyclaude/web-runtime/types/component.types';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useBoolean, useDebounceValue } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '../../hooks/use-boolean.ts';
+import { useDebounceValue } from '../../hooks/use-debounce-value.ts';
 
 import { enhancedSearchCache } from '../utils/search-cache';
 import { syncSearchStateFromURL, syncSearchStateToURL } from '../utils/search-state';

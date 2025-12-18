@@ -13,7 +13,8 @@
  */
 
 import { toggleFollow } from '@heyclaude/web-runtime/actions/user';
-import { useAuthenticatedUser, useSafeAction } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import { useSafeAction } from '@heyclaude/web-runtime/hooks/use-safe-action';
 import { Button, toasts } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
 import { useCallback, useOptimistic } from 'react';

@@ -1,11 +1,10 @@
 import { type sponsorship_tier } from '@heyclaude/data-layer/prisma';
 import { type GetSponsorshipAnalyticsReturns } from '@heyclaude/database-types/postgres-types';
 import { sponsorship_tier as sponsorshipTierEnum } from '@heyclaude/database-types/prisma';
-import {
-  generatePageMetadata,
-  getAuthenticatedUser,
-  getSponsorshipAnalytics,
-} from '@heyclaude/web-runtime/data';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getSponsorshipAnalytics } from '@heyclaude/web-runtime/data/account';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   Card,
@@ -18,7 +17,6 @@ import {
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { notFound } from 'next/navigation';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { SignInButton } from '@/src/components/core/auth/sign-in-button';
@@ -51,9 +49,7 @@ interface AnalyticsPageProperties {
  * @see https://nextjs.org/docs/app/api-reference/functions/generate-metadata
  */
 export async function generateMetadata({ params }: AnalyticsPageProperties): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   const { id } = await params;
   return generatePageMetadata('/account/sponsorships/:id/analytics', { params: { id } });
 }
@@ -307,14 +303,14 @@ async function SponsorshipAnalyticsPageContent({
             <div>
               <p className="text-sm-medium">Start Date</p>
               <p className="text-muted-foreground">
-                {new Date(sponsorship.start_date).toLocaleDateString()}
+                {formatDate(sponsorship.start_date)}
               </p>
             </div>
 
             <div>
               <p className="text-sm-medium">End Date</p>
               <p className="text-muted-foreground">
-                {new Date(sponsorship.end_date).toLocaleDateString()}
+                {formatDate(sponsorship.end_date)}
               </p>
             </div>
 
@@ -356,7 +352,10 @@ async function SponsorshipAnalyticsPageContent({
               return (
                 <div className="grid grid-cols-12 items-center gap-1" key={dayKey}>
                   <div className="text-muted-foreground col-span-2 text-xs">
-                    {date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
+                    {(() => {
+                      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                      return `${monthNames[date.getUTCMonth()]} ${date.getUTCDate()}`;
+                    })()}
                   </div>
                   <div className="col-span-10 grid grid-cols-2 gap-0.5">
                     {/* Impressions bar */}

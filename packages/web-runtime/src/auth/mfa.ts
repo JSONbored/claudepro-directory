@@ -4,7 +4,8 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { logger, normalizeError } from '../index';
+import { logger } from '../logger.ts';
+import { normalizeError } from '../errors.ts';
 
 /**
  * MFA Factor Types

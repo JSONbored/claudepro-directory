@@ -1,7 +1,7 @@
 'use client';
 
 import type { announcement_icon } from '@heyclaude/data-layer/prisma';
-import { useAnnouncementDismissal } from '@heyclaude/web-runtime/hooks';
+import { useAnnouncementDismissal } from '@heyclaude/web-runtime/hooks/use-announcement-dismissal';
 import {
   AlertTriangle,
   ArrowRight,
@@ -19,7 +19,7 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { type ComponentType, useEffect } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 /**
  * Icon mapping for announcements

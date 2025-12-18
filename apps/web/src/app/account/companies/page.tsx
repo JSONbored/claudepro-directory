@@ -7,9 +7,9 @@
 import { type UserCompaniesCompany } from '@heyclaude/database-types/postgres-types';
 import {
   generatePageMetadata,
-  getAuthenticatedUser,
-  getUserCompleteData,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
 import {
@@ -35,7 +35,6 @@ import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { SignInButton } from '@/src/components/core/auth/sign-in-button';
@@ -73,9 +72,7 @@ function isAllowedHttpUrl(url: null | string | undefined): boolean {
  * @see /account/companies
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   return generatePageMetadata('/account/companies');
 }
 

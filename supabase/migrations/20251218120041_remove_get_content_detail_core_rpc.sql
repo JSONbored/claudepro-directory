@@ -1,0 +1,12 @@
+-- Migration: Remove unused get_content_detail_core RPC
+-- Version: 20251218120013
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-18
+--
+-- Description: Remove get_content_detail_core RPC function - Converted to Prisma
+-- ContentService.getContentDetailCore now uses Prisma directly (line 822), RPC no longer called.
+--
+-- Function signature: get_content_detail_core(p_category content_category, p_slug text)
+-- Related: ContentService.getContentDetailCore uses Prisma queries instead
+
+DROP FUNCTION IF EXISTS public.get_content_detail_core(public.content_category, text);

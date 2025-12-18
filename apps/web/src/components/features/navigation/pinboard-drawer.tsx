@@ -11,7 +11,7 @@
  */
 
 import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
-import { usePinboard } from '@heyclaude/web-runtime/hooks';
+import { usePinboard } from '@heyclaude/web-runtime/hooks/use-pinboard';
 import { BookmarkMinus, BookmarkPlus } from '@heyclaude/web-runtime/icons';
 import { logClientInfo, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {

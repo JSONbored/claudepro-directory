@@ -1,10 +1,10 @@
-'use server';
+import 'server-only';
 
 import { type content_category } from '@heyclaude/data-layer/prisma';
 import { type GetContentTemplatesReturns } from '@heyclaude/database-types/postgres-types';
 import { serializeForClient } from '@heyclaude/shared-runtime';
 
-import { createCachedDataFunction, generateResourceTags } from '../cached-data-factory.ts';
+import { createDataFunction } from '../cached-data-factory.ts';
 
 type ContentTemplatesResult = GetContentTemplatesReturns;
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
@@ -21,15 +21,12 @@ export type MergedTemplateItem = ContentTemplateItem &
  * Uses 'use cache' to cache content templates. This data is public and same for all users.
  * Templates change periodically, so we use the 'medium' cacheLife profile.
  */
-export const getContentTemplates = createCachedDataFunction<
+export const getContentTemplates = createDataFunction<
   content_category,
   MergedTemplateItem[]
 >({
   serviceKey: 'content',
   methodName: 'getContentTemplates',
-  cacheMode: 'public',
-  cacheLife: 'medium', // 1hr stale, 15min revalidate, 1 day expire
-  cacheTags: (category) => generateResourceTags('templates', category),
   module: 'data/content/templates',
   operation: 'getContentTemplates',
   transformArgs: (category) => ({ p_category: category }),

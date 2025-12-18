@@ -11,7 +11,8 @@
 'use client';
 
 import type { changelogModel } from '@heyclaude/data-layer/prisma';
-import { useInfiniteScroll } from '@heyclaude/web-runtime/hooks';
+import { useInfiniteScroll } from '@heyclaude/web-runtime/hooks/use-infinite-scroll';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { getChangelogPath } from '@heyclaude/web-runtime/utils/changelog';
 import Link from 'next/link';
 
@@ -47,13 +48,9 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
 
   // Format date helper - EXACTLY matches Magic UI template format
   // Handle both Date objects (from Prisma) and string dates (from RPC)
-  const formatDate = (date: Date | string): string => {
+  const formatChangelogDate = (date: Date | string): string => {
     const dateObj = date instanceof Date ? date : new Date(date);
-    return dateObj.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    return formatDate(dateObj, 'long');
   };
 
   // Extract tags from entry (if available in metadata or keywords)
@@ -83,7 +80,7 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
     <>
       {displayedEntries.map((entry) => {
         const date = new Date(entry.release_date);
-        const formattedDate = formatDate(date);
+        const formattedDate = formatChangelogDate(date);
         const tags = getTags(entry);
         const version = getVersion(entry);
 

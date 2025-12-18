@@ -39,7 +39,9 @@ import * as React from 'react';
 import { useInView, type UseInViewOptions } from 'motion/react';
 import { useTheme } from 'next-themes';
 import { Button, cn } from '@heyclaude/web-runtime/ui';
-import { useBoolean, useTimeout, useInterval } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useTimeout } from '@heyclaude/web-runtime/hooks/use-timeout';
+import { useInterval } from '@heyclaude/web-runtime/hooks/use-interval';
 import { getThemeConfig } from '@heyclaude/shared-runtime';
 import { Copy, Check } from 'lucide-react';
 

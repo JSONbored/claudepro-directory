@@ -23,7 +23,10 @@ import {
 import { uploadCompanyLogoAction } from '@heyclaude/web-runtime/actions/companies';
 import { FORM_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { useAuthenticatedUser, useFormSubmit, useLoggedAsync, useSafeAction } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import { useFormSubmit } from '@heyclaude/web-runtime/hooks/use-form-submit';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
+import { useSafeAction } from '@heyclaude/web-runtime/hooks/use-safe-action';
 import { FileText, X } from '@heyclaude/web-runtime/icons';
 import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import {
@@ -40,7 +43,7 @@ import {
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 

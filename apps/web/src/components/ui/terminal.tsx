@@ -32,7 +32,9 @@
  */
 
 import { cn } from '@heyclaude/web-runtime/ui';
-import { useBoolean, useTimeout, useInterval } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useTimeout } from '@heyclaude/web-runtime/hooks/use-timeout';
+import { useInterval } from '@heyclaude/web-runtime/hooks/use-interval';
 import { motion, type MotionProps } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 

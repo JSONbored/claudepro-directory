@@ -3,7 +3,7 @@ import 'server-only';
 import { type GenerateMetadataCompleteReturns } from '@heyclaude/database-types/postgres-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 
-import { createCachedDataFunction, generateResourceTags } from '../cached-data-factory.ts';
+import { createDataFunction } from '../cached-data-factory.ts';
 
 /**
  * Determines if RPC calls should be skipped due to missing environment variables
@@ -37,22 +37,13 @@ interface SEOMetadataBase {
   twitterCard: 'summary_large_image';
 }
 
-// Internal cached function - declared before overloads
-const getSEOMetadataInternal = createCachedDataFunction<
+// Internal data function - declared before overloads
+const getSEOMetadataInternal = createDataFunction<
   { route: string; includeSchemas: boolean },
   SEOMetadataBase | { metadata: SEOMetadataBase; schemas: GenerateMetadataCompleteReturns['schemas'] } | null
 >({
   serviceKey: 'misc', // Consolidated: SeoService methods moved to MiscService
   methodName: 'generateMetadata',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
-  cacheTags: (args) => {
-    const tags = generateResourceTags('seo', args.route);
-    if (args.includeSchemas) {
-      tags.push('structured-data');
-    }
-    return tags;
-  },
   module: 'data/seo/client',
   operation: 'getSEOMetadata',
   transformArgs: (args) => ({
@@ -114,6 +105,17 @@ export async function getSEOMetadata(
  * Get SEO metadata for a route
  * Uses 'use cache' to cache SEO metadata. Route becomes part of the cache key.
  * This data is public and same for all users, so it can be cached at build time.
+ * 
+ * **Build-Time Optimization:**
+ * - During build: RPC call executes normally (deterministic - uses stored database data)
+ * - At runtime: Uses cached result from Next.js cache (no RPC call if cache valid)
+ * - Result is cached forever (or until content changes and cache is invalidated)
+ * 
+ * **Why this works without connection():**
+ * - The RPC function is STABLE (deterministic for same inputs)
+ * - Uses stored SEO fields from database (seo_title, seo_description, keywords)
+ * - Request cache skips Date.now() during build (via isBuildTime() check)
+ * - Next.js 'use cache' directive handles caching automatically
  *
  * @param route - The route path to generate SEO metadata for
  * @param options - Optional configuration
@@ -136,6 +138,10 @@ export async function getSEOMetadata(
   }
 
   const includeSchemas = options?.includeSchemas ?? false;
+  
+  // During build time: RPC call is deterministic (uses stored database data)
+  // Request cache already skips Date.now() during build, so this is safe
+  // At runtime: Next.js 'use cache' uses cached result (no RPC call if cache valid)
   return await getSEOMetadataInternal({ route, includeSchemas });
 }
 

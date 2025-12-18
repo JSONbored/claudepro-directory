@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { setupTestWithErrorTracking } from '../../../../config/tests/utils/error-tracking';
 
 /**
  * Comprehensive Navigation E2E Tests
@@ -16,80 +17,33 @@ import { expect, test } from '@playwright/test';
  */
 
 test.describe('Navigation', () => {
-  // Track all console messages for error detection
-  let consoleErrors: string[] = [];
-  let consoleWarnings: string[] = [];
-  let networkErrors: string[] = [];
-
   test.beforeEach(async ({ page }) => {
-    // Reset tracking
-    consoleErrors = [];
-    consoleWarnings = [];
-    networkErrors = [];
-
-    // Capture all console messages
-    page.on('console', (msg) => {
-      const text = msg.text();
-      if (msg.type() === 'error') {
-        // Filter out known acceptable errors
-        if (
-          !text.includes('Only plain objects') &&
-          !text.includes('background:') &&
-          !text.includes('background-color:') &&
-          !text.includes('Feature-Policy')
-        ) {
-          consoleErrors.push(text);
-        }
-      } else if (msg.type() === 'warning') {
-        // Filter out known acceptable warnings (but track preload warnings for newsletter)
-        if (
-          !text.includes('apple-mobile-web-app-capable') &&
-          !text.includes('Feature-Policy') &&
-          !text.includes('hydrated but some attributes') &&
-          !text.includes('hydration-mismatch')
-        ) {
-          consoleWarnings.push(text);
-        }
-      }
+    // Set up error tracking with custom acceptable errors/warnings for navigation-specific issues
+    const { cleanup, navigate } = setupTestWithErrorTracking(page, '/', {
+      acceptableErrors: [
+        'Only plain objects',
+        'background:',
+        'background-color:',
+        'Feature-Policy',
+      ],
+      acceptableWarnings: [
+        'apple-mobile-web-app-capable',
+        'Feature-Policy',
+        'hydrated but some attributes',
+        'hydration-mismatch',
+      ],
     });
-
-    // Capture page errors
-    page.on('pageerror', (error) => {
-      consoleErrors.push(`Page Error: ${error.message}`);
-    });
-
-    // Capture network failures
-    page.on('requestfailed', (request) => {
-      const url = request.url();
-      const failure = request.failure();
-      if (failure && !url.includes('favicon')) {
-        networkErrors.push(`${url} - ${failure.errorText}`);
-      }
-    });
-
-    // Navigate to homepage
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Wait for React hydration
+    await navigate();
+    
+    // Store cleanup function for afterEach
+    (page as any).__errorTrackingCleanup = cleanup;
   });
 
   test.afterEach(async ({ page }) => {
-    // FAIL test if any console errors detected
-    if (consoleErrors.length > 0) {
-      console.error('Console errors detected:', consoleErrors);
-      throw new Error(`Test failed due to console errors: ${consoleErrors.join('; ')}`);
-    }
-
-    // FAIL test if any console warnings detected (strict mode)
-    if (consoleWarnings.length > 0) {
-      console.warn('Console warnings detected:', consoleWarnings);
-      throw new Error(`Test failed due to console warnings: ${consoleWarnings.join('; ')}`);
-    }
-
-    // FAIL test if any network errors detected
-    if (networkErrors.length > 0) {
-      console.error('Network errors detected:', networkErrors);
-      throw new Error(`Test failed due to network errors: ${networkErrors.join('; ')}`);
+    // Check for errors and throw if any detected
+    const cleanup = (page as any).__errorTrackingCleanup;
+    if (cleanup) {
+      cleanup();
     }
   });
 
@@ -492,14 +446,11 @@ test.describe('Navigation', () => {
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(3000);
 
-      // Check console warnings for newsletter preload issues
-      const newsletterPreloadWarnings = consoleWarnings.filter(warning =>
-        warning.includes('newsletter') && warning.includes('preload')
-      );
-
-      if (newsletterPreloadWarnings.length > 0) {
-        throw new Error(`Newsletter preload warnings detected: ${newsletterPreloadWarnings.join('; ')}`);
-      }
+      // Note: Newsletter preload warnings are now handled by the shared error tracking utility
+      // If any unacceptable warnings are detected, the test will fail in afterEach
+      // This test verifies the page loads without newsletter-specific issues
+      const mainContent = page.locator('main, [role="main"]').first();
+      await expect(mainContent).toBeVisible();
     });
   });
 

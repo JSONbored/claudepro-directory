@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import {
   type experience_level,
@@ -8,7 +8,7 @@ import {
 } from '@heyclaude/data-layer/prisma';
 import { type GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
 
-import { createCachedDataFunction } from '../cached-data-factory.ts';
+import { createDataFunction } from '../cached-data-factory.ts';
 
 export interface RecommendationInput {
   experienceLevel: experience_level;
@@ -25,21 +25,12 @@ export interface RecommendationInput {
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
  */
-export const getConfigRecommendations = createCachedDataFunction<
+export const getConfigRecommendations = createDataFunction<
   RecommendationInput,
   GetRecommendationsReturns | null
 >({
   serviceKey: 'misc', // Consolidated: QuizService methods moved to MiscService
   methodName: 'getRecommendations',
-  cacheMode: 'private',
-  cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
-  cacheTags: (input) => {
-    const tags = [`recommendations-${input.useCase}-${input.experienceLevel}`];
-    if (input.viewerId) {
-      tags.push(`recommendations-viewer-${input.viewerId}`);
-    }
-    return tags;
-  },
   module: 'data/tools/recommendations',
   operation: 'getConfigRecommendations',
   transformArgs: (input) => ({

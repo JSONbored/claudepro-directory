@@ -7,13 +7,14 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { deleteJob } from '@heyclaude/web-runtime/actions/jobs-crud';
-import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
 import { Trash } from '@heyclaude/web-runtime/icons';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn, toasts, Button } from '@heyclaude/web-runtime/ui';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useTransition } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 

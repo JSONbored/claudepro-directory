@@ -1,8 +1,8 @@
-'use server';
+import 'server-only';
 
 import { type GetQuizConfigurationReturns } from '@heyclaude/database-types/postgres-types';
 
-import { createCachedDataFunction, generateResourceTags } from './cached-data-factory.ts';
+import { createDataFunction } from './cached-data-factory.ts';
 
 export type QuizConfigurationResult = GetQuizConfigurationReturns;
 
@@ -17,12 +17,9 @@ export type QuizConfigurationResult = GetQuizConfigurationReturns;
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Not prerendered (runs at request time)
  */
-export const getQuizConfiguration = createCachedDataFunction<void, QuizConfigurationResult | null>({
+export const getQuizConfiguration = createDataFunction<void, QuizConfigurationResult | null>({
   serviceKey: 'misc', // Consolidated: QuizService methods moved to MiscService
   methodName: 'getQuizConfiguration',
-  cacheMode: 'private',
-  cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
-  cacheTags: () => generateResourceTags('quiz-configuration'),
   module: 'data/quiz',
   operation: 'getQuizConfiguration',
 });

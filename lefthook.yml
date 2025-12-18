@@ -207,20 +207,29 @@ pre-push:
           fi
         done
         
-        if [ ${#MISSING_VARS[@]} -gt 0 ]; then
-          echo "⚠️  Missing env vars: ${MISSING_VARS[*]}"
-          echo "   Loading from .env.local..."
-          
-          if [ -f ".env.local" ]; then
-            set -a && source .env.local && set +a
-            echo "   ✅ Loaded .env.local"
+        # Use Infisical for build verification (required for local dev)
+        if command -v infisical >/dev/null 2>&1; then
+          # Use Infisical for build verification
+          set +e
+          BUILD_OUTPUT=$(infisical run --env=dev -- pnpm build 2>&1)
+          BUILD_STATUS=$?
+          echo "$BUILD_OUTPUT" | tail -10
+          if [ $BUILD_STATUS -ne 0 ]; then
+            echo "   ⚠️  Build failed (non-blocking - fix before merging)"
           else
-            echo "   ⚠️  .env.local not found - build verification skipped"
-            echo "   (CI will verify with proper environment)"
-            exit 0
+            DURATION=$(( ($(date +%s%N) - START) / 1000000 ))
+            echo "   ✅ Build verified with Infisical (${DURATION}ms)"
           fi
+          exit 0
+        elif [ ${#MISSING_VARS[@]} -gt 0 ]; then
+          echo "⚠️  Missing env vars: ${MISSING_VARS[*]}"
+          echo "   ⚠️  Infisical not available - build verification skipped"
+          echo "   For local development, install Infisical CLI and run: infisical run --env=dev -- <command>"
+          echo "   (CI will verify with proper environment)"
+          exit 0
         fi
         
+        # Run build (env vars already available from Infisical or .env.local)
         set +e
         BUILD_OUTPUT=$(pnpm build 2>&1)
         BUILD_STATUS=$?

@@ -6,8 +6,8 @@
 'use client';
 
 import { createMFAChallenge, enrollTOTPFactor, verifyMFAChallenge } from '@heyclaude/web-runtime/auth/mfa';
-import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/supabase/browser';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
 import { AlertCircle, Loader2, Shield } from '@heyclaude/web-runtime/icons';
 import {
   errorToasts,
@@ -22,7 +22,7 @@ import {
   Input,
   Label,
 } from '@heyclaude/web-runtime/ui';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import Image from 'next/image';
 import { useState } from 'react';
 

@@ -1,0 +1,25 @@
+-- Migration: Remove is_bookmarked RPC function
+-- Version: 20251218120651
+-- Applied via: Supabase MCP
+-- Date: 2025-12-18
+--
+-- Description: Remove is_bookmarked RPC function - converted to Prisma direct query
+--
+-- This function was a simple EXISTS check:
+--   SELECT EXISTS (SELECT 1 FROM bookmarks WHERE user_id = p_user_id AND content_type = p_content_type AND content_slug = p_content_slug)
+--
+-- The service now uses Prisma directly in AccountService.isBookmarked():
+--   prisma.bookmarks.findFirst({
+--     where: {
+--       user_id: args.p_user_id,
+--       content_type: args.p_content_type,
+--       content_slug: args.p_content_slug,
+--     },
+--     select: { id: true },
+--   })
+--   return bookmark !== null;
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/account.ts: Converted isBookmarked() to use Prisma
+
+DROP FUNCTION IF EXISTS public.is_bookmarked(uuid, public.content_category, text);

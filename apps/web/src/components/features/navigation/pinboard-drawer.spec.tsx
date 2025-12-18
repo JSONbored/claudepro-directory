@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { setupTestWithErrorTracking } from '../../../../config/tests/utils/error-tracking';
 
 /**
  * Comprehensive Pinboard Drawer E2E Tests
@@ -15,74 +16,20 @@ import { expect, test } from '@playwright/test';
  */
 
 test.describe('Pinboard Drawer', () => {
-  // Track all console messages for error detection
-  let consoleErrors: string[] = [];
-  let consoleWarnings: string[] = [];
-  let networkErrors: string[] = [];
-
   test.beforeEach(async ({ page }) => {
-    // Reset tracking
-    consoleErrors = [];
-    consoleWarnings = [];
-    networkErrors = [];
-
-    // Capture all console messages
-    page.on('console', (msg) => {
-      const text = msg.text();
-      if (msg.type() === 'error') {
-        // Filter out known acceptable errors
-        if (!isAcceptableError(text)) {
-          consoleErrors.push(text);
-        }
-      } else if (msg.type() === 'warning') {
-        // Filter out known acceptable warnings
-        if (!isAcceptableWarning(text)) {
-          consoleWarnings.push(text);
-        }
-      }
-    });
-
-    // Capture page errors
-    page.on('pageerror', (error) => {
-      consoleErrors.push(`Page Error: ${error.message}`);
-    });
-
-    // Capture network failures
-    page.on('requestfailed', (request) => {
-      const url = request.url();
-      // Filter out non-critical failures
-      if (isCriticalResource(url)) {
-        networkErrors.push(`${url} - ${request.failure()?.errorText}`);
-      }
-    });
-
-    // Navigate to a page with pinboard access
-    await page.goto('/');
+    // Set up error tracking and navigate to homepage
+    const { cleanup, navigate } = setupTestWithErrorTracking(page, '/');
+    await navigate();
     
-    // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
-    
-    // Wait for React to hydrate
-    await page.waitForTimeout(1000);
+    // Store cleanup function for afterEach
+    (page as any).__errorTrackingCleanup = cleanup;
   });
 
   test.afterEach(async ({ page }) => {
-    // FAIL test if any console errors detected
-    if (consoleErrors.length > 0) {
-      console.error('Console errors detected:', consoleErrors);
-      throw new Error(`Test failed due to console errors: ${consoleErrors.join('; ')}`);
-    }
-
-    // FAIL test if any console warnings detected (strict mode)
-    if (consoleWarnings.length > 0) {
-      console.warn('Console warnings detected:', consoleWarnings);
-      throw new Error(`Test failed due to console warnings: ${consoleWarnings.join('; ')}`);
-    }
-
-    // FAIL test if any network errors detected
-    if (networkErrors.length > 0) {
-      console.error('Network errors detected:', networkErrors);
-      throw new Error(`Test failed due to network errors: ${networkErrors.join('; ')}`);
+    // Check for errors and throw if any detected
+    const cleanup = (page as any).__errorTrackingCleanup;
+    if (cleanup) {
+      cleanup();
     }
   });
 
@@ -258,19 +205,3 @@ test.describe('Pinboard Drawer', () => {
     await expect(drawer).toBeVisible();
   });
 });
-
-// Helper functions
-function isAcceptableError(text: string): boolean {
-  // Add known acceptable errors here
-  return false; // Strict mode - no acceptable errors
-}
-
-function isAcceptableWarning(text: string): boolean {
-  // Add known acceptable warnings here
-  return false; // Strict mode - no acceptable warnings
-}
-
-function isCriticalResource(url: string): boolean {
-  // Filter out non-critical resources (analytics, etc.)
-  return !url.includes('analytics') && !url.includes('vercel') && !url.includes('segment');
-}

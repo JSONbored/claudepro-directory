@@ -13,9 +13,9 @@
  */
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseServerClient, getAuthenticatedUser } from '@heyclaude/web-runtime/server';
+import { createSupabaseServerClient } from '@heyclaude/web-runtime/supabase/server';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import Link from 'next/link';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { AccountMFAGuard } from '@/src/components/core/auth/account-mfa-guard';
@@ -40,6 +40,12 @@ import { AccountSidebarSkeleton } from '@/src/components/features/account/accoun
  * @see getAuthenticatedUser
  */
 async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
+  'use cache: private';
+  
+  // Defer to request time before using non-deterministic operations (Date.now())
+  const { connection } = await import('next/server');
+  await connection();
+  
   // Authentication check - required in layout for route protection
   const result = await getAuthenticatedUser({
     context: 'AccountLayout',
@@ -49,11 +55,6 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
   // - return a non-null user
   // - or throw/redirect when unauthenticated
   const user = result.user!;
-
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  // Must be called before any impure functions like Date.now()
-  await connection();
 
   // Calculate timestamp immediately after connection() to ensure it's at request time
   // This satisfies React's purity requirements by isolating the impure function call

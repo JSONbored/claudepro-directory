@@ -1,8 +1,8 @@
-'use server';
+import 'server-only';
 
 import { type payment_plan_catalogModel } from '@heyclaude/data-layer/prisma';
 
-import { createCachedDataFunction, generateResourceTags } from './cached-data-factory.ts';
+import { createDataFunction } from './cached-data-factory.ts';
 
 // Type for job billing summary (matches job_billing_summary view structure)
 // This type represents a single row from the view
@@ -69,12 +69,9 @@ function sanitizeBenefits(benefits: PaymentPlanRow['benefits']): null | string[]
  * Get payment plan catalog
  * Uses 'use cache' to cache payment plan catalog. This data is public and same for all users.
  */
-export const getPaymentPlanCatalog = createCachedDataFunction<void, PaymentPlanCatalogEntry[]>({
+export const getPaymentPlanCatalog = createDataFunction<void, PaymentPlanCatalogEntry[]>({
   serviceKey: 'jobs',
   methodName: 'getPaymentPlanCatalog',
-  cacheMode: 'public',
-  cacheLife: { expire: 7200, revalidate: 3600, stale: 300 }, // 5min stale, 1hr revalidate, 2hr expire
-  cacheTags: () => generateResourceTags('payments', undefined, ['payment-plans']),
   module: 'data/payments',
   operation: 'getPaymentPlanCatalog',
   transformResult: (result) => {
@@ -123,24 +120,22 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
     return [];
   }
 
-  const cachedFn = createCachedDataFunction<string[], JobBillingSummaryEntry[]>({
+  const cachedFn = createDataFunction<string[], JobBillingSummaryEntry[]>({
     serviceKey: 'jobs',
     methodName: 'getJobBillingSummaries',
-    cacheMode: 'private',
-    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
-    cacheTags: (jobIds) => {
-      // Create cache tag from sorted jobIds for stable cache key
-      const sortedJobIds = [...jobIds].sort().join('-');
-      return [`job-billing-${sortedJobIds}`];
-    },
     module: 'data/payments',
     operation: 'getJobBillingSummaries',
     transformArgs: (jobIds) => ({ p_job_ids: jobIds }),
     transformResult: (result) => {
-      const data = result as unknown[];
-      // Type guard: Validate each entry has required fields
+      // Type guard: RPC returns unknown[], validate structure before using
+      // This is safer than a direct cast because we verify the structure matches JobBillingSummaryEntry
+      if (!Array.isArray(result)) {
+        return [];
+      }
+      
       const entries: JobBillingSummaryEntry[] = [];
-      for (const entry of data) {
+      for (const entry of result) {
+        // Validate entry has required fields before casting
         if (
           typeof entry === 'object' &&
           entry !== null &&

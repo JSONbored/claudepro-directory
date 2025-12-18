@@ -14,8 +14,10 @@ import {
   removeItemFromCollection,
   reorderCollectionItems,
 } from '@heyclaude/web-runtime/actions/collection-items';
-import { isValidCategory, sanitizeSlug } from '@heyclaude/web-runtime/core';
-import { useAuthenticatedUser, useSafeAction } from '@heyclaude/web-runtime/hooks';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { sanitizeSlug } from '@heyclaude/web-runtime/content';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import { useSafeAction } from '@heyclaude/web-runtime/hooks/use-safe-action';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { ExternalLink, Plus, Trash } from '@heyclaude/web-runtime/icons';
 import {

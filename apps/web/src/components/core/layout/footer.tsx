@@ -8,7 +8,7 @@
 
 'use client';
 
-import { getContactChannels } from '@heyclaude/web-runtime/core';
+import { getContactChannels } from '@heyclaude/web-runtime/config/marketing-client';
 import {
   APP_CONFIG,
   EXTERNAL_SERVICES,
@@ -29,7 +29,7 @@ import { motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { memo, useEffect, useMemo } from 'react';
 
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';

@@ -1,6 +1,7 @@
 'use client';
 
-import { useBoolean, useInterval } from './index.ts';
+import { useBoolean } from './use-boolean.ts';
+import { useInterval } from './use-interval.ts';
 import { useCallback, useState } from 'react';
 
 /**

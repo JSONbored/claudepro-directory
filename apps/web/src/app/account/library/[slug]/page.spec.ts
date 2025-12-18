@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { setupErrorTracking } from '../../../../../../config/tests/utils/error-tracking';
 
 /**
  * Comprehensive Collection Detail Page E2E Tests
@@ -22,49 +23,19 @@ import { expect, test } from '@playwright/test';
  */
 
 test.describe('Collection Detail Page', () => {
-  let consoleErrors: string[] = [];
-  let consoleWarnings: string[] = [];
-  let networkErrors: string[] = [];
-
   test.beforeEach(async ({ page }) => {
-    consoleErrors = [];
-    consoleWarnings = [];
-    networkErrors = [];
-
-    page.on('console', (msg) => {
-      const text = msg.text();
-      if (msg.type() === 'error') {
-        if (!isAcceptableError(text)) {
-          consoleErrors.push(text);
-        }
-      } else if (msg.type() === 'warning') {
-        if (!isAcceptableWarning(text)) {
-          consoleWarnings.push(text);
-        }
-      }
-    });
-
-    page.on('pageerror', (error) => {
-      consoleErrors.push(`Page Error: ${error.message}`);
-    });
-
-    page.on('requestfailed', (request) => {
-      const url = request.url();
-      if (isCriticalResource(url)) {
-        networkErrors.push(`${url} - ${request.failure()?.errorText}`);
-      }
-    });
+    // Set up error tracking (navigation handled per test with different slugs)
+    const cleanup = setupErrorTracking(page);
+    
+    // Store cleanup function for afterEach
+    (page as any).__errorTrackingCleanup = cleanup;
   });
 
   test.afterEach(async ({ page }) => {
-    if (consoleErrors.length > 0) {
-      throw new Error(`Test failed due to console errors: ${consoleErrors.join('; ')}`);
-    }
-    if (consoleWarnings.length > 0) {
-      throw new Error(`Test failed due to console warnings: ${consoleWarnings.join('; ')}`);
-    }
-    if (networkErrors.length > 0) {
-      throw new Error(`Test failed due to network errors: ${networkErrors.join('; ')}`);
+    // Check for errors and throw if any detected
+    const cleanup = (page as any).__errorTrackingCleanup;
+    if (cleanup) {
+      cleanup();
     }
   });
 
@@ -413,15 +384,3 @@ test.describe('Collection Detail Page', () => {
     await expect(mainElement.first()).toBeVisible();
   });
 });
-
-function isAcceptableError(text: string): boolean {
-  return false;
-}
-
-function isAcceptableWarning(text: string): boolean {
-  return false;
-}
-
-function isCriticalResource(url: string): boolean {
-  return !url.includes('favicon') && !url.includes('analytics');
-}

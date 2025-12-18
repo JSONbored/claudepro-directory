@@ -7,7 +7,9 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { isValidProvider } from '@heyclaude/web-runtime/auth/oauth-providers';
-import { useAuthenticatedUser, useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useTimeout } from '@heyclaude/web-runtime/hooks/use-timeout';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
 import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {

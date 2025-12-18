@@ -8,7 +8,10 @@
 
 import { POLLING_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
-import { useInterval, useIsClient, useBoolean, useLocalStorage } from '@heyclaude/web-runtime/hooks';
+import { useInterval } from '@heyclaude/web-runtime/hooks/use-interval';
+import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useLocalStorage } from '@heyclaude/web-runtime/hooks/use-local-storage';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface UseNewsletterCountReturn {

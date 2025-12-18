@@ -28,35 +28,16 @@ const TOKEN_FILE = getTokenFilePath();
 const DEFAULT_APP_URL = 'http://localhost:3000';
 
 /**
- * Load environment variables from .env.local if it exists
+ * Environment variables are provided by Infisical (for local dev) or platform (for CI/Build).
+ * This function does NOT load .env files - all secrets must come from Infisical.
+ * For local development, run commands with: infisical run --env=dev -- <command>
  */
 function loadEnvFile(): void {
-  const cwd = process.cwd();
-  const envPath = path.resolve(cwd, '.env.local');
-  if (existsSync(envPath)) {
-    const envContent = readFileSync(envPath, 'utf8');
-    for (const line of envContent.split('\n')) {
-      const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith('#')) {
-        const match = trimmed.match(/^([^=]+)=(.*)$/);
-        if (match?.[1] && match[2] !== undefined) {
-          const key = match[1].trim();
-          let value = match[2].trim();
-          // Remove quotes if present
-          if (
-            (value.startsWith('"') && value.endsWith('"')) ||
-            (value.startsWith("'") && value.endsWith("'"))
-          ) {
-            value = value.slice(1, -1);
-          }
-          process.env[key] ??= value;
-        }
-      }
-    }
-  }
+  // No-op: Environment variables are provided by Infisical or platform
+  // All secrets must be in Infisical dev environment for local development
 }
 
-// Load .env.local if it exists
+// Environment variables are provided by Infisical (no .env file loading)
 loadEnvFile();
 
 const SUPABASE_URL =

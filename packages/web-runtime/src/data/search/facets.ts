@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { type content_category } from '@heyclaude/data-layer/prisma';
 import {
@@ -8,7 +8,7 @@ import {
 
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 
-import { createCachedDataFunction, generateResourceTags } from '../cached-data-factory.ts';
+import { createDataFunction } from '../cached-data-factory.ts';
 
 // Use generated type from Prisma generator
 type SearchFacetsRow = GetSearchFacetsReturns[number];
@@ -91,12 +91,9 @@ function extractAggregatedArrays(data: SearchFacetsRow[]): {
  * Uses 'use cache' to cache search facets. This data is public and same for all users.
  * @returns Aggregated search facets with authors, categories, tags, and facet summaries
  */
-export const getSearchFacets = createCachedDataFunction<void, SearchFacetAggregate>({
+export const getSearchFacets = createDataFunction<void, SearchFacetAggregate>({
   serviceKey: 'search',
   methodName: 'getSearchFacets',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: () => generateResourceTags('search', undefined, ['search-facets']),
   module: 'data/search/facets',
   operation: 'getSearchFacets',
   transformResult: (result) => {
@@ -128,12 +125,9 @@ export const getSearchFacets = createCachedDataFunction<void, SearchFacetAggrega
  * @param limit - Maximum number of popular searches to return (default: 100)
  * @returns Array of trending search terms
  */
-export const getPopularSearches = createCachedDataFunction<number, GetTrendingSearchesReturns>({
+export const getPopularSearches = createDataFunction<number, GetTrendingSearchesReturns>({
   serviceKey: 'search',
   methodName: 'getTrendingSearches',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: (limit) => generateResourceTags('search', undefined, ['popular-searches', `popular-searches-${limit}`]),
   module: 'data/search/facets',
   operation: 'getPopularSearches',
   transformArgs: (limit) => ({ limit_count: limit }),

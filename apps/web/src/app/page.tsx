@@ -1,14 +1,13 @@
 /** Homepage consuming homepageConfigs for runtime-tunable categories */
 
 import { type content_category, type user_tier } from '@heyclaude/data-layer/prisma';
-import { isValidCategory, trackRPCFailure } from '@heyclaude/web-runtime/core';
-import { isBookmarkedBatch } from '@heyclaude/web-runtime/data';
-import {
-  generatePageMetadata,
-  getAuthenticatedUser,
-  getHomepageCategoryIds,
-  getHomepageData,
-} from '@heyclaude/web-runtime/server';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { trackRPCFailure } from '@heyclaude/web-runtime/utils/homepage-error-tracking';
+import { isBookmarkedBatch } from '@heyclaude/web-runtime/data/account';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getHomepageCategoryIds } from '@heyclaude/web-runtime/data/config/category';
+import { getHomepageData } from '@heyclaude/web-runtime/data/content/homepage';
 import { type Metadata } from 'next';
 // Suspense removed - not needed since data is fetched at page level
 // Suspense above the fold can cause blank states to be cached
@@ -31,10 +30,8 @@ import { HomepageSearchProvider } from '@/src/components/features/home/homepage-
  * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  const { connection } = await import('next/server');
-  await connection();
+  // NOTE: 'use cache' removed - generatePageMetadata may use dynamic data sources
+  // Metadata generation is already optimized at the SEO layer
   return generatePageMetadata('/');
 }
 
@@ -72,11 +69,12 @@ interface HomePageProperties {
  * @see trackRPCFailure
  */
 export default async function HomePage({ searchParams: _searchParams }: HomePageProperties) {
+  // NOTE: 'use cache' removed because this page uses getAuthenticatedUser() which calls cookies()
+  // cookies() cannot be used inside 'use cache' functions per Next.js requirements
+  // The page will still benefit from caching at the component level where appropriate
+  
   // CRITICAL OPTIMIZATION: Fetch homepage data ONCE at page level
   // This eliminates 3 separate function calls (hero, content, contributors)
-  // Defer to request time before any non-deterministic operations
-  const { connection } = await import('next/server');
-  await connection();
 
   const categoryIds = getHomepageCategoryIds; // Constant array, not a function call
   const homepageResult = await getHomepageData(categoryIds).catch((error: unknown) => {
@@ -117,7 +115,8 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
 
   // OPTIMIZATION: Memoize new community members processing to avoid recreating on every render
   // This is a server component, but we still want efficient processing
-  const topContributors = (homepageResult?.top_contributors ?? [])
+  const topContributorsRaw = homepageResult?.top_contributors;
+  const topContributors = (Array.isArray(topContributorsRaw) ? topContributorsRaw : [])
     .filter(
       (c: unknown): c is TopContributor =>
         typeof c === 'object' &&
@@ -222,9 +221,8 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
       }
     } catch (error) {
       // Log error but don't fail page render - bookmark status is non-critical
-      const { createLogger, normalizeError } =
+      const { logger, normalizeError } =
         await import('@heyclaude/shared-runtime/logger/index');
-      const logger = createLogger({ timestamp: false });
       const normalized = normalizeError(error, 'Bookmark status batch check failed');
       logger.warn({
         err: normalized,

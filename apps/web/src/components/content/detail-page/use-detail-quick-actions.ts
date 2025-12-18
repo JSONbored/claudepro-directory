@@ -1,8 +1,10 @@
 'use client';
 
-import { isValidCategory, logUnhandledPromise } from '@heyclaude/web-runtime/core';
-import { useCopyToClipboard, usePulse } from '@heyclaude/web-runtime/hooks';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks/use-copy-to-clipboard';
+import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
 import { type ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { useCallback, useMemo } from 'react';

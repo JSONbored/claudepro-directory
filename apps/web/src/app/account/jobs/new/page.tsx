@@ -1,11 +1,11 @@
 import { type CreateJobWithPaymentResult } from '@heyclaude/database-types/postgres-types';
 import { type CreateJobInput, createJob } from '@heyclaude/web-runtime/actions/jobs-crud';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getPaymentPlanCatalog } from '@heyclaude/web-runtime/data/payments';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { connection } from 'next/server';
 import { lazy, Suspense } from 'react';
 
 // OPTIMIZATION: Dynamic import for large form component (763 lines) - only loads when needed
@@ -28,9 +28,7 @@ const JobForm = lazy(() =>
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   return generatePageMetadata('/account/jobs/new');
 }
 

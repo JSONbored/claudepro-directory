@@ -15,8 +15,9 @@
 import 'server-only';
 
 import { NextRequest } from 'next/server';
-import { routeFluxRequest } from '@heyclaude/web-runtime/flux';
-import { createApiOptionsHandler, createApiRoute, getVersionedRoute } from '@heyclaude/web-runtime/server';
+import { routeFluxRequest } from '@heyclaude/web-runtime/flux/router';
+import { createOptionsHandler as createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 
 interface RouteContext {
   params: Promise<{

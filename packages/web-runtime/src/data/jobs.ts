@@ -15,7 +15,7 @@ import {
   isValidJobType,
 } from '../utils/type-guards.ts';
 
-import { createCachedDataFunction, generateResourceTags } from './cached-data-factory.ts';
+import { createDataFunction } from './cached-data-factory.ts';
 import { getService } from './service-factory.ts';
 
 export type JobsFilterResult = FilterJobsReturns;
@@ -82,15 +82,12 @@ function pulseJobSearchAsync(searchQuery: string): void {
  * Get jobs list without filters (cached)
  * Uses 'use cache' to cache jobs lists. This data is public and same for all users.
  */
-const getJobsListCached = createCachedDataFunction<
+const getJobsListCached = createDataFunction<
   { limit: number; offset: number },
   JobsFilterResult | null
 >({
   serviceKey: 'search',
   methodName: 'filterJobs',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: () => generateResourceTags('jobs', undefined, ['jobs-list']),
   module: 'data/jobs',
   operation: 'getJobsListCached',
   transformArgs: (args) => ({
@@ -105,12 +102,9 @@ const getJobsListCached = createCachedDataFunction<
  * Get filtered jobs with search/filters (cached)
  * Uses 'use cache' to cache filtered jobs. This data is public and same for all users.
  */
-const getFilteredJobsCached = createCachedDataFunction<FilterJobsArgs, JobsFilterResult | null>({
+const getFilteredJobsCached = createDataFunction<FilterJobsArgs, JobsFilterResult | null>({
   serviceKey: 'search',
   methodName: 'filterJobs',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: () => generateResourceTags('jobs', undefined, ['jobs-search']),
   module: 'data/jobs',
   operation: 'getFilteredJobsCached',
   onError: () => null,
@@ -196,12 +190,9 @@ export async function getFilteredJobs(
  * OPTIMIZATION: Uses Prisma directly instead of RPC for better performance.
  * Only fetches slugs needed for generateStaticParams, avoiding unnecessary data processing.
  */
-export const getActiveJobSlugs = createCachedDataFunction<number, string[]>({
+export const getActiveJobSlugs = createDataFunction<number, string[]>({
   serviceKey: 'jobs',
   methodName: 'getActiveJobSlugs',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
-  cacheTags: () => generateResourceTags('jobs', undefined, ['jobs-slugs']),
   module: 'data/jobs',
   operation: 'getActiveJobSlugs',
   onError: () => [], // Return empty array on error
@@ -213,12 +204,9 @@ export const getActiveJobSlugs = createCachedDataFunction<number, string[]>({
  * Uses 'use cache' to cache job details. This data is public and same for all users.
  * Job details change periodically, so we use the 'medium' cacheLife profile.
  */
-export const getJobBySlug = createCachedDataFunction<string, unknown>({
+export const getJobBySlug = createDataFunction<string, unknown>({
   serviceKey: 'jobs',
   methodName: 'getJobBySlug',
-  cacheMode: 'public',
-  cacheLife: 'medium', // 1hr stale, 15min revalidate, 1 day expire - optimized for SEO
-  cacheTags: (slug) => generateResourceTags('jobs', slug),
   module: 'data/jobs',
   operation: 'getJobBySlug',
   transformArgs: (slug) => ({ p_slug: slug }),
@@ -230,12 +218,9 @@ export const getJobBySlug = createCachedDataFunction<string, unknown>({
  * Featured jobs change periodically, so we use the 'long' cacheLife profile.
  */
 export async function getFeaturedJobs(limit = 5): Promise<jobsModel[]> {
-  const cachedFn = createCachedDataFunction<void, jobsModel[]>({
+  const cachedFn = createDataFunction<void, jobsModel[]>({
     serviceKey: 'jobs',
     methodName: 'getFeaturedJobs',
-    cacheMode: 'public',
-    cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-    cacheTags: () => generateResourceTags('jobs', undefined, ['jobs-featured']),
     module: 'data/jobs',
     operation: 'getFeaturedJobs',
     transformResult: (result) => {

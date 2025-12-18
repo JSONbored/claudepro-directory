@@ -22,10 +22,10 @@
  */
 
 import type { content_category } from '@heyclaude/data-layer/prisma';
-import { trackInteraction } from '@heyclaude/web-runtime/client';
+import { trackInteraction } from '@heyclaude/web-runtime/pulse-client';
 import { getOrCreateSessionId } from '@heyclaude/web-runtime/logging/client';
 import { getPollingConfig } from '@heyclaude/web-runtime/config/static-configs';
-import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { useEffect, useState } from 'react';
 

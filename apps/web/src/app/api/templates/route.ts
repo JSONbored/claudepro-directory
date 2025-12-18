@@ -22,17 +22,11 @@
  */
 import 'server-only';
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
-import {
-  badRequestResponse,
-  categorySchema,
-  createApiOptionsHandler,
-  createCachedApiRoute,
-  getOnlyCorsHeaders,
-  getVersionedRoute,
-  jsonResponse,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/server';
+import { VALID_CATEGORIES } from '@heyclaude/web-runtime/utils/category-validation';
+import { createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext } from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { badRequestResponse, getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { categorySchema } from '@heyclaude/web-runtime/api/schemas';
 import { z } from 'zod';
 
 // Shared category validator

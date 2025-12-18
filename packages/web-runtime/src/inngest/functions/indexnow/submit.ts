@@ -12,7 +12,7 @@
 import { inngest } from '../../client';
 import { RETRY_CONFIGS } from '../../config';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { fetchWithRetryAndTimeout } from '@heyclaude/web-runtime/server';
+import { fetchWithRetryAndTimeout } from '@heyclaude/web-runtime/server/fetch-helpers';
 import { TIMEOUT_PRESETS } from '@heyclaude/shared-runtime';
 
 const INDEXNOW_API_URL = 'https://api.indexnow.org/IndexNow';

@@ -30,8 +30,9 @@ import {
 } from '@heyclaude/web-runtime/actions/pulse';
 import { contact_action_typeSchema } from '@heyclaude/web-runtime/prisma-zod-schemas';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
-import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
-import { useLoggedAsync, useConfetti } from '@heyclaude/web-runtime/hooks';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
+import { useConfetti } from '@heyclaude/web-runtime/hooks/use-confetti';
 import { Check, X } from '@heyclaude/web-runtime/icons';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
@@ -57,7 +58,7 @@ import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 // Internal type with non-nullable fields (after transformation)
 interface ContactCommand {

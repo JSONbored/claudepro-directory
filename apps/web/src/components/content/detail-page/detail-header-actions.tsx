@@ -15,9 +15,13 @@
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import type { content_category } from '@heyclaude/data-layer/prisma';
 import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
-import { logUnhandledPromise, isValidCategory } from '@heyclaude/web-runtime/core';
-import { getCategoryConfig } from '@heyclaude/web-runtime/data';
-import { useCopyToClipboard, usePulse, usePinboard, useIsClient } from '@heyclaude/web-runtime/hooks';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
+import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks/use-copy-to-clipboard';
+import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
+import { usePinboard } from '@heyclaude/web-runtime/hooks/use-pinboard';
+import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import {
   ArrowLeft,

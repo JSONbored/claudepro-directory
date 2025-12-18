@@ -35,7 +35,7 @@ import { motion } from 'motion/react';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { type ReactNode } from 'react';
 import { memo, useEffect } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 export type AnimationVariant =
   | 'fade-in'

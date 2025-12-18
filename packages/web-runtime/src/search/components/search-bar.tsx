@@ -25,7 +25,7 @@
 import { Search } from '@heyclaude/web-runtime/icons';
 import { Input, cn } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useRef, useState, useId } from 'react';
-import { useDebounceValue } from '@heyclaude/web-runtime/hooks';
+import { useDebounceValue } from '../../hooks/use-debounce-value.ts';
 
 import { useSearchContext } from '../context/search-provider';
 

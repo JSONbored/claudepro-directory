@@ -1,0 +1,13 @@
+-- Migration: Remove unused refresh_metadata_templates_cache RPC
+-- Version: 20251218120035
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-18
+--
+-- Description: Remove refresh_metadata_templates_cache RPC function - Trigger uses different function
+-- The trigger uses refresh_metadata_templates_cache_on_change(), not refresh_metadata_templates_cache().
+-- This function is unused.
+--
+-- Function signature: refresh_metadata_templates_cache()
+-- Related: Trigger uses refresh_metadata_templates_cache_on_change() instead
+
+DROP FUNCTION IF EXISTS public.refresh_metadata_templates_cache();

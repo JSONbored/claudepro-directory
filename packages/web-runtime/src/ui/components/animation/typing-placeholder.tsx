@@ -29,7 +29,7 @@ import { useReducedMotion } from '../../../hooks/motion/index.ts';
 import { cn } from '../../utils.ts';
 import { motion } from 'motion/react';
 import { useEffect, useState, useRef } from 'react';
-import { useBoolean } from '../../../hooks/index.ts';
+import { useBoolean } from '../../../hooks/use-boolean.ts';
 
 interface TypingPlaceholderProps {
   /** Array of texts to cycle through */

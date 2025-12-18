@@ -9,14 +9,12 @@
  * @module apps/web/src/app/search/search-page-client
  */
 
-import { usePulse } from '@heyclaude/web-runtime/hooks';
-import {
-  SearchBar,
-  SearchFilters,
-  SearchProvider,
-  SearchResults,
-  useSearchAPI,
-} from '@heyclaude/web-runtime/search';
+import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
+import { SearchProvider } from '@heyclaude/web-runtime/search/context/search-provider';
+import { SearchBar } from '@heyclaude/web-runtime/search/components/search-bar';
+import { SearchFilters } from '@heyclaude/web-runtime/search/components/search-filters';
+import { SearchResults } from '@heyclaude/web-runtime/search/components/search-results';
+import { useSearchAPI } from '@heyclaude/web-runtime/search/hooks/use-search-api';
 import { type FilterState } from '@heyclaude/web-runtime/types/component.types';
 import { usePathname } from 'next/navigation';
 import { Suspense, useCallback, useMemo } from 'react';

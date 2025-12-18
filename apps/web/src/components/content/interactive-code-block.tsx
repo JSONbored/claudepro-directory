@@ -5,12 +5,13 @@
  */
 
 import type { content_category } from '@heyclaude/data-layer/prisma';
-import { isValidCategory, logUnhandledPromise, type SharePlatform } from '@heyclaude/web-runtime/core';
+import { isValidCategory, VALID_CATEGORIES } from '@heyclaude/web-runtime/utils/category-validation';
 import { DURATION } from '@heyclaude/web-runtime/design-system';
-import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
-import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
+import { type SharePlatform } from '@heyclaude/web-runtime/client/share';
+import { getTimeoutConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import {
   Camera,
@@ -39,7 +40,9 @@ import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 // Removed react-share - using native Web Share API and custom share buttons instead
-import { useBoolean, useIsClient, useTimeout } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
+import { useTimeout } from '@heyclaude/web-runtime/hooks/use-timeout';
 
 const CLIPBOARD_RESET_DEFAULT_MS = 2000;
 

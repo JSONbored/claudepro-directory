@@ -6,7 +6,7 @@
  */
 
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 
 /**
  * Parse and validate a category query parameter.

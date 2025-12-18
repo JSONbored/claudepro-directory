@@ -1,7 +1,5 @@
-import {
-  trackMissingData,
-  trackValidationFailure,
-} from '@heyclaude/web-runtime/core';
+import { trackMissingData } from '@heyclaude/web-runtime/utils/homepage-error-tracking';
+import { trackValidationFailure } from '@heyclaude/web-runtime/utils/homepage-error-tracking';
 import { normalizeError, serializeForClient } from '@heyclaude/shared-runtime';
 import type { GetHomepageOptimizedReturns } from '@heyclaude/database-types/postgres-types';
 import type { jobsModel } from '@heyclaude/database-types/prisma/models';
@@ -21,11 +19,10 @@ async function processHomepageData(
   homepageResult: GetHomepageOptimizedReturns | null,
   categoryIds: readonly string[]
 ) {
-  // Use cache-safe logger for Server Components that run during prerendering
+  // Use default logger (timestamps disabled by default - safe for prerendering)
   // Dynamically import to avoid serialization issues
-  const { createLogger } = await import('@heyclaude/shared-runtime/logger/index.ts');
-  const cacheLogger = createLogger({ timestamp: false });
-  const reqLogger = cacheLogger.child({
+  const { logger } = await import('@heyclaude/shared-runtime/logger/index.ts');
+  const reqLogger = logger.child({
     operation: 'processHomepageData',
     route: '/',
     module: 'apps/web/src/components/features/home/homepage-content-server',
@@ -243,11 +240,10 @@ export async function HomepageContentServer({
   categoryIds: readonly string[];
   bookmarkStatusMap?: Map<string, boolean>;
 }) {
-  // Use cache-safe logger for Server Components that run during prerendering
+  // Use default logger (timestamps disabled by default - safe for prerendering)
   // Dynamically import to avoid serialization issues
-  const { createLogger } = await import('@heyclaude/shared-runtime/logger/index.ts');
-  const cacheLogger = createLogger({ timestamp: false });
-  const reqLogger = cacheLogger.child({
+  const { logger } = await import('@heyclaude/shared-runtime/logger/index.ts');
+  const reqLogger = logger.child({
     operation: 'HomepageContentServer',
     route: '/',
     module: 'apps/web/src/components/features/home/homepage-content-server',

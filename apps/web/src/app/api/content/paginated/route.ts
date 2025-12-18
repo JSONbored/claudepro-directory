@@ -21,14 +21,13 @@ import 'server-only';
 import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
 import { type GetContentPaginatedSlimArgs } from '@heyclaude/database-types/postgres-types';
 import {
-  createApiOptionsHandler,
+  createOptionsHandler as createApiOptionsHandler,
   createCachedApiRoute,
-  getOnlyCorsHeaders,
-  getVersionedRoute,
-  jsonResponse,
   type RouteHandlerContext,
-} from '@heyclaude/web-runtime/server';
-import { categorySchema, paginationSchema } from '@heyclaude/web-runtime/server';
+} from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { categorySchema, paginationSchema } from '@heyclaude/web-runtime/api/schemas';
 
 // Local type for migrated RPC (RPC removed, using Prisma directly)
 type ContentPaginatedSlimItem = contentModel;

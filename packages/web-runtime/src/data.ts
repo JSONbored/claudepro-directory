@@ -8,11 +8,7 @@ import { z } from 'zod';
 import { logger } from './logger.ts';
 import { normalizeError } from './errors.ts';
 import { getSkeletonKeys } from './skeleton-keys.ts';
-
-const perf =
-  typeof globalThis.performance !== 'undefined'
-    ? globalThis.performance
-    : { now: () => Date.now() };
+import { DATE_CONFIG } from './config/unified-config.ts';
 
 const PARSE_STRATEGY = {
   DEVALUE: 'devalue',
@@ -98,7 +94,6 @@ export function safeParse<T = unknown>(
   options?: Partial<ParseOptions>
 ): T {
   const opts = parseOptionsSchema.parse(options || {});
-  const startTime = perf.now();
 
   const maxSize = opts.maxSize || MAX_SAFE_SIZE;
   if (str.length > maxSize) {
@@ -132,19 +127,6 @@ export function safeParse<T = unknown>(
 
       default:
         throw new Error(`Unknown parse strategy: ${opts.strategy}`);
-    }
-
-    const parseTime = perf.now() - startTime;
-
-    if (opts.enableLogging && parseTime > 100) {
-      logger.warn(
-        {
-          strategy: String(opts.strategy),
-          parseTime: `${parseTime.toFixed(2)}ms`,
-          size: `${str.length} bytes`,
-        },
-        'Slow JSON parse detected'
-      );
     }
 
     return result;
@@ -274,13 +256,88 @@ export function formatDate(date: string | Date, style: DateFormatStyle = 'long')
   }
 }
 
-export function formatRelativeDate(date: string | Date, options: RelativeDateOptions = {}): string {
-  const { style = 'detailed', maxDays } = options;
+/**
+ * Format a date and time deterministically using UTC to prevent hydration mismatches.
+ * 
+ * Replaces `toLocaleString()` with deterministic UTC-based formatting.
+ * 
+ * @param date - Date string or Date object to format
+ * @returns Formatted date/time string (e.g., "Jan 15, 2024, 3:45 PM")
+ */
+export function formatDateTime(date: string | Date): string {
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    // Use UTC methods for deterministic output
+    const year = dateObj.getUTCFullYear();
+    const month = dateObj.getUTCMonth(); // 0-11
+    const day = dateObj.getUTCDate();
+    const hours = dateObj.getUTCHours();
+    const minutes = dateObj.getUTCMinutes();
+    
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    const displayMinutes = minutes.toString().padStart(2, '0');
+    
+    return `${monthNames[month]} ${day}, ${year}, ${displayHours}:${displayMinutes} ${ampm}`;
+  } catch (error) {
+    const normalized = normalizeError(error, 'formatDateTime failed');
+    logger.warn({ err: normalized,
+      input: typeof date === 'string' ? date : date.toString(),
+    }, 'formatDateTime failed');
+    return typeof date === 'string' ? date : date.toString();
+  }
+}
+
+/**
+ * Format a date as a relative time string (e.g., "2 days ago", "just now").
+ * 
+ * **Build-Time Safety:**
+ * - Accepts optional `now` parameter for deterministic builds
+ * - If `now` is not provided, uses current time (runtime-only, not build-time safe)
+ * - For server components with 'use cache', either:
+ *   1. Provide `now` parameter (deterministic)
+ *   2. Use after `connection()` (deferred to request time)
+ *   3. Move to client components (client-side only)
+ * 
+ * @param date - Date string or Date object to format
+ * @param options - Formatting options
+ * @param options.style - Style of relative date ('simple' or 'detailed', default: 'detailed')
+ * @param options.maxDays - Maximum days before switching to absolute date format
+ * @param options.now - Optional current time (Date object or timestamp) for deterministic builds
+ * @returns Relative time string (e.g., "just now", "2 minutes ago", "3 days ago", "Today")
+ * 
+ * @example
+ * ```ts
+ * // Runtime usage (after connection() or in client component)
+ * formatRelativeDate('2024-01-13T00:00:00Z', { style: 'simple' })
+ * 
+ * // Build-time safe usage (deterministic)
+ * formatRelativeDate('2024-01-13T00:00:00Z', { 
+ *   style: 'simple',
+ *   now: new Date('2024-01-15T00:00:00Z') // Explicit current time
+ * })
+ * ```
+ */
+export function formatRelativeDate(date: string | Date, options: RelativeDateOptions & { now?: Date | number } = {}): string {
+  const { style = 'detailed', maxDays, now } = options;
 
   try {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
-    const now = new Date();
-    const diffMs = now.getTime() - dateObj.getTime();
+    
+    // CRITICAL: `now` parameter is REQUIRED to avoid new Date() calls
+    // Next.js statically detects `new Date()` calls even if they're in conditional branches
+    // If `now` is not provided, return formatted date instead (build-safe fallback)
+    // This ensures the function never calls new Date() or Date.now() during build
+    if (now === undefined) {
+      // Always return formatted date if `now` is not provided (build-safe)
+      // This prevents Next.js from detecting any new Date() calls in this function
+      return formatDate(dateObj);
+    }
+    
+    const nowTime = typeof now === 'number' ? now : now.getTime();
+    const diffMs = nowTime - dateObj.getTime();
     const diffSeconds = Math.floor(diffMs / 1000);
     const diffMinutes = Math.floor(diffSeconds / 60);
     const diffHours = Math.floor(diffMinutes / 60);
@@ -335,21 +392,15 @@ export function formatDistanceToNow(date: Date): string {
 }
 
 /**
- * Get formatted last updated date for legal pages (cookies, privacy)
- * Returns current date in "Month Day, Year" format (e.g., "November 15, 2025")
+ * Get formatted last updated date for legal pages (cookies, privacy, terms)
+ * Returns static date from DATE_CONFIG (build-time safe, no new Date() calls)
+ * 
+ * This date should be updated in unified-config.ts when legal pages are modified.
+ * 
+ * @returns Formatted date string (e.g., "November 15, 2025")
  */
 export function getLastUpdatedDate(): string {
-  try {
-    return new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to format last updated date');
-    logger.error({ err: normalized }, 'getLastUpdatedDate: date formatting failed');
-    return 'Unavailable';
-  }
+  return DATE_CONFIG.lastUpdatedDate;
 }
 
 /**

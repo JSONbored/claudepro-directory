@@ -36,14 +36,9 @@
 import 'server-only';
 
 // OPTIMIZATION: Removed unused imports - factory handles errors automatically
-import {
-  createApiOptionsHandler,
-  createCachedApiRoute,
-  getOnlyCorsHeaders,
-  getVersionedRoute,
-  jsonResponse,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/server';
+import { createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext } from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 
 /**
  * GET /api/status - Health check endpoint

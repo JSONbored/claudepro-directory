@@ -12,13 +12,14 @@
  */
 
 import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
-import { useIntersectionObserver } from '@heyclaude/web-runtime/hooks';
+import { useIntersectionObserver } from '@heyclaude/web-runtime/hooks/use-intersection-observer';
 import { UnifiedCardGrid, ConfigCard } from '@heyclaude/web-runtime/ui';
-import { getTrendingSlugs, isNewSince } from '@heyclaude/web-runtime/core';
-import { logUnhandledPromise, trackHomepageSectionError } from '@heyclaude/web-runtime/core';
-import { useIsMounted } from '@heyclaude/web-runtime/hooks';
+import { getTrendingSlugs, isNewSince } from '@heyclaude/web-runtime/utils/content-highlights';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
+import { trackHomepageSectionError } from '@heyclaude/web-runtime/utils/homepage-error-tracking';
+import { useIsMounted } from '@heyclaude/web-runtime/hooks/use-is-mounted';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { usePathname } from 'next/navigation';
 import { useCallback, useMemo, useRef, useState } from 'react';

@@ -6,16 +6,12 @@
 
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
-import {
-  ensureStringArray,
-  getContentItemUrl,
-  getMetadata,
-  getSocialLinks,
-  isValidCategory,
-  logUnhandledPromise,
-  sanitizeSlug,
-} from '@heyclaude/web-runtime/core';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { ensureStringArray, getMetadata } from '@heyclaude/web-runtime/utils/content-helpers';
+import { getContentItemUrl, sanitizeSlug } from '@heyclaude/web-runtime/content';
+import { getSocialLinks } from '@heyclaude/web-runtime/config/marketing-client';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
+import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
 import { Copy, ExternalLink, Github, Thermometer } from '@heyclaude/web-runtime/icons';
 import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import { type ContentItem } from '@heyclaude/web-runtime/types/component.types';

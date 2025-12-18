@@ -8,15 +8,10 @@
 import 'server-only';
 
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import {
-  createApiOptionsHandler,
-  createCachedApiRoute,
-  getOnlyCorsHeaders,
-  getVersionedRoute,
-  jsonResponse,
-  trendingQuerySchema,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/server';
+import { createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext } from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { trendingQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 
 type ContentCategory = content_category;
 

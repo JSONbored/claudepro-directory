@@ -1,4 +1,4 @@
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { getLastUpdatedDate } from '@heyclaude/web-runtime/data/utils';
 import { logger } from '@heyclaude/web-runtime/logging/server';
@@ -20,6 +20,7 @@ import PrivacyLoading from './loading';
  */
 
 export async function generateMetadata(): Promise<Metadata> {
+  'use cache';
   return generatePageMetadata('/privacy');
 }
 

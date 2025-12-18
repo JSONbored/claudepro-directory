@@ -8,13 +8,14 @@ import {
   type GetUserCompleteDataReturns,
   type UserDashboardSubmission,
 } from '@heyclaude/database-types/postgres-types';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import {
   generatePageMetadata,
-  getAuthenticatedUser,
-  getCategoryConfig,
-  getUserCompleteData,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
+import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -30,7 +31,6 @@ import {
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { SignInButton } from '@/src/components/core/auth/sign-in-button';
@@ -50,9 +50,7 @@ import Loading from './loading';
  */
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   return generatePageMetadata('/account/submissions');
 }
 
@@ -104,15 +102,11 @@ function formatSubmissionDate(dateString: string): string {
   if (!dateString || typeof dateString !== 'string') {
     return '-';
   }
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) {
+  try {
+    return formatDate(dateString, 'short');
+  } catch {
     return '-';
   }
-  return date.toLocaleDateString('en-US', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
 }
 
 /***
@@ -310,7 +304,6 @@ async function SubmissionsPageContent({
     reqLogger.warn(
       {
         section: 'data-fetch',
-        timestamp: new Date().toISOString(),
       },
       'SubmissionsPage: unauthenticated access attempt'
     );

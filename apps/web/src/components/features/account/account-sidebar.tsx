@@ -5,7 +5,7 @@
  */
 
 import { ensureUserRecord } from '@heyclaude/web-runtime/actions/user';
-import { getUserCompleteData } from '@heyclaude/web-runtime/data';
+import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import {
   Activity,
   Bookmark,

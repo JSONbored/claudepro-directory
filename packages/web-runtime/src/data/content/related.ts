@@ -1,10 +1,10 @@
-'use server';
+import 'server-only';
 import { type GetRelatedContentReturns } from '@heyclaude/database-types/postgres-types';
 import { type content_category } from '@heyclaude/data-layer/prisma';
 
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 
-import { createCachedDataFunction, generateContentTags } from '../cached-data-factory.ts';
+import { createDataFunction } from '../cached-data-factory.ts';
 
 export interface RelatedContentInput {
   currentCategory: string;
@@ -24,12 +24,9 @@ export interface RelatedContentResult {
  * Get related content
  * Uses 'use cache' to cache related content. This data is public and same for all users.
  */
-export const getRelatedContent = createCachedDataFunction<RelatedContentInput, RelatedContentResult>({
+export const getRelatedContent = createDataFunction<RelatedContentInput, RelatedContentResult>({
   serviceKey: 'content',
   methodName: 'getRelatedContent',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: (input) => generateContentTags(input.currentCategory, null, ['related-content']),
   module: 'data/content/related',
   operation: 'getRelatedContent',
   validate: (input) => isValidCategory(input.currentCategory),

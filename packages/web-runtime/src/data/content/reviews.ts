@@ -1,8 +1,8 @@
-'use server';
+import 'server-only';
 import { type content_category } from '@heyclaude/data-layer/prisma';
 import { type GetReviewsWithStatsReturns } from '@heyclaude/database-types/postgres-types';
 
-import { createCachedDataFunction } from '../cached-data-factory.ts';
+import { createDataFunction } from '../cached-data-factory.ts';
 
 export interface ReviewsWithStatsParameters {
   contentSlug: string;
@@ -25,21 +25,12 @@ export interface ReviewsWithStatsParameters {
  * - Cache keys include all input parameters
  * - Not prerendered (runs at request time)
  */
-export const getReviewsWithStatsData = createCachedDataFunction<
+export const getReviewsWithStatsData = createDataFunction<
   ReviewsWithStatsParameters,
   GetReviewsWithStatsReturns | null
 >({
   serviceKey: 'content',
   methodName: 'getReviewsWithStats',
-  cacheMode: 'private',
-  cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
-  cacheTags: (params) => {
-    const tags = [`reviews-${params.contentType}-${params.contentSlug}`];
-    if (params.userId) {
-      tags.push(`reviews-user-${params.userId}`);
-    }
-    return tags;
-  },
   module: 'data/content/reviews',
   operation: 'getReviewsWithStatsData',
   transformArgs: (params) => ({

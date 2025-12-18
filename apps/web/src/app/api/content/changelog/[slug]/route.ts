@@ -17,15 +17,14 @@
 
 import 'server-only';
 import {
-  changelogEntryFormatSchema,
-  createApiOptionsHandler,
+  createOptionsHandler as createApiOptionsHandler,
   createCachedApiRoute,
-  getOnlyCorsHeaders,
-  getVersionedRoute,
-  notFoundResponse,
-  textResponse,
   type RouteHandlerContext,
-} from '@heyclaude/web-runtime/server';
+} from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getOnlyCorsHeaders, textResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { notFoundResponse } from '@heyclaude/web-runtime/server/not-found-response';
+import { changelogEntryFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import { z } from 'zod';
 
 /**

@@ -2,8 +2,16 @@ import 'server-only';
 import { type content_category } from '@heyclaude/data-layer/prisma';
 import { cacheTag } from 'next/cache';
 
+/**
+ * Helper to create cache tags for content
+ * 
+ * @param category - Content category (content_category type or string)
+ * @param slug - Optional content slug
+ * @param additionalTags - Optional additional tags to include
+ * @returns Array of cache tag strings
+ */
 export function generateContentTags(
-  category?: content_category | null,
+  category?: content_category | string | null,
   slug?: null | string,
   additionalTags: string[] = []
 ): string[] {
@@ -128,6 +136,26 @@ export function applyContactCacheTags(additionalTags: string[] = []): void {
   for (const tag of tags) {
     cacheTag(tag);
   }
+}
+
+/**
+ * Helper to create cache tags for any resource type
+ * 
+ * @param resourceType - The type of resource (e.g., 'jobs', 'companies', 'changelog')
+ * @param resourceId - Optional resource identifier (e.g., slug, id)
+ * @param additionalTags - Optional additional tags to include
+ * @returns Array of cache tag strings
+ */
+export function generateResourceTags(
+  resourceType: string,
+  resourceId?: string | null,
+  additionalTags: string[] = []
+): string[] {
+  const tags: string[] = [resourceType, ...additionalTags];
+  if (resourceId) {
+    tags.push(`${resourceType}-${resourceId}`);
+  }
+  return tags;
 }
 
 export function normalizeRpcResult<T>(result: null | T | T[] | undefined): null | T {

@@ -29,7 +29,9 @@
 import 'server-only';
 
 import { type GetSocialProofStatsReturnRow } from '@heyclaude/database-types/postgres-types';
-import { createApiOptionsHandler, createCachedApiRoute, getVersionedRoute, jsonResponse, type RouteHandlerContext } from '@heyclaude/web-runtime/server';
+import { createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext } from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 import { connection } from 'next/server';
 
 /**

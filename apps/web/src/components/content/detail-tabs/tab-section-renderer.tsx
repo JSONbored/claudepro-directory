@@ -9,7 +9,7 @@
  */
 
 import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {
   type ContentItem,

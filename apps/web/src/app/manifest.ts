@@ -1,4 +1,4 @@
-import { getContentDescriptionCopy } from '@heyclaude/web-runtime/data';
+import { getContentDescriptionCopy } from '@heyclaude/web-runtime/data/marketing/site';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { type MetadataRoute } from 'next';
 

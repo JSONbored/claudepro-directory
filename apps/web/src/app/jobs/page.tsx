@@ -4,13 +4,11 @@
  */
 
 import { ExperienceLevel, JobType } from '@heyclaude/data-layer/prisma';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
-import { type JobsFilterResult } from '@heyclaude/web-runtime/data';
-import {
-  generatePageMetadata,
-  getCategoryConfig,
-  getFilteredJobs,
-} from '@heyclaude/web-runtime/data';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { type JobsFilterResult } from '@heyclaude/web-runtime/data/jobs';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
+import { getFilteredJobs } from '@heyclaude/web-runtime/data/jobs';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   Briefcase,
@@ -101,6 +99,7 @@ async function JobsCountBadge() {
 export async function generateMetadata({
   searchParams,
 }: PagePropsWithSearchParams): Promise<Metadata> {
+  // Note: Cannot use 'use cache' with searchParams - they're dynamic request data
   const rawParameters = await searchParams;
   return generatePageMetadata('/jobs', {
     filters: {

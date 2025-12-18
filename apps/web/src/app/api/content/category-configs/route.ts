@@ -23,13 +23,12 @@
 
 import 'server-only';
 import {
-  createApiOptionsHandler,
+  createOptionsHandler as createApiOptionsHandler,
   createCachedApiRoute,
-  getOnlyCorsHeaders,
-  getVersionedRoute,
-  jsonResponse,
   type RouteHandlerContext,
-} from '@heyclaude/web-runtime/server';
+} from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 
 /**
  * GET /api/content/category-configs - Get category configurations

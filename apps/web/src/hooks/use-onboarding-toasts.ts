@@ -13,7 +13,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { useLocalStorage } from '@heyclaude/web-runtime/hooks';
+import { useLocalStorage } from '@heyclaude/web-runtime/hooks/use-local-storage';
 
 interface OnboardingToast {
   delay?: number;

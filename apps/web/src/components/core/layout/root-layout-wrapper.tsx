@@ -6,8 +6,9 @@
 'use client';
 
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
-import { getLayoutFlags } from '@heyclaude/web-runtime/data';
-import { useConfetti, useSessionStorage } from '@heyclaude/web-runtime/hooks';
+import { getLayoutFlags } from '@heyclaude/web-runtime/data/layout/flags-client';
+import { useConfetti } from '@heyclaude/web-runtime/hooks/use-confetti';
+import { useSessionStorage } from '@heyclaude/web-runtime/hooks/use-session-storage';
 import {
   logClientError,
   normalizeError,

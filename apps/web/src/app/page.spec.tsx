@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { setupTestWithErrorTracking } from '../../../../config/tests/utils/error-tracking';
 
 /**
  * Comprehensive Homepage E2E Tests
@@ -34,11 +35,6 @@ import { expect, test } from '@playwright/test';
  */
 
 test.describe('Homepage', () => {
-  // Track all console messages for error detection
-  let consoleErrors: string[] = [];
-  let consoleWarnings: string[] = [];
-  let networkErrors: string[] = [];
-
   // Helper function to get search input (standardized selector)
   const getSearchInput = (page: any) => {
     return page.getByPlaceholder(/search for rules, mcp servers, agents, commands, and more/i).or(
@@ -47,85 +43,19 @@ test.describe('Homepage', () => {
   };
 
   test.beforeEach(async ({ page }) => {
-    // Reset tracking
-    consoleErrors = [];
-    consoleWarnings = [];
-    networkErrors = [];
-
-    // Capture all console messages
-    page.on('console', (msg) => {
-      const text = msg.text();
-      if (msg.type() === 'error') {
-        // Filter out known acceptable errors (metadata URL, background styles)
-        if (
-          !text.includes('Only plain objects') &&
-          !text.includes('background:') &&
-          !text.includes('background-color:') &&
-          !text.includes('Feature-Policy')
-        ) {
-          consoleErrors.push(text);
-        }
-      } else if (msg.type() === 'warning') {
-        // Filter out known acceptable warnings
-        // NOTE: We track newsletter preload warnings separately to catch the bug
-        if (
-          !text.includes('apple-mobile-web-app-capable') &&
-          !text.includes('Feature-Policy') &&
-          !text.includes('hydrated but some attributes') && // Hydration warnings from React (known issue)
-          !text.includes('hydration-mismatch') // Hydration mismatch warnings
-        ) {
-          consoleWarnings.push(text);
-        }
-      }
-    });
-
-    // Capture page errors
-    page.on('pageerror', (error) => {
-      consoleErrors.push(`Page Error: ${error.message}`);
-    });
-
-    // Capture network failures
-    page.on('requestfailed', (request) => {
-      const url = request.url();
-      // Filter out only truly non-critical failures
-      if (
-        !url.includes('analytics') &&
-        !url.includes('umami') &&
-        !url.includes('vercel') &&
-        !url.includes('favicon')
-      ) {
-        // Service worker errors ARE critical and should be tracked
-        networkErrors.push(`${url} - ${request.failure()?.errorText || 'Failed'}`);
-      }
-    });
-
-    // Navigate to homepage
-    await page.goto('/');
+    // Set up error tracking and navigate to homepage
+    const { cleanup, navigate } = setupTestWithErrorTracking(page, '/');
+    await navigate();
     
-    // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
-    
-    // Wait for React to hydrate
-    await page.waitForTimeout(1000);
+    // Store cleanup function for afterEach
+    (page as any).__errorTrackingCleanup = cleanup;
   });
 
   test.afterEach(async ({ page }) => {
-    // FAIL test if any console errors detected
-    if (consoleErrors.length > 0) {
-      console.error('Console errors detected:', consoleErrors);
-      throw new Error(`Test failed due to console errors: ${consoleErrors.join('; ')}`);
-    }
-
-    // FAIL test if any console warnings detected (strict mode)
-    if (consoleWarnings.length > 0) {
-      console.warn('Console warnings detected:', consoleWarnings);
-      throw new Error(`Test failed due to console warnings: ${consoleWarnings.join('; ')}`);
-    }
-
-    // FAIL test if any network errors detected
-    if (networkErrors.length > 0) {
-      console.error('Network errors detected:', networkErrors);
-      throw new Error(`Test failed due to network errors: ${networkErrors.join('; ')}`);
+    // Check for errors and throw if any detected
+    const cleanup = (page as any).__errorTrackingCleanup;
+    if (cleanup) {
+      cleanup();
     }
   });
 

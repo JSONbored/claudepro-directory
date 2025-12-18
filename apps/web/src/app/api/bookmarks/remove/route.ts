@@ -19,12 +19,9 @@ import 'server-only';
 
 import { removeBookmark } from '@heyclaude/web-runtime/actions/bookmarks';
 import { content_categorySchema } from '@heyclaude/web-runtime/prisma-zod-schemas';
-import {
-  createApiOptionsHandler,
-  createApiRoute,
-  getVersionedRoute,
-  jsonResponse,
-} from '@heyclaude/web-runtime/server';
+import { createOptionsHandler as createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 import { connection } from 'next/server';
 import { z } from 'zod';
 

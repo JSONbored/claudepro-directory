@@ -24,8 +24,9 @@
 
 import type { EnrichedContentItem } from '@heyclaude/database-types/postgres-types';
 import type { contentModel, content_category } from '@heyclaude/data-layer/prisma';
-import { ensureStringArray, getMetadata, isValidCategory } from '@heyclaude/web-runtime/core';
-import { getCategoryConfigs } from '@heyclaude/web-runtime/data';
+import { ensureStringArray, getMetadata } from '@heyclaude/web-runtime/utils/content-helpers';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { getCategoryConfigs } from '@heyclaude/web-runtime/data/config/category';
 import { AlertTriangle, CheckCircle } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -105,7 +106,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
   if (validItemRefs.length > 0) {
     try {
       // Import batch fetch function
-      const { getContentBatchBySlugs } = await import('@heyclaude/web-runtime/data');
+      const { getContentBatchBySlugs } = await import('@heyclaude/web-runtime/data/content');
       
       // Batch fetch all items by category
       const contentMap = await getContentBatchBySlugs(

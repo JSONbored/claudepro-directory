@@ -1,11 +1,11 @@
-import { getContactChannels } from '@heyclaude/web-runtime/core';
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { getContactChannels } from '@heyclaude/web-runtime/config/marketing-client';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import { Card, CardContent, CardHeader, CardTitle, NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import { cacheLife } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 import { lazy, Suspense } from 'react';
 
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
@@ -32,6 +32,13 @@ const ContactTerminal = lazy(() =>
  */
 
 export async function generateMetadata(): Promise<Metadata> {
+  'use cache';
+  // Static route - metadata never changes, use very long cache (30 days)
+  // Generated once at build time, cached forever (or until manual invalidation)
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTag('seo-metadata-static');
+  cacheTag('seo-metadata-contact');
+  
   return generatePageMetadata('/contact');
 }
 

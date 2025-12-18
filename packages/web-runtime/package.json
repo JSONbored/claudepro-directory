@@ -5,24 +5,10 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": {
-      "development": "./src/index.ts",
-      "types": "./dist/index.d.ts",
-      "default": "./src/index.ts"
-    },
-    "./server": {
-      "development": "./src/server.ts",
-      "types": "./dist/server.d.ts",
-      "default": "./src/server.ts"
-    },
     "./server-edge": {
       "development": "./src/server-edge.ts",
       "types": "./dist/server-edge.d.ts",
       "default": "./src/server-edge.ts"
-    },
-    "./actions": {
-      "types": "./src/entries/actions.ts",
-      "default": "./src/entries/actions.ts"
     },
     "./actions/bookmarks": {
       "types": "./src/actions/bookmarks.ts",
@@ -96,26 +82,122 @@
       "types": "./src/entries/ui.ts",
       "default": "./src/entries/ui.ts"
     },
-    "./hooks": {
-      "types": "./src/entries/hooks.ts",
-      "default": "./src/entries/hooks.ts"
-    },
     "./hooks/motion": {
       "types": "./src/hooks/motion/index.ts",
       "default": "./src/hooks/motion/index.ts"
     },
-    "./client": {
-      "types": "./src/entries/client.ts",
-      "default": "./src/entries/client.ts"
+    "./hooks/use-announcement-dismissal": {
+      "types": "./src/hooks/use-announcement-dismissal.ts",
+      "default": "./src/hooks/use-announcement-dismissal.ts"
     },
-    "./core": {
-      "types": "./src/entries/core.ts",
-      "default": "./src/entries/core.ts"
+    "./hooks/use-authenticated-user": {
+      "types": "./src/hooks/use-authenticated-user.ts",
+      "default": "./src/hooks/use-authenticated-user.ts"
     },
-    "./data": {
-      "types": "./src/entries/data-server.ts",
-      "react-server": "./src/entries/data-server.ts",
-      "default": "./src/entries/data-client.ts"
+    "./hooks/use-boolean": {
+      "types": "./src/hooks/use-boolean.ts",
+      "default": "./src/hooks/use-boolean.ts"
+    },
+    "./hooks/use-button-success": {
+      "types": "./src/hooks/use-button-success.ts",
+      "default": "./src/hooks/use-button-success.ts"
+    },
+    "./hooks/use-component-card-config": {
+      "types": "./src/hooks/use-component-card-config.tsx",
+      "default": "./src/hooks/use-component-card-config.tsx"
+    },
+    "./hooks/use-confetti": {
+      "types": "./src/hooks/use-confetti.ts",
+      "default": "./src/hooks/use-confetti.ts"
+    },
+    "./hooks/use-copy-to-clipboard": {
+      "types": "./src/hooks/use-copy-to-clipboard.ts",
+      "react-server": "./src/hooks/use-copy-to-clipboard.ts",
+      "default": "./src/hooks/use-copy-to-clipboard.ts"
+    },
+    "./hooks/use-debounce-callback": {
+      "types": "./src/hooks/use-debounce-callback.ts",
+      "default": "./src/hooks/use-debounce-callback.ts"
+    },
+    "./hooks/use-debounce-value": {
+      "types": "./src/hooks/use-debounce-value.ts",
+      "default": "./src/hooks/use-debounce-value.ts"
+    },
+    "./hooks/use-form-submit": {
+      "types": "./src/hooks/use-form-submit.ts",
+      "default": "./src/hooks/use-form-submit.ts"
+    },
+    "./hooks/use-infinite-scroll": {
+      "types": "./src/hooks/use-infinite-scroll.ts",
+      "default": "./src/hooks/use-infinite-scroll.ts"
+    },
+    "./hooks/use-intersection-observer": {
+      "types": "./src/hooks/use-intersection-observer.ts",
+      "default": "./src/hooks/use-intersection-observer.ts"
+    },
+    "./hooks/use-interval": {
+      "types": "./src/hooks/use-interval.ts",
+      "default": "./src/hooks/use-interval.ts"
+    },
+    "./hooks/use-is-client": {
+      "types": "./src/hooks/use-is-client.ts",
+      "default": "./src/hooks/use-is-client.ts"
+    },
+    "./hooks/use-is-mounted": {
+      "types": "./src/hooks/use-is-mounted.ts",
+      "default": "./src/hooks/use-is-mounted.ts"
+    },
+    "./hooks/use-local-storage": {
+      "types": "./src/hooks/use-local-storage.ts",
+      "default": "./src/hooks/use-local-storage.ts"
+    },
+    "./hooks/use-logged-async": {
+      "types": "./src/hooks/use-logged-async.ts",
+      "default": "./src/hooks/use-logged-async.ts"
+    },
+    "./hooks/use-media-query": {
+      "types": "./src/hooks/use-media-query.ts",
+      "default": "./src/hooks/use-media-query.ts"
+    },
+    "./hooks/use-multiple-intersection-observer": {
+      "types": "./src/hooks/use-multiple-intersection-observer.ts",
+      "default": "./src/hooks/use-multiple-intersection-observer.ts"
+    },
+    "./hooks/use-newsletter": {
+      "types": "./src/hooks/use-newsletter.ts",
+      "default": "./src/hooks/use-newsletter.ts"
+    },
+    "./hooks/use-on-click-outside": {
+      "types": "./src/hooks/use-on-click-outside.ts",
+      "default": "./src/hooks/use-on-click-outside.ts"
+    },
+    "./hooks/use-pinboard": {
+      "types": "./src/hooks/use-pinboard.ts",
+      "default": "./src/hooks/use-pinboard.ts"
+    },
+    "./hooks/use-pulse": {
+      "types": "./src/hooks/use-pulse.ts",
+      "default": "./src/hooks/use-pulse.ts"
+    },
+    "./hooks/use-recently-viewed": {
+      "types": "./src/hooks/use-recently-viewed.ts",
+      "default": "./src/hooks/use-recently-viewed.ts"
+    },
+    "./hooks/use-safe-action": {
+      "types": "./src/hooks/use-safe-action.ts",
+      "default": "./src/hooks/use-safe-action.ts"
+    },
+    "./hooks/use-scroll-lock": {
+      "types": "./src/hooks/use-scroll-lock.ts",
+      "default": "./src/hooks/use-scroll-lock.ts"
+    },
+    "./hooks/use-session-storage": {
+      "types": "./src/hooks/use-session-storage.ts",
+      "default": "./src/hooks/use-session-storage.ts"
+    },
+    "./hooks/use-timeout": {
+      "types": "./src/hooks/use-timeout.ts",
+      "default": "./src/hooks/use-timeout.ts"
     },
     "./data/utils": {
       "types": "./src/data.ts",
@@ -128,6 +210,10 @@
     "./types/app.schema": {
       "types": "./src/types/app.schema.ts",
       "default": "./src/types/app.schema.ts"
+    },
+    "./types/category": {
+      "types": "./src/types/category.ts",
+      "default": "./src/types/category.ts"
     },
     "./utils/changelog": {
       "types": "./src/utils/changelog.ts",
@@ -144,10 +230,6 @@
     "./utils/optimize-avatar-url": {
       "types": "./src/utils/optimize-avatar-url.ts",
       "default": "./src/utils/optimize-avatar-url.ts"
-    },
-    "./data/drafts/draft-manager": {
-      "types": "./src/data/drafts/draft-manager.ts",
-      "default": "./src/data/drafts/draft-manager.ts"
     },
     "./hooks/use-authenticated-user": {
       "types": "./src/hooks/use-authenticated-user.ts",
@@ -221,6 +303,35 @@
       "types": "./src/data/config/category/index.ts",
       "default": "./src/data/config/category/index.ts"
     },
+    "./data/account": {
+      "types": "./src/data/account.ts",
+      "react-server": "./src/data/account.ts",
+      "default": "./src/data/account.ts"
+    },
+    "./data/announcements": {
+      "types": "./src/data/announcements.ts",
+      "react-server": "./src/data/announcements.ts",
+      "default": "./src/data/announcements.ts"
+    },
+    "./data/changelog": {
+      "types": "./src/data/changelog.ts",
+      "react-server": "./src/data/changelog.ts",
+      "default": "./src/data/changelog.ts"
+    },
+    "./data/changelog.shared": {
+      "types": "./src/data/changelog.shared.ts",
+      "default": "./src/data/changelog.shared.ts"
+    },
+    "./data/community": {
+      "types": "./src/data/community.ts",
+      "react-server": "./src/data/community.ts",
+      "default": "./src/data/community.ts"
+    },
+    "./data/companies": {
+      "types": "./src/data/companies.ts",
+      "react-server": "./src/data/companies.ts",
+      "default": "./src/data/companies.ts"
+    },
     "./data/content": {
       "types": "./src/data/content/index.ts",
       "default": "./src/data/content/index.ts"
@@ -230,9 +341,209 @@
       "react-server": "./src/data/content/detail.ts",
       "default": "./src/data/content/detail.ts"
     },
+    "./data/content/homepage": {
+      "types": "./src/data/content/homepage.ts",
+      "react-server": "./src/data/content/homepage.ts",
+      "default": "./src/data/content/homepage.ts"
+    },
+    "./data/content/related": {
+      "types": "./src/data/content/related.ts",
+      "react-server": "./src/data/content/related.ts",
+      "default": "./src/data/content/related.ts"
+    },
+    "./data/content/templates": {
+      "types": "./src/data/content/templates.ts",
+      "react-server": "./src/data/content/templates.ts",
+      "default": "./src/data/content/templates.ts"
+    },
+    "./data/content-helpers": {
+      "types": "./src/data/content-helpers.ts",
+      "react-server": "./src/data/content-helpers.ts",
+      "default": "./src/data/content-helpers.ts"
+    },
+    "./data/forms/submission-form-fields": {
+      "types": "./src/data/forms/submission-form-fields.ts",
+      "react-server": "./src/data/forms/submission-form-fields.ts",
+      "default": "./src/data/forms/submission-form-fields.ts"
+    },
+    "./data/jobs": {
+      "types": "./src/data/jobs.ts",
+      "react-server": "./src/data/jobs.ts",
+      "default": "./src/data/jobs.ts"
+    },
+    "./data/marketing": {
+      "types": "./src/data/marketing.ts",
+      "react-server": "./src/data/marketing.ts",
+      "default": "./src/data/marketing.ts"
+    },
+    "./data/marketing/site": {
+      "types": "./src/data/marketing/site.ts",
+      "react-server": "./src/data/marketing/site.ts",
+      "default": "./src/data/marketing/site.ts"
+    },
+    "./data/payments": {
+      "types": "./src/data/payments.ts",
+      "react-server": "./src/data/payments.ts",
+      "default": "./src/data/payments.ts"
+    },
+    "./data/search/facets": {
+      "types": "./src/data/search/facets.ts",
+      "react-server": "./src/data/search/facets.ts",
+      "default": "./src/data/search/facets.ts"
+    },
+    "./data/seo/client": {
+      "types": "./src/data/seo/client.ts",
+      "react-server": "./src/data/seo/client.ts",
+      "default": "./src/data/seo/client.ts"
+    },
+    "./data/tools/recommendations": {
+      "types": "./src/data/tools/recommendations.ts",
+      "react-server": "./src/data/tools/recommendations.ts",
+      "default": "./src/data/tools/recommendations.ts"
+    },
     "./seo": {
       "types": "./src/seo/generator.ts",
       "default": "./src/seo/generator.ts"
+    },
+    "./api/route-factory": {
+      "types": "./src/api/route-factory.ts",
+      "react-server": "./src/api/route-factory.ts",
+      "default": "./src/api/route-factory.ts"
+    },
+    "./api/schemas": {
+      "types": "./src/api/schemas.ts",
+      "react-server": "./src/api/schemas.ts",
+      "default": "./src/api/schemas.ts"
+    },
+    "./api/versioning": {
+      "types": "./src/api/versioning.ts",
+      "react-server": "./src/api/versioning.ts",
+      "default": "./src/api/versioning.ts"
+    },
+    "./server/api-helpers": {
+      "types": "./src/server/api-helpers.ts",
+      "react-server": "./src/server/api-helpers.ts",
+      "default": "./src/server/api-helpers.ts"
+    },
+    "./server/fetch-helpers": {
+      "types": "./src/server/fetch-helpers.ts",
+      "react-server": "./src/server/fetch-helpers.ts",
+      "default": "./src/server/fetch-helpers.ts"
+    },
+    "./server/not-found-response": {
+      "types": "./src/server/not-found-response.ts",
+      "react-server": "./src/server/not-found-response.ts",
+      "default": "./src/server/not-found-response.ts"
+    },
+    "./auth/get-authenticated-user": {
+      "types": "./src/auth/get-authenticated-user.ts",
+      "react-server": "./src/auth/get-authenticated-user.ts",
+      "default": "./src/auth/get-authenticated-user.ts"
+    },
+    "./supabase/server": {
+      "types": "./src/supabase/server.ts",
+      "react-server": "./src/supabase/server.ts",
+      "default": "./src/supabase/server.ts"
+    },
+    "./supabase/pgmq-client": {
+      "types": "./src/supabase/pgmq-client.ts",
+      "react-server": "./src/supabase/pgmq-client.ts",
+      "default": "./src/supabase/pgmq-client.ts"
+    },
+    "./pulse": {
+      "types": "./src/pulse.ts",
+      "react-server": "./src/pulse.ts",
+      "default": "./src/pulse.ts"
+    },
+    "./utils/content-transforms": {
+      "types": "./src/utils/content-transforms.ts",
+      "react-server": "./src/utils/content-transforms.ts",
+      "default": "./src/utils/content-transforms.ts"
+    },
+    "./utils/content-highlights": {
+      "types": "./src/utils/content-highlights.ts",
+      "react-server": "./src/utils/content-highlights.ts",
+      "default": "./src/utils/content-highlights.ts"
+    },
+    "./utils/homepage-error-tracking": {
+      "types": "./src/utils/homepage-error-tracking.ts",
+      "react-server": "./src/utils/homepage-error-tracking.ts",
+      "default": "./src/utils/homepage-error-tracking.ts"
+    },
+    "./utils/navigation-helpers": {
+      "types": "./src/utils/navigation-helpers.ts",
+      "react-server": "./src/utils/navigation-helpers.ts",
+      "default": "./src/utils/navigation-helpers.ts"
+    },
+    "./utils/category-validation": {
+      "types": "./src/utils/category-validation.ts",
+      "react-server": "./src/utils/category-validation.ts",
+      "default": "./src/utils/category-validation.ts"
+    },
+    "./utils/content-helpers": {
+      "types": "./src/utils/content-helpers.ts",
+      "react-server": "./src/utils/content-helpers.ts",
+      "default": "./src/utils/content-helpers.ts"
+    },
+    "./utils/url-safety": {
+      "types": "./src/utils/url-safety.ts",
+      "react-server": "./src/utils/url-safety.ts",
+      "default": "./src/utils/url-safety.ts"
+    },
+    "./utils/url-validation": {
+      "types": "./src/utils/url-validation.ts",
+      "react-server": "./src/utils/url-validation.ts",
+      "default": "./src/utils/url-validation.ts"
+    },
+    "./content": {
+      "types": "./src/content.ts",
+      "react-server": "./src/content.ts",
+      "default": "./src/content.ts"
+    },
+    "./pulse-client": {
+      "types": "./src/pulse-client.ts",
+      "react-server": "./src/pulse-client.ts",
+      "default": "./src/pulse-client.ts"
+    },
+    "./config/marketing-client": {
+      "types": "./src/config/marketing-client.ts",
+      "react-server": "./src/config/marketing-client.ts",
+      "default": "./src/config/marketing-client.ts"
+    },
+    "./client/share": {
+      "types": "./src/client/share.ts",
+      "react-server": "./src/client/share.ts",
+      "default": "./src/client/share.ts"
+    },
+    "./types/app.schema": {
+      "types": "./src/types/app.schema.ts",
+      "react-server": "./src/types/app.schema.ts",
+      "default": "./src/types/app.schema.ts"
+    },
+    "./hooks/use-copy-to-clipboard": {
+      "types": "./src/hooks/use-copy-to-clipboard.ts",
+      "react-server": "./src/hooks/use-copy-to-clipboard.ts",
+      "default": "./src/hooks/use-copy-to-clipboard.ts"
+    },
+    "./errors": {
+      "types": "./src/errors.ts",
+      "react-server": "./src/errors.ts",
+      "default": "./src/errors.ts"
+    },
+    "./edge/transform": {
+      "types": "./src/edge/transform.ts",
+      "react-server": "./src/edge/transform.ts",
+      "default": "./src/edge/transform.ts"
+    },
+    "./data/layout": {
+      "types": "./src/data/layout.ts",
+      "react-server": "./src/data/layout.ts",
+      "default": "./src/data/layout.ts"
+    },
+    "./data/layout/constants": {
+      "types": "./src/data/layout/constants.ts",
+      "react-server": "./src/data/layout/constants.ts",
+      "default": "./src/data/layout/constants.ts"
     },
     "./ui/constants": {
       "types": "./src/ui/constants.ts",
@@ -262,29 +573,18 @@
       "types": "./src/config/unified-config.ts",
       "default": "./src/config/unified-config.ts"
     },
-    "./inngest": {
-      "types": "./src/inngest/index.ts",
-      "default": "./src/inngest/index.ts"
-    },
     "./inngest/client": {
       "types": "./src/inngest/client.ts",
       "default": "./src/inngest/client.ts"
     },
-    "./email": {
-      "types": "./src/email/index.ts",
-      "default": "./src/email/index.ts"
+    "./inngest/serve": {
+      "types": "./src/inngest/serve.ts",
+      "react-server": "./src/inngest/serve.ts",
+      "default": "./src/inngest/serve.ts"
     },
-    "./email/components": {
-      "types": "./src/email/components/index.ts",
-      "default": "./src/email/components/index.ts"
-    },
-    "./email/config": {
-      "types": "./src/email/config/index.ts",
-      "default": "./src/email/config/index.ts"
-    },
-    "./integrations": {
-      "types": "./src/integrations/index.ts",
-      "default": "./src/integrations/index.ts"
+    "./inngest/config": {
+      "types": "./src/inngest/config.ts",
+      "default": "./src/inngest/config.ts"
     },
     "./integrations/resend": {
       "types": "./src/integrations/resend.ts",
@@ -302,13 +602,60 @@
       "types": "./src/design-tokens/index.ts",
       "default": "./src/design-tokens/index.ts"
     },
-    "./flux": {
-      "types": "./src/flux/index.ts",
-      "default": "./src/flux/index.ts"
+    "./flux/router": {
+      "types": "./src/flux/router.ts",
+      "react-server": "./src/flux/router.ts",
+      "default": "./src/flux/router.ts"
     },
-    "./search": {
-      "types": "./src/search/index.ts",
-      "default": "./src/search/index.ts"
+    "./supabase/browser": {
+      "types": "./src/supabase/browser.ts",
+      "default": "./src/supabase/browser.ts"
+    },
+    "./supabase/server-anon": {
+      "types": "./src/supabase/server-anon.ts",
+      "react-server": "./src/supabase/server-anon.ts",
+      "default": "./src/supabase/server-anon.ts"
+    },
+    "./hooks/use-boolean": {
+      "types": "./src/hooks/use-boolean.ts",
+      "default": "./src/hooks/use-boolean.ts"
+    },
+    "./hooks/use-button-success": {
+      "types": "./src/hooks/use-button-success.ts",
+      "default": "./src/hooks/use-button-success.ts"
+    },
+    "./hooks/use-logged-async": {
+      "types": "./src/hooks/use-logged-async.ts",
+      "default": "./src/hooks/use-logged-async.ts"
+    },
+    "./search/context/search-provider": {
+      "types": "./src/search/context/search-provider.tsx",
+      "default": "./src/search/context/search-provider.tsx"
+    },
+    "./search/components/search-bar": {
+      "types": "./src/search/components/search-bar.tsx",
+      "default": "./src/search/components/search-bar.tsx"
+    },
+    "./search/components/search-filters": {
+      "types": "./src/search/components/search-filters.tsx",
+      "default": "./src/search/components/search-filters.tsx"
+    },
+    "./search/components/search-results": {
+      "types": "./src/search/components/search-results.tsx",
+      "default": "./src/search/components/search-results.tsx"
+    },
+    "./search/components/animated-search-bar": {
+      "types": "./src/search/components/animated-search-bar.tsx",
+      "default": "./src/search/components/animated-search-bar.tsx"
+    },
+    "./search/hooks/use-search-api": {
+      "types": "./src/search/hooks/use-search-api.ts",
+      "default": "./src/search/hooks/use-search-api.ts"
+    },
+    "./api/query-helpers": {
+      "types": "./src/api/query-helpers.ts",
+      "react-server": "./src/api/query-helpers.ts",
+      "default": "./src/api/query-helpers.ts"
     }
   },
   "dependencies": {

@@ -1,0 +1,12 @@
+-- Migration: Remove unused get_quiz_configuration RPC
+-- Version: 20251218120029
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-18
+--
+-- Description: Remove get_quiz_configuration RPC function - Converted to Prisma
+-- MiscService.getQuizConfiguration now uses Prisma directly (line 842), RPC no longer called.
+--
+-- Function signature: get_quiz_configuration()
+-- Related: MiscService.getQuizConfiguration uses Prisma queries instead
+
+DROP FUNCTION IF EXISTS public.get_quiz_configuration();

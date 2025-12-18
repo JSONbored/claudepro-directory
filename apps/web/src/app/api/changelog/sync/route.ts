@@ -66,16 +66,14 @@ import { ChangelogService } from '@heyclaude/data-layer';
 import { type SyncChangelogEntryArgs } from '@heyclaude/database-types/postgres-types';
 import { requireEnvVar } from '@heyclaude/shared-runtime';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { type RouteHandlerContext } from '@heyclaude/web-runtime/server';
 import {
-  createApiOptionsHandler,
+  createOptionsHandler as createApiOptionsHandler,
   createApiRoute,
-  getVersionedRoute,
-  jsonResponse,
-  pgmqSend,
-  postCorsHeaders,
-  unauthorizedResponse,
-} from '@heyclaude/web-runtime/server';
+  type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { jsonResponse, postCorsHeaders, unauthorizedResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { pgmqSend } from '@heyclaude/web-runtime/supabase/pgmq-client';
 import { z } from 'zod';
 
 /**

@@ -1,38 +1,36 @@
 import { Page } from '@playwright/test';
 
-export async function waitForPageLoad(page: Page) {
-  await page.waitForLoadState('networkidle');
-  await page.waitForLoadState('domcontentloaded');
-  // Wait for images to load
-  await page.evaluate(() => {
-    return Promise.all(
-      Array.from(document.images)
-        .filter((img) => !img.complete)
-        .map(
-          (img) =>
-            new Promise((resolve, reject) => {
-              img.onload = resolve;
-              img.onerror = resolve; // Resolve even on error to not block
-              setTimeout(resolve, 5000); // Timeout after 5s
-            })
-        )
-    );
-  });
-  // Wait for any animations/transitions to complete
+/**
+ * Wait for page to be fully loaded and stable
+ * 
+ * Uses Playwright's built-in waiting strategies for efficiency.
+ * Waits for network idle, DOM content loaded, and React hydration.
+ * 
+ * @param page - Playwright page instance
+ * @param timeout - Maximum time to wait in milliseconds (default: 30000)
+ */
+export async function waitForPageLoad(page: Page, timeout = 30000) {
+  // Wait for network to be idle (all requests completed)
+  await page.waitForLoadState('networkidle', { timeout });
+  
+  // Wait for DOM content to be loaded
+  await page.waitForLoadState('domcontentloaded', { timeout });
+  
+  // Wait for React to hydrate (most components need this)
   await page.waitForTimeout(1000);
-  // Wait for any lazy-loaded content
-  await page.evaluate(() => {
-    return new Promise((resolve) => {
-      if (document.readyState === 'complete') {
-        resolve(undefined);
-      } else {
-        window.addEventListener('load', () => resolve(undefined));
-        setTimeout(() => resolve(undefined), 2000); // Timeout after 2s
-      }
-    });
-  });
-  // Final wait for stability
-  await page.waitForTimeout(500);
+  
+  // Wait for any remaining images to load (with timeout)
+  try {
+    await page.waitForFunction(
+      () => {
+        const images = Array.from(document.images);
+        return images.every(img => img.complete || img.naturalWidth === 0);
+      },
+      { timeout: 5000 }
+    );
+  } catch {
+    // Ignore timeout - images may be lazy-loaded or have errors
+  }
 }
 
 export async function setTheme(page: Page, theme: 'light' | 'dark') {

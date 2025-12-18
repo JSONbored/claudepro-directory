@@ -180,7 +180,7 @@ export class SearchService extends BasePrismaService {
         );
 
         // Transform to match RPC return structure (table row format)
-        return results.map((row) => ({
+        return results.map((row: (typeof results)[number]) => ({
           query: row.query,
           count: Number(row.count), // Convert bigint to number
           label: row.label,

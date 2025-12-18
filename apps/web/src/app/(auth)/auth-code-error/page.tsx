@@ -1,5 +1,5 @@
-import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/core';
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
@@ -13,7 +13,6 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
@@ -27,9 +26,7 @@ const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
  * @see {@link https://nextjs.org/docs/app/building-your-application/metadata Metadata (Next.js)}
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   return generatePageMetadata(AUTH_CODE_ERROR_PATH);
 }
 
@@ -86,9 +83,7 @@ async function AuthCodeErrorContent({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  // Note: Cannot use 'use cache' with searchParams - they're dynamic request data
 
   const operation = 'AuthCodeErrorPage';
   const route = AUTH_CODE_ERROR_PATH;

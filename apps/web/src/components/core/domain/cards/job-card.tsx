@@ -1,8 +1,8 @@
 'use client';
 
-import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
 import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
 import {
   Building,
   Clock,

@@ -31,7 +31,7 @@
  */
 
 import { logger } from '../../../logger.ts';
-import { normalizeError } from '../../../errors.ts';
+import { getSafeExternalUrl, getSafeMailtoUrl } from '../../../utils/url-safety.ts';
 import Link from 'next/link';
 import type { ComponentProps, ReactNode } from 'react';
 
@@ -50,50 +50,6 @@ function isValidInternalPath(path: string): boolean {
   // Basic path validation - allow alphanumeric, slashes, hyphens, underscores, query params, hash
   // This is permissive but safe for Next.js routing
   return /^\/[a-zA-Z0-9/?#\-_.~!*'();:@&=+$,%[\]]*$/.test(path);
-}
-
-/**
- * Validate and sanitize external URL for safe use in href
- * Only allows HTTPS URLs, returns canonicalized URL or null if invalid
- */
-function getSafeExternalUrl(url: string): string | null {
-  if (!url || typeof url !== 'string') return null;
-
-  try {
-    const parsed = new URL(url.trim());
-    // Allow HTTPS, HTTP, and mailto protocols
-    if (
-      parsed.protocol !== 'https:' &&
-      parsed.protocol !== 'http:' &&
-      parsed.protocol !== 'mailto:'
-    )
-      return null;
-    // Block localhost in production (optional, but safer)
-    // For now, allow it for development
-    // Reject dangerous components
-    if (parsed.username || parsed.password) return null;
-
-    // Sanitize: remove query strings and fragments for external links (optional)
-    // For navigation links, we might want to keep them, so we'll just sanitize credentials
-    parsed.username = '';
-    parsed.password = '';
-    // Normalize hostname
-    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
-    // Remove default ports
-    if (parsed.port === '80' || parsed.port === '443') {
-      parsed.port = '';
-    }
-
-    // Return canonicalized href
-    return parsed.href;
-  } catch (error) {
-    // Log URL parsing errors for debugging
-    const normalized = normalizeError(error, 'NavLink: Failed to parse external URL');
-    logger.warn({ err: normalized,
-      component: 'NavLink',
-      url: String(url), }, 'NavLink: Invalid external URL');
-    return null;
-  }
 }
 
 export interface NavLinkProps extends Omit<ComponentProps<typeof Link>, 'href' | 'children'> {
@@ -143,8 +99,20 @@ export function NavLink({
   );
 
   if (external) {
-    // Validate and sanitize external URL
-    const safeUrl = getSafeExternalUrl(href);
+    // Check if this is a mailto link
+    const isMailto = typeof href === 'string' && href.trim().toLowerCase().startsWith('mailto:');
+    
+    let safeUrl: string | null = null;
+    
+    if (isMailto) {
+      // Extract email from mailto: URL and validate
+      const email = href.trim().substring(7); // Remove 'mailto:' prefix
+      safeUrl = getSafeMailtoUrl(email);
+    } else {
+      // Validate and sanitize external website URL using shared utility
+      safeUrl = getSafeExternalUrl(href);
+    }
+    
     if (!safeUrl) {
       // Don't render unsafe external links - log for debugging
       logger.warn(
@@ -152,19 +120,26 @@ export function NavLink({
           component: 'NavLink',
           href: String(href),
           external: true,
+          isMailto,
         },
         'NavLink: Unsafe external URL rejected'
       );
       return <span className={`group ${className}`}>{content}</span>;
     }
+    
+    // For mailto links, don't add target="_blank" or rel="noopener noreferrer"
+    // (mailto links open email client, not a new tab)
+    const linkProps = isMailto
+      ? { href: safeUrl, ...(props as ComponentProps<'a'>) }
+      : {
+          href: safeUrl,
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          ...(props as ComponentProps<'a'>),
+        };
+    
     return (
-      <a
-        href={safeUrl}
-        className={`group ${className}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        {...(props as ComponentProps<'a'>)}
-      >
+      <a className={`group ${className}`} {...linkProps}>
         {content}
       </a>
     );

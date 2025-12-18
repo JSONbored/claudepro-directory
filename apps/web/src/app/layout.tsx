@@ -5,18 +5,15 @@ import './shiki-code-blocks.css';
 
 import { getComponentCardConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { ComponentConfigContextProvider } from '@heyclaude/web-runtime/hooks';
+import { ComponentConfigContextProvider } from '@heyclaude/web-runtime/hooks/use-component-card-config';
 import { logger } from '@heyclaude/web-runtime/logging/server';
-import {
-  DEFAULT_LAYOUT_DATA,
-  generatePageMetadata,
-  getLayoutData,
-} from '@heyclaude/web-runtime/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { DEFAULT_LAYOUT_DATA } from '@heyclaude/web-runtime/data/layout/constants';
+import { getLayoutData } from '@heyclaude/web-runtime/data/layout';
 import { ErrorBoundary, LazyMotionProvider, MotionConfigProvider } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife, cacheTag } from 'next/cache';
 import localFont from 'next/font/local';
-import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
 
@@ -124,11 +121,10 @@ function getHomeMetadata() {
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  'use cache';
   // Note: This metadata fetch is intentional in layout for site-wide SEO
   // The data is cached and shared across all pages
-  // We await connection() first to ensure non-deterministic operations are allowed
   // eslint-disable-next-line architectural-rules/no-blocking-operations-in-layouts -- Site-wide metadata, cached and necessary for SEO
-  await connection();
   const homeMetadata = await getHomeMetadata();
 
   return {
@@ -223,9 +219,7 @@ function LayoutFallback({ children }: { children: React.ReactNode }) {
  
  * @returns {Promise<unknown>} Description of return value*/
 async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
-  // Await connection() first to ensure non-deterministic operations are allowed
-  // This prevents "Uncached data was accessed outside of <Suspense>" errors
-  await connection();
+  'use cache';
   const [layoutDataResult] = await Promise.allSettled([getLayoutData()]);
 
   // Extract layout data with fallbacks

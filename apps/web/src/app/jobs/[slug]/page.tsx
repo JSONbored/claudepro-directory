@@ -3,8 +3,9 @@
  */
 
 import { ContentCategory, type content_category } from '@heyclaude/data-layer/prisma';
-import { getSafeMailtoUrl, getSafeWebsiteUrl, isValidCategory } from '@heyclaude/web-runtime/core';
-import { getCategoryConfig } from '@heyclaude/web-runtime/data';
+import { getSafeMailtoUrl, getSafeWebsiteUrl } from '@heyclaude/web-runtime/utils/url-safety';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   ArrowLeft,
@@ -17,7 +18,8 @@ import {
   Users,
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getJobBySlug } from '@heyclaude/web-runtime/data/jobs';
 import { type PageProps } from '@heyclaude/web-runtime/types/app.schema';
 import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
 import {
@@ -62,6 +64,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
+  'use cache';
   const { slug } = await params;
 
   // Create request-scoped child logger
@@ -104,6 +107,7 @@ export async function generateMetadata({
  * @see getFilteredJobs - source of job listings used to derive slugs
  */
 export async function generateStaticParams() {
+  'use cache';
   // Limit to top 10 jobs to optimize build time
   // Remaining jobs are handled via dynamic routing on-demand
   const MAX_STATIC_JOBS = 10;
@@ -115,7 +119,7 @@ export async function generateStaticParams() {
     route: '/jobs',
   });
 
-  const { getActiveJobSlugs } = await import('@heyclaude/web-runtime/data');
+  const { getActiveJobSlugs } = await import('@heyclaude/web-runtime/data/jobs');
   try {
     // OPTIMIZATION: Use Prisma directly to get only slugs needed for static generation
     // This avoids unnecessary RPC function calls and data processing

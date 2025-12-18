@@ -1,8 +1,9 @@
 'use client';
 
 import type { newsletter_source } from '@heyclaude/data-layer/prisma';
-import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
+import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/config/marketing-client';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
 import { Mail } from '@heyclaude/web-runtime/icons';
 import {
   cn,

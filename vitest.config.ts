@@ -26,6 +26,12 @@ export default defineConfig({
     pool: 'threads',
     maxWorkers: '50%', // Use 50% of available CPU cores
 
+    // Enable test result caching for faster re-runs
+    // Cache is invalidated when source files or dependencies change
+    cache: {
+      dir: '.vitest-cache',
+    },
+
     // Optional: Enable profiling for performance debugging (set VITEST_PROFILE=1)
     execArgv: process.env.VITEST_PROFILE
       ? [
@@ -90,6 +96,26 @@ export default defineConfig({
         functions: 80,
         branches: 70,
         statements: 80,
+        // Per-file thresholds for critical paths
+        // These are checked in addition to global thresholds
+        '**/packages/web-runtime/src/data/**': {
+          lines: 85,
+          functions: 85,
+          branches: 75,
+          statements: 85,
+        },
+        '**/packages/web-runtime/src/actions/**': {
+          lines: 85,
+          functions: 85,
+          branches: 75,
+          statements: 85,
+        },
+        '**/packages/data-layer/src/services/**': {
+          lines: 85,
+          functions: 85,
+          branches: 75,
+          statements: 85,
+        },
       },
     },
 
@@ -114,7 +140,9 @@ export default defineConfig({
           include: ['src/**/*.{test,spec}.{ts,tsx}'],
           environment: 'node',
           pool: 'threads',
-          maxWorkers: 2, // Smaller package, fewer workers needed
+          // Smaller package with fewer tests - use fewer workers
+          maxWorkers: process.env.CI ? 1 : 2,
+          minWorkers: 1,
         },
       },
       {
@@ -124,7 +152,9 @@ export default defineConfig({
           include: ['src/**/*.{test,spec}.{ts,tsx}'],
           environment: 'node',
           pool: 'threads',
-          maxWorkers: 2, // Smaller package, fewer workers needed
+          // Smaller package with fewer tests - use fewer workers
+          maxWorkers: process.env.CI ? 1 : 2,
+          minWorkers: 1,
         },
       },
       {
@@ -135,7 +165,9 @@ export default defineConfig({
           exclude: ['src/**/*.{test,spec}.tsx'],
           environment: 'node',
           pool: 'threads',
-          maxWorkers: 3, // Medium package
+          // Medium package - balance workers for performance
+          maxWorkers: process.env.CI ? 2 : 3,
+          minWorkers: 1,
         },
       },
       {
@@ -145,7 +177,9 @@ export default defineConfig({
           include: ['src/**/*.{test,spec}.tsx'],
           environment: 'jsdom',
           pool: 'threads',
-          maxWorkers: 3, // Medium package
+          // React tests need jsdom - slightly more resource intensive
+          maxWorkers: process.env.CI ? 2 : 3,
+          minWorkers: 1,
         },
       },
       {
@@ -155,7 +189,9 @@ export default defineConfig({
           include: ['src/**/*.{test,spec}.{ts,tsx}'],
           environment: 'node',
           pool: 'threads',
-          maxWorkers: 2, // Smaller package, fewer workers needed
+          // Smaller package with fewer tests - use fewer workers
+          maxWorkers: process.env.CI ? 1 : 2,
+          minWorkers: 1,
         },
       },
       {
@@ -170,7 +206,10 @@ export default defineConfig({
             ['**/*.spec.ts', 'node'],
           ],
           pool: 'threads',
-          maxWorkers: '75%', // Larger app, can use more workers
+          // Larger app with more tests - can use more workers
+          // Use percentage for local (75% of cores), fixed for CI (better predictability)
+          maxWorkers: process.env.CI ? 4 : '75%',
+          minWorkers: 1,
         },
       },
     ],

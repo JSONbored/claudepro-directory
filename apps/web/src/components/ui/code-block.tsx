@@ -155,7 +155,8 @@ import {
   useState,
 } from 'react';
 import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, cn } from '@heyclaude/web-runtime/ui';
-import { useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useTimeout } from '@heyclaude/web-runtime/hooks/use-timeout';
 import { getThemeConfig } from '@heyclaude/shared-runtime';
 
 export type BundledLanguage = string;

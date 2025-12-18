@@ -1,10 +1,16 @@
 /**
  * Unified Structured Data - Renders Schema.org JSON-LD from generate_metadata_complete RPC
  * Schemas are serialized with XSS protection client-side
+ * 
+ * **Build-Time Optimization:**
+ * - This component is used in pages with 'use cache' directive
+ * - During build: RPC call executes (deterministic - uses stored database data)
+ * - At runtime: Uses cached result from Next.js cache (no RPC call if cache valid)
  */
 
 import { serializeJsonLd } from '@heyclaude/shared-runtime';
-import { getSEOMetadataWithSchemas } from '@heyclaude/web-runtime/data';
+import { serializeForClient } from '@heyclaude/shared-runtime/utils/serialize';
+import { getSEOMetadataWithSchemas } from '@heyclaude/web-runtime/data/seo/client';
 
 interface StructuredDataProps {
   route: string;
@@ -39,6 +45,12 @@ function sanitizeUrlsInObject(obj: unknown): unknown {
 }
 
 export async function StructuredData({ route }: StructuredDataProps) {
+  // Fetch SEO metadata with schemas (build-time cached, deterministic)
+  // During build: RPC executes (deterministic - uses stored database data), result cached by Next.js 'use cache'
+  // At runtime: Uses cached result (no RPC call if cache valid)
+  // Request cache skips Date.now() during build (via isBuildTime() check), so this is safe
+  // Note: Next.js may still require connection() before database calls, but we can't use it in 'use cache' context
+  // The RPC is STABLE (deterministic), so it should work at build time
   const seoData = await getSEOMetadataWithSchemas(route);
 
   // getSEOMetadataWithSchemas() now always returns unified structure with schemas array
@@ -50,8 +62,33 @@ export async function StructuredData({ route }: StructuredDataProps) {
   return (
     <>
       {seoData.schemas.map((schema, index) => {
-        // Sanitize schema to remove javascript: protocol before serialization
-        const sanitizedSchema = sanitizeUrlsInObject(schema);
+        // First, serialize for client to remove any functions or non-serializable data
+        // This ensures the schema is safe to pass through Next.js prerendering
+        // Use aggressive serialization to remove all functions, React components, and non-serializable values
+        const serializedSchema = serializeForClient(schema);
+        
+        // Additional pass: Remove any remaining functions or React components that might have been missed
+        // This handles edge cases where functions are nested deeply or in unexpected structures
+        const deepCleaned = JSON.parse(
+          JSON.stringify(serializedSchema, (_key, value) => {
+            // Remove functions
+            if (typeof value === 'function') {
+              return undefined;
+            }
+            // Remove React components (have $$typeof property)
+            if (value && typeof value === 'object' && '$$typeof' in value) {
+              return undefined;
+            }
+            // Remove objects with render functions (React components)
+            if (value && typeof value === 'object' && typeof value.render === 'function') {
+              return undefined;
+            }
+            return value;
+          })
+        );
+        
+        // Sanitize schema to remove javascript: protocol before JSON-LD serialization
+        const sanitizedSchema = sanitizeUrlsInObject(deepCleaned);
         
         // Serialize JSON-LD with XSS protection
         // Prisma JsonValue and shared-runtime JsonValue are structurally compatible

@@ -1,7 +1,8 @@
 'use client';
 
 import { SPRING } from '@heyclaude/web-runtime/design-system';
-import { useBoolean, useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks/use-copy-to-clipboard';
 import { AlertCircle, Check, Copy, RefreshCw } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import {

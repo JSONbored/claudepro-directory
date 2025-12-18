@@ -2,7 +2,9 @@
 
 import { ListTree } from '@heyclaude/web-runtime/icons';
 import { type ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
-import { useIsClient, useMultipleIntersectionObserver, useReducedMotion } from '@heyclaude/web-runtime/hooks';
+import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
+import { useMultipleIntersectionObserver } from '@heyclaude/web-runtime/hooks/use-multiple-intersection-observer';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 

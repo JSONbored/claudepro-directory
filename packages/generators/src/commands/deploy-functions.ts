@@ -10,31 +10,13 @@ import { logger } from '../toolkit/logger.ts';
 const IGNORED_DIRECTORIES = new Set(['_shared', 'node_modules']);
 
 /**
- * Load environment variables from .env files (simple sync loader)
+ * Environment variables are provided by Infisical (for local dev) or platform (for CI/Build).
+ * This function does NOT load .env files - all secrets must come from Infisical.
+ * For local development, run commands with: infisical run --env=dev -- <command>
  */
-function loadEnvFiles(repoRoot: string): void {
-  const envFiles = ['.env.local', '.env'];
-  
-  for (const file of envFiles) {
-    const filePath = path.join(repoRoot, file);
-    if (existsSync(filePath)) {
-      try {
-        const content = readFileSync(filePath, 'utf8');
-        for (const line of content.split('\n')) {
-          if (!line || line.startsWith('#')) continue;
-          const [key, ...values] = line.split('=');
-          if (key) {
-            // Remove surrounding quotes if present, only set if not already set
-            const value = values.join('=').replaceAll(/^["']|["']$/g, '');
-            process.env[key] ??= value;
-          }
-        }
-      } catch {
-        // Silently ignore errors reading env files - they're optional
-        // The env variables may be provided through other means (CI, shell)
-      }
-    }
-  }
+function loadEnvFiles(_repoRoot: string): void {
+  // No-op: Environment variables are provided by Infisical or platform
+  // All secrets must be in Infisical dev environment for local development
 }
 
 // Paths relative to this file (dist/commands/deploy-functions.js) -> root
@@ -223,7 +205,7 @@ export function runDeployFunctions(): void {
     return;
   }
 
-  // Load environment variables from .env.local
+  // Environment variables are provided by Infisical (for local dev) or platform (for CI/Build)
   loadEnvFiles(REPO_ROOT);
 
   const allFunctions = discoverFunctions();

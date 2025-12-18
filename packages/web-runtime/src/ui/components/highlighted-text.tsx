@@ -32,7 +32,7 @@
 import { logger } from '../../logger.ts';
 import { normalizeError } from '../../errors.ts';
 import { memo, useEffect, useState } from 'react';
-import { useBoolean } from '../../hooks/index.ts';
+import { useBoolean } from '../../hooks/use-boolean.ts';
 
 export interface HighlightedTextProps {
   /** Pre-highlighted HTML string from edge function */

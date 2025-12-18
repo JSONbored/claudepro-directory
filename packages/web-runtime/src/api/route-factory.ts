@@ -493,6 +493,9 @@ export interface CachedApiRouteConfig<TQuery = unknown, TBody = unknown> extends
   /** Optional: Transform service result before returning */
   transformResult?: (result: unknown, query: TQuery, body: TBody) => unknown;
   /** Optional: Custom response handler (overrides default jsonResponse) */
+  // Type assertion required: responseHandler can return any Response type (NextResponse, Response, etc.)
+  // Using 'any' here is necessary because different response types (NextResponse, Response) don't share
+  // a common base type that TypeScript can infer. The handler is responsible for returning a valid Response.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   responseHandler?: (result: unknown, query: TQuery, body: TBody, ctx: RouteHandlerContext<TQuery, TBody>) => any;
 }
@@ -569,9 +572,15 @@ function createCachedServiceMethod<TQuery, TBody>(
     // Cast query/body to unknown since config.methodArgs expects unknown
     const args = config.methodArgs(query, body, routeParams);
     
-    // Call service method
-    const serviceRecord = serviceInstance as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
-    const method = serviceRecord[config.methodName];
+    // Dynamic method access on service instances
+    // Services are stored in a Map<ServiceKey, ServiceTypeMap[ServiceKey]> where ServiceTypeMap
+    // is a union of all service types. TypeScript can't verify that a specific service has a
+    // specific method name at compile time, so we access methods dynamically with proper type narrowing.
+    // The runtime check below (typeof method !== 'function') ensures safety.
+    // Use 'unknown' first to avoid unsafe type assertions, then narrow with runtime check
+    const serviceRecord = serviceInstance as unknown;
+    const serviceMethods = serviceRecord as Record<string, (...args: unknown[]) => Promise<unknown>>;
+    const method = serviceMethods[config.methodName];
     if (!method || typeof method !== 'function') {
       throw new Error(
         `Method '${config.methodName}' not found on service '${config.serviceKey}'. ` +

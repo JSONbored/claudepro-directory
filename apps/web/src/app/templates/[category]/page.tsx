@@ -10,8 +10,8 @@
  */
 
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
-import { getContentTemplates } from '@heyclaude/web-runtime/data';
+import { VALID_CATEGORIES } from '@heyclaude/web-runtime/utils/category-validation';
+import { getContentTemplates } from '@heyclaude/web-runtime/data/content/templates';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { notFound } from 'next/navigation';
 import { NextResponse } from 'next/server';

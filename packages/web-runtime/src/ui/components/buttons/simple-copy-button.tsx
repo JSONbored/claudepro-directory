@@ -50,7 +50,8 @@ import { MICROINTERACTIONS } from '../../../design-system/index.ts';
 // COLORS removed - using direct Tailwind utilities
 import { Check, Copy } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '../../../hooks/use-boolean.ts';
+import { useTimeout } from '../../../hooks/use-timeout.ts';
 import { Button } from '../button.tsx';
 
 /**

@@ -1,5 +1,5 @@
-import { trackRPCFailure } from '@heyclaude/web-runtime/core';
-import { getSearchFacets } from '@heyclaude/web-runtime/server';
+import { trackRPCFailure } from '@heyclaude/web-runtime/utils/homepage-error-tracking';
+import { getSearchFacets } from '@heyclaude/web-runtime/data/search/facets';
 import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
 
 /**

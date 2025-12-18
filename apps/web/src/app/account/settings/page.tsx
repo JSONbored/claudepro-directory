@@ -4,13 +4,14 @@
 
 // GetUserSettingsReturns type is now derived from getUserCompleteData return type
 import { type GetUserCompleteDataReturns } from '@heyclaude/database-types/postgres-types';
-import { extractFirstFieldFromTuple, isPostgresTupleString } from '@heyclaude/web-runtime';
+import { extractFirstFieldFromTuple, isPostgresTupleString } from '@heyclaude/web-runtime/utils/deserialize-postgres-tuple';
 import { ensureUserRecord } from '@heyclaude/web-runtime/actions/user';
 import {
   generatePageMetadata,
-  getAuthenticatedUser,
-  getUserCompleteData,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -77,7 +78,6 @@ export default async function SettingsPage() {
     reqLogger.warn(
       {
         section: 'data-fetch',
-        timestamp: new Date().toISOString(),
       },
       'SettingsPage: unauthenticated access attempt'
     );
@@ -348,11 +348,7 @@ export default async function SettingsPage() {
               <p className="text-sm-medium">Member Since</p>
               <p className="text-muted-foreground">
                 {profile.created_at
-                  ? new Date(profile.created_at).toLocaleDateString('en-US', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })
+                  ? formatDate(profile.created_at, 'long')
                   : 'N/A'}
               </p>
             </div>

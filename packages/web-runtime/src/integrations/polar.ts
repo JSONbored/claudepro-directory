@@ -105,7 +105,7 @@ export async function createPolarCheckout(
 /**
  * Get Polar product price ID based on plan and tier
  *
- * SETUP REQUIRED: Configure these in .env.local after Polar account approval:
+ * SETUP REQUIRED: Configure these in Infisical dev environment after Polar account approval:
  * - POLAR_PRODUCT_PRICE_ONETIME_STANDARD
  * - POLAR_PRODUCT_PRICE_ONETIME_FEATURED
  * - POLAR_PRODUCT_PRICE_SUBSCRIPTION_STANDARD

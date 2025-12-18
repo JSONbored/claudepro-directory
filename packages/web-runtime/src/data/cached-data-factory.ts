@@ -1,44 +1,172 @@
 /**
- * Unified Cached Data Function Factory
+ * Unified Data Function Factory
  *
  * Eliminates repetitive boilerplate across 96+ wrapper functions by providing
  * a declarative factory that automatically handles:
- * - Cache directives ('use cache' or 'use cache: private')
- * - Cache life profiles
- * - Cache tags
  * - Logging
  * - Error handling
  * - Service instantiation
  * - Result transformation
  *
  * This factory reduces ~5,000+ LOC of boilerplate to declarative configuration.
+ *
+ * ARCHITECTURAL DECISION: No caching in data layer
+ * - Pages control caching with 'use cache' directive
+ * - Data functions are simple async functions (no 'use cache')
+ * - Pages apply cacheTag() and cacheLife() within their 'use cache' context
+ * - This prevents serialization errors and simplifies the architecture
+ *
+ * NOTE: This file uses 'server-only' (not 'use server') because:
+ * - These are server-only data fetching functions
+ * - 'server-only' ensures these functions are never imported in client components
+ * - Helper functions (generateContentTags, generateResourceTags) are in content-helpers.ts
  */
+
+import 'server-only';
 
 import type { ServiceKey } from './service-factory.ts';
 import { getService } from './service-factory.ts';
 import { logger, type LogContext } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
-import { cacheLife, cacheTag } from 'next/cache';
 
 /**
- * Cache life profile type
+ * Map to store function configurations for data functions
+ * Uses string key to avoid closure capture and ensure stable references
+ * This prevents "Functions cannot be passed directly to Client Components" errors.
  */
-export type CacheLifeProfile =
-  | 'short'
-  | 'medium'
-  | 'long'
-  | 'userProfile'
-  | { stale: number; revalidate: number; expire: number };
+const dataFunctionConfigs = new Map<
+  string,
+  {
+    serviceKey: ServiceKey;
+    methodName: string;
+    module: string;
+    operation: string;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    normalizeResult?: (result: unknown) => unknown | null;
+    onError?: (error: unknown, args: unknown) => unknown | null;
+    throwOnError: boolean;
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+  }
+>();
 
 /**
- * Cache mode: 'public' uses 'use cache', 'private' uses 'use cache: private'
+ * Shared implementation function (extracted to module level to avoid closure capture)
+ * This function is called by data functions via Map lookup, not closure capture
+ * 
+ * NOTE: This function only handles data fetching, logging, and error handling.
+ * Caching is handled at the page level with 'use cache' directive.
  */
-export type CacheMode = 'public' | 'private';
+async function executeDataFunction(
+  fnConfig: {
+    serviceKey: ServiceKey;
+    methodName: string;
+    module: string;
+    operation: string;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    normalizeResult?: (result: unknown) => unknown | null;
+    onError?: (error: unknown, args: unknown) => unknown | null;
+    throwOnError: boolean;
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+  },
+  args: unknown
+): Promise<unknown | null> {
+  // Validate arguments if validator provided
+  if (fnConfig.validate && !fnConfig.validate(args)) {
+    const reqLogger = logger.child({
+      module: fnConfig.module,
+      operation: fnConfig.operation,
+    });
+    const normalized = normalizeError(
+      fnConfig.validateError || 'Validation failed',
+      `${fnConfig.operation}: validation failed`
+    );
+    reqLogger.error({ err: normalized }, `${fnConfig.operation}: validation failed`);
+    return null;
+  }
+
+  // Setup logger (initial context from args only)
+  const initialContext = fnConfig.logContext ? fnConfig.logContext(args) : {};
+  const reqLogger = logger.child({
+    module: fnConfig.module,
+    operation: fnConfig.operation,
+    ...initialContext,
+  });
+
+  try {
+    // Get service instance
+    const service = await getService(fnConfig.serviceKey);
+
+    // Transform arguments if transformer provided
+    const serviceArgs = fnConfig.transformArgs ? fnConfig.transformArgs(args) : args;
+
+    // Dynamic method access on service instances
+    // Services are stored in a Map<ServiceKey, ServiceTypeMap[ServiceKey]> where ServiceTypeMap
+    // is a union of all service types. TypeScript can't verify that a specific service has a
+    // specific method name at compile time, so we access methods dynamically with proper type narrowing.
+    // The runtime check below (typeof serviceMethod !== 'function') ensures safety.
+    // Use 'unknown' first to avoid unsafe type assertions, then narrow with runtime check
+    const serviceRecord = service as unknown;
+    const serviceMethods = serviceRecord as Record<string, (...args: unknown[]) => Promise<unknown>>;
+    const serviceMethod = serviceMethods[fnConfig.methodName];
+
+    if (!serviceMethod || typeof serviceMethod !== 'function') {
+      throw new Error(
+        `Method '${fnConfig.methodName}' not found on service '${fnConfig.serviceKey}'. ` +
+          `Available methods: ${Object.getOwnPropertyNames(Object.getPrototypeOf(service))
+            .filter((m) => m !== 'constructor')
+            .join(', ')}`
+      );
+    }
+
+    const result = await serviceMethod.call(service, serviceArgs);
+
+    // Transform result if transformer provided
+    let transformedResult: unknown | null = result;
+    if (fnConfig.transformResult) {
+      transformedResult = fnConfig.transformResult(result, args);
+    } else if (fnConfig.normalizeResult) {
+      transformedResult = fnConfig.normalizeResult(result);
+    }
+
+    // Log success
+    const logData: LogContext = {
+      hasResult: transformedResult !== null && transformedResult !== undefined,
+    };
+    if (fnConfig.logContext) {
+      Object.assign(logData, fnConfig.logContext(args, transformedResult));
+    }
+    reqLogger.info(logData, `${fnConfig.operation}: fetched successfully`);
+
+    return transformedResult;
+  } catch (error) {
+    // Custom error handler
+    if (fnConfig.onError) {
+      return fnConfig.onError(error, args);
+    }
+
+    // Default error handling
+    const normalized = normalizeError(error, `${fnConfig.operation} failed`);
+    const errorLogData: LogContext = { err: normalized };
+    reqLogger.error(errorLogData, `${fnConfig.operation} failed`);
+
+    if (fnConfig.throwOnError) {
+      throw normalized;
+    }
+
+    return null;
+  }
+}
 
 /**
- * Configuration for creating a cached data function
+ * Configuration for creating a data function
  */
-export interface CachedDataFunctionConfig<TArgs, TReturn> {
+export interface DataFunctionConfig<TArgs, TReturn> {
   /**
    * Service key from service factory registry
    */
@@ -48,21 +176,6 @@ export interface CachedDataFunctionConfig<TArgs, TReturn> {
    * Method name on the service to call
    */
   methodName: string;
-
-  /**
-   * Cache mode: 'public' for shared cache, 'private' for user-specific cache
-   */
-  cacheMode?: CacheMode;
-
-  /**
-   * Cache life profile or custom values
-   */
-  cacheLife: CacheLifeProfile;
-
-  /**
-   * Generate cache tags from arguments
-   */
-  cacheTags: (args: TArgs) => string[];
 
   /**
    * Module name for logging (e.g., 'data/content/detail')
@@ -121,16 +234,13 @@ export interface CachedDataFunctionConfig<TArgs, TReturn> {
 }
 
 /**
- * Create a cached data function with automatic cache/logging/error handling
+ * Create a data function with automatic logging/error handling
  *
  * @example
  * ```typescript
- * export const getContentDetailCore = createCachedDataFunction({
+ * export const getContentDetailCore = createDataFunction({
  *   serviceKey: 'content',
  *   methodName: 'getContentDetailCore',
- *   cacheMode: 'public',
- *   cacheLife: 'medium',
- *   cacheTags: (args) => generateContentTags(args.category, args.slug),
  *   module: 'data/content/detail',
  *   operation: 'getContentDetailCore',
  *   validate: (args) => isValidCategory(args.category),
@@ -142,161 +252,98 @@ export interface CachedDataFunctionConfig<TArgs, TReturn> {
  * });
  * ```
  */
-export function createCachedDataFunction<TArgs, TReturn>(
-  config: CachedDataFunctionConfig<TArgs, TReturn>
+export function createDataFunction<TArgs, TReturn>(
+  config: DataFunctionConfig<TArgs, TReturn>
 ): (args: TArgs) => Promise<TReturn | null> {
-  const {
-    serviceKey,
-    methodName,
-    cacheMode = 'public',
-    cacheLife: cacheLifeProfile,
-    cacheTags,
-    module,
-    operation,
-    validate,
-    validateError,
-    transformArgs,
-    transformResult,
-    normalizeResult,
-    onError,
-    throwOnError = false,
-    logContext,
-  } = config;
-
-  return async (args: TArgs): Promise<TReturn | null> => {
-    // Apply cache directive
-    if (cacheMode === 'private') {
-      'use cache: private';
-    } else {
-      'use cache';
-    }
-
-    // Apply cache life profile
-    if (typeof cacheLifeProfile === 'string') {
-      cacheLife(cacheLifeProfile);
-    } else {
-      cacheLife(cacheLifeProfile);
-    }
-
-    // Apply cache tags
-    const tags = cacheTags(args);
-    for (const tag of tags) {
-      cacheTag(tag);
-    }
-
-    // Validate arguments if validator provided
-    if (validate && !validate(args)) {
-      const reqLogger = logger.child({
-        module,
-        operation,
-      });
-      const normalized = normalizeError(
-        validateError || 'Validation failed',
-        `${operation}: validation failed`
-      );
-      reqLogger.error({ err: normalized }, `${operation}: validation failed`);
-      return null;
-    }
-
-    // Setup logger (initial context from args only)
-    const initialContext = logContext ? logContext(args) : {};
-    const reqLogger = logger.child({
-      module,
-      operation,
-      ...initialContext,
-    });
-
-    try {
-      // Get service instance
-      const service = await getService(serviceKey);
-
-      // Transform arguments if transformer provided
-      const serviceArgs = transformArgs ? transformArgs(args) : args;
-
-      // Call service method
-      const serviceRecord = service as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
-      const serviceMethod = serviceRecord[methodName];
-
-      if (!serviceMethod || typeof serviceMethod !== 'function') {
-        throw new Error(
-          `Method '${methodName}' not found on service '${serviceKey}'. ` +
-            `Available methods: ${Object.getOwnPropertyNames(Object.getPrototypeOf(service))
-              .filter((m) => m !== 'constructor')
-              .join(', ')}`
-        );
-      }
-
-      const result = await serviceMethod.call(service, serviceArgs);
-
-      // Transform result if transformer provided
-      let transformedResult: TReturn | null = result as TReturn;
-      if (transformResult) {
-        transformedResult = transformResult(result, args);
-      } else if (normalizeResult) {
-        transformedResult = normalizeResult(result);
-      }
-
-      // Log success
-      const logData: LogContext = {
-        hasResult: transformedResult !== null && transformedResult !== undefined,
-      };
-      if (logContext) {
-        Object.assign(logData, logContext(args, transformedResult));
-      }
-      reqLogger.info(logData, `${operation}: fetched successfully`);
-
-      return transformedResult;
-    } catch (error) {
-      // Custom error handler
-      if (onError) {
-        return onError(error, args);
-      }
-
-      // Default error handling
-      const normalized = normalizeError(error, `${operation} failed`);
-      const errorLogData: LogContext = { err: normalized };
-      reqLogger.error(errorLogData, `${operation} failed`);
-
-      if (throwOnError) {
-        throw normalized;
-      }
-
-      return null;
-    }
+  // Prepare config (with unknown types to avoid closure capture)
+  const fnConfig: {
+    serviceKey: ServiceKey;
+    methodName: string;
+    module: string;
+    operation: string;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    normalizeResult?: (result: unknown) => unknown | null;
+    onError?: (error: unknown, args: unknown) => unknown | null;
+    throwOnError: boolean;
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+  } = {
+    serviceKey: config.serviceKey,
+    methodName: config.methodName,
+    module: config.module,
+    operation: config.operation,
+    throwOnError: config.throwOnError ?? false,
   };
-}
 
-/**
- * Helper to create cache tags for content
- */
-export function generateContentTags(
-  category?: string | null,
-  slug?: string | null,
-  additionalTags: string[] = []
-): string[] {
-  const tags: string[] = ['content', ...additionalTags];
-  if (category) {
-    tags.push(`content-${category}`);
-    if (slug) {
-      tags.push(`content-${category}-${slug}`);
+  // Add optional properties only if they exist (for exactOptionalPropertyTypes compatibility)
+  if (config.validate) {
+    fnConfig.validate = config.validate as (args: unknown) => boolean;
+  }
+  if (config.validateError) {
+    fnConfig.validateError = config.validateError;
+  }
+  if (config.transformArgs) {
+    fnConfig.transformArgs = config.transformArgs as (args: unknown) => unknown;
+  }
+  if (config.transformResult) {
+    fnConfig.transformResult = config.transformResult as (result: unknown, args?: unknown) => unknown;
+  }
+  if (config.normalizeResult) {
+    fnConfig.normalizeResult = config.normalizeResult as (result: unknown) => unknown | null;
+  }
+  if (config.onError) {
+    fnConfig.onError = config.onError as (error: unknown, args: unknown) => unknown | null;
+  }
+  if (config.logContext) {
+    fnConfig.logContext = config.logContext as (args: unknown, result?: unknown) => LogContext;
+  }
+
+  // Create a unique string key to use as the identifier (stable reference, not captured in closure)
+  const functionId = `data-function-${config.module}-${config.operation}`;
+
+  // Create the data function without capturing config in closure
+  // This prevents "Functions cannot be passed directly to Client Components" errors
+  const dataFunction = async (args: unknown): Promise<unknown | null> => {
+    // Retrieve configuration from Map at runtime using stable string key (not captured in closure)
+    const storedConfig = dataFunctionConfigs.get(functionId);
+    if (!storedConfig) {
+      throw new Error(`Data function configuration not found for ${config.operation}`);
     }
-  } else {
-    tags.push('content-all');
-  }
-  return tags;
+    
+    return executeDataFunction(storedConfig, args);
+  };
+
+  // Store configuration in Map using string key (stable reference)
+  dataFunctionConfigs.set(functionId, fnConfig);
+
+  // Return function with original generic types (cast to match expected signature)
+  return dataFunction as (args: TArgs) => Promise<TReturn | null>;
 }
 
 /**
- * Helper to create cache tags for any resource type
+ * @deprecated Use createDataFunction instead. This alias is kept for backward compatibility during migration.
  */
-export function generateResourceTags(
-  resourceType: string,
-  resourceId?: string | null,
-  additionalTags: string[] = []
-): string[] {
-  const tags: string[] = [resourceType, ...additionalTags];
-  if (resourceId) {
-    tags.push(`${resourceType}-${resourceId}`);
-  }
-  return tags;
-}
+export const createCachedDataFunction = createDataFunction;
+
+/**
+ * @deprecated Use DataFunctionConfig instead. This type is kept for backward compatibility during migration.
+ */
+export type CachedDataFunctionConfig<TArgs, TReturn> = DataFunctionConfig<TArgs, TReturn> & {
+  /**
+   * @deprecated Cache mode is unused - pages control caching
+   */
+  cacheMode?: 'public' | 'private';
+  /**
+   * @deprecated Cache life is unused - pages control caching
+   */
+  cacheLife?: 'short' | 'medium' | 'long' | 'userProfile' | { stale: number; revalidate: number; expire: number };
+  /**
+   * @deprecated Cache tags are unused - pages apply tags within 'use cache' context
+   */
+  cacheTags?: (args: TArgs) => string[];
+};
+
+// Helper functions (generateContentTags, generateResourceTags) are in content-helpers.ts
+// They are pure utility functions that return arrays and don't need 'use server' directive.

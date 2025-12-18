@@ -6,9 +6,9 @@
 'use client';
 
 import { requiresMFAChallenge } from '@heyclaude/web-runtime/auth/mfa';
-import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
+import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/supabase/browser';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 

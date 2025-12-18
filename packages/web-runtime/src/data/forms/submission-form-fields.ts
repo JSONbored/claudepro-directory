@@ -1,7 +1,6 @@
-'use server';
+import 'server-only';
 
 import { type FormFieldConfigItem } from '@heyclaude/database-types/postgres-types';
-import { cacheLife, cacheTag } from 'next/cache';
 
 import {
   type FieldDefinition,
@@ -15,10 +14,7 @@ import {
   type TextareaFieldDefinition,
   type TextFieldDefinition,
 } from '../../types/component.types.ts';
-import { createCachedDataFunction, generateResourceTags } from '../cached-data-factory.ts';
-
-const FORM_FIELDS_CACHE_TAG = 'submission-form-fields';
-const FORM_FIELDS_CACHE_SECONDS = 60 * 60 * 6;
+import { createDataFunction } from '../cached-data-factory.ts';
 
 function mapField(item: FormFieldConfigItem): FieldDefinition | null {
   if (!item.name || !item.label || !item.type) {
@@ -115,15 +111,12 @@ function emptySection(): SubmissionFormSection {
  * Fetch fields for a content type (cached)
  * Uses 'use cache' to cache form field configuration. This data is public and same for all users.
  */
-const fetchFieldsForContentType = createCachedDataFunction<
+const fetchFieldsForContentType = createDataFunction<
   SubmissionContentType,
   SubmissionFormSection
 >({
   serviceKey: 'misc',
   methodName: 'getFormFieldConfig',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: (contentType) => generateResourceTags('forms', undefined, ['templates', `submission-${contentType}`]),
   module: 'data/forms/submission-form-fields',
   operation: 'fetchFieldsForContentType',
   transformArgs: (contentType) => ({ p_form_type: contentType }),
@@ -217,13 +210,7 @@ async function fetchSubmissionSections(
  * This data is public and same for all users, so it can be cached at build time.
  */
 export async function getSubmissionFormFields(): Promise<SubmissionFormConfig> {
-  'use cache';
-  cacheLife({
-    expire: FORM_FIELDS_CACHE_SECONDS * 2,
-    revalidate: FORM_FIELDS_CACHE_SECONDS,
-    stale: FORM_FIELDS_CACHE_SECONDS / 2,
-  });
-  cacheTag(FORM_FIELDS_CACHE_TAG);
+  // Simple data fetching function - pages control caching with 'use cache' directive
 
   return loadSubmissionFormFields();
 }

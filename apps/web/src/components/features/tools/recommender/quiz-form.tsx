@@ -6,8 +6,8 @@
  */
 
 import { getQuizConfigurationAction } from '@heyclaude/web-runtime/actions/quiz';
-import { generateConfigRecommendations } from '@heyclaude/web-runtime/core';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { generateConfigRecommendations } from '@heyclaude/web-runtime/pulse-client';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
 import { ArrowLeft, ArrowRight, Sparkles } from '@heyclaude/web-runtime/icons';
 import { logClientError, logClientInfo, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {

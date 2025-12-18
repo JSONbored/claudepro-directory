@@ -1,14 +1,12 @@
-import { getContactChannels } from '@heyclaude/web-runtime/core';
+import { getContactChannels } from '@heyclaude/web-runtime/config/marketing-client';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Github, MessageSquare, Twitter, Users } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import {
-  generatePageMetadata,
-  getCommunityDirectory,
-  getConfigurationCount,
-  getHomepageCategoryIds,
-  getHomepageData,
-} from '@heyclaude/web-runtime/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getCommunityDirectory } from '@heyclaude/web-runtime/data/community';
+import { getConfigurationCount } from '@heyclaude/web-runtime/data/content';
+import { getHomepageCategoryIds } from '@heyclaude/web-runtime/data/config/category';
+import { getHomepageData } from '@heyclaude/web-runtime/data/content/homepage';
 import {
   Button,
   Card,
@@ -20,7 +18,6 @@ import {
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { CommunityStatsCard } from '@/src/components/features/community/community-stats-card';
@@ -44,9 +41,7 @@ import Loading from './loading';
  */
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   return generatePageMetadata('/community');
 }
 

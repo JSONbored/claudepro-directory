@@ -40,7 +40,7 @@
  */
 
 import type { content_category } from '@heyclaude/data-layer/prisma';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';

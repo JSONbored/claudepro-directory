@@ -1,9 +1,8 @@
-'use server';
+import 'server-only';
 
 import { logger } from '../logger.ts';
 
 import { getActiveAnnouncement } from './announcements';
-import { generateResourceTags } from './cached-data-factory.ts';
 import { DEFAULT_LAYOUT_DATA, type LayoutData } from './layout/constants';
 
 /**
@@ -24,16 +23,7 @@ const PROMISE_REJECTED_STATUS = 'rejected' as const;
  * Layout data (navigation + announcements) changes very rarely, so we use the 'long' cacheLife profile.
  */
 export async function getLayoutData(): Promise<LayoutData> {
-  'use cache';
-
-  const { cacheLife, cacheTag } = await import('next/cache');
-
-  // Configure cache - use 'long' profile for rarely-changing layout data
-  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire
-  const tags = generateResourceTags('layout', undefined, ['ui', 'navigation', 'announcements']);
-  for (const tag of tags) {
-    cacheTag(tag);
-  }
+  // Simple data fetching function - pages control caching with 'use cache' directive
 
   const reqLogger = logger.child({
     module: 'data/layout',

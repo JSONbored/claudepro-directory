@@ -16,7 +16,7 @@ import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { memo } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 // NavigationCommandMenu is now rendered in CommandMenuWrapper (root-layout-wrapper.tsx)

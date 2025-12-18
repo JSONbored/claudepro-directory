@@ -14,13 +14,14 @@
 import { SubmissionType, SubmissionStatus } from '@heyclaude/data-layer/prisma';
 import { submission_statusSchema } from '@heyclaude/web-runtime/prisma-zod-schemas';
 import type { submission_status, content_category } from '@heyclaude/data-layer/prisma';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions/submit-content-for-review';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { ParseStrategy, safeParse } from '@heyclaude/web-runtime/data/utils';
 import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
-import { useSafeAction, useConfetti } from '@heyclaude/web-runtime/hooks';
+import { useSafeAction } from '@heyclaude/web-runtime/hooks/use-safe-action';
+import { useConfetti } from '@heyclaude/web-runtime/hooks/use-confetti';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import { usePathname } from 'next/navigation';
 import { useCallback } from 'react';
@@ -67,7 +68,7 @@ import { ContentTypeFieldRenderer } from './dynamic-form-field';
 import { ExamplesArrayInput } from './examples-array-input';
 import { TemplateSelector } from './template-selector';
 
-import type { MergedTemplateItem } from '@heyclaude/web-runtime/data';
+import type { MergedTemplateItem } from '@heyclaude/web-runtime/data/content/templates';
 
 /**
  * Usage example schema (Zod)

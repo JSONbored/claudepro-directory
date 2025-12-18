@@ -11,7 +11,7 @@ import {
   PRIMARY_NAVIGATION,
   SECONDARY_NAVIGATION,
 } from '@heyclaude/web-runtime/config/navigation';
-import { getContactChannels } from '@heyclaude/web-runtime/core';
+import { getContactChannels } from '@heyclaude/web-runtime/config/marketing-client';
 import { SPRING, MICROINTERACTIONS, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion, useDragControls } from '@heyclaude/web-runtime/hooks/motion';
 import { DiscordIcon, Github, Menu } from '@heyclaude/web-runtime/icons';
@@ -28,7 +28,7 @@ import {
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 

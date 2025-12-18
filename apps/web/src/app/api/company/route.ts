@@ -21,15 +21,14 @@
 
 import 'server-only';
 import {
-  createApiOptionsHandler,
+  createOptionsHandler as createApiOptionsHandler,
   createCachedApiRoute,
-  getOnlyCorsHeaders,
-  getVersionedRoute,
-  jsonResponse,
-  notFoundResponse,
-  slugSchema,
   type RouteHandlerContext,
-} from '@heyclaude/web-runtime/server';
+} from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { notFoundResponse } from '@heyclaude/web-runtime/server/not-found-response';
+import { slugSchema } from '@heyclaude/web-runtime/api/schemas';
 import { z } from 'zod';
 
 /**

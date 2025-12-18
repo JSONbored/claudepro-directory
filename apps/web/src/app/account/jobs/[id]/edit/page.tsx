@@ -7,16 +7,13 @@ import { JobCategory, JobType } from '@heyclaude/data-layer/prisma';
 import { type job_category, type job_type, type jobsModel } from '@heyclaude/data-layer/prisma';
 import { type CreateJobInput, updateJob } from '@heyclaude/web-runtime/actions/jobs-crud';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import {
-  generatePageMetadata,
-  getAuthenticatedUser,
-  getPaymentPlanCatalog,
-  getUserJobById,
-} from '@heyclaude/web-runtime/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getPaymentPlanCatalog } from '@heyclaude/web-runtime/data/payments';
+import { getUserJobById } from '@heyclaude/web-runtime/data/account';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
-import { connection } from 'next/server';
 import { lazy, Suspense } from 'react';
 
 import Loading from './loading';
@@ -50,9 +47,7 @@ interface EditJobPageMetadataProperties {
 export async function generateMetadata({
   params,
 }: EditJobPageMetadataProperties): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
   const { id } = await params;
   return generatePageMetadata('/account/jobs/:id/edit', { params: { id } });
 }

@@ -9,7 +9,8 @@
 import type { newsletter_source } from '@heyclaude/data-layer/prisma';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { useConfetti, useNewsletter } from '@heyclaude/web-runtime/hooks';
+import { useConfetti } from '@heyclaude/web-runtime/hooks/use-confetti';
+import { useNewsletter } from '@heyclaude/web-runtime/hooks/use-newsletter';
 import { Check, ChevronUp, Loader2, Mail, Send, TrendingUp } from '@heyclaude/web-runtime/icons';
 import {
   cn,
@@ -22,7 +23,7 @@ import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system'
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { useId, useMemo } from 'react';
 
 /**

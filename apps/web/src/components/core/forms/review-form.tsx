@@ -1,13 +1,14 @@
 'use client';
 
 import { createReview, updateReview } from '@heyclaude/web-runtime/actions/reviews-crud';
-import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
 import {
   MAX_REVIEW_LENGTH,
   type ReviewFormProps,
 } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, Button, Label, Textarea } from '@heyclaude/web-runtime/ui';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useId, useState, useTransition } from 'react';
 

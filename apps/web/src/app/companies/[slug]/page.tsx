@@ -9,8 +9,10 @@ import {
   type job_plan,
   type workplace_type,
 } from '@heyclaude/data-layer/prisma';
-import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/core';
-import { generatePageMetadata, getCompanyProfile } from '@heyclaude/web-runtime/data';
+import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/utils/url-safety';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { getCompanyProfile } from '@heyclaude/web-runtime/data/companies';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   Briefcase,
@@ -99,6 +101,7 @@ const MAX_STATIC_COMPANIES = 10;
  * @see {@link MAX_STATIC_COMPANIES}
  */
 export async function generateStaticParams() {
+  'use cache';
   // Create request-scoped child logger
   const reqLogger = logger.child({
     module: 'apps/web/src/app/companies/[slug]',
@@ -106,7 +109,7 @@ export async function generateStaticParams() {
     route: '/companies/[slug]',
   });
 
-  const { getCompaniesList } = await import('@heyclaude/web-runtime/data');
+  const { getCompaniesList } = await import('@heyclaude/web-runtime/data/companies');
 
   try {
     const result = await getCompaniesList(MAX_STATIC_COMPANIES, 0);
@@ -160,6 +163,7 @@ export async function generateStaticParams() {
  * @see generatePageMetadata
  */
 export async function generateMetadata({ params }: CompanyPageProperties): Promise<Metadata> {
+  'use cache';
   const { slug } = await params;
 
   return generatePageMetadata('/companies/:slug', {
@@ -335,10 +339,11 @@ function CompanyHeader({
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 Using Claude since{' '}
-                {new Date(company.using_cursor_since).toLocaleDateString('en-US', {
-                  month: 'short',
-                  year: 'numeric',
-                })}
+                {(() => {
+                  const date = new Date(company.using_cursor_since);
+                  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                  return `${monthNames[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+                })()}
               </div>
             ) : null}
           </div>
@@ -522,11 +527,7 @@ function CompanyStats({
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground text-sm">Latest Posting</span>
               <span className="text-sm font-semibold">
-                {new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric',
-                })}
+                {formatDate(stats.latest_job_posted_at, 'short')}
               </span>
             </div>
           ) : null}

@@ -1,7 +1,7 @@
 'use client';
 
 import { ExperienceLevel } from '@heyclaude/data-layer/prisma';
-import { useNewsletter } from '@heyclaude/web-runtime/hooks';
+import { useNewsletter } from '@heyclaude/web-runtime/hooks/use-newsletter';
 import {
   cn,
   Button,

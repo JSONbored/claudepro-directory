@@ -26,7 +26,7 @@ import {
   cn,
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 export interface Navigation3DCardProps {
   href: string;

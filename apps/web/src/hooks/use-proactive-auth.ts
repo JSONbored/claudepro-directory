@@ -16,7 +16,7 @@
  * @module apps/web/src/hooks/use-proactive-auth
  */
 
-import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import { useCallback } from 'react';
 
 import { useAuthModal } from './use-auth-modal';

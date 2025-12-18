@@ -1,0 +1,24 @@
+-- Migration: Remove is_following RPC function
+-- Version: 20251218120653
+-- Applied via: Supabase MCP
+-- Date: 2025-12-18
+--
+-- Description: Remove is_following RPC function - converted to Prisma direct query
+--
+-- This function was a simple EXISTS check:
+--   SELECT EXISTS (SELECT 1 FROM followers WHERE follower_id = p_follower_id AND following_id = p_following_id)
+--
+-- The service now uses Prisma directly in AccountService.isFollowing():
+--   prisma.followers.findFirst({
+--     where: {
+--       follower_id: args.follower_id,
+--       following_id: args.following_id,
+--     },
+--     select: { id: true },
+--   })
+--   return follow !== null;
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/account.ts: Converted isFollowing() to use Prisma
+
+DROP FUNCTION IF EXISTS public.is_following(uuid, uuid);

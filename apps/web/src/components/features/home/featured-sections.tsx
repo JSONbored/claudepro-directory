@@ -7,7 +7,9 @@ import type { jobsModel } from '@heyclaude/database-types/prisma/models';
 
 // Use Prisma model type instead of excluded composite type
 type Jobs = jobsModel;
-import { trackMissingData, getTrendingSlugs, isNewSince, isValidCategory } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { getTrendingSlugs, isNewSince } from '@heyclaude/web-runtime/utils/content-highlights';
+import { trackMissingData } from '@heyclaude/web-runtime/utils/homepage-error-tracking';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink } from '@heyclaude/web-runtime/icons';
 import {

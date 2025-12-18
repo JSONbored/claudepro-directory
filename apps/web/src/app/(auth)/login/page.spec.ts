@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { setupTestWithErrorTracking } from '../../../../config/tests/utils/error-tracking';
 
 /**
  * Comprehensive Login Page E2E Tests
@@ -17,71 +18,20 @@ import { expect, test } from '@playwright/test';
  */
 
 test.describe('/login', () => {
-  // Track all console messages for error detection
-  let consoleErrors: string[] = [];
-  let consoleWarnings: string[] = [];
-  let networkErrors: string[] = [];
-
   test.beforeEach(async ({ page }) => {
-    // Reset tracking
-    consoleErrors = [];
-    consoleWarnings = [];
-    networkErrors = [];
-
-    // Capture all console messages
-    page.on('console', (msg) => {
-      const text = msg.text();
-      if (msg.type() === 'error') {
-        if (!isAcceptableError(text)) {
-          consoleErrors.push(text);
-        }
-      } else if (msg.type() === 'warning') {
-        if (!isAcceptableWarning(text)) {
-          consoleWarnings.push(text);
-        }
-      }
-    });
-
-    // Capture page errors
-    page.on('pageerror', (error) => {
-      consoleErrors.push(`Page Error: ${error.message}`);
-    });
-
-    // Capture network failures
-    page.on('requestfailed', (request) => {
-      const url = request.url();
-      if (isCriticalResource(url)) {
-        networkErrors.push(`${url} - ${request.failure()?.errorText}`);
-      }
-    });
-
-    // Navigate to page
-    await page.goto('/login');
-
-    // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
-
-    // Wait for React to hydrate
-    await page.waitForTimeout(1000);
+    // Set up error tracking and navigate to login page
+    const { cleanup, navigate } = setupTestWithErrorTracking(page, '/login');
+    await navigate();
+    
+    // Store cleanup function for afterEach
+    (page as any).__errorTrackingCleanup = cleanup;
   });
 
   test.afterEach(async ({ page }) => {
-    // FAIL test if any console errors detected
-    if (consoleErrors.length > 0) {
-      console.error('Console errors detected:', consoleErrors);
-      throw new Error(`Test failed due to console errors: ${consoleErrors.join('; ')}`);
-    }
-
-    // FAIL test if any console warnings detected (strict mode)
-    if (consoleWarnings.length > 0) {
-      console.warn('Console warnings detected:', consoleWarnings);
-      throw new Error(`Test failed due to console warnings: ${consoleWarnings.join('; ')}`);
-    }
-
-    // FAIL test if any network errors detected
-    if (networkErrors.length > 0) {
-      console.error('Network errors detected:', networkErrors);
-      throw new Error(`Test failed due to network errors: ${networkErrors.join('; ')}`);
+    // Check for errors and throw if any detected
+    const cleanup = (page as any).__errorTrackingCleanup;
+    if (cleanup) {
+      cleanup();
     }
   });
 
@@ -102,9 +52,10 @@ test.describe('/login', () => {
   });
 
   test('should handle redirect parameter', async ({ page }) => {
-    // Test with redirect parameter
-    await page.goto('/login?redirect=/account');
-    await page.waitForLoadState('networkidle');
+    // Test with redirect parameter - navigate to different URL
+    const { cleanup, navigate } = setupTestWithErrorTracking(page, '/login?redirect=/account');
+    await navigate();
+    (page as any).__errorTrackingCleanup = cleanup;
 
     // Should handle redirect parameter without errors
     await expect(page.getByRole('main')).toBeVisible();
@@ -135,6 +86,9 @@ test.describe('/login', () => {
 
   test('should be responsive on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
+    const { cleanup, navigate } = setupTestWithErrorTracking(page, '/login');
+    await navigate();
+    (page as any).__errorTrackingCleanup = cleanup;
 
     // Check layout doesn't break
     const mainElement = page.getByRole('main');
@@ -144,8 +98,6 @@ test.describe('/login', () => {
   test('should handle generateMetadata error gracefully', async ({ page }) => {
     // This tests the error path when generatePageMetadata fails
     // The function doesn't have explicit error handling, but Next.js handles it
-    await page.goto('/login');
-    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
     // Page should render even if metadata generation fails
@@ -160,8 +112,6 @@ test.describe('/login', () => {
   test('should handle searchParams promise rejection gracefully', async ({ page }) => {
     // This tests the error path when searchParams promise rejects
     // The component uses try/catch in LoginPageContent
-    await page.goto('/login');
-    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
     // Page should render even if searchParams promise rejects
@@ -176,8 +126,6 @@ test.describe('/login', () => {
   test('should handle null/undefined redirect parameter', async ({ page }) => {
     // This tests that missing redirect parameter is handled
     // The component uses resolvedSearchParameters.redirect which may be undefined
-    await page.goto('/login');
-    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
     // Page should render even without redirect parameter
@@ -192,8 +140,6 @@ test.describe('/login', () => {
   test('should display Suspense fallback during loading', async ({ page }) => {
     // This tests that Suspense fallback (null) is handled
     // The component uses Suspense with fallback={null}
-    await page.goto('/login');
-    
     // Suspense fallback is null, so no loading indicator
     // But page should eventually load
     await page.waitForLoadState('networkidle');
@@ -203,16 +149,3 @@ test.describe('/login', () => {
     await expect(main).toBeVisible();
   });
 });
-
-// Helper functions
-function isAcceptableError(text: string): boolean {
-  return false;
-}
-
-function isAcceptableWarning(text: string): boolean {
-  return false;
-}
-
-function isCriticalResource(url: string): boolean {
-  return !url.includes('favicon') && !url.includes('analytics');
-}

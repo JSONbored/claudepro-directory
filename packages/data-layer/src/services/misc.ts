@@ -29,10 +29,9 @@ import type {
   GetUserCollectionDetailReturns,
   GetRecommendationsArgs,
   GetRecommendationsReturns,
-  GetDueSequenceEmailsReturns,
   EnrollInEmailSequenceArgs,
-  DueSequenceEmailItem,
 } from '@heyclaude/database-types/postgres-types';
+import type { DueSequenceEmailItem } from '@heyclaude/database-types/postgres-types/composites/due_sequence_email_item';
 import type { webhook_source } from '@heyclaude/data-layer/prisma';
 // Use explicit Prisma model type to avoid conflicts with postgres-types composite types
 import type { announcementsModel } from '@heyclaude/database-types/prisma/models';
@@ -117,36 +116,35 @@ export class MiscService extends BasePrismaService {
       'getActiveNotifications',
       'getActiveNotifications',
       async () => {
-        const now = new Date();
-        
-        // Build where clause: active = true, not in dismissed_ids, not expired
-        const whereConditions = [];
-        
-        // Not in dismissed_ids array (if provided)
+        // Use raw SQL with database NOW() for date comparison (eliminates new Date() call)
+        // More efficient: database handles date comparison natively
         if (p_dismissed_ids.length > 0) {
-          whereConditions.push({ id: { notIn: p_dismissed_ids } });
+          // Use parameterized query for dismissed_ids
+          const notifications = await prisma.$queryRawUnsafe<notificationsModel[]>(
+            `
+            SELECT *
+            FROM public.notifications
+            WHERE active = true
+              AND (expires_at IS NULL OR expires_at > NOW())
+              AND id != ALL($1::text[])
+            ORDER BY created_at DESC
+            `,
+            p_dismissed_ids
+          );
+          return notifications;
+        } else {
+          // No dismissed_ids - simpler query
+          const notifications = await prisma.$queryRawUnsafe<notificationsModel[]>(
+            `
+            SELECT *
+            FROM public.notifications
+            WHERE active = true
+              AND (expires_at IS NULL OR expires_at > NOW())
+            ORDER BY created_at DESC
+            `
+          );
+          return notifications;
         }
-        
-        // Not expired (expires_at IS NULL OR expires_at > NOW())
-        whereConditions.push({
-          OR: [
-            { expires_at: null },
-            { expires_at: { gt: now } },
-          ],
-        });
-
-        // OPTIMIZATION: Check what fields are actually used by callers
-        // For now, fetch all fields since notifications may need full data
-        // TODO: Review usage and add select if only specific fields are needed
-        const notifications = await prisma.notifications.findMany({
-          where: {
-            active: true,
-            AND: whereConditions,
-          },
-          orderBy: { created_at: 'desc' },
-        });
-
-        return notifications;
       },
       args
     );
@@ -164,39 +162,24 @@ export class MiscService extends BasePrismaService {
   async getActiveAnnouncement(
     args: GetActiveAnnouncementArgs = {}
   ): Promise<announcementsModel | null> {
-    const { p_now = new Date() } = args;
-
+    // Remove p_now parameter - use database NOW() instead (eliminates new Date() call)
     return withSmartCache<announcementsModel | null>(
       'getActiveAnnouncement',
       'getActiveAnnouncement',
       async () => {
-        // Prisma findFirst returns the model type directly (announcementsModel | null)
-        // Explicitly type the result to ensure correct type inference
-        const result = await prisma.announcements.findFirst({
-          where: {
-            active: true,
-            AND: [
-              {
-                OR: [
-                  { start_date: null },
-                  { start_date: { lte: p_now } },
-                ],
-              },
-              {
-                OR: [
-                  { end_date: null },
-                  { end_date: { gte: p_now } },
-                ],
-              },
-            ],
-          },
-          orderBy: [
-            { priority: 'desc' },
-            { start_date: 'desc' },
-          ],
-        });
-        // Prisma findFirst returns the model type directly (announcementsModel | null)
-        return result;
+        // Use raw SQL with database NOW() for date comparison (more efficient, eliminates Date.now())
+        const result = await prisma.$queryRawUnsafe<announcementsModel[]>(
+          `
+          SELECT *
+          FROM public.announcements
+          WHERE active = true
+            AND (start_date IS NULL OR start_date <= NOW())
+            AND (end_date IS NULL OR end_date >= NOW())
+          ORDER BY priority DESC, start_date DESC NULLS LAST
+          LIMIT 1
+          `
+        );
+        return result[0] ?? null;
       },
       args
     );
@@ -367,61 +350,52 @@ export class MiscService extends BasePrismaService {
       'getSocialProofStats',
       'getSocialProofStats',
       async () => {
-        // Calculate date ranges
-        const now = new Date();
-        const weekAgo = new Date(now);
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        const monthAgo = new Date(now);
-        monthAgo.setDate(monthAgo.getDate() - 30);
-
-        // Fetch all stats in parallel
+        // Use database date calculations with SQL INTERVAL (eliminates new Date() calls)
+        // More efficient: database handles date arithmetic natively
         const [
-          recentSubmissionsCount,
-          monthSubmissions,
-          topContributors,
+          recentSubmissionsCountResult,
+          monthSubmissionsResult,
+          topContributorsResult,
           totalContentCount,
         ] = await Promise.all([
-          // Recent submissions count (last 7 days)
-          prisma.content_submissions.count({
-            where: {
-              created_at: {
-                gte: weekAgo,
-              },
-            },
-          }),
-          // Month submissions and success rate
-          prisma.content_submissions.groupBy({
-            by: ['status'],
-            where: {
-              created_at: {
-                gte: monthAgo,
-              },
-            },
-            _count: {
-              id: true,
-            },
-          }),
-          // Top 5 contributors this week (unique authors with most submissions)
-          prisma.content_submissions.groupBy({
-            by: ['author'],
-            where: {
-              created_at: {
-                gte: weekAgo,
-              },
-            },
-            _count: {
-              id: true,
-            },
-            orderBy: {
-              _count: {
-                id: 'desc',
-              },
-            },
-            take: 5,
-          }),
+          // Recent submissions count (last 7 days) - using SQL NOW() - INTERVAL
+          prisma.$queryRawUnsafe<Array<{ count: bigint }>>(
+            `SELECT COUNT(*)::bigint as count FROM public.content_submissions WHERE created_at >= NOW() - INTERVAL '7 days'`
+          ),
+          // Month submissions and success rate - using SQL NOW() - INTERVAL
+          prisma.$queryRawUnsafe<Array<{ status: string | null; count: bigint }>>(
+            `
+            SELECT status, COUNT(*)::bigint as count
+            FROM public.content_submissions
+            WHERE created_at >= NOW() - INTERVAL '30 days'
+            GROUP BY status
+            `
+          ),
+          // Top 5 contributors this week - using SQL NOW() - INTERVAL
+          prisma.$queryRawUnsafe<Array<{ author: string | null; count: bigint }>>(
+            `
+            SELECT author, COUNT(*)::bigint as count
+            FROM public.content_submissions
+            WHERE created_at >= NOW() - INTERVAL '7 days'
+            GROUP BY author
+            ORDER BY count DESC
+            LIMIT 5
+            `
+          ),
           // Total content count (proxy for total users)
           prisma.content.count(),
         ]);
+
+        // Transform results to match expected structure
+        const recentSubmissionsCount = Number(recentSubmissionsCountResult[0]?.count ?? 0);
+        const monthSubmissions = monthSubmissionsResult.map((r) => ({
+          status: r.status,
+          _count: { id: Number(r.count) },
+        }));
+        const topContributors = topContributorsResult.map((r) => ({
+          author: r.author,
+          _count: { id: Number(r.count) },
+        }));
 
         // OPTIMIZATION: Calculate month submissions count and success rate from groupBy results
         // groupBy already provides counts per status, so we can sum them directly
@@ -637,13 +611,11 @@ export class MiscService extends BasePrismaService {
 
   async updateWebhookEventStatus(webhookId: string): Promise<void> {
     try {
-      await prisma.webhook_events.update({
-        where: { id: webhookId },
-        data: {
-          processed: true,
-          processed_at: new Date(),
-        },
-      });
+      // Use database NOW() for timestamp (eliminates new Date() call)
+      await prisma.$executeRawUnsafe(
+        `UPDATE public.webhook_events SET processed = true, processed_at = NOW() WHERE id = $1::uuid`,
+        webhookId
+      );
     } catch (error) {
       logRpcError(error, {
         rpcName: 'webhook_events.update',
@@ -897,26 +869,32 @@ export class MiscService extends BasePrismaService {
    * 
    * @returns Array of due sequence email items
    */
-  async getDueSequenceEmails(): Promise<GetDueSequenceEmailsReturns> {
-    const now = new Date();
-    
-    // Fetch due emails (step 1)
-    const dueSchedules = await prisma.email_sequence_schedule.findMany({
-      where: {
-        sequence_id: 'onboarding',
-        processed: false,
-        due_at: {
-          lte: now,
-        },
-      },
-      orderBy: {
-        due_at: 'asc',
-      },
-      take: 100, // Safety limit: max 100 emails per batch
-    });
+  async getDueSequenceEmails(): Promise<DueSequenceEmailItem[]> {
+    // Use database NOW() for date comparison (eliminates new Date() call)
+    // More efficient: database handles date comparison natively
+    const dueSchedules = await prisma.$queryRawUnsafe<Array<{
+      id: string;
+      sequence_id: string;
+      email: string;
+      due_at: Date;
+      processed: boolean;
+      step: number;
+    }>>(
+      `
+      SELECT id, sequence_id, email, due_at, processed, step
+      FROM public.email_sequence_schedule
+      WHERE sequence_id = 'onboarding'
+        AND processed = false
+        AND due_at <= NOW()
+      ORDER BY due_at ASC
+      LIMIT 100
+      `
+    );
 
     if (dueSchedules.length === 0) {
-      return [] as unknown as GetDueSequenceEmailsReturns;
+      // Return empty array matching DueSequenceEmailItem[] type
+      const emptyResult: DueSequenceEmailItem[] = [];
+      return emptyResult;
     }
 
     // Fetch active sequences for the emails (step 2)
@@ -938,15 +916,16 @@ export class MiscService extends BasePrismaService {
     const activeEmailsSet = new Set(activeSequences.map((s) => s.email));
 
     // Filter schedules to only those with active sequences and transform to match RPC return structure
+    // DueSequenceEmailItem has all fields nullable
     const result: DueSequenceEmailItem[] = dueSchedules
       .filter((schedule) => activeEmailsSet.has(schedule.email))
       .map((schedule) => ({
-        id: schedule.id,
-        email: schedule.email,
-        step: schedule.step,
+        id: schedule.id ?? null,
+        email: schedule.email ?? null,
+        step: schedule.step ?? null,
       }));
     
-    return result as unknown as GetDueSequenceEmailsReturns;
+    return result;
   }
 
   /**
@@ -970,9 +949,15 @@ export class MiscService extends BasePrismaService {
         },
         data: {
           current_step: expectedStep + 1,
-          updated_at: new Date(),
+          // Use database NOW() for updated_at (eliminates new Date() call)
+          // Note: Prisma doesn't support SQL functions in data, so we use raw SQL for the entire update
         },
       });
+      // Update updated_at separately using raw SQL with NOW() (within transaction)
+      await tx.$executeRawUnsafe(
+        `UPDATE public.email_sequences SET updated_at = NOW() WHERE id = $1::uuid`,
+        sequenceId
+      );
 
       // Step 2: Fetch updated record (in same transaction)
       if (result.count === 0) {
@@ -991,12 +976,11 @@ export class MiscService extends BasePrismaService {
    * Updates email sequence last_sent_at timestamp (from EmailService)
    */
   async updateEmailSequenceLastSent(sequenceId: string): Promise<void> {
-    await prisma.email_sequences.update({
-      where: { id: sequenceId },
-      data: {
-        last_sent_at: new Date(),
-      },
-    });
+    // Use database NOW() for timestamp (eliminates new Date() call)
+    await prisma.$executeRawUnsafe(
+      `UPDATE public.email_sequences SET last_sent_at = NOW() WHERE id = $1::uuid`,
+      sequenceId
+    );
   }
 
   /**

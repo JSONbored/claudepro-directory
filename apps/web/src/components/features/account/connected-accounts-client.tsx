@@ -8,6 +8,7 @@
 import type { oauth_provider } from '@heyclaude/data-layer/prisma';
 import type { GetUserIdentitiesReturns } from '@heyclaude/database-types/postgres-types';
 import { unlinkOAuthProvider } from '@heyclaude/web-runtime/actions/unlink-oauth-provider';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import {
   AlertTriangle,
   CheckCircle,
@@ -27,7 +28,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@heyclaude/web-runtime/ui';
-import { useBoolean, useSafeAction } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
+import { useSafeAction } from '@heyclaude/web-runtime/hooks/use-safe-action';
 import { type ComponentType, useState } from 'react';
 
 type Identity = NonNullable<GetUserIdentitiesReturns['identities']>[number];
@@ -185,7 +187,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
                     <p>{identity.email ?? 'No email'}</p>
                     <p className="text-xs">
                       {identity.last_sign_in_at
-                        ? `Last sign-in: ${new Date(identity.last_sign_in_at).toLocaleDateString()}`
+                        ? `Last sign-in: ${formatDate(identity.last_sign_in_at)}`
                         : 'Never signed in'}
                     </p>
                   </div>

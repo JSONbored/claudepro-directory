@@ -24,21 +24,18 @@
 import 'server-only';
 import { type content_category } from '@heyclaude/data-layer/prisma';
 import { APP_CONFIG } from '@heyclaude/shared-runtime';
-import { isValidCategory, VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import {
-  contentDetailQuerySchema,
-  createApiOptionsHandler,
+  createOptionsHandler as createApiOptionsHandler,
   createFormatHandlerRoute,
-  getOnlyCorsHeaders,
-  getVersionedRoute,
-  getWithAcceptCorsHeaders,
-  jsonResponse,
-  markdownResponse,
-  notFoundResponse,
-  textResponse,
   type FormatHandlerConfig,
   type RouteHandlerContext,
-} from '@heyclaude/web-runtime/server';
+} from '@heyclaude/web-runtime/api/route-factory';
+import { VALID_CATEGORIES } from '@heyclaude/web-runtime/utils/category-validation';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import { getOnlyCorsHeaders, getWithAcceptCorsHeaders, jsonResponse, markdownResponse, textResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { notFoundResponse } from '@heyclaude/web-runtime/server/not-found-response';
+import { contentDetailQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import { NextResponse } from 'next/server';
 
 const SITE_URL = APP_CONFIG.url;
@@ -203,7 +200,7 @@ async function handleStorageFormat(
     });
   }
 
-  const { createSupabaseAnonClient } = await import('@heyclaude/web-runtime/server');
+  const { createSupabaseAnonClient } = await import('@heyclaude/web-runtime/supabase/server-anon');
   const storageClient = createSupabaseAnonClient();
   const { data: { publicUrl } } = storageClient.storage.from(bucket).getPublicUrl(objectPath);
   logger.info({ bucket, objectPath, publicUrl, redirect: true }, 'Redirecting to Supabase Storage public URL');

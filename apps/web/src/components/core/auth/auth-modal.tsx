@@ -32,11 +32,11 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
-import { useIsClient } from '@heyclaude/web-runtime/hooks';
+import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
 import { motion } from 'motion/react';
 import { AnimatePresence } from '@heyclaude/web-runtime/ui';
 import { useEffect, useMemo, useState } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 import { NewsletterOptInTile } from '@/src/components/core/auth/newsletter-opt-in-tile';
 import { OAuthProviderButton } from '@/src/components/core/auth/oauth-provider-button';

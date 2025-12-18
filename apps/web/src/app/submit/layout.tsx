@@ -1,4 +1,4 @@
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { type Metadata } from 'next';
 import { type ReactNode } from 'react';
 

@@ -141,12 +141,12 @@ export class NewsletterService extends BasePrismaService {
 
   async updateLastEmailSentAt(email: string): Promise<void> {
     try {
-      await prisma.newsletter_subscriptions.update({
-        where: { email },
-        data: {
-          last_email_sent_at: new Date(),
-        },
-      });
+      // Use database NOW() for timestamp (eliminates new Date() call)
+      // More efficient: database handles timestamp natively
+      await prisma.$executeRawUnsafe(
+        `UPDATE public.newsletter_subscriptions SET last_email_sent_at = NOW() WHERE email = $1`,
+        email
+      );
     } catch (error) {
       logRpcError(error, {
         rpcName: 'newsletter_subscriptions.update',
@@ -159,12 +159,11 @@ export class NewsletterService extends BasePrismaService {
 
   async updateLastActiveAt(email: string): Promise<void> {
     try {
-      await prisma.newsletter_subscriptions.update({
-        where: { email },
-        data: {
-          last_active_at: new Date(),
-        },
-      });
+      // Use database NOW() for timestamp (eliminates new Date() call)
+      await prisma.$executeRawUnsafe(
+        `UPDATE public.newsletter_subscriptions SET last_active_at = NOW() WHERE email = $1`,
+        email
+      );
     } catch (error) {
       logRpcError(error, {
         rpcName: 'newsletter_subscriptions.update',
@@ -198,13 +197,12 @@ export class NewsletterService extends BasePrismaService {
 
   async updateEngagementScore(email: string, engagementScore: number): Promise<void> {
     try {
-      await prisma.newsletter_subscriptions.update({
-        where: { email },
-        data: {
-          engagement_score: engagementScore,
-          updated_at: new Date(),
-        },
-      });
+      // Use database NOW() for updated_at (eliminates new Date() call)
+      await prisma.$executeRawUnsafe(
+        `UPDATE public.newsletter_subscriptions SET engagement_score = $1, updated_at = NOW() WHERE email = $2`,
+        engagementScore,
+        email
+      );
     } catch (error) {
       logRpcError(error, {
         rpcName: 'newsletter_subscriptions.update',
@@ -223,14 +221,11 @@ export class NewsletterService extends BasePrismaService {
    */
   async unsubscribeWithTimestamp(email: string): Promise<void> {
     try {
-      await prisma.newsletter_subscriptions.update({
-        where: { email },
-        data: {
-          unsubscribed_at: new Date(),
-          updated_at: new Date(),
-          status: 'unsubscribed', // Combined: update status in same query
-        },
-      });
+      // Use database NOW() for timestamps (eliminates new Date() calls)
+      await prisma.$executeRawUnsafe(
+        `UPDATE public.newsletter_subscriptions SET unsubscribed_at = NOW(), updated_at = NOW(), status = 'unsubscribed' WHERE email = $1`,
+        email
+      );
     } catch (error) {
       logRpcError(error, {
         rpcName: 'newsletter_subscriptions.update',

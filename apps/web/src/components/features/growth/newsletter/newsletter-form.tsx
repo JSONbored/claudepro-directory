@@ -2,8 +2,9 @@
 
 import type { newsletter_source } from '@heyclaude/data-layer/prisma';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
-import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
-import { useConfetti, useNewsletter } from '@heyclaude/web-runtime/hooks';
+import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/config/marketing-client';
+import { useConfetti } from '@heyclaude/web-runtime/hooks/use-confetti';
+import { useNewsletter } from '@heyclaude/web-runtime/hooks/use-newsletter';
 import { ArrowRight, Loader2 } from '@heyclaude/web-runtime/icons';
 import {
   cn,

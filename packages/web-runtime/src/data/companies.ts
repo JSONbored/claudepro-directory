@@ -1,5 +1,4 @@
-'use server';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import 'server-only';
 import {
   type GetCompaniesListReturns,
   type GetCompanyAdminProfileReturns,
@@ -7,10 +6,8 @@ import {
   type SearchUnifiedArgs,
 } from '@heyclaude/database-types/postgres-types';
 
-import { createCachedDataFunction, generateResourceTags } from './cached-data-factory.ts';
+import { createDataFunction } from './cached-data-factory.ts';
 import { normalizeRpcResult } from './content-helpers.ts';
-
-const JOBS_CATEGORY: content_category = 'jobs';
 
 type GetCompanyAdminProfileReturn = GetCompanyAdminProfileReturns;
 
@@ -26,15 +23,12 @@ type GetCompanyAdminProfileReturn = GetCompanyAdminProfileReturns;
  * - Per-company cache keys (companyId in cache tag)
  * - Not prerendered (runs at request time)
  */
-export const getCompanyAdminProfile = createCachedDataFunction<
+export const getCompanyAdminProfile = createDataFunction<
   string,
   GetCompanyAdminProfileReturn[number]
 >({
   serviceKey: 'companies',
   methodName: 'getCompanyAdminProfile',
-  cacheMode: 'private',
-  cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
-  cacheTags: (companyId) => [`company-admin-${companyId}`],
   module: 'data/companies',
   operation: 'getCompanyAdminProfile',
   validate: (companyId) => Boolean(companyId),
@@ -51,12 +45,9 @@ export const getCompanyAdminProfile = createCachedDataFunction<
  * Uses 'use cache' to cache company profiles. This data is public and same for all users.
  * Company profiles change periodically, so we use the 'long' cacheLife profile.
  */
-export const getCompanyProfile = createCachedDataFunction<string, GetCompanyProfileReturns>({
+export const getCompanyProfile = createDataFunction<string, GetCompanyProfileReturns>({
   serviceKey: 'companies',
   methodName: 'getCompanyProfile',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: (slug) => generateResourceTags('companies', slug, [JOBS_CATEGORY]),
   module: 'data/companies',
   operation: 'getCompanyProfile',
   transformArgs: (slug) => ({ p_slug: slug }),
@@ -72,15 +63,12 @@ export async function getCompaniesList(
   limit = 50,
   offset = 0
 ): Promise<GetCompaniesListReturns> {
-  const cachedFn = createCachedDataFunction<
+  const cachedFn = createDataFunction<
     { limit: number; offset: number },
     GetCompaniesListReturns
   >({
     serviceKey: 'companies',
     methodName: 'getCompaniesList',
-    cacheMode: 'public',
-    cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-    cacheTags: () => generateResourceTags('companies', undefined, [JOBS_CATEGORY]),
     module: 'data/companies',
     operation: 'getCompaniesList',
     transformArgs: (args) => ({
@@ -108,15 +96,12 @@ export interface CompanySearchResult {
  * Fetch company search results (internal cached function)
  * Uses search service to find companies matching query
  */
-const fetchCompanySearchResults = createCachedDataFunction<
+const fetchCompanySearchResults = createDataFunction<
   { query: string; limit: number },
   CompanySearchResult[]
 >({
   serviceKey: 'search',
   methodName: 'searchUnified',
-  cacheMode: 'public',
-  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTags: () => generateResourceTags('companies', undefined, ['company-search']),
   module: 'data/companies',
   operation: 'fetchCompanySearchResults',
   transformArgs: (args) =>

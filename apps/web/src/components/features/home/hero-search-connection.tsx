@@ -8,7 +8,7 @@
  */
 
 import { createContext, useContext, useState, type ReactNode } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import type { UnifiedSearchProps } from '@heyclaude/web-runtime/types/component.types';
 
 interface HeroSearchConnectionContextValue {

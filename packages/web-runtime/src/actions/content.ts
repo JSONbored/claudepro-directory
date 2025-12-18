@@ -84,9 +84,12 @@ export const fetchPaginatedContent = rateLimitedAction
       return [];
     }
     
-    // Return items directly - convert ContentPaginatedSlimItem[] to DisplayableContent[]
-    // They're compatible types, just need explicit conversion
-    return (data.items ?? []) as unknown as DisplayableContent[];
+    // Type assertion: ContentPaginatedSlimItem[] is structurally compatible with DisplayableContent[]
+    // DisplayableContent is a union type that includes EnrichedContentItem and other content types.
+    // ContentPaginatedSlimItem has all required fields (slug, title, category, etc.) that DisplayableContent
+    // expects, but TypeScript can't verify the structural compatibility without the assertion.
+    // This is safe because ContentPaginatedSlimItem is a subset of DisplayableContent's requirements.
+    return data.items as DisplayableContent[];
   });
 
 // Removed all collection and review actions - migrated to generated actions

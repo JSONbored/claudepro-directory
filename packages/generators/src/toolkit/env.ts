@@ -1,37 +1,15 @@
 /**
  * Shared environment variable loading utility.
- * Only attempts to read from .env.local in local dev (no implicit Vercel CLI usage).
+ * For local development: Use Infisical (run commands with `infisical run --env=dev -- <command>`).
+ * In CI/Build (Vercel/GitHub): Environment variables are provided by platform.
+ * 
+ * This utility does NOT load .env files - all secrets must come from Infisical or platform env vars.
  */
-
-import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { logger } from './logger.ts';
 
-const ENV_FILES = ['.env.edge.local', '.env.local', '.env.db.local', '.env'];
-
-function parseEnvContent(content: string): Record<string, string> {
-  const result: Record<string, string> = {};
-  const lines = content.split('\n');
-  
-  for (const line of lines) {
-    const trimmedLine = line.trim();
-    // Skip empty lines and comments
-    if (!trimmedLine || trimmedLine.startsWith('#')) continue;
-    
-    const [key, ...values] = trimmedLine.split('=');
-    const trimmedKey = key?.trim();
-    if (trimmedKey) {
-      // Remove surrounding quotes and trim value
-      const rawValue = values.join('=');
-      result[trimmedKey] = rawValue.replaceAll(/^["']|["']$/g, '').trim();
-    }
-  }
-  
-  return result;
-}
 
 export async function ensureEnvVars(
   requiredVars: string[],
@@ -41,13 +19,19 @@ export async function ensureEnvVars(
   const missingOptionalVars = optionalVars.filter((v) => !process.env[v]);
 
   if (missingVars.length === 0) {
+    const source = process.env['VERCEL'] || process.env['CI']
+      ? 'Platform (Vercel/CI)'
+      : 'Infisical';
     if (missingOptionalVars.length > 0) {
       logger.info(
-        `✅ Required environment variables loaded (${missingOptionalVars.length} optional vars missing)`,
-        { command: 'env', missingOptionalVarsCount: missingOptionalVars.length }
+        `✅ Required environment variables loaded from ${source} (${missingOptionalVars.length} optional vars missing)`,
+        { command: 'env', missingOptionalVarsCount: missingOptionalVars.length, source }
       );
     } else {
-      logger.info('✅ Environment variables already loaded', { command: 'env' });
+      logger.info(`✅ Environment variables already loaded from ${source}`, {
+        command: 'env',
+        source,
+      });
     }
     return;
   }
@@ -61,9 +45,9 @@ export async function ensureEnvVars(
   if (isCI) {
     const environment = process.env['VERCEL']
       ? 'vercel'
-      : (process.env['GITHUB_ACTIONS']
+      : process.env['GITHUB_ACTIONS']
         ? 'github'
-        : 'ci');
+        : 'ci';
     logger.warn(`⚠️  Missing environment variables in CI/Build: ${missingVars.join(', ')}`, {
       command: 'env',
       missingVarsCount: missingVars.length,
@@ -74,44 +58,17 @@ export async function ensureEnvVars(
     );
   }
 
-  logger.info(`📥 Loading environment variables (missing: ${missingVars.join(', ')})...`, {
-    command: 'env',
-    missingVarsCount: missingVars.length,
-  });
-
-  let loadedFiles = 0;
-  for (const file of ENV_FILES) {
-    if (existsSync(file)) {
-      try {
-        const content = await readFile(file, 'utf8');
-        const envVars = parseEnvContent(content);
-
-        // Only set if not already set (priority: process.env > earlier files > later files)
-        for (const [key, value] of Object.entries(envVars)) {
-          process.env[key] ??= value;
-        }
-        loadedFiles++;
-      } catch (error) {
-        const errorObj = normalizeError(error, 'Failed to read env file');
-        logger.warn(`Failed to read ${file}`, { command: 'env', file, err: errorObj });
-      }
+  // Local development: Must use Infisical (no .env file fallback)
+  logger.error(
+    `❌ Missing required environment variables: ${missingVars.join(', ')}`,
+    {
+      command: 'env',
+      missingVarsCount: missingVars.length,
     }
-  }
-
-  if (loadedFiles === 0) {
-    logger.warn(
-      'No .env files found (.env.edge.local, .env.local, .env.db.local). Export the required variables in your shell.',
-      { command: 'env' }
-    );
-  }
-
-  // Re-check missing vars
-  const stillMissing = requiredVars.filter((v) => !process.env[v]);
-  if (stillMissing.length > 0) {
-    throw new Error(
-      `Missing required environment variables after loading env files: ${stillMissing.join(', ')}`
-    );
-  }
-
-  logger.info('✅ Environment variables loaded', { command: 'env' });
+  );
+  throw new Error(
+    `Missing required environment variables: ${missingVars.join(', ')}. ` +
+      `For local development, use Infisical: infisical run --env=dev -- <command>. ` +
+      `Add missing secrets to Infisical: infisical secrets set <SECRET_NAME> "<value>" --env=dev`
+  );
 }

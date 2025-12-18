@@ -14,7 +14,7 @@ import { motion, useScroll, useMotionValueEvent } from 'motion/react';
 import { AnimatePresence } from '@heyclaude/web-runtime/ui';
 import { useScrollDirection, cn } from '@heyclaude/web-runtime/ui';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 
 interface ScrollAwareTocProps {
