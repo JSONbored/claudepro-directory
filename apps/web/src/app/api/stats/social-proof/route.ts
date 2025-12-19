@@ -28,8 +28,10 @@
 
 import 'server-only';
 
-import { type GetSocialProofStatsReturnRow } from '@heyclaude/database-types/postgres-types';
-import { createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext } from '@heyclaude/web-runtime/api/route-factory';
+import { type GetSocialProofStatsReturnRow } from '@heyclaude/data-layer';
+import {
+  createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 import { connection } from 'next/server';
@@ -40,12 +42,21 @@ import { connection } from 'next/server';
  * Returns aggregated social proof metrics: top contributors this week (up to 5 usernames),
  * submissions count in the past 7 days, success rate percentage over the past 30 days,
  * and total user count. Includes ETag and Last-Modified headers for conditional requests.
- * 
+ *
  * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
+ * @param result
+ * @param _query
+ * @param _body
+ * @param ctx
  */
-const responseHandler = async (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext<unknown, unknown>) => {
+const responseHandler = async (
+  result: unknown,
+  _query: unknown,
+  _body: unknown,
+  ctx: RouteHandlerContext
+) => {
   const { logger } = ctx;
-  
+
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
   await connection();
 
@@ -107,6 +118,7 @@ export const GET = createCachedApiRoute({
     tags: ['stats', 'social-proof'],
   },
   operation: 'SocialProofStatsAPI',
+  responseHandler,
   route: getVersionedRoute('stats/social-proof'),
   service: {
     methodArgs: () => [],
@@ -118,8 +130,7 @@ export const GET = createCachedApiRoute({
     type SocialProofStatsRow = GetSocialProofStatsReturnRow;
 
     const data = result ?? [];
-    const row =
-      Array.isArray(data) && data.length > 0 ? (data[0] as SocialProofStatsRow) : null;
+    const row = Array.isArray(data) && data.length > 0 ? (data[0] as SocialProofStatsRow) : null;
 
     if (!row) {
       return {
@@ -137,12 +148,13 @@ export const GET = createCachedApiRoute({
       },
       submissions: row.submission_count ?? 0,
       successRate:
-        row.success_rate !== null && row.success_rate !== undefined ? Number(row.success_rate) : null,
+        row.success_rate !== null && row.success_rate !== undefined
+          ? Number(row.success_rate)
+          : null,
       totalUsers: row.total_users ?? null,
     };
   },
-  responseHandler,
-} as unknown as Parameters<typeof createCachedApiRoute>[0]);
+} as Parameters<typeof createCachedApiRoute>[0]);
 
 /**
  * OPTIONS handler for CORS preflight requests

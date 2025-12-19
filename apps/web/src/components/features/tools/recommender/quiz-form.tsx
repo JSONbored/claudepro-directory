@@ -29,7 +29,7 @@ import { QuizProgress } from './quiz-progress';
 
 import { ExperienceLevel, FocusAreaType, IntegrationType, UseCaseType } from '@heyclaude/data-layer/prisma';
 import type { experience_level, focus_area_type, integration_type, use_case_type } from '@heyclaude/data-layer/prisma';
-import type { GetQuizConfigurationReturns } from '@heyclaude/database-types/postgres-types';
+import type { GetQuizConfigurationReturns } from '@heyclaude/data-layer';
 
 // Use enum values directly from Prisma enum objects
 const EXPERIENCE_LEVEL_VALUES = Object.values(ExperienceLevel) as readonly experience_level[];

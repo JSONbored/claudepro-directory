@@ -10,7 +10,6 @@
  * ## What Belongs Here
  * - Deno-specific utilities and type definitions
  * - Supabase Edge Function middleware and routing
- * - PGMQ client for queue operations
  * - Storage utilities (upload, proxy)
  *
  * ## What Does NOT Belong Here (Migrated to web-runtime/shared-runtime)
@@ -41,9 +40,6 @@ export * from './clients/supabase.ts';
 export * from './utils/storage/client.ts';
 export * from './utils/storage/upload.ts';
 export * from './utils/storage/proxy.ts';
-
-// PGMQ (Queue Operations)
-export * from './utils/pgmq-client.ts';
 
 // Integrations (only http-client remains)
 export * from './utils/integrations/http-client.ts';

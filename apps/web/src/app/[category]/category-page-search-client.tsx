@@ -11,10 +11,10 @@
 
 import { type content_category } from '@heyclaude/data-layer/prisma';
 import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
-import { SearchProvider } from '@heyclaude/web-runtime/search/context/search-provider';
 import { SearchBar } from '@heyclaude/web-runtime/search/components/search-bar';
 import { SearchFilters } from '@heyclaude/web-runtime/search/components/search-filters';
 import { SearchResults } from '@heyclaude/web-runtime/search/components/search-results';
+import { SearchProvider } from '@heyclaude/web-runtime/search/context/search-provider';
 import { useSearchAPI } from '@heyclaude/web-runtime/search/hooks/use-search-api';
 import { type FilterState } from '@heyclaude/web-runtime/types/component.types';
 import { usePathname } from 'next/navigation';
@@ -143,7 +143,7 @@ export function CategoryPageSearchClient({
             <div className="text-muted-foreground p-8 text-center">Loading search results...</div>
           }
         >
-          <SearchResults showActions showCategory onAuthRequired={handleAuthRequired} />
+          <SearchResults onAuthRequired={handleAuthRequired} showActions showCategory />
         </Suspense>
       </div>
     </SearchProvider>

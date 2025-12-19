@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { type GetQuizConfigurationReturns } from '@heyclaude/database-types/postgres-types';
+import { type GetQuizConfigurationReturns } from '@heyclaude/data-layer';
 
 import { createDataFunction } from './cached-data-factory.ts';
 
@@ -17,9 +17,9 @@ export type QuizConfigurationResult = GetQuizConfigurationReturns;
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Not prerendered (runs at request time)
  */
-export const getQuizConfiguration = createDataFunction<void, QuizConfigurationResult | null>({
-  serviceKey: 'misc', // Consolidated: QuizService methods moved to MiscService
+export const getQuizConfiguration = createDataFunction<void, null | QuizConfigurationResult>({
   methodName: 'getQuizConfiguration',
   module: 'data/quiz',
   operation: 'getQuizConfiguration',
+  serviceKey: 'misc', // Consolidated: QuizService methods moved to MiscService
 });

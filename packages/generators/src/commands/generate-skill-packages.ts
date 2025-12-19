@@ -3,6 +3,7 @@ import { performance } from 'node:perf_hooks';
 import { transformSkillToMarkdown, type SkillRow } from '@heyclaude/web-runtime/transformers/skill-to-md';
 import archiver from 'archiver';
 
+import { prisma } from '@heyclaude/data-layer';
 import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.ts';
 import { ensureEnvVars } from '../toolkit/env.ts';
 import { logger } from '../toolkit/logger.ts';
@@ -32,7 +33,7 @@ export async function runGenerateSkillPackages(): Promise<void> {
   const startTime = performance.now();
 
   logger.info('\n📊 Loading skills from database...');
-  const skills = await loadAllSkillsFromDatabase(supabase);
+  const skills = await loadAllSkillsFromDatabase();
   logger.info(`✅ Found ${skills.length} skills in database\n`, { skillCount: skills.length });
 
   logger.info('🔍 Computing content hashes and filtering changed skills...');
@@ -149,20 +150,17 @@ async function generateZipBuffer(slug: string, skillMdContent: string): Promise<
   });
 }
 
-async function loadAllSkillsFromDatabase(
-  supabase: ReturnType<typeof createServiceRoleClient>
-): Promise<SkillRow[]> {
-  const { data, error } = await supabase
-    .from('content')
-    .select('*')
-    .eq('category', 'skills')
-    .order('slug');
+async function loadAllSkillsFromDatabase(): Promise<SkillRow[]> {
+  const skills = await prisma.content.findMany({
+    where: {
+      category: 'skills',
+    },
+    orderBy: {
+      slug: 'asc',
+    },
+  });
 
-  if (error) {
-    throw new Error(`Failed to fetch skills from database: ${error.message}`);
-  }
-
-  return data as SkillRow[];
+  return skills as SkillRow[];
 }
 
 async function uploadToStorage(
@@ -186,14 +184,14 @@ async function uploadToStorage(
     data: { publicUrl },
   } = supabase.storage.from('skills').getPublicUrl(fileName);
 
-  const { error: updateError } = await supabase
-    .from('content')
-    .update({ storage_url: publicUrl })
-    .eq('id', skill.id);
-
-  if (updateError) {
-    throw new Error(`Database update failed: ${updateError.message}`);
-  }
+  await prisma.content.update({
+    where: {
+      id: skill.id,
+    },
+    data: {
+      storage_url: publicUrl,
+    },
+  });
 
   return publicUrl;
 }

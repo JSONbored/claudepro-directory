@@ -24,10 +24,8 @@ export type ContactCommandsRow = ContactCommandResult | null;
  * Contact commands change periodically, so we use the 'long' cacheLife profile.
  */
 export const fetchContactCommands = createDataFunction<void, ContactCommandsRow>({
-  serviceKey: 'misc',
   methodName: 'getContactCommands',
   module: 'data/contact',
-  operation: 'fetchContactCommands',
   normalizeResult: (result) => {
     const commands = result as ContactCommandResult[] | undefined;
     if (!commands || !Array.isArray(commands) || commands.length === 0) {
@@ -35,4 +33,6 @@ export const fetchContactCommands = createDataFunction<void, ContactCommandsRow>
     }
     return commands[0] ?? null;
   },
+  operation: 'fetchContactCommands',
+  serviceKey: 'misc',
 });

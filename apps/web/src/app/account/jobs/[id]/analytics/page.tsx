@@ -2,15 +2,13 @@
  * Job Analytics Page - Display view/click metrics for job postings.
  */
 
-import {
-  generatePageMetadata,
-} from '@heyclaude/web-runtime/seo';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserJobById } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Button,
   Card,

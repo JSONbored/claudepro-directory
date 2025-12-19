@@ -11,8 +11,9 @@
  * even though Prisma-generated files are excluded from TypeScript compilation.
  */
 
-import { writeFile, readFile, access } from 'node:fs/promises';
-import { join } from 'node:path';
+import { writeFile, readFile, access, readdir } from 'node:fs/promises';
+import { join, dirname } from 'node:path';
+import { stat } from 'node:fs/promises';
 
 const PRISMA_INDEX_PATH = join(
   process.cwd(),
@@ -86,6 +87,122 @@ async function fixPjtgImport() {
   }
 }
 
+/**
+ * Fix Prisma namespace type references in Zod schema files
+ * 
+ * Prisma uses inconsistent casing for namespace types:
+ * - AggregateArgs: PascalCase (e.g., AnnouncementsAggregateArgs)
+ * - CountArgs: camelCase (e.g., announcementsCountArgs)
+ * - GroupByArgs: camelCase (e.g., announcementsGroupByArgs)
+ * 
+ * prisma-zod-generator generates camelCase for all types, so we need to fix
+ * only AggregateArgs to PascalCase, while keeping CountArgs and GroupByArgs as camelCase.
+ */
+async function fixPrismaNamespaceTypeCasing() {
+  const zodSchemasDir = join(
+    process.cwd(),
+    'packages/database-types/src/prisma/zod/schemas'
+  );
+
+  try {
+    // Recursively find all .ts files in the schemas directory
+    async function findTsFiles(dir: string): Promise<string[]> {
+      const files: string[] = [];
+      try {
+        const entries = await readdir(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          const fullPath = join(dir, entry.name);
+          if (entry.isDirectory()) {
+            files.push(...await findTsFiles(fullPath));
+          } else if (entry.isFile() && entry.name.endsWith('.ts')) {
+            files.push(fullPath);
+          }
+        }
+      } catch (error) {
+        // Directory might not exist, that's okay
+      }
+      return files;
+    }
+
+    const schemaFiles = await findTsFiles(zodSchemasDir);
+    let fixedCount = 0;
+    let removedUnusedImports = 0;
+
+    for (const filePath of schemaFiles) {
+      try {
+        let content = await readFile(filePath, 'utf-8');
+        let modified = false;
+
+        // Fix ONLY AggregateArgs to PascalCase (Prisma uses PascalCase for AggregateArgs)
+        // Keep CountArgs and GroupByArgs as camelCase (Prisma uses camelCase for these)
+        // Pattern: Prisma.modelNameAggregateArgs -> Prisma.ModelNameAggregateArgs
+        const aggregateArgsPattern = /Prisma\.([a-z][a-zA-Z0-9_]*)AggregateArgs/g;
+        
+        const fixedContent = content.replace(aggregateArgsPattern, (match, modelName) => {
+          // Convert camelCase model name to PascalCase
+          // Handle snake_case models (e.g., webhook_events -> Webhook_events)
+          // Handle camelCase models (e.g., announcements -> Announcements)
+          const pascalCaseName = modelName
+            .split('_')
+            .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join('_');
+          
+          const fixed = `Prisma.${pascalCaseName}AggregateArgs`;
+          if (fixed !== match) {
+            modified = true;
+            return fixed;
+          }
+          return match;
+        });
+
+        if (modified) {
+          content = fixedContent;
+          fixedCount++;
+        }
+
+        // Remove unused Prisma imports
+        // Check if Prisma is imported but not used in the file
+        const hasPrismaImport = /import\s+(type\s+)?\{?\s*Prisma\s*\}?\s+from/.test(content);
+        if (hasPrismaImport) {
+          // Check if Prisma is actually used (not just in comments)
+          const prismaUsagePattern = /\bPrisma\./;
+          const hasPrismaUsage = prismaUsagePattern.test(content);
+          
+          if (!hasPrismaUsage) {
+            // Remove the unused import
+            content = content.replace(
+              /import\s+(type\s+)?\{?\s*Prisma\s*\}?\s+from\s+['"][^'"]+['"];?\s*\n?/g,
+              ''
+            );
+            // Also remove type-only imports
+            content = content.replace(
+              /import\s+type\s+\{\s*Prisma\s*\}\s+from\s+['"][^'"]+['"];?\s*\n?/g,
+              ''
+            );
+            modified = true;
+            removedUnusedImports++;
+          }
+        }
+
+        if (modified) {
+          await writeFile(filePath, content, 'utf-8');
+        }
+      } catch (error) {
+        console.warn(`⚠️  Could not process ${filePath}:`, error);
+      }
+    }
+
+    if (fixedCount > 0 || removedUnusedImports > 0) {
+      console.log(`✅ Fixed Prisma AggregateArgs casing in ${fixedCount} files`);
+      console.log(`✅ Removed ${removedUnusedImports} unused Prisma imports`);
+    } else {
+      console.log('✅ No Prisma namespace type casing issues found');
+    }
+  } catch (error) {
+    console.warn('⚠️  Could not fix Prisma namespace type casing:', error);
+  }
+}
+
 async function verifyGeneratorOutputs() {
   const checks = [
     { path: PRISMA_INDEX_PATH, name: 'Prisma index' },
@@ -121,6 +238,8 @@ async function main() {
     console.log('✅ Created/updated packages/database-types/src/prisma/index.ts');
     
     await fixPjtgImport();
+    
+    await fixPrismaNamespaceTypeCasing();
     
     await verifyGeneratorOutputs();
   } catch (error) {

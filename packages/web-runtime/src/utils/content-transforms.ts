@@ -6,11 +6,8 @@
  */
 
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import {
-  type GetPopularContentReturns,
-  type GetRecentContentReturns,
-  type GetTrendingMetricsWithContentReturns,
-} from '@heyclaude/database-types/postgres-types';
+import { type GetPopularContentReturns, type GetTrendingMetricsWithContentReturns } from '@heyclaude/database-types/postgres-types';
+import { type GetRecentContentReturns } from '@heyclaude/data-layer';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import {
   type DisplayableContent,
@@ -81,7 +78,7 @@ export function mapTrendingMetrics(
   defaultCategory: content_category = 'agents'
 ): DisplayableContent[] {
   if (rows.length === 0) return [];
-  return rows.map((row, index) => {
+  return rows.map((row: GetTrendingMetricsWithContentReturns[number], index: number) => {
     const resolvedCategory = category ?? row.category;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : defaultCategory;
     return toHomepageContentItem({
@@ -113,7 +110,7 @@ export function mapPopularContent(
   defaultCategory: content_category = 'agents'
 ): DisplayableContent[] {
   if (rows.length === 0) return [];
-  return rows.map((row, index) => {
+  return rows.map((row: GetPopularContentReturns[number], index: number) => {
     const resolvedCategory = category ?? row.category;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : defaultCategory;
     return toHomepageContentItem({
@@ -144,15 +141,16 @@ export function mapRecentContent(
   defaultCategory: content_category = 'agents'
 ): DisplayableContent[] {
   if (rows.length === 0) return [];
-  return rows.map((row, index) => {
+  return rows.map((row: GetRecentContentReturns[number], index: number) => {
     const resolvedCategory = category ?? row.category;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : defaultCategory;
     return toHomepageContentItem({
       author: row.author ?? 'Community',
       category: validCategory,
       // Use static fallback timestamp instead of new Date() (build-time safe)
-      created_at: row.created_at ?? '1970-01-01T00:00:00.000Z',
-      date_added: row.created_at ?? '1970-01-01T00:00:00.000Z',
+      // contentModel has created_at as Date, convert to ISO string
+      created_at: row.created_at instanceof Date ? row.created_at.toISOString() : (row.created_at ?? '1970-01-01T00:00:00.000Z'),
+      date_added: row.date_added instanceof Date ? row.date_added.toISOString() : (row.date_added ?? row.created_at instanceof Date ? row.created_at.toISOString() : (row.created_at ?? '1970-01-01T00:00:00.000Z')),
       description: row.description ?? '',
       featuredRank: index + 1,
       slug: row.slug ?? '',

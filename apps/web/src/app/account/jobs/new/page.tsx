@@ -1,8 +1,8 @@
 import { type CreateJobWithPaymentResult } from '@heyclaude/database-types/postgres-types';
-import { type CreateJobInput, createJob } from '@heyclaude/web-runtime/actions/jobs-crud';
+import { createJob, type CreateJobInput } from '@heyclaude/web-runtime/actions/jobs-crud';
+import { getPaymentPlanCatalog } from '@heyclaude/web-runtime/data/payments';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
-import { getPaymentPlanCatalog } from '@heyclaude/web-runtime/data/payments';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -203,9 +203,9 @@ export default async function NewJobPage() {
 
       <Suspense fallback={<div className="text-muted-foreground text-sm">Loading job form...</div>}>
         <JobForm
-          onSubmit={handleSubmit}
           planCatalog={planCatalog}
           submitLabel="Create Job Listing"
+          onSubmit={handleSubmit}
         />
       </Suspense>
     </div>

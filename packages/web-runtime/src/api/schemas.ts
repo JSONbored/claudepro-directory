@@ -15,10 +15,10 @@
 // Import zod-openapi for TypeScript type augmentation (enables .meta() OpenAPI support)
 import 'zod-openapi';
 import {
-  content_categorySchema,
   experience_levelSchema,
 } from '../prisma-zod-schemas.ts';
 import { jobCategorySchema, jobTypeSchema } from '../prisma-zod-schemas.ts';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { z } from 'zod';
 
 // =============================================================================
@@ -71,12 +71,16 @@ export const paginationSchema = z.object({
 export const categorySchema = z
   .string()
   .optional()
-  .transform((val) => {
+  .transform((val): content_category | null => {
     // Transform 'all' or empty to null
     if (!val || val === 'all') return null;
-    return val;
+    // Validate it's a valid content_category
+    const validCategories: content_category[] = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog'];
+    if (validCategories.includes(val as content_category)) {
+      return val as content_category;
+    }
+    return null;
   })
-  .pipe(content_categorySchema.nullable())
   .describe('Content category filter (use "all" or omit for all categories)')
   .meta({
     description: 'Content category filter (use "all" or omit for all categories)',

@@ -3,7 +3,7 @@
  *
  * Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage).
  * Supports various export options including metadata and footer inclusion.
- * 
+ *
  * SIMPLIFIED: Uses format handler factory to eliminate 4 separate format handler functions (~900 lines → ~400 lines)
  *
  * @example
@@ -24,18 +24,23 @@
 import 'server-only';
 import { type content_category } from '@heyclaude/data-layer/prisma';
 import { APP_CONFIG } from '@heyclaude/shared-runtime';
-import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import {
-  createOptionsHandler as createApiOptionsHandler,
-  createFormatHandlerRoute,
-  type FormatHandlerConfig,
-  type RouteHandlerContext,
+  createOptionsHandler as createApiOptionsHandler, createFormatHandlerRoute, type FormatHandlerConfig, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
-import { VALID_CATEGORIES } from '@heyclaude/web-runtime/utils/category-validation';
-import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
-import { getOnlyCorsHeaders, getWithAcceptCorsHeaders, jsonResponse, markdownResponse, textResponse } from '@heyclaude/web-runtime/server/api-helpers';
-import { notFoundResponse } from '@heyclaude/web-runtime/server/not-found-response';
 import { contentDetailQuerySchema } from '@heyclaude/web-runtime/api/schemas';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import {
+  getOnlyCorsHeaders,
+  getWithAcceptCorsHeaders,
+  jsonResponse,
+  markdownResponse,
+  textResponse,
+} from '@heyclaude/web-runtime/server/api-helpers';
+import { notFoundResponse } from '@heyclaude/web-runtime/server/not-found-response';
+import {
+  isValidCategory,
+  VALID_CATEGORIES,
+} from '@heyclaude/web-runtime/utils/category-validation';
 import { NextResponse } from 'next/server';
 
 const SITE_URL = APP_CONFIG.url;
@@ -58,7 +63,10 @@ function sanitizeHeaderValue(val: string): string {
 }
 
 function sanitizeFilename(name: string): string {
-  let cleaned = name.replaceAll(/[\r\n\t\b\f\v]/g, '').replaceAll(/["\\]/g, '').trim();
+  const cleaned = name
+    .replaceAll(/[\r\n\t\b\f\v]/g, '')
+    .replaceAll(/["\\]/g, '')
+    .trim();
   return cleaned || 'export.md';
 }
 
@@ -71,7 +79,9 @@ async function getRouteParams(nextContext: unknown): Promise<{ category: string;
   if (!context?.params) throw new Error('Missing route context');
   const params = await context.params;
   if (!isValidCategory(params.category)) {
-    throw new Error(`Invalid category '${params.category}'. Valid categories: ${VALID_CATEGORIES.join(', ')}`);
+    throw new Error(
+      `Invalid category '${params.category}'. Valid categories: ${VALID_CATEGORIES.join(', ')}`
+    );
   }
   return params;
 }
@@ -79,13 +89,13 @@ async function getRouteParams(nextContext: unknown): Promise<{ category: string;
 // Shared LLMs handler (llms and llms-txt are identical - both supported for backward compatibility)
 function handleLlmsFormat(
   result: unknown,
-  _format: 'llms-txt' | 'llms',
+  _format: 'llms' | 'llms-txt',
   _query: ContentDetailQuery,
   _body: unknown,
-  ctx: RouteHandlerContext<ContentDetailQuery, unknown>
+  ctx: RouteHandlerContext<ContentDetailQuery>
 ) {
   const { logger } = ctx;
-  const data = result as string | null;
+  const data = result as null | string;
   if (!data) return notFoundResponse('LLMs.txt content not found', 'Content');
   let formatted: string;
   if (typeof data === 'string') {
@@ -111,11 +121,16 @@ function handleLlmsFormat(
 }
 
 // Shared LLMs method args builder
-function buildLlmsMethodArgs(_format: ContentDetailFormat, _query: ContentDetailQuery, _body: unknown, routeParams?: Record<string, string>) {
+function buildLlmsMethodArgs(
+  _format: ContentDetailFormat,
+  _query: ContentDetailQuery,
+  _body: unknown,
+  routeParams?: Record<string, string>
+) {
   const category = routeParams?.['category'];
   const slug = routeParams?.['slug'];
   if (!category || !slug || !isValidCategory(category)) throw new Error('Invalid category or slug');
-  return [{ p_category: category as content_category, p_slug: slug }];
+  return [{ p_category: category, p_slug: slug }];
 }
 
 // Shared markdown handler (markdown and md are identical - both supported for backward compatibility)
@@ -124,10 +139,16 @@ function handleMarkdownFormat(
   _format: 'markdown' | 'md',
   _query: ContentDetailQuery,
   _body: unknown,
-  ctx: RouteHandlerContext<ContentDetailQuery, unknown>
+  ctx: RouteHandlerContext<ContentDetailQuery>
 ) {
   const { logger } = ctx;
-  const data = result as { success?: boolean; error?: string; markdown?: string; filename?: string; content_id?: string };
+  const data = result as {
+    content_id?: string;
+    error?: string;
+    filename?: string;
+    markdown?: string;
+    success?: boolean;
+  };
   const success = getProperty(data, 'success');
   if (typeof success !== 'boolean' || !success) {
     const error = getProperty(data, 'error');
@@ -140,17 +161,32 @@ function handleMarkdownFormat(
   const markdown = getProperty(data, 'markdown');
   const filename = getProperty(data, 'filename');
   const contentId = getProperty(data, 'content_id');
-  if (typeof markdown !== 'string' || typeof filename !== 'string' || typeof contentId !== 'string') {
+  if (
+    typeof markdown !== 'string' ||
+    typeof filename !== 'string' ||
+    typeof contentId !== 'string'
+  ) {
     logger.warn({}, 'Content Markdown: invalid response structure');
-    return jsonResponse({ error: 'Markdown generation failed: invalid response' }, 400, getWithAcceptCorsHeaders);
+    return jsonResponse(
+      { error: 'Markdown generation failed: invalid response' },
+      400,
+      getWithAcceptCorsHeaders
+    );
   }
   if (!markdown || markdown.trim().length === 0) {
     logger.warn({}, 'Content Markdown: empty markdown content returned');
-    return jsonResponse({ error: 'Markdown generation failed: empty content' }, 400, getWithAcceptCorsHeaders);
+    return jsonResponse(
+      { error: 'Markdown generation failed: empty content' },
+      400,
+      getWithAcceptCorsHeaders
+    );
   }
   const safeFilename = sanitizeFilename(filename);
   const safeContentId = sanitizeHeaderValue(contentId);
-  logger.info({ filename: safeFilename, markdownLength: markdown.length }, 'Content Markdown generated');
+  logger.info(
+    { filename: safeFilename, markdownLength: markdown.length },
+    'Content Markdown generated'
+  );
   return markdownResponse(markdown, safeFilename, 200, getWithAcceptCorsHeaders, {
     'X-Content-ID': safeContentId,
     'X-Generated-By': 'prisma.rpc.generate_markdown_export',
@@ -158,16 +194,23 @@ function handleMarkdownFormat(
 }
 
 // Shared markdown method args builder
-function buildMarkdownMethodArgs(_format: ContentDetailFormat, query: ContentDetailQuery, _body: unknown, routeParams?: Record<string, string>) {
+function buildMarkdownMethodArgs(
+  _format: ContentDetailFormat,
+  query: ContentDetailQuery,
+  _body: unknown,
+  routeParams?: Record<string, string>
+) {
   const category = routeParams?.['category'];
   const slug = routeParams?.['slug'];
   if (!category || !slug || !isValidCategory(category)) throw new Error('Invalid category or slug');
-  return [{
-    p_category: category as content_category,
-    p_include_footer: query.includeFooter ?? false,
-    p_include_metadata: query.includeMetadata ?? true,
-    p_slug: slug,
-  }];
+  return [
+    {
+      p_category: category,
+      p_include_footer: query.includeFooter ?? false,
+      p_include_metadata: query.includeMetadata ?? true,
+      p_slug: slug,
+    },
+  ];
 }
 
 // Shared storage handler
@@ -175,7 +218,7 @@ async function handleStorageFormat(
   category: content_category,
   slug: string,
   metadataMode: boolean,
-  logger: RouteHandlerContext<ContentDetailQuery, unknown>['logger'],
+  logger: RouteHandlerContext<ContentDetailQuery>['logger'],
   getStoragePath: (args: { p_slug: string }) => Promise<unknown>,
   rpcName: string
 ): Promise<NextResponse> {
@@ -202,8 +245,13 @@ async function handleStorageFormat(
 
   const { createSupabaseAnonClient } = await import('@heyclaude/web-runtime/supabase/server-anon');
   const storageClient = createSupabaseAnonClient();
-  const { data: { publicUrl } } = storageClient.storage.from(bucket).getPublicUrl(objectPath);
-  logger.info({ bucket, objectPath, publicUrl, redirect: true }, 'Redirecting to Supabase Storage public URL');
+  const {
+    data: { publicUrl },
+  } = storageClient.storage.from(bucket).getPublicUrl(objectPath);
+  logger.info(
+    { bucket, objectPath, publicUrl, redirect: true },
+    'Redirecting to Supabase Storage public URL'
+  );
   return NextResponse.redirect(publicUrl, {
     headers: {
       'Cache-Control': 'public, max-age=31536000, immutable',
@@ -216,14 +264,14 @@ async function handleStorageFormat(
   });
 }
 
-type ContentDetailFormat = 'json' | 'markdown' | 'md' | 'llms' | 'llms-txt' | 'storage';
+type ContentDetailFormat = 'json' | 'llms' | 'llms-txt' | 'markdown' | 'md' | 'storage';
 
-type ContentDetailQuery = {
+interface ContentDetailQuery {
   format: ContentDetailFormat;
-  includeMetadata?: boolean;
-  includeFooter?: boolean;
-  metadata?: boolean;
-};
+  includeFooter?: boolean | undefined;
+  includeMetadata?: boolean | undefined;
+  metadata?: boolean | undefined;
+}
 
 /**
  * GET /api/v1/content/[category]/[slug] - Get content detail in multiple formats
@@ -231,33 +279,40 @@ type ContentDetailQuery = {
  * Returns individual content records in multiple formats with optimized caching.
  * Uses format handler factory to eliminate switch/if statements and consolidate 4 format handlers.
  */
-export const GET = createFormatHandlerRoute<ContentDetailFormat, ContentDetailQuery, unknown>({
-  route: getVersionedRoute('content/[category]/[slug]'),
-  operation: 'ContentRecordAPI',
-  method: 'GET',
-  cors: 'anon',
+export const GET = createFormatHandlerRoute<ContentDetailFormat, ContentDetailQuery>({
   cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
   cacheTags: (format, _query, _body, routeParams) => {
     const category = routeParams?.['category'] ?? '';
     const slug = routeParams?.['slug'] ?? '';
-    return ['content', 'content-detail', `content-${category}-${slug}`, `content-${category}-${slug}-${format}`];
+    return [
+      'content',
+      'content-detail',
+      `content-${category}-${slug}`,
+      `content-${category}-${slug}-${format}`,
+    ];
   },
-  querySchema: contentDetailQuerySchema as any, // Type compatibility issue with exactOptionalPropertyTypes
+  cors: 'anon',
   defaultFormat: 'json',
   formats: {
     json: {
-      serviceKey: 'content',
-      methodName: 'getApiContentFull',
       getRouteParams,
       methodArgs: (_format, _query, _body, routeParams) => {
         const category = routeParams?.['category'];
         const slug = routeParams?.['slug'];
-        if (!category || !slug || !isValidCategory(category)) throw new Error('Invalid category or slug');
-        return [{ p_base_url: SITE_URL, p_category: category as content_category, p_slug: slug }];
+        if (!category || !slug || !isValidCategory(category))
+          throw new Error('Invalid category or slug');
+        return [{ p_base_url: SITE_URL, p_category: category, p_slug: slug }];
       },
-      responseHandler: (result: unknown, _format: 'json', _query: ContentDetailQuery, _body: unknown, ctx: RouteHandlerContext<ContentDetailQuery, unknown>) => {
+      methodName: 'getApiContentFull',
+      responseHandler: (
+        result: unknown,
+        _format: 'json',
+        _query: ContentDetailQuery,
+        _body: unknown,
+        ctx: RouteHandlerContext<ContentDetailQuery>
+      ) => {
         const { logger } = ctx;
-        const data = result as unknown;
+        const data = result;
         if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
           logger.warn({}, 'Content not found');
           return notFoundResponse('Content not found', 'Content');
@@ -279,49 +334,54 @@ export const GET = createFormatHandlerRoute<ContentDetailFormat, ContentDetailQu
           'X-Generated-By': 'prisma.rpc.get_api_content_full',
         });
       },
+      serviceKey: 'content',
+    },
+    llms: {
+      getRouteParams,
+      methodArgs: buildLlmsMethodArgs,
+      methodName: 'getItemLlmsTxt',
+      responseHandler: handleLlmsFormat,
+      serviceKey: 'content',
     },
     // llms and llms-txt are identical (both supported for backward compatibility)
     'llms-txt': {
-      serviceKey: 'content',
-      methodName: 'getItemLlmsTxt',
       getRouteParams,
       methodArgs: buildLlmsMethodArgs,
-      responseHandler: handleLlmsFormat,
-    },
-    llms: {
-      serviceKey: 'content',
       methodName: 'getItemLlmsTxt',
-      getRouteParams,
-      methodArgs: buildLlmsMethodArgs,
       responseHandler: handleLlmsFormat,
+      serviceKey: 'content',
     },
     // markdown and md are identical (both supported for backward compatibility)
     markdown: {
-      serviceKey: 'content',
-      methodName: 'generateMarkdownExport',
       getRouteParams,
       methodArgs: buildMarkdownMethodArgs,
+      methodName: 'generateMarkdownExport',
       responseHandler: handleMarkdownFormat,
+      serviceKey: 'content',
     },
     md: {
-      serviceKey: 'content',
-      methodName: 'generateMarkdownExport',
       getRouteParams,
       methodArgs: buildMarkdownMethodArgs,
+      methodName: 'generateMarkdownExport',
       responseHandler: handleMarkdownFormat,
+      serviceKey: 'content',
     },
     storage: {
-      serviceKey: 'content',
-      methodName: 'getSkillStoragePath', // Dummy - actual method called conditionally in responseHandler
       getRouteParams,
-      methodArgs: (_format, _query, _body, _routeParams) => {
+      methodArgs: (_format, _query, _body, _routeParams) =>
         // Return empty args - storage format calls service methods directly in responseHandler
-        return [];
-      },
-      responseHandler: async (_result: unknown, _format: 'storage', query: ContentDetailQuery, _body: unknown, ctx: RouteHandlerContext<ContentDetailQuery, unknown>) => {
+        [],
+      methodName: 'getSkillStoragePath', // Dummy - actual method called conditionally in responseHandler
+      responseHandler: async (
+        _result: unknown,
+        _format: 'storage',
+        query: ContentDetailQuery,
+        _body: unknown,
+        ctx: RouteHandlerContext<ContentDetailQuery>
+      ) => {
         const { logger, nextContext } = ctx;
         const metadataMode = query.metadata ?? false;
-        
+
         // Extract category from route params
         interface RouteContext {
           params: Promise<{ category: string; slug: string }>;
@@ -330,9 +390,9 @@ export const GET = createFormatHandlerRoute<ContentDetailFormat, ContentDetailQu
         if (!context?.params) throw new Error('Missing route context');
         const { category, slug } = await context.params;
         const typedCategory = category as content_category;
-        
+
         logger.info({ category: typedCategory, metadataMode, slug }, 'Handling storage format');
-        
+
         // Handle skills category
         if (typedCategory === 'skills') {
           const { ContentService } = await import('@heyclaude/data-layer');
@@ -346,7 +406,7 @@ export const GET = createFormatHandlerRoute<ContentDetailFormat, ContentDetailQu
             'prisma.rpc.get_skill_storage_path'
           );
         }
-        
+
         // Handle mcp category
         if (typedCategory === 'mcp') {
           const { ContentService } = await import('@heyclaude/data-layer');
@@ -360,16 +420,18 @@ export const GET = createFormatHandlerRoute<ContentDetailFormat, ContentDetailQu
             'prisma.rpc.get_mcpb_storage_path'
           );
         }
-        
-        throw new Error(`Storage format not supported for category '${typedCategory}'. Supported categories: skills, mcp`);
+
+        throw new Error(
+          `Storage format not supported for category '${typedCategory}'. Supported categories: skills, mcp`
+        );
       },
+      serviceKey: 'content',
     },
-  } as Record<ContentDetailFormat, FormatHandlerConfig<ContentDetailFormat, ContentDetailQuery, unknown>>,
+  } as Record<ContentDetailFormat, FormatHandlerConfig<ContentDetailFormat, ContentDetailQuery>>,
+  method: 'GET',
   openapi: {
-    summary: 'Get content detail in multiple formats',
     description:
       'Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage). Supports various export options including metadata and footer inclusion.',
-    tags: ['content', 'export'],
     operationId: 'getContentDetail',
     responses: {
       200: {
@@ -382,7 +444,12 @@ export const GET = createFormatHandlerRoute<ContentDetailFormat, ContentDetailQu
         description: 'Content not found',
       },
     },
+    summary: 'Get content detail in multiple formats',
+    tags: ['content', 'export'],
   },
+  operation: 'ContentRecordAPI',
+  querySchema: contentDetailQuerySchema, // Type compatibility issue with exactOptionalPropertyTypes
+  route: getVersionedRoute('content/[category]/[slug]'),
 });
 
 /**

@@ -24,10 +24,11 @@
 
 import 'server-only';
 
-import type { ServiceKey } from './service-factory.ts';
-import { getService } from './service-factory.ts';
-import { logger, type LogContext } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
+import { type LogContext, logger } from '../logger.ts';
+
+import { type ServiceKey } from './service-factory.ts';
+import { getService } from './service-factory.ts';
 
 /**
  * Map to store function configurations for data functions
@@ -37,45 +38,165 @@ import { normalizeError } from '../errors.ts';
 const dataFunctionConfigs = new Map<
   string,
   {
-    serviceKey: ServiceKey;
+    logContext?: (args: unknown, result?: unknown) => LogContext;
     methodName: string;
     module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
     operation: string;
-    validate?: (args: unknown) => boolean;
-    validateError?: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
     transformArgs?: (args: unknown) => unknown;
     transformResult?: (result: unknown, args?: unknown) => unknown;
-    normalizeResult?: (result: unknown) => unknown | null;
-    onError?: (error: unknown, args: unknown) => unknown | null;
-    throwOnError: boolean;
-    logContext?: (args: unknown, result?: unknown) => LogContext;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
   }
 >();
 
-/**
+/**********
+*
  * Shared implementation function (extracted to module level to avoid closure capture)
  * This function is called by data functions via Map lookup, not closure capture
  * 
  * NOTE: This function only handles data fetching, logging, and error handling.
  * Caching is handled at the page level with 'use cache' directive.
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig.serviceKey
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig.methodName
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig.module
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig.operation
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig.validate
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig.validateError
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig.transformArgs
+ * @param fnConfig.transformResult
+ * @param fnConfig.normalizeResult
+ * @param fnConfig.onError
+ * @param fnConfig.throwOnError
+ * @param fnConfig.logContext
+ * @param args
+ * @returns {Promise<unknown>} Return value description
  */
 async function executeDataFunction(
   fnConfig: {
-    serviceKey: ServiceKey;
+    logContext?: (args: unknown, result?: unknown) => LogContext;
     methodName: string;
     module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
     operation: string;
-    validate?: (args: unknown) => boolean;
-    validateError?: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
     transformArgs?: (args: unknown) => unknown;
     transformResult?: (result: unknown, args?: unknown) => unknown;
-    normalizeResult?: (result: unknown) => unknown | null;
-    onError?: (error: unknown, args: unknown) => unknown | null;
-    throwOnError: boolean;
-    logContext?: (args: unknown, result?: unknown) => LogContext;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
   },
   args: unknown
-): Promise<unknown | null> {
+): Promise<null | unknown> {
   // Validate arguments if validator provided
   if (fnConfig.validate && !fnConfig.validate(args)) {
     const reqLogger = logger.child({
@@ -112,7 +233,10 @@ async function executeDataFunction(
     // The runtime check below (typeof serviceMethod !== 'function') ensures safety.
     // Use 'unknown' first to avoid unsafe type assertions, then narrow with runtime check
     const serviceRecord = service as unknown;
-    const serviceMethods = serviceRecord as Record<string, (...args: unknown[]) => Promise<unknown>>;
+    const serviceMethods = serviceRecord as Record<
+      string,
+      (...args: unknown[]) => Promise<unknown>
+    >;
     const serviceMethod = serviceMethods[fnConfig.methodName];
 
     if (!serviceMethod || typeof serviceMethod !== 'function') {
@@ -127,7 +251,7 @@ async function executeDataFunction(
     const result = await serviceMethod.call(service, serviceArgs);
 
     // Transform result if transformer provided
-    let transformedResult: unknown | null = result;
+    let transformedResult: null | unknown = result;
     if (fnConfig.transformResult) {
       transformedResult = fnConfig.transformResult(result, args);
     } else if (fnConfig.normalizeResult) {
@@ -168,9 +292,10 @@ async function executeDataFunction(
  */
 export interface DataFunctionConfig<TArgs, TReturn> {
   /**
-   * Service key from service factory registry
+   * Additional logging context to include
+   * Receives both args and result for comprehensive logging
    */
-  serviceKey: ServiceKey;
+  logContext?: (args: TArgs, result?: unknown) => LogContext;
 
   /**
    * Method name on the service to call
@@ -183,19 +308,30 @@ export interface DataFunctionConfig<TArgs, TReturn> {
   module: string;
 
   /**
+   * Normalize result (e.g., extract first item from array, handle null)
+   * If not provided, result is returned as-is
+   */
+  normalizeResult?: (result: unknown) => null | TReturn;
+
+  /**
+   * Custom error handler - if provided, overrides default error handling
+   */
+  onError?: (error: unknown, args: TArgs) => null | TReturn;
+
+  /**
    * Operation name for logging (e.g., 'getContentDetailCore')
    */
   operation: string;
 
   /**
-   * Optional validation function - returns false if args are invalid
+   * Service key from service factory registry
    */
-  validate?: (args: TArgs) => boolean;
+  serviceKey: ServiceKey;
 
   /**
-   * Optional validation error message
+   * Whether to throw errors or return null (default: return null)
    */
-  validateError?: string;
+  throwOnError?: boolean;
 
   /**
    * Transform service method arguments to RPC args format
@@ -211,31 +347,20 @@ export interface DataFunctionConfig<TArgs, TReturn> {
   transformResult?: (result: unknown, args?: TArgs) => TReturn;
 
   /**
-   * Normalize result (e.g., extract first item from array, handle null)
-   * If not provided, result is returned as-is
+   * Optional validation function - returns false if args are invalid
    */
-  normalizeResult?: (result: unknown) => TReturn | null;
+  validate?: (args: TArgs) => boolean;
 
   /**
-   * Custom error handler - if provided, overrides default error handling
+   * Optional validation error message
    */
-  onError?: (error: unknown, args: TArgs) => TReturn | null;
-
-  /**
-   * Whether to throw errors or return null (default: return null)
-   */
-  throwOnError?: boolean;
-
-  /**
-   * Additional logging context to include
-   * Receives both args and result for comprehensive logging
-   */
-  logContext?: (args: TArgs, result?: unknown) => LogContext;
+  validateError?: string;
 }
 
 /**
  * Create a data function with automatic logging/error handling
  *
+ * @param config
  * @example
  * ```typescript
  * export const getContentDetailCore = createDataFunction({
@@ -254,26 +379,26 @@ export interface DataFunctionConfig<TArgs, TReturn> {
  */
 export function createDataFunction<TArgs, TReturn>(
   config: DataFunctionConfig<TArgs, TReturn>
-): (args: TArgs) => Promise<TReturn | null> {
+): (args: TArgs) => Promise<null | TReturn> {
   // Prepare config (with unknown types to avoid closure capture)
   const fnConfig: {
-    serviceKey: ServiceKey;
+    logContext?: (args: unknown, result?: unknown) => LogContext;
     methodName: string;
     module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
     operation: string;
-    validate?: (args: unknown) => boolean;
-    validateError?: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
     transformArgs?: (args: unknown) => unknown;
     transformResult?: (result: unknown, args?: unknown) => unknown;
-    normalizeResult?: (result: unknown) => unknown | null;
-    onError?: (error: unknown, args: unknown) => unknown | null;
-    throwOnError: boolean;
-    logContext?: (args: unknown, result?: unknown) => LogContext;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
   } = {
-    serviceKey: config.serviceKey,
     methodName: config.methodName,
     module: config.module,
     operation: config.operation,
+    serviceKey: config.serviceKey,
     throwOnError: config.throwOnError ?? false,
   };
 
@@ -288,13 +413,16 @@ export function createDataFunction<TArgs, TReturn>(
     fnConfig.transformArgs = config.transformArgs as (args: unknown) => unknown;
   }
   if (config.transformResult) {
-    fnConfig.transformResult = config.transformResult as (result: unknown, args?: unknown) => unknown;
+    fnConfig.transformResult = config.transformResult as (
+      result: unknown,
+      args?: unknown
+    ) => unknown;
   }
   if (config.normalizeResult) {
-    fnConfig.normalizeResult = config.normalizeResult as (result: unknown) => unknown | null;
+    fnConfig.normalizeResult = config.normalizeResult as (result: unknown) => null | unknown;
   }
   if (config.onError) {
-    fnConfig.onError = config.onError as (error: unknown, args: unknown) => unknown | null;
+    fnConfig.onError = config.onError as (error: unknown, args: unknown) => null | unknown;
   }
   if (config.logContext) {
     fnConfig.logContext = config.logContext as (args: unknown, result?: unknown) => LogContext;
@@ -305,13 +433,13 @@ export function createDataFunction<TArgs, TReturn>(
 
   // Create the data function without capturing config in closure
   // This prevents "Functions cannot be passed directly to Client Components" errors
-  const dataFunction = async (args: unknown): Promise<unknown | null> => {
+  const dataFunction = async (args: unknown): Promise<null | unknown> => {
     // Retrieve configuration from Map at runtime using stable string key (not captured in closure)
     const storedConfig = dataFunctionConfigs.get(functionId);
     if (!storedConfig) {
       throw new Error(`Data function configuration not found for ${config.operation}`);
     }
-    
+
     return executeDataFunction(storedConfig, args);
   };
 
@@ -319,7 +447,7 @@ export function createDataFunction<TArgs, TReturn>(
   dataFunctionConfigs.set(functionId, fnConfig);
 
   // Return function with original generic types (cast to match expected signature)
-  return dataFunction as (args: TArgs) => Promise<TReturn | null>;
+  return dataFunction as (args: TArgs) => Promise<null | TReturn>;
 }
 
 /**
@@ -332,13 +460,18 @@ export const createCachedDataFunction = createDataFunction;
  */
 export type CachedDataFunctionConfig<TArgs, TReturn> = DataFunctionConfig<TArgs, TReturn> & {
   /**
-   * @deprecated Cache mode is unused - pages control caching
-   */
-  cacheMode?: 'public' | 'private';
-  /**
    * @deprecated Cache life is unused - pages control caching
    */
-  cacheLife?: 'short' | 'medium' | 'long' | 'userProfile' | { stale: number; revalidate: number; expire: number };
+  cacheLife?:
+    | 'long'
+    | 'medium'
+    | 'short'
+    | 'userProfile'
+    | { expire: number; revalidate: number; stale: number };
+  /**
+   * @deprecated Cache mode is unused - pages control caching
+   */
+  cacheMode?: 'private' | 'public';
   /**
    * @deprecated Cache tags are unused - pages apply tags within 'use cache' context
    */

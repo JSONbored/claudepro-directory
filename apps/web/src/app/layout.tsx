@@ -5,11 +5,11 @@ import './shiki-code-blocks.css';
 
 import { getComponentCardConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { getLayoutData } from '@heyclaude/web-runtime/data/layout';
+import { DEFAULT_LAYOUT_DATA } from '@heyclaude/web-runtime/data/layout/constants';
 import { ComponentConfigContextProvider } from '@heyclaude/web-runtime/hooks/use-component-card-config';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
-import { DEFAULT_LAYOUT_DATA } from '@heyclaude/web-runtime/data/layout/constants';
-import { getLayoutData } from '@heyclaude/web-runtime/data/layout';
 import { ErrorBoundary, LazyMotionProvider, MotionConfigProvider } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife, cacheTag } from 'next/cache';

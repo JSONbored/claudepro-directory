@@ -17,14 +17,12 @@
 
 import 'server-only';
 import {
-  createOptionsHandler as createApiOptionsHandler,
-  createCachedApiRoute,
-  type RouteHandlerContext,
+  createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
+import { changelogEntryFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, textResponse } from '@heyclaude/web-runtime/server/api-helpers';
 import { notFoundResponse } from '@heyclaude/web-runtime/server/not-found-response';
-import { changelogEntryFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import { z } from 'zod';
 
 /**
@@ -32,7 +30,7 @@ import { z } from 'zod';
  *
  * Returns a changelog entry as an LLMs-compliant plain-text file for the given slug.
  * Validates the format query parameter (must be 'llms-entry').
- * 
+ *
  * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
 export const GET = createCachedApiRoute({
@@ -65,7 +63,7 @@ export const GET = createCachedApiRoute({
   querySchema: z.object({
     format: changelogEntryFormatSchema,
   }),
-  responseHandler: (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext<unknown, unknown>) => {
+  responseHandler: (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext) => {
     const { logger } = ctx;
     const data = result as null | string;
 
@@ -92,7 +90,11 @@ export const GET = createCachedApiRoute({
       }
       return await context.params;
     },
-    methodArgs: (_query: { format: 'llms-entry' }, _body: unknown, routeParams?: Record<string, string>) => {
+    methodArgs: (
+      _query: { format: 'llms-entry' },
+      _body: unknown,
+      routeParams?: Record<string, string>
+    ) => {
       const slug = routeParams?.['slug'];
       if (!slug) {
         throw new Error('Missing slug in route params');

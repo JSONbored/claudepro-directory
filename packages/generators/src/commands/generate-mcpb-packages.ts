@@ -8,6 +8,7 @@ import type { contentModel, JsonValue } from '@heyclaude/database-types/prisma';
 
 type Json = JsonValue;
 
+import { prisma } from '@heyclaude/data-layer';
 import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.ts';
 import { ensureEnvVars } from '../toolkit/env.ts';
 import { logger } from '../toolkit/logger.ts';
@@ -64,7 +65,7 @@ export async function runGenerateMcpbPackages(): Promise<void> {
   const startTime = performance.now();
 
   logger.info('\n📊 Loading MCP servers from database...');
-  const mcps = await loadAllMcpServersFromDatabase(supabase);
+  const mcps = await loadAllMcpServersFromDatabase();
   logger.info(`✅ Found ${mcps.length} MCP servers in database\n`, { mcpCount: mcps.length });
 
   logger.info('🔍 Computing content hashes and filtering changed MCP servers...');
@@ -206,15 +207,20 @@ interface VerificationResult {
 async function verifyMcpbPackages(
   supabase: ReturnType<typeof createServiceRoleClient>
 ): Promise<VerificationResult> {
-  const { data: mcpContent, error: fetchError } = await supabase
-    .from('content')
-    .select('id, slug, title, mcpb_storage_url')
-    .eq('category', 'mcp')
-    .order('slug');
-
-  if (fetchError) {
-    throw new Error(`Failed to fetch MCP content: ${fetchError.message}`);
-  }
+  const mcpContent = await prisma.content.findMany({
+    where: {
+      category: 'mcp',
+    },
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      mcpb_storage_url: true,
+    },
+    orderBy: {
+      slug: 'asc',
+    },
+  });
 
   if (mcpContent.length === 0) {
     return {
@@ -281,20 +287,17 @@ async function verifyMcpbPackages(
   };
 }
 
-async function loadAllMcpServersFromDatabase(
-  supabase: ReturnType<typeof createServiceRoleClient>
-): Promise<McpRow[]> {
-  const { data, error } = await supabase
-    .from('content')
-    .select('*')
-    .eq('category', 'mcp')
-    .order('slug');
+async function loadAllMcpServersFromDatabase(): Promise<McpRow[]> {
+  const mcps = await prisma.content.findMany({
+    where: {
+      category: 'mcp',
+    },
+    orderBy: {
+      slug: 'asc',
+    },
+  });
 
-  if (error) {
-    throw new Error(`Failed to fetch MCP servers from database: ${error.message}`);
-  }
-
-  return data as McpRow[];
+  return mcps as McpRow[];
 }
 
 function extractUserConfig(mcp: McpRow): Record<string, UserConfigEntry> {
@@ -673,18 +676,16 @@ async function uploadToStorage(
   } = supabase.storage.from('mcpb-packages').getPublicUrl(fileName);
 
   // Update database with storage URL and build hash
-  const { error: updateError } = await supabase
-    .from('content')
-    .update({
+  await prisma.content.update({
+    where: {
+      id: mcp.id,
+    },
+    data: {
       mcpb_storage_url: publicUrl,
       mcpb_build_hash: contentHash,
-      mcpb_last_built_at: new Date().toISOString(),
-    })
-    .eq('id', mcp.id);
-
-  if (updateError) {
-    throw new Error(`Database update failed: ${updateError.message}`);
-  }
+      mcpb_last_built_at: new Date(),
+    },
+  });
 
   return publicUrl;
 }

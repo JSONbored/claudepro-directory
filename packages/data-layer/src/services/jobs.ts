@@ -6,11 +6,52 @@
  * RPC function types use postgres-types generator (Prisma doesn't generate RPC types).
  */
 
-import type {
-  GetJobsListReturns,
-  GetJobBillingSummariesArgs,
-  GetJobBillingSummariesReturns,
-} from '@heyclaude/database-types/postgres-types';
+// Local types for converted RPCs (RPCs removed, using Prisma directly)
+type GetJobsListReturns = Array<{
+  id: string;
+  slug: string;
+  title: string;
+  company: string;
+  description: string;
+  location: string | null;
+  remote: boolean;
+  salary: string | null;
+  type: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship' | null;
+  category: 'engineering' | 'design' | 'product' | 'marketing' | 'sales' | 'support' | 'research' | 'data' | 'operations' | 'leadership' | 'consulting' | 'education' | 'other' | null;
+  tags: string[];
+  requirements: string[] | null;
+  benefits: string[] | null;
+  link: string | null;
+  contact_email: string | null;
+  posted_at: string | null;
+  expires_at: string | null;
+  active: boolean;
+  status: 'draft' | 'pending_payment' | 'pending_review' | 'active' | 'expired' | 'rejected' | 'deleted' | null;
+  plan: 'one-time' | 'subscription' | null;
+  tier: 'standard' | 'featured' | null;
+  order: number;
+  created_at: string;
+  updated_at: string;
+}>;
+
+type GetJobBillingSummariesArgs = {
+  p_job_ids: string[];
+};
+
+type GetJobBillingSummariesReturns = Array<{
+  job_id: string;
+  plan: 'one-time' | 'subscription' | null;
+  tier: 'standard' | 'featured' | null;
+  price_cents: number | null;
+  is_subscription: boolean | null;
+  billing_cycle_days: number | null;
+  job_expiry_days: number | null;
+  last_payment_amount: number | null;
+  last_payment_at: string | null;
+  last_payment_status: 'pending' | 'completed' | 'failed' | 'refunded' | null;
+  subscription_status: 'active' | 'cancelled' | 'past_due' | 'paused' | 'revoked' | null;
+  subscription_renews_at: string | null;
+}>;
 // Import JobBillingSummary type directly from the function file
 // Note: This type represents the job_billing_summary view structure
 type JobBillingSummary = {

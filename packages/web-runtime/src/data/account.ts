@@ -18,7 +18,7 @@ import {
   type GetUserIdentitiesReturns,
   type GetUserLibraryReturns,
   type UserCompaniesCompany,
-} from '@heyclaude/database-types/postgres-types';
+} from '@heyclaude/data-layer';
 import { z } from 'zod';
 
 import { getAuthenticatedUserFromClient } from '../auth/get-authenticated-user.ts';
@@ -46,7 +46,6 @@ const accountDashboardSchema = z.object({
   }),
 });
 
-
 /**
  * Get user bookmarks for collections
  *
@@ -63,7 +62,7 @@ export async function getUserBookmarksForCollections(userId: string): Promise<bo
   // OPTIMIZATION: Use getUserCompleteData directly instead of wrapper
   const completeData = await getUserCompleteData(userId);
   const bookmarksArray = completeData?.user_library?.bookmarks ?? [];
-  return bookmarksArray
+    return bookmarksArray
     .filter(
       (
         b: (typeof bookmarksArray)[number]
@@ -72,31 +71,30 @@ export async function getUserBookmarksForCollections(userId: string): Promise<bo
         content_type: string;
         created_at: string;
         id: string;
-        updated_at: string;
         user_id: string;
       } =>
         b.id !== null &&
         b.user_id !== null &&
         b.content_type !== null &&
         b.content_slug !== null &&
-        b.created_at !== null &&
-        b.updated_at !== null
+        b.created_at !== null
     )
-    .map((b) => ({
+    .map((b: { content_slug: string; content_type: string; created_at: string; id: string; updated_at?: string; user_id: string; notes?: string | null }) => ({
       content_slug: b.content_slug,
       content_type: b.content_type as bookmarksModel['content_type'], // RPC returns string, Prisma expects enum
       created_at: new Date(b.created_at), // Convert string to Date for Prisma type
       id: b.id,
       notes: b.notes ?? null,
-      updated_at: new Date(b.updated_at), // Convert string to Date for Prisma type
+      updated_at: b.updated_at ? new Date(b.updated_at) : new Date(b.created_at), // Convert string to Date for Prisma type, fallback to created_at
       user_id: b.user_id,
     }));
 }
 
-
 /**
  * Get user job by ID
  * Simplified: Extracts job from getUserCompleteData result
+ * @param userId
+ * @param jobId
  */
 export async function getUserJobById(userId: string, jobId: string): Promise<jobsModel | null> {
   const completeData = await getUserCompleteData(userId);
@@ -177,12 +175,12 @@ export async function getUserCompleteData(
     // OPTIMIZATION: Use singleton instance (services are stateless)
     const service = await getService('account');
 
-    // Build RPC parameters - only include p_activity_type if it's provided (not null/undefined)
+    // Build RPC parameters - p_activity_type is optional
     const rpcParams: GetUserCompleteDataArgs = {
       p_activity_limit: options?.activityLimit ?? 20,
       p_activity_offset: options?.activityOffset ?? 0,
       p_user_id: userId,
-      ...(options?.activityType && { p_activity_type: options.activityType }),
+      p_activity_type: options?.activityType ?? null,
     };
 
     const result = await service.getUserCompleteData(rpcParams);
@@ -239,28 +237,30 @@ export async function getUserCompleteData(
  * Get collection detail
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * @param userId
+ * @param slug
  */
 export async function getCollectionDetail(
   userId: string,
   slug: string
 ): Promise<GetCollectionDetailWithItemsReturns | null> {
   const cachedFn = createDataFunction<
-    { userId: string; slug: string },
+    { slug: string; userId: string },
     GetCollectionDetailWithItemsReturns | null
   >({
-    serviceKey: 'account',
+    logContext: (args) => ({ slug: args.slug, userId: args.userId }),
     methodName: 'getCollectionDetailWithItems',
     module: 'data/account',
+    onError: () => null,
     operation: 'getCollectionDetail',
+    serviceKey: 'account',
     transformArgs: (args) => ({
       p_slug: args.slug,
       p_user_id: args.userId,
     }),
-    onError: () => null,
-    logContext: (args) => ({ slug: args.slug, userId: args.userId }),
   });
 
-  return await cachedFn({ userId, slug });
+  return await cachedFn({ slug, userId });
 }
 
 /**
@@ -302,28 +302,30 @@ export async function getCollectionDetail(
  * Get sponsorship analytics
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * @param userId
+ * @param sponsorshipId
  */
 export async function getSponsorshipAnalytics(
   userId: string,
   sponsorshipId: string
 ): Promise<GetSponsorshipAnalyticsReturns | null> {
   const cachedFn = createDataFunction<
-    { userId: string; sponsorshipId: string },
+    { sponsorshipId: string; userId: string },
     GetSponsorshipAnalyticsReturns | null
   >({
-    serviceKey: 'account',
+    logContext: (args) => ({ sponsorshipId: args.sponsorshipId, userId: args.userId }),
     methodName: 'getSponsorshipAnalytics',
     module: 'data/account',
+    onError: () => null,
     operation: 'getSponsorshipAnalytics',
+    serviceKey: 'account',
     transformArgs: (args) => ({
       p_sponsorship_id: args.sponsorshipId,
       p_user_id: args.userId,
     }),
-    onError: () => null,
-    logContext: (args) => ({ sponsorshipId: args.sponsorshipId, userId: args.userId }),
   });
 
-  return await cachedFn({ userId, sponsorshipId });
+  return await cachedFn({ sponsorshipId, userId });
 }
 
 // All call sites have been updated to use getUserCompleteData().sponsorships
@@ -331,6 +333,8 @@ export async function getSponsorshipAnalytics(
 /**
  * Get user company by ID
  * Simplified: Extracts company from getUserCompleteData result
+ * @param userId
+ * @param companyId
  */
 export async function getUserCompanyById(
   userId: string,
@@ -347,31 +351,33 @@ export async function getUserCompanyById(
  * Get submission dashboard
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * @param recentLimit
+ * @param contributorsLimit
  */
 export async function getSubmissionDashboard(
   recentLimit = 5,
   contributorsLimit = 5
 ): Promise<GetSubmissionDashboardReturns | null> {
   const cachedFn = createDataFunction<
-    { recentLimit: number; contributorsLimit: number },
+    { contributorsLimit: number; recentLimit: number },
     GetSubmissionDashboardReturns | null
   >({
-    serviceKey: 'account',
-    methodName: 'getSubmissionDashboard',
-    module: 'data/account',
-    operation: 'getSubmissionDashboard',
-    transformArgs: (args) => ({
-      p_contributors_limit: args.contributorsLimit,
-      p_recent_limit: args.recentLimit,
-    }),
-    onError: () => null,
     logContext: (args) => ({
       contributorsLimit: args.contributorsLimit,
       recentLimit: args.recentLimit,
     }),
+    methodName: 'getSubmissionDashboard',
+    module: 'data/account',
+    onError: () => null,
+    operation: 'getSubmissionDashboard',
+    serviceKey: 'account',
+    transformArgs: (args) => ({
+      p_contributors_limit: args.contributorsLimit,
+      p_recent_limit: args.recentLimit,
+    }),
   });
 
-  return await cachedFn({ recentLimit, contributorsLimit });
+  return await cachedFn({ contributorsLimit, recentLimit });
 }
 
 /**
@@ -414,6 +420,7 @@ export interface AccountDashboardBundle {
  * Get user identities
  * Simplified: Extracts identities from getUserCompleteData result
  * Uses same cache tags as getUserCompleteData for cache sharing
+ * @param userId
  */
 export async function getUserIdentitiesData(
   userId: string
@@ -431,6 +438,10 @@ export async function getUserIdentitiesData(
  * Check if content is bookmarked by user
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * @param input
+ * @param input.content_slug
+ * @param input.content_type
+ * @param input.userId
  */
 export async function isBookmarked(input: {
   content_slug: string;
@@ -441,22 +452,22 @@ export async function isBookmarked(input: {
     { content_slug: string; content_type: content_category; userId: string },
     boolean
   >({
-    serviceKey: 'account',
-    methodName: 'isBookmarked',
-    module: 'data/account',
-    operation: 'isBookmarked',
-    transformArgs: (input) => ({
-      p_content_slug: input.content_slug,
-      p_content_type: input.content_type,
-      p_user_id: input.userId,
-    }),
-    transformResult: (result) => Boolean(result), // Generated type is unknown, but function returns boolean
-    onError: () => false,
     logContext: (input) => ({
       content_slug: input.content_slug,
       content_type: input.content_type,
       userId: input.userId,
     }),
+    methodName: 'isBookmarked',
+    module: 'data/account',
+    onError: () => false,
+    operation: 'isBookmarked',
+    serviceKey: 'account',
+    transformArgs: (input) => ({
+      p_content_slug: input.content_slug,
+      p_content_type: input.content_type,
+      p_user_id: input.userId,
+    }),
+    transformResult: Boolean, // Generated type is unknown, but function returns boolean
   });
 
   return (await cachedFn(input)) ?? false;
@@ -471,29 +482,29 @@ export async function isBookmarked(input: {
  * Check if user is following another user
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * @param input
+ * @param input.followerId
+ * @param input.followingId
  */
 export async function isFollowing(input: {
   followerId: string;
   followingId: string;
 }): Promise<boolean> {
-  const cachedFn = createDataFunction<
-    { followerId: string; followingId: string },
-    boolean
-  >({
-    serviceKey: 'account',
-    methodName: 'isFollowing',
-    module: 'data/account',
-    operation: 'isFollowing',
-    transformArgs: (input) => ({
-      follower_id: input.followerId,
-      following_id: input.followingId,
-    }),
-    transformResult: (result) => Boolean(result), // Generated type is unknown, but function returns boolean
-    onError: () => false,
+  const cachedFn = createDataFunction<{ followerId: string; followingId: string }, boolean>({
     logContext: (input) => ({
       followerId: input.followerId,
       followingId: input.followingId,
     }),
+    methodName: 'isFollowing',
+    module: 'data/account',
+    onError: () => false,
+    operation: 'isFollowing',
+    serviceKey: 'account',
+    transformArgs: (input) => ({
+      follower_id: input.followerId,
+      following_id: input.followingId,
+    }),
+    transformResult: Boolean, // Generated type is unknown, but function returns boolean
   });
 
   return (await cachedFn(input)) ?? false;
@@ -508,6 +519,9 @@ export async function isFollowing(input: {
  * Batch check bookmark status for multiple items
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * @param input
+ * @param input.items
+ * @param input.userId
  */
 export async function isBookmarkedBatch(input: {
   items: Array<{
@@ -526,18 +540,18 @@ export async function isBookmarkedBatch(input: {
     },
     IsBookmarkedBatchReturns
   >({
-    serviceKey: 'account',
-    methodName: 'isBookmarkedBatch',
-    module: 'data/account',
-    operation: 'isBookmarkedBatch',
-    transformArgs: (input) => ({
-      p_items: input.items, // Array is valid - service handles both array and JSONB
-      p_user_id: input.userId,
-    }),
-    onError: () => [],
     logContext: (input) => ({
       itemCount: input.items.length,
       userId: input.userId,
+    }),
+    methodName: 'isBookmarkedBatch',
+    module: 'data/account',
+    onError: () => [],
+    operation: 'isBookmarkedBatch',
+    serviceKey: 'account',
+    transformArgs: (input) => ({
+      p_items: input.items, // Array is valid - service handles both array and JSONB
+      p_user_id: input.userId,
     }),
   });
 
@@ -553,6 +567,9 @@ export async function isBookmarkedBatch(input: {
  * Batch check follow status for multiple users
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * @param input
+ * @param input.followedUserIds
+ * @param input.followerId
  */
 export async function isFollowingBatch(input: {
   followedUserIds: string[];
@@ -562,18 +579,18 @@ export async function isFollowingBatch(input: {
     { followedUserIds: string[]; followerId: string },
     IsFollowingBatchReturns
   >({
-    serviceKey: 'account',
-    methodName: 'isFollowingBatch',
-    module: 'data/account',
-    operation: 'isFollowingBatch',
-    transformArgs: (input) => ({
-      p_followed_user_ids: input.followedUserIds,
-      p_follower_id: input.followerId,
-    }),
-    onError: () => [],
     logContext: (input) => ({
       followedUserCount: input.followedUserIds.length,
       followerId: input.followerId,
+    }),
+    methodName: 'isFollowingBatch',
+    module: 'data/account',
+    onError: () => [],
+    operation: 'isFollowingBatch',
+    serviceKey: 'account',
+    transformArgs: (input) => ({
+      p_followed_user_ids: input.followedUserIds,
+      p_follower_id: input.followerId,
     }),
   });
 
@@ -613,8 +630,9 @@ export async function getAccountDashboardBundle(
   ]);
 
   // Extract dashboard and library from complete data
+  // Type assertion needed because Zod schema allows null tier but type expects it
   const dashboard = completeData?.account_dashboard
-    ? accountDashboardSchema.parse(completeData.account_dashboard)
+    ? (accountDashboardSchema.parse(completeData.account_dashboard) as GetAccountDashboardReturns)
     : null;
   const library = completeData?.user_library ?? null;
 

@@ -1,7 +1,7 @@
 import { type GetCommunityDirectoryReturns } from '@heyclaude/database-types/postgres-types';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { getCommunityDirectory } from '@heyclaude/web-runtime/data/community';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { Suspense } from 'react';

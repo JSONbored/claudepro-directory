@@ -25,41 +25,37 @@
 
 import 'server-only';
 import {
-  createOptionsHandler as createApiOptionsHandler,
-  createFormatHandlerRoute,
-  type FormatHandlerConfig,
-  type RouteHandlerContext,
+  createFormatHandlerRoute, createOptionsHandler as createApiOptionsHandler, type FormatHandlerConfig, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
-import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
-import { getOnlyCorsHeaders, jsonResponse, textResponse } from '@heyclaude/web-runtime/server/api-helpers';
 import { sitewideFormatSchema } from '@heyclaude/web-runtime/api/schemas';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import {
+  getOnlyCorsHeaders,
+  jsonResponse,
+  textResponse,
+} from '@heyclaude/web-runtime/server/api-helpers';
 import { z } from 'zod';
 
-type SitewideFormat = 'json' | 'readme' | 'llms-txt' | 'llms';
+type SitewideFormat = 'json' | 'llms' | 'llms-txt' | 'readme';
 
 // Shared LLMs handler (llms and llms-txt are identical)
 function handleLlmsFormat(
   result: unknown,
-  _format: 'llms-txt' | 'llms',
+  _format: 'llms' | 'llms-txt',
   _query: { format?: SitewideFormat },
   _body: unknown,
-  ctx: RouteHandlerContext<{ format?: SitewideFormat }, unknown>
+  ctx: RouteHandlerContext<{ format?: SitewideFormat }>
 ) {
   const { logger } = ctx;
-  const data = result as string | null;
+  const data = result as null | string;
   if (!data) {
     logger.error({}, 'Sitewide LLMs export returned null');
     throw new Error('Sitewide LLMs export failed: RPC returned null or invalid');
   }
   logger.info({ bytes: data.length }, 'Sitewide llms generated');
-  return textResponse(
-    data,
-    200,
-    getOnlyCorsHeaders,
-    {
-      'X-Generated-By': 'prisma.rpc.generate_sitewide_llms_txt',
-    }
-  );
+  return textResponse(data, 200, getOnlyCorsHeaders, {
+    'X-Generated-By': 'prisma.rpc.generate_sitewide_llms_txt',
+  });
 }
 
 /**
@@ -68,42 +64,55 @@ function handleLlmsFormat(
  * Serves sitewide content in multiple export formats with optimized caching.
  * Uses format handler factory to eliminate switch/if statements.
  */
-export const GET = createFormatHandlerRoute<SitewideFormat, { format?: SitewideFormat }, unknown>({
-  route: getVersionedRoute('content/sitewide'),
-  operation: 'ContentSitewideAPI',
-  method: 'GET',
-  cors: 'anon',
+export const GET = createFormatHandlerRoute<SitewideFormat, { format?: SitewideFormat }>({
   cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
   cacheTags: ['content', 'sitewide'],
-  querySchema: z.object({
-    format: sitewideFormatSchema,
-  }),
+  cors: 'anon',
   defaultFormat: 'llms-txt',
   formats: {
     json: {
-      serviceKey: 'content',
-      methodName: 'getSitewideContentList',
       methodArgs: () => [{ p_limit: 5000 }],
-      responseHandler: (result: unknown, _format: 'json', _query: { format?: SitewideFormat }, _body: unknown, ctx: RouteHandlerContext<{ format?: SitewideFormat }, unknown>) => {
+      methodName: 'getSitewideContentList',
+      responseHandler: (
+        result: unknown,
+        _format: 'json',
+        _query: { format?: SitewideFormat },
+        _body: unknown,
+        ctx: RouteHandlerContext<{ format?: SitewideFormat }>
+      ) => {
         const { logger } = ctx;
         const data = result as unknown[];
         logger.info({ itemCount: data.length }, 'Sitewide JSON generated');
-        return jsonResponse(
-          data,
-          200,
-          getOnlyCorsHeaders,
-          {
-            Vary: 'Accept-Encoding',
-            'X-Generated-By': 'prisma.rpc.get_sitewide_content_list',
-          }
-        );
+        return jsonResponse(data, 200, getOnlyCorsHeaders, {
+          Vary: 'Accept-Encoding',
+          'X-Generated-By': 'prisma.rpc.get_sitewide_content_list',
+        });
       },
+      serviceKey: 'content',
+    },
+    llms: {
+      methodArgs: () => [],
+      methodName: 'getSitewideLlmsTxt',
+      responseHandler: handleLlmsFormat,
+      serviceKey: 'content',
+    },
+    // llms and llms-txt are identical (both supported for backward compatibility)
+    'llms-txt': {
+      methodArgs: () => [],
+      methodName: 'getSitewideLlmsTxt',
+      responseHandler: handleLlmsFormat,
+      serviceKey: 'content',
     },
     readme: {
-      serviceKey: 'content',
-      methodName: 'getSitewideReadme',
       methodArgs: () => [],
-      responseHandler: (result: unknown, _format: 'readme', _query: { format?: SitewideFormat }, _body: unknown, ctx: RouteHandlerContext<{ format?: SitewideFormat }, unknown>) => {
+      methodName: 'getSitewideReadme',
+      responseHandler: (
+        result: unknown,
+        _format: 'readme',
+        _query: { format?: SitewideFormat },
+        _body: unknown,
+        ctx: RouteHandlerContext<{ format?: SitewideFormat }>
+      ) => {
         const { logger } = ctx;
         const data = result as { categories?: unknown[]; total_count?: number };
         logger.info(
@@ -113,35 +122,17 @@ export const GET = createFormatHandlerRoute<SitewideFormat, { format?: SitewideF
           },
           'Sitewide README data fetched'
         );
-        return jsonResponse(
-          data,
-          200,
-          getOnlyCorsHeaders,
-          {
-            'X-Generated-By': 'prisma.rpc.generate_readme_data',
-          }
-        );
+        return jsonResponse(data, 200, getOnlyCorsHeaders, {
+          'X-Generated-By': 'prisma.rpc.generate_readme_data',
+        });
       },
-    },
-    // llms and llms-txt are identical (both supported for backward compatibility)
-    'llms-txt': {
       serviceKey: 'content',
-      methodName: 'getSitewideLlmsTxt',
-      methodArgs: () => [],
-      responseHandler: handleLlmsFormat,
     },
-    llms: {
-      serviceKey: 'content',
-      methodName: 'getSitewideLlmsTxt',
-      methodArgs: () => [],
-      responseHandler: handleLlmsFormat,
-    },
-  } as Record<SitewideFormat, FormatHandlerConfig<SitewideFormat, { format?: SitewideFormat }, unknown>>,
+  } as Record<SitewideFormat, FormatHandlerConfig<SitewideFormat, { format?: SitewideFormat }>>,
+  method: 'GET',
   openapi: {
-    summary: 'Get sitewide content in various formats',
     description:
       'Serves sitewide content in multiple export formats: LLMs text format (default), README JSON data, or complete JSON array. Used for exporting the entire directory content.',
-    tags: ['content', 'export', 'sitewide'],
     operationId: 'getSitewideContent',
     responses: {
       200: {
@@ -154,7 +145,14 @@ export const GET = createFormatHandlerRoute<SitewideFormat, { format?: SitewideF
         description: 'Failed to generate sitewide export',
       },
     },
+    summary: 'Get sitewide content in various formats',
+    tags: ['content', 'export', 'sitewide'],
   },
+  operation: 'ContentSitewideAPI',
+  querySchema: z.object({
+    format: sitewideFormatSchema,
+  }),
+  route: getVersionedRoute('content/sitewide'),
 });
 
 /**

@@ -6,7 +6,7 @@
  */
 
 import type { oauth_provider } from '@heyclaude/data-layer/prisma';
-import type { GetUserIdentitiesReturns } from '@heyclaude/database-types/postgres-types';
+import type { GetUserIdentitiesReturns } from '@heyclaude/data-layer';
 import { unlinkOAuthProvider } from '@heyclaude/web-runtime/actions/unlink-oauth-provider';
 import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import {

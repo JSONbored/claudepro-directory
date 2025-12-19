@@ -34,7 +34,6 @@
  */
 
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { getContentByCategory } from '@heyclaude/web-runtime/data/content';
@@ -42,6 +41,7 @@ import { ExternalLink, HelpCircle } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { Button, ICON_NAME_MAP, UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
@@ -212,22 +212,24 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   // - Only the specific props each component needs
   // - All props are already serializable (strings, numbers, plain objects)
   // - No serialization workarounds needed
-  
+
   // Get icon name from component (for CategoryHeroShell)
   const iconName = getIconNameFromComponent(config.icon);
 
   // Process badge text functions (for CategoryBadges)
   // Badge text can be a function that takes item count, so we evaluate it here
-  const processedBadges: Array<{ icon?: string; text: string }> = config.listPage.badges.map((badge) => {
-    const itemsLength = items?.length ?? 0;
-    const processed: { icon?: string; text: string } = {
-      text: typeof badge.text === 'function' ? badge.text(itemsLength) : badge.text,
-    };
-    if (badge.icon) {
-      processed.icon = badge.icon;
+  const processedBadges: Array<{ icon?: string; text: string }> = config.listPage.badges.map(
+    (badge) => {
+      const itemsLength = items?.length ?? 0;
+      const processed: { icon?: string; text: string } = {
+        text: typeof badge.text === 'function' ? badge.text(itemsLength) : badge.text,
+      };
+      if (badge.icon) {
+        processed.icon = badge.icon;
+      }
+      return processed;
     }
-    return processed;
-  });
+  );
 
   // PPR Optimization: Static shell (hero with config) renders immediately
   // Dynamic content (badges + items list) streams in Suspense
@@ -242,12 +244,12 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
         title={config.pluralTitle}
       >
         {/* CRITICAL: No Suspense above the fold - data is already fetched, prevents blank states from being cached */}
-        <CategoryBadges badges={processedBadges} pluralTitle={config.pluralTitle} items={items} />
+        <CategoryBadges badges={processedBadges} items={items} pluralTitle={config.pluralTitle} />
       </CategoryHeroShell>
 
       {/* CRITICAL: No Suspense above the fold - data is already fetched, prevents blank states from being cached */}
-      <CategoryPageContent 
-        category={typedCategory} 
+      <CategoryPageContent
+        category={typedCategory}
         pluralTitle={config.pluralTitle}
         searchPlaceholder={config.listPage.searchPlaceholder}
       />
@@ -360,6 +362,8 @@ function CategoryHeroShell({
  * @param config - Unified category configuration that may include `listPage.badges` and `pluralTitle`
  * @param reqLogger - Request-scoped logger used to record load warnings or errors
  * @param category.config
+ * @param category.badges
+ * @param category.pluralTitle
  * @param category.items
  * @returns A list (<ul>) of rendered UnifiedBadge elements for the category
  *
@@ -369,14 +373,14 @@ function CategoryHeroShell({
  */
 function CategoryBadges({
   badges,
-  pluralTitle,
   items,
+  pluralTitle,
 }: {
   // ARCHITECTURAL FIX: Only pass what's needed, not entire config
   // All props are serializable (no React components, no functions)
   badges: Array<{ icon?: string; text: string }>;
-  pluralTitle: string;
   items: Awaited<ReturnType<typeof getContentByCategory>>;
+  pluralTitle: string;
 }) {
   // OPTIMIZATION: Items are now passed as prop from parent (fetched once at page level)
   // This eliminates duplicate getContentByCategory() calls
@@ -425,6 +429,8 @@ function CategoryBadges({
  *
  * @param root0.config
  * @param root0.items
+ * @param root0.pluralTitle
+ * @param root0.searchPlaceholder
  * @see getContentByCategory
  * @see ContentSearchClient
  * @see ContentSidebar
@@ -454,10 +460,7 @@ function CategoryPageContent({
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_18rem]">
           {/* Main content area - Full width within grid column */}
           <div className="min-w-0">
-            <CategoryPageSearchClient
-              category={category}
-              searchPlaceholder={searchPlaceholder}
-            />
+            <CategoryPageSearchClient category={category} searchPlaceholder={searchPlaceholder} />
           </div>
 
           {/* Sidebar - Unified ContentSidebar with JobsPromo + RecentlyViewed */}

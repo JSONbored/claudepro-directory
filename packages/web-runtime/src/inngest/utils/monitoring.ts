@@ -8,6 +8,7 @@
  */
 
 import { getEnvVar } from '@heyclaude/shared-runtime';
+import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 import { FEATURE_FLAGS } from '@heyclaude/web-runtime/config/unified-config';
 import { logger } from '../../logging/server';
 
@@ -84,7 +85,7 @@ export function sendBetterStackHeartbeat(
   const heartbeatUrl = getEnvVar(envVarName);
   if (!heartbeatUrl) {
     // Only log in development to avoid noise
-    if (process.env.NODE_ENV === 'development') {
+    if (isDevelopment) {
       logger.debug(
         { envVarName, ...context },
         'BetterStack heartbeat URL not configured'

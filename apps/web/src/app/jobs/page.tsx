@@ -4,12 +4,11 @@
  */
 
 import { ExperienceLevel, JobType } from '@heyclaude/data-layer/prisma';
-import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
-import { type JobsFilterResult } from '@heyclaude/web-runtime/data/jobs';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
-import { getFilteredJobs } from '@heyclaude/web-runtime/data/jobs';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { getFilteredJobs } from '@heyclaude/web-runtime/data/jobs';
+import { type JobCardJobType } from '@heyclaude/web-runtime/types/component.types';
+import { type JobsFilterResult } from '@heyclaude/web-runtime/data/jobs';
 import {
   Briefcase,
   Clock,
@@ -20,6 +19,7 @@ import {
   SlidersHorizontal,
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
 import {
   Button,
@@ -34,6 +34,7 @@ import {
   SelectValue,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { type Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -701,10 +702,25 @@ const SORT_VALUES = new Set<SortOption>(['newest', 'oldest', 'salary']);
  *
  * @see extractSalaryValue - Parses salary strings into numeric values used for salary sorting
  */
-function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
+function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption): JobCardJobType[] {
   if (!jobs || !Array.isArray(jobs)) return [];
+  
+  // Type guard to ensure jobs are properly typed
+  const typedJobs = jobs.filter((job): job is JobCardJobType => {
+    return (
+      typeof job === 'object' &&
+      job !== null &&
+      'id' in job &&
+      'slug' in job &&
+      'title' in job &&
+      'company' in job &&
+      'posted_at' in job &&
+      typeof (job as { posted_at: unknown }).posted_at === 'string'
+    );
+  }) as JobCardJobType[];
+  
   if (sort === 'oldest') {
-    return jobs.toSorted((a, b) => {
+    return typedJobs.toSorted((a, b) => {
       const aDate = a.posted_at ? new Date(a.posted_at).getTime() : 0;
       const bDate = b.posted_at ? new Date(b.posted_at).getTime() : 0;
       return aDate - bDate;
@@ -712,7 +728,7 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
   }
 
   if (sort === 'salary') {
-    return jobs.toSorted((a, b) => {
+    return typedJobs.toSorted((a, b) => {
       const aMax = extractSalaryValue(a.salary);
       const bMax = extractSalaryValue(b.salary);
       return bMax - aMax;
@@ -720,7 +736,7 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
   }
 
   // newest default
-  return jobs.toSorted((a, b) => {
+  return typedJobs.toSorted((a, b) => {
     const aDate = a.posted_at ? new Date(a.posted_at).getTime() : 0;
     const bDate = b.posted_at ? new Date(b.posted_at).getTime() : 0;
     return bDate - aDate;

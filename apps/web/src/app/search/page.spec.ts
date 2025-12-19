@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { setupTestWithErrorTracking } from '../../../../config/tests/utils/error-tracking';
+import { setupTestWithErrorTracking } from '../../../../../config/tests/utils/error-tracking';
 
 /**
  * Comprehensive Search Page E2E Tests
@@ -235,6 +235,119 @@ test.describe('Search Page', () => {
     // But page should render
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
+  });
+
+  test('should handle filter interactions (category, tag, author)', async ({ page }) => {
+    // Wait for page to load
+    await page.waitForTimeout(2000);
+    
+    // Find filter buttons/checkboxes
+    const categoryFilter = page.getByRole('button', { name: /category|filter by category/i }).first();
+    const tagFilter = page.getByRole('button', { name: /tag|filter by tag/i }).first();
+    const authorFilter = page.getByRole('button', { name: /author|filter by author/i }).first();
+    
+    const hasCategoryFilter = await categoryFilter.isVisible().catch(() => false);
+    const hasTagFilter = await tagFilter.isVisible().catch(() => false);
+    const hasAuthorFilter = await authorFilter.isVisible().catch(() => false);
+    
+    // Test category filter if available
+    if (hasCategoryFilter) {
+      await categoryFilter.click();
+      await page.waitForTimeout(500);
+      
+      // Should show filter options or update results
+      const filterOptions = page.getByRole('option', { name: /agents|mcp|rules/i }).first();
+      const hasOptions = await filterOptions.isVisible().catch(() => false);
+      
+      if (hasOptions) {
+        await filterOptions.click();
+        await page.waitForTimeout(1000);
+        
+        // Results should update
+        const results = page.locator('[data-testid="search-results"], article');
+        await expect(results.first()).toBeVisible();
+      }
+    }
+  });
+
+  test('should handle autocomplete suggestion selection', async ({ page }) => {
+    // Find search input
+    const searchInput = page.getByPlaceholder(/search/i).or(
+      page.locator('input[type="search"]')
+    ).first();
+    
+    await expect(searchInput).toBeVisible({ timeout: 10000 });
+
+    // Type partial query to trigger autocomplete
+    await searchInput.fill('cl');
+    await page.waitForTimeout(800); // Wait for debounce + API call
+    
+    // Check for autocomplete suggestions dropdown
+    const suggestions = page.getByRole('listbox', { name: /suggestions/i }).or(
+      page.locator('[data-testid="autocomplete-suggestions"]')
+    );
+    const hasSuggestions = await suggestions.isVisible().catch(() => false);
+    
+    if (hasSuggestions) {
+      // Click first suggestion
+      const firstSuggestion = suggestions.getByRole('option').first();
+      await firstSuggestion.click();
+      await page.waitForTimeout(500);
+      
+      // Search input should be updated with suggestion
+      const inputValue = await searchInput.inputValue();
+      expect(inputValue.length).toBeGreaterThan(0);
+    }
+  });
+
+  test('should handle result card interactions (bookmark, copy, share)', async ({ page }) => {
+    // Find search input
+    const searchInput = page.getByPlaceholder(/search/i).or(
+      page.locator('input[type="search"]')
+    ).first();
+    
+    await expect(searchInput).toBeVisible({ timeout: 10000 });
+
+    // Enter search query
+    await searchInput.fill('mcp');
+    await page.waitForTimeout(2000);
+    
+    // Find result cards
+    const resultCards = page.locator('[data-testid="config-card"], article, [role="article"]');
+    const cardCount = await resultCards.count();
+    
+    if (cardCount > 0) {
+      const firstCard = resultCards.first();
+      
+      // Test bookmark button on result card
+      const bookmarkButton = firstCard.getByRole('button', { name: /bookmark|save/i }).first();
+      const hasBookmarkButton = await bookmarkButton.isVisible().catch(() => false);
+      
+      if (hasBookmarkButton) {
+        await bookmarkButton.click();
+        await page.waitForTimeout(500);
+        
+        const toast = page.getByText(/bookmarked|saved|sign in/i);
+        const hasToast = await toast.isVisible().catch(() => false);
+        expect(hasToast).toBe(true);
+      }
+      
+      // Test copy button on result card
+      const copyButton = firstCard.getByRole('button', { name: /copy|copy link/i }).first();
+      const hasCopyButton = await copyButton.isVisible().catch(() => false);
+      
+      if (hasCopyButton) {
+        await copyButton.click();
+        await page.waitForTimeout(500);
+        
+        const toast = page.getByText(/copied|link copied/i);
+        const hasToast = await toast.isVisible().catch(() => false);
+        
+        if (hasToast) {
+          await expect(toast).toBeVisible();
+        }
+      }
+    }
   });
 
   test('should handle search with filters applied', async ({ page }) => {

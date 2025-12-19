@@ -7,9 +7,6 @@
  */
 
 import type {
-  GetFormFieldConfigArgs,
-  GetFormFieldConfigReturns,
-  GetSocialProofStatsReturns,
   GetApiHealthReturns,
   GetApiHealthFormattedReturns,
   GetSiteUrlsReturns,
@@ -31,10 +28,61 @@ import type {
   GetRecommendationsReturns,
   EnrollInEmailSequenceArgs,
 } from '@heyclaude/database-types/postgres-types';
-import type { DueSequenceEmailItem } from '@heyclaude/database-types/postgres-types/composites/due_sequence_email_item';
 import type { webhook_source } from '@heyclaude/data-layer/prisma';
 // Use explicit Prisma model type to avoid conflicts with postgres-types composite types
 import type { announcementsModel } from '@heyclaude/database-types/prisma/models';
+
+// Local types for converted RPCs (RPCs removed, using Prisma directly)
+type DueSequenceEmailItem = {
+  id: string | null;
+  sequence_id: string | null;
+  email: string | null;
+  due_at: string | null;
+  processed: boolean | null;
+  step: number | null;
+};
+
+export type GetFormFieldConfigArgs = {
+  p_form_type: string;
+};
+
+export type FormFieldConfigItem = {
+  name: string;
+  label: string;
+  type: string;
+  required: boolean;
+  placeholder: string | null;
+  help_text: string | null;
+  default_value: string | null;
+  grid_column: number | null;
+  icon_name: string | null;
+  icon_position: string | null;
+  rows: number | null;
+  monospace: boolean | null;
+  min_value: number | null;
+  max_value: number | null;
+  step_value: number | null;
+  select_options: Record<string, unknown> | null;
+  field_group: string | null;
+  display_order: number | null;
+};
+
+export type GetFormFieldConfigReturns = {
+  form_type: string;
+  fields: FormFieldConfigItem[] | null;
+};
+
+// Exported for use in web-runtime
+export type GetSocialProofStatsReturns = Array<{
+  contributor_count: number;
+  contributor_names: string[] | null;
+  submission_count: number;
+  success_rate: number | null;
+  total_users: number;
+}>;
+
+// Alias for API route compatibility
+export type GetSocialProofStatsReturnRow = GetSocialProofStatsReturns[number];
 
 // Local types for converted RPCs (using Prisma directly)
 type GetWebhookEventBySvixIdArgs = {
@@ -66,7 +114,8 @@ type Notification = Awaited<ReturnType<typeof prisma.notifications.create>>;
 type EmailSequence = Awaited<ReturnType<typeof prisma.email_sequences.findUnique>>;
 
 // Local types for consolidated services
-type QuizConfigurationQuestion = {
+// Exported for use in web-runtime
+export type QuizConfigurationQuestion = {
   id: string | null;
   question: string | null;
   description: string | null;
@@ -80,7 +129,7 @@ type QuizConfigurationQuestion = {
   }> | null;
 };
 
-type GetQuizConfigurationReturns = QuizConfigurationQuestion[];
+export type GetQuizConfigurationReturns = QuizConfigurationQuestion[];
 
 // Type helpers: Extract input types from Prisma operations
 type AppSettingCreateInput = Parameters<typeof prisma.app_settings.create>[0]['data'];
@@ -118,11 +167,25 @@ export class MiscService extends BasePrismaService {
       async () => {
         // Use raw SQL with database NOW() for date comparison (eliminates new Date() call)
         // More efficient: database handles date comparison natively
+        // OPTIMIZATION: Select only needed fields instead of SELECT * to reduce data transfer
         if (p_dismissed_ids.length > 0) {
           // Use parameterized query for dismissed_ids
           const notifications = await prisma.$queryRawUnsafe<notificationsModel[]>(
             `
-            SELECT *
+            SELECT 
+              id,
+              type,
+              priority,
+              active,
+              expires_at,
+              title,
+              message,
+              action_label,
+              action_href,
+              action_onclick,
+              icon,
+              created_at,
+              updated_at
             FROM public.notifications
             WHERE active = true
               AND (expires_at IS NULL OR expires_at > NOW())
@@ -136,7 +199,20 @@ export class MiscService extends BasePrismaService {
           // No dismissed_ids - simpler query
           const notifications = await prisma.$queryRawUnsafe<notificationsModel[]>(
             `
-            SELECT *
+            SELECT 
+              id,
+              type,
+              priority,
+              active,
+              expires_at,
+              title,
+              message,
+              action_label,
+              action_href,
+              action_onclick,
+              icon,
+              created_at,
+              updated_at
             FROM public.notifications
             WHERE active = true
               AND (expires_at IS NULL OR expires_at > NOW())
@@ -168,9 +244,23 @@ export class MiscService extends BasePrismaService {
       'getActiveAnnouncement',
       async () => {
         // Use raw SQL with database NOW() for date comparison (more efficient, eliminates Date.now())
+        // OPTIMIZATION: Select only needed fields instead of SELECT * to reduce data transfer
         const result = await prisma.$queryRawUnsafe<announcementsModel[]>(
           `
-          SELECT *
+          SELECT 
+            id,
+            variant,
+            tag,
+            title,
+            href,
+            icon,
+            start_date,
+            end_date,
+            priority,
+            dismissible,
+            active,
+            created_at,
+            updated_at
           FROM public.announcements
           WHERE active = true
             AND (start_date IS NULL OR start_date <= NOW())
@@ -826,13 +916,13 @@ export class MiscService extends BasePrismaService {
         });
 
         // Transform to match RPC return structure (QuizConfigurationQuestion[])
-        const transformed: QuizConfigurationQuestion[] = questions.map((q) => ({
+        const transformed: QuizConfigurationQuestion[] = questions.map((q: typeof questions[number]) => ({
           id: q.question_id,
           question: q.question_text,
           description: q.description,
           required: q.required ?? false,
           display_order: q.display_order,
-          options: q.quiz_options.map((opt) => ({
+          options: q.quiz_options.map((opt: typeof q.quiz_options[number]) => ({
             value: opt.value,
             label: opt.label,
             description: opt.description,
@@ -898,7 +988,7 @@ export class MiscService extends BasePrismaService {
     }
 
     // Fetch active sequences for the emails (step 2)
-    const emails = dueSchedules.map((s) => s.email);
+    const emails = dueSchedules.map((s: typeof dueSchedules[number]) => s.email);
     const activeSequences = await prisma.email_sequences.findMany({
       where: {
         sequence_id: 'onboarding',
@@ -913,15 +1003,18 @@ export class MiscService extends BasePrismaService {
     });
 
     // Create a Set of active email addresses for fast lookup
-    const activeEmailsSet = new Set(activeSequences.map((s) => s.email));
+    const activeEmailsSet = new Set(activeSequences.map((s: typeof activeSequences[number]) => s.email));
 
     // Filter schedules to only those with active sequences and transform to match RPC return structure
     // DueSequenceEmailItem has all fields nullable
     const result: DueSequenceEmailItem[] = dueSchedules
-      .filter((schedule) => activeEmailsSet.has(schedule.email))
-      .map((schedule) => ({
+      .filter((schedule: typeof dueSchedules[number]) => activeEmailsSet.has(schedule.email))
+      .map((schedule: typeof dueSchedules[number]) => ({
         id: schedule.id ?? null,
+        sequence_id: schedule.sequence_id ?? null,
         email: schedule.email ?? null,
+        due_at: schedule.due_at ? schedule.due_at.toISOString() : null,
+        processed: schedule.processed ?? null,
         step: schedule.step ?? null,
       }));
     
@@ -969,7 +1062,7 @@ export class MiscService extends BasePrismaService {
       });
 
       return updated ?? null;
-    });
+    }, { timeout: 10000 }); // 10 second timeout for email sequence operations
   }
 
   /**

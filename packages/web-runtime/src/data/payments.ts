@@ -70,10 +70,14 @@ function sanitizeBenefits(benefits: PaymentPlanRow['benefits']): null | string[]
  * Uses 'use cache' to cache payment plan catalog. This data is public and same for all users.
  */
 export const getPaymentPlanCatalog = createDataFunction<void, PaymentPlanCatalogEntry[]>({
-  serviceKey: 'jobs',
+  logContext: (_, result) => ({
+    count: Array.isArray(result) ? result.length : 0,
+  }),
   methodName: 'getPaymentPlanCatalog',
   module: 'data/payments',
   operation: 'getPaymentPlanCatalog',
+  serviceKey: 'jobs',
+  throwOnError: true,
   transformResult: (result) => {
     const data = result as PaymentPlanRow[];
     // Type guard: Validate each entry has required fields
@@ -85,7 +89,7 @@ export const getPaymentPlanCatalog = createDataFunction<void, PaymentPlanCatalog
         'tier' in entry &&
         'price_cents' in entry
       ) {
-        rows.push(entry as PaymentPlanRow);
+        rows.push(entry);
       }
     }
 
@@ -104,16 +108,13 @@ export const getPaymentPlanCatalog = createDataFunction<void, PaymentPlanCatalog
       })
     );
   },
-  throwOnError: true,
-  logContext: (_, result) => ({
-    count: Array.isArray(result) ? result.length : 0,
-  }),
 });
 
 /**
  * Get job billing summaries for a list of job IDs
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific billing data.
+ * @param jobIds
  */
 export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBillingSummaryEntry[]> {
   if (jobIds.length === 0) {
@@ -121,10 +122,12 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
   }
 
   const cachedFn = createDataFunction<string[], JobBillingSummaryEntry[]>({
-    serviceKey: 'jobs',
+    logContext: (jobIds) => ({ jobCount: jobIds.length }),
     methodName: 'getJobBillingSummaries',
     module: 'data/payments',
     operation: 'getJobBillingSummaries',
+    serviceKey: 'jobs',
+    throwOnError: true,
     transformArgs: (jobIds) => ({ p_job_ids: jobIds }),
     transformResult: (result) => {
       // Type guard: RPC returns unknown[], validate structure before using
@@ -132,7 +135,7 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
       if (!Array.isArray(result)) {
         return [];
       }
-      
+
       const entries: JobBillingSummaryEntry[] = [];
       for (const entry of result) {
         // Validate entry has required fields before casting
@@ -148,8 +151,6 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
       }
       return entries;
     },
-    throwOnError: true,
-    logContext: (jobIds) => ({ jobCount: jobIds.length }),
   });
 
   const result = await cachedFn(jobIds);

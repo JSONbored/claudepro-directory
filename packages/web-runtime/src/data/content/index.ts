@@ -2,15 +2,18 @@ import 'server-only';
 
 import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
 import {
-  type EnrichedContentItem,
   type GetPopularContentReturns,
   type GetTrendingContentReturns,
   type GetTrendingMetricsWithContentReturns,
 } from '@heyclaude/database-types/postgres-types';
+
+// EnrichedContentItem was removed - use contentModel instead
+type EnrichedContentItem = contentModel;
 import { normalizeError } from '@heyclaude/shared-runtime';
+
 import { logger } from '../../logger.ts';
-import { QUERY_LIMITS } from '../config/constants.ts';
 import { createDataFunction } from '../cached-data-factory.ts';
+import { QUERY_LIMITS } from '../config/constants.ts';
 import { getService } from '../service-factory.ts';
 
 /**
@@ -18,20 +21,20 @@ import { getService } from '../service-factory.ts';
  * Simple data fetching function - pages control caching with 'use cache' directive
  */
 export const getContentByCategory = createDataFunction<content_category, EnrichedContentItem[]>({
-  serviceKey: 'content',
-  methodName: 'getEnrichedContentList',
-  module: 'data/content/index',
-  operation: 'getContentByCategory',
-  transformArgs: (category) => ({
-    p_category: category,
-    p_limit: QUERY_LIMITS.content.default,
-    p_offset: 0,
-  }),
-  onError: () => [], // Return empty array on error
   logContext: (category, result) => ({
     category,
     count: Array.isArray(result) ? result.length : 0,
     dbCall: true,
+  }),
+  methodName: 'getEnrichedContentList',
+  module: 'data/content/index',
+  onError: () => [], // Return empty array on error
+  operation: 'getContentByCategory',
+  serviceKey: 'content',
+  transformArgs: (category) => ({
+    p_category: category,
+    p_limit: QUERY_LIMITS.content.default,
+    p_offset: 0,
   }),
 });
 
@@ -43,10 +46,14 @@ export const getContentBySlug = createDataFunction<
   { category: content_category; slug: string },
   EnrichedContentItem | null
 >({
-  serviceKey: 'content',
+  logContext: (args) => ({
+    category: args.category,
+    slug: args.slug,
+  }),
   methodName: 'getEnrichedContentList',
   module: 'data/content/index',
   operation: 'getContentBySlug',
+  serviceKey: 'content',
   transformArgs: (args) => ({
     p_category: args.category,
     p_limit: 1,
@@ -57,15 +64,18 @@ export const getContentBySlug = createDataFunction<
     const data = result as EnrichedContentItem[];
     return data[0] ?? null;
   },
-  logContext: (args) => ({
-    category: args.category,
-    slug: args.slug,
-  }),
 });
 
-/**
+/***
+ *
  * Group items by category for efficient batch fetching
- */
+ * @param {Array<{ category: content_category; slug: string }>} items
+ * @returns {Map<content_category, string[]>} Return value description
+ * @param {Array<{ category: content_category; slug: string }>} items Parameter description
+ * @param {Array<{ category: content_category; slug: string }>} items Parameter description
+ * @param {Array<{ category: content_category; slug: string }>} items Parameter description
+  * @param {Array<{ category: content_category; slug: string }>} items Parameter description
+*/
 function groupItemsByCategory(
   items: Array<{ category: content_category; slug: string }>
 ): Map<content_category, string[]> {
@@ -82,6 +92,7 @@ function groupItemsByCategory(
  * Batch fetch content items by slugs (optimized for collections)
  * Simple data fetching function - pages control caching with 'use cache' directive
  * OPTIMIZATION: Fetches multiple items in a single RPC call instead of N+1 queries.
+ * @param items
  */
 export async function getContentBatchBySlugs(
   items: Array<{ category: content_category; slug: string }>
@@ -97,15 +108,15 @@ export async function getContentBatchBySlugs(
 
     // Fetch all categories in parallel
     const categoryResults = await Promise.all(
-      [...itemsByCategory.entries()].map(async ([category, slugs]) => {
-        const data = await service.getEnrichedContentList({
-          p_category: category,
-          p_limit: slugs.length,
-          p_offset: 0,
-          p_slugs: slugs,
-        });
-        return data;
-      })
+      [...itemsByCategory.entries()].map(
+        async ([category, slugs]) =>
+          await service.getEnrichedContentList({
+            p_category: category,
+            p_limit: slugs.length,
+            p_offset: 0,
+            p_slugs: slugs,
+          })
+      )
     );
 
     // Build result map
@@ -134,10 +145,12 @@ export async function getContentBatchBySlugs(
  * Uses optimized getContentPaginatedSlim with window function for better performance.
  */
 export const getContentCount = createDataFunction<content_category | undefined, number>({
-  serviceKey: 'content',
+  logContext: (category) => ({ category: category ?? 'all' }),
   methodName: 'getContentPaginatedSlim',
   module: 'data/content/index',
+  onError: () => 0, // Return 0 on error
   operation: 'getContentCount',
+  serviceKey: 'content',
   transformArgs: (category) => ({
     ...(category ? { p_category: category } : {}),
     p_limit: 1,
@@ -149,8 +162,6 @@ export const getContentCount = createDataFunction<content_category | undefined, 
     const paginatedResult = result as { pagination?: { total_count?: number } };
     return paginatedResult.pagination?.total_count ?? 0;
   },
-  onError: () => 0, // Return 0 on error
-  logContext: (category) => ({ category: category ?? 'all' }),
 });
 
 /**
@@ -169,21 +180,20 @@ export const getTrendingContent = createDataFunction<
   { category?: content_category; limit?: number },
   GetTrendingContentReturns
 >({
-  serviceKey: 'trending',
-  methodName: 'getTrendingContent',
-  module: 'data/content/index',
-  operation: 'getTrendingContent',
-  transformArgs: (args) => ({
-    ...(args.category ? { p_category: args.category } : {}),
-    p_limit: args.limit ?? 20,
-  }),
-  onError: () => [], // Return empty array on error
   logContext: (args) => ({
     category: args.category ?? 'all',
     limit: args.limit ?? 20,
   }),
+  methodName: 'getTrendingContent',
+  module: 'data/content/index',
+  onError: () => [], // Return empty array on error
+  operation: 'getTrendingContent',
+  serviceKey: 'trending',
+  transformArgs: (args) => ({
+    ...(args.category ? { p_category: args.category } : {}),
+    p_limit: args.limit ?? 20,
+  }),
 });
-
 
 interface TrendingPageParameters {
   category?: content_category | null;
@@ -241,7 +251,7 @@ export async function getTrendingPageData(
   } catch (error) {
     const normalized = normalizeError(error, 'getTrendingPageData failed');
     logger.error(
-      { err: normalized, category: category ?? 'all', limit: safeLimit },
+      { category: category ?? 'all', err: normalized, limit: safeLimit },
       'getTrendingPageData: failed'
     );
     return {

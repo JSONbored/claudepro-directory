@@ -1,10 +1,8 @@
-import {
-  generatePageMetadata,
-} from '@heyclaude/web-runtime/seo';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getCollectionDetail } from '@heyclaude/web-runtime/data/account';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -13,6 +11,7 @@ import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
 
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
+import type { content_category, bookmarksModel } from '@heyclaude/data-layer/prisma';
 
 import Loading from './loading';
 
@@ -179,12 +178,16 @@ async function EditCollectionPageContent({
     updated_at: new Date(rpcCollection.updated_at),
   };
 
+  // Convert RPC return data to Prisma bookmarksModel type
+  // RPC returns: { created_at: string, updated_at: string, content_type: string | null, ... }
+  // Prisma expects: { created_at: Date, updated_at: Date, content_type: content_category | null, ... }
   const bookmarks = (rpcBookmarks ?? []).map((b) => ({
     ...b,
+    content_type: b.content_type as content_category | null, // RPC returns string, Prisma expects enum
     created_at: new Date(b.created_at),
     notes: b.notes ?? null,
     updated_at: new Date(b.updated_at),
-  }));
+  })) as bookmarksModel[];
 
   // Final summary log
   userLogger.info({ section: 'data-fetch' }, 'EditCollectionPage: page render completed');

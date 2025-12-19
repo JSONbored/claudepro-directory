@@ -14,22 +14,22 @@
  * No manual type mapping required - services are discovered automatically.
  */
 
-import type {
-  AccountService,
-  ChangelogService,
-  CompaniesService,
-  ContentService,
-  JobsService,
-  MiscService,
-  NewsletterService,
-  SearchService,
-  TrendingService,
+import {
+  type AccountService,
+  type ChangelogService,
+  type CompaniesService,
+  type ContentService,
+  type JobsService,
+  type MiscService,
+  type NewsletterService,
+  type SearchService,
+  type TrendingService,
 } from '@heyclaude/data-layer';
 
 /**
  * Auto-generated service registry
  * Maps service keys to their class names for lazy loading
- * 
+ *
  * To add a new service: Add the entry here and TypeScript will infer the types automatically
  */
 const SERVICE_REGISTRY = {
@@ -53,7 +53,7 @@ export type ServiceKey = keyof typeof SERVICE_REGISTRY;
  * Service type map (auto-inferred from imports)
  * TypeScript automatically infers types from the imported service types
  */
-type ServiceTypeMap = {
+interface ServiceTypeMap {
   account: AccountService;
   changelog: ChangelogService;
   companies: CompaniesService;
@@ -63,7 +63,7 @@ type ServiceTypeMap = {
   newsletter: NewsletterService;
   search: SearchService;
   trending: TrendingService;
-};
+}
 
 /**
  * Singleton service instances cache
@@ -98,9 +98,7 @@ const serviceInstances = new Map<ServiceKey, ServiceTypeMap[ServiceKey]>();
  * const result = await contentService.getContentDetailCore({...});
  * ```
  */
-export async function getService<T extends ServiceKey>(
-  serviceKey: T
-): Promise<ServiceTypeMap[T]> {
+export async function getService<T extends ServiceKey>(serviceKey: T): Promise<ServiceTypeMap[T]> {
   // Return existing singleton instance if available
   const existing = serviceInstances.get(serviceKey);
   if (existing) {
@@ -131,7 +129,7 @@ export async function getService<T extends ServiceKey>(
 /**
  * Direct service accessors (alternative to getService)
  * Provides direct access without string keys for better DX
- * 
+ *
  * @example
  * ```typescript
  * const contentService = await services.content();

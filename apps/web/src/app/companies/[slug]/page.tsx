@@ -6,14 +6,17 @@
 
 import {
   type experience_level,
+  type job_category,
   type job_plan,
+  type job_tier,
+  type job_type,
   type workplace_type,
 } from '@heyclaude/data-layer/prisma';
-import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/utils/url-safety';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { type CompanyProfileJobItem } from '@heyclaude/data-layer';
+import { type JobCardJobType } from '@heyclaude/web-runtime/types/component.types';
 import { getCompanyProfile } from '@heyclaude/web-runtime/data/companies';
-import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import {
   Briefcase,
   Building,
@@ -23,6 +26,7 @@ import {
   Users,
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Card,
   CardContent,
@@ -31,6 +35,7 @@ import {
   CardTitle,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/utils/url-safety';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Image from 'next/image';
@@ -284,10 +289,10 @@ function CompanyHeader({
       <div className="flex items-start gap-3">
         {company.logo ? (
           <Image
-            priority
             alt={`${company.name} logo`}
             className="border-background h-24 w-24 card-base border-4 object-cover"
             height={96}
+            priority
             src={company.logo}
             width={96}
           />
@@ -341,7 +346,20 @@ function CompanyHeader({
                 Using Claude since{' '}
                 {(() => {
                   const date = new Date(company.using_cursor_since);
-                  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                  const monthNames = [
+                    'Jan',
+                    'Feb',
+                    'Mar',
+                    'Apr',
+                    'May',
+                    'Jun',
+                    'Jul',
+                    'Aug',
+                    'Sep',
+                    'Oct',
+                    'Nov',
+                    'Dec',
+                  ];
                   return `${monthNames[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
                 })()}
               </div>
@@ -373,23 +391,11 @@ function CompanyJobsList({
 }) {
   const { active_jobs } = profile;
 
-  const filteredActiveJobs =
+  // Filter and type narrow active_jobs to ensure all required fields are present
+  // Map to JobCardJobType format with proper type conversions
+  const filteredActiveJobs: JobCardJobType[] =
     active_jobs?.filter(
-      (
-        job
-      ): job is typeof job & {
-        click_count: number;
-        company: string;
-        experience: experience_level;
-        expires_at: string;
-        id: string;
-        plan: job_plan;
-        posted_at: string;
-        slug: string;
-        title: string;
-        view_count: number;
-        workplace: workplace_type;
-      } =>
+      (job): job is CompanyProfileJobItem =>
         Boolean(
           job.id &&
           job.slug &&
@@ -403,7 +409,29 @@ function CompanyJobsList({
           typeof job.view_count === 'number' &&
           typeof job.click_count === 'number'
         )
-    ) ?? [];
+    ).map((job): JobCardJobType => ({
+      id: job.id,
+      slug: job.slug,
+      title: job.title,
+      company: job.company,
+      company_logo: job.company_logo,
+      location: job.location,
+      description: job.description,
+      salary: job.salary,
+      remote: job.remote,
+      type: job.type as job_type | null,
+      workplace: (job.workplace as workplace_type) ?? 'remote',
+      experience: (job.experience as experience_level) ?? 'beginner',
+      category: (job.category as job_category) ?? null,
+      tags: job.tags,
+      plan: (job.plan as job_plan) ?? 'free',
+      tier: job.tier as job_tier | null,
+      posted_at: job.posted_at ?? '',
+      expires_at: job.expires_at ?? '',
+      view_count: job.view_count,
+      click_count: job.click_count,
+      link: job.link,
+    })) ?? [];
 
   return (
     <>
@@ -429,32 +457,7 @@ function CompanyJobsList({
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {filteredActiveJobs.map((job) => (
-            <JobCard
-              job={{
-                category: job.category,
-                click_count: job.click_count,
-                company: job.company,
-                company_logo: job.company_logo,
-                description: job.description,
-                experience: job.experience,
-                expires_at: job.expires_at,
-                id: job.id,
-                link: job.link,
-                location: job.location,
-                plan: job.plan,
-                posted_at: job.posted_at,
-                remote: job.remote ?? false,
-                salary: job.salary,
-                slug: job.slug,
-                tags: job.tags ?? [],
-                tier: job.tier,
-                title: job.title,
-                type: job.type,
-                view_count: job.view_count,
-                workplace: job.workplace,
-              }}
-              key={job.id}
-            />
+            <JobCard job={job} key={job.id} />
           ))}
         </div>
       )}

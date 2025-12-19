@@ -1,8 +1,8 @@
-import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
 import {
   Button,
   Card,

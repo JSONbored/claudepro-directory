@@ -19,15 +19,13 @@
 
 import 'server-only';
 import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
-import { type GetContentPaginatedSlimArgs } from '@heyclaude/database-types/postgres-types';
+import { type GetContentPaginatedSlimArgs } from '@heyclaude/data-layer';
 import {
-  createOptionsHandler as createApiOptionsHandler,
-  createCachedApiRoute,
-  type RouteHandlerContext,
+  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
+import { categorySchema, paginationSchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
-import { categorySchema, paginationSchema } from '@heyclaude/web-runtime/api/schemas';
 
 // Local type for migrated RPC (RPC removed, using Prisma directly)
 type ContentPaginatedSlimItem = contentModel;
@@ -53,7 +51,9 @@ export const GET = createCachedApiRoute({
   cacheLife: { expire: 2_592_000, revalidate: 21_600, stale: 86_400 }, // 1 day stale, 6hr revalidate, 30 days expire
   cacheTags: (query) => {
     const category = query.category as content_category | null;
-    return category ? ['content-paginated', `content-paginated-${category}`] : ['content-paginated'];
+    return category
+      ? ['content-paginated', `content-paginated-${category}`]
+      : ['content-paginated'];
   },
   cors: 'anon',
   method: 'GET',
@@ -76,7 +76,12 @@ export const GET = createCachedApiRoute({
   querySchema: paginationSchema.extend({
     category: categorySchema,
   }),
-  responseHandler: (result: unknown, query: { category: content_category | null; limit: number; offset: number }, _body: unknown, ctx: RouteHandlerContext<{ category: content_category | null; limit: number; offset: number }, unknown>) => {
+  responseHandler: (
+    result: unknown,
+    query: { category: content_category | null; limit: number; offset: number },
+    _body: unknown,
+    ctx: RouteHandlerContext<{ category: content_category | null; limit: number; offset: number }>
+  ) => {
     const { logger } = ctx;
     const { limit, offset } = query;
 

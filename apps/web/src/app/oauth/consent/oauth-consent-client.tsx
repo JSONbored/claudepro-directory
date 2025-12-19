@@ -7,9 +7,9 @@
  * Displays client information, requested scopes, and handles approve/deny actions.
  */
 
-import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/supabase/browser';
 import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
+import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/supabase/browser';
 import { Button, cn, UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { AlertCircle, CheckCircle2, ExternalLink, Shield, XCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -70,9 +70,9 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
           const errorMessage =
             approveError instanceof Error
               ? approveError.message
-              : (typeof approveError === 'string'
+              : typeof approveError === 'string'
                 ? approveError
-                : 'Failed to approve authorization');
+                : 'Failed to approve authorization';
           setError(errorMessage);
           setIsProcessingFalse();
           return;
@@ -118,9 +118,9 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
           const errorMessage =
             denyError instanceof Error
               ? denyError.message
-              : (typeof denyError === 'string'
+              : typeof denyError === 'string'
                 ? denyError
-                : 'Failed to deny authorization');
+                : 'Failed to deny authorization';
           setError(errorMessage);
           setIsProcessingFalse();
           return;
@@ -249,11 +249,11 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
           <Button
             className="flex-1 transition-colors"
             disabled={isProcessing}
-            size="lg"
-            variant="outline"
             onClick={() => {
               void handleDeny();
             }}
+            size="lg"
+            variant="outline"
           >
             <XCircle aria-hidden="true" className="mr-2 h-4 w-4" />
             Deny
@@ -261,11 +261,11 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
           <Button
             className="hover:bg-accent/20 flex-1 transition-colors"
             disabled={isProcessing}
-            size="lg"
-            variant="default"
             onClick={() => {
               void handleApprove();
             }}
+            size="lg"
+            variant="default"
           >
             <CheckCircle2 aria-hidden="true" className="mr-2 h-4 w-4" />
             {isProcessing ? 'Processing...' : 'Approve'}

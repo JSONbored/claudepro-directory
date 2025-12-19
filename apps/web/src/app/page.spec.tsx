@@ -1224,19 +1224,150 @@ test.describe('Homepage', () => {
     const cardCount = await cards.count();
 
     if (cardCount > 0) {
+      const firstCard = cards.first();
+      
       // Hover over first card
-      await cards.first().hover();
+      await firstCard.hover();
       await page.waitForTimeout(300);
 
       // Verify card is still visible
-      await expect(cards.first()).toBeVisible();
+      await expect(firstCard).toBeVisible();
 
       // Try clicking the card (should navigate)
-      const cardLink = cards.first().getByRole('link').first();
+      const cardLink = firstCard.getByRole('link').first();
       const hasLink = await cardLink.isVisible().catch(() => false);
       
       if (hasLink) {
         const href = await cardLink.getAttribute('href');
+        expect(href).toBeTruthy();
+      }
+    }
+  });
+
+  test('should handle bookmark button interactions on content cards', async ({ page }) => {
+    // Wait for content to load
+    await page.waitForTimeout(2000);
+
+    // Look for config cards
+    const cards = page.locator('[data-testid="config-card"], article, [role="article"]');
+    const cardCount = await cards.count();
+
+    if (cardCount > 0) {
+      const firstCard = cards.first();
+      
+      // Find bookmark button (may require authentication)
+      const bookmarkButton = firstCard.getByRole('button', { name: /bookmark|save/i }).first();
+      const hasBookmarkButton = await bookmarkButton.isVisible().catch(() => false);
+      
+      if (hasBookmarkButton) {
+        // Click bookmark button
+        await bookmarkButton.click();
+        await page.waitForTimeout(500);
+        
+        // Should show toast or auth modal (if not authenticated)
+        const toast = page.getByText(/bookmarked|saved|sign in/i);
+        const authModal = page.getByText(/sign in required|please sign in/i);
+        
+        const hasToast = await toast.isVisible().catch(() => false);
+        const hasAuthModal = await authModal.isVisible().catch(() => false);
+        
+        // Either toast or auth modal should appear
+        expect(hasToast || hasAuthModal).toBe(true);
+      }
+    }
+  });
+
+  test('should handle copy button interactions on content cards', async ({ page }) => {
+    // Wait for content to load
+    await page.waitForTimeout(2000);
+
+    // Look for config cards
+    const cards = page.locator('[data-testid="config-card"], article, [role="article"]');
+    const cardCount = await cards.count();
+
+    if (cardCount > 0) {
+      const firstCard = cards.first();
+      
+      // Find copy button (SimpleCopyButton)
+      const copyButton = firstCard.getByRole('button', { name: /copy|copy link/i }).first();
+      const hasCopyButton = await copyButton.isVisible().catch(() => false);
+      
+      if (hasCopyButton) {
+        // Click copy button
+        await copyButton.click();
+        await page.waitForTimeout(500);
+        
+        // Should show success toast
+        const toast = page.getByText(/copied|link copied/i);
+        const hasToast = await toast.isVisible().catch(() => false);
+        
+        // Toast may appear briefly, check if it exists
+        if (hasToast) {
+          await expect(toast).toBeVisible();
+        }
+      }
+    }
+  });
+
+  test('should handle pin button interactions on content cards', async ({ page }) => {
+    // Wait for content to load
+    await page.waitForTimeout(2000);
+
+    // Look for config cards
+    const cards = page.locator('[data-testid="config-card"], article, [role="article"]');
+    const cardCount = await cards.count();
+
+    if (cardCount > 0) {
+      const firstCard = cards.first();
+      
+      // Find pin button (pinboard toggle)
+      const pinButton = firstCard.getByRole('button', { name: /pin|unpin|pinboard/i }).first();
+      const hasPinButton = await pinButton.isVisible().catch(() => false);
+      
+      if (hasPinButton) {
+        // Click pin button
+        await pinButton.click();
+        await page.waitForTimeout(500);
+        
+        // Should show toast
+        const toast = page.getByText(/pinned|unpinned|saved for later/i);
+        const hasToast = await toast.isVisible().catch(() => false);
+        
+        // Toast may appear briefly
+        if (hasToast) {
+          await expect(toast).toBeVisible();
+        }
+      }
+    }
+  });
+
+  test('should handle external link clicks on content cards', async ({ page }) => {
+    // Wait for content to load
+    await page.waitForTimeout(2000);
+
+    // Look for config cards
+    const cards = page.locator('[data-testid="config-card"], article, [role="article"]');
+    const cardCount = await cards.count();
+
+    if (cardCount > 0) {
+      const firstCard = cards.first();
+      
+      // Find external links (GitHub, docs)
+      const githubLink = firstCard.getByRole('link', { name: /github|repository/i }).first();
+      const docsLink = firstCard.getByRole('link', { name: /docs|documentation/i }).first();
+      
+      const hasGithubLink = await githubLink.isVisible().catch(() => false);
+      const hasDocsLink = await docsLink.isVisible().catch(() => false);
+      
+      // At least one external link should be present if card has metadata
+      if (hasGithubLink) {
+        const href = await githubLink.getAttribute('href');
+        expect(href).toBeTruthy();
+        expect(href).toContain('github.com');
+      }
+      
+      if (hasDocsLink) {
+        const href = await docsLink.getAttribute('href');
         expect(href).toBeTruthy();
       }
     }

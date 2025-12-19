@@ -24,17 +24,19 @@ import 'server-only';
 
 import { type GetSearchSuggestionsFormattedArgs } from '@heyclaude/database-types/postgres-types';
 // OPTIMIZATION: Removed unused imports - factory handles errors automatically
-import { createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext } from '@heyclaude/web-runtime/api/route-factory';
+import {
+  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
+import { searchAutocompleteQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getWithAuthCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
-import { searchAutocompleteQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 
 /**
  * GET /api/search/autocomplete - Get search autocomplete suggestions
  *
  * Returns search autocomplete suggestions based on a query string.
  * Validates query (minimum 2 characters) and limit (1-20, default 10) parameters.
- * 
+ *
  * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
 export const GET = createCachedApiRoute({
@@ -59,7 +61,12 @@ export const GET = createCachedApiRoute({
   },
   operation: 'SearchAutocompleteAPI',
   querySchema: searchAutocompleteQuerySchema,
-  responseHandler: (result: unknown, query: { limit: number; q: string }, _body: unknown, ctx: RouteHandlerContext<{ limit: number; q: string }, unknown>) => {
+  responseHandler: (
+    result: unknown,
+    query: { limit: number; q: string },
+    _body: unknown,
+    ctx: RouteHandlerContext<{ limit: number; q: string }>
+  ) => {
     const { logger } = ctx;
     const { limit, q } = query;
 

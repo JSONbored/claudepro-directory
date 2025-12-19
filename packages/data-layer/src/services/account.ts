@@ -8,37 +8,330 @@
 import type {
   BatchInsertUserInteractionsArgs,
   BatchInsertUserInteractionsReturns,
-  GetAccountDashboardArgs,
-  GetAccountDashboardReturns,
-  GetUserLibraryArgs,
-  GetUserLibraryReturns,
-  GetUserDashboardArgs,
-  GetUserDashboardReturns,
-  GetCollectionDetailWithItemsArgs,
-  GetCollectionDetailWithItemsReturns,
-  GetUserSettingsArgs,
-  GetUserSettingsReturns,
-  GetSponsorshipAnalyticsArgs,
-  GetSponsorshipAnalyticsReturns,
-  GetUserCompaniesArgs,
-  GetUserCompaniesReturns,
-  GetUserSponsorshipsArgs,
-  GetUserSponsorshipsReturns,
-  GetSubmissionDashboardArgs,
-  GetSubmissionDashboardReturns,
-  GetUserActivitySummaryArgs,
-  GetUserActivitySummaryReturns,
-  GetUserActivityTimelineArgs,
-  GetUserActivityTimelineReturns,
-  GetUserIdentitiesArgs,
-  GetUserIdentitiesReturns,
-  GetUserCompleteDataArgs,
-  GetUserCompleteDataReturns,
 } from '@heyclaude/database-types/postgres-types';
 import type { content_category } from '@heyclaude/data-layer/prisma';
 import { prisma } from '../prisma/client.ts';
 
 // Local types for converted RPCs (RPCs removed, using Prisma directly)
+// These RPC functions were removed and converted to Prisma direct queries
+// Types are defined locally to match the original RPC return structures
+// Exported for use in web-runtime
+
+export type GetAccountDashboardArgs = {
+  p_user_id: string;
+};
+
+export type GetAccountDashboardReturns = {
+  bookmark_count: number;
+  profile: {
+    name: string | null;
+    tier: 'free' | 'pro' | 'enterprise' | null;
+    created_at: string | null;
+  } | null;
+};
+
+export type GetUserLibraryArgs = {
+  p_user_id: string;
+};
+
+export type GetUserLibraryReturns = {
+  bookmarks: Array<{
+    id: string;
+    user_id: string;
+    content_type: string | null;
+    content_slug: string;
+    notes: string | null;
+    created_at: string;
+    updated_at: string;
+  }> | null;
+  collections: Array<{
+    id: string;
+    slug: string;
+    name: string;
+    description: string | null;
+    is_public: boolean;
+    item_count: number;
+    view_count: number;
+    created_at: string;
+  }> | null;
+  stats: {
+    bookmark_count: number;
+    collection_count: number;
+    total_collection_items: number;
+    total_collection_views: number;
+  } | null;
+};
+
+export type GetUserDashboardArgs = {
+  p_user_id: string;
+};
+
+export type UserDashboardSubmission = {
+  id: string;
+  user_id: string | null;
+  content_type: string | null;
+  content_slug: string;
+  content_name: string;
+  pr_number: string | null;
+  pr_url: string | null;
+  branch_name: string | null;
+  status: string | null;
+  submission_data: Record<string, unknown> | null;
+  rejection_reason: string | null;
+  created_at: string;
+  updated_at: string;
+  merged_at: string | null;
+};
+
+export type GetUserDashboardReturns = {
+  submissions: UserDashboardSubmission[];
+  companies: Record<string, unknown> | null;
+  jobs: Record<string, unknown> | null;
+};
+
+export type GetCollectionDetailWithItemsArgs = {
+  p_slug: string;
+  p_user_id: string;
+};
+
+export type GetCollectionDetailWithItemsReturns = {
+  collection: {
+    id: string;
+    user_id: string;
+    slug: string;
+    name: string;
+    description: string | null;
+    is_public: boolean;
+    view_count: number;
+    bookmark_count: number;
+    item_count: number;
+    created_at: string;
+    updated_at: string;
+  } | null;
+  items: Array<{
+    id: string;
+    collection_id: string;
+    user_id: string;
+    content_type: string | null;
+    content_slug: string;
+    order: number;
+    notes: string | null;
+    added_at: string;
+    created_at: string;
+    updated_at: string;
+  }> | null;
+  bookmarks: Array<{
+    id: string;
+    user_id: string;
+    content_type: string | null;
+    content_slug: string;
+    notes: string | null;
+    created_at: string;
+    updated_at: string;
+  }> | null;
+};
+
+export type GetUserSettingsArgs = {
+  p_user_id: string;
+};
+
+export type GetUserSettingsReturns = {
+  profile: {
+    display_name: string | null;
+    bio: string | null;
+    work: string | null;
+    website: string | null;
+    social_x_link: string | null;
+    interests: string[];
+    profile_public: boolean | null;
+    follow_email: boolean | null;
+    created_at: string | null;
+  } | null;
+  user_data: {
+    slug: string | null; // Prisma schema: String? (nullable)
+    name: string | null;
+    image: string | null;
+    tier: 'free' | 'pro' | 'enterprise' | null; // Prisma schema: user_tier? (nullable)
+  } | null;
+  username: string | null;
+};
+
+export type GetSponsorshipAnalyticsArgs = {
+  p_user_id: string;
+  p_sponsorship_id: string;
+};
+
+export type GetSponsorshipAnalyticsReturns = {
+  sponsorship: {
+    id: string;
+    user_id: string;
+    content_type: content_category;
+    content_id: string;
+    active: boolean | null;
+    start_date: string;
+    end_date: string;
+    impression_limit: number | null;
+    impression_count: number | null;
+    click_count: number | null;
+    created_at: string;
+    updated_at: string;
+    tier: string;
+  } | null;
+  daily_stats: Array<{
+    date: string | null;
+    impressions: number | null;
+    clicks: number | null;
+  }> | null;
+  computed_metrics: {
+    ctr: number;
+    days_active: number;
+    avg_impressions_per_day: number;
+  } | null;
+};
+
+export type GetUserCompaniesArgs = {
+  p_user_id: string;
+};
+
+export type GetUserCompaniesReturns = {
+  companies: Array<{
+    id: string;
+    slug: string;
+    name: string;
+    logo: string | null;
+    website: string | null;
+    description: string | null;
+    size: string | null;
+    industry: string | null;
+    using_cursor_since: string | null;
+    featured: boolean | null;
+    created_at: string;
+    updated_at: string;
+    stats: {
+      total_jobs: number;
+      active_jobs: number;
+      total_views: number;
+      total_clicks: number;
+      latest_job_posted_at: string | null;
+    } | null;
+  }>;
+};
+
+export type UserCompaniesCompany = GetUserCompaniesReturns['companies'][number];
+
+export type GetUserSponsorshipsArgs = {
+  p_user_id: string;
+};
+
+export type GetUserSponsorshipsReturns = unknown[];
+
+export type GetSubmissionDashboardArgs = {
+  p_limit: number;
+  p_offset: number;
+  p_recent_limit?: number;
+  p_contributors_limit?: number;
+};
+
+export type GetSubmissionDashboardReturns = {
+  stats: {
+    total: number;
+    pending: number;
+    merged_this_week: number;
+  };
+  recent: Array<{
+    id: string;
+    content_name: string;
+    content_type: string | null;
+    merged_at: string | null;
+    user: {
+      name: string | null; // Prisma schema: String? (nullable)
+      slug: string | null; // Prisma schema: String? (nullable)
+    } | null;
+  }>;
+  contributors: Array<{
+    rank: number;
+    name: string | null; // Prisma schema: String? (nullable)
+    slug: string | null; // Prisma schema: String? (nullable)
+    merged_count: number;
+  }>;
+};
+
+export type GetUserActivitySummaryArgs = {
+  p_user_id: string;
+};
+
+export type GetUserActivitySummaryReturns = {
+  total_posts: number;
+  total_comments: number;
+  total_votes: number;
+  total_submissions: number;
+  merged_submissions: number;
+  total_activity: number;
+} | null;
+
+export type GetUserActivityTimelineArgs = {
+  p_user_id: string;
+  p_activity_type?: string | null;
+  p_activity_limit?: number;
+  p_activity_offset?: number;
+  p_type?: string;
+  p_limit?: number;
+  p_offset?: number;
+};
+
+export type GetUserActivityTimelineReturns = {
+  activities: Array<{
+    id: string;
+    type: string;
+    title: string;
+    body: string | null;
+    vote_type: string | null;
+    content_type: string | null;
+    content_slug: string | null;
+    post_id: string | null;
+    parent_id: string | null;
+    submission_url: string;
+    description: string;
+    status: string | null;
+    user_id: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+  has_more: boolean;
+  total: number;
+};
+
+export type GetUserIdentitiesArgs = {
+  p_user_id: string;
+};
+
+export type GetUserIdentitiesReturns = {
+  identities: Array<{
+    provider: string;
+    email: string | null;
+    created_at: string | null;
+    last_sign_in_at: string | null;
+  }>;
+};
+
+export type GetUserCompleteDataArgs = {
+  p_user_id: string;
+  p_activity_limit: number;
+  p_activity_offset: number;
+  p_activity_type?: string | null;
+};
+
+export type GetUserCompleteDataReturns = {
+  account_dashboard: GetAccountDashboardReturns;
+  user_dashboard: GetUserDashboardReturns;
+  user_settings: GetUserSettingsReturns;
+  activity_summary: GetUserActivitySummaryReturns;
+  activity_timeline: GetUserActivityTimelineReturns;
+  user_library: GetUserLibraryReturns;
+  user_identities: GetUserIdentitiesReturns;
+  sponsorships: unknown[] | null;
+};
+
 type IsBookmarkedArgs = {
   p_user_id: string;
   p_content_type: content_category;
@@ -142,7 +435,7 @@ export class AccountService extends BasePrismaService {
           bookmark_count: user.bookmark_count ?? 0,
           profile: {
             name: user.name,
-            tier: (user.tier ?? 'free') as GetAccountDashboardReturns['profile'] extends { tier: infer T } ? T : never,
+            tier: (user.tier ?? 'free') as 'free' | 'pro' | 'enterprise' | null,
             created_at: user.created_at.toISOString(),
             account_age: user.account_age,
           } as GetAccountDashboardReturns['profile'] & { account_age: number },
@@ -1003,7 +1296,7 @@ export class AccountService extends BasePrismaService {
             return {
               id: submission.id,
               content_name: submission.name,
-              content_type: submission.submission_type, // submission_type enum matches expected type
+              content_type: submission.submission_type ? String(submission.submission_type) : null, // Convert enum to string | null
               merged_at: submission.moderated_at?.toISOString() ?? null,
               user: user
                 ? {

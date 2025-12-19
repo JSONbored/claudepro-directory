@@ -7,6 +7,9 @@
 
 import { z } from 'zod';
 
+import type { contentModel } from '@heyclaude/database-types/prisma/models';
+import { contentModelSchema } from '@heyclaude/database-types/prisma/zod/schemas';
+
 /**
  * Arguments for PostgreSQL function: get_trending_content
  */

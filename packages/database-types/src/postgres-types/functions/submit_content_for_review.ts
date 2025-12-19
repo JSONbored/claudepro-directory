@@ -7,6 +7,9 @@
 
 import { z } from 'zod';
 
+import type { SubmitContentForReviewResult } from '../composites/submit_content_for_review_result';
+import { submitContentForReviewResultSchema } from '../composites/submit_content_for_review_result';
+
 /**
  * Arguments for PostgreSQL function: submit_content_for_review
  */
@@ -63,12 +66,12 @@ export type SubmitContentForReviewArgsFromZod = z.infer<typeof submitContentForR
 /**
  * Return type for PostgreSQL function: submit_content_for_review
  */
-export type SubmitContentForReviewReturns = unknown;
+export type SubmitContentForReviewReturns = SubmitContentForReviewResult;
 
 /**
  * Zod schema for submit_content_for_review function return type
  */
-export const submitContentForReviewReturnsSchema = z.unknown();
+export const submitContentForReviewReturnsSchema = submitContentForReviewResultSchema;
 
 /**
  * Type inference from Zod schema (should match type above)

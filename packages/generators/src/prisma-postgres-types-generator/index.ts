@@ -47,47 +47,41 @@ generatorHandler({
         ...(generator.config?.['excludeCompositeTypes'] ? { excludeCompositeTypes: generator.config['excludeCompositeTypes'] as string[] } : {}),
       };
 
-      // Get database connection string from datasource
-      // Prisma generator helper provides datasources in options.datasources or options.dmmf.datasources
-      const datasources = options.datasources || (options.dmmf as { datasources?: unknown[] } | undefined)?.datasources || [];
-      const datasource = datasources[0] as { url?: string | { value?: string; fromEnvVar?: string } } | undefined;
-      if (!datasource) {
-        throw new Error('No datasource found in Prisma schema');
-      }
+      // Get database connection string
+      // Prisma 7.1.0+ uses prisma.config.ts which may not pass resolved URL to generators
+      // Read DIRECT_URL directly from environment (Prisma 7.1.0+ uses it for migrations/introspection)
+      // Fallback to DATABASE_URL for compatibility
+      let connectionString = process.env['DIRECT_URL'] || process.env['DATABASE_URL'] || '';
+      
+      // Try to get from Prisma's datasource if available (for compatibility with older Prisma versions)
+      if (!connectionString) {
+        const datasources = options.datasources || (options.dmmf as { datasources?: unknown[] } | undefined)?.datasources || [];
+        const datasource = datasources[0] as { url?: string | { value?: string; fromEnvVar?: string } } | undefined;
+        
+        if (datasource) {
+          // Extract connection string from environment variable or direct value
+          const urlValue = typeof datasource.url === 'string' 
+            ? datasource.url 
+            : (datasource.url as { value?: string; fromEnvVar?: string })?.value || 
+              ((datasource.url as { fromEnvVar?: string })?.fromEnvVar 
+                ? process.env[(datasource.url as { fromEnvVar: string }).fromEnvVar] || ''
+                : '');
 
-      // Extract connection string from environment variable or direct value
-      // datasource.url can be a string or an object with .value property
-      const urlValue = typeof datasource.url === 'string' 
-        ? datasource.url 
-        : (datasource.url as { value?: string; fromEnvVar?: string })?.value || 
-          ((datasource.url as { fromEnvVar?: string })?.fromEnvVar 
-            ? process.env[(datasource.url as { fromEnvVar: string }).fromEnvVar] || ''
-            : '');
-
-      let connectionString: string;
-      if (urlValue.startsWith('env("') || urlValue.startsWith('env(\'')) {
-        // Extract env var name: env("VAR_NAME") or env('VAR_NAME')
-        const envVar = urlValue.replace(/^env\(["']/, '').replace(/["']\)$/, '');
-        connectionString = process.env[envVar] || '';
-        if (!connectionString) {
-          throw new Error(
-            `Database connection string not found. Please set ${envVar} environment variable.`
-          );
-        }
-      } else if (urlValue) {
-        connectionString = urlValue;
-      } else {
-        // Try to get from DATABASE_URL as fallback
-        connectionString = process.env['DATABASE_URL'] || '';
-        if (!connectionString) {
-          throw new Error(
-            'Database connection string not found. Please set DATABASE_URL environment variable or configure datasource.url in schema.prisma.'
-          );
+          if (urlValue.startsWith('env("') || urlValue.startsWith('env(\'')) {
+            // Extract env var name: env("VAR_NAME") or env('VAR_NAME')
+            const envVar = urlValue.replace(/^env\(["']/, '').replace(/["']\)$/, '');
+            connectionString = process.env[envVar] || '';
+          } else if (urlValue) {
+            connectionString = urlValue;
+          }
         }
       }
 
       if (!connectionString) {
-        throw new Error('Database connection string is empty');
+        throw new Error(
+          'Database connection string not found. Please set DIRECT_URL (for Prisma 7.1.0+ migrations/introspection) or DATABASE_URL environment variable. ' +
+          'Infisical should inject DIRECT_URL when running: infisical run --env=dev -- prisma generate'
+        );
       }
 
     // Introspect database
@@ -117,13 +111,21 @@ generatorHandler({
 
     // Filter composite types if exclude patterns are specified
     // This ensures excluded composite types are not available for function generation
+    // Patterns support exact matches and wildcards (*)
     let filteredCompositeTypes = metadata.compositeTypes;
     if (config.excludeCompositeTypes) {
       filteredCompositeTypes = Object.fromEntries(
         Object.entries(metadata.compositeTypes).filter(([name]) => {
-          const matches = config.excludeCompositeTypes!.some((pattern) =>
-            new RegExp(pattern.replace(/\*/g, '.*')).test(name)
-          );
+          const matches = config.excludeCompositeTypes!.some((pattern) => {
+            // If pattern contains *, treat as wildcard pattern
+            if (pattern.includes('*')) {
+              const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+              return regex.test(name);
+            }
+            // Otherwise, use exact match (not substring match)
+            // This prevents "content" from matching "search_content_optimized_result"
+            return name === pattern;
+          });
           return !matches; // Exclude if matches pattern
         })
       );
@@ -145,9 +147,15 @@ generatorHandler({
     // Helper function to extract composite type from a type string (similar to function-generator.ts)
     function stripSchemaPrefix(typeName: string): string {
       if (!typeName) return typeName;
+      // Remove quotes first
       let cleaned = typeName.replace(/["']/g, '');
-      const schemaMatch = cleaned.match(/^[a-z_][a-z0-9_]*\.([a-z_][a-z0-9_]*)$/i);
-      return schemaMatch && schemaMatch[1] ? schemaMatch[1] : cleaned;
+      // Handle schema-qualified names: public.type_name or "public"."type_name"
+      // Match: schema.type or "schema"."type"
+      const schemaMatch = cleaned.match(/^([a-z_][a-z0-9_]*\.)?([a-z_][a-z0-9_]*)$/i);
+      if (schemaMatch && schemaMatch[2]) {
+        return schemaMatch[2]; // Return just the type name without schema
+      }
+      return cleaned;
     }
     
     function extractBaseCompositeTypeFromString(
@@ -156,50 +164,57 @@ generatorHandler({
     ): string | null {
       if (!typeString) return null;
 
+      // Normalize the type string first (remove quotes, whitespace)
+      const normalized = typeString.trim().replace(/["']/g, '');
+
       // Handle SETOF (returns set of rows)
-      if (typeString.toUpperCase().includes('SETOF')) {
-        const baseTypeMatch = typeString.match(/SETOF\s+([\w.]+)/i);
+      if (normalized.toUpperCase().includes('SETOF')) {
+        const baseTypeMatch = normalized.match(/SETOF\s+([\w.]+)/i);
         if (baseTypeMatch?.[1]) {
           const baseType = stripSchemaPrefix(baseTypeMatch[1]);
           if (compositeTypes[baseType]) {
             return baseType;
           }
-          if (baseType.startsWith('_')) {
-            return extractBaseCompositeTypeFromString(baseType, compositeTypes);
-          }
+          // Recursively check if it's an array or nested composite
+          return extractBaseCompositeTypeFromString(baseType, compositeTypes);
         }
         return null;
       }
 
-      // Handle array types (prefixed with _)
-      if (typeString.startsWith('_')) {
-        const baseType = stripSchemaPrefix(typeString.slice(1));
+      // Handle array types (prefixed with _ in PostgreSQL)
+      if (normalized.startsWith('_')) {
+        const baseType = stripSchemaPrefix(normalized.slice(1));
         if (compositeTypes[baseType]) {
           return baseType;
         }
-        if (baseType.startsWith('_')) {
-          return extractBaseCompositeTypeFromString(baseType, compositeTypes);
-        }
-        if (baseType.includes('[]')) {
-          return extractBaseCompositeTypeFromString(baseType.replace('[]', ''), compositeTypes);
-        }
-      }
-
-      // Handle explicit array notation
-      if (typeString.includes('[]')) {
-        const baseType = stripSchemaPrefix(typeString.replace(/\[\]/g, ''));
-        if (compositeTypes[baseType]) {
-          return baseType;
-        }
+        // Recursively check nested arrays or composites
         return extractBaseCompositeTypeFromString(baseType, compositeTypes);
       }
 
-      // Strip schema prefix before checking
-      const normalizedType = stripSchemaPrefix(typeString);
+      // Handle explicit array notation ([])
+      if (normalized.includes('[]')) {
+        const baseType = stripSchemaPrefix(normalized.replace(/\[\]/g, ''));
+        if (compositeTypes[baseType]) {
+          return baseType;
+        }
+        // Recursively check nested arrays
+        return extractBaseCompositeTypeFromString(baseType, compositeTypes);
+      }
 
-      // Direct composite type
+      // Strip schema prefix and check direct composite type
+      const normalizedType = stripSchemaPrefix(normalized);
+      
+      // Direct composite type match
       if (compositeTypes[normalizedType]) {
         return normalizedType;
+      }
+
+      // Try case-insensitive match as fallback (PostgreSQL is case-insensitive for unquoted identifiers)
+      const lowerNormalized = normalizedType.toLowerCase();
+      for (const [compositeName] of Object.entries(compositeTypes)) {
+        if (compositeName.toLowerCase() === lowerNormalized) {
+          return compositeName; // Return the actual key (preserves case)
+        }
       }
 
       return null;
@@ -222,6 +237,22 @@ generatorHandler({
         const baseType = extractBaseCompositeTypeFromString(functionMeta.returnType, filteredCompositeTypes);
         if (baseType) {
           usedCompositeTypes.add(baseType);
+        } else {
+          // Fallback: Try direct match after schema stripping
+          const normalizedReturnType = stripSchemaPrefix(functionMeta.returnType);
+          if (filteredCompositeTypes[normalizedReturnType]) {
+            // Direct match found - add it (this handles edge cases where extraction didn't work)
+            usedCompositeTypes.add(normalizedReturnType);
+          } else {
+            // Additional fallback: Try case-insensitive match
+            const lowerNormalized = normalizedReturnType.toLowerCase();
+            for (const [compositeName] of Object.entries(filteredCompositeTypes)) {
+              if (compositeName.toLowerCase() === lowerNormalized) {
+                usedCompositeTypes.add(compositeName);
+                break;
+              }
+            }
+          }
         }
       }
       

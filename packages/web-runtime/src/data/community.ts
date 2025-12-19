@@ -21,13 +21,14 @@ const DEFAULT_DIRECTORY_LIMIT = 100;
  * Follows architectural strategy: data layer -> database RPC -> DB
  */
 const searchUsersUnified = createDataFunction<
-  { query: string; limit: number },
+  { limit: number; query: string },
   CommunityDirectoryUser[]
 >({
-  serviceKey: 'search',
   methodName: 'searchUnified',
   module: 'data/community',
+  onError: () => [], // Return empty array on error
   operation: 'searchUsersUnified',
+  serviceKey: 'search',
   transformArgs: (args) =>
     ({
       p_entities: ['user'],
@@ -37,7 +38,15 @@ const searchUsersUnified = createDataFunction<
       p_query: args.query,
     }) as SearchUnifiedArgs,
   transformResult: (result) => {
-    const searchResponse = result as { data?: Array<{ description?: string; created_at?: string; id?: string; title?: string; slug?: string }> };
+    const searchResponse = result as {
+      data?: Array<{
+        created_at?: string;
+        description?: string;
+        id?: string;
+        slug?: string;
+        title?: string;
+      }>;
+    };
     const results = searchResponse.data || [];
     return results.map((result) => ({
       bio: result.description || null,
@@ -50,7 +59,6 @@ const searchUsersUnified = createDataFunction<
       work: null,
     }));
   },
-  onError: () => [], // Return empty array on error
 });
 
 export type CollectionDetailData = GetUserCollectionDetailReturns;
@@ -60,17 +68,14 @@ export type CollectionDetailData = GetUserCollectionDetailReturns;
  * Uses 'use cache' to cache directory listings. This data is public and same for all users.
  * Community directory changes periodically, so we use the 'long' cacheLife profile.
  */
-const getCommunityDirectoryRpc = createDataFunction<
-  number,
-  GetCommunityDirectoryReturns | null
->({
-  serviceKey: 'misc', // Consolidated: CommunityService methods moved to MiscService
+const getCommunityDirectoryRpc = createDataFunction<number, GetCommunityDirectoryReturns | null>({
+  logContext: (limit) => ({ limit }),
   methodName: 'getCommunityDirectory',
   module: 'data/community',
   operation: 'getCommunityDirectoryRpc',
-  transformArgs: (limit) => ({ p_limit: limit }),
+  serviceKey: 'misc', // Consolidated: CommunityService methods moved to MiscService
   throwOnError: true,
-  logContext: (limit) => ({ limit }),
+  transformArgs: (limit) => ({ p_limit: limit }),
 });
 
 export async function getCommunityDirectory(options: {
@@ -87,7 +92,7 @@ export async function getCommunityDirectory(options: {
     try {
       // Use SearchService directly (same as API route)
       // Follows architectural strategy: data layer -> database RPC -> DB
-      const allUsers = await searchUsersUnified({ query: searchQuery.trim(), limit });
+      const allUsers = await searchUsersUnified({ limit, query: searchQuery.trim() });
 
       // Fire-and-forget: Pulse user search
       if (allUsers) {
@@ -145,18 +150,18 @@ export const getPublicUserProfile = createDataFunction<
   { slug: string; viewerId?: string },
   GetUserProfileReturns | null
 >({
-  serviceKey: 'misc', // Consolidated: CommunityService methods moved to MiscService
-  methodName: 'getUserProfile',
-  module: 'data/community',
-  operation: 'getPublicUserProfile',
-  transformArgs: (input) => ({
-    p_user_slug: input.slug,
-    ...(input.viewerId ? { p_viewer_id: input.viewerId } : {}),
-  }),
-  throwOnError: true,
   logContext: (input) => ({
     hasViewer: Boolean(input.viewerId),
     slug: input.slug,
+  }),
+  methodName: 'getUserProfile',
+  module: 'data/community',
+  operation: 'getPublicUserProfile',
+  serviceKey: 'misc', // Consolidated: CommunityService methods moved to MiscService
+  throwOnError: true,
+  transformArgs: (input) => ({
+    p_user_slug: input.slug,
+    ...(input.viewerId ? { p_viewer_id: input.viewerId } : {}),
   }),
 });
 
@@ -176,19 +181,19 @@ export const getPublicCollectionDetail = createDataFunction<
   { collectionSlug: string; userSlug: string; viewerId?: string },
   CollectionDetailData | null
 >({
-  serviceKey: 'misc', // Consolidated: CommunityService methods moved to MiscService
-  methodName: 'getUserCollectionDetail',
-  module: 'data/community',
-  operation: 'getPublicCollectionDetail',
-  transformArgs: (input) => ({
-    p_collection_slug: input.collectionSlug,
-    p_user_slug: input.userSlug,
-    ...(input.viewerId ? { p_viewer_id: input.viewerId } : {}),
-  }),
-  throwOnError: true,
   logContext: (input) => ({
     collectionSlug: input.collectionSlug,
     hasViewer: Boolean(input.viewerId),
     slug: input.userSlug,
+  }),
+  methodName: 'getUserCollectionDetail',
+  module: 'data/community',
+  operation: 'getPublicCollectionDetail',
+  serviceKey: 'misc', // Consolidated: CommunityService methods moved to MiscService
+  throwOnError: true,
+  transformArgs: (input) => ({
+    p_collection_slug: input.collectionSlug,
+    p_user_slug: input.userSlug,
+    ...(input.viewerId ? { p_viewer_id: input.viewerId } : {}),
   }),
 });

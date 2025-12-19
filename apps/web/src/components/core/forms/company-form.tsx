@@ -13,7 +13,7 @@
  * ```
  */
 
-import type { UserCompaniesCompany } from '@heyclaude/database-types/postgres-types';
+import type { UserCompaniesCompany } from '@heyclaude/data-layer';
 import type { company_size } from '@heyclaude/database-types/prisma';
 import { normalizeError, getFormDataString, getFormDataStringRequired, getFormDataEnum } from '@heyclaude/shared-runtime';
 import {

@@ -1,6 +1,6 @@
 import { SubmissionStatus } from '@heyclaude/data-layer/prisma';
 import type { submission_status, submission_type } from '@heyclaude/data-layer/prisma';
-import type { UserDashboardSubmission } from '@heyclaude/database-types/postgres-types';
+import type { UserDashboardSubmission } from '@heyclaude/data-layer';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
   UnifiedBadge,

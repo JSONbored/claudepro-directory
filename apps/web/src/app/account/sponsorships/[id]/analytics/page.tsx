@@ -1,11 +1,11 @@
 import { type sponsorship_tier } from '@heyclaude/data-layer/prisma';
-import { type GetSponsorshipAnalyticsReturns } from '@heyclaude/database-types/postgres-types';
+import { type GetSponsorshipAnalyticsReturns } from '@heyclaude/data-layer';
 import { sponsorship_tier as sponsorshipTierEnum } from '@heyclaude/database-types/prisma';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getSponsorshipAnalytics } from '@heyclaude/web-runtime/data/account';
 import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Card,
   CardContent,
@@ -269,7 +269,7 @@ async function SponsorshipAnalyticsPageContent({
             change: 'Clicks / Impressions',
             label: 'Click-Through Rate',
             trend:
-              Number.parseFloat(ctr) > 2 ? 'up' : Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down',
+              Number.parseFloat(ctr) > 2 ? 'up' : (Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down'),
             value: `${ctr}%`,
           },
           {
@@ -302,16 +302,12 @@ async function SponsorshipAnalyticsPageContent({
 
             <div>
               <p className="text-sm-medium">Start Date</p>
-              <p className="text-muted-foreground">
-                {formatDate(sponsorship.start_date)}
-              </p>
+              <p className="text-muted-foreground">{formatDate(sponsorship.start_date)}</p>
             </div>
 
             <div>
               <p className="text-sm-medium">End Date</p>
-              <p className="text-muted-foreground">
-                {formatDate(sponsorship.end_date)}
-              </p>
+              <p className="text-muted-foreground">{formatDate(sponsorship.end_date)}</p>
             </div>
 
             <div>
@@ -353,7 +349,20 @@ async function SponsorshipAnalyticsPageContent({
                 <div className="grid grid-cols-12 items-center gap-1" key={dayKey}>
                   <div className="text-muted-foreground col-span-2 text-xs">
                     {(() => {
-                      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                      const monthNames = [
+                        'Jan',
+                        'Feb',
+                        'Mar',
+                        'Apr',
+                        'May',
+                        'Jun',
+                        'Jul',
+                        'Aug',
+                        'Sep',
+                        'Oct',
+                        'Nov',
+                        'Dec',
+                      ];
                       return `${monthNames[date.getUTCMonth()]} ${date.getUTCDate()}`;
                     })()}
                   </div>

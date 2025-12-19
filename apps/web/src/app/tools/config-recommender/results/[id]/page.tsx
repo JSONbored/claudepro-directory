@@ -20,10 +20,10 @@ import {
   type GetRecommendationsReturns,
   type RecommendationItem,
 } from '@heyclaude/database-types/postgres-types';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
-import { getConfigRecommendations } from '@heyclaude/web-runtime/data/tools/recommendations';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { getConfigRecommendations } from '@heyclaude/web-runtime/data/tools/recommendations';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { type Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import { notFound } from 'next/navigation';

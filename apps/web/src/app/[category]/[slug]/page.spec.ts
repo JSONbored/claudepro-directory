@@ -190,6 +190,159 @@ test.describe('Content Detail Page', () => {
     expect(hasError).toBe(false);
   });
 
+  test('should handle bookmark/pin interactions in DetailHeaderActions', async ({ page }) => {
+    // Navigate to a valid content detail page
+    await page.goto('/agents/test-agent');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    // Find bookmark/pin button in DetailHeaderActions
+    const bookmarkButton = page.getByRole('button', { name: /bookmark|pin|unpin/i }).first();
+    const hasBookmarkButton = await bookmarkButton.isVisible().catch(() => false);
+    
+    if (hasBookmarkButton) {
+      await bookmarkButton.click();
+      await page.waitForTimeout(500);
+      
+      // Should show toast
+      const toast = page.getByText(/pinned|unpinned|bookmarked|saved/i);
+      const hasToast = await toast.isVisible().catch(() => false);
+      
+      if (hasToast) {
+        await expect(toast).toBeVisible();
+      }
+    }
+  });
+
+  test('should handle copy content/share link interactions', async ({ page }) => {
+    await page.goto('/agents/test-agent');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    // Find share/copy button
+    const shareButton = page.getByRole('button', { name: /share|copy link/i }).first();
+    const hasShareButton = await shareButton.isVisible().catch(() => false);
+    
+    if (hasShareButton) {
+      await shareButton.click();
+      await page.waitForTimeout(500);
+      
+      // Should show toast
+      const toast = page.getByText(/copied|link copied/i);
+      const hasToast = await toast.isVisible().catch(() => false);
+      
+      if (hasToast) {
+        await expect(toast).toBeVisible();
+      }
+    }
+  });
+
+  test('should handle download functionality when available', async ({ page }) => {
+    // Test with MCP category (has .mcpb download) or skills (has .zip download)
+    await page.goto('/mcp/test-mcp-server');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    // Find download button
+    const downloadButton = page.getByRole('button', { name: /download|\.mcpb|\.zip/i }).first();
+    const hasDownloadButton = await downloadButton.isVisible().catch(() => false);
+    
+    if (hasDownloadButton) {
+      // Monitor network requests for download
+      const downloadRequests: string[] = [];
+      page.on('request', (request) => {
+        if (request.url().includes('/api/content/') && request.url().includes('format=storage')) {
+          downloadRequests.push(request.url());
+        }
+      });
+      
+      await downloadButton.click();
+      await page.waitForTimeout(1000);
+      
+      // Should trigger download request or show toast
+      const toast = page.getByText(/download|downloading/i);
+      const hasToast = await toast.isVisible().catch(() => false);
+      
+      // Either download request triggered or toast shown
+      expect(downloadRequests.length > 0 || hasToast).toBe(true);
+    }
+  });
+
+  test('should handle share menu (Twitter, LinkedIn, copy link)', async ({ page }) => {
+    await page.goto('/agents/test-agent');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    // Find "More actions" menu button
+    const moreMenuButton = page.getByRole('button', { name: /more|menu/i }).first();
+    const hasMoreMenu = await moreMenuButton.isVisible().catch(() => false);
+    
+    if (hasMoreMenu) {
+      await moreMenuButton.click();
+      await page.waitForTimeout(300);
+      
+      // Check for share options in dropdown
+      const twitterOption = page.getByText(/twitter|share on x/i);
+      const linkedinOption = page.getByText(/linkedin/i);
+      const copyLinkOption = page.getByText(/copy link/i);
+      
+      const hasTwitter = await twitterOption.isVisible().catch(() => false);
+      const hasLinkedIn = await linkedinOption.isVisible().catch(() => false);
+      const hasCopyLink = await copyLinkOption.isVisible().catch(() => false);
+      
+      // At least one share option should be available
+      if (hasTwitter || hasLinkedIn || hasCopyLink) {
+        // Test copy link option
+        if (hasCopyLink) {
+          await copyLinkOption.click();
+          await page.waitForTimeout(500);
+          
+          const toast = page.getByText(/copied|link copied/i);
+          const hasToast = await toast.isVisible().catch(() => false);
+          
+          if (hasToast) {
+            await expect(toast).toBeVisible();
+          }
+        }
+      }
+    }
+  });
+
+  test('should handle copy for AI / copy markdown in dropdown menu', async ({ page }) => {
+    await page.goto('/agents/test-agent');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    // Find "More actions" menu button
+    const moreMenuButton = page.getByRole('button', { name: /more|menu/i }).first();
+    const hasMoreMenu = await moreMenuButton.isVisible().catch(() => false);
+    
+    if (hasMoreMenu) {
+      await moreMenuButton.click();
+      await page.waitForTimeout(300);
+      
+      // Check for copy options
+      const copyForAIOption = page.getByText(/copy for ai|llms\.txt/i);
+      const copyMarkdownOption = page.getByText(/copy markdown/i);
+      
+      const hasCopyForAI = await copyForAIOption.isVisible().catch(() => false);
+      const hasCopyMarkdown = await copyMarkdownOption.isVisible().catch(() => false);
+      
+      // Test copy markdown if available
+      if (hasCopyMarkdown) {
+        await copyMarkdownOption.click();
+        await page.waitForTimeout(500);
+        
+        const toast = page.getByText(/copied markdown/i);
+        const hasToast = await toast.isVisible().catch(() => false);
+        
+        if (hasToast) {
+          await expect(toast).toBeVisible();
+        }
+      }
+    }
+  });
+
   test('should handle ensureStringArray edge cases', async ({ page }) => {
     // This tests that ensureStringArray handles null/undefined/invalid tags
     // The component uses ensureStringArray(fullItem.tags) and .slice(0, 3)

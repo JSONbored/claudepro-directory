@@ -3,7 +3,8 @@
  * Uses Activity type from user.actions (based on get_user_activity_timeline RPC)
  */
 
-import type { UserActivityTimelineItem } from '@heyclaude/database-types/postgres-types';
+import type { GetUserActivityTimelineReturns } from '@heyclaude/data-layer';
+type UserActivityTimelineItem = GetUserActivityTimelineReturns['activities'][number];
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import { Card, CardContent } from '@heyclaude/web-runtime/ui';

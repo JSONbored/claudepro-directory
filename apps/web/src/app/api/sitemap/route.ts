@@ -3,7 +3,7 @@
  *
  * Generates XML or JSON sitemaps for search engines.
  * Supports IndexNow submission for search engine indexing.
- * 
+ *
  * SIMPLIFIED: Uses format handler factory to eliminate conditional logic (~384 lines → ~250 lines)
  *
  * @example
@@ -29,12 +29,18 @@ import {
   getNumberProperty,
   getStringProperty,
 } from '@heyclaude/shared-runtime';
+import {
+  createOptionsHandler as createApiOptionsHandler, createApiRoute, createFormatHandlerRoute, type FormatHandlerConfig, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
+import { sitemapFormatSchema } from '@heyclaude/web-runtime/api/schemas';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { inngest } from '@heyclaude/web-runtime/inngest/client';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { createOptionsHandler as createApiOptionsHandler, createApiRoute, createFormatHandlerRoute, type FormatHandlerConfig, type RouteHandlerContext } from '@heyclaude/web-runtime/api/route-factory';
-import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
-import { getOnlyCorsHeaders, jsonResponse, xmlResponse } from '@heyclaude/web-runtime/server/api-helpers';
-import { sitemapFormatSchema } from '@heyclaude/web-runtime/api/schemas';
+import {
+  getOnlyCorsHeaders,
+  jsonResponse,
+  xmlResponse,
+} from '@heyclaude/web-runtime/server/api-helpers';
 import { z } from 'zod';
 
 const INDEXNOW_API_KEY = getEnvVar('INDEXNOW_API_KEY');
@@ -60,7 +66,7 @@ function timingSafeEqual(a?: null | string, b?: null | string): boolean {
   return diff === 0;
 }
 
-type SitemapFormat = 'xml' | 'json';
+type SitemapFormat = 'json' | 'xml';
 
 /**
  * GET /api/v1/sitemap - Get sitemap in XML or JSON format
@@ -68,25 +74,24 @@ type SitemapFormat = 'xml' | 'json';
  * Generates XML or JSON sitemaps for search engines.
  * Uses format handler factory to eliminate conditional logic.
  */
-export const GET = createFormatHandlerRoute<SitemapFormat, { format: SitemapFormat }, unknown>({
-  route: getVersionedRoute('sitemap'),
-  operation: 'SitemapAPI',
-  method: 'GET',
-  cors: 'anon',
+export const GET = createFormatHandlerRoute<SitemapFormat, { format: SitemapFormat }>({
   cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
   cacheTags: ['sitemap'],
-  querySchema: z.object({
-    format: sitemapFormatSchema,
-  }),
+  cors: 'anon',
   defaultFormat: 'xml',
   formats: {
     json: {
-      serviceKey: 'misc',
-      methodName: 'getSiteUrls',
       methodArgs: () => [],
-      responseHandler: (result: unknown, _format: 'json', _query: { format: SitemapFormat }, _body: unknown, ctx: RouteHandlerContext<{ format: SitemapFormat }, unknown>) => {
+      methodName: 'getSiteUrls',
+      responseHandler: (
+        result: unknown,
+        _format: 'json',
+        _query: { format: SitemapFormat },
+        _body: unknown,
+        ctx: RouteHandlerContext<{ format: SitemapFormat }>
+      ) => {
         const { logger } = ctx;
-        const data = result as unknown[] | null | undefined;
+        const data = result as null | undefined | unknown[];
         if (!Array.isArray(data) || data.length === 0) {
           logger.warn({}, 'get_site_urls returned no rows');
           return jsonResponse({ error: 'No URLs available' }, 500, getOnlyCorsHeaders);
@@ -130,38 +135,42 @@ export const GET = createFormatHandlerRoute<SitemapFormat, { format: SitemapForm
           }
         );
       },
+      serviceKey: 'misc',
     },
     xml: {
-      serviceKey: 'misc',
-      methodName: 'generateSitemapXml',
       methodArgs: () => [{ p_base_url: SITE_URL }],
-      responseHandler: (result: unknown, _format: 'xml', _query: { format: SitemapFormat }, _body: unknown, ctx: RouteHandlerContext<{ format: SitemapFormat }, unknown>) => {
+      methodName: 'generateSitemapXml',
+      responseHandler: (
+        result: unknown,
+        _format: 'xml',
+        _query: { format: SitemapFormat },
+        _body: unknown,
+        ctx: RouteHandlerContext<{ format: SitemapFormat }>
+      ) => {
         const { logger } = ctx;
-        const data = result as string | null;
+        const data = result as null | string;
         if (!data) {
           logger.warn({}, 'generate_sitemap_xml returned null');
-          return jsonResponse({ error: 'Sitemap XML generation returned null' }, 500, getOnlyCorsHeaders);
+          return jsonResponse(
+            { error: 'Sitemap XML generation returned null' },
+            500,
+            getOnlyCorsHeaders
+          );
         }
         logger.info({}, 'Sitemap XML generated');
-        return xmlResponse(
-          data,
-          'application/xml; charset=utf-8',
-          200,
-          getOnlyCorsHeaders,
-          {
-            'X-Content-Source': 'prisma.mv_site_urls',
-            'X-Generated-By': 'prisma.rpc.generate_sitemap_xml',
-            'X-Robots-Tag': 'index, follow',
-          }
-        );
+        return xmlResponse(data, 'application/xml; charset=utf-8', 200, getOnlyCorsHeaders, {
+          'X-Content-Source': 'prisma.mv_site_urls',
+          'X-Generated-By': 'prisma.rpc.generate_sitemap_xml',
+          'X-Robots-Tag': 'index, follow',
+        });
       },
+      serviceKey: 'misc',
     },
-  } as Record<SitemapFormat, FormatHandlerConfig<SitemapFormat, { format: SitemapFormat }, unknown>>,
+  } as Record<SitemapFormat, FormatHandlerConfig<SitemapFormat, { format: SitemapFormat }>>,
+  method: 'GET',
   openapi: {
-    summary: 'Get sitemap in XML or JSON format',
     description:
       'Generates XML or JSON sitemaps for search engines. Supports both XML (default) and JSON formats.',
-    tags: ['sitemap', 'seo'],
     operationId: 'getSitemap',
     responses: {
       200: {
@@ -171,7 +180,14 @@ export const GET = createFormatHandlerRoute<SitemapFormat, { format: SitemapForm
         description: 'Sitemap generation failed',
       },
     },
+    summary: 'Get sitemap in XML or JSON format',
+    tags: ['sitemap', 'seo'],
   },
+  operation: 'SitemapAPI',
+  querySchema: z.object({
+    format: sitemapFormatSchema,
+  }),
+  route: getVersionedRoute('sitemap'),
 });
 
 /**

@@ -36,43 +36,20 @@ export const calculateTrendingMetrics = inngest.createFunction(
     const trendingService = await getService('trending');
 
     // Step 1: Calculate time-windowed metrics from user_interactions
+    // NOTE: calculateContentTimeMetrics RPC was removed in migration 20251217000229
+    // The materialized view refresh is sufficient for trending metrics
+    // If time-windowed metrics are needed in the future, implement using Prisma queries directly
     const metricsResult = await step.run('calculate-time-metrics', async (): Promise<{
       updated: number;
       created: number;
     }> => {
-      try {
-        // Use TrendingService for proper data layer architecture
-        const result = await trendingService.calculateContentTimeMetrics();
-        
-        // Function returns a single row, so take first element
-        const firstRow = result[0];
-        const updatedCount = firstRow?.updated_count ?? 0;
-        const createdCount = firstRow?.created_count ?? 0;
-
-        logger.info(
-          {
-            ...logContext,
-            updatedCount,
-            createdCount,
-          },
-          'Time-windowed metrics calculated'
-        );
-
-        return {
-          updated: updatedCount,
-          created: createdCount,
-        };
-      } catch (error) {
-        const normalized = normalizeError(error, 'Failed to calculate time-windowed metrics');
-        logger.error(
-          {
-            ...logContext,
-            err: normalized,
-          },
-          'Failed to calculate time-windowed metrics'
-        );
-        throw normalized;
-      }
+      // Return zero metrics since the RPC was removed
+      // The materialized view refresh below will update trending scores
+      logger.info(logContext, 'Time-windowed metrics calculation skipped (RPC removed)');
+      return {
+        updated: 0,
+        created: 0,
+      };
     });
 
     // Step 2: Refresh materialized view with updated metrics

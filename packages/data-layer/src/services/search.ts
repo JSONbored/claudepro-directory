@@ -22,13 +22,22 @@ import type {
   GetSearchSuggestionsFormattedReturns,
   BatchInsertSearchQueriesArgs,
   BatchInsertSearchQueriesReturns,
-  GetTrendingSearchesArgs,
-  GetTrendingSearchesReturns,
-  SearchContentOptimizedResult,
   SearchUnifiedResult,
   SearchContentOptimizedRow,
   SearchUnifiedRow,
 } from '@heyclaude/database-types/postgres-types';
+
+// Local types for converted RPCs (RPCs removed, using Prisma directly)
+// Exported for use in web-runtime
+export type GetTrendingSearchesArgs = {
+  limit_count?: number;
+};
+
+export type GetTrendingSearchesReturns = Array<{
+  query: string;
+  count: number; // Converted from bigint to number in transformation
+  label: string;
+}>;
 import {
   type experience_level,
   type job_category,
@@ -77,13 +86,13 @@ export class SearchService extends BasePrismaService {
    */
   async searchContent(
     args: SearchContentOptimizedArgs
-  ): Promise<{ data: SearchContentOptimizedResult['results']; total_count: number }> {
+  ): Promise<{ data: SearchContentOptimizedRow[]; total_count: number }> {
     const result = await this.callRpc<SearchContentOptimizedReturns | null>(
       'search_content_optimized',
       args,
       { methodName: 'searchContent' }
     );
-    const rows = result?.results ?? [];
+    const rows = (result?.results ?? []) as SearchContentOptimizedRow[];
     const totalCount = result?.total_count ? Number(result.total_count) : rows.length;
     return { data: rows, total_count: totalCount };
   }
@@ -264,9 +273,9 @@ export class SearchService extends BasePrismaService {
         jobArgs.p_remote_only = jobRemote;
       }
 
-      const result = await this.filterJobs(jobArgs);
-      const jobs = result.jobs ?? [];
-      const totalCount = typeof result.total_count === 'number' ? result.total_count : jobs.length;
+      const result = await this.filterJobs(jobArgs) as { jobs?: unknown[] | null; total_count?: number | null };
+      const jobs = (result?.jobs ?? []) as SearchResultRow[];
+      const totalCount = typeof result?.total_count === 'number' ? result.total_count : jobs.length;
 
       return {
         results: jobs as SearchResultRow[],

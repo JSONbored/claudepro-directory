@@ -7,6 +7,9 @@
 
 import { z } from 'zod';
 
+import type { ContentPaginatedResult } from '../composites/content_paginated_result';
+import { contentPaginatedResultSchema } from '../composites/content_paginated_result';
+
 /**
  * Arguments for PostgreSQL function: get_content_paginated
  */
@@ -59,12 +62,12 @@ export type GetContentPaginatedArgsFromZod = z.infer<typeof getContentPaginatedA
 /**
  * Return type for PostgreSQL function: get_content_paginated
  */
-export type GetContentPaginatedReturns = unknown;
+export type GetContentPaginatedReturns = ContentPaginatedResult;
 
 /**
  * Zod schema for get_content_paginated function return type
  */
-export const getContentPaginatedReturnsSchema = z.unknown();
+export const getContentPaginatedReturnsSchema = contentPaginatedResultSchema;
 
 /**
  * Type inference from Zod schema (should match type above)

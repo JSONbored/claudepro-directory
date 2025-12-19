@@ -29,10 +29,15 @@ export const getReviewsWithStatsData = createDataFunction<
   ReviewsWithStatsParameters,
   GetReviewsWithStatsReturns | null
 >({
-  serviceKey: 'content',
+  logContext: (params) => ({
+    contentSlug: params.contentSlug,
+    contentType: params.contentType,
+    hasUser: Boolean(params.userId),
+  }),
   methodName: 'getReviewsWithStats',
   module: 'data/content/reviews',
   operation: 'getReviewsWithStatsData',
+  serviceKey: 'content',
   transformArgs: (params) => ({
     p_content_slug: params.contentSlug,
     p_content_type: params.contentType,
@@ -40,10 +45,5 @@ export const getReviewsWithStatsData = createDataFunction<
     ...(params.limit ? { p_limit: params.limit } : {}),
     ...(params.offset ? { p_offset: params.offset } : {}),
     ...(params.userId ? { p_user_id: params.userId } : {}),
-  }),
-  logContext: (params) => ({
-    contentSlug: params.contentSlug,
-    contentType: params.contentType,
-    hasUser: Boolean(params.userId),
   }),
 });

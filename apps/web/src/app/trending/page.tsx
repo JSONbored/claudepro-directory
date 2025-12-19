@@ -5,11 +5,10 @@
 
 import { type content_category } from '@heyclaude/data-layer/prisma';
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { getTrendingPageData } from '@heyclaude/web-runtime/data/content';
 import { Clock, Star, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
-import { mapPopularContent, mapRecentContent, mapTrendingMetrics } from '@heyclaude/web-runtime/utils/content-transforms';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
 import {
   Tooltip,
@@ -18,6 +17,11 @@ import {
   TooltipTrigger,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import {
+  mapPopularContent,
+  mapRecentContent,
+  mapTrendingMetrics,
+} from '@heyclaude/web-runtime/utils/content-transforms';
 import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
@@ -119,7 +123,8 @@ async function TrendingPageContent({
   const rawParameters = await searchParams;
 
   // Use shared query parameter helpers for consistency
-  const { parseCategoryParam, parseLimitParam } = await import('@heyclaude/web-runtime/api/query-helpers');
+  const { parseCategoryParam, parseLimitParam } =
+    await import('@heyclaude/web-runtime/api/query-helpers');
   const categoryParameter = rawParameters['category'];
   const normalizedCategory = parseCategoryParam(categoryParameter);
   const limit = parseLimitParam(

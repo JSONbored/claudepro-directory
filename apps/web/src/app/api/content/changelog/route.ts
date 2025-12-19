@@ -20,13 +20,11 @@
 
 import 'server-only';
 import {
-  createOptionsHandler as createApiOptionsHandler,
-  createCachedApiRoute,
-  type RouteHandlerContext,
+  createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
+import { changelogFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, textResponse } from '@heyclaude/web-runtime/server/api-helpers';
-import { changelogFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import { z } from 'zod';
 
 /**
@@ -34,7 +32,7 @@ import { z } from 'zod';
  *
  * Returns the changelog in LLMs.txt format for AI/LLM consumption.
  * Validates format parameter (must be 'llms-changelog').
- * 
+ *
  * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
 export const GET = createCachedApiRoute({
@@ -61,7 +59,7 @@ export const GET = createCachedApiRoute({
   querySchema: z.object({
     format: changelogFormatSchema,
   }),
-  responseHandler: (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext<unknown, unknown>) => {
+  responseHandler: (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext) => {
     const { logger } = ctx;
     const data = result as null | string;
 

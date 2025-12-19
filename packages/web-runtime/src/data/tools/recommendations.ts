@@ -29,10 +29,17 @@ export const getConfigRecommendations = createDataFunction<
   RecommendationInput,
   GetRecommendationsReturns | null
 >({
-  serviceKey: 'misc', // Consolidated: QuizService methods moved to MiscService
+  logContext: (input, result) => ({
+    experienceLevel: input.experienceLevel,
+    hasViewer: Boolean(input.viewerId),
+    resultCount: (result as GetRecommendationsReturns | null)?.results?.length ?? 0,
+    useCase: input.useCase,
+  }),
   methodName: 'getRecommendations',
   module: 'data/tools/recommendations',
+  onError: () => null,
   operation: 'getConfigRecommendations',
+  serviceKey: 'misc', // Consolidated: QuizService methods moved to MiscService
   transformArgs: (input) => ({
     p_experience_level: input.experienceLevel,
     p_focus_areas: input.focusAreas ?? [],
@@ -41,12 +48,5 @@ export const getConfigRecommendations = createDataFunction<
     p_tool_preferences: input.toolPreferences,
     p_use_case: input.useCase,
     ...(input.viewerId ? { p_viewer_id: input.viewerId } : {}),
-  }),
-  onError: () => null,
-  logContext: (input, result) => ({
-    experienceLevel: input.experienceLevel,
-    hasViewer: Boolean(input.viewerId),
-    resultCount: (result as GetRecommendationsReturns | null)?.results?.length ?? 0,
-    useCase: input.useCase,
   }),
 });

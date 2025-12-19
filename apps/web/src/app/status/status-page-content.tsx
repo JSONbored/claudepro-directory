@@ -6,6 +6,7 @@
 
 'use client';
 
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { useInterval } from '@heyclaude/web-runtime/hooks/use-interval';
 import {
@@ -15,7 +16,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Status, StatusIndicator, StatusLabel } from '@/src/components/ui/status';
@@ -193,9 +193,7 @@ export function StatusPageContent() {
                 <CardTitle className="text-lg">Last Updated</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground text-sm">
-                  {formatDate(healthData.timestamp)}
-                </p>
+                <p className="text-muted-foreground text-sm">{formatDate(healthData.timestamp)}</p>
               </CardContent>
             </Card>
           ) : null}

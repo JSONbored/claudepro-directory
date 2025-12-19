@@ -17,9 +17,9 @@
  * - Serverless-friendly architecture
  */
 
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Card,
   CardContent,

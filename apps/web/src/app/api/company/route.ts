@@ -21,14 +21,12 @@
 
 import 'server-only';
 import {
-  createOptionsHandler as createApiOptionsHandler,
-  createCachedApiRoute,
-  type RouteHandlerContext,
+  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
+import { slugSchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 import { notFoundResponse } from '@heyclaude/web-runtime/server/not-found-response';
-import { slugSchema } from '@heyclaude/web-runtime/api/schemas';
 import { z } from 'zod';
 
 /**
@@ -36,7 +34,7 @@ import { z } from 'zod';
  *
  * Returns company profile data by slug identifier.
  * Validates slug parameter and returns company profile with cache headers.
- * 
+ *
  * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
 export const GET = createCachedApiRoute({
@@ -66,9 +64,14 @@ export const GET = createCachedApiRoute({
   querySchema: z.object({
     slug: slugSchema.describe('Company slug identifier'),
   }),
-  responseHandler: (result: unknown, query: { slug: string }, _body: unknown, ctx: RouteHandlerContext<{ slug: string }, unknown>) => {
+  responseHandler: (
+    result: unknown,
+    query: { slug: string },
+    _body: unknown,
+    ctx: RouteHandlerContext<{ slug: string }>
+  ) => {
     const { logger } = ctx;
-    const profile = result as { p_slug: string; [key: string]: unknown } | null | undefined;
+    const profile = result as null | undefined | { [key: string]: unknown; p_slug: string };
 
     // Check if profile exists
     if (!profile || (typeof profile === 'object' && Object.keys(profile).length === 0)) {

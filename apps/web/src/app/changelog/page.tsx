@@ -23,10 +23,10 @@
  */
 
 import { type changelogModel } from '@heyclaude/data-layer/prisma';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { getChangelogOverview } from '@heyclaude/web-runtime/data/changelog';
 import { APP_CONFIG, QUERY_LIMITS } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { Suspense } from 'react';

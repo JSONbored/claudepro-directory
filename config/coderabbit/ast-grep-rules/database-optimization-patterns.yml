@@ -1,65 +1,10 @@
 # Database Optimization Pattern Rules
 # Enforces database query optimization from .cursor/rules/performance-optimization-standards.mdc
-# Critical patterns for database performance and caching
+# Codebase uses Prisma ORM with request-scoped caching via withSmartCache()
 
 ---
-# Rule: Detect missing request-scoped caching for RPC calls
-id: missing-request-scoped-cache-rpc
-language: typescript
-files:
-  - 'packages/data-layer/src/services/**/*.ts'
-rule:
-  all:
-    - kind: await_expression
-    - has:
-        pattern: await $SUPABASE.rpc($RPC_NAME, $ARGS)
-    - not:
-        inside:
-          pattern: withSmartCache($$$)
-message: "RPC calls in service methods should use withSmartCache() to prevent duplicate calls within the same request. Wrap: return withSmartCache('rpc_name', 'methodName', async () => { const { data, error } = await this.supabase.rpc(...); ... }, args)"
-severity: error
-
----
-# Rule: Detect missing cacheLife() in cached functions
-id: missing-cache-life-directive
-language: typescript
-files:
-  - 'app/**/*.tsx'
-rule:
-  all:
-    - kind: function_declaration
-    - has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
-    - has:
-        regex: 'use cache'
-    - not:
-        has:
-          pattern: cacheLife($$$)
-message: "Cache Components must include cacheLife() profile. Add: cacheLife('hours') or cacheLife({ expire: 3600, revalidate: 300, stale: 60 }). Import cacheLife from 'next/cache'"
-severity: error
-
----
-# Rule: Detect missing cacheTag() in cached functions
-id: missing-cache-tag-directive
-language: typescript
-files:
-  - 'app/**/*.tsx'
-rule:
-  all:
-    - kind: function_declaration
-    - has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
-    - has:
-        regex: 'use cache'
-    - not:
-        has:
-          pattern: cacheTag($$$)
-message: "Cache Components must include cacheTag() for invalidation. Add: cacheTag('resource-type') and cacheTag('resource-type-${id}') for hierarchical invalidation. Import cacheTag from 'next/cache'"
-severity: error
-
----
-# Rule: Detect missing withSmartCache wrapper in service methods
-id: missing-smart-cache-wrapper
+# Rule:
+id: missing-request-scoped-cache-prisma
 language: typescript
 files:
   - 'packages/data-layer/src/services/**/*.ts'
@@ -67,39 +12,162 @@ rule:
   all:
     - kind: method_definition
     - has:
-        pattern: await $OBJ.supabase.rpc($$$)
+        regex: 'await prisma\.\w+\('
+    - has:
+        regex: prisma\.(\$queryRawUnsafe|\$queryRaw|findMany|findFirst|findUnique|create|update|delete|upsert)
     - not:
-        has:
-          pattern: withSmartCache($$$)
-message: "Service methods with RPC calls should use withSmartCache() for request-scoped caching. This prevents duplicate RPC calls within the same request lifecycle."
+        inside:
+          regex: 'withSmartCache\('
+message: "Prisma queries in service methods should use withSmartCache() to prevent duplicate calls within the same request. Wrap: return withSmartCache('method_name', 'methodName', async () => { const result = await prisma.$queryRawUnsafe(...); ... }, args). Import: import { withSmartCache } from '../utils/request-cache.ts';"
 severity: error
 
 ---
-# Rule: Detect RPC calls without error destructuring
-id: missing-rpc-error-destructuring
+# Rule:
+id: missing-smart-cache-prisma-raw
 language: typescript
+files:
+  - 'packages/data-layer/src/services/**/*.ts'
+rule:
+  all:
+    - kind: await_expression
+    - has:
+        regex: 'await prisma\.\$queryRawUnsafe\('
+    - not:
+        inside:
+          regex: 'withSmartCache\('
+message: "Prisma $queryRawUnsafe calls in service methods should use withSmartCache() for request-scoped caching. This prevents duplicate queries within the same request lifecycle. Wrap the query in withSmartCache()."
+severity: error
+
+---
+# Rule:
+id: prisma-query-missing-error-handling
+language: typescript
+files:
+  - 'packages/data-layer/src/services/**/*.ts'
+rule:
+  all:
+    - kind: await_expression
+    - has:
+        regex: 'await prisma\.\w+\('
+    - has:
+        regex: prisma\.(\$queryRawUnsafe|\$queryRaw|findMany|findFirst|findUnique|create|update|delete)
+    - not:
+        inside:
+          has:
+            regex: 'try.*catch'
+message: "Prisma queries should include error handling. Wrap in try/catch to handle PrismaClientKnownRequestError, PrismaClientValidationError, and other Prisma errors. Use normalizeError() for consistent error handling."
+severity: warning
+
+---
+# Rule:
+id: prisma-query-missing-select-optimization
+language: typescript
+files:
+  - 'packages/data-layer/src/services/**/*.ts'
+rule:
+  all:
+    - kind: await_expression
+    - has:
+        regex: 'await prisma\.(findMany|findFirst|findUnique)\('
+    - not:
+        has:
+          regex: 'select:|include:'
+message: "Prisma findMany/findFirst/findUnique queries should use select or include to fetch only needed fields. This reduces data transfer and improves performance. Example: await prisma.user.findMany({ select: { id: true, name: true } });"
+severity: warning
+
+---
+# Rule:
+id: prisma-findmany-missing-where
+language: typescript
+files:
+  - 'packages/data-layer/src/services/**/*.ts'
+rule:
+  all:
+    - kind: await_expression
+    - has:
+        regex: 'await prisma\.(findMany|findFirst)\('
+    - not:
+        has:
+          pattern: 'where:'
+    - not:
+        inside:
+          has:
+            regex: '// All records|// Intentionally|// Testing|// Small dataset'
+message: "Prisma findMany/findFirst queries should include where clause to avoid full table scans. Add where: { ... } to filter results. If you need all records, add a comment explaining why."
+severity: warning
+
+---
+# Rule:
+id: prisma-findmany-missing-pagination
+language: typescript
+files:
+  - 'packages/data-layer/src/services/**/*.ts'
+rule:
+  all:
+    - kind: await_expression
+    - has:
+        regex: 'await prisma\.findMany\('
+    - not:
+        has:
+          regex: 'take:|skip:|cursor:'
+    - not:
+        inside:
+          has:
+            regex: '// Small dataset|// Cached|// Limited results|// All records needed'
+message: "Prisma findMany queries for potentially large datasets should include pagination (take/skip or cursor). Add take: limit, skip: offset for pagination, or use cursor-based pagination for better performance."
+severity: warning
+
+---
+# Rule:
+id: prisma-direct-client-usage
+language: typescript
+rule:
+  all:
+    - kind: new_expression
+    - has:
+        regex: 'new PrismaClient\('
+    - not:
+        inside:
+          has:
+            regex: '// Test|// Migration|// One-time script'
+message: "Don't create new PrismaClient instances. Use singleton pattern from @heyclaude/data-layer/prisma to ensure connection pooling and proper lifecycle management. Import: import { prisma } from '@heyclaude/data-layer/prisma';"
+severity: error
+
+---
+# Rule:
+id: prisma-unsafe-type-assertion
+language: typescript
+files:
+  - 'packages/data-layer/src/services/**/*.ts'
+rule:
+  all:
+    - kind: await_expression
+    - has:
+        regex: 'await prisma\.\w+\('
+    - has:
+        regex: 'as any|as unknown'
+message: "Prisma queries should use proper TypeScript types. Avoid 'as any' or 'as unknown'. Use Prisma's generated types (Prisma.tableGetPayload<{}>) or define proper return types for $queryRawUnsafe. Import: import type { Prisma } from '@heyclaude/data-layer/prisma';"
+severity: error
+
+---
+# Rule:
+id: prisma-missing-error-destructuring
+language: typescript
+files:
+  - 'packages/data-layer/src/services/**/*.ts'
 rule:
   all:
     - kind: variable_declarator
     - has:
-        pattern: const $RESULT = await $SUPABASE.rpc($$$)
+        regex: 'const \w+ = await prisma\.\w+\('
+    - has:
+        regex: prisma\.(\$queryRawUnsafe|\$queryRaw)
     - not:
         has:
-          pattern: const { $DATA, error } = await $SUPABASE.rpc($$$)
-message: "RPC calls must destructure error from response. Use: const { data, error } = await supabase.rpc(...)"
-severity: error
+          pattern: 'try.*catch'
+message: "Prisma $queryRawUnsafe/$queryRaw calls should be wrapped in try/catch for error handling. Prisma raw queries can throw errors that should be caught and normalized. Use normalizeError() for consistent error handling."
+severity: warning
 
----
-# Rule: Detect missing error check after RPC call
-id: missing-rpc-error-check
-language: typescript
-rule:
-  all:
-    - kind: variable_declarator
-    - has:
-        pattern: const { $DATA, error } = await $SUPABASE.rpc($$$)
-    - not:
-        follows:
-          pattern: if (error) { $$$ }
-message: "RPC calls must check for errors after destructuring. Add: if (error) { throw error; } or handle error appropriately"
-severity: error
+# Note: Supabase RPC patterns are deprecated - codebase uses Prisma ORM
+# Service methods use withSmartCache() for request-scoped caching
+# Prisma queries should use proper types and error handling

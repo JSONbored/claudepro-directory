@@ -26,8 +26,11 @@ export interface PaginatedContentParameters {
 }
 
 /***
+ **
  * Normalize a string value to a content_category or undefined.
  * Uses shared isValidCategory validation from @heyclaude/web-runtime/utils/category-validation.
+ * @param {null | string | undefined} value
+ * @returns {content_category | undefined} Return value description
  */
 function toContentCategory(value: null | string | undefined): content_category | undefined {
   if (!value) return undefined;
@@ -43,24 +46,24 @@ export const getPaginatedContent = createDataFunction<
   PaginatedContentParameters,
   ContentPaginatedSlimResult | null
 >({
-  serviceKey: 'content',
-  methodName: 'getContentPaginatedSlim',
-  module: 'data/content/paginated',
-  operation: 'getPaginatedContent',
-  transformArgs: (params) => {
-    const normalizedCategory = params.category ? toContentCategory(params.category) : undefined;
-    return {
-      ...(normalizedCategory ? { p_category: normalizedCategory } : {}),
-      p_limit: params.limit,
-      p_offset: params.offset,
-    };
-  },
   logContext: (params) => {
     const normalizedCategory = params.category ? toContentCategory(params.category) : undefined;
     return {
       category: normalizedCategory ?? params.category ?? 'all',
       limit: params.limit,
       offset: params.offset,
+    };
+  },
+  methodName: 'getContentPaginatedSlim',
+  module: 'data/content/paginated',
+  operation: 'getPaginatedContent',
+  serviceKey: 'content',
+  transformArgs: (params) => {
+    const normalizedCategory = params.category ? toContentCategory(params.category) : undefined;
+    return {
+      ...(normalizedCategory ? { p_category: normalizedCategory } : {}),
+      p_limit: params.limit,
+      p_offset: params.offset,
     };
   },
 });

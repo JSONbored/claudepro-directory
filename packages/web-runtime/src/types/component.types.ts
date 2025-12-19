@@ -23,11 +23,13 @@ import type {
   contentModel,
 } from '@heyclaude/data-layer/prisma';
 import type {
-  EnrichedContentItem,
   RelatedContentItem,
   SearchContentOptimizedRow,
   SearchUnifiedRow,
 } from '@heyclaude/database-types/postgres-types';
+
+// EnrichedContentItem was removed - use contentModel instead
+type EnrichedContentItem = contentModel;
 import type {
   GetContentDetailCompleteReturns,
 } from '@heyclaude/database-types/postgres-types';

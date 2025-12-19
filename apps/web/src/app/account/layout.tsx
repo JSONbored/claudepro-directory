@@ -12,9 +12,9 @@
  * However, the structure renders immediately while sidebar data streams.
  */
 
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseServerClient } from '@heyclaude/web-runtime/supabase/server';
-import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
@@ -41,11 +41,11 @@ import { AccountSidebarSkeleton } from '@/src/components/features/account/accoun
  */
 async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
   'use cache: private';
-  
+
   // Defer to request time before using non-deterministic operations (Date.now())
   const { connection } = await import('next/server');
   await connection();
-  
+
   // Authentication check - required in layout for route protection
   const result = await getAuthenticatedUser({
     context: 'AccountLayout',
@@ -58,7 +58,7 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
 
   // Calculate timestamp immediately after connection() to ensure it's at request time
   // This satisfies React's purity requirements by isolating the impure function call
-  // eslint-disable-next-line react-hooks/purity -- Date.now() is safe after await connection() (Next.js pattern)
+
   const currentTimestamp = Math.floor(Date.now() / 1000);
 
   // Session management - required for authentication

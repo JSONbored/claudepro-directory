@@ -1,10 +1,8 @@
 import 'server-only';
 
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import {
-  type GetSearchFacetsReturns,
-  type GetTrendingSearchesReturns,
-} from '@heyclaude/database-types/postgres-types';
+import { type GetSearchFacetsReturns } from '@heyclaude/database-types/postgres-types';
+import { type GetTrendingSearchesReturns } from '@heyclaude/data-layer';
 
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 
@@ -47,9 +45,16 @@ function normalizeFacetRow(row: SearchFacetsRow): SearchFacetSummary {
 }
 
 /***
+**
  * Extracts aggregated arrays from RPC result
  * The RPC now returns pre-aggregated arrays in each row (same values)
  * We use the first row's aggregated values for efficiency
+ * @param {SearchFacetsRow[]} data
+ * @returns {{
+  authors: string[];
+  categories: content_category[];
+  tags: string[];
+}} Return value description
  */
 function extractAggregatedArrays(data: SearchFacetsRow[]): {
   authors: string[];
@@ -92,10 +97,20 @@ function extractAggregatedArrays(data: SearchFacetsRow[]): {
  * @returns Aggregated search facets with authors, categories, tags, and facet summaries
  */
 export const getSearchFacets = createDataFunction<void, SearchFacetAggregate>({
-  serviceKey: 'search',
+  logContext: (_, result) => {
+    const aggregate = result as SearchFacetAggregate | undefined;
+    return {
+      authorCount: aggregate?.authors.length ?? 0,
+      categoryCount: aggregate?.categories.length ?? 0,
+      facetCount: aggregate?.facets.length ?? 0,
+      tagCount: aggregate?.tags.length ?? 0,
+    };
+  },
   methodName: 'getSearchFacets',
   module: 'data/search/facets',
   operation: 'getSearchFacets',
+  serviceKey: 'search',
+  throwOnError: true,
   transformResult: (result) => {
     const data = result as GetSearchFacetsReturns;
     const facets = data.map((row) => normalizeFacetRow(row));
@@ -107,16 +122,6 @@ export const getSearchFacets = createDataFunction<void, SearchFacetAggregate>({
       tags,
     };
   },
-  throwOnError: true,
-  logContext: (_, result) => {
-    const aggregate = result as SearchFacetAggregate | undefined;
-    return {
-      authorCount: aggregate?.authors.length ?? 0,
-      categoryCount: aggregate?.categories.length ?? 0,
-      facetCount: aggregate?.facets.length ?? 0,
-      tagCount: aggregate?.tags.length ?? 0,
-    };
-  },
 });
 
 /**
@@ -126,11 +131,11 @@ export const getSearchFacets = createDataFunction<void, SearchFacetAggregate>({
  * @returns Array of trending search terms
  */
 export const getPopularSearches = createDataFunction<number, GetTrendingSearchesReturns>({
-  serviceKey: 'search',
+  logContext: (limit) => ({ limit }),
   methodName: 'getTrendingSearches',
   module: 'data/search/facets',
-  operation: 'getPopularSearches',
-  transformArgs: (limit) => ({ limit_count: limit }),
   onError: () => [], // Return empty array on error
-  logContext: (limit) => ({ limit }),
+  operation: 'getPopularSearches',
+  serviceKey: 'search',
+  transformArgs: (limit) => ({ limit_count: limit }),
 });

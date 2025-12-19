@@ -4,18 +4,13 @@
  */
 
 // GetUserLibraryReturns type is now derived from getUserCompleteData return type
-import {
-  type GetUserCompleteDataReturns,
-  type UserLibraryBookmark,
-  type UserLibraryCollection,
-} from '@heyclaude/database-types/postgres-types';
-import {
-  generatePageMetadata,
-} from '@heyclaude/web-runtime/seo';
+import { type GetUserLibraryReturns } from '@heyclaude/data-layer';
+type UserLibraryBookmark = NonNullable<GetUserLibraryReturns['bookmarks']>[number];
+type UserLibraryCollection = NonNullable<GetUserLibraryReturns['collections']>[number];
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
-import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import {
   Bookmark as BookmarkIcon,
   ExternalLink,
@@ -24,6 +19,7 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Button,
   Card,
@@ -156,7 +152,7 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
   userLogger.info({ section: 'data-fetch' }, 'LibraryPage: authentication successful');
 
   // Section: Library Data Fetch
-  let data: GetUserCompleteDataReturns['user_library'] | null = null;
+  let data: GetUserLibraryReturns | null = null;
   try {
     const completeData = await getUserCompleteData(user.id);
     data = completeData?.user_library ?? null;
@@ -301,10 +297,7 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground text-xs">
-                      Saved{' '}
-                      {bookmark.created_at
-                        ? formatDate(bookmark.created_at)
-                        : 'Unknown date'}
+                      Saved {bookmark.created_at ? formatDate(bookmark.created_at) : 'Unknown date'}
                     </p>
                   </CardContent>
                 </Card>

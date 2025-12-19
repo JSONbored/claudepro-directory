@@ -1,11 +1,10 @@
 import { type job_plan, type job_tier, type jobsModel } from '@heyclaude/data-layer/prisma';
-import { type GetUserCompleteDataReturns } from '@heyclaude/database-types/postgres-types';
-import { type JobBillingSummaryEntry } from '@heyclaude/web-runtime/data/payments';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { type GetUserCompleteDataReturns } from '@heyclaude/data-layer';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
-import { getJobBillingSummaries } from '@heyclaude/web-runtime/data/payments';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { getJobBillingSummaries } from '@heyclaude/web-runtime/data/payments';
+import { type JobBillingSummaryEntry } from '@heyclaude/web-runtime/data/payments';
 import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
 import {
   BarChart,
@@ -17,6 +16,7 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Alert,
   AlertDescription,
@@ -657,17 +657,17 @@ async function JobsListWithBilling({
             ]
               .filter(Boolean)
               .join(' • ')
-          : (job.expires_at
+          : job.expires_at
             ? `Active until ${formatRelativeDate(job.expires_at)}`
-            : null);
+            : null;
         const paymentCopy =
           summary?.last_payment_at && summary.last_payment_amount !== null
             ? `${formatPriceLabel(summary.last_payment_amount, false)} • Received ${formatRelativeDate(
                 summary.last_payment_at
               )}`
-            : (summary?.last_payment_at
+            : summary?.last_payment_at
               ? `Last payment ${formatRelativeDate(summary.last_payment_at)}`
-              : null);
+              : null;
         const showBillingCard =
           Boolean(planPriceLabel ?? renewalCopy ?? paymentCopy) || Boolean(summary);
 

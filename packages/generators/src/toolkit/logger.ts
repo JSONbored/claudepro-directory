@@ -13,7 +13,7 @@
  * @module generators/toolkit/logger
  */
 
-// Use relative imports for tsx compatibility in monorepo
+// Use direct imports (not barrel exports) for tsx compatibility in monorepo
 // This avoids module resolution issues with workspace packages
 import { createPinoConfig } from '../../../shared-runtime/src/logger/config.ts';
 import { normalizeError } from '../../../shared-runtime/src/error-handling.ts';

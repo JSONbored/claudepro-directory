@@ -14,9 +14,6 @@ import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
 import { withSmartCache } from '../utils/request-cache.ts';
 import type { contentModel } from '@heyclaude/database-types/prisma/models';
-import type {
-  EnrichedContentItem,
-} from '@heyclaude/database-types/postgres-types';
 
 // Local types for migrated RPCs (RPCs removed, using Prisma directly)
 // These types match the transformed Prisma query results
@@ -24,8 +21,9 @@ import type {
 /**
  * ContentTemplatesItem - Transformed template structure
  * Based on Prisma content_templates query with transformation applied
+ * Exported for use in web-runtime
  */
-type ContentTemplatesItem = {
+export type ContentTemplatesItem = {
   id: string;
   type: string; // category from template (renamed from category)
   name: string;
@@ -37,8 +35,9 @@ type ContentTemplatesItem = {
 
 /**
  * ContentTemplatesResult - Return type for getContentTemplates
+ * Exported for use in web-runtime
  */
-type ContentTemplatesResult = {
+export type ContentTemplatesResult = {
   templates: ContentTemplatesItem[] | null;
 };
 
@@ -51,7 +50,16 @@ type ContentPaginatedSlimItem = contentModel;
 /**
  * ContentPaginatedSlimResult - Paginated result with items and pagination metadata
  */
-type ContentPaginatedSlimResult = {
+// Exported for use in web-runtime
+export type GetContentPaginatedSlimArgs = {
+  p_category?: content_category | null;
+  p_limit?: number;
+  p_offset?: number;
+  p_order_by?: string;
+  p_order_direction?: string;
+};
+
+export type ContentPaginatedSlimResult = {
   items: ContentPaginatedSlimItem[];
   pagination: {
     total_count: number;
@@ -62,9 +70,76 @@ type ContentPaginatedSlimResult = {
     total_pages: number;
   };
 };
+
+// Local types for converted RPCs (RPCs removed, using Prisma directly)
+type CategoryConfigFeatures = {
+  show_on_homepage: boolean | null;
+  display_config: boolean | null; // Prisma schema: Boolean
+  generate_full_content: boolean | null;
+  build_enable_cache: boolean | null;
+  api_generate_static: boolean | null;
+  api_include_trending: boolean | null;
+  section_features: boolean | null;
+  section_installation: boolean | null;
+  section_use_cases: boolean | null;
+  section_configuration: boolean | null;
+  section_security: boolean | null;
+  section_troubleshooting: boolean | null;
+  section_examples: boolean | null;
+  section_requirements: boolean | null;
+  section_description: boolean | null;
+  metadata_show_github_link: boolean | null;
+};
+
+type CategoryConfigWithFeatures = {
+  category: content_category;
+  title: string | null;
+  plural_title: string | null;
+  description: string | null;
+  icon_name: string | null;
+  color_scheme: string | null;
+  keywords: string | null; // Prisma schema: String (not String[])
+  meta_description: string | null;
+  search_placeholder: string | null;
+  empty_state_message: string | null;
+  url_slug: string | null;
+  content_loader: string | null;
+  config_format: string | null;
+  primary_action_type: string | null;
+  primary_action_label: string | null;
+  primary_action_config: Record<string, unknown> | null;
+  validation_config: Record<string, unknown> | null;
+  generation_config: Record<string, unknown> | null;
+  schema_name: string | null;
+  api_schema: Record<string, unknown> | string[] | null; // Prisma schema: Json? (can be object or array)
+  metadata_fields: string[] | null; // Prisma schema: String[] (array, not object)
+  badges: string[] | null;
+  features: CategoryConfigFeatures | null;
+};
+
+type GetCategoryConfigsWithFeaturesReturns = CategoryConfigWithFeatures[];
+
+type GetContentDetailCoreArgs = {
+  p_slug: string;
+  p_category: content_category;
+};
+
+type GetContentDetailCoreReturns = {
+  content: Record<string, unknown> | null;
+  collection_items: Array<{
+    id: string;
+    collection_id: string;
+    content_type: string;
+    content_slug: string;
+    order: number;
+    added_at: string;
+    title: string | null;
+    description: string | null;
+    author: string | null;
+  }>;
+} | null;
+
 import type {
-  CategoryConfigFeatures,
-  CategoryConfigWithFeatures,
   GenerateReadmeDataArgs,
   GenerateReadmeDataReturns,
   GetSitewideContentListArgs,
@@ -81,7 +156,6 @@ import type {
   GenerateChangelogEntryLlmsTxtReturns,
   GenerateToolLlmsTxtArgs,
   GenerateToolLlmsTxtReturns,
-  GetCategoryConfigsWithFeaturesReturns,
   GetApiContentFullArgs,
   GetApiContentFullReturns,
   GenerateMarkdownExportArgs,
@@ -102,9 +176,6 @@ import type {
   GetReviewsWithStatsReturns,
   GetRelatedContentArgs,
   GetRelatedContentReturns,
-  GetContentTemplatesArgs,
-  GetContentDetailCoreArgs,
-  GetContentDetailCoreReturns,
   GetContentAnalyticsArgs,
   GetContentAnalyticsReturns,
   GetHomepageOptimizedArgs,
@@ -348,7 +419,11 @@ export class ContentService extends BasePrismaService {
             validation_config: config.validation_config,
             generation_config: config.generation_config,
             schema_name: config.schema_name,
-            api_schema: config.api_schema,
+            api_schema: (typeof config.api_schema === 'object' && config.api_schema !== null && !Array.isArray(config.api_schema)
+              ? (config.api_schema as Record<string, unknown>)
+              : Array.isArray(config.api_schema)
+              ? (config.api_schema as string[])
+              : null) as Record<string, unknown> | string[] | null,
             metadata_fields: config.metadata_fields ?? null,
             badges: config.badges ?? null,
             features: features as CategoryConfigFeatures | null,
@@ -436,7 +511,7 @@ export class ContentService extends BasePrismaService {
     p_slugs?: string[] | null;
     p_limit?: number;
     p_offset?: number;
-  }): Promise<EnrichedContentItem[]> {
+  }): Promise<contentModel[]> {
     const { p_category, p_slugs, p_limit = 100, p_offset = 0 } = args;
 
     // Build WHERE conditions dynamically
@@ -513,7 +588,7 @@ export class ContentService extends BasePrismaService {
         // Type narrowing: $queryRawUnsafe returns unknown[], validate structure
         const rawResult = await prisma.$queryRawUnsafe(query, ...queryParams);
         const result = Array.isArray(rawResult) 
-          ? (rawResult satisfies EnrichedContentItem[])
+          ? (rawResult satisfies contentModel[])
           : [];
         return result;
       },
@@ -575,7 +650,7 @@ export class ContentService extends BasePrismaService {
    * @returns Content templates result matching the RPC return type for backward compatibility
    */
   async getContentTemplates(
-    args: GetContentTemplatesArgs
+    args: Record<string, never> = {}
   ): Promise<ContentTemplatesResult> {
     // OPTIMIZATION: Use Prisma directly with request-scoped caching
     return withSmartCache(
@@ -588,7 +663,7 @@ export class ContentService extends BasePrismaService {
         // OPTIMIZATION: Select only needed fields to reduce data transfer
         const templates = await prisma.content_templates.findMany({
           where: {
-            category: p_category,
+            ...(p_category !== undefined && p_category !== null ? { category: p_category } : {}),
             active: true,
           },
           select: {
@@ -646,13 +721,7 @@ export class ContentService extends BasePrismaService {
    * 
    * Note: This uses a materialized view, so we use $queryRawUnsafe for the complex query.
    */
-  async getContentPaginatedSlim(args: {
-    p_category?: content_category | null;
-    p_limit?: number;
-    p_offset?: number;
-    p_order_by?: string;
-    p_order_direction?: string;
-  }): Promise<ContentPaginatedSlimResult> {
+  async getContentPaginatedSlim(args: GetContentPaginatedSlimArgs): Promise<ContentPaginatedSlimResult> {
     // OPTIMIZATION: Use withSmartCache for request-scoped caching
     return withSmartCache(
       'get_content_paginated_slim',
@@ -736,7 +805,8 @@ export class ContentService extends BasePrismaService {
           OFFSET ${offsetParam}
         `;
 
-        const itemsRaw = await prisma.$queryRawUnsafe(
+        // OPTIMIZATION: Explicit type annotation for better type safety
+        const itemsRaw = await prisma.$queryRawUnsafe<Array<contentModel & { total_count: bigint }>>(
           itemsQuery,
           ...queryParams
         );

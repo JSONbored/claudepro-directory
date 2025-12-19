@@ -6,12 +6,12 @@
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import { type content_category } from '@heyclaude/data-layer/prisma';
 import { type GetUserProfileReturns } from '@heyclaude/database-types/postgres-types';
-import { sanitizeSlug } from '@heyclaude/web-runtime/content';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { sanitizeSlug } from '@heyclaude/web-runtime/content';
 import { getPublicUserProfile } from '@heyclaude/web-runtime/data/community';
 import { Globe } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';

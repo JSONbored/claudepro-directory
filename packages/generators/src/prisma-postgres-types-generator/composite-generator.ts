@@ -35,13 +35,23 @@ export async function generateCompositeTypes(
   const exports: string[] = [];
 
   // Filter out excluded composite types
+  // Note: Composite types should already be filtered before being passed here,
+  // but we do a final check to ensure excluded types aren't generated
+  // Patterns support exact matches and wildcards (*)
   let filteredComposites = compositeTypes;
   if (config.excludeCompositeTypes) {
     filteredComposites = Object.fromEntries(
       Object.entries(compositeTypes).filter(([name]) => {
-        const matches = config.excludeCompositeTypes!.some((pattern) =>
-          new RegExp(pattern.replace(/\*/g, '.*')).test(name)
-        );
+        const matches = config.excludeCompositeTypes!.some((pattern) => {
+          // If pattern contains *, treat as wildcard pattern
+          if (pattern.includes('*')) {
+            const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+            return regex.test(name);
+          }
+          // Otherwise, use exact match (not substring match)
+          // This prevents "content" from matching "search_content_optimized_result"
+          return name === pattern;
+        });
         return !matches; // Exclude if matches pattern
       })
     );

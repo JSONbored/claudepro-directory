@@ -4,14 +4,14 @@ import { cacheTag } from 'next/cache';
 
 /**
  * Helper to create cache tags for content
- * 
+ *
  * @param category - Content category (content_category type or string)
  * @param slug - Optional content slug
  * @param additionalTags - Optional additional tags to include
  * @returns Array of cache tag strings
  */
 export function generateContentTags(
-  category?: content_category | string | null,
+  category?: content_category | null | string,
   slug?: null | string,
   additionalTags: string[] = []
 ): string[] {
@@ -140,7 +140,7 @@ export function applyContactCacheTags(additionalTags: string[] = []): void {
 
 /**
  * Helper to create cache tags for any resource type
- * 
+ *
  * @param resourceType - The type of resource (e.g., 'jobs', 'companies', 'changelog')
  * @param resourceId - Optional resource identifier (e.g., slug, id)
  * @param additionalTags - Optional additional tags to include
@@ -148,7 +148,7 @@ export function applyContactCacheTags(additionalTags: string[] = []): void {
  */
 export function generateResourceTags(
   resourceType: string,
-  resourceId?: string | null,
+  resourceId?: null | string,
   additionalTags: string[] = []
 ): string[] {
   const tags: string[] = [resourceType, ...additionalTags];

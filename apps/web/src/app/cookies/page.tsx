@@ -1,6 +1,6 @@
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { getLastUpdatedDate } from '@heyclaude/web-runtime/data/utils';
 import { logger } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife, cacheTag } from 'next/cache';
@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
   cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire
   cacheTag('seo-metadata-static');
   cacheTag('seo-metadata-cookies');
-  
+
   return generatePageMetadata('/cookies');
 }
 

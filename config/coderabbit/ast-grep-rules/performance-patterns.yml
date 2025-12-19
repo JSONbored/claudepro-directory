@@ -4,7 +4,7 @@
 # Consolidated from: performance-patterns.yml, performance-patterns-enhanced.yml
 
 ---
-# Rule: Detect N+1 query problem (sequential RPC calls in loops)
+# Rule: Detect N+1 query problem (sequential database queries in loops)
 id: n-plus-one-query-pattern
 language: typescript
 rule:
@@ -14,8 +14,10 @@ rule:
       - kind: for_in_statement
       - kind: while_statement
     - has:
-        pattern: await $SUPABASE.rpc($$$)
-message: "N+1 query detected: RPC calls inside loop. Use Promise.all() for parallel execution or batch query. Example: await Promise.all(items.map(item => supabase.rpc('get_item', { id: item.id })))"
+        pattern: await prisma\.($METHOD)($$$)
+    - has:
+        regex: prisma\.(\$queryRawUnsafe|\$queryRaw|findMany|findFirst|findUnique|create|update|delete|upsert)
+message: "N+1 query detected: Prisma queries inside loop. Use Promise.all() for parallel execution, batch query with Prisma's include/select, or use a single query with WHERE IN. Example: await Promise.all(items.map(item => prisma.table.findUnique({ where: { id: item.id } }))) or await prisma.table.findMany({ where: { id: { in: itemIds } } })"
 severity: error
 
 ---

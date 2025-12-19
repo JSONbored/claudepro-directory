@@ -6,7 +6,6 @@
  */
 
 import type {
-  CalculateContentTimeMetricsReturns,
   GetPopularContentArgs,
   GetPopularContentReturns,
   GetPopularContentFormattedArgs,
@@ -30,11 +29,15 @@ import { BasePrismaService } from './base-prisma-service.ts';
 import { withSmartCache } from '../utils/request-cache.ts';
 
 // Local types for converted RPCs (RPC removed, using Prisma directly)
-type GetRecentContentArgs = {
+// Exported for use in web-runtime
+export type GetRecentContentArgs = {
   p_category?: string | null;
   p_limit?: number | null;
   p_days?: number | null;
 };
+
+// getRecentContent returns contentModel[], but we export a type alias for backward compatibility
+export type GetRecentContentReturns = contentModel[];
 
 /**
  * Trending Service using Prisma Client
@@ -179,14 +182,15 @@ export class TrendingService extends BasePrismaService {
     );
   }
 
-  async calculateContentTimeMetrics(): Promise<CalculateContentTimeMetricsReturns> {
-    // Mutations don't use caching
-    return this.callRpc<CalculateContentTimeMetricsReturns>(
-      'calculate_content_time_metrics',
-      {},
-      { methodName: 'calculateContentTimeMetrics', useCache: false }
-    );
-  }
+  // Removed: calculate_content_time_metrics RPC function was removed in migration 20251217000229
+  // async calculateContentTimeMetrics(): Promise<CalculateContentTimeMetricsReturns> {
+  //   // Mutations don't use caching
+  //   return this.callRpc<CalculateContentTimeMetricsReturns>(
+  //     'calculate_content_time_metrics',
+  //     {},
+  //     { methodName: 'calculateContentTimeMetrics', useCache: false }
+  //   );
+  // }
 
   async refreshTrendingMetricsView(): Promise<void> {
     // Mutations don't use caching

@@ -3,10 +3,10 @@
  * Allows users to manage their multi-factor authentication settings
  */
 
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Shield } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
-import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import {
   Card,
   CardContent,

@@ -6,6 +6,7 @@
  */
 
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
+import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 import { NextResponse } from 'next/server';
 
 export const publicCorsHeaders = {
@@ -98,7 +99,7 @@ export function buildCacheHeaders(
   };
 
   // Add debug header in development for cache configuration visibility
-  if (process.env.NODE_ENV === 'development') {
+  if (isDevelopment) {
     headers['X-Cache-Debug'] = JSON.stringify({
       preset: key,
       ttl,

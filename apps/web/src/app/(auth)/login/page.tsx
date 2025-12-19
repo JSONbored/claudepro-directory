@@ -1,5 +1,5 @@
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { type Metadata } from 'next';
 import { connection } from 'next/server';
 import { Suspense } from 'react';

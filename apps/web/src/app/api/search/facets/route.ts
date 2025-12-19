@@ -26,7 +26,9 @@
 import 'server-only';
 
 // OPTIMIZATION: Removed unused imports - factory handles errors automatically
-import { createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext } from '@heyclaude/web-runtime/api/route-factory';
+import {
+  createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getWithAuthCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 
@@ -34,7 +36,7 @@ import { getWithAuthCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/ser
  * GET /api/search/facets - Get search facets
  *
  * Returns available search facets (categories, tags, authors) for filtering.
- * 
+ *
  * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
 export const GET = createCachedApiRoute({
@@ -55,7 +57,12 @@ export const GET = createCachedApiRoute({
     tags: ['search', 'facets'],
   },
   operation: 'SearchFacetsAPI',
-  responseHandler: (result: unknown, _query: unknown, _body: unknown, _ctx: RouteHandlerContext<unknown, unknown>) => {
+  responseHandler: (
+    result: unknown,
+    _query: unknown,
+    _body: unknown,
+    _ctx: RouteHandlerContext
+  ) => {
     const facets = Array.isArray(result) ? result : [];
     return jsonResponse({ facets }, 200, getWithAuthCorsHeaders);
   },

@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { type FormFieldConfigItem } from '@heyclaude/database-types/postgres-types';
+import { type FormFieldConfigItem } from '@heyclaude/data-layer';
 
 import {
   type FieldDefinition,
@@ -111,17 +111,24 @@ function emptySection(): SubmissionFormSection {
  * Fetch fields for a content type (cached)
  * Uses 'use cache' to cache form field configuration. This data is public and same for all users.
  */
-const fetchFieldsForContentType = createDataFunction<
-  SubmissionContentType,
-  SubmissionFormSection
->({
-  serviceKey: 'misc',
+const fetchFieldsForContentType = createDataFunction<SubmissionContentType, SubmissionFormSection>({
+  logContext: (contentType, result) => {
+    const section = result as SubmissionFormSection | undefined;
+    return {
+      contentType,
+      fieldCount: section
+        ? section.common.length + section.typeSpecific.length + section.tags.length
+        : 0,
+    };
+  },
   methodName: 'getFormFieldConfig',
   module: 'data/forms/submission-form-fields',
+  onError: () => emptySection(),
   operation: 'fetchFieldsForContentType',
+  serviceKey: 'misc',
   transformArgs: (contentType) => ({ p_form_type: contentType }),
   transformResult: (result) => {
-    const rpcResult = result as { fields: FormFieldConfigItem[] | null } | null;
+    const rpcResult = result as null | { fields: FormFieldConfigItem[] | null };
     if (
       rpcResult === null ||
       rpcResult === undefined ||
@@ -168,17 +175,6 @@ const fetchFieldsForContentType = createDataFunction<
     }
 
     return section;
-  },
-  onError: () => emptySection(),
-  logContext: (contentType, result) => {
-    const section = result as SubmissionFormSection | undefined;
-    return {
-      contentType,
-      fieldCount:
-        section
-          ? section.common.length + section.typeSpecific.length + section.tags.length
-          : 0,
-    };
   },
 });
 

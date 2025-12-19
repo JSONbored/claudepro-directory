@@ -51,13 +51,11 @@ export function generateEnumSchemas(
 function generateEnumSchemaFile(enumName: string, _enumValues: string[]): string {
   // Import the Prisma enum object (value object) for runtime validation
   // The enum object contains the actual database values (handles @map() directives)
-  const enumObjectName = enumName; // Prisma enum objects use the same name as the type
+  // Use a different import name to avoid duplicate identifier with the type
+  const enumObjectName = `${enumName}Enum`;
   
   // Note: _enumValues is used for validation (checking if empty) but not in the generated code
   // We use Object.values() of the Prisma enum object at runtime instead
-  
-  // Import the Prisma enum type for type annotation
-  const enumTypeImport = `import type { ${enumName} } from '@heyclaude/data-layer/prisma';`;
   
   // Generate file content that:
   // 1. Imports the Prisma enum object for runtime validation
@@ -68,15 +66,17 @@ function generateEnumSchemaFile(enumName: string, _enumValues: string[]): string
     // Import the Prisma enum object (value object) for runtime validation
     // This object contains the actual database values, properly handling @map() directives
     // The enum objects are exported from @heyclaude/database-types/prisma (snake_case)
-    `import { ${enumObjectName} } from '@heyclaude/database-types/prisma';`,
+    // Use alias to avoid duplicate identifier with type import
+    `import { ${enumName} as ${enumObjectName} } from '@heyclaude/database-types/prisma';`,
     // Import the Prisma enum type for type annotation
-    enumTypeImport,
+    // Enum types are exported from @heyclaude/database-types/prisma (enums.ts)
+    `import type { ${enumName} } from '@heyclaude/database-types/prisma';`,
     '',
     // Create Zod schema using z.string().pipe() with transform to ensure correct type inference
     // This validates against the actual database values (handles @map() correctly)
     // and ensures TypeScript infers the Prisma enum type (not a string literal union)
     // This is generated code, ensuring perfect type inference without manual assertions in consuming code
-    `export const ${enumName}Schema: z.ZodType<${enumName}, z.ZodTypeDef, string> = z.string().pipe(`,
+    `export const ${enumName}Schema: z.ZodType<${enumName}> = z.string().pipe(`,
     `  z.custom<${enumName}>((val) => {`,
     `    const enumValues = Object.values(${enumObjectName}) as readonly string[];`,
     `    return typeof val === 'string' && enumValues.includes(val);`,

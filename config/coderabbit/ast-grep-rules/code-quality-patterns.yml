@@ -10,10 +10,10 @@ rule:
   all:
     - kind: comment
     - has:
-        regex: TODO|FIXME|HACK|XXX|BUG
+        regex: 'TODO|FIXME|HACK|XXX|BUG'
     - not:
         has:
-          regex: #[0-9]+|LINE-[0-9]+|GH-[0-9]+|LINEAR-[A-Z0-9]+
+          regex: '#[0-9]+|LINE-[0-9]+|GH-[0-9]+|LINEAR-[A-Z0-9]+'
 message: "TODO/FIXME comments should reference issue tracker (e.g., TODO #123, TODO LINEAR-ABC123). Create Linear issue and reference it, or remove if no longer needed."
 severity: info
 
@@ -29,7 +29,7 @@ rule:
     - not:
         inside:
           has:
-            pattern: validateEnv|env\.|requireEnvVar|getEnvObject
+            regex: 'validateEnv|env\.|requireEnvVar|getEnvObject'
 message: "Direct process.env access without validation. Use validated env object from @heyclaude/shared-runtime/schemas/env instead. This ensures type safety and runtime validation."
 severity: error
 
@@ -44,10 +44,10 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export (async )?function $FUNC($$$) { $$$ }
+        regex: 'export\s+(async\s+)?function\s+\w+\([^)]*\)\s*\{'
     - not:
         has:
-          pattern: /**
+          regex: '/\*\*'
 message: "Public API functions should include JSDoc comments for documentation. Add @param, @returns, @example for better developer experience."
 severity: warning
 
@@ -59,6 +59,6 @@ rule:
   all:
     - kind: call_expression
     - has:
-        regex: unstable_cache|React\.cache|fetchCached|getCacheTtl|getCacheInvalidateTags
+        regex: 'unstable_cache|React\.cache|fetchCached|getCacheTtl|getCacheInvalidateTags'
 message: "Deprecated API detected. Use modern alternatives: unstable_cache → 'use cache', React.cache → removed, fetchCached → removed, getCacheTtl → cacheLife()."
 severity: error

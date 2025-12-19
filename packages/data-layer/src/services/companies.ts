@@ -5,18 +5,124 @@
  * Uses generated Prisma postgres-types for RPC function types and Zod schemas.
  */
 
-import type {
-  GetCompanyAdminProfileArgs,
-  GetCompanyAdminProfileReturns,
-  GetCompanyProfileArgs,
-  GetCompanyProfileReturns,
-  GetCompaniesListArgs,
-  GetCompaniesListReturns,
-  CompanyListItem,
-  CompanyJobStatsItem,
-  CompanyProfileJobItem,
-  CompanyProfileStats,
-} from '@heyclaude/database-types/postgres-types';
+// Local types for converted RPCs (RPCs removed, using Prisma directly)
+// These RPC functions were removed and converted to Prisma direct queries
+// Types are defined locally to match the original RPC return structures
+// Exported for use in web-runtime
+
+export type GetCompanyAdminProfileArgs = {
+  p_company_id: string;
+};
+
+export type GetCompanyAdminProfileReturns = Array<{
+  id: string;
+  owner_id: string;
+  slug: string;
+  name: string;
+  logo: string | null;
+  website: string | null;
+  description: string | null;
+  size: string | null;
+  industry: string | null;
+  using_cursor_since: string | null;
+  featured: boolean;
+  created_at: string;
+  updated_at: string;
+}>;
+
+export type GetCompanyProfileArgs = {
+  p_slug: string;
+};
+
+export type CompanyProfileStats = {
+  total_jobs: number;
+  active_jobs: number;
+  featured_jobs: number;
+  remote_jobs: number;
+  avg_salary_min: number | null;
+  total_views: number;
+  total_clicks: number;
+  click_through_rate: number | null;
+  latest_job_posted_at: string | null;
+};
+
+export type CompanyProfileJobItem = {
+  id: string;
+  slug: string;
+  title: string;
+  company: string;
+  company_logo: string | null;
+  location: string | null;
+  description: string;
+  salary: string | null;
+  remote: boolean;
+  type: 'full-time' | 'part-time' | 'contract' | 'internship' | null;
+  workplace: string | null;
+  experience: string | null;
+  category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
+  tags: string[];
+  plan: 'free' | 'basic' | 'premium' | null;
+  tier: 'standard' | 'featured' | null;
+  posted_at: string | null;
+  expires_at: string | null;
+  view_count: number;
+  click_count: number;
+  link: string | null;
+};
+
+export type GetCompanyProfileReturns = {
+  company: {
+    id: string;
+    owner_id: string;
+    slug: string;
+    name: string;
+    logo: string | null;
+    website: string | null;
+    description: string | null;
+    size: string | null; // Stored as enum in DB but returned as string
+    industry: string | null;
+    using_cursor_since: string | null;
+    featured: boolean;
+    created_at: string;
+    updated_at: string;
+    json_ld: Record<string, unknown> | null;
+  } | null;
+  active_jobs: CompanyProfileJobItem[] | null;
+  stats: CompanyProfileStats | null;
+};
+
+export type GetCompaniesListArgs = {
+  p_limit?: number;
+  p_offset?: number;
+};
+
+export type CompanyJobStatsItem = {
+  active_jobs: number;
+  total_jobs: number;
+  remote_jobs: number;
+  total_views: number;
+  total_clicks: number;
+  latest_job_posted_at: string | null;
+};
+
+export type CompanyListItem = {
+  id: string;
+  slug: string;
+  name: string;
+  logo: string | null;
+  website: string | null;
+  description: string | null;
+  size: string | null;
+  industry: string | null;
+  featured: boolean;
+  created_at: string;
+  stats: CompanyJobStatsItem;
+};
+
+export type GetCompaniesListReturns = {
+  companies: CompanyListItem[] | null;
+  total: number;
+};
 import { BasePrismaService } from './base-prisma-service.ts';
 import { prisma } from '../prisma/client.ts';
 import { withSmartCache } from '../utils/request-cache.ts';

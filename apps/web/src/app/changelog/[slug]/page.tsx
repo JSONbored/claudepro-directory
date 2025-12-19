@@ -22,11 +22,11 @@
  * - Responsive design
  */
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { getChangelogEntryBySlug } from '@heyclaude/web-runtime/data/changelog';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { Breadcrumbs, NavLink, Separator } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import { type Metadata } from 'next';
@@ -119,7 +119,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   'use cache';
   const { slug } = await params;
-  
+
   // Dynamic route - metadata changes when changelog entry changes
   // Use long cache with content-based invalidation
   cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire
@@ -306,7 +306,7 @@ async function ChangelogEntryPageContent({
         <Separator className="my-8" />
 
         {/* Content */}
-        <ChangelogContent entry={entry} hideHeader />
+        <ChangelogContent hideHeader entry={entry} />
       </article>
     </>
   );

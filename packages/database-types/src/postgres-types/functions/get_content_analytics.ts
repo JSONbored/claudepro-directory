@@ -7,6 +7,9 @@
 
 import { z } from 'zod';
 
+import type { ContentDetailAnalytics } from '../composites/content_detail_analytics';
+import { contentDetailAnalyticsSchema } from '../composites/content_detail_analytics';
+
 /**
  * Arguments for PostgreSQL function: get_content_analytics
  */
@@ -39,12 +42,12 @@ export type GetContentAnalyticsArgsFromZod = z.infer<typeof getContentAnalyticsA
 /**
  * Return type for PostgreSQL function: get_content_analytics
  */
-export type GetContentAnalyticsReturns = unknown;
+export type GetContentAnalyticsReturns = ContentDetailAnalytics;
 
 /**
  * Zod schema for get_content_analytics function return type
  */
-export const getContentAnalyticsReturnsSchema = z.unknown();
+export const getContentAnalyticsReturnsSchema = contentDetailAnalyticsSchema;
 
 /**
  * Type inference from Zod schema (should match type above)

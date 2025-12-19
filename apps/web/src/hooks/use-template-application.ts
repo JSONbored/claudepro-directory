@@ -9,13 +9,10 @@
 
 'use client';
 
-import type { GetContentTemplatesReturns } from '@heyclaude/database-types/postgres-types';
+import type { ContentTemplatesResult } from '@heyclaude/data-layer';
 import { normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { useCallback } from 'react';
-
-// Use generated type directly from @heyclaude/database-types
-type ContentTemplatesResult = GetContentTemplatesReturns;
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
 
 // Type representing the merged structure (matches what getContentTemplates returns)

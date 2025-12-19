@@ -469,12 +469,12 @@ pre-push:
             echo "      💡 Review: config/coderabbit/ast-grep-rules/code-quality-patterns.yml"
           fi
           
-          # Enhanced performance patterns
-          echo "   ⚡ Enhanced performance patterns..."
-          PERF_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/performance-patterns-enhanced.yml 2>/dev/null | grep -c "memory-leak\|large-bundle" || echo "0")
+          # Performance patterns (enhanced rules merged into performance-patterns.yml)
+          echo "   ⚡ Performance patterns..."
+          PERF_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/performance-patterns.yml 2>/dev/null | grep -c "memory-leak\|large-bundle\|n-plus-one" || echo "0")
           if [ "$PERF_ISSUES" != "0" ]; then
             echo "      ⚠️  Found performance issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/performance-patterns-enhanced.yml"
+            echo "      💡 Review: config/coderabbit/ast-grep-rules/performance-patterns.yml"
           fi
           
           # Tool-specific patterns (Pino, Next.js, Prisma, React, Zod)
@@ -485,10 +485,10 @@ pre-push:
             echo "      💡 Review: config/coderabbit/ast-grep-rules/pino-logging-patterns.yml"
           fi
           
-          NEXTJS_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/nextjs-cache-components-patterns.yml 2>/dev/null | grep -c "missing-cache\|missing-cache-life\|missing-cache-tag" || echo "0")
-          if [ "$NEXTJS_ISSUES" != "0" ]; then
-            echo "      ⚠️  Found Next.js Cache Components issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/nextjs-cache-components-patterns.yml"
+          CACHE_COMPONENTS_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/cache-components-patterns.yml 2>/dev/null | grep -c "missing-cache\|missing-cache-life\|missing-cache-tag" || echo "0")
+          if [ "$CACHE_COMPONENTS_ISSUES" != "0" ]; then
+            echo "      ⚠️  Found Cache Components issues"
+            echo "      💡 Review: config/coderabbit/ast-grep-rules/cache-components-patterns.yml"
           fi
           
           PRISMA_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/prisma-best-practices.yml 2>/dev/null | grep -c "n-plus-one\|missing-transaction\|missing-where" || echo "0")

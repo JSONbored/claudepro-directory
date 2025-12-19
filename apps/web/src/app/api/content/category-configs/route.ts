@@ -23,9 +23,7 @@
 
 import 'server-only';
 import {
-  createOptionsHandler as createApiOptionsHandler,
-  createCachedApiRoute,
-  type RouteHandlerContext,
+  createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
@@ -35,7 +33,7 @@ import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/
  *
  * Returns category configuration data including features, metadata, and display settings.
  * Used by the frontend to render category-specific UI and determine available features.
- * 
+ *
  * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
 export const GET = createCachedApiRoute({
@@ -56,9 +54,9 @@ export const GET = createCachedApiRoute({
     tags: ['content', 'categories', 'config'],
   },
   operation: 'CategoryConfigsAPI',
-  responseHandler: (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext<unknown, unknown>) => {
+  responseHandler: (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext) => {
     const { logger } = ctx;
-    const data = result as unknown[] | null | undefined;
+    const data = result as null | undefined | unknown[];
 
     logger.info(
       {

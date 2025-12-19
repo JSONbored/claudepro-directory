@@ -1,13 +1,13 @@
 /** Homepage consuming homepageConfigs for runtime-tunable categories */
 
 import { type content_category, type user_tier } from '@heyclaude/data-layer/prisma';
-import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
-import { trackRPCFailure } from '@heyclaude/web-runtime/utils/homepage-error-tracking';
-import { isBookmarkedBatch } from '@heyclaude/web-runtime/data/account';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { isBookmarkedBatch } from '@heyclaude/web-runtime/data/account';
 import { getHomepageCategoryIds } from '@heyclaude/web-runtime/data/config/category';
 import { getHomepageData } from '@heyclaude/web-runtime/data/content/homepage';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { trackRPCFailure } from '@heyclaude/web-runtime/utils/homepage-error-tracking';
 import { type Metadata } from 'next';
 // Suspense removed - not needed since data is fetched at page level
 // Suspense above the fold can cause blank states to be cached
@@ -72,7 +72,7 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
   // NOTE: 'use cache' removed because this page uses getAuthenticatedUser() which calls cookies()
   // cookies() cannot be used inside 'use cache' functions per Next.js requirements
   // The page will still benefit from caching at the component level where appropriate
-  
+
   // CRITICAL OPTIMIZATION: Fetch homepage data ONCE at page level
   // This eliminates 3 separate function calls (hero, content, contributors)
 
@@ -221,8 +221,7 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
       }
     } catch (error) {
       // Log error but don't fail page render - bookmark status is non-critical
-      const { logger, normalizeError } =
-        await import('@heyclaude/shared-runtime/logger/index');
+      const { logger, normalizeError } = await import('@heyclaude/shared-runtime/logger/index');
       const normalized = normalizeError(error, 'Bookmark status batch check failed');
       logger.warn({
         err: normalized,

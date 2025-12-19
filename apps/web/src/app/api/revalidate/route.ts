@@ -30,9 +30,15 @@
  */
 import 'server-only';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { createOptionsHandler as createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/api/route-factory';
+import {
+  createApiRoute, createOptionsHandler as createApiOptionsHandler,
+} from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
-import { getOnlyCorsHeaders, jsonResponse, unauthorizedResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import {
+  getOnlyCorsHeaders,
+  jsonResponse,
+  unauthorizedResponse,
+} from '@heyclaude/web-runtime/server/api-helpers';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 
@@ -89,15 +95,15 @@ export const POST = createApiRoute({
     if (category) {
       paths.push('/', `/${category}`);
       if (slug) paths.push(`/${category}/${slug}`);
-      paths.forEach((path) => revalidatePath(path));
+      for (const path of paths) revalidatePath(path);
     }
 
     // Tag invalidation
     if (tags?.length) {
-      tags.forEach((tag) => {
+      for (const tag of tags) {
         revalidateTag(tag, 'max');
         invalidatedTags.push(tag);
-      });
+      }
     }
 
     // If neither category nor tags provided, return error

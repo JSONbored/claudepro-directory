@@ -10,7 +10,8 @@
     "lint": "echo 'Skipping lint for generated types'"
   },
   "dependencies": {
-    "zod": "^4.2.0"
+    "zod": "^4.2.0",
+    "decimal.js": "^10.4.3"
   },
   "exports": {
     "./prisma": {
@@ -42,6 +43,11 @@
       "development": "./src/prisma/zod/index.ts",
       "types": "./dist/prisma/zod/index.d.ts",
       "default": "./src/prisma/zod/index.ts"
+    },
+    "./prisma/zod/schemas": {
+      "development": "./src/prisma/zod/schemas/index.ts",
+      "types": "./dist/prisma/zod/schemas/index.d.ts",
+      "default": "./src/prisma/zod/schemas/index.ts"
     },
     "./prisma/zod/*": {
       "development": "./src/prisma/zod/*.ts",

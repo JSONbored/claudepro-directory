@@ -1,8 +1,8 @@
 import { getContactChannels } from '@heyclaude/web-runtime/config/marketing-client';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { Card, CardContent, CardHeader, CardTitle, NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife, cacheTag } from 'next/cache';
@@ -38,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
   cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire
   cacheTag('seo-metadata-static');
   cacheTag('seo-metadata-contact');
-  
+
   return generatePageMetadata('/contact');
 }
 
@@ -182,8 +182,8 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
                   Join the conversation, ask questions, and share ideas with the community.
                 </p>
                 <NavLink
-                  className="inline-flex items-center gap-1"
                   external
+                  className="inline-flex items-center gap-1"
                   href={`${channels.github}/discussions`}
                 >
                   Visit Discussions →
@@ -206,8 +206,8 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
                   Chat with other users, get help, and stay updated on the latest developments.
                 </p>
                 <NavLink
-                  className="inline-flex items-center gap-1"
                   external
+                  className="inline-flex items-center gap-1"
                   href={channels.discord}
                 >
                   Join Discord →
@@ -230,8 +230,8 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
                   Found a bug or have a feature request? Open an issue on GitHub.
                 </p>
                 <NavLink
-                  className="inline-flex items-center gap-1"
                   external
+                  className="inline-flex items-center gap-1"
                   href={`${channels.github}/issues/new`}
                 >
                   Create Issue →
@@ -254,8 +254,8 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
                   For private inquiries, partnerships, or other matters, reach us via email.
                 </p>
                 <NavLink
-                  className="inline-flex items-center gap-1"
                   external
+                  className="inline-flex items-center gap-1"
                   href={`mailto:${channels.email}`}
                 >
                   {channels.email} →

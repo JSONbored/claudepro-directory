@@ -36,7 +36,9 @@
 import 'server-only';
 
 // OPTIMIZATION: Removed unused imports - factory handles errors automatically
-import { createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext } from '@heyclaude/web-runtime/api/route-factory';
+import {
+  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 
@@ -45,7 +47,7 @@ import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/
  *
  * Queries the database via Prisma and returns a normalized health report.
  * HTTP status is 200 for `healthy` or `degraded`, and 503 for any other status.
- * 
+ *
  * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
 export const GET = createCachedApiRoute({
@@ -69,9 +71,9 @@ export const GET = createCachedApiRoute({
     tags: ['health', 'monitoring'],
   },
   operation: 'StatusAPI',
-  responseHandler: (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext<unknown, unknown>) => {
+  responseHandler: (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext) => {
     const { logger } = ctx;
-    const data = result as { status?: string; [key: string]: unknown } | null | undefined;
+    const data = result as null | undefined | { [key: string]: unknown; status?: string };
 
     // Determine HTTP status code based on health status
     // Handle case where status might be a composite type string (from database function)

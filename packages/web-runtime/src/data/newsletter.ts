@@ -9,9 +9,9 @@ import { createDataFunction } from './cached-data-factory.ts';
  * Newsletter count changes frequently, so we use the 'long' cacheLife profile.
  */
 export const getNewsletterSubscriberCount = createDataFunction<void, number>({
-  serviceKey: 'newsletter',
   methodName: 'getNewsletterSubscriberCount',
   module: 'data/newsletter',
   operation: 'getNewsletterSubscriberCount',
-  transformResult: (result) => (result as number | null) ?? 0,
+  serviceKey: 'newsletter',
+  transformResult: (result) => (result as null | number) ?? 0,
 });

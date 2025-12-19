@@ -3,8 +3,8 @@ import {
   type GetCompaniesListReturns,
   type GetCompanyAdminProfileReturns,
   type GetCompanyProfileReturns,
-  type SearchUnifiedArgs,
-} from '@heyclaude/database-types/postgres-types';
+} from '@heyclaude/data-layer';
+import { type SearchUnifiedArgs } from '@heyclaude/database-types/postgres-types';
 
 import { createDataFunction } from './cached-data-factory.ts';
 import { normalizeRpcResult } from './content-helpers.ts';
@@ -27,17 +27,17 @@ export const getCompanyAdminProfile = createDataFunction<
   string,
   GetCompanyAdminProfileReturn[number]
 >({
-  serviceKey: 'companies',
   methodName: 'getCompanyAdminProfile',
   module: 'data/companies',
-  operation: 'getCompanyAdminProfile',
-  validate: (companyId) => Boolean(companyId),
-  transformArgs: (companyId) => ({ p_company_id: companyId }),
   normalizeResult: (result) => {
     const normalized = normalizeRpcResult(result as GetCompanyAdminProfileReturns);
     return (normalized as GetCompanyAdminProfileReturn[number]) || null;
   },
+  operation: 'getCompanyAdminProfile',
+  serviceKey: 'companies',
   throwOnError: true,
+  transformArgs: (companyId) => ({ p_company_id: companyId }),
+  validate: Boolean,
 });
 
 /**
@@ -46,43 +46,41 @@ export const getCompanyAdminProfile = createDataFunction<
  * Company profiles change periodically, so we use the 'long' cacheLife profile.
  */
 export const getCompanyProfile = createDataFunction<string, GetCompanyProfileReturns>({
-  serviceKey: 'companies',
   methodName: 'getCompanyProfile',
   module: 'data/companies',
   operation: 'getCompanyProfile',
-  transformArgs: (slug) => ({ p_slug: slug }),
+  serviceKey: 'companies',
   throwOnError: true,
+  transformArgs: (slug) => ({ p_slug: slug }),
 });
 
 /**
  * Get companies list
  * Uses 'use cache' to cache companies lists. This data is public and same for all users.
  * Company lists change periodically, so we use the 'long' cacheLife profile.
+ * @param limit
+ * @param offset
  */
-export async function getCompaniesList(
-  limit = 50,
-  offset = 0
-): Promise<GetCompaniesListReturns> {
-  const cachedFn = createDataFunction<
-    { limit: number; offset: number },
-    GetCompaniesListReturns
-  >({
-    serviceKey: 'companies',
-    methodName: 'getCompaniesList',
-    module: 'data/companies',
-    operation: 'getCompaniesList',
-    transformArgs: (args) => ({
-      p_limit: args.limit,
-      p_offset: args.offset,
-    }),
+export async function getCompaniesList(limit = 50, offset = 0): Promise<GetCompaniesListReturns> {
+  const cachedFn = createDataFunction<{ limit: number; offset: number }, GetCompaniesListReturns>({
     logContext: (args) => ({
       limit: args.limit,
       offset: args.offset,
     }),
+    methodName: 'getCompaniesList',
+    module: 'data/companies',
+    operation: 'getCompaniesList',
+    serviceKey: 'companies',
     throwOnError: true,
+    transformArgs: (args) => ({
+      p_limit: args.limit,
+      p_offset: args.offset,
+    }),
   });
 
-  return (await cachedFn({ limit, offset })) ?? ({ companies: [], total: 0 } as GetCompaniesListReturns);
+  return (
+    (await cachedFn({ limit, offset })) ?? ({ companies: [], total: 0 } as GetCompaniesListReturns)
+  );
 }
 
 export interface CompanySearchResult {
@@ -97,13 +95,14 @@ export interface CompanySearchResult {
  * Uses search service to find companies matching query
  */
 const fetchCompanySearchResults = createDataFunction<
-  { query: string; limit: number },
+  { limit: number; query: string },
   CompanySearchResult[]
 >({
-  serviceKey: 'search',
   methodName: 'searchUnified',
   module: 'data/companies',
+  onError: () => [], // Return empty array on error
   operation: 'fetchCompanySearchResults',
+  serviceKey: 'search',
   transformArgs: (args) =>
     ({
       p_entities: ['company'],
@@ -113,7 +112,9 @@ const fetchCompanySearchResults = createDataFunction<
       p_query: args.query,
     }) as SearchUnifiedArgs,
   transformResult: (result) => {
-    const searchResponse = result as { data?: Array<{ description?: string; id?: string; title?: string; slug?: string }> };
+    const searchResponse = result as {
+      data?: Array<{ description?: string; id?: string; slug?: string; title?: string }>;
+    };
     const results = searchResponse.data || [];
     return results.map((entity) => ({
       description: entity.description || null,
@@ -122,7 +123,6 @@ const fetchCompanySearchResults = createDataFunction<
       slug: entity.slug || null,
     }));
   },
-  onError: () => [], // Return empty array on error
 });
 
 /**
@@ -133,6 +133,8 @@ const fetchCompanySearchResults = createDataFunction<
  * Company search results change frequently, so we use the 'long' cacheLife profile.
  *
  * Follows architectural strategy: data layer -> database RPC -> DB
+ * @param query
+ * @param limit
  */
 export async function searchCompanies(query: string, limit = 10): Promise<CompanySearchResult[]> {
   const trimmed = query.trim();
@@ -140,5 +142,5 @@ export async function searchCompanies(query: string, limit = 10): Promise<Compan
     return [];
   }
 
-  return (await fetchCompanySearchResults({ query: trimmed, limit })) ?? [];
+  return (await fetchCompanySearchResults({ limit, query: trimmed })) ?? [];
 }

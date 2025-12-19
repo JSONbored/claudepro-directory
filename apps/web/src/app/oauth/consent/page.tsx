@@ -14,10 +14,10 @@
  * 6. Redirect back to client with authorization code or error
  */
 
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
-import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { createSupabaseServerClient } from '@heyclaude/web-runtime/supabase/server';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { createSupabaseServerClient } from '@heyclaude/web-runtime/supabase/server';
 import { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';

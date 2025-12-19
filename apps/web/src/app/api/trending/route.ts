@@ -8,23 +8,27 @@
 import 'server-only';
 
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext } from '@heyclaude/web-runtime/api/route-factory';
+import {
+  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
+import { trendingQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
-import { trendingQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 
 type ContentCategory = content_category;
 
 // Shared method args builder
 function buildTrendingMethodArgs(category: ContentCategory | null | undefined, limit: number) {
-  return [{
-    ...(category ? { p_category: category } : {}),
-    p_limit: limit,
-  }];
+  return [
+    {
+      ...(category ? { p_category: category } : {}),
+      p_limit: limit,
+    },
+  ];
 }
 
 // Shared response builder
-function buildTabResponse(data: unknown[], key: 'trending' | 'popular' | 'recent') {
+function buildTabResponse(data: unknown[], key: 'popular' | 'recent' | 'trending') {
   const items = Array.isArray(data) ? data : [];
   return jsonResponse(
     key === 'trending'
@@ -42,28 +46,52 @@ function buildTabResponse(data: unknown[], key: 'trending' | 'popular' | 'recent
  * Supports both page and sidebar modes with category filtering.
  */
 export const GET = createCachedApiRoute({
-  route: getVersionedRoute('trending'),
-  operation: 'TrendingAPI',
-  method: 'GET',
-  cors: 'anon',
   cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
   cacheTags: (query) => {
     const category = query.category as ContentCategory | null;
-    const mode = query.mode as 'sidebar' | undefined;
-    const tab = query.tab as 'popular' | 'recent' | 'trending' | undefined;
+    const mode = query.mode;
+    const tab = query.tab;
     const tags = ['trending'];
     if (category) tags.push(`trending-${category}`);
     if (mode) tags.push(`trending-${mode}`);
     if (tab) tags.push(`trending-${tab}`);
     return tags;
   },
-  querySchema: trendingQuerySchema as any,
-  service: {
-    serviceKey: 'trending',
-    methodName: 'getTrendingMetricsFormatted',
-    methodArgs: (query) => buildTrendingMethodArgs(query.category as ContentCategory | null, query.limit as number),
+  cors: 'anon',
+  method: 'GET',
+  openapi: {
+    description:
+      'Returns trending, popular, or recent content based on tab selection. Supports both page and sidebar modes with category filtering.',
+    operationId: 'getTrending',
+    responses: {
+      200: {
+        description: 'Trending content retrieved successfully',
+      },
+      400: {
+        description: 'Invalid tab or category parameter',
+      },
+    },
+    summary: 'Get trending, popular, or recent content',
+    tags: ['content', 'trending'],
   },
-  responseHandler: async (_result: unknown, query: { category?: ContentCategory | null; limit: number; mode?: 'sidebar'; tab?: 'popular' | 'recent' | 'trending' }, _body: unknown, ctx: RouteHandlerContext<{ category?: ContentCategory | null; limit: number; mode?: 'sidebar'; tab?: 'popular' | 'recent' | 'trending' }, unknown>) => {
+  operation: 'TrendingAPI',
+  querySchema: trendingQuerySchema,
+  responseHandler: async (
+    _result: unknown,
+    query: {
+      category?: ContentCategory | null;
+      limit: number;
+      mode?: 'page' | 'sidebar';
+      tab?: 'popular' | 'recent' | 'trending';
+    },
+    _body: unknown,
+    ctx: RouteHandlerContext<{
+      category?: ContentCategory | null;
+      limit: number;
+      mode?: 'page' | 'sidebar';
+      tab?: 'popular' | 'recent' | 'trending';
+    }>
+  ) => {
     const { logger } = ctx;
     const { category, limit, mode, tab } = query;
 
@@ -75,9 +103,17 @@ export const GET = createCachedApiRoute({
     if (mode === 'sidebar') {
       const sidebarCategory = category ?? 'guides';
       logger.info({ category: sidebarCategory, limit }, 'Processing trending sidebar');
+      const sidebarArgs = buildTrendingMethodArgs(sidebarCategory, limit);
+      const baseArgs = sidebarArgs[0];
+      if (!baseArgs) {
+        throw new Error('Failed to build trending method args');
+      }
       const [trending, recent] = await Promise.all([
-        service.getSidebarTrendingFormatted(buildTrendingMethodArgs(sidebarCategory, limit)[0] as any),
-        service.getSidebarRecentFormatted({ ...buildTrendingMethodArgs(sidebarCategory, limit)[0] as any, p_days: 30 }),
+        service.getSidebarTrendingFormatted(baseArgs),
+        service.getSidebarRecentFormatted({
+          ...baseArgs,
+          p_days: 30,
+        }),
       ]);
       return jsonResponse(
         {
@@ -92,37 +128,38 @@ export const GET = createCachedApiRoute({
     // Handle page tabs
     logger.info({ category: category ?? 'all', limit, tab }, 'Processing trending page tabs');
 
+    const methodArgs = buildTrendingMethodArgs(category, limit);
+    const baseArgs = methodArgs[0];
+    if (!baseArgs) {
+      throw new Error('Failed to build trending method args');
+    }
+
     if (tab === 'trending') {
-      const trending = await service.getTrendingMetricsFormatted(buildTrendingMethodArgs(category, limit)[0] as any);
+      const trending = await service.getTrendingMetricsFormatted(baseArgs);
       return buildTabResponse(Array.isArray(trending) ? trending : [], 'trending');
     }
 
     if (tab === 'popular') {
-      const popular = await service.getPopularContentFormatted(buildTrendingMethodArgs(category, limit)[0] as any);
+      const popular = await service.getPopularContentFormatted(baseArgs);
       return buildTabResponse(Array.isArray(popular) ? popular : [], 'popular');
     }
 
     if (tab === 'recent') {
-      const recent = await service.getRecentContentFormatted({ ...buildTrendingMethodArgs(category, limit)[0] as any, p_days: 30 });
+      const recent = await service.getRecentContentFormatted({
+        ...baseArgs,
+        p_days: 30,
+      });
       return buildTabResponse(Array.isArray(recent) ? recent : [], 'recent');
     }
 
     throw new Error('Invalid tab. Valid tabs: trending, popular, recent');
   },
-  openapi: {
-    summary: 'Get trending, popular, or recent content',
-    description:
-      'Returns trending, popular, or recent content based on tab selection. Supports both page and sidebar modes with category filtering.',
-    tags: ['content', 'trending'],
-    operationId: 'getTrending',
-    responses: {
-      200: {
-        description: 'Trending content retrieved successfully',
-      },
-      400: {
-        description: 'Invalid tab or category parameter',
-      },
-    },
+  route: getVersionedRoute('trending'),
+  service: {
+    methodArgs: (query) =>
+      buildTrendingMethodArgs(query.category as ContentCategory | null, query.limit),
+    methodName: 'getTrendingMetricsFormatted',
+    serviceKey: 'trending',
   },
 });
 

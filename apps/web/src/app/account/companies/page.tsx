@@ -4,10 +4,7 @@
  */
 
 // GetUserCompaniesReturns type is now derived from getUserCompleteData return type
-import { type UserCompaniesCompany } from '@heyclaude/database-types/postgres-types';
-import {
-  generatePageMetadata,
-} from '@heyclaude/web-runtime/seo';
+import { type UserCompaniesCompany } from '@heyclaude/data-layer';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -22,6 +19,7 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Button,
   Card,

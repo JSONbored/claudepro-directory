@@ -7,6 +7,9 @@
 
 import { z } from 'zod';
 
+import type { RelatedContentItem } from '../composites/related_content_item';
+import { relatedContentItemSchema } from '../composites/related_content_item';
+
 /**
  * Arguments for PostgreSQL function: get_related_content
  */
@@ -47,12 +50,12 @@ export type GetRelatedContentArgsFromZod = z.infer<typeof getRelatedContentArgsS
 /**
  * Return type for PostgreSQL function: get_related_content
  */
-export type GetRelatedContentReturns = unknown[];
+export type GetRelatedContentReturns = RelatedContentItem[];
 
 /**
  * Zod schema for get_related_content function return type
  */
-export const getRelatedContentReturnsSchema = z.array(z.unknown());
+export const getRelatedContentReturnsSchema = z.array(relatedContentItemSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

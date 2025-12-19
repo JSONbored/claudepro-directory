@@ -65,14 +65,16 @@ import { timingSafeEqual } from 'node:crypto';
 import { ChangelogService } from '@heyclaude/data-layer';
 import { type SyncChangelogEntryArgs } from '@heyclaude/database-types/postgres-types';
 import { requireEnvVar } from '@heyclaude/shared-runtime';
-import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  createOptionsHandler as createApiOptionsHandler,
-  createApiRoute,
-  type RouteHandlerContext,
+  createApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
-import { jsonResponse, postCorsHeaders, unauthorizedResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { normalizeError } from '@heyclaude/web-runtime/logging/server';
+import {
+  jsonResponse,
+  postCorsHeaders,
+  unauthorizedResponse,
+} from '@heyclaude/web-runtime/server/api-helpers';
 import { pgmqSend } from '@heyclaude/web-runtime/supabase/pgmq-client';
 import { z } from 'zod';
 
@@ -90,8 +92,13 @@ export const changelogSyncRequestSchema = z.object({
   whatChanged: z.string().optional(),
 });
 
-/**
+/*****
+ *
  * Validates the authentication token using timing-safe comparison to prevent timing attacks.
+ * @param {null | string} authHeader
+ * @param {string} expectedToken
+ * @param {RouteHandlerContext['logger']} reqLogger
+ * @returns {boolean} Return value description
  */
 function validateToken(
   authHeader: null | string,
@@ -195,7 +202,8 @@ export const POST = createApiRoute({
       ...(tldr && { p_tldr: tldr }),
       ...(whatChanged && { p_what_changed: whatChanged }),
       ...(rawContent && { p_raw_content: rawContent }),
-      ...(sections && Object.keys(sections).length > 0 && { p_sections: sections as Record<string, unknown> }),
+      ...(sections &&
+        Object.keys(sections).length > 0 && { p_sections: sections as Record<string, unknown> }),
     };
     const changelogData = await service.syncChangelogEntry(syncArgs);
 

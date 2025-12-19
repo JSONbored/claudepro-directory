@@ -15,6 +15,7 @@ import { getService } from '../../../data/service-factory';
 import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 // Type for sequence email - simplified based on RPC return
+// Note: DueSequenceEmailItem from service has all nullable fields, but we filter to non-null
 interface SequenceEmailItem {
   id: string;
   email: string;
@@ -22,6 +23,16 @@ interface SequenceEmailItem {
   template_slug?: string | null;
   email_subject?: string | null;
 }
+
+// Type from service (all fields nullable)
+type DueSequenceEmailItem = {
+  id: string | null;
+  sequence_id: string | null;
+  email: string | null;
+  due_at: string | null;
+  processed: boolean | null;
+  step: number | null;
+};
 
 /**
  * Email sequence function
@@ -53,14 +64,16 @@ export const processEmailSequence = inngest.createFunction(
         // Map RPC result to our expected type, filtering out nulls
         if (!Array.isArray(data)) return [];
         
-        return data
-          .filter((item): item is { id: string; email: string; step: number } => 
-            item.id !== null && item.email !== null && item.step !== null
+        return (data as DueSequenceEmailItem[])
+          .filter((item): item is DueSequenceEmailItem & { id: string; email: string; step: number } => 
+            item.id !== null && 
+            item.email !== null && 
+            item.step !== null
           )
           .map((item) => ({
-            id: item.id,
-            email: item.email,
-            step: item.step,
+            id: item.id!,
+            email: item.email!,
+            step: item.step!,
           }));
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to fetch due sequence emails');

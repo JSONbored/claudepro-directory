@@ -1,12 +1,11 @@
 import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
-import { ensureStringArray } from '@heyclaude/web-runtime/utils/content-helpers';
-import { getAccountDashboardBundle } from '@heyclaude/web-runtime/data/account';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
-import { getContentDetailCore } from '@heyclaude/web-runtime/data/content/detail';
+import { getAccountDashboardBundle } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { getContentDetailCore } from '@heyclaude/web-runtime/data/content/detail';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { type HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
 import {
   Button,
@@ -18,6 +17,7 @@ import {
   NavLink,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { ensureStringArray } from '@heyclaude/web-runtime/utils/content-helpers';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
@@ -210,7 +210,7 @@ function DashboardHeaderAndStats({
   const bookmarkCount = bookmark_count;
   // Account age is now calculated in database using SQL (eliminates Date.now() usage)
   // Type assertion needed because account_age is added at service layer, not in database composite type
-  const accountAge = (profile as { account_age?: number } | null)?.account_age ?? 0;
+  const accountAge = (profile as null | { account_age?: number })?.account_age ?? 0;
 
   const bookmarks = (libraryData?.bookmarks ?? []).filter(
     (bookmark) => bookmark.content_slug !== null && bookmark.content_type !== null

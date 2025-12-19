@@ -30,14 +30,20 @@ export async function introspectDatabase(
   schema: string = 'public'
 ): Promise<DatabaseMetadata> {
   // Configure SSL for Supabase connections
-  // Supabase requires SSL connections for security
-  // Always enable SSL unless explicitly disabled in connection string
-  const needsSSL = !connectionString.includes('sslmode=disable');
+  // Supabase ALWAYS requires SSL connections, even in development/build
+  // Supabase uses self-signed certificates, so we must set rejectUnauthorized: false
+  // This matches the pattern used in packages/data-layer/src/prisma/client.ts
+  // 
+  // Use connection string as-is (Supabase connection strings include sslmode=require)
+  // The pg Client will use the ssl config we provide, and sslmode in the URL is fine
+
+  // Create pg Client with SSL configuration
+  // Always enable SSL for Supabase (required for all connections)
+  // Add connection timeout and better error handling
   const client = new Client({
-    connectionString,
-    ssl: needsSSL
-      ? { rejectUnauthorized: false } // Supabase uses self-signed certificates
-      : false, // Explicitly disable SSL only if sslmode=disable is in connection string
+    connectionString: connectionString,
+    ssl: { rejectUnauthorized: false }, // Accept self-signed certificates (Supabase uses self-signed certs)
+    connectionTimeoutMillis: 10000, // 10 second connection timeout
   });
   
   try {
@@ -113,19 +119,65 @@ functions_agg AS (
       ),
       'args', COALESCE(
         (
+          -- Use pg_proc to correctly detect function parameter defaults
+          -- information_schema.parameters.parameter_default is unreliable for functions
+          -- pg_proc.proargdefaults contains OIDs of default expressions for parameters with defaults
+          -- Parameters with defaults are always the LAST N parameters, where N = array_length(proargdefaults)
+          WITH proc_info AS (
+            SELECT 
+              p.pronargs,
+              -- Count DEFAULT keywords in function arguments string
+              -- pg_get_function_arguments returns the full signature including defaults
+              -- We count occurrences of 'DEFAULT' to determine how many parameters have defaults
+              COALESCE(
+                (length(pg_get_function_arguments(p.oid)) - length(replace(pg_get_function_arguments(p.oid), 'DEFAULT', ''))) / length('DEFAULT'),
+                0
+              ) as num_defaults
+            FROM pg_proc p
+            JOIN pg_namespace n ON p.pronamespace = n.oid
+            WHERE n.nspname = $1
+              AND p.proname = r.routine_name
+              AND EXISTS (
+                SELECT 1 
+                FROM information_schema.parameters p2 
+                WHERE p2.specific_name = r.specific_name
+                LIMIT 1
+              )
+            ORDER BY p.oid
+            LIMIT 1
+          ),
+          param_info AS (
+            SELECT 
+              p.parameter_name,
+              p.parameter_mode,
+              p.data_type,
+              p.udt_name,
+              p.ordinal_position,
+              -- Determine if parameter has default:
+              -- Parameters with defaults are the last N parameters where N = num_defaults
+              -- Formula: parameter has default if ordinal_position > (pronargs - num_defaults)
+              -- Example: 5 params, 2 defaults -> positions 4 and 5 have defaults
+              --          position 4 > (5 - 2) = 4 > 3 = true ✓
+              CASE 
+                WHEN pi.num_defaults IS NULL OR pi.num_defaults = 0 THEN false
+                ELSE p.ordinal_position > (pi.pronargs - pi.num_defaults)
+              END as has_default
+            FROM information_schema.parameters p
+            CROSS JOIN proc_info pi
+            WHERE p.specific_name = r.specific_name
+              AND p.parameter_mode IN ('IN', 'INOUT')
+          )
           SELECT json_agg(
             json_build_object(
-              'name', p.parameter_name,
-              'mode', p.parameter_mode,
-              'type', p.data_type,
-              'udtName', p.udt_name,
-              'ordinal', p.ordinal_position,
-              'hasDefault', p.parameter_default IS NOT NULL
-            ) ORDER BY p.ordinal_position
+              'name', parameter_name,
+              'mode', parameter_mode,
+              'type', data_type,
+              'udtName', udt_name,
+              'ordinal', ordinal_position,
+              'hasDefault', has_default
+            ) ORDER BY ordinal_position
           )
-          FROM information_schema.parameters p
-          WHERE p.specific_name = r.specific_name
-            AND p.parameter_mode IN ('IN', 'INOUT')
+          FROM param_info
         ),
         '[]'::json
       )
@@ -272,10 +324,29 @@ SELECT
       functionReturnStructures,
     };
   } catch (error) {
+    const errorMessage = (error as Error).message;
+    // Sanitize connection string for error message (hide password)
+    const sanitizedConnectionString = connectionString.replace(/:[^:@]+@/, ':****@');
+    
+    // Provide more helpful error messages for common connection issues
+    if (errorMessage.includes('EHOSTUNREACH') || errorMessage.includes('ENOTFOUND')) {
+      throw new Error(
+        `Failed to connect to database. Please check:\n` +
+        `1. Network connectivity to the database host\n` +
+        `2. DIRECT_URL is correct: ${sanitizedConnectionString}\n` +
+        `3. Database is accessible from your network\n` +
+        `Original error: ${errorMessage}`
+      );
+    }
     throw new Error(
-      `Failed to introspect database: ${(error as Error).message}`
+      `Failed to introspect database: ${errorMessage}`
     );
   } finally {
-    await client.end();
+    // Ensure client is properly closed even if connection failed
+    try {
+      await client.end();
+    } catch {
+      // Ignore errors when closing (client might not be connected)
+    }
   }
 }

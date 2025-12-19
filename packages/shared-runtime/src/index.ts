@@ -51,9 +51,7 @@ export {
 export * from './validate-email.ts';
 export * from './sanitize-text.ts';
 export * from './og-constants.ts';
-export * from './batch-processor.ts';
 export * from './timeout.ts';
-export * from './circuit-breaker.ts';
 export * from './code-highlight.ts';
 export * from './code-highlight-themes.ts';
 export * from './content-processing.ts';

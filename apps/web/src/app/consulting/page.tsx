@@ -41,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
   cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire
   cacheTag('seo-metadata-static');
   cacheTag('seo-metadata-consulting');
-  
+
   return generatePageMetadata('/consulting');
 }
 

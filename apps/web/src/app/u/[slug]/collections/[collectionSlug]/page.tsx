@@ -4,12 +4,12 @@
  */
 
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
-import { type CollectionDetailData } from '@heyclaude/web-runtime/data/community';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { type CollectionDetailData } from '@heyclaude/web-runtime/data/community';
 import { getPublicCollectionDetail } from '@heyclaude/web-runtime/data/community';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Button,
   Card,
@@ -71,6 +71,11 @@ function isValidSlug(slug: string): boolean {
  *
  * @see isValidContentType
  * @see isValidSlug
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
  * @param {{ content_slug: string; content_type: string }} item Parameter description
  * @param {{ content_slug: string; content_type: string }} item Parameter description
  * @param {{ content_slug: string; content_type: string }} item Parameter description

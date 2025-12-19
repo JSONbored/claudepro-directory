@@ -7,6 +7,9 @@
 
 import { z } from 'zod';
 
+import type { FilterJobsResult } from '../composites/filter_jobs_result';
+import { filterJobsResultSchema } from '../composites/filter_jobs_result';
+
 /**
  * Arguments for PostgreSQL function: filter_jobs
  */
@@ -55,12 +58,12 @@ export type FilterJobsArgsFromZod = z.infer<typeof filterJobsArgsSchema>;
 /**
  * Return type for PostgreSQL function: filter_jobs
  */
-export type FilterJobsReturns = unknown;
+export type FilterJobsReturns = FilterJobsResult;
 
 /**
  * Zod schema for filter_jobs function return type
  */
-export const filterJobsReturnsSchema = z.unknown();
+export const filterJobsReturnsSchema = filterJobsResultSchema;
 
 /**
  * Type inference from Zod schema (should match type above)

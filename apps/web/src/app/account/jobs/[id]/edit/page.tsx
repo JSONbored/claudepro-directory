@@ -6,11 +6,11 @@
 import { JobCategory, JobType } from '@heyclaude/data-layer/prisma';
 import { type job_category, type job_type, type jobsModel } from '@heyclaude/data-layer/prisma';
 import { type CreateJobInput, updateJob } from '@heyclaude/web-runtime/actions/jobs-crud';
+import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
+import { getUserJobById } from '@heyclaude/web-runtime/data/account';
+import { getPaymentPlanCatalog } from '@heyclaude/web-runtime/data/payments';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
-import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
-import { getPaymentPlanCatalog } from '@heyclaude/web-runtime/data/payments';
-import { getUserJobById } from '@heyclaude/web-runtime/data/account';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
@@ -284,9 +284,9 @@ async function EditJobPageContent({
             requirements: job.requirements,
             tags: job.tags,
           }}
-          onSubmit={handleSubmit}
           planCatalog={planCatalog}
           submitLabel="Update Job Listing"
+          onSubmit={handleSubmit}
         />
       </Suspense>
     </div>

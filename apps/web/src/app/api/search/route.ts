@@ -21,11 +21,13 @@
  */
 
 import 'server-only';
+import { SearchService } from '@heyclaude/data-layer';
 import {
   type content_category,
   type experience_level,
   type job_category,
   type job_type,
+  type Json,
 } from '@heyclaude/data-layer/prisma';
 import {
   type SearchContentOptimizedArgs,
@@ -34,18 +36,20 @@ import {
 } from '@heyclaude/database-types/postgres-types';
 import { type jobsModel } from '@heyclaude/database-types/prisma/models';
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { type Json } from '@heyclaude/data-layer/prisma';
-import { VALID_CATEGORIES } from '@heyclaude/web-runtime/utils/category-validation';
-import { createOptionsHandler as createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/api/route-factory';
-import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
-import { getWithAuthCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import {
+  createOptionsHandler as createApiOptionsHandler, createApiRoute,
+} from '@heyclaude/web-runtime/api/route-factory';
 import { searchQuerySchema } from '@heyclaude/web-runtime/api/schemas';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { enqueuePulseEventServer } from '@heyclaude/web-runtime/pulse';
+import { getWithAuthCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import {
+  isValidCategory,
+  VALID_CATEGORIES,
+} from '@heyclaude/web-runtime/utils/category-validation';
 import { cacheLife } from 'next/cache';
 
 // OPTIMIZATION: Use SearchService methods instead of separate helper files
-import { SearchService } from '@heyclaude/data-layer';
-import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 
 // Use Prisma model type instead of excluded composite type
 type Jobs = jobsModel;
@@ -92,7 +96,7 @@ export const GET = createApiRoute({
 
     // Convert categories array to enum array (using Prisma types)
     const validatedCategories = (() => {
-      if (!categoriesArray || categoriesArray.length === 0) return undefined;
+      if (!categoriesArray || categoriesArray.length === 0) return;
       const valid = categoriesArray
         .map((cat) => {
           const normalized = cat.trim().toLowerCase();
@@ -117,9 +121,9 @@ export const GET = createApiRoute({
 
     const searchType: SearchType = hasJobFilters
       ? 'jobs'
-      : entitiesArray && entitiesArray.length > 0
+      : (entitiesArray && entitiesArray.length > 0
         ? 'unified'
-        : 'content';
+        : 'content');
 
     logger.info(
       {

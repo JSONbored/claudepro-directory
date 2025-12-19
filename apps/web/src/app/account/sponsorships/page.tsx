@@ -1,13 +1,11 @@
-import { type GetUserCompleteDataReturns } from '@heyclaude/database-types/postgres-types';
-import {
-  generatePageMetadata,
-} from '@heyclaude/web-runtime/seo';
+import type { sponsorship_tier } from '@heyclaude/data-layer/prisma';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
-import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Button,
   Card,
@@ -60,6 +58,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * @returns `true` if the sponsorship's `active` flag is `true` and `now` is between `start_date` and `end_date` (inclusive), `false` otherwise.
  *
  * @see SponsorshipsPage
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
@@ -219,10 +222,28 @@ async function SponsorshipsPageContent({
   });
 
   // Section: Sponsorships Data Fetch
-  let sponsorships: GetUserCompleteDataReturns['sponsorships'] = [];
+  // sponsorships is unknown[] from GetUserCompleteDataReturns, need to type it properly
+  // Based on sponsored_content Prisma model structure
+  type SponsorshipItem = {
+    id: string;
+    user_id: string;
+    content_type: string | null;
+    content_id: string | null;
+    tier: string | null;
+    active: boolean | null;
+    start_date: string;
+    end_date: string;
+    impression_count: number | null;
+    click_count: number | null;
+    impression_limit: number | null;
+    created_at: string;
+    updated_at: string;
+    [key: string]: unknown;
+  };
+  let sponsorships: SponsorshipItem[] = [];
   try {
     const completeData = await getUserCompleteData(user.id);
-    sponsorships = completeData?.sponsorships ?? [];
+    sponsorships = (completeData?.sponsorships ?? []) as SponsorshipItem[];
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships');
     userLogger.error(
@@ -265,12 +286,12 @@ async function SponsorshipsPageContent({
   }
 
   const orderedSponsorships = [...sponsorships].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    (a: SponsorshipItem, b: SponsorshipItem) => new Date(b.created_at as string).getTime() - new Date(a.created_at as string).getTime()
   );
 
   // Compute active count once using consistent logic
   const now = new Date();
-  const activeCount = orderedSponsorships.filter((s) => isSponsorshipActive(s, now)).length;
+  const activeCount = orderedSponsorships.filter((s: SponsorshipItem) => isSponsorshipActive(s as { active: boolean | null; start_date: string; end_date: string }, now)).length;
 
   return (
     <div className="space-y-6">
@@ -290,21 +311,22 @@ async function SponsorshipsPageContent({
       </div>
 
       <div className="grid gap-4">
-        {orderedSponsorships.map((sponsorship) => {
-          const isActive = isSponsorshipActive(sponsorship, now);
+            {orderedSponsorships.map((sponsorship: SponsorshipItem) => {
+              const isActive = isSponsorshipActive(sponsorship as { active: boolean | null; start_date: string; end_date: string }, now);
 
-          const impressionCount = sponsorship.impression_count ?? 0;
-          const clickCount = sponsorship.click_count ?? 0;
+          const impressionCount = (sponsorship['impression_count'] as number | null | undefined) ?? 0;
+          const clickCount = (sponsorship['click_count'] as number | null | undefined) ?? 0;
 
+          const impressionLimit = (sponsorship['impression_limit'] as number | null | undefined);
           const hasHitLimit =
-            sponsorship.impression_limit != undefined &&
-            impressionCount >= sponsorship.impression_limit;
+            impressionLimit != null &&
+            impressionCount >= impressionLimit;
 
           const ctr =
             impressionCount > 0 ? ((clickCount / impressionCount) * 100).toFixed(2) : '0.00';
 
           // Use generated ENUM type directly - no validation needed
-          const safeTier = sponsorship.tier;
+          const safeTier = (sponsorship['tier'] as string | null) as sponsorship_tier | null;
 
           return (
             <Card key={sponsorship.id}>
@@ -312,7 +334,7 @@ async function SponsorshipsPageContent({
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <UnifiedBadge showIcon tier={safeTier} variant="sponsored" />
+                      <UnifiedBadge showIcon tier={(safeTier ?? 'standard') as sponsorship_tier} variant="sponsored" />
                       {isActive ? (
                         <UnifiedBadge
                           className="border-green-500/20 bg-green-500/10 text-green-600 dark:text-green-400"
@@ -335,11 +357,10 @@ async function SponsorshipsPageContent({
                       ) : null}
                     </div>
                     <CardTitle className="mt-2">
-                      {sponsorship.content_type} - ID: {sponsorship.content_id}
+                      {(sponsorship['content_type'] as string | null) ?? 'Unknown'} - ID: {(sponsorship['content_id'] as string | null) ?? 'N/A'}
                     </CardTitle>
                     <CardDescription>
-                      {formatDate(sponsorship.start_date)} -{' '}
-                      {formatDate(sponsorship.end_date)}
+                      {formatDate(sponsorship.start_date)} - {formatDate(sponsorship.end_date)}
                     </CardDescription>
                   </div>
                   <Button asChild size="sm" variant="outline">
@@ -360,9 +381,9 @@ async function SponsorshipsPageContent({
                       Impressions
                     </div>
                     <div className="text-2xl font-bold">{impressionCount.toLocaleString()}</div>
-                    {sponsorship.impression_limit == null ? null : (
+                    {impressionLimit == null ? null : (
                       <div className="text-muted-foreground text-xs">
-                        of {sponsorship.impression_limit.toLocaleString()}
+                        of {impressionLimit.toLocaleString()}
                       </div>
                     )}
                   </div>
@@ -385,12 +406,12 @@ async function SponsorshipsPageContent({
                 </div>
 
                 {/* Progress bar if has limit */}
-                {sponsorship.impression_limit == null ? null : (
+                {impressionLimit == null ? null : (
                   <div
-                    aria-label={`Impressions: ${impressionCount} of ${sponsorship.impression_limit}`}
-                    aria-valuemax={sponsorship.impression_limit}
+                    aria-label={`Impressions: ${impressionCount} of ${impressionLimit}`}
+                    aria-valuemax={impressionLimit}
                     aria-valuemin={0}
-                    aria-valuenow={Math.min(impressionCount, sponsorship.impression_limit)}
+                    aria-valuenow={Math.min(impressionCount, impressionLimit)}
                     className="bg-muted h-2 w-full rounded-full"
                     role="progressbar"
                   >
@@ -398,7 +419,7 @@ async function SponsorshipsPageContent({
                       aria-hidden="true"
                       className="bg-primary h-2 rounded-full transition-all"
                       style={{
-                        width: `${Math.min(100, (impressionCount / sponsorship.impression_limit) * 100)}%`,
+                        width: `${Math.min(100, (impressionCount / impressionLimit) * 100)}%`,
                       }}
                     />
                   </div>

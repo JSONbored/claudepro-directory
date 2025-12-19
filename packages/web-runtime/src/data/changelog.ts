@@ -4,9 +4,7 @@ import {
   type changelogModel,
   type JsonValue,
 } from '@heyclaude/data-layer/prisma';
-import {
-  type GetChangelogOverviewReturns,
-} from '@heyclaude/database-types/postgres-types';
+import { type GetChangelogOverviewReturns } from '@heyclaude/database-types/postgres-types';
 
 import { createDataFunction } from './cached-data-factory.ts';
 import { QUERY_LIMITS } from './config/constants.ts';
@@ -47,24 +45,24 @@ export const getChangelogOverview = createDataFunction<
   },
   GetChangelogOverviewReturns
 >({
-  serviceKey: 'changelog',
-  methodName: 'getChangelogOverview',
-  module: 'data/changelog',
-  operation: 'getChangelogOverview',
-  transformArgs: (options) => ({
-    ...(options.category ? { p_category: options.category } : {}),
-    p_featured_only: options.featuredOnly ?? false,
-    p_limit: options.limit ?? 50,
-    p_offset: options.offset ?? 0,
-    p_published_only: options.publishedOnly ?? true,
-  }),
-  onError: (_, options) => createEmptyOverview(options.limit ?? 50, options.offset ?? 0),
   logContext: (options) => ({
     ...(options.category ? { category: options.category } : {}),
     featuredOnly: options.featuredOnly ?? false,
     limit: options.limit ?? 50,
     offset: options.offset ?? 0,
     publishedOnly: options.publishedOnly ?? true,
+  }),
+  methodName: 'getChangelogOverview',
+  module: 'data/changelog',
+  onError: (_, options) => createEmptyOverview(options.limit ?? 50, options.offset ?? 0),
+  operation: 'getChangelogOverview',
+  serviceKey: 'changelog',
+  transformArgs: (options) => ({
+    ...(options.category ? { p_category: options.category } : {}),
+    p_featured_only: options.featuredOnly ?? false,
+    p_limit: options.limit ?? 50,
+    p_offset: options.offset ?? 0,
+    p_published_only: options.publishedOnly ?? true,
   }),
 });
 
@@ -74,23 +72,21 @@ export const getChangelogOverview = createDataFunction<
  * Changelog entries change periodically, so we use the 'long' cacheLife profile.
  */
 export const getChangelogEntryBySlug = createDataFunction<string, changelogModel | null>({
-  serviceKey: 'changelog',
   methodName: 'getChangelogDetail',
   module: 'data/changelog',
   operation: 'getChangelogEntryBySlug',
+  serviceKey: 'changelog',
   transformArgs: (slug) => ({ p_slug: slug }),
   transformResult: (result) => {
-    const detailResult = result as { entry?: unknown } | null;
+    const detailResult = result as null | { entry?: unknown };
     if (!detailResult?.entry) {
       return null;
     }
 
     const entry = detailResult.entry as {
-      created_at?: string;
-      updated_at?: string;
-      release_date?: string;
       changes?: unknown;
       content?: string;
+      created_at?: string;
       description?: string;
       featured?: boolean;
       id?: string;
@@ -98,9 +94,11 @@ export const getChangelogEntryBySlug = createDataFunction<string, changelogModel
       metadata?: unknown;
       published?: boolean;
       raw_content?: string;
+      release_date?: string;
       slug?: string;
       title?: string;
       tldr?: string;
+      updated_at?: string;
     };
 
     // Convert RPC return data (string dates) to Prisma types (Date objects)
@@ -123,9 +121,11 @@ export const getChangelogEntryBySlug = createDataFunction<string, changelogModel
       published: entry.published ?? false,
       raw_content: entry.raw_content ?? '',
       // Use release_date if provided, otherwise fallback to created_at (eliminates new Date() call)
-      release_date: entry.release_date 
-        ? new Date(entry.release_date) 
-        : (entry.created_at ? new Date(entry.created_at) : new Date('1970-01-01')), // Fixed epoch fallback if both missing
+      release_date: entry.release_date
+        ? new Date(entry.release_date)
+        : entry.created_at
+          ? new Date(entry.created_at)
+          : new Date('1970-01-01'), // Fixed epoch fallback if both missing
       robots_follow: null,
       robots_index: null,
       seo_description: null,
@@ -176,7 +176,6 @@ export async function getChangelog(): Promise<{
   };
 }
 
-
 /**
  * Get published changelog slugs for static generation
  *
@@ -184,11 +183,10 @@ export async function getChangelog(): Promise<{
  * Only fetches slugs needed for generateStaticParams, avoiding unnecessary data processing.
  */
 export const getPublishedChangelogSlugs = createDataFunction<number, string[]>({
-  serviceKey: 'changelog',
+  logContext: (limit) => ({ limit }),
   methodName: 'getPublishedChangelogSlugs',
   module: 'data/changelog',
-  operation: 'getPublishedChangelogSlugs',
   onError: () => [], // Return empty array on error
-  logContext: (limit) => ({ limit }),
+  operation: 'getPublishedChangelogSlugs',
+  serviceKey: 'changelog',
 });
-

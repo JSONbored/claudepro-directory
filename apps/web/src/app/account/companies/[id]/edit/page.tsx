@@ -2,14 +2,12 @@
  * Edit Company Page - Update existing company via edge function
  */
 
-import { type UserCompaniesCompany } from '@heyclaude/database-types/postgres-types';
-import {
-  generatePageMetadata,
-} from '@heyclaude/web-runtime/seo';
+import { type UserCompaniesCompany } from '@heyclaude/data-layer';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompanyById } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Button,
   Card,

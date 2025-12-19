@@ -1,7 +1,7 @@
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { getLastUpdatedDate } from '@heyclaude/web-runtime/data/utils';
 import { logger } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';

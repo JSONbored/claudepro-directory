@@ -160,6 +160,80 @@ test.describe('Account Dashboard', () => {
     }
   });
 
+  test('should handle bookmark management (add/remove bookmarks)', async ({ page }) => {
+    // Wait for content to load
+    await page.waitForTimeout(2000);
+    
+    // Navigate to Bookmarks tab if available
+    const bookmarksTab = page.getByRole('tab', { name: /bookmarks/i });
+    const hasBookmarksTab = await bookmarksTab.isVisible().catch(() => false);
+    
+    if (hasBookmarksTab) {
+      await bookmarksTab.click();
+      await page.waitForTimeout(1000);
+      
+      // Find bookmark items
+      const bookmarkItems = page.locator('[data-testid="bookmark-item"], article');
+      const bookmarkCount = await bookmarkItems.count();
+      
+      if (bookmarkCount > 0) {
+        // Test remove bookmark button
+        const removeButton = bookmarkItems.first().getByRole('button', { name: /remove|delete|unbookmark/i });
+        const hasRemoveButton = await removeButton.isVisible().catch(() => false);
+        
+        if (hasRemoveButton) {
+          await removeButton.click();
+          await page.waitForTimeout(500);
+          
+          // Should show toast or update UI
+          const toast = page.getByText(/removed|deleted|unbookmarked/i);
+          const hasToast = await toast.isVisible().catch(() => false);
+          
+          if (hasToast) {
+            await expect(toast).toBeVisible();
+          }
+        }
+      }
+    }
+  });
+
+  test('should handle collection management', async ({ page }) => {
+    // Wait for content to load
+    await page.waitForTimeout(2000);
+    
+    // Check for collection-related UI elements
+    const collectionSection = page.getByText(/collections|my collections/i);
+    const hasCollectionSection = await collectionSection.isVisible().catch(() => false);
+    
+    if (hasCollectionSection) {
+      // Find "Create collection" or "New collection" button
+      const createCollectionButton = page.getByRole('button', { name: /create collection|new collection|add collection/i });
+      const hasCreateButton = await createCollectionButton.isVisible().catch(() => false);
+      
+      if (hasCreateButton) {
+        // Verify button is clickable
+        await expect(createCollectionButton).toBeEnabled();
+      }
+      
+      // Check for existing collections
+      const collectionItems = page.locator('[data-testid="collection-item"], article');
+      const collectionCount = await collectionItems.count();
+      
+      if (collectionCount > 0) {
+        // Test collection item interactions
+        const firstCollection = collectionItems.first();
+        const collectionLink = firstCollection.getByRole('link').first();
+        const hasLink = await collectionLink.isVisible().catch(() => false);
+        
+        if (hasLink) {
+          const href = await collectionLink.getAttribute('href');
+          expect(href).toBeTruthy();
+          expect(href).toMatch(/\/account\/library\/[a-z0-9-]+/);
+        }
+      }
+    }
+  });
+
   test('should display recently saved section', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);

@@ -4,7 +4,10 @@
  * Utilities for working with content items and metadata.
  */
 
-import type { EnrichedContentItem } from '@heyclaude/database-types/postgres-types';
+import type { contentModel } from '@heyclaude/data-layer/prisma';
+
+// EnrichedContentItem was removed - use contentModel instead
+type EnrichedContentItem = contentModel;
 import { prisma } from '@heyclaude/data-layer/prisma';
 
 /**

@@ -1,12 +1,12 @@
 import { getContactChannels } from '@heyclaude/web-runtime/config/marketing-client';
+import { getCommunityDirectory } from '@heyclaude/web-runtime/data/community';
+import { getHomepageCategoryIds } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { getConfigurationCount } from '@heyclaude/web-runtime/data/content';
+import { getHomepageData } from '@heyclaude/web-runtime/data/content/homepage';
 import { Github, MessageSquare, Twitter, Users } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
-import { getCommunityDirectory } from '@heyclaude/web-runtime/data/community';
-import { getConfigurationCount } from '@heyclaude/web-runtime/data/content';
-import { getHomepageCategoryIds } from '@heyclaude/web-runtime/data/config/category';
-import { getHomepageData } from '@heyclaude/web-runtime/data/content/homepage';
 import {
   Button,
   Card,

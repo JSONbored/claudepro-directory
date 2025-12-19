@@ -39,13 +39,20 @@ interface SEOMetadataBase {
 
 // Internal data function - declared before overloads
 const getSEOMetadataInternal = createDataFunction<
-  { route: string; includeSchemas: boolean },
-  SEOMetadataBase | { metadata: SEOMetadataBase; schemas: GenerateMetadataCompleteReturns['schemas'] } | null
+  { includeSchemas: boolean; route: string },
+  | null
+  | SEOMetadataBase
+  | { metadata: SEOMetadataBase; schemas: GenerateMetadataCompleteReturns['schemas'] }
 >({
-  serviceKey: 'misc', // Consolidated: SeoService methods moved to MiscService
+  logContext: (args) => ({
+    includeSchemas: args.includeSchemas,
+    route: args.route,
+  }),
   methodName: 'generateMetadata',
   module: 'data/seo/client',
+  onError: () => null,
   operation: 'getSEOMetadata',
+  serviceKey: 'misc', // Consolidated: SeoService methods moved to MiscService
   transformArgs: (args) => ({
     p_include: args.includeSchemas ? 'metadata,schemas' : 'metadata',
     p_route: args.route,
@@ -68,11 +75,6 @@ const getSEOMetadataInternal = createDataFunction<
 
     return baseMetadata;
   },
-  onError: () => null,
-  logContext: (args) => ({
-    includeSchemas: args.includeSchemas,
-    route: args.route,
-  }),
 });
 
 /**
@@ -105,12 +107,12 @@ export async function getSEOMetadata(
  * Get SEO metadata for a route
  * Uses 'use cache' to cache SEO metadata. Route becomes part of the cache key.
  * This data is public and same for all users, so it can be cached at build time.
- * 
+ *
  * **Build-Time Optimization:**
  * - During build: RPC call executes normally (deterministic - uses stored database data)
  * - At runtime: Uses cached result from Next.js cache (no RPC call if cache valid)
  * - Result is cached forever (or until content changes and cache is invalidated)
- * 
+ *
  * **Why this works without connection():**
  * - The RPC function is STABLE (deterministic for same inputs)
  * - Uses stored SEO fields from database (seo_title, seo_description, keywords)
@@ -138,11 +140,11 @@ export async function getSEOMetadata(
   }
 
   const includeSchemas = options?.includeSchemas ?? false;
-  
+
   // During build time: RPC call is deterministic (uses stored database data)
   // Request cache already skips Date.now() during build, so this is safe
   // At runtime: Next.js 'use cache' uses cached result (no RPC call if cache valid)
-  return await getSEOMetadataInternal({ route, includeSchemas });
+  return await getSEOMetadataInternal({ includeSchemas, route });
 }
 
 /***

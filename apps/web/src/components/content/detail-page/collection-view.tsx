@@ -22,7 +22,6 @@
  * @see src/components/features/content/config-card.tsx - Embedded item cards
  */
 
-import type { EnrichedContentItem } from '@heyclaude/database-types/postgres-types';
 import type { contentModel, content_category } from '@heyclaude/data-layer/prisma';
 import { ensureStringArray, getMetadata } from '@heyclaude/web-runtime/utils/content-helpers';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
@@ -42,7 +41,7 @@ import { Suspense } from 'react';
 
 interface ItemWithData {
   category: string;
-  data: EnrichedContentItem;
+  data: contentModel;
   reason?: string;
   slug: string;
 }

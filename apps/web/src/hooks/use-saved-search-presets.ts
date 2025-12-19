@@ -347,7 +347,12 @@ function sanitizeFilters(filters: FilterState = {}): FilterState {
           .map((tag: string) => (typeof tag === 'string' ? tag.trim() : ''))
           .filter((tag: string): tag is string => tag.length > 0)
       ),
-    ].sort((a: string, b: string) => a.localeCompare(b));
+    ].sort((a: unknown, b: unknown) => {
+      if (typeof a === 'string' && typeof b === 'string') {
+        return a.localeCompare(b);
+      }
+      return 0;
+    }) as string[];
     if (normalizedTags.length > 0) {
       sanitized.tags = normalizedTags;
     }

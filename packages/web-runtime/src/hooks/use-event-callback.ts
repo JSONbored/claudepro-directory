@@ -1,5 +1,6 @@
 'use client';
 
+import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 import { useCallback, useRef } from 'react';
 import { useIsomorphicLayoutEffect } from './use-isomorphic-layout-effect.ts';
 
@@ -94,7 +95,7 @@ export function useEventCallback<Args extends unknown[], R>(
       }
 
       // Check if we're in render phase (development only)
-      if (process.env.NODE_ENV === 'development') {
+      if (isDevelopment) {
         // This is a best-effort check - React doesn't expose render phase detection
         // In practice, event callbacks should only be called from event handlers
       }

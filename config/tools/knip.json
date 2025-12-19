@@ -77,6 +77,7 @@
     "apps/web/src/lib/ui-constants.ts",
     "config/tools/disable-server-only.cjs",
     "content/skills/**/*.zip",
+    "prisma.config.ts",
     "reports/knip/**/*.json",
     "vitest.setup.ts",
     "vitest.config.ts",
@@ -165,7 +166,8 @@
   "project": [
     "config/**/*.ts",
     "scripts/**/*.ts",
-    "!config/tools/disable-server-only.cjs"
+    "!config/tools/disable-server-only.cjs",
+    "!prisma.config.ts"
   ],
   "eslint": {
     "config": [

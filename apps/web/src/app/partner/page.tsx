@@ -1,6 +1,9 @@
-import { getPartnerContactChannels, getPartnerCtas } from '@heyclaude/web-runtime/config/marketing-client';
-import { getPartnerHeroStats } from '@heyclaude/web-runtime/data/marketing/site';
+import {
+  getPartnerContactChannels,
+  getPartnerCtas,
+} from '@heyclaude/web-runtime/config/marketing-client';
 import { getPartnerPricing } from '@heyclaude/web-runtime/data/marketing';
+import { getPartnerHeroStats } from '@heyclaude/web-runtime/data/marketing/site';
 import {
   BarChart,
   Briefcase,

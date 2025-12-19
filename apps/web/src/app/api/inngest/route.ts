@@ -9,20 +9,21 @@
 
 import 'server-only';
 
-import { NextRequest } from 'next/server';
+import {
+  createApiRoute, createOptionsHandler as createApiOptionsHandler,
+} from '@heyclaude/web-runtime/api/route-factory';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import {
   GET as inngestGET,
   POST as inngestPOST,
   PUT as inngestPUT,
 } from '@heyclaude/web-runtime/inngest/serve';
-import { createOptionsHandler as createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/api/route-factory';
-import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
-import { connection } from 'next/server';
+import { connection, NextRequest } from 'next/server';
 
 // Shared Inngest handler (all methods follow same pattern)
 async function handleInngestRequest(
   method: 'GET' | 'POST' | 'PUT',
-  handler: typeof inngestGET | typeof inngestPOST | typeof inngestPUT,
+  handler: typeof inngestGET,
   logger: ReturnType<typeof import('@heyclaude/web-runtime/logging/server').logger.child>,
   request: NextRequest,
   nextContext: unknown

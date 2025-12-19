@@ -1,0 +1,149 @@
+# Prisma Service Layer Pattern Rules
+# Enforces service layer architecture with BasePrismaService
+# All database operations should go through service classes extending BasePrismaService
+
+---
+# Rule: Detect service classes not extending BasePrismaService
+id: service-not-extending-base
+language: typescript
+files:
+  - 'packages/data-layer/src/services/**/*.ts'
+rule:
+  all:
+    - kind: class_declaration
+    - has:
+        pattern: 'export class $SERVICE'
+    - has:
+        regex: Service
+    - not:
+        has:
+          regex: 'extends BasePrismaService'
+message: "Service classes must extend BasePrismaService for consistent RPC handling, error logging, and request-scoped caching. Change: export class ServiceName extends BasePrismaService { ... }. Import: import { BasePrismaService } from '../base-prisma-service.ts';"
+severity: error
+
+---
+# Rule: Detect direct prisma usage outside service classes
+id: direct-prisma-outside-service
+language: typescript
+files:
+  - 'packages/web-runtime/src/data/**/*.ts'
+  - 'apps/web/src/app/**/*.tsx'
+rule:
+  all:
+    - kind: await_expression
+    - has:
+        regex: 'await prisma\.\w+\('
+    - has:
+        regex: prisma\.(\$queryRawUnsafe|\$queryRaw|findMany|findFirst|findUnique|create|update|delete|upsert)
+    - not:
+        inside:
+          has:
+            regex: 'class.*Service|extends BasePrismaService'
+message: "Direct Prisma usage should be in service classes, not data functions or pages. Create a service class extending BasePrismaService and call service methods from data functions. This ensures proper error handling, logging, and request-scoped caching."
+severity: error
+
+---
+# Rule:
+id: service-method-missing-smart-cache
+language: typescript
+files:
+  - 'packages/data-layer/src/services/**/*.ts'
+rule:
+  all:
+    - kind: method_definition
+    - inside:
+        has:
+          pattern: 'class $SERVICE extends BasePrismaService'
+    - has:
+        regex: 'await prisma\.\w+\('
+    - has:
+        regex: prisma\.(\$queryRawUnsafe|\$queryRaw|findMany|findFirst|findUnique)
+    - not:
+        has:
+          regex: 'withSmartCache\('
+    - not:
+        has:
+          regex: 'this\.callRpc\('
+message: "Service methods with Prisma queries should use withSmartCache() for request-scoped caching or this.callRpc() for RPC calls (which uses withSmartCache internally). This prevents duplicate queries within the same request. Wrap: return withSmartCache('method_name', 'methodName', async () => { const result = await prisma.$queryRawUnsafe(...); ... }, args)"
+severity: error
+
+---
+# Rule:
+id: service-rpc-missing-error-handling
+language: typescript
+files:
+  - 'packages/data-layer/src/services/**/*.ts'
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        regex: 'this\.callRpc\('
+    - not:
+        inside:
+          has:
+            regex: 'try.*catch'
+message: "Service methods using this.callRpc() should include error handling. BasePrismaService.callRpc() handles errors internally, but wrap in try/catch if you need custom error handling. Use normalizeError() for consistent error handling."
+severity: warning
+
+---
+# Rule:
+id: service-direct-prisma-rpc
+language: typescript
+files:
+  - 'packages/data-layer/src/services/**/*.ts'
+rule:
+  all:
+    - kind: method_definition
+    - inside:
+        has:
+          pattern: 'class $SERVICE extends BasePrismaService'
+    - has:
+        regex: 'await prisma\.\$queryRawUnsafe\('
+    - has:
+        regex: SELECT \* FROM \w+\(
+    - not:
+        has:
+          regex: 'this\.callRpc\('
+message: "Service methods calling PostgreSQL RPC functions should use this.callRpc() instead of direct prisma.$queryRawUnsafe(). This provides consistent error handling, logging, and request-scoped caching. Use: const result = await this.callRpc('function_name', { p_param: value });"
+severity: warning
+
+---
+# Rule:
+id: service-class-export-verification
+language: typescript
+files:
+  - 'packages/data-layer/src/services/**/*.ts'
+rule:
+  all:
+    - kind: class_declaration
+    - has:
+        pattern: 'export class $SERVICE extends BasePrismaService'
+    - not:
+        has:
+          pattern: 'export class $SERVICE'
+message: "Service classes extending BasePrismaService should be exported for use in data functions. Ensure 'export' keyword is present."
+severity: error
+
+---
+# Rule:
+id: data-function-service-instantiation
+language: typescript
+files:
+  - 'packages/web-runtime/src/data/**/*.ts'
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        regex: 'const \w+ = new \w+Service\('
+    - has:
+        regex: Service
+    - not:
+        has:
+          regex: 'new \w+Service\(\)'
+message: "Service classes should be instantiated without arguments. BasePrismaService doesn't require constructor arguments. Use: const service = new ServiceName();"
+severity: warning
+
+# Note: All database operations should go through service classes
+# Service classes extend BasePrismaService for consistent patterns
+# Data functions instantiate services and call service methods
+# This ensures proper error handling, logging, and request-scoped caching

@@ -19,8 +19,8 @@
  * @module data-layer/utils/rpc-error-logging
  */
 
-import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
-import { createPinoConfig } from '@heyclaude/shared-runtime/logger/index.ts';
+import { normalizeError } from '@heyclaude/shared-runtime';
+import { createPinoConfig } from '@heyclaude/shared-runtime';
 import pino from 'pino';
 
 // Create Pino logger instance with centralized configuration

@@ -26,10 +26,10 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: function $NESTED($$$) { $$$ }
+        regex: 'function \w+\([^)]*\)\s*\{'
     - inside:
         has:
-          pattern: function $PARENT($$$) { $$$ }
+          regex: 'function \w+\([^)]*\)\s*\{'
     - has:
         regex: use[A-Z]|useState|useEffect|useCallback|useMemo
 message: "React hooks must be called at the top level of a component or custom hook, not inside nested functions, callbacks, or loops. Move hook to component level."
@@ -48,7 +48,7 @@ rule:
         regex: addEventListener|setInterval|setTimeout|subscribe|createConnection|AbortController
     - not:
         has:
-          pattern: return () => { $$$ }
+          regex: 'return\s*\(\)\s*=>\s*\{'
 message: "useEffect with side effects (event listeners, timers, subscriptions) must include cleanup function. Add: return () => { removeEventListener(...); clearInterval(...); unsubscribe(...); } to prevent memory leaks."
 severity: error
 
@@ -62,12 +62,12 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export function use$HOOK($$$) { $$$ }
+        regex: 'export function use[A-Z]\w*\([^)]*\)\s*\{'
     - has:
         regex: addEventListener|setInterval|setTimeout|subscribe|createConnection|AbortController
     - not:
         has:
-          pattern: return () => { $$$ }
+          regex: 'return\s*\(\)\s*=>\s*\{'
 message: "Custom hooks with subscriptions/timers/event listeners must return cleanup function. Add: return () => { cleanup code }"
 severity: error
 
@@ -83,7 +83,7 @@ rule:
     - has:
         regex: useState\(\{|useState\(\[
     - has:
-        pattern: $STATE\.(push|pop|splice|sort|reverse)|$STATE\.($KEY) =|$STATE\[$INDEX\] =
+        regex: '\w+\.(push|pop|splice|sort|reverse)|\w+\.\w+\s*=|\[[^\]]+\]\s*='
 message: "Don't mutate state objects/arrays directly. Use functional updates: setState(prev => ({ ...prev, key: value })) or setState(prev => [...prev, item]). Direct mutation causes bugs and doesn't trigger re-renders."
 severity: error
 
@@ -95,11 +95,11 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: (useMemo|useCallback)($FUNC, $DEPS)
+        regex: '(useMemo|useCallback)\([^,]+,\s*[^)]+\)'
     - has:
-        pattern: (useMemo|useCallback)($FUNC, \[\])
+        regex: '(useMemo|useCallback)\([^,]+,\s*\[\]\)'
     - has:
-        pattern: $VAR|$FUNC
+        regex: '\w+|\w+'
 message: "useMemo/useCallback should include all dependencies used in the callback. Empty dependency array [] is only correct if callback uses no external values. Add missing dependencies or use ESLint exhaustive-deps rule."
 severity: warning
 
@@ -111,12 +111,12 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export function $HOOK($$$) { $$$ }
+        regex: 'export function \w+\([^)]*\)\s*\{'
     - has:
         regex: useState|useEffect|useCallback|useMemo|useRef
     - not:
         has:
-          pattern: function use[A-Z]
+          regex: 'function use[A-Z]'
 message: "Custom hooks must start with 'use' prefix (e.g., useMyHook, not myHook). This is a React convention that enables ESLint to apply Rules of Hooks. Rename function to start with 'use'."
 severity: error
 
@@ -130,16 +130,14 @@ rule:
     - has:
         pattern: (useCallback|useMemo)($FUNC, $DEPS)
     - has:
-        pattern: (useCallback|useMemo)(\(\) => $SIMPLE, $DEPS)
+        regex: '(useCallback|useMemo)\(\s*\(\)\s*=>\s*[^,]+,\s*[^)]+\)'
 message: "useCallback/useMemo is unnecessary for simple values or functions passed to native DOM elements. Only use for expensive computations or when passing to memoized components. Remove useCallback/useMemo for simple cases."
 severity: info
 
----
 # Note: Missing useEffect dependency detection is better handled by ESLint exhaustive-deps rule
 # AST-GREP cannot reliably detect all dependency cases
 # This rule is informational only
 
----
 # Note: React.memo detection for list items requires JSX pattern matching
 # This is better handled by ESLint rule: react/jsx-no-bind
 # AST-GREP has limitations with complex JSX pattern matching

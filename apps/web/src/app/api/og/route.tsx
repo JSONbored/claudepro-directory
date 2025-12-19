@@ -16,14 +16,22 @@
 
 import 'server-only';
 import { OG_DEFAULTS, OG_DIMENSIONS } from '@heyclaude/shared-runtime';
-import { createOptionsHandler as createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/api/route-factory';
-import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import {
+  createOptionsHandler as createApiOptionsHandler, createApiRoute,
+} from '@heyclaude/web-runtime/api/route-factory';
 import { ogImageQuerySchema } from '@heyclaude/web-runtime/api/schemas';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { ImageResponse } from 'next/og';
 
-/**
+/******
+ *
  * Generate an Open Graph image using Next.js ImageResponse.
  * Caching is handled via HTTP cache headers (not Cache Components).
+ * @param {string} title
+ * @param {string} description
+ * @param {string} type
+ * @param {string[]} tags
+ * @returns {Promise<unknown>} Return value description
  */
 async function generateOgImage(
   title: string,

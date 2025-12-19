@@ -22,17 +22,25 @@
  */
 import 'server-only';
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { VALID_CATEGORIES } from '@heyclaude/web-runtime/utils/category-validation';
-import { createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext } from '@heyclaude/web-runtime/api/route-factory';
-import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
-import { badRequestResponse, getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import {
+  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
 import { categorySchema } from '@heyclaude/web-runtime/api/schemas';
+import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
+import {
+  badRequestResponse,
+  getOnlyCorsHeaders,
+  jsonResponse,
+} from '@heyclaude/web-runtime/server/api-helpers';
+import { VALID_CATEGORIES } from '@heyclaude/web-runtime/utils/category-validation';
 import { z } from 'zod';
 
 // Shared category validator
 function validateCategory(category: content_category | null | undefined): content_category {
   if (!category || !VALID_CATEGORIES.includes(category)) {
-    throw new Error(`Category parameter is required and cannot be "all". Valid categories: ${VALID_CATEGORIES.join(', ')}`);
+    throw new Error(
+      `Category parameter is required and cannot be "all". Valid categories: ${VALID_CATEGORIES.join(', ')}`
+    );
   }
   return category;
 }
@@ -70,7 +78,12 @@ export const GET = createCachedApiRoute({
   querySchema: z.object({
     category: categorySchema,
   }),
-  responseHandler: (result: unknown, query: { category: content_category | null }, _body: unknown, ctx: RouteHandlerContext<{ category: content_category | null }, unknown>) => {
+  responseHandler: (
+    result: unknown,
+    query: { category: content_category | null },
+    _body: unknown,
+    ctx: RouteHandlerContext<{ category: content_category | null }>
+  ) => {
     const { logger } = ctx;
     const { category } = query;
 
@@ -85,7 +98,7 @@ export const GET = createCachedApiRoute({
         getOnlyCorsHeaders
       );
     }
-    const serviceResult = result as { templates?: unknown[] } | null | undefined;
+    const serviceResult = result as null | undefined | { templates?: unknown[] };
     const templates = serviceResult?.templates?.filter(Boolean) ?? [];
 
     // Structured logging with cache tags

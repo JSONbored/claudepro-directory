@@ -5,14 +5,12 @@
 
 import { ContentCategory, SubmissionType } from '@heyclaude/data-layer/prisma';
 import { type content_category, type submission_type } from '@heyclaude/data-layer/prisma';
-import {
-  generatePageMetadata,
-} from '@heyclaude/web-runtime/seo';
-import { getContentTemplates } from '@heyclaude/web-runtime/data/content/templates';
 import { getSubmissionDashboard } from '@heyclaude/web-runtime/data/account';
+import { getContentTemplates } from '@heyclaude/web-runtime/data/content/templates';
 import { getSubmissionFormFields } from '@heyclaude/web-runtime/data/forms/submission-form-fields';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { type SubmissionFormConfig } from '@heyclaude/web-runtime/types/component.types';
 import { Card, CardContent, CardHeader, CardTitle, cn } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';

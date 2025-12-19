@@ -3,17 +3,14 @@
  */
 
 // GetUserSettingsReturns type is now derived from getUserCompleteData return type
-import { type GetUserCompleteDataReturns } from '@heyclaude/database-types/postgres-types';
-import { extractFirstFieldFromTuple, isPostgresTupleString } from '@heyclaude/web-runtime/utils/deserialize-postgres-tuple';
+import { type GetUserCompleteDataReturns } from '@heyclaude/data-layer';
 import { ensureUserRecord } from '@heyclaude/web-runtime/actions/user';
-import {
-  generatePageMetadata,
-} from '@heyclaude/web-runtime/seo';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
-import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Button,
   Card,
@@ -22,6 +19,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import {
+  extractFirstFieldFromTuple,
+  isPostgresTupleString,
+} from '@heyclaude/web-runtime/utils/deserialize-postgres-tuple';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Image from 'next/image';
@@ -347,9 +348,7 @@ export default async function SettingsPage() {
             <div>
               <p className="text-sm-medium">Member Since</p>
               <p className="text-muted-foreground">
-                {profile.created_at
-                  ? formatDate(profile.created_at, 'long')
-                  : 'N/A'}
+                {profile.created_at ? formatDate(profile.created_at, 'long') : 'N/A'}
               </p>
             </div>
           </div>

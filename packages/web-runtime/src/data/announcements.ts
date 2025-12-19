@@ -9,8 +9,8 @@ import { createDataFunction } from './cached-data-factory.ts';
  * Simple data fetching function - pages control caching with 'use cache' directive
  */
 export const getActiveAnnouncement = createDataFunction<void, announcementsModel | null>({
-  serviceKey: 'misc',
   methodName: 'getActiveAnnouncement',
   module: 'data/announcements',
   operation: 'getActiveAnnouncement',
+  serviceKey: 'misc',
 });

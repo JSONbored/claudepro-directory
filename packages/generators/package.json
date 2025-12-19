@@ -52,6 +52,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@heyclaude/data-layer": "workspace:*",
     "@heyclaude/database-types": "workspace:*",
     "@heyclaude/edge-runtime": "workspace:*",
     "@heyclaude/shared-runtime": "workspace:*",

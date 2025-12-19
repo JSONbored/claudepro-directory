@@ -1,9 +1,7 @@
-import {
-  generatePageMetadata,
-} from '@heyclaude/web-runtime/seo';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserIdentitiesData } from '@heyclaude/web-runtime/data/account';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Card,
   CardContent,

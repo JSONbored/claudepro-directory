@@ -1,15 +1,11 @@
-import {
-  type GetUserCompleteDataReturns,
-  type UserActivityTimelineItem,
-} from '@heyclaude/database-types/postgres-types';
-import {
-  generatePageMetadata,
-} from '@heyclaude/web-runtime/seo';
+import type { GetUserCompleteDataReturns, GetUserActivityTimelineReturns } from '@heyclaude/data-layer';
+type UserActivityTimelineItem = GetUserActivityTimelineReturns['activities'][number];
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Button,
   Card,
@@ -44,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
   cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire
   cacheTag('seo-metadata-account');
   cacheTag('seo-metadata-account-activity');
-  
+
   return generatePageMetadata('/account/activity');
 }
 

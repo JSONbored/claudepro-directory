@@ -1,5 +1,5 @@
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { logger } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { type Metadata } from 'next';
 import { cacheLife, cacheTag } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
   cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire
   cacheTag('seo-metadata-static');
   cacheTag('seo-metadata-account-library');
-  
+
   return generatePageMetadata(TARGET_ROUTE);
 }
 

@@ -1,60 +1,209 @@
 # Cache Components Pattern Rules
-# Enforces Cache Components patterns from ESLint rule: require-cache-components
-# Matches: config/tools/eslint-plugin-architectural-rules.js -> require-cache-components
+# Enforces Next.js 16 Cache Components usage and best practices
+# Pages control caching with 'use cache' directive
+# Data functions are simple async functions (no 'use cache') - see cached-data-factory.ts
 
 ---
-# Rule: Detect missing 'use cache' directive in server components with async data fetching
-id: missing-use-cache-directive
+# Rule: Detect missing 'use cache' directive in pages with async data fetching
+id: missing-use-cache-directive-page
 language: typescript
 files:
-  - 'app/**/*.tsx'
+  - 'apps/web/src/app/**/*.tsx'
 rule:
   all:
     - kind: function_declaration
-      has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
     - has:
-        pattern: await $ASYNC($$$)
+        pattern: 'export default async function $PAGE($$$) { $$$ }'
+    - has:
+        pattern: 'await $DATA_FETCH($$$)'
     - not:
         has:
           regex: 'use cache'
-message: "Server components with async data fetching must use 'use cache' or 'use cache: private' directive. Add directive as first statement in function body."
+message: "Pages with async data fetching must use 'use cache' or 'use cache: private' directive. Add directive as first statement in function body. Data functions don't use 'use cache' - pages control caching."
 severity: error
 
 ---
-# Rule: Detect non-deterministic operations before connection()
-id: non-deterministic-before-connection
+# Rule: Detect missing cacheLife() in cached pages
+id: missing-cache-life-page
 language: typescript
 files:
-  - 'app/**/*.tsx'
+  - 'apps/web/src/app/**/*.tsx'
 rule:
   all:
     - kind: function_declaration
-      has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
     - has:
-        pattern: (Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID())($$$)
-    - not:
-        follows:
-          pattern: await connection()
-message: "Non-deterministic operations (Date.now(), Math.random(), new Date(), performance.now(), crypto.randomUUID()) must come after await connection(). Move operation after connection() call."
-severity: error
-
----
-# Rule: Detect missing connection() in components with non-deterministic operations
-id: missing-connection-with-non-deterministic
-language: typescript
-files:
-  - 'app/**/*.tsx'
-rule:
-  all:
-    - kind: function_declaration
-      has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
+        pattern: 'export default async function $PAGE($$$) { $$$ }'
     - has:
-        pattern: (Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID())($$$)
+        regex: 'use cache'
     - not:
         has:
-          pattern: await connection()
-message: "Components using non-deterministic operations must call await connection() at the start. Add: await connection() at function start."
+          pattern: 'cacheLife'
+message: "Pages using 'use cache' must include cacheLife() profile. Add cacheLife('profile-name') or cacheLife({ stale, revalidate, expire }) after 'use cache' directive. Import: import { cacheLife } from 'next/cache';"
 severity: error
+
+---
+# Rule: Detect missing cacheTag() in cached pages
+id: missing-cache-tag-page
+language: typescript
+files:
+  - 'apps/web/src/app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: 'export default async function $PAGE($$$) { $$$ }'
+    - has:
+        regex: 'use cache'
+    - has:
+          pattern: 'cacheLife'
+    - not:
+        has:
+          pattern: 'cacheTag'
+message: "Pages using 'use cache' must include cacheTag() for cache invalidation. Add cacheTag('resource-type') and cacheTag('resource-type-${id}') after cacheLife(). Import: import { cacheTag } from 'next/cache';"
+severity: error
+
+---
+# Rule: Detect incorrect cacheLife profile for user-specific data
+id: incorrect-cache-life-user-data
+language: typescript
+files:
+  - 'apps/web/src/app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: 'export default async function $PAGE($$$) { $$$ }'
+    - has:
+        regex: 'use cache'
+    - has:
+        regex: cacheLife\(.*static.*\)|cacheLife\(.*stable.*\)|cacheLife\(.*max.*\)
+    - has:
+        regex: user|account|activity|notification|bookmark|recent|session|profile
+message: "User-specific data should use 'use cache: private' with shorter cache life profiles ('userProfile', 'minutes', 'quarter'). 'static'/'stable'/'max' are for rarely-changing public content. Use: cacheLife('userProfile') or cacheLife('minutes')"
+severity: warning
+
+---
+# Rule: Detect missing 'use cache: private' for user-specific pages
+id: missing-private-cache-user-data
+language: typescript
+files:
+  - 'apps/web/src/app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: 'export default async function $PAGE($$$) { $$$ }'
+    - has:
+        regex: user|account|activity|notification|bookmark|library|profile
+    - has:
+        pattern: 'await $DATA_FETCH($$$)'
+    - not:
+        has:
+          regex: 'use cache: private'
+message: "User-specific pages should use 'use cache: private' instead of 'use cache' to prevent cross-user data leakage. Change 'use cache' to 'use cache: private' for user-specific data."
+severity: error
+
+---
+# Rule: Detect non-deterministic operations before connection() in cached pages
+id: non-deterministic-before-connection-page
+language: typescript
+files:
+  - 'apps/web/src/app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: 'export default async function $PAGE($$$) { $$$ }'
+    - has:
+        regex: 'use cache'
+    - has:
+        regex: Date\.now|Math\.random|new Date|process\.hrtime|generateRequestId
+    - not:
+        follows:
+          pattern: 'await connection()'
+message: "Non-deterministic operations (Date.now(), Math.random(), new Date(), generateRequestId()) in cached pages must come after await connection(). Add 'await connection();' at the start of the function before any non-deterministic operations. Import: import { connection } from 'next/server';"
+severity: error
+
+---
+# Rule: Detect missing connection() in pages with non-deterministic operations
+id: missing-connection-page-non-deterministic
+language: typescript
+files:
+  - 'apps/web/src/app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: 'export default async function $PAGE($$$) { $$$ }'
+    - has:
+        regex: 'use cache'
+    - has:
+        pattern: '(Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID()|generateRequestId)($$$)'
+    - not:
+        has:
+          pattern: 'await connection()'
+message: "Pages using 'use cache' with non-deterministic operations must call await connection() at the start. Add: await connection() at function start before any non-deterministic operations. Import: import { connection } from 'next/server';"
+severity: error
+
+---
+# Rule: Detect missing hierarchical cache tags in pages
+id: missing-hierarchical-cache-tags-page
+language: typescript
+files:
+  - 'apps/web/src/app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: 'export default async function $PAGE($$$) { $$$ }'
+    - has:
+        regex: 'use cache'
+    - has:
+          pattern: "cacheTag('content')"
+    - has:
+        pattern: 'await params'
+    - not:
+        has:
+          regex: 'cacheTag\(.*content-.*\)'
+message: "Cache tags should be hierarchical for granular invalidation. Add: cacheTag('content-${category}') and cacheTag('content-${slug}') in addition to cacheTag('content'). This allows invalidating specific content without invalidating all content."
+severity: warning
+
+---
+# Rule: Detect mutations without cache tag invalidation
+id: mutation-without-cache-invalidation
+language: typescript
+files:
+  - 'packages/web-runtime/src/actions/**/*.ts'
+  - 'apps/web/src/app/api/**/*.ts'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: create|update|delete|upsert|insert|remove|add
+    - has:
+        pattern: 'await $SERVICE.($METHOD)($$$)'
+    - not:
+        has:
+          pattern: 'revalidateTag'
+message: "Mutations must invalidate related cache tags. Add revalidateTag('resource-type') and revalidateTag('resource-type-${id}') after mutation. Import: import { revalidateTag } from 'next/cache';"
+severity: error
+
+---
+# Rule: Detect data functions incorrectly using 'use cache' directive
+id: data-function-using-cache-directive
+language: typescript
+files:
+  - 'packages/web-runtime/src/data/**/*.ts'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: 'export async function $DATA($$$) { $$$ }'
+    - has:
+        regex: 'use cache'
+message: "Data functions should NOT use 'use cache' directive. Pages control caching with 'use cache' directive. Data functions are simple async functions. See cached-data-factory.ts for architectural decision. Remove 'use cache' from data function."
+severity: error
+
+# Note: Data functions in packages/web-runtime/src/data/**/*.ts do NOT use 'use cache'
+# Pages in apps/web/src/app/**/*.tsx use 'use cache' to control caching
+# This is an architectural decision documented in cached-data-factory.ts

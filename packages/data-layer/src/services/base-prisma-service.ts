@@ -13,6 +13,7 @@
 import { prisma } from '../prisma/client.ts';
 import { logRpcError } from '../utils/rpc-error-logging.ts';
 import { withSmartCache } from '../utils/request-cache.ts';
+import type { Prisma } from '@heyclaude/database-types/prisma';
 // Extract TransactionClient type from prisma.$transaction method
 // This avoids namespace import issues while still getting the correct type
 type TransactionClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
@@ -136,13 +137,15 @@ export abstract class BasePrismaService {
    * Use this for complex queries that can't be expressed with Prisma's query builder.
    * Always use parameterized queries to prevent SQL injection.
    *
+   * OPTIMIZATION: Type-safe wrapper for $queryRawUnsafe with better error handling.
+   *
    * @param query - SQL query string with placeholders ($1, $2, etc.)
    * @param params - Parameters for the query
-   * @returns Query result
+   * @returns Query result with proper typing
    *
    * @example
    * ```typescript
-   * const result = await this.executeRaw<{ count: bigint }[]>(
+   * const result = await this.executeRaw<Array<{ count: bigint }>>(
    *   'SELECT COUNT(*) as count FROM content WHERE category = $1',
    *   'agents'
    * );
@@ -153,7 +156,10 @@ export abstract class BasePrismaService {
     ...params: unknown[]
   ): Promise<T> {
     try {
-      return (await prisma.$queryRawUnsafe(query, ...params)) as T;
+      // OPTIMIZATION: Explicit type assertion for better type safety
+      // Prisma $queryRawUnsafe returns unknown[], so we assert to T
+      const result = await prisma.$queryRawUnsafe(query, ...params);
+      return result as T;
     } catch (error) {
       logRpcError(error, {
         rpcName: 'executeRaw',
@@ -169,7 +175,10 @@ export abstract class BasePrismaService {
    *
    * Use this for operations that need to be atomic.
    *
+   * OPTIMIZATION: Added timeout configuration to prevent hanging transactions.
+   *
    * @param callback - Transaction callback that receives Prisma transaction client
+   * @param options - Optional transaction configuration
    * @returns Result from the transaction
    *
    * @example
@@ -178,12 +187,37 @@ export abstract class BasePrismaService {
    *   const company = await tx.companies.create({ data: {...} });
    *   await tx.jobs.create({ data: { company_id: company.id, ...} });
    *   return company;
-   * });
+   * }, { timeout: 10000 }); // 10 second timeout
    * ```
    */
   protected async transaction<T>(
-    callback: (tx: TransactionClient) => Promise<T>
+    callback: (tx: TransactionClient) => Promise<T>,
+    options?: {
+      /** Maximum time (in milliseconds) the transaction can run before timing out */
+      timeout?: number;
+      /** Isolation level for the transaction */
+      isolationLevel?: Prisma.TransactionIsolationLevel;
+    }
   ): Promise<T> {
-    return prisma.$transaction(callback);
+    // OPTIMIZATION: Add timeout to prevent hanging transactions
+    // Default timeout: 30 seconds (matches query timeout)
+    const timeout = options?.timeout ?? 30000;
+    
+    // Build transaction options, only including isolationLevel if provided
+    const transactionOptions: {
+      maxWait: number;
+      timeout: number;
+      isolationLevel?: Prisma.TransactionIsolationLevel;
+    } = {
+      maxWait: timeout, // Maximum time to wait for a transaction slot
+      timeout, // Maximum time the transaction can run
+    };
+    
+    // Only add isolationLevel if provided (handles undefined properly with exactOptionalPropertyTypes)
+    if (options?.isolationLevel !== undefined) {
+      transactionOptions.isolationLevel = options.isolationLevel;
+    }
+    
+    return prisma.$transaction(callback, transactionOptions);
   }
 }

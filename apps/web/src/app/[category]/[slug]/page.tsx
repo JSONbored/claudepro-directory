@@ -6,21 +6,20 @@
  * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
 import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
-import { type EnrichedContentItem } from '@heyclaude/database-types/postgres-types';
 import { getDeploymentEnv } from '@heyclaude/shared-runtime/platform';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
-import { ensureStringArray } from '@heyclaude/web-runtime/utils/content-helpers';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
+import {
+  getContentAnalytics,
+  type GetContentAnalyticsReturns,
+  getContentDetailCore,
+} from '@heyclaude/web-runtime/data/content/detail';
+import { getRelatedContent } from '@heyclaude/web-runtime/data/content/related';
 import { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks/use-recently-viewed';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
-import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
-import { getRelatedContent } from '@heyclaude/web-runtime/data/content/related';
-import {
-  getContentAnalytics,
-  getContentDetailCore,
-  type GetContentAnalyticsReturns,
-} from '@heyclaude/web-runtime/data/content/detail';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { ensureStringArray } from '@heyclaude/web-runtime/utils/content-helpers';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { notFound } from 'next/navigation';
@@ -83,14 +82,14 @@ export async function generateStaticParams() {
         const categoryParameters = topItems
           .filter(
             (
-              item: EnrichedContentItem
-            ): item is EnrichedContentItem & {
+              item: contentModel
+            ): item is contentModel & {
               slug: string;
             } => Boolean(item.slug)
           )
           .map(
             (
-              item: EnrichedContentItem & {
+              item: contentModel & {
                 slug: string;
               }
             ) => ({ category, slug: item.slug })
@@ -484,8 +483,12 @@ async function DetailPageContent({
   // 2. Fetch Analytics & Related (Non-blocking promise - for Suspense)
   const analyticsPromise = getContentAnalytics({ category, slug });
 
-  const viewCountPromise = analyticsPromise.then((data: GetContentAnalyticsReturns | null) => data?.view_count ?? 0);
-  const copyCountPromise = analyticsPromise.then((data: GetContentAnalyticsReturns | null) => data?.copy_count ?? 0);
+  const viewCountPromise = analyticsPromise.then(
+    (data: GetContentAnalyticsReturns | null) => data?.view_count ?? 0
+  );
+  const copyCountPromise = analyticsPromise.then(
+    (data: GetContentAnalyticsReturns | null) => data?.copy_count ?? 0
+  );
 
   const relatedItemsPromise = getRelatedContent({
     currentCategory: category,

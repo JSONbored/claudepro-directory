@@ -1,6 +1,6 @@
 import 'server-only';
-import { type GetRelatedContentReturns } from '@heyclaude/database-types/postgres-types';
 import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type GetRelatedContentReturns } from '@heyclaude/database-types/postgres-types';
 
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 
@@ -25,11 +25,18 @@ export interface RelatedContentResult {
  * Uses 'use cache' to cache related content. This data is public and same for all users.
  */
 export const getRelatedContent = createDataFunction<RelatedContentInput, RelatedContentResult>({
-  serviceKey: 'content',
+  logContext: (input) => {
+    const currentSlug = input.currentPath.split('/').pop() ?? '';
+    return {
+      category: input.currentCategory,
+      slug: currentSlug,
+    };
+  },
   methodName: 'getRelatedContent',
   module: 'data/content/related',
+  onError: () => ({ items: [] }), // Return empty array on error
   operation: 'getRelatedContent',
-  validate: (input) => isValidCategory(input.currentCategory),
+  serviceKey: 'content',
   transformArgs: (input) => {
     const currentSlug = input.currentPath.split('/').pop() ?? '';
     return {
@@ -45,12 +52,5 @@ export const getRelatedContent = createDataFunction<RelatedContentInput, Related
     const items = data.filter((item) => Boolean(item.title && item.slug && item.category));
     return { items };
   },
-  onError: () => ({ items: [] }), // Return empty array on error
-  logContext: (input) => {
-    const currentSlug = input.currentPath.split('/').pop() ?? '';
-    return {
-      category: input.currentCategory,
-      slug: currentSlug,
-    };
-  },
+  validate: (input) => isValidCategory(input.currentCategory),
 });

@@ -1,5 +1,3 @@
-import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/utils/url-safety';
-import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { getCompaniesList } from '@heyclaude/web-runtime/data/companies';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -11,6 +9,7 @@ import {
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Button,
   Card,
@@ -20,6 +19,7 @@ import {
   CardTitle,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/utils/url-safety';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Image from 'next/image';

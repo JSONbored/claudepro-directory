@@ -2,11 +2,10 @@
  * Job Detail Page - Database-first job listing display
  */
 
-import { ContentCategory, type content_category } from '@heyclaude/data-layer/prisma';
-import { getSafeMailtoUrl, getSafeWebsiteUrl } from '@heyclaude/web-runtime/utils/url-safety';
-import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { type content_category, ContentCategory } from '@heyclaude/data-layer/prisma';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { getJobBySlug } from '@heyclaude/web-runtime/data/jobs';
 import {
   ArrowLeft,
   Building2,
@@ -19,7 +18,6 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
-import { getJobBySlug } from '@heyclaude/web-runtime/data/jobs';
 import { type PageProps } from '@heyclaude/web-runtime/types/app.schema';
 import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
 import {
@@ -30,6 +28,8 @@ import {
   CardTitle,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { getSafeMailtoUrl, getSafeWebsiteUrl } from '@heyclaude/web-runtime/utils/url-safety';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
@@ -90,7 +90,12 @@ export async function generateMetadata({
 
   const jobForMetadata = job ? (job as Record<string, unknown>) : undefined;
   return generatePageMetadata('/jobs/:slug', {
-    item: jobForMetadata ? { ...jobForMetadata, tags: (Array.isArray(jobForMetadata['tags']) ? jobForMetadata['tags'] : []) } : undefined,
+    item: jobForMetadata
+      ? {
+          ...jobForMetadata,
+          tags: Array.isArray(jobForMetadata['tags']) ? jobForMetadata['tags'] : [],
+        }
+      : undefined,
     params: { slug },
     slug,
   });
@@ -269,7 +274,9 @@ async function JobPageContent({
   // Use bracket notation for index signature properties
   const jobData = job as Record<string, unknown>;
   const tags = (Array.isArray(jobData['tags']) ? jobData['tags'] : []) as string[];
-  const requirements = (Array.isArray(jobData['requirements']) ? jobData['requirements'] : []) as string[];
+  const requirements = (
+    Array.isArray(jobData['requirements']) ? jobData['requirements'] : []
+  ) as string[];
   const benefits = (Array.isArray(jobData['benefits']) ? jobData['benefits'] : []) as string[];
 
   return (
@@ -408,7 +415,9 @@ async function JobPageContent({
                     );
                   })()}
                   {(() => {
-                    const safeMailtoUrl = getSafeMailtoUrl(jobData['contact_email'] as string | undefined);
+                    const safeMailtoUrl = getSafeMailtoUrl(
+                      jobData['contact_email'] as string | undefined
+                    );
                     if (!safeMailtoUrl) return null;
                     return (
                       <Button asChild className="w-full" variant="outline">
@@ -443,7 +452,8 @@ async function JobPageContent({
                     <Users className="text-muted-foreground h-4 w-4" />
                     <span>
                       {jobData['category'] && isValidCategory(jobData['category'] as string)
-                        ? (getCategoryConfig(jobData['category'] as content_category)?.typeName ?? (jobData['category'] as string))
+                        ? (getCategoryConfig(jobData['category'] as content_category)?.typeName ??
+                          (jobData['category'] as string))
                         : ((jobData['category'] as string) ?? 'General')}
                     </span>
                   </div>

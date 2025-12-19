@@ -31,9 +31,12 @@ export interface JobsFilterOptions {
   sort?: 'newest' | 'oldest' | 'salary';
 }
 
-/**
+/***
+ *
  * Build RPC arguments from filter options
  * Extracted to eliminate duplication
+ * @param {JobsFilterOptions} options
+ * @returns {FilterJobsArgs} Return value description
  */
 function buildFilterJobsArgs(options: JobsFilterOptions): FilterJobsArgs {
   const { category, employment, experience, limit, offset, remote, searchQuery } = options;
@@ -64,9 +67,12 @@ function buildFilterJobsArgs(options: JobsFilterOptions): FilterJobsArgs {
   return rpcArguments;
 }
 
-/**
+/***
+ *
  * Pulse job search analytics (fire and forget)
  * Extracted to eliminate duplication
+ * @param {string} searchQuery
+ * @returns {void} Return value description
  */
 function pulseJobSearchAsync(searchQuery: string): void {
   void pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
@@ -86,16 +92,17 @@ const getJobsListCached = createDataFunction<
   { limit: number; offset: number },
   JobsFilterResult | null
 >({
-  serviceKey: 'search',
+  logContext: (args) => ({ limit: args.limit, offset: args.offset }),
   methodName: 'filterJobs',
   module: 'data/jobs',
-  operation: 'getJobsListCached',
-  transformArgs: (args) => ({
-    p_limit: args.limit,
-    p_offset: args.offset,
-  } as FilterJobsArgs),
   onError: () => null,
-  logContext: (args) => ({ limit: args.limit, offset: args.offset }),
+  operation: 'getJobsListCached',
+  serviceKey: 'search',
+  transformArgs: (args) =>
+    ({
+      p_limit: args.limit,
+      p_offset: args.offset,
+    }) as FilterJobsArgs,
 });
 
 /**
@@ -103,11 +110,6 @@ const getJobsListCached = createDataFunction<
  * Uses 'use cache' to cache filtered jobs. This data is public and same for all users.
  */
 const getFilteredJobsCached = createDataFunction<FilterJobsArgs, JobsFilterResult | null>({
-  serviceKey: 'search',
-  methodName: 'filterJobs',
-  module: 'data/jobs',
-  operation: 'getFilteredJobsCached',
-  onError: () => null,
   logContext: (args) => ({
     category: args.p_category ?? null,
     employment: args.p_employment_type ?? null,
@@ -117,6 +119,11 @@ const getFilteredJobsCached = createDataFunction<FilterJobsArgs, JobsFilterResul
     remote: args.p_remote_only ?? null,
     searchQuery: args.p_search_query ?? null,
   }),
+  methodName: 'filterJobs',
+  module: 'data/jobs',
+  onError: () => null,
+  operation: 'getFilteredJobsCached',
+  serviceKey: 'search',
 });
 
 /**
@@ -191,12 +198,12 @@ export async function getFilteredJobs(
  * Only fetches slugs needed for generateStaticParams, avoiding unnecessary data processing.
  */
 export const getActiveJobSlugs = createDataFunction<number, string[]>({
-  serviceKey: 'jobs',
+  logContext: (limit) => ({ limit }),
   methodName: 'getActiveJobSlugs',
   module: 'data/jobs',
-  operation: 'getActiveJobSlugs',
   onError: () => [], // Return empty array on error
-  logContext: (limit) => ({ limit }),
+  operation: 'getActiveJobSlugs',
+  serviceKey: 'jobs',
 });
 
 /**
@@ -205,10 +212,10 @@ export const getActiveJobSlugs = createDataFunction<number, string[]>({
  * Job details change periodically, so we use the 'medium' cacheLife profile.
  */
 export const getJobBySlug = createDataFunction<string, unknown>({
-  serviceKey: 'jobs',
   methodName: 'getJobBySlug',
   module: 'data/jobs',
   operation: 'getJobBySlug',
+  serviceKey: 'jobs',
   transformArgs: (slug) => ({ p_slug: slug }),
 });
 
@@ -216,19 +223,20 @@ export const getJobBySlug = createDataFunction<string, unknown>({
  * Retrieve a list of featured jobs for display.
  * Uses 'use cache' to cache featured jobs. This data is public and same for all users.
  * Featured jobs change periodically, so we use the 'long' cacheLife profile.
+ * @param limit
  */
 export async function getFeaturedJobs(limit = 5): Promise<jobsModel[]> {
   const cachedFn = createDataFunction<void, jobsModel[]>({
-    serviceKey: 'jobs',
+    logContext: () => ({ limit }),
     methodName: 'getFeaturedJobs',
     module: 'data/jobs',
+    onError: () => [], // Return empty array on error
     operation: 'getFeaturedJobs',
+    serviceKey: 'jobs',
     transformResult: (result) => {
       const jobs = result as jobsModel[];
       return jobs.slice(0, limit);
     },
-    onError: () => [], // Return empty array on error
-    logContext: () => ({ limit }),
   });
 
   return (await cachedFn(undefined as void)) ?? [];

@@ -4,21 +4,16 @@ import {
   type submission_status,
   type submission_type,
 } from '@heyclaude/data-layer/prisma';
-import {
-  type GetUserCompleteDataReturns,
-  type UserDashboardSubmission,
-} from '@heyclaude/database-types/postgres-types';
-import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
-import {
-  generatePageMetadata,
-} from '@heyclaude/web-runtime/seo';
+import { type GetUserCompleteDataReturns, type GetUserDashboardReturns } from '@heyclaude/data-layer';
+type UserDashboardSubmission = GetUserDashboardReturns['submissions'][number];
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
-import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
-import { formatDate } from '@heyclaude/web-runtime/data/utils';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
   Button,
   Card,
@@ -28,6 +23,7 @@ import {
   CardTitle,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
