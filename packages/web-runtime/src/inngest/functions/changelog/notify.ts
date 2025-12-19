@@ -164,6 +164,7 @@ export const processChangelogNotifyQueue = inngest.createFunction(
           }
 
           // 2. Insert notification (critical path)
+          // Build notification data carefully to avoid exactOptionalPropertyTypes issues
           const notificationInsert: notificationsCreateInput = {
             id: job.entryId,
             title: job.title,

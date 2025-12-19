@@ -26,6 +26,10 @@ import {
   createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { categorySchema } from '@heyclaude/web-runtime/api/schemas';
+import {
+  errorResponseSchema,
+  templatesResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import {
   badRequestResponse,
@@ -34,6 +38,14 @@ import {
 } from '@heyclaude/web-runtime/server/api-helpers';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/utils/category-validation';
 import { z } from 'zod';
+
+/**
+ * Query schema for templates API
+ * Exported for OpenAPI generation
+ */
+export const templatesQuerySchema = z.object({
+  category: categorySchema,
+});
 
 // Shared category validator
 function validateCategory(category: content_category | null | undefined): content_category {
@@ -66,18 +78,57 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'Templates retrieved successfully',
+        schema: templatesResponseSchema,
+        headers: {
+          'X-RateLimit-Remaining': {
+            schema: { type: 'string' },
+            description: 'Remaining rate limit requests',
+          },
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+          'X-Generated-By': {
+            schema: { type: 'string' },
+            description: 'Source of the response data',
+          },
+        },
+        example: {
+          success: true,
+          category: 'skills',
+          count: 25,
+          templates: [
+            {
+              id: 'template-1',
+              title: 'Example Template',
+              description: 'An example template for demonstration',
+              category: 'skills',
+            },
+          ],
+        },
       },
       400: {
         description: 'Invalid or missing category parameter',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Invalid category parameter',
+          message: 'Category parameter is required and cannot be "all". Valid categories: agents, mcp, rules, commands, hooks, statuslines, skills, collections, guides, jobs, changelog',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while fetching templates',
+        },
       },
     },
     summary: 'Get content templates by category',
     tags: ['content', 'templates'],
   },
   operation: 'TemplatesAPI',
-  querySchema: z.object({
-    category: categorySchema,
-  }),
+  querySchema: templatesQuerySchema,
   responseHandler: (
     result: unknown,
     query: { category: content_category | null },

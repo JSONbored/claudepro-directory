@@ -29,6 +29,10 @@ import {
   createFormatHandlerRoute, createOptionsHandler as createApiOptionsHandler, type FormatHandlerConfig, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { feedQuerySchema } from '@heyclaude/web-runtime/api/schemas';
+import {
+  errorResponseSchema,
+  feedResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, xmlResponse } from '@heyclaude/web-runtime/server/api-helpers';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
@@ -155,14 +159,51 @@ export const GET = createFormatHandlerRoute<FeedType, { category?: null | string
       responses: {
         200: {
           description: 'Feed generated successfully (RSS or Atom XML)',
+          schema: feedResponseSchema,
+          headers: {
+            'Content-Type': {
+              schema: { type: 'string' },
+              description: 'Content type (application/rss+xml or application/atom+xml)',
+            },
+            'Cache-Control': {
+              schema: { type: 'string' },
+              description: 'Cache control directive',
+            },
+            'X-Content-Source': {
+              schema: { type: 'string' },
+              description: 'Source of the feed content',
+            },
+            'X-Generated-By': {
+              schema: { type: 'string' },
+              description: 'Source of the response data',
+            },
+            'X-Robots-Tag': {
+              schema: { type: 'string' },
+              description: 'Robots meta tag directive',
+            },
         },
-        400: {
-          description: 'Invalid type or category parameter',
+        example: '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Claude Pro Directory</title><link>https://claudepro.directory</link><description>Community-driven directory of Claude configurations</description><item><title>Example Content</title><link>https://claudepro.directory/skills/example</link><description>Example content description</description></item></channel></rss>',
+      },
+      400: {
+        description: 'Invalid type or category parameter',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Invalid type or category parameter',
+          message: 'Invalid feed type. Valid types: rss, atom',
         },
       },
-      summary: 'Generate RSS or Atom feeds',
-      tags: ['feeds', 'rss', 'atom'],
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while generating the feed',
+        },
+      },
     },
+    summary: 'Generate RSS or Atom feeds',
+    tags: ['feeds', 'rss', 'atom'],
+  },
     operation: 'FeedsAPI',
     querySchema: feedQuerySchema, // Type compatibility with exactOptionalPropertyTypes
     route: getVersionedRoute('feeds'),

@@ -83,21 +83,19 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
       }
     }
 
-    // Fetch from API route (avoids HMR issues with server actions)
+    // Fetch from API route using generated client (avoids HMR issues with server actions)
     try {
-      const response = await fetch('/api/flux/email/count', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      // Use generated API client for flux catch-all route
+      const { createApiClient } = await import('@heyclaude/database-types/api-client');
+      const client = createApiClient('/api/v1');
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch newsletter count: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const newCount = data?.count ?? null;
+      // Call flux route with path segments: email/count
+      // Response schema is now properly extracted
+      // Zodios expects path parameters in a 'params' object
+      const data = await client.fluxGet({ params: { '...path': 'email/count' } });
+      const newCount = (data && typeof data === 'object' && 'count' in data && typeof data.count === 'number')
+        ? data.count
+        : null;
 
       if (newCount === null || typeof newCount !== 'number') {
         throw new Error('Invalid newsletter count response');

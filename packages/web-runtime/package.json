@@ -209,6 +209,7 @@
     },
     "./types/app.schema": {
       "types": "./src/types/app.schema.ts",
+      "react-server": "./src/types/app.schema.ts",
       "default": "./src/types/app.schema.ts"
     },
     "./types/category": {
@@ -221,19 +222,17 @@
     },
     "./utils/url-safety": {
       "types": "./src/utils/url-safety.ts",
+      "react-server": "./src/utils/url-safety.ts",
       "default": "./src/utils/url-safety.ts"
     },
     "./utils/category-validation": {
       "types": "./src/utils/category-validation.ts",
+      "react-server": "./src/utils/category-validation.ts",
       "default": "./src/utils/category-validation.ts"
     },
     "./utils/optimize-avatar-url": {
       "types": "./src/utils/optimize-avatar-url.ts",
       "default": "./src/utils/optimize-avatar-url.ts"
-    },
-    "./hooks/use-authenticated-user": {
-      "types": "./src/hooks/use-authenticated-user.ts",
-      "default": "./src/hooks/use-authenticated-user.ts"
     },
     "./prisma-zod-schemas": {
       "types": "./src/prisma-zod-schemas.ts",
@@ -265,6 +264,7 @@
     },
     "./utils/navigation-helpers": {
       "types": "./src/utils/navigation-helpers.ts",
+      "react-server": "./src/utils/navigation-helpers.ts",
       "default": "./src/utils/navigation-helpers.ts"
     },
     "./auth/oauth-providers": {
@@ -415,6 +415,12 @@
       "react-server": "./src/api/schemas.ts",
       "default": "./src/api/schemas.ts"
     },
+    "./api/response-schemas": {
+      "development": "./src/api/response-schemas.ts",
+      "types": "./dist/src/api/response-schemas.d.ts",
+      "react-server": "./src/api/response-schemas.ts",
+      "default": "./src/api/response-schemas.ts"
+    },
     "./api/versioning": {
       "types": "./src/api/versioning.ts",
       "react-server": "./src/api/versioning.ts",
@@ -470,25 +476,10 @@
       "react-server": "./src/utils/homepage-error-tracking.ts",
       "default": "./src/utils/homepage-error-tracking.ts"
     },
-    "./utils/navigation-helpers": {
-      "types": "./src/utils/navigation-helpers.ts",
-      "react-server": "./src/utils/navigation-helpers.ts",
-      "default": "./src/utils/navigation-helpers.ts"
-    },
-    "./utils/category-validation": {
-      "types": "./src/utils/category-validation.ts",
-      "react-server": "./src/utils/category-validation.ts",
-      "default": "./src/utils/category-validation.ts"
-    },
     "./utils/content-helpers": {
       "types": "./src/utils/content-helpers.ts",
       "react-server": "./src/utils/content-helpers.ts",
       "default": "./src/utils/content-helpers.ts"
-    },
-    "./utils/url-safety": {
-      "types": "./src/utils/url-safety.ts",
-      "react-server": "./src/utils/url-safety.ts",
-      "default": "./src/utils/url-safety.ts"
     },
     "./utils/url-validation": {
       "types": "./src/utils/url-validation.ts",
@@ -514,16 +505,6 @@
       "types": "./src/client/share.ts",
       "react-server": "./src/client/share.ts",
       "default": "./src/client/share.ts"
-    },
-    "./types/app.schema": {
-      "types": "./src/types/app.schema.ts",
-      "react-server": "./src/types/app.schema.ts",
-      "default": "./src/types/app.schema.ts"
-    },
-    "./hooks/use-copy-to-clipboard": {
-      "types": "./src/hooks/use-copy-to-clipboard.ts",
-      "react-server": "./src/hooks/use-copy-to-clipboard.ts",
-      "default": "./src/hooks/use-copy-to-clipboard.ts"
     },
     "./errors": {
       "types": "./src/errors.ts",
@@ -616,18 +597,6 @@
       "react-server": "./src/supabase/server-anon.ts",
       "default": "./src/supabase/server-anon.ts"
     },
-    "./hooks/use-boolean": {
-      "types": "./src/hooks/use-boolean.ts",
-      "default": "./src/hooks/use-boolean.ts"
-    },
-    "./hooks/use-button-success": {
-      "types": "./src/hooks/use-button-success.ts",
-      "default": "./src/hooks/use-button-success.ts"
-    },
-    "./hooks/use-logged-async": {
-      "types": "./src/hooks/use-logged-async.ts",
-      "default": "./src/hooks/use-logged-async.ts"
-    },
     "./search/context/search-provider": {
       "types": "./src/search/context/search-provider.tsx",
       "default": "./src/search/context/search-provider.tsx"
@@ -680,10 +649,10 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@radix-ui/react-visually-hidden": "^1.2.4",
-    "@react-email/components": "^1.0.1",
-    "@tanstack/react-virtual": "^3.13.13",
+    "@react-email/components": "^1.0.2",
     "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.87.3",
+    "@supabase/supabase-js": "^2.89.0",
+    "@tanstack/react-virtual": "^3.13.13",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -691,9 +660,9 @@
     "devalue": "^5.6.1",
     "dompurify": "^3.3.1",
     "gsap": "^3.14.2",
-    "html2canvas-pro": "^1.5.13",
-    "inngest": "^3.47.0",
-    "lucide-react": "^0.561.0",
+    "html2canvas-pro": "^1.6.0",
+    "inngest": "^3.48.0",
+    "lucide-react": "^0.562.0",
     "motion": "^12.23.26",
     "next-safe-action": "^8.0.11",
     "pino": "^10.1.0",
@@ -703,7 +672,7 @@
     "server-only": "^0.0.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
-    "zod": "^4.2.0",
+    "zod": "^4.2.1",
     "zustand": "^5.0.9"
   },
   "scripts": {
@@ -720,7 +689,7 @@
   "devDependencies": {
     "@types/canvas-confetti": "^1.9.0",
     "@types/react": "19.2.7",
-    "next": "16.0.10",
+    "next": "16.1.0",
     "pino-pretty": "^13.1.3",
     "react": "19.2.3",
     "react-dom": "19.2.3"

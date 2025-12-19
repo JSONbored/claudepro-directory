@@ -12,6 +12,10 @@ import 'server-only';
 import {
   createApiRoute, createOptionsHandler as createApiOptionsHandler,
 } from '@heyclaude/web-runtime/api/route-factory';
+import {
+  errorResponseSchema,
+  inngestResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import {
   GET as inngestGET,
@@ -51,6 +55,30 @@ export const GET = createApiRoute({
     responses: {
       200: {
         description: 'Function definitions returned successfully',
+        schema: inngestResponseSchema,
+        headers: {
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+        },
+        example: {
+          functions: [
+            {
+              id: 'changelog/notify',
+              name: 'changelog/notify',
+              triggers: [{ event: 'changelog/sync' }],
+            },
+          ],
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while processing Inngest request',
+        },
       },
     },
     summary: 'Inngest introspection endpoint',
@@ -75,9 +103,33 @@ export const POST = createApiRoute({
     description:
       'Handles POST requests from Inngest to invoke functions. Delegates to Inngest runtime.',
     operationId: 'inngestInvoke',
+    requestBody: {
+      description: 'Inngest function invocation payload (varies by function)',
+      required: false,
+    },
     responses: {
       200: {
         description: 'Function executed successfully',
+        schema: inngestResponseSchema,
+        headers: {
+          'X-RateLimit-Remaining': {
+            schema: { type: 'string' },
+            description: 'Remaining rate limit requests',
+          },
+        },
+        example: {
+          success: true,
+          functionId: 'changelog/notify',
+          result: { notified: true },
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while executing Inngest function',
+        },
       },
     },
     summary: 'Inngest function invocation endpoint',
@@ -102,9 +154,32 @@ export const PUT = createApiRoute({
     description:
       'Handles PUT requests from Inngest for function synchronization. Delegates to Inngest runtime.',
     operationId: 'inngestSync',
+    requestBody: {
+      description: 'Inngest sync payload (varies by sync type)',
+      required: false,
+    },
     responses: {
       200: {
         description: 'Sync completed successfully',
+        schema: inngestResponseSchema,
+        headers: {
+          'X-RateLimit-Remaining': {
+            schema: { type: 'string' },
+            description: 'Remaining rate limit requests',
+          },
+        },
+        example: {
+          success: true,
+          synced: true,
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while syncing Inngest functions',
+        },
       },
     },
     summary: 'Inngest sync endpoint',

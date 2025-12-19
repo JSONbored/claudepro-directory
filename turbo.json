@@ -33,6 +33,16 @@
       ],
       "cache": true
     },
+    "generate:api-client:exec": {
+      "outputs": ["packages/database-types/src/api-client/client.generated.ts"],
+      "inputs": [
+        "openapi.json",
+        "packages/generators/src/commands/generate-api-client.ts",
+        "packages/generators/src/bin/generate-api-client.ts",
+        "package.json"
+      ],
+      "cache": true
+    },
     "build": {
       "outputs": [".next/**", "!.next/cache/**"],
       "inputs": [
@@ -52,7 +62,7 @@
         "pnpm-lock.yaml",
         "tsconfig.json"
       ],
-      "dependsOn": ["^build", "generate:service-worker:exec"]
+      "dependsOn": ["^build", "generate:service-worker:exec", "generate:api-client:exec"]
     },
     "lint:build": {
       "dependsOn": [

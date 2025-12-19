@@ -22,6 +22,11 @@ import {
   createOptionsHandler as createApiOptionsHandler, createFormatHandlerRoute, type FormatHandlerConfig, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { categoryContentFormatSchema } from '@heyclaude/web-runtime/api/schemas';
+import {
+  changelogResponseSchema,
+  errorResponseSchema,
+  paginatedContentResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import {
   getOnlyCorsHeaders,
@@ -34,6 +39,14 @@ import {
   VALID_CATEGORIES,
 } from '@heyclaude/web-runtime/utils/category-validation';
 import { z } from 'zod';
+
+/**
+ * Query schema for category content API
+ * Exported for OpenAPI generation
+ */
+export const categoryContentQuerySchema = z.object({
+  format: categoryContentFormatSchema,
+});
 
 type CategoryFormat = 'json' | 'llms-category';
 
@@ -141,21 +154,61 @@ export const GET = createFormatHandlerRoute<CategoryFormat, { format: CategoryFo
     responses: {
       200: {
         description: 'Category content retrieved successfully',
+        schema: z.union([paginatedContentResponseSchema, changelogResponseSchema]),
+        headers: {
+          'Content-Type': {
+            schema: { type: 'string' },
+            description: 'Content type (text/plain for llms-category, application/json for json)',
+          },
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+          'X-Generated-By': {
+            schema: { type: 'string' },
+            description: 'Source of the response data',
+          },
+        },
+        example: [
+          {
+            id: 'content-1',
+            title: 'Example Content',
+            slug: 'example-content',
+            category: 'agents',
+            description: 'An example content item',
+          },
+        ],
       },
       400: {
         description: 'Invalid category or format parameter',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Invalid category or format parameter',
+          message: `Invalid category 'invalid'. Valid categories: ${VALID_CATEGORIES.join(', ')}`,
+        },
       },
       404: {
         description: 'Category content not found',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Category content not found',
+          message: 'No content found for the specified category',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while fetching category content',
+        },
       },
     },
     summary: 'Get category content',
     tags: ['content', 'categories', 'export'],
   },
   operation: 'ContentCategoryAPI',
-  querySchema: z.object({
-    format: categoryContentFormatSchema,
-  }),
+  querySchema: categoryContentQuerySchema,
   route: getVersionedRoute('content/[category]'),
 });
 

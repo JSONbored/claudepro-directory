@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { setupErrorTracking } from '../../../../../config/tests/utils/error-tracking';
+import { expectOpenApiResponse } from '../__helpers__/openapi-validation';
 
 /**
  * Comprehensive Search API Route E2E Tests
@@ -36,16 +37,18 @@ test.describe('Search API Route', () => {
   });
 
   test('should return 200 for valid search query', async ({ page }) => {
-    const response = await page.request.get('/api/search?q=claude&limit=10');
+    const response = await page.request.get('/api/v1/search?q=claude&limit=10');
     
     expect(response.status()).toBe(200);
     
+    // Validate response matches OpenAPI spec
+    await expectOpenApiResponse(response, '/api/v1/search', 'GET');
+    
     const data = await response.json();
     expect(data).toHaveProperty('results');
-    expect(data).toHaveProperty('totalCount');
+    expect(data).toHaveProperty('pagination');
     expect(Array.isArray(data.results)).toBe(true);
-    expect(typeof data.totalCount).toBe('number');
-    expect(data.totalCount).toBeGreaterThanOrEqual(0);
+    expect(typeof data.pagination).toBe('object');
   });
 
   test('should handle empty query parameter', async ({ page }) => {

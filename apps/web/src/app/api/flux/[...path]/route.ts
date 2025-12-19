@@ -17,6 +17,10 @@ import 'server-only';
 import {
   createApiRoute, createOptionsHandler as createApiOptionsHandler,
 } from '@heyclaude/web-runtime/api/route-factory';
+import {
+  errorResponseSchema,
+  fluxResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { routeFluxRequest } from '@heyclaude/web-runtime/flux/router';
 import { NextRequest } from 'next/server';
@@ -56,14 +60,41 @@ export const GET = createApiRoute({
   method: 'GET',
   openapi: {
     description:
-      'Routes GET requests to appropriate Flux handlers based on path segments (e.g., /api/flux/email/count).',
+      'Routes GET requests to appropriate Flux handlers based on path segments (e.g., /api/flux/email/count). Supports dynamic routing for internal services.',
     operationId: 'fluxGet',
     responses: {
       200: {
         description: 'Request routed successfully',
+        schema: fluxResponseSchema,
+        headers: {
+          'X-RateLimit-Remaining': {
+            schema: { type: 'string' },
+            description: 'Remaining rate limit requests',
+          },
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+        },
+        example: {
+          count: 1234,
+        },
       },
       404: {
         description: 'Route not found',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Route not found',
+          message: 'No Flux handler found for path: invalid/path',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while routing Flux request',
+        },
       },
     },
     summary: 'Flux catch-all GET handler',
@@ -85,14 +116,42 @@ export const POST = createApiRoute({
   method: 'POST',
   openapi: {
     description:
-      'Routes POST requests to appropriate Flux handlers based on path segments (e.g., /api/flux/discord/direct).',
+      'Routes POST requests to appropriate Flux handlers based on path segments (e.g., /api/flux/discord/direct). Supports dynamic routing for internal services.',
     operationId: 'fluxPost',
+    requestBody: {
+      description: 'Request body varies by Flux handler path (e.g., Discord notification payload, webhook data)',
+      required: false,
+    },
     responses: {
       200: {
         description: 'Request routed successfully',
+        schema: fluxResponseSchema,
+        headers: {
+          'X-RateLimit-Remaining': {
+            schema: { type: 'string' },
+            description: 'Remaining rate limit requests',
+          },
+        },
+        example: {
+          success: true,
+          message: 'Discord notification sent',
+        },
       },
       404: {
         description: 'Route not found',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Route not found',
+          message: 'No Flux handler found for path: invalid/path',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while routing Flux request',
+        },
       },
     },
     summary: 'Flux catch-all POST handler',

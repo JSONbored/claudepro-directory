@@ -9,11 +9,12 @@
  * @module web-runtime/search/hooks/use-search-api
  */
 
+import { createApiClient } from '@heyclaude/database-types/api-client';
 import type { DisplayableContent, FilterState } from '@heyclaude/web-runtime/types/component.types';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 
 export interface UseSearchAPIOptions {
-  /** Base URL for search API (default: '/api/search') */
+  /** Base URL for search API (default: '/api/v1') */
   apiPath?: string;
   /** Default limit for results (default: 50) */
   limit?: number;
@@ -32,7 +33,7 @@ export interface UseSearchAPIOptions {
  * ```
  */
 export function useSearchAPI(options: UseSearchAPIOptions = {}) {
-  const { apiPath = '/api/search', limit = 50, offset = 0 } = options;
+  const { apiPath = '/api/v1', limit = 50, offset = 0 } = options;
 
   return async (
     query: string,
@@ -44,16 +45,16 @@ export function useSearchAPI(options: UseSearchAPIOptions = {}) {
       if (signal?.aborted) {
         return [];
       }
-      
-      // Build query parameters
-      const searchParams = new URLSearchParams({
-        q: query.trim(),
-        entities: 'content', // Use unified search
-        limit: limit.toString(),
-        offset: offset.toString(),
+
+      // Create API client instance
+      const client = createApiClient(apiPath, {
+        axiosConfig: {
+          ...(signal ? { signal } : {}), // Support abort signals (only include if defined)
+        },
       });
 
       // Map FilterState sort to API route sort
+      let sort: 'relevance' | 'popularity' | 'newest' | 'alphabetical' | undefined;
       if (filters.sort) {
         const sortMap: Record<string, 'relevance' | 'popularity' | 'newest' | 'alphabetical'> = {
           relevance: 'relevance',
@@ -62,68 +63,56 @@ export function useSearchAPI(options: UseSearchAPIOptions = {}) {
           alphabetical: 'alphabetical',
           trending: 'relevance', // Map trending to relevance
         };
-        const mappedSort = sortMap[filters.sort];
-        if (mappedSort) {
-          searchParams.set('sort', mappedSort);
-        }
+        sort = sortMap[filters.sort];
       }
 
-      // Add category filter
+      // Build query parameters for the generated client
+      // Only include properties that are in the generated client's expected type
+      // (dateRange and popularity are not in the API schema, so we skip them)
+      const searchParams: {
+        q?: string;
+        limit?: number;
+        offset?: number;
+        sort?: 'relevance' | 'popularity' | 'newest' | 'alphabetical';
+        categories?: string;
+        tags?: string;
+        authors?: string;
+        entities?: string;
+        job_category?: 'engineering' | 'design' | 'product' | 'marketing' | 'sales' | 'support' | 'research' | 'data' | 'operations' | 'leadership' | 'consulting' | 'education' | 'other';
+        job_employment?: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship';
+        job_experience?: string;
+        job_remote?: 'true' | 'false';
+      } = {};
+      
+      // Only add properties that have values (exactOptionalPropertyTypes requirement)
+      if (query.trim()) {
+        searchParams.q = query.trim();
+      }
+      searchParams.entities = 'content'; // Use unified search
+      searchParams.limit = limit;
+      searchParams.offset = offset;
+      if (sort) {
+        searchParams.sort = sort;
+      }
       if (filters.category) {
-        searchParams.set('categories', filters.category);
+        searchParams.categories = filters.category;
       }
-
-      // Add tag filters
       if (filters.tags && filters.tags.length > 0) {
-        searchParams.set('tags', filters.tags.join(','));
+        searchParams.tags = filters.tags.join(',');
       }
-
-      // Add author filter
       if (filters.author) {
-        searchParams.set('authors', filters.author);
+        searchParams.authors = filters.author;
       }
+      // Note: dateRange and popularity filters are not in the API schema, so we skip them
 
-      // Add date range filter
-      if (filters.dateRange) {
-        searchParams.set('dateRange', filters.dateRange);
-      }
-
-      // Add popularity filter
-      if (filters.popularity && filters.popularity.length === 2) {
-        searchParams.set('popularity', `${filters.popularity[0]},${filters.popularity[1]}`);
-      }
-
-      // Check if request was aborted
+      // Check if request was aborted before API call
       if (signal?.aborted) {
         return [];
       }
 
-      const fetchUrl = `${apiPath}?${searchParams.toString()}`;
-
-      // Call API route
-      const response = await fetch(fetchUrl, {
-        method: 'GET',
-        ...(signal ? { signal } : {}),
-      });
-
-      if (!response.ok) {
-        const error = new Error(`Search API returned ${response.status}: ${response.statusText}`);
-        logClientError(
-          '[useSearchAPI] Search API error response',
-          normalizeError(error, 'Search API error'),
-          'useSearchAPI.error',
-          {
-            component: 'useSearchAPI',
-            action: 'api-call-error',
-            url: fetchUrl,
-            status: response.status,
-            statusText: response.statusText,
-          }
-        );
-        throw error;
-      }
-
-      const result = await response.json();
+      // Call API using generated client
+      // Zodios expects query parameters in a 'queries' object for GET requests
+      const result = await client.search({ queries: searchParams });
 
       // Check again after API call
       if (signal?.aborted) {
@@ -131,9 +120,12 @@ export function useSearchAPI(options: UseSearchAPIOptions = {}) {
       }
 
       // Extract results from API response
-      const results = (Array.isArray(result.results) ? result.results : []) as DisplayableContent[];
+      // Response schema is now properly extracted and typed
+      if (result && typeof result === 'object' && 'results' in result && Array.isArray(result.results)) {
+        return result.results as DisplayableContent[];
+      }
       
-      return results;
+      return [];
     } catch (error) {
       // Ignore AbortError
       if (error instanceof Error && error.name === 'AbortError') {

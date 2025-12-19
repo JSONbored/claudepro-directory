@@ -380,27 +380,20 @@ export const ConfigCard = memo(
 
         // User is authenticated - proceed with bookmark action
         try {
-          // Use API route instead of server action to avoid HMR issues
-          const response = await fetch('/api/bookmarks/add', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              content_type: validatedCategory,
-              content_slug: item.slug,
-              notes: '',
-            }),
+          // Use generated API client instead of fetch
+          const { createApiClient } = await import('@heyclaude/database-types/api-client');
+          const client = createApiClient('/api/v1');
+
+          const result = await client.addBookmark({
+            content_type: validatedCategory,
+            content_slug: item.slug,
+            notes: '',
           });
 
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-            throw new Error(errorData.error || `API returned ${response.status}`);
-          }
-
-          const result = await response.json();
-
-          if (result?.data?.success) {
+          // Response schema is now properly extracted
+          if (result && typeof result === 'object' && 'data' in result && 
+              result.data && typeof result.data === 'object' && 'success' in result.data &&
+              result.data['success'] === true) {
             toasts.success.bookmarkAdded();
 
             pulse

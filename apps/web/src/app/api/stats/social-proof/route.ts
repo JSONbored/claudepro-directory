@@ -32,6 +32,10 @@ import { type GetSocialProofStatsReturnRow } from '@heyclaude/data-layer';
 import {
   createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
+import {
+  errorResponseSchema,
+  socialProofStatsResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 import { connection } from 'next/server';
@@ -112,6 +116,42 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'Social proof statistics retrieved successfully',
+        schema: socialProofStatsResponseSchema,
+        headers: {
+          'ETag': {
+            schema: { type: 'string' },
+            description: 'Entity tag for conditional requests',
+          },
+          'Last-Modified': {
+            schema: { type: 'string' },
+            description: 'Last modification timestamp (RFC 7231)',
+          },
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+        },
+        example: {
+          success: true,
+          stats: {
+            contributors: {
+              count: 42,
+              names: ['user1', 'user2', 'user3', 'user4', 'user5'],
+            },
+            submissions: 150,
+            successRate: 85.5,
+            totalUsers: 1000,
+          },
+          timestamp: '2025-01-11T12:00:00Z',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while fetching social proof statistics',
+        },
       },
     },
     summary: 'Get social proof statistics',

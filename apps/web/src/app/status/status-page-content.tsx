@@ -68,9 +68,17 @@ export function StatusPageContent() {
   const fetchStatus = useCallback(async () => {
     try {
       setIsLoadingTrue();
-      const response = await fetch('/api/status');
-      const data = await response.json();
-      setHealthData(data);
+      // Use generated API client instead of fetch
+      const { createApiClient } = await import('@heyclaude/database-types/api-client');
+      const client = createApiClient('/api/v1');
+
+      const data = await client.getApiStatus();
+      // Response schema is now properly extracted
+      if (data && typeof data === 'object') {
+        setHealthData(data as ApiHealthData);
+      } else {
+        setHealthData({ status: 'unhealthy' });
+      }
       setError(null);
       // Reset poll interval and error count on success
       consecutiveErrorsRef.current = 0;

@@ -58,8 +58,8 @@
     "@heyclaude/shared-runtime": "workspace:*",
     "@heyclaude/web-runtime": "workspace:*",
     "@iarna/toml": "^2.2.5",
-    "@prisma/generator-helper": "^7.1.0",
-    "@supabase/supabase-js": "^2.87.3",
+    "@prisma/generator-helper": "^7.2.0",
+    "@supabase/supabase-js": "^2.89.0",
     "archiver": "^7.0.1",
     "escape-html": "^1.0.3",
     "glob": "^13.0.0",
@@ -72,7 +72,7 @@
     "postcss-value-parser": "^4.2.0",
     "resend": "^6.6.0",
     "ts-morph": "^27.0.2",
-    "zod": "^4.2.0",
+    "zod": "^4.2.1",
     "zod-openapi": "^5.4.5"
   },
   "devDependencies": {

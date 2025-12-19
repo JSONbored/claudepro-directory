@@ -29,8 +29,12 @@ import 'server-only';
 import {
   createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
+import {
+  errorResponseSchema,
+  searchFacetsResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
-import { getWithAuthCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 
 /**
  * GET /api/search/facets - Get search facets
@@ -42,7 +46,7 @@ import { getWithAuthCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/ser
 export const GET = createCachedApiRoute({
   cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
   cacheTags: ['search-facets'],
-  cors: 'auth',
+  cors: 'anon',
   method: 'GET',
   openapi: {
     description:
@@ -51,6 +55,41 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'Search facets retrieved successfully',
+        schema: searchFacetsResponseSchema,
+        headers: {
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+          'X-Generated-By': {
+            schema: { type: 'string' },
+            description: 'Source of the response data',
+          },
+        },
+        example: {
+          facets: [
+            {
+              category: 'skills',
+              content_count: 150,
+              tags: ['javascript', 'typescript', 'react'],
+              authors: ['user1', 'user2'],
+            },
+            {
+              category: 'agents',
+              content_count: 75,
+              tags: ['ai', 'automation', 'llm'],
+              authors: ['user3'],
+            },
+          ],
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while fetching search facets',
+        },
       },
     },
     summary: 'Get search facets',
@@ -64,7 +103,7 @@ export const GET = createCachedApiRoute({
     _ctx: RouteHandlerContext
   ) => {
     const facets = Array.isArray(result) ? result : [];
-    return jsonResponse({ facets }, 200, getWithAuthCorsHeaders);
+    return jsonResponse({ facets }, 200, getOnlyCorsHeaders);
   },
   route: getVersionedRoute('search/facets'),
   service: {

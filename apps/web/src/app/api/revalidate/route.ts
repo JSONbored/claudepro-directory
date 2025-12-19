@@ -33,6 +33,10 @@ import { env } from '@heyclaude/shared-runtime/schemas/env';
 import {
   createApiRoute, createOptionsHandler as createApiOptionsHandler,
 } from '@heyclaude/web-runtime/api/route-factory';
+import {
+  errorResponseSchema,
+  revalidationResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import {
   getOnlyCorsHeaders,
@@ -149,15 +153,57 @@ export const POST = createApiRoute({
     description:
       'Trigger on-demand ISR revalidation and cache tag invalidation for specified targets. Called by edge function via Supabase Realtime (logical replication).',
     operationId: 'revalidate',
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      description: 'Revalidation request with secret token, optional category/slug for path revalidation, and optional tags for cache invalidation',
+      required: true,
+    },
     responses: {
       200: {
         description: 'Revalidation completed successfully',
+        schema: revalidationResponseSchema,
+        headers: {
+          'X-RateLimit-Remaining': {
+            schema: { type: 'string' },
+            description: 'Remaining rate limit requests',
+          },
+        },
+        example: {
+          revalidated: true,
+          paths: ['/', '/agents', '/agents/code-reviewer'],
+          tags: ['content', 'homepage', 'trending'],
+          timestamp: '2025-01-11T12:00:00Z',
+        },
       },
       400: {
         description: 'Invalid request payload or missing category/tags',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Invalid request payload',
+          message: 'Missing category or tags in webhook payload',
+        },
       },
       401: {
         description: 'Unauthorized - invalid secret',
+        schema: errorResponseSchema,
+        headers: {
+          'WWW-Authenticate': {
+            schema: { type: 'string' },
+            description: 'Authentication challenge',
+          },
+        },
+        example: {
+          error: 'Unauthorized',
+          message: 'Missing secret parameter',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred during revalidation',
+        },
       },
     },
     summary: 'Trigger on-demand ISR revalidation',

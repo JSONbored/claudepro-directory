@@ -36,11 +36,11 @@
   "dependencies": {
     "@heyclaude/database-types": "workspace:*",
     "@heyclaude/shared-runtime": "workspace:*",
-    "@prisma/adapter-pg": "^7.1.0",
-    "@supabase/supabase-js": "^2.87.3",
+    "@prisma/adapter-pg": "^7.2.0",
+    "@supabase/supabase-js": "^2.89.0",
     "pg": "^8.16.3",
     "pino": "^10.1.0",
-    "zod": "^4.2.0"
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@types/pg": "^8.16.0",

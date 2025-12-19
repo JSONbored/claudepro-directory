@@ -28,6 +28,10 @@ import {
   createFormatHandlerRoute, createOptionsHandler as createApiOptionsHandler, type FormatHandlerConfig, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { sitewideFormatSchema } from '@heyclaude/web-runtime/api/schemas';
+import {
+  errorResponseSchema,
+  sitewideContentResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import {
   getOnlyCorsHeaders,
@@ -35,6 +39,14 @@ import {
   textResponse,
 } from '@heyclaude/web-runtime/server/api-helpers';
 import { z } from 'zod';
+
+/**
+ * Query schema for sitewide content API
+ * Exported for OpenAPI generation
+ */
+export const sitewideContentQuerySchema = z.object({
+  format: sitewideFormatSchema,
+});
 
 type SitewideFormat = 'json' | 'llms' | 'llms-txt' | 'readme';
 
@@ -137,21 +149,45 @@ export const GET = createFormatHandlerRoute<SitewideFormat, { format?: SitewideF
     responses: {
       200: {
         description: 'Sitewide content retrieved successfully in requested format',
+        schema: sitewideContentResponseSchema,
+        headers: {
+          'Content-Type': {
+            schema: { type: 'string' },
+            description: 'Content type (text/plain for llms formats, application/json for json/readme)',
+          },
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+          'X-Generated-By': {
+            schema: { type: 'string' },
+            description: 'Source of the response data',
+          },
+        },
+        example: '# Sitewide Content\n\n## Skills\n- Example Skill 1\n- Example Skill 2\n\n## Agents\n- Example Agent 1',
       },
       400: {
         description: 'Invalid format parameter',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Invalid format parameter',
+          message: 'Invalid format. Valid formats: llms, llms-txt, readme, json',
+        },
       },
       500: {
         description: 'Failed to generate sitewide export',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Failed to generate sitewide export',
+          message: 'An unexpected error occurred while generating sitewide content',
+        },
       },
     },
     summary: 'Get sitewide content in various formats',
     tags: ['content', 'export', 'sitewide'],
   },
   operation: 'ContentSitewideAPI',
-  querySchema: z.object({
-    format: sitewideFormatSchema,
-  }),
+  querySchema: sitewideContentQuerySchema,
   route: getVersionedRoute('content/sitewide'),
 });
 

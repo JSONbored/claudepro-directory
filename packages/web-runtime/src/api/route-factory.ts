@@ -152,10 +152,31 @@ export interface OpenAPIMetadata {
   tags?: string[];
   /** Operation ID (unique identifier for this operation) */
   operationId?: string;
-  /** Example responses (status code -> description) */
-  responses?: Record<number, { description: string; schema?: z.ZodSchema }>;
+  /** Example responses (status code -> response config) */
+  responses?: Record<
+    number,
+    {
+      description: string;
+      schema?: z.ZodSchema;
+      /** Response headers documentation */
+      headers?: Record<string, { schema: { type: string }; description: string }>;
+      /** Example response value */
+      example?: unknown;
+    }
+  >;
   /** Whether this endpoint is deprecated */
   deprecated?: boolean;
+  /** Security requirements for this operation */
+  security?: Array<Record<string, string[]>>;
+  /** External documentation links */
+  externalDocs?: { description: string; url: string };
+  /** Request body documentation */
+  requestBody?: {
+    /** Description of the request body */
+    description?: string;
+    /** Whether the request body is required */
+    required?: boolean;
+  };
 }
 
 /**

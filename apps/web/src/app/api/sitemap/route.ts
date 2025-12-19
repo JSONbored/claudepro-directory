@@ -33,6 +33,12 @@ import {
   createOptionsHandler as createApiOptionsHandler, createApiRoute, createFormatHandlerRoute, type FormatHandlerConfig, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { sitemapFormatSchema } from '@heyclaude/web-runtime/api/schemas';
+import {
+  errorResponseSchema,
+  indexNowResponseSchema,
+  sitemapJsonResponseSchema,
+  sitemapXmlResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { inngest } from '@heyclaude/web-runtime/inngest/client';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -42,6 +48,14 @@ import {
   xmlResponse,
 } from '@heyclaude/web-runtime/server/api-helpers';
 import { z } from 'zod';
+
+/**
+ * Query schema for sitemap API
+ * Exported for OpenAPI generation
+ */
+export const sitemapQuerySchema = z.object({
+  format: sitemapFormatSchema,
+});
 
 const INDEXNOW_API_KEY = getEnvVar('INDEXNOW_API_KEY');
 const INDEXNOW_TRIGGER_KEY = getEnvVar('INDEXNOW_TRIGGER_KEY');
@@ -175,18 +189,53 @@ export const GET = createFormatHandlerRoute<SitemapFormat, { format: SitemapForm
     responses: {
       200: {
         description: 'Sitemap generated successfully',
+        schema: z.union([sitemapXmlResponseSchema, sitemapJsonResponseSchema]),
+        headers: {
+          'Content-Type': {
+            schema: { type: 'string' },
+            description: 'Content type (application/xml for xml, application/json for json)',
+          },
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+          'X-Content-Source': {
+            schema: { type: 'string' },
+            description: 'Source of the sitemap content',
+          },
+          'X-Generated-By': {
+            schema: { type: 'string' },
+            description: 'Source of the response data',
+          },
+          'X-Robots-Tag': {
+            schema: { type: 'string' },
+            description: 'Robots meta tag directive',
+          },
+        },
+        example: '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://claudepro.directory/</loc><lastmod>2025-01-11</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url></urlset>',
+      },
+      400: {
+        description: 'Invalid format parameter',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Invalid format parameter',
+          message: 'Invalid format. Valid formats: xml, json',
+        },
       },
       500: {
         description: 'Sitemap generation failed',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Sitemap generation failed',
+          message: 'An unexpected error occurred while generating the sitemap',
+        },
       },
     },
     summary: 'Get sitemap in XML or JSON format',
     tags: ['sitemap', 'seo'],
   },
   operation: 'SitemapAPI',
-  querySchema: z.object({
-    format: sitemapFormatSchema,
-  }),
+  querySchema: sitemapQuerySchema,
   route: getVersionedRoute('sitemap'),
 });
 
@@ -327,15 +376,56 @@ export const POST = createApiRoute({
     description:
       'Submits site URLs to IndexNow for search engine indexing. Requires authentication via x-indexnow-trigger-key header.',
     operationId: 'submitIndexNow',
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      description: 'IndexNow submission request (no body required, authentication via header)',
+      required: false,
+    },
     responses: {
       200: {
         description: 'IndexNow submission enqueued successfully',
+        schema: indexNowResponseSchema,
+        headers: {
+          'X-RateLimit-Remaining': {
+            schema: { type: 'string' },
+            description: 'Remaining rate limit requests',
+          },
+        },
+        example: {
+          message: 'IndexNow submission enqueued',
+          ok: true,
+          submitted: 1234,
+        },
       },
       401: {
         description: 'Unauthorized - invalid trigger key',
+        schema: errorResponseSchema,
+        headers: {
+          'WWW-Authenticate': {
+            schema: { type: 'string' },
+            description: 'Authentication challenge',
+          },
+        },
+        example: {
+          error: 'Unauthorized',
+          message: 'Invalid trigger key',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while submitting to IndexNow',
+        },
       },
       503: {
         description: 'Service unavailable - IndexNow keys not configured',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Service unavailable',
+          message: 'IndexNow trigger key not configured',
+        },
       },
     },
     summary: 'Submit URLs to IndexNow',

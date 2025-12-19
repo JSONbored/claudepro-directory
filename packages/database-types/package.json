@@ -10,8 +10,8 @@
     "lint": "echo 'Skipping lint for generated types'"
   },
   "dependencies": {
-    "zod": "^4.2.0",
-    "decimal.js": "^10.4.3"
+    "decimal.js": "^10.6.0",
+    "zod": "^4.2.1"
   },
   "exports": {
     "./prisma": {
@@ -70,6 +70,11 @@
     },
     "./openapi/openapi.yaml": {
       "default": "./src/openapi/openapi.yaml"
+    },
+    "./api-client": {
+      "development": "./src/api-client/client.generated.ts",
+      "types": "./dist/api-client/client.generated.d.ts",
+      "default": "./src/api-client/client.generated.ts"
     },
     "./docs": {
       "default": "./docs/index.html"

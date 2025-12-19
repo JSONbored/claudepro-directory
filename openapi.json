@@ -3,7 +3,17 @@
   "info": {
     "title": "ClaudePro Directory API",
     "version": "1.1.0",
-    "description": "API documentation for ClaudePro Directory - A community-driven directory of Claude configurations"
+    "description": "API documentation for ClaudePro Directory - A community-driven directory of Claude configurations",
+    "contact": {
+      "name": "Claude Pro Directory",
+      "url": "https://claudepro.directory",
+      "email": "support@claudepro.directory"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "termsOfService": "https://claudepro.directory/terms"
   },
   "servers": [
     {
@@ -15,25 +25,352 @@
       "description": "Development"
     }
   ],
+  "tags": [
+    {
+      "name": "content",
+      "description": "Content-related endpoints for browsing and exporting Claude configurations"
+    },
+    {
+      "name": "search",
+      "description": "Search and discovery endpoints for finding Claude configurations"
+    },
+    {
+      "name": "bookmarks",
+      "description": "User bookmark management endpoints for saving favorite configurations"
+    },
+    {
+      "name": "company",
+      "description": "Company profile endpoints for viewing company information"
+    },
+    {
+      "name": "profiles",
+      "description": "Profile-related endpoints for user and company profiles"
+    },
+    {
+      "name": "feeds",
+      "description": "RSS and Atom feed endpoints for content syndication"
+    },
+    {
+      "name": "templates",
+      "description": "Content template endpoints for wizard and form generation"
+    },
+    {
+      "name": "trending",
+      "description": "Trending, popular, and recent content endpoints"
+    },
+    {
+      "name": "health",
+      "description": "Health check and monitoring endpoints for API status"
+    },
+    {
+      "name": "changelog",
+      "description": "Changelog endpoints for viewing and syncing release notes"
+    },
+    {
+      "name": "sitemap",
+      "description": "Sitemap generation endpoints for SEO"
+    },
+    {
+      "name": "stats",
+      "description": "Statistics and analytics endpoints"
+    },
+    {
+      "name": "flux",
+      "description": "Flux integration endpoints for external services"
+    },
+    {
+      "name": "inngest",
+      "description": "Inngest webhook endpoints for background job processing"
+    },
+    {
+      "name": "og",
+      "description": "Open Graph image generation endpoints for social media previews"
+    },
+    {
+      "name": "openapi",
+      "description": "OpenAPI specification endpoint for API documentation"
+    }
+  ],
   "paths": {
-    "/api/v1/templates": {
+    "/api/v1/sitemap": {
       "get": {
-        "summary": "Get content templates by category",
-        "description": "Fetches content templates by category for client-side consumption. Used by the wizard to load templates dynamically.",
+        "summary": "Get sitemap in XML or JSON format",
+        "description": "Generates XML or JSON sitemaps for search engines. Supports both XML (default) and JSON formats.",
         "tags": [
-          "content",
-          "templates"
+          "sitemap",
+          "seo"
         ],
-        "operationId": "getTemplates",
+        "operationId": "getSitemap",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "description": "Sitemap export format",
+              "example": "xml",
+              "enum": [
+                "xml",
+                "json"
+              ],
+              "default": "xml",
+              "type": "string"
+            },
+            "description": "Sitemap export format"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Templates retrieved successfully"
+            "description": "Sitemap generated successfully",
+            "headers": {
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (application/xml for xml, application/json for json)"
+              },
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Content-Source'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the sitemap content"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              },
+              "'X-Robots-Tag'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Robots meta tag directive"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"><url><loc>https://claudepro.directory/</loc><lastmod>2025-01-11</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url></urlset>"
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing category parameter"
+            "description": "Invalid format parameter",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid format parameter",
+                  "message": "Invalid format. Valid formats: xml, json"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Sitemap generation failed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Sitemap generation failed",
+                  "message": "An unexpected error occurred while generating the sitemap"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Submit URLs to IndexNow",
+        "description": "Submits site URLs to IndexNow for search engine indexing. Requires authentication via x-indexnow-trigger-key header.",
+        "tags": [
+          "sitemap",
+          "seo",
+          "indexnow"
+        ],
+        "operationId": "submitIndexNow",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "IndexNow submission enqueued successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "IndexNow submission enqueued",
+                  "ok": true,
+                  "submitted": 1234
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "description": "Response message",
+                      "type": "string"
+                    },
+                    "ok": {
+                      "description": "Operation success status",
+                      "type": "boolean"
+                    },
+                    "submitted": {
+                      "description": "Number of URLs submitted",
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "ok",
+                    "submitted"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized - invalid trigger key",
+            "headers": {
+              "'WWW-Authenticate'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Authentication challenge"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Unauthorized",
+                  "message": "Invalid trigger key"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while submitting to IndexNow"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable - IndexNow keys not configured",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Service unavailable",
+                  "message": "IndexNow trigger key not configured"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -105,38 +442,98 @@
         ],
         "responses": {
           "200": {
-            "description": "Trending content retrieved successfully"
+            "description": "Trending content retrieved successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              },
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "items": [
+                    {
+                      "id": "content-1",
+                      "title": "Example Content",
+                      "slug": "example-content",
+                      "category": "skills",
+                      "popularity_score": 95.5
+                    }
+                  ]
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid tab or category parameter"
+            "description": "Invalid tab or category parameter",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid tab or category parameter",
+                  "message": "Invalid tab. Valid tabs: trending, popular, recent"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/v1/status": {
-      "get": {
-        "summary": "Get API health status",
-        "description": "Returns the current health status of the API and database connections. Used for monitoring, uptime checks, and health dashboards.",
-        "tags": [
-          "health",
-          "monitoring"
-        ],
-        "operationId": "getApiStatus",
-        "responses": {
-          "200": {
-            "description": "API is healthy or degraded"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          },
-          "503": {
-            "description": "API is unhealthy"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while fetching trending content"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -151,15 +548,612 @@
           "jobs"
         ],
         "operationId": "search",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "description": "Maximum number of results to return (1-100)",
+              "example": 20,
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "integer"
+            },
+            "description": "Maximum number of results to return (1-100)"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "description": "Number of results to skip (pagination offset)",
+              "example": 0,
+              "minimum": 0,
+              "default": 0,
+              "type": "integer",
+              "maximum": 9007199254740991
+            },
+            "description": "Number of results to skip (pagination offset)"
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Search query string",
+              "example": "ai agents",
+              "default": "",
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 2048
+            },
+            "description": "Search query string"
+          },
+          {
+            "in": "query",
+            "name": "categories",
+            "schema": {
+              "description": "Comma-separated list of content categories to filter by",
+              "example": "agents,mcp",
+              "type": "string"
+            },
+            "description": "Comma-separated list of content categories to filter by"
+          },
+          {
+            "in": "query",
+            "name": "tags",
+            "schema": {
+              "description": "Comma-separated list of tags to filter by",
+              "example": "ai,automation",
+              "type": "string"
+            },
+            "description": "Comma-separated list of tags to filter by"
+          },
+          {
+            "in": "query",
+            "name": "authors",
+            "schema": {
+              "description": "Comma-separated list of author slugs to filter by",
+              "example": "user1,user2",
+              "type": "string"
+            },
+            "description": "Comma-separated list of author slugs to filter by"
+          },
+          {
+            "in": "query",
+            "name": "entities",
+            "schema": {
+              "description": "Entity types to include in search",
+              "example": [
+                "content",
+                "job"
+              ],
+              "type": "string"
+            },
+            "description": "Entity types to include in search"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "description": "Sort order for results",
+              "example": "relevance",
+              "default": "relevance",
+              "type": "string",
+              "enum": [
+                "relevance",
+                "popularity",
+                "newest",
+                "alphabetical"
+              ]
+            },
+            "description": "Sort order for results"
+          },
+          {
+            "in": "query",
+            "name": "job_category",
+            "schema": {
+              "description": "Job category filter",
+              "example": "engineering",
+              "type": "string",
+              "enum": [
+                "engineering",
+                "design",
+                "product",
+                "marketing",
+                "sales",
+                "support",
+                "research",
+                "data",
+                "operations",
+                "leadership",
+                "consulting",
+                "education",
+                "other"
+              ]
+            },
+            "description": "Job category filter"
+          },
+          {
+            "in": "query",
+            "name": "job_employment",
+            "schema": {
+              "description": "Job employment type filter",
+              "example": "full-time",
+              "type": "string",
+              "enum": [
+                "full-time",
+                "part-time",
+                "contract",
+                "freelance",
+                "internship"
+              ]
+            },
+            "description": "Job employment type filter"
+          },
+          {
+            "in": "query",
+            "name": "job_experience",
+            "schema": {
+              "description": "Job experience level filter",
+              "example": "mid-level",
+              "type": "string"
+            },
+            "description": "Job experience level filter"
+          },
+          {
+            "in": "query",
+            "name": "job_remote",
+            "schema": {
+              "description": "Filter for remote jobs (true/false)",
+              "example": true,
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "Filter for remote jobs (true/false)"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Search results retrieved successfully"
+            "description": "Search results retrieved successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              },
+              "'X-RateLimit-Reset'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Rate limit reset timestamp"
+              },
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "query": "ai agents",
+                  "results": [
+                    {
+                      "id": "content-1",
+                      "title": "AI Agent Framework",
+                      "slug": "ai-agent-framework",
+                      "category": "agents",
+                      "description": "A comprehensive framework for building AI agents"
+                    }
+                  ],
+                  "filters": {
+                    "sort": "relevance",
+                    "categories": [
+                      "agents"
+                    ],
+                    "tags": [
+                      "ai",
+                      "automation"
+                    ]
+                  },
+                  "pagination": {
+                    "total": 42,
+                    "limit": 20,
+                    "offset": 0,
+                    "hasMore": true
+                  },
+                  "searchType": "content"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "filters": {
+                      "description": "Applied search filters",
+                      "type": "object",
+                      "properties": {
+                        "sort": {
+                          "description": "Sort order",
+                          "type": "string"
+                        },
+                        "categories": {
+                          "description": "Filtered categories",
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "tags": {
+                          "description": "Filtered tags",
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "authors": {
+                          "description": "Filtered authors",
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "entities": {
+                          "description": "Filtered entities",
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "job_category": {
+                          "description": "Job category filter",
+                          "type": "string"
+                        },
+                        "job_employment": {
+                          "description": "Job employment type filter",
+                          "type": "string"
+                        },
+                        "job_experience": {
+                          "description": "Job experience level filter",
+                          "type": "string"
+                        },
+                        "job_remote": {
+                          "description": "Job remote filter",
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "pagination": {
+                      "description": "Pagination metadata",
+                      "type": "object",
+                      "properties": {
+                        "hasMore": {
+                          "description": "Whether more results are available",
+                          "type": "boolean"
+                        },
+                        "limit": {
+                          "description": "Number of results per page",
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "offset": {
+                          "description": "Current page offset",
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "total": {
+                          "description": "Total number of results",
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "hasMore",
+                        "limit",
+                        "offset",
+                        "total"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "query": {
+                      "description": "Search query string",
+                      "type": "string"
+                    },
+                    "results": {
+                      "description": "Search results",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "description": "Result item ID",
+                            "type": "string"
+                          },
+                          "title": {
+                            "description": "Result item title",
+                            "type": "string"
+                          },
+                          "slug": {
+                            "description": "Result item slug",
+                            "type": "string"
+                          },
+                          "category": {
+                            "description": "Result item category",
+                            "type": "string"
+                          },
+                          "description": {
+                            "description": "Result item description",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id"
+                        ],
+                        "additionalProperties": {}
+                      }
+                    },
+                    "searchType": {
+                      "description": "Type of search performed",
+                      "type": "string",
+                      "enum": [
+                        "content",
+                        "jobs",
+                        "unified"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "filters",
+                    "pagination",
+                    "query",
+                    "results",
+                    "searchType"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid query parameters"
+            "description": "Invalid query parameters",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid query parameters",
+                  "message": "Invalid categories. Valid values: agents, mcp, rules, commands, hooks, statuslines, skills, collections, guides, jobs, changelog"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while processing the search request"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/templates": {
+      "get": {
+        "summary": "Get content templates by category",
+        "description": "Fetches content templates by category for client-side consumption. Used by the wizard to load templates dynamically.",
+        "tags": [
+          "content",
+          "templates"
+        ],
+        "operationId": "getTemplates",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "description": "Content category filter (use \"all\" or omit for all categories)",
+              "example": "skills",
+              "type": "string"
+            },
+            "description": "Content category filter (use \"all\" or omit for all categories)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Templates retrieved successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              },
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "category": "skills",
+                  "count": 25,
+                  "templates": [
+                    {
+                      "id": "template-1",
+                      "title": "Example Template",
+                      "description": "An example template for demonstration",
+                      "category": "skills"
+                    }
+                  ]
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "description": "Operation success status",
+                      "type": "boolean"
+                    },
+                    "category": {
+                      "description": "Template category",
+                      "type": "string"
+                    },
+                    "count": {
+                      "description": "Number of templates",
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "templates": {
+                      "description": "Template items",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "description": "Template ID",
+                            "type": "string"
+                          },
+                          "title": {
+                            "description": "Template title",
+                            "type": "string"
+                          },
+                          "description": {
+                            "description": "Template description",
+                            "type": "string"
+                          },
+                          "category": {
+                            "description": "Template category",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "category"
+                        ],
+                        "additionalProperties": {}
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "category",
+                    "count",
+                    "templates"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing category parameter",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid category parameter",
+                  "message": "Category parameter is required and cannot be \"all\". Valid categories: agents, mcp, rules, commands, hooks, statuslines, skills, collections, guides, jobs, changelog"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while fetching templates"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -174,7 +1168,14 @@
           "webhook"
         ],
         "operationId": "revalidate",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
+          "description": "Revalidation request with secret token, optional category/slug for path revalidation, and optional tags for cache invalidation",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -206,65 +1207,159 @@
         },
         "responses": {
           "200": {
-            "description": "Revalidation completed successfully"
+            "description": "Revalidation completed successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "revalidated": true,
+                  "paths": [
+                    "/",
+                    "/agents",
+                    "/agents/code-reviewer"
+                  ],
+                  "tags": [
+                    "content",
+                    "homepage",
+                    "trending"
+                  ],
+                  "timestamp": "2025-01-11T12:00:00Z"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "revalidated": {
+                      "description": "Revalidation success status",
+                      "type": "boolean"
+                    },
+                    "paths": {
+                      "description": "Revalidated paths",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "tags": {
+                      "description": "Invalidated cache tags",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "timestamp": {
+                      "description": "Revalidation timestamp (ISO 8601)",
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    }
+                  },
+                  "required": [
+                    "revalidated",
+                    "timestamp"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid request payload or missing category/tags"
+            "description": "Invalid request payload or missing category/tags",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid request payload",
+                  "message": "Missing category or tags in webhook payload"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "401": {
-            "description": "Unauthorized - invalid secret"
+            "description": "Unauthorized - invalid secret",
+            "headers": {
+              "'WWW-Authenticate'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Authentication challenge"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Unauthorized",
+                  "message": "Missing secret parameter"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/v1/sitemap": {
-      "get": {
-        "summary": "Get sitemap in XML or JSON format",
-        "description": "Generates XML or JSON sitemaps for search engines. Supports both XML (default) and JSON formats.",
-        "tags": [
-          "sitemap",
-          "seo"
-        ],
-        "operationId": "getSitemap",
-        "responses": {
-          "200": {
-            "description": "Sitemap generated successfully"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "500": {
-            "description": "Sitemap generation failed"
-          }
-        }
-      },
-      "post": {
-        "summary": "Submit URLs to IndexNow",
-        "description": "Submits site URLs to IndexNow for search engine indexing. Requires authentication via x-indexnow-trigger-key header.",
-        "tags": [
-          "sitemap",
-          "seo",
-          "indexnow"
-        ],
-        "operationId": "submitIndexNow",
-        "responses": {
-          "200": {
-            "description": "IndexNow submission enqueued successfully"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized - invalid trigger key"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          },
-          "503": {
-            "description": "Service unavailable - IndexNow keys not configured"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred during revalidation"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -280,13 +1375,66 @@
         "operationId": "inngestIntrospection",
         "responses": {
           "200": {
-            "description": "Function definitions returned successfully"
+            "description": "Function definitions returned successfully",
+            "headers": {
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "functions": [
+                    {
+                      "id": "changelog/notify",
+                      "name": "changelog/notify",
+                      "triggers": [
+                        {
+                          "event": "changelog/sync"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "schema": {
+                  "description": "Inngest function response (varies by function)"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while processing Inngest request"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       },
@@ -300,13 +1448,60 @@
         "operationId": "inngestInvoke",
         "responses": {
           "200": {
-            "description": "Function executed successfully"
+            "description": "Function executed successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "functionId": "changelog/notify",
+                  "result": {
+                    "notified": true
+                  }
+                },
+                "schema": {
+                  "description": "Inngest function response (varies by function)"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while executing Inngest function"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       },
@@ -320,13 +1515,57 @@
         "operationId": "inngestSync",
         "responses": {
           "200": {
-            "description": "Sync completed successfully"
+            "description": "Sync completed successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "synced": true
+                },
+                "schema": {
+                  "description": "Inngest function response (varies by function)"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while syncing Inngest functions"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -377,13 +1616,259 @@
         ],
         "responses": {
           "200": {
-            "description": "Feed generated successfully (RSS or Atom XML)"
+            "description": "Feed generated successfully (RSS or Atom XML)",
+            "headers": {
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (application/rss+xml or application/atom+xml)"
+              },
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Content-Source'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the feed content"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              },
+              "'X-Robots-Tag'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Robots meta tag directive"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><rss version=\"2.0\"><channel><title>Claude Pro Directory</title><link>https://claudepro.directory</link><description>Community-driven directory of Claude configurations</description><item><title>Example Content</title><link>https://claudepro.directory/skills/example</link><description>Example content description</description></item></channel></rss>",
+                "schema": {
+                  "description": "RSS or Atom feed XML content",
+                  "type": "string"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid type or category parameter"
+            "description": "Invalid type or category parameter",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid type or category parameter",
+                  "message": "Invalid feed type. Valid types: rss, atom"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while generating the feed"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/status": {
+      "get": {
+        "summary": "Get API health status",
+        "description": "Returns the current health status of the API and database connections. Used for monitoring, uptime checks, and health dashboards.",
+        "tags": [
+          "health",
+          "monitoring"
+        ],
+        "operationId": "getApiStatus",
+        "responses": {
+          "200": {
+            "description": "API is healthy or degraded",
+            "headers": {
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "healthy",
+                  "database": "connected",
+                  "timestamp": "2025-01-11T12:00:00Z",
+                  "version": "1.1.0"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "description": "API health status",
+                      "type": "string",
+                      "enum": [
+                        "healthy",
+                        "degraded",
+                        "unhealthy"
+                      ]
+                    },
+                    "database": {
+                      "description": "Database connection status",
+                      "type": "string"
+                    },
+                    "timestamp": {
+                      "description": "Status check timestamp (ISO 8601)",
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    },
+                    "version": {
+                      "description": "API version",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while checking API status"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "API is unhealthy",
+            "headers": {
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "unhealthy",
+                  "database": "disconnected",
+                  "timestamp": "2025-01-11T12:00:00Z"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "description": "API health status",
+                      "type": "string",
+                      "enum": [
+                        "healthy",
+                        "degraded",
+                        "unhealthy"
+                      ]
+                    },
+                    "database": {
+                      "description": "Database connection status",
+                      "type": "string"
+                    },
+                    "timestamp": {
+                      "description": "Status check timestamp (ISO 8601)",
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    },
+                    "version": {
+                      "description": "API version",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": {}
+                }
+              }
+            }
           }
         }
       }
@@ -397,18 +1882,278 @@
           "profiles"
         ],
         "operationId": "getCompanyProfile",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "slug",
+            "schema": {
+              "description": "Company slug identifier",
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[a-z0-9-]+$"
+            },
+            "required": true,
+            "description": "Company slug identifier"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Company profile retrieved successfully"
+            "description": "Company profile retrieved successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              },
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "123e4567-e89b-12d3-a456-426614174000",
+                  "name": "Acme Corp",
+                  "slug": "acme-corp",
+                  "description": "A leading technology company",
+                  "website": "https://acme.com",
+                  "logo_url": "https://acme.com/logo.png"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "description": "Company ID",
+                      "type": "string"
+                    },
+                    "name": {
+                      "description": "Company name",
+                      "type": "string"
+                    },
+                    "slug": {
+                      "description": "Company slug",
+                      "type": "string"
+                    },
+                    "description": {
+                      "description": "Company description",
+                      "type": "string"
+                    },
+                    "website": {
+                      "description": "Company website URL",
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "logo_url": {
+                      "description": "Company logo URL",
+                      "format": "uri",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "slug"
+                  ],
+                  "additionalProperties": {}
+                }
+              }
+            }
           },
           "400": {
-            "description": "Missing or invalid slug parameter"
+            "description": "Missing or invalid slug parameter",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Missing or invalid slug parameter",
+                  "message": "Slug parameter is required and must be a valid slug format"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "404": {
-            "description": "Company not found"
+            "description": "Company not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Company not found",
+                  "message": "No company found with slug \"invalid-slug\""
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while fetching company profile"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/openapi.json": {
+      "get": {
+        "summary": "Get OpenAPI specification",
+        "description": "Serves the generated OpenAPI specification JSON file. Used by API documentation tools like Scalar API Reference.",
+        "tags": [
+          "openapi",
+          "documentation"
+        ],
+        "operationId": "getOpenApiSpec",
+        "responses": {
+          "200": {
+            "description": "OpenAPI specification retrieved successfully",
+            "headers": {
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (application/json)"
+              },
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "openapi": "3.1.0",
+                  "info": {
+                    "title": "ClaudePro Directory API",
+                    "version": "1.1.0",
+                    "description": "API documentation for ClaudePro Directory"
+                  },
+                  "paths": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "OpenAPI specification not found. Run: pnpm generate:openapi",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "OpenAPI specification not found",
+                  "message": "OpenAPI specification not found. Run: pnpm generate:openapi"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to load OpenAPI specification",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Failed to load OpenAPI specification",
+                  "message": "An unexpected error occurred while loading the OpenAPI specification"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -424,13 +2169,128 @@
         "operationId": "getSearchFacets",
         "responses": {
           "200": {
-            "description": "Search facets retrieved successfully"
+            "description": "Search facets retrieved successfully",
+            "headers": {
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "facets": [
+                    {
+                      "category": "skills",
+                      "content_count": 150,
+                      "tags": [
+                        "javascript",
+                        "typescript",
+                        "react"
+                      ],
+                      "authors": [
+                        "user1",
+                        "user2"
+                      ]
+                    },
+                    {
+                      "category": "agents",
+                      "content_count": 75,
+                      "tags": [
+                        "ai",
+                        "automation",
+                        "llm"
+                      ],
+                      "authors": [
+                        "user3"
+                      ]
+                    }
+                  ]
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "facets": {
+                      "description": "Available search facets",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "category": {
+                            "description": "Category name",
+                            "type": "string"
+                          },
+                          "content_count": {
+                            "description": "Number of content items in this category",
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "tags": {
+                            "description": "Available tags",
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "authors": {
+                            "description": "Available authors",
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "facets"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while fetching search facets"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -473,13 +2333,137 @@
         ],
         "responses": {
           "200": {
-            "description": "Autocomplete suggestions retrieved successfully"
+            "description": "Autocomplete suggestions retrieved successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              },
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "query": "react",
+                  "suggestions": [
+                    {
+                      "text": "react hooks",
+                      "search_count": 150,
+                      "is_popular": true
+                    },
+                    {
+                      "text": "react native",
+                      "search_count": 120,
+                      "is_popular": false
+                    }
+                  ]
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "query": {
+                      "description": "Search query",
+                      "type": "string"
+                    },
+                    "suggestions": {
+                      "description": "Autocomplete suggestions",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "text": {
+                            "description": "Suggestion text",
+                            "type": "string"
+                          },
+                          "search_count": {
+                            "description": "Number of searches for this suggestion",
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "is_popular": {
+                            "description": "Whether this suggestion is popular",
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "text"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "query",
+                    "suggestions"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid query parameters (query must be at least 2 characters)"
+            "description": "Invalid query parameters (query must be at least 2 characters)",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid query parameters",
+                  "message": "Query must be at least 2 characters"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while fetching autocomplete suggestions"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -493,6 +2477,38 @@
           "internal"
         ],
         "operationId": "forwardClientLogs",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "err": {},
+                  "level": {
+                    "type": "integer",
+                    "minimum": 10,
+                    "maximum": 60
+                  },
+                  "msg": {
+                    "type": "string"
+                  },
+                  "time": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "level",
+                  "msg",
+                  "time"
+                ],
+                "additionalProperties": {}
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Log forwarded successfully"
@@ -506,50 +2522,217 @@
         }
       }
     },
-    "/api/v1/flux/[...path]": {
+    "/api/v1/flux/{...path}": {
       "get": {
         "summary": "Flux catch-all GET handler",
-        "description": "Routes GET requests to appropriate Flux handlers based on path segments (e.g., /api/flux/email/count).",
+        "description": "Routes GET requests to appropriate Flux handlers based on path segments (e.g., /api/flux/email/count). Supports dynamic routing for internal services.",
         "tags": [
           "flux",
           "internal"
         ],
         "operationId": "fluxGet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "...path",
+            "schema": {
+              "description": "Path parameter: ...path",
+              "type": "string"
+            },
+            "required": true,
+            "description": "Path parameter: ...path"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Request routed successfully"
+            "description": "Request routed successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              },
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "count": 1234
+                },
+                "schema": {
+                  "description": "Flux handler response (varies by handler)"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
           },
           "404": {
-            "description": "Route not found"
+            "description": "Route not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Route not found",
+                  "message": "No Flux handler found for path: invalid/path"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while routing Flux request"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       },
       "post": {
         "summary": "Flux catch-all POST handler",
-        "description": "Routes POST requests to appropriate Flux handlers based on path segments (e.g., /api/flux/discord/direct).",
+        "description": "Routes POST requests to appropriate Flux handlers based on path segments (e.g., /api/flux/discord/direct). Supports dynamic routing for internal services.",
         "tags": [
           "flux",
           "internal"
         ],
         "operationId": "fluxPost",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "...path",
+            "schema": {
+              "description": "Path parameter: ...path",
+              "type": "string"
+            },
+            "required": true,
+            "description": "Path parameter: ...path"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Request routed successfully"
+            "description": "Request routed successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Discord notification sent"
+                },
+                "schema": {
+                  "description": "Flux handler response (varies by handler)"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
           },
           "404": {
-            "description": "Route not found"
+            "description": "Route not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Route not found",
+                  "message": "No Flux handler found for path: invalid/path"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while routing Flux request"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -564,15 +2747,168 @@
           "sitewide"
         ],
         "operationId": "getSitewideContent",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "description": "Sitewide content export format",
+              "example": "llms",
+              "enum": [
+                "llms",
+                "llms-txt",
+                "readme",
+                "json"
+              ],
+              "default": "llms",
+              "type": "string"
+            },
+            "description": "Sitewide content export format"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Sitewide content retrieved successfully in requested format"
+            "description": "Sitewide content retrieved successfully in requested format",
+            "headers": {
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (text/plain for llms formats, application/json for json/readme)"
+              },
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": "# Sitewide Content\n\n## Skills\n- Example Skill 1\n- Example Skill 2\n\n## Agents\n- Example Agent 1",
+                "schema": {
+                  "anyOf": [
+                    {
+                      "description": "LLMs.txt format (plain text)",
+                      "type": "string"
+                    },
+                    {
+                      "description": "README format (JSON)",
+                      "type": "object",
+                      "properties": {
+                        "categories": {
+                          "description": "Content categories",
+                          "type": "array",
+                          "items": {}
+                        },
+                        "total_count": {
+                          "description": "Total content count",
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": {}
+                    },
+                    {
+                      "description": "JSON format (array of content)",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "description": "Content ID",
+                            "type": "string"
+                          },
+                          "title": {
+                            "description": "Content title",
+                            "type": "string"
+                          },
+                          "slug": {
+                            "description": "Content slug",
+                            "type": "string"
+                          },
+                          "category": {
+                            "description": "Content category",
+                            "type": "string"
+                          },
+                          "description": {
+                            "description": "Content description",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id"
+                        ],
+                        "additionalProperties": {}
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid format parameter"
+            "description": "Invalid format parameter",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid format parameter",
+                  "message": "Invalid format. Valid formats: llms, llms-txt, readme, json"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Failed to generate sitewide export"
+            "description": "Failed to generate sitewide export",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Failed to generate sitewide export",
+                  "message": "An unexpected error occurred while generating sitewide content"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -586,38 +2922,153 @@
           "pagination"
         ],
         "operationId": "getPaginatedContent",
-        "responses": {
-          "200": {
-            "description": "Paginated content retrieved successfully"
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "description": "Maximum number of results to return (1-100)",
+              "example": 20,
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "integer"
+            },
+            "description": "Maximum number of results to return (1-100)"
           },
-          "400": {
-            "description": "Invalid pagination or category parameters"
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "description": "Number of results to skip (pagination offset)",
+              "example": 0,
+              "minimum": 0,
+              "default": 0,
+              "type": "integer",
+              "maximum": 9007199254740991
+            },
+            "description": "Number of results to skip (pagination offset)"
           },
-          "500": {
-            "description": "Internal Server Error"
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "description": "Content category filter (use \"all\" or omit for all categories)",
+              "example": "skills",
+              "type": "string"
+            },
+            "description": "Content category filter (use \"all\" or omit for all categories)"
           }
-        }
-      }
-    },
-    "/api/v1/content/changelog": {
-      "get": {
-        "summary": "Get changelog in LLMs.txt format",
-        "description": "Returns the changelog in LLMs.txt format for AI/LLM consumption. Used for exporting changelog data in a standardized text format.",
-        "tags": [
-          "content",
-          "changelog",
-          "export"
         ],
-        "operationId": "getChangelogIndex",
         "responses": {
           "200": {
-            "description": "Changelog LLMs.txt content retrieved successfully"
+            "description": "Paginated content retrieved successfully",
+            "headers": {
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "description": "Content ID",
+                        "type": "string"
+                      },
+                      "title": {
+                        "description": "Content title",
+                        "type": "string"
+                      },
+                      "slug": {
+                        "description": "Content slug",
+                        "type": "string"
+                      },
+                      "category": {
+                        "description": "Content category",
+                        "type": "string"
+                      },
+                      "description": {
+                        "description": "Content description",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "additionalProperties": {}
+                  }
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid format parameter"
+            "description": "Invalid pagination or category parameters",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid pagination or category parameters",
+                  "message": "Limit must be between 1 and 100"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while fetching paginated content"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -634,69 +3085,209 @@
         "operationId": "getCategoryConfigs",
         "responses": {
           "200": {
-            "description": "Category configurations retrieved successfully"
+            "description": "Category configurations retrieved successfully",
+            "headers": {
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "category": {
+                        "description": "Category identifier",
+                        "type": "string"
+                      },
+                      "display_name": {
+                        "description": "Category display name",
+                        "type": "string"
+                      },
+                      "features": {
+                        "description": "Available features for this category",
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "metadata": {
+                        "description": "Category metadata",
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      }
+                    },
+                    "required": [
+                      "category"
+                    ],
+                    "additionalProperties": {}
+                  }
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while fetching category configurations"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
     },
-    "/api/v1/content/[category]": {
+    "/api/v1/content/changelog": {
       "get": {
-        "summary": "Get category content",
-        "description": "Returns category content in multiple formats (LLMs.txt or JSON). Supports filtering by content category with optimized caching.",
+        "summary": "Get changelog in LLMs.txt format",
+        "description": "Returns the changelog in LLMs.txt format for AI/LLM consumption. Used for exporting changelog data in a standardized text format.",
         "tags": [
           "content",
-          "categories",
+          "changelog",
           "export"
         ],
-        "operationId": "getCategoryContent",
-        "responses": {
-          "200": {
-            "description": "Category content retrieved successfully"
-          },
-          "400": {
-            "description": "Invalid category or format parameter"
-          },
-          "404": {
-            "description": "Category content not found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/v1/bookmarks/remove": {
-      "post": {
-        "summary": "Remove bookmark",
-        "description": "Removes a bookmark for the authenticated user. Requires authentication.",
-        "tags": [
-          "bookmarks",
-          "user"
-        ],
-        "operationId": "removeBookmark",
-        "security": [
+        "operationId": "getChangelogIndex",
+        "parameters": [
           {
-            "bearerAuth": []
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "description": "Changelog export format",
+              "example": "llms-changelog",
+              "enum": [
+                "llms-changelog"
+              ],
+              "default": "llms-changelog",
+              "type": "string"
+            },
+            "description": "Changelog export format"
           }
         ],
         "responses": {
           "200": {
-            "description": "Bookmark removed successfully"
+            "description": "Changelog LLMs.txt content retrieved successfully",
+            "headers": {
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (text/plain)"
+              },
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": "# Changelog\n\n## [1.0.0] - 2025-01-11\n- Added new feature\n- Fixed bug\n\n## [0.9.0] - 2025-01-10\n- Initial release",
+                "schema": {
+                  "description": "Changelog in LLMs.txt format",
+                  "type": "string"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid request body"
-          },
-          "401": {
-            "description": "Unauthorized - user not authenticated"
+            "description": "Invalid format parameter",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid format parameter",
+                  "message": "Invalid format. Valid format: llms-changelog"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while generating changelog"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -711,7 +3302,14 @@
           "webhook"
         ],
         "operationId": "syncChangelog",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
+          "description": "Changelog entry data including version, date, content, and optional metadata (tldr, whatChanged, sections, rawContent)",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -762,16 +3360,476 @@
         },
         "responses": {
           "200": {
-            "description": "Changelog entry synced successfully"
+            "description": "Changelog entry synced successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "id": "changelog-entry-123",
+                  "slug": "1-2-0-2025-12-07",
+                  "message": "Changelog entry synced successfully"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "description": "Sync operation success",
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "description": "Changelog entry ID",
+                      "type": "string"
+                    },
+                    "slug": {
+                      "description": "Changelog entry slug",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Success message",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "id",
+                    "slug",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid request body"
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid request body",
+                  "message": "Content is required"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "401": {
-            "description": "Unauthorized - invalid or missing Bearer token"
+            "description": "Unauthorized - invalid or missing Bearer token",
+            "headers": {
+              "'WWW-Authenticate'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Authentication challenge"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Unauthorized",
+                  "message": "Invalid or missing Bearer token"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while syncing changelog entry"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/content/{category}": {
+      "get": {
+        "summary": "Get category content",
+        "description": "Returns category content in multiple formats (LLMs.txt or JSON). Supports filtering by content category with optimized caching.",
+        "tags": [
+          "content",
+          "categories",
+          "export"
+        ],
+        "operationId": "getCategoryContent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "category",
+            "schema": {
+              "description": "Path parameter: category",
+              "type": "string"
+            },
+            "required": true,
+            "description": "Path parameter: category"
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "description": "Category content export format",
+              "example": "llms-category",
+              "enum": [
+                "llms-category",
+                "json"
+              ],
+              "default": "llms-category",
+              "type": "string"
+            },
+            "description": "Category content export format"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category content retrieved successfully",
+            "headers": {
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (text/plain for llms-category, application/json for json)"
+              },
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid category or format parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category content not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Category content not found",
+                  "message": "No content found for the specified category"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while fetching category content"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/bookmarks/remove": {
+      "post": {
+        "summary": "Remove bookmark",
+        "description": "Removes a bookmark for the authenticated user. Requires authentication.",
+        "tags": [
+          "bookmarks",
+          "user"
+        ],
+        "operationId": "removeBookmark",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Bookmark details including content slug and content type",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content_slug": {
+                    "type": "string"
+                  },
+                  "content_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "content_slug",
+                  "content_type"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bookmark removed successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "bookmark-123",
+                    "content_slug": "my-server",
+                    "content_type": "mcp"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "description": "Operation success status",
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "description": "Bookmark ID",
+                          "type": "string"
+                        },
+                        "content_slug": {
+                          "description": "Content slug",
+                          "type": "string"
+                        },
+                        "content_type": {
+                          "description": "Content type",
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid request body",
+                  "message": "content_slug is required and must be a string"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated",
+            "headers": {
+              "'WWW-Authenticate'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Authentication challenge"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Unauthorized",
+                  "message": "Authentication required. Please provide a valid JWT token."
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while removing the bookmark"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -790,23 +3848,184 @@
             "bearerAuth": []
           }
         ],
+        "requestBody": {
+          "description": "Bookmark details including content slug, content type, and optional notes",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content_slug": {
+                    "type": "string"
+                  },
+                  "content_type": {
+                    "type": "string"
+                  },
+                  "notes": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "content_slug",
+                  "content_type"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Bookmark added successfully"
+            "description": "Bookmark added successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "bookmark-123",
+                    "content_slug": "my-server",
+                    "content_type": "mcp",
+                    "notes": "Optional notes"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "description": "Operation success status",
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "description": "Bookmark ID",
+                          "type": "string"
+                        },
+                        "content_slug": {
+                          "description": "Content slug",
+                          "type": "string"
+                        },
+                        "content_type": {
+                          "description": "Content type",
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid request body"
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid request body",
+                  "message": "content_slug is required and must be a string"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "401": {
-            "description": "Unauthorized - user not authenticated"
+            "description": "Unauthorized - user not authenticated",
+            "headers": {
+              "'WWW-Authenticate'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Authentication challenge"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Unauthorized",
+                  "message": "Authentication required. Please provide a valid JWT token."
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while adding the bookmark"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
     },
-    "/api/v1/content/changelog/[slug]": {
+    "/api/v1/content/changelog/{slug}": {
       "get": {
         "summary": "Get changelog entry in LLMs.txt format",
         "description": "Returns a changelog entry as an LLMs-compliant plain-text file for the given slug. Validates the format query parameter (must be 'llms-entry').",
@@ -816,23 +4035,153 @@
           "export"
         ],
         "operationId": "getChangelogEntry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "description": "Path parameter: slug",
+              "type": "string"
+            },
+            "required": true,
+            "description": "Path parameter: slug"
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "description": "Changelog entry export format",
+              "example": "llms-entry",
+              "enum": [
+                "llms-entry"
+              ],
+              "default": "llms-entry",
+              "type": "string"
+            },
+            "description": "Changelog entry export format"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Changelog entry LLMs.txt content retrieved successfully"
+            "description": "Changelog entry LLMs.txt content retrieved successfully",
+            "headers": {
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (text/plain)"
+              },
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": "# Changelog Entry\n\n## [1.2.0] - 2025-12-07\n\n### Added\n- New feature X\n- New feature Y\n\n### Fixed\n- Bug fix A\n- Bug fix B",
+                "schema": {
+                  "description": "Changelog entry in LLMs.txt format",
+                  "type": "string"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid format parameter"
+            "description": "Invalid format parameter",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid format parameter",
+                  "message": "Invalid format. Valid format: llms-entry"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "404": {
-            "description": "Changelog entry not found"
+            "description": "Changelog entry not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Changelog entry not found",
+                  "message": "No changelog entry found with slug \"invalid-slug\""
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while generating changelog entry"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
     },
-    "/api/v1/content/[category]/[slug]": {
+    "/api/v1/content/{category}/{slug}": {
       "get": {
         "summary": "Get content detail in multiple formats",
         "description": "Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage). Supports various export options including metadata and footer inclusion.",
@@ -842,6 +4191,26 @@
         ],
         "operationId": "getContentDetail",
         "parameters": [
+          {
+            "in": "path",
+            "name": "category",
+            "schema": {
+              "description": "Path parameter: category",
+              "type": "string"
+            },
+            "required": true,
+            "description": "Path parameter: category"
+          },
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "description": "Path parameter: slug",
+              "type": "string"
+            },
+            "required": true,
+            "description": "Path parameter: slug"
+          },
           {
             "in": "query",
             "name": "format",
@@ -906,16 +4275,119 @@
         ],
         "responses": {
           "200": {
-            "description": "Content detail retrieved successfully"
+            "description": "Content detail retrieved successfully",
+            "headers": {
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (application/json for json, text/markdown for markdown, text/plain for llms, application/json for storage)"
+              },
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "content-1",
+                  "title": "Code Reviewer Agent",
+                  "slug": "code-reviewer",
+                  "category": "agents",
+                  "description": "An AI agent that reviews code for quality and best practices",
+                  "content": "Full content here..."
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid category, format, or query parameters"
+            "description": "Invalid category, format, or query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "404": {
-            "description": "Content not found"
+            "description": "Content not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Content not found",
+                  "message": "No content found with slug \"invalid-slug\" in category \"agents\""
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while fetching content detail"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }

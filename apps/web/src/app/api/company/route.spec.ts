@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { expectOpenApiResponse } from '../__helpers__/openapi-validation';
 
 /**
  * Comprehensive Company API Route E2E Tests
@@ -17,10 +18,13 @@ import { expect, test } from '@playwright/test';
 test.describe('GET /api/company', () => {
   test('should return company profile with valid slug', async ({ request }) => {
     // Use a test slug - adjust based on your test data
-    const response = await request.get('/api/company?slug=test-company');
+    const response = await request.get('/api/v1/company?slug=test-company');
 
     // If company exists, should return 200
     if (response.status() === 200) {
+      // Validate response matches OpenAPI spec
+      await expectOpenApiResponse(response, '/api/v1/company', 'GET');
+      
       const data = await response.json();
 
       // Validate response structure
@@ -34,7 +38,7 @@ test.describe('GET /api/company', () => {
   });
 
   test('should return 400 for missing slug parameter', async ({ request }) => {
-    const response = await request.get('/api/company');
+    const response = await request.get('/api/v1/company');
 
     expect(response.status()).toBe(400);
 
@@ -43,7 +47,7 @@ test.describe('GET /api/company', () => {
   });
 
   test('should return 400 for invalid slug format', async ({ request }) => {
-    const response = await request.get('/api/company?slug=Invalid Slug!');
+    const response = await request.get('/api/v1/company?slug=Invalid Slug!');
 
     expect(response.status()).toBe(400);
 

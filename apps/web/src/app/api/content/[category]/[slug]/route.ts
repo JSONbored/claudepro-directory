@@ -28,6 +28,11 @@ import {
   createOptionsHandler as createApiOptionsHandler, createFormatHandlerRoute, type FormatHandlerConfig, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { contentDetailQuerySchema } from '@heyclaude/web-runtime/api/schemas';
+import {
+  changelogResponseSchema,
+  contentDetailResponseSchema,
+  errorResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import {
   getOnlyCorsHeaders,
@@ -37,6 +42,7 @@ import {
   textResponse,
 } from '@heyclaude/web-runtime/server/api-helpers';
 import { notFoundResponse } from '@heyclaude/web-runtime/server/not-found-response';
+import { z } from 'zod';
 import {
   isValidCategory,
   VALID_CATEGORIES,
@@ -436,12 +442,65 @@ export const GET = createFormatHandlerRoute<ContentDetailFormat, ContentDetailQu
     responses: {
       200: {
         description: 'Content detail retrieved successfully',
+        schema: z.union([
+          contentDetailResponseSchema,
+          changelogResponseSchema,
+          z.string().describe('Markdown or LLMs.txt format (plain text)'),
+          z.object({
+            bucket: z.string(),
+            category: z.string(),
+            download_url: z.string().url(),
+            note: z.string(),
+            object_path: z.string(),
+            slug: z.string(),
+          }).describe('Storage metadata format'),
+        ]),
+        headers: {
+          'Content-Type': {
+            schema: { type: 'string' },
+            description: 'Content type (application/json for json, text/markdown for markdown, text/plain for llms, application/json for storage)',
+          },
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+          'X-Generated-By': {
+            schema: { type: 'string' },
+            description: 'Source of the response data',
+          },
+        },
+        example: {
+          id: 'content-1',
+          title: 'Code Reviewer Agent',
+          slug: 'code-reviewer',
+          category: 'agents',
+          description: 'An AI agent that reviews code for quality and best practices',
+          content: 'Full content here...',
+        },
       },
       400: {
         description: 'Invalid category, format, or query parameters',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Invalid category, format, or query parameters',
+          message: `Invalid category 'invalid'. Valid categories: ${VALID_CATEGORIES.join(', ')}`,
+        },
       },
       404: {
         description: 'Content not found',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Content not found',
+          message: 'No content found with slug "invalid-slug" in category "agents"',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while fetching content detail',
+        },
       },
     },
     summary: 'Get content detail in multiple formats',

@@ -12,8 +12,14 @@ import {
   createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { trendingQuerySchema } from '@heyclaude/web-runtime/api/schemas';
+import {
+  errorResponseSchema,
+  trendingPageResponseSchema,
+  trendingSidebarResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { z } from 'zod';
 
 type ContentCategory = content_category;
 
@@ -66,9 +72,48 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'Trending content retrieved successfully',
+        schema: z.union([trendingPageResponseSchema, trendingSidebarResponseSchema]),
+        headers: {
+          'X-RateLimit-Remaining': {
+            schema: { type: 'string' },
+            description: 'Remaining rate limit requests',
+          },
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+          'X-Generated-By': {
+            schema: { type: 'string' },
+            description: 'Source of the response data',
+          },
+        },
+        example: {
+          items: [
+            {
+              id: 'content-1',
+              title: 'Example Content',
+              slug: 'example-content',
+              category: 'skills',
+              popularity_score: 95.5,
+            },
+          ],
+        },
       },
       400: {
         description: 'Invalid tab or category parameter',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Invalid tab or category parameter',
+          message: 'Invalid tab. Valid tabs: trending, popular, recent',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while fetching trending content',
+        },
       },
     },
     summary: 'Get trending, popular, or recent content',

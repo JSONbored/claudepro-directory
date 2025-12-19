@@ -134,7 +134,10 @@ function createLoggerInstance(): pino.Logger {
             // Performance: Pino batches logs automatically, so this is efficient
             // Security: Redaction happens before transmit, so no sensitive data sent
             // Note: transmit.level: 'warn' already filters to warn (40) and above
-            fetch('/api/logs/client', {
+            // Use /api/v1/logs/client for versioned API
+            // Note: Using fetch directly here for fire-and-forget performance
+            // The generated client adds overhead we don't need for logging
+            fetch('/api/v1/logs/client', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

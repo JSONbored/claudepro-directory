@@ -83,23 +83,14 @@ async function clearNewsletterOptInCookie() {
 
   const cookieStoreApi = (globalThis as WindowWithCookieStore).cookieStore;
   if (cookieStoreApi?.delete) {
+    // Modern Cookie Store API (preferred)
     await cookieStoreApi.delete(NEWSLETTER_OPT_IN_COOKIE);
     return;
   }
 
-  const response = await fetch('/api/newsletter-opt-in/clear', {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to clear ${NEWSLETTER_OPT_IN_COOKIE} cookie: ${response.status} ${response.statusText}`
-    );
-  }
+  // Fallback: Use document.cookie to clear the cookie directly
+  // This is more reliable than calling a non-existent API route
+  document.cookie = `${NEWSLETTER_OPT_IN_COOKIE}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax`;
 }
 
 import type { announcementsModel } from '@heyclaude/data-layer/prisma';

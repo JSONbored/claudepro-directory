@@ -28,8 +28,12 @@ import {
   createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { searchAutocompleteQuerySchema } from '@heyclaude/web-runtime/api/schemas';
+import {
+  errorResponseSchema,
+  searchAutocompleteResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
-import { getWithAuthCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 
 /**
  * GET /api/search/autocomplete - Get search autocomplete suggestions
@@ -42,7 +46,7 @@ import { getWithAuthCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/ser
 export const GET = createCachedApiRoute({
   cacheLife: 'short', // 15min stale, 5min revalidate, 2hr expire
   cacheTags: (query) => ['search-autocomplete', `search-autocomplete-${query.q}`],
-  cors: 'auth',
+  cors: 'anon',
   method: 'GET',
   openapi: {
     description:
@@ -51,9 +55,48 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'Autocomplete suggestions retrieved successfully',
+        schema: searchAutocompleteResponseSchema,
+        headers: {
+          'X-RateLimit-Remaining': {
+            schema: { type: 'string' },
+            description: 'Remaining rate limit requests',
+          },
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+        },
+        example: {
+          query: 'react',
+          suggestions: [
+            {
+              text: 'react hooks',
+              search_count: 150,
+              is_popular: true,
+            },
+            {
+              text: 'react native',
+              search_count: 120,
+              is_popular: false,
+            },
+          ],
+        },
       },
       400: {
         description: 'Invalid query parameters (query must be at least 2 characters)',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Invalid query parameters',
+          message: 'Query must be at least 2 characters',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while fetching autocomplete suggestions',
+        },
       },
     },
     summary: 'Get search autocomplete suggestions',
@@ -86,7 +129,7 @@ export const GET = createCachedApiRoute({
         suggestions,
       },
       200,
-      getWithAuthCorsHeaders
+      getOnlyCorsHeaders
     );
   },
   route: getVersionedRoute('search/autocomplete'),

@@ -1,0 +1,189 @@
+#!/usr/bin/env tsx
+
+/**
+ * API Client Generator
+ *
+ * Generates TypeScript client from OpenAPI spec using openapi-zod-client.
+ * The generated client provides type-safe API calls with Zod validation.
+ *
+ * Output: packages/database-types/src/api-client/client.generated.ts
+ */
+
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Calculate PROJECT_ROOT: from packages/generators/src/commands/ -> project root
+let PROJECT_ROOT = join(__dirname, '../../../../');
+if (!existsSync(join(PROJECT_ROOT, 'apps/web'))) {
+  PROJECT_ROOT = join(__dirname, '../../../../../');
+}
+if (!existsSync(join(PROJECT_ROOT, 'apps/web'))) {
+  PROJECT_ROOT = process.cwd();
+}
+
+const OPENAPI_JSON_PATH = join(PROJECT_ROOT, 'openapi.json');
+const OUTPUT_PATH = join(PROJECT_ROOT, 'packages/database-types/src/api-client/client.generated.ts');
+
+/**
+ * Generate TypeScript client from OpenAPI spec
+ */
+export async function generateApiClient(): Promise<void> {
+  // Verify openapi.json exists
+  if (!existsSync(OPENAPI_JSON_PATH)) {
+    console.warn(
+      `⚠️  OpenAPI spec not found at ${OPENAPI_JSON_PATH}. Generating it now...`
+    );
+    // Try to generate OpenAPI spec first
+    try {
+      const { execSync } = await import('node:child_process');
+      execSync('pnpm generate:openapi', {
+        cwd: PROJECT_ROOT,
+        stdio: 'inherit',
+      });
+    } catch (error) {
+      throw new Error(
+        `OpenAPI spec not found and could not generate it. Run 'pnpm generate:openapi' first.`
+      );
+    }
+  }
+
+  console.log('📦 Generating TypeScript API client from OpenAPI spec...');
+  console.log(`   Input: ${OPENAPI_JSON_PATH}`);
+  console.log(`   Output: ${OUTPUT_PATH}`);
+
+  try {
+    // Use openapi-zod-client CLI to generate client
+    // The CLI generates a client with Zod validation using zodios
+    // Use spawn with proper argument array to handle paths with spaces
+    const { spawnSync } = await import('node:child_process');
+    
+    const args = [
+      'openapi-zod-client',
+      OPENAPI_JSON_PATH,
+      '-o',
+      OUTPUT_PATH,
+      '--with-docs',
+      '--with-description',
+      '--export-types',
+      '--base-url',
+      '/api/v1',
+    ];
+    
+    const result = spawnSync('npx', args, {
+      cwd: PROJECT_ROOT,
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        NODE_OPTIONS: '--no-warnings',
+      },
+      shell: false, // Don't use shell - pass args directly
+    });
+    
+    if (result.error) {
+      throw result.error;
+    }
+    
+    if (result.status !== 0) {
+      throw new Error(`openapi-zod-client exited with code ${result.status}`);
+    }
+
+    // Read generated file and fix issues
+    let generatedContent = readFileSync(OUTPUT_PATH, 'utf-8');
+    
+    // Fix: openapi-zod-client doesn't escape quotes in .describe() calls
+    // Pattern: .describe("text with "quotes" inside")
+    // TypeScript needs: .describe("text with \"quotes\" inside")
+    // Fix: Use a character-by-character approach to properly handle nested quotes
+    let fixedContent = '';
+    let i = 0;
+    while (i < generatedContent.length) {
+      const describeStart = generatedContent.indexOf('.describe("', i);
+      if (describeStart === -1) {
+        fixedContent += generatedContent.substring(i);
+        break;
+      }
+      
+      // Add everything before the .describe("
+      fixedContent += generatedContent.substring(i, describeStart + '.describe("'.length);
+      
+      // Find the closing ")" by looking for quote followed by )
+      let j = describeStart + '.describe("'.length;
+      const descriptionStart = j;
+      
+      while (j < generatedContent.length) {
+        if (generatedContent[j] === '"' && generatedContent[j + 1] === ')') {
+          // Found closing quote - escape all quotes in the description
+          const description = generatedContent.substring(descriptionStart, j);
+          const escaped = description.replace(/"/g, '\\"');
+          fixedContent += escaped + '")';
+          j += 2; // Skip " and )
+          break;
+        }
+        j++;
+      }
+      
+      i = j;
+    }
+    
+    generatedContent = fixedContent;
+    
+    // Fix: openapi-zod-client generates z.record() with only 1 argument (value schema)
+    // Zod requires 2 arguments: key schema and value schema
+    // Pattern: z.record(z.array(z.string()))
+    // Fix: z.record(z.string(), z.array(z.string()))
+    generatedContent = generatedContent.replace(
+      /z\.record\(([^,)]+)\)/g,
+      (match, valueSchema) => {
+        // Add default key schema (z.string()) when only value schema is provided
+        return `z.record(z.string(), ${valueSchema})`;
+      }
+    );
+    
+    // Add header comment
+    const header = `/**
+ * Generated API Client
+ *
+ * This file is auto-generated from openapi.json using openapi-zod-client.
+ * DO NOT EDIT THIS FILE MANUALLY.
+ *
+ * To regenerate:
+ *   1. Run: pnpm generate:openapi
+ *   2. Run: pnpm generate:api-client
+ *
+ * @generated
+ */
+
+`;
+
+    // Only add header if it doesn't already exist
+    if (!generatedContent.includes('@generated')) {
+      generatedContent = header + generatedContent;
+    }
+    
+    // Write the fixed content
+    writeFileSync(OUTPUT_PATH, generatedContent, 'utf-8');
+
+    console.log('✅ API client generated successfully!');
+    console.log(`   Location: ${OUTPUT_PATH}`);
+  } catch (error) {
+    console.error('❌ Failed to generate API client:', error);
+    throw error;
+  }
+}
+
+// Run if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  generateApiClient()
+    .then(() => {
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('💥 API client generation failed:', error);
+      process.exit(1);
+    });
+}

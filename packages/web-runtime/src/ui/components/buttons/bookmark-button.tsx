@@ -19,14 +19,14 @@
  *
  * @remarks
  * - Requires authentication (shows sign-in prompt if not authenticated)
- * - Persists bookmarks to database via API routes (/api/bookmarks/add, /api/bookmarks/remove)
+ * - Persists bookmarks to database via API routes (/api/v1/bookmarks/add, /api/v1/bookmarks/remove)
  * - Shows confetti celebration on bookmark add (if enabled in config)
  * - Tracks bookmark events with analytics
  * - Displays loading spinner during async operations
  * - Automatically refreshes router after state change
  *
- * @see /api/bookmarks/add API route for adding bookmarks
- * @see /api/bookmarks/remove API route for removing bookmarks
+ * @see /api/v1/bookmarks/add API route for adding bookmarks
+ * @see /api/v1/bookmarks/remove API route for removing bookmarks
  */
 
 import { checkConfettiEnabled } from '../../../config/static-configs.ts';
@@ -135,47 +135,42 @@ export function BookmarkButton({
         if (isBookmarked) {
           await runLoggedAsync(
             async () => {
-              // Use API route instead of server action to avoid HMR issues
-              const response = await fetch('/api/bookmarks/remove', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  content_type: validatedCategory,
-                  content_slug: contentSlug,
-                }),
+              // Use generated API client instead of fetch
+              const { createApiClient } = await import('@heyclaude/database-types/api-client');
+              const client = createApiClient('/api/v1');
+
+              const result = await client.removeBookmark({
+                content_type: validatedCategory,
+                content_slug: contentSlug,
               });
 
-              if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-                throw new Error(errorData.error || `API returned ${response.status}`);
-              }
+              // Response schema is now properly extracted
+              if (result && typeof result === 'object' && 'data' in result && 
+                  result.data && typeof result.data === 'object' && 'success' in result.data) {
+                const success = result.data['success'];
+                if (success === true) {
+                  setIsBookmarked(false);
+                  toasts.success.bookmarkRemoved();
 
-              const result = await response.json();
-
-              if (result?.data?.success) {
-                setIsBookmarked(false);
-                toasts.success.bookmarkRemoved();
-
-                // Track bookmark removal (non-blocking)
-                pulse
-                  .bookmark({
-                    category: validatedCategory,
-                    slug: contentSlug,
-                    action: 'remove',
-                  })
-                  .catch((error) => {
-                    const normalized = normalizeError(
-                      error,
-                      'BookmarkButton: bookmark removal tracking failed'
-                    );
-                    logClientWarn('BookmarkButton: bookmark removal tracking failed', normalized, 'BookmarkButton.handleToggle', {
-                      component: 'BookmarkButton',
-                      contentType,
-                      contentSlug,
+                  // Track bookmark removal (non-blocking)
+                  pulse
+                    .bookmark({
+                      category: validatedCategory,
+                      slug: contentSlug,
+                      action: 'remove',
+                    })
+                    .catch((error) => {
+                      const normalized = normalizeError(
+                        error,
+                        'BookmarkButton: bookmark removal tracking failed'
+                      );
+                      logClientWarn('BookmarkButton: bookmark removal tracking failed', normalized, 'BookmarkButton.handleToggle', {
+                        component: 'BookmarkButton',
+                        contentType,
+                        contentSlug,
+                      });
                     });
-                  });
+                }
               }
             },
             {
@@ -186,53 +181,48 @@ export function BookmarkButton({
         } else {
           await runLoggedAsync(
             async () => {
-              // Use API route instead of server action to avoid HMR issues
-              const response = await fetch('/api/bookmarks/add', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  content_type: validatedCategory,
-                  content_slug: contentSlug,
-                  notes: '',
-                }),
+              // Use generated API client instead of fetch
+              const { createApiClient } = await import('@heyclaude/database-types/api-client');
+              const client = createApiClient('/api/v1');
+
+              const result = await client.addBookmark({
+                content_type: validatedCategory,
+                content_slug: contentSlug,
+                notes: '',
               });
 
-              if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-                throw new Error(errorData.error || `API returned ${response.status}`);
-              }
+              // Response schema is now properly extracted
+              if (result && typeof result === 'object' && 'data' in result && 
+                  result.data && typeof result.data === 'object' && 'success' in result.data) {
+                const success = result.data['success'];
+                if (success === true) {
+                  setIsBookmarked(true);
+                  toasts.success.bookmarkAdded();
 
-              const result = await response.json();
-
-              if (result?.data?.success) {
-                setIsBookmarked(true);
-                toasts.success.bookmarkAdded();
-
-                // Track bookmark addition (non-blocking)
-                pulse
-                  .bookmark({
-                    category: validatedCategory,
-                    slug: contentSlug,
-                    action: 'add',
-                  })
-                  .catch((error) => {
-                    const normalized = normalizeError(
-                      error,
-                      'BookmarkButton: bookmark addition tracking failed'
-                    );
-                    logClientWarn('BookmarkButton: bookmark addition tracking failed', normalized, 'BookmarkButton.handleToggle', {
-                      component: 'BookmarkButton',
-                      contentType,
-                      contentSlug,
+                  // Track bookmark addition (non-blocking)
+                  pulse
+                    .bookmark({
+                      category: validatedCategory,
+                      slug: contentSlug,
+                      action: 'add',
+                    })
+                    .catch((error) => {
+                      const normalized = normalizeError(
+                        error,
+                        'BookmarkButton: bookmark addition tracking failed'
+                      );
+                      logClientWarn('BookmarkButton: bookmark addition tracking failed', normalized, 'BookmarkButton.handleToggle', {
+                        component: 'BookmarkButton',
+                        contentType,
+                        contentSlug,
+                      });
                     });
-                  });
 
-                // Check confetti enabled (static config)
-                const confettiEnabled = checkConfettiEnabled();
-                if (confettiEnabled) {
-                  celebrateBookmark();
+                  // Check confetti enabled (static config)
+                  const confettiEnabled = checkConfettiEnabled();
+                  if (confettiEnabled) {
+                    celebrateBookmark();
+                  }
                 }
               }
             },

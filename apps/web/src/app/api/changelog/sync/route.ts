@@ -68,6 +68,10 @@ import { requireEnvVar } from '@heyclaude/shared-runtime';
 import {
   createApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
+import {
+  changelogSyncResponseSchema,
+  errorResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -290,15 +294,57 @@ export const POST = createApiRoute({
     description:
       'Syncs changelog entry from CHANGELOG.md to database and enqueues notification. Called by GitHub Actions after generating changelog and creating tag. Requires Bearer token authentication.',
     operationId: 'syncChangelog',
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      description: 'Changelog entry data including version, date, content, and optional metadata (tldr, whatChanged, sections, rawContent)',
+      required: true,
+    },
     responses: {
       200: {
         description: 'Changelog entry synced successfully',
+        schema: changelogSyncResponseSchema,
+        headers: {
+          'X-RateLimit-Remaining': {
+            schema: { type: 'string' },
+            description: 'Remaining rate limit requests',
+          },
+        },
+        example: {
+          success: true,
+          id: 'changelog-entry-123',
+          slug: '1-2-0-2025-12-07',
+          message: 'Changelog entry synced successfully',
+        },
       },
       400: {
         description: 'Invalid request body',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Invalid request body',
+          message: 'Content is required',
+        },
       },
       401: {
         description: 'Unauthorized - invalid or missing Bearer token',
+        schema: errorResponseSchema,
+        headers: {
+          'WWW-Authenticate': {
+            schema: { type: 'string' },
+            description: 'Authentication challenge',
+          },
+        },
+        example: {
+          error: 'Unauthorized',
+          message: 'Invalid or missing Bearer token',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while syncing changelog entry',
+        },
       },
     },
     summary: 'Sync changelog entry',

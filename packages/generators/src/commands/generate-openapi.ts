@@ -57,8 +57,18 @@ interface RouteMetadata {
     description?: string;
     tags?: string[];
     operationId?: string;
-    responses?: Record<number, { description: string; schema?: z.ZodSchema }>;
+    responses?: Record<number, { 
+      description: string; 
+      schema?: z.ZodSchema; 
+      schemaSource?: string; 
+      schemaName?: string;
+      headers?: Record<string, { schema: { type: string }; description: string }>;
+      example?: unknown;
+    }>;
     deprecated?: boolean;
+    security?: Array<Record<string, string[]>>;
+    externalDocs?: { description: string; url: string };
+    requestBody?: { description?: string; required?: boolean };
   };
   querySchema?: z.ZodSchema;
   bodySchema?: z.ZodSchema;
@@ -70,6 +80,8 @@ interface RouteMetadata {
   bodySchemaSource?: string; // Source code for schema (for evaluation)
   querySchemaName?: string; // Name of exported schema (if exported)
   bodySchemaName?: string; // Name of exported schema (if exported)
+  responseSchemaSources?: Record<number, string>; // Source code for response schemas (for evaluation)
+  responseSchemaNames?: Record<number, string>; // Names of exported response schemas (if exported)
 }
 
 /**
@@ -184,12 +196,19 @@ function extractOpenAPIMetadata(configObj: ObjectLiteralExpression): RouteMetada
     }
   }
 
-  // Extract responses
+  // Extract responses (including response schemas, headers, examples)
   const responsesProp = initializer.getProperty('responses');
   if (responsesProp && Node.isPropertyAssignment(responsesProp)) {
     const responsesInit = responsesProp.getInitializer();
     if (responsesInit && Node.isObjectLiteralExpression(responsesInit)) {
-      const responses: Record<number, { description: string; schema?: z.ZodSchema }> = {};
+      const responses: Record<number, { 
+        description: string; 
+        schema?: z.ZodSchema; 
+        schemaSource?: string; 
+        schemaName?: string;
+        headers?: Record<string, { schema: { type: string }; description: string }>;
+        example?: unknown;
+      }> = {};
       for (const prop of responsesInit.getProperties()) {
         if (Node.isPropertyAssignment(prop)) {
           const key = prop.getName();
@@ -205,12 +224,203 @@ function extractOpenAPIMetadata(configObj: ObjectLiteralExpression): RouteMetada
                   description = descInit.getLiteralValue();
                 }
               }
-              responses[statusCode] = { description };
+              
+              // Extract schema property (similar to querySchema/bodySchema extraction)
+              const schemaProp = valueInit.getProperty('schema');
+              let schemaSource: string | null = null;
+              let schemaName: string | null = null;
+              
+              if (schemaProp && Node.isPropertyAssignment(schemaProp)) {
+                schemaSource = extractSchemaSource(schemaProp);
+                
+                // If schema source is an identifier, it might be an exported schema
+                if (schemaSource) {
+                  const trimmed = schemaSource.trim();
+                  // Check if it's a simple identifier (exported schema) or a property access
+                  if (/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(trimmed)) {
+                    schemaName = trimmed;
+                  }
+                }
+              }
+              
+              // Extract headers
+              const headersProp = valueInit.getProperty('headers');
+              let headers: Record<string, { schema: { type: string }; description: string }> | undefined;
+              if (headersProp && Node.isPropertyAssignment(headersProp)) {
+                const headersInit = headersProp.getInitializer();
+                if (headersInit && Node.isObjectLiteralExpression(headersInit)) {
+                  headers = {};
+                  for (const headerProp of headersInit.getProperties()) {
+                    if (Node.isPropertyAssignment(headerProp)) {
+                      const headerName = headerProp.getName();
+                      const headerValueInit = headerProp.getInitializer();
+                      if (headerValueInit && Node.isObjectLiteralExpression(headerValueInit)) {
+                        const headerSchemaProp = headerValueInit.getProperty('schema');
+                        const headerDescProp = headerValueInit.getProperty('description');
+                        let headerSchema: { type: string } | undefined;
+                        let headerDescription = '';
+                        
+                        if (headerSchemaProp && Node.isPropertyAssignment(headerSchemaProp)) {
+                          const headerSchemaInit = headerSchemaProp.getInitializer();
+                          if (headerSchemaInit && Node.isObjectLiteralExpression(headerSchemaInit)) {
+                            const typeProp = headerSchemaInit.getProperty('type');
+                            if (typeProp && Node.isPropertyAssignment(typeProp)) {
+                              const typeInit = typeProp.getInitializer();
+                              if (typeInit && Node.isStringLiteral(typeInit)) {
+                                headerSchema = { type: typeInit.getLiteralValue() };
+                              }
+                            }
+                          }
+                        }
+                        
+                        if (headerDescProp && Node.isPropertyAssignment(headerDescProp)) {
+                          const headerDescInit = headerDescProp.getInitializer();
+                          if (headerDescInit && Node.isStringLiteral(headerDescInit)) {
+                            headerDescription = headerDescInit.getLiteralValue();
+                          }
+                        }
+                        
+                        if (headerSchema && headerDescription) {
+                          headers[headerName] = { schema: headerSchema, description: headerDescription };
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              
+              // Extract example
+              const exampleProp = valueInit.getProperty('example');
+              let example: unknown | undefined;
+              if (exampleProp && Node.isPropertyAssignment(exampleProp)) {
+                const exampleInit = exampleProp.getInitializer();
+                if (exampleInit) {
+                  // Try to extract example value (object literal, string, number, etc.)
+                  if (Node.isObjectLiteralExpression(exampleInit)) {
+                    // For object literals, we'll need to evaluate at runtime
+                    // Store the source text for now
+                    example = exampleInit.getText();
+                  } else if (Node.isStringLiteral(exampleInit)) {
+                    example = exampleInit.getLiteralValue();
+                  } else if (Node.isNumericLiteral(exampleInit)) {
+                    example = parseFloat(exampleInit.getText());
+                  } else if (Node.isTrueLiteral(exampleInit)) {
+                    example = true;
+                  } else if (Node.isFalseLiteral(exampleInit)) {
+                    example = false;
+                  }
+                }
+              }
+              
+              responses[statusCode] = {
+                description,
+                ...(schemaSource ? { schemaSource, ...(schemaName ? { schemaName } : {}) } : {}),
+                ...(headers ? { headers } : {}),
+                ...(example !== undefined ? { example } : {}),
+              };
             }
           }
         }
       }
       if (Object.keys(responses).length > 0) metadata.responses = responses;
+    }
+  }
+
+  // Extract security
+  const securityProp = initializer.getProperty('security');
+  if (securityProp && Node.isPropertyAssignment(securityProp)) {
+    const securityInit = securityProp.getInitializer();
+    if (securityInit && Node.isArrayLiteralExpression(securityInit)) {
+      const security: Array<Record<string, string[]>> = [];
+      for (const element of securityInit.getElements()) {
+        if (Node.isObjectLiteralExpression(element)) {
+          const securityObj: Record<string, string[]> = {};
+          for (const prop of element.getProperties()) {
+            if (Node.isPropertyAssignment(prop)) {
+              const key = prop.getName();
+              const valueInit = prop.getInitializer();
+              if (valueInit && Node.isArrayLiteralExpression(valueInit)) {
+                const scopes: string[] = [];
+                for (const scopeElement of valueInit.getElements()) {
+                  if (Node.isStringLiteral(scopeElement)) {
+                    scopes.push(scopeElement.getLiteralValue());
+                  }
+                }
+                securityObj[key] = scopes;
+              } else if (valueInit && Node.isArrayLiteralExpression(valueInit) === false) {
+                // Empty array case: bearerAuth: []
+                securityObj[key] = [];
+              }
+            }
+          }
+          if (Object.keys(securityObj).length > 0) {
+            security.push(securityObj);
+          }
+        }
+      }
+      if (security.length > 0) metadata.security = security;
+    }
+  }
+
+  // Extract externalDocs
+  const externalDocsProp = initializer.getProperty('externalDocs');
+  if (externalDocsProp && Node.isPropertyAssignment(externalDocsProp)) {
+    const externalDocsInit = externalDocsProp.getInitializer();
+    if (externalDocsInit && Node.isObjectLiteralExpression(externalDocsInit)) {
+      const descProp = externalDocsInit.getProperty('description');
+      const urlProp = externalDocsInit.getProperty('url');
+      let description = '';
+      let url = '';
+      
+      if (descProp && Node.isPropertyAssignment(descProp)) {
+        const descInit = descProp.getInitializer();
+        if (descInit && Node.isStringLiteral(descInit)) {
+          description = descInit.getLiteralValue();
+        }
+      }
+      
+      if (urlProp && Node.isPropertyAssignment(urlProp)) {
+        const urlInit = urlProp.getInitializer();
+        if (urlInit && Node.isStringLiteral(urlInit)) {
+          url = urlInit.getLiteralValue();
+        }
+      }
+      
+      if (description && url) {
+        metadata.externalDocs = { description, url };
+      }
+    }
+  }
+
+  // Extract requestBody
+  const requestBodyProp = initializer.getProperty('requestBody');
+  if (requestBodyProp && Node.isPropertyAssignment(requestBodyProp)) {
+    const requestBodyInit = requestBodyProp.getInitializer();
+    if (requestBodyInit && Node.isObjectLiteralExpression(requestBodyInit)) {
+      const descProp = requestBodyInit.getProperty('description');
+      const requiredProp = requestBodyInit.getProperty('required');
+      let description: string | undefined;
+      let required: boolean | undefined;
+      
+      if (descProp && Node.isPropertyAssignment(descProp)) {
+        const descInit = descProp.getInitializer();
+        if (descInit && Node.isStringLiteral(descInit)) {
+          description = descInit.getLiteralValue();
+        }
+      }
+      
+      if (requiredProp && Node.isPropertyAssignment(requiredProp)) {
+        const requiredInit = requiredProp.getInitializer();
+        if (requiredInit && (Node.isTrueLiteral(requiredInit) || Node.isFalseLiteral(requiredInit))) {
+          required = Node.isTrueLiteral(requiredInit);
+        }
+      }
+      
+      if (description !== undefined || required !== undefined) {
+        metadata.requestBody = {};
+        if (description !== undefined) metadata.requestBody.description = description;
+        if (required !== undefined) metadata.requestBody.required = required;
+      }
     }
   }
 
@@ -415,6 +625,24 @@ async function extractRouteMetadata(filePath: string): Promise<RouteMetadata[]> 
         // Store schema names for exported schemas
         ...(querySchemaName ? { querySchemaName } : {}),
         ...(bodySchemaName ? { bodySchemaName } : {}),
+        // Store response schema sources and names
+        ...(openapi?.responses ? (() => {
+          const responseSchemaSources: Record<number, string> = {};
+          const responseSchemaNames: Record<number, string> = {};
+          for (const [code, response] of Object.entries(openapi.responses)) {
+            const statusCode = parseInt(code, 10);
+            if (!isNaN(statusCode) && response.schemaSource) {
+              responseSchemaSources[statusCode] = response.schemaSource;
+              if (response.schemaName) {
+                responseSchemaNames[statusCode] = response.schemaName;
+              }
+            }
+          }
+          return {
+            ...(Object.keys(responseSchemaSources).length > 0 ? { responseSchemaSources } : {}),
+            ...(Object.keys(responseSchemaNames).length > 0 ? { responseSchemaNames } : {}),
+          };
+        })() : {}),
       };
 
       routes.push(routeMetadata);
@@ -461,6 +689,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
       '@heyclaude/web-runtime': join(PROJECT_ROOT, 'packages/web-runtime/src/index.ts'),
       '@heyclaude/web-runtime/server': join(PROJECT_ROOT, 'packages/web-runtime/src/server.ts'),
       '@heyclaude/web-runtime/api/schemas': join(PROJECT_ROOT, 'packages/web-runtime/src/api/schemas.ts'),
+      '@heyclaude/web-runtime/api/response-schemas': join(PROJECT_ROOT, 'packages/web-runtime/src/api/response-schemas.ts'),
       '@heyclaude/shared-runtime': join(PROJECT_ROOT, 'packages/shared-runtime/src/index.ts'),
       '@heyclaude/data-layer': join(PROJECT_ROOT, 'packages/data-layer/src/index.ts'),
       '@heyclaude/data-layer/prisma': join(PROJECT_ROOT, 'packages/data-layer/src/prisma/index.ts'),
@@ -1590,6 +1819,25 @@ export const ${schemaName} = ${schemaCode};
             }
           }
         }
+        
+        // Evaluate response schemas (similar to query/body schemas)
+        if (route.openapi?.responses && route.responseSchemaSources) {
+          for (const [code, schemaSource] of Object.entries(route.responseSchemaSources)) {
+            const statusCode = parseInt(code, 10);
+            if (!isNaN(statusCode) && route.openapi.responses[statusCode] && !route.openapi.responses[statusCode].schema) {
+              const schemaName = schemaSource.trim();
+              const cleanSchemaName = schemaName.replace(/\s+as\s+\w+$/, '');
+              
+              // Try to get from route module exports
+              if (routeModule[cleanSchemaName]) {
+                const schema = routeModule[cleanSchemaName];
+                if (schema && typeof schema === 'object' && '_def' in schema) {
+                  route.openapi.responses[statusCode].schema = schema as z.ZodSchema;
+                }
+              }
+            }
+          }
+        }
       } else if (sourceFile) {
         // Route file couldn't be imported, but we can try to extract exported schemas using AST
         // Look for exported variable declarations that match our schema names
@@ -2311,6 +2559,57 @@ export const ${schemaName} = ${schemaCode};
     console.warn(`Error evaluating schemas for ${relativePath}:`, error);
   }
   
+  // Evaluate response schemas from shared modules (similar to query/body schemas)
+  for (const route of routes) {
+    if (route.responseSchemaSources) {
+      for (const [code, schemaSource] of Object.entries(route.responseSchemaSources)) {
+      const statusCode = parseInt(code, 10);
+      if (!isNaN(statusCode) && route.openapi?.responses?.[statusCode] && !route.openapi.responses[statusCode].schema) {
+        const schemaName = schemaSource.trim().replace(/\s+as\s+\w+$/, '');
+        if (schemaName && /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(schemaName)) {
+          try {
+            // Try response-schemas file first (where response schemas are defined)
+            const possibleModules = [
+              join(PROJECT_ROOT, 'packages/web-runtime/src/api/response-schemas.ts'),
+              join(PROJECT_ROOT, 'packages/web-runtime/src/api/schemas.ts'),
+              join(PROJECT_ROOT, 'packages/web-runtime/src/server.ts'),
+              '@heyclaude/web-runtime/api/response-schemas',
+              '@heyclaude/web-runtime/api/schemas',
+              '@heyclaude/web-runtime/server',
+            ];
+            
+            for (const modulePath of possibleModules) {
+              try {
+                let module: any = null;
+                if (modulePath.startsWith('@heyclaude/')) {
+                  const resolvedPath = resolveWorkspacePackage(modulePath);
+                  if (resolvedPath && existsSync(resolvedPath)) {
+                    module = (await jitiInstance.import(resolvedPath)) as any;
+                  }
+                } else {
+                  module = (await jitiInstance.import(modulePath)) as any;
+                }
+                
+                if (module && module[schemaName]) {
+                  const schema = module[schemaName];
+                  if (schema && typeof schema === 'object' && ('_def' in schema || schema instanceof z.ZodType)) {
+                    route.openapi.responses[statusCode].schema = schema as z.ZodSchema;
+                    break;
+                  }
+                }
+              } catch {
+                // Module not found - continue to next
+              }
+            }
+          } catch {
+            // Could not resolve response schema
+          }
+          }
+        }
+      }
+    }
+  }
+  
   // Report schema extraction status
   for (const route of routes) {
     if (route.querySchemaSource && !route.querySchema) {
@@ -2319,9 +2618,49 @@ export const ${schemaName} = ${schemaCode};
     if (route.bodySchemaSource && !route.bodySchema) {
       console.warn(`  ⚠ Could not extract body schema for ${route.route}: ${route.bodySchemaSource}`);
     }
+    if (route.responseSchemaSources) {
+      for (const [code, schemaSource] of Object.entries(route.responseSchemaSources)) {
+        const statusCode = parseInt(code, 10);
+        if (!isNaN(statusCode) && route.openapi?.responses?.[statusCode] && !route.openapi.responses[statusCode].schema) {
+          console.warn(`  ⚠ Could not extract response schema for ${route.route} ${statusCode}: ${schemaSource}`);
+        }
+      }
+    }
   }
   
   return routes;
+}
+
+/**
+ * Extract path parameters from route path and convert to OpenAPI format
+ * Converts Next.js dynamic segments [param] to OpenAPI {param} format
+ * 
+ * @example
+ * '/api/v1/content/[category]/[slug]' -> '/api/v1/content/{category}/{slug}'
+ * Returns: { openApiPath: '/api/v1/content/{category}/{slug}', pathParams: ['category', 'slug'] }
+ */
+function extractPathParameters(routePath: string): { openApiPath: string; pathParams: string[] } {
+  const pathParams: string[] = [];
+  // Convert Next.js dynamic segments [param] to OpenAPI {param} format
+  const openApiPath = routePath.replace(/\[([^\]]+)\]/g, (match, paramName) => {
+    pathParams.push(paramName);
+    return `{${paramName}}`;
+  });
+  return { openApiPath, pathParams };
+}
+
+/**
+ * Create Zod schema for path parameters
+ */
+function createPathParamsSchema(pathParams: string[]): z.ZodObject<any> | null {
+  if (pathParams.length === 0) return null;
+  
+  const shape: Record<string, z.ZodString> = {};
+  for (const param of pathParams) {
+    shape[param] = z.string().describe(`Path parameter: ${param}`);
+  }
+  
+  return z.object(shape);
 }
 
 /**
@@ -2331,22 +2670,27 @@ export const ${schemaName} = ${schemaCode};
 function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
   const paths: Record<string, any> = {};
   
-  // Group routes by path
+  // Group routes by path (using OpenAPI path format with {param} instead of [param])
   const routesByPath = new Map<string, RouteMetadata[]>();
   for (const route of routes) {
-    if (!routesByPath.has(route.route)) {
-      routesByPath.set(route.route, []);
+    const { openApiPath } = extractPathParameters(route.route);
+    if (!routesByPath.has(openApiPath)) {
+      routesByPath.set(openApiPath, []);
     }
-    routesByPath.get(route.route)!.push(route);
+    routesByPath.get(openApiPath)!.push(route);
   }
   
   // Build paths structure
-  for (const [path, pathRoutes] of routesByPath) {
+  for (const [openApiPath, pathRoutes] of routesByPath) {
     const pathItem: Record<string, any> = {};
     
     for (const route of pathRoutes) {
       const method = route.method.toLowerCase();
       const operation: any = {};
+      
+      // Extract path parameters for this route
+      const { pathParams } = extractPathParameters(route.route);
+      const pathParamsSchema = createPathParamsSchema(pathParams);
       
       // Add OpenAPI metadata
       const openapi = route.openapi;
@@ -2366,37 +2710,72 @@ function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
         if (openapi.deprecated !== undefined) {
           operation.deprecated = openapi.deprecated;
         }
+        if (openapi.externalDocs !== undefined) {
+          operation.externalDocs = openapi.externalDocs;
+        }
+        if (openapi.security !== undefined) {
+          operation.security = openapi.security;
+        }
       }
       
-      // Add security if auth required
-      if (route.requireAuth) {
+      // Add security if auth required (fallback to requireAuth if security not explicitly set)
+      if (route.requireAuth && !openapi?.security) {
         operation.security = [{ bearerAuth: [] }];
       }
       
-      // Add requestParams with query schema (zod-openapi handles conversion automatically)
+      // Build requestParams object (zod-openapi will convert to parameters array)
+      const requestParams: Record<string, z.ZodSchema> = {};
+      
+      // Add path parameters if any
+      if (pathParamsSchema) {
+        requestParams.path = pathParamsSchema;
+      }
+      
+      // Add query parameters
       if (route.querySchema) {
         if (route.querySchema instanceof z.ZodObject) {
-          operation.requestParams = {
-            query: route.querySchema,
-          };
+          requestParams.query = route.querySchema;
         } else {
           // If it's not a ZodObject, log warning
-          console.warn(`  ⚠ Query schema for ${route.route} is not a ZodObject, skipping requestParams`);
+          console.warn(`  ⚠ Query schema for ${route.route} is not a ZodObject, skipping requestParams.query`);
         }
       } else if (route.querySchemaSource) {
         // Schema exists but wasn't extracted - log warning
         console.warn(`  ⚠ Query schema source found but not extracted for ${route.route}: ${route.querySchemaSource}`);
       }
       
+      // Only add requestParams if it has at least one parameter type
+      if (Object.keys(requestParams).length > 0) {
+        operation.requestParams = requestParams;
+      }
+      
       // Add requestBody with body schema (zod-openapi handles conversion automatically)
       if (route.bodySchema && ['post', 'put', 'patch'].includes(method)) {
-        operation.requestBody = {
+        const requestBody: any = {
           content: {
             'application/json': {
               schema: route.bodySchema,
             },
           },
         };
+        
+        // Add requestBody description and required if provided
+        if (openapi?.requestBody) {
+          if (openapi.requestBody.description !== undefined) {
+            requestBody.description = openapi.requestBody.description;
+          }
+          if (openapi.requestBody.required !== undefined) {
+            requestBody.required = openapi.requestBody.required;
+          } else {
+            // Default to true for POST/PUT/PATCH
+            requestBody.required = true;
+          }
+        } else {
+          // Default to true for POST/PUT/PATCH
+          requestBody.required = true;
+        }
+        
+        operation.requestBody = requestBody;
       } else if (route.bodySchemaSource && ['post', 'put', 'patch'].includes(method)) {
         // Schema exists but wasn't extracted - log warning
         console.warn(`  ⚠ Body schema source found but not extracted for ${route.route}: ${route.bodySchemaSource}`);
@@ -2422,20 +2801,59 @@ function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
         };
       }
       
-      // Merge with openapi.responses if provided (including response schemas)
+      // Merge with openapi.responses if provided (including response schemas, headers, examples)
       if (route.openapi?.responses) {
         for (const [code, response] of Object.entries(route.openapi.responses)) {
           const responseObj: any = {
             description: response.description,
           };
           
-          // Add response schema if provided
+          // Add response schema if provided (zod-openapi will convert Zod schema to OpenAPI schema)
           if (response.schema) {
             responseObj.content = {
               'application/json': {
                 schema: response.schema,
               },
             };
+          }
+          
+          // Add response headers if provided
+          if (response.headers) {
+            responseObj.headers = response.headers;
+          }
+          
+          // Add response example if provided
+          if (response.example !== undefined) {
+            // If example is a string (object literal source), try to evaluate it
+            if (typeof response.example === 'string' && response.example.trim().startsWith('{')) {
+              try {
+                // Try to evaluate the object literal as JSON
+                const evaluated = eval(`(${response.example})`);
+                if (responseObj.content) {
+                  responseObj.content['application/json'].example = evaluated;
+                } else {
+                  responseObj.content = {
+                    'application/json': {
+                      example: evaluated,
+                    },
+                  };
+                }
+              } catch {
+                // If evaluation fails, skip example
+                console.warn(`  ⚠ Could not evaluate example for ${route.route} ${code} response`);
+              }
+            } else {
+              // Direct value (string, number, boolean)
+              if (responseObj.content) {
+                responseObj.content['application/json'].example = response.example;
+              } else {
+                responseObj.content = {
+                  'application/json': {
+                    example: response.example,
+                  },
+                };
+              }
+            }
           }
           
           responses[code] = responseObj;
@@ -2447,7 +2865,7 @@ function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
       pathItem[method] = operation;
     }
     
-    paths[path] = pathItem;
+    paths[openApiPath] = pathItem;
   }
   
   return paths;
@@ -2488,6 +2906,16 @@ function generateOpenAPIDocument(routes: RouteMetadata[]) {
       title: 'ClaudePro Directory API',
       version: '1.1.0',
       description: 'API documentation for ClaudePro Directory - A community-driven directory of Claude configurations',
+      contact: {
+        name: 'Claude Pro Directory',
+        url: 'https://claudepro.directory',
+        email: 'support@claudepro.directory',
+      },
+      license: {
+        name: 'MIT',
+        url: 'https://opensource.org/licenses/MIT',
+      },
+      termsOfService: 'https://claudepro.directory/terms',
     },
     servers: [
       {
@@ -2498,6 +2926,24 @@ function generateOpenAPIDocument(routes: RouteMetadata[]) {
         url: 'http://localhost:3000/api/v1',
         description: 'Development',
       },
+    ],
+    tags: [
+      { name: 'content', description: 'Content-related endpoints for browsing and exporting Claude configurations' },
+      { name: 'search', description: 'Search and discovery endpoints for finding Claude configurations' },
+      { name: 'bookmarks', description: 'User bookmark management endpoints for saving favorite configurations' },
+      { name: 'company', description: 'Company profile endpoints for viewing company information' },
+      { name: 'profiles', description: 'Profile-related endpoints for user and company profiles' },
+      { name: 'feeds', description: 'RSS and Atom feed endpoints for content syndication' },
+      { name: 'templates', description: 'Content template endpoints for wizard and form generation' },
+      { name: 'trending', description: 'Trending, popular, and recent content endpoints' },
+      { name: 'health', description: 'Health check and monitoring endpoints for API status' },
+      { name: 'changelog', description: 'Changelog endpoints for viewing and syncing release notes' },
+      { name: 'sitemap', description: 'Sitemap generation endpoints for SEO' },
+      { name: 'stats', description: 'Statistics and analytics endpoints' },
+      { name: 'flux', description: 'Flux integration endpoints for external services' },
+      { name: 'inngest', description: 'Inngest webhook endpoints for background job processing' },
+      { name: 'og', description: 'Open Graph image generation endpoints for social media previews' },
+      { name: 'openapi', description: 'OpenAPI specification endpoint for API documentation' },
     ],
     paths,
     components: {

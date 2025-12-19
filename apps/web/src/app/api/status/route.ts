@@ -39,6 +39,10 @@ import 'server-only';
 import {
   createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
+import {
+  errorResponseSchema,
+  statusResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 
@@ -62,9 +66,46 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'API is healthy or degraded',
+        schema: statusResponseSchema,
+        headers: {
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+          'X-Generated-By': {
+            schema: { type: 'string' },
+            description: 'Source of the response data',
+          },
+        },
+        example: {
+          status: 'healthy',
+          database: 'connected',
+          timestamp: '2025-01-11T12:00:00Z',
+          version: '1.1.0',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while checking API status',
+        },
       },
       503: {
         description: 'API is unhealthy',
+        schema: statusResponseSchema,
+        headers: {
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+        },
+        example: {
+          status: 'unhealthy',
+          database: 'disconnected',
+          timestamp: '2025-01-11T12:00:00Z',
+        },
       },
     },
     summary: 'Get API health status',

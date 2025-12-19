@@ -40,9 +40,13 @@ import {
   createOptionsHandler as createApiOptionsHandler, createApiRoute,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { searchQuerySchema } from '@heyclaude/web-runtime/api/schemas';
+import {
+  errorResponseSchema,
+  searchResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { enqueuePulseEventServer } from '@heyclaude/web-runtime/pulse';
-import { getWithAuthCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 import {
   isValidCategory,
   VALID_CATEGORIES,
@@ -73,7 +77,7 @@ type SearchResultRow = Jobs | SearchContentOptimizedRow | SearchUnifiedRow;
  * Validates all query parameters using Zod schema and processes search results.
  */
 export const GET = createApiRoute({
-  cors: 'auth',
+  cors: 'anon',
   handler: async ({ logger, query }) => {
     // Zod schema ensures proper types
     const {
@@ -256,7 +260,7 @@ export const GET = createApiRoute({
       'Search completed'
     );
 
-    return jsonResponse(responseBody, 200, getWithAuthCorsHeaders);
+    return jsonResponse(responseBody, 200, getOnlyCorsHeaders);
   },
   method: 'GET',
   openapi: {
@@ -266,9 +270,61 @@ export const GET = createApiRoute({
     responses: {
       200: {
         description: 'Search results retrieved successfully',
+        schema: searchResponseSchema,
+        headers: {
+          'X-RateLimit-Remaining': {
+            schema: { type: 'string' },
+            description: 'Remaining rate limit requests',
+          },
+          'X-RateLimit-Reset': {
+            schema: { type: 'string' },
+            description: 'Rate limit reset timestamp',
+          },
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+        },
+        example: {
+          query: 'ai agents',
+          results: [
+            {
+              id: 'content-1',
+              title: 'AI Agent Framework',
+              slug: 'ai-agent-framework',
+              category: 'agents',
+              description: 'A comprehensive framework for building AI agents',
+            },
+          ],
+          filters: {
+            sort: 'relevance',
+            categories: ['agents'],
+            tags: ['ai', 'automation'],
+          },
+          pagination: {
+            total: 42,
+            limit: 20,
+            offset: 0,
+            hasMore: true,
+          },
+          searchType: 'content',
+        },
       },
       400: {
         description: 'Invalid query parameters',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Invalid query parameters',
+          message: 'Invalid categories. Valid values: agents, mcp, rules, commands, hooks, statuslines, skills, collections, guides, jobs, changelog',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while processing the search request',
+        },
       },
     },
     summary: 'Unified search across content, jobs, companies, and users',

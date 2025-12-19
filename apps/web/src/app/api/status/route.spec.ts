@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { expectOpenApiResponse } from '../__helpers__/openapi-validation';
 
 /**
  * Comprehensive Status API Route E2E Tests
@@ -16,9 +17,12 @@ import { expect, test } from '@playwright/test';
 
 test.describe('GET /api/status', () => {
   test('should return health status successfully', async ({ request }) => {
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
 
     expect(response.status()).toBe(200);
+
+    // Validate response matches OpenAPI spec
+    await expectOpenApiResponse(response, '/api/v1/status', 'GET');
 
     const data = await response.json();
 
@@ -38,7 +42,7 @@ test.describe('GET /api/status', () => {
   });
 
   test('should return 200 for healthy status', async ({ request }) => {
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
     const data = await response.json();
 
     // If status is healthy, should return 200
@@ -48,7 +52,7 @@ test.describe('GET /api/status', () => {
   });
 
   test('should return 200 for degraded status', async ({ request }) => {
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
     const data = await response.json();
 
     // If status is degraded, should return 200
@@ -58,7 +62,7 @@ test.describe('GET /api/status', () => {
   });
 
   test('should return 503 for unhealthy status', async ({ request }) => {
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
     const data = await response.json();
 
     // If status is unhealthy, should return 503
@@ -68,20 +72,20 @@ test.describe('GET /api/status', () => {
   });
 
   test('should include cache headers', async ({ request }) => {
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
 
     expect(response.headers()['cache-control']).toBeDefined();
     expect(response.headers()['cache-control']).toContain('public');
   });
 
   test('should include CORS headers', async ({ request }) => {
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
 
     expect(response.headers()['access-control-allow-origin']).toBeDefined();
   });
 
   test('should include X-Generated-By header', async ({ request }) => {
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
 
     expect(response.headers()['x-generated-by']).toBeDefined();
     expect(response.headers()['x-generated-by']).toContain('prisma.rpc.get_api_health_formatted');
@@ -90,7 +94,7 @@ test.describe('GET /api/status', () => {
   test('should handle service layer errors gracefully', async ({ request }) => {
     // This test verifies error handling if MiscService.getApiHealthFormatted fails
     // In a real scenario, we'd mock the service, but for E2E we verify graceful degradation
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
 
     // Should still return a response (either 200 or 503)
     expect([200, 503]).toContain(response.status());
@@ -100,17 +104,17 @@ test.describe('GET /api/status', () => {
   });
 
   test('should handle OPTIONS request', async ({ request }) => {
-    const response = await request.options('/api/status');
+    const response = await request.options('/api/v1/status');
 
     expect(response.status()).toBe(200);
     expect(response.headers()['access-control-allow-methods']).toBeDefined();
   });
 
   test('should return consistent response format', async ({ request }) => {
-    const response1 = await request.get('/api/status');
+    const response1 = await request.get('/api/v1/status');
     const data1 = await response1.json();
 
-    const response2 = await request.get('/api/status');
+    const response2 = await request.get('/api/v1/status');
     const data2 = await response2.json();
 
     // Response structure should be consistent
@@ -119,7 +123,7 @@ test.describe('GET /api/status', () => {
 
   test('should handle rapid consecutive requests', async ({ request }) => {
     // Make multiple rapid requests
-    const promises = Array.from({ length: 5 }, () => request.get('/api/status'));
+    const promises = Array.from({ length: 5 }, () => request.get('/api/v1/status'));
 
     const responses = await Promise.all(promises);
 
@@ -144,7 +148,7 @@ test.describe('GET /api/status', () => {
     // In E2E, we can't easily mock the service response, but we can verify
     // the route handles the response correctly regardless of format
     
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
     
     expect([200, 503]).toContain(response.status());
     
@@ -159,7 +163,7 @@ test.describe('GET /api/status', () => {
   test('should fix composite type string in response data', async ({ request }) => {
     // This tests that if the service returns a composite type string for status,
     // the route fixes it in the response
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
     
     expect([200, 503]).toContain(response.status());
     
@@ -173,7 +177,7 @@ test.describe('GET /api/status', () => {
   test('should handle getCachedApiHealthFormatted errors gracefully', async ({ request }) => {
     // This tests that getCachedApiHealthFormatted errors are handled
     // The route doesn't catch errors (factory handles them)
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
     
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
@@ -185,7 +189,7 @@ test.describe('GET /api/status', () => {
   test('should handle MiscService.getApiHealthFormatted errors', async ({ request }) => {
     // This tests that service.getApiHealthFormatted errors are handled
     // The route doesn't catch errors (factory handles them)
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
     
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
@@ -197,7 +201,7 @@ test.describe('GET /api/status', () => {
   test('should handle null data from getCachedApiHealthFormatted', async ({ request }) => {
     // This tests that null data is handled
     // The route checks if (typeof data === 'object' && data !== null && 'status' in data)
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
     
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
@@ -209,7 +213,7 @@ test.describe('GET /api/status', () => {
   test('should handle data not being an object', async ({ request }) => {
     // This tests that non-object data is handled
     // The route checks if (typeof data === 'object' && data !== null)
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
     
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
@@ -221,7 +225,7 @@ test.describe('GET /api/status', () => {
   test('should handle data.status not existing', async ({ request }) => {
     // This tests that missing status field is handled
     // The route checks if ('status' in data)
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
     
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
@@ -233,7 +237,7 @@ test.describe('GET /api/status', () => {
   test('should handle composite type string parsing with regex match', async ({ request }) => {
     // This tests that regex match for composite type string works
     // The route uses statusValue.match(/^\((\w+),/)
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
     
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
@@ -246,7 +250,7 @@ test.describe('GET /api/status', () => {
   test('should handle composite type string with no match', async ({ request }) => {
     // This tests that regex match returning null is handled
     // The route uses match?.[1] ? match[1] : 'unhealthy'
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
     
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
@@ -258,7 +262,7 @@ test.describe('GET /api/status', () => {
   test('should handle statusCode calculation for all status values', async ({ request }) => {
     // This tests that statusCode is calculated correctly
     // The route uses status === 'healthy' ? 200 : status === 'degraded' ? 200 : 503
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
     
     const data = await response.json();
     
@@ -272,7 +276,7 @@ test.describe('GET /api/status', () => {
   test('should handle responseData being spread correctly', async ({ request }) => {
     // This tests that responseData spread works correctly
     // The route uses {...data, status} when fixing composite string
-    const response = await request.get('/api/status');
+    const response = await request.get('/api/v1/status');
     
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());

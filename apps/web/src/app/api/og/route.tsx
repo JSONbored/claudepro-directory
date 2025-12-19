@@ -20,6 +20,10 @@ import {
   createOptionsHandler as createApiOptionsHandler, createApiRoute,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { ogImageQuerySchema } from '@heyclaude/web-runtime/api/schemas';
+import {
+  errorResponseSchema,
+  ogImageResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { ImageResponse } from 'next/og';
 
@@ -216,9 +220,34 @@ export const GET = createApiRoute({
     responses: {
       200: {
         description: 'OG image generated successfully (image/png)',
+        schema: ogImageResponseSchema,
+        headers: {
+          'Content-Type': {
+            schema: { type: 'string' },
+            description: 'Content type (image/png)',
+          },
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+        },
+        example: '[Binary PNG image data - 1200x630 pixels]',
       },
       400: {
         description: 'Invalid query parameters',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Invalid query parameters',
+          message: 'Title must be a string',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while generating OG image',
+        },
       },
     },
     summary: 'Generate Open Graph image',

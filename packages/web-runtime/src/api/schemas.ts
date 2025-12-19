@@ -225,6 +225,7 @@ export const optionalUrlSchema = z
   .meta({
     description: 'Optional URL field (empty string or valid URL)',
     example: 'https://example.com',
+    format: 'uri',
   });
 
 /**

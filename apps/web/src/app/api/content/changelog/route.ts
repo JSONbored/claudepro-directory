@@ -23,9 +23,21 @@ import {
   createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { changelogFormatSchema } from '@heyclaude/web-runtime/api/schemas';
+import {
+  changelogResponseSchema,
+  errorResponseSchema,
+} from '@heyclaude/web-runtime/api/response-schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, textResponse } from '@heyclaude/web-runtime/server/api-helpers';
 import { z } from 'zod';
+
+/**
+ * Query schema for changelog index API
+ * Exported for OpenAPI generation
+ */
+export const changelogQuerySchema = z.object({
+  format: changelogFormatSchema,
+});
 
 /**
  * GET /api/content/changelog - Get changelog in LLMs.txt format
@@ -47,18 +59,45 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'Changelog LLMs.txt content retrieved successfully',
+        schema: changelogResponseSchema,
+        headers: {
+          'Content-Type': {
+            schema: { type: 'string' },
+            description: 'Content type (text/plain)',
+          },
+          'Cache-Control': {
+            schema: { type: 'string' },
+            description: 'Cache control directive',
+          },
+          'X-Generated-By': {
+            schema: { type: 'string' },
+            description: 'Source of the response data',
+          },
+        },
+        example: '# Changelog\n\n## [1.0.0] - 2025-01-11\n- Added new feature\n- Fixed bug\n\n## [0.9.0] - 2025-01-10\n- Initial release',
       },
       400: {
         description: 'Invalid format parameter',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Invalid format parameter',
+          message: 'Invalid format. Valid format: llms-changelog',
+        },
+      },
+      500: {
+        description: 'Internal server error',
+        schema: errorResponseSchema,
+        example: {
+          error: 'Internal server error',
+          message: 'An unexpected error occurred while generating changelog',
+        },
       },
     },
     summary: 'Get changelog in LLMs.txt format',
     tags: ['content', 'changelog', 'export'],
   },
   operation: 'ChangelogIndexAPI',
-  querySchema: z.object({
-    format: changelogFormatSchema,
-  }),
+  querySchema: changelogQuerySchema,
   responseHandler: (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext) => {
     const { logger } = ctx;
     const data = result as null | string;
