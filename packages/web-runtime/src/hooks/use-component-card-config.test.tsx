@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import React from 'react';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import { useComponentCardConfig, ComponentConfigContextProvider } from './use-component-card-config';

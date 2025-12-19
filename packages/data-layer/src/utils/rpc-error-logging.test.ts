@@ -6,6 +6,10 @@ vi.mock('@heyclaude/shared-runtime', () => ({
     level: 'info',
     ...(options?.service && { service: options.service }),
   })),
+  normalizeError: vi.fn((error: unknown) => {
+    if (error instanceof Error) return error;
+    return new Error(String(error));
+  }),
 }));
 
 // Import after mock is set up

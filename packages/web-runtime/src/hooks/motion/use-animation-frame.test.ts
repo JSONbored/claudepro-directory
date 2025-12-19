@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useAnimationFrame } from './use-animation-frame';
 
-// Mock motion/react
-const mockUseAnimationFrame = vi.fn();
+// Mock motion/react - use vi.hoisted() for variables used in vi.mock()
+const mockUseAnimationFrame = vi.hoisted(() => vi.fn());
 
 vi.mock('motion/react', () => ({
   useAnimationFrame: mockUseAnimationFrame,

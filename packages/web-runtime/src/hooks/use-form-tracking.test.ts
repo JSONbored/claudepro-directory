@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useFormTracking, useStepTimer } from './use-form-tracking';
 import type { FormTrackingMetadata } from './use-form-tracking';

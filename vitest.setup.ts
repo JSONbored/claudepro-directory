@@ -114,6 +114,27 @@ vi.mock('next/cache', () => ({
 vi.mock('server-only', () => ({}));
 
 // ============================================================================
+// Prisma Client Mock (must be before any imports that use Prisma)
+// ============================================================================
+
+// Note: DATABASE_URL is provided via Infisical in test command
+// Tests that need Prismock should mock prisma/client.ts in the test file itself
+// (see packages/data-layer/src/services/*.test.ts for examples)
+//
+// ARCHITECTURAL DECISION: We do NOT globally mock Prisma with Prismock here because:
+// 1. Prismock initialization requires reading prisma/schema.prisma, which can fail
+//    when initialized globally due to Vitest's module transformation
+// 2. Each test file that needs Prismock should mock it locally using setupPrismockMock()
+// 3. This ensures proper isolation and prevents initialization issues
+//
+// If a test file imports code that uses Prisma, it MUST mock Prisma locally.
+// Example:
+//   vi.mock('@heyclaude/data-layer/prisma/client', () => {
+//     const { setupPrismockMock } = require('../../data-layer/src/test-utils/prisma-mock.ts');
+//     return { prisma: setupPrismockMock() };
+//   });
+
+// ============================================================================
 // Environment Variables
 // ============================================================================
 
@@ -123,6 +144,8 @@ process.env.NEXT_PUBLIC_SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://test.supabase.co';
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key';
+// Provide DATABASE_URL for tests (Prismock doesn't need it, but some code checks for it)
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
 
 // ============================================================================
 // Global Test Utilities

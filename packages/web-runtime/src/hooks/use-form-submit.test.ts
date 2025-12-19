@@ -3,31 +3,31 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useFormSubmit } from './use-form-submit';
 import type { UseFormSubmitOptions } from './use-form-submit';
 
-// Mock dependencies
-const mockPush = vi.fn();
-const mockRefresh = vi.fn();
-const mockRouter = {
+// Mock dependencies - use vi.hoisted() for variables used in vi.mock()
+const mockPush = vi.hoisted(() => vi.fn());
+const mockRefresh = vi.hoisted(() => vi.fn());
+const mockRouter = vi.hoisted(() => ({
   push: mockPush,
   refresh: mockRefresh,
-};
+}));
 
 vi.mock('next/navigation', () => ({
   useRouter: () => mockRouter,
 }));
 
-const mockRunLoggedAsync = vi.fn();
+const mockRunLoggedAsync = vi.hoisted(() => vi.fn());
 vi.mock('./use-logged-async', () => ({
   useLoggedAsync: vi.fn(() => mockRunLoggedAsync),
 }));
 
-const mockSuccess = vi.fn();
-const mockError = vi.fn();
-const mockToasts = {
+const mockSuccess = vi.hoisted(() => vi.fn());
+const mockError = vi.hoisted(() => vi.fn());
+const mockToasts = vi.hoisted(() => ({
   raw: {
     success: mockSuccess,
     error: mockError,
   },
-};
+}));
 
 vi.mock('../client/toast', () => ({
   toasts: mockToasts,

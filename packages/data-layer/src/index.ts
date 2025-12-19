@@ -10,3 +10,4 @@ export * from './services/misc.ts'; // Consolidated: includes SEO, Community, Qu
 
 export { BasePrismaService } from './services/base-prisma-service.ts';
 export { prisma } from './prisma/client.ts';
+export { withSmartCache } from './utils/request-cache.ts';

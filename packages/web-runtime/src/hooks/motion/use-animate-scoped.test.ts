@@ -2,10 +2,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useAnimateScoped } from './use-animate-scoped';
 
-// Mock motion/react
-const mockScope = { current: null };
-const mockAnimate = vi.fn();
-const mockUseAnimate = vi.fn(() => [mockScope, mockAnimate]);
+// Mock motion/react - use vi.hoisted() for variables used in vi.mock()
+const mockScope = vi.hoisted(() => ({ current: null }));
+const mockAnimate = vi.hoisted(() => vi.fn());
+const mockUseAnimate = vi.hoisted(() => vi.fn(() => [mockScope, mockAnimate]));
 
 vi.mock('motion/react', () => ({
   useAnimate: mockUseAnimate,

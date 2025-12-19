@@ -2,12 +2,12 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useSafeAction } from './use-safe-action';
 
-// Mock next-safe-action
-const mockExecute = vi.fn();
-const mockExecuteAsync = vi.fn();
-const mockReset = vi.fn();
+// Mock next-safe-action - use vi.hoisted() for variables used in vi.mock()
+const mockExecute = vi.hoisted(() => vi.fn());
+const mockExecuteAsync = vi.hoisted(() => vi.fn());
+const mockReset = vi.hoisted(() => vi.fn());
 
-const mockUseAction = vi.fn(() => ({
+const mockUseAction = vi.hoisted(() => vi.fn(() => ({
   execute: mockExecute,
   executeAsync: mockExecuteAsync,
   input: undefined,
@@ -21,7 +21,7 @@ const mockUseAction = vi.fn(() => ({
   hasSucceeded: false,
   hasErrored: false,
   hasNavigated: false,
-}));
+})));
 
 vi.mock('next-safe-action/hooks', () => ({
   useAction: mockUseAction,

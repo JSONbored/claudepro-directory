@@ -43,6 +43,18 @@ export const prisma =
   globalForPrisma.prisma ??
   (() => {
     // Get DATABASE_URL from environment (transaction mode, port 6543)
+    // During build time, DATABASE_URL may not be available - handle gracefully
+    const dbUrl = process.env['DATABASE_URL'];
+    if (!dbUrl) {
+      // Only throw if we're in Vercel (production deployment) - not during local builds
+      // Local builds with Infisical will have DATABASE_URL injected, so this check is for Vercel only
+      if (process.env['VERCEL']) {
+        throw new Error('DATABASE_URL is required for Prisma Client. Set it in your environment variables.');
+      }
+      // During local build (even with NODE_ENV=production), allow missing DATABASE_URL
+      // This allows the build to complete even if DATABASE_URL is not set
+      // Runtime errors will still occur if DATABASE_URL is missing when actually used
+    }
     let connectionString = requireEnvVar(
       'DATABASE_URL',
       'DATABASE_URL is required for Prisma Client. Set it in your environment variables.'

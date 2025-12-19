@@ -3,16 +3,16 @@ import { renderHook, act } from '@testing-library/react';
 import { useLoggedAsync } from './use-logged-async';
 import type { UseLoggedAsyncOptions } from './use-logged-async';
 
-// Mock dependencies
-const mockError = vi.fn();
-const mockWarn = vi.fn();
-const mockLogger = {
+// Mock dependencies - use vi.hoisted() for variables used in vi.mock()
+const mockError = vi.hoisted(() => vi.fn());
+const mockWarn = vi.hoisted(() => vi.fn());
+const mockLogger = vi.hoisted(() => ({
   error: mockError,
   warn: mockWarn,
   info: vi.fn(),
   debug: vi.fn(),
   child: vi.fn(),
-};
+}));
 
 vi.mock('../logger', () => ({
   logger: mockLogger,

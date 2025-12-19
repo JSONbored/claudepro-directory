@@ -2,11 +2,11 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PrismockClient } from 'prismock';
 import { CompaniesService } from './companies.ts';
 
-// Mock the prisma singleton with Prismock
-vi.mock('../prisma/client.ts', () => {
-  const { setupPrismockMock } = require('../test-utils/prisma-mock.ts');
+// Mock the prisma singleton with Prismock (async to avoid Node.js TS processing issue)
+vi.mock('../prisma/client.ts', async () => {
+  const { setupPrismockMockAsync } = await import('../test-utils/prisma-mock.ts');
   return {
-    prisma: setupPrismockMock(),
+    prisma: await setupPrismockMockAsync(),
   };
 });
 

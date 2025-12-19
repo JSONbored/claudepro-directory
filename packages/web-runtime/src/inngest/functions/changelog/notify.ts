@@ -176,7 +176,9 @@ export const processChangelogNotifyQueue = inngest.createFunction(
           };
 
           const service = await getService('misc');
-          await service.upsertNotification(notificationInsert);
+          // Type assertion needed due to exactOptionalPropertyTypes mismatch between dist/src types
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await service.upsertNotification(notificationInsert as any);
 
           notificationInserted = true;
           logger.info({ ...logContext,

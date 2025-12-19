@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useConfetti } from './use-confetti';
 
-// Mock canvas-confetti
-const mockConfetti = vi.fn();
+// Mock canvas-confetti - use vi.hoisted() for variables used in vi.mock()
+const mockConfetti = vi.hoisted(() => vi.fn());
 vi.mock('canvas-confetti', () => ({
   default: mockConfetti,
 }));

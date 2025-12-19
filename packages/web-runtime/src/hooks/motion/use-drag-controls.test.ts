@@ -2,13 +2,13 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useDragControls } from './use-drag-controls';
 
-// Mock motion/react
-const mockDragControls = {
+// Mock motion/react - use vi.hoisted() for variables used in vi.mock()
+const mockDragControls = vi.hoisted(() => ({
   start: vi.fn(),
   stop: vi.fn(),
   cancel: vi.fn(),
-};
-const mockUseDragControls = vi.fn(() => mockDragControls);
+}));
+const mockUseDragControls = vi.hoisted(() => vi.fn(() => mockDragControls));
 
 vi.mock('motion/react', () => ({
   useDragControls: mockUseDragControls,

@@ -1,20 +1,31 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-// Mock safe-action middleware
+// Mock safe-action middleware - properly chain the API to match actual usage
+// authedAction.inputSchema().outputSchema().metadata().action()
 vi.mock('./safe-action.ts', () => {
-  const createActionMock = (schema: any) => ({
+  const createActionMock = (inputSchema: any, outputSchema?: any) => ({
     action: vi.fn((handler) => {
       return async (input: unknown) => {
-        const parsed = schema.parse(input);
-        return handler({ parsedInput: parsed, ctx: { userId: 'test-user-id' } });
+        const parsed = inputSchema.parse(input);
+        const result = await handler({ 
+          parsedInput: parsed, 
+          ctx: { userId: 'test-user-id', userEmail: 'test@example.com' } 
+        });
+        if (outputSchema) {
+          return outputSchema.parse(result);
+        }
+        return result;
       };
     }),
   });
 
   return {
     authedAction: {
-      metadata: vi.fn(() => ({
-        inputSchema: vi.fn((schema) => createActionMock(schema)),
+      inputSchema: vi.fn((inputSchema: any) => ({
+        outputSchema: vi.fn((outputSchema: any) => ({
+          metadata: vi.fn(() => createActionMock(inputSchema, outputSchema)),
+        })),
+        metadata: vi.fn(() => createActionMock(inputSchema)),
       })),
     },
   };
@@ -50,7 +61,18 @@ describe('bookmarks', () => {
       const { addBookmark } = await import('./bookmarks.ts');
       const { runRpc } = await import('./run-rpc-instance.ts');
 
-      const mockResult = { success: true, bookmark_id: 'bookmark-123' };
+      // Mock result must match addBookmarkReturnsSchema structure (AddBookmarkResult composite)
+      const mockResult = { 
+        success: true,
+        bookmark: { 
+          id: '123e4567-e89b-12d3-a456-426614174000', 
+          user_id: '123e4567-e89b-12d3-a456-426614174001', 
+          content_type: 'agents', 
+          content_slug: 'test-agent',
+          notes: 'My notes',
+          created_at: '2024-01-01T00:00:00Z'
+        } 
+      };
       vi.mocked(runRpc).mockResolvedValue(mockResult as any);
 
       const result = await addBookmark({
@@ -81,7 +103,19 @@ describe('bookmarks', () => {
       const { runRpc } = await import('./run-rpc-instance.ts');
       const { revalidatePath, revalidateTag } = await import('next/cache');
 
-      vi.mocked(runRpc).mockResolvedValue({ success: true } as any);
+      // Mock result must match addBookmarkReturnsSchema structure (AddBookmarkResult composite)
+      const mockResult = { 
+        success: true,
+        bookmark: { 
+          id: '123e4567-e89b-12d3-a456-426614174000', 
+          user_id: '123e4567-e89b-12d3-a456-426614174001', 
+          content_type: 'agents', 
+          content_slug: 'test-agent',
+          notes: null,
+          created_at: '2024-01-01T00:00:00Z'
+        } 
+      };
+      vi.mocked(runRpc).mockResolvedValue(mockResult as any);
 
       await addBookmark({
         content_type: 'agents',

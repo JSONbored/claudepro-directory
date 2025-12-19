@@ -236,18 +236,20 @@ export const jobPostingDripCampaign = inngest.createFunction(
       return await jobsService.getJobStatsById(jobId);
     });
 
-    if (jobStats && jobStats.status === 'active') {
+    if (jobStats && jobStats['status'] === 'active') {
       await step.run('send-performance-report', async () => {
+        const viewCount = Number(jobStats['view_count'] || 0);
+        const clickCount = Number(jobStats['click_count'] || 0);
         const result = await sendEmail({
           to: employerEmail,
           from: FROM_EMAIL,
-          subject: `📊 Your job posting stats: ${jobStats.view_count || 0} views`,
+          subject: `📊 Your job posting stats: ${viewCount} views`,
           html: buildPerformanceReportEmail(
             safeJobTitle,
             jobSlug,
             safeName,
-            jobStats.view_count || 0,
-            jobStats.click_count || 0
+            viewCount,
+            clickCount
           ),
         });
 

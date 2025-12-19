@@ -3,29 +3,31 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCopyToClipboard, useButtonSuccess } from './use-copy-to-clipboard';
 import type { UseCopyToClipboardOptions, UseButtonSuccessOptions } from './use-copy-to-clipboard';
 
-// Mock dependencies
-vi.mock('./use-boolean', () => ({
-  useBoolean: vi.fn((initialValue = false) => {
-    const [value, setValue] = vi.hoisted(() => {
-      let state = initialValue;
-      return [
-        () => state,
-        (newValue: boolean | ((prev: boolean) => boolean)) => {
-          state = typeof newValue === 'function' ? newValue(state) : newValue;
-        },
-      ];
-    })();
-
+// Mock dependencies - hoist state outside of vi.mock()
+const createMockUseBoolean = vi.hoisted(() => {
+  const stateMap = new Map<symbol, boolean>();
+  return (initialValue = false) => {
+    const id = Symbol();
+    stateMap.set(id, initialValue);
     return {
-      value: value(),
+      value: () => stateMap.get(id) ?? initialValue,
       setValue: (newValue: boolean | ((prev: boolean) => boolean)) => {
-        setValue(newValue);
+        const current = stateMap.get(id) ?? initialValue;
+        const next = typeof newValue === 'function' ? newValue(current) : newValue;
+        stateMap.set(id, next);
       },
-      setTrue: () => setValue(true),
-      setFalse: () => setValue(false),
-      toggle: () => setValue((prev) => !prev),
+      setTrue: () => stateMap.set(id, true),
+      setFalse: () => stateMap.set(id, false),
+      toggle: () => {
+        const current = stateMap.get(id) ?? initialValue;
+        stateMap.set(id, !current);
+      },
     };
-  }),
+  };
+});
+
+vi.mock('./use-boolean', () => ({
+  useBoolean: createMockUseBoolean,
 }));
 
 vi.mock('./use-timeout', () => ({

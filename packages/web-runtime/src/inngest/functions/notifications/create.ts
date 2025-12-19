@@ -115,7 +115,9 @@ export const createNotification = inngest.createFunction(
       }
 
       const service = await getService('misc');
-      const data = await service.insertNotification(notificationData);
+      // Type assertion needed due to exactOptionalPropertyTypes mismatch between dist/src types
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data = await service.insertNotification(notificationData as any);
 
       return { id: data.id };
     });
@@ -215,7 +217,9 @@ export const broadcastNotification = inngest.createFunction(
       }
 
       const service = await getService('misc');
-      const data = await service.insertNotification(notificationData);
+      // Type assertion needed due to exactOptionalPropertyTypes mismatch between dist/src types
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data = await service.insertNotification(notificationData as any);
 
       return { id: data.id };
     });

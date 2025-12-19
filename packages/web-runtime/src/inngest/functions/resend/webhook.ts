@@ -85,7 +85,9 @@ async function incrementEngagementCounter(
 
   if (healthStatus) updateData.health_status = healthStatus;
 
-  await service.upsertEmailEngagementSummary(updateData);
+      // Type assertion needed due to exactOptionalPropertyTypes mismatch between dist/src types
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await service.upsertEmailEngagementSummary(updateData as any);
 }
 
 /**
@@ -222,6 +224,8 @@ export const handleResendWebhook = inngest.createFunction(
 
           await step.run(`update-engagement-bounced-${email}`, async () => {
             const service = await getService('misc');
+            // Type assertion needed due to exactOptionalPropertyTypes mismatch between dist/src types
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await service.upsertEmailEngagementSummary({
               email,
               emails_bounced: 1,
@@ -262,6 +266,8 @@ export const handleResendWebhook = inngest.createFunction(
 
           await step.run(`update-engagement-complaint-${email}`, async () => {
             const service = await getService('misc');
+            // Type assertion needed due to exactOptionalPropertyTypes mismatch between dist/src types
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await service.upsertEmailEngagementSummary({
               email,
               emails_complained: 1,

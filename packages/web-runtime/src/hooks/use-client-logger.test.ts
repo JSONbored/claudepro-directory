@@ -3,33 +3,33 @@ import { renderHook, act } from '@testing-library/react';
 import { useClientLogger } from './use-client-logger';
 import type { UseClientLoggerOptions } from './use-client-logger';
 
-// Mock dependencies
-const mockGetOrCreateSessionId = vi.fn(() => 'session-123');
+// Mock dependencies - use vi.hoisted() for variables used in vi.mock()
+const mockGetOrCreateSessionId = vi.hoisted(() => vi.fn(() => 'session-123'));
 vi.mock('../utils/client-session', () => ({
   getOrCreateSessionId: mockGetOrCreateSessionId,
 }));
 
-const mockCreateClientLogContext = vi.fn((operation: string, context: any) => ({
+const mockCreateClientLogContext = vi.hoisted(() => vi.fn((operation: string, context: any) => ({
   operation,
   ...context,
-}));
+})));
 vi.mock('../utils/client-logger', () => ({
   createClientLogContext: mockCreateClientLogContext,
 }));
 
-const mockChild = vi.fn((bindings: any) => ({
+const mockChild = vi.hoisted(() => vi.fn((bindings: any) => ({
   error: vi.fn(),
   warn: vi.fn(),
   info: vi.fn(),
   debug: vi.fn(),
-}));
-const mockLogger = {
+})));
+const mockLogger = vi.hoisted(() => ({
   child: mockChild,
   error: vi.fn(),
   warn: vi.fn(),
   info: vi.fn(),
   debug: vi.fn(),
-};
+}));
 vi.mock('../logger', () => ({
   logger: mockLogger,
   toLogContextValue: vi.fn((value: unknown) => value),

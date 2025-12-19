@@ -437,7 +437,9 @@ export const SEARCH_CONFIG = {
 // =============================================================================
 
 /** Homepage configuration */
-import { ContentCategory } from '@heyclaude/data-layer/prisma';
+// Import directly from database-types to avoid pulling in prisma client (server-only)
+// Note: database-types exports content_category (lowercase), not ContentCategory
+import { content_category as ContentCategory } from '@heyclaude/database-types/prisma';
 
 export const HOMEPAGE_CONFIG = {
   featured_categories: [

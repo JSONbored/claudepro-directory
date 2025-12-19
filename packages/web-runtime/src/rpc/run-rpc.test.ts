@@ -1,6 +1,24 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { createRunRpc } from './run-rpc.ts';
-import type { RpcClientLike } from './run-rpc.ts';
+import { PrismockClient } from 'prismock';
+
+// Mock Prisma client with Prismock (required for BasePrismaService)
+// Use the same pattern as data-layer service tests - use require() to avoid ESM issues
+vi.mock('@heyclaude/data-layer/prisma/client', () => {
+  const { setupPrismockMock } = require('../../../data-layer/src/test-utils/prisma-mock.ts');
+  return {
+    prisma: setupPrismockMock(),
+  };
+});
+
+// Mock request cache (now properly exported from data-layer package)
+vi.mock('@heyclaude/data-layer', async () => {
+  const actual = await vi.importActual('@heyclaude/data-layer');
+  return {
+    ...actual,
+    withSmartCache: vi.fn((_key, _method, fn) => fn()),
+  };
+});
 
 // Mock dependencies
 vi.mock('../errors.ts', () => ({
@@ -18,72 +36,64 @@ vi.mock('../logger.ts', () => ({
 }));
 
 describe('createRunRpc', () => {
-  let mockClient: RpcClientLike;
-  let createClient: () => Promise<RpcClientLike>;
   let runRpc: ReturnType<typeof createRunRpc>;
+  let mockPrisma: any;
 
-  beforeEach(() => {
-    mockClient = {
-      rpc: vi.fn(),
-    };
-
-    createClient = vi.fn(async () => mockClient);
-    runRpc = createRunRpc({ createClient });
+  beforeEach(async () => {
+    // Get the mocked Prisma instance (Prismock)
+    const { prisma } = await import('@heyclaude/data-layer/prisma/client');
+    mockPrisma = prisma;
+    
+    // Reset mocks
+    vi.clearAllMocks();
+    if (mockPrisma.reset) {
+      mockPrisma.reset();
+    }
+    
+    // Create runRpc instance (no createClient needed - uses Prisma directly)
+    runRpc = createRunRpc();
   });
 
   describe('successful RPC calls', () => {
     it('should return data on successful RPC call', async () => {
       const mockData = { id: '123', name: 'Test' };
-      vi.mocked(mockClient.rpc).mockResolvedValue({
-        data: mockData,
-        error: null,
-      });
+      vi.mocked(mockPrisma.$queryRawUnsafe).mockResolvedValue([mockData] as any);
 
       const result = await runRpc('test_rpc', { arg: 'value' }, {
         action: 'testAction',
       });
 
-      expect(createClient).toHaveBeenCalled();
-      expect(mockClient.rpc).toHaveBeenCalledWith('test_rpc', { arg: 'value' });
+      expect(mockPrisma.$queryRawUnsafe).toHaveBeenCalled();
       expect(result).toEqual(mockData);
     });
 
     it('should pass userId in context', async () => {
-      vi.mocked(mockClient.rpc).mockResolvedValue({
-        data: { success: true },
-        error: null,
-      });
+      vi.mocked(mockPrisma.$queryRawUnsafe).mockResolvedValue([{ success: true }] as any);
 
       await runRpc('test_rpc', {}, {
         action: 'testAction',
         userId: 'user123',
       });
 
-      expect(mockClient.rpc).toHaveBeenCalled();
+      expect(mockPrisma.$queryRawUnsafe).toHaveBeenCalled();
     });
 
     it('should include metadata in context', async () => {
-      vi.mocked(mockClient.rpc).mockResolvedValue({
-        data: { success: true },
-        error: null,
-      });
+      vi.mocked(mockPrisma.$queryRawUnsafe).mockResolvedValue([{ success: true }] as any);
 
       await runRpc('test_rpc', {}, {
         action: 'testAction',
         meta: { source: 'api' },
       });
 
-      expect(mockClient.rpc).toHaveBeenCalled();
+      expect(mockPrisma.$queryRawUnsafe).toHaveBeenCalled();
     });
   });
 
   describe('error handling', () => {
     it('should throw normalized error on RPC failure', async () => {
-      const rpcError = { message: 'RPC failed', code: 'PGRST116' };
-      vi.mocked(mockClient.rpc).mockResolvedValue({
-        data: null,
-        error: rpcError,
-      });
+      const dbError = new Error('Database error');
+      vi.mocked(mockPrisma.$queryRawUnsafe).mockRejectedValue(dbError);
 
       await expect(
         runRpc('test_rpc', {}, { action: 'testAction' })
@@ -92,12 +102,9 @@ describe('createRunRpc', () => {
 
     it('should log RPC errors with context', async () => {
       const { logActionFailure } = await import('../errors.ts');
-      const rpcError = { message: 'Database error' };
+      const dbError = new Error('Database error');
       
-      vi.mocked(mockClient.rpc).mockResolvedValue({
-        data: null,
-        error: rpcError,
-      });
+      vi.mocked(mockPrisma.$queryRawUnsafe).mockRejectedValue(dbError);
 
       await expect(
         runRpc('test_rpc', { param: 'value' }, {
@@ -117,10 +124,8 @@ describe('createRunRpc', () => {
 
     it('should include RPC name and args in error context', async () => {
       const { logActionFailure } = await import('../errors.ts');
-      vi.mocked(mockClient.rpc).mockResolvedValue({
-        data: null,
-        error: { message: 'Error' },
-      });
+      const dbError = new Error('Database error');
+      vi.mocked(mockPrisma.$queryRawUnsafe).mockRejectedValue(dbError);
 
       await expect(
         runRpc('test_rpc', { arg1: 'val1', arg2: 42 }, { action: 'testAction' })
@@ -137,39 +142,21 @@ describe('createRunRpc', () => {
         })
       );
     });
-
-    it('should handle client creation failure', async () => {
-      const clientError = new Error('Failed to create client');
-      createClient = vi.fn(async () => {
-        throw clientError;
-      });
-      runRpc = createRunRpc({ createClient });
-
-      await expect(
-        runRpc('test_rpc', {}, { action: 'testAction' })
-      ).rejects.toThrow('Failed to create client');
-    });
   });
 
   describe('edge cases', () => {
     it('should handle null data', async () => {
-      vi.mocked(mockClient.rpc).mockResolvedValue({
-        data: null,
-        error: null,
-      });
+      vi.mocked(mockPrisma.$queryRawUnsafe).mockResolvedValue([null] as any);
 
       const result = await runRpc('test_rpc', {}, { action: 'testAction' });
       expect(result).toBeNull();
     });
 
     it('should handle empty args object', async () => {
-      vi.mocked(mockClient.rpc).mockResolvedValue({
-        data: { success: true },
-        error: null,
-      });
+      vi.mocked(mockPrisma.$queryRawUnsafe).mockResolvedValue([{ success: true }] as any);
 
       const result = await runRpc('test_rpc', {}, { action: 'testAction' });
-      expect(mockClient.rpc).toHaveBeenCalledWith('test_rpc', {});
+      expect(mockPrisma.$queryRawUnsafe).toHaveBeenCalled();
       expect(result).toEqual({ success: true });
     });
 
@@ -179,25 +166,19 @@ describe('createRunRpc', () => {
         pagination: { limit: 10, offset: 0 },
       };
 
-      vi.mocked(mockClient.rpc).mockResolvedValue({
-        data: [],
-        error: null,
-      });
+      vi.mocked(mockPrisma.$queryRawUnsafe).mockResolvedValue([[]] as any);
 
       await runRpc('test_rpc', complexArgs, { action: 'testAction' });
-      expect(mockClient.rpc).toHaveBeenCalledWith('test_rpc', complexArgs);
+      expect(mockPrisma.$queryRawUnsafe).toHaveBeenCalled();
     });
   });
 
   describe('type safety', () => {
     it('should allow custom RPC types', async () => {
       type CustomRpc = 'custom_rpc_1' | 'custom_rpc_2';
-      const customRunRpc = createRunRpc<CustomRpc>({ createClient });
+      const customRunRpc = createRunRpc<CustomRpc>();
 
-      vi.mocked(mockClient.rpc).mockResolvedValue({
-        data: { result: 'custom' },
-        error: null,
-      });
+      vi.mocked(mockPrisma.$queryRawUnsafe).mockResolvedValue([{ result: 'custom' }] as any);
 
       const result = await customRunRpc('custom_rpc_1', {}, {
         action: 'customAction',
@@ -212,10 +193,7 @@ describe('createRunRpc', () => {
         count: number;
       }
 
-      vi.mocked(mockClient.rpc).mockResolvedValue({
-        data: { id: 'test', count: 5 },
-        error: null,
-      });
+      vi.mocked(mockPrisma.$queryRawUnsafe).mockResolvedValue([{ id: 'test', count: 5 }] as any);
 
       const result = await runRpc<TestResult>('test_rpc', {}, {
         action: 'testAction',

@@ -2,32 +2,50 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useUnifiedSearch } from './use-unified-search.ts';
 
-// Mock useLocalStorage
-vi.mock('./use-local-storage.ts', () => ({
-  useLocalStorage: vi.fn((key: string, options: any) => {
-    const [value, setValue] = vi.hoisted(() => {
-      const state = { value: options?.defaultValue || 'trending', setValue: vi.fn() };
-      state.setValue = vi.fn((newValue) => {
-        state.value = typeof newValue === 'function' ? newValue(state.value) : newValue;
+// Mock useLocalStorage - hoist state outside of vi.mock()
+const createMockUseLocalStorage = vi.hoisted(() => {
+  const stateMap = new Map<symbol, { value: any; setValue: ReturnType<typeof vi.fn> }>();
+  return (key: string, options: any) => {
+    const id = Symbol(key);
+    if (!stateMap.has(id)) {
+      const setValueFn = vi.fn((newValue: any) => {
+        const current = stateMap.get(id);
+        if (current) {
+          current.value = typeof newValue === 'function' ? newValue(current.value) : newValue;
+        }
       });
-      return [state.value, state.setValue];
-    })();
-    return { value, setValue };
-  }),
+      stateMap.set(id, { value: options?.defaultValue || 'trending', setValue: setValueFn });
+    }
+    const state = stateMap.get(id)!;
+    return { value: state.value, setValue: state.setValue };
+  };
+});
+
+vi.mock('./use-local-storage.ts', () => ({
+  useLocalStorage: createMockUseLocalStorage,
 }));
 
-// Mock useBoolean
-vi.mock('./use-boolean.ts', () => ({
-  useBoolean: vi.fn(() => {
-    const [value, setValue] = vi.hoisted(() => {
-      const state = { value: false, setValue: vi.fn() };
-      state.setValue = vi.fn((newValue) => {
-        state.value = typeof newValue === 'function' ? newValue(state.value) : newValue;
+// Mock useBoolean - hoist state outside of vi.mock()
+const createMockUseBoolean = vi.hoisted(() => {
+  const stateMap = new Map<symbol, { value: boolean; setValue: ReturnType<typeof vi.fn> }>();
+  return () => {
+    const id = Symbol();
+    if (!stateMap.has(id)) {
+      const setValueFn = vi.fn((newValue: boolean | ((prev: boolean) => boolean)) => {
+        const current = stateMap.get(id);
+        if (current) {
+          current.value = typeof newValue === 'function' ? newValue(current.value) : newValue;
+        }
       });
-      return [state.value, state.setValue];
-    })();
-    return { value, setValue };
-  }),
+      stateMap.set(id, { value: false, setValue: setValueFn });
+    }
+    const state = stateMap.get(id)!;
+    return { value: state.value, setValue: state.setValue };
+  };
+});
+
+vi.mock('./use-boolean.ts', () => ({
+  useBoolean: createMockUseBoolean,
 }));
 
 describe('useUnifiedSearch', () => {

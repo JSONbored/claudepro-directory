@@ -44,20 +44,21 @@ export default defineConfig({
 
     // Environment based on file extension
     // Component tests (.tsx) need jsdom, server tests (.ts) use node
+    // NOTE: .spec.ts files are Playwright E2E tests, excluded from Vitest
     environment: 'node',
     environmentMatchGlobs: [
       // React component tests need jsdom
       ['**/*.test.tsx', 'jsdom'],
-      ['**/*.spec.tsx', 'jsdom'],
       // Server-side tests use node (default)
       ['**/*.test.ts', 'node'],
-      ['**/*.spec.ts', 'node'],
     ],
 
     // Include test files (only in source directories, not node_modules)
+    // NOTE: .spec.ts files are Playwright E2E tests, not Vitest unit tests
+    // Only include .test.ts files for Vitest unit tests
     include: [
-      'packages/**/*.{test,spec}.{ts,tsx}',
-      'apps/**/*.{test,spec}.{ts,tsx}',
+      'packages/**/*.test.{ts,tsx}',
+      'apps/**/*.test.{ts,tsx}',
     ],
 
     // Exclude patterns
@@ -69,6 +70,7 @@ export default defineConfig({
       '**/.turbo/**',
       '**/*.generated.{ts,tsx}', // Exclude auto-generated files
       'apps/edge/functions/**', // Edge functions use Deno, test separately
+      '**/*.spec.{ts,tsx}', // Exclude Playwright E2E tests (.spec.ts files)
     ],
 
     // Coverage configuration
@@ -137,79 +139,110 @@ export default defineConfig({
         test: {
           name: 'shared-runtime',
           root: './packages/shared-runtime',
-          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+          include: ['src/**/*.test.{ts,tsx}'],
           environment: 'node',
           pool: 'threads',
           // Smaller package with fewer tests - use fewer workers
           maxWorkers: process.env.CI ? 1 : 2,
           minWorkers: 1,
+          sequence: {
+            groupOrder: 1,
+          },
         },
       },
       {
         test: {
           name: 'data-layer',
           root: './packages/data-layer',
-          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+          include: ['src/**/*.test.{ts,tsx}'],
           environment: 'node',
           pool: 'threads',
           // Smaller package with fewer tests - use fewer workers
           maxWorkers: process.env.CI ? 1 : 2,
           minWorkers: 1,
+          sequence: {
+            groupOrder: 2,
+          },
         },
       },
       {
         test: {
           name: 'web-runtime-node',
           root: './packages/web-runtime',
-          include: ['src/**/*.{test,spec}.ts'],
-          exclude: ['src/**/*.{test,spec}.tsx'],
+          include: ['src/**/*.test.ts'],
+          exclude: ['src/**/*.test.tsx', 'src/hooks/**/*.test.ts'],
           environment: 'node',
           pool: 'threads',
           // Medium package - balance workers for performance
           maxWorkers: process.env.CI ? 2 : 3,
           minWorkers: 1,
+          sequence: {
+            groupOrder: 3,
+          },
+        },
+      },
+      {
+        test: {
+          name: 'web-runtime-hooks',
+          root: './packages/web-runtime',
+          include: ['src/hooks/**/*.test.ts'],
+          environment: 'jsdom',
+          pool: 'threads',
+          // React hook tests need jsdom - slightly more resource intensive
+          maxWorkers: process.env.CI ? 2 : 3,
+          minWorkers: 1,
+          sequence: {
+            groupOrder: 3.5,
+          },
         },
       },
       {
         test: {
           name: 'web-runtime-react',
           root: './packages/web-runtime',
-          include: ['src/**/*.{test,spec}.tsx'],
+          include: ['src/**/*.test.tsx'],
           environment: 'jsdom',
           pool: 'threads',
           // React tests need jsdom - slightly more resource intensive
           maxWorkers: process.env.CI ? 2 : 3,
           minWorkers: 1,
+          sequence: {
+            groupOrder: 4,
+          },
         },
       },
       {
         test: {
           name: 'generators',
           root: './packages/generators',
-          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+          include: ['src/**/*.test.{ts,tsx}'],
           environment: 'node',
           pool: 'threads',
           // Smaller package with fewer tests - use fewer workers
           maxWorkers: process.env.CI ? 1 : 2,
           minWorkers: 1,
+          sequence: {
+            groupOrder: 5,
+          },
         },
       },
       {
         test: {
           name: 'web-app',
           root: './apps/web',
-          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+          include: ['src/**/*.test.{ts,tsx}'],
           environmentMatchGlobs: [
             ['**/*.test.tsx', 'jsdom'],
-            ['**/*.spec.tsx', 'jsdom'],
             ['**/*.test.ts', 'node'],
-            ['**/*.spec.ts', 'node'],
           ],
           pool: 'threads',
           // Larger app with more tests - can use more workers
           // Use percentage for local (75% of cores), fixed for CI (better predictability)
           maxWorkers: process.env.CI ? 4 : '75%',
           minWorkers: 1,
+          sequence: {
+            groupOrder: 6,
+          },
         },
       },
     ],

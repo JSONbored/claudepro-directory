@@ -3,20 +3,20 @@ import { renderHook, act } from '@testing-library/react';
 import { useCardNavigation } from './use-card-navigation';
 import type { UseCardNavigationOptions } from './use-card-navigation';
 
-// Mock dependencies
-const mockPush = vi.fn();
-const mockRouter = {
+// Mock dependencies - use vi.hoisted() for variables used in vi.mock()
+const mockPush = vi.hoisted(() => vi.fn());
+const mockRouter = vi.hoisted(() => ({
   push: mockPush,
   refresh: vi.fn(),
   back: vi.fn(),
   forward: vi.fn(),
-};
+}));
 
 vi.mock('next/navigation', () => ({
   useRouter: () => mockRouter,
 }));
 
-const mockNavigateWithTransition = vi.fn();
+const mockNavigateWithTransition = vi.hoisted(() => vi.fn());
 vi.mock('../client/view-transitions', () => ({
   navigateWithTransition: mockNavigateWithTransition,
 }));
