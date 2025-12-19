@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { PrismockClient } from 'prismock';
+import type { MockPrismaClient } from '../test-utils/prisma-mock.ts';
 import { SearchService } from './search.ts';
 
 // Mock the prisma singleton with Prismock (async to avoid Node.js TS processing issue)

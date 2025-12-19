@@ -20,7 +20,9 @@ import { minify } from 'terser';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const serviceWorkerPath = resolve(__dirname, '../apps/web/public/scripts/service-worker-init.js');
+// Path calculation: from packages/generators/src/bin/ to apps/web/public/scripts/
+// Go up 4 levels: bin -> src -> generators -> packages -> root, then into apps/web
+const serviceWorkerPath = resolve(__dirname, '../../../../apps/web/public/scripts/service-worker-init.js');
 
 async function minifyServiceWorker() {
   try {

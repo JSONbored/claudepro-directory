@@ -6,6 +6,7 @@
  * 1. Create/update the prisma/index.ts barrel export file
  * 2. Fix any import extensions that Prisma generators might have broken
  * 3. Verify all generators produced expected output
+ * 4. Fix Node.js v25 TypeScript processing issue in Prisma client
  * 
  * This ensures that @heyclaude/database-types/prisma exports work correctly
  * even though Prisma-generated files are excluded from TypeScript compilation.
@@ -13,8 +14,8 @@
 
 import { writeFile, readFile, access, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { logger } from '../packages/generators/src/toolkit/logger.ts';
-import { normalizeError } from '../packages/shared-runtime/src/error-handling.ts';
+import { logger } from '../toolkit/logger.ts';
+import { normalizeError } from '../../../shared-runtime/src/error-handling.ts';
 
 const PRISMA_INDEX_PATH = join(
   process.cwd(),

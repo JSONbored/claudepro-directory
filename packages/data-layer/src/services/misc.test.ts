@@ -1,12 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { PrismockClient } from 'prismock';
+import type { MockPrismaClient } from '../test-utils/prisma-mock.ts';
 import { MiscService } from './misc.ts';
 
-// Mock the prisma singleton with Prismock
-vi.mock('../prisma/client.ts', () => {
-  const { setupPrismockMock } = require('../test-utils/prisma-mock.ts');
+// Mock the prisma singleton with Prismock (async to avoid Node.js TS processing issue)
+vi.mock('../prisma/client.ts', async () => {
+  const { setupPrismockMockAsync } = await import('../test-utils/prisma-mock.ts');
   return {
-    prisma: setupPrismockMock(),
+    prisma: await setupPrismockMockAsync(),
   };
 });
 
@@ -22,12 +22,12 @@ vi.mock('../utils/request-cache.ts', () => ({
 
 describe('MiscService', () => {
   let miscService: MiscService;
-  let prismock: PrismockClient;
+  let prismock: MockPrismaClient;
 
   beforeEach(async () => {
     // Get the mocked prisma instance (Prismock)
     const { prisma } = await import('../prisma/client.ts');
-    prismock = prisma as PrismockClient;
+    prismock = prisma as MockPrismaClient;
 
     // Reset Prismock data before each test
     prismock.reset();

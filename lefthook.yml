@@ -1,6 +1,7 @@
 # Lefthook Configuration - Claude Pro Directory
-# Version: 4.0.0 (Optimized - December 2025)
+# Version: 4.1.0 (Optimized - December 2025)
 # Optimized for large codebase: Reduced from 18→5 pre-commit groups, 15→4 pre-push commands
+# Added: Infisical secrets scanning as blocking step in pre-commit and pre-push
 
 # ============================================================================
 # OUTPUT CONTROL
@@ -13,13 +14,57 @@ output:
 
 # ============================================================================
 # PRE-COMMIT: Fast, parallel, smart grouping
-# Only TypeScript type checking blocks commits
+# Secrets scanning and TypeScript type checking block commits
 # Linting and tests run but don't block
 # ============================================================================
 pre-commit:
   parallel: true
   follow: true
   commands:
+    # GROUP 0: CRITICAL SECURITY - Secrets scanning (BLOCKING)
+    # Must run first and block commits if secrets are detected
+    secrets-scan:
+      glob: "**/*"
+      run: |
+        echo "🔒 Scanning for secrets in staged files..."
+        START=$(date +%s%N)
+        
+        # Check if Infisical CLI is available
+        if ! command -v infisical >/dev/null 2>&1; then
+          echo "⚠️  Infisical CLI not found - secrets scanning skipped"
+          echo "   Install: brew install infisical/get-cli/infisical"
+          echo "   Or: https://infisical.com/docs/cli/overview"
+          echo "   ⚠️  WARNING: Secrets scanning is disabled without Infisical CLI"
+          exit 0
+        fi
+        
+        # Scan staged files for secrets (BLOCKING)
+        # --staged: Only scan files in git staging area
+        # --exit-code 1: Exit with error code if secrets found (default)
+        # --silent: Disable tip/info messages for cleaner output
+        # --redact: Redact secrets from output (security best practice)
+        if infisical scan git-changes --staged --silent --redact; then
+          DURATION=$(( ($(date +%s%N) - START) / 1000000 ))
+          echo "✅ Secrets scan passed (${DURATION}ms)"
+        else
+          echo ""
+          echo "❌ SECURITY ALERT: Secrets detected in staged files!"
+          echo ""
+          echo "🔒 Action Required:"
+          echo "   1. Remove hardcoded secrets from your code"
+          echo "   2. Use environment variables via Infisical instead"
+          echo "   3. For local dev: infisical run --env=dev -- <command>"
+          echo "   4. Never commit secrets, API keys, tokens, or passwords"
+          echo ""
+          echo "💡 Common fixes:"
+          echo "   • Replace: const apiKey = 'sk-...'"
+          echo "   • With: const apiKey = process.env['API_KEY']"
+          echo "   • Or use: infisical run --env=dev -- <command>"
+          echo ""
+          exit 1
+        fi
+      fail_text: "❌ SECURITY: Secrets detected in staged files. Remove hardcoded secrets before committing."
+
     # GROUP 1: Critical blocking checks (TypeScript only)
     critical:
       glob: "**/*.{ts,tsx}"
@@ -173,14 +218,60 @@ pre-commit:
       fail_text: "💡 Quick insights (non-blocking)."
 
 # ============================================================================
-# PRE-PUSH: Type checking blocks, everything else is non-blocking
-# Only TypeScript type checking blocks pushes
+# PRE-PUSH: Secrets scanning and type checking block, everything else is non-blocking
+# Secrets scanning and TypeScript type checking block pushes
 # Build, linting, and tests run but don't block
 # ============================================================================
 pre-push:
   parallel: false
   commands:
-    # Type checking (only blocking check)
+    # CRITICAL SECURITY - Secrets scanning (BLOCKING)
+    # Must run first and block pushes if secrets are detected
+    secrets-scan:
+      run: |
+        echo "🔒 Scanning for secrets in uncommitted changes..."
+        START=$(date +%s%N)
+        
+        # Check if Infisical CLI is available
+        if ! command -v infisical >/dev/null 2>&1; then
+          echo "⚠️  Infisical CLI not found - secrets scanning skipped"
+          echo "   Install: brew install infisical/get-cli/infisical"
+          echo "   Or: https://infisical.com/docs/cli/overview"
+          echo "   ⚠️  WARNING: Secrets scanning is disabled without Infisical CLI"
+          echo "   💡 CI/CD will still scan with TruffleHog (see .github/workflows/security.yml)"
+          exit 0
+        fi
+        
+        # Scan all uncommitted changes for secrets (BLOCKING)
+        # Without --staged: Scans all uncommitted changes (staged + unstaged)
+        # --silent: Disable tip/info messages for cleaner output
+        # --redact: Redact secrets from output (security best practice)
+        if infisical scan git-changes --silent --redact; then
+          DURATION=$(( ($(date +%s%N) - START) / 1000000 ))
+          echo "✅ Secrets scan passed (${DURATION}ms)"
+        else
+          echo ""
+          echo "❌ SECURITY ALERT: Secrets detected in uncommitted changes!"
+          echo ""
+          echo "🔒 Action Required:"
+          echo "   1. Remove hardcoded secrets from your code"
+          echo "   2. Use environment variables via Infisical instead"
+          echo "   3. For local dev: infisical run --env=dev -- <command>"
+          echo "   4. Never commit secrets, API keys, tokens, or passwords"
+          echo ""
+          echo "💡 Common fixes:"
+          echo "   • Replace: const apiKey = 'sk-...'"
+          echo "   • With: const apiKey = process.env['API_KEY']"
+          echo "   • Or use: infisical run --env=dev -- <command>"
+          echo ""
+          echo "🔍 To see detailed findings (without redaction):"
+          echo "   infisical scan git-changes --verbose"
+          echo ""
+          exit 1
+        fi
+      fail_text: "❌ SECURITY: Secrets detected in uncommitted changes. Remove hardcoded secrets before pushing."
+
+    # Type checking (blocking check)
     type-check:
       run: |
         echo "🔍 Running type checking..."
@@ -571,6 +662,7 @@ pre-push:
         echo "📋 Pre-push Summary & Quick Actions"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
+        echo "✅ Secrets scanning: PASSED (blocking check)"
         echo "✅ Type checking: PASSED (blocking check)"
         echo ""
         echo "💡 Quick Actions (if needed):"
@@ -580,6 +672,7 @@ pre-push:
         echo "   • Check circular:    pnpm analyze:circular"
         echo "   • Run tests:          pnpm test"
         echo "   • Visual tests:        pnpm test:visual"
+        echo "   • Scan for secrets:   infisical scan git-changes --verbose"
         echo ""
         echo "📚 Documentation:"
         echo "   • Logging standards:  .cursor/rules/logging-instrumentation.mdc"
@@ -662,12 +755,26 @@ min_version: 1.13.0
 # ============================================================================
 # USAGE TIPS & HELPFUL COMMANDS
 # ============================================================================
+# Install Infisical CLI (required for secrets scanning):
+#   brew install infisical/get-cli/infisical
+#   Or: https://infisical.com/docs/cli/overview
+#
+# Authenticate Infisical:
+#   infisical login
+#
+# Verify secrets scanning works:
+#   infisical scan git-changes --staged --verbose
+#
 # Skip specific commands:
 #   LEFTHOOK_EXCLUDE=critical,edge git commit
 #   LEFTHOOK_EXCLUDE=build,linting,tests,code-quality git push
 #
 # Skip commit-msg validation:
 #   LEFTHOOK_EXCLUDE=commit-msg git commit
+#
+# Skip secrets scanning (NOT RECOMMENDED - security risk):
+#   LEFTHOOK_EXCLUDE=secrets-scan git commit
+#   LEFTHOOK_EXCLUDE=secrets-scan git push
 #
 # Skip build verification (when env vars missing):
 #   LEFTHOOK_EXCLUDE=build git push

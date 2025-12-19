@@ -95,7 +95,7 @@
         "prisma/zod-generator.config.json",
         "package.json",
         "pnpm-lock.yaml",
-        "scripts/post-prisma-generate.ts",
+        "packages/generators/src/scripts/post-prisma-generate.ts",
         "packages/generators/src/prisma-postgres-types-generator/**/*"
       ],
       "cache": true,

@@ -2,6 +2,7 @@ import 'server-only';
 
 import { type GenerateMetadataCompleteReturns } from '@heyclaude/database-types/postgres-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
+import { cacheLife, cacheTag } from 'next/cache';
 
 import { createDataFunction } from '../cached-data-factory.ts';
 
@@ -135,6 +136,14 @@ export async function getSEOMetadata(
       schemas: GenerateMetadataCompleteReturns['schemas'];
     }
 > {
+  'use cache';
+
+  // SEO metadata is rarely changing, so use 'long' cacheLife profile
+  // 1 day stale, 6hr revalidate, 30 days expire
+  cacheLife('long');
+  cacheTag('seo-metadata');
+  cacheTag(`seo-metadata-${route}`);
+
   if (shouldSkipRpcCall()) {
     return null;
   }
@@ -142,6 +151,7 @@ export async function getSEOMetadata(
   const includeSchemas = options?.includeSchemas ?? false;
 
   // During build time: RPC call is deterministic (uses stored database data)
+  // With 'use cache' directive, Next.js treats this as a cache component
   // Request cache already skips Date.now() during build, so this is safe
   // At runtime: Next.js 'use cache' uses cached result (no RPC call if cache valid)
   return await getSEOMetadataInternal({ includeSchemas, route });

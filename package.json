@@ -29,8 +29,8 @@
     "packages/*"
   ],
   "scripts": {
-    "prisma:generate:exec": "infisical run --env=dev -- prisma generate && tsx scripts/post-prisma-generate.ts",
-    "postgenerate": "tsx scripts/post-prisma-generate.ts",
+    "prisma:generate:exec": "infisical run --env=dev --recursive -- sh -c 'prisma generate && tsx packages/generators/src/scripts/post-prisma-generate.ts'",
+    "postgenerate": "tsx packages/generators/src/scripts/post-prisma-generate.ts",
     "generators:build": "pnpm --filter @heyclaude/generators build",
     "deploy:web": "vercel",
     "deploy:edge": "infisical run --env=dev -- tsx packages/generators/src/bin/deploy-functions.ts",
@@ -45,7 +45,7 @@
     "build:force": "turbo run build --force",
     "build:clean": "rm -rf .turbo packages/*/dist packages/*/.tsbuildinfo && turbo run build --force",
     "build:analyze": "TURBOPACK_STATS=1 next build apps/web --turbopack",
-    "build:sw": "tsx scripts/minify-service-worker.ts",
+    "build:sw": "tsx packages/generators/src/bin/minify-service-worker.ts",
     "build:web": "pnpm build:sw && turbo run build --filter=web",
     "build:web:dev": "infisical run --env=dev --recursive -- sh -c 'pnpm build:sw && pnpm --filter web build --debug-prerender'",
     "analyze:bundle": "cd apps/web && ANALYZE=true pnpm build",
@@ -64,7 +64,6 @@
     "generate:readme": "turbo run generate:readme:exec",
     "sync:db": "infisical run --env=dev -- pnpm exec heyclaude-sync-db --skip-dump",
     "sync:db:full": "infisical run --env=dev -- pnpm exec heyclaude-sync-db",
-    "setup:betterstack": "tsx scripts/setup-betterstack-monitors.ts",
     "cache:info": "turbo run cache:info:exec",
     "cache:clear": "turbo run cache:clear:exec",
     "webhooks:replay": "turbo run webhooks:replay:exec",
