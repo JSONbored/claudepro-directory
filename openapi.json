@@ -16,28 +16,6 @@
     }
   ],
   "paths": {
-    "/api/v1/trending": {
-      "get": {
-        "summary": "Get trending, popular, or recent content",
-        "description": "Returns trending, popular, or recent content based on tab selection. Supports both page and sidebar modes with category filtering.",
-        "tags": [
-          "content",
-          "trending"
-        ],
-        "operationId": "getTrending",
-        "responses": {
-          "200": {
-            "description": "Trending content retrieved successfully"
-          },
-          "400": {
-            "description": "Invalid tab or category parameter"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
     "/api/v1/templates": {
       "get": {
         "summary": "Get content templates by category",
@@ -53,6 +31,84 @@
           },
           "400": {
             "description": "Invalid or missing category parameter"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/trending": {
+      "get": {
+        "summary": "Get trending, popular, or recent content",
+        "description": "Returns trending, popular, or recent content based on tab selection. Supports both page and sidebar modes with category filtering.",
+        "tags": [
+          "content",
+          "trending"
+        ],
+        "operationId": "getTrending",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tab",
+            "schema": {
+              "description": "Trending page tab selection",
+              "example": "trending",
+              "enum": [
+                "trending",
+                "popular",
+                "recent"
+              ],
+              "default": "trending",
+              "type": "string"
+            },
+            "description": "Trending page tab selection"
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "description": "Content category filter (use \"all\" or omit for all categories)",
+              "example": "skills",
+              "type": "string"
+            },
+            "description": "Content category filter (use \"all\" or omit for all categories)"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "description": "Maximum number of results to return (1-100)",
+              "example": 12,
+              "minimum": 1,
+              "maximum": 100,
+              "default": 12,
+              "type": "integer"
+            },
+            "description": "Maximum number of results to return (1-100)"
+          },
+          {
+            "in": "query",
+            "name": "mode",
+            "schema": {
+              "description": "Response mode (page or sidebar)",
+              "example": "page",
+              "enum": [
+                "page",
+                "sidebar"
+              ],
+              "default": "page",
+              "type": "string"
+            },
+            "description": "Response mode (page or sidebar)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trending content retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid tab or category parameter"
           },
           "500": {
             "description": "Internal Server Error"
@@ -85,51 +141,25 @@
         }
       }
     },
-    "/api/v1/sitemap": {
+    "/api/v1/search": {
       "get": {
-        "summary": "Get sitemap in XML or JSON format",
-        "description": "Generates XML or JSON sitemaps for search engines. Supports both XML (default) and JSON formats.",
+        "summary": "Unified search across content, jobs, companies, and users",
+        "description": "Provides comprehensive search with filtering, sorting, pagination, and job-specific filters. Supports content, jobs, companies, and users in a single unified search.",
         "tags": [
-          "sitemap",
-          "seo"
+          "search",
+          "content",
+          "jobs"
         ],
-        "operationId": "getSitemap",
+        "operationId": "search",
         "responses": {
           "200": {
-            "description": "Sitemap generated successfully"
+            "description": "Search results retrieved successfully"
           },
           "400": {
-            "description": "Bad Request"
-          },
-          "500": {
-            "description": "Sitemap generation failed"
-          }
-        }
-      },
-      "post": {
-        "summary": "Submit URLs to IndexNow",
-        "description": "Submits site URLs to IndexNow for search engine indexing. Requires authentication via x-indexnow-trigger-key header.",
-        "tags": [
-          "sitemap",
-          "seo",
-          "indexnow"
-        ],
-        "operationId": "submitIndexNow",
-        "responses": {
-          "200": {
-            "description": "IndexNow submission enqueued successfully"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized - invalid trigger key"
+            "description": "Invalid query parameters"
           },
           "500": {
             "description": "Internal Server Error"
-          },
-          "503": {
-            "description": "Service unavailable - IndexNow keys not configured"
           }
         }
       }
@@ -190,25 +220,51 @@
         }
       }
     },
-    "/api/v1/search": {
+    "/api/v1/sitemap": {
       "get": {
-        "summary": "Unified search across content, jobs, companies, and users",
-        "description": "Provides comprehensive search with filtering, sorting, pagination, and job-specific filters. Supports content, jobs, companies, and users in a single unified search.",
+        "summary": "Get sitemap in XML or JSON format",
+        "description": "Generates XML or JSON sitemaps for search engines. Supports both XML (default) and JSON formats.",
         "tags": [
-          "search",
-          "content",
-          "jobs"
+          "sitemap",
+          "seo"
         ],
-        "operationId": "search",
+        "operationId": "getSitemap",
         "responses": {
           "200": {
-            "description": "Search results retrieved successfully"
+            "description": "Sitemap generated successfully"
           },
           "400": {
-            "description": "Invalid query parameters"
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Sitemap generation failed"
+          }
+        }
+      },
+      "post": {
+        "summary": "Submit URLs to IndexNow",
+        "description": "Submits site URLs to IndexNow for search engine indexing. Requires authentication via x-indexnow-trigger-key header.",
+        "tags": [
+          "sitemap",
+          "seo",
+          "indexnow"
+        ],
+        "operationId": "submitIndexNow",
+        "responses": {
+          "200": {
+            "description": "IndexNow submission enqueued successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized - invalid trigger key"
           },
           "500": {
             "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Service unavailable - IndexNow keys not configured"
           }
         }
       }
@@ -615,6 +671,36 @@
         }
       }
     },
+    "/api/v1/bookmarks/remove": {
+      "post": {
+        "summary": "Remove bookmark",
+        "description": "Removes a bookmark for the authenticated user. Requires authentication.",
+        "tags": [
+          "bookmarks",
+          "user"
+        ],
+        "operationId": "removeBookmark",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bookmark removed successfully"
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/v1/changelog/sync": {
       "post": {
         "summary": "Sync changelog entry",
@@ -707,36 +793,6 @@
         "responses": {
           "200": {
             "description": "Bookmark added successfully"
-          },
-          "400": {
-            "description": "Invalid request body"
-          },
-          "401": {
-            "description": "Unauthorized - user not authenticated"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/v1/bookmarks/remove": {
-      "post": {
-        "summary": "Remove bookmark",
-        "description": "Removes a bookmark for the authenticated user. Requires authentication.",
-        "tags": [
-          "bookmarks",
-          "user"
-        ],
-        "operationId": "removeBookmark",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Bookmark removed successfully"
           },
           "400": {
             "description": "Invalid request body"
@@ -871,6 +927,5705 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "audit_log_entries": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "instance_id": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "object",
+            "description": "[AuditLogPayload]"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ip_address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "ip_address"
+        ]
+      },
+      "flow_state": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "auth_code": {
+            "type": "string"
+          },
+          "code_challenge_method": {
+            "$ref": "#/components/schemas/code_challenge_method"
+          },
+          "code_challenge": {
+            "type": "string"
+          },
+          "provider_type": {
+            "type": "string"
+          },
+          "provider_access_token": {
+            "type": "string"
+          },
+          "provider_refresh_token": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "authentication_method": {
+            "type": "string"
+          },
+          "auth_code_issued_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "saml_relay_states": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/saml_relay_states"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "auth_code",
+          "code_challenge_method",
+          "code_challenge",
+          "provider_type",
+          "authentication_method",
+          "saml_relay_states"
+        ]
+      },
+      "identities": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "provider_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "identity_data": {
+            "type": "object",
+            "description": "[IdentityData]"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "last_sign_in_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "users": {
+            "$ref": "#/components/schemas/auth_users"
+          }
+        },
+        "required": [
+          "provider_id",
+          "user_id",
+          "identity_data",
+          "provider",
+          "id",
+          "users"
+        ]
+      },
+      "instances": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          },
+          "raw_base_config": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "mfa_amr_claims": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "authentication_method": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "sessions": {
+            "$ref": "#/components/schemas/sessions"
+          }
+        },
+        "required": [
+          "session_id",
+          "created_at",
+          "updated_at",
+          "authentication_method",
+          "id",
+          "sessions"
+        ]
+      },
+      "mfa_challenges": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "factor_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verified_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ip_address": {
+            "type": "string"
+          },
+          "otp_code": {
+            "type": "string"
+          },
+          "web_authn_session_data": {
+            "type": "object",
+            "description": "[WebAuthnSessionData]"
+          },
+          "mfa_factors": {
+            "$ref": "#/components/schemas/mfa_factors"
+          }
+        },
+        "required": [
+          "id",
+          "factor_id",
+          "created_at",
+          "ip_address",
+          "mfa_factors"
+        ]
+      },
+      "mfa_factors": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "friendly_name": {
+            "type": "string"
+          },
+          "factor_type": {
+            "$ref": "#/components/schemas/factor_type"
+          },
+          "status": {
+            "$ref": "#/components/schemas/factor_status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "secret": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "last_challenged_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "web_authn_credential": {
+            "type": "object",
+            "description": "[WebAuthnCredential]"
+          },
+          "web_authn_aaguid": {
+            "type": "string"
+          },
+          "last_webauthn_challenge_data": {
+            "type": "object",
+            "description": "[WebAuthnSessionData]"
+          },
+          "mfa_challenges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mfa_challenges"
+            }
+          },
+          "users": {
+            "$ref": "#/components/schemas/auth_users"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "factor_type",
+          "status",
+          "created_at",
+          "updated_at",
+          "mfa_challenges",
+          "users"
+        ]
+      },
+      "oauth_authorizations": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "authorization_id": {
+            "type": "string"
+          },
+          "client_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "redirect_uri": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "string"
+          },
+          "code_challenge": {
+            "type": "string"
+          },
+          "code_challenge_method": {
+            "$ref": "#/components/schemas/code_challenge_method"
+          },
+          "response_type": {
+            "$ref": "#/components/schemas/oauth_response_type"
+          },
+          "status": {
+            "$ref": "#/components/schemas/oauth_authorization_status"
+          },
+          "authorization_code": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "approved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nonce": {
+            "type": "string"
+          },
+          "oauth_clients": {
+            "$ref": "#/components/schemas/oauth_clients"
+          },
+          "users": {
+            "$ref": "#/components/schemas/auth_users"
+          }
+        },
+        "required": [
+          "id",
+          "authorization_id",
+          "client_id",
+          "redirect_uri",
+          "scope",
+          "response_type",
+          "status",
+          "created_at",
+          "expires_at",
+          "oauth_clients"
+        ]
+      },
+      "oauth_client_states": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "provider_type": {
+            "type": "string"
+          },
+          "code_verifier": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "provider_type",
+          "created_at"
+        ]
+      },
+      "oauth_clients": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "client_secret_hash": {
+            "type": "string"
+          },
+          "registration_type": {
+            "$ref": "#/components/schemas/oauth_registration_type"
+          },
+          "redirect_uris": {
+            "type": "string"
+          },
+          "grant_types": {
+            "type": "string"
+          },
+          "client_name": {
+            "type": "string"
+          },
+          "client_uri": {
+            "type": "string"
+          },
+          "logo_uri": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "client_type": {
+            "$ref": "#/components/schemas/oauth_client_type"
+          },
+          "oauth_authorizations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/oauth_authorizations"
+            }
+          },
+          "oauth_consents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/oauth_consents"
+            }
+          },
+          "sessions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/sessions"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "registration_type",
+          "redirect_uris",
+          "grant_types",
+          "created_at",
+          "updated_at",
+          "client_type",
+          "oauth_authorizations",
+          "oauth_consents",
+          "sessions"
+        ]
+      },
+      "oauth_consents": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "client_id": {
+            "type": "string"
+          },
+          "scopes": {
+            "type": "string"
+          },
+          "granted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "oauth_clients": {
+            "$ref": "#/components/schemas/oauth_clients"
+          },
+          "users": {
+            "$ref": "#/components/schemas/auth_users"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "client_id",
+          "scopes",
+          "granted_at",
+          "oauth_clients",
+          "users"
+        ]
+      },
+      "one_time_tokens": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "token_type": {
+            "$ref": "#/components/schemas/one_time_token_type"
+          },
+          "token_hash": {
+            "type": "string"
+          },
+          "relates_to": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "users": {
+            "$ref": "#/components/schemas/auth_users"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "token_type",
+          "token_hash",
+          "relates_to",
+          "created_at",
+          "updated_at",
+          "users"
+        ]
+      },
+      "refresh_tokens": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "instance_id": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "token": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "revoked": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "parent": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "sessions": {
+            "$ref": "#/components/schemas/sessions"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "saml_providers": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sso_provider_id": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "metadata_xml": {
+            "type": "string"
+          },
+          "metadata_url": {
+            "type": "string"
+          },
+          "attribute_mapping": {
+            "type": "object",
+            "description": "[AttributeMapping]"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "name_id_format": {
+            "type": "string"
+          },
+          "sso_providers": {
+            "$ref": "#/components/schemas/sso_providers"
+          }
+        },
+        "required": [
+          "id",
+          "sso_provider_id",
+          "entity_id",
+          "metadata_xml",
+          "sso_providers"
+        ]
+      },
+      "saml_relay_states": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sso_provider_id": {
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string"
+          },
+          "for_email": {
+            "type": "string"
+          },
+          "redirect_to": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "flow_state_id": {
+            "type": "string"
+          },
+          "flow_state": {
+            "$ref": "#/components/schemas/flow_state"
+          },
+          "sso_providers": {
+            "$ref": "#/components/schemas/sso_providers"
+          }
+        },
+        "required": [
+          "id",
+          "sso_provider_id",
+          "request_id",
+          "sso_providers"
+        ]
+      },
+      "schema_migrations": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "version"
+        ]
+      },
+      "sessions": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "factor_id": {
+            "type": "string"
+          },
+          "aal": {
+            "$ref": "#/components/schemas/aal_level"
+          },
+          "not_after": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "refreshed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "user_agent": {
+            "type": "string"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "oauth_client_id": {
+            "type": "string"
+          },
+          "refresh_token_hmac_key": {
+            "type": "string"
+          },
+          "refresh_token_counter": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scopes": {
+            "type": "string"
+          },
+          "mfa_amr_claims": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mfa_amr_claims"
+            }
+          },
+          "refresh_tokens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/refresh_tokens"
+            }
+          },
+          "oauth_clients": {
+            "$ref": "#/components/schemas/oauth_clients"
+          },
+          "users": {
+            "$ref": "#/components/schemas/auth_users"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "mfa_amr_claims",
+          "refresh_tokens",
+          "users"
+        ]
+      },
+      "sso_domains": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.\nThis model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sso_provider_id": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sso_providers": {
+            "$ref": "#/components/schemas/sso_providers"
+          }
+        },
+        "required": [
+          "id",
+          "sso_provider_id",
+          "domain",
+          "sso_providers"
+        ]
+      },
+      "sso_providers": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.\nThis model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "resource_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "saml_providers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/saml_providers"
+            }
+          },
+          "saml_relay_states": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/saml_relay_states"
+            }
+          },
+          "sso_domains": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/sso_domains"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "saml_providers",
+          "saml_relay_states",
+          "sso_domains"
+        ]
+      },
+      "auth_users": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.\nThis model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.",
+        "properties": {
+          "instance_id": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "aud": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "encrypted_password": {
+            "type": "string"
+          },
+          "email_confirmed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "invited_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "confirmation_token": {
+            "type": "string"
+          },
+          "confirmation_sent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recovery_token": {
+            "type": "string"
+          },
+          "recovery_sent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "email_change_token_new": {
+            "type": "string"
+          },
+          "email_change": {
+            "type": "string"
+          },
+          "email_change_sent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_sign_in_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "raw_app_meta_data": {
+            "type": "object",
+            "description": "[RawAppMetaData]"
+          },
+          "raw_user_meta_data": {
+            "type": "object",
+            "description": "[RawUserMetaData]"
+          },
+          "is_super_admin": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "phone_confirmed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "phone_change": {
+            "type": "string"
+          },
+          "phone_change_token": {
+            "type": "string"
+          },
+          "phone_change_sent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "confirmed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "email_change_token_current": {
+            "type": "string"
+          },
+          "email_change_confirm_status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "banned_until": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reauthentication_token": {
+            "type": "string"
+          },
+          "reauthentication_sent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "is_sso_user": {
+            "type": "boolean"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "is_anonymous": {
+            "type": "boolean"
+          },
+          "identities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/identities"
+            }
+          },
+          "mfa_factors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mfa_factors"
+            }
+          },
+          "oauth_authorizations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/oauth_authorizations"
+            }
+          },
+          "oauth_consents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/oauth_consents"
+            }
+          },
+          "one_time_tokens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/one_time_tokens"
+            }
+          },
+          "sessions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/sessions"
+            }
+          },
+          "announcement_dismissals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/announcement_dismissals"
+            }
+          },
+          "contact_submissions_contact_submissions_responded_byTousers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/contact_submissions"
+            }
+          },
+          "contact_submissions_contact_submissions_user_idTousers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/contact_submissions"
+            }
+          },
+          "content_submissions_content_submissions_moderated_byTousers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/content_submissions"
+            }
+          },
+          "content_submissions_content_submissions_submitter_idTousers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/content_submissions"
+            }
+          },
+          "content_votes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/content_votes"
+            }
+          },
+          "notification_dismissals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/notification_dismissals"
+            }
+          },
+          "search_queries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/search_queries"
+            }
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          }
+        },
+        "required": [
+          "id",
+          "is_sso_user",
+          "is_anonymous",
+          "identities",
+          "mfa_factors",
+          "oauth_authorizations",
+          "oauth_consents",
+          "one_time_tokens",
+          "sessions",
+          "announcement_dismissals",
+          "contact_submissions_contact_submissions_responded_byTousers",
+          "contact_submissions_contact_submissions_user_idTousers",
+          "content_submissions_content_submissions_moderated_byTousers",
+          "content_submissions_content_submissions_submitter_idTousers",
+          "content_votes",
+          "notification_dismissals",
+          "search_queries"
+        ]
+      },
+      "announcement_dismissals": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "announcement_id": {
+            "type": "string"
+          },
+          "dismissed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "announcements": {
+            "$ref": "#/components/schemas/announcements"
+          },
+          "users": {
+            "$ref": "#/components/schemas/auth_users"
+          }
+        },
+        "required": [
+          "user_id",
+          "announcement_id",
+          "dismissed_at",
+          "created_at",
+          "updated_at",
+          "announcements",
+          "users"
+        ]
+      },
+      "announcements": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "variant": {
+            "$ref": "#/components/schemas/announcement_variant"
+          },
+          "tag": {
+            "$ref": "#/components/schemas/announcement_tag"
+          },
+          "title": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "icon": {
+            "$ref": "#/components/schemas/announcement_icon"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/announcement_priority"
+          },
+          "dismissible": {
+            "type": "boolean"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "announcement_dismissals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/announcement_dismissals"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "variant",
+          "title",
+          "priority",
+          "dismissible",
+          "active",
+          "created_at",
+          "updated_at",
+          "announcement_dismissals"
+        ]
+      },
+      "app_settings": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "setting_key": {
+            "type": "string"
+          },
+          "setting_value": {
+            "type": "object",
+            "description": "[AppSettingValue]"
+          },
+          "setting_type": {
+            "$ref": "#/components/schemas/setting_type"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/app_setting_category"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "previous_value": {
+            "type": "object",
+            "description": "[AppSettingValue]"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/environment"
+          }
+        },
+        "required": [
+          "setting_key",
+          "setting_value",
+          "setting_type",
+          "enabled",
+          "description",
+          "category",
+          "version",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "bookmarks": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "content_type": {
+            "$ref": "#/components/schemas/content_category"
+          },
+          "content_slug": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "content_type",
+          "content_slug",
+          "created_at",
+          "updated_at",
+          "users"
+        ]
+      },
+      "category_configs": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.\nThis model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "plural_title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "icon_name": {
+            "$ref": "#/components/schemas/category_icon"
+          },
+          "color_scheme": {
+            "type": "string"
+          },
+          "show_on_homepage": {
+            "type": "boolean"
+          },
+          "keywords": {
+            "type": "string"
+          },
+          "meta_description": {
+            "type": "string"
+          },
+          "sections": {
+            "type": "object",
+            "description": "[CategorySections]"
+          },
+          "primary_action_type": {
+            "$ref": "#/components/schemas/primary_action_type"
+          },
+          "primary_action_label": {
+            "type": "string"
+          },
+          "primary_action_config": {
+            "type": "object",
+            "description": "[PrimaryActionConfig]"
+          },
+          "search_placeholder": {
+            "type": "string"
+          },
+          "empty_state_message": {
+            "type": "string"
+          },
+          "url_slug": {
+            "type": "string"
+          },
+          "content_loader": {
+            "type": "string"
+          },
+          "display_config": {
+            "type": "boolean"
+          },
+          "config_format": {
+            "$ref": "#/components/schemas/config_format"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validation_config": {
+            "type": "object",
+            "description": "[ValidationConfig]"
+          },
+          "generation_config": {
+            "type": "object",
+            "description": "[GenerationConfig]"
+          },
+          "schema_name": {
+            "type": "string"
+          },
+          "api_schema": {
+            "type": "object",
+            "description": "[ApiSchema]"
+          },
+          "metadata_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "badges": {
+            "type": "object",
+            "description": "[CategoryBadges]"
+          },
+          "category": {
+            "$ref": "#/components/schemas/content_category"
+          }
+        },
+        "required": [
+          "title",
+          "plural_title",
+          "description",
+          "icon_name",
+          "color_scheme",
+          "show_on_homepage",
+          "keywords",
+          "meta_description",
+          "sections",
+          "primary_action_type",
+          "primary_action_label",
+          "search_placeholder",
+          "url_slug",
+          "content_loader",
+          "display_config",
+          "created_at",
+          "updated_at",
+          "metadata_fields",
+          "category"
+        ]
+      },
+      "changelog": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "release_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "tldr": {
+            "type": "string"
+          },
+          "changes": {
+            "type": "object",
+            "description": "[ChangelogChanges]"
+          },
+          "content": {
+            "type": "string"
+          },
+          "raw_content": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "featured": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "og_image": {
+            "type": "string"
+          },
+          "canonical_url": {
+            "type": "string"
+          },
+          "og_type": {
+            "type": "string"
+          },
+          "twitter_card": {
+            "type": "string"
+          },
+          "robots_index": {
+            "type": "boolean"
+          },
+          "robots_follow": {
+            "type": "boolean"
+          },
+          "json_ld": {
+            "type": "object",
+            "description": "[JsonLd]"
+          },
+          "git_commit_sha": {
+            "type": "string"
+          },
+          "commit_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contributors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "description": "[ChangelogMetadata]"
+          },
+          "source": {
+            "$ref": "#/components/schemas/changelog_source"
+          },
+          "seo_title": {
+            "type": "string"
+          },
+          "seo_description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "release_date",
+          "title",
+          "slug",
+          "changes",
+          "content",
+          "raw_content",
+          "keywords",
+          "published",
+          "featured",
+          "created_at",
+          "updated_at",
+          "contributors"
+        ]
+      },
+      "collection_items": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "collection_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "content_type": {
+            "$ref": "#/components/schemas/content_category"
+          },
+          "content_slug": {
+            "type": "string"
+          },
+          "order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "added_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "user_collections": {
+            "$ref": "#/components/schemas/user_collections"
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          }
+        },
+        "required": [
+          "id",
+          "collection_id",
+          "user_id",
+          "content_type",
+          "content_slug",
+          "order",
+          "added_at",
+          "created_at",
+          "updated_at",
+          "user_collections",
+          "users"
+        ]
+      },
+      "companies": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.\nThis model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "owner_id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "logo": {
+            "type": "string"
+          },
+          "website": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "size": {
+            "$ref": "#/components/schemas/company_size"
+          },
+          "industry": {
+            "type": "string"
+          },
+          "using_cursor_since": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "featured": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "json_ld": {
+            "type": "object",
+            "description": "[JsonLd]"
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          },
+          "jobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/jobs"
+            }
+          },
+          "user_mcps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/user_mcps"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "created_at",
+          "updated_at",
+          "jobs",
+          "user_mcps"
+        ]
+      },
+      "contact_commands": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "command_id": {
+            "type": "string"
+          },
+          "command_text": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/contact_command_category"
+          },
+          "icon_name": {
+            "$ref": "#/components/schemas/contact_command_icon"
+          },
+          "display_order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requires_auth": {
+            "type": "boolean"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "action_type": {
+            "$ref": "#/components/schemas/contact_action_type"
+          },
+          "action_value": {
+            "type": "string"
+          },
+          "confetti_variant": {
+            "$ref": "#/components/schemas/confetti_variant"
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "description": "[ContactCommandMetadata]"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "command_id",
+          "command_text",
+          "category",
+          "display_order",
+          "action_type",
+          "aliases",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "contact_submissions": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/contact_category"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/submission_status"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "[Metadata]"
+          },
+          "response_sent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "responded_by": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "users_contact_submissions_responded_byTousers": {
+            "$ref": "#/components/schemas/auth_users"
+          },
+          "users_contact_submissions_user_idTousers": {
+            "$ref": "#/components/schemas/auth_users"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "category",
+          "message",
+          "status",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "content": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.\nThis model contains an index with non-default null sort order and requires additional setup for migrations. Visit https://pris.ly/d/default-index-null-ordering for more info.\nThis model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "seo_title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "author_profile_url": {
+            "type": "string"
+          },
+          "date_added": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "content": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/content_source"
+          },
+          "documentation_url": {
+            "type": "string"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "use_cases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "examples": {
+            "type": "object",
+            "description": "[ContentExamples]"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "[ContentMetadata]"
+          },
+          "git_hash": {
+            "type": "string"
+          },
+          "synced_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "difficulty_score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "has_troubleshooting": {
+            "type": "boolean"
+          },
+          "has_prerequisites": {
+            "type": "boolean"
+          },
+          "has_breaking_changes": {
+            "type": "boolean"
+          },
+          "download_url": {
+            "type": "string"
+          },
+          "storage_url": {
+            "type": "string"
+          },
+          "og_type": {
+            "type": "string"
+          },
+          "twitter_card": {
+            "type": "string"
+          },
+          "robots_index": {
+            "type": "boolean"
+          },
+          "robots_follow": {
+            "type": "boolean"
+          },
+          "json_ld": {
+            "type": "object",
+            "description": "[JsonLd]"
+          },
+          "view_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookmark_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "review_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avg_rating": {
+            "type": "number",
+            "format": "double"
+          },
+          "popularity_score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "display_title": {
+            "type": "string"
+          },
+          "copy_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reading_time": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mcpb_storage_url": {
+            "type": "string"
+          },
+          "mcpb_build_hash": {
+            "type": "string"
+          },
+          "mcpb_last_built_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "category": {
+            "$ref": "#/components/schemas/content_category"
+          },
+          "og_image": {
+            "type": "string"
+          },
+          "use_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seo_description": {
+            "type": "string"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "author_user_id": {
+            "type": "string"
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          },
+          "content_time_metrics": {
+            "$ref": "#/components/schemas/content_time_metrics"
+          },
+          "content_votes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/content_votes"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "description",
+          "author",
+          "date_added",
+          "tags",
+          "features",
+          "use_cases",
+          "metadata",
+          "created_at",
+          "updated_at",
+          "view_count",
+          "bookmark_count",
+          "review_count",
+          "copy_count",
+          "category",
+          "use_count",
+          "keywords",
+          "content_votes"
+        ]
+      },
+      "content_generation_tracking": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/content_category"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "generated_by": {
+            "$ref": "#/components/schemas/generation_source"
+          },
+          "generation_trigger": {
+            "type": "string"
+          },
+          "generation_model": {
+            "type": "string"
+          },
+          "quality_score": {
+            "type": "number",
+            "format": "double"
+          },
+          "validation_passed": {
+            "type": "boolean"
+          },
+          "validation_errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "github_pr_url": {
+            "type": "string"
+          },
+          "discovery_metadata": {
+            "type": "object",
+            "description": "[DiscoveryMetadata]"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "category",
+          "slug",
+          "generated_by",
+          "validation_passed",
+          "validation_errors",
+          "generated_at",
+          "updated_at",
+          "created_at"
+        ]
+      },
+      "content_similarities": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "content_a_slug": {
+            "type": "string"
+          },
+          "content_b_slug": {
+            "type": "string"
+          },
+          "similarity_score": {
+            "type": "number",
+            "format": "double"
+          },
+          "similarity_factors": {
+            "type": "object",
+            "description": "[SimilarityFactors]"
+          },
+          "calculated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "content_a_type": {
+            "$ref": "#/components/schemas/content_category"
+          },
+          "content_b_type": {
+            "$ref": "#/components/schemas/content_category"
+          }
+        },
+        "required": [
+          "id",
+          "content_a_slug",
+          "content_b_slug",
+          "similarity_score",
+          "calculated_at"
+        ]
+      },
+      "content_submissions": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.\nThis model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "submission_type": {
+            "$ref": "#/components/schemas/submission_type"
+          },
+          "status": {
+            "$ref": "#/components/schemas/submission_status"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/content_category"
+          },
+          "author": {
+            "type": "string"
+          },
+          "author_profile_url": {
+            "type": "string"
+          },
+          "github_url": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "content_data": {
+            "type": "object",
+            "description": "[ContentSubmissionData]"
+          },
+          "moderator_notes": {
+            "type": "string"
+          },
+          "moderated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "moderated_by": {
+            "type": "string"
+          },
+          "github_pr_url": {
+            "type": "string"
+          },
+          "merged_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "spam_score": {
+            "type": "number",
+            "format": "double"
+          },
+          "spam_reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "submitter_id": {
+            "type": "string"
+          },
+          "submitter_email": {
+            "type": "string"
+          },
+          "submitter_ip": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "approved_slug": {
+            "type": "string"
+          },
+          "users_content_submissions_moderated_byTousers": {
+            "$ref": "#/components/schemas/auth_users"
+          },
+          "users_content_submissions_submitter_idTousers": {
+            "$ref": "#/components/schemas/auth_users"
+          }
+        },
+        "required": [
+          "id",
+          "submission_type",
+          "status",
+          "name",
+          "description",
+          "category",
+          "author",
+          "tags",
+          "content_data",
+          "spam_reasons",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "content_templates": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/content_category"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "template_data": {
+            "type": "object",
+            "description": "[TemplateData]"
+          },
+          "display_order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "is_featured": {
+            "type": "boolean"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "usage_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "category",
+          "name",
+          "description",
+          "template_data",
+          "display_order",
+          "is_featured",
+          "active",
+          "usage_count",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "content_time_metrics": {
+        "type": "object",
+        "description": "This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "content_id": {
+            "type": "string"
+          },
+          "views_7d": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "views_30d": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "copies_7d": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "copies_30d": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookmarks_7d": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookmarks_30d": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "views_prev_7d": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "velocity_7d": {
+            "type": "number",
+            "format": "double"
+          },
+          "last_calculated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "content": {
+            "$ref": "#/components/schemas/content"
+          }
+        },
+        "required": [
+          "content_id",
+          "views_7d",
+          "views_30d",
+          "copies_7d",
+          "copies_30d",
+          "bookmarks_7d",
+          "bookmarks_30d",
+          "views_prev_7d",
+          "velocity_7d",
+          "last_calculated_at",
+          "created_at",
+          "updated_at",
+          "content"
+        ]
+      },
+      "content_votes": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "content_slug": {
+            "type": "string"
+          },
+          "content_type": {
+            "$ref": "#/components/schemas/content_category"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "users": {
+            "$ref": "#/components/schemas/auth_users"
+          },
+          "content": {
+            "$ref": "#/components/schemas/content"
+          }
+        },
+        "required": [
+          "id",
+          "content_slug",
+          "content_type",
+          "created_at",
+          "content"
+        ]
+      },
+      "email_blocklist": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/email_blocklist_reason"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "email",
+          "reason",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "email_engagement_summary": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "resend_contact_id": {
+            "type": "string"
+          },
+          "emails_sent": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "emails_delivered": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "emails_opened": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "emails_clicked": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "emails_bounced": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "emails_complained": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "emails_failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "last_sent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_delivered_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_opened_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_clicked_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_bounce_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_complaint_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "engagement_score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "health_status": {
+            "type": "string"
+          },
+          "opens_last_30d": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "clicks_last_30d": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "newsletter_subscriptions": {
+            "$ref": "#/components/schemas/newsletter_subscriptions"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "email_sequence_schedule": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sequence_id": {
+            "$ref": "#/components/schemas/email_sequence_id"
+          },
+          "email": {
+            "type": "string"
+          },
+          "step": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "processed": {
+            "type": "boolean"
+          },
+          "processed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "sequence_id",
+          "email",
+          "step",
+          "due_at",
+          "processed",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "email_sequences": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sequence_id": {
+            "$ref": "#/components/schemas/email_sequence_id"
+          },
+          "email": {
+            "type": "string"
+          },
+          "current_step": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_steps": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_sent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/email_sequence_status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "sequence_id",
+          "email",
+          "current_step",
+          "total_steps",
+          "started_at",
+          "status",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "followers": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "follower_id": {
+            "type": "string"
+          },
+          "following_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "users_followers_follower_idTousers": {
+            "$ref": "#/components/schemas/public_users"
+          },
+          "users_followers_following_idTousers": {
+            "$ref": "#/components/schemas/public_users"
+          }
+        },
+        "required": [
+          "id",
+          "follower_id",
+          "following_id",
+          "created_at",
+          "updated_at",
+          "users_followers_follower_idTousers",
+          "users_followers_following_idTousers"
+        ]
+      },
+      "form_field_configs": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "form_type": {
+            "type": "string"
+          },
+          "field_group": {
+            "type": "string"
+          },
+          "display_order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "field_name": {
+            "type": "string"
+          },
+          "field_label": {
+            "type": "string"
+          },
+          "field_type": {
+            "$ref": "#/components/schemas/form_field_type"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "placeholder": {
+            "type": "string"
+          },
+          "help_text": {
+            "type": "string"
+          },
+          "default_value": {
+            "type": "string"
+          },
+          "grid_column": {
+            "$ref": "#/components/schemas/form_grid_column"
+          },
+          "icon_name": {
+            "$ref": "#/components/schemas/form_field_icon"
+          },
+          "icon_position": {
+            "$ref": "#/components/schemas/form_icon_position"
+          },
+          "config": {
+            "type": "object",
+            "description": "[FormFieldConfig]"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "form_type",
+          "field_group",
+          "display_order",
+          "field_name",
+          "field_label",
+          "field_type",
+          "required",
+          "grid_column",
+          "enabled",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "job_runs": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "job_name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/job_run_status"
+          },
+          "message": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "job_name",
+          "status",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "job_subscription_audit_log": {
+        "type": "object",
+        "description": "This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "job_id": {
+            "type": "string"
+          },
+          "subscription_id": {
+            "type": "string"
+          },
+          "issue": {
+            "type": "string"
+          },
+          "resolved": {
+            "type": "boolean"
+          },
+          "details": {
+            "type": "object",
+            "description": "[AuditLogDetails]"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "jobs": {
+            "$ref": "#/components/schemas/jobs"
+          }
+        },
+        "required": [
+          "id",
+          "job_id",
+          "issue",
+          "resolved",
+          "created_at",
+          "jobs"
+        ]
+      },
+      "jobs": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "company_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "company": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "salary": {
+            "type": "string"
+          },
+          "remote": {
+            "type": "boolean"
+          },
+          "type": {
+            "$ref": "#/components/schemas/job_type"
+          },
+          "workplace": {
+            "$ref": "#/components/schemas/workplace_type"
+          },
+          "experience": {
+            "$ref": "#/components/schemas/experience_level"
+          },
+          "category": {
+            "$ref": "#/components/schemas/job_category"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "requirements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "benefits": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "link": {
+            "type": "string"
+          },
+          "contact_email": {
+            "type": "string"
+          },
+          "company_logo": {
+            "type": "string"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/job_plan"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "posted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "featured": {
+            "type": "boolean"
+          },
+          "order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "view_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "click_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "admin_notes": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/job_status"
+          },
+          "locked_price": {
+            "type": "number",
+            "format": "double"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/job_tier"
+          },
+          "is_placeholder": {
+            "type": "boolean"
+          },
+          "json_ld": {
+            "type": "object",
+            "description": "[JsonLd]"
+          },
+          "discord_message_id": {
+            "type": "string"
+          },
+          "job_subscription_audit_log": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/job_subscription_audit_log"
+            }
+          },
+          "companies": {
+            "$ref": "#/components/schemas/companies"
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          },
+          "payments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/payments"
+            }
+          },
+          "subscriptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/subscriptions"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "company",
+          "description",
+          "type",
+          "category",
+          "tags",
+          "requirements",
+          "benefits",
+          "link",
+          "plan",
+          "created_at",
+          "updated_at",
+          "slug",
+          "status",
+          "tier",
+          "is_placeholder",
+          "job_subscription_audit_log",
+          "payments",
+          "subscriptions"
+        ]
+      },
+      "metadata_templates": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "route_pattern": {
+            "type": "string"
+          },
+          "title_formulas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description_template": {
+            "type": "string"
+          },
+          "default_keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "use_current_year": {
+            "type": "boolean"
+          },
+          "use_current_month_year": {
+            "type": "boolean"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "route_pattern",
+          "title_formulas",
+          "description_template",
+          "default_keywords",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "mfa_failed_verification_attempts": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "factor_id": {
+            "type": "string"
+          },
+          "last_failed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "user_id",
+          "factor_id",
+          "last_failed_at"
+        ]
+      },
+      "newsletter_subscriptions": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "referrer": {
+            "type": "string"
+          },
+          "copy_type": {
+            "$ref": "#/components/schemas/copy_type"
+          },
+          "copy_category": {
+            "$ref": "#/components/schemas/content_category"
+          },
+          "copy_slug": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/newsletter_subscription_status"
+          },
+          "confirmed": {
+            "type": "boolean"
+          },
+          "confirmation_token": {
+            "type": "string"
+          },
+          "confirmed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ip_address": {
+            "type": "string"
+          },
+          "user_agent": {
+            "type": "string"
+          },
+          "consent_given": {
+            "type": "boolean"
+          },
+          "subscribed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "unsubscribed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_email_sent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "$ref": "#/components/schemas/newsletter_source"
+          },
+          "resend_contact_id": {
+            "type": "string"
+          },
+          "last_sync_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sync_error": {
+            "type": "string"
+          },
+          "engagement_score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "primary_interest": {
+            "$ref": "#/components/schemas/newsletter_interest"
+          },
+          "categories_visited": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "total_copies": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "last_active_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "preferred_email_frequency": {
+            "$ref": "#/components/schemas/email_frequency"
+          },
+          "resend_topics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sync_status": {
+            "$ref": "#/components/schemas/newsletter_sync_status"
+          },
+          "email_engagement_summary": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/email_engagement_summary"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "status",
+          "created_at",
+          "updated_at",
+          "categories_visited",
+          "resend_topics",
+          "sync_status",
+          "email_engagement_summary"
+        ]
+      },
+      "notification_dismissals": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "notification_id": {
+            "type": "string"
+          },
+          "dismissed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notifications": {
+            "$ref": "#/components/schemas/notifications"
+          },
+          "users": {
+            "$ref": "#/components/schemas/auth_users"
+          }
+        },
+        "required": [
+          "user_id",
+          "notification_id",
+          "dismissed_at",
+          "created_at",
+          "updated_at",
+          "notifications",
+          "users"
+        ]
+      },
+      "notifications": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/notification_type"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/notification_priority"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "action_label": {
+            "type": "string"
+          },
+          "action_href": {
+            "type": "string"
+          },
+          "action_onclick": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notification_dismissals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/notification_dismissals"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "priority",
+          "active",
+          "title",
+          "message",
+          "created_at",
+          "updated_at",
+          "notification_dismissals"
+        ]
+      },
+      "password_failed_verification_attempts": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "last_failed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "failed_attempts": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "user_id",
+          "last_failed_at",
+          "failed_attempts"
+        ]
+      },
+      "payment_plan_catalog": {
+        "type": "object",
+        "description": "This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "plan": {
+            "$ref": "#/components/schemas/job_plan"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/job_tier"
+          },
+          "product_type": {
+            "$ref": "#/components/schemas/payment_product_type"
+          },
+          "price_cents": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "is_subscription": {
+            "type": "boolean"
+          },
+          "billing_cycle_days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "job_expiry_days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
+            "type": "string"
+          },
+          "benefits": {
+            "type": "object",
+            "description": "[PaymentPlanBenefits]"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "plan",
+          "tier",
+          "product_type",
+          "price_cents",
+          "is_subscription",
+          "job_expiry_days",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "payments": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "polar_transaction_id": {
+            "type": "string"
+          },
+          "polar_checkout_id": {
+            "type": "string"
+          },
+          "polar_customer_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/payment_transaction_status"
+          },
+          "product_type": {
+            "$ref": "#/components/schemas/payment_product_type"
+          },
+          "product_id": {
+            "type": "string"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/job_plan"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "[Metadata]"
+          },
+          "paid_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "jobs": {
+            "$ref": "#/components/schemas/jobs"
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "polar_transaction_id",
+          "amount",
+          "currency",
+          "status",
+          "product_type",
+          "created_at",
+          "updated_at",
+          "users"
+        ]
+      },
+      "quiz_options": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "question_id": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "display_order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "icon_name": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "quiz_questions": {
+            "$ref": "#/components/schemas/quiz_questions"
+          }
+        },
+        "required": [
+          "id",
+          "question_id",
+          "value",
+          "label",
+          "display_order",
+          "created_at",
+          "updated_at",
+          "quiz_questions"
+        ]
+      },
+      "quiz_questions": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "question_id": {
+            "type": "string"
+          },
+          "question_text": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "display_order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "quiz_options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/quiz_options"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "question_id",
+          "question_text",
+          "display_order",
+          "created_at",
+          "updated_at",
+          "quiz_options"
+        ]
+      },
+      "rate_limit_tracker": {
+        "type": "object",
+        "description": "This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "identifier": {
+            "type": "string"
+          },
+          "counter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "window_start": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "identifier"
+        ]
+      },
+      "review_helpful_votes": {
+        "type": "object",
+        "description": "This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "review_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "review_ratings": {
+            "$ref": "#/components/schemas/review_ratings"
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          }
+        },
+        "required": [
+          "id",
+          "review_id",
+          "user_id",
+          "created_at",
+          "updated_at",
+          "review_ratings",
+          "users"
+        ]
+      },
+      "review_ratings": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "content_type": {
+            "$ref": "#/components/schemas/content_category"
+          },
+          "content_slug": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "review_text": {
+            "type": "string"
+          },
+          "helpful_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "review_helpful_votes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/review_helpful_votes"
+            }
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "content_type",
+          "content_slug",
+          "rating",
+          "helpful_count",
+          "created_at",
+          "updated_at",
+          "review_helpful_votes",
+          "users"
+        ]
+      },
+      "script_artifacts": {
+        "type": "object",
+        "description": "This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "script": {
+            "type": "string"
+          },
+          "artifact_name": {
+            "type": "string"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "[Metadata]"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "generated_by": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "script",
+          "artifact_name",
+          "hash",
+          "generated_at"
+        ]
+      },
+      "script_cache": {
+        "type": "object",
+        "description": "This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "cache_key": {
+            "type": "string"
+          },
+          "script": {
+            "type": "string"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "[Metadata]"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "cache_key",
+          "script",
+          "hash",
+          "updated_at"
+        ]
+      },
+      "search_queries": {
+        "type": "object",
+        "description": "This table is a partition table and requires additional setup for migrations. Visit https://pris.ly/d/partition-tables for more info.\nThis table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "filters": {
+            "type": "object"
+          },
+          "result_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "normalized_query": {
+            "type": "string"
+          },
+          "users": {
+            "$ref": "#/components/schemas/auth_users"
+          }
+        },
+        "required": [
+          "id",
+          "query",
+          "created_at"
+        ]
+      },
+      "sponsored_content": {
+        "type": "object",
+        "description": "This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "content_type": {
+            "$ref": "#/components/schemas/content_category"
+          },
+          "content_id": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "impression_limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "impression_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "click_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/sponsorship_tier"
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "content_type",
+          "content_id",
+          "start_date",
+          "end_date",
+          "created_at",
+          "updated_at",
+          "tier",
+          "users"
+        ]
+      },
+      "static_routes": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "icon_name": {
+            "$ref": "#/components/schemas/static_route_icon"
+          },
+          "group_name": {
+            "$ref": "#/components/schemas/route_group"
+          },
+          "sort_order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "og_type": {
+            "type": "string"
+          },
+          "twitter_card": {
+            "type": "string"
+          },
+          "robots_index": {
+            "type": "boolean"
+          },
+          "robots_follow": {
+            "type": "boolean"
+          },
+          "json_ld": {
+            "type": "object",
+            "description": "[JsonLd]"
+          },
+          "seo_title": {
+            "type": "string"
+          },
+          "seo_description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "path",
+          "title",
+          "description",
+          "icon_name",
+          "group_name",
+          "sort_order",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "structured_data_config": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "generate_application": {
+            "type": "boolean"
+          },
+          "generate_source_code": {
+            "type": "boolean"
+          },
+          "generate_how_to": {
+            "type": "boolean"
+          },
+          "generate_creative_work": {
+            "type": "boolean"
+          },
+          "generate_faq": {
+            "type": "boolean"
+          },
+          "generate_breadcrumb": {
+            "type": "boolean"
+          },
+          "generate_speakable": {
+            "type": "boolean"
+          },
+          "generate_review": {
+            "type": "boolean"
+          },
+          "generate_aggregate_rating": {
+            "type": "boolean"
+          },
+          "generate_video_object": {
+            "type": "boolean"
+          },
+          "generate_course": {
+            "type": "boolean"
+          },
+          "generate_job_posting": {
+            "type": "boolean"
+          },
+          "generate_collection_page": {
+            "type": "boolean"
+          },
+          "category_display_name": {
+            "type": "string"
+          },
+          "application_sub_category": {
+            "type": "string"
+          },
+          "default_keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "default_requirements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "creative_work_description": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "generate_learning_resource": {
+            "type": "boolean"
+          },
+          "generate_item_list": {
+            "type": "boolean"
+          },
+          "category": {
+            "$ref": "#/components/schemas/content_category"
+          }
+        },
+        "required": [
+          "category_display_name",
+          "default_keywords",
+          "default_requirements",
+          "created_at",
+          "updated_at",
+          "category"
+        ]
+      },
+      "subscriptions": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "polar_subscription_id": {
+            "type": "string"
+          },
+          "polar_customer_id": {
+            "type": "string"
+          },
+          "polar_product_id": {
+            "type": "string"
+          },
+          "plan_name": {
+            "$ref": "#/components/schemas/job_tier"
+          },
+          "status": {
+            "$ref": "#/components/schemas/subscription_status"
+          },
+          "current_period_start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "current_period_end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancel_at_period_end": {
+            "type": "boolean"
+          },
+          "product_type": {
+            "$ref": "#/components/schemas/payment_product_type"
+          },
+          "product_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelled_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "jobs": {
+            "$ref": "#/components/schemas/jobs"
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "polar_subscription_id",
+          "plan_name",
+          "status",
+          "current_period_start",
+          "current_period_end",
+          "created_at",
+          "updated_at",
+          "users"
+        ]
+      },
+      "tier_display_config": {
+        "type": "object",
+        "description": "This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "css_classes": {
+            "type": "string"
+          },
+          "display_order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/user_tier"
+          }
+        },
+        "required": [
+          "label",
+          "css_classes",
+          "display_order",
+          "created_at",
+          "updated_at",
+          "tier"
+        ]
+      },
+      "user_collections": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "is_public": {
+            "type": "boolean"
+          },
+          "view_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookmark_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "item_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "collection_items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/collection_items"
+            }
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "name",
+          "slug",
+          "is_public",
+          "view_count",
+          "bookmark_count",
+          "item_count",
+          "created_at",
+          "updated_at",
+          "collection_items",
+          "users"
+        ]
+      },
+      "user_content": {
+        "type": "object",
+        "description": "This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "content_type": {
+            "$ref": "#/components/schemas/content_category"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "plan": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "featured": {
+            "type": "boolean"
+          },
+          "view_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "download_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "content_type",
+          "slug",
+          "name",
+          "description",
+          "content",
+          "tags",
+          "plan",
+          "created_at",
+          "updated_at",
+          "users"
+        ]
+      },
+      "user_interactions": {
+        "type": "object",
+        "description": "This table is a partition table and requires additional setup for migrations. Visit https://pris.ly/d/partition-tables for more info.\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "content_type": {
+            "$ref": "#/components/schemas/content_category"
+          },
+          "content_slug": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "[Metadata]"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "interaction_type": {
+            "$ref": "#/components/schemas/interaction_type"
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "interaction_type"
+        ]
+      },
+      "user_mcps": {
+        "type": "object",
+        "description": "This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "company_id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "logo": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          },
+          "mcp_link": {
+            "type": "string"
+          },
+          "plan": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "view_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "click_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "companies": {
+            "$ref": "#/components/schemas/companies"
+          },
+          "users": {
+            "$ref": "#/components/schemas/public_users"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "slug",
+          "name",
+          "description",
+          "link",
+          "plan",
+          "created_at",
+          "updated_at",
+          "users"
+        ]
+      },
+      "user_similarities": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_a_id": {
+            "type": "string"
+          },
+          "user_b_id": {
+            "type": "string"
+          },
+          "similarity_score": {
+            "type": "number",
+            "format": "double"
+          },
+          "common_items": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "calculated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "users_user_similarities_user_a_idTousers": {
+            "$ref": "#/components/schemas/public_users"
+          },
+          "users_user_similarities_user_b_idTousers": {
+            "$ref": "#/components/schemas/public_users"
+          }
+        },
+        "required": [
+          "id",
+          "user_a_id",
+          "user_b_id",
+          "similarity_score",
+          "calculated_at",
+          "created_at",
+          "updated_at",
+          "users_user_similarities_user_a_idTousers",
+          "users_user_similarities_user_b_idTousers"
+        ]
+      },
+      "public_users": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.\nThis model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "hero": {
+            "type": "string"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "work": {
+            "type": "string"
+          },
+          "website": {
+            "type": "string"
+          },
+          "social_x_link": {
+            "type": "string"
+          },
+          "interests": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "follow_email": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "follower_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "following_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "submission_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookmark_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "profile_public": {
+            "type": "boolean"
+          },
+          "json_ld": {
+            "type": "object",
+            "description": "[JsonLd]"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/user_tier"
+          },
+          "role": {
+            "$ref": "#/components/schemas/user_role"
+          },
+          "post_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comment_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "votes_received_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "username": {
+            "type": "string"
+          },
+          "bookmarks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/bookmarks"
+            }
+          },
+          "collection_items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/collection_items"
+            }
+          },
+          "companies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/companies"
+            }
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/content"
+            }
+          },
+          "followers_followers_follower_idTousers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/followers"
+            }
+          },
+          "followers_followers_following_idTousers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/followers"
+            }
+          },
+          "jobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/jobs"
+            }
+          },
+          "payments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/payments"
+            }
+          },
+          "review_helpful_votes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/review_helpful_votes"
+            }
+          },
+          "review_ratings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/review_ratings"
+            }
+          },
+          "sponsored_content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/sponsored_content"
+            }
+          },
+          "subscriptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/subscriptions"
+            }
+          },
+          "user_collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/user_collections"
+            }
+          },
+          "user_content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/user_content"
+            }
+          },
+          "user_interactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/user_interactions"
+            }
+          },
+          "user_mcps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/user_mcps"
+            }
+          },
+          "user_similarities_user_similarities_user_a_idTousers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/user_similarities"
+            }
+          },
+          "user_similarities_user_similarities_user_b_idTousers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/user_similarities"
+            }
+          },
+          "users": {
+            "$ref": "#/components/schemas/auth_users"
+          }
+        },
+        "required": [
+          "id",
+          "interests",
+          "created_at",
+          "updated_at",
+          "follower_count",
+          "following_count",
+          "submission_count",
+          "bookmark_count",
+          "role",
+          "bookmarks",
+          "collection_items",
+          "companies",
+          "content",
+          "followers_followers_follower_idTousers",
+          "followers_followers_following_idTousers",
+          "jobs",
+          "payments",
+          "review_helpful_votes",
+          "review_ratings",
+          "sponsored_content",
+          "subscriptions",
+          "user_collections",
+          "user_content",
+          "user_interactions",
+          "user_mcps",
+          "user_similarities_user_similarities_user_a_idTousers",
+          "user_similarities_user_similarities_user_b_idTousers",
+          "users"
+        ]
+      },
+      "webhook_event_runs": {
+        "type": "object",
+        "description": "This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "webhook_event_id": {
+            "type": "string"
+          },
+          "attempt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "$ref": "#/components/schemas/webhook_delivery_status"
+          },
+          "error": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "[Metadata]"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "duration_ms": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "webhook_events": {
+            "$ref": "#/components/schemas/webhook_events"
+          }
+        },
+        "required": [
+          "id",
+          "webhook_event_id",
+          "attempt",
+          "status",
+          "started_at",
+          "created_at",
+          "webhook_events"
+        ]
+      },
+      "webhook_events": {
+        "type": "object",
+        "description": "This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.\nThis model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments\nThis model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/webhook_event_type"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "data": {
+            "type": "object",
+            "description": "[Data]"
+          },
+          "processed": {
+            "type": "boolean"
+          },
+          "processed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "error": {
+            "type": "string"
+          },
+          "retry_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "next_retry_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "svix_id": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/webhook_source"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/webhook_direction"
+          },
+          "related_id": {
+            "type": "string"
+          },
+          "http_status_code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "response_payload": {
+            "type": "object"
+          },
+          "attempt_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "last_error": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "webhook_event_runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/webhook_event_runs"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "created_at",
+          "data",
+          "source",
+          "direction",
+          "attempt_count",
+          "updated_at",
+          "webhook_event_runs"
+        ]
+      },
+      "aal_level": {
+        "type": "string",
+        "enum": [
+          "aal1",
+          "aal2",
+          "aal3"
+        ]
+      },
+      "code_challenge_method": {
+        "type": "string",
+        "enum": [
+          "s256",
+          "plain"
+        ]
+      },
+      "factor_status": {
+        "type": "string",
+        "enum": [
+          "unverified",
+          "verified"
+        ]
+      },
+      "factor_type": {
+        "type": "string",
+        "enum": [
+          "totp",
+          "webauthn",
+          "phone"
+        ]
+      },
+      "oauth_authorization_status": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "denied",
+          "expired"
+        ]
+      },
+      "oauth_client_type": {
+        "type": "string",
+        "enum": [
+          "public",
+          "confidential"
+        ]
+      },
+      "oauth_registration_type": {
+        "type": "string",
+        "enum": [
+          "dynamic",
+          "manual"
+        ]
+      },
+      "oauth_response_type": {
+        "type": "string",
+        "enum": [
+          "code"
+        ]
+      },
+      "one_time_token_type": {
+        "type": "string",
+        "enum": [
+          "confirmation_token",
+          "reauthentication_token",
+          "recovery_token",
+          "email_change_token_new",
+          "email_change_token_current",
+          "phone_change_token"
+        ]
+      },
+      "announcement_icon": {
+        "type": "string",
+        "enum": [
+          "ArrowUpRight",
+          "ArrowRight",
+          "AlertTriangle",
+          "Calendar",
+          "BookOpen",
+          "Sparkles"
+        ]
+      },
+      "announcement_priority": {
+        "type": "string",
+        "enum": [
+          "high",
+          "medium",
+          "low"
+        ]
+      },
+      "announcement_tag": {
+        "type": "string",
+        "enum": [
+          "Feature",
+          "New"
+        ]
+      },
+      "announcement_variant": {
+        "type": "string",
+        "enum": [
+          "default",
+          "outline",
+          "secondary",
+          "destructive"
+        ]
+      },
+      "app_setting_category": {
+        "type": "string",
+        "enum": [
+          "feature_flag",
+          "config",
+          "secret",
+          "experimental",
+          "maintenance"
+        ]
+      },
+      "category_icon": {
+        "type": "string",
+        "enum": [
+          "BookOpen",
+          "Briefcase",
+          "FileText",
+          "Layers",
+          "Server",
+          "Sparkles",
+          "Terminal",
+          "Webhook"
+        ]
+      },
+      "changelog_category": {
+        "type": "string",
+        "enum": [
+          "Added",
+          "Changed",
+          "Fixed",
+          "Security",
+          "Deprecated",
+          "Removed"
+        ]
+      },
+      "changelog_source": {
+        "type": "string",
+        "enum": [
+          "manual",
+          "jsonbored",
+          "automation"
+        ]
+      },
+      "company_size": {
+        "type": "string",
+        "enum": [
+          "just_me",
+          "two_to_ten",
+          "eleven_to_fifty",
+          "fifty_one_to_two_hundred",
+          "two_hundred_one_to_five_hundred",
+          "five_hundred_plus"
+        ]
+      },
+      "confetti_variant": {
+        "type": "string",
+        "enum": [
+          "success",
+          "celebration",
+          "milestone",
+          "subtle"
+        ]
+      },
+      "config_format": {
+        "type": "string",
+        "enum": [
+          "json",
+          "multi",
+          "hook"
+        ]
+      },
+      "contact_action_type": {
+        "type": "string",
+        "enum": [
+          "internal",
+          "external",
+          "route",
+          "sheet",
+          "easter_egg"
+        ]
+      },
+      "contact_category": {
+        "type": "string",
+        "enum": [
+          "bug",
+          "feature",
+          "partnership",
+          "general",
+          "other"
+        ]
+      },
+      "contact_command_category": {
+        "type": "string",
+        "enum": [
+          "hidden",
+          "info",
+          "social",
+          "support",
+          "utility"
+        ]
+      },
+      "contact_command_icon": {
+        "type": "string",
+        "enum": [
+          "Bug",
+          "Clock",
+          "HelpCircle",
+          "Lightbulb",
+          "Mail",
+          "MessageSquare",
+          "Sparkles",
+          "Trash"
+        ]
+      },
+      "content_category": {
+        "type": "string",
+        "enum": [
+          "agents",
+          "mcp",
+          "rules",
+          "commands",
+          "hooks",
+          "statuslines",
+          "skills",
+          "collections",
+          "guides",
+          "jobs",
+          "changelog"
+        ]
+      },
+      "content_field_type": {
+        "type": "string",
+        "enum": [
+          "installation",
+          "use_cases",
+          "troubleshooting",
+          "requirements"
+        ]
+      },
+      "content_source": {
+        "type": "string",
+        "enum": [
+          "claudepro",
+          "community",
+          "official"
+        ]
+      },
+      "copy_type": {
+        "type": "string",
+        "enum": [
+          "llmstxt",
+          "markdown",
+          "code",
+          "link"
+        ]
+      },
+      "crud_action": {
+        "type": "string",
+        "enum": [
+          "create",
+          "update",
+          "delete",
+          "add_item",
+          "remove_item"
+        ]
+      },
+      "educational_level": {
+        "type": "string",
+        "enum": [
+          "Beginner",
+          "Intermediate",
+          "Advanced"
+        ]
+      },
+      "email_blocklist_reason": {
+        "type": "string",
+        "enum": [
+          "spam_complaint",
+          "hard_bounce",
+          "repeated_soft_bounce",
+          "manual"
+        ]
+      },
+      "email_frequency": {
+        "type": "string",
+        "enum": [
+          "weekly",
+          "biweekly",
+          "monthly",
+          "paused"
+        ]
+      },
+      "email_sequence_id": {
+        "type": "string",
+        "enum": [
+          "onboarding"
+        ]
+      },
+      "email_sequence_status": {
+        "type": "string",
+        "enum": [
+          "active",
+          "completed",
+          "cancelled"
+        ]
+      },
+      "environment": {
+        "type": "string",
+        "enum": [
+          "development",
+          "preview",
+          "production"
+        ]
+      },
+      "experience_level": {
+        "type": "string",
+        "enum": [
+          "beginner",
+          "intermediate",
+          "advanced"
+        ]
+      },
+      "field_scope": {
+        "type": "string",
+        "enum": [
+          "common",
+          "type_specific",
+          "tags"
+        ]
+      },
+      "field_type": {
+        "type": "string",
+        "enum": [
+          "text",
+          "textarea",
+          "number",
+          "select"
+        ]
+      },
+      "focus_area_type": {
+        "type": "string",
+        "enum": [
+          "security",
+          "performance",
+          "documentation",
+          "testing",
+          "code_quality",
+          "automation"
+        ]
+      },
+      "follow_action": {
+        "type": "string",
+        "enum": [
+          "follow",
+          "unfollow"
+        ]
+      },
+      "form_field_icon": {
+        "type": "string",
+        "enum": [
+          "Github"
+        ]
+      },
+      "form_field_type": {
+        "type": "string",
+        "enum": [
+          "text",
+          "textarea",
+          "number",
+          "select"
+        ]
+      },
+      "form_grid_column": {
+        "type": "string",
+        "enum": [
+          "full",
+          "half",
+          "third",
+          "two_thirds"
+        ]
+      },
+      "form_icon_position": {
+        "type": "string",
+        "enum": [
+          "left",
+          "right"
+        ]
+      },
+      "generation_source": {
+        "type": "string",
+        "enum": [
+          "ai",
+          "manual",
+          "import",
+          "migration"
+        ]
+      },
+      "grid_column": {
+        "type": "string",
+        "enum": [
+          "full",
+          "half",
+          "third",
+          "two_thirds"
+        ]
+      },
+      "guide_subcategory": {
+        "type": "string",
+        "enum": [
+          "tutorials",
+          "comparisons",
+          "workflows",
+          "use_cases",
+          "troubleshooting"
+        ]
+      },
+      "icon_position": {
+        "type": "string",
+        "enum": [
+          "left",
+          "right"
+        ]
+      },
+      "integration_type": {
+        "type": "string",
+        "enum": [
+          "github",
+          "database",
+          "cloud_aws",
+          "cloud_gcp",
+          "cloud_azure",
+          "communication",
+          "none"
+        ]
+      },
+      "interaction_type": {
+        "type": "string",
+        "enum": [
+          "view",
+          "copy",
+          "bookmark",
+          "click",
+          "time_spent",
+          "search",
+          "filter",
+          "screenshot",
+          "share",
+          "download",
+          "pwa_installed",
+          "pwa_launched",
+          "newsletter_subscribe",
+          "contact_interact",
+          "contact_submit",
+          "form_started",
+          "form_step_completed",
+          "form_field_focused",
+          "form_template_selected",
+          "form_abandoned",
+          "form_submitted",
+          "sponsored_impression",
+          "sponsored_click"
+        ]
+      },
+      "job_category": {
+        "type": "string",
+        "enum": [
+          "engineering",
+          "design",
+          "product",
+          "marketing",
+          "sales",
+          "support",
+          "research",
+          "data",
+          "operations",
+          "leadership",
+          "consulting",
+          "education",
+          "other"
+        ]
+      },
+      "job_plan": {
+        "type": "string",
+        "enum": [
+          "one_time",
+          "subscription"
+        ]
+      },
+      "job_run_status": {
+        "type": "string",
+        "enum": [
+          "queued",
+          "running",
+          "retrying",
+          "succeeded",
+          "failed",
+          "cancelled"
+        ]
+      },
+      "job_status": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "pending_payment",
+          "pending_review",
+          "active",
+          "expired",
+          "rejected",
+          "deleted"
+        ]
+      },
+      "job_tier": {
+        "type": "string",
+        "enum": [
+          "standard",
+          "featured"
+        ]
+      },
+      "job_type": {
+        "type": "string",
+        "enum": [
+          "full_time",
+          "part_time",
+          "contract",
+          "freelance",
+          "internship"
+        ]
+      },
+      "newsletter_interest": {
+        "type": "string",
+        "enum": [
+          "general",
+          "agents",
+          "mcp",
+          "rules",
+          "commands",
+          "hooks",
+          "statuslines",
+          "skills",
+          "collections",
+          "guides",
+          "jobs",
+          "changelog"
+        ]
+      },
+      "newsletter_source": {
+        "type": "string",
+        "enum": [
+          "footer",
+          "homepage",
+          "modal",
+          "content_page",
+          "inline",
+          "post_copy",
+          "resend_import",
+          "oauth_signup"
+        ]
+      },
+      "newsletter_subscription_status": {
+        "type": "string",
+        "enum": [
+          "active",
+          "unsubscribed",
+          "bounced",
+          "complained"
+        ]
+      },
+      "newsletter_sync_status": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "synced",
+          "failed",
+          "skipped"
+        ]
+      },
+      "notification_priority": {
+        "type": "string",
+        "enum": [
+          "high",
+          "medium",
+          "low"
+        ]
+      },
+      "notification_type": {
+        "type": "string",
+        "enum": [
+          "announcement",
+          "feedback"
+        ]
+      },
+      "oauth_provider": {
+        "type": "string",
+        "enum": [
+          "discord",
+          "github",
+          "google"
+        ]
+      },
+      "open_graph_type": {
+        "type": "string",
+        "enum": [
+          "profile",
+          "website"
+        ]
+      },
+      "payment_product_type": {
+        "type": "string",
+        "enum": [
+          "job_listing",
+          "mcp_listing",
+          "user_content",
+          "subscription",
+          "premium_membership"
+        ]
+      },
+      "payment_transaction_status": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "completed",
+          "failed",
+          "refunded"
+        ]
+      },
+      "primary_action_type": {
+        "type": "string",
+        "enum": [
+          "notification",
+          "copy_command",
+          "copy_script",
+          "scroll",
+          "download",
+          "github_link"
+        ]
+      },
+      "route_group": {
+        "type": "string",
+        "enum": [
+          "primary",
+          "secondary",
+          "actions"
+        ]
+      },
+      "setting_type": {
+        "type": "string",
+        "enum": [
+          "boolean",
+          "string",
+          "number",
+          "json"
+        ]
+      },
+      "sort_direction": {
+        "type": "string",
+        "enum": [
+          "asc",
+          "desc"
+        ]
+      },
+      "sort_option": {
+        "type": "string",
+        "enum": [
+          "relevance",
+          "date",
+          "popularity",
+          "name",
+          "updated",
+          "created",
+          "views",
+          "trending"
+        ]
+      },
+      "sponsorship_tier": {
+        "type": "string",
+        "enum": [
+          "featured",
+          "promoted",
+          "spotlight",
+          "sponsored"
+        ]
+      },
+      "static_route_icon": {
+        "type": "string",
+        "enum": [
+          "Activity",
+          "Bookmark",
+          "Briefcase",
+          "Building2",
+          "Cookie",
+          "FileText",
+          "Handshake",
+          "HelpCircle",
+          "Home",
+          "Library",
+          "Link",
+          "Mail",
+          "Plus",
+          "PlusCircle",
+          "Search",
+          "Settings",
+          "Shield",
+          "Star",
+          "TrendingUp",
+          "User",
+          "Users",
+          "Wand2"
+        ]
+      },
+      "submission_status": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "rejected",
+          "spam",
+          "merged"
+        ]
+      },
+      "submission_type": {
+        "type": "string",
+        "enum": [
+          "agents",
+          "mcp",
+          "rules",
+          "commands",
+          "hooks",
+          "statuslines",
+          "skills"
+        ]
+      },
+      "subscription_status": {
+        "type": "string",
+        "enum": [
+          "active",
+          "cancelled",
+          "past_due",
+          "paused",
+          "revoked"
+        ]
+      },
+      "trending_metric": {
+        "type": "string",
+        "enum": [
+          "views",
+          "likes",
+          "shares",
+          "downloads",
+          "all"
+        ]
+      },
+      "trending_period": {
+        "type": "string",
+        "enum": [
+          "today",
+          "week",
+          "month",
+          "year",
+          "all"
+        ]
+      },
+      "twitter_card_type": {
+        "type": "string",
+        "enum": [
+          "summary_large_image",
+          "summary",
+          "app",
+          "player"
+        ]
+      },
+      "use_case_type": {
+        "type": "string",
+        "enum": [
+          "code_review",
+          "api_development",
+          "frontend_development",
+          "data_science",
+          "content_creation",
+          "devops_infrastructure",
+          "general_development",
+          "testing_qa",
+          "security_audit"
+        ]
+      },
+      "user_role": {
+        "type": "string",
+        "enum": [
+          "user",
+          "admin",
+          "moderator"
+        ]
+      },
+      "user_tier": {
+        "type": "string",
+        "enum": [
+          "free",
+          "pro",
+          "enterprise"
+        ]
+      },
+      "webhook_delivery_status": {
+        "type": "string",
+        "enum": [
+          "running",
+          "succeeded",
+          "failed"
+        ]
+      },
+      "webhook_direction": {
+        "type": "string",
+        "enum": [
+          "inbound",
+          "outbound"
+        ]
+      },
+      "webhook_event_type": {
+        "type": "string",
+        "enum": [
+          "changelog_announcement",
+          "changelog_notification",
+          "content_announcement_create",
+          "content_announcement_update",
+          "deployment_succeeded",
+          "email_bounced",
+          "email_clicked",
+          "email_delivery_delayed",
+          "job_deleted",
+          "job_expired",
+          "job_notification_create",
+          "job_notification_update",
+          "job_status_change",
+          "job_submission_new",
+          "jobs_expired",
+          "submission_notification",
+          "submission_notification_update",
+          "email_complained",
+          "content_announcement",
+          "error_notification",
+          "order_paid",
+          "order_refunded",
+          "subscription_canceled",
+          "subscription_renewal",
+          "subscription_revoked"
+        ]
+      },
+      "webhook_source": {
+        "type": "string",
+        "enum": [
+          "resend",
+          "vercel",
+          "discord",
+          "supabase_db",
+          "custom",
+          "polar"
+        ]
+      },
+      "workplace_type": {
+        "type": "string",
+        "enum": [
+          "Remote",
+          "On_site",
+          "Hybrid"
+        ]
       }
     }
   }

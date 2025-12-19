@@ -13,14 +13,14 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export (async )?function $ACTION($$$) { $$$ }
+        regex: 'export\s+(async\s+)?function\s+\w+\([^)]*\)\s*\{'
     - has:
         regex: create|update|delete|upsert|insert|remove|add
     - has:
-        pattern: await $SERVICE.($METHOD)($$$)
+        regex: 'await\s+\w+\.\w+\('
     - not:
         has:
-          pattern: revalidateTag($$$)
+          regex: 'revalidateTag\('
 message: "Mutations must invalidate related cache tags. Add: revalidateTag('resource-type') and revalidateTag('resource-type-${id}') after mutation. Import revalidateTag from 'next/cache'"
 severity: error
 
@@ -34,7 +34,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: 'use cache'
     - has:
@@ -54,7 +54,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: 'use cache'
     - has:

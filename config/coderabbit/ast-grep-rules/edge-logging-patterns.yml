@@ -27,8 +27,9 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export (const|function) $HANDLER($$$) { $$$ }
-        regex: (GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)
+        regex: 'export\s+(const|function)\s+\w+\([^)]*\)\s*\{'
+    - has:
+        regex: '(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)'
     - not:
         has:
           regex: (createEmailHandlerContext|createDataApiContext|createSearchContext|createTransformApiContext|createUtilityContext|createNotificationRouterContext|createChangelogHandlerContext|createWebAppContext)
@@ -45,13 +46,14 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export (const|function) $HANDLER($$$) { $$$ }
-        regex: (GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)
+        regex: 'export\s+(const|function)\s+\w+\([^)]*\)\s*\{'
+    - has:
+        regex: '(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)'
     - has:
         regex: const logContext = create
     - not:
         has:
-          pattern: initRequestLogging($$$)
+          regex: 'initRequestLogging\('
 message: "Edge function handler is missing initRequestLogging() call. Add: initRequestLogging(logContext) at handler start. This will automatically set logger bindings."
 severity: error
 
@@ -65,12 +67,13 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export (const|function) $HANDLER($$$) { $$$ }
-        regex: (GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)
+        regex: 'export\s+(const|function)\s+\w+\([^)]*\)\s*\{'
     - has:
-        pattern: return (new Response|Response.$METHOD)($$$)
+        regex: '(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)'
+    - has:
+        regex: 'return\s+(new Response|Response\.\w+)\('
     - not:
         has:
-          pattern: traceRequestComplete($$$)
+          regex: 'traceRequestComplete\('
 message: "Edge function handler is missing traceRequestComplete() call before success response. Add: traceRequestComplete(logContext) before returning."
 severity: error

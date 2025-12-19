@@ -12,7 +12,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export function $FUNC($$$) { $$$ }
+        regex: 'export function \w+\([^)]*\)\s*\{'
     - not:
         has:
           regex: :\s*\w+\s*\{

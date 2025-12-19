@@ -129,8 +129,6 @@ import { withSmartCache } from '../utils/request-cache.ts';
 
 // Type helper: Extract model type from Prisma query result (non-nullable)
 type Job = NonNullable<Awaited<ReturnType<typeof prisma.jobs.findUnique>>>;
-// Import Prisma model type for arrays
-import type { jobsModel } from '@heyclaude/database-types/prisma/models';
 export class JobsService extends BasePrismaService {
   /**
    * Get active jobs list
@@ -317,8 +315,8 @@ export class JobsService extends BasePrismaService {
    *
    * @returns Array of featured jobs (real + placeholders, max 6 total)
    */
-  async getFeaturedJobs(): Promise<jobsModel[]> {
-    return withSmartCache<jobsModel[]>(
+  async getFeaturedJobs() {
+    return withSmartCache(
       'getFeaturedJobs',
       'getFeaturedJobs',
       async () => {
@@ -337,6 +335,8 @@ export class JobsService extends BasePrismaService {
 
         // OPTIMIZATION: Fetch real jobs and placeholder jobs in parallel when both are needed
         // This reduces sequential queries from 2 to 1 parallel batch
+        // OPTIMIZATION: Use select to fetch only required fields (17 fields: 14 display + 3 sorting)
+        // This reduces data transfer significantly (from 30+ fields to 17 fields per job)
         const [realJobs, placeholderJobs] = await Promise.all([
           prisma.jobs.findMany({
             where: {
@@ -344,6 +344,27 @@ export class JobsService extends BasePrismaService {
               active: true,
               featured: true,
               is_placeholder: false,
+            },
+            select: {
+              // Display fields (14)
+              slug: true,
+              title: true,
+              company: true,
+              company_logo: true,
+              location: true,
+              remote: true,
+              type: true,
+              category: true,
+              tags: true,
+              posted_at: true,
+              link: true,
+              tier: true,
+              description: true,
+              salary: true,
+              // Sorting fields (3) - needed for combined.sort() logic
+              is_placeholder: true,
+              featured: true,
+              order: true,
             },
             orderBy: [
               { order: 'desc' },
@@ -358,6 +379,27 @@ export class JobsService extends BasePrismaService {
                   active: true,
                   is_placeholder: true,
                 },
+                select: {
+                  // Display fields (14)
+                  slug: true,
+                  title: true,
+                  company: true,
+                  company_logo: true,
+                  location: true,
+                  remote: true,
+                  type: true,
+                  category: true,
+                  tags: true,
+                  posted_at: true,
+                  link: true,
+                  tier: true,
+                  description: true,
+                  salary: true,
+                  // Sorting fields (3) - needed for combined.sort() logic
+                  is_placeholder: true,
+                  featured: true,
+                  order: true,
+                },
                 orderBy: [
                   { featured: 'desc' },
                   { order: 'desc' },
@@ -365,7 +407,7 @@ export class JobsService extends BasePrismaService {
                 ],
                 take: neededPlaceholders,
               })
-            : Promise.resolve([] as jobsModel[]),
+            : Promise.resolve([]),
         ]);
 
         // Combine and sort: real jobs first, then placeholders
@@ -421,16 +463,35 @@ export class JobsService extends BasePrismaService {
    */
   async getJobsByCategory(
     args: GetJobsByCategoryArgs
-  ): Promise<Job[]> {
-    return withSmartCache<Job[]>(
+  ) {
+    return withSmartCache(
       'getJobsByCategory',
       'getJobsByCategory',
       async () => {
+        // OPTIMIZATION: Use select to fetch only required fields (14 fields)
+        // This reduces data transfer significantly (from 30+ fields to 14 fields per job)
+        // Fields match JobCard component requirements (used on job listing pages)
         const jobs = await prisma.jobs.findMany({
           where: {
             status: 'active',
             active: true,
             category: args.p_category as job_category,
+          },
+          select: {
+            slug: true,
+            title: true,
+            company: true,
+            company_logo: true,
+            location: true,
+            remote: true,
+            type: true,
+            category: true,
+            tags: true,
+            posted_at: true,
+            link: true,
+            tier: true,
+            description: true,
+            salary: true,
           },
           orderBy: [
             { featured: 'desc' },
@@ -512,7 +573,20 @@ export class JobsService extends BasePrismaService {
       'getPaymentPlanCatalog',
       'getPaymentPlanCatalog',
       async () => {
+        // OPTIMIZATION: Use select to fetch only required fields (9 fields, excluding created_at/updated_at)
+        // This reduces data transfer (from 11 fields to 9 fields per plan)
         const plans = await prisma.payment_plan_catalog.findMany({
+          select: {
+            plan: true,
+            tier: true,
+            price_cents: true,
+            is_subscription: true,
+            billing_cycle_days: true,
+            job_expiry_days: true,
+            description: true,
+            benefits: true,
+            product_type: true,
+          },
           orderBy: [
             { plan: 'asc' },
             { tier: 'asc' },

@@ -13,9 +13,9 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE(params: $TYPE) { $$$ }
+        regex: 'export default async function \w+\(params:\s*\w+\)\s*\{'
     - has:
-        pattern: params\.(slug|id|category)
+        regex: 'params\.(slug|id|category)'
     - not:
         has:
           pattern: await params
@@ -30,7 +30,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($PARAMS) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: params:\s*Promise<
     - not:
@@ -49,9 +49,9 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($$$, searchParams: $TYPE) { $$$ }
+        regex: 'export default async function \w+\([^,]+,\s*searchParams:\s*\w+\)\s*\{'
     - has:
-        pattern: searchParams\.($KEY)
+        regex: 'searchParams\.\w+'
     - not:
         has:
           pattern: await searchParams
@@ -66,7 +66,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($PARAMS) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: searchParams:\s*Promise<
     - not:
@@ -83,10 +83,10 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: cookies\(\)\.get|headers\(\)\.get
+        regex: 'cookies\(\)\.get|headers\(\)\.get'
     - not:
         has:
-          pattern: await cookies\(\)|await headers\(\)
+          regex: 'await cookies\(\)|await headers\(\)'
 message: "Next.js 16 cookies() and headers() are async. Always await before accessing. Example: const cookies = await cookies(); const token = cookies.get('token');"
 severity: error
 
@@ -98,7 +98,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export (async )?function generateMetadata($PARAMS) { $$$ }
+        regex: 'export\s+(async\s+)?function generateMetadata\([^)]*\)\s*\{'
     - has:
         regex: params:\s*Promise<
     - not:
@@ -117,7 +117,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export function generateMetadata($PARAMS) { $$$ }
+        regex: 'export function generateMetadata\([^)]*\)\s*\{'
     - has:
         regex: params:\s+\w+
     - not:
@@ -134,10 +134,10 @@ rule:
   all:
     - kind: import_statement
     - has:
-        regex: 'server-only'|unstable_cache|headers|cookies|draftMode
+        regex: "'server-only'|unstable_cache|headers|cookies|draftMode"
     - inside:
         has:
-          pattern: 'use client'
+          regex: "'use client'"
 message: "Server-only imports (unstable_cache, headers, cookies, draftMode) cannot be used in client components. Move to server component or use client-safe alternatives. Remove 'use client' or move server code to server component."
 severity: error
 
@@ -149,11 +149,11 @@ rule:
   all:
     - kind: member_expression
     - has:
-        pattern: (window|document|navigator|localStorage|sessionStorage)\.($PROP)
+        regex: '(window|document|navigator|localStorage|sessionStorage)\.\w+'
     - not:
         inside:
           has:
-            pattern: 'use client'
+            regex: "'use client'"
 message: "Browser APIs (window, document, navigator, localStorage) cannot be used in server components. Move to client component ('use client') or use typeof window !== 'undefined' check in client component."
 severity: error
 
@@ -169,7 +169,7 @@ rule:
     - not:
         inside:
           has:
-            pattern: 'use client'
+            regex: "'use client'"
 message: "React hooks (useState, useEffect, etc.) cannot be used in server components. Add 'use client' directive at top of file, or move hook logic to client component."
 severity: error
 
@@ -183,13 +183,13 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: await $FETCH($$$)
+        regex: 'await\s+\w+\([^)]*\)'
     - not:
         inside:
           has:
-            pattern: <Suspense
+            regex: '<Suspense'
 message: "Async components with data fetching should be wrapped in Suspense boundaries for proper loading states. Add <Suspense fallback={<Loading />}> around async component, or create loading.tsx file."
 severity: warning
 
@@ -203,9 +203,9 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: await $FETCH($$$)
+        regex: 'await\s+\w+\([^)]*\)'
 message: "Routes with data fetching should have error.tsx file for error boundaries. Create error.tsx in same directory with error boundary component. This prevents full app crashes on errors."
 severity: warning
 
@@ -219,8 +219,8 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: await $FETCH($$$)
+        regex: 'await\s+\w+\([^)]*\)'
 message: "Async pages should have corresponding loading.tsx file for proper loading states. Create loading.tsx in same directory with page-specific skeleton component. This improves UX during data fetching."
 severity: warning

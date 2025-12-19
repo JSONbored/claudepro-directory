@@ -36,15 +36,128 @@ generatorHandler({
     try {
       const { generator } = options;
 
-      // Parse generator configuration
+      // Validate generator configuration
+      const output = generator.output?.value;
+      if (!output || typeof output !== 'string') {
+        throw new Error(
+          'Generator configuration error: "output" is required and must be a string. ' +
+          'Example: output = "../packages/database-types/src/postgres-types"'
+        );
+      }
+
+      const schema = generator.config?.['schema'];
+      if (schema !== undefined && typeof schema !== 'string') {
+        throw new Error(
+          'Generator configuration error: "schema" must be a string. ' +
+          'Example: schema = "public"'
+        );
+      }
+
+      // Prisma passes boolean values as strings from schema.prisma
+      // Parse "true"/"false" strings to booleans
+      const generateTypesRaw = generator.config?.['generateTypes'];
+      let generateTypes: boolean | undefined;
+      if (generateTypesRaw !== undefined) {
+        if (typeof generateTypesRaw === 'boolean') {
+          generateTypes = generateTypesRaw;
+        } else if (typeof generateTypesRaw === 'string') {
+          generateTypes = generateTypesRaw.toLowerCase() === 'true';
+        } else {
+          throw new Error(
+            'Generator configuration error: "generateTypes" must be a boolean or string ("true"/"false"). ' +
+            'Example: generateTypes = true'
+          );
+        }
+      }
+
+      const generateZodRaw = generator.config?.['generateZod'];
+      let generateZod: boolean | undefined;
+      if (generateZodRaw !== undefined) {
+        if (typeof generateZodRaw === 'boolean') {
+          generateZod = generateZodRaw;
+        } else if (typeof generateZodRaw === 'string') {
+          generateZod = generateZodRaw.toLowerCase() === 'true';
+        } else {
+          throw new Error(
+            'Generator configuration error: "generateZod" must be a boolean or string ("true"/"false"). ' +
+            'Example: generateZod = true'
+          );
+        }
+      }
+
+      // Validate include/exclude patterns
+      const includeFunctions = generator.config?.['includeFunctions'];
+      if (includeFunctions !== undefined) {
+        if (!Array.isArray(includeFunctions)) {
+          throw new Error(
+            'Generator configuration error: "includeFunctions" must be an array of strings. ' +
+            'Example: includeFunctions = ["get_*", "filter_*"]'
+          );
+        }
+        if (includeFunctions.some((pattern) => typeof pattern !== 'string')) {
+          throw new Error(
+            'Generator configuration error: "includeFunctions" array must contain only strings.'
+          );
+        }
+      }
+
+      const excludeFunctions = generator.config?.['excludeFunctions'];
+      if (excludeFunctions !== undefined) {
+        if (!Array.isArray(excludeFunctions)) {
+          throw new Error(
+            'Generator configuration error: "excludeFunctions" must be an array of strings. ' +
+            'Example: excludeFunctions = ["internal_*"]'
+          );
+        }
+        if (excludeFunctions.some((pattern) => typeof pattern !== 'string')) {
+          throw new Error(
+            'Generator configuration error: "excludeFunctions" array must contain only strings.'
+          );
+        }
+      }
+
+      const excludeCompositeTypes = generator.config?.['excludeCompositeTypes'];
+      if (excludeCompositeTypes !== undefined) {
+        if (!Array.isArray(excludeCompositeTypes)) {
+          throw new Error(
+            'Generator configuration error: "excludeCompositeTypes" must be an array of strings. ' +
+            'Example: excludeCompositeTypes = ["announcements", "content"]'
+          );
+        }
+        if (excludeCompositeTypes.some((pattern) => typeof pattern !== 'string')) {
+          throw new Error(
+            'Generator configuration error: "excludeCompositeTypes" array must contain only strings.'
+          );
+        }
+      }
+
+      // Check for conflicting include/exclude patterns
+      if (includeFunctions && excludeFunctions) {
+        const conflicts = includeFunctions.filter((inc) =>
+          excludeFunctions.some((exc) => {
+            // Simple conflict detection: if include pattern matches exclude pattern
+            const incRegex = new RegExp('^' + inc.replace(/\*/g, '.*') + '$');
+            const excRegex = new RegExp('^' + exc.replace(/\*/g, '.*') + '$');
+            return incRegex.test(exc) || excRegex.test(inc);
+          })
+        );
+        if (conflicts.length > 0) {
+          throw new Error(
+            `Generator configuration error: Conflicting include/exclude patterns detected: ${conflicts.join(', ')}. ` +
+            'A function cannot be both included and excluded.'
+          );
+        }
+      }
+
+      // Parse generator configuration (after validation)
       const config: GeneratorConfig = {
-        output: generator.output?.value || './dist/prisma/postgres-types',
-        schema: (generator.config?.['schema'] as string) || 'public',
-        generateTypes: (generator.config?.['generateTypes'] as boolean | undefined) !== false,
-        generateZod: (generator.config?.['generateZod'] as boolean | undefined) !== false,
-        ...(generator.config?.['includeFunctions'] ? { includeFunctions: generator.config['includeFunctions'] as string[] } : {}),
-        ...(generator.config?.['excludeFunctions'] ? { excludeFunctions: generator.config['excludeFunctions'] as string[] } : {}),
-        ...(generator.config?.['excludeCompositeTypes'] ? { excludeCompositeTypes: generator.config['excludeCompositeTypes'] as string[] } : {}),
+        output: output || './dist/prisma/postgres-types',
+        schema: (schema as string) || 'public',
+        generateTypes: generateTypes !== false,
+        generateZod: generateZod !== false,
+        ...(includeFunctions ? { includeFunctions: includeFunctions as string[] } : {}),
+        ...(excludeFunctions ? { excludeFunctions: excludeFunctions as string[] } : {}),
+        ...(excludeCompositeTypes ? { excludeCompositeTypes: excludeCompositeTypes as string[] } : {}),
       };
 
       // Get database connection string
@@ -79,13 +192,31 @@ generatorHandler({
 
       if (!connectionString) {
         throw new Error(
-          'Database connection string not found. Please set DIRECT_URL (for Prisma 7.1.0+ migrations/introspection) or DATABASE_URL environment variable. ' +
-          'Infisical should inject DIRECT_URL when running: infisical run --env=dev -- prisma generate'
+          'Database connection string not found. Please set DIRECT_URL (for Prisma 7.1.0+ migrations/introspection) or DATABASE_URL environment variable.\n' +
+          'For local development: infisical run --env=dev -- prisma generate\n' +
+          'For CI/CD: Ensure DIRECT_URL is set in your environment variables.\n' +
+          'For Supabase: Get connection string from Project Settings > Database > Connection string (Session mode, port 5432)'
+        );
+      }
+
+      // Validate connection string format (basic check)
+      if (!connectionString.match(/^(postgresql|postgres|pgsql):\/\//i)) {
+        throw new Error(
+          `Invalid connection string format. Expected postgresql://, postgres://, or pgsql:// prefix.\n` +
+          `Received: ${connectionString.substring(0, 50)}...\n` +
+          `Please check your DIRECT_URL or DATABASE_URL environment variable.`
         );
       }
 
     // Introspect database
+    // Note: Progress reporting is handled by Prisma's generator output
+    // We use console.log here as generators run during build time and need direct output
+    // This is acceptable per logging standards (generators are build-time tools)
+    // eslint-disable-next-line architectural-rules/no-console-calls -- Generators need direct console output for progress
+    console.log('🔍 Introspecting PostgreSQL database...');
     const metadata = await introspectDatabase(connectionString, config.schema);
+    // eslint-disable-next-line architectural-rules/no-console-calls -- Generators need direct console output for progress
+    console.log(`✅ Found ${Object.keys(metadata.functions).length} functions, ${Object.keys(metadata.compositeTypes).length} composite types, ${Object.keys(metadata.enums).length} enums`);
 
     // Filter functions if include/exclude patterns are specified
     let functions = metadata.functions;
@@ -132,6 +263,8 @@ generatorHandler({
     }
 
     // Generate types and schemas
+    // eslint-disable-next-line architectural-rules/no-console-calls -- Generators need direct console output for progress
+    console.log('📝 Generating function types and schemas...');
     const functionOutput = config.generateTypes || config.generateZod
       ? await generateFunctionTypes(
           functions, 
@@ -141,6 +274,8 @@ generatorHandler({
           config
         )
       : { files: {}, exports: [] };
+    // eslint-disable-next-line architectural-rules/no-console-calls -- Generators need direct console output for progress
+    console.log(`✅ Generated ${Object.keys(functionOutput.files).length} function type files`);
 
     // ROOT CAUSE FIX: Only generate composite types that are actually used by functions
     // This prevents generating types for unused composite types (e.g., from deleted functions)
@@ -295,15 +430,23 @@ generatorHandler({
       )
     );
 
+    // eslint-disable-next-line architectural-rules/no-console-calls -- Generators need direct console output for progress
+    console.log('📝 Generating composite type definitions...');
     const compositeOutput = config.generateTypes || config.generateZod
       ? await generateCompositeTypes(usedCompositeTypesRecord, metadata.enums, config)
       : { files: {}, exports: [] };
+    // eslint-disable-next-line architectural-rules/no-console-calls -- Generators need direct console output for progress
+    console.log(`✅ Generated ${Object.keys(compositeOutput.files).length} composite type files`);
 
     // Generate enum schemas (matching prisma-zod-generator format but with correct database values)
     // Output to prisma-zod-generator's location to replace/fix its incorrect enum schemas
+    // eslint-disable-next-line architectural-rules/no-console-calls -- Generators need direct console output for progress
+    console.log('📝 Generating enum schemas...');
     const enumOutput = config.generateZod
       ? generateEnumSchemas(metadata.enums, config)
       : { files: {}, exports: [] };
+    // eslint-disable-next-line architectural-rules/no-console-calls -- Generators need direct console output for progress
+    console.log(`✅ Generated ${Object.keys(enumOutput.files).length} enum schema files`);
 
     // ARCHITECTURAL FIX: Clear TypeScript build caches before generating
     // This prevents TypeScript from resolving stale type information from previous generations
@@ -462,16 +605,37 @@ generatorHandler({
     }
 
     // Write function files
+    // eslint-disable-next-line architectural-rules/no-console-calls -- Generators need direct console output for progress
+    console.log('💾 Writing generated files...');
+    const writePromises: Array<Promise<void>> = [];
+    
     for (const [functionName, content] of Object.entries(functionOutput.files)) {
       const filePath = join(functionsDir, `${functionName}.ts`);
-      await writeFile(filePath, content, 'utf-8');
+      writePromises.push(writeFile(filePath, content, 'utf-8'));
     }
 
     // Write composite files
     for (const [compositeName, content] of Object.entries(compositeOutput.files)) {
       const filePath = join(compositesDir, `${compositeName}.ts`);
-      await writeFile(filePath, content, 'utf-8');
+      writePromises.push(writeFile(filePath, content, 'utf-8'));
     }
+    
+    // Write enum schema files to prisma-zod-generator's enum schemas location
+    if (config.generateZod && enumOutput.files) {
+      const prismaZodOutput = join(process.cwd(), 'packages/database-types/src/prisma/zod');
+      const enumSchemasDir = join(prismaZodOutput, 'schemas', 'enums');
+      await mkdir(enumSchemasDir, { recursive: true });
+      
+      for (const [fileName, content] of Object.entries(enumOutput.files)) {
+        const filePath = join(enumSchemasDir, fileName);
+        writePromises.push(writeFile(filePath, content, 'utf-8'));
+      }
+    }
+    
+    // Write all files in parallel
+    await Promise.all(writePromises);
+    // eslint-disable-next-line architectural-rules/no-console-calls -- Generators need direct console output for progress
+    console.log(`✅ Wrote ${writePromises.length} files`);
 
     // Write index files
     const functionsIndex = generateIndexFile(functionOutput.exports, 'functions');
@@ -570,11 +734,39 @@ export * from './pjtg.ts';
       const errorMessage = error instanceof Error ? error.message : String(error);
       const errorStack = error instanceof Error ? error.stack : undefined;
       
+      // Clean up TypeScript build caches after failure to prevent stale types
+      // This ensures failed generations don't leave corrupted type information
+      try {
+        const { unlink } = await import('node:fs/promises');
+        const { existsSync } = await import('node:fs');
+        
+        const buildInfoPaths = [
+          join(process.cwd(), 'packages/database-types/.tsbuildinfo'),
+          join(process.cwd(), 'packages/web-runtime/.tsbuildinfo'),
+          join(process.cwd(), 'apps/web/.tsbuildinfo'),
+        ];
+        
+        for (const buildInfoPath of buildInfoPaths) {
+          if (existsSync(buildInfoPath)) {
+            try {
+              await unlink(buildInfoPath);
+            } catch {
+              // Ignore errors - file might be locked
+            }
+          }
+        }
+      } catch {
+        // Non-critical - continue with error reporting even if cache cleanup fails
+      }
+      
       // Use console.error for Prisma generator output (standard for generators)
       // This is acceptable as generators run during build time and need direct output
+      // eslint-disable-next-line architectural-rules/no-console-calls -- Generators need direct console output for errors
       console.error('❌ Prisma PostgreSQL Types Generator failed:');
+      // eslint-disable-next-line architectural-rules/no-console-calls -- Generators need direct console output for errors
       console.error(`   Error: ${errorMessage}`);
       if (errorStack) {
+        // eslint-disable-next-line architectural-rules/no-console-calls -- Generators need direct console output for errors
         console.error(`   Stack: ${errorStack.split('\n').slice(0, 5).join('\n')}`);
       }
       

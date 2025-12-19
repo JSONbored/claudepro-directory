@@ -13,12 +13,12 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: (Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID())($$$)
+        regex: '(Date\.now|Math\.random|new Date|performance\.now|crypto\.randomUUID)\('
     - not:
         follows:
-          pattern: await connection()
+          regex: 'await connection\(\)'
 message: "Non-deterministic operations (Date.now(), Math.random(), new Date(), performance.now(), crypto.randomUUID()) must come after await connection(). Move operation after connection() call."
 severity: error
 
@@ -32,12 +32,12 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: (Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID())($$$)
+        regex: '(Date\.now|Math\.random|new Date|performance\.now|crypto\.randomUUID)\('
     - not:
         has:
-          pattern: await connection()
+          regex: 'await connection\(\)'
 message: "Server components using non-deterministic operations must call await connection() at the start. Add: await connection() at function start. Import connection from 'next/server'"
 severity: error
 
@@ -51,13 +51,13 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         pattern: await connection()
     - has:
-        pattern: (Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID())($$$)
+        regex: '(Date\.now|Math\.random|new Date|performance\.now|crypto\.randomUUID)\('
     - not:
         follows:
-          pattern: await connection()
+          regex: 'await connection\(\)'
 message: "connection() must be called before any non-deterministic operations. Move await connection() to the start of the function."
 severity: error

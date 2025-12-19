@@ -29,7 +29,7 @@ rule:
     - kind: catch_clause
     - not:
         has:
-          pattern: normalizeError($$$)
+          regex: 'normalizeError\('
 message: "Catch blocks must use normalizeError() before logging or throwing. Import normalizeError from @heyclaude/web-runtime/logging/server (server) or @heyclaude/shared-runtime/logger (shared)"
 severity: error
 
@@ -43,9 +43,9 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export default async function $NAME($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: logger.$METHOD($$$)
+        regex: 'logger\.\w+\('
     - not:
         has:
           pattern: 'const $LOGGER = logger.child({ operation: $OP, route: $ROUTE, module: $MODULE })'
@@ -60,7 +60,7 @@ rule:
   all:
     - kind: call_expression
       has:
-        pattern: logger.child({ $$$ })
+        regex: 'logger\.child\(\s*\{[^}]*\}\)'
     - not:
         has:
           regex: operation:\s*['"]
@@ -83,9 +83,9 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export default async function $NAME($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: $LOGGER.$METHOD($$$)
+        regex: '\w+Logger\.\w+\('
     - not:
         has:
           regex: section:\s*['"]
@@ -100,12 +100,12 @@ rule:
   all:
     - kind: variable_declarator
       has:
-        pattern: const $HANDLER = async () => { $$$ }
+        regex: 'const\s+\w+\s*=\s*async\s*\(\)\s*=>\s*\{'
     - inside:
         has:
           regex: 'use client'
     - not:
         has:
-          pattern: useLoggedAsync($$$)
+          regex: 'useLoggedAsync\('
 message: "Client components with async operations must use useLoggedAsync hook. Import useLoggedAsync from @heyclaude/web-runtime/hooks"
 severity: warning

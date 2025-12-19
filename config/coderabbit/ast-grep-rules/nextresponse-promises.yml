@@ -10,12 +10,12 @@ rule:
   all:
     - kind: return_statement
       has:
-        pattern: return NextResponse.$METHOD($$$)
+        regex: 'return\s+NextResponse\.\w+\('
     - inside:
-        pattern: async function $FUNC($$$) { $$$ }
+        regex: 'async function \w+\([^)]*\)\s*\{'
     - not:
         has:
-          pattern: await NextResponse.$METHOD($$$)
+          regex: 'await\s+NextResponse\.\w+\('
 message: "NextResponse methods that return promises must be awaited in async functions. Use: return await NextResponse.json(...)"
 severity: error
 
@@ -27,9 +27,9 @@ rule:
   all:
     - kind: call_expression
       has:
-        pattern: NextResponse.$METHOD($$$)
+        regex: 'NextResponse\.\w+\('
     - inside:
-        pattern: async function $FUNC($$$) { $$$ }
+        regex: 'async function \w+\([^)]*\)\s*\{'
     - not:
         inside:
           kind: try_statement

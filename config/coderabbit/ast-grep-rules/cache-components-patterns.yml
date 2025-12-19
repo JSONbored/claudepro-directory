@@ -13,9 +13,9 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: 'export default async function $PAGE($$$) { $$$ }'
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: 'await $DATA_FETCH($$$)'
+        regex: 'await\s+\w+\([^)]*\)'
     - not:
         has:
           regex: 'use cache'
@@ -32,7 +32,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: 'export default async function $PAGE($$$) { $$$ }'
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: 'use cache'
     - not:
@@ -51,7 +51,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: 'export default async function $PAGE($$$) { $$$ }'
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: 'use cache'
     - has:
@@ -72,7 +72,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: 'export default async function $PAGE($$$) { $$$ }'
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: 'use cache'
     - has:
@@ -92,11 +92,11 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: 'export default async function $PAGE($$$) { $$$ }'
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: user|account|activity|notification|bookmark|library|profile
     - has:
-        pattern: 'await $DATA_FETCH($$$)'
+        regex: 'await\s+\w+\([^)]*\)'
     - not:
         has:
           regex: 'use cache: private'
@@ -113,14 +113,14 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: 'export default async function $PAGE($$$) { $$$ }'
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: 'use cache'
     - has:
         regex: Date\.now|Math\.random|new Date|process\.hrtime|generateRequestId
     - not:
         follows:
-          pattern: 'await connection()'
+          regex: 'await connection\(\)'
 message: "Non-deterministic operations (Date.now(), Math.random(), new Date(), generateRequestId()) in cached pages must come after await connection(). Add 'await connection();' at the start of the function before any non-deterministic operations. Import: import { connection } from 'next/server';"
 severity: error
 
@@ -134,14 +134,14 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: 'export default async function $PAGE($$$) { $$$ }'
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: 'use cache'
     - has:
-        pattern: '(Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID()|generateRequestId)($$$)'
+        regex: '(Date\.now|Math\.random|new Date|performance\.now|crypto\.randomUUID|generateRequestId)\('
     - not:
         has:
-          pattern: 'await connection()'
+          regex: 'await connection\(\)'
 message: "Pages using 'use cache' with non-deterministic operations must call await connection() at the start. Add: await connection() at function start before any non-deterministic operations. Import: import { connection } from 'next/server';"
 severity: error
 
@@ -155,7 +155,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: 'export default async function $PAGE($$$) { $$$ }'
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: 'use cache'
     - has:
@@ -181,7 +181,7 @@ rule:
     - has:
         regex: create|update|delete|upsert|insert|remove|add
     - has:
-        pattern: 'await $SERVICE.($METHOD)($$$)'
+        regex: 'await\s+\w+\.\w+\([^)]*\)'
     - not:
         has:
           pattern: 'revalidateTag'
@@ -198,7 +198,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: 'export async function $DATA($$$) { $$$ }'
+        regex: 'export async function \w+\([^)]*\)\s*\{'
     - has:
         regex: 'use cache'
 message: "Data functions should NOT use 'use cache' directive. Pages control caching with 'use cache' directive. Data functions are simple async functions. See cached-data-factory.ts for architectural decision. Remove 'use cache' from data function."

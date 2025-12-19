@@ -10,10 +10,10 @@ rule:
   all:
     - kind: for_statement
     - has:
-        pattern: 'for ($VAR of $ARRAY) { $$$ }'
+        regex: 'for\s+\(\w+\s+of\s+\w+\)\s*\{'
     - inside:
         has:
-          pattern: 'await $PRISMA.($METHOD)($$$)'
+          regex: 'await\s+\w+\.\w+\([^)]*\)'
     - has:
         regex: prisma\.(findMany|findFirst|findUnique|create|update|delete)
 message: "N+1 query pattern detected. Use Prisma's include/select to fetch related data in a single query, or use Promise.all() for parallel queries. Example: await prisma.user.findMany({ include: { posts: true } });"
@@ -27,9 +27,9 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: 'await $PRISMA.($METHOD1)($$$)'
+        regex: 'await\s+\w+\.\w+\([^)]*\)'
     - has:
-        pattern: 'await $PRISMA.($METHOD2)($$$)'
+        regex: 'await\s+\w+\.\w+\([^)]*\)'
     - has:
         regex: prisma\.(create|update|delete)
     - not:
@@ -46,7 +46,7 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: 'await prisma\.($METHOD)($$$)'
+        regex: 'await prisma\.\w+\('
     - not:
         inside:
           has:
@@ -62,7 +62,7 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: 'await prisma\.(findMany|findFirst|findUnique)($$$)'
+        regex: 'await prisma\.(findMany|findFirst|findUnique)\('
     - not:
         has:
           regex: 'select:|include:'
@@ -77,7 +77,7 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: 'await prisma\.(findMany|findFirst)($$$)'
+        regex: 'await prisma\.(findMany|findFirst)\('
     - not:
         has:
           pattern: 'where:'
@@ -96,7 +96,7 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: 'await prisma\.findMany($$$)'
+        regex: 'await prisma\.findMany\('
     - not:
         has:
           regex: 'take:|skip:|cursor:'
@@ -115,7 +115,7 @@ rule:
   all:
     - kind: new_expression
     - has:
-        pattern: 'new PrismaClient($$$)'
+        regex: 'new PrismaClient\('
     - not:
         inside:
           has:
@@ -131,7 +131,7 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: 'await prisma\.($TABLE)\.($METHOD)($$$)'
+        regex: 'await prisma\.\w+\.\w+\('
     - has:
         regex: 'as any|as unknown'
 message: "Prisma queries should use proper TypeScript types. Avoid 'as any' or 'as unknown'. Use Prisma's generated types (Prisma.tableGetPayload<{}>) for type safety. Import: import type { Prisma } from '@heyclaude/data-layer/prisma';"

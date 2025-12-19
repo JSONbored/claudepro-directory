@@ -25,10 +25,55 @@ export interface DatabaseMetadata {
  * Uses direct PostgreSQL client connection for better error handling
  * and Prisma integration.
  */
+/**
+ * Validate PostgreSQL connection string format
+ */
+function validateConnectionString(connectionString: string): { valid: boolean; error?: string } {
+  if (!connectionString || typeof connectionString !== 'string') {
+    return { valid: false, error: 'Connection string must be a non-empty string' };
+  }
+
+  // Check for basic PostgreSQL connection string format
+  // Supports: postgresql://, postgres://, pgsql://
+  const postgresPattern = /^(postgresql|postgres|pgsql):\/\//i;
+  if (!postgresPattern.test(connectionString)) {
+    return {
+      valid: false,
+      error: 'Connection string must start with postgresql://, postgres://, or pgsql://',
+    };
+  }
+
+  // Check for required components (basic validation)
+  try {
+    const url = new URL(connectionString.replace(/^(postgresql|postgres|pgsql):/i, 'https:'));
+    if (!url.hostname) {
+      return { valid: false, error: 'Connection string must include a hostname' };
+    }
+    if (!url.pathname || url.pathname === '/') {
+      // Database name is optional in some cases, but warn
+      // Most Supabase connections include database name
+    }
+  } catch {
+    return { valid: false, error: 'Connection string is not a valid URL format' };
+  }
+
+  return { valid: true };
+}
+
 export async function introspectDatabase(
   connectionString: string,
   schema: string = 'public'
 ): Promise<DatabaseMetadata> {
+  // Validate connection string before attempting connection
+  const validation = validateConnectionString(connectionString);
+  if (!validation.valid) {
+    throw new Error(
+      `Invalid connection string: ${validation.error}. ` +
+      `Please check your DIRECT_URL or DATABASE_URL environment variable. ` +
+      `Expected format: postgresql://user:password@host:port/database`
+    );
+  }
+
   // Configure SSL for Supabase connections
   // Supabase ALWAYS requires SSL connections, even in development/build
   // Supabase uses self-signed certificates, so we must set rejectUnauthorized: false
@@ -233,8 +278,11 @@ SELECT
     }
 
     // Introspect SETOF record functions to get actual return structure
+    // OPTIMIZATION: Process in parallel batches for better performance
     const functionReturnStructures: Record<string, CompositeTypeAttribute[]> = {};
     
+    // Collect all SETOF record functions first
+    const setofFunctions: Array<[string, FunctionMeta]> = [];
     for (const [functionName, functionMeta] of Object.entries(metadata.functions || {})) {
       const returnType = functionMeta.returnType || '';
       // Detect SETOF record (dynamic return structure)
@@ -246,56 +294,85 @@ SELECT
                           baseReturnType.toLowerCase() === 'pg_catalog.record';
       
       if (isRecordType) {
-        try {
-          // Build function call with appropriate argument values
-          // For required arguments, we'll use safe default values based on type
-          const argValues: unknown[] = functionMeta.args.map((arg) => {
-            // If argument has default, use null (will use default)
-            if (arg.hasDefault) {
-              return null;
-            }
+        setofFunctions.push([functionName, functionMeta]);
+      }
+    }
+    
+    // Process SETOF functions in parallel batches (with concurrency limit)
+    // Note: We use a single client connection, but PostgreSQL can handle concurrent queries
+    // We limit concurrency to avoid overwhelming the connection
+    const CONCURRENCY_LIMIT = 5;
+    const batches: Array<Array<[string, FunctionMeta]>> = [];
+    for (let i = 0; i < setofFunctions.length; i += CONCURRENCY_LIMIT) {
+      batches.push(setofFunctions.slice(i, i + CONCURRENCY_LIMIT));
+    }
+    
+    // Process each batch in parallel
+    for (const batch of batches) {
+      const batchResults = await Promise.allSettled(
+        batch.map(async ([functionName, functionMeta]) => {
+          try {
+            // Build function call with appropriate argument values
+            // For required arguments, we'll use safe default values based on type
+            const argValues: unknown[] = functionMeta.args.map((arg) => {
+              // If argument has default, use null (will use default)
+              if (arg.hasDefault) {
+                return null;
+              }
+              
+              // For required arguments, use safe defaults based on type
+              const udtName = (arg.udtName || '').toLowerCase();
+              if (udtName.includes('uuid') || udtName === 'uuid') {
+                // Use a test UUID for UUID arguments
+                return '00000000-0000-0000-0000-000000000000';
+              } else if (udtName.includes('text') || udtName.includes('varchar') || udtName.includes('string')) {
+                // Use empty string for text arguments
+                return '';
+              } else if (udtName.includes('int') || udtName.includes('numeric') || udtName.includes('number')) {
+                // Use 0 for numeric arguments
+                return 0;
+              } else if (udtName.includes('bool') || udtName === 'boolean') {
+                // Use false for boolean arguments
+                return false;
+              } else {
+                // Default to null for unknown types
+                return null;
+              }
+            });
             
-            // For required arguments, use safe defaults based on type
-            const udtName = (arg.udtName || '').toLowerCase();
-            if (udtName.includes('uuid') || udtName === 'uuid') {
-              // Use a test UUID for UUID arguments
-              return '00000000-0000-0000-0000-000000000000';
-            } else if (udtName.includes('text') || udtName.includes('varchar') || udtName.includes('string')) {
-              // Use empty string for text arguments
-              return '';
-            } else if (udtName.includes('int') || udtName.includes('numeric') || udtName.includes('number')) {
-              // Use 0 for numeric arguments
-              return 0;
-            } else if (udtName.includes('bool') || udtName === 'boolean') {
-              // Use false for boolean arguments
-              return false;
-            } else {
-              // Default to null for unknown types
-              return null;
-            }
-          });
-          
-          const argPlaceholders = functionMeta.args.map((_, i) => `$${i + 1}`).join(', ');
-          const functionCall = argPlaceholders 
-            ? `SELECT * FROM ${schema}.${functionName}(${argPlaceholders}) LIMIT 0`
-            : `SELECT * FROM ${schema}.${functionName}() LIMIT 0`;
-          
-          // Execute to get result set metadata (LIMIT 0 means no rows returned, just metadata)
-          // This is safe even with test arguments because LIMIT 0 prevents actual data processing
-          const testResult = await client.query(functionCall, argValues);
-          
-          // Extract column information from result fields
-          // pg library provides field metadata in result.fields
-          if (testResult.fields && testResult.fields.length > 0) {
-            const attributes: CompositeTypeAttribute[] = await Promise.all(
-              testResult.fields.map(async (field, index) => {
-                // Get type name from OID
-                // field.dataTypeID is the PostgreSQL OID for the column type
-                const typeResult = await client.query(
-                  'SELECT typname FROM pg_type WHERE oid = $1',
-                  [field.dataTypeID]
-                );
-                const udtName = typeResult.rows[0]?.typname || 'unknown';
+            const argPlaceholders = functionMeta.args.map((_, i) => `$${i + 1}`).join(', ');
+            const functionCall = argPlaceholders 
+              ? `SELECT * FROM ${schema}.${functionName}(${argPlaceholders}) LIMIT 0`
+              : `SELECT * FROM ${schema}.${functionName}() LIMIT 0`;
+            
+            // Execute to get result set metadata (LIMIT 0 means no rows returned, just metadata)
+            // This is safe even with test arguments because LIMIT 0 prevents actual data processing
+            const testResult = await client.query(functionCall, argValues);
+            
+            // Extract column information from result fields
+            // pg library provides field metadata in result.fields
+            if (testResult.fields && testResult.fields.length > 0) {
+              // OPTIMIZATION: Batch all type lookups together for this function
+              // Collect all unique type OIDs first
+              const uniqueOids = new Set(testResult.fields.map(field => field.dataTypeID));
+              
+              // Batch query all types at once
+              const typeOids = Array.from(uniqueOids);
+              const typeResults = typeOids.length > 0
+                ? await client.query(
+                    'SELECT oid, typname FROM pg_type WHERE oid = ANY($1)',
+                    [typeOids]
+                  )
+                : { rows: [] };
+              
+              // Create a map for quick lookup
+              const typeMap = new Map(
+                typeResults.rows.map(row => [row.oid, row.typname])
+              );
+              
+              // Build attributes using the type map
+              const attributes: CompositeTypeAttribute[] = testResult.fields.map((field, index) => {
+                const udtName = typeMap.get(field.dataTypeID) || 'unknown';
                 
                 return {
                   name: field.name,
@@ -303,17 +380,28 @@ SELECT
                   nullable: true, // Assume nullable for safety (can't determine from result set)
                   ordinal: index + 1,
                 };
-              })
-            );
+              });
+              
+              return { functionName, attributes };
+            }
             
-            functionReturnStructures[functionName] = attributes;
+            return { functionName, attributes: null };
+          } catch (error) {
+            // If introspection fails (function has side effects, requires specific args, etc.),
+            // we'll fall back to Record<string, unknown>
+            // This is safe and expected for some functions
+            // Return null to indicate failure (will be handled by Promise.allSettled)
+            return { functionName, attributes: null, error };
           }
-        } catch (error) {
-          // If introspection fails (function has side effects, requires specific args, etc.),
-          // we'll fall back to Record<string, unknown>
-          // This is safe and expected for some functions
-          // Silently continue - the generator will handle it
+        })
+      );
+      
+      // Process batch results
+      for (const result of batchResults) {
+        if (result.status === 'fulfilled' && result.value.attributes) {
+          functionReturnStructures[result.value.functionName] = result.value.attributes;
         }
+        // Silently ignore failures - the generator will handle missing return structures
       }
     }
 
@@ -335,11 +423,40 @@ SELECT
         `1. Network connectivity to the database host\n` +
         `2. DIRECT_URL is correct: ${sanitizedConnectionString}\n` +
         `3. Database is accessible from your network\n` +
+        `4. Firewall rules allow connections from your IP\n` +
+        `5. For Supabase: Ensure you're using the correct project reference and region\n` +
         `Original error: ${errorMessage}`
       );
     }
+    
+    if (errorMessage.includes('password authentication failed') || errorMessage.includes('authentication failed')) {
+      throw new Error(
+        `Database authentication failed. Please check:\n` +
+        `1. DIRECT_URL contains correct username and password\n` +
+        `2. Database user has proper permissions\n` +
+        `3. For Supabase: Ensure you're using the correct connection string from dashboard\n` +
+        `Connection string (sanitized): ${sanitizedConnectionString}\n` +
+        `Original error: ${errorMessage}`
+      );
+    }
+    
+    if (errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT')) {
+      throw new Error(
+        `Database connection timed out. Please check:\n` +
+        `1. Database host is reachable\n` +
+        `2. Network connection is stable\n` +
+        `3. Firewall allows connections on the database port\n` +
+        `4. For Supabase: Check if the project is paused or experiencing issues\n` +
+        `Connection string (sanitized): ${sanitizedConnectionString}\n` +
+        `Original error: ${errorMessage}`
+      );
+    }
+    
     throw new Error(
-      `Failed to introspect database: ${errorMessage}`
+      `Failed to introspect database: ${errorMessage}\n` +
+      `Connection string (sanitized): ${sanitizedConnectionString}\n` +
+      `Schema: ${schema}\n` +
+      `Suggestion: Verify DIRECT_URL is set correctly and database is accessible.`
     );
   } finally {
     // Ensure client is properly closed even if connection failed

@@ -11,16 +11,16 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: new Date($$$)
+        regex: 'new Date\('
     - inside:
         has:
-          pattern: <$COMPONENT $PROPS={$$$} />
+          regex: '<\w+\s+\w+=\{[^}]*\}'
     - not:
         has:
           pattern: serializeForClient
     - not:
         has:
-          pattern: toISOString|toJSON
+          regex: 'toISOString|toJSON'
 message: "Date objects cannot be passed directly to Client Components. Use serializeForClient() to convert Date objects to ISO strings, or call .toISOString() before passing. Import: import { serializeForClient } from '@heyclaude/shared-runtime/utils/serialize';"
 severity: error
 
@@ -37,7 +37,7 @@ rule:
         regex: Date\.now|new Date\(
     - inside:
         has:
-          pattern: <$COMPONENT $PROPS={$$$} />
+          regex: '<\w+\s+\w+=\{[^}]*\}'
     - not:
         has:
           pattern: serializeForClient
@@ -55,7 +55,7 @@ rule:
         regex: new (Map|Set|Symbol|Function|class )
     - inside:
         has:
-          pattern: <$COMPONENT $PROPS={$$$} />
+          regex: '<\w+\s+\w+=\{[^}]*\}'
     - not:
         has:
           pattern: serializeForClient
@@ -72,9 +72,9 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $SERVER($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: await $DATA_FETCH($$$)
+        regex: 'await\s+\w+\([^)]*\)'
     - has:
         regex: data=|props=|items=|content=
     - not:
@@ -93,10 +93,10 @@ rule:
     - has:
         regex: 'use client'
     - has:
-        pattern: await $SUPABASE.(from|rpc)($$$)
+        regex: 'await\s+\w+\.(from|rpc)\('
     - not:
         has:
-          pattern: useEffect|useSWR|useQuery
+          regex: 'useEffect|useSWR|useQuery'
 message: "Direct data fetching (supabase.from, supabase.rpc) in client components is inefficient and exposes database credentials. Move data fetching to server component or use React Query/SWR for client-side data fetching. Server components should handle all database queries."
 severity: error
 
@@ -110,9 +110,9 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: await $DATA($$$)
+        regex: 'await\s+\w+\([^)]*\)'
     - has:
         pattern: <$CHILD_COMPONENT />
     - not:
@@ -131,11 +131,11 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: await $FETCH1($ARGS)
+        regex: 'await\s+\w+\([^)]*\)'
     - has:
-        pattern: await $FETCH2($ARGS)
+        regex: 'await\s+\w+\([^)]*\)'
     - has:
         regex: get|fetch|load
 message: "Same data may be fetched multiple times. Consider fetching once at page level and passing down, or using request-scoped caching (withSmartCache) to prevent duplicate RPC calls within the same request."
@@ -152,11 +152,11 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: const reqLogger = logger.child({ $$$ })
+        regex: 'const reqLogger\s*=\s*logger\.child\(\s*\{[^}]*\}\)'
     - has:
-        pattern: await $DATA_FUNC($$$)
+        regex: 'await\s+\w+\([^)]*\)'
     - not:
         has:
           pattern: reqLogger
@@ -171,7 +171,7 @@ rule:
   all:
     - kind: arrow_function
     - has:
-        pattern: ($$$) => { $$$ }
+        regex: '\([^)]*\)\s*=>\s*\{'
     - not:
         inside:
           has:
@@ -189,11 +189,11 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: await $DATA_FETCH($$$)
+        regex: 'await\s+\w+\([^)]*\)'
     - not:
         has:
-          pattern: try.*catch|\.catch\(
+          regex: 'try.*catch|\.catch\('
 message: "Data fetching in pages should include error handling. Wrap in try/catch or use .catch() to handle failures gracefully. Add error boundaries (error.tsx) for route-level error handling."
 severity: warning

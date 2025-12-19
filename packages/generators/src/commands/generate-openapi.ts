@@ -28,6 +28,7 @@ import { Project, Node, ObjectLiteralExpression, PropertyAssignment, ExportDecla
 import { createDocument } from 'zod-openapi';
 import { z } from 'zod';
 import jiti from 'jiti';
+import yaml from 'js-yaml';
 
 // Import zod-openapi for type augmentation
 import 'zod-openapi';
@@ -2453,6 +2454,26 @@ function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
 }
 
 /**
+ * Parse Prisma OpenAPI YAML file and extract schemas
+ * Uses js-yaml to parse the YAML and extract components.schemas
+ */
+function parsePrismaOpenApiYaml(yamlContent: string): Record<string, any> {
+  try {
+    const parsed = yaml.load(yamlContent) as any;
+    
+    // Extract components.schemas
+    if (parsed?.components?.schemas && typeof parsed.components.schemas === 'object') {
+      return parsed.components.schemas;
+    }
+    
+    return {};
+  } catch (error) {
+    console.warn(`Failed to parse Prisma OpenAPI YAML: ${error instanceof Error ? error.message : String(error)}`);
+    return {};
+  }
+}
+
+/**
  * Generate OpenAPI document from route metadata
  * Uses zod-openapi's createDocument() with proper paths structure
  */
@@ -2542,6 +2563,42 @@ export async function generateOpenAPI(): Promise<void> {
 
   // Generate OpenAPI document
   const document = generateOpenAPIDocument(allRoutes);
+
+  // Merge Prisma OpenAPI schemas (from prisma-openapi generator)
+  const prismaOpenApiPath = join(PROJECT_ROOT, 'packages/database-types/src/openapi/openapi.yaml');
+  if (existsSync(prismaOpenApiPath)) {
+    try {
+      const prismaOpenApiContent = await readFile(prismaOpenApiPath, 'utf-8');
+      const prismaSchemas = parsePrismaOpenApiYaml(prismaOpenApiContent);
+      
+      // Merge Prisma schemas into API document
+      if (prismaSchemas && Object.keys(prismaSchemas).length > 0) {
+        if (!document.components) {
+          document.components = {};
+        }
+        if (!document.components.schemas) {
+          document.components.schemas = {};
+        }
+        
+        // Merge Prisma schemas, avoiding conflicts (API schemas take precedence)
+        // This allows API routes to override Prisma model schemas if needed
+        const mergedSchemas = {
+          ...prismaSchemas,
+          ...document.components.schemas,
+        };
+        
+        document.components.schemas = mergedSchemas;
+        console.log(`\n✓ Merged ${Object.keys(prismaSchemas).length} Prisma model schemas into OpenAPI spec`);
+        console.log(`   Prisma schemas are now available as $ref in API responses`);
+      }
+    } catch (error) {
+      console.warn(`\n⚠️  Could not merge Prisma OpenAPI schemas: ${error instanceof Error ? error.message : String(error)}`);
+      console.warn(`   Continuing without Prisma schemas...`);
+    }
+  } else {
+    console.log(`\nℹ️  Prisma OpenAPI file not found at ${prismaOpenApiPath}`);
+    console.log(`   Run \`pnpm prisma:generate:exec\` to generate Prisma schemas first.`);
+  }
 
   // Write JSON
   const jsonPath = join(PROJECT_ROOT, 'openapi.json');

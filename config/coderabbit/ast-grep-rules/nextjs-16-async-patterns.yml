@@ -10,7 +10,7 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export default async function $PAGE($PARAMS) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: params:\s*Promise<
     - not:
@@ -27,7 +27,7 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export default async function $PAGE($PARAMS) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: searchParams:\s*Promise<
     - not:
@@ -44,7 +44,7 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export (async )?function generateMetadata($PARAMS) { $$$ }
+        regex: 'export\s+(async\s+)?function generateMetadata\([^)]*\)\s*\{'
     - has:
         regex: params:\s*Promise<
     - not:
@@ -63,7 +63,7 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export function generateMetadata($PARAMS) { $$$ }
+        regex: 'export function generateMetadata\([^)]*\)\s*\{'
     - has:
         regex: params:\s+\w+
     - not:

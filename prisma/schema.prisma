@@ -3,12 +3,19 @@ generator client {
   output   = "../packages/database-types/src/prisma"
   engineType = "client"
   moduleFormat = "esm"
-  previewFeatures = ["relationJoins"]
+  // Preview features:
+  // - relationJoins: Enable SQL JOINs for relation loading (performance optimization)
+  // - schemaEngineDriverAdapters: Required for @prisma/adapter-pg compatibility
+  // - postgresqlExtensions: Better support for PostgreSQL extensions (uuid-ossp, vector, pg_trgm, etc.)
+  // Note: Prisma metrics ($metrics API) is available without a preview feature in Prisma 7.1.0+
+  previewFeatures = ["relationJoins", "schemaEngineDriverAdapters", "postgresqlExtensions"]
+  // Note: improvedQueryRaw is now stable in Prisma 7.1.0+ and doesn't need to be in previewFeatures
 }
 
 generator zod {
   provider = "prisma-zod-generator"
   output   = "../packages/database-types/src/prisma/zod"
+  config   = "./zod-generator.config.json"
 }
 
 generator json-types {
@@ -34,14 +41,12 @@ generator openapi {
   output   = "../packages/database-types/src/openapi"
 }
 
-generator docs {
-  provider = "node node_modules/.pnpm/prisma-docs-generator@0.8.0/node_modules/prisma-docs-generator/dist/index.js"
-  output   = "../packages/database-types/docs"
-}
-
 datasource db {
   provider = "postgresql"
   schemas  = ["auth", "public"]
+  // Note: PostgreSQL extensions (uuid-ossp, vector, pg_trgm, unaccent, pgmq) are defined
+  // in database migrations. The postgresqlExtensions preview feature enables better
+  // type safety and support for extension functions/types in Prisma Client.
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments

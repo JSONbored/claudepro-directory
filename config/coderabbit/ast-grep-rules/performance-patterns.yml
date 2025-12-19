@@ -14,7 +14,7 @@ rule:
       - kind: for_in_statement
       - kind: while_statement
     - has:
-        pattern: await prisma\.($METHOD)($$$)
+        regex: 'await prisma\.\w+\('
     - has:
         regex: prisma\.(\$queryRawUnsafe|\$queryRaw|findMany|findFirst|findUnique|create|update|delete|upsert)
 message: "N+1 query detected: Prisma queries inside loop. Use Promise.all() for parallel execution, batch query with Prisma's include/select, or use a single query with WHERE IN. Example: await Promise.all(items.map(item => prisma.table.findUnique({ where: { id: item.id } }))) or await prisma.table.findMany({ where: { id: { in: itemIds } } })"
@@ -31,7 +31,7 @@ rule:
       - kind: for_in_statement
       - kind: while_statement
     - has:
-        pattern: await $ASYNC($$$)
+        regex: 'await\s+\w+\([^)]*\)'
 message: "await in loop causes sequential execution. Use Promise.all() for parallel execution: await Promise.all(items.map(item => asyncOperation(item)))"
 severity: error
 
@@ -43,15 +43,15 @@ rule:
   all:
     - kind: variable_declarator
     - has:
-        pattern: const $VAR1 = await $ASYNC1($$$)
+        regex: 'const\s+\w+\s*=\s*await\s+\w+\([^)]*\)'
     - follows:
         has:
-          pattern: const $VAR2 = await $ASYNC2($$$)
+          regex: 'const\s+\w+\s*=\s*await\s+\w+\([^)]*\)'
     - has:
         regex: get|fetch|load|query
     - not:
         has:
-          pattern: Promise\.all|Promise\.allSettled
+          regex: 'Promise\.all|Promise\.allSettled'
 message: "Independent async operations should run in parallel with Promise.all() or Promise.allSettled() for better performance. Example: const [result1, result2] = await Promise.all([async1(), async2()]);"
 severity: warning
 
@@ -66,7 +66,7 @@ rule:
         regex: (chart|editor|pdf|video|player|monaco|codemirror|ace|three|babylon|fabric|konva|d3|recharts|plotly)
     - not:
         has:
-          pattern: await import($$$)
+          regex: 'await\s+import\('
 message: "Heavy dependency imported statically. Consider dynamic import for code splitting: const { HeavyLib } = await import('heavy-lib')"
 severity: warning
 
@@ -86,7 +86,7 @@ rule:
         regex: (\.map\(|\.filter\(|\.reduce\(|\.sort\(|JSON\.parse|JSON\.stringify|\.flat\(|\.flatMap\()
     - not:
         has:
-          pattern: useMemo($$$)
+          regex: 'useMemo\('
 message: "Expensive computation in component without useMemo. Wrap with useMemo to prevent recalculation on every render. Example: const result = useMemo(() => expensiveComputation(), [deps])"
 severity: warning
 
@@ -98,13 +98,13 @@ rule:
   all:
     - kind: variable_declarator
     - has:
-        pattern: const $CALLBACK = ($$$) => { $$$ }
+        regex: 'const\s+\w+\s*=\s*\([^)]*\)\s*=>\s*\{'
     - inside:
         has:
           regex: 'use client'
     - not:
         has:
-          pattern: useCallback($$$)
+          regex: 'useCallback\('
 message: "Callback functions in client components should use useCallback to prevent unnecessary re-renders. Wrap: const callback = useCallback(() => { ... }, [deps])"
 severity: warning
 
@@ -116,7 +116,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export (function|const) $COMPONENT($PROPS) { $$$ }
+        regex: 'export\s+(function|const)\s+\w+\([^)]*\)\s*\{'
     - has:
         regex: (\.map\(|\.filter\(|\.reduce\(|\.length > \d+|JSON\.parse|JSON\.stringify)
     - not:
@@ -135,9 +135,9 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: await $DATA_FETCH($$$)
+        regex: 'await\s+\w+\([^)]*\)'
     - not:
         inside:
           pattern: <Suspense>$$$</Suspense>
@@ -152,13 +152,13 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: addEventListener($$$)
+        regex: 'addEventListener\('
     - inside:
         has:
-          pattern: useEffect($$$, $DEPS)
+          regex: 'useEffect\([^,]+,\s*\[[^\]]*\]\)'
     - not:
         has:
-          pattern: return () => { removeEventListener($$$) }
+          regex: 'return\s*\(\)\s*=>\s*\{\s*removeEventListener\('
 message: "Event listeners in useEffect must be cleaned up to prevent memory leaks. Add: return () => { removeEventListener(...) } in useEffect cleanup."
 severity: error
 

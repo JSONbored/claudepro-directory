@@ -88,9 +88,20 @@ export class TrendingService extends BasePrismaService {
       async () => {
         // Use database SQL INTERVAL for date calculation (eliminates Date.now() call)
         // More efficient: database handles date arithmetic natively
-        // Build where clause using raw SQL for date filtering
+        // OPTIMIZATION: Replace SELECT * with explicit field list (9 fields)
+        // This reduces data transfer significantly (from 30+ fields to 9 fields per content item)
+        // Fields match mapRecentContent and edge function requirements
         let query = `
-          SELECT *
+          SELECT 
+            category,
+            author,
+            created_at,
+            date_added,
+            description,
+            slug,
+            tags,
+            title,
+            display_title
           FROM public.content
           WHERE 1=1
         `;

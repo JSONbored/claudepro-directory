@@ -39,10 +39,10 @@ rule:
         regex: (chart|editor|pdf|video|player|monaco|codemirror|ace|three|babylon|fabric|konva|d3|recharts|plotly|markdown|mermaid)
     - inside:
         has:
-          pattern: if ($CONDITION) { $$$ }
+          regex: 'if\s*\([^)]+\)\s*\{'
     - not:
         has:
-          pattern: await import($$$)
+          regex: 'await\s+import\('
 message: "Heavy dependency used conditionally should use dynamic import for code splitting. Use: if (needed) { const { Lib } = await import('heavy-lib') }"
 severity: warning
 
@@ -72,7 +72,7 @@ rule:
         regex: (chart|editor|pdf|video|player|monaco|codemirror|ace|three|babylon|fabric|konva|d3|recharts|plotly)
     - not:
         has:
-          pattern: await import($$$)
+          regex: 'await\s+import\('
 message: "Heavy dependencies in route pages should use dynamic imports for code splitting. Use: const { Component } = await import('heavy-component')"
 severity: warning
 
@@ -87,9 +87,9 @@ rule:
         regex: (chart|editor|pdf|video|player|monaco|codemirror|ace|three|babylon|fabric|konva|d3|recharts|plotly)
     - not:
         has:
-          pattern: lazy($$$)
+          regex: 'lazy\('
     - not:
         has:
-          pattern: await import($$$)
+          regex: 'await\s+import\('
 message: "Heavy components should use React.lazy() or dynamic import for code splitting. Use: const Component = lazy(() => import('./Component'))"
 severity: info

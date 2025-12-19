@@ -1165,8 +1165,24 @@ export class AccountService extends BasePrismaService {
       'getUserSponsorships',
       'getUserSponsorships',
       async () => {
+        // OPTIMIZATION: Use select to fetch only required fields (12 fields, excluding user_id)
+        // This reduces data transfer and improves query performance
         const sponsorships = await prisma.sponsored_content.findMany({
           where: { user_id: args.p_user_id },
+          select: {
+            id: true,
+            content_type: true,
+            content_id: true,
+            active: true,
+            start_date: true,
+            end_date: true,
+            impression_limit: true,
+            impression_count: true,
+            click_count: true,
+            created_at: true,
+            updated_at: true,
+            tier: true,
+          },
           orderBy: { created_at: 'desc' },
         });
         // Transform Prisma results to match RPC return format

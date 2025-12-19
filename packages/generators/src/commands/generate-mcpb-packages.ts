@@ -288,9 +288,22 @@ async function verifyMcpbPackages(
 }
 
 async function loadAllMcpServersFromDatabase(): Promise<McpRow[]> {
+  // OPTIMIZATION: Use select to fetch only required fields (8 fields)
+  // This reduces data transfer significantly (from 30+ fields to 8 fields per MCP server)
+  // Fields match script usage requirements
   const mcps = await prisma.content.findMany({
     where: {
       category: 'mcp',
+    },
+    select: {
+      id: true,
+      slug: true,
+      metadata: true,
+      description: true,
+      title: true,
+      mcpb_storage_url: true,
+      author: true,
+      documentation_url: true,
     },
     orderBy: {
       slug: 'asc',

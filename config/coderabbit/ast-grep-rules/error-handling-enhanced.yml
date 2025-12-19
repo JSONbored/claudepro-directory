@@ -10,11 +10,11 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: $ASYNC($$$)
+        regex: '\w+\([^)]*\)'
     - not:
         inside:
           has:
-            pattern: try.*catch|\.catch\(|await
+            regex: 'try.*catch|\.catch\(|await'
 message: "Async function call without error handling. Add try/catch or .catch() to handle rejections. Unhandled rejections crash Node.js processes."
 severity: error
 
@@ -28,12 +28,12 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: payment|checkout|auth|login|signup|billing|subscription
     - not:
         has:
-          pattern: error.tsx|ErrorBoundary
+          regex: 'error\.tsx|ErrorBoundary'
 message: "Critical user flows (payment, auth, billing) must have error boundaries to prevent full app crashes. Create error.tsx file in route directory."
 severity: error
 

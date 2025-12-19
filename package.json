@@ -30,7 +30,6 @@
   ],
   "scripts": {
     "prisma:generate:exec": "infisical run --env=dev -- prisma generate && tsx scripts/post-prisma-generate.ts",
-    "postinstall": "pnpm prisma:generate:exec",
     "postgenerate": "tsx scripts/post-prisma-generate.ts",
     "generators:build": "pnpm --filter @heyclaude/generators build",
     "deploy:web": "vercel",

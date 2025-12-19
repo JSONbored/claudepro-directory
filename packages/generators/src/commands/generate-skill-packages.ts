@@ -151,9 +151,23 @@ async function generateZipBuffer(slug: string, skillMdContent: string): Promise<
 }
 
 async function loadAllSkillsFromDatabase(): Promise<SkillRow[]> {
+  // OPTIMIZATION: Use select to fetch only required fields (9 fields)
+  // This reduces data transfer significantly (from 30+ fields to 9 fields per skill)
+  // Fields match transformSkillToMarkdown requirements
   const skills = await prisma.content.findMany({
     where: {
       category: 'skills',
+    },
+    select: {
+      id: true,
+      slug: true,
+      description: true,
+      content: true,
+      metadata: true,
+      features: true,
+      use_cases: true,
+      examples: true,
+      documentation_url: true,
     },
     orderBy: {
       slug: 'asc',

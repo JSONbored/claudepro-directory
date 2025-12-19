@@ -13,10 +13,10 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: 'export async function (GET|POST|PUT|DELETE|PATCH)($REQ: NextRequest)'
+        regex: 'export async function (GET|POST|PUT|DELETE|PATCH)\([^)]*NextRequest[^)]*\)'
     - not:
         has:
-          pattern: 'createApiRoute|createCachedApiRoute'
+          regex: 'createApiRoute|createCachedApiRoute'
 message: "API routes must use createApiRoute() factory. Replace raw NextRequest handler with createApiRoute({ route, operation, method, cors, querySchema/bodySchema, handler }). Import from @heyclaude/web-runtime/server. Factory handles validation, logging, CORS, and error handling automatically."
 severity: error
 
@@ -30,7 +30,7 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: 'createApiRoute($CONFIG)'
+        regex: 'createApiRoute\('
     - not:
         has:
           pattern: 'route:'
@@ -47,7 +47,7 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: 'createApiRoute($CONFIG)'
+        regex: 'createApiRoute\('
     - not:
         has:
           pattern: 'operation:'
@@ -64,7 +64,7 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: 'createApiRoute($CONFIG)'
+        regex: 'createApiRoute\('
     - not:
         has:
           pattern: 'method:'
@@ -81,7 +81,7 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: 'createApiRoute($CONFIG)'
+        regex: 'createApiRoute\('
     - not:
         has:
           pattern: 'cors:'
@@ -117,7 +117,7 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: 'export const (POST|PUT|PATCH) = createApiRoute($CONFIG)'
+        regex: 'export const (POST|PUT|PATCH)\s*=\s*createApiRoute\('
     - has:
         pattern: 'handler: async ({ body'
     - not:
@@ -136,7 +136,7 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: 'createApiRoute($CONFIG)'
+        regex: 'createApiRoute\('
     - has:
         regex: cors:\s*['"]auth['"]
     - not:
@@ -155,7 +155,7 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: 'export const (GET|POST|PUT|DELETE|PATCH) = createApiRoute($CONFIG)'
+        regex: 'export const (GET|POST|PUT|DELETE|PATCH)\s*=\s*createApiRoute\('
     - has:
         pattern: 'cors:'
     - not:
@@ -174,7 +174,7 @@ rule:
   all:
     - kind: call_expression
     - has:
-        pattern: 'createApiRoute($CONFIG)'
+        regex: 'createApiRoute\('
     - not:
         has:
           pattern: 'openapi:'
@@ -191,10 +191,10 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: 'export async function (GET|POST|PUT|DELETE|PATCH)($REQ: NextRequest)'
+        regex: 'export async function (GET|POST|PUT|DELETE|PATCH)\([^)]*NextRequest[^)]*\)'
     - not:
         has:
-          pattern: 'createApiRoute|createCachedApiRoute'
+          regex: 'createApiRoute|createCachedApiRoute'
 message: "Raw NextRequest handlers are deprecated. Use createApiRoute() factory instead. Factory handles validation, logging, CORS, and error handling automatically. See .cursor/rules/api-route-patterns.mdc"
 severity: error
 

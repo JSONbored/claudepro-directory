@@ -12,7 +12,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: 'export (async )?function (GET|POST|PUT|DELETE)($$$) { $$$ }'
+        regex: 'export\s+(async\s+)?function\s+(GET|POST|PUT|DELETE)\([^)]*\)\s*\{'
     - not:
         has:
           regex: querySchema|bodySchema|z\.object|z\.string|createApiRoute
@@ -27,7 +27,7 @@ rule:
   all:
     - kind: variable_declarator
     - has:
-        pattern: 'const $SCHEMA = z\.object($$$)'
+        regex: 'const\s+\w+\s*=\s*z\.object\('
     - has:
         regex: 'z\.(string|number|boolean|array|object)\('
     - not:
@@ -44,7 +44,7 @@ rule:
   all:
     - kind: variable_declarator
     - has:
-        pattern: 'const $SCHEMA = z\.object({ $FIELD: z\.string($$$) })'
+        regex: 'const\s+\w+\s*=\s*z\.object\(\s*\{\s*\w+:\s*z\.string\('
     - has:
         pattern: 'z\.string\(\)'
     - not:
@@ -64,7 +64,7 @@ rule:
   all:
     - kind: variable_declarator
     - has:
-        pattern: 'const $SCHEMA = z\.object($$$)'
+        regex: 'const\s+\w+\s*=\s*z\.object\('
     - has:
         regex: 'z\.(string|number|boolean)\('
     - not:
@@ -117,7 +117,7 @@ rule:
   all:
     - kind: variable_declarator
     - has:
-        pattern: 'const $SCHEMA = z\.object({ $NUM: z\.number($$$) })'
+        regex: 'const\s+\w+\s*=\s*z\.object\(\s*\{\s*\w+:\s*z\.number\('
     - has:
         pattern: 'z\.number\('
     - not:

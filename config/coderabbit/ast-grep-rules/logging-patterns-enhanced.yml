@@ -12,7 +12,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: logger\.info|logger\.warn|logger\.error
     - not:
@@ -31,7 +31,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: logger\.child
     - not:
@@ -50,7 +50,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         pattern: generateRequestId()
     - not:

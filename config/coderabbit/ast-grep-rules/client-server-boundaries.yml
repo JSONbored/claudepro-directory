@@ -105,7 +105,7 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export (function|const) $COMPONENT($$$) { $$$ }
+        regex: 'export\s+(function|const)\s+\w+\([^)]*\)\s*\{'
     - has:
         regex: (useState|useEffect|useCallback|useMemo|useRef|useContext|useReducer)
     - not:

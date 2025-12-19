@@ -81,12 +81,15 @@
       ],
       "inputs": [
         "prisma/schema.prisma",
+        "prisma.config.ts",
+        "prisma/zod-generator.config.json",
         "package.json",
         "pnpm-lock.yaml",
         "scripts/post-prisma-generate.ts",
         "packages/generators/src/prisma-postgres-types-generator/**/*"
       ],
-      "cache": true
+      "cache": true,
+      "passThroughEnv": ["DIRECT_URL", "DATABASE_URL"]
     },
     "type-check": {
       "dependsOn": ["@heyclaude/database-types#build"],

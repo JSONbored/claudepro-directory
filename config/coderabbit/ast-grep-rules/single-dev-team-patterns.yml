@@ -11,15 +11,15 @@ rule:
   all:
     - kind: variable_declarator
     - has:
-        pattern: const $VAR1 = await $QUERY1($$$)
+        regex: 'const\s+\w+\s*=\s*await\s+\w+\([^)]*\)'
     - follows:
         has:
-          pattern: const $VAR2 = await $QUERY2($$$)
+          regex: 'const\s+\w+\s*=\s*await\s+\w+\([^)]*\)'
     - has:
         regex: get|fetch|rpc|query
     - not:
         has:
-          pattern: Promise\.all|Promise\.allSettled
+          regex: 'Promise\.all|Promise\.allSettled'
 message: "Independent queries should run in parallel with Promise.all() for better performance. Sequential queries cause unnecessary delays. Example: const [result1, result2] = await Promise.all([query1(), query2()]); This can improve performance by 50-80% for independent operations."
 severity: warning
 
@@ -33,7 +33,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         pattern: await $FETCH1($ARGS)
     - has:
@@ -53,9 +53,9 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export async function $DATA_FUNC($$$) { $$$ }
+        regex: 'export async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: logger\.(info|warn|error)
+        regex: 'logger\.(info|warn|error)'
     - not:
         has:
           pattern: reqLogger:.*ReturnType.*logger\.child
@@ -70,7 +70,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export (function|const) $COMPONENT($$$) { $$$ }
+        regex: 'export\s+(function|const)\s+\w+\([^)]*\)\s*\{'
     - has:
         regex: useState|useEffect|useCallback|useMemo|useRef|useContext
     - not:
@@ -89,7 +89,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: Date\.now|Math\.random|new Date|performance\.now|crypto\.randomUUID
     - not:
@@ -108,7 +108,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($PARAMS) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: params\.(slug|id)
     - not:
@@ -127,11 +127,11 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: payment|checkout|auth|login|signup|billing|subscription|account
     - has:
-        pattern: await $FETCH($$$)
+        regex: 'await\s+\w+\([^)]*\)'
 message: "Critical user flows (payment, auth, billing, account) must have error.tsx file for error boundaries. Create error.tsx in same directory to prevent full app crashes. This is especially important for revenue-critical flows."
 severity: error
 
@@ -145,12 +145,12 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: page|home|about|contact|help|community|jobs|companies|changelog|trending|search|submit|templates|tools|status|accessibility|privacy|terms|cookies|consulting|partner
     - not:
         has:
-          pattern: export.*metadata|export.*generateMetadata
+          regex: 'export.*metadata|export.*generateMetadata'
 message: "Public pages should export metadata or generateMetadata() for SEO and social sharing. Add: export const metadata: Metadata = { title, description, openGraph, twitter } or export async function generateMetadata() { ... }"
 severity: warning
 
@@ -164,9 +164,9 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: await $FETCH($$$)
+        regex: 'await\s+\w+\([^)]*\)'
     - has:
         regex: rpc|query|fetch|get
 message: "Pages with data fetching should have loading.tsx file for proper loading states. Create loading.tsx in same directory with page-specific skeleton component. This improves UX during data fetching and enables progressive rendering with Suspense."
@@ -182,9 +182,9 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
-        pattern: await $DATA_FETCH($$$)
+        regex: 'await\s+\w+\([^)]*\)'
     - has:
         regex: if.*!.*data|if.*data.*===.*null|if.*data.*===.*undefined
     - not:
@@ -203,12 +203,12 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PARENT($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         pattern: <$CHILD_COMPONENT />
     - inside:
         has:
-          pattern: export.*async function $CHILD($$$) { $$$ }
+          regex: 'export.*async function \w+\([^)]*\)\s*\{'
     - not:
         has:
           pattern: <Suspense
@@ -242,13 +242,13 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export default async function $PAGE($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: payment|checkout|auth|login|signup|billing|subscription
     - has:
-        pattern: await $FETCH($$$)
+        regex: 'await\s+\w+\([^)]*\)'
     - not:
         has:
-          pattern: error.tsx|ErrorBoundary
+          regex: 'error\.tsx|ErrorBoundary'
 message: "Critical user flows (payment, auth, billing, subscription) must have error boundaries to prevent full app crashes. Create error.tsx file in route directory with error boundary component."
 severity: error

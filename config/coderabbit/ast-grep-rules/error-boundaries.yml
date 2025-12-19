@@ -12,10 +12,10 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export default async function $COMPONENT($$$) { $$$ }
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
     - not:
         inside:
-          pattern: <ErrorBoundary>$$$</ErrorBoundary>
+          regex: '<ErrorBoundary[^>]*>'
 message: "Server components should be wrapped in error boundaries for error handling. Add <ErrorBoundary> wrapper or create error.tsx file"
 severity: warning
 
@@ -29,10 +29,10 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: 'export default function $ERROR_BOUNDARY({ error }: { error: Error }) { $$$ }'
+        regex: 'export default function \w+\(\s*\{\s*error\s*\}:\s*\{\s*error:\s*Error\s*\}\s*\)\s*\{'
     - not:
         has:
-          pattern: (logClientErrorBoundary|logger.error|reqLogger.error)($$$)
+          regex: '(logClientErrorBoundary|logger\.error|reqLogger\.error)\('
 message: "Error boundaries must log errors. Use logClientErrorBoundary() for client error boundaries (from @heyclaude/web-runtime/logging/client) or logger.error()/reqLogger.error() for server error boundaries (from @heyclaude/web-runtime/logging/server)"
 severity: error
 
@@ -44,17 +44,17 @@ rule:
   all:
     - kind: function_declaration
       has:
-        pattern: export function $COMPONENT($$$) { $$$ }
+        regex: 'export function \w+\([^)]*\)\s*\{'
     - inside:
         has:
           regex: 'use client'
     - has:
-        pattern: await $ASYNC($$$)
+        regex: 'await\s+\w+\([^)]*\)'
     - not:
         inside:
-          pattern: <ErrorBoundary>$$$</ErrorBoundary>
+          regex: '<ErrorBoundary[^>]*>'
     - not:
         has:
-          pattern: useLoggedAsync($$$)
+          regex: 'useLoggedAsync\('
 message: "Client components with async operations should be wrapped in error boundaries or use useLoggedAsync for error handling. Add <ErrorBoundary> wrapper or use useLoggedAsync hook from @heyclaude/web-runtime/hooks"
 severity: warning

@@ -109,7 +109,7 @@ import { withSmartCache } from '../utils/request-cache.ts';
 // Type helpers: Extract model types from Prisma query results
 type SponsoredContent = Awaited<ReturnType<typeof prisma.sponsored_content.findUnique>>;
 type AppSetting = Awaited<ReturnType<typeof prisma.app_settings.findUnique>>;
-type EmailEngagementSummary = Awaited<ReturnType<typeof prisma.email_engagement_summary.findUnique>>;
+// Removed: EmailEngagementSummary type - now using inferred type from select query
 type Notification = Awaited<ReturnType<typeof prisma.notifications.create>>;
 type EmailSequence = Awaited<ReturnType<typeof prisma.email_sequences.findUnique>>;
 
@@ -645,15 +645,28 @@ export class MiscService extends BasePrismaService {
    * 
    * OPTIMIZATION: Uses request-scoped caching to prevent duplicate queries in same request.
    */
-  async getEmailEngagementSummary(email: string): Promise<
-    EmailEngagementSummary | null
-  > {
+  async getEmailEngagementSummary(email: string) {
     return withSmartCache(
       'getEmailEngagementSummary',
       'getEmailEngagementSummary',
       async () => {
+        // OPTIMIZATION: Use select to fetch only required fields (10 fields)
+        // This reduces data transfer (from 20+ fields to 10 fields)
+        // Return type will automatically narrow to selected fields (Prisma handles this)
         const summary = await prisma.email_engagement_summary.findUnique({
           where: { email },
+          select: {
+            email: true,
+            emails_sent: true,
+            emails_delivered: true,
+            emails_opened: true,
+            emails_clicked: true,
+            last_sent_at: true,
+            last_delivered_at: true,
+            last_opened_at: true,
+            last_clicked_at: true,
+            health_status: true,
+          },
         });
         return summary;
       },
@@ -901,9 +914,22 @@ export class MiscService extends BasePrismaService {
       'getQuizConfiguration',
       async () => {
         // OPTIMIZATION: Use relationLoadStrategy: 'join' to fetch questions and options in a single query
+        // OPTIMIZATION: Replace include with select to fetch only required fields
+        // This reduces data transfer from both questions and options tables
         const questions = await prisma.quiz_questions.findMany({
-          include: {
+          select: {
+            question_id: true,
+            question_text: true,
+            description: true,
+            required: true,
+            display_order: true,
             quiz_options: {
+              select: {
+                value: true,
+                label: true,
+                description: true,
+                icon_name: true,
+              },
               orderBy: {
                 display_order: 'asc',
               },

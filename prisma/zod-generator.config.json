@@ -1,0 +1,78 @@
+{
+  "$schema": "https://raw.githubusercontent.com/omar-dulaimi/prisma-zod-generator/master/website/static/zod-generator.config.schema.json",
+  "mode": "custom",
+  "output": "../packages/database-types/src/prisma/zod",
+  "globalExclusions": {
+    "input": ["id", "createdAt", "updatedAt"],
+    "result": [],
+    "pure": []
+  },
+  "modelExclusions": {
+    "audit_log_entries": {
+      "enabled": false
+    },
+    "flow_state": {
+      "enabled": false
+    },
+    "identities": {
+      "enabled": false
+    },
+    "instances": {
+      "enabled": false
+    },
+    "mfa_amr_claims": {
+      "enabled": false
+    },
+    "mfa_challenges": {
+      "enabled": false
+    },
+    "mfa_factors": {
+      "enabled": false
+    },
+    "oauth_authorizations": {
+      "enabled": false
+    },
+    "oauth_client_states": {
+      "enabled": false
+    },
+    "oauth_clients": {
+      "enabled": false
+    },
+    "oauth_consents": {
+      "enabled": false
+    },
+    "one_time_tokens": {
+      "enabled": false
+    },
+    "refresh_tokens": {
+      "enabled": false
+    },
+    "saml_providers": {
+      "enabled": false
+    },
+    "saml_relay_states": {
+      "enabled": false
+    },
+    "schema_migrations": {
+      "enabled": false
+    },
+    "sessions": {
+      "enabled": false
+    },
+    "sso_domains": {
+      "enabled": false
+    },
+    "sso_providers": {
+      "enabled": false
+    },
+    "auth_users": {
+      "enabled": false
+    }
+  },
+  "safety": {
+    "level": "standard",
+    "skipManifest": false,
+    "allowDangerousPaths": false,
+    "warningsOnly": false
+  }
+}

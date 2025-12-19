@@ -27,12 +27,12 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export function use$HOOK($$$) { $$$ }
+        regex: 'export function use[A-Z]\w*\([^)]*\)\s*\{'
     - has:
         regex: addEventListener|setInterval|setTimeout|subscribe|createConnection|AbortController
     - not:
         has:
-          pattern: return () => { $$$ }
+          regex: 'return\s*\(\)\s*=>\s*\{'
 message: "Custom hooks with subscriptions/timers/event listeners must return cleanup function. Add: return () => { cleanup code }"
 severity: error
 
@@ -46,7 +46,7 @@ rule:
   all:
     - kind: function_declaration
     - has:
-        pattern: export function $HOOK($$$) { $$$ }
+        regex: 'export function \w+\([^)]*\)\s*\{'
     - has:
         regex: useState|useEffect|useCallback|useMemo|useRef
     - not:

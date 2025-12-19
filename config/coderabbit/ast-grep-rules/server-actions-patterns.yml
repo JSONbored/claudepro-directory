@@ -18,7 +18,7 @@ rule:
         pattern: export const $ACTION = $VALUE
     - not:
         has:
-          pattern: (authedAction|optionalAuthAction|rateLimitedAction|actionClient)($$$)
+          regex: '(authedAction|optionalAuthAction|rateLimitedAction|actionClient)\('
 message: "Server actions must use safe-action middleware (authedAction, optionalAuthAction, rateLimitedAction, or actionClient). Import from @heyclaude/web-runtime/actions/safe-action"
 severity: error
 
@@ -33,10 +33,10 @@ rule:
   all:
     - kind: variable_declarator
       has:
-        pattern: export const $ACTION = (authedAction|optionalAuthAction|rateLimitedAction|actionClient)($$$)
+        regex: 'export const \w+\s*=\s*(authedAction|optionalAuthAction|rateLimitedAction|actionClient)\('
     - not:
         has:
-          pattern: $ACTION.metadata($$$)
+          regex: '\w+\.metadata\('
 message: "Server actions must include metadata using .metadata({ actionName: '...', category: '...' }). Add metadata before .inputSchema()"
 severity: error
 
@@ -51,12 +51,12 @@ rule:
   all:
     - kind: variable_declarator
       has:
-        pattern: export const $ACTION = (authedAction|optionalAuthAction|rateLimitedAction|actionClient)($$$)
+        regex: 'export const \w+\s*=\s*(authedAction|optionalAuthAction|rateLimitedAction|actionClient)\('
     - has:
-        pattern: $ACTION.metadata($$$)
+          regex: '\w+\.metadata\('
     - not:
         has:
-          pattern: $ACTION.inputSchema(z.object($$$))
+          regex: '\w+\.inputSchema\(\s*z\.object\('
 message: "Server actions must include input validation using .inputSchema(z.object(...)). Add inputSchema after .metadata() and before .action()"
 severity: error
 
@@ -71,9 +71,9 @@ rule:
   all:
     - kind: call_expression
       has:
-        pattern: $ACTION.action(async ($$$) => { $$$ })
+        regex: '\w+\.action\(\s*async\s*\([^)]*\)\s*=>\s*\{'
     - inside:
-        pattern: (authedAction|optionalAuthAction|rateLimitedAction|actionClient)($$$)
+        regex: '(authedAction|optionalAuthAction|rateLimitedAction|actionClient)\('
     - not:
         has:
           kind: catch_clause
