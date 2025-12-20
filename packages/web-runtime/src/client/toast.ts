@@ -16,7 +16,7 @@
 import { toast } from 'sonner';
 import { normalizeError } from '../errors.ts';
 import { logClientInfo, logClientError } from '../logging/client.ts';
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 
 type ToastRaw = ((...args: Parameters<typeof toast>) => void) & {
   success: (...args: Parameters<typeof toast.success>) => void;

@@ -7,7 +7,9 @@
 
 'use client';
 
-import type { changelogModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type changelogModel = Prisma.changelogGetPayload<{}>;
 import { formatChangelogDateShort } from '@heyclaude/web-runtime/utils/changelog';
 import Link from 'next/link';
 
@@ -39,9 +41,7 @@ interface TimelineMarkerProps {
  */
 export function TimelineMarker({ entry, isActive, targetPath, onClick }: TimelineMarkerProps) {
   return (
-    <div
-      className={`relative sticky top-24 ${isActive ? 'z-20' : 'z-10'}`}
-    >
+    <div className={`relative sticky top-24 ${isActive ? 'z-20' : 'z-10'}`}>
       {/* Horizontal connector line from marker dot to timeline - Brighter, more visible */}
       {/* Aligned with h2 title baseline (text-3xl ~30px, so baseline at ~28px) */}
       <div className="bg-primary/60 absolute top-[28px] -left-5 h-px w-5" aria-hidden="true" />
@@ -49,7 +49,7 @@ export function TimelineMarker({ entry, isActive, targetPath, onClick }: Timelin
       {/* Marker dot - Brighter, more visible, aligned with entry header h2 title baseline */}
       <div
         className={`absolute top-[24px] -left-[21px] h-3 w-3 rounded-full transition-all ${
-          isActive ? 'bg-primary ring-2 ring-primary/30 shadow-sm' : 'bg-primary/50'
+          isActive ? 'bg-primary ring-primary/30 shadow-sm ring-2' : 'bg-primary/50'
         }`}
         aria-hidden="true"
       />
@@ -66,15 +66,21 @@ export function TimelineMarker({ entry, isActive, targetPath, onClick }: Timelin
         {/* Title and date - Matches entry header structure exactly (h2 + date with mb-3 spacing) */}
         <div className="flex min-w-0 flex-col">
           <h3
-            className={`text-base leading-tight mb-4 ${isActive ? 'text-foreground font-semibold' : 'text-muted-foreground font-normal'} group-hover:text-foreground transition-all duration-200 ease-out line-clamp-2`}
+            className={`mb-4 text-base leading-tight ${isActive ? 'text-foreground font-semibold' : 'text-muted-foreground font-normal'} group-hover:text-foreground line-clamp-2 transition-all duration-200 ease-out`}
           >
             {entry.title}
           </h3>
           <time
-            dateTime={entry.release_date instanceof Date ? entry.release_date.toISOString() : entry.release_date}
-            className={`text-xs leading-tight text-muted-foreground ${isActive ? 'opacity-100' : 'opacity-60'}`}
+            dateTime={
+              entry.release_date instanceof Date
+                ? entry.release_date.toISOString()
+                : entry.release_date
+            }
+            className={`text-muted-foreground text-xs leading-tight ${isActive ? 'opacity-100' : 'opacity-60'}`}
           >
-            {formatChangelogDateShort(entry.release_date instanceof Date ? entry.release_date : entry.release_date)}
+            {formatChangelogDateShort(
+              entry.release_date instanceof Date ? entry.release_date : entry.release_date
+            )}
           </time>
         </div>
       </Link>

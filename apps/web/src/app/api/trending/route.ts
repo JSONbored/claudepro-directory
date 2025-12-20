@@ -7,9 +7,11 @@
 
 import 'server-only';
 
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@prisma/client';
 import {
-  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+  createCachedApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { trendingQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import {

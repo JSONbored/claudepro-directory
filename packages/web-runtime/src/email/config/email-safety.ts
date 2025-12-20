@@ -57,14 +57,11 @@ export function getEmailSafetyConfig(): EmailSafetyConfig {
   const deploymentEnv = getDeploymentEnv();
 
   // Determine if production (platform-agnostic)
-  const isProduction =
-    nodeEnv === 'production' ||
-    deploymentEnv === 'production';
+  const isProduction = nodeEnv === 'production' || deploymentEnv === 'production';
 
   // Check for dev email override
   const allowDevEmails =
-    process.env['ALLOW_DEV_EMAILS'] === 'true' ||
-    process.env['ALLOW_DEV_EMAILS'] === '1';
+    process.env['ALLOW_DEV_EMAILS'] === 'true' || process.env['ALLOW_DEV_EMAILS'] === '1';
 
   // Parse whitelisted emails (comma-separated)
   const whitelistedEmails = (process.env['DEV_EMAIL_WHITELIST'] || '')
@@ -141,7 +138,8 @@ export function checkEmailSafety(recipientEmail: string): EmailSafetyCheckResult
   // Block by default in non-production
   return {
     allowed: false,
-    reason: `Email blocked in ${process.env['NODE_ENV'] || 'development'} environment. ` +
+    reason:
+      `Email blocked in ${process.env['NODE_ENV'] || 'development'} environment. ` +
       'Set ALLOW_DEV_EMAILS=true or add to DEV_EMAIL_WHITELIST to override.',
   };
 }
@@ -169,13 +167,13 @@ export function logBlockedEmail(emailData: BlockedEmailLog, reason: string): voi
   pinoLogger.info(
     {
       operation: 'email-safety-block',
-        reason,
+      reason,
       to: recipients.join(', '),
       from: emailData.from,
-    subject: emailData.subject,
-    tags: emailData.tags?.map((t) => `${t.name}=${t.value}`).join(', '),
-    htmlPreview: emailData.html ? emailData.html.slice(0, 200) + '...' : undefined,
-    environment: process.env['NODE_ENV'] || 'development',
+      subject: emailData.subject,
+      tags: emailData.tags?.map((t) => `${t.name}=${t.value}`).join(', '),
+      htmlPreview: emailData.html ? emailData.html.slice(0, 200) + '...' : undefined,
+      environment: process.env['NODE_ENV'] || 'development',
       tip: 'To send real emails in dev, set ALLOW_DEV_EMAILS=true or add email to DEV_EMAIL_WHITELIST',
     },
     '📧 Email BLOCKED (dev mode)'

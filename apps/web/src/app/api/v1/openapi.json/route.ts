@@ -98,10 +98,13 @@ export const GET = createApiRoute({
       const openApiSpec = await readFile(OPENAPI_JSON_PATH, 'utf-8');
       const spec = JSON.parse(openApiSpec);
 
-      logger.info({
-        path: OPENAPI_JSON_PATH,
-        pathsCount: Object.keys(spec.paths || {}).length,
-      }, 'OpenAPI spec served');
+      logger.info(
+        {
+          path: OPENAPI_JSON_PATH,
+          pathsCount: Object.keys(spec.paths || {}).length,
+        },
+        'OpenAPI spec served'
+      );
 
       // Return as JSON with appropriate headers
       return jsonResponse(spec, 200, getOnlyCorsHeaders, {
@@ -111,9 +114,12 @@ export const GET = createApiRoute({
     } catch (error) {
       // If file doesn't exist, return 404
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-        logger.warn({
-          path: OPENAPI_JSON_PATH,
-        }, 'OpenAPI spec file not found');
+        logger.warn(
+          {
+            path: OPENAPI_JSON_PATH,
+          },
+          'OpenAPI spec file not found'
+        );
         return NextResponse.json(
           { error: 'OpenAPI specification not found. Run: pnpm generate:openapi' },
           { status: 404, headers: getOnlyCorsHeaders }

@@ -24,7 +24,12 @@ import { existsSync, writeFileSync, unlinkSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { glob } from 'glob';
-import { Project, Node, ObjectLiteralExpression, PropertyAssignment, ExportDeclaration } from 'ts-morph';
+import {
+  Project,
+  Node,
+  ObjectLiteralExpression,
+  PropertyAssignment,
+} from 'ts-morph';
 import { createDocument } from 'zod-openapi';
 import { z } from 'zod';
 import jiti from 'jiti';
@@ -57,14 +62,17 @@ interface RouteMetadata {
     description?: string;
     tags?: string[];
     operationId?: string;
-    responses?: Record<number, { 
-      description: string; 
-      schema?: z.ZodSchema; 
-      schemaSource?: string; 
-      schemaName?: string;
-      headers?: Record<string, { schema: { type: string }; description: string }>;
-      example?: unknown;
-    }>;
+    responses?: Record<
+      number,
+      {
+        description: string;
+        schema?: z.ZodSchema;
+        schemaSource?: string;
+        schemaName?: string;
+        headers?: Record<string, { schema: { type: string }; description: string }>;
+        example?: unknown;
+      }
+    >;
     deprecated?: boolean;
     security?: Array<Record<string, string[]>>;
     externalDocs?: { description: string; url: string };
@@ -136,7 +144,9 @@ function extractRoutePath(configObj: ObjectLiteralExpression): string | null {
 /**
  * Extract OpenAPI metadata from config object
  */
-function extractOpenAPIMetadata(configObj: ObjectLiteralExpression): RouteMetadata['openapi'] | undefined {
+function extractOpenAPIMetadata(
+  configObj: ObjectLiteralExpression
+): RouteMetadata['openapi'] | undefined {
   const openapiProp = configObj.getProperty('openapi');
   if (!openapiProp || !Node.isPropertyAssignment(openapiProp)) return undefined;
 
@@ -201,14 +211,17 @@ function extractOpenAPIMetadata(configObj: ObjectLiteralExpression): RouteMetada
   if (responsesProp && Node.isPropertyAssignment(responsesProp)) {
     const responsesInit = responsesProp.getInitializer();
     if (responsesInit && Node.isObjectLiteralExpression(responsesInit)) {
-      const responses: Record<number, { 
-        description: string; 
-        schema?: z.ZodSchema; 
-        schemaSource?: string; 
-        schemaName?: string;
-        headers?: Record<string, { schema: { type: string }; description: string }>;
-        example?: unknown;
-      }> = {};
+      const responses: Record<
+        number,
+        {
+          description: string;
+          schema?: z.ZodSchema;
+          schemaSource?: string;
+          schemaName?: string;
+          headers?: Record<string, { schema: { type: string }; description: string }>;
+          example?: unknown;
+        }
+      > = {};
       for (const prop of responsesInit.getProperties()) {
         if (Node.isPropertyAssignment(prop)) {
           const key = prop.getName();
@@ -224,15 +237,15 @@ function extractOpenAPIMetadata(configObj: ObjectLiteralExpression): RouteMetada
                   description = descInit.getLiteralValue();
                 }
               }
-              
+
               // Extract schema property (similar to querySchema/bodySchema extraction)
               const schemaProp = valueInit.getProperty('schema');
               let schemaSource: string | null = null;
               let schemaName: string | null = null;
-              
+
               if (schemaProp && Node.isPropertyAssignment(schemaProp)) {
                 schemaSource = extractSchemaSource(schemaProp);
-                
+
                 // If schema source is an identifier, it might be an exported schema
                 if (schemaSource) {
                   const trimmed = schemaSource.trim();
@@ -242,10 +255,12 @@ function extractOpenAPIMetadata(configObj: ObjectLiteralExpression): RouteMetada
                   }
                 }
               }
-              
+
               // Extract headers
               const headersProp = valueInit.getProperty('headers');
-              let headers: Record<string, { schema: { type: string }; description: string }> | undefined;
+              let headers:
+                | Record<string, { schema: { type: string }; description: string }>
+                | undefined;
               if (headersProp && Node.isPropertyAssignment(headersProp)) {
                 const headersInit = headersProp.getInitializer();
                 if (headersInit && Node.isObjectLiteralExpression(headersInit)) {
@@ -259,10 +274,13 @@ function extractOpenAPIMetadata(configObj: ObjectLiteralExpression): RouteMetada
                         const headerDescProp = headerValueInit.getProperty('description');
                         let headerSchema: { type: string } | undefined;
                         let headerDescription = '';
-                        
+
                         if (headerSchemaProp && Node.isPropertyAssignment(headerSchemaProp)) {
                           const headerSchemaInit = headerSchemaProp.getInitializer();
-                          if (headerSchemaInit && Node.isObjectLiteralExpression(headerSchemaInit)) {
+                          if (
+                            headerSchemaInit &&
+                            Node.isObjectLiteralExpression(headerSchemaInit)
+                          ) {
                             const typeProp = headerSchemaInit.getProperty('type');
                             if (typeProp && Node.isPropertyAssignment(typeProp)) {
                               const typeInit = typeProp.getInitializer();
@@ -272,23 +290,26 @@ function extractOpenAPIMetadata(configObj: ObjectLiteralExpression): RouteMetada
                             }
                           }
                         }
-                        
+
                         if (headerDescProp && Node.isPropertyAssignment(headerDescProp)) {
                           const headerDescInit = headerDescProp.getInitializer();
                           if (headerDescInit && Node.isStringLiteral(headerDescInit)) {
                             headerDescription = headerDescInit.getLiteralValue();
                           }
                         }
-                        
+
                         if (headerSchema && headerDescription) {
-                          headers[headerName] = { schema: headerSchema, description: headerDescription };
+                          headers[headerName] = {
+                            schema: headerSchema,
+                            description: headerDescription,
+                          };
                         }
                       }
                     }
                   }
                 }
               }
-              
+
               // Extract example
               const exampleProp = valueInit.getProperty('example');
               let example: unknown | undefined;
@@ -311,7 +332,7 @@ function extractOpenAPIMetadata(configObj: ObjectLiteralExpression): RouteMetada
                   }
                 }
               }
-              
+
               responses[statusCode] = {
                 description,
                 ...(schemaSource ? { schemaSource, ...(schemaName ? { schemaName } : {}) } : {}),
@@ -371,21 +392,21 @@ function extractOpenAPIMetadata(configObj: ObjectLiteralExpression): RouteMetada
       const urlProp = externalDocsInit.getProperty('url');
       let description = '';
       let url = '';
-      
+
       if (descProp && Node.isPropertyAssignment(descProp)) {
         const descInit = descProp.getInitializer();
         if (descInit && Node.isStringLiteral(descInit)) {
           description = descInit.getLiteralValue();
         }
       }
-      
+
       if (urlProp && Node.isPropertyAssignment(urlProp)) {
         const urlInit = urlProp.getInitializer();
         if (urlInit && Node.isStringLiteral(urlInit)) {
           url = urlInit.getLiteralValue();
         }
       }
-      
+
       if (description && url) {
         metadata.externalDocs = { description, url };
       }
@@ -401,21 +422,24 @@ function extractOpenAPIMetadata(configObj: ObjectLiteralExpression): RouteMetada
       const requiredProp = requestBodyInit.getProperty('required');
       let description: string | undefined;
       let required: boolean | undefined;
-      
+
       if (descProp && Node.isPropertyAssignment(descProp)) {
         const descInit = descProp.getInitializer();
         if (descInit && Node.isStringLiteral(descInit)) {
           description = descInit.getLiteralValue();
         }
       }
-      
+
       if (requiredProp && Node.isPropertyAssignment(requiredProp)) {
         const requiredInit = requiredProp.getInitializer();
-        if (requiredInit && (Node.isTrueLiteral(requiredInit) || Node.isFalseLiteral(requiredInit))) {
+        if (
+          requiredInit &&
+          (Node.isTrueLiteral(requiredInit) || Node.isFalseLiteral(requiredInit))
+        ) {
           required = Node.isTrueLiteral(requiredInit);
         }
       }
-      
+
       if (description !== undefined || required !== undefined) {
         metadata.requestBody = {};
         if (description !== undefined) metadata.requestBody.description = description;
@@ -435,7 +459,10 @@ function extractOpenAPIMetadata(configObj: ObjectLiteralExpression): RouteMetada
 /**
  * Extract auth requirements from config object
  */
-function extractAuthRequirements(configObj: ObjectLiteralExpression): { requireAuth?: boolean; optionalAuth?: boolean } {
+function extractAuthRequirements(configObj: ObjectLiteralExpression): {
+  requireAuth?: boolean;
+  optionalAuth?: boolean;
+} {
   const result: { requireAuth?: boolean; optionalAuth?: boolean } = {};
 
   const requireAuthProp = configObj.getProperty('requireAuth');
@@ -481,7 +508,7 @@ async function extractRouteMetadata(filePath: string): Promise<RouteMetadata[]> 
     skipLoadingLibFiles: true, // Don't load lib files
     // No compilerOptions needed - we're only doing AST parsing, not type checking
   });
-  
+
   // Add only the specific file we need - ts-morph won't try to load dependencies
   const sourceFile = project.addSourceFileAtPath(filePath);
   const routes: RouteMetadata[] = [];
@@ -489,13 +516,13 @@ async function extractRouteMetadata(filePath: string): Promise<RouteMetadata[]> 
   // Manually find exported const declarations using AST traversal (no type checking required)
   // This avoids the need for a full compiler program
   const exportedVars = new Map<string, Node[]>();
-  
+
   sourceFile.forEachDescendant((node) => {
     // Look for: export const GET = ... or export const POST = ...
     if (Node.isVariableStatement(node)) {
       const declarationList = node.getDeclarationList();
       const declarations = declarationList.getDeclarations();
-      
+
       for (const declaration of declarations) {
         const name = declaration.getName();
         if (['GET', 'POST', 'PUT', 'DELETE', 'PATCH'].includes(name)) {
@@ -550,18 +577,20 @@ async function extractRouteMetadata(filePath: string): Promise<RouteMetadata[]> 
       // Extract schema sources for runtime evaluation
       const querySchemaProp = configObj.getProperty('querySchema');
       const bodySchemaProp = configObj.getProperty('bodySchema');
-      const querySchemaSource = querySchemaProp && Node.isPropertyAssignment(querySchemaProp)
-        ? extractSchemaSource(querySchemaProp)
-        : null;
-      const bodySchemaSource = bodySchemaProp && Node.isPropertyAssignment(bodySchemaProp)
-        ? extractSchemaSource(bodySchemaProp)
-        : null;
+      const querySchemaSource =
+        querySchemaProp && Node.isPropertyAssignment(querySchemaProp)
+          ? extractSchemaSource(querySchemaProp)
+          : null;
+      const bodySchemaSource =
+        bodySchemaProp && Node.isPropertyAssignment(bodySchemaProp)
+          ? extractSchemaSource(bodySchemaProp)
+          : null;
 
       // Try to find exported schemas that match
       // Look for exported schemas in the file
       let querySchemaName: string | null = null;
       let bodySchemaName: string | null = null;
-      
+
       // If schema source is an identifier, it might be an exported schema
       if (querySchemaSource) {
         let trimmed = querySchemaSource.trim();
@@ -587,7 +616,7 @@ async function extractRouteMetadata(filePath: string): Promise<RouteMetadata[]> 
           }
         }
       }
-      
+
       if (bodySchemaSource) {
         let trimmed = bodySchemaSource.trim();
         // Remove " as any" or other type assertions
@@ -626,23 +655,25 @@ async function extractRouteMetadata(filePath: string): Promise<RouteMetadata[]> 
         ...(querySchemaName ? { querySchemaName } : {}),
         ...(bodySchemaName ? { bodySchemaName } : {}),
         // Store response schema sources and names
-        ...(openapi?.responses ? (() => {
-          const responseSchemaSources: Record<number, string> = {};
-          const responseSchemaNames: Record<number, string> = {};
-          for (const [code, response] of Object.entries(openapi.responses)) {
-            const statusCode = parseInt(code, 10);
-            if (!isNaN(statusCode) && response.schemaSource) {
-              responseSchemaSources[statusCode] = response.schemaSource;
-              if (response.schemaName) {
-                responseSchemaNames[statusCode] = response.schemaName;
+        ...(openapi?.responses
+          ? (() => {
+              const responseSchemaSources: Record<number, string> = {};
+              const responseSchemaNames: Record<number, string> = {};
+              for (const [code, response] of Object.entries(openapi.responses)) {
+                const statusCode = parseInt(code, 10);
+                if (!isNaN(statusCode) && response.schemaSource) {
+                  responseSchemaSources[statusCode] = response.schemaSource;
+                  if (response.schemaName) {
+                    responseSchemaNames[statusCode] = response.schemaName;
+                  }
+                }
               }
-            }
-          }
-          return {
-            ...(Object.keys(responseSchemaSources).length > 0 ? { responseSchemaSources } : {}),
-            ...(Object.keys(responseSchemaNames).length > 0 ? { responseSchemaNames } : {}),
-          };
-        })() : {}),
+              return {
+                ...(Object.keys(responseSchemaSources).length > 0 ? { responseSchemaSources } : {}),
+                ...(Object.keys(responseSchemaNames).length > 0 ? { responseSchemaNames } : {}),
+              };
+            })()
+          : {}),
       };
 
       routes.push(routeMetadata);
@@ -657,7 +688,10 @@ async function extractRouteMetadata(filePath: string): Promise<RouteMetadata[]> 
  * Extracts actual Zod schema objects from exported schemas or evaluates inline schemas
  * Uses jiti to handle server-only imports
  */
-async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promise<RouteMetadata[]> {
+async function evaluateSchemas(
+  filePath: string,
+  routes: RouteMetadata[]
+): Promise<RouteMetadata[]> {
   if (routes.length === 0) return routes;
 
   // Create a minimal Project for import analysis only
@@ -670,9 +704,9 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
     // No compilerOptions needed - we're only doing AST parsing, not type checking
   });
   const sourceFile = project.addSourceFileAtPathIfExists(filePath);
-  
+
   const relativePath = relative(PROJECT_ROOT, filePath);
-  
+
   /**
    * Resolve internal workspace package imports to source files
    * This handles @heyclaude/* imports that jiti can't resolve automatically
@@ -682,21 +716,30 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
     if (!moduleSpecifier.startsWith('@heyclaude/')) {
       return null;
     }
-    
+
     // Map package names to source paths based on package.json exports
     // This must match the actual package.json exports structure
     const packageMap: Record<string, string> = {
       '@heyclaude/web-runtime': join(PROJECT_ROOT, 'packages/web-runtime/src/index.ts'),
       '@heyclaude/web-runtime/server': join(PROJECT_ROOT, 'packages/web-runtime/src/server.ts'),
-      '@heyclaude/web-runtime/api/schemas': join(PROJECT_ROOT, 'packages/web-runtime/src/api/schemas.ts'),
-      '@heyclaude/web-runtime/api/response-schemas': join(PROJECT_ROOT, 'packages/web-runtime/src/api/response-schemas.ts'),
+      '@heyclaude/web-runtime/api/schemas': join(
+        PROJECT_ROOT,
+        'packages/web-runtime/src/api/schemas.ts'
+      ),
+      '@heyclaude/web-runtime/api/response-schemas': join(
+        PROJECT_ROOT,
+        'packages/web-runtime/src/api/response-schemas.ts'
+      ),
       '@heyclaude/shared-runtime': join(PROJECT_ROOT, 'packages/shared-runtime/src/index.ts'),
       '@heyclaude/data-layer': join(PROJECT_ROOT, 'packages/data-layer/src/index.ts'),
       '@heyclaude/data-layer/prisma': join(PROJECT_ROOT, 'packages/data-layer/src/prisma/index.ts'),
       '@heyclaude/database-types': join(PROJECT_ROOT, 'packages/database-types/src/index.ts'),
-      '@heyclaude/database-types/prisma': join(PROJECT_ROOT, 'packages/database-types/src/prisma/index.ts'),
+      '@heyclaude/database-types/prisma': join(
+        PROJECT_ROOT,
+        'packages/database-types/src/prisma/index.ts'
+      ),
     };
-    
+
     // Check exact match first
     if (packageMap[moduleSpecifier]) {
       const path = packageMap[moduleSpecifier];
@@ -704,20 +747,20 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
         return path;
       }
     }
-    
+
     // Try to resolve subpath imports (e.g., @heyclaude/web-runtime/something)
-    for (const [pkg, basePath] of Object.entries(packageMap)) {
+    for (const [pkg] of Object.entries(packageMap)) {
       if (moduleSpecifier.startsWith(pkg + '/') && moduleSpecifier !== pkg) {
         const subpath = moduleSpecifier.slice(pkg.length + 1);
         const packageName = pkg.replace('@heyclaude/', '');
         const packageRoot = join(PROJECT_ROOT, 'packages', packageName, 'src');
-        
+
         // Try direct file path
         const directPath = join(packageRoot, `${subpath}.ts`);
         if (existsSync(directPath)) {
           return directPath;
         }
-        
+
         // Try index.ts in subdirectory
         const indexPath = join(packageRoot, subpath, 'index.ts');
         if (existsSync(indexPath)) {
@@ -725,7 +768,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
         }
       }
     }
-    
+
     return null;
   }
 
@@ -734,11 +777,14 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
    * Handles both workspace packages (@heyclaude/*) and relative imports
    * Returns null if not a file (e.g., is a directory)
    */
-  async function resolveModuleSpecifier(specifier: string, fromFile: string): Promise<string | null> {
+  async function resolveModuleSpecifier(
+    specifier: string,
+    fromFile: string
+  ): Promise<string | null> {
     if (!fromFile || !specifier) {
       return null;
     }
-    
+
     try {
       // Handle workspace packages
       if (specifier.startsWith('@heyclaude/')) {
@@ -754,12 +800,12 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
         }
         return null;
       }
-      
+
       // Handle relative imports
       if (specifier.startsWith('./') || specifier.startsWith('../')) {
         const fromDir = dirname(fromFile);
         const resolved = join(fromDir, specifier);
-        
+
         // Try with .ts extension
         const withTs = resolved + '.ts';
         if (existsSync(withTs)) {
@@ -770,7 +816,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
             // Not a file
           }
         }
-        
+
         // Try without extension (if it already has one)
         if (existsSync(resolved)) {
           try {
@@ -780,7 +826,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
             // Not a file
           }
         }
-        
+
         // Try .tsx
         const withTsx = resolved + '.tsx';
         if (existsSync(withTsx)) {
@@ -796,7 +842,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
       // Silently fail - return null
       return null;
     }
-    
+
     return null;
   }
 
@@ -804,7 +850,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
    * Extract a specific schema definition and all its dependencies using AST
    * Returns a standalone TypeScript module that can be evaluated by jiti
    * This avoids module resolution issues by recursively inlining all dependencies
-   * 
+   *
    * Strategy:
    * 1. Extract the schema definition code
    * 2. Find all identifiers used in the schema
@@ -822,26 +868,26 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
     if (depth > 20) {
       throw new Error(`Maximum dependency depth exceeded for ${schemaName}`);
     }
-    
+
     // Prevent circular dependencies - use filePath + schemaName as key
     const schemaKey = `${filePath}::${schemaName}`;
     if (extractedSchemas.has(schemaKey)) {
       return null; // Already extracted
     }
     extractedSchemas.set(schemaKey, filePath);
-    
+
     // Create a minimal Project for AST parsing
     const project = new Project({
       skipAddingFilesFromTsConfig: true,
       skipFileDependencyResolution: true,
       skipLoadingLibFiles: true,
     });
-    
+
     const sourceFile = project.addSourceFileAtPathIfExists(filePath);
     if (!sourceFile) {
       return null;
     }
-    
+
     // Find the exported schema declaration
     // First check for direct exports: export const schemaName = ...
     let schemaDeclaration: Node | null = null;
@@ -857,7 +903,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
         }
       }
     });
-    
+
     // If not found as direct export, check for re-exports: export { schemaName } from '...'
     if (!schemaDeclaration) {
       for (const imp of sourceFile.getExportDeclarations()) {
@@ -882,43 +928,78 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
         }
       }
     }
-    
+
     if (!schemaDeclaration || !Node.isVariableDeclaration(schemaDeclaration)) {
       return null;
     }
-    
-    const initializer = schemaDeclaration.getInitializer();
+
+    // TypeScript type narrowing: schemaDeclaration is now VariableDeclaration
+    const variableDecl = schemaDeclaration as import('ts-morph').VariableDeclaration;
+    const initializer = variableDecl.getInitializer();
     if (!initializer) {
       return null;
     }
-    
+
     // Extract the schema definition code
     const schemaCode = initializer.getText();
-    
+
     // Find all identifiers used in the schema code that might be dependencies
     const usedIdentifiers = new Set<string>();
-    initializer.forEachDescendant((node) => {
+    initializer.forEachDescendant((node: import('ts-morph').Node) => {
       if (Node.isIdentifier(node)) {
         const name = node.getText();
         // Skip common keywords and built-ins
-        if (!['z', 'object', 'string', 'number', 'boolean', 'array', 'optional', 'extend', 'default', 'describe', 'meta', 'coerce', 'int', 'min', 'max', 'pipe', 'transform', 'nullable', 'Object', 'values', 'as', 'readonly', 'custom', 'message', 'Invalid', 'typeof', 'keyof'].includes(name)) {
+        if (
+          ![
+            'z',
+            'object',
+            'string',
+            'number',
+            'boolean',
+            'array',
+            'optional',
+            'extend',
+            'default',
+            'describe',
+            'meta',
+            'coerce',
+            'int',
+            'min',
+            'max',
+            'pipe',
+            'transform',
+            'nullable',
+            'Object',
+            'values',
+            'as',
+            'readonly',
+            'custom',
+            'message',
+            'Invalid',
+            'typeof',
+            'keyof',
+          ].includes(name)
+        ) {
           usedIdentifiers.add(name);
         }
       }
     });
-    
+
     // Note: Enum extraction is now handled inline when extracting schema dependencies
     // This ensures enums are extracted in the correct order (before schemas that use them)
-    
+
     // Collect all imports and their resolved paths
-    const importMap = new Map<string, { specifier: string; resolved: string; names: string[]; filePath: string }>();
-    
+    const importMap = new Map<
+      string,
+      { specifier: string; resolved: string; names: string[]; filePath: string }
+    >();
+
     // Get all imports from the source file
     for (const imp of sourceFile.getImportDeclarations()) {
       const moduleSpecifier = imp.getModuleSpecifierValue();
       const namedImports = imp.getNamedImports();
       const defaultImport = imp.getDefaultImport();
-      
+
       // Check which imports are actually used
       const usedNames: string[] = [];
       for (const namedImport of namedImports) {
@@ -927,19 +1008,23 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
           usedNames.push(name);
         }
       }
-      
+
       if (usedNames.length > 0 || (defaultImport && usedIdentifiers.has(defaultImport.getText()))) {
         // Resolve the module specifier to an absolute path
         let resolvedSpecifier = moduleSpecifier;
         let resolvedPath = moduleSpecifier;
-        if (moduleSpecifier.startsWith('@heyclaude/') || moduleSpecifier.startsWith('./') || moduleSpecifier.startsWith('../')) {
+        if (
+          moduleSpecifier.startsWith('@heyclaude/') ||
+          moduleSpecifier.startsWith('./') ||
+          moduleSpecifier.startsWith('../')
+        ) {
           const resolved = await resolveModuleSpecifier(moduleSpecifier, filePath);
           if (resolved) {
             resolvedSpecifier = resolved;
             resolvedPath = resolved;
           }
         }
-        
+
         importMap.set(moduleSpecifier, {
           specifier: resolvedSpecifier,
           resolved: resolvedSpecifier,
@@ -948,19 +1033,23 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
         });
       }
     }
-    
+
     // Recursively extract dependencies
     // We'll collect schema definitions and imports separately
     const dependencySchemaDefs: string[] = []; // Just the const schemaName = code; parts
     const dependencyImports: string[] = [];
-    
+
     // IMPORTANT: Extract imported schemas FIRST (before same-file schemas that depend on them)
     // This ensures dependencies are available when schemas that use them are evaluated
-    
+
     // 2. Extract schemas from imported files FIRST (for workspace/relative imports)
     for (const [originalSpecifier, { resolved, names, filePath: importFilePath }] of importMap) {
       // Only process workspace and relative imports (skip node_modules)
-      if (originalSpecifier.startsWith('@heyclaude/') || originalSpecifier.startsWith('./') || originalSpecifier.startsWith('../')) {
+      if (
+        originalSpecifier.startsWith('@heyclaude/') ||
+        originalSpecifier.startsWith('./') ||
+        originalSpecifier.startsWith('../')
+      ) {
         if (existsSync(importFilePath)) {
           // For each imported name, check if it's an exported schema in that file
           for (const name of names) {
@@ -971,7 +1060,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                 skipFileDependencyResolution: true,
                 skipLoadingLibFiles: true,
               });
-              
+
               const depSourceFile = depProject.addSourceFileAtPathIfExists(importFilePath);
               if (depSourceFile) {
                 // Find the schema declaration
@@ -988,7 +1077,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                     }
                   }
                 });
-                
+
                 // Check for re-exports
                 if (!depDeclaration) {
                   for (const exp of depSourceFile.getExportDeclarations()) {
@@ -998,7 +1087,10 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                       for (const namedExport of namedExports) {
                         if (namedExport.getName() === name) {
                           // Re-export - recursively extract from source
-                          const reExportResolved = await resolveModuleSpecifier(moduleSpecifier, importFilePath);
+                          const reExportResolved = await resolveModuleSpecifier(
+                            moduleSpecifier,
+                            importFilePath
+                          );
                           if (reExportResolved && existsSync(reExportResolved)) {
                             // Use AST to extract directly from the re-exported file
                             const reExportProject = new Project({
@@ -1006,8 +1098,9 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                               skipFileDependencyResolution: true,
                               skipLoadingLibFiles: true,
                             });
-                            
-                            const reExportSourceFile = reExportProject.addSourceFileAtPathIfExists(reExportResolved);
+
+                            const reExportSourceFile =
+                              reExportProject.addSourceFileAtPathIfExists(reExportResolved);
                             if (reExportSourceFile) {
                               // Find the schema declaration in the re-exported file
                               let reExportDeclaration: Node | null = null;
@@ -1023,47 +1116,87 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                                   }
                                 }
                               });
-                              
-                              if (reExportDeclaration && Node.isVariableDeclaration(reExportDeclaration)) {
-                                const reExportInitializer = reExportDeclaration.getInitializer();
+
+                              if (
+                                reExportDeclaration &&
+                                Node.isVariableDeclaration(reExportDeclaration)
+                              ) {
+                                const reExportVarDecl = reExportDeclaration as import('ts-morph').VariableDeclaration;
+                                const reExportInitializer = reExportVarDecl.getInitializer();
                                 if (reExportInitializer) {
                                   // Extract imports from the re-exported file FIRST (before schema)
                                   // Check if schema uses imported enums that need to be inlined
                                   const reExportUsedIds = new Set<string>();
-                                  reExportInitializer.forEachDescendant((node) => {
+                                  reExportInitializer.forEachDescendant((node: import('ts-morph').Node) => {
                                     if (Node.isIdentifier(node)) {
                                       const idName = node.getText();
-                                      if (!['z', 'string', 'pipe', 'custom', 'Object', 'values', 'as', 'readonly', 'includes', 'message', 'Invalid', 'typeof', 'keyof'].includes(idName)) {
+                                      if (
+                                        ![
+                                          'z',
+                                          'string',
+                                          'pipe',
+                                          'custom',
+                                          'Object',
+                                          'values',
+                                          'as',
+                                          'readonly',
+                                          'includes',
+                                          'message',
+                                          'Invalid',
+                                          'typeof',
+                                          'keyof',
+                                        ].includes(idName)
+                                      ) {
                                         reExportUsedIds.add(idName);
                                       }
                                     }
                                   });
-                                  
+
                                   // Extract enum dependencies FIRST (before the schema that uses them)
                                   for (const imp of reExportSourceFile.getImportDeclarations()) {
                                     const impSpecifier = imp.getModuleSpecifierValue();
                                     const impNamedImports = imp.getNamedImports();
-                                    
+
                                     for (const namedImport of impNamedImports) {
                                       const impName = namedImport.getName();
                                       if (reExportUsedIds.has(impName)) {
                                         // If this is an enum from workspace, try to inline it
                                         if (impSpecifier.startsWith('@heyclaude/')) {
-                                          const enumResolved = await resolveModuleSpecifier(impSpecifier, reExportResolved);
+                                          const enumResolved = await resolveModuleSpecifier(
+                                            impSpecifier,
+                                            reExportResolved
+                                          );
                                           if (enumResolved && existsSync(enumResolved)) {
                                             try {
-                                              const enumContent = await readFile(enumResolved, 'utf-8');
+                                              const enumContent = await readFile(
+                                                enumResolved,
+                                                'utf-8'
+                                              );
                                               // Look for: export const enumName = { ... } as const
                                               // Handle multi-line enum objects
-                                              const enumMatch = enumContent.match(new RegExp(`export const ${impName}\\s*=\\s*({[\\s\\S]*?})\\s*as\\s+const`, 's'));
+                                              const enumMatch = enumContent.match(
+                                                new RegExp(
+                                                  `export const ${impName}\\s*=\\s*({[\\s\\S]*?})\\s*as\\s+const`,
+                                                  's'
+                                                )
+                                              );
                                               if (enumMatch) {
                                                 // Inline the enum FIRST (before schema that uses it)
-                                                dependencySchemaDefs.push(`const ${impName} = ${enumMatch[1]} as const;`);
+                                                dependencySchemaDefs.push(
+                                                  `const ${impName} = ${enumMatch[1]} as const;`
+                                                );
                                               } else {
                                                 // Try without 'as const'
-                                                const enumMatch2 = enumContent.match(new RegExp(`export const ${impName}\\s*=\\s*({[\\s\\S]*?});`, 's'));
+                                                const enumMatch2 = enumContent.match(
+                                                  new RegExp(
+                                                    `export const ${impName}\\s*=\\s*({[\\s\\S]*?});`,
+                                                    's'
+                                                  )
+                                                );
                                                 if (enumMatch2) {
-                                                  dependencySchemaDefs.push(`const ${impName} = ${enumMatch2[1]};`);
+                                                  dependencySchemaDefs.push(
+                                                    `const ${impName} = ${enumMatch2[1]};`
+                                                  );
                                                 }
                                               }
                                             } catch {
@@ -1074,7 +1207,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                                       }
                                     }
                                   }
-                                  
+
                                   // NOW extract the schema (after its dependencies)
                                   const reExportCode = reExportInitializer.getText();
                                   dependencySchemaDefs.push(`const ${name} = ${reExportCode};`);
@@ -1088,39 +1221,68 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                     }
                   }
                 }
-                
+
                 if (depDeclaration && Node.isVariableDeclaration(depDeclaration)) {
-                  const depInitializer = depDeclaration.getInitializer();
+                  const depVarDecl = depDeclaration as import('ts-morph').VariableDeclaration;
+                  const depInitializer = depVarDecl.getInitializer();
                   if (depInitializer) {
                     // Extract dependencies FIRST (before the schema that uses them)
                     const depUsedIds = new Set<string>();
-                    depInitializer.forEachDescendant((node) => {
+                    depInitializer.forEachDescendant((node: import('ts-morph').Node) => {
                       if (Node.isIdentifier(node)) {
                         const idName = node.getText();
-                        if (!['z', 'string', 'pipe', 'custom', 'Object', 'values', 'as', 'readonly', 'includes', 'message', 'Invalid', 'typeof', 'keyof'].includes(idName)) {
+                        if (
+                          ![
+                            'z',
+                            'string',
+                            'pipe',
+                            'custom',
+                            'Object',
+                            'values',
+                            'as',
+                            'readonly',
+                            'includes',
+                            'message',
+                            'Invalid',
+                            'typeof',
+                            'keyof',
+                          ].includes(idName)
+                        ) {
                           depUsedIds.add(idName);
                         }
                       }
                     });
-                    
+
                     // Check if schema uses imported enums - extract them FIRST
                     for (const imp of depSourceFile.getImportDeclarations()) {
                       const impSpecifier = imp.getModuleSpecifierValue();
                       const impNamedImports = imp.getNamedImports();
-                      
+
                       for (const namedImport of impNamedImports) {
                         const impName = namedImport.getName();
                         if (depUsedIds.has(impName) && impSpecifier.startsWith('@heyclaude/')) {
                           // Try to extract enum FIRST
-                          const enumResolved = await resolveModuleSpecifier(impSpecifier, importFilePath);
+                          const enumResolved = await resolveModuleSpecifier(
+                            impSpecifier,
+                            importFilePath
+                          );
                           if (enumResolved && existsSync(enumResolved)) {
                             try {
                               const enumContent = await readFile(enumResolved, 'utf-8');
-                              const enumMatch = enumContent.match(new RegExp(`export const ${impName}\\s*=\\s*({[\\s\\S]*?})\\s*as\\s+const`, 's'));
+                              const enumMatch = enumContent.match(
+                                new RegExp(
+                                  `export const ${impName}\\s*=\\s*({[\\s\\S]*?})\\s*as\\s+const`,
+                                  's'
+                                )
+                              );
                               if (enumMatch) {
-                                dependencySchemaDefs.push(`const ${impName} = ${enumMatch[1]} as const;`);
+                                dependencySchemaDefs.push(
+                                  `const ${impName} = ${enumMatch[1]} as const;`
+                                );
                               } else {
-                                const enumMatch2 = enumContent.match(new RegExp(`export const ${impName}\\s*=\\s*({[\\s\\S]*?});`, 's'));
+                                const enumMatch2 = enumContent.match(
+                                  new RegExp(`export const ${impName}\\s*=\\s*({[\\s\\S]*?});`, 's')
+                                );
                                 if (enumMatch2) {
                                   dependencySchemaDefs.push(`const ${impName} = ${enumMatch2[1]};`);
                                 }
@@ -1132,7 +1294,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                         }
                       }
                     }
-                    
+
                     // NOW extract the schema (after its dependencies)
                     const depCode = depInitializer.getText();
                     dependencySchemaDefs.push(`const ${name} = ${depCode};`);
@@ -1147,7 +1309,10 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
               }
             } catch (error) {
               // If extraction fails, try to import it directly
-              console.warn(`  ⚠ Could not extract dependency ${name} from ${relative(PROJECT_ROOT, importFilePath)}:`, error instanceof Error ? error.message : String(error));
+              console.warn(
+                `  ⚠ Could not extract dependency ${name} from ${relative(PROJECT_ROOT, importFilePath)}:`,
+                error instanceof Error ? error.message : String(error)
+              );
               dependencyImports.push(`import { ${name} } from '${resolved}';`);
             }
           }
@@ -1159,7 +1324,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
         }
       }
     }
-    
+
     // 1. Extract schemas from the same file (AFTER imported schemas)
     // IMPORTANT: Extract dependencies BEFORE the main schema
     for (const identifier of usedIdentifiers) {
@@ -1177,7 +1342,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
           }
         }
       });
-      
+
       if (isExportedSchema && identifier !== schemaName) {
         // Extract directly from AST (not recursively, to avoid full modules)
         let depDeclaration: Node | null = null;
@@ -1193,26 +1358,43 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
             }
           }
         });
-        
+
         if (depDeclaration && Node.isVariableDeclaration(depDeclaration)) {
-          const depInitializer = depDeclaration.getInitializer();
+          const depVarDecl = depDeclaration as import('ts-morph').VariableDeclaration;
+          const depInitializer = depVarDecl.getInitializer();
           if (depInitializer) {
             // Extract dependencies of this schema FIRST (like enums and other schemas it uses)
             const depUsedIds = new Set<string>();
-            depInitializer.forEachDescendant((node) => {
+            depInitializer.forEachDescendant((node: import('ts-morph').Node) => {
               if (Node.isIdentifier(node)) {
                 const idName = node.getText();
-                if (!['z', 'string', 'pipe', 'custom', 'Object', 'values', 'as', 'readonly', 'includes', 'message', 'Invalid', 'typeof', 'keyof'].includes(idName)) {
+                if (
+                  ![
+                    'z',
+                    'string',
+                    'pipe',
+                    'custom',
+                    'Object',
+                    'values',
+                    'as',
+                    'readonly',
+                    'includes',
+                    'message',
+                    'Invalid',
+                    'typeof',
+                    'keyof',
+                  ].includes(idName)
+                ) {
                   depUsedIds.add(idName);
                 }
               }
             });
-            
+
             // Check if this schema uses imported schemas or enums - extract them FIRST
             for (const imp of sourceFile.getImportDeclarations()) {
               const impSpecifier = imp.getModuleSpecifierValue();
               const impNamedImports = imp.getNamedImports();
-              
+
               for (const namedImport of impNamedImports) {
                 const impName = namedImport.getName();
                 if (depUsedIds.has(impName)) {
@@ -1223,18 +1405,25 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                       try {
                         const enumContent = await readFile(enumResolved, 'utf-8');
                         // Try to match enum pattern first
-                        const enumMatch = enumContent.match(new RegExp(`export const ${impName}\\s*=\\s*({[\\s\\S]*?})\\s*as\\s+const`, 's'));
+                        const enumMatch = enumContent.match(
+                          new RegExp(
+                            `export const ${impName}\\s*=\\s*({[\\s\\S]*?})\\s*as\\s+const`,
+                            's'
+                          )
+                        );
                         if (enumMatch) {
                           dependencySchemaDefs.push(`const ${impName} = ${enumMatch[1]} as const;`);
                           continue; // Skip to next import
                         } else {
-                          const enumMatch2 = enumContent.match(new RegExp(`export const ${impName}\\s*=\\s*({[\\s\\S]*?});`, 's'));
+                          const enumMatch2 = enumContent.match(
+                            new RegExp(`export const ${impName}\\s*=\\s*({[\\s\\S]*?});`, 's')
+                          );
                           if (enumMatch2) {
                             dependencySchemaDefs.push(`const ${impName} = ${enumMatch2[1]};`);
                             continue; // Skip to next import
                           }
                         }
-                        
+
                         // Not an enum - might be a schema, try to extract it
                         // Use AST to extract the schema definition
                         const depProject = new Project({
@@ -1242,7 +1431,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                           skipFileDependencyResolution: true,
                           skipLoadingLibFiles: true,
                         });
-                        
+
                         const depSourceFile = depProject.addSourceFileAtPathIfExists(enumResolved);
                         if (depSourceFile) {
                           // Find the schema declaration
@@ -1259,7 +1448,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                               }
                             }
                           });
-                          
+
                           // Check for re-exports
                           if (!depDeclaration) {
                             for (const exp of depSourceFile.getExportDeclarations()) {
@@ -1269,36 +1458,54 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                                 for (const namedExport of namedExports) {
                                   if (namedExport.getName() === impName) {
                                     // Re-export - recursively extract from source
-                                    const reExportResolved = await resolveModuleSpecifier(moduleSpecifier, enumResolved);
+                                    const reExportResolved = await resolveModuleSpecifier(
+                                      moduleSpecifier,
+                                      enumResolved
+                                    );
                                     if (reExportResolved && existsSync(reExportResolved)) {
                                       // Recursively extract the schema (this will handle dependencies)
-                                      const nestedSchemaDef = await extractSchemaDefinitionWithDependencies(
-                                        reExportResolved,
-                                        impName,
-                                        extractedSchemas,
-                                        depth + 1
-                                      );
+                                      const nestedSchemaDef =
+                                        await extractSchemaDefinitionWithDependencies(
+                                          reExportResolved,
+                                          impName,
+                                          extractedSchemas,
+                                          depth + 1
+                                        );
                                       if (nestedSchemaDef) {
                                         // Extract just the schema definition from the nested module
                                         // The nested module already has all dependencies inlined
-                                        const schemaMatch = nestedSchemaDef.match(new RegExp(`export const ${impName}\\s*=\\s*([\\s\\S]*?);\\s*$`, 'm'));
+                                        const schemaMatch = nestedSchemaDef.match(
+                                          new RegExp(
+                                            `export const ${impName}\\s*=\\s*([\\s\\S]*?);\\s*$`,
+                                            'm'
+                                          )
+                                        );
                                         if (schemaMatch) {
                                           // Extract all dependencies from the nested module (enums, etc.)
                                           // and the schema itself
                                           const lines = nestedSchemaDef.split('\n');
-                                          let inDependencies = false;
                                           const depLines: string[] = [];
                                           for (const line of lines) {
-                                            if (line.includes(`const ${impName} =`) || line.includes(`export const ${impName} =`)) {
+                                            if (
+                                              line.includes(`const ${impName} =`) ||
+                                              line.includes(`export const ${impName} =`)
+                                            ) {
                                               // Extract just the const declaration (without export)
-                                              const constMatch = line.match(/export\s+const\s+(\w+)\s*=\s*([\s\S]*?);/);
+                                              const constMatch = line.match(
+                                                /export\s+const\s+(\w+)\s*=\s*([\s\S]*?);/
+                                              );
                                               if (constMatch) {
-                                                depLines.push(`const ${constMatch[1]} = ${constMatch[2]};`);
+                                                depLines.push(
+                                                  `const ${constMatch[1]} = ${constMatch[2]};`
+                                                );
                                               } else {
                                                 depLines.push(line.replace(/export\s+/, ''));
                                               }
                                               break;
-                                            } else if (line.trim().startsWith('const ') && !line.includes('export')) {
+                                            } else if (
+                                              line.trim().startsWith('const ') &&
+                                              !line.includes('export')
+                                            ) {
                                               // This is a dependency (enum or other schema)
                                               depLines.push(line);
                                             }
@@ -1313,7 +1520,8 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                               }
                             }
                           } else if (depDeclaration && Node.isVariableDeclaration(depDeclaration)) {
-                            const depInitializer = depDeclaration.getInitializer();
+                            const depVarDecl = depDeclaration as import('ts-morph').VariableDeclaration;
+                            const depInitializer = depVarDecl.getInitializer();
                             if (depInitializer) {
                               const depCode = depInitializer.getText();
                               dependencySchemaDefs.push(`const ${impName} = ${depCode};`);
@@ -1337,7 +1545,9 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                       );
                       if (nestedSchemaDef) {
                         // Extract the schema definition from the nested module
-                        const schemaMatch = nestedSchemaDef.match(new RegExp(`export const ${impName}\\s*=\\s*([\\s\\S]*?);\\s*$`, 'm'));
+                        const schemaMatch = nestedSchemaDef.match(
+                          new RegExp(`export const ${impName}\\s*=\\s*([\\s\\S]*?);\\s*$`, 'm')
+                        );
                         if (schemaMatch) {
                           dependencySchemaDefs.push(`const ${impName} = ${schemaMatch[1]};`);
                         }
@@ -1347,7 +1557,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                 }
               }
             }
-            
+
             // NOW extract the schema (after its dependencies)
             const depCode = depInitializer.getText();
             dependencySchemaDefs.push(`const ${identifier} = ${depCode};`);
@@ -1355,11 +1565,15 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
         }
       }
     }
-    
+
     // 2. Extract schemas from imported files (for workspace/relative imports)
     for (const [originalSpecifier, { resolved, names, filePath: importFilePath }] of importMap) {
       // Only process workspace and relative imports (skip node_modules)
-      if (originalSpecifier.startsWith('@heyclaude/') || originalSpecifier.startsWith('./') || originalSpecifier.startsWith('../')) {
+      if (
+        originalSpecifier.startsWith('@heyclaude/') ||
+        originalSpecifier.startsWith('./') ||
+        originalSpecifier.startsWith('../')
+      ) {
         if (existsSync(importFilePath)) {
           // For each imported name, check if it's an exported schema in that file
           for (const name of names) {
@@ -1370,7 +1584,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                 skipFileDependencyResolution: true,
                 skipLoadingLibFiles: true,
               });
-              
+
               const depSourceFile = depProject.addSourceFileAtPathIfExists(importFilePath);
               if (depSourceFile) {
                 // Find the schema declaration
@@ -1387,7 +1601,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                     }
                   }
                 });
-                
+
                 // Check for re-exports
                 if (!depDeclaration) {
                   for (const exp of depSourceFile.getExportDeclarations()) {
@@ -1397,7 +1611,10 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                       for (const namedExport of namedExports) {
                         if (namedExport.getName() === name) {
                           // Re-export - recursively extract from source
-                          const reExportResolved = await resolveModuleSpecifier(moduleSpecifier, importFilePath);
+                          const reExportResolved = await resolveModuleSpecifier(
+                            moduleSpecifier,
+                            importFilePath
+                          );
                           if (reExportResolved && existsSync(reExportResolved)) {
                             // Use AST to extract directly from the re-exported file
                             const reExportProject = new Project({
@@ -1405,8 +1622,9 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                               skipFileDependencyResolution: true,
                               skipLoadingLibFiles: true,
                             });
-                            
-                            const reExportSourceFile = reExportProject.addSourceFileAtPathIfExists(reExportResolved);
+
+                            const reExportSourceFile =
+                              reExportProject.addSourceFileAtPathIfExists(reExportResolved);
                             if (reExportSourceFile) {
                               // Find the schema declaration in the re-exported file
                               let reExportDeclaration: Node | null = null;
@@ -1422,47 +1640,87 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                                   }
                                 }
                               });
-                              
-                              if (reExportDeclaration && Node.isVariableDeclaration(reExportDeclaration)) {
-                                const reExportInitializer = reExportDeclaration.getInitializer();
+
+                              if (
+                                reExportDeclaration &&
+                                Node.isVariableDeclaration(reExportDeclaration)
+                              ) {
+                                const reExportVarDecl = reExportDeclaration as import('ts-morph').VariableDeclaration;
+                                const reExportInitializer = reExportVarDecl.getInitializer();
                                 if (reExportInitializer) {
                                   // Extract imports from the re-exported file FIRST (before schema)
                                   // Check if schema uses imported enums that need to be inlined
                                   const reExportUsedIds = new Set<string>();
-                                  reExportInitializer.forEachDescendant((node) => {
+                                  reExportInitializer.forEachDescendant((node: import('ts-morph').Node) => {
                                     if (Node.isIdentifier(node)) {
                                       const idName = node.getText();
-                                      if (!['z', 'string', 'pipe', 'custom', 'Object', 'values', 'as', 'readonly', 'includes', 'message', 'Invalid', 'typeof', 'keyof'].includes(idName)) {
+                                      if (
+                                        ![
+                                          'z',
+                                          'string',
+                                          'pipe',
+                                          'custom',
+                                          'Object',
+                                          'values',
+                                          'as',
+                                          'readonly',
+                                          'includes',
+                                          'message',
+                                          'Invalid',
+                                          'typeof',
+                                          'keyof',
+                                        ].includes(idName)
+                                      ) {
                                         reExportUsedIds.add(idName);
                                       }
                                     }
                                   });
-                                  
+
                                   // Extract enum dependencies FIRST (before the schema that uses them)
                                   for (const imp of reExportSourceFile.getImportDeclarations()) {
                                     const impSpecifier = imp.getModuleSpecifierValue();
                                     const impNamedImports = imp.getNamedImports();
-                                    
+
                                     for (const namedImport of impNamedImports) {
                                       const impName = namedImport.getName();
                                       if (reExportUsedIds.has(impName)) {
                                         // If this is an enum from workspace, try to inline it
                                         if (impSpecifier.startsWith('@heyclaude/')) {
-                                          const enumResolved = await resolveModuleSpecifier(impSpecifier, reExportResolved);
+                                          const enumResolved = await resolveModuleSpecifier(
+                                            impSpecifier,
+                                            reExportResolved
+                                          );
                                           if (enumResolved && existsSync(enumResolved)) {
                                             try {
-                                              const enumContent = await readFile(enumResolved, 'utf-8');
+                                              const enumContent = await readFile(
+                                                enumResolved,
+                                                'utf-8'
+                                              );
                                               // Look for: export const enumName = { ... } as const
                                               // Handle multi-line enum objects
-                                              const enumMatch = enumContent.match(new RegExp(`export const ${impName}\\s*=\\s*({[\\s\\S]*?})\\s*as\\s+const`, 's'));
+                                              const enumMatch = enumContent.match(
+                                                new RegExp(
+                                                  `export const ${impName}\\s*=\\s*({[\\s\\S]*?})\\s*as\\s+const`,
+                                                  's'
+                                                )
+                                              );
                                               if (enumMatch) {
                                                 // Inline the enum FIRST (before schema that uses it)
-                                                dependencySchemaDefs.push(`const ${impName} = ${enumMatch[1]} as const;`);
+                                                dependencySchemaDefs.push(
+                                                  `const ${impName} = ${enumMatch[1]} as const;`
+                                                );
                                               } else {
                                                 // Try without 'as const'
-                                                const enumMatch2 = enumContent.match(new RegExp(`export const ${impName}\\s*=\\s*({[\\s\\S]*?});`, 's'));
+                                                const enumMatch2 = enumContent.match(
+                                                  new RegExp(
+                                                    `export const ${impName}\\s*=\\s*({[\\s\\S]*?});`,
+                                                    's'
+                                                  )
+                                                );
                                                 if (enumMatch2) {
-                                                  dependencySchemaDefs.push(`const ${impName} = ${enumMatch2[1]};`);
+                                                  dependencySchemaDefs.push(
+                                                    `const ${impName} = ${enumMatch2[1]};`
+                                                  );
                                                 }
                                               }
                                             } catch {
@@ -1473,7 +1731,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                                       }
                                     }
                                   }
-                                  
+
                                   // NOW extract the schema (after its dependencies)
                                   const reExportCode = reExportInitializer.getText();
                                   dependencySchemaDefs.push(`const ${name} = ${reExportCode};`);
@@ -1487,39 +1745,68 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                     }
                   }
                 }
-                
+
                 if (depDeclaration && Node.isVariableDeclaration(depDeclaration)) {
-                  const depInitializer = depDeclaration.getInitializer();
+                  const depVarDecl = depDeclaration as import('ts-morph').VariableDeclaration;
+                  const depInitializer = depVarDecl.getInitializer();
                   if (depInitializer) {
                     // Extract dependencies FIRST (before the schema that uses them)
                     const depUsedIds = new Set<string>();
-                    depInitializer.forEachDescendant((node) => {
+                    depInitializer.forEachDescendant((node: import('ts-morph').Node) => {
                       if (Node.isIdentifier(node)) {
                         const idName = node.getText();
-                        if (!['z', 'string', 'pipe', 'custom', 'Object', 'values', 'as', 'readonly', 'includes', 'message', 'Invalid', 'typeof', 'keyof'].includes(idName)) {
+                        if (
+                          ![
+                            'z',
+                            'string',
+                            'pipe',
+                            'custom',
+                            'Object',
+                            'values',
+                            'as',
+                            'readonly',
+                            'includes',
+                            'message',
+                            'Invalid',
+                            'typeof',
+                            'keyof',
+                          ].includes(idName)
+                        ) {
                           depUsedIds.add(idName);
                         }
                       }
                     });
-                    
+
                     // Check if schema uses imported enums - extract them FIRST
                     for (const imp of depSourceFile.getImportDeclarations()) {
                       const impSpecifier = imp.getModuleSpecifierValue();
                       const impNamedImports = imp.getNamedImports();
-                      
+
                       for (const namedImport of impNamedImports) {
                         const impName = namedImport.getName();
                         if (depUsedIds.has(impName) && impSpecifier.startsWith('@heyclaude/')) {
                           // Try to extract enum FIRST
-                          const enumResolved = await resolveModuleSpecifier(impSpecifier, importFilePath);
+                          const enumResolved = await resolveModuleSpecifier(
+                            impSpecifier,
+                            importFilePath
+                          );
                           if (enumResolved && existsSync(enumResolved)) {
                             try {
                               const enumContent = await readFile(enumResolved, 'utf-8');
-                              const enumMatch = enumContent.match(new RegExp(`export const ${impName}\\s*=\\s*({[\\s\\S]*?})\\s*as\\s+const`, 's'));
+                              const enumMatch = enumContent.match(
+                                new RegExp(
+                                  `export const ${impName}\\s*=\\s*({[\\s\\S]*?})\\s*as\\s+const`,
+                                  's'
+                                )
+                              );
                               if (enumMatch) {
-                                dependencySchemaDefs.push(`const ${impName} = ${enumMatch[1]} as const;`);
+                                dependencySchemaDefs.push(
+                                  `const ${impName} = ${enumMatch[1]} as const;`
+                                );
                               } else {
-                                const enumMatch2 = enumContent.match(new RegExp(`export const ${impName}\\s*=\\s*({[\\s\\S]*?});`, 's'));
+                                const enumMatch2 = enumContent.match(
+                                  new RegExp(`export const ${impName}\\s*=\\s*({[\\s\\S]*?});`, 's')
+                                );
                                 if (enumMatch2) {
                                   dependencySchemaDefs.push(`const ${impName} = ${enumMatch2[1]};`);
                                 }
@@ -1531,7 +1818,7 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
                         }
                       }
                     }
-                    
+
                     // NOW extract the schema (after its dependencies)
                     const depCode = depInitializer.getText();
                     dependencySchemaDefs.push(`const ${name} = ${depCode};`);
@@ -1546,7 +1833,10 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
               }
             } catch (error) {
               // If extraction fails, try to import it directly
-              console.warn(`  ⚠ Could not extract dependency ${name} from ${relative(PROJECT_ROOT, importFilePath)}:`, error instanceof Error ? error.message : String(error));
+              console.warn(
+                `  ⚠ Could not extract dependency ${name} from ${relative(PROJECT_ROOT, importFilePath)}:`,
+                error instanceof Error ? error.message : String(error)
+              );
               dependencyImports.push(`import { ${name} } from '${resolved}';`);
             }
           }
@@ -1558,18 +1848,18 @@ async function evaluateSchemas(filePath: string, routes: RouteMetadata[]): Promi
         }
       }
     }
-    
+
     // Build import statements for external packages only
     // Internal dependencies are inlined above
     // Deduplicate imports
     const importSet = new Set<string>(dependencyImports);
-    
+
     // Always include zod and zod-openapi (only once)
     importSet.add("import 'zod-openapi';");
     importSet.add("import { z } from 'zod';");
-    
+
     const importStatements = Array.from(importSet);
-    
+
     // Build standalone module with all dependencies inlined
     // IMPORTANT: dependencySchemaDefs already contains enums in the correct order
     // (enums are added FIRST, then schemas that use them)
@@ -1588,7 +1878,7 @@ ${dependencySchemaDefs.join('\n\n')}
 
 export const ${schemaName} = ${schemaCode};
 `;
-    
+
     return standaloneModule;
   }
 
@@ -1596,11 +1886,11 @@ export const ${schemaName} = ${schemaCode};
    * Recursively preprocess a file and all its workspace dependencies
    * This creates a complete preprocessed file with all imports resolved to absolute paths
    * Handles both workspace packages and relative imports
-   * 
+   *
    * CRITICAL: This function must ensure ALL imports in ALL dependencies are resolved,
    * not just the top-level file. When jiti imports the preprocessed file, it will
    * encounter imports in dependencies that also need to be resolved.
-   * 
+   *
    * Strategy: Process all dependencies recursively, then replace ALL imports with
    * absolute paths in a single pass to ensure nothing is missed.
    */
@@ -1613,7 +1903,7 @@ export const ${schemaName} = ${schemaCode};
     if (depth > 20) {
       throw new Error(`Maximum dependency depth exceeded for ${filePath}`);
     }
-    
+
     // Prevent circular dependencies
     const normalizedPath = filePath.replace(/\\/g, '/');
     if (processedFiles.has(normalizedPath)) {
@@ -1621,30 +1911,36 @@ export const ${schemaName} = ${schemaCode};
       return '';
     }
     processedFiles.add(normalizedPath);
-    
+
     if (!existsSync(filePath)) {
       throw new Error(`File not found: ${filePath}`);
     }
-    
+
     let content = await readFile(filePath, 'utf-8');
-    
+
     // Find all imports (both workspace and relative) that need resolution
     const importRegex = /from\s+['"]([^'"]+)['"]/g;
-    const importsToProcess: Array<{ specifier: string; resolved: string | null; match: string }> = [];
+    const importsToProcess: Array<{ specifier: string; resolved: string | null; match: string }> =
+      [];
     let match;
-    
+
     // Collect all imports that need resolution
     while ((match = importRegex.exec(content)) !== null) {
       const specifier = match[1];
+      if (!specifier) continue; // Skip if specifier is undefined
       // Only process workspace packages and relative imports (skip node_modules, etc.)
-      if (specifier.startsWith('@heyclaude/') || specifier.startsWith('./') || specifier.startsWith('../')) {
+      if (
+        specifier.startsWith('@heyclaude/') ||
+        specifier.startsWith('./') ||
+        specifier.startsWith('../')
+      ) {
         const resolved = await resolveModuleSpecifier(specifier, filePath);
         if (resolved) {
-          importsToProcess.push({ specifier, resolved, match: match[0] });
+          importsToProcess.push({ specifier, resolved, match: match[0] ?? '' });
         }
       }
     }
-    
+
     // Recursively preprocess all dependencies first (depth-first)
     // This ensures all dependencies are processed before we replace imports
     for (const { resolved } of importsToProcess) {
@@ -1652,7 +1948,7 @@ export const ${schemaName} = ${schemaCode};
         await preprocessFileWithDependencies(resolved, processedFiles, depth + 1);
       }
     }
-    
+
     // Now replace ALL imports with resolved absolute paths in a single pass
     // Use a map to track replacements to avoid double-replacement
     const replacementMap = new Map<string, string>();
@@ -1661,31 +1957,32 @@ export const ${schemaName} = ${schemaCode};
         replacementMap.set(importMatch, `from '${resolved}'`);
       }
     }
-    
+
     // Apply all replacements
     for (const [oldImport, newImport] of replacementMap) {
       content = content.replace(oldImport, newImport);
     }
-    
+
     // Final pass: catch any remaining imports that might have been missed
     // This handles edge cases where imports are in different formats
     const finalPassRegex = /from\s+['"](@heyclaude\/[^'"]+|\.\.?\/[^'"]+)['"]/g;
     let finalMatch;
     const finalReplacements: Array<{ old: string; new: string }> = [];
-    
+
     while ((finalMatch = finalPassRegex.exec(content)) !== null) {
       const specifier = finalMatch[1];
+      if (!specifier) continue; // Skip if specifier is undefined
       const resolved = await resolveModuleSpecifier(specifier, filePath);
       if (resolved) {
-        finalReplacements.push({ old: finalMatch[0], new: `from '${resolved}'` });
+        finalReplacements.push({ old: finalMatch[0] ?? '', new: `from '${resolved}'` });
       }
     }
-    
+
     // Apply final replacements
     for (const { old, new: newImport } of finalReplacements) {
       content = content.replace(old, newImport);
     }
-    
+
     return content;
   }
 
@@ -1695,53 +1992,14 @@ export const ${schemaName} = ${schemaCode};
    */
   function preprocessImports(code: string): string {
     // Replace @heyclaude/* imports with resolved file paths
-    return code.replace(
-      /from\s+['"](@heyclaude\/[^'"]+)['"]/g,
-      (match, moduleSpecifier) => {
-        const resolved = resolveWorkspacePackage(moduleSpecifier);
-        if (resolved && existsSync(resolved)) {
-          // Use absolute path for jiti
-          return `from '${resolved}'`;
-        }
-        return match; // Keep original if can't resolve
+    return code.replace(/from\s+['"](@heyclaude\/[^'"]+)['"]/g, (match, moduleSpecifier) => {
+      const resolved = resolveWorkspacePackage(moduleSpecifier);
+      if (resolved && existsSync(resolved)) {
+        // Use absolute path for jiti
+        return `from '${resolved}'`;
       }
-    );
-  }
-
-  /**
-   * Custom module resolver for jiti that understands workspace packages
-   * This allows jiti to resolve @heyclaude/* imports correctly
-   */
-  function createJitiResolver() {
-    return (id: string, parentPath?: string) => {
-      // Try to resolve workspace packages first
-      if (id.startsWith('@heyclaude/')) {
-        const resolved = resolveWorkspacePackage(id);
-        if (resolved && existsSync(resolved)) {
-          return resolved;
-        }
-      }
-      
-      // Try to resolve relative imports
-      if (parentPath && (id.startsWith('./') || id.startsWith('../'))) {
-        const resolved = join(dirname(parentPath), id);
-        // Try with .ts extension
-        if (existsSync(resolved + '.ts')) {
-          return resolved + '.ts';
-        }
-        // Try without extension
-        if (existsSync(resolved)) {
-          return resolved;
-        }
-        // Try .tsx
-        if (existsSync(resolved + '.tsx')) {
-          return resolved + '.tsx';
-        }
-      }
-      
-      // Return original for Node.js to handle (node_modules, etc.)
-      return id;
-    };
+      return match; // Keep original if can't resolve
+    });
   }
 
   // Initialize jiti for handling server-only imports
@@ -1752,11 +2010,11 @@ export const ${schemaName} = ${schemaCode};
     // Note: jiti doesn't directly support custom resolvers in the way we need
     // We'll handle resolution via preprocessing instead
   });
-  
+
   try {
     // Try to import the route file using jiti (handles server-only)
     let routeModule: any = null;
-    
+
     try {
       // Use jiti to import route file - it can handle server-only dependencies
       routeModule = (await jitiInstance.import(filePath)) as any;
@@ -1767,7 +2025,7 @@ export const ${schemaName} = ${schemaCode};
       // Note: This is expected for files with 'server-only' imports
       // console.warn(`Could not import route file ${relativePath}:`, error instanceof Error ? error.message : String(error));
     }
-    
+
     // Process routes to extract schemas
     // Even if routeModule is null (can't import route file), we can still try to get schemas from shared modules
     for (const route of routes) {
@@ -1775,7 +2033,7 @@ export const ${schemaName} = ${schemaCode};
       if (routeModule) {
         // Debug: log what's available in the module
         // console.log(`  Available exports in ${relativePath}:`, Object.keys(routeModule));
-        
+
         // If we have an exported schema name, try to get it from the module
         if (route.querySchemaName && routeModule[route.querySchemaName]) {
           const schema = routeModule[route.querySchemaName];
@@ -1784,7 +2042,7 @@ export const ${schemaName} = ${schemaCode};
             // console.log(`  ✓ Extracted query schema: ${route.querySchemaName}`);
           }
         }
-        
+
         if (route.bodySchemaName && routeModule[route.bodySchemaName]) {
           const schema = routeModule[route.bodySchemaName];
           if (schema && typeof schema === 'object' && '_def' in schema) {
@@ -1792,7 +2050,7 @@ export const ${schemaName} = ${schemaCode};
             // console.log(`  ✓ Extracted body schema: ${route.bodySchemaName}`);
           }
         }
-        
+
         // If schema source is an identifier and we found it in exports, use it
         if (route.querySchemaSource && !route.querySchema) {
           const schemaName = route.querySchemaSource.trim();
@@ -1806,7 +2064,7 @@ export const ${schemaName} = ${schemaCode};
             }
           }
         }
-        
+
         if (route.bodySchemaSource && !route.bodySchema) {
           const schemaName = route.bodySchemaSource.trim();
           // Remove " as any" suffix if present
@@ -1819,15 +2077,19 @@ export const ${schemaName} = ${schemaCode};
             }
           }
         }
-        
+
         // Evaluate response schemas (similar to query/body schemas)
         if (route.openapi?.responses && route.responseSchemaSources) {
           for (const [code, schemaSource] of Object.entries(route.responseSchemaSources)) {
             const statusCode = parseInt(code, 10);
-            if (!isNaN(statusCode) && route.openapi.responses[statusCode] && !route.openapi.responses[statusCode].schema) {
+            if (
+              !isNaN(statusCode) &&
+              route.openapi.responses[statusCode] &&
+              !route.openapi.responses[statusCode].schema
+            ) {
               const schemaName = schemaSource.trim();
               const cleanSchemaName = schemaName.replace(/\s+as\s+\w+$/, '');
-              
+
               // Try to get from route module exports
               if (routeModule[cleanSchemaName]) {
                 const schema = routeModule[cleanSchemaName];
@@ -1850,7 +2112,7 @@ export const ${schemaName} = ${schemaCode};
             querySchemaNameToExtract = trimmed;
           }
         }
-        
+
         if (querySchemaNameToExtract) {
           const schemaName = querySchemaNameToExtract;
           if (schemaName) {
@@ -1867,9 +2129,10 @@ export const ${schemaName} = ${schemaCode};
                 }
               }
             });
-            
+
             if (foundDeclaration && Node.isVariableDeclaration(foundDeclaration)) {
-              const init = foundDeclaration.getInitializer();
+              const foundVarDecl = foundDeclaration as import('ts-morph').VariableDeclaration;
+              const init = foundVarDecl.getInitializer();
               if (init) {
                 // Try to create a temporary file with just the schema and import it using jiti
                 try {
@@ -1880,7 +2143,7 @@ export const ${schemaName} = ${schemaCode};
                     const spec = imp.getModuleSpecifierValue();
                     const namedImports = imp.getNamedImports();
                     if (namedImports.length > 0) {
-                      const named = namedImports.map(n => n.getName()).join(', ');
+                      const named = namedImports.map((n) => n.getName()).join(', ');
                       imports.push(`import { ${named} } from '${spec}';`);
                     }
                     const defaultImport = imp.getDefaultImport();
@@ -1889,17 +2152,26 @@ export const ${schemaName} = ${schemaCode};
                     }
                   }
                   // Filter out 'server-only' import - we'll mock it
-                  const filteredImports = imports.filter(imp => !imp.includes("'server-only'") && !imp.includes('"server-only"'));
+                  const filteredImports = imports.filter(
+                    (imp) => !imp.includes("'server-only'") && !imp.includes('"server-only"')
+                  );
                   // Check if zod is already imported
                   let hasZodImport = false;
                   for (const imp of filteredImports) {
-                    if (imp.includes('from \'zod\'') || imp.includes('from "zod"') || imp.includes('from \'zod') || imp.includes('from "zod')) {
+                    if (
+                      imp.includes("from 'zod'") ||
+                      imp.includes('from "zod"') ||
+                      imp.includes("from 'zod") ||
+                      imp.includes('from "zod')
+                    ) {
                       hasZodImport = true;
                       break;
                     }
                   }
                   // Only add zod import if not already present
-                  const zodImports = hasZodImport ? '' : "import { z } from 'zod';\nimport 'zod-openapi';\n";
+                  const zodImports = hasZodImport
+                    ? ''
+                    : "import { z } from 'zod';\nimport 'zod-openapi';\n";
                   // Create a minimal module that exports just the schema
                   // Mock 'server-only' as a no-op
                   // Preprocess imports to resolve workspace packages
@@ -1907,11 +2179,18 @@ export const ${schemaName} = ${schemaCode};
                   const preprocessedImports = preprocessImports(rawImports);
                   const tempModuleCode = `// Mock server-only for schema evaluation\nif (typeof require !== 'undefined') {\n  require.cache['server-only'] = { exports: {} };\n}\n${zodImports}${preprocessedImports}\nexport const ${schemaName} = ${schemaSource};\n`;
                   // Write to temp file and import it using jiti
-                  const tempPath = join(PROJECT_ROOT, `.temp-schema-${schemaName}-${Date.now()}.ts`);
+                  const tempPath = join(
+                    PROJECT_ROOT,
+                    `.temp-schema-${schemaName}-${Date.now()}.ts`
+                  );
                   writeFileSync(tempPath, tempModuleCode, 'utf-8');
                   try {
                     const tempModule = (await jitiInstance.import(tempPath)) as any;
-                    if (tempModule[schemaName] && typeof tempModule[schemaName] === 'object' && '_def' in tempModule[schemaName]) {
+                    if (
+                      tempModule[schemaName] &&
+                      typeof tempModule[schemaName] === 'object' &&
+                      '_def' in tempModule[schemaName]
+                    ) {
                       route.querySchema = tempModule[schemaName] as z.ZodSchema;
                     }
                   } finally {
@@ -1923,13 +2202,16 @@ export const ${schemaName} = ${schemaCode};
                   }
                 } catch (error) {
                   // Could not extract schema - will try shared modules
-                  console.warn(`  ⚠ Could not extract schema ${schemaName} from temp file:`, error instanceof Error ? error.message : String(error));
+                  console.warn(
+                    `  ⚠ Could not extract schema ${schemaName} from temp file:`,
+                    error instanceof Error ? error.message : String(error)
+                  );
                 }
               }
             }
           }
         }
-        
+
         // Same for body schema
         let bodySchemaNameToExtract = route.bodySchemaName;
         if (!bodySchemaNameToExtract && route.bodySchemaSource) {
@@ -1940,7 +2222,7 @@ export const ${schemaName} = ${schemaCode};
             bodySchemaNameToExtract = trimmed;
           }
         }
-        
+
         if (bodySchemaNameToExtract) {
           const schemaName = bodySchemaNameToExtract;
           if (schemaName) {
@@ -1957,9 +2239,10 @@ export const ${schemaName} = ${schemaCode};
                 }
               }
             });
-            
+
             if (foundDeclaration && Node.isVariableDeclaration(foundDeclaration)) {
-              const init = foundDeclaration.getInitializer();
+              const foundVarDecl = foundDeclaration as import('ts-morph').VariableDeclaration;
+              const init = foundVarDecl.getInitializer();
               if (init) {
                 try {
                   const schemaSource = init.getText();
@@ -1969,7 +2252,7 @@ export const ${schemaName} = ${schemaCode};
                     const spec = imp.getModuleSpecifierValue();
                     const namedImports = imp.getNamedImports();
                     if (namedImports.length > 0) {
-                      const named = namedImports.map(n => n.getName()).join(', ');
+                      const named = namedImports.map((n) => n.getName()).join(', ');
                       imports.push(`import { ${named} } from '${spec}';`);
                     }
                     const defaultImport = imp.getDefaultImport();
@@ -1978,26 +2261,42 @@ export const ${schemaName} = ${schemaCode};
                     }
                   }
                   // Filter out 'server-only' import - we'll mock it
-                  const filteredImports = imports.filter(imp => !imp.includes("'server-only'") && !imp.includes('"server-only"'));
+                  const filteredImports = imports.filter(
+                    (imp) => !imp.includes("'server-only'") && !imp.includes('"server-only"')
+                  );
                   // Check if zod is already imported
                   let hasZodImport = false;
                   for (const imp of filteredImports) {
-                    if (imp.includes('from \'zod\'') || imp.includes('from "zod"') || imp.includes('from \'zod') || imp.includes('from "zod')) {
+                    if (
+                      imp.includes("from 'zod'") ||
+                      imp.includes('from "zod"') ||
+                      imp.includes("from 'zod") ||
+                      imp.includes('from "zod')
+                    ) {
                       hasZodImport = true;
                       break;
                     }
                   }
                   // Only add zod import if not already present
-                  const zodImports = hasZodImport ? '' : "import { z } from 'zod';\nimport 'zod-openapi';\n";
+                  const zodImports = hasZodImport
+                    ? ''
+                    : "import { z } from 'zod';\nimport 'zod-openapi';\n";
                   // Preprocess imports to resolve workspace packages
                   const rawImports = filteredImports.join('\n');
                   const preprocessedImports = preprocessImports(rawImports);
                   const tempModuleCode = `// Mock server-only for schema evaluation\nif (typeof require !== 'undefined') {\n  require.cache['server-only'] = { exports: {} };\n}\n${zodImports}${preprocessedImports}\nexport const ${schemaName} = ${schemaSource};\n`;
-                  const tempPath = join(PROJECT_ROOT, `.temp-schema-${schemaName}-${Date.now()}.ts`);
+                  const tempPath = join(
+                    PROJECT_ROOT,
+                    `.temp-schema-${schemaName}-${Date.now()}.ts`
+                  );
                   writeFileSync(tempPath, tempModuleCode, 'utf-8');
                   try {
                     const tempModule = (await jitiInstance.import(tempPath)) as any;
-                    if (tempModule[schemaName] && typeof tempModule[schemaName] === 'object' && '_def' in tempModule[schemaName]) {
+                    if (
+                      tempModule[schemaName] &&
+                      typeof tempModule[schemaName] === 'object' &&
+                      '_def' in tempModule[schemaName]
+                    ) {
                       route.bodySchema = tempModule[schemaName] as z.ZodSchema;
                     }
                   } finally {
@@ -2009,32 +2308,39 @@ export const ${schemaName} = ${schemaCode};
                   }
                 } catch (error) {
                   // Could not extract schema
-                  console.warn(`  ⚠ Could not extract body schema ${schemaName} from temp file:`, error instanceof Error ? error.message : String(error));
+                  console.warn(
+                    `  ⚠ Could not extract body schema ${schemaName} from temp file:`,
+                    error instanceof Error ? error.message : String(error)
+                  );
                 }
               }
             }
           }
         }
-        
+
         // Handle schema extraction from shared modules (e.g., trendingQuerySchema from @heyclaude/web-runtime/server)
         // First, try to extract from shared modules if it's a simple identifier
         if (route.querySchemaSource && !route.querySchema) {
           const schemaSource = route.querySchemaSource.trim();
           // Remove " as any" suffix if present
           const cleanSchemaName = schemaSource.replace(/\s+as\s+any$/, '');
-          
+
           // If it's a simple identifier, try to extract from shared modules
           if (/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(cleanSchemaName)) {
             // Check if this schema is imported from a shared module
             for (const imp of sourceFile.getImportDeclarations()) {
               const moduleSpecifier = imp.getModuleSpecifierValue();
               const namedImports = imp.getNamedImports();
-              
+
               // Check if the schema is imported from this module
               for (const namedImport of namedImports) {
                 if (namedImport.getName() === cleanSchemaName) {
                   // This schema is imported - try to extract it from the source module
-                  if (moduleSpecifier.startsWith('@heyclaude/') || moduleSpecifier.startsWith('./') || moduleSpecifier.startsWith('../')) {
+                  if (
+                    moduleSpecifier.startsWith('@heyclaude/') ||
+                    moduleSpecifier.startsWith('./') ||
+                    moduleSpecifier.startsWith('../')
+                  ) {
                     const schemasPath = await resolveModuleSpecifier(moduleSpecifier, filePath);
                     if (schemasPath && existsSync(schemasPath)) {
                       try {
@@ -2043,40 +2349,64 @@ export const ${schemaName} = ${schemaCode};
                           schemasPath,
                           cleanSchemaName
                         );
-                        
+
                         if (schemaDefinition) {
                           // Write standalone evaluation module with all dependencies inlined
-                          const tempSchemasPath = join(PROJECT_ROOT, `.temp-schema-${cleanSchemaName}-${Date.now()}.ts`);
+                          const tempSchemasPath = join(
+                            PROJECT_ROOT,
+                            `.temp-schema-${cleanSchemaName}-${Date.now()}.ts`
+                          );
                           await writeFile(tempSchemasPath, schemaDefinition, 'utf-8');
-                          
+
                           try {
                             const module = (await jitiInstance.import(tempSchemasPath)) as any;
                             if (module && module[cleanSchemaName]) {
                               const schema = module[cleanSchemaName];
-                              if (schema && typeof schema === 'object' && ('_def' in schema || schema instanceof z.ZodType)) {
+                              if (
+                                schema &&
+                                typeof schema === 'object' &&
+                                ('_def' in schema || schema instanceof z.ZodType)
+                              ) {
                                 route.querySchema = schema as z.ZodSchema;
-                                console.log(`  ✓ Extracted query schema ${cleanSchemaName} using AST extraction`);
+                                console.log(
+                                  `  ✓ Extracted query schema ${cleanSchemaName} using AST extraction`
+                                );
                                 break;
                               }
                             }
                           } catch (error) {
                             // AST extraction failed, fall back to preprocessing approach
-                            console.warn(`  ⚠ AST extraction failed for ${cleanSchemaName}, trying preprocessing:`, error instanceof Error ? error.message : String(error));
-                            
+                            console.warn(
+                              `  ⚠ AST extraction failed for ${cleanSchemaName}, trying preprocessing:`,
+                              error instanceof Error ? error.message : String(error)
+                            );
+
                             // Fallback: Try the preprocessing approach
                             try {
                               const processedFiles = new Set<string>();
-                              const preprocessedContent = await preprocessFileWithDependencies(schemasPath, processedFiles);
-                              const tempSchemasPath = join(PROJECT_ROOT, `.temp-schema-preprocessed-${cleanSchemaName}-${Date.now()}.ts`);
+                              const preprocessedContent = await preprocessFileWithDependencies(
+                                schemasPath,
+                                processedFiles
+                              );
+                              const tempSchemasPath = join(
+                                PROJECT_ROOT,
+                                `.temp-schema-preprocessed-${cleanSchemaName}-${Date.now()}.ts`
+                              );
                               await writeFile(tempSchemasPath, preprocessedContent, 'utf-8');
-                              
+
                               try {
                                 const module = (await jitiInstance.import(tempSchemasPath)) as any;
                                 if (module && module[cleanSchemaName]) {
                                   const schema = module[cleanSchemaName];
-                                  if (schema && typeof schema === 'object' && ('_def' in schema || schema instanceof z.ZodType)) {
+                                  if (
+                                    schema &&
+                                    typeof schema === 'object' &&
+                                    ('_def' in schema || schema instanceof z.ZodType)
+                                  ) {
                                     route.querySchema = schema as z.ZodSchema;
-                                    console.log(`  ✓ Extracted query schema ${cleanSchemaName} using preprocessing fallback`);
+                                    console.log(
+                                      `  ✓ Extracted query schema ${cleanSchemaName} using preprocessing fallback`
+                                    );
                                   }
                                 }
                               } finally {
@@ -2087,7 +2417,12 @@ export const ${schemaName} = ${schemaCode};
                                 }
                               }
                             } catch (preprocessError) {
-                              console.warn(`  ⚠ Preprocessing fallback also failed for ${cleanSchemaName}:`, preprocessError instanceof Error ? preprocessError.message : String(preprocessError));
+                              console.warn(
+                                `  ⚠ Preprocessing fallback also failed for ${cleanSchemaName}:`,
+                                preprocessError instanceof Error
+                                  ? preprocessError.message
+                                  : String(preprocessError)
+                              );
                             }
                           } finally {
                             try {
@@ -2099,7 +2434,10 @@ export const ${schemaName} = ${schemaCode};
                         }
                       } catch (error) {
                         // Could not extract schema
-                        console.warn(`  ⚠ Could not extract query schema ${cleanSchemaName} from ${relative(PROJECT_ROOT, schemasPath)}:`, error instanceof Error ? error.message : String(error));
+                        console.warn(
+                          `  ⚠ Could not extract query schema ${cleanSchemaName} from ${relative(PROJECT_ROOT, schemasPath)}:`,
+                          error instanceof Error ? error.message : String(error)
+                        );
                       }
                       break;
                     }
@@ -2109,7 +2447,7 @@ export const ${schemaName} = ${schemaCode};
             }
           }
         }
-        
+
         // Handle inline schema expressions (e.g., paginationSchema.extend({ category: categorySchema }))
         // Extract the full expression and evaluate it
         if (route.querySchemaSource && !route.querySchema) {
@@ -2124,7 +2462,7 @@ export const ${schemaName} = ${schemaCode};
                 const spec = imp.getModuleSpecifierValue();
                 const namedImports = imp.getNamedImports();
                 if (namedImports.length > 0) {
-                  const named = namedImports.map(n => n.getName()).join(', ');
+                  const named = namedImports.map((n) => n.getName()).join(', ');
                   imports.push(`import { ${named} } from '${spec}';`);
                   // Check if zod is already imported
                   if (named.includes('z') && (spec === 'zod' || spec.includes('zod'))) {
@@ -2137,9 +2475,13 @@ export const ${schemaName} = ${schemaCode};
                 }
               }
               // Filter out 'server-only' import - we'll mock it
-              const filteredImports = imports.filter(imp => !imp.includes("'server-only'") && !imp.includes('"server-only"'));
+              const filteredImports = imports.filter(
+                (imp) => !imp.includes("'server-only'") && !imp.includes('"server-only"')
+              );
               // Only add zod import if not already present
-              const zodImports = hasZodImport ? '' : "import { z } from 'zod';\nimport 'zod-openapi';\n";
+              const zodImports = hasZodImport
+                ? ''
+                : "import { z } from 'zod';\nimport 'zod-openapi';\n";
               // Create a temp module that evaluates the inline expression
               // Preprocess imports to resolve workspace packages
               const rawImports = filteredImports.join('\n');
@@ -2149,7 +2491,11 @@ export const ${schemaName} = ${schemaCode};
               writeFileSync(tempPath, tempModuleCode, 'utf-8');
               try {
                 const tempModule = (await jitiInstance.import(tempPath)) as any;
-                if (tempModule.tempSchema && typeof tempModule.tempSchema === 'object' && '_def' in tempModule.tempSchema) {
+                if (
+                  tempModule.tempSchema &&
+                  typeof tempModule.tempSchema === 'object' &&
+                  '_def' in tempModule.tempSchema
+                ) {
                   route.querySchema = tempModule.tempSchema as z.ZodSchema;
                 }
               } finally {
@@ -2161,11 +2507,14 @@ export const ${schemaName} = ${schemaCode};
               }
             } catch (error) {
               // Could not evaluate inline schema - will try shared modules
-              console.warn(`  ⚠ Could not evaluate inline query schema:`, error instanceof Error ? error.message : String(error));
+              console.warn(
+                `  ⚠ Could not evaluate inline query schema:`,
+                error instanceof Error ? error.message : String(error)
+              );
             }
           }
         }
-        
+
         if (route.bodySchemaSource && !route.bodySchema) {
           const schemaSource = route.bodySchemaSource.trim();
           // If it's not a simple identifier, it's an inline expression - try to evaluate it
@@ -2178,7 +2527,7 @@ export const ${schemaName} = ${schemaCode};
                 const spec = imp.getModuleSpecifierValue();
                 const namedImports = imp.getNamedImports();
                 if (namedImports.length > 0) {
-                  const named = namedImports.map(n => n.getName()).join(', ');
+                  const named = namedImports.map((n) => n.getName()).join(', ');
                   imports.push(`import { ${named} } from '${spec}';`);
                   // Check if zod is already imported
                   if (named.includes('z') && (spec === 'zod' || spec.includes('zod'))) {
@@ -2191,9 +2540,13 @@ export const ${schemaName} = ${schemaCode};
                 }
               }
               // Filter out 'server-only' import - we'll mock it
-              const filteredImports = imports.filter(imp => !imp.includes("'server-only'") && !imp.includes('"server-only"'));
+              const filteredImports = imports.filter(
+                (imp) => !imp.includes("'server-only'") && !imp.includes('"server-only"')
+              );
               // Only add zod import if not already present
-              const zodImports = hasZodImport ? '' : "import { z } from 'zod';\nimport 'zod-openapi';\n";
+              const zodImports = hasZodImport
+                ? ''
+                : "import { z } from 'zod';\nimport 'zod-openapi';\n";
               // Create a temp module that evaluates the inline expression
               // Preprocess imports to resolve workspace packages
               const rawImports = filteredImports.join('\n');
@@ -2203,7 +2556,11 @@ export const ${schemaName} = ${schemaCode};
               writeFileSync(tempPath, tempModuleCode, 'utf-8');
               try {
                 const tempModule = (await jitiInstance.import(tempPath)) as any;
-                if (tempModule.tempSchema && typeof tempModule.tempSchema === 'object' && '_def' in tempModule.tempSchema) {
+                if (
+                  tempModule.tempSchema &&
+                  typeof tempModule.tempSchema === 'object' &&
+                  '_def' in tempModule.tempSchema
+                ) {
                   route.bodySchema = tempModule.tempSchema as z.ZodSchema;
                 }
               } finally {
@@ -2215,12 +2572,15 @@ export const ${schemaName} = ${schemaCode};
               }
             } catch (error) {
               // Could not evaluate inline schema - will try shared modules
-              console.warn(`  ⚠ Could not evaluate inline body schema:`, error instanceof Error ? error.message : String(error));
+              console.warn(
+                `  ⚠ Could not evaluate inline body schema:`,
+                error instanceof Error ? error.message : String(error)
+              );
             }
           }
         }
       }
-      
+
       // Whether or not routeModule was imported, try to resolve schemas from imports and shared modules
       if (sourceFile) {
         // Check if schema is imported in the route file
@@ -2228,24 +2588,35 @@ export const ${schemaName} = ${schemaCode};
         for (const imp of imports) {
           const moduleSpecifier = imp.getModuleSpecifierValue();
           const namedImports = imp.getNamedImports();
-          
+
           for (const namedImport of namedImports) {
             const importName = namedImport.getName();
-            
+
             // Check if this import matches our query schema (clean schema source name first)
             if (route.querySchemaSource && !route.querySchema) {
               const cleanSchemaSource = route.querySchemaSource.trim().replace(/\s+as\s+\w+$/, '');
               // Debug: Log when we're checking for a match
-              if (importName === cleanSchemaSource || importName.toLowerCase() === cleanSchemaSource.toLowerCase()) {
+              if (
+                importName === cleanSchemaSource ||
+                importName.toLowerCase() === cleanSchemaSource.toLowerCase()
+              ) {
                 // Try case-insensitive match if exact match fails
-                if (importName !== cleanSchemaSource && importName.toLowerCase() === cleanSchemaSource.toLowerCase()) {
-                  console.warn(`  ⚠ Case mismatch: importName="${importName}" vs cleanSchemaSource="${cleanSchemaSource}"`);
+                if (
+                  importName !== cleanSchemaSource &&
+                  importName.toLowerCase() === cleanSchemaSource.toLowerCase()
+                ) {
+                  console.warn(
+                    `  ⚠ Case mismatch: importName="${importName}" vs cleanSchemaSource="${cleanSchemaSource}"`
+                  );
                 }
                 try {
                   // If importing from server, prefer direct schemas import to avoid server-only issues
                   if (moduleSpecifier === '@heyclaude/web-runtime/server') {
                     // Try direct schemas file first (avoids server-only dependencies)
-                    const schemasPath = join(PROJECT_ROOT, 'packages/web-runtime/src/api/schemas.ts');
+                    const schemasPath = join(
+                      PROJECT_ROOT,
+                      'packages/web-runtime/src/api/schemas.ts'
+                    );
                     if (existsSync(schemasPath)) {
                       try {
                         // NEW APPROACH: Use AST to extract the schema definition and its dependencies
@@ -2254,19 +2625,28 @@ export const ${schemaName} = ${schemaCode};
                           schemasPath,
                           importName
                         );
-                        
+
                         if (schemaDefinition) {
                           // Write standalone evaluation module with all dependencies inlined
-                          const tempSchemasPath = join(PROJECT_ROOT, `.temp-schema-${importName}-${Date.now()}.ts`);
+                          const tempSchemasPath = join(
+                            PROJECT_ROOT,
+                            `.temp-schema-${importName}-${Date.now()}.ts`
+                          );
                           await writeFile(tempSchemasPath, schemaDefinition, 'utf-8');
-                          
+
                           try {
                             const module = (await jitiInstance.import(tempSchemasPath)) as any;
                             if (module && module[importName]) {
                               const schema = module[importName];
-                              if (schema && typeof schema === 'object' && ('_def' in schema || schema instanceof z.ZodType)) {
+                              if (
+                                schema &&
+                                typeof schema === 'object' &&
+                                ('_def' in schema || schema instanceof z.ZodType)
+                              ) {
                                 route.querySchema = schema as z.ZodSchema;
-                                console.log(`  ✓ Extracted query schema ${importName} using AST extraction`);
+                                console.log(
+                                  `  ✓ Extracted query schema ${importName} using AST extraction`
+                                );
                                 break;
                               }
                             }
@@ -2280,30 +2660,49 @@ export const ${schemaName} = ${schemaCode};
                         }
                       } catch (error) {
                         // AST extraction failed, fall back to preprocessing approach
-                        console.warn(`  ⚠ AST extraction failed for ${importName}, trying preprocessing:`, error instanceof Error ? error.message : String(error));
-                        
+                        console.warn(
+                          `  ⚠ AST extraction failed for ${importName}, trying preprocessing:`,
+                          error instanceof Error ? error.message : String(error)
+                        );
+
                         // Fallback: Try the preprocessing approach
                         try {
                           const processedFiles = new Set<string>();
-                          const preprocessedContent = await preprocessFileWithDependencies(schemasPath, processedFiles);
-                          
+                          const preprocessedContent = await preprocessFileWithDependencies(
+                            schemasPath,
+                            processedFiles
+                          );
+
                           // Verify all imports are resolved
-                          const unresolvedImports = preprocessedContent.match(/from\s+['"](@heyclaude\/[^'"]+|\.\.?\/[^'"]+)['"]/g);
+                          const unresolvedImports = preprocessedContent.match(
+                            /from\s+['"](@heyclaude\/[^'"]+|\.\.?\/[^'"]+)['"]/g
+                          );
                           if (unresolvedImports && unresolvedImports.length > 0) {
                             // Still has unresolved imports - this approach won't work
-                            console.warn(`  ⚠ Preprocessing still has ${unresolvedImports.length} unresolved imports for ${importName}`);
+                            console.warn(
+                              `  ⚠ Preprocessing still has ${unresolvedImports.length} unresolved imports for ${importName}`
+                            );
                           } else {
                             // All imports resolved - write and import
-                            const tempSchemasPath = join(PROJECT_ROOT, `.temp-schemas-${Date.now()}.ts`);
+                            const tempSchemasPath = join(
+                              PROJECT_ROOT,
+                              `.temp-schemas-${Date.now()}.ts`
+                            );
                             await writeFile(tempSchemasPath, preprocessedContent, 'utf-8');
-                            
+
                             try {
                               const module = (await jitiInstance.import(tempSchemasPath)) as any;
                               if (module && module[importName]) {
                                 const schema = module[importName];
-                                if (schema && typeof schema === 'object' && ('_def' in schema || schema instanceof z.ZodType)) {
+                                if (
+                                  schema &&
+                                  typeof schema === 'object' &&
+                                  ('_def' in schema || schema instanceof z.ZodType)
+                                ) {
                                   route.querySchema = schema as z.ZodSchema;
-                                  console.log(`  ✓ Extracted query schema ${importName} from preprocessed schemas file`);
+                                  console.log(
+                                    `  ✓ Extracted query schema ${importName} from preprocessed schemas file`
+                                  );
                                   break;
                                 }
                               }
@@ -2316,22 +2715,28 @@ export const ${schemaName} = ${schemaCode};
                             }
                           }
                         } catch (fallbackError) {
-                          console.warn(`  ⚠ Preprocessing fallback also failed for ${importName}:`, fallbackError instanceof Error ? fallbackError.message : String(fallbackError));
+                          console.warn(
+                            `  ⚠ Preprocessing fallback also failed for ${importName}:`,
+                            fallbackError instanceof Error
+                              ? fallbackError.message
+                              : String(fallbackError)
+                          );
                         }
                       }
                     }
                   }
-                  
+
                   // Try to resolve workspace package imports to source files
                   let resolvedPath: string | null = null;
                   if (moduleSpecifier.startsWith('@heyclaude/')) {
                     resolvedPath = resolveWorkspacePackage(moduleSpecifier);
                   }
-                  
-                  const module = resolvedPath && existsSync(resolvedPath)
-                    ? (await jitiInstance.import(resolvedPath)) as any
-                    : (await jitiInstance.import(moduleSpecifier)) as any;
-                  
+
+                  const module =
+                    resolvedPath && existsSync(resolvedPath)
+                      ? ((await jitiInstance.import(resolvedPath)) as any)
+                      : ((await jitiInstance.import(moduleSpecifier)) as any);
+
                   if (module && module[importName]) {
                     const schema = module[importName];
                     if (schema && typeof schema === 'object' && '_def' in schema) {
@@ -2361,7 +2766,7 @@ export const ${schemaName} = ${schemaCode};
                 }
               }
             }
-            
+
             // Check if this import matches our body schema (clean schema source name first)
             if (route.bodySchemaSource && !route.bodySchema) {
               const cleanSchemaSource = route.bodySchemaSource.trim().replace(/\s+as\s+\w+$/, '');
@@ -2370,7 +2775,10 @@ export const ${schemaName} = ${schemaCode};
                   // If importing from server, prefer direct schemas import to avoid server-only issues
                   if (moduleSpecifier === '@heyclaude/web-runtime/server') {
                     // Try direct schemas file first (avoids server-only dependencies)
-                    const schemasPath = join(PROJECT_ROOT, 'packages/web-runtime/src/api/schemas.ts');
+                    const schemasPath = join(
+                      PROJECT_ROOT,
+                      'packages/web-runtime/src/api/schemas.ts'
+                    );
                     if (existsSync(schemasPath)) {
                       try {
                         const module = (await jitiInstance.import(schemasPath)) as any;
@@ -2386,17 +2794,18 @@ export const ${schemaName} = ${schemaCode};
                       }
                     }
                   }
-                  
+
                   // Try to resolve workspace package imports to source files
                   let resolvedPath: string | null = null;
                   if (moduleSpecifier.startsWith('@heyclaude/')) {
                     resolvedPath = resolveWorkspacePackage(moduleSpecifier);
                   }
-                  
-                  const module = resolvedPath && existsSync(resolvedPath)
-                    ? (await jitiInstance.import(resolvedPath)) as any
-                    : (await jitiInstance.import(moduleSpecifier)) as any;
-                  
+
+                  const module =
+                    resolvedPath && existsSync(resolvedPath)
+                      ? ((await jitiInstance.import(resolvedPath)) as any)
+                      : ((await jitiInstance.import(moduleSpecifier)) as any);
+
                   if (module && module[importName]) {
                     const schema = module[importName];
                     if (schema && typeof schema === 'object' && '_def' in schema) {
@@ -2429,7 +2838,7 @@ export const ${schemaName} = ${schemaCode};
           }
         }
       }
-      
+
       // If still not found, try common shared module locations
       // This works for schemas like searchQuerySchema, paginationSchema, etc.
       if (route.querySchemaSource && !route.querySchema) {
@@ -2446,7 +2855,7 @@ export const ${schemaName} = ${schemaCode};
               '@heyclaude/web-runtime/api/schemas',
               '@heyclaude/web-runtime/server',
             ];
-            
+
             for (const modulePath of possibleModules) {
               try {
                 let module: any = null;
@@ -2471,11 +2880,15 @@ export const ${schemaName} = ${schemaCode};
                   // Try file path import using jiti (for source files)
                   module = (await jitiInstance.import(modulePath)) as any;
                 }
-                
+
                 if (module && module[schemaName]) {
                   const schema = module[schemaName];
                   // Check if it's a Zod schema (has _def property or is instance of z.ZodType)
-                  if (schema && typeof schema === 'object' && ('_def' in schema || schema instanceof z.ZodType)) {
+                  if (
+                    schema &&
+                    typeof schema === 'object' &&
+                    ('_def' in schema || schema instanceof z.ZodType)
+                  ) {
                     route.querySchema = schema as z.ZodSchema;
                     console.log(`  ✓ Extracted query schema ${schemaName} from ${modulePath}`);
                     break;
@@ -2494,7 +2907,7 @@ export const ${schemaName} = ${schemaCode};
           }
         }
       }
-      
+
       if (route.bodySchemaSource && !route.bodySchema) {
         // Clean schema name (remove type assertions like "as any")
         const schemaName = route.bodySchemaSource.trim().replace(/\s+as\s+\w+$/, '');
@@ -2509,7 +2922,7 @@ export const ${schemaName} = ${schemaCode};
               '@heyclaude/web-runtime/api/schemas',
               '@heyclaude/web-runtime/server',
             ];
-            
+
             for (const modulePath of possibleModules) {
               try {
                 let module: any = null;
@@ -2534,11 +2947,15 @@ export const ${schemaName} = ${schemaCode};
                   // Try file path import using jiti (for source files)
                   module = (await jitiInstance.import(modulePath)) as any;
                 }
-                
+
                 if (module && module[schemaName]) {
                   const schema = module[schemaName];
                   // Check if it's a Zod schema (has _def property or is instance of z.ZodType)
-                  if (schema && typeof schema === 'object' && ('_def' in schema || schema instanceof z.ZodType)) {
+                  if (
+                    schema &&
+                    typeof schema === 'object' &&
+                    ('_def' in schema || schema instanceof z.ZodType)
+                  ) {
                     route.bodySchema = schema as z.ZodSchema;
                     console.log(`  ✓ Extracted body schema ${schemaName} from ${modulePath}`);
                     break;
@@ -2558,83 +2975,101 @@ export const ${schemaName} = ${schemaCode};
     // Log error but don't fail completely - some schemas may still be extracted
     console.warn(`Error evaluating schemas for ${relativePath}:`, error);
   }
-  
+
   // Evaluate response schemas from shared modules (similar to query/body schemas)
   for (const route of routes) {
     if (route.responseSchemaSources) {
       for (const [code, schemaSource] of Object.entries(route.responseSchemaSources)) {
-      const statusCode = parseInt(code, 10);
-      if (!isNaN(statusCode) && route.openapi?.responses?.[statusCode] && !route.openapi.responses[statusCode].schema) {
-        const schemaName = schemaSource.trim().replace(/\s+as\s+\w+$/, '');
-        if (schemaName && /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(schemaName)) {
-          try {
-            // Try response-schemas file first (where response schemas are defined)
-            const possibleModules = [
-              join(PROJECT_ROOT, 'packages/web-runtime/src/api/response-schemas.ts'),
-              join(PROJECT_ROOT, 'packages/web-runtime/src/api/schemas.ts'),
-              join(PROJECT_ROOT, 'packages/web-runtime/src/server.ts'),
-              '@heyclaude/web-runtime/api/response-schemas',
-              '@heyclaude/web-runtime/api/schemas',
-              '@heyclaude/web-runtime/server',
-            ];
-            
-            for (const modulePath of possibleModules) {
-              try {
-                let module: any = null;
-                if (modulePath.startsWith('@heyclaude/')) {
-                  const resolvedPath = resolveWorkspacePackage(modulePath);
-                  if (resolvedPath && existsSync(resolvedPath)) {
-                    module = (await jitiInstance.import(resolvedPath)) as any;
+        const statusCode = parseInt(code, 10);
+        if (
+          !isNaN(statusCode) &&
+          route.openapi?.responses?.[statusCode] &&
+          !route.openapi.responses[statusCode].schema
+        ) {
+          const schemaName = schemaSource.trim().replace(/\s+as\s+\w+$/, '');
+          if (schemaName && /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(schemaName)) {
+            try {
+              // Try response-schemas file first (where response schemas are defined)
+              const possibleModules = [
+                join(PROJECT_ROOT, 'packages/web-runtime/src/api/response-schemas.ts'),
+                join(PROJECT_ROOT, 'packages/web-runtime/src/api/schemas.ts'),
+                join(PROJECT_ROOT, 'packages/web-runtime/src/server.ts'),
+                '@heyclaude/web-runtime/api/response-schemas',
+                '@heyclaude/web-runtime/api/schemas',
+                '@heyclaude/web-runtime/server',
+              ];
+
+              for (const modulePath of possibleModules) {
+                try {
+                  let module: any = null;
+                  if (modulePath.startsWith('@heyclaude/')) {
+                    const resolvedPath = resolveWorkspacePackage(modulePath);
+                    if (resolvedPath && existsSync(resolvedPath)) {
+                      module = (await jitiInstance.import(resolvedPath)) as any;
+                    }
+                  } else {
+                    module = (await jitiInstance.import(modulePath)) as any;
                   }
-                } else {
-                  module = (await jitiInstance.import(modulePath)) as any;
-                }
-                
-                if (module && module[schemaName]) {
-                  const schema = module[schemaName];
-                  if (schema && typeof schema === 'object' && ('_def' in schema || schema instanceof z.ZodType)) {
-                    route.openapi.responses[statusCode].schema = schema as z.ZodSchema;
-                    break;
+
+                  if (module && module[schemaName]) {
+                    const schema = module[schemaName];
+                    if (
+                      schema &&
+                      typeof schema === 'object' &&
+                      ('_def' in schema || schema instanceof z.ZodType)
+                    ) {
+                      route.openapi.responses[statusCode].schema = schema as z.ZodSchema;
+                      break;
+                    }
                   }
+                } catch {
+                  // Module not found - continue to next
                 }
-              } catch {
-                // Module not found - continue to next
               }
+            } catch {
+              // Could not resolve response schema
             }
-          } catch {
-            // Could not resolve response schema
-          }
           }
         }
       }
     }
   }
-  
+
   // Report schema extraction status
   for (const route of routes) {
     if (route.querySchemaSource && !route.querySchema) {
-      console.warn(`  ⚠ Could not extract query schema for ${route.route}: ${route.querySchemaSource}`);
+      console.warn(
+        `  ⚠ Could not extract query schema for ${route.route}: ${route.querySchemaSource}`
+      );
     }
     if (route.bodySchemaSource && !route.bodySchema) {
-      console.warn(`  ⚠ Could not extract body schema for ${route.route}: ${route.bodySchemaSource}`);
+      console.warn(
+        `  ⚠ Could not extract body schema for ${route.route}: ${route.bodySchemaSource}`
+      );
     }
     if (route.responseSchemaSources) {
       for (const [code, schemaSource] of Object.entries(route.responseSchemaSources)) {
         const statusCode = parseInt(code, 10);
-        if (!isNaN(statusCode) && route.openapi?.responses?.[statusCode] && !route.openapi.responses[statusCode].schema) {
-          console.warn(`  ⚠ Could not extract response schema for ${route.route} ${statusCode}: ${schemaSource}`);
+        if (
+          !isNaN(statusCode) &&
+          route.openapi?.responses?.[statusCode] &&
+          !route.openapi.responses[statusCode].schema
+        ) {
+          console.warn(
+            `  ⚠ Could not extract response schema for ${route.route} ${statusCode}: ${schemaSource}`
+          );
         }
       }
     }
   }
-  
+
   return routes;
 }
 
 /**
  * Extract path parameters from route path and convert to OpenAPI format
  * Converts Next.js dynamic segments [param] to OpenAPI {param} format
- * 
+ *
  * @example
  * '/api/v1/content/[category]/[slug]' -> '/api/v1/content/{category}/{slug}'
  * Returns: { openApiPath: '/api/v1/content/{category}/{slug}', pathParams: ['category', 'slug'] }
@@ -2642,7 +3077,7 @@ export const ${schemaName} = ${schemaCode};
 function extractPathParameters(routePath: string): { openApiPath: string; pathParams: string[] } {
   const pathParams: string[] = [];
   // Convert Next.js dynamic segments [param] to OpenAPI {param} format
-  const openApiPath = routePath.replace(/\[([^\]]+)\]/g, (match, paramName) => {
+  const openApiPath = routePath.replace(/\[([^\]]+)\]/g, (_match, paramName) => {
     pathParams.push(paramName);
     return `{${paramName}}`;
   });
@@ -2654,12 +3089,12 @@ function extractPathParameters(routePath: string): { openApiPath: string; pathPa
  */
 function createPathParamsSchema(pathParams: string[]): z.ZodObject<any> | null {
   if (pathParams.length === 0) return null;
-  
+
   const shape: Record<string, z.ZodString> = {};
   for (const param of pathParams) {
     shape[param] = z.string().describe(`Path parameter: ${param}`);
   }
-  
+
   return z.object(shape);
 }
 
@@ -2669,7 +3104,7 @@ function createPathParamsSchema(pathParams: string[]): z.ZodObject<any> | null {
  */
 function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
   const paths: Record<string, any> = {};
-  
+
   // Group routes by path (using OpenAPI path format with {param} instead of [param])
   const routesByPath = new Map<string, RouteMetadata[]>();
   for (const route of routes) {
@@ -2679,19 +3114,19 @@ function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
     }
     routesByPath.get(openApiPath)!.push(route);
   }
-  
+
   // Build paths structure
   for (const [openApiPath, pathRoutes] of routesByPath) {
     const pathItem: Record<string, any> = {};
-    
+
     for (const route of pathRoutes) {
       const method = route.method.toLowerCase();
       const operation: any = {};
-      
+
       // Extract path parameters for this route
       const { pathParams } = extractPathParameters(route.route);
       const pathParamsSchema = createPathParamsSchema(pathParams);
-      
+
       // Add OpenAPI metadata
       const openapi = route.openapi;
       if (openapi) {
@@ -2717,38 +3152,42 @@ function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
           operation.security = openapi.security;
         }
       }
-      
+
       // Add security if auth required (fallback to requireAuth if security not explicitly set)
       if (route.requireAuth && !openapi?.security) {
         operation.security = [{ bearerAuth: [] }];
       }
-      
+
       // Build requestParams object (zod-openapi will convert to parameters array)
       const requestParams: Record<string, z.ZodSchema> = {};
-      
+
       // Add path parameters if any
       if (pathParamsSchema) {
-        requestParams.path = pathParamsSchema;
+        requestParams['path'] = pathParamsSchema;
       }
-      
+
       // Add query parameters
       if (route.querySchema) {
         if (route.querySchema instanceof z.ZodObject) {
-          requestParams.query = route.querySchema;
+          requestParams['query'] = route.querySchema;
         } else {
           // If it's not a ZodObject, log warning
-          console.warn(`  ⚠ Query schema for ${route.route} is not a ZodObject, skipping requestParams.query`);
+          console.warn(
+            `  ⚠ Query schema for ${route.route} is not a ZodObject, skipping requestParams.query`
+          );
         }
       } else if (route.querySchemaSource) {
         // Schema exists but wasn't extracted - log warning
-        console.warn(`  ⚠ Query schema source found but not extracted for ${route.route}: ${route.querySchemaSource}`);
+        console.warn(
+          `  ⚠ Query schema source found but not extracted for ${route.route}: ${route.querySchemaSource}`
+        );
       }
-      
+
       // Only add requestParams if it has at least one parameter type
       if (Object.keys(requestParams).length > 0) {
         operation.requestParams = requestParams;
       }
-      
+
       // Add requestBody with body schema (zod-openapi handles conversion automatically)
       if (route.bodySchema && ['post', 'put', 'patch'].includes(method)) {
         const requestBody: any = {
@@ -2758,7 +3197,7 @@ function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
             },
           },
         };
-        
+
         // Add requestBody description and required if provided
         if (openapi?.requestBody) {
           if (openapi.requestBody.description !== undefined) {
@@ -2774,16 +3213,18 @@ function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
           // Default to true for POST/PUT/PATCH
           requestBody.required = true;
         }
-        
+
         operation.requestBody = requestBody;
       } else if (route.bodySchemaSource && ['post', 'put', 'patch'].includes(method)) {
         // Schema exists but wasn't extracted - log warning
-        console.warn(`  ⚠ Body schema source found but not extracted for ${route.route}: ${route.bodySchemaSource}`);
+        console.warn(
+          `  ⚠ Body schema source found but not extracted for ${route.route}: ${route.bodySchemaSource}`
+        );
       }
-      
+
       // Build responses structure
       const responses: Record<string, any> = {};
-      
+
       // Default responses
       responses['200'] = {
         description: 'Success',
@@ -2794,20 +3235,20 @@ function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
       responses['500'] = {
         description: 'Internal Server Error',
       };
-      
+
       if (route.requireAuth) {
         responses['401'] = {
           description: 'Unauthorized',
         };
       }
-      
+
       // Merge with openapi.responses if provided (including response schemas, headers, examples)
       if (route.openapi?.responses) {
         for (const [code, response] of Object.entries(route.openapi.responses)) {
           const responseObj: any = {
             description: response.description,
           };
-          
+
           // Add response schema if provided (zod-openapi will convert Zod schema to OpenAPI schema)
           if (response.schema) {
             responseObj.content = {
@@ -2816,12 +3257,12 @@ function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
               },
             };
           }
-          
+
           // Add response headers if provided
           if (response.headers) {
             responseObj.headers = response.headers;
           }
-          
+
           // Add response example if provided
           if (response.example !== undefined) {
             // If example is a string (object literal source), try to evaluate it
@@ -2855,19 +3296,19 @@ function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
               }
             }
           }
-          
+
           responses[code] = responseObj;
         }
       }
-      
+
       operation.responses = responses;
-      
+
       pathItem[method] = operation;
     }
-    
+
     paths[openApiPath] = pathItem;
   }
-  
+
   return paths;
 }
 
@@ -2878,15 +3319,17 @@ function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
 function parsePrismaOpenApiYaml(yamlContent: string): Record<string, any> {
   try {
     const parsed = yaml.load(yamlContent) as any;
-    
+
     // Extract components.schemas
     if (parsed?.components?.schemas && typeof parsed.components.schemas === 'object') {
       return parsed.components.schemas;
     }
-    
+
     return {};
   } catch (error) {
-    console.warn(`Failed to parse Prisma OpenAPI YAML: ${error instanceof Error ? error.message : String(error)}`);
+    console.warn(
+      `Failed to parse Prisma OpenAPI YAML: ${error instanceof Error ? error.message : String(error)}`
+    );
     return {};
   }
 }
@@ -2898,14 +3341,15 @@ function parsePrismaOpenApiYaml(yamlContent: string): Record<string, any> {
 function generateOpenAPIDocument(routes: RouteMetadata[]) {
   // Build paths structure with Zod schemas directly
   const paths = buildOpenAPIPaths(routes);
-  
+
   // Use createDocument() with paths structure - zod-openapi handles all conversion automatically
   const document = createDocument({
     openapi: '3.1.0',
     info: {
       title: 'ClaudePro Directory API',
       version: '1.1.0',
-      description: 'API documentation for ClaudePro Directory - A community-driven directory of Claude configurations',
+      description:
+        'API documentation for ClaudePro Directory - A community-driven directory of Claude configurations',
       contact: {
         name: 'Claude Pro Directory',
         url: 'https://claudepro.directory',
@@ -2928,21 +3372,39 @@ function generateOpenAPIDocument(routes: RouteMetadata[]) {
       },
     ],
     tags: [
-      { name: 'content', description: 'Content-related endpoints for browsing and exporting Claude configurations' },
-      { name: 'search', description: 'Search and discovery endpoints for finding Claude configurations' },
-      { name: 'bookmarks', description: 'User bookmark management endpoints for saving favorite configurations' },
+      {
+        name: 'content',
+        description: 'Content-related endpoints for browsing and exporting Claude configurations',
+      },
+      {
+        name: 'search',
+        description: 'Search and discovery endpoints for finding Claude configurations',
+      },
+      {
+        name: 'bookmarks',
+        description: 'User bookmark management endpoints for saving favorite configurations',
+      },
       { name: 'company', description: 'Company profile endpoints for viewing company information' },
       { name: 'profiles', description: 'Profile-related endpoints for user and company profiles' },
       { name: 'feeds', description: 'RSS and Atom feed endpoints for content syndication' },
-      { name: 'templates', description: 'Content template endpoints for wizard and form generation' },
+      {
+        name: 'templates',
+        description: 'Content template endpoints for wizard and form generation',
+      },
       { name: 'trending', description: 'Trending, popular, and recent content endpoints' },
       { name: 'health', description: 'Health check and monitoring endpoints for API status' },
-      { name: 'changelog', description: 'Changelog endpoints for viewing and syncing release notes' },
+      {
+        name: 'changelog',
+        description: 'Changelog endpoints for viewing and syncing release notes',
+      },
       { name: 'sitemap', description: 'Sitemap generation endpoints for SEO' },
       { name: 'stats', description: 'Statistics and analytics endpoints' },
       { name: 'flux', description: 'Flux integration endpoints for external services' },
       { name: 'inngest', description: 'Inngest webhook endpoints for background job processing' },
-      { name: 'og', description: 'Open Graph image generation endpoints for social media previews' },
+      {
+        name: 'og',
+        description: 'Open Graph image generation endpoints for social media previews',
+      },
       { name: 'openapi', description: 'OpenAPI specification endpoint for API documentation' },
     ],
     paths,
@@ -2989,7 +3451,7 @@ export async function generateOpenAPI(): Promise<void> {
   let querySchemasFailed = 0;
   let bodySchemasExtracted = 0;
   let bodySchemasFailed = 0;
-  
+
   for (const route of allRoutes) {
     if (route.querySchemaSource) {
       if (route.querySchema) {
@@ -3016,7 +3478,7 @@ export async function generateOpenAPI(): Promise<void> {
     try {
       const prismaOpenApiContent = await readFile(prismaOpenApiPath, 'utf-8');
       const prismaSchemas = parsePrismaOpenApiYaml(prismaOpenApiContent);
-      
+
       // Merge Prisma schemas into API document
       if (prismaSchemas && Object.keys(prismaSchemas).length > 0) {
         if (!document.components) {
@@ -3025,20 +3487,24 @@ export async function generateOpenAPI(): Promise<void> {
         if (!document.components.schemas) {
           document.components.schemas = {};
         }
-        
+
         // Merge Prisma schemas, avoiding conflicts (API schemas take precedence)
         // This allows API routes to override Prisma model schemas if needed
         const mergedSchemas = {
           ...prismaSchemas,
           ...document.components.schemas,
         };
-        
+
         document.components.schemas = mergedSchemas;
-        console.log(`\n✓ Merged ${Object.keys(prismaSchemas).length} Prisma model schemas into OpenAPI spec`);
+        console.log(
+          `\n✓ Merged ${Object.keys(prismaSchemas).length} Prisma model schemas into OpenAPI spec`
+        );
         console.log(`   Prisma schemas are now available as $ref in API responses`);
       }
     } catch (error) {
-      console.warn(`\n⚠️  Could not merge Prisma OpenAPI schemas: ${error instanceof Error ? error.message : String(error)}`);
+      console.warn(
+        `\n⚠️  Could not merge Prisma OpenAPI schemas: ${error instanceof Error ? error.message : String(error)}`
+      );
       console.warn(`   Continuing without Prisma schemas...`);
     }
   } else {
@@ -3055,7 +3521,7 @@ export async function generateOpenAPI(): Promise<void> {
   console.log(`\n📊 Schema Extraction Summary:`);
   console.log(`  Query Schemas: ${querySchemasExtracted} extracted, ${querySchemasFailed} failed`);
   console.log(`  Body Schemas: ${bodySchemasExtracted} extracted, ${bodySchemasFailed} failed`);
-  
+
   if (querySchemasFailed > 0 || bodySchemasFailed > 0) {
     console.log(`\n⚠️  Warning: Some schemas could not be extracted.`);
     console.log(`   This may be due to:`);

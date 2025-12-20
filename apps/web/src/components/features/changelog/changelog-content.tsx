@@ -18,8 +18,11 @@
  * - No MDX dependencies
  */
 
-import type { changelogModel, changelog_category, contentModel } from '@heyclaude/data-layer/prisma';
-import { ChangelogCategory } from '@heyclaude/data-layer/prisma';
+import { Prisma, changelog_category as ChangelogCategory } from '@prisma/client';
+import type { changelog_category } from '@prisma/client';
+
+type changelogModel = Prisma.changelogGetPayload<{}>;
+type contentModel = Prisma.contentGetPayload<{}>;
 import { parseChangelogChanges } from '@heyclaude/web-runtime/data/changelog.shared';
 import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import {
@@ -38,7 +41,10 @@ import { Suspense } from 'react';
 
 // Dynamic import for JSONSectionRenderer (822 lines) - lazy load for code splitting
 const JSONSectionRenderer = dynamic(
-  () => import('@/src/components/content/json-to-sections').then((mod) => ({ default: mod.JSONSectionRenderer })),
+  () =>
+    import('@/src/components/content/json-to-sections').then((mod) => ({
+      default: mod.JSONSectionRenderer,
+    })),
   { ssr: true }
 );
 import { markdownToHtml } from '@/src/lib/utils/markdown-to-html';
@@ -99,12 +105,18 @@ const CATEGORY_ICONS: Record<
  * Badge Color Map - Tailwind utilities for each changelog category
  */
 const BADGE_COLOR_MAP: Record<changelog_category, string> = {
-  Added: 'bg-color-badge-changelog-added-bg text-color-badge-changelog-added-text-light dark:text-color-badge-changelog-added-text-dark border-color-badge-changelog-added-border',
-  Changed: 'bg-color-badge-changelog-changed-bg text-color-badge-changelog-changed-text-light dark:text-color-badge-changelog-changed-text-dark border-color-badge-changelog-changed-border',
-  Deprecated: 'bg-color-badge-changelog-deprecated-bg text-color-badge-changelog-deprecated-text-light dark:text-color-badge-changelog-deprecated-text-dark border-color-badge-changelog-deprecated-border',
-  Removed: 'bg-color-badge-changelog-removed-bg text-color-badge-changelog-removed-text-light dark:text-color-badge-changelog-removed-text-dark border-color-badge-changelog-removed-border',
-  Fixed: 'bg-color-badge-changelog-fixed-bg text-color-badge-changelog-fixed-text-light dark:text-color-badge-changelog-fixed-text-dark border-color-badge-changelog-fixed-border',
-  Security: 'bg-color-badge-changelog-security-bg text-color-badge-changelog-security-text-light dark:text-color-badge-changelog-security-text-dark border-color-badge-changelog-security-border',
+  Added:
+    'bg-color-badge-changelog-added-bg text-color-badge-changelog-added-text-light dark:text-color-badge-changelog-added-text-dark border-color-badge-changelog-added-border',
+  Changed:
+    'bg-color-badge-changelog-changed-bg text-color-badge-changelog-changed-text-light dark:text-color-badge-changelog-changed-text-dark border-color-badge-changelog-changed-border',
+  Deprecated:
+    'bg-color-badge-changelog-deprecated-bg text-color-badge-changelog-deprecated-text-light dark:text-color-badge-changelog-deprecated-text-dark border-color-badge-changelog-deprecated-border',
+  Removed:
+    'bg-color-badge-changelog-removed-bg text-color-badge-changelog-removed-text-light dark:text-color-badge-changelog-removed-text-dark border-color-badge-changelog-removed-border',
+  Fixed:
+    'bg-color-badge-changelog-fixed-bg text-color-badge-changelog-fixed-text-light dark:text-color-badge-changelog-fixed-text-dark border-color-badge-changelog-fixed-border',
+  Security:
+    'bg-color-badge-changelog-security-bg text-color-badge-changelog-security-text-light dark:text-color-badge-changelog-security-text-dark border-color-badge-changelog-security-border',
 };
 
 /**
@@ -135,28 +147,22 @@ function CategorySection({
   const badgeColor = BADGE_COLOR_MAP[category];
 
   return (
-    <section
-      className="mb-6 py-4 border-border/50 border-b last:border-b-0"
-    >
+    <section className="border-border/50 mb-6 border-b py-4 last:border-b-0">
       {/* Category Header */}
-      <div className="flex items-center gap-2 mb-4">
+      <div className="mb-4 flex items-center gap-2">
         <Icon className="h-5 w-5" />
         <h2 className="text-xl font-semibold">{category}</h2>
-        <UnifiedBadge
-          variant="base"
-          style="outline"
-          className={`${badgeColor} text-xs-medium`}
-        >
+        <UnifiedBadge variant="base" style="outline" className={`${badgeColor} text-xs-medium`}>
           {items.length} {items.length === 1 ? 'item' : 'items'}
         </UnifiedBadge>
       </div>
 
       {/* Change Items List */}
-      <ul className="space-y-2 list-none pl-0">
+      <ul className="list-none space-y-2 pl-0">
         {items.map((item, index) => (
           <li
             key={index}
-            className="flex items-start gap-3 py-2 transition-all duration-200 ease-out hover:bg-accent/5 rounded-md px-3"
+            className="hover:bg-accent/5 flex items-start gap-3 rounded-md px-3 py-2 transition-all duration-200 ease-out"
           >
             <span
               className={`${badgeColor} mt-0.5 flex flex-shrink-0 items-center justify-center rounded-full p-1`}
@@ -164,7 +170,7 @@ function CategorySection({
             >
               <Icon className="h-4 w-4" />
             </span>
-            <div className="text-base leading-normal flex-1">
+            <div className="flex-1 text-base leading-normal">
               <div className="prose prose-slate dark:prose-invert prose-sm prose-headings:font-semibold prose-headings:text-foreground prose-headings:mt-4 prose-headings:mb-3 prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:my-3 prose-ul:my-3 prose-ol:my-3 prose-li:my-1.5 prose-li:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:font-semibold prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted prose-pre:text-foreground prose-pre:p-3 prose-pre:rounded prose-pre:overflow-x-auto prose-blockquote:border-l-2 prose-blockquote:border-primary prose-blockquote:pl-3 prose-blockquote:italic prose-blockquote:my-3 max-w-none">
                 <TrustedHTML html={markdownToHtml(item.content)} />
               </div>
@@ -221,9 +227,7 @@ function renderAdditionalContent(
   return (
     <>
       {hasStructuredChanges && (hasMetadataSections || hasAdditionalContent) ? (
-        <div
-          className="mt-8 py-8 border-border/50 border-t"
-        >
+        <div className="border-border/50 mt-8 border-t py-8">
           {hasMetadataSections ? (
             <div className="prose prose-slate dark:prose-invert max-w-none">
               <Suspense fallback={<div className="h-32" />}>
@@ -307,21 +311,28 @@ export const ChangelogContent = memo(
         {/* Entry Header - Title and Date (always rendered for timeline alignment, visually hidden if hideHeader=true) */}
         <header
           ref={onHeaderRef}
-          className={`border-border/30 mb-6 border-b pb-4 scroll-mt-24 ${hideHeader ? 'sr-only' : ''}`}
+          className={`border-border/30 mb-6 scroll-mt-24 border-b pb-4 ${hideHeader ? 'sr-only' : ''}`}
           id={`changelog-entry-header-${entry.slug}`}
         >
-          <h2 className="text-2xl font-bold mb-4">{entry.title}</h2>
+          <h2 className="mb-4 text-2xl font-bold">{entry.title}</h2>
           <time
-            dateTime={entry.release_date instanceof Date ? entry.release_date.toISOString() : entry.release_date}
+            dateTime={
+              entry.release_date instanceof Date
+                ? entry.release_date.toISOString()
+                : entry.release_date
+            }
             className="text-muted-foreground text-sm leading-relaxed"
           >
-            {formatDate(entry.release_date instanceof Date ? entry.release_date : entry.release_date, 'long')}
+            {formatDate(
+              entry.release_date instanceof Date ? entry.release_date : entry.release_date,
+              'long'
+            )}
           </time>
         </header>
 
         {/* Category Badges - Subtle, below header */}
         {nonEmptyCategories.length > 0 && (
-          <div className="flex flex-wrap gap-2 py-3 mb-6">
+          <div className="mb-6 flex flex-wrap gap-2 py-3">
             {nonEmptyCategories.map((category) => (
               <UnifiedBadge
                 key={category}

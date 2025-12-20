@@ -9,10 +9,7 @@ import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-confi
 import { getLayoutFlags } from '@heyclaude/web-runtime/data/layout/flags-client';
 import { useConfetti } from '@heyclaude/web-runtime/hooks/use-confetti';
 import { useSessionStorage } from '@heyclaude/web-runtime/hooks/use-session-storage';
-import {
-  logClientError,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/client';
+import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { toasts, ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
@@ -21,7 +18,10 @@ import { useEffect, useCallback } from 'react';
 import { AnnouncementBannerClient } from '@/src/components/core/layout/announcement-banner-client';
 import { Navigation } from '@/src/components/core/layout/navigation';
 import { NavigationCommandMenu } from '@/src/components/core/layout/navigation-command-menu';
-import { CommandPaletteProvider, useCommandPalette } from '@/src/components/features/navigation/command-palette-provider';
+import {
+  CommandPaletteProvider,
+  useCommandPalette,
+} from '@/src/components/features/navigation/command-palette-provider';
 import { PinboardDrawerProvider } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { RecentlyViewedMobileTray } from '@/src/components/features/navigation/recently-viewed-mobile';
 
@@ -48,16 +48,19 @@ const NewsletterFooterBar = dynamic(
  */
 function CommandMenuWrapper({ children }: { children: React.ReactNode }) {
   const { isOpen, openPalette, closePalette } = useCommandPalette();
-  
+
   // CRITICAL FIX: onOpenChange needs to handle both open and close
-  const handleOpenChange = useCallback((open: boolean) => {
-    if (open) {
-      openPalette();
-    } else {
-      closePalette();
-    }
-  }, [openPalette, closePalette]);
-  
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) {
+        openPalette();
+      } else {
+        closePalette();
+      }
+    },
+    [openPalette, closePalette]
+  );
+
   return (
     <>
       {children}
@@ -93,7 +96,9 @@ async function clearNewsletterOptInCookie() {
   document.cookie = `${NEWSLETTER_OPT_IN_COOKIE}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax`;
 }
 
-import type { announcementsModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type announcementsModel = Prisma.announcementsGetPayload<{}>;
 
 interface LayoutContentProps {
   announcement: announcementsModel | null;
@@ -191,12 +196,16 @@ export function LayoutContent({ children, announcement }: LayoutContentProps) {
             <div className="bg-background flex min-h-screen flex-col">
               {announcement ? <AnnouncementBannerClient announcement={announcement} /> : null}
               <Navigation />
-            <main id="main-content" className="flex-1">
-              {children}
-            </main>
-            <Footer />
-            <RecentlyViewedMobileTray />
-            <NewsletterFooterBar source="footer" showAfterDelay={delayMs} ctaVariant={ctaVariant} />
+              <main id="main-content" className="flex-1">
+                {children}
+              </main>
+              <Footer />
+              <RecentlyViewedMobileTray />
+              <NewsletterFooterBar
+                source="footer"
+                showAfterDelay={delayMs}
+                ctaVariant={ctaVariant}
+              />
             </div>
           </CommandMenuWrapper>
         </PinboardDrawerProvider>

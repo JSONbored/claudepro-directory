@@ -75,10 +75,7 @@ export interface UseMediaQueryOptions {
  * if (isDesktop === undefined) return <Loading />;
  * ```
  */
-export function useMediaQuery(
-  query: string,
-  options: UseMediaQueryOptions = {}
-): boolean {
+export function useMediaQuery(query: string, options: UseMediaQueryOptions = {}): boolean {
   const { defaultValue = false, initializeWithValue = true } = options;
 
   const [matches, setMatches] = useState<boolean>(() => {

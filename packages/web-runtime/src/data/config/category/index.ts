@@ -1,6 +1,10 @@
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@prisma/client';
 
-import { type CategoryStatsConfig, type UnifiedCategoryConfig } from '../../../types/category.ts';
+import {
+  type CategoryStatsConfig,
+  type TabConfig,
+  type UnifiedCategoryConfig,
+} from '../../../types/category.ts';
 
 import { CATEGORY_CONFIGS } from './category-config.ts';
 import { getTabConfigForCategory } from './default-tab-configs.ts';
@@ -24,7 +28,7 @@ export const getCategoryConfig = (
     ...baseConfig,
     detailPage: {
       ...baseConfig.detailPage,
-      tabs,
+      ...(tabs ? { tabs: tabs as ReadonlyArray<TabConfig> } : {}),
     },
   };
 };

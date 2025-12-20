@@ -1,21 +1,21 @@
 /**
  * RPC Error Logging Utility
- * 
+ *
  * Provides error logging for database RPC calls with business context.
- * 
+ *
  * NOTE: This focuses on error logging only, not performance metrics.
  * Use Supabase dashboard for query performance monitoring.
- * 
+ *
  * Uses Pino logger with centralized configuration for consistent logging
  * across the codebase. Pino automatically handles:
  * - Error serialization (via stdSerializers.err)
  * - Sensitive data redaction (via redact option in config)
- * 
+ *
  * The logger wrapper provides a message-first API (consistent with web-runtime and edge-runtime):
  * - logger.info(message, context?)
  * - logger.error(message, error?, context?)
  * - logger.warn(message, context?)
- * 
+ *
  * @module data-layer/utils/rpc-error-logging
  */
 
@@ -158,14 +158,14 @@ export interface RpcErrorLogContext {
 
 /**
  * Wrapper for RPC calls that logs errors with business context
- * 
+ *
  * NOTE: This does NOT log performance metrics. Use Supabase dashboard
  * for query performance monitoring.
- * 
+ *
  * @param rpcCall - The RPC call function
  * @param context - Logging context
  * @returns The result of the RPC call
- * 
+ *
  * @example
  * ```typescript
  * return withRpcErrorLogging(
@@ -188,7 +188,7 @@ export async function withRpcErrorLogging<T>(
 ): Promise<T> {
   try {
     const result = await rpcCall();
-    
+
     // Only log critical operations (mutations) for audit trail
     if (context.isMutation) {
       // Use dbQuery serializer for consistent database query formatting
@@ -200,10 +200,10 @@ export async function withRpcErrorLogging<T>(
         },
         // Note: requestId, operation, userId are automatically injected via mixin from logger.bindings()
       };
-      
+
       logger.info('Critical RPC operation completed', logContext);
     }
-    
+
     return result;
   } catch (error) {
     // Use dbQuery and args serializers for consistent formatting
@@ -215,24 +215,24 @@ export async function withRpcErrorLogging<T>(
       },
       // Note: requestId, operation, userId are automatically injected via mixin from logger.bindings()
     };
-    
+
     // Pino's stdSerializers.err automatically handles error serialization
     // Pass error as second parameter - wrapper will serialize it properly
     // Mixin automatically injects requestId, operation, userId from logger.bindings()
     logger.error('RPC call failed', error, logContext);
-    
+
     throw error;
   }
 }
 
 /**
  * Simple error logging for RPC calls (when wrapper is not used)
- * 
+ *
  * Use this directly in service methods for simple error logging.
- * 
+ *
  * @param error - The error to log
  * @param context - Logging context
- * 
+ *
  * @example
  * ```typescript
  * const { data, error } = await this.supabase.rpc('my_rpc', args);
@@ -256,7 +256,7 @@ export function logRpcError(error: unknown, context: RpcErrorLogContext): void {
     },
     // Note: requestId, operation, userId are automatically injected via mixin from logger.bindings()
   };
-  
+
   // Pino's stdSerializers.err automatically handles error serialization
   // Pass error as second parameter - wrapper will serialize it properly
   // Mixin automatically injects requestId, operation, userId from logger.bindings()

@@ -38,14 +38,17 @@ export function DetailToc({ headings, className }: DetailTocProps) {
     return normalizedHeadings.reduce((min, heading) => Math.min(min, heading.level), 6);
   }, [normalizedHeadings]);
 
-  const updateHash = useCallback((id: string) => {
-    if (!isClient || !id) return;
-    const { pathname, search } = window.location;
-    const currentHash = window.location.hash.replace('#', '');
-    if (currentHash === id) return;
-    const nextUrl = `${pathname}${search ? search : ''}#${id}`;
-    window.history.replaceState(null, '', nextUrl);
-  }, [isClient]);
+  const updateHash = useCallback(
+    (id: string) => {
+      if (!isClient || !id) return;
+      const { pathname, search } = window.location;
+      const currentHash = window.location.hash.replace('#', '');
+      if (currentHash === id) return;
+      const nextUrl = `${pathname}${search ? search : ''}#${id}`;
+      window.history.replaceState(null, '', nextUrl);
+    },
+    [isClient]
+  );
 
   useEffect(() => {
     if (!isClient || normalizedHeadings.length === 0) {
@@ -83,7 +86,7 @@ export function DetailToc({ headings, className }: DetailTocProps) {
   // Use requestAnimationFrame to batch intersection updates
   useEffect(() => {
     if (entries.size === 0) return;
-    
+
     // Defer processing to next animation frame to avoid blocking scroll
     const rafId = requestAnimationFrame(() => {
       // Find most visible element (same logic as getMostVisibleId but computed here)
@@ -163,7 +166,15 @@ export function DetailToc({ headings, className }: DetailTocProps) {
       <div className={cn('flex items-center justify-between', 'gap-2')}>
         <div className="flex items-center gap-1.5">
           <ListTree className={cn('text-muted-foreground', 'h-4 w-4')} aria-hidden="true" />
-          <p className={cn('text-muted-foreground', 'text-xs', 'font-semibold', 'tracking-wide', 'uppercase')}>
+          <p
+            className={cn(
+              'text-muted-foreground',
+              'text-xs',
+              'font-semibold',
+              'tracking-wide',
+              'uppercase'
+            )}
+          >
             On this page
           </p>
         </div>
@@ -180,8 +191,11 @@ export function DetailToc({ headings, className }: DetailTocProps) {
                 type="button"
                 onClick={() => handleHeadingClick(heading)}
                 className={cn(
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                  'w-full rounded-md', 'px-3', 'py-1.5', 'text-left text-sm transition-colors',
+                  'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                  'w-full rounded-md',
+                  'px-3',
+                  'py-1.5',
+                  'text-left text-sm transition-colors',
                   activeId === heading.id
                     ? 'bg-accent/15 text-foreground'
                     : 'text-muted-foreground hover:bg-accent/10 hover:text-foreground'
@@ -194,7 +208,8 @@ export function DetailToc({ headings, className }: DetailTocProps) {
                 <span className="flex items-center gap-1.5">
                   <span
                     className={cn(
-                      'h-6 w-6', 'rounded-full',
+                      'h-6 w-6',
+                      'rounded-full',
                       activeId === heading.id ? 'bg-primary' : 'bg-muted-foreground/50'
                     )}
                   />

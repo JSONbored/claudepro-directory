@@ -22,7 +22,7 @@ test.describe('/account/jobs/new', () => {
     // Set up error tracking and navigate to new job page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/account/jobs/new');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });

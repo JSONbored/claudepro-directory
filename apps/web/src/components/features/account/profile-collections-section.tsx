@@ -2,7 +2,7 @@
 
 /**
  * Profile Collections Section
- * 
+ *
  * Client component for displaying user's public collections with hover animations
  */
 
@@ -12,7 +12,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  NavLink
+  NavLink,
 } from '@heyclaude/web-runtime/ui';
 import { FolderOpen } from '@heyclaude/web-runtime/icons';
 import { motion } from 'motion/react';
@@ -40,7 +40,7 @@ export function ProfileCollectionsSection({
     return (
       <Card>
         <CardContent className="flex flex-col items-center py-12">
-          <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
+          <FolderOpen className="text-muted-foreground mb-4 h-12 w-12" />
           <p className="text-muted-foreground">No public collections yet</p>
         </CardContent>
       </Card>
@@ -57,10 +57,7 @@ export function ProfileCollectionsSection({
             id: string;
             name: null | string;
             slug: string;
-          } =>
-            collection.id !== null &&
-            collection.slug !== null &&
-            collection.name !== null
+          } => collection.id !== null && collection.slug !== null && collection.name !== null
         )
         .map((collection) => {
           const safeCollectionUrl = getSafeCollectionUrl(slug, collection.slug);
@@ -74,7 +71,7 @@ export function ProfileCollectionsSection({
               whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
               transition={MICROINTERACTIONS.card.transition}
             >
-              <Card className="card-gradient transition-smooth group cursor-pointer border-border/50">
+              <Card className="card-gradient transition-smooth group border-border/50 cursor-pointer">
                 <NavLink href={safeCollectionUrl}>
                   <CardHeader>
                     <CardTitle className="text-lg">{collection.name}</CardTitle>
@@ -85,9 +82,7 @@ export function ProfileCollectionsSection({
                     ) : null}
                   </CardHeader>
                   <CardContent>
-                    <div
-                      className="flex items-center justify-between text-sm"
-                    >
+                    <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">
                         {collection.item_count ?? 0}{' '}
                         {(collection.item_count ?? 0) === 1 ? 'item' : 'items'}

@@ -1,20 +1,33 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-// Mock safe-action middleware
+// Mock safe-action middleware - standardized pattern
+// Pattern: rateLimitedAction.inputSchema().metadata().action()
 vi.mock('./safe-action.ts', () => {
-  const createActionMock = () => ({
-    action: vi.fn((handler) => {
+  // Define all factory functions inside the mock factory to avoid hoisting issues
+  const createActionHandler = (inputSchema: any) => {
+    return vi.fn((handler: any) => {
       return async (input: unknown) => {
-        return handler({ parsedInput: input, ctx: {} });
+        const parsed = inputSchema ? inputSchema.parse(input) : input;
+        return handler({
+          parsedInput: parsed,
+          ctx: { userAgent: 'test-user-agent', startTime: performance.now() },
+        });
       };
-    }),
+    });
+  };
+
+  const createMetadataResult = (inputSchema: any) => ({
+    action: createActionHandler(inputSchema),
+  });
+
+  const createInputSchemaResult = (inputSchema: any) => ({
+    metadata: vi.fn(() => createMetadataResult(inputSchema)),
+    action: createActionHandler(inputSchema),
   });
 
   return {
     rateLimitedAction: {
-      inputSchema: vi.fn(() => ({
-        metadata: vi.fn(() => createActionMock()),
-      })),
+      inputSchema: vi.fn((schema: any) => createInputSchemaResult(schema)),
     },
   };
 });

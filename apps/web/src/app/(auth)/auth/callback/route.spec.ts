@@ -22,7 +22,7 @@ test.describe('Auth Callback Route (/auth/callback)', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (API routes don't need navigation)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });

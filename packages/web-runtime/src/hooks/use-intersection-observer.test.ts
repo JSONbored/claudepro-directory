@@ -26,9 +26,7 @@ afterEach(() => {
 
 describe('useIntersectionObserver', () => {
   it('should initialize with initialIsIntersecting', () => {
-    const { result } = renderHook(() =>
-      useIntersectionObserver({ initialIsIntersecting: true })
-    );
+    const { result } = renderHook(() => useIntersectionObserver({ initialIsIntersecting: true }));
 
     expect(result.current.isIntersecting).toBe(true);
   });
@@ -59,9 +57,7 @@ describe('useIntersectionObserver', () => {
 
   it('should call onChange callback when intersection changes', () => {
     const onChange = vi.fn();
-    const { result } = renderHook(() =>
-      useIntersectionObserver({ onChange })
-    );
+    const { result } = renderHook(() => useIntersectionObserver({ onChange }));
 
     const element = document.createElement('div');
     act(() => {
@@ -85,9 +81,7 @@ describe('useIntersectionObserver', () => {
   });
 
   it('should freeze once visible when freezeOnceVisible is true', () => {
-    const { result } = renderHook(() =>
-      useIntersectionObserver({ freezeOnceVisible: true })
-    );
+    const { result } = renderHook(() => useIntersectionObserver({ freezeOnceVisible: true }));
 
     const element = document.createElement('div');
     act(() => {

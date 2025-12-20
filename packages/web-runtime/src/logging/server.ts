@@ -1,14 +1,14 @@
 /**
  * Server-Side Logging Barrel Export
- * 
+ *
  * Centralized barrel export for all server-side logging and error instrumentation utilities.
  * This module is server-only and should NOT be imported in client components.
- * 
+ *
  * **⚠️ IMPORTANT: Server-Only Module**
  * - ❌ **DO NOT** import this in client components (`'use client'`)
  * - ✅ **ONLY** import in server components, API routes, or server actions
  * - Uses `import 'server-only'` to enforce server-only boundary
- * 
+ *
  * **Usage:**
  * ```typescript
  * // Server component or API route
@@ -22,23 +22,23 @@
  *   createErrorResponse,
  * } from '@heyclaude/web-runtime/logging/server';
  * ```
- * 
+ *
  * **What's Included:**
  * - Main logger instance (`logger`)
  * - Log context builders (`createWebAppContext`, `createWebAppContextWithId`)
  * - Request context utilities (`getRequestContext`, `createLogContext`) - server-only
  * - Error normalization (`normalizeError`)
  * - Error response utilities (`createErrorResponse`, `handleApiError`)
- * 
+ *
  * **Client/Server Boundaries:**
  * - All other utilities are server-only (use `next/headers` or other server APIs)
  * - For client-side logging, use {@link ../logging/client | Client Logging Barrel} instead
- * 
+ *
  * **Related Modules:**
  * - {@link ../logging/client | Client Logging Barrel} - Client-side logging utilities
  * - {@link ../logger | Logger Instance} - Main logger instance
  * - {@link @heyclaude/shared-runtime/logger/config | Pino Configuration} - Centralized logger config
- * 
+ *
  * @module web-runtime/logging/server
  * @see {@link ../logging/client | Client Logging Barrel} - Client-side logging utilities
  * @see {@link ../utils/request-context | request-context} - Server-only request context utilities
@@ -49,7 +49,6 @@ import 'server-only';
 
 // Main logger instance
 export { logger, type LogContext, type LogContextValue, toLogContextValue } from '../logger.ts';
-
 
 // Server-only request context utilities
 export { getRequestContext, createLogContext } from '../utils/request-context.ts';

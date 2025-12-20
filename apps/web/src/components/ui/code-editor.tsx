@@ -2,10 +2,10 @@
 
 /**
  * Code Editor Component
- * 
+ *
  * An animated code editor component that types out code character-by-character with syntax highlighting.
  * Perfect for demos, landing pages, and interactive code presentations.
- * 
+ *
  * @example
  * ```tsx
  * <CodeEditor
@@ -18,13 +18,13 @@
  *   const example = 'Hello World';
  * </CodeEditor>
  * ```
- * 
+ *
  * **When to use:**
  * - Landing pages: Animated code demos that grab attention
  * - Documentation: Step-by-step code reveals
  * - Interactive tutorials: Progressive code disclosure
  * - Marketing pages: Eye-catching code presentations
- * 
+ *
  * **Key features:**
  * - Character-by-character typing animation
  * - Syntax highlighting via Shiki
@@ -63,11 +63,14 @@ function CopyButton({
   const { value: copied, setTrue: setCopiedTrue, setFalse: setCopiedFalse } = useBoolean();
 
   // Reset copy state after 2000ms when copied is true
-  useTimeout(() => {
-    if (copied) {
-      setCopiedFalse();
-    }
-  }, copied ? 2000 : null);
+  useTimeout(
+    () => {
+      if (copied) {
+        setCopiedFalse();
+      }
+    },
+    copied ? 2000 : null
+  );
 
   const handleCopy = async () => {
     try {
@@ -87,11 +90,7 @@ function CopyButton({
       onClick={handleCopy}
       className={cn('h-8 w-8 p-0', className)}
     >
-      {copied ? (
-        <Check className="h-3 w-3" />
-      ) : (
-        <Copy className="h-3 w-3" />
-      )}
+      {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
     </Button>
   );
 }
@@ -177,16 +176,7 @@ function CodeEditor({
     };
 
     loadHighlightedCode();
-  }, [
-    lang,
-    themes,
-    writing,
-    isInView,
-    duration,
-    delay,
-    visibleCode,
-    resolvedTheme,
-  ]);
+  }, [lang, themes, writing, isInView, duration, delay, visibleCode, resolvedTheme]);
 
   // Reset when code/writing changes
   React.useEffect(() => {
@@ -223,41 +213,49 @@ function CodeEditor({
 
   // Use useTimeout for initial delay, then useInterval for typing
   const shouldStartTyping = writing && code.length > 0 && isInView && typingIndex === 0;
-  
-  useTimeout(() => {
-    if (shouldStartTyping) {
-      setTypingIndex(1);
-    }
-  }, shouldStartTyping ? delay * 1000 : null);
+
+  useTimeout(
+    () => {
+      if (shouldStartTyping) {
+        setTypingIndex(1);
+      }
+    },
+    shouldStartTyping ? delay * 1000 : null
+  );
 
   // Use useInterval for typing animation
-  useInterval(() => {
-    if (!writing || !code.length || !isInView) return;
-    
-    if (typingIndex < characters.length) {
-      setVisibleCode((prev) => prev + characters[typingIndex]);
-      setTypingIndex((prev) => prev + 1);
-      editorRef.current?.scrollTo({
-        top: editorRef.current?.scrollHeight,
-        behavior: 'smooth',
-      });
-    } else {
-      setIsDoneTrue();
-      onDone?.();
-    }
-  }, writing && code.length > 0 && isInView && typingIndex > 0 && typingIndex < characters.length ? interval : null);
+  useInterval(
+    () => {
+      if (!writing || !code.length || !isInView) return;
+
+      if (typingIndex < characters.length) {
+        setVisibleCode((prev) => prev + characters[typingIndex]);
+        setTypingIndex((prev) => prev + 1);
+        editorRef.current?.scrollTo({
+          top: editorRef.current?.scrollHeight,
+          behavior: 'smooth',
+        });
+      } else {
+        setIsDoneTrue();
+        onDone?.();
+      }
+    },
+    writing && code.length > 0 && isInView && typingIndex > 0 && typingIndex < characters.length
+      ? interval
+      : null
+  );
 
   return (
     <div
       data-slot="code-editor"
       className={cn(
-        'relative bg-muted/50 w-[600px] h-[400px] border border-border overflow-hidden flex flex-col rounded-xl',
-        className,
+        'bg-muted/50 border-border relative flex h-[400px] w-[600px] flex-col overflow-hidden rounded-xl border',
+        className
       )}
       {...(props as any)}
     >
       {header ? (
-        <div className="relative flex h-10 flex-row items-center justify-between gap-y-2 border-b border-border/75 bg-muted px-4 dark:border-border/50">
+        <div className="border-border/75 bg-muted dark:border-border/50 relative flex h-10 flex-row items-center justify-between gap-y-2 border-b px-4">
           {dots && (
             <div className="flex flex-row gap-x-2">
               <div className="size-2 rounded-full bg-red-500"></div>
@@ -270,21 +268,18 @@ function CodeEditor({
             <div
               className={cn(
                 'flex flex-row items-center gap-2',
-                dots &&
-                  'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2',
+                dots && 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
               )}
             >
               {icon ? (
                 <div
                   className="text-muted-foreground [&_svg]:size-3.5"
-                  dangerouslySetInnerHTML={
-                    typeof icon === 'string' ? { __html: icon } : undefined
-                  }
+                  dangerouslySetInnerHTML={typeof icon === 'string' ? { __html: icon } : undefined}
                 >
                   {typeof icon !== 'string' ? icon : null}
                 </div>
               ) : null}
-              <figcaption className={cn('flex-1 truncate text-[13px] text-muted-foreground')}>
+              <figcaption className={cn('text-muted-foreground flex-1 truncate text-[13px]')}>
                 {title}
               </figcaption>
             </div>
@@ -306,7 +301,7 @@ function CodeEditor({
             content={code}
             size="sm"
             variant="ghost"
-            className="absolute right-2 top-2 z-[2] backdrop-blur-md bg-transparent hover:bg-black/5 dark:hover:bg-white/10"
+            className="absolute top-2 right-2 z-[2] bg-transparent backdrop-blur-md hover:bg-black/5 dark:hover:bg-white/10"
             {...(onCopy ? { onCopy } : {})}
           />
         )
@@ -317,10 +312,10 @@ function CodeEditor({
       >
         <div
           className={cn(
-            `[&>pre,_&_code]:!bg-transparent [&>pre,_&_code]:[background:transparent_!important] [&>pre,_&_code]:border-none [&_code]:text-[13px]`,
+            `[&_code]:text-[13px] [&>pre,_&_code]:border-none [&>pre,_&_code]:!bg-transparent [&>pre,_&_code]:[background:transparent_!important]`,
             cursor &&
               !isDone &&
-              "[&_.line:last-of-type::after]:content-['|'] [&_.line:last-of-type::after]:animate-pulse [&_.line:last-of-type::after]:inline-block [&_.line:last-of-type::after]:w-[1ch] [&_.line:last-of-type::after]:-translate-px",
+              "[&_.line:last-of-type::after]:inline-block [&_.line:last-of-type::after]:w-[1ch] [&_.line:last-of-type::after]:-translate-px [&_.line:last-of-type::after]:animate-pulse [&_.line:last-of-type::after]:content-['|']"
           )}
           dangerouslySetInnerHTML={{ __html: highlightedCode }}
         />

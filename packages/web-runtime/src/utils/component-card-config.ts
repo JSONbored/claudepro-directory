@@ -1,9 +1,9 @@
 /**
  * Component Card Config Utilities (Server-Safe)
- * 
+ *
  * Pure utility functions for component card configuration mapping.
  * These functions are server-safe and can be used in both client and server contexts.
- * 
+ *
  * The React hook and context provider remain in use-component-card-config.tsx (client-only).
  */
 

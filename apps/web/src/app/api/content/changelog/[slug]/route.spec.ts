@@ -18,9 +18,7 @@ import { expect, test } from '@playwright/test';
 test.describe('GET /api/content/changelog/[slug]', () => {
   test('should return changelog entry LLMs.txt with valid slug and format', async ({ request }) => {
     // Test with a valid changelog slug - adjust based on your test data
-    const response = await request.get(
-      '/api/content/changelog/1-2-0-2025-12-07?format=llms-entry'
-    );
+    const response = await request.get('/api/content/changelog/1-2-0-2025-12-07?format=llms-entry');
 
     if (response.status() === 200) {
       const contentType = response.headers()['content-type'];
@@ -45,9 +43,7 @@ test.describe('GET /api/content/changelog/[slug]', () => {
   });
 
   test('should return 400 for invalid format', async ({ request }) => {
-    const response = await request.get(
-      '/api/content/changelog/1-2-0-2025-12-07?format=invalid'
-    );
+    const response = await request.get('/api/content/changelog/1-2-0-2025-12-07?format=invalid');
 
     expect(response.status()).toBe(400);
   });
@@ -65,9 +61,7 @@ test.describe('GET /api/content/changelog/[slug]', () => {
   });
 
   test('should include X-Generated-By header', async ({ request }) => {
-    const response = await request.get(
-      '/api/content/changelog/1-2-0-2025-12-07?format=llms-entry'
-    );
+    const response = await request.get('/api/content/changelog/1-2-0-2025-12-07?format=llms-entry');
 
     if (response.status() === 200) {
       expect(response.headers()['x-generated-by']).toBeDefined();
@@ -78,9 +72,7 @@ test.describe('GET /api/content/changelog/[slug]', () => {
   });
 
   test('should include cache headers', async ({ request }) => {
-    const response = await request.get(
-      '/api/content/changelog/1-2-0-2025-12-07?format=llms-entry'
-    );
+    const response = await request.get('/api/content/changelog/1-2-0-2025-12-07?format=llms-entry');
 
     if (response.status() === 200) {
       expect(response.headers()['cache-control']).toBeDefined();
@@ -89,17 +81,13 @@ test.describe('GET /api/content/changelog/[slug]', () => {
   });
 
   test('should include CORS headers', async ({ request }) => {
-    const response = await request.get(
-      '/api/content/changelog/1-2-0-2025-12-07?format=llms-entry'
-    );
+    const response = await request.get('/api/content/changelog/1-2-0-2025-12-07?format=llms-entry');
 
     expect(response.headers()['access-control-allow-origin']).toBeDefined();
   });
 
   test('should include security headers', async ({ request }) => {
-    const response = await request.get(
-      '/api/content/changelog/1-2-0-2025-12-07?format=llms-entry'
-    );
+    const response = await request.get('/api/content/changelog/1-2-0-2025-12-07?format=llms-entry');
 
     if (response.status() === 200) {
       expect(response.headers()['x-content-type-options']).toBeDefined();
@@ -127,9 +115,7 @@ test.describe('GET /api/content/changelog/[slug]', () => {
   });
 
   test('should return valid text content', async ({ request }) => {
-    const response = await request.get(
-      '/api/content/changelog/1-2-0-2025-12-07?format=llms-entry'
-    );
+    const response = await request.get('/api/content/changelog/1-2-0-2025-12-07?format=llms-entry');
 
     if (response.status() === 200) {
       const text = await response.text();
@@ -183,16 +169,14 @@ test.describe('GET /api/content/changelog/[slug]', () => {
     // This tests the replaceAll(String.raw`\n`, '\n') operation
     // The route replaces escaped newlines with actual newlines
     // In E2E, we can verify the output doesn't contain escaped newlines
-    const response = await request.get(
-      '/api/content/changelog/1-2-0-2025-12-07?format=llms-entry'
-    );
+    const response = await request.get('/api/content/changelog/1-2-0-2025-12-07?format=llms-entry');
 
     if (response.status() === 200) {
       const text = await response.text();
-      
+
       // Should not contain escaped newlines (\\n)
       expect(text).not.toContain('\\n');
-      
+
       // Should contain actual newlines or be properly formatted
       expect(text.length).toBeGreaterThan(0);
     }
@@ -203,9 +187,7 @@ test.describe('GET /api/content/changelog/[slug]', () => {
     // The route throws an error if context is missing
     // In E2E, we can't easily simulate this, but we can verify graceful handling
     // This is more of an integration test - the route should always have context in real usage
-    const response = await request.get(
-      '/api/content/changelog/1-2-0-2025-12-07?format=llms-entry'
-    );
+    const response = await request.get('/api/content/changelog/1-2-0-2025-12-07?format=llms-entry');
 
     // Should return 200, 400, 404, or 500 (not crash)
     expect([200, 400, 404, 500]).toContain(response.status());

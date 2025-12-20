@@ -1,9 +1,9 @@
 /**
  * BetterStack API Client
- * 
+ *
  * Programmatic creation and management of BetterStack monitors.
  * Uses BETTERSTACK_API_TOKEN for authentication.
- * 
+ *
  * @module web-runtime/inngest/utils/betterstack-api
  */
 
@@ -35,7 +35,7 @@ interface HeartbeatMonitorResponse {
 
 /**
  * Create a BetterStack heartbeat monitor via API
- * 
+ *
  * @param config - Monitor configuration
  * @returns Monitor ID and heartbeat URL, or null if creation failed
  */
@@ -44,7 +44,10 @@ export async function createHeartbeatMonitor(
 ): Promise<HeartbeatMonitorResponse | null> {
   const apiToken = getEnvVar('BETTERSTACK_API_TOKEN');
   if (!apiToken) {
-    logger.warn({ envVarName: 'BETTERSTACK_API_TOKEN' }, 'BETTERSTACK_API_TOKEN not set, skipping monitor creation');
+    logger.warn(
+      { envVarName: 'BETTERSTACK_API_TOKEN' },
+      'BETTERSTACK_API_TOKEN not set, skipping monitor creation'
+    );
     return null;
   }
 
@@ -52,7 +55,7 @@ export async function createHeartbeatMonitor(
     const response = await fetch(`${BETTERSTACK_API_BASE}/heartbeats`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiToken}`,
+        Authorization: `Bearer ${apiToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -128,15 +131,20 @@ export async function createHeartbeatMonitor(
 
 /**
  * List all heartbeat monitors
- * 
+ *
  * @returns Array of monitor IDs and URLs, or null if fetch failed
  */
-export async function listHeartbeatMonitors(): Promise<
-  Array<{ id: string; name: string; url: string }> | null
-> {
+export async function listHeartbeatMonitors(): Promise<Array<{
+  id: string;
+  name: string;
+  url: string;
+}> | null> {
   const apiToken = getEnvVar('BETTERSTACK_API_TOKEN');
   if (!apiToken) {
-    logger.warn({ envVarName: 'BETTERSTACK_API_TOKEN' }, 'BETTERSTACK_API_TOKEN not set, cannot list monitors');
+    logger.warn(
+      { envVarName: 'BETTERSTACK_API_TOKEN' },
+      'BETTERSTACK_API_TOKEN not set, cannot list monitors'
+    );
     return null;
   }
 
@@ -144,7 +152,7 @@ export async function listHeartbeatMonitors(): Promise<
     const response = await fetch(`${BETTERSTACK_API_BASE}/heartbeats`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${apiToken}`,
+        Authorization: `Bearer ${apiToken}`,
         'Content-Type': 'application/json',
       },
     });
@@ -179,14 +187,17 @@ export async function listHeartbeatMonitors(): Promise<
 
 /**
  * Delete a heartbeat monitor
- * 
+ *
  * @param monitorId - Monitor ID to delete
  * @returns true if deleted successfully, false otherwise
  */
 export async function deleteHeartbeatMonitor(monitorId: string): Promise<boolean> {
   const apiToken = getEnvVar('BETTERSTACK_API_TOKEN');
   if (!apiToken) {
-    logger.warn({ envVarName: 'BETTERSTACK_API_TOKEN' }, 'BETTERSTACK_API_TOKEN not set, cannot delete monitor');
+    logger.warn(
+      { envVarName: 'BETTERSTACK_API_TOKEN' },
+      'BETTERSTACK_API_TOKEN not set, cannot delete monitor'
+    );
     return false;
   }
 
@@ -194,7 +205,7 @@ export async function deleteHeartbeatMonitor(monitorId: string): Promise<boolean
     const response = await fetch(`${BETTERSTACK_API_BASE}/heartbeats/${monitorId}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${apiToken}`,
+        Authorization: `Bearer ${apiToken}`,
         'Content-Type': 'application/json',
       },
     });
@@ -213,11 +224,17 @@ export async function deleteHeartbeatMonitor(monitorId: string): Promise<boolean
       return false;
     }
 
-    logger.info({ monitorId: String(monitorId) }, 'BetterStack heartbeat monitor deleted successfully');
+    logger.info(
+      { monitorId: String(monitorId) },
+      'BetterStack heartbeat monitor deleted successfully'
+    );
     return true;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to delete BetterStack heartbeat monitor');
-    logger.error({ err: normalized, monitorId: String(monitorId) }, 'Failed to delete BetterStack heartbeat monitor');
+    logger.error(
+      { err: normalized, monitorId: String(monitorId) },
+      'Failed to delete BetterStack heartbeat monitor'
+    );
     return false;
   }
 }

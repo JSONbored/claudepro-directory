@@ -89,7 +89,9 @@ test.describe('GET /api/content/[category]', () => {
 
     if (response.status() === 200) {
       expect(response.headers()['x-generated-by']).toBeDefined();
-      expect(response.headers()['x-generated-by']).toContain('prisma.rpc.get_category_content_list');
+      expect(response.headers()['x-generated-by']).toContain(
+        'prisma.rpc.get_category_content_list'
+      );
     }
   });
 
@@ -98,7 +100,9 @@ test.describe('GET /api/content/[category]', () => {
 
     if (response.status() === 200) {
       expect(response.headers()['x-generated-by']).toBeDefined();
-      expect(response.headers()['x-generated-by']).toContain('prisma.rpc.generate_category_llms_txt');
+      expect(response.headers()['x-generated-by']).toContain(
+        'prisma.rpc.generate_category_llms_txt'
+      );
     }
   });
 

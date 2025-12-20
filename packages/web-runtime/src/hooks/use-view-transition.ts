@@ -79,9 +79,14 @@ export function useViewTransition(): UseViewTransitionReturn {
       // Fallback: Execute immediately without animation
       if (!isSupported) {
         Promise.resolve(updateCallback()).catch((error) => {
-          logClientWarn('useViewTransition: fallback update failed (unsupported)', error, 'useViewTransition.fallback', {
-            component: 'useViewTransition',
-          });
+          logClientWarn(
+            'useViewTransition: fallback update failed (unsupported)',
+            error,
+            'useViewTransition.fallback',
+            {
+              component: 'useViewTransition',
+            }
+          );
         });
         return undefined;
       }
@@ -92,7 +97,10 @@ export function useViewTransition(): UseViewTransitionReturn {
       } catch (error) {
         if (isDevelopment) {
           const normalized = normalizeError(error, 'View Transition failed');
-          logger.warn({ err: normalized, }, 'View Transition failed, falling back to instant update');
+          logger.warn(
+            { err: normalized },
+            'View Transition failed, falling back to instant update'
+          );
         }
         Promise.resolve(updateCallback()).catch((fallbackError) => {
           logClientWarn(

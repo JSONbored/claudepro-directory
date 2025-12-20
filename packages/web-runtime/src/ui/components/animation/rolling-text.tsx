@@ -87,12 +87,15 @@ export function RollingText({
   useInterval(handleWordCycle, words.length > 1 ? duration : null);
 
   // Handle word switch after exit animation
-  useTimeout(() => {
-    if (isExiting) {
-      setCurrentIndex((prev) => (prev + 1) % words.length);
-      setIsExitingFalse();
-    }
-  }, isExiting ? 600 : null);
+  useTimeout(
+    () => {
+      if (isExiting) {
+        setCurrentIndex((prev) => (prev + 1) % words.length);
+        setIsExitingFalse();
+      }
+    },
+    isExiting ? 600 : null
+  );
 
   const currentWord = words[currentIndex] || '';
   const characters = React.useMemo(
@@ -105,14 +108,11 @@ export function RollingText({
   );
 
   // Calculate max width needed for all words to prevent layout shift
-  const maxWordLength = React.useMemo(
-    () => Math.max(...words.map((word) => word.length)),
-    [words]
-  );
+  const maxWordLength = React.useMemo(() => Math.max(...words.map((word) => word.length)), [words]);
 
   // Extract style prop to ensure color inheritance
   const { style: propsStyle, ...restProps } = props;
-  
+
   return (
     <span
       ref={localRef}
@@ -133,7 +133,11 @@ export function RollingText({
       {...restProps}
     >
       <span className="sr-only">{currentWord}</span>
-      <span aria-hidden="true" className="inline-flex" style={propsStyle ? { color: 'inherit' } : undefined}>
+      <span
+        aria-hidden="true"
+        className="inline-flex"
+        style={propsStyle ? { color: 'inherit' } : undefined}
+      >
         {isMounted ? (
           characters.map((item, idx) => (
             <motion.span
@@ -165,7 +169,9 @@ export function RollingText({
             </motion.span>
           ))
         ) : (
-          <span className="inline-block" style={propsStyle ? { color: 'inherit' } : undefined}>{words[0]}</span>
+          <span className="inline-block" style={propsStyle ? { color: 'inherit' } : undefined}>
+            {words[0]}
+          </span>
         )}
       </span>
     </span>

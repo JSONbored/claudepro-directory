@@ -4,7 +4,7 @@
  * DetailSidebar - Sidebar orchestrator for detail pages
  */
 
-import { ContentCategory } from '@heyclaude/data-layer/prisma';
+import { content_category as ContentCategory } from '@prisma/client';
 import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
 import { ensureStringArray, getMetadata } from '@heyclaude/web-runtime/utils/content-helpers';
 import { getContentItemUrl, sanitizeSlug } from '@heyclaude/web-runtime/content';
@@ -134,21 +134,13 @@ export interface DetailSidebarProps {
   };
   customRenderer?:
     | ((
-        item:
-          | ContentItem
-          | GetContentDetailCompleteReturns['content'],
-        relatedItems:
-          | ContentItem[]
-          | GetContentDetailCompleteReturns['related'],
+        item: ContentItem | GetContentDetailCompleteReturns['content'],
+        relatedItems: ContentItem[] | GetContentDetailCompleteReturns['related'],
         router: ReturnType<typeof useRouter>
       ) => React.ReactNode)
     | undefined;
-  item:
-    | ContentItem
-    | GetContentDetailCompleteReturns['content'];
-  relatedItems:
-    | ContentItem[]
-    | GetContentDetailCompleteReturns['related'];
+  item: ContentItem | GetContentDetailCompleteReturns['content'];
+  relatedItems: ContentItem[] | GetContentDetailCompleteReturns['related'];
 }
 
 /**
@@ -175,7 +167,8 @@ export const DetailSidebar = memo(function DetailSidebar({
 
   // Type guard: Check if item is Record<string, unknown> (from GetContentDetailCompleteReturns)
   // and extract category/slug safely, or use ContentItem properties directly
-  const itemCategory = 'category' in item && typeof item.category === 'string' ? item.category : null;
+  const itemCategory =
+    'category' in item && typeof item.category === 'string' ? item.category : null;
   const itemSlug = 'slug' in item && typeof item.slug === 'string' ? item.slug : null;
 
   // Default sidebar using SidebarCard with inline configuration
@@ -186,7 +179,10 @@ export const DetailSidebar = memo(function DetailSidebar({
       : null;
 
   const showGitHubLink = config.metadata?.showGitHubLink ?? true;
-  const hasDocumentationUrl = 'documentation_url' in item && typeof item.documentation_url === 'string' && item.documentation_url;
+  const hasDocumentationUrl =
+    'documentation_url' in item &&
+    typeof item.documentation_url === 'string' &&
+    item.documentation_url;
   // Type narrowing: getMetadata accepts ContentItem or EnrichedContentItem
   // item is ContentItem | GetContentDetailCompleteReturns['content'], both compatible
   const metadata = getMetadata(item as ContentItem);
@@ -201,23 +197,21 @@ export const DetailSidebar = memo(function DetailSidebar({
   const hasSource = 'source' in item && typeof item.source === 'string' && item.source;
   // Type guard for Record<string, unknown> (object but not array or null)
   function isValidRecord(value: unknown): value is Record<string, unknown> {
-    return (
-      typeof value === 'object' &&
-      value !== null &&
-      !Array.isArray(value)
-    );
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
   }
 
-  const mcpServers = isValidRecord(metadata['mcpServers'])
-    ? metadata['mcpServers']
-    : null;
+  const mcpServers = isValidRecord(metadata['mcpServers']) ? metadata['mcpServers'] : null;
   const configurationObject = isValidRecord(metadata['configuration'])
     ? metadata['configuration']
     : null;
   // Type guard: Check if item is ContentItem (has id property) vs Record<string, unknown>
   // ContentItem is contentModel which has proper types including 'id'
-  const isContentItem = (value: ContentItem | GetContentDetailCompleteReturns['content']): value is ContentItem => {
-    return value !== null && typeof value === 'object' && 'id' in value && typeof value.id === 'string';
+  const isContentItem = (
+    value: ContentItem | GetContentDetailCompleteReturns['content']
+  ): value is ContentItem => {
+    return (
+      value !== null && typeof value === 'object' && 'id' in value && typeof value.id === 'string'
+    );
   };
 
   // Only call useDetailQuickActions if item is ContentItem (not Record<string, unknown>)
@@ -273,7 +267,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 asChild
               >
                 <a href={githubUrl} target="_blank" rel="noopener noreferrer">
-                  <Github className="h-4 w-4 mr-2" />
+                  <Github className="mr-2 h-4 w-4" />
                   View on GitHub
                 </a>
               </Button>
@@ -309,9 +303,8 @@ export const DetailSidebar = memo(function DetailSidebar({
                       onClick={() => {
                         pulse
                           .click({
-                            category: itemCategory && isValidCategory(itemCategory)
-                              ? itemCategory
-                              : null,
+                            category:
+                              itemCategory && isValidCategory(itemCategory) ? itemCategory : null,
                             slug: itemSlug || null,
                             metadata: {
                               action: 'external_link',
@@ -333,7 +326,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                       asChild
                     >
                       <a href={safeDocUrl} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-2" />
+                        <ExternalLink className="mr-2 h-4 w-4" />
                         Documentation
                       </a>
                     </Button>
@@ -358,18 +351,29 @@ export const DetailSidebar = memo(function DetailSidebar({
                   variant="base"
                   style="default"
                   className={`text-xs-medium ${
-                    itemCategory === 'agents' ? 'bg-transparent text-category-agents border-category-agents-border font-semibold' :
-                    itemCategory === 'mcp' ? 'bg-transparent text-category-mcp border-category-mcp-border font-semibold' :
-                    itemCategory === 'commands' ? 'bg-transparent text-category-commands border-category-commands-border font-semibold' :
-                    itemCategory === 'rules' ? 'bg-transparent text-category-rules border-category-rules-border font-semibold' :
-                    itemCategory === 'hooks' ? 'bg-transparent text-category-hooks border-category-hooks-border font-semibold' :
-                    itemCategory === 'statuslines' ? 'bg-transparent text-category-statuslines border-category-statuslines-border font-semibold' :
-                    itemCategory === 'collections' ? 'bg-transparent text-category-collections border-category-collections-border font-semibold' :
-                    itemCategory === 'skills' ? 'bg-transparent text-category-skills border-category-skills-border font-semibold' :
-                    itemCategory === 'guides' ? 'bg-transparent text-category-guides border-category-guides-border font-semibold' :
-                    itemCategory === 'jobs' ? 'bg-muted/20 text-muted border-muted/30' :
-                    itemCategory === 'changelog' ? 'bg-muted/20 text-muted border-muted/30' :
-                    'bg-muted/20 text-muted border-muted/30'
+                    itemCategory === 'agents'
+                      ? 'text-category-agents border-category-agents-border bg-transparent font-semibold'
+                      : itemCategory === 'mcp'
+                        ? 'text-category-mcp border-category-mcp-border bg-transparent font-semibold'
+                        : itemCategory === 'commands'
+                          ? 'text-category-commands border-category-commands-border bg-transparent font-semibold'
+                          : itemCategory === 'rules'
+                            ? 'text-category-rules border-category-rules-border bg-transparent font-semibold'
+                            : itemCategory === 'hooks'
+                              ? 'text-category-hooks border-category-hooks-border bg-transparent font-semibold'
+                              : itemCategory === 'statuslines'
+                                ? 'text-category-statuslines border-category-statuslines-border bg-transparent font-semibold'
+                                : itemCategory === 'collections'
+                                  ? 'text-category-collections border-category-collections-border bg-transparent font-semibold'
+                                  : itemCategory === 'skills'
+                                    ? 'text-category-skills border-category-skills-border bg-transparent font-semibold'
+                                    : itemCategory === 'guides'
+                                      ? 'text-category-guides border-category-guides-border bg-transparent font-semibold'
+                                      : itemCategory === 'jobs'
+                                        ? 'bg-muted/20 text-muted border-muted/30'
+                                        : itemCategory === 'changelog'
+                                          ? 'bg-muted/20 text-muted border-muted/30'
+                                          : 'bg-muted/20 text-muted border-muted/30'
                   }`}
                 >
                   {config.typeName}
@@ -399,7 +403,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                     <UnifiedBadge
                       variant="base"
                       style="outline"
-                      className="border-orange-500/30 bg-orange-500/10 text-xs-medium text-orange-600"
+                      className="text-xs-medium border-orange-500/30 bg-orange-500/10 text-orange-600"
                     >
                       {String(temperature)}
                     </UnifiedBadge>
@@ -466,7 +470,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 className="w-full justify-start gap-2 text-left"
                 onClick={action.onClick}
               >
-                <Copy className="h-4 w-4 mr-2" />
+                <Copy className="mr-2 h-4 w-4" />
                 <div className="text-left">
                   <div className="text-sm-medium">{action.label}</div>
                   {action.description ? (
@@ -520,10 +524,10 @@ export const DetailSidebar = memo(function DetailSidebar({
                 <Link
                   key={relatedSlug}
                   href={safeRelatedUrl}
-                  className="flex items-center justify-between border-border hover:bg-muted/50 block w-full cursor-pointer card-base p-3 text-left transition-colors"
+                  className="border-border hover:bg-muted/50 card-base block flex w-full cursor-pointer items-center justify-between p-3 text-left transition-colors"
                 >
                   <div className="min-w-0 flex-1">
-                    <h4 className="truncate text-sm-medium">
+                    <h4 className="text-sm-medium truncate">
                       {getDisplayTitle({
                         title:
                           'title' in relatedItem && typeof relatedItem.title === 'string'

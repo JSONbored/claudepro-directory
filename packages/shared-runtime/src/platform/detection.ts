@@ -1,9 +1,9 @@
 /**
  * Platform Detection Utility
- * 
+ *
  * Provides platform-agnostic detection for deployment environments.
  * Supports: Vercel, Netlify, Cloudflare Pages, AWS Amplify, Railway, Render, and others.
- * 
+ *
  * @module platform/detection
  */
 
@@ -21,14 +21,14 @@ export type Platform =
 
 /**
  * Detects the current deployment platform based on environment variables.
- * 
+ *
  * Platform detection priority:
  * 1. Explicit DEPLOYMENT_PLATFORM env var (highest priority)
  * 2. Platform-specific environment variables
  * 3. Unknown (fallback)
- * 
+ *
  * @returns The detected platform identifier
- * 
+ *
  * @example
  * ```ts
  * const platform = detectPlatform();
@@ -95,10 +95,10 @@ export function detectPlatform(): Platform {
 
 /**
  * Checks if the current platform is a specific platform.
- * 
+ *
  * @param platform - The platform to check for
  * @returns True if the current platform matches
- * 
+ *
  * @example
  * ```ts
  * if (isPlatform('vercel')) {
@@ -112,7 +112,7 @@ export function isPlatform(platform: Platform): boolean {
 
 /**
  * Checks if the current platform is Vercel.
- * 
+ *
  * @returns True if running on Vercel
  */
 export function isVercel(): boolean {
@@ -121,7 +121,7 @@ export function isVercel(): boolean {
 
 /**
  * Checks if the current platform is Netlify.
- * 
+ *
  * @returns True if running on Netlify
  */
 export function isNetlify(): boolean {
@@ -130,7 +130,7 @@ export function isNetlify(): boolean {
 
 /**
  * Checks if the current platform is Cloudflare Pages.
- * 
+ *
  * @returns True if running on Cloudflare Pages
  */
 export function isCloudflare(): boolean {

@@ -32,7 +32,7 @@ export function mapPostgresTypeToZod(
       case 'int2':
       case 'int4':
       case 'int8':
-      case 'integer':  // Common alias
+      case 'integer': // Common alias
       case 'smallint':
       case 'bigint':
       case 'float4':

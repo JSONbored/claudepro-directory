@@ -1,6 +1,6 @@
 /**
  * Vitest Setup File
- * 
+ *
  * This file runs before all tests to set up the test environment.
  * It mocks Next.js APIs and other Node.js-specific modules that aren't
  * available in the test environment.
@@ -35,7 +35,7 @@ vi.mock('@heyclaude/shared-runtime', async () => {
   } catch {
     // If import fails, we'll use mocks only
   }
-  
+
   return {
     // Mock functions that need to be spies
     createPinoConfig: vi.fn((options?: { service?: string }) => ({
@@ -52,7 +52,10 @@ vi.mock('@heyclaude/shared-runtime', async () => {
     createUtilityContext: vi.fn((domain, action, meta) => ({ domain, action, ...meta })),
     withTimeout: vi.fn((promise) => promise),
     TimeoutError: class TimeoutError extends Error {
-      constructor(message: string, public readonly timeoutMs?: number) {
+      constructor(
+        message: string,
+        public readonly timeoutMs?: number
+      ) {
         super(message);
         this.name = 'TimeoutError';
       }
@@ -69,12 +72,15 @@ vi.mock('@heyclaude/shared-runtime', async () => {
     EXTERNAL_SERVICES: actualExports.EXTERNAL_SERVICES || {},
     TIME_CONSTANTS: actualExports.TIME_CONSTANTS || {},
     // Re-export any other non-function exports from actual module
-    ...Object.keys(actualExports).reduce((acc, key) => {
-      if (!acc[key] && typeof actualExports[key] !== 'function' && !key.startsWith('_')) {
-        acc[key] = actualExports[key];
-      }
-      return acc;
-    }, {} as Record<string, unknown>),
+    ...Object.keys(actualExports).reduce(
+      (acc, key) => {
+        if (!acc[key] && typeof actualExports[key] !== 'function' && !key.startsWith('_')) {
+          acc[key] = actualExports[key];
+        }
+        return acc;
+      },
+      {} as Record<string, unknown>
+    ),
   };
 });
 
@@ -117,22 +123,17 @@ vi.mock('server-only', () => ({}));
 // Prisma Client Mock (must be before any imports that use Prisma)
 // ============================================================================
 
-// Note: DATABASE_URL is provided via Infisical in test command
-// Tests that need Prismock should mock prisma/client.ts in the test file itself
-// (see packages/data-layer/src/services/*.test.ts for examples)
+// Prismock is automatically configured via __mocks__/@prisma/client.ts
+// Vitest automatically uses this mock when @prisma/client is imported in tests.
+// This follows the official Prismock recommended approach.
 //
-// ARCHITECTURAL DECISION: We do NOT globally mock Prisma with Prismock here because:
-// 1. Prismock initialization requires reading prisma/schema.prisma, which can fail
-//    when initialized globally due to Vitest's module transformation
-// 2. Each test file that needs Prismock should mock it locally using setupPrismockMock()
-// 3. This ensures proper isolation and prevents initialization issues
+// @see https://github.com/morintd/prismock#automatically-recommended
 //
-// If a test file imports code that uses Prisma, it MUST mock Prisma locally.
-// Example:
-//   vi.mock('@heyclaude/data-layer/prisma/client', () => {
-//     const { setupPrismockMock } = require('../../data-layer/src/test-utils/prisma-mock.ts');
-//     return { prisma: setupPrismockMock() };
-//   });
+// All imports of PrismaClient from @prisma/client will automatically use
+// PrismockClient instead, providing in-memory database for all tests.
+//
+// Note: DATABASE_URL is provided via Infisical in test command, but Prismock
+// doesn't require it (uses in-memory storage).
 
 // ============================================================================
 // Environment Variables
@@ -146,6 +147,15 @@ process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key';
 // Provide DATABASE_URL for tests (Prismock doesn't need it, but some code checks for it)
 process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
+
+// ============================================================================
+// React Profiler Integration (vitest-react-profiler)
+// ============================================================================
+
+// Import and configure vitest-react-profiler for React performance testing
+// This enables profiling React component renders in tests
+// TODO: Temporarily disabled to debug Vitest startup error
+// import 'vitest-react-profiler/setup';
 
 // ============================================================================
 // Global Test Utilities

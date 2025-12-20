@@ -65,9 +65,7 @@ import { useCallback, useState } from 'react';
  * reset(); // Clear all entries
  * ```
  */
-export function useMap<K, V>(
-  initialState: Map<K, V> | Array<[K, V]> = new Map()
-) {
+export function useMap<K, V>(initialState: Map<K, V> | Array<[K, V]> = new Map()) {
   const [map, setMap] = useState<ReadonlyMap<K, V>>(() => {
     if (initialState instanceof Map) {
       return new Map(initialState);

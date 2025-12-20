@@ -15,13 +15,13 @@
 /**
  * Parallax Effects
  * Speed multipliers: 1 = normal scroll, < 1 = slower, > 1 = faster
- * 
+ *
  * @example
  * ```tsx
  * const shouldReduceMotion = useReducedMotion();
  * const { scrollY } = useScroll();
  * const y = useTransform(scrollY, [0, 1000], [0, -200]);
- * 
+ *
  * return (
  *   <motion.div style={{ y: shouldReduceMotion ? 0 : y }} />
  * );

@@ -4,8 +4,11 @@
  * Code block with syntax highlighting, screenshot, share, and copy functionality
  */
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
-import { isValidCategory, VALID_CATEGORIES } from '@heyclaude/web-runtime/utils/category-validation';
+import type { content_category } from '@prisma/client';
+import {
+  isValidCategory,
+  VALID_CATEGORIES,
+} from '@heyclaude/web-runtime/utils/category-validation';
 import { DURATION } from '@heyclaude/web-runtime/design-system';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
 import { type SharePlatform } from '@heyclaude/web-runtime/client/share';
@@ -54,7 +57,7 @@ const CLIPBOARD_RESET_DEFAULT_MS = 2000;
  */
 function escapeHtml(html: string): string {
   if (typeof html !== 'string') return '';
-  
+
   // Guard for SSR: document is not available during server-side rendering
   if (typeof document === 'undefined') {
     // Safe string fallback for SSR: manually escape HTML entities
@@ -65,7 +68,7 @@ function escapeHtml(html: string): string {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
   }
-  
+
   const div = document.createElement('div');
   div.textContent = html;
   return div.innerHTML;
@@ -102,17 +105,12 @@ async function sanitizeShikiHtml(html: string): Promise<string> {
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load DOMPurify');
-    logClientWarn(
-      '[Sanitize] Failed to load DOMPurify',
-      normalized,
-      'sanitizeShikiHtml.load',
-      {
-        component: 'sanitizeShikiHtml',
-        action: 'load-dompurify',
-        category: 'sanitize',
-        recoverable: true,
-      }
-    );
+    logClientWarn('[Sanitize] Failed to load DOMPurify', normalized, 'sanitizeShikiHtml.load', {
+      component: 'sanitizeShikiHtml',
+      action: 'load-dompurify',
+      category: 'sanitize',
+      recoverable: true,
+    });
     // Fallback to escaped plain text instead of raw HTML
     return escapeHtml(html);
   }
@@ -168,7 +166,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
   // Handle native Web Share API (mobile/desktop with support)
   const handleNativeShare = async () => {
     if (!supportsWebShare) return false;
-    
+
     try {
       const shareText = generateShareText({
         url: currentUrl,
@@ -177,13 +175,13 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
         platform: 'native',
         title: `${category} - ${slug}`,
       });
-      
+
       await navigator.share({
         title: `${category} - ${slug}`,
         text: shareText,
         url: currentUrl,
       });
-      
+
       onShare('native');
       return true;
     } catch (error) {
@@ -214,7 +212,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
       platform,
       title: `${category} - ${slug}`,
     });
-    
+
     // Open share URL in new window
     window.open(shareUrl, '_blank', 'noopener,noreferrer');
     onShare(platform);
@@ -224,7 +222,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
     <motion.div
       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
       animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-      className="absolute top-0 right-0 border-border bg-card/95 top-full z-50 mt-2 w-56 card-base p-3 shadow-xl backdrop-blur-md"
+      className="border-border bg-card/95 card-base absolute top-0 top-full right-0 z-50 mt-2 w-56 p-3 shadow-xl backdrop-blur-md"
       onMouseLeave={onMouseLeave}
     >
       {/* Native Web Share (if supported) */}
@@ -232,9 +230,19 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
         <button
           type="button"
           onClick={handleNativeShare}
-          className={cn('hover:bg-accent/15 flex w-full items-center', 'gap-3', 'rounded-lg', 'px-4', 'py-2.5', 'text-sm', 'font-medium', 'transition-all duration-200 ease-out', 'hover:scale-[1.02] active:scale-[0.98]')}
+          className={cn(
+            'hover:bg-accent/15 flex w-full items-center',
+            'gap-3',
+            'rounded-lg',
+            'px-4',
+            'py-2.5',
+            'text-sm',
+            'font-medium',
+            'transition-all duration-200 ease-out',
+            'hover:scale-[1.02] active:scale-[0.98]'
+          )}
         >
-          <div className="flex-center h-5 w-5 rounded-full bg-accent/20">
+          <div className="flex-center bg-accent/20 h-5 w-5 rounded-full">
             <Share2 className="h-3 w-3" />
           </div>
           <span className="text-foreground">Share</span>
@@ -246,10 +254,20 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
         <button
           type="button"
           onClick={() => handlePlatformShare('twitter')}
-          className={cn('hover:bg-accent/15 flex w-full items-center', 'gap-3', 'rounded-lg', 'px-4', 'py-2.5', 'text-sm', 'font-medium', 'transition-all duration-200 ease-out', 'hover:scale-[1.02] active:scale-[0.98]')}
+          className={cn(
+            'hover:bg-accent/15 flex w-full items-center',
+            'gap-3',
+            'rounded-lg',
+            'px-4',
+            'py-2.5',
+            'text-sm',
+            'font-medium',
+            'transition-all duration-200 ease-out',
+            'hover:scale-[1.02] active:scale-[0.98]'
+          )}
         >
-          <div className="flex-center h-5 w-5 rounded-full bg-color-twitter-bg">
-            <Twitter className="h-3 w-3 text-color-twitter" />
+          <div className="flex-center bg-color-twitter-bg h-5 w-5 rounded-full">
+            <Twitter className="text-color-twitter h-3 w-3" />
           </div>
           <span className="text-foreground">Share on Twitter</span>
         </button>
@@ -260,10 +278,20 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
         <button
           type="button"
           onClick={() => handlePlatformShare('linkedin')}
-          className={cn('hover:bg-accent/15 flex w-full items-center', 'gap-3', 'rounded-lg', 'px-4', 'py-2.5', 'text-sm', 'font-medium', 'transition-all duration-200 ease-out', 'hover:scale-[1.02] active:scale-[0.98]')}
+          className={cn(
+            'hover:bg-accent/15 flex w-full items-center',
+            'gap-3',
+            'rounded-lg',
+            'px-4',
+            'py-2.5',
+            'text-sm',
+            'font-medium',
+            'transition-all duration-200 ease-out',
+            'hover:scale-[1.02] active:scale-[0.98]'
+          )}
         >
-          <div className="flex-center h-5 w-5 rounded-full bg-color-linkedin-bg">
-            <Linkedin className="h-3 w-3 text-color-linkedin" />
+          <div className="flex-center bg-color-linkedin-bg h-5 w-5 rounded-full">
+            <Linkedin className="text-color-linkedin h-3 w-3" />
           </div>
           <span className="text-foreground">Share on LinkedIn</span>
         </button>
@@ -273,9 +301,19 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
       <button
         type="button"
         onClick={() => onShare('copy_link')}
-        className={cn('text-foreground hover:bg-accent/15 flex w-full items-center', 'gap-3', 'rounded-lg', 'px-4', 'py-2.5', 'text-sm', 'font-medium', 'transition-all duration-200 ease-out', 'hover:scale-[1.02] active:scale-[0.98]')}
+        className={cn(
+          'text-foreground hover:bg-accent/15 flex w-full items-center',
+          'gap-3',
+          'rounded-lg',
+          'px-4',
+          'py-2.5',
+          'text-sm',
+          'font-medium',
+          'transition-all duration-200 ease-out',
+          'hover:scale-[1.02] active:scale-[0.98]'
+        )}
       >
-        <div className="flex-center h-5 w-5 rounded-full bg-accent/20">
+        <div className="flex-center bg-accent/20 h-5 w-5 rounded-full">
           <Copy className="h-3 w-3" />
         </div>
         <span>Copy Link</span>
@@ -321,8 +359,16 @@ export function ProductionCodeBlock({
 }: ProductionCodeBlockProps) {
   const { value: isExpanded, toggle: toggleIsExpanded } = useBoolean();
   const { value: isCopied, setTrue: setIsCopiedTrue, setFalse: setIsCopiedFalse } = useBoolean();
-  const { value: isScreenshotting, setTrue: setIsScreenshottingTrue, setFalse: setIsScreenshottingFalse } = useBoolean();
-  const { value: isShareOpen, toggle: toggleIsShareOpen, setFalse: setIsShareOpenFalse } = useBoolean();
+  const {
+    value: isScreenshotting,
+    setTrue: setIsScreenshottingTrue,
+    setFalse: setIsScreenshottingFalse,
+  } = useBoolean();
+  const {
+    value: isShareOpen,
+    toggle: toggleIsShareOpen,
+    setFalse: setIsShareOpenFalse,
+  } = useBoolean();
   const { value: needsCollapse, setValue: setNeedsCollapse } = useBoolean();
   const [clipboardResetDelay, setClipboardResetDelay] = useState(CLIPBOARD_RESET_DEFAULT_MS);
   const [safeHtml, setSafeHtml] = useState<string>(html);
@@ -439,18 +485,24 @@ export function ProductionCodeBlock({
       ? clipboardResetDelay
       : CLIPBOARD_RESET_DEFAULT_MS;
 
-  useTimeout(() => {
-    if (isCopied) {
-      setIsCopiedFalse();
-    }
-  }, isCopied ? delay : null);
+  useTimeout(
+    () => {
+      if (isCopied) {
+        setIsCopiedFalse();
+      }
+    },
+    isCopied ? delay : null
+  );
 
   // Failsafe timeout for screenshot: Reset state after 5 seconds regardless of outcome
-  useTimeout(() => {
-    if (isScreenshotting) {
-      setIsScreenshottingFalse();
-    }
-  }, isScreenshotting ? 5000 : null);
+  useTimeout(
+    () => {
+      if (isScreenshotting) {
+        setIsScreenshottingFalse();
+      }
+    },
+    isScreenshotting ? 5000 : null
+  );
 
   const handleCopy = async () => {
     setIsCopiedTrue();
@@ -465,20 +517,15 @@ export function ProductionCodeBlock({
     } catch (error) {
       setIsCopiedFalse();
       const normalized = normalizeError(error, 'Copy failed');
-      logClientWarn(
-        '[Clipboard] Copy failed',
-        normalized,
-        'ProductionCodeBlock.handleCopy',
-        {
-          component: 'ProductionCodeBlock',
-          action: 'copy',
-          category: 'clipboard',
-          recoverable: true,
-          userRetryable: true,
-          itemCategory: category,
-          itemSlug: slug,
-        }
-      );
+      logClientWarn('[Clipboard] Copy failed', normalized, 'ProductionCodeBlock.handleCopy', {
+        component: 'ProductionCodeBlock',
+        action: 'copy',
+        category: 'clipboard',
+        recoverable: true,
+        userRetryable: true,
+        itemCategory: category,
+        itemSlug: slug,
+      });
       // Show error toast with "Retry" button
       toasts.raw.error('Failed to copy code', {
         action: {
@@ -644,20 +691,15 @@ export function ProductionCodeBlock({
           },
         },
       });
-      logClientWarn(
-        '[Share] Download failed',
-        normalized,
-        'ProductionCodeBlock.handleDownload',
-        {
-          component: 'ProductionCodeBlock',
-          action: 'download',
-          category: 'share',
-          recoverable: true,
-          userRetryable: true,
-          itemCategory: category,
-          itemSlug: slug,
-        }
-      );
+      logClientWarn('[Share] Download failed', normalized, 'ProductionCodeBlock.handleDownload', {
+        component: 'ProductionCodeBlock',
+        action: 'download',
+        category: 'share',
+        recoverable: true,
+        userRetryable: true,
+        itemCategory: category,
+        itemSlug: slug,
+      });
     }
   };
 
@@ -714,31 +756,26 @@ export function ProductionCodeBlock({
           },
         },
       });
-      logClientWarn(
-        '[Share] Share failed',
-        normalized,
-        'ProductionCodeBlock.handleShare',
-        {
-          component: 'ProductionCodeBlock',
-          action: 'share',
-          category: 'share',
-          recoverable: true,
-          userRetryable: true,
-          itemCategory: category,
-          itemSlug: slug,
-          platform,
-        }
-      );
+      logClientWarn('[Share] Share failed', normalized, 'ProductionCodeBlock.handleShare', {
+        component: 'ProductionCodeBlock',
+        action: 'share',
+        category: 'share',
+        recoverable: true,
+        userRetryable: true,
+        itemCategory: category,
+        itemSlug: slug,
+        platform,
+      });
     }
   };
 
   const maxHeight = `${maxLines * 1.6}rem`; // 1.6rem per line
 
   return (
-    <div className={`relative card-base bg-code/50 ${className}`}>
+    <div className={`card-base bg-code/50 relative ${className}`}>
       {/* Header with filename, language badge, and action buttons */}
       {filename ? (
-        <div className="flex items-center justify-between border-b border-border/50 px-4 py-2">
+        <div className="border-border/50 flex items-center justify-between border-b px-4 py-2">
           <span className="text-sm-medium font-mono">{filename}</span>
           <div className="flex items-center gap-1">
             {/* Screenshot button */}
@@ -746,7 +783,7 @@ export function ProductionCodeBlock({
               type="button"
               onClick={handleScreenshot}
               disabled={isScreenshotting}
-              className="flex-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground disabled:opacity-50"
+              className="flex-center bg-code/95 text-muted-foreground hover:bg-code hover:text-foreground rounded-md p-1.5 shadow-md backdrop-blur-md transition-colors disabled:opacity-50"
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
               <Camera className="h-3 w-3" />
@@ -757,7 +794,7 @@ export function ProductionCodeBlock({
               <motion.button
                 type="button"
                 onClick={toggleIsShareOpen}
-                className="flex-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
+                className="flex-center bg-code/95 text-muted-foreground hover:bg-code hover:text-foreground rounded-md p-1.5 shadow-md backdrop-blur-md transition-colors"
                 title="Share code"
               >
                 <Share2 className="h-3 w-3" />
@@ -781,13 +818,13 @@ export function ProductionCodeBlock({
               onClick={handleCopy}
               animate={isCopied && !shouldReduceMotion ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: DURATION.default }}
-              className="flex-center rounded-md bg-code/95 p-1.5 shadow-md backdrop-blur-md transition-colors hover:bg-code"
+              className="flex-center bg-code/95 hover:bg-code rounded-md p-1.5 shadow-md backdrop-blur-md transition-colors"
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
                 <Check className="h-3 w-3 text-green-500" />
               ) : (
-                <Copy className="h-3 w-3 text-muted-foreground" />
+                <Copy className="text-muted-foreground h-3 w-3" />
               )}
             </motion.button>
 
@@ -795,7 +832,7 @@ export function ProductionCodeBlock({
             <motion.button
               type="button"
               onClick={handleDownload}
-              className="flex-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
+              className="flex-center bg-code/95 text-muted-foreground hover:bg-code hover:text-foreground rounded-md p-1.5 shadow-md backdrop-blur-md transition-colors"
               title="Download code"
             >
               <Download className="h-3 w-3" />
@@ -803,7 +840,17 @@ export function ProductionCodeBlock({
 
             {/* Language badge - Polar-style minimal */}
             {language && language !== 'text' ? (
-              <div className={cn('text-muted-foreground', 'px-3', 'py-1', 'text-[10px]', 'font-semibold', 'tracking-wide', 'uppercase')}>
+              <div
+                className={cn(
+                  'text-muted-foreground',
+                  'px-3',
+                  'py-1',
+                  'text-[10px]',
+                  'font-semibold',
+                  'tracking-wide',
+                  'uppercase'
+                )}
+              >
                 {language}
               </div>
             ) : null}
@@ -814,7 +861,7 @@ export function ProductionCodeBlock({
       {/* Code block container - Polar-style clean design */}
       <div
         ref={codeBlockRef}
-        className="border-border relative overflow-hidden card-base transition-[height] ease-in-out duration-[0.2s]"
+        className="border-border card-base relative overflow-hidden transition-[height] duration-[0.2s] ease-in-out"
         style={{
           height: needsCollapse && !isExpanded ? maxHeight : 'auto',
         }}
@@ -827,7 +874,7 @@ export function ProductionCodeBlock({
               type="button"
               onClick={handleScreenshot}
               disabled={isScreenshotting}
-              className="flex-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground disabled:opacity-50"
+              className="flex-center bg-code/95 text-muted-foreground hover:bg-code hover:text-foreground rounded-md p-1.5 shadow-md backdrop-blur-md transition-colors disabled:opacity-50"
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
               <Camera className="h-3 w-3" />
@@ -838,7 +885,7 @@ export function ProductionCodeBlock({
               <motion.button
                 type="button"
                 onClick={toggleIsShareOpen}
-                className="flex-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
+                className="flex-center bg-code/95 text-muted-foreground hover:bg-code hover:text-foreground rounded-md p-1.5 shadow-md backdrop-blur-md transition-colors"
                 title="Share code"
               >
                 <Share2 className="h-3 w-3" />
@@ -862,13 +909,13 @@ export function ProductionCodeBlock({
               onClick={handleCopy}
               animate={isCopied && !shouldReduceMotion ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: DURATION.default }}
-              className="flex-center rounded-md bg-code/95 p-1.5 shadow-md backdrop-blur-md transition-colors hover:bg-code"
+              className="flex-center bg-code/95 hover:bg-code rounded-md p-1.5 shadow-md backdrop-blur-md transition-colors"
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
                 <Check className="h-3 w-3 text-green-500" />
               ) : (
-                <Copy className="h-3 w-3 text-muted-foreground" />
+                <Copy className="text-muted-foreground h-3 w-3" />
               )}
             </motion.button>
 
@@ -876,7 +923,7 @@ export function ProductionCodeBlock({
             <motion.button
               type="button"
               onClick={handleDownload}
-              className="flex-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
+              className="flex-center bg-code/95 text-muted-foreground hover:bg-code hover:text-foreground rounded-md p-1.5 shadow-md backdrop-blur-md transition-colors"
               title="Download code"
             >
               <Download className="h-3 w-3" />
@@ -884,7 +931,17 @@ export function ProductionCodeBlock({
 
             {/* Language badge - Polar-style minimal */}
             {language && language !== 'text' ? (
-              <div className={cn('text-muted-foreground', 'px-3', 'py-1', 'text-[10px]', 'font-semibold', 'tracking-wide', 'uppercase')}>
+              <div
+                className={cn(
+                  'text-muted-foreground',
+                  'px-3',
+                  'py-1',
+                  'text-[10px]',
+                  'font-semibold',
+                  'tracking-wide',
+                  'uppercase'
+                )}
+              >
                 {language}
               </div>
             ) : null}
@@ -893,7 +950,7 @@ export function ProductionCodeBlock({
 
         {/* Gradient fade when collapsed */}
         {needsCollapse && !isExpanded ? (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-20 bg-gradient-to-b from-transparent to-background" />
+          <div className="to-background pointer-events-none absolute inset-x-0 bottom-0 z-10 h-20 bg-gradient-to-b from-transparent" />
         ) : null}
 
         {/* Server-rendered Shiki HTML */}
@@ -925,10 +982,24 @@ export function ProductionCodeBlock({
         <button
           type="button"
           onClick={toggleIsExpanded}
-          className={cn('border', 'border-t', 'text-muted-foreground', 'hover:text-foreground', 'flex items-center gap-2', 'w-full', 'gap-1.5', 'py-3', 'text-xs', 'transition-colors')}
+          className={cn(
+            'border',
+            'border-t',
+            'text-muted-foreground',
+            'hover:text-foreground',
+            'flex items-center gap-2',
+            'w-full',
+            'gap-1.5',
+            'py-3',
+            'text-xs',
+            'transition-colors'
+          )}
         >
           <ChevronDown
-            className={cn('h-3.5 w-3.5 transition-transform duration-200', isExpanded ? 'rotate-180' : '')}
+            className={cn(
+              'h-3.5 w-3.5 transition-transform duration-200',
+              isExpanded ? 'rotate-180' : ''
+            )}
           />
           <span>{isExpanded ? 'Collapse' : `Show ${code.split('\n').length} lines`}</span>
         </button>

@@ -35,7 +35,12 @@ export function normalizeError(error: unknown, fallbackMessage = 'Unknown error'
     'message' in error &&
     typeof (error as { message: unknown }).message === 'string'
   ) {
-    const postgrestError = error as { code: unknown; message: string; details?: unknown; hint?: unknown };
+    const postgrestError = error as {
+      code: unknown;
+      message: string;
+      details?: unknown;
+      hint?: unknown;
+    };
     // Use the message field directly instead of JSON.stringify
     return new Error(postgrestError.message);
   }

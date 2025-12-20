@@ -17,7 +17,7 @@
  * @module web-runtime/search/components/search-filters
  */
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
@@ -90,10 +90,7 @@ export function SearchFilters({
   })();
 
   // Handle filter change
-  const handleFilterChange = (
-    key: keyof FilterState,
-    value: FilterState[keyof FilterState]
-  ) => {
+  const handleFilterChange = (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
     setFilters((prev) => {
       const updated: FilterState = { ...prev };
       if (value === undefined) {
@@ -131,7 +128,7 @@ export function SearchFilters({
   return (
     <motion.section
       className={cn(
-        'border-border/50 bg-[rgba(0,0,0,0.6)] backdrop-blur-xl space-y-4 rounded-lg border p-4 md:space-y-6 md:p-6 shadow-xl',
+        'border-border/50 space-y-4 rounded-lg border bg-[rgba(0,0,0,0.6)] p-4 shadow-xl backdrop-blur-xl md:space-y-6 md:p-6',
         className
       )}
       initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
@@ -178,9 +175,7 @@ export function SearchFilters({
                 <SelectItem value="all">All Categories</SelectItem>
                 {availableCategories.map((cat) => {
                   const displayName = isValidCategory(cat)
-                    ? getCategoryConfig(
-                        cat as content_category
-                      )?.typeName ?? cat
+                    ? (getCategoryConfig(cat as content_category)?.typeName ?? cat)
                     : cat;
                   return (
                     <SelectItem key={cat} value={cat}>
@@ -230,14 +225,14 @@ export function SearchFilters({
         )}
 
         {/* Date Range */}
-          <motion.div
-            className="space-y-2"
-            layout
-            layoutDependency={filters.author}
-            initial={shouldReduceMotion ? {} : { opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ ...SPRING.smooth, delay: 0.2 }}
-          >
+        <motion.div
+          className="space-y-2"
+          layout
+          layoutDependency={filters.author}
+          initial={shouldReduceMotion ? {} : { opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ ...SPRING.smooth, delay: 0.2 }}
+        >
           <Label htmlFor={dateRangeSelectId}>Date Range</Label>
           <Select
             value={filters.dateRange || 'all'}
@@ -278,9 +273,7 @@ export function SearchFilters({
         <div className="px-2 py-4">
           <Slider
             value={filters.popularity || [0, 100]}
-            onValueChange={(value) =>
-              handleFilterChange('popularity', value as [number, number])
-            }
+            onValueChange={(value) => handleFilterChange('popularity', value as [number, number])}
             min={0}
             max={100}
             step={1}

@@ -61,16 +61,16 @@ const DialogContent = ({
 }) => {
   // Internal ref to apply transform directly to DOM (bypasses Radix style overrides)
   const internalRef = useRef<React.ElementRef<typeof DialogPrimitive.Content> | null>(null);
-  
+
   // Scroll lock: Lock body scroll when dialog is open
   // Use manual control to sync with Radix's open state via data-state attribute
   const { lock, unlock } = useScrollLock({ autoLock: false });
-  
+
   // Monitor data-state attribute to sync scroll lock with dialog open state
   useEffect(() => {
     const element = internalRef.current;
     if (!element) return;
-    
+
     // Check initial state
     const isOpen = element.getAttribute('data-state') === 'open';
     if (isOpen) {
@@ -78,7 +78,7 @@ const DialogContent = ({
     } else {
       unlock();
     }
-    
+
     // Watch for state changes
     const observer = new MutationObserver(() => {
       const currentState = element.getAttribute('data-state');
@@ -88,37 +88,44 @@ const DialogContent = ({
         unlock();
       }
     });
-    
+
     observer.observe(element, {
       attributes: true,
       attributeFilter: ['data-state'],
     });
-    
+
     return () => {
       observer.disconnect();
       unlock(); // Ensure unlock on unmount
     };
   }, [lock, unlock]);
-  
+
   // Combine refs: support both internal and external refs
-  const combinedRef = useCallback((node: React.ElementRef<typeof DialogPrimitive.Content> | null) => {
-    internalRef.current = node;
-    if (externalRef) {
-      if (typeof externalRef === 'function') {
-        externalRef(node);
-      } else {
-        (externalRef as React.MutableRefObject<React.ElementRef<typeof DialogPrimitive.Content> | null>).current = node;
+  const combinedRef = useCallback(
+    (node: React.ElementRef<typeof DialogPrimitive.Content> | null) => {
+      internalRef.current = node;
+      if (externalRef) {
+        if (typeof externalRef === 'function') {
+          externalRef(node);
+        } else {
+          (
+            externalRef as React.MutableRefObject<React.ElementRef<
+              typeof DialogPrimitive.Content
+            > | null>
+          ).current = node;
+        }
       }
-    }
-  }, [externalRef]);
-  
+    },
+    [externalRef]
+  );
+
   // CRITICAL FIX: Apply transform directly to DOM element after Radix applies its styles
   // This ensures the dialog is centered even if Radix overrides our inline styles
   // Use both useEffect (for initial mount) and a more aggressive observer (for style updates)
   useEffect(() => {
     const element = internalRef.current;
     if (!element) return;
-    
+
     // Apply transform and z-index directly to DOM using setProperty with 'important' flag
     // This overrides Radix's inline styles which are applied via JavaScript
     const applyTransform = () => {
@@ -136,27 +143,27 @@ const DialogContent = ({
         element.style.setProperty('position', 'fixed', 'important');
       }
     };
-    
+
     // Apply immediately and repeatedly until it sticks
     applyTransform();
     const immediateInterval = setInterval(applyTransform, 10);
-    
+
     // Keep applying for longer (2 seconds) to ensure it sticks through all Radix animations
     setTimeout(() => {
       clearInterval(immediateInterval);
     }, 2000);
-    
+
     // Re-apply on any style changes (Radix may update styles during animations)
     const observer = new MutationObserver(() => {
       applyTransform();
     });
-    
+
     observer.observe(element, {
       attributes: true,
       attributeFilter: ['style', 'class'],
       attributeOldValue: false,
     });
-    
+
     // Also observe child attribute changes (Radix may update child elements)
     if (element.parentElement) {
       observer.observe(element.parentElement, {
@@ -164,7 +171,7 @@ const DialogContent = ({
         attributeFilter: ['style', 'class'],
       });
     }
-    
+
     // Watch for any style mutations on the element itself
     const styleObserver = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
@@ -173,19 +180,19 @@ const DialogContent = ({
         }
       }
     });
-    
+
     styleObserver.observe(element, {
       attributes: true,
       attributeFilter: ['style'],
     });
-    
+
     return () => {
       clearInterval(immediateInterval);
       observer.disconnect();
       styleObserver.disconnect();
     };
   }, []);
-  
+
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -195,13 +202,13 @@ const DialogContent = ({
           // CRITICAL: Use fixed positioning with proper centering
           // Use !important variants to ensure transform classes aren't overridden by Radix UI
           // CRITICAL: z-index must be higher than overlay (z-[60]) to appear above blur
-          '!fixed !top-[50%] !left-[50%] !right-auto !bottom-auto !-translate-x-1/2 !-translate-y-1/2 !z-[100] !m-0',
+          '!fixed !top-[50%] !right-auto !bottom-auto !left-[50%] !z-[100] !m-0 !-translate-x-1/2 !-translate-y-1/2',
           // CRITICAL FIX: Responsive width - never full width, always properly constrained
           // Mobile: viewport minus safe padding (1rem each side)
           // Desktop: auto width with max-width constraint (can be overridden by className prop for specific dialogs like command palette)
           'w-[calc(100vw-2rem)] sm:w-auto sm:max-w-lg',
           // Base styling
-          'border bg-background shadow-lg rounded-lg',
+          'bg-background rounded-lg border shadow-lg',
           // Padding (default, can be overridden by className prop)
           'p-6',
           // Use data-state for visibility and animations (Radix sets this on Content)
@@ -230,9 +237,9 @@ const DialogContent = ({
         <DialogPrimitive.Close
           className={cn(
             'absolute top-4 right-4',
-            'rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100',
-            'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-            'disabled:opacity-50 disabled:pointer-events-none',
+            'ring-offset-background rounded-sm opacity-70 transition-opacity hover:opacity-100',
+            'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2',
+            'disabled:pointer-events-none disabled:opacity-50',
             'data-[state=open]:bg-accent data-[state=open]:text-muted-foreground'
           )}
         >
@@ -267,7 +274,7 @@ const DialogTitle = ({
 }) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-lg font-semibold leading-none tracking-tight', className)}
+    className={cn('text-lg leading-none font-semibold tracking-tight', className)}
     {...props}
   />
 );
@@ -282,7 +289,7 @@ const DialogDescription = ({
 }) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-sm leading-normal text-muted-foreground', className)}
+    className={cn('text-muted-foreground text-sm leading-normal', className)}
     {...props}
   />
 );

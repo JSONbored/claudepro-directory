@@ -9,7 +9,7 @@
  * @module apps/web/src/components/content/content-list-search-client
  */
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import { SearchProvider } from '@heyclaude/web-runtime/search/context/search-provider';
 import { SearchBar } from '@heyclaude/web-runtime/search/components/search-bar';
 import { SearchResults } from '@heyclaude/web-runtime/search/components/search-results';
@@ -100,22 +100,20 @@ export function ContentListSearchClient<T extends DisplayableContent>({
       defaultFilters={category ? { category } : {}}
     >
       <div className="space-y-6">
-        <SearchBar
-          placeholder={searchPlaceholder}
-          variant="default"
-          size="lg"
-        />
+        <SearchBar placeholder={searchPlaceholder} variant="default" size="lg" />
 
-        <Suspense fallback={<div className="text-muted-foreground p-4 text-center">Loading filters...</div>}>
+        <Suspense
+          fallback={<div className="text-muted-foreground p-4 text-center">Loading filters...</div>}
+        >
           <SearchFilters />
         </Suspense>
 
-        <Suspense fallback={<div className="text-muted-foreground p-8 text-center">Loading search results...</div>}>
-          <SearchResults
-            showCategory
-            showActions
-            onAuthRequired={handleAuthRequired}
-          />
+        <Suspense
+          fallback={
+            <div className="text-muted-foreground p-8 text-center">Loading search results...</div>
+          }
+        >
+          <SearchResults showCategory showActions onAuthRequired={handleAuthRequired} />
         </Suspense>
       </div>
     </SearchProvider>

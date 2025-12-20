@@ -3,7 +3,7 @@ import { setupTestWithErrorTracking } from '../../../../config/tests/utils/error
 
 /**
  * Comprehensive Navigation E2E Tests
- * 
+ *
  * Tests ALL navigation functionality across all breakpoints:
  * - Main navigation (desktop, tablet, mobile)
  * - Sub-menu bar (breadcrumbs, search, pinboard, GitHub Stars, Explore dropdown)
@@ -34,7 +34,7 @@ test.describe('Navigation', () => {
       ],
     });
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -69,9 +69,9 @@ test.describe('Navigation', () => {
     });
 
     test('should have Explore dropdown in sub-menu bar', async ({ page }) => {
-      const exploreButton = page.getByRole('button', { name: /explore/i }).or(
-        page.locator('button:has-text("Explore")')
-      );
+      const exploreButton = page
+        .getByRole('button', { name: /explore/i })
+        .or(page.locator('button:has-text("Explore")'));
       await expect(exploreButton.first()).toBeVisible();
     });
   });
@@ -86,9 +86,7 @@ test.describe('Navigation', () => {
       await page.waitForTimeout(1000); // Wait for drawer animation
 
       // Check if drawer is open (Sheet component)
-      const drawer = page.locator('[role="dialog"]').or(
-        page.locator('[data-state="open"]')
-      );
+      const drawer = page.locator('[role="dialog"]').or(page.locator('[data-state="open"]'));
       await expect(drawer).toBeVisible();
 
       // Check if pinboard title is visible
@@ -106,7 +104,10 @@ test.describe('Navigation', () => {
       await expect(drawer).toBeVisible();
 
       // Should show either pinned items or empty state
-      const hasContent = await page.getByText(/pinned for later/i).isVisible().catch(() => false);
+      const hasContent = await page
+        .getByText(/pinned for later/i)
+        .isVisible()
+        .catch(() => false);
       expect(hasContent).toBe(true);
     });
 
@@ -116,14 +117,15 @@ test.describe('Navigation', () => {
       await page.waitForTimeout(1000);
 
       // Find and click close button
-      const closeButton = page.getByRole('button', { name: /close/i }).or(
-        page.locator('button[aria-label*="close" i]')
-      ).first();
-      
+      const closeButton = page
+        .getByRole('button', { name: /close/i })
+        .or(page.locator('button[aria-label*="close" i]'))
+        .first();
+
       if (await closeButton.isVisible().catch(() => false)) {
         await closeButton.click();
         await page.waitForTimeout(500);
-        
+
         // Drawer should be closed
         const drawer = page.locator('[role="dialog"][data-state="open"]');
         await expect(drawer).not.toBeVisible();
@@ -140,7 +142,7 @@ test.describe('Navigation', () => {
       if (await backdrop.isVisible().catch(() => false)) {
         await backdrop.click({ position: { x: 10, y: 10 } });
         await page.waitForTimeout(500);
-        
+
         // Drawer should be closed
         const drawer = page.locator('[role="dialog"][data-state="open"]');
         await expect(drawer).not.toBeVisible();
@@ -175,9 +177,9 @@ test.describe('Navigation', () => {
       await page.waitForTimeout(1500); // Wait for dialog animation
 
       // Check if command dialog is open
-      const commandDialog = page.locator('[role="dialog"]').or(
-        page.locator('input[placeholder*="Search navigation" i]')
-      );
+      const commandDialog = page
+        .locator('[role="dialog"]')
+        .or(page.locator('input[placeholder*="Search navigation" i]'));
       await expect(commandDialog).toBeVisible();
 
       // Check if search input is visible
@@ -191,11 +193,11 @@ test.describe('Navigation', () => {
       await page.waitForTimeout(1500);
 
       // Check for command menu sections
-      const primaryNav = page.getByText(/primary navigation/i).or(
-        page.locator('[role="group"]:has-text("Primary")')
-      );
+      const primaryNav = page
+        .getByText(/primary navigation/i)
+        .or(page.locator('[role="group"]:has-text("Primary")'));
       const hasPrimaryNav = await primaryNav.isVisible().catch(() => false);
-      
+
       // Should have at least search input visible
       const searchInput = page.locator('input[placeholder*="Search navigation" i]');
       await expect(searchInput).toBeVisible();
@@ -223,13 +225,13 @@ test.describe('Navigation', () => {
       } else {
         await page.keyboard.press('Control+k');
       }
-      
+
       await page.waitForTimeout(1500);
 
       // Command dialog should be open
-      const commandDialog = page.locator('[role="dialog"]').or(
-        page.locator('input[placeholder*="Search navigation" i]')
-      );
+      const commandDialog = page
+        .locator('[role="dialog"]')
+        .or(page.locator('input[placeholder*="Search navigation" i]'));
       await expect(commandDialog).toBeVisible();
     });
 
@@ -257,7 +259,7 @@ test.describe('Navigation', () => {
 
       const searchInput = page.locator('input[placeholder*="Search navigation" i]');
       await expect(searchInput).toBeVisible();
-      
+
       // Type in search input
       await searchInput.fill('agents');
       await page.waitForTimeout(500);
@@ -275,12 +277,9 @@ test.describe('Navigation', () => {
 
     test('should open GitHub in new tab when clicked', async ({ page, context }) => {
       const githubButton = page.getByRole('button', { name: /star us on github/i });
-      
+
       // Set up promise to wait for new page
-      const [newPage] = await Promise.all([
-        context.waitForEvent('page'),
-        githubButton.click(),
-      ]);
+      const [newPage] = await Promise.all([context.waitForEvent('page'), githubButton.click()]);
 
       // Should open GitHub
       await newPage.waitForLoadState();
@@ -291,24 +290,23 @@ test.describe('Navigation', () => {
 
   test.describe('Explore Dropdown', () => {
     test('should display Explore dropdown button', async ({ page }) => {
-      const exploreButton = page.getByRole('button', { name: /explore/i }).or(
-        page.locator('button:has-text("Explore")')
-      );
+      const exploreButton = page
+        .getByRole('button', { name: /explore/i })
+        .or(page.locator('button:has-text("Explore")'));
       await expect(exploreButton.first()).toBeVisible();
     });
 
     test('should open Explore dropdown when clicked', async ({ page }) => {
-      const exploreButton = page.getByRole('button', { name: /explore/i }).or(
-        page.locator('button:has-text("Explore")')
-      ).first();
-      
+      const exploreButton = page
+        .getByRole('button', { name: /explore/i })
+        .or(page.locator('button:has-text("Explore")'))
+        .first();
+
       await exploreButton.click();
       await page.waitForTimeout(500);
 
       // Check if dropdown content is visible
-      const dropdownContent = page.locator('[role="menu"]').or(
-        page.locator('[data-state="open"]')
-      );
+      const dropdownContent = page.locator('[role="menu"]').or(page.locator('[data-state="open"]'));
       const isVisible = await dropdownContent.isVisible().catch(() => false);
       expect(isVisible).toBe(true);
     });
@@ -316,23 +314,21 @@ test.describe('Navigation', () => {
 
   test.describe('Main Navigation', () => {
     test('should display main navigation', async ({ page }) => {
-      const nav = page.locator('nav[aria-label*="navigation" i]').or(
-        page.locator('nav').first()
-      );
+      const nav = page.locator('nav[aria-label*="navigation" i]').or(page.locator('nav').first());
       await expect(nav).toBeVisible();
     });
 
     test('should display logo', async ({ page }) => {
-      const logo = page.getByRole('link', { name: /heyclaude.*homepage/i }).or(
-        page.locator('a[href="/"]').first()
-      );
+      const logo = page
+        .getByRole('link', { name: /heyclaude.*homepage/i })
+        .or(page.locator('a[href="/"]').first());
       await expect(logo).toBeVisible();
     });
 
     test('should navigate to homepage when logo is clicked', async ({ page }) => {
-      const logo = page.getByRole('link', { name: /heyclaude.*homepage/i }).or(
-        page.locator('a[href="/"]').first()
-      );
+      const logo = page
+        .getByRole('link', { name: /heyclaude.*homepage/i })
+        .or(page.locator('a[href="/"]').first());
       await logo.click();
       await page.waitForLoadState('networkidle');
       expect(page.url()).toBe('http://localhost:3000/');
@@ -373,9 +369,9 @@ test.describe('Navigation', () => {
       await page.waitForLoadState('networkidle');
 
       // Mobile menu button should be visible
-      const mobileMenuButton = page.getByRole('button', { name: /open mobile menu/i }).or(
-        page.locator('button[aria-label*="menu" i]')
-      );
+      const mobileMenuButton = page
+        .getByRole('button', { name: /open mobile menu/i })
+        .or(page.locator('button[aria-label*="menu" i]'));
       await expect(mobileMenuButton).toBeVisible();
     });
 
@@ -385,16 +381,14 @@ test.describe('Navigation', () => {
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(1000);
 
-      const mobileMenuButton = page.getByRole('button', { name: /open mobile menu/i }).or(
-        page.locator('button[aria-label*="menu" i]')
-      );
+      const mobileMenuButton = page
+        .getByRole('button', { name: /open mobile menu/i })
+        .or(page.locator('button[aria-label*="menu" i]'));
       await mobileMenuButton.click();
       await page.waitForTimeout(1000);
 
       // Mobile menu sheet should be visible
-      const mobileMenu = page.locator('[role="dialog"]').or(
-        page.locator('[data-state="open"]')
-      );
+      const mobileMenu = page.locator('[role="dialog"]').or(page.locator('[data-state="open"]'));
       await expect(mobileMenu).toBeVisible();
     });
   });
@@ -407,11 +401,11 @@ test.describe('Navigation', () => {
 
     test('should navigate to main content when skip link is activated', async ({ page }) => {
       const skipLink = page.getByRole('link', { name: /skip to main content/i });
-      
+
       // Focus the link (it's sr-only until focused)
       await skipLink.focus();
       await skipLink.click();
-      
+
       // Should scroll to main content
       const mainContent = page.locator('#main-content');
       await expect(mainContent).toBeVisible();
@@ -427,16 +421,18 @@ test.describe('Navigation', () => {
       // Check if backdrop is visible (should not be)
       const backdrop = page.locator('[data-state="open"][class*="bg-black"]').first();
       const backdropVisible = await backdrop.isVisible().catch(() => false);
-      
+
       // Backdrop should not be visible unless a modal is actually open
       if (backdropVisible) {
         // If backdrop is visible, a modal should also be visible
         const modal = page.locator('[role="dialog"]');
         const modalVisible = await modal.isVisible().catch(() => false);
-        
+
         // If backdrop is visible but no modal, that's the bug
         if (!modalVisible) {
-          throw new Error('Page is blurred (backdrop visible) but no modal is open - this is the newsletter modal bug');
+          throw new Error(
+            'Page is blurred (backdrop visible) but no modal is open - this is the newsletter modal bug'
+          );
         }
       }
     });

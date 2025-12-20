@@ -1,14 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import type { MockPrismaClient } from '../test-utils/prisma-mock.ts';
 import { ChangelogService } from './changelog.ts';
+import { prisma } from '../prisma/client.ts';
+import type { PrismaClient } from '@prisma/client';
 
-// Mock the prisma singleton with Prismock (async to avoid Node.js TS processing issue)
-vi.mock('../prisma/client.ts', async () => {
-  const { setupPrismockMockAsync } = await import('../test-utils/prisma-mock.ts');
-  return {
-    prisma: await setupPrismockMockAsync(),
-  };
-});
+// Prismock is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from '../prisma/client.ts' will automatically use PrismockClient
 
 // Mock the RPC error logging utility
 vi.mock('../utils/rpc-error-logging.ts', () => ({
@@ -22,15 +18,40 @@ vi.mock('../utils/request-cache.ts', () => ({
 
 describe('ChangelogService', () => {
   let changelogService: ChangelogService;
-  let prismock: MockPrismaClient;
+  let prismock: PrismaClient;
+  let queryRawUnsafeSpy: ReturnType<typeof vi.fn>;
+
+  /**
+   * Helper to safely mock Prismock model methods
+   */
+  function mockPrismockMethod<T>(
+    model: any,
+    method: string,
+    returnValue: T
+  ): ReturnType<typeof vi.fn> {
+    if (!model) {
+      throw new Error(`Prismock model does not exist - check if model name matches schema.prisma`);
+    }
+    const mockFn = vi.fn().mockResolvedValue(returnValue as any);
+    model[method] = mockFn;
+    return mockFn;
+  }
 
   beforeEach(async () => {
-    // Get the mocked prisma instance (Prismock)
-    const { prisma } = await import('../prisma/client.ts');
-    prismock = prisma as MockPrismaClient;
+    // Get the prisma instance (automatically PrismockClient via __mocks__/@prisma/client.ts)
+    prismock = prisma;
 
     // Reset Prismock data before each test
-    prismock.reset();
+    if ('reset' in prismock && typeof prismock.reset === 'function') {
+      prismock.reset();
+    }
+
+    // Prismock doesn't support $queryRawUnsafe, so we add it as a mock function
+    queryRawUnsafeSpy = vi.fn().mockResolvedValue([]);
+    (prismock as any).$queryRawUnsafe = queryRawUnsafeSpy;
+
+    // Ensure Prismock models are initialized
+    void prismock.changelog;
 
     changelogService = new ChangelogService();
   });
@@ -42,23 +63,28 @@ describe('ChangelogService', () => {
         total_count: 0,
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await changelogService.getChangelogOverview({
         p_limit: 10,
         p_offset: 0,
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_changelog_overview')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key order: p_category (optional), p_limit, p_offset, p_published_only (optional)
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('get_changelog_overview'),
+        10, // p_limit
+        0 // p_offset
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
 
     it('should throw error when RPC fails', async () => {
       const mockError = new Error('Database error');
 
-      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
+      queryRawUnsafeSpy.mockRejectedValue(mockError);
 
       await expect(
         changelogService.getChangelogOverview({
@@ -77,20 +103,24 @@ describe('ChangelogService', () => {
         content: 'Test changelog content',
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await changelogService.getChangelogDetail({
         p_slug: '1-2-0-2025-12-07',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_changelog_detail')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key order: p_slug
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('get_changelog_detail'),
+        '1-2-0-2025-12-07' // p_slug
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
 
     it('should handle null data gracefully', async () => {
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([] as any);
+      queryRawUnsafeSpy.mockResolvedValue([] as any);
 
       const result = await changelogService.getChangelogDetail({
         p_slug: 'non-existent',
@@ -107,14 +137,17 @@ describe('ChangelogService', () => {
         category_stats: [],
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await changelogService.getChangelogWithCategoryStats({
         p_limit: 10,
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_changelog_with_category_stats')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key order: p_limit
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('get_changelog_with_category_stats'),
+        10 // p_limit
       );
       expect(result).toEqual(mockData);
     });
@@ -130,7 +163,7 @@ describe('ChangelogService', () => {
         },
       ];
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      queryRawUnsafeSpy.mockResolvedValue(mockData as any);
 
       const result = await changelogService.upsertChangelogEntry({
         p_version: '1.2.0',
@@ -138,14 +171,21 @@ describe('ChangelogService', () => {
         p_content: 'Test content',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('upsert_changelog_entry')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key insertion order: p_version, p_date, p_content
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('upsert_changelog_entry'),
+        '1.2.0', // p_version (first in insertion order)
+        '2025-12-07', // p_date
+        'Test content' // p_content
       );
+      // RPC returns TABLE(...) which is an array, callRpc with returnType: 'array' keeps it as array
+      // Service then unwraps first element
       expect(result).toEqual(mockData[0]);
     });
 
     it('should return null when entry not found', async () => {
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([] as any);
+      queryRawUnsafeSpy.mockResolvedValue([] as any);
 
       const result = await changelogService.upsertChangelogEntry({
         p_version: '1.2.0',
@@ -166,7 +206,7 @@ describe('ChangelogService', () => {
         },
       ];
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      queryRawUnsafeSpy.mockResolvedValue(mockData as any);
 
       const result = await changelogService.syncChangelogEntry({
         p_version: '1.2.0',
@@ -174,38 +214,38 @@ describe('ChangelogService', () => {
         p_content: 'Test content',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('sync_changelog_entry')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key insertion order: p_version, p_date, p_content
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('sync_changelog_entry'),
+        '1.2.0', // p_version (first in insertion order)
+        '2025-12-07', // p_date
+        'Test content' // p_content
       );
+      // RPC returns TABLE(...) which is an array, callRpc with returnType: 'array' keeps it as array
+      // Service then unwraps first element
       expect(result).toEqual(mockData[0]);
     });
   });
 
   describe('getPublishedChangelogSlugs', () => {
     it('should return published changelog slugs', async () => {
-      const mockData = [
-        { slug: '1-2-0-2025-12-07' },
-        { slug: '1-1-0-2025-12-01' },
-      ];
+      const mockData = [{ slug: '1-2-0-2025-12-07' }, { slug: '1-1-0-2025-12-01' }];
 
       // This uses Prisma directly, not RPC
-      vi.mocked(prismock.changelog_entries.findMany).mockResolvedValue(
-        mockData as any
-      );
+      mockPrismockMethod(prismock.changelog, 'findMany', mockData);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
 
       const result = await changelogService.getPublishedChangelogSlugs(10);
 
-      expect(prismock.changelog_entries.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { published: true },
-          select: { slug: true },
-          orderBy: { date: 'desc' },
-          take: 10,
-        })
-      );
+      expect(prismock.changelog.findMany).toHaveBeenCalledWith({
+        where: { published: true },
+        select: { slug: true },
+        orderBy: { release_date: 'desc' },
+        take: 10,
+      });
       expect(result).toEqual(['1-2-0-2025-12-07', '1-1-0-2025-12-01']);
     });
   });

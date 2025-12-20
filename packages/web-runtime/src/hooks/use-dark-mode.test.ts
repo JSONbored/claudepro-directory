@@ -98,9 +98,7 @@ describe('useDarkMode', () => {
   it('should not apply dark class when applyDarkClass is false', () => {
     mockMediaQueryList.matches = true;
 
-    renderHook(() =>
-      useDarkMode({ applyDarkClass: false } as UseDarkModeOptions)
-    );
+    renderHook(() => useDarkMode({ applyDarkClass: false } as UseDarkModeOptions));
 
     expect(document.documentElement.classList.contains('dark')).toBe(false);
   });
@@ -212,9 +210,7 @@ describe('useDarkMode', () => {
     // @ts-expect-error - Intentionally setting window to undefined for SSR test
     global.window = undefined;
 
-    const { result } = renderHook(() =>
-      useDarkMode({ defaultValue: false } as UseDarkModeOptions)
-    );
+    const { result } = renderHook(() => useDarkMode({ defaultValue: false } as UseDarkModeOptions));
 
     expect(result.current.isDarkMode).toBe(false);
 
@@ -227,9 +223,7 @@ describe('useDarkMode', () => {
       throw new Error('matchMedia not supported');
     });
 
-    const { result } = renderHook(() =>
-      useDarkMode({ defaultValue: false } as UseDarkModeOptions)
-    );
+    const { result } = renderHook(() => useDarkMode({ defaultValue: false } as UseDarkModeOptions));
 
     expect(result.current.isDarkMode).toBe(false);
   });

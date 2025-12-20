@@ -21,9 +21,11 @@ interface OAuthConsentClientProps {
     client: {
       client_id: string;
       name: string;
+      description?: string | null;
     };
     redirect_uri: string;
     scopes?: null | string[];
+    resource?: string | null; // RFC 8707 resource parameter (MCP server URL)
   };
   authorizationId: string;
 }
@@ -159,12 +161,22 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
   // Map scope names to user-friendly descriptions
   const scopeDescriptions: Record<string, string> = {
     email: 'Access your email address',
-    'mcp:resources': 'Access MCP resources on your behalf',
-    'mcp:tools': 'Access MCP tools on your behalf',
+    'mcp:resources': 'Access MCP resources on your behalf (content exports, category data, sitewide data)',
+    'mcp:tools': 'Access MCP tools on your behalf (search, browse, submit content, manage bookmarks)',
     openid: 'Access your basic profile information',
     phone: 'Access your phone number',
     profile: 'Access your profile information (name, picture)',
   };
+
+  // Determine if this is an MCP client request
+  const isMcpClient = authDetails.resource?.includes('/mcp') || 
+                      authDetails.scopes?.some(scope => scope.startsWith('mcp:')) ||
+                      false;
+
+  // MCP-specific access description
+  const mcpAccessDescription = isMcpClient
+    ? 'This AI agent will be able to access the Claude Pro Directory through the Model Context Protocol (MCP). This includes searching content, browsing categories, accessing resources, and submitting new content on your behalf.'
+    : null;
 
   return (
     <div className="mx-auto flex min-h-[400px] max-w-2xl flex-col gap-4 p-6">
@@ -185,10 +197,33 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
             <h2 className="flex items-center gap-1 text-xl font-semibold">
               <span>{authDetails.client.name}</span>
             </h2>
-            <UnifiedBadge className="text-xs" style="secondary" variant="base">
-              OAuth Client
-            </UnifiedBadge>
+            <div className="flex items-center gap-2">
+              {isMcpClient && (
+                <UnifiedBadge className="text-xs" style="default" variant="base">
+                  MCP Client
+                </UnifiedBadge>
+              )}
+              <UnifiedBadge className="text-xs" style="secondary" variant="base">
+                OAuth Client
+              </UnifiedBadge>
+            </div>
           </div>
+
+          {/* Client Description (if available) */}
+          {authDetails.client.description && (
+            <p className="text-muted-foreground text-sm">{authDetails.client.description}</p>
+          )}
+
+          {/* MCP Access Description */}
+          {mcpAccessDescription && (
+            <div className="bg-accent/10 border-accent/20 flex items-start gap-2 rounded-lg border p-3">
+              <Shield aria-hidden="true" className="text-accent mt-0.5 h-4 w-4 flex-shrink-0" />
+              <div className="flex flex-1 flex-col gap-1">
+                <p className="text-sm font-semibold">What this AI agent can access:</p>
+                <p className="text-muted-foreground text-xs">{mcpAccessDescription}</p>
+              </div>
+            </div>
+          )}
 
           <div className="text-muted-foreground flex flex-col gap-1 text-sm">
             <div className="flex items-center gap-1">
@@ -196,6 +231,12 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
               <span className="font-medium">Redirect URI:</span>
               <span className="font-mono text-xs break-all">{authDetails.redirect_uri}</span>
             </div>
+            {authDetails.resource && (
+              <div className="flex items-center gap-1">
+                <span className="font-medium">Resource:</span>
+                <span className="font-mono text-xs break-all">{authDetails.resource}</span>
+              </div>
+            )}
             <div className="flex items-center gap-1">
               <span className="font-medium">Client ID:</span>
               <span className="font-mono text-xs break-all">{authDetails.client.client_id}</span>

@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReviewAggregateRating } from '@heyclaude/database-types/postgres-types';
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import type { GetReviewsWithStatsReturns } from '@heyclaude/database-types/postgres-types';
 import { deleteReview } from '@heyclaude/web-runtime/actions/reviews-crud';
 import { getReviewsWithStats } from '@heyclaude/web-runtime/actions/content';
@@ -14,15 +14,7 @@ import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { Edit, Star, ThumbsUp, Trash } from '@heyclaude/web-runtime/icons';
 import { type ReviewSectionProps } from '@heyclaude/web-runtime/types/component.types';
-import {
-  toasts,
-  BaseCard,
-  Button,
-  Card,
-  Label,
-  StarDisplay,
-  cn,
-} from '@heyclaude/web-runtime/ui';
+import { toasts, BaseCard, Button, Card, Label, StarDisplay, cn } from '@heyclaude/web-runtime/ui';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useState, memo } from 'react';
 
@@ -48,10 +40,12 @@ export function ReviewListSection({
   currentUserId,
 }: Omit<ReviewSectionProps, 'variant'>) {
   const sortSelectId = useId(); // Generate unique ID for sort select
-  const [reviews, setReviews] = useState<
-    NonNullable<GetReviewsWithStatsReturns>['reviews']
-  >([]);
-  const { value: isLoading, setTrue: setIsLoadingTrue, setFalse: setIsLoadingFalse } = useBoolean(true);
+  const [reviews, setReviews] = useState<NonNullable<GetReviewsWithStatsReturns>['reviews']>([]);
+  const {
+    value: isLoading,
+    setTrue: setIsLoadingTrue,
+    setFalse: setIsLoadingFalse,
+  } = useBoolean(true);
   const [sortBy, setSortBy] = useState<'helpful' | 'rating_high' | 'rating_low' | 'recent'>(
     'recent'
   );
@@ -179,154 +173,185 @@ export function ReviewListSection({
   };
 
   // Handle delete
-  const handleDelete = useCallback(async (reviewId: string) => {
-    if (!isMounted()) return;
-    
-    // Proactive auth check - show modal before attempting action
-    if (status === 'loading') {
-      // Wait for auth check to complete
-      return;
-    }
-
-    if (!user) {
-      // User is not authenticated - show auth modal
-      if (isMounted()) {
-        openAuthModal({
-          valueProposition: 'Sign in to interact with reviews',
-          redirectTo: pathname ?? undefined,
-        });
-      }
-      return;
-    }
-
-    // User is authenticated - proceed with delete action
-    try {
-      const result = await deleteReview({ delete_id: reviewId });
-      if (result?.data?.success && isMounted()) {
-        toasts.success.itemDeleted('Review');
-        setReviews((prev) => (prev ?? []).filter((r) => r.id !== reviewId));
-        // Refresh stats after deletion
-        loadReviewsWithStats(1, sortBy).catch((error) => {
-          logUnhandledPromise('ReviewListSection refresh after delete', error, {
-            contentType,
-            contentSlug,
-          });
-        });
-        router.refresh();
-      }
-    } catch (error) {
+  const handleDelete = useCallback(
+    async (reviewId: string) => {
       if (!isMounted()) return;
-      const normalized = normalizeError(error, 'Failed to delete review');
-      logClientWarn(
-        '[Reviews] Delete failed',
-        normalized,
-        'ReviewListSection.handleDelete',
-        {
+
+      // Proactive auth check - show modal before attempting action
+      if (status === 'loading') {
+        // Wait for auth check to complete
+        return;
+      }
+
+      if (!user) {
+        // User is not authenticated - show auth modal
+        if (isMounted()) {
+          openAuthModal({
+            valueProposition: 'Sign in to interact with reviews',
+            redirectTo: pathname ?? undefined,
+          });
+        }
+        return;
+      }
+
+      // User is authenticated - proceed with delete action
+      try {
+        const result = await deleteReview({ delete_id: reviewId });
+        if (result?.data?.success && isMounted()) {
+          toasts.success.itemDeleted('Review');
+          setReviews((prev) => (prev ?? []).filter((r) => r.id !== reviewId));
+          // Refresh stats after deletion
+          loadReviewsWithStats(1, sortBy).catch((error) => {
+            logUnhandledPromise('ReviewListSection refresh after delete', error, {
+              contentType,
+              contentSlug,
+            });
+          });
+          router.refresh();
+        }
+      } catch (error) {
+        if (!isMounted()) return;
+        const normalized = normalizeError(error, 'Failed to delete review');
+        logClientWarn('[Reviews] Delete failed', normalized, 'ReviewListSection.handleDelete', {
           component: 'ReviewListSection',
           action: 'delete-review',
           category: 'reviews',
           reviewId,
           contentType,
           contentSlug,
-        }
-      );
-      // Check if error is auth-related and show modal if so
-      const errorMessage = normalized.message;
-      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
-        if (isMounted()) {
-          openAuthModal({
-            valueProposition: 'Sign in to interact with reviews',
-            redirectTo: pathname ?? undefined,
-          });
-        }
-      } else {
-        // Non-auth errors - show toast with retry option
-        if (isMounted()) {
-          toasts.raw.error('Failed to delete review', {
-            action: {
-              label: 'Retry',
-              onClick: () => {
-                handleDelete(reviewId);
+        });
+        // Check if error is auth-related and show modal if so
+        const errorMessage = normalized.message;
+        if (
+          errorMessage.includes('signed in') ||
+          errorMessage.includes('auth') ||
+          errorMessage.includes('unauthorized')
+        ) {
+          if (isMounted()) {
+            openAuthModal({
+              valueProposition: 'Sign in to interact with reviews',
+              redirectTo: pathname ?? undefined,
+            });
+          }
+        } else {
+          // Non-auth errors - show toast with retry option
+          if (isMounted()) {
+            toasts.raw.error('Failed to delete review', {
+              action: {
+                label: 'Retry',
+                onClick: () => {
+                  handleDelete(reviewId);
+                },
               },
-            },
-          });
+            });
+          }
         }
       }
-    }
-  }, [user, status, openAuthModal, pathname, sortBy, contentType, contentSlug, router, loadReviewsWithStats, isMounted]);
+    },
+    [
+      user,
+      status,
+      openAuthModal,
+      pathname,
+      sortBy,
+      contentType,
+      contentSlug,
+      router,
+      loadReviewsWithStats,
+      isMounted,
+    ]
+  );
 
   // Handle mark helpful
-  const handleMarkHelpful = useCallback(async (reviewId: string) => {
-    if (!isMounted()) return;
-    
-    // Proactive auth check - show modal before attempting action
-    if (status === 'loading') {
-      // Wait for auth check to complete
-      return;
-    }
-
-    if (!user) {
-      // User is not authenticated - show auth modal
-      if (isMounted()) {
-        openAuthModal({
-          valueProposition: 'Sign in to interact with reviews',
-          redirectTo: pathname ?? undefined,
-        });
-      }
-      return;
-    }
-
-    // User is authenticated - proceed with mark helpful action
-    try {
-      await markReviewHelpful({ review_id: reviewId, helpful: true });
-      if (isMounted()) {
-        toasts.success.actionCompleted('mark as helpful');
-        // Refresh reviews to update helpful count
-        loadReviewsWithStats(page, sortBy).catch((error) => {
-          logUnhandledPromise('ReviewListSection refresh after mark helpful', error, {
-            contentType,
-            contentSlug,
-          });
-        });
-      }
-    } catch (error) {
+  const handleMarkHelpful = useCallback(
+    async (reviewId: string) => {
       if (!isMounted()) return;
-      const normalized = normalizeError(error, 'Failed to mark review as helpful');
-      logClientWarn(
-        '[Reviews] Mark helpful failed',
-        normalized,
-        'ReviewListSection.handleMarkHelpful',
-        {
-          component: 'ReviewListSection',
-          action: 'mark-helpful',
-          category: 'reviews',
-          reviewId,
-        }
-      );
-      // Check if error is auth-related and show modal if so
-      const errorMessage = normalized.message;
-      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+
+      // Proactive auth check - show modal before attempting action
+      if (status === 'loading') {
+        // Wait for auth check to complete
+        return;
+      }
+
+      if (!user) {
+        // User is not authenticated - show auth modal
         if (isMounted()) {
           openAuthModal({
             valueProposition: 'Sign in to interact with reviews',
             redirectTo: pathname ?? undefined,
           });
         }
-      } else {
-        // Non-auth errors - show toast with retry option
+        return;
+      }
+
+      // User is authenticated - proceed with mark helpful action
+      try {
+        await markReviewHelpful({ review_id: reviewId, helpful: true });
         if (isMounted()) {
-          toasts.raw.error('Failed to mark review as helpful', {
-            action: {
-              label: 'Retry',
-              onClick: () => {
-                handleMarkHelpful(reviewId);
-              },
-            },
+          toasts.success.actionCompleted('mark as helpful');
+          // Refresh reviews to update helpful count
+          loadReviewsWithStats(page, sortBy).catch((error) => {
+            logUnhandledPromise('ReviewListSection refresh after mark helpful', error, {
+              contentType,
+              contentSlug,
+            });
           });
         }
+      } catch (error) {
+        if (!isMounted()) return;
+        const normalized = normalizeError(error, 'Failed to mark review as helpful');
+        logClientWarn(
+          '[Reviews] Mark helpful failed',
+          normalized,
+          'ReviewListSection.handleMarkHelpful',
+          {
+            component: 'ReviewListSection',
+            action: 'mark-helpful',
+            category: 'reviews',
+            reviewId,
+          }
+        );
+        // Check if error is auth-related and show modal if so
+        const errorMessage = normalized.message;
+        if (
+          errorMessage.includes('signed in') ||
+          errorMessage.includes('auth') ||
+          errorMessage.includes('unauthorized')
+        ) {
+          if (isMounted()) {
+            openAuthModal({
+              valueProposition: 'Sign in to interact with reviews',
+              redirectTo: pathname ?? undefined,
+            });
+          }
+        } else {
+          // Non-auth errors - show toast with retry option
+          if (isMounted()) {
+            toasts.raw.error('Failed to mark review as helpful', {
+              action: {
+                label: 'Retry',
+                onClick: () => {
+                  handleMarkHelpful(reviewId);
+                },
+              },
+            });
+          }
+        }
       }
-    }
-  }, [user, status, openAuthModal, pathname, page, sortBy, contentType, contentSlug, loadReviewsWithStats, isMounted]);
+    },
+    [
+      user,
+      status,
+      openAuthModal,
+      pathname,
+      page,
+      sortBy,
+      contentType,
+      contentSlug,
+      loadReviewsWithStats,
+      isMounted,
+    ]
+  );
 
   return (
     <div className="space-y-6">
@@ -440,7 +465,7 @@ export function ReviewListSection({
  */
 /**
  * ReviewCardItem - Memoized review card component
- * 
+ *
  * PERFORMANCE: Memoized to prevent re-renders when parent state changes.
  * Only re-renders when review data, editing state, or callbacks change.
  */

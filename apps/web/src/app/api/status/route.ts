@@ -37,7 +37,9 @@ import 'server-only';
 
 // OPTIMIZATION: Removed unused imports - factory handles errors automatically
 import {
-  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+  createCachedApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import {
   errorResponseSchema,

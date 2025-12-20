@@ -87,7 +87,7 @@ export const CLAUDE_DESKTOP_PATHS = {
 
 /** Animation settings */
 export const UI_ANIMATION = {
-  'easing': 'ease-in-out',
+  easing: 'ease-in-out',
   'button.hover_scale': 1.02,
   'card.hover_lift': '2px',
   // Animation ticker
@@ -123,14 +123,14 @@ export const PAGINATION_CONFIG = {
 
 /** Navigation settings */
 export const NAVIGATION_CONFIG = {
-  'backdrop_blur': '12px',
-  'scroll_threshold': 20,
-  'animation_duration': 300,
-  'height_default_mobile': 'h-14',
-  'height_default_desktop': 'h-16',
-  'height_scrolled_mobile': 'h-11',
-  'height_scrolled_desktop': 'h-12',
-  'mobile_swipe_threshold': 100,
+  backdrop_blur: '12px',
+  scroll_threshold: 20,
+  animation_duration: 300,
+  height_default_mobile: 'h-14',
+  height_default_desktop: 'h-16',
+  height_scrolled_mobile: 'h-11',
+  height_scrolled_desktop: 'h-12',
+  mobile_swipe_threshold: 100,
 } as const;
 
 /** Media query breakpoints */
@@ -166,9 +166,9 @@ export const COMPONENT_FLAGS = {
   'fab.show_search_button': true,
   'fab.show_scroll_to_top': true,
   'fab.show_notifications': true,
-  'notifications_provider': true,
-  'notifications_sheet': true,
-  'notifications_toasts': true,
+  notifications_provider: true,
+  notifications_sheet: true,
+  notifications_toasts: true,
   'copy_email.modal_enabled': true,
 } as const;
 
@@ -188,14 +188,14 @@ export const FEATURE_FLAGS = {
   'intersection_observer.default_root_margin': '0px',
   'analytics.vercel_enabled': false,
   // Hero Section Feature Flags
-  'hero.partners_marquee.enabled': false,  // Partner marquee in hero section (disabled by default until logos are ready)
+  'hero.partners_marquee.enabled': false, // Partner marquee in hero section (disabled by default until logos are ready)
   // BetterStack Monitoring Feature Flags
-  'monitoring.betterstack.enabled': true,  // Master switch - disable all BetterStack monitoring
-  'monitoring.betterstack.inngest.enabled': true,  // Inngest function monitoring
-  'monitoring.betterstack.inngest.critical_failures': true,  // onFailure callbacks
-  'monitoring.betterstack.inngest.cron_success': true,  // Success heartbeats for cron functions
-  'monitoring.betterstack.api.endpoints': true,  // API endpoint monitoring
-  'monitoring.betterstack.vercel.cron': true,  // Existing Vercel cron monitoring (keep existing)
+  'monitoring.betterstack.enabled': true, // Master switch - disable all BetterStack monitoring
+  'monitoring.betterstack.inngest.enabled': true, // Inngest function monitoring
+  'monitoring.betterstack.inngest.critical_failures': true, // onFailure callbacks
+  'monitoring.betterstack.inngest.cron_success': true, // Success heartbeats for cron functions
+  'monitoring.betterstack.api.endpoints': true, // API endpoint monitoring
+  'monitoring.betterstack.vercel.cron': true, // Existing Vercel cron monitoring (keep existing)
 } as const;
 
 /** Security settings */
@@ -234,19 +234,19 @@ export const LOGGER_CONFIG = {
 
 /** UI timeouts */
 export const UI_TIMEOUTS = {
-  'debounce_ms': 150,
-  'tooltip_ms': 300,
-  'animation_ms': 300,
-  'transition_ms': 200,
-  'prefetch_delay_ms': 300,
-  'button_success_duration_ms': 2000,
-  'clipboard_reset_delay_ms': 2000,
-  'modal_close_delay_ms': 300,
-  'dropdown_open_delay_ms': 200,
-  'hover_activate_delay_ms': 150,
-  'scroll_direction_threshold_px': 100,
-  'scroll_hysteresis_px': 10,
-  'form_debounce_ms': 300,
+  debounce_ms: 150,
+  tooltip_ms: 300,
+  animation_ms: 300,
+  transition_ms: 200,
+  prefetch_delay_ms: 300,
+  button_success_duration_ms: 2000,
+  clipboard_reset_delay_ms: 2000,
+  modal_close_delay_ms: 300,
+  dropdown_open_delay_ms: 200,
+  hover_activate_delay_ms: 150,
+  scroll_direction_threshold_px: 100,
+  scroll_hysteresis_px: 10,
+  form_debounce_ms: 300,
   'window_focus.blur_timeout_ms': 100,
   'window_size.debounce_ms': 150,
   'window_size.throttle_ms': 100,
@@ -302,46 +302,46 @@ export const QUEUE_CONFIG = {
 
 /** Toast notification messages */
 export const TOAST_MESSAGES = {
-  'profile_updated': 'Profile updated successfully',
-  'signed_out': 'Signed out successfully',
-  'submission_created_title': 'Submission Created!',
-  'submission_created_description': 'Your {contentType} has been submitted for review.',
-  'template_applied_title': 'Template Applied!',
-  'template_applied_description': 'Form has been pre-filled. Customize as needed.',
-  'copied': 'Copied to clipboard!',
-  'link_copied': 'Link copied to clipboard!',
-  'code_copied': 'Code copied to clipboard!',
-  'screenshot_copied': 'Screenshot copied & downloaded!',
-  'bookmark_added': 'Bookmark added',
-  'bookmark_removed': 'Bookmark removed',
-  'changes_saved': 'Changes saved successfully',
-  'save_failed': 'Failed to save. Please try again.',
-  'required_fields': 'Please fill in all required fields',
-  'auth_required': 'Please sign in to continue',
-  'permission_denied': 'You do not have permission to perform this action',
-  'submission_error_title': 'Submission Error',
-  'submission_error_description': 'Failed to submit. Please try again.',
-  'network_error': 'Network error. Please check your connection and try again.',
-  'server_error': 'Server error. Please try again later.',
-  'rate_limited': 'Too many requests. Please wait a moment and try again.',
-  'screenshot_failed': 'Failed to generate screenshot',
-  'profile_update_failed': 'Failed to update profile',
-  'vote_update_failed': 'Failed to update vote',
-  'coming_soon': 'Coming soon!',
-  'redirecting': 'Redirecting...',
-  'unsaved_changes': 'You have unsaved changes',
-  'slow_connection': 'Slow connection detected. This may take longer than usual.',
-  'saving': 'Saving...',
-  'processing': 'Processing...',
+  profile_updated: 'Profile updated successfully',
+  signed_out: 'Signed out successfully',
+  submission_created_title: 'Submission Created!',
+  submission_created_description: 'Your {contentType} has been submitted for review.',
+  template_applied_title: 'Template Applied!',
+  template_applied_description: 'Form has been pre-filled. Customize as needed.',
+  copied: 'Copied to clipboard!',
+  link_copied: 'Link copied to clipboard!',
+  code_copied: 'Code copied to clipboard!',
+  screenshot_copied: 'Screenshot copied & downloaded!',
+  bookmark_added: 'Bookmark added',
+  bookmark_removed: 'Bookmark removed',
+  changes_saved: 'Changes saved successfully',
+  save_failed: 'Failed to save. Please try again.',
+  required_fields: 'Please fill in all required fields',
+  auth_required: 'Please sign in to continue',
+  permission_denied: 'You do not have permission to perform this action',
+  submission_error_title: 'Submission Error',
+  submission_error_description: 'Failed to submit. Please try again.',
+  network_error: 'Network error. Please check your connection and try again.',
+  server_error: 'Server error. Please try again later.',
+  rate_limited: 'Too many requests. Please wait a moment and try again.',
+  screenshot_failed: 'Failed to generate screenshot',
+  profile_update_failed: 'Failed to update profile',
+  vote_update_failed: 'Failed to update vote',
+  coming_soon: 'Coming soon!',
+  redirecting: 'Redirecting...',
+  unsaved_changes: 'You have unsaved changes',
+  slow_connection: 'Slow connection detected. This may take longer than usual.',
+  saving: 'Saving...',
+  processing: 'Processing...',
 } as const;
 
 /** Email subject lines */
 export const EMAIL_SUBJECTS = {
-  'welcome': 'Welcome to Claude Pro Directory! 🎉',
-  'magic_link': 'Your Magic Link - Claude Pro Directory',
-  'password_reset': 'Reset Your Password - Claude Pro Directory',
-  'job_posted': 'Your Job Listing is Live!',
-  'collection_shared': 'Someone shared a collection with you!',
+  welcome: 'Welcome to Claude Pro Directory! 🎉',
+  magic_link: 'Your Magic Link - Claude Pro Directory',
+  password_reset: 'Reset Your Password - Claude Pro Directory',
+  job_posted: 'Your Job Listing is Live!',
+  collection_shared: 'Someone shared a collection with you!',
 } as const;
 
 // =============================================================================
@@ -351,18 +351,24 @@ export const EMAIL_SUBJECTS = {
 /** Newsletter CTA copy */
 export const NEWSLETTER_CTA = {
   'aggressive.headline': 'Join 500+ subscribers getting exclusive Claude configs',
-  'aggressive.description': 'Be the first to access new agents, MCP servers, and advanced prompts. Limited spots available.',
+  'aggressive.description':
+    'Be the first to access new agents, MCP servers, and advanced prompts. Limited spots available.',
   'social_proof.headline': '500+ Claude users already subscribed',
-  'social_proof.description': 'Join developers from Anthropic, Google, and leading AI companies who read our newsletter.',
+  'social_proof.description':
+    'Join developers from Anthropic, Google, and leading AI companies who read our newsletter.',
   'value_focused.headline': 'Get weekly Claude resources & updates',
-  'value_focused.description': 'Weekly roundup of the best Claude configurations, tutorials, and community highlights.',
+  'value_focused.description':
+    'Weekly roundup of the best Claude configurations, tutorials, and community highlights.',
   'contextual.agents.headline': 'Master Agents & Prompts',
-  'contextual.agents.description': 'Get weekly agent templates, advanced prompting techniques, and expert tutorials delivered to your inbox.',
+  'contextual.agents.description':
+    'Get weekly agent templates, advanced prompting techniques, and expert tutorials delivered to your inbox.',
   'contextual.mcp.headline': 'MCP Integration Secrets',
-  'contextual.mcp.description': 'Stay ahead with weekly MCP server tutorials, integration guides, and new server announcements.',
+  'contextual.mcp.description':
+    'Stay ahead with weekly MCP server tutorials, integration guides, and new server announcements.',
   'contextual.guides.headline': 'Level Up Your Claude Skills',
-  'contextual.guides.description': 'Get in-depth guides, best practices, and expert tips for mastering Claude delivered weekly.',
-  'footer_text': 'Free weekly newsletter • Unsubscribe anytime',
+  'contextual.guides.description':
+    'Get in-depth guides, best practices, and expert tips for mastering Claude delivered weekly.',
+  footer_text: 'Free weekly newsletter • Unsubscribe anytime',
 } as const;
 
 /** Newsletter behavior settings */
@@ -376,10 +382,25 @@ export const NEWSLETTER_BEHAVIOR = {
   initial_retry_delay_ms: 1000,
   retry_backoff_multiplier: 2,
   excluded_pages: [
-    '/', '/trending', '/guides', '/board', '/changelog', '/community',
-    '/companies', '/for-you', '/jobs', '/partner', '/submit',
-    '/tools/config-recommender', '/agents/', '/mcp/', '/rules/',
-    '/commands/', '/hooks/', '/statuslines/', '/collections/',
+    '/',
+    '/trending',
+    '/guides',
+    '/board',
+    '/changelog',
+    '/community',
+    '/companies',
+    '/for-you',
+    '/jobs',
+    '/partner',
+    '/submit',
+    '/tools/config-recommender',
+    '/agents/',
+    '/mcp/',
+    '/rules/',
+    '/commands/',
+    '/hooks/',
+    '/statuslines/',
+    '/collections/',
   ],
 } as const;
 
@@ -394,9 +415,9 @@ export const PRICING_CONFIG = {
   'jobs.duration_days': 30,
   'sponsored.regular': 199,
   'sponsored.discounted': 119,
-  'launch_discount_percent': 40,
-  'launch_discount_enabled': true,
-  'launch_discount_end_date': '2025-12-31',
+  launch_discount_percent: 40,
+  launch_discount_enabled: true,
+  launch_discount_end_date: '2025-12-31',
 } as const;
 
 // =============================================================================
@@ -438,8 +459,8 @@ export const SEARCH_CONFIG = {
 
 /** Homepage configuration */
 // Import directly from database-types to avoid pulling in prisma client (server-only)
-// Note: database-types exports content_category (lowercase), not ContentCategory
-import { content_category as ContentCategory } from '@heyclaude/database-types/prisma';
+// Note: Prisma exports enums as snake_case in Prisma namespace
+import { content_category as ContentCategory } from '@prisma/client';
 
 export const HOMEPAGE_CONFIG = {
   featured_categories: [
@@ -473,26 +494,61 @@ export const HOMEPAGE_CONFIG = {
 /** Sitemap configuration */
 export const SITEMAP_CONFIG = {
   exclude_patterns: [
-    '/login', '/auth/*', '/auth-code-error', '/account', '/account/*',
-    '/api/*', '/board/new', '*/new', '*/edit', '*/analytics',
-    '/tools/*/results/*', '(auth)/*', '(seo)/*',
+    '/login',
+    '/auth/*',
+    '/auth-code-error',
+    '/account',
+    '/account/*',
+    '/api/*',
+    '/board/new',
+    '*/new',
+    '*/edit',
+    '*/analytics',
+    '/tools/*/results/*',
+    '(auth)/*',
+    '(seo)/*',
   ],
   priority_overrides: {
-    '/': 1, '/u/*': 0.6, '/guides': 0.7, '/trending': 0.8,
-    '/ph-bundle': 0.9, '/ph-waitlist': 0.8,
+    '/': 1,
+    '/u/*': 0.6,
+    '/guides': 0.7,
+    '/trending': 0.8,
+    '/ph-bundle': 0.9,
+    '/ph-waitlist': 0.8,
   },
   changefreq_overrides: {
-    '/': 'daily', '/u/*': 'weekly', '/trending': 'daily',
-    '/changelog': 'daily', '/ph-bundle': 'weekly', '/ph-waitlist': 'weekly',
+    '/': 'daily',
+    '/u/*': 'weekly',
+    '/trending': 'daily',
+    '/changelog': 'daily',
+    '/ph-bundle': 'weekly',
+    '/ph-waitlist': 'weekly',
   },
 } as const;
 
 /** Local storage prohibited patterns */
 export const LOCAL_STORAGE_PROHIBITED = [
-  'password', 'token', 'secret', 'key', 'auth', 'session', 'credit',
-  'ssn', 'license', 'passport', 'apikey', 'api_key', 'access_token',
-  'refresh_token', 'bearer', 'jwt', 'oauth', 'private', 'confidential',
-  'sensitive', 'pii',
+  'password',
+  'token',
+  'secret',
+  'key',
+  'auth',
+  'session',
+  'credit',
+  'ssn',
+  'license',
+  'passport',
+  'apikey',
+  'api_key',
+  'access_token',
+  'refresh_token',
+  'bearer',
+  'jwt',
+  'oauth',
+  'private',
+  'confidential',
+  'sensitive',
+  'pii',
 ] as const;
 
 // =============================================================================
@@ -510,4 +566,3 @@ export const POLLING_CONFIG = {
   'analytics.stats_ms': 300000,
   newsletter_count_ms: 300000,
 } as const;
-

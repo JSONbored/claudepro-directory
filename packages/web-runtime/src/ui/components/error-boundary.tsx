@@ -11,10 +11,7 @@
 import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 
 import { AlertCircle, Home, RefreshCw, Copy, Check } from '../../icons.tsx';
-import type {
-  ErrorBoundaryProps,
-  ErrorFallbackProps,
-} from '../../types/component.types.ts';
+import type { ErrorBoundaryProps, ErrorFallbackProps } from '../../types/component.types.ts';
 import { createErrorBoundaryFallback } from '../../client/error-handler.ts';
 // Removed deprecated responsive utility - using direct Tailwind classes
 import { useCopyToClipboard } from '../../hooks/use-copy-to-clipboard.ts';
@@ -153,15 +150,12 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
  * ErrorBoundary component using web-runtime UI primitives directly
  */
 export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
-  const handleError = useCallback(
-    (error: Error, errorInfo: { componentStack?: string | null }) => {
-      // Use centralized error handler for consistent logging and tracking
-      createErrorBoundaryFallback(error, {
-        componentStack: errorInfo.componentStack || '',
-      });
-    },
-    []
-  );
+  const handleError = useCallback((error: Error, errorInfo: { componentStack?: string | null }) => {
+    // Use centralized error handler for consistent logging and tracking
+    createErrorBoundaryFallback(error, {
+      componentStack: errorInfo.componentStack || '',
+    });
+  }, []);
 
   const Fallback = fallback || ErrorFallback;
 

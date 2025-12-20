@@ -20,14 +20,7 @@
  */
 
 import { X } from '@heyclaude/web-runtime/icons';
-import {
-  cn,
-  toasts,
-  UnifiedBadge,
-  Button,
-  Input,
-  Label,
-} from '@heyclaude/web-runtime/ui';
+import { cn, toasts, UnifiedBadge, Button, Input, Label } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
 
 // =============================================================================
@@ -259,7 +252,7 @@ export function ListItemManager(props: ListItemManagerProps) {
                   <button
                     type="button"
                     onClick={() => handleRemove(index)}
-                    className="ml-0.5 hover:text-destructive"
+                    className="hover:text-destructive ml-0.5"
                     aria-label={`Remove ${item}`}
                     disabled={disabled}
                   >
@@ -309,21 +302,21 @@ export function ListItemManager(props: ListItemManagerProps) {
 
       {/* Min items error */}
       {showMinError ? (
-        <p className="text-xs text-destructive">
+        <p className="text-destructive text-xs">
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
       ) : null}
 
       {/* Custom error message */}
       {errorMessage ? (
-        <p className="text-xs text-destructive" role="alert">
+        <p className="text-destructive text-xs" role="alert">
           {errorMessage}
         </p>
       ) : null}
 
       {/* Empty state message for required fields */}
       {minItems && items.length === 0 ? (
-        <p className="text-xs text-destructive">
+        <p className="text-destructive text-xs">
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
       ) : null}

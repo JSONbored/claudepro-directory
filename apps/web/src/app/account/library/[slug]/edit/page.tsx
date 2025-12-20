@@ -11,7 +11,9 @@ import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
 
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
-import type { content_category, bookmarksModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma, content_category } from '@prisma/client';
+
+type bookmarksModel = Prisma.bookmarksGetPayload<{}>;
 
 import Loading from './loading';
 

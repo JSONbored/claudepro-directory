@@ -25,7 +25,10 @@
  * ```
  */
 
-import { type RecentlyViewedCategory, useRecentlyViewed } from '@heyclaude/web-runtime/hooks/use-recently-viewed';
+import {
+  type RecentlyViewedCategory,
+  useRecentlyViewed,
+} from '@heyclaude/web-runtime/hooks/use-recently-viewed';
 import { useEffect } from 'react';
 
 export interface RecentlyViewedTrackerProps {

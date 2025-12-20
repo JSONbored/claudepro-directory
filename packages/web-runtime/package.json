@@ -281,7 +281,9 @@
     },
     "./logging/server": {
       "types": "./src/logging/server.ts",
-      "react-server": "./src/logging/server.ts"
+      "development": "./src/logging/server.ts",
+      "react-server": "./src/logging/server.ts",
+      "default": "./src/logging/server.ts"
     },
     "./data/config/constants": {
       "types": "./src/data/config/constants.ts",
@@ -660,8 +662,8 @@
     "devalue": "^5.6.1",
     "dompurify": "^3.3.1",
     "gsap": "^3.14.2",
-    "html2canvas-pro": "^1.6.0",
-    "inngest": "^3.48.0",
+    "html2canvas-pro": "^1.6.1",
+    "inngest": "^3.48.1",
     "lucide-react": "^0.562.0",
     "motion": "^12.23.26",
     "next-safe-action": "^8.0.11",
@@ -687,6 +689,7 @@
     "react-dom": "^19.2.2"
   },
   "devDependencies": {
+    "@inngest/test": "^0.1.9",
     "@types/canvas-confetti": "^1.9.0",
     "@types/react": "19.2.7",
     "next": "16.1.0",

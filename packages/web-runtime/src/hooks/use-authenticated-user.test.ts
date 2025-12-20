@@ -35,10 +35,10 @@ describe('useAuthenticatedUser', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    
+
     mockGetUser = vi.fn();
     mockOnAuthStateChange = vi.fn();
-    
+
     mockSupabase = {
       auth: {
         getUser: mockGetUser,
@@ -157,7 +157,7 @@ describe('useAuthenticatedUser', () => {
 
   it('should update state when auth state changes', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
-    
+
     let authStateChangeCallback: ((event: string, session: Session | null) => void) | null = null;
     mockOnAuthStateChange.mockImplementation((callback) => {
       authStateChangeCallback = callback;
@@ -184,7 +184,7 @@ describe('useAuthenticatedUser', () => {
   it('should refresh user when refreshUser is called', async () => {
     const initialUser = { id: 'user-123', email: 'test@example.com' } as User;
     const refreshedUser = { id: 'user-123', email: 'updated@example.com' } as User;
-    
+
     mockGetUser
       .mockResolvedValueOnce({ data: { user: initialUser }, error: null })
       .mockResolvedValueOnce({ data: { user: refreshedUser }, error: null });

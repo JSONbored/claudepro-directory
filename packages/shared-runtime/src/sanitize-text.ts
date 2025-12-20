@@ -32,17 +32,19 @@ export function sanitizeText(text: unknown, options: SanitizeTextOptions = {}): 
   // Note: Path-traversal protections (.. and // removal) are handled
   // by context-specific functions (sanitizeUrl, sanitizeFilename)
 
-  sanitized = allowHtml ? sanitizeHtml(sanitized, {
-      allowedTags: ['b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li', 'br', 'span', 'p'],
-      allowedAttributes: {
-        a: ['href', 'title', 'target'],
-        span: ['style'],
-      },
-      allowedSchemes: ['http', 'https', 'mailto'],
-    }) : sanitizeHtml(sanitized, {
-      allowedTags: [],
-      allowedAttributes: {},
-    });
+  sanitized = allowHtml
+    ? sanitizeHtml(sanitized, {
+        allowedTags: ['b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li', 'br', 'span', 'p'],
+        allowedAttributes: {
+          a: ['href', 'title', 'target'],
+          span: ['style'],
+        },
+        allowedSchemes: ['http', 'https', 'mailto'],
+      })
+    : sanitizeHtml(sanitized, {
+        allowedTags: [],
+        allowedAttributes: {},
+      });
 
   // Remove dangerous URL schemes that can execute code
   sanitized = sanitized.replaceAll(/javascript:/gi, '');
@@ -59,12 +61,15 @@ export function sanitizeText(text: unknown, options: SanitizeTextOptions = {}): 
   sanitized = sanitized.trim();
 
   if (sanitized.length > maxLength) {
-    logger.warn({
-      function: 'sanitize-text',
-      operation: 'text-truncated',
-      original_length: text.length,
-      max_length: maxLength,
-    }, 'Text truncated due to length limit');
+    logger.warn(
+      {
+        function: 'sanitize-text',
+        operation: 'text-truncated',
+        original_length: text.length,
+        max_length: maxLength,
+      },
+      'Text truncated due to length limit'
+    );
     sanitized = sanitized.slice(0, maxLength);
   }
 

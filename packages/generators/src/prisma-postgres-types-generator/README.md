@@ -5,6 +5,7 @@ A Prisma custom generator that generates TypeScript types and Zod schemas for Po
 ## Overview
 
 This generator extends Prisma's type generation capabilities by adding support for:
+
 - ✅ **PostgreSQL Functions (RPCs)** - Function argument and return types
 - ✅ **PostgreSQL Composite Types** - User-defined structured types
 - ✅ **TypeScript Types** - Full type safety with autocomplete
@@ -103,7 +104,7 @@ export type UserCompleteDataResult = {
     };
   } | null;
   user_dashboard: {
-    submissions: Array<{ id: string; title: string; }>;
+    submissions: Array<{ id: string; title: string }>;
   } | null;
 };
 
@@ -111,19 +112,25 @@ export type UserCompleteDataResult = {
  * Zod schema for user_complete_data_result composite type
  */
 export const userCompleteDataResultSchema = z.object({
-  account_dashboard: z.object({
-    bookmark_count: z.number(),
-    profile: z.object({
-      created_at: z.string(),
-      name: z.string().nullable(),
-    }),
-  }).nullable(),
-  user_dashboard: z.object({
-    submissions: z.array(z.object({
-      id: z.string(),
-      title: z.string(),
-    })),
-  }).nullable(),
+  account_dashboard: z
+    .object({
+      bookmark_count: z.number(),
+      profile: z.object({
+        created_at: z.string(),
+        name: z.string().nullable(),
+      }),
+    })
+    .nullable(),
+  user_dashboard: z
+    .object({
+      submissions: z.array(
+        z.object({
+          id: z.string(),
+          title: z.string(),
+        })
+      ),
+    })
+    .nullable(),
 });
 
 /**
@@ -138,7 +145,10 @@ export type UserCompleteDataResult = z.infer<typeof userCompleteDataResultSchema
 
 ```typescript
 import { getContentBySlugArgsSchema } from '@heyclaude/data-layer/prisma/postgres-types/functions';
-import type { GetContentBySlugArgs, GetContentBySlugReturns } from '@heyclaude/data-layer/prisma/postgres-types/functions';
+import type {
+  GetContentBySlugArgs,
+  GetContentBySlugReturns,
+} from '@heyclaude/data-layer/prisma/postgres-types/functions';
 
 export const POST = createApiRoute({
   bodySchema: getContentBySlugArgsSchema,
@@ -224,14 +234,14 @@ export const getContent = actionClient
 
 ## Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `output` | string | `./generated/prisma/postgres-types` | Output directory for generated files |
-| `schema` | string | `"public"` | PostgreSQL schema to introspect |
-| `generateTypes` | boolean | `true` | Generate TypeScript types |
-| `generateZod` | boolean | `true` | Generate Zod schemas |
-| `includeFunctions` | string[] | `undefined` | Include only functions matching patterns (e.g., `["get_*"]`) |
-| `excludeFunctions` | string[] | `undefined` | Exclude functions matching patterns (e.g., `["internal_*"]`) |
+| Option             | Type     | Default                             | Description                                                  |
+| ------------------ | -------- | ----------------------------------- | ------------------------------------------------------------ |
+| `output`           | string   | `./generated/prisma/postgres-types` | Output directory for generated files                         |
+| `schema`           | string   | `"public"`                          | PostgreSQL schema to introspect                              |
+| `generateTypes`    | boolean  | `true`                              | Generate TypeScript types                                    |
+| `generateZod`      | boolean  | `true`                              | Generate Zod schemas                                         |
+| `includeFunctions` | string[] | `undefined`                         | Include only functions matching patterns (e.g., `["get_*"]`) |
+| `excludeFunctions` | string[] | `undefined`                         | Exclude functions matching patterns (e.g., `["internal_*"]`) |
 
 ## Troubleshooting
 
@@ -242,6 +252,7 @@ Ensure the generator is properly configured in `schema.prisma` and the provider 
 ### Database Connection Errors
 
 The generator requires access to the database. Ensure:
+
 - `DATABASE_URL` or the datasource URL environment variable is set
 - Database is accessible from the generation environment
 - Connection string is valid
@@ -249,6 +260,7 @@ The generator requires access to the database. Ensure:
 ### Type Errors
 
 If generated types have errors:
+
 1. Check that all PostgreSQL types are supported
 2. Verify database schema is correct
 3. Check generator logs for warnings about unsupported types
@@ -271,6 +283,7 @@ packages/generators/src/prisma-postgres-types-generator/
 ### Reusing Existing Utilities
 
 The generator leverages existing utilities from the generators toolkit:
+
 - `toolkit/introspection.ts` - Database introspection queries
 - `toolkit/zod-mapper.ts` - PostgreSQL → Zod type mapping
 

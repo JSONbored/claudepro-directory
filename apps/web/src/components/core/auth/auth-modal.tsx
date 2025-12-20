@@ -201,7 +201,7 @@ export function AuthModal({
               {...animationConfig}
               className={cn(
                 'relative',
-                shouldReduceMotion ? '' : 'perspective-[800px] [transform-style:preserve-3d]'
+                shouldReduceMotion ? '' : '[transform-style:preserve-3d] perspective-[800px]'
               )}
             >
               <DialogHeader>

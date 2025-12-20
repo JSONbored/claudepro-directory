@@ -7,7 +7,7 @@
 
 import { z } from 'zod';
 
-import type { contentModel } from '@heyclaude/database-types/prisma/models';
+import type { Prisma } from '@prisma/client';
 import { contentModelSchema } from '@heyclaude/database-types/prisma/zod/schemas';
 
 /**
@@ -38,7 +38,7 @@ export type GetTrendingContentArgsFromZod = z.infer<typeof getTrendingContentArg
 /**
  * Return type for PostgreSQL function: get_trending_content
  */
-export type GetTrendingContentReturns = contentModel[];
+export type GetTrendingContentReturns = Prisma.contentGetPayload<{}>[];
 
 /**
  * Zod schema for get_trending_content function return type

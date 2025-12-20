@@ -2,7 +2,7 @@
 
 /**
  * Submit Page Sidebar Skeleton
- * 
+ *
  * Perfectly matches SubmitPageSidebar structure:
  * - SidebarActivityCard with tabs (Recent/Tips)
  * - Recent submissions list
@@ -32,7 +32,7 @@ export function SubmitPageSidebarSkeleton() {
       <Card>
         {/* Tabs */}
         <CardHeader className="pb-2">
-          <div className="grid w-full grid-cols-2 gap-1 card-base p-0.5">
+          <div className="card-base grid w-full grid-cols-2 gap-1 p-0.5">
             <Skeleton size="sm" width="3xl" rounded="md" className="h-9" />
             <Skeleton size="sm" width="3xl" rounded="md" className="h-9" />
           </div>
@@ -49,7 +49,7 @@ export function SubmitPageSidebarSkeleton() {
               transition={{ ...SPRING.loading, delay: 0.3 + i * STAGGER.micro }}
             >
               <Skeleton size="sm" width="xs" rounded="full" className="h-6" />
-              <div className="flex flex-col gap-1 flex-1">
+              <div className="flex flex-1 flex-col gap-1">
                 <Skeleton size="sm" width="2/3" className="h-4" />
                 <Skeleton size="xs" width="xs" className="h-3" />
               </div>

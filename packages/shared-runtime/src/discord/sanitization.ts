@@ -1,6 +1,6 @@
 /**
  * Discord Sanitization Utilities
- * 
+ *
  * Functions for safely formatting user-provided content for Discord embeds.
  * Prevents markdown injection, link spoofing, and excessive content.
  */
@@ -9,47 +9,47 @@ import { DISCORD_LIMITS } from './constants.ts';
 
 /**
  * Sanitize a string for safe use in Discord embeds
- * 
+ *
  * - Removes markdown link syntax that could be used for link injection
  * - Truncates to specified maxLength
  * - Handles null/undefined gracefully
- * 
+ *
  * @param str - String to sanitize
  * @param maxLength - Maximum length (default: 200)
  * @returns Sanitized string
  */
 export function sanitizeForDiscord(str: string | null | undefined, maxLength = 200): string {
   if (!str) return '';
-  
+
   // Limit input length before regex processing to prevent ReDoS attacks
   // This ensures regex operations complete in reasonable time even on malicious input
   const inputLimit = maxLength * 10; // Allow 10x the output limit for processing
   const limitedStr = str.length > inputLimit ? str.slice(0, inputLimit) : str;
-  
+
   // Remove markdown link syntax [text](url) to prevent link injection
   // Keep the text part, discard the URL
   // Using [^\]]+ instead of [^\]]* to avoid ambiguous matching and reduce backtracking
   // The + quantifier requires at least one character, making the match more specific
   let sanitized = limitedStr.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
-  
+
   // Remove any remaining raw URLs that could be misleading
   // This is optional - uncomment if needed
   // sanitized = sanitized.replace(/https?:\/\/[^\s]+/g, '[link removed]');
-  
+
   // Escape backticks to prevent code block injection
   sanitized = sanitized.replace(/`/g, "'");
-  
+
   // Truncate to max length
   if (sanitized.length > maxLength) {
     sanitized = sanitized.slice(0, maxLength - 3) + '...';
   }
-  
+
   return sanitized;
 }
 
 /**
  * Sanitize text for Discord embed title
- * 
+ *
  * @param title - Title string to sanitize
  * @returns Sanitized title string
  */
@@ -59,7 +59,7 @@ export function sanitizeEmbedTitle(title: string | null | undefined): string {
 
 /**
  * Sanitize text for Discord embed description
- * 
+ *
  * @param description - Description string to sanitize
  * @returns Sanitized description string
  */
@@ -69,7 +69,7 @@ export function sanitizeEmbedDescription(description: string | null | undefined)
 
 /**
  * Sanitize text for Discord embed field value
- * 
+ *
  * @param value - Field value string to sanitize
  * @returns Sanitized field value string
  */
@@ -79,10 +79,10 @@ export function sanitizeFieldValue(value: string | null | undefined): string {
 
 /**
  * Validate a slug for use in URLs
- * 
+ *
  * Checks if the slug contains only valid URL-safe characters
  * to prevent URL injection attacks.
- * 
+ *
  * @param slug - Slug to validate
  * @returns true if valid, false otherwise
  */
@@ -94,10 +94,10 @@ export function isValidSlug(slug: string | null | undefined): boolean {
 
 /**
  * Sanitize error text for Discord code blocks
- * 
+ *
  * Prevents code block injection by replacing triple backticks
  * with single quotes.
- * 
+ *
  * @param errorText - Error text to sanitize
  * @param maxLength - Maximum length (default: 1000)
  * @returns Sanitized error text safe for code blocks
@@ -105,11 +105,11 @@ export function isValidSlug(slug: string | null | undefined): boolean {
 export function sanitizeErrorForCodeBlock(errorText: string, maxLength = 1000): string {
   // Replace triple backticks with single quotes to prevent code block injection
   let sanitized = errorText.replace(/```/g, "'''");
-  
+
   // Truncate if too long
   if (sanitized.length > maxLength) {
     sanitized = sanitized.slice(0, maxLength - 3) + '...';
   }
-  
+
   return sanitized;
 }

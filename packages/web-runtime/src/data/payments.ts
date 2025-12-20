@@ -1,6 +1,8 @@
 import 'server-only';
 
-import { type payment_plan_catalogModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type payment_plan_catalogModel = Prisma.payment_plan_catalogGetPayload<{}>;
 
 import { createDataFunction } from './cached-data-factory.ts';
 

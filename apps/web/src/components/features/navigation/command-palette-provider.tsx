@@ -14,7 +14,12 @@ interface CommandPaletteContextValue {
 const CommandPaletteContext = createContext<null | CommandPaletteContextValue>(null);
 
 export function CommandPaletteProvider({ children }: { children: React.ReactNode }) {
-  const { value: isOpen, setTrue: openPalette, setFalse: closePalette, toggle: togglePalette } = useBoolean();
+  const {
+    value: isOpen,
+    setTrue: openPalette,
+    setFalse: closePalette,
+    toggle: togglePalette,
+  } = useBoolean();
 
   const contextValue = useMemo(
     () => ({
@@ -27,9 +32,7 @@ export function CommandPaletteProvider({ children }: { children: React.ReactNode
   );
 
   return (
-    <CommandPaletteContext.Provider value={contextValue}>
-      {children}
-    </CommandPaletteContext.Provider>
+    <CommandPaletteContext.Provider value={contextValue}>{children}</CommandPaletteContext.Provider>
   );
 }
 

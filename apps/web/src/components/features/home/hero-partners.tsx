@@ -47,12 +47,12 @@ const PARTNERS: Partner[] = [
  *
  * Displays partner logos in a smooth, infinite scrolling marquee.
  * Appears at the bottom of the hero section with "Trusted by" label.
- * 
+ *
  * Feature flag: 'hero.partners_marquee.enabled' - Set to true to enable
  */
 export function HeroPartners() {
   const shouldReduceMotion = useReducedMotion();
-  
+
   // Feature flag check - can be disabled via config
   const isEnabled = Boolean(getFeatureFlag('hero.partners_marquee.enabled'));
 
@@ -89,16 +89,11 @@ export function HeroPartners() {
 
         {/* Partner Logos Marquee */}
         <Marquee className="w-full">
-          <MarqueeContent
-            speed={40}
-            pauseOnHover
-            autoFill
-            className="flex items-center"
-          >
+          <MarqueeContent speed={40} pauseOnHover autoFill className="flex items-center">
             {PARTNERS.map((partner, index) => (
               <MarqueeItem
                 key={`${partner.name}-${index}`}
-                className="mx-6 flex-center h-12 w-auto opacity-60 transition-opacity hover:opacity-100"
+                className="flex-center mx-6 h-12 w-auto opacity-60 transition-opacity hover:opacity-100"
               >
                 {partner.href ? (
                   <a
@@ -113,7 +108,7 @@ export function HeroPartners() {
                       alt={partner.alt}
                       width={120}
                       height={48}
-                      className="h-auto w-auto max-h-12 object-contain grayscale transition-all hover:grayscale-0"
+                      className="h-auto max-h-12 w-auto object-contain grayscale transition-all hover:grayscale-0"
                       unoptimized
                     />
                   </a>
@@ -123,7 +118,7 @@ export function HeroPartners() {
                     alt={partner.alt}
                     width={120}
                     height={48}
-                    className="h-auto w-auto max-h-12 object-contain grayscale"
+                    className="h-auto max-h-12 w-auto object-contain grayscale"
                     unoptimized
                   />
                 )}

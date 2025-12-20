@@ -3,7 +3,7 @@ import { setupTestWithErrorTracking } from '../../../../../config/tests/utils/er
 
 /**
  * Comprehensive Account Connected Accounts Page E2E Tests
- * 
+ *
  * Tests ALL functionality on the connected accounts page with strict error checking:
  * - Authentication flow (redirect to login if not authenticated)
  * - OAuth provider display (GitHub, Google, Discord)
@@ -26,7 +26,7 @@ test.describe('Account Connected Accounts Page', () => {
     // Set up error tracking and navigate to connected accounts page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/account/connected-accounts');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -43,13 +43,13 @@ test.describe('Account Connected Accounts Page', () => {
     // Check for sign-in prompt or redirect
     const signInPrompt = page.getByText(/sign in required|please sign in/i);
     const signInButton = page.getByRole('button', { name: /sign in|go to login/i });
-    
+
     // Either sign-in prompt should be visible, or we should be redirected
     const hasSignInPrompt = await signInPrompt.isVisible().catch(() => false);
     const hasSignInButton = await signInButton.isVisible().catch(() => false);
     const currentUrl = page.url();
     const isRedirected = currentUrl.includes('/login') || currentUrl.includes('/auth');
-    
+
     // Should have sign-in prompt OR be redirected
     expect(hasSignInPrompt || hasSignInButton || isRedirected).toBe(true);
   });
@@ -57,7 +57,7 @@ test.describe('Account Connected Accounts Page', () => {
   test('should render connected accounts page when authenticated', async ({ page }) => {
     // Note: This test assumes user is authenticated
     // In a real scenario, you'd set up authentication state first
-    
+
     // Check main element is present
     const mainElement = page.getByRole('main');
     await expect(mainElement).toBeVisible();
@@ -70,17 +70,18 @@ test.describe('Account Connected Accounts Page', () => {
   test('should display OAuth provider cards (GitHub, Google, Discord)', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for provider cards
     const githubCard = page.getByText(/github/i);
     const googleCard = page.getByText(/google/i);
     const discordCard = page.getByText(/discord/i);
-    
+
     // At least one provider should be visible
-    const hasProviders = await githubCard.isVisible().catch(() => false) ||
-                        await googleCard.isVisible().catch(() => false) ||
-                        await discordCard.isVisible().catch(() => false);
-    
+    const hasProviders =
+      (await githubCard.isVisible().catch(() => false)) ||
+      (await googleCard.isVisible().catch(() => false)) ||
+      (await discordCard.isVisible().catch(() => false));
+
     // Providers may or may not be visible depending on implementation
     // But page should render
     const main = page.getByRole('main');
@@ -90,11 +91,11 @@ test.describe('Account Connected Accounts Page', () => {
   test('should display connection status for each provider', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for connection status badges
     const connectedBadge = page.getByText(/connected|linked/i);
     const linkButton = page.getByRole('button', { name: /link account/i });
-    
+
     // Connection status may or may not be visible depending on data
     // But page should render
     const main = page.getByRole('main');
@@ -104,15 +105,15 @@ test.describe('Account Connected Accounts Page', () => {
   test('should handle link account action', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for link account button
     const linkButton = page.getByRole('button', { name: /link account/i });
     const hasLinkButton = await linkButton.isVisible().catch(() => false);
-    
+
     if (hasLinkButton) {
       // Verify button is clickable
       await expect(linkButton).toBeVisible();
-      
+
       // Note: Actually clicking would trigger OAuth flow, so we just verify it exists
     }
   });
@@ -120,20 +121,20 @@ test.describe('Account Connected Accounts Page', () => {
   test('should handle unlink account action with confirmation', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for unlink button
     const unlinkButton = page.getByRole('button', { name: /unlink/i });
     const hasUnlinkButton = await unlinkButton.isVisible().catch(() => false);
-    
+
     if (hasUnlinkButton) {
       // Click unlink button
       await unlinkButton.click();
       await page.waitForTimeout(500);
-      
+
       // Check for confirmation dialog
       const confirmDialog = page.getByRole('dialog');
       const hasDialog = await confirmDialog.isVisible().catch(() => false);
-      
+
       // Dialog may or may not appear immediately
       if (hasDialog) {
         await expect(confirmDialog).toBeVisible();
@@ -164,16 +165,16 @@ test.describe('Account Connected Accounts Page', () => {
   test('should handle loading states', async ({ page }) => {
     // Navigate to page
     await page.goto('/account/connected-accounts');
-    
+
     // Check for loading indicators (may flash quickly)
     const loadingIndicator = page.locator('[aria-busy="true"], [data-loading="true"]');
     const hasLoading = await loadingIndicator.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });

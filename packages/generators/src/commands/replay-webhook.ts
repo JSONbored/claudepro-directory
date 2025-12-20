@@ -1,4 +1,6 @@
-import type { webhook_eventsModel } from '@heyclaude/database-types/prisma';
+import type { Prisma } from '@prisma/client';
+
+type webhook_eventsModel = Prisma.webhook_eventsGetPayload<{}>;
 
 import { ensureEnvVars } from '../toolkit/env.ts';
 import { logger } from '../toolkit/logger.ts';

@@ -8,7 +8,14 @@
 
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@heyclaude/web-runtime/config/navigation';
 import { SPRING, MICROINTERACTIONS, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
-import { Bookmark, ChevronDown, Github, MessageSquare, PlusCircle, Search } from '@heyclaude/web-runtime/icons';
+import {
+  Bookmark,
+  ChevronDown,
+  Github,
+  MessageSquare,
+  PlusCircle,
+  Search,
+} from '@heyclaude/web-runtime/icons';
 import {
   UnifiedBadge,
   PrefetchLink,
@@ -48,7 +55,14 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: cn('group', 'relative', 'px-3', 'py-2', 'text-xs-medium', 'transition-all duration-200 ease-out', 'no-underline',
+    className: cn(
+      'group',
+      'relative',
+      'px-3',
+      'py-2',
+      'text-xs-medium',
+      'transition-all duration-200 ease-out',
+      'no-underline',
       active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground',
       className
     ),
@@ -64,7 +78,13 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
       <span className="relative inline-block">
         {children}
         <span
-          className={cn('absolute bottom-0 left-0', 'underline', 'bg-accent', 'transition-all duration-300 ease-out', active ? 'w-full' : 'w-0 group-hover:w-full')}
+          className={cn(
+            'absolute bottom-0 left-0',
+            'underline',
+            'bg-accent',
+            'transition-all duration-300 ease-out',
+            active ? 'w-full' : 'w-0 group-hover:w-full'
+          )}
           aria-hidden="true"
         />
       </span>
@@ -77,7 +97,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
  * Extracted to allow hooks at top level (fixes Rules of Hooks violation)
  */
 interface ConfigsDropdownProps {
-  link: typeof PRIMARY_NAVIGATION[0];
+  link: (typeof PRIMARY_NAVIGATION)[0];
 }
 
 function ConfigsDropdown({ link }: ConfigsDropdownProps) {
@@ -92,22 +112,33 @@ function ConfigsDropdown({ link }: ConfigsDropdownProps) {
   }, [isOpen]);
 
   return (
-    <NavigationHoverCard 
-      key={link.label} 
-      openDelay={150} 
-      closeDelay={300}
-      onOpenChange={setIsOpen}
-    >
+    <NavigationHoverCard key={link.label} openDelay={150} closeDelay={300} onOpenChange={setIsOpen}>
       <NavigationHoverCardTrigger asChild>
         <button
           type="button"
-          className={cn('group', 'relative', 'flex items-center', 'px-3', 'py-2', 'font-medium', 'text-xs', 'text-foreground/80 hover:text-foreground', 'transition-all duration-200 ease-out')}
+          className={cn(
+            'group',
+            'relative',
+            'flex items-center',
+            'px-3',
+            'py-2',
+            'font-medium',
+            'text-xs',
+            'text-foreground/80 hover:text-foreground',
+            'transition-all duration-200 ease-out'
+          )}
           aria-label={`Open ${link.label} menu`}
         >
           <span className="relative">
             {link.label}
             <span
-              className={cn('absolute bottom-0 left-0', 'underline', 'bg-accent w-0', 'transition-all duration-300 ease-out', 'group-hover:w-full')}
+              className={cn(
+                'absolute bottom-0 left-0',
+                'underline',
+                'bg-accent w-0',
+                'transition-all duration-300 ease-out',
+                'group-hover:w-full'
+              )}
               aria-hidden="true"
             />
           </span>
@@ -120,17 +151,18 @@ function ConfigsDropdown({ link }: ConfigsDropdownProps) {
         className={cn(
           'w-[720px] xl:w-[800px]',
           'p-4',
-          cn('relative', 'overflow-hidden', 'rounded-xl', 'border', 'border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl')
+          cn(
+            'relative',
+            'overflow-hidden',
+            'rounded-xl',
+            'border',
+            'border-border/60 bg-background/95 shadow-2xl backdrop-blur-xl'
+          )
         )}
         sideOffset={8}
       >
         {/* Animated gradient border with heyclaude orange */}
-        <AnimatedBorder
-          colorFrom="#F97316"
-          colorTo="#FB923C"
-          duration={3}
-          borderWidth={2}
-        />
+        <AnimatedBorder colorFrom="#F97316" colorTo="#FB923C" duration={3} borderWidth={2} />
         <AnimatePresence mode="wait">
           {isOpen && (
             <motion.div
@@ -150,19 +182,25 @@ function ConfigsDropdown({ link }: ConfigsDropdownProps) {
                 >
                   <Link
                     href="/tools/config-recommender"
-                    className={cn('group/hero block', 'rounded-lg', 'border', 'border-border/50 bg-card/50', 'p-4')}
+                    className={cn(
+                      'group/hero block',
+                      'rounded-lg',
+                      'border',
+                      'border-border/50 bg-card/50',
+                      'p-4'
+                    )}
                   >
-                  <div className="mb-4">
-                    <h3 className={cn('font-semibold text-base', 'mb-1')}>{link.label}</h3>
-                    <p className={cn('text-muted-foreground text-sm', 'leading-tight')}>
-                      {link.description || 'Browse all configuration types for Claude Code'}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs-medium text-accent">
-                    <span>Explore All</span>
-                    <ChevronDown className="h-3 w-3 rotate-[-90deg]" />
-                  </div>
-                </Link>
+                    <div className="mb-4">
+                      <h3 className={cn('text-base font-semibold', 'mb-1')}>{link.label}</h3>
+                      <p className={cn('text-muted-foreground text-sm', 'leading-tight')}>
+                        {link.description || 'Browse all configuration types for Claude Code'}
+                      </p>
+                    </div>
+                    <div className="text-xs-medium text-accent flex items-center gap-1">
+                      <span>Explore All</span>
+                      <ChevronDown className="h-3 w-3 rotate-[-90deg]" />
+                    </div>
+                  </Link>
                 </motion.div>
               </div>
 
@@ -177,72 +215,141 @@ function ConfigsDropdown({ link }: ConfigsDropdownProps) {
                   );
 
                   const itemsPerColumn = 4;
-                  const columns: Array<Array<typeof allLinks[0]>> = [];
+                  const columns: Array<Array<(typeof allLinks)[0]>> = [];
                   for (let i = 0; i < allLinks.length; i += itemsPerColumn) {
                     columns.push(allLinks.slice(i, i + itemsPerColumn));
                   }
 
                   return (
-                    <div className={cn('grid gap-4', columns.length === 1 ? 'grid-cols-1' : columns.length === 2 ? 'grid-cols-2' : 'grid-cols-3')}>
+                    <div
+                      className={cn(
+                        'grid gap-4',
+                        columns.length === 1
+                          ? 'grid-cols-1'
+                          : columns.length === 2
+                            ? 'grid-cols-2'
+                            : 'grid-cols-3'
+                      )}
+                    >
                       {columns.map((columnLinks, colIndex) => (
-                        <div key={`${link.label}-column-${colIndex}`} className="space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden scrollbar-hide">
+                        <div
+                          key={`${link.label}-column-${colIndex}`}
+                          className="scrollbar-hide max-h-[280px] space-y-2 overflow-x-hidden overflow-y-auto"
+                        >
                           {columnLinks.map((child, childIndex) => {
                             const category = getCategoryFromHref(child.href);
                             const ChildIcon = child.icon;
                             const isLastInColumn = childIndex === columnLinks.length - 1;
                             return (
-                              <div key={`${animationKey}-${link.label}-${child.label}-${colIndex}-${childIndex}`}>
+                              <div
+                                key={`${animationKey}-${link.label}-${child.label}-${colIndex}-${childIndex}`}
+                              >
                                 <motion.div
-                                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
-                                  animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                                  initial={
+                                    shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 4 }
+                                  }
+                                  animate={
+                                    shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }
+                                  }
                                   transition={{
                                     ...SPRING.smooth,
                                     delay: (colIndex * itemsPerColumn + childIndex) * STAGGER.micro, // Using micro for 20ms
                                   }}
                                 >
                                   <motion.div
-                                    whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.card.hover}
+                                    whileHover={
+                                      shouldReduceMotion ? {} : MICROINTERACTIONS.card.hover
+                                    }
                                     whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
                                     transition={MICROINTERACTIONS.card.transition}
                                   >
                                     <Link
                                       href={child.href}
                                       prefetch
-                                      className={cn('group/item block', 'rounded-lg', 'px-2.5', 'py-3', 'text-sm leading-none no-underline outline-none', 'hover:bg-accent/20', 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', 'overflow-hidden')}
+                                      className={cn(
+                                        'group/item block',
+                                        'rounded-lg',
+                                        'px-2.5',
+                                        'py-3',
+                                        'text-sm leading-none no-underline outline-none',
+                                        'hover:bg-accent/20',
+                                        'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                                        'overflow-hidden'
+                                      )}
                                     >
-                                      <div className={cn('flex items-center gap-2', 'mb-0.5', 'flex-wrap')}>
+                                      <div
+                                        className={cn(
+                                          'flex items-center gap-2',
+                                          'mb-0.5',
+                                          'flex-wrap'
+                                        )}
+                                      >
                                         {ChildIcon && (
-                                          <div className={cn('flex-center', 'h-5 w-5', 'shrink-0', 'rounded-lg', 'bg-muted/50', 'text-muted-foreground', 'group-hover/item:bg-muted group-hover/item:text-foreground')}>
+                                          <div
+                                            className={cn(
+                                              'flex-center',
+                                              'h-5 w-5',
+                                              'shrink-0',
+                                              'rounded-lg',
+                                              'bg-muted/50',
+                                              'text-muted-foreground',
+                                              'group-hover/item:bg-muted group-hover/item:text-foreground'
+                                            )}
+                                          >
                                             <ChildIcon className="h-3 w-3" />
                                           </div>
                                         )}
-                                        <div className="font-medium break-words word-break-break-word">{child.label}</div>
+                                        <div className="word-break-break-word font-medium break-words">
+                                          {child.label}
+                                        </div>
                                         {category && (
-                                          <UnifiedBadge 
-                                            variant="category" 
-                                            category={category} 
+                                          <UnifiedBadge
+                                            variant="category"
+                                            category={category}
                                             href={null}
-                                            className={cn('shrink-0', 'text-[10px]', 'px-1.5', 'py-0')} 
+                                            className={cn(
+                                              'shrink-0',
+                                              'text-[10px]',
+                                              'px-1.5',
+                                              'py-0'
+                                            )}
                                           />
                                         )}
                                         {child.isNew && (
-                                          <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
+                                          <UnifiedBadge
+                                            variant="new-badge"
+                                            badgeVariant="default"
+                                            className="shrink-0"
+                                          />
                                         )}
                                         {child.external && (
-                                          <span className={cn('text-muted-foreground text-xs', 'shrink-0', 'ml-auto')}>↗</span>
+                                          <span
+                                            className={cn(
+                                              'text-muted-foreground text-xs',
+                                              'shrink-0',
+                                              'ml-auto'
+                                            )}
+                                          >
+                                            ↗
+                                          </span>
                                         )}
                                       </div>
                                       {child.description && (
-                                        <p className={cn('text-muted-foreground', 'text-[11px]', 'leading-snug break-words word-break-break-word line-clamp-1', 'ml-8')}>
+                                        <p
+                                          className={cn(
+                                            'text-muted-foreground',
+                                            'text-[11px]',
+                                            'word-break-break-word line-clamp-1 leading-snug break-words',
+                                            'ml-8'
+                                          )}
+                                        >
                                           {child.description}
                                         </p>
                                       )}
                                     </Link>
                                   </motion.div>
                                 </motion.div>
-                                {!isLastInColumn && (
-                                  <div className="h-px bg-border/30 my-0.5" />
-                                )}
+                                {!isLastInColumn && <div className="bg-border/30 my-0.5 h-px" />}
                               </div>
                             );
                           })}
@@ -265,7 +372,7 @@ function ConfigsDropdown({ link }: ConfigsDropdownProps) {
  * Extracted to allow hooks at top level (fixes Rules of Hooks violation)
  */
 interface DiscoverResourcesContributeDropdownProps {
-  link: typeof PRIMARY_NAVIGATION[0];
+  link: (typeof PRIMARY_NAVIGATION)[0];
 }
 
 function DiscoverResourcesContributeDropdown({ link }: DiscoverResourcesContributeDropdownProps) {
@@ -279,22 +386,33 @@ function DiscoverResourcesContributeDropdown({ link }: DiscoverResourcesContribu
   }, [isOpen]);
 
   return (
-    <NavigationHoverCard 
-      key={link.label} 
-      openDelay={150} 
-      closeDelay={300}
-      onOpenChange={setIsOpen}
-    >
+    <NavigationHoverCard key={link.label} openDelay={150} closeDelay={300} onOpenChange={setIsOpen}>
       <NavigationHoverCardTrigger asChild>
         <button
           type="button"
-          className={cn('group', 'relative', 'flex items-center', 'px-3', 'py-2', 'font-medium', 'text-xs', 'text-foreground/80 hover:text-foreground', 'transition-all duration-200 ease-out')}
+          className={cn(
+            'group',
+            'relative',
+            'flex items-center',
+            'px-3',
+            'py-2',
+            'font-medium',
+            'text-xs',
+            'text-foreground/80 hover:text-foreground',
+            'transition-all duration-200 ease-out'
+          )}
           aria-label={`Open ${link.label} menu`}
         >
           <span className="relative">
             {link.label}
             <span
-              className={cn('absolute bottom-0 left-0', 'underline', 'bg-accent w-0', 'transition-all duration-300 ease-out', 'group-hover:w-full')}
+              className={cn(
+                'absolute bottom-0 left-0',
+                'underline',
+                'bg-accent w-0',
+                'transition-all duration-300 ease-out',
+                'group-hover:w-full'
+              )}
               aria-hidden="true"
             />
           </span>
@@ -308,17 +426,18 @@ function DiscoverResourcesContributeDropdown({ link }: DiscoverResourcesContribu
           'w-[480px]',
           'lg:w-[600px]',
           'p-4',
-          cn('relative', 'overflow-hidden', 'rounded-xl', 'border', 'border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl')
+          cn(
+            'relative',
+            'overflow-hidden',
+            'rounded-xl',
+            'border',
+            'border-border/60 bg-background/95 shadow-2xl backdrop-blur-xl'
+          )
         )}
         sideOffset={8}
       >
         {/* Animated gradient border with heyclaude orange */}
-        <AnimatedBorder
-          colorFrom="#F97316"
-          colorTo="#FB923C"
-          duration={3}
-          borderWidth={2}
-        />
+        <AnimatedBorder colorFrom="#F97316" colorTo="#FB923C" duration={3} borderWidth={2} />
         <AnimatePresence mode="wait">
           {isOpen && (
             <motion.ul
@@ -327,14 +446,31 @@ function DiscoverResourcesContributeDropdown({ link }: DiscoverResourcesContribu
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: DURATION.micro }}
-              className={cn('relative', 'z-10 grid', 'space-y-3', 'sm:w-[400px]', 'md:w-[480px]', 'md:grid-cols-2', 'lg:w-[600px]')}
+              className={cn(
+                'relative',
+                'z-10 grid',
+                'space-y-3',
+                'sm:w-[400px]',
+                'md:w-[480px]',
+                'md:grid-cols-2',
+                'lg:w-[600px]'
+              )}
             >
               {link.sections!.map((section, sectionIndex) => {
                 const isLastSection = sectionIndex === link.sections!.length - 1;
                 return (
                   <li key={`${link.label}-${section.heading}`}>
                     <div className="mb-2">
-                      <p className={cn('text-[10px]', 'font-semibold', 'text-muted-foreground', 'opacity-70 uppercase', 'tracking-wide', 'px-3')}>
+                      <p
+                        className={cn(
+                          'text-[10px]',
+                          'font-semibold',
+                          'text-muted-foreground',
+                          'uppercase opacity-70',
+                          'tracking-wide',
+                          'px-3'
+                        )}
+                      >
                         {section.heading}
                       </p>
                     </div>
@@ -343,7 +479,9 @@ function DiscoverResourcesContributeDropdown({ link }: DiscoverResourcesContribu
                         const isLastInSection = childIndex === section.links.length - 1;
                         const ChildIcon = child.icon;
                         return (
-                          <div key={`${animationKey}-${link.label}-${section.heading}-${child.label}`}>
+                          <div
+                            key={`${animationKey}-${link.label}-${section.heading}-${child.label}`}
+                          >
                             <motion.div
                               initial={{ opacity: 0, y: 4 }}
                               animate={{ opacity: 1, y: 0 }}
@@ -360,37 +498,87 @@ function DiscoverResourcesContributeDropdown({ link }: DiscoverResourcesContribu
                                 <Link
                                   href={child.href}
                                   prefetch
-                                  className={cn('group/item block', 'rounded-lg', 'px-3', 'py-2.5', 'text-sm leading-none no-underline outline-none', 'hover:bg-accent/20', 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', 'overflow-hidden')}
+                                  className={cn(
+                                    'group/item block',
+                                    'rounded-lg',
+                                    'px-3',
+                                    'py-2.5',
+                                    'text-sm leading-none no-underline outline-none',
+                                    'hover:bg-accent/20',
+                                    'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                                    'overflow-hidden'
+                                  )}
                                 >
                                   <div className="flex items-start gap-2">
                                     {ChildIcon && (
-                                      <div className={cn('flex items-center', 'h-6 w-6', 'shrink-0', 'items-center justify-center', 'rounded-lg', 'bg-muted/50', 'text-muted-foreground', 'group-hover/item:bg-muted group-hover/item:text-foreground')}>
+                                      <div
+                                        className={cn(
+                                          'flex items-center',
+                                          'h-6 w-6',
+                                          'shrink-0',
+                                          'items-center justify-center',
+                                          'rounded-lg',
+                                          'bg-muted/50',
+                                          'text-muted-foreground',
+                                          'group-hover/item:bg-muted group-hover/item:text-foreground'
+                                        )}
+                                      >
                                         <ChildIcon className="h-4 w-4" />
                                       </div>
                                     )}
-                                    <div className="flex-1 min-w-0">
-                                      <div className={cn('flex items-center gap-2', 'mb-0.5', 'flex-wrap')}>
-                                        <div className="font-medium break-words word-break-break-word">{child.label}</div>
+                                    <div className="min-w-0 flex-1">
+                                      <div
+                                        className={cn(
+                                          'flex items-center gap-2',
+                                          'mb-0.5',
+                                          'flex-wrap'
+                                        )}
+                                      >
+                                        <div className="word-break-break-word font-medium break-words">
+                                          {child.label}
+                                        </div>
                                         {(() => {
                                           const category = getCategoryFromHref(child.href);
                                           return category ? (
-                                            <UnifiedBadge 
-                                              variant="category" 
-                                              category={category} 
+                                            <UnifiedBadge
+                                              variant="category"
+                                              category={category}
                                               href={null}
-                                              className={cn('shrink-0', 'text-[10px]', 'px-1.5', 'py-0')} 
+                                              className={cn(
+                                                'shrink-0',
+                                                'text-[10px]',
+                                                'px-1.5',
+                                                'py-0'
+                                              )}
                                             />
                                           ) : null;
                                         })()}
                                         {child.isNew && (
-                                          <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
+                                          <UnifiedBadge
+                                            variant="new-badge"
+                                            badgeVariant="default"
+                                            className="shrink-0"
+                                          />
                                         )}
                                         {child.external && (
-                                          <span className={cn('text-muted-foreground text-xs', 'shrink-0', 'ml-auto')}>↗</span>
+                                          <span
+                                            className={cn(
+                                              'text-muted-foreground text-xs',
+                                              'shrink-0',
+                                              'ml-auto'
+                                            )}
+                                          >
+                                            ↗
+                                          </span>
                                         )}
                                       </div>
                                       {child.description && (
-                                        <p className={cn('text-muted-foreground text-xs', 'leading-snug break-words word-break-break-word line-clamp-2')}>
+                                        <p
+                                          className={cn(
+                                            'text-muted-foreground text-xs',
+                                            'word-break-break-word line-clamp-2 leading-snug break-words'
+                                          )}
+                                        >
                                           {child.description}
                                         </p>
                                       )}
@@ -399,16 +587,12 @@ function DiscoverResourcesContributeDropdown({ link }: DiscoverResourcesContribu
                                 </Link>
                               </motion.div>
                             </motion.div>
-                            {!isLastInSection && (
-                              <div className="h-px bg-border/30 mx-2" />
-                            )}
+                            {!isLastInSection && <div className="bg-border/30 mx-2 h-px" />}
                           </div>
                         );
                       })}
-                  </div>
-                    {!isLastSection && (
-                      <div className="h-px bg-border/40 my-2 mx-1" />
-                    )}
+                    </div>
+                    {!isLastSection && <div className="bg-border/40 mx-1 my-2 h-px" />}
                   </li>
                 );
               })}
@@ -425,7 +609,7 @@ function DiscoverResourcesContributeDropdown({ link }: DiscoverResourcesContribu
  * Extracted to allow hooks at top level (fixes Rules of Hooks violation)
  */
 interface FallbackDropdownProps {
-  link: typeof PRIMARY_NAVIGATION[0];
+  link: (typeof PRIMARY_NAVIGATION)[0];
 }
 
 function FallbackDropdown({ link }: FallbackDropdownProps) {
@@ -439,22 +623,33 @@ function FallbackDropdown({ link }: FallbackDropdownProps) {
   }, [isOpen]);
 
   return (
-    <NavigationHoverCard 
-      key={link.label} 
-      openDelay={150} 
-      closeDelay={300}
-      onOpenChange={setIsOpen}
-    >
+    <NavigationHoverCard key={link.label} openDelay={150} closeDelay={300} onOpenChange={setIsOpen}>
       <NavigationHoverCardTrigger asChild>
         <button
           type="button"
-          className={cn('group', 'relative', 'flex items-center', 'px-3', 'py-2', 'font-medium', 'text-xs', 'text-foreground/80 hover:text-foreground', 'transition-all duration-200 ease-out')}
+          className={cn(
+            'group',
+            'relative',
+            'flex items-center',
+            'px-3',
+            'py-2',
+            'font-medium',
+            'text-xs',
+            'text-foreground/80 hover:text-foreground',
+            'transition-all duration-200 ease-out'
+          )}
           aria-label={`Open ${link.label} menu`}
         >
           <span className="relative">
             {link.label}
             <span
-              className={cn('absolute bottom-0 left-0', 'underline', 'bg-accent w-0', 'transition-all duration-300 ease-out', 'group-hover:w-full')}
+              className={cn(
+                'absolute bottom-0 left-0',
+                'underline',
+                'bg-accent w-0',
+                'transition-all duration-300 ease-out',
+                'group-hover:w-full'
+              )}
               aria-hidden="true"
             />
           </span>
@@ -467,17 +662,18 @@ function FallbackDropdown({ link }: FallbackDropdownProps) {
         className={cn(
           'w-64',
           'p-3',
-          cn('relative', 'overflow-hidden', 'rounded-xl', 'border', 'border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl')
+          cn(
+            'relative',
+            'overflow-hidden',
+            'rounded-xl',
+            'border',
+            'border-border/60 bg-background/95 shadow-2xl backdrop-blur-xl'
+          )
         )}
         sideOffset={8}
       >
         {/* Animated gradient border with heyclaude orange */}
-        <AnimatedBorder
-          colorFrom="#F97316"
-          colorTo="#FB923C"
-          duration={3}
-          borderWidth={2}
-        />
+        <AnimatedBorder colorFrom="#F97316" colorTo="#FB923C" duration={3} borderWidth={2} />
         <AnimatePresence mode="wait">
           {isOpen && (
             <motion.div
@@ -495,7 +691,15 @@ function FallbackDropdown({ link }: FallbackDropdownProps) {
                     return (
                       <div key={`${link.label}-${section.heading}`}>
                         <div className={cn('px-3', 'py-2', 'mb-1.5')}>
-                          <p className={cn('text-[10px]', 'font-semibold', 'text-muted-foreground', 'opacity-70 uppercase', 'tracking-wide')}>
+                          <p
+                            className={cn(
+                              'text-[10px]',
+                              'font-semibold',
+                              'text-muted-foreground',
+                              'uppercase opacity-70',
+                              'tracking-wide'
+                            )}
+                          >
                             {section.heading}
                           </p>
                         </div>
@@ -504,79 +708,99 @@ function FallbackDropdown({ link }: FallbackDropdownProps) {
                             const ChildIcon = child.icon;
                             const isLastInSection = childIndex === section.links.length - 1;
                             return (
-                              <div key={`${animationKey}-${link.label}-${section.heading}-${child.label}-${childIndex}`}>
-                            <motion.div
-                              key={`${animationKey}-${link.label}-${section.heading}-${child.label}-${childIndex}`}
-                              initial={{ opacity: 0, y: 4 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{
-                                ...SPRING.smooth,
-                                delay: childIndex * STAGGER.micro, // Using micro for 30ms
-                              }}
-                            >
-                              <motion.div
-                                whileHover={MICROINTERACTIONS.card.hover}
-                                whileTap={MICROINTERACTIONS.card.tap}
-                                transition={MICROINTERACTIONS.card.transition}
+                              <div
+                                key={`${animationKey}-${link.label}-${section.heading}-${child.label}-${childIndex}`}
                               >
-                                <Link
-                                  href={child.href}
-                                  prefetch
-                                  className={cn('group/item block', 'rounded-lg', 'px-3', 'py-2.5', 'text-sm leading-none no-underline outline-none', 'hover:bg-accent/20', 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', 'overflow-hidden')}
+                                <motion.div
+                                  key={`${animationKey}-${link.label}-${section.heading}-${child.label}-${childIndex}`}
+                                  initial={{ opacity: 0, y: 4 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{
+                                    ...SPRING.smooth,
+                                    delay: childIndex * STAGGER.micro, // Using micro for 30ms
+                                  }}
                                 >
-                                <div className="flex items-start gap-2">
-                                  {ChildIcon && (
-                                    <div className="flex-center h-8 w-8 shrink-0 rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
-                                      <ChildIcon className="h-4 w-4" />
-                                    </div>
-                                  )}
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-                                      <div className="font-medium break-words word-break-break-word">{child.label}</div>
-                                      {(() => {
-                                        const category = getCategoryFromHref(child.href);
-                                        return category ? (
-                                          <UnifiedBadge 
-                                            variant="category" 
-                                            category={category} 
-                                            href={null}
-                                            className={cn('shrink-0', 'text-[10px]', 'px-1.5', 'py-0')} 
-                                          />
-                                        ) : null;
-                                      })()}
-                                      {child.isNew && (
-                                        <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
+                                  <motion.div
+                                    whileHover={MICROINTERACTIONS.card.hover}
+                                    whileTap={MICROINTERACTIONS.card.tap}
+                                    transition={MICROINTERACTIONS.card.transition}
+                                  >
+                                    <Link
+                                      href={child.href}
+                                      prefetch
+                                      className={cn(
+                                        'group/item block',
+                                        'rounded-lg',
+                                        'px-3',
+                                        'py-2.5',
+                                        'text-sm leading-none no-underline outline-none',
+                                        'hover:bg-accent/20',
+                                        'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                                        'overflow-hidden'
                                       )}
-                                      {child.external && (
-                                        <span className="text-muted-foreground text-xs shrink-0 ml-auto">↗</span>
-                                      )}
-                                    </div>
-                                    {child.description && (
-                                      <p className="text-muted-foreground text-xs leading-snug break-words word-break-break-word line-clamp-2">
-                                        {child.description}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                              </Link>
-                              </motion.div>
-                            </motion.div>
-                            {!isLastInSection && (
-                              <div className="h-px bg-border/30 mx-2" />
-                            )}
-                          </div>
-                          );
-                        })}
+                                    >
+                                      <div className="flex items-start gap-2">
+                                        {ChildIcon && (
+                                          <div className="flex-center bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground h-8 w-8 shrink-0 rounded-lg">
+                                            <ChildIcon className="h-4 w-4" />
+                                          </div>
+                                        )}
+                                        <div className="min-w-0 flex-1">
+                                          <div className="mb-0.5 flex flex-wrap items-center gap-1.5">
+                                            <div className="word-break-break-word font-medium break-words">
+                                              {child.label}
+                                            </div>
+                                            {(() => {
+                                              const category = getCategoryFromHref(child.href);
+                                              return category ? (
+                                                <UnifiedBadge
+                                                  variant="category"
+                                                  category={category}
+                                                  href={null}
+                                                  className={cn(
+                                                    'shrink-0',
+                                                    'text-[10px]',
+                                                    'px-1.5',
+                                                    'py-0'
+                                                  )}
+                                                />
+                                              ) : null;
+                                            })()}
+                                            {child.isNew && (
+                                              <UnifiedBadge
+                                                variant="new-badge"
+                                                badgeVariant="default"
+                                                className="shrink-0"
+                                              />
+                                            )}
+                                            {child.external && (
+                                              <span className="text-muted-foreground ml-auto shrink-0 text-xs">
+                                                ↗
+                                              </span>
+                                            )}
+                                          </div>
+                                          {child.description && (
+                                            <p className="text-muted-foreground word-break-break-word line-clamp-2 text-xs leading-snug break-words">
+                                              {child.description}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </Link>
+                                  </motion.div>
+                                </motion.div>
+                                {!isLastInSection && <div className="bg-border/30 mx-2 h-px" />}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {!isLastSection && <div className="bg-border/40 mx-1 my-2 h-px" />}
                       </div>
-                      {!isLastSection && (
-                        <div className="h-px bg-border/40 my-2 mx-1" />
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
                 </div>
               ) : link.children ? (
-                        <div className="space-y-1">
+                <div className="space-y-1">
                   {link.children.map((child, childIndex) => {
                     const ChildIcon = child.icon;
                     return (
@@ -597,29 +821,46 @@ function FallbackDropdown({ link }: FallbackDropdownProps) {
                           <Link
                             href={child.href}
                             prefetch
-                            className={cn('group/item block', 'rounded-lg', 'px-3', 'py-2.5', 'text-sm leading-none no-underline outline-none', 'hover:bg-accent/5', 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2')}
+                            className={cn(
+                              'group/item block',
+                              'rounded-lg',
+                              'px-3',
+                              'py-2.5',
+                              'text-sm leading-none no-underline outline-none',
+                              'hover:bg-accent/5',
+                              'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
+                            )}
                           >
-                          <div className="flex items-start gap-2">
-                                  {ChildIcon && (
-                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
-                                      <ChildIcon className="h-4 w-4" />
-                                    </div>
+                            <div className="flex items-start gap-2">
+                              {ChildIcon && (
+                                <div className="bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                                  <ChildIcon className="h-4 w-4" />
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <div className={cn('flex items-center gap-2', 'mb-0.5')}>
+                                  <div className="font-medium">{child.label}</div>
+                                  {child.isNew && (
+                                    <UnifiedBadge
+                                      variant="new-badge"
+                                      badgeVariant="default"
+                                      className="shrink-0"
+                                    />
                                   )}
-                            <div className="flex-1 min-w-0">
-                              <div className={cn('flex items-center gap-2', 'mb-0.5')}>
-                                <div className="font-medium">{child.label}</div>
-                                {child.isNew && (
-                                  <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
+                                </div>
+                                {child.description && (
+                                  <p
+                                    className={cn(
+                                      'text-muted-foreground text-xs',
+                                      'line-clamp-2 leading-snug'
+                                    )}
+                                  >
+                                    {child.description}
+                                  </p>
                                 )}
                               </div>
-                              {child.description && (
-                                      <p className={cn('text-muted-foreground text-xs', 'line-clamp-2 leading-snug')}>
-                                  {child.description}
-                                </p>
-                              )}
                             </div>
-                          </div>
-                        </Link>
+                          </Link>
                         </motion.div>
                       </motion.div>
                     );
@@ -642,12 +883,12 @@ interface NavigationDesktopProps {
  * Community Icons Row Component
  * Horizontal row of icon-only buttons for Search, Discord, Pinboard, and GitHub Stars
  */
-function CommunityIconsRow({ 
-  openPinboardDrawer, 
+function CommunityIconsRow({
+  openPinboardDrawer,
   isPinboardOpen,
   openCommandPalette,
   isCommandMenuOpen,
-}: { 
+}: {
   openPinboardDrawer: () => void;
   isPinboardOpen: boolean;
   openCommandPalette: () => void;
@@ -656,7 +897,7 @@ function CommunityIconsRow({
   const pulse = usePulse();
   const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
   const [githubStars, setGithubStars] = useState<number | null>(null);
-  
+
   // Fetch GitHub star count
   useEffect(() => {
     const repoUrl = SOCIAL_LINK_SNAPSHOT.github;
@@ -698,7 +939,7 @@ function CommunityIconsRow({
         setGithubStars(null);
       });
   }, []);
-  
+
   const handleDiscordClick = () => {
     pulse
       .click({
@@ -715,7 +956,7 @@ function CommunityIconsRow({
       });
     window.open('https://discord.gg/Ax3Py4YDrq', '_blank', 'noopener,noreferrer');
   };
-  
+
   const handleGitHubClick = () => {
     const repoUrl = SOCIAL_LINK_SNAPSHOT.github;
     pulse
@@ -733,9 +974,9 @@ function CommunityIconsRow({
       });
     window.open(repoUrl, '_blank', 'noopener,noreferrer');
   };
-  
+
   return (
-    <div className={cn('border-t border-border/30', 'mt-4', 'pt-4')}>
+    <div className={cn('border-border/30 border-t', 'mt-4', 'pt-4')}>
       <div className={cn('flex-center', 'gap-3', 'px-3')}>
         {/* Search / Command Menu */}
         <motion.div
@@ -751,12 +992,12 @@ function CommunityIconsRow({
               'h-6 w-6',
               'text-muted-foreground',
               'hover:text-foreground',
-              isCommandMenuOpen && "text-accent bg-accent/10"
+              isCommandMenuOpen && 'text-accent bg-accent/10'
             )}
-            aria-label={isCommandMenuOpen ? "Close command menu" : "Open command menu"}
+            aria-label={isCommandMenuOpen ? 'Close command menu' : 'Open command menu'}
             title="Search navigation (⌘K)"
           >
-            <Search className={cn('h-4 w-4', isCommandMenuOpen && "fill-current")} />
+            <Search className={cn('h-4 w-4', isCommandMenuOpen && 'fill-current')} />
           </Button>
         </motion.div>
 
@@ -776,7 +1017,7 @@ function CommunityIconsRow({
             <MessageSquare className="h-4 w-4" />
           </Button>
         </motion.div>
-        
+
         {/* Pinboard */}
         <motion.div
           whileHover={MICROINTERACTIONS.button.hover}
@@ -791,14 +1032,14 @@ function CommunityIconsRow({
               'h-6 w-6',
               'text-muted-foreground',
               'hover:text-foreground',
-              isPinboardOpen && "text-accent bg-accent/10"
+              isPinboardOpen && 'text-accent bg-accent/10'
             )}
-            aria-label={isPinboardOpen ? "Close pinboard" : "Open pinboard"}
+            aria-label={isPinboardOpen ? 'Close pinboard' : 'Open pinboard'}
           >
-            <Bookmark className={cn('h-4 w-4', isPinboardOpen && "fill-current")} />
+            <Bookmark className={cn('h-4 w-4', isPinboardOpen && 'fill-current')} />
           </Button>
         </motion.div>
-        
+
         {/* GitHub Stars */}
         <motion.div
           whileHover={MICROINTERACTIONS.button.hover}
@@ -814,8 +1055,17 @@ function CommunityIconsRow({
           >
             <Github className="h-4 w-4" />
             {githubStars !== null && (
-              <span className={cn('absolute -top-1 -right-1', 'text-[10px]', 'font-medium', 'text-accent')}>
-                {githubStars > 999 ? `${(githubStars / 1000).toFixed(1)}k` : githubStars.toLocaleString()}
+              <span
+                className={cn(
+                  'absolute -top-1 -right-1',
+                  'text-[10px]',
+                  'font-medium',
+                  'text-accent'
+                )}
+              >
+                {githubStars > 999
+                  ? `${(githubStars / 1000).toFixed(1)}k`
+                  : githubStars.toLocaleString()}
               </span>
             )}
           </Button>
@@ -838,10 +1088,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
   // Don't render until mounted (prevents hydration mismatch with Radix UI generated IDs)
   if (!isMounted) {
     return (
-      <nav
-        className="hidden xl:flex items-center gap-2 text-xs"
-        aria-label="Primary navigation"
-      >
+      <nav className="hidden items-center gap-2 text-xs xl:flex" aria-label="Primary navigation">
         {/* Placeholder to maintain layout during SSR */}
         <div className="invisible">
           {PRIMARY_NAVIGATION.map((link) => (
@@ -853,10 +1100,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
   }
 
   return (
-    <nav
-        className="hidden xl:flex items-center gap-2 text-xs"
-      aria-label="Primary navigation"
-    >
+    <nav className="hidden items-center gap-2 text-xs xl:flex" aria-label="Primary navigation">
       {PRIMARY_NAVIGATION.map((link) => {
         // Special handling for Jobs dropdown with enhanced design
         if (link.label === 'Jobs' && link.sections) {
@@ -865,13 +1109,29 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
               <NavigationHoverCardTrigger asChild>
                 <button
                   type="button"
-                  className={cn('group', 'relative', 'flex items-center', 'px-3', 'py-2', 'font-medium', 'text-xs', 'text-foreground/80 hover:text-foreground', 'transition-all duration-200 ease-out')}
+                  className={cn(
+                    'group',
+                    'relative',
+                    'flex items-center',
+                    'px-3',
+                    'py-2',
+                    'font-medium',
+                    'text-xs',
+                    'text-foreground/80 hover:text-foreground',
+                    'transition-all duration-200 ease-out'
+                  )}
                   aria-label={`Open ${link.label} menu`}
                 >
                   <span className="relative">
                     {link.label}
                     <span
-                      className={cn('absolute bottom-0 left-0', 'underline', 'bg-accent w-0', 'transition-all duration-300 ease-out', 'group-hover:w-full')}
+                      className={cn(
+                        'absolute bottom-0 left-0',
+                        'underline',
+                        'bg-accent w-0',
+                        'transition-all duration-300 ease-out',
+                        'group-hover:w-full'
+                      )}
                       aria-hidden="true"
                     />
                   </span>
@@ -884,7 +1144,13 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                 className={cn(
                   'w-[720px] xl:w-[800px]',
                   'p-4',
-                  cn('relative', 'overflow-hidden', 'rounded-xl', 'border', 'border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl')
+                  cn(
+                    'relative',
+                    'overflow-hidden',
+                    'rounded-xl',
+                    'border',
+                    'border-border/60 bg-background/95 shadow-2xl backdrop-blur-xl'
+                  )
                 )}
                 sideOffset={8}
               >
@@ -906,25 +1172,32 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                     >
                       <Link
                         href="/account/jobs/new"
-                        className={cn('group/cta block', 'rounded-lg', 'border-2 border-accent/20 bg-gradient-to-br from-accent/10 to-accent/5', 'p-4')}
+                        className={cn(
+                          'group/cta block',
+                          'rounded-lg',
+                          'border-accent/20 from-accent/10 to-accent/5 border-2 bg-gradient-to-br',
+                          'p-4'
+                        )}
                       >
-                      <div className={cn('flex items-center gap-3', 'mb-2')}>
-                        <div className="flex-center h-10 w-10 rounded-lg bg-accent/20 group-hover/cta:bg-accent/30 transition-colors">
-                          <PlusCircle className="h-5 w-5 text-accent" />
+                        <div className={cn('flex items-center gap-3', 'mb-2')}>
+                          <div className="flex-center bg-accent/20 group-hover/cta:bg-accent/30 h-10 w-10 rounded-lg transition-colors">
+                            <PlusCircle className="text-accent h-5 w-5" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-sm font-semibold">Post a Job</h3>
+                            <p className="text-muted-foreground text-xs">
+                              Reach talented developers
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-sm">Post a Job</h3>
-                          <p className="text-muted-foreground text-xs">Reach talented developers</p>
+                        <p className={cn('text-muted-foreground text-xs', 'mb-4')}>
+                          Featured listings available. Premium placement options.
+                        </p>
+                        <div className="text-xs-medium text-accent flex items-center gap-1">
+                          <span>Create Listing</span>
+                          <ChevronDown className="h-3 w-3 rotate-[-90deg]" />
                         </div>
-                      </div>
-                      <p className={cn('text-muted-foreground text-xs', 'mb-4')}>
-                        Featured listings available. Premium placement options.
-                      </p>
-                      <div className="flex items-center gap-1 text-xs-medium text-accent">
-                        <span>Create Listing</span>
-                        <ChevronDown className="h-3 w-3 rotate-[-90deg]" />
-                      </div>
-                    </Link>
+                      </Link>
                     </motion.div>
 
                     {/* Quick Links */}
@@ -944,10 +1217,10 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                             <Link
                               href={child.href}
                               prefetch
-                              className="flex items-center gap-1 px-1 py-1.5 text-sm rounded-md group/item"
+                              className="group/item flex items-center gap-1 rounded-md px-1 py-1.5 text-sm"
                             >
                               {ChildIcon && (
-                                <ChildIcon className="h-4 w-4 text-muted-foreground group-hover/item:text-accent" />
+                                <ChildIcon className="text-muted-foreground group-hover/item:text-accent h-4 w-4" />
                               )}
                               <span className="flex-1">{child.label}</span>
                             </Link>
@@ -959,19 +1232,26 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
 
                   {/* Right Column: Featured Jobs Preview */}
                   <div>
-                    <div className="px-1 py-1 mb-2">
-                      <p className={cn('text-[10px]', 'font-semibold', 'text-muted-foreground/70 uppercase', 'tracking-wide')}>
+                    <div className="mb-2 px-1 py-1">
+                      <p
+                        className={cn(
+                          'text-[10px]',
+                          'font-semibold',
+                          'text-muted-foreground/70 uppercase',
+                          'tracking-wide'
+                        )}
+                      >
                         Featured Jobs
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <div className="rounded-lg border border-border/50 bg-card/50 p-2 text-sm">
+                      <div className="border-border/50 bg-card/50 rounded-lg border p-2 text-sm">
                         <p className="text-muted-foreground text-xs">
                           Featured job previews will appear here
                         </p>
                         <Link
                           href="/jobs?featured=true"
-                          className="text-xs text-accent hover:underline mt-2 inline-block"
+                          className="text-accent mt-2 inline-block text-xs hover:underline"
                         >
                           View all featured jobs →
                         </Link>
@@ -986,26 +1266,25 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
 
         // Special handling for Configs - Two-column layout with hero card on left
         if (link.label === 'Configs' && link.sections) {
-          return (
-            <ConfigsDropdown key={link.label} link={link} />
-          );
+          return <ConfigsDropdown key={link.label} link={link} />;
         }
 
         // Special handling for Discover, Resources, Contribute - Multi-column grid with descriptions
         if (
-          (link.label === 'Discover' || link.label === 'Resources' || link.label === 'Contribute') &&
+          (link.label === 'Discover' ||
+            link.label === 'Resources' ||
+            link.label === 'Contribute') &&
           link.sections
         ) {
-          return (
-            <DiscoverResourcesContributeDropdown key={link.label} link={link} />
-          );
+          return <DiscoverResourcesContributeDropdown key={link.label} link={link} />;
         }
 
         // Render hover dropdown for links with sections or children (fallback)
-        if ((link.sections && link.sections.length > 0) || (link.children && link.children.length > 0)) {
-          return (
-            <FallbackDropdown key={link.label} link={link} />
-          );
+        if (
+          (link.sections && link.sections.length > 0) ||
+          (link.children && link.children.length > 0)
+        ) {
+          return <FallbackDropdown key={link.label} link={link} />;
         }
 
         // Render regular link for items without children
@@ -1027,13 +1306,29 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
         <NavigationHoverCardTrigger asChild>
           <button
             type="button"
-            className={cn('group', 'relative', 'flex items-center', 'px-3', 'py-2', 'font-medium', 'text-xs', 'text-foreground/80 hover:text-foreground', 'transition-all duration-200 ease-out')}
+            className={cn(
+              'group',
+              'relative',
+              'flex items-center',
+              'px-3',
+              'py-2',
+              'font-medium',
+              'text-xs',
+              'text-foreground/80 hover:text-foreground',
+              'transition-all duration-200 ease-out'
+            )}
             aria-label="Open additional navigation menu"
           >
             <span className="relative">
               More
               <span
-                className={cn('absolute bottom-0 left-0', 'underline', 'bg-accent w-0', 'transition-all duration-300 ease-out', 'group-hover:w-full')}
+                className={cn(
+                  'absolute bottom-0 left-0',
+                  'underline',
+                  'bg-accent w-0',
+                  'transition-all duration-300 ease-out',
+                  'group-hover:w-full'
+                )}
                 aria-hidden="true"
               />
             </span>
@@ -1046,24 +1341,41 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
           className={cn(
             'w-80',
             'p-4',
-            cn('relative', 'overflow-hidden', 'rounded-xl', 'border', 'border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl')
+            cn(
+              'relative',
+              'overflow-hidden',
+              'rounded-xl',
+              'border',
+              'border-border/60 bg-background/95 shadow-2xl backdrop-blur-xl'
+            )
           )}
           sideOffset={8}
         >
-                {/* Subtle animated gradient border */}
-                <AnimatedBorder
-                  colorFrom="rgba(249, 115, 22, 0.4)"
-                  colorTo="rgba(249, 115, 22, 0.2)"
-                  duration={4}
-                  borderWidth={1.5}
-                />
+          {/* Subtle animated gradient border */}
+          <AnimatedBorder
+            colorFrom="rgba(249, 115, 22, 0.4)"
+            colorTo="rgba(249, 115, 22, 0.2)"
+            duration={4}
+            borderWidth={1.5}
+          />
           {/* Support group with enhanced layout */}
           <div className={cn('relative z-10', 'space-y-3')}>
             {SECONDARY_NAVIGATION.map((group, groupIndex) => {
               const isLastGroup = groupIndex === SECONDARY_NAVIGATION.length - 1;
               return (
                 <div key={group.heading}>
-                  <div className={cn('text-[10px]', 'font-semibold', 'text-muted-foreground', 'uppercase', 'tracking-wide', 'px-3', 'py-1.5', 'mb-2')}>
+                  <div
+                    className={cn(
+                      'text-[10px]',
+                      'font-semibold',
+                      'text-muted-foreground',
+                      'uppercase',
+                      'tracking-wide',
+                      'px-3',
+                      'py-1.5',
+                      'mb-2'
+                    )}
+                  >
                     {group.heading}
                   </div>
                   <ul className="grid gap-0.5">
@@ -1071,68 +1383,75 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                       // Filter out Pinboard, Discord, and GitHub from vertical list (they'll be in horizontal icon row at bottom)
                       .filter((link) => {
                         if (group.heading === 'Community') {
-                          return link.label !== 'Pinboard' && link.label !== 'Discord' && link.label !== 'GitHub';
+                          return (
+                            link.label !== 'Pinboard' &&
+                            link.label !== 'Discord' &&
+                            link.label !== 'GitHub'
+                          );
                         }
                         return true;
                       })
                       .map((link, linkIndex) => {
-                      const LinkIcon = link.icon;
-                      
-                  return (
-                    <Fragment key={`${group.heading}-${link.label}-fragment`}>
-                      {linkIndex > 0 && (
-                        <li key={`${group.heading}-${link.label}-divider`}>
-                          <div className="h-px bg-border/30 my-0.5 mx-2" />
-                        </li>
-                      )}
-                      <li key={`${group.heading}-${link.label}`}>
-                        <motion.div
-                          whileHover={{
-                            ...MICROINTERACTIONS.card.hover,
-                            backgroundColor: 'rgba(249, 115, 22, 0.05)', // Preserve exact original background (accent/5)
-                            y: 0, // Preserve original (no y movement for these links)
-                          }}
-                          whileTap={MICROINTERACTIONS.card.tap}
-                          transition={MICROINTERACTIONS.card.transition}
-                        >
-                          <Link
-                            href={link.href}
-                            prefetch={!link.external}
-                            {...(link.external && { target: '_blank', rel: 'noopener noreferrer' })}
-                            className="group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none focus:bg-accent/5"
-                          >
-                            <div className="flex items-start gap-2">
-                              {LinkIcon && (
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
-                                  <LinkIcon className="h-4 w-4" />
-                                </div>
-                              )}
-                              <div className="flex-1 min-w-0 overflow-hidden">
-                                <div className={cn('font-medium', 'mb-0.5', 'break-words')}>{link.label}</div>
-                                {link.description && (
-                                  <p className="text-muted-foreground text-xs leading-snug break-words line-clamp-2">
-                                    {link.description}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </Link>
-                        </motion.div>
-                      </li>
-                    </Fragment>
-                  );
-                  })}
+                        const LinkIcon = link.icon;
+
+                        return (
+                          <Fragment key={`${group.heading}-${link.label}-fragment`}>
+                            {linkIndex > 0 && (
+                              <li key={`${group.heading}-${link.label}-divider`}>
+                                <div className="bg-border/30 mx-2 my-0.5 h-px" />
+                              </li>
+                            )}
+                            <li key={`${group.heading}-${link.label}`}>
+                              <motion.div
+                                whileHover={{
+                                  ...MICROINTERACTIONS.card.hover,
+                                  backgroundColor: 'rgba(249, 115, 22, 0.05)', // Preserve exact original background (accent/5)
+                                  y: 0, // Preserve original (no y movement for these links)
+                                }}
+                                whileTap={MICROINTERACTIONS.card.tap}
+                                transition={MICROINTERACTIONS.card.transition}
+                              >
+                                <Link
+                                  href={link.href}
+                                  prefetch={!link.external}
+                                  {...(link.external && {
+                                    target: '_blank',
+                                    rel: 'noopener noreferrer',
+                                  })}
+                                  className="group/item focus:bg-accent/5 block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none"
+                                >
+                                  <div className="flex items-start gap-2">
+                                    {LinkIcon && (
+                                      <div className="bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                                        <LinkIcon className="h-4 w-4" />
+                                      </div>
+                                    )}
+                                    <div className="min-w-0 flex-1 overflow-hidden">
+                                      <div className={cn('font-medium', 'mb-0.5', 'break-words')}>
+                                        {link.label}
+                                      </div>
+                                      {link.description && (
+                                        <p className="text-muted-foreground line-clamp-2 text-xs leading-snug break-words">
+                                          {link.description}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </Link>
+                              </motion.div>
+                            </li>
+                          </Fragment>
+                        );
+                      })}
                   </ul>
-                  {!isLastGroup && (
-                    <div className="h-px bg-border/40 my-4 mx-1" />
-                  )}
+                  {!isLastGroup && <div className="bg-border/40 mx-1 my-4 h-px" />}
                 </div>
               );
             })}
           </div>
-          
+
           {/* Horizontal icon row at bottom: Search, Discord, Pinboard, GitHub Stars */}
-          <CommunityIconsRow 
+          <CommunityIconsRow
             openPinboardDrawer={openPinboardDrawer}
             isPinboardOpen={isPinboardOpen}
             openCommandPalette={openPalette}
@@ -1140,7 +1459,6 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
           />
         </NavigationHoverCardContent>
       </NavigationHoverCard>
-
     </nav>
   );
 }

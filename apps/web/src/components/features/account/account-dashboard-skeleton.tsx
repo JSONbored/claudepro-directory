@@ -2,7 +2,7 @@
 
 /**
  * Account Dashboard Skeleton
- * 
+ *
  * Perfectly matches the structure of /account page:
  * - Header with title and welcome message
  * - 3 AnimatedStatsCard components in grid (Bookmarks, Tier, Member Since)
@@ -14,7 +14,13 @@ import { Skeleton } from '@heyclaude/web-runtime/ui';
 import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 
 const KEYS_3 = Array.from({ length: 3 }, (_, i) => `skeleton-${i + 1}`);
 const KEYS_6 = Array.from({ length: 6 }, (_, i) => `skeleton-${i + 1}`);
@@ -46,8 +52,8 @@ function StatsCardSkeleton() {
  */
 function QuickActionRowSkeleton() {
   return (
-    <div className="flex items-center justify-between card-base p-2">
-      <div className="flex flex-col gap-1 flex-1">
+    <div className="card-base flex items-center justify-between p-2">
+      <div className="flex flex-1 flex-col gap-1">
         <Skeleton size="sm" width="2/3" />
         <Skeleton size="xs" width="xs" />
       </div>
@@ -61,7 +67,7 @@ function QuickActionRowSkeleton() {
  */
 export function AccountDashboardSkeleton() {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <motion.div
       className="space-y-6"
@@ -167,8 +173,13 @@ export function AccountDashboardSkeleton() {
                       <CardContent className="p-6">
                         <div className="space-y-3">
                           <div className="flex items-start gap-2">
-                            <Skeleton size="md" width="md" rounded="md" className="h-12 w-12 shrink-0" />
-                            <div className="flex flex-col gap-2 flex-1">
+                            <Skeleton
+                              size="md"
+                              width="md"
+                              rounded="md"
+                              className="h-12 w-12 shrink-0"
+                            />
+                            <div className="flex flex-1 flex-col gap-2">
                               <Skeleton size="md" width="3/4" />
                               <Skeleton size="sm" width="3xl" />
                             </div>

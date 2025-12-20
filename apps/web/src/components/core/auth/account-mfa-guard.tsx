@@ -33,9 +33,17 @@ interface AccountMFAGuardProps {
  * @see requiresMFAChallenge
  */
 export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
-  const { value: checking, setTrue: setCheckingTrue, setFalse: setCheckingFalse } = useBoolean(true);
+  const {
+    value: checking,
+    setTrue: setCheckingTrue,
+    setFalse: setCheckingFalse,
+  } = useBoolean(true);
   const { value: requiresMFA, setValue: setRequiresMFA } = useBoolean();
-  const { value: mfaDialogOpen, setTrue: setMfaDialogOpenTrue, setFalse: setMfaDialogOpenFalse } = useBoolean();
+  const {
+    value: mfaDialogOpen,
+    setTrue: setMfaDialogOpenTrue,
+    setFalse: setMfaDialogOpenFalse,
+  } = useBoolean();
   const [checkError, setCheckError] = useState<Error | null>(null);
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
@@ -119,8 +127,8 @@ export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <h2 className="mb-2 text-xl font-semibold text-destructive">Authentication Error</h2>
-          <p className="mb-4 text-muted-foreground">
+          <h2 className="text-destructive mb-2 text-xl font-semibold">Authentication Error</h2>
+          <p className="text-muted-foreground mb-4">
             Unable to verify authentication requirements. Please refresh the page or contact support
             if the issue persists.
           </p>
@@ -133,7 +141,7 @@ export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
                 // Error already handled in checkMFARequirement
               });
             }}
-            className="rounded-md bg-primary px-4 py-2 text-primary-foreground"
+            className="bg-primary text-primary-foreground rounded-md px-4 py-2"
           >
             Retry
           </button>

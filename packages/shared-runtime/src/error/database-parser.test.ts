@@ -29,7 +29,8 @@ describe('parseDatabaseError', () => {
     it('should parse profiles_display_name_check constraint', () => {
       const error: PostgrestError = {
         code: '23514',
-        message: 'new row for relation "profiles" violates constraint "profiles_display_name_check"',
+        message:
+          'new row for relation "profiles" violates constraint "profiles_display_name_check"',
         details: null,
         hint: null,
       };

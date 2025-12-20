@@ -20,7 +20,7 @@ test.describe('/contact', () => {
     // Set up error tracking and navigate to contact page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/contact');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -88,7 +88,10 @@ test.describe('/contact', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -104,7 +107,10 @@ test.describe('/contact', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -120,7 +126,10 @@ test.describe('/contact', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -136,7 +145,10 @@ test.describe('/contact', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -168,7 +180,10 @@ test.describe('/contact', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 });

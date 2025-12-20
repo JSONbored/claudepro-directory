@@ -20,7 +20,7 @@ test.describe('Privacy Policy Page (/privacy)', () => {
     // Set up error tracking and navigate to privacy page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/privacy');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -130,7 +130,10 @@ test.describe('Privacy Policy Page (/privacy)', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -146,7 +149,10 @@ test.describe('Privacy Policy Page (/privacy)', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -170,16 +176,16 @@ test.describe('Privacy Policy Page (/privacy)', () => {
     // This tests that PrivacyLoading is shown during Suspense
     // The component uses Suspense with PrivacyLoading fallback
     await page.goto('/privacy');
-    
+
     // Check for loading state (may flash quickly)
     const loading = page.locator('[data-loading], [aria-busy="true"]');
     const hasLoading = await loading.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main').or(page.locator('body'));
     await expect(main.first()).toBeVisible();
   });

@@ -7,7 +7,11 @@
  */
 
 import { POLLING_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
-import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import {
+  logClientError,
+  logClientWarn,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/client';
 import { useInterval } from '@heyclaude/web-runtime/hooks/use-interval';
 import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
 import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
@@ -42,16 +46,22 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
   const { value: isTabVisible, setValue: setIsTabVisible } = useBoolean(true);
   const configLoadedRef = useRef(false);
   const isClient = useIsClient();
-  
+
   // Use useLocalStorage hooks for cache management
-  const { value: cachedCount, setValue: setCachedCount } = useLocalStorage<string | null>(CACHE_KEY, {
-    defaultValue: null,
-    syncAcrossTabs: false,
-  });
-  const { value: cacheTimestamp, setValue: setCacheTimestamp } = useLocalStorage<string | null>(CACHE_TIMESTAMP_KEY, {
-    defaultValue: null,
-    syncAcrossTabs: false,
-  });
+  const { value: cachedCount, setValue: setCachedCount } = useLocalStorage<string | null>(
+    CACHE_KEY,
+    {
+      defaultValue: null,
+      syncAcrossTabs: false,
+    }
+  );
+  const { value: cacheTimestamp, setValue: setCacheTimestamp } = useLocalStorage<string | null>(
+    CACHE_TIMESTAMP_KEY,
+    {
+      defaultValue: null,
+      syncAcrossTabs: false,
+    }
+  );
 
   // Load config from unified config once when hook mounts (client-side only)
   useEffect(() => {
@@ -93,9 +103,10 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
       // Response schema is now properly extracted
       // Zodios expects path parameters in a 'params' object
       const data = await client.fluxGet({ params: { '...path': 'email/count' } });
-      const newCount = (data && typeof data === 'object' && 'count' in data && typeof data.count === 'number')
-        ? data.count
-        : null;
+      const newCount =
+        data && typeof data === 'object' && 'count' in data && typeof data.count === 'number'
+          ? data.count
+          : null;
 
       if (newCount === null || typeof newCount !== 'number') {
         throw new Error('Invalid newsletter count response');
@@ -136,16 +147,11 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
   useEffect(() => {
     fetchCount().catch((error_: unknown) => {
       const normalized = normalizeError(error_, 'Initial newsletter count fetch failed');
-      logClientWarn(
-        '[Newsletter] Initial fetch failed',
-        normalized,
-        'useNewsletterCount.fetch',
-        {
-          component: 'useNewsletterCount',
-          action: 'initial-fetch',
-          category: 'newsletter',
-        }
-      );
+      logClientWarn('[Newsletter] Initial fetch failed', normalized, 'useNewsletterCount.fetch', {
+        component: 'useNewsletterCount',
+        action: 'initial-fetch',
+        category: 'newsletter',
+      });
     });
   }, [fetchCount]);
 

@@ -103,44 +103,40 @@ export function useSessionStorage<T>(
 
   const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === 'undefined') {
-      return typeof initialValue === 'function'
-        ? (initialValue as () => T)()
-        : initialValue;
+      return typeof initialValue === 'function' ? (initialValue as () => T)() : initialValue;
     }
 
     if (!initializeWithValue) {
-      return typeof initialValue === 'function'
-        ? (initialValue as () => T)()
-        : initialValue;
+      return typeof initialValue === 'function' ? (initialValue as () => T)() : initialValue;
     }
 
     try {
       const item = window.sessionStorage.getItem(key);
       if (item === null) {
-        return typeof initialValue === 'function'
-          ? (initialValue as () => T)()
-          : initialValue;
+        return typeof initialValue === 'function' ? (initialValue as () => T)() : initialValue;
       }
       return deserializer(item);
     } catch (error) {
       const errorObj = error instanceof Error ? error : new Error(String(error));
-      logger.warn({ err: errorObj,
-        category: 'storage',
-        component: 'useSessionStorage',
-        recoverable: true,
-        action: 'initialize',
-        key, }, `Error reading sessionStorage key "${key}"`);
-      return typeof initialValue === 'function'
-        ? (initialValue as () => T)()
-        : initialValue;
+      logger.warn(
+        {
+          err: errorObj,
+          category: 'storage',
+          component: 'useSessionStorage',
+          recoverable: true,
+          action: 'initialize',
+          key,
+        },
+        `Error reading sessionStorage key "${key}"`
+      );
+      return typeof initialValue === 'function' ? (initialValue as () => T)() : initialValue;
     }
   });
 
   const setValue: React.Dispatch<React.SetStateAction<T>> = useCallback(
     (value) => {
       try {
-        const valueToStore =
-          value instanceof Function ? value(storedValue) : value;
+        const valueToStore = value instanceof Function ? value(storedValue) : value;
         setStoredValue(valueToStore);
 
         if (typeof window !== 'undefined') {
@@ -148,12 +144,17 @@ export function useSessionStorage<T>(
         }
       } catch (error) {
         const errorObj = error instanceof Error ? error : new Error(String(error));
-        logger.warn({ err: errorObj,
-          category: 'storage',
-          component: 'useSessionStorage',
-          recoverable: true,
-          action: 'setValue',
-          key, }, `Error setting sessionStorage key "${key}"`);
+        logger.warn(
+          {
+            err: errorObj,
+            category: 'storage',
+            component: 'useSessionStorage',
+            recoverable: true,
+            action: 'setValue',
+            key,
+          },
+          `Error setting sessionStorage key "${key}"`
+        );
       }
     },
     [key, serializer, storedValue]
@@ -163,18 +164,21 @@ export function useSessionStorage<T>(
     try {
       window.sessionStorage.removeItem(key);
       setStoredValue(
-        typeof initialValue === 'function'
-          ? (initialValue as () => T)()
-          : initialValue
+        typeof initialValue === 'function' ? (initialValue as () => T)() : initialValue
       );
     } catch (error) {
       const errorObj = error instanceof Error ? error : new Error(String(error));
-      logger.warn({ err: errorObj,
-        category: 'storage',
-        component: 'useSessionStorage',
-        recoverable: true,
-        action: 'removeValue',
-        key, }, `Error removing sessionStorage key "${key}"`);
+      logger.warn(
+        {
+          err: errorObj,
+          category: 'storage',
+          component: 'useSessionStorage',
+          recoverable: true,
+          action: 'removeValue',
+          key,
+        },
+        `Error removing sessionStorage key "${key}"`
+      );
     }
   }, [key, initialValue]);
 
@@ -190,12 +194,17 @@ export function useSessionStorage<T>(
           setStoredValue(e.newValue ? deserializer(e.newValue) : initialValue);
         } catch (error) {
           const errorObj = error instanceof Error ? error : new Error(String(error));
-          logger.warn({ err: errorObj,
-            category: 'storage',
-            component: 'useSessionStorage',
-            recoverable: true,
-            action: 'handleStorageChange',
-            key, }, `Error reading sessionStorage key "${key}"`);
+          logger.warn(
+            {
+              err: errorObj,
+              category: 'storage',
+              component: 'useSessionStorage',
+              recoverable: true,
+              action: 'handleStorageChange',
+              key,
+            },
+            `Error reading sessionStorage key "${key}"`
+          );
         }
       }
     };

@@ -23,16 +23,16 @@ export async function createSupabaseServerClient(): Promise<SupabaseServerClient
   if (!supabaseUrl) {
     throw new Error(
       'Missing NEXT_PUBLIC_SUPABASE_URL environment variable. ' +
-      'Please ensure Infisical dev environment contains NEXT_PUBLIC_SUPABASE_URL, ' +
-      'or set it in your environment variables.'
+        'Please ensure Infisical dev environment contains NEXT_PUBLIC_SUPABASE_URL, ' +
+        'or set it in your environment variables.'
     );
   }
 
   if (!supabaseAnonKey) {
     throw new Error(
       'Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable. ' +
-      'Please ensure Infisical dev environment contains NEXT_PUBLIC_SUPABASE_ANON_KEY, ' +
-      'or set it in your environment variables.'
+        'Please ensure Infisical dev environment contains NEXT_PUBLIC_SUPABASE_ANON_KEY, ' +
+        'or set it in your environment variables.'
     );
   }
 
@@ -40,13 +40,15 @@ export async function createSupabaseServerClient(): Promise<SupabaseServerClient
     cookies: {
       getAll() {
         const allCookies = cookieStore.getAll();
-        logger.debug({ count: allCookies.length,
-          names: allCookies.map((c) => c.name), }, 'Supabase getting cookies');
+        logger.debug(
+          { count: allCookies.length, names: allCookies.map((c) => c.name) },
+          'Supabase getting cookies'
+        );
         return allCookies;
       },
       setAll(cookiesToSet) {
         try {
-          logger.info({ count: cookiesToSet.length, }, 'Supabase setting cookies');
+          logger.info({ count: cookiesToSet.length }, 'Supabase setting cookies');
           for (const { name, value, options } of cookiesToSet) {
             cookieStore.set(name, value, options);
           }
@@ -56,15 +58,27 @@ export async function createSupabaseServerClient(): Promise<SupabaseServerClient
               return;
             }
             const normalized = normalizeError(error, 'Failed to set auth cookies in Route Handler');
-            logger.error({ err: normalized, context: 'supabase_server_client',
-              cookieCount: cookiesToSet.length, }, 'Failed to set auth cookies in Route Handler');
+            logger.error(
+              {
+                err: normalized,
+                context: 'supabase_server_client',
+                cookieCount: cookiesToSet.length,
+              },
+              'Failed to set auth cookies in Route Handler'
+            );
           } else {
             const normalized = normalizeError(
               error,
               'Failed to set auth cookies in Route Handler (non-Error exception)'
             );
-            logger.error({ err: normalized, context: 'supabase_server_client',
-                cookieCount: cookiesToSet.length, }, 'Failed to set auth cookies in Route Handler (non-Error exception)');
+            logger.error(
+              {
+                err: normalized,
+                context: 'supabase_server_client',
+                cookieCount: cookiesToSet.length,
+              },
+              'Failed to set auth cookies in Route Handler (non-Error exception)'
+            );
           }
         }
       },

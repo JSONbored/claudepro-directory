@@ -14,13 +14,7 @@
 
 import { sanitizeSlug } from '@heyclaude/web-runtime/content';
 import { Award, Medal, TrendingUp } from '@heyclaude/web-runtime/icons';
-import {
-  UnifiedBadge,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@heyclaude/web-runtime/ui';
+import { UnifiedBadge, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 import { optimizeAvatarUrl } from '@heyclaude/web-runtime/utils/optimize-avatar-url';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -127,7 +121,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-accent" />
+            <TrendingUp className="text-accent h-4 w-4" />
             <CardTitle className="text-sm">Trending Contributors</CardTitle>
           </div>
         </CardHeader>
@@ -181,7 +175,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm-medium">{displayName}</p>
+                  <p className="text-sm-medium truncate">{displayName}</p>
                   {contributor.total_contributions !== undefined && (
                     <div className="text-muted-foreground flex items-center gap-1 text-xs">
                       <Award className="h-3 w-3" />
@@ -236,7 +230,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm-medium">{displayName}</p>
+                    <p className="text-sm-medium truncate">{displayName}</p>
                     {member.work ? (
                       <p className="text-muted-foreground truncate text-xs">{member.work}</p>
                     ) : null}

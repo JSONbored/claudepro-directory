@@ -1,8 +1,8 @@
 /**
  * PGMQ Type Definitions
- * 
+ *
  * Type-safe interfaces for PostgreSQL Message Queue operations.
- * These types are runtime-agnostic and can be used by both edge-runtime and web-runtime.
+ * These types are runtime-agnostic and can be used by web-runtime.
  */
 
 /**
@@ -58,23 +58,23 @@ export const PGMQ_QUEUES = {
   discord_jobs: 'discord_jobs',
   discord_submissions: 'discord_submissions',
   discord_errors: 'discord_errors',
-  
+
   // Email queues
   email_subscribe: 'email_subscribe',
   email_welcome: 'email_welcome',
   email_transactional: 'email_transactional',
   email_contact: 'email_contact',
   email_job_lifecycle: 'email_job_lifecycle',
-  
+
   // Content processing
   changelog_process: 'changelog_process',
   changelog_notify: 'changelog_notify',
   embedding_generation: 'embedding_generation',
   image_generation: 'image_generation',
   package_generation: 'package_generation',
-  
+
   // Analytics
   pulse: 'pulse',
 } as const;
 
-export type PgmqQueueName = typeof PGMQ_QUEUES[keyof typeof PGMQ_QUEUES];
+export type PgmqQueueName = (typeof PGMQ_QUEUES)[keyof typeof PGMQ_QUEUES];

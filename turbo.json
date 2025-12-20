@@ -55,7 +55,6 @@
         "packages/**/package.json",
         "packages/**/tsconfig.json",
         "!packages/generators/**",
-        "!packages/edge-runtime/**",
         "!**/*.test.{ts,tsx}",
         "!**/*.spec.{ts,tsx}",
         "package.json",
@@ -114,11 +113,6 @@
       "cache": true,
       "interactive": false
     },
-    "type-check:edge": {
-      "outputs": [],
-      "inputs": ["apps/edge/functions/**/*", "apps/edge/supabase/deno.json"],
-      "cache": true
-    },
     "lint": {
       "dependsOn": [
         "@heyclaude/database-types#build",
@@ -127,11 +121,6 @@
         "@heyclaude/web-runtime#build"
       ],
       "outputs": [],
-      "cache": true
-    },
-    "lint:edge": {
-      "outputs": [],
-      "inputs": ["apps/edge/functions/**/*"],
       "cache": true
     },
     "test:unit": {
@@ -272,15 +261,6 @@
       "dependsOn": ["generators:build"],
       "cache": false
     },
-    "email:upload:exec": {
-      "dependsOn": ["generators:build"],
-      "cache": false,
-      "passThroughEnv": ["RESEND_API_KEY"]
-    },
-    "deploy:edge:exec": {
-      "cache": false,
-      "passThroughEnv": ["SUPABASE_PROJECT_REF", "NEXT_PUBLIC_SUPABASE_URL"]
-    }
   },
   "globalDependencies": ["package.json", "pnpm-lock.yaml"],
   "globalEnv": [

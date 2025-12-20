@@ -16,9 +16,7 @@ import type { ReadonlyURLSearchParams } from 'next/navigation';
  * @param searchParams - URL search parameters
  * @returns FilterState object parsed from URL
  */
-export function syncSearchStateFromURL(
-  searchParams: ReadonlyURLSearchParams
-): FilterState {
+export function syncSearchStateFromURL(searchParams: ReadonlyURLSearchParams): FilterState {
   const filters: FilterState = {};
 
   // Parse sort
@@ -143,11 +141,7 @@ export function syncSearchStateToURL(
  * @param basePath - Base path (default: '/search')
  * @returns Shareable URL string
  */
-export function createSearchURL(
-  query: string,
-  filters: FilterState,
-  basePath = '/search'
-): string {
+export function createSearchURL(query: string, filters: FilterState, basePath = '/search'): string {
   const params = syncSearchStateToURL(query, filters, new URLSearchParams());
   const queryString = params.toString();
   return queryString ? `${basePath}?${queryString}` : basePath;

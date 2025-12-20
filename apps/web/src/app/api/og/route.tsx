@@ -17,7 +17,8 @@
 import 'server-only';
 import { OG_DEFAULTS, OG_DIMENSIONS } from '@heyclaude/shared-runtime';
 import {
-  createOptionsHandler as createApiOptionsHandler, createApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  createApiRoute,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { ogImageQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import {

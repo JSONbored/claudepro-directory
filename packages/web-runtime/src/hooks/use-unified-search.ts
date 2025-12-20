@@ -40,7 +40,7 @@
  * @module web-runtime/hooks/use-unified-search
  */
 
-import type { sort_option } from '@heyclaude/data-layer/prisma';
+import type { sort_option } from '@prisma/client';
 import { useLocalStorage } from './use-local-storage.ts';
 import type { FilterState } from '../types/component.types.ts';
 import { useCallback, useState } from 'react';
@@ -98,8 +98,9 @@ export function useUnifiedSearch({
     'user-pref-sort',
     {
       defaultValue: (initialSort as sort_option) || ('trending' as sort_option),
-    syncAcrossTabs: true,
-  });
+      syncAcrossTabs: true,
+    }
+  );
 
   const [filters, setFilters] = useState<FilterState>(() => ({
     sort: savedSort || initialSort,

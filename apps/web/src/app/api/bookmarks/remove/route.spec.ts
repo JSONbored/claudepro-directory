@@ -3,7 +3,7 @@ import { setupErrorTracking } from '../../../../../config/tests/utils/error-trac
 
 /**
  * Comprehensive Remove Bookmark API Route E2E Tests
- * 
+ *
  * Tests ALL functionality of the /api/bookmarks/remove endpoint with strict error checking:
  * - POST request handling
  * - Request body validation (content_slug, content_type)
@@ -20,7 +20,7 @@ test.describe('Remove Bookmark API Route', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (API routes don't need navigation)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -40,9 +40,9 @@ test.describe('Remove Bookmark API Route', () => {
         content_type: 'agents',
       },
     });
-    
+
     expect(response.status()).toBe(401);
-    
+
     const data = await response.json();
     expect(data).toHaveProperty('error');
   });
@@ -53,7 +53,7 @@ test.describe('Remove Bookmark API Route', () => {
         // Missing required fields
       },
     });
-    
+
     expect(response.status()).toBe(400);
   });
 
@@ -64,7 +64,7 @@ test.describe('Remove Bookmark API Route', () => {
         content_type: 'invalid-type',
       },
     });
-    
+
     expect(response.status()).toBe(400);
   });
 
@@ -74,7 +74,7 @@ test.describe('Remove Bookmark API Route', () => {
         content_type: 'agents',
       },
     });
-    
+
     expect(response.status()).toBe(400);
   });
 
@@ -84,23 +84,25 @@ test.describe('Remove Bookmark API Route', () => {
         content_slug: 'test-slug',
       },
     });
-    
+
     expect(response.status()).toBe(400);
   });
 
   test('should handle OPTIONS request for CORS preflight', async ({ page }) => {
     const response = await page.request.options('/api/bookmarks/remove');
-    
+
     expect(response.status()).toBe(200);
-    
+
     // Check for CORS preflight headers
     const headers = response.headers();
-    expect(headers['access-control-allow-methods'] || headers['Access-Control-Allow-Methods']).toBeTruthy();
+    expect(
+      headers['access-control-allow-methods'] || headers['Access-Control-Allow-Methods']
+    ).toBeTruthy();
   });
 
   test('should validate content_type enum values', async ({ page }) => {
     const validTypes = ['agents', 'mcp', 'commands', 'rules', 'hooks', 'statuslines'];
-    
+
     for (const contentType of validTypes) {
       const response = await page.request.post('/api/bookmarks/remove', {
         data: {
@@ -108,10 +110,10 @@ test.describe('Remove Bookmark API Route', () => {
           content_type: contentType,
         },
       });
-      
+
       // Should accept valid types (may return 401 if not authenticated, but not 400 for invalid type)
       expect([200, 401, 400]).toContain(response.status());
-      
+
       // If 400, it should be for auth, not for invalid type
       if (response.status() === 400) {
         const data = await response.json();
@@ -130,7 +132,7 @@ test.describe('Remove Bookmark API Route', () => {
         content_type: 'agents',
       },
     });
-    
+
     // Should return 401 (not authenticated) or 200 (if authenticated)
     // This confirms the route structure is correct
     expect([200, 401, 400]).toContain(response.status());
@@ -146,10 +148,10 @@ test.describe('Remove Bookmark API Route', () => {
         content_type: 'agents',
       },
     });
-    
+
     // Should return 200, 400, 401, or 500 (not crash)
     expect([200, 400, 401, 500]).toContain(response.status());
-    
+
     if (response.status() === 500) {
       const data = await response.json();
       expect(data).toHaveProperty('error');

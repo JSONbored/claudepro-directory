@@ -500,7 +500,7 @@ export function getBreadcrumbTrail(pathname: string): NavigationLink[] {
  */
 function getIconName(icon?: LucideIcon): string | null {
   if (!icon) return null;
-  
+
   // Create reverse mapping from icon component to name
   const iconNameMap: Map<LucideIcon, string> = new Map([
     [BookOpen, 'BookOpen'],
@@ -525,7 +525,7 @@ function getIconName(icon?: LucideIcon): string | null {
     [Users, 'Users'],
     [Zap, 'Zap'],
   ]);
-  
+
   return iconNameMap.get(icon) ?? null;
 }
 
@@ -564,9 +564,10 @@ function convertLinkToCommandItems(link: NavigationLink): Array<{
         // CRITICAL FIX: Create unique path by including section heading AND index
         // This prevents duplicates when the same heading appears multiple times (e.g., "Community")
         // Use section heading + section index + path to ensure uniqueness
-        const uniquePath = childLink.href === '#' 
-          ? childLink.href 
-          : `${childLink.href}?section=${encodeURIComponent(section.heading)}&sectionIndex=${sectionIndex}`;
+        const uniquePath =
+          childLink.href === '#'
+            ? childLink.href
+            : `${childLink.href}?section=${encodeURIComponent(section.heading)}&sectionIndex=${sectionIndex}`;
         items.push({
           path: uniquePath,
           title: childLink.label,
@@ -643,9 +644,10 @@ export function getCommandMenuNavigationData(): {
     for (const link of group.links) {
       const items = convertLinkToCommandItems(link);
       // Add group context to paths to ensure uniqueness
-      const itemsWithContext = items.map(item => ({
+      const itemsWithContext = items.map((item) => ({
         ...item,
-        path: item.path === '#' ? item.path : `${item.path}?group=${encodeURIComponent(group.heading)}`,
+        path:
+          item.path === '#' ? item.path : `${item.path}?group=${encodeURIComponent(group.heading)}`,
       }));
       secondary.push(...itemsWithContext);
     }

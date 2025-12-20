@@ -29,7 +29,7 @@ const KEYS_6 = Array.from({ length: 6 }, (_, i) => `skeleton-${i + 1}`);
  */
 export function ChangelogContentSkeleton() {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <motion.div
       className="space-y-3"
@@ -38,7 +38,6 @@ export function ChangelogContentSkeleton() {
       transition={SPRING.smooth}
     >
       {KEYS_6.map((key, index) => {
-
         return (
           <motion.div
             key={key}
@@ -65,16 +64,16 @@ export function ChangelogContentSkeleton() {
               {/* Right: Content */}
               <div className="relative flex-1 pb-4 pl-4 md:pl-8">
                 {/* Vertical timeline line */}
-                <div className="absolute left-0 top-2 hidden h-full w-px bg-border md:block">
+                <div className="bg-border absolute top-2 left-0 hidden h-full w-px md:block">
                   {/* Timeline dot */}
-                  <div className="absolute z-10 size-3 -translate-x-1/2 rounded-full bg-primary md:block" />
+                  <div className="bg-primary absolute z-10 size-3 -translate-x-1/2 rounded-full md:block" />
                 </div>
 
                 <div className="relative z-10 space-y-6">
                   {/* Title */}
                   <div className="flex flex-col gap-1">
                     <Skeleton size="lg" width="3/4" className="h-8" />
-                    
+
                     {/* Tags */}
                     <div className="flex flex-wrap gap-2">
                       <Skeleton size="xs" width="xs" rounded="full" className="h-6" />

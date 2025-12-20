@@ -168,7 +168,7 @@ function CaseStudyVariant(props: CaseStudyProps) {
           </div>
           {logo ? (
             <div className="bg-muted flex h-16 w-16 items-center justify-center rounded-lg">
-              <BookOpen className="h-8 w-8 text-muted-foreground" />
+              <BookOpen className="text-muted-foreground h-8 w-8" />
             </div>
           ) : null}
         </div>
@@ -186,7 +186,7 @@ function CaseStudyVariant(props: CaseStudyProps) {
 
         <div>
           <h4 className="mb-2 font-semibold text-green-600 dark:text-green-400">Results</h4>
-          <ul className="list-disc space-y-1 pl-4 text-muted-foreground">
+          <ul className="text-muted-foreground list-disc space-y-1 pl-4">
             {results.map((result) => (
               <li key={result}>{result}</li>
             ))}
@@ -292,14 +292,19 @@ function FeatureGridVariant(props: FeatureGridProps) {
             itemScope
             itemType="https://schema.org/ListItem"
             className={cn(
-              "group border-border/50 from-card/30 via-card/50 to-card/30 hover:from-card/50 hover:via-card/70 hover:to-card/50 relative h-full overflow-hidden border bg-linear-to-br shadow-lg hover:-translate-y-1 hover:shadow-xl animate-fade-in-up",
-              "transition-all duration-[var(--duration-default)] ease-out"
+              'group border-border/50 from-card/30 via-card/50 to-card/30 hover:from-card/50 hover:via-card/70 hover:to-card/50 animate-fade-in-up relative h-full overflow-hidden border bg-linear-to-br shadow-lg hover:-translate-y-1 hover:shadow-xl',
+              'transition-all duration-[var(--duration-default)] ease-out'
             )}
             style={{
               animationDelay: `${index * 50}ms`,
             }}
           >
-            <div className={cn("from-primary/5 to-primary/5 pointer-events-none absolute inset-0 bg-linear-to-br via-transparent opacity-0 transition-opacity group-hover:opacity-100", "transition-all duration-[var(--duration-default)] ease-out")} />
+            <div
+              className={cn(
+                'from-primary/5 to-primary/5 pointer-events-none absolute inset-0 bg-linear-to-br via-transparent opacity-0 transition-opacity group-hover:opacity-100',
+                'transition-all duration-[var(--duration-default)] ease-out'
+              )}
+            />
 
             <CardHeader>
               <CardTitle className="relative z-10 flex items-start justify-between" itemProp="name">
@@ -357,7 +362,7 @@ function TLDRVariant(props: TLDRSummaryProps) {
     >
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-primary" />
+          <Zap className="text-primary h-5 w-5" />
           {title}
         </CardTitle>
       </CardHeader>
@@ -414,10 +419,7 @@ function ExpertQuoteVariant(props: ExpertQuoteProps) {
       <footer className="flex items-center gap-3">
         {imageUrl ? (
           <Avatar className="h-12 w-12">
-            <AvatarImage 
-              src={optimizeAvatarUrl(imageUrl, 48) ?? imageUrl} 
-              alt={author} 
-            />
+            <AvatarImage src={optimizeAvatarUrl(imageUrl, 48) ?? imageUrl} alt={author} />
             <AvatarFallback>{author.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
         ) : null}
@@ -477,7 +479,7 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
     >
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-accent-foreground" />
+          <BookOpen className="text-accent-foreground h-5 w-5" />
           {title}
         </CardTitle>
         {description ? (
@@ -491,10 +493,10 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
               key={`${item.label}-${index}`}
               itemScope
               itemType="https://schema.org/PropertyValue"
-              className="flex flex-col gap-2 bg-card/50 card-base p-3 sm:flex-row sm:items-start sm:gap-4"
+              className="bg-card/50 card-base flex flex-col gap-2 p-3 sm:flex-row sm:items-start sm:gap-4"
             >
               <div className="sm:w-1/3">
-                <p itemProp="name" className="font-medium text-muted-foreground text-sm">
+                <p itemProp="name" className="text-muted-foreground text-sm font-medium">
                   {item.label}
                 </p>
               </div>

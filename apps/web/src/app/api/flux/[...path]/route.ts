@@ -15,7 +15,8 @@
 import 'server-only';
 
 import {
-  createApiRoute, createOptionsHandler as createApiOptionsHandler,
+  createApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
 } from '@heyclaude/web-runtime/api/route-factory';
 import {
   errorResponseSchema,
@@ -119,7 +120,8 @@ export const POST = createApiRoute({
       'Routes POST requests to appropriate Flux handlers based on path segments (e.g., /api/flux/discord/direct). Supports dynamic routing for internal services.',
     operationId: 'fluxPost',
     requestBody: {
-      description: 'Request body varies by Flux handler path (e.g., Discord notification payload, webhook data)',
+      description:
+        'Request body varies by Flux handler path (e.g., Discord notification payload, webhook data)',
       required: false,
     },
     responses: {

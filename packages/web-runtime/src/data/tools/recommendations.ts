@@ -5,7 +5,7 @@ import {
   type focus_area_type,
   type integration_type,
   type use_case_type,
-} from '@heyclaude/data-layer/prisma';
+} from '@prisma/client';
 import { type GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
 
 import { createDataFunction } from '../cached-data-factory.ts';

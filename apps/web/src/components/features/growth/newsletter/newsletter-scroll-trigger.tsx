@@ -5,7 +5,7 @@
  * Shows inline CTA when user reaches 60% scroll depth (indicates engagement)
  */
 
-import type { newsletter_source } from '@heyclaude/data-layer/prisma';
+import type { newsletter_source } from '@prisma/client';
 import { getNewsletterConfigValue } from '@heyclaude/web-runtime/config/static-configs';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
 import { ensureNumber } from '@heyclaude/web-runtime/data/utils';
@@ -45,7 +45,7 @@ export function NewsletterScrollTrigger({
   const [scrollHeightThreshold, setScrollHeightThreshold] = useState(minScrollHeight ?? 500);
   const { scrollYProgress } = useScroll();
   const shouldReduceMotion = useReducedMotion();
-  
+
   // Use useSessionStorage hook for scroll trigger state
   const [scrollShown, setScrollShown] = useSessionStorage<string | null>(
     'newsletter-scroll-shown',
@@ -114,7 +114,15 @@ export function NewsletterScrollTrigger({
     });
 
     return () => unsubscribe();
-  }, [scrollYProgress, threshold, hasTriggered, scrollHeightThreshold, setIsVisibleTrue, setHasTriggeredTrue, setScrollShown]);
+  }, [
+    scrollYProgress,
+    threshold,
+    hasTriggered,
+    scrollHeightThreshold,
+    setIsVisibleTrue,
+    setHasTriggeredTrue,
+    setScrollShown,
+  ]);
 
   if (!isVisible || hasTriggered) {
     return null;

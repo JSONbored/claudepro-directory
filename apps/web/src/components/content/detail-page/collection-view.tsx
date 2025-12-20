@@ -22,7 +22,9 @@
  * @see src/components/features/content/config-card.tsx - Embedded item cards
  */
 
-import type { contentModel, content_category } from '@heyclaude/data-layer/prisma';
+import type { Prisma, content_category } from '@prisma/client';
+
+type contentModel = Prisma.contentGetPayload<{}>;
 import { ensureStringArray, getMetadata } from '@heyclaude/web-runtime/utils/content-helpers';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { getCategoryConfigs } from '@heyclaude/web-runtime/data/config/category';
@@ -72,16 +74,16 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
 
   const metadata = getMetadata(collection);
   // Type guard for collection items
-  function isCollectionItem(value: unknown): value is { category: string; reason?: string; slug: string } {
+  function isCollectionItem(
+    value: unknown
+  ): value is { category: string; reason?: string; slug: string } {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
     // Type narrowing: value is object, check properties
     const obj = value as Record<string, unknown>;
     return typeof obj['category'] === 'string' && typeof obj['slug'] === 'string';
   }
 
-  const items = Array.isArray(metadata['items'])
-    ? metadata['items'].filter(isCollectionItem)
-    : [];
+  const items = Array.isArray(metadata['items']) ? metadata['items'].filter(isCollectionItem) : [];
 
   // OPTIMIZATION: Batch fetch all collection items in single RPC call(s) instead of N+1 queries
   // This reduces database calls from N (one per item) to C (one per category)
@@ -101,12 +103,12 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
   });
 
   let itemsWithContent: Array<ItemWithData | null> = [];
-  
+
   if (validItemRefs.length > 0) {
     try {
       // Import batch fetch function
       const { getContentBatchBySlugs } = await import('@heyclaude/web-runtime/data/content');
-      
+
       // Batch fetch all items by category
       const contentMap = await getContentBatchBySlugs(
         validItemRefs.map((ref) => ({
@@ -147,10 +149,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
       const category = item.category;
       // Validate category is safe before using as property key
       if (!isValidCategory(category)) {
-        logger.warn(
-          { category, slug: item.slug },
-          'CollectionView: Invalid category in item'
-        );
+        logger.warn({ category, slug: item.slug }, 'CollectionView: Invalid category in item');
         return acc;
       }
       if (!acc[category]) {
@@ -201,10 +200,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-1 text-lg">
-              <AlertTriangle
-                className="h-5 w-5 text-yellow-500"
-                aria-hidden="true"
-              />
+              <AlertTriangle className="h-5 w-5 text-yellow-500" aria-hidden="true" />
               Prerequisites
             </CardTitle>
           </CardHeader>
@@ -213,7 +209,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
               {prerequisites.map((prereq: string) => (
                 <li key={prereq} className="flex items-start gap-2">
                   <CheckCircle
-                    className="text-muted-foreground h-4 w-4 flex-shrink-0 mt-0.5"
+                    className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0"
                     aria-hidden="true"
                   />
                   <span className="text-muted-foreground text-sm">{prereq}</span>
@@ -245,8 +241,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                 <h3 className="text-foreground mb-4 text-lg font-semibold">
                   {(isValidCategory(category) && category in categoryConfigs
                     ? categoryConfigs[category]?.pluralTitle
-                    : null) ||
-                    category}{' '}
+                    : null) || category}{' '}
                   ({items.length})
                 </h3>
                 <div className="grid gap-3 sm:grid-cols-1">
@@ -306,15 +301,9 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             <div className="grid grid-cols-2 gap-3">
               <div className="flex items-center gap-2">
                 {compatibility.claudeDesktop ? (
-                  <CheckCircle
-                    className="h-4 w-4 text-green-500"
-                    aria-hidden="true"
-                  />
+                  <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
                 ) : (
-                  <AlertTriangle
-                    className="h-4 w-4 text-red-500"
-                    aria-hidden="true"
-                  />
+                  <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
                 )}
                 <span className="text-muted-foreground text-sm">
                   Claude Desktop {compatibility.claudeDesktop ? '(Supported)' : '(Not Supported)'}
@@ -322,15 +311,9 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
               </div>
               <div className="flex items-center gap-2">
                 {compatibility.claudeCode ? (
-                  <CheckCircle
-                    className="h-4 w-4 text-green-500"
-                    aria-hidden="true"
-                  />
+                  <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
                 ) : (
-                  <AlertTriangle
-                    className="h-4 w-4 text-red-500"
-                    aria-hidden="true"
-                  />
+                  <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
                 )}
                 <span className="text-muted-foreground text-sm">
                   Claude Code {compatibility.claudeCode ? '(Supported)' : '(Not Supported)'}

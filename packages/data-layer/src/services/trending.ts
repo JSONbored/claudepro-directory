@@ -23,7 +23,9 @@ import type {
   GetTrendingMetricsWithContentArgs,
   GetTrendingMetricsWithContentReturns,
 } from '@heyclaude/database-types/postgres-types';
-import type { contentModel } from '@heyclaude/database-types/prisma/models';
+import type { Prisma, PrismaClient, content_category } from '@prisma/client';
+
+type contentModel = Prisma.contentGetPayload<{}>;
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
 import { withSmartCache } from '../utils/request-cache.ts';
@@ -48,6 +50,10 @@ export type GetRecentContentReturns = contentModel[];
  * - Same public API as Supabase-based service
  */
 export class TrendingService extends BasePrismaService {
+  constructor(prismaClient?: PrismaClient) {
+    super(prismaClient);
+  }
+
   async getTrendingMetrics(
     args: GetTrendingMetricsWithContentArgs
   ): Promise<GetTrendingMetricsWithContentReturns> {
@@ -58,14 +64,10 @@ export class TrendingService extends BasePrismaService {
     );
   }
 
-  async getPopularContent(
-    args: GetPopularContentArgs
-  ): Promise<GetPopularContentReturns> {
-    return this.callRpc<GetPopularContentReturns>(
-      'get_popular_content',
-      args,
-      { methodName: 'getPopularContent' }
-    );
+  async getPopularContent(args: GetPopularContentArgs): Promise<GetPopularContentReturns> {
+    return this.callRpc<GetPopularContentReturns>('get_popular_content', args, {
+      methodName: 'getPopularContent',
+    });
   }
 
   /**
@@ -77,70 +79,59 @@ export class TrendingService extends BasePrismaService {
    * @param args - Arguments with optional p_category, p_limit, p_days
    * @returns Array of recent content items
    */
-  async getRecentContent(
-    args: GetRecentContentArgs = {}
-  ): Promise<contentModel[]> {
+  async getRecentContent(args: GetRecentContentArgs = {}): Promise<contentModel[]> {
     const { p_category = null, p_limit = 20, p_days = 180 } = args;
 
     return withSmartCache<contentModel[]>(
       'getRecentContent',
       'getRecentContent',
       async () => {
-        // Use database SQL INTERVAL for date calculation (eliminates Date.now() call)
-        // More efficient: database handles date arithmetic natively
-        // OPTIMIZATION: Replace SELECT * with explicit field list (9 fields)
+        // OPTIMIZATION: Use Prisma query builder instead of raw SQL for better type safety
+        // Calculate date threshold in JavaScript (safe within withSmartCache)
+        const dateThreshold = p_days
+          ? (() => {
+              const date = new Date();
+              date.setDate(date.getDate() - p_days);
+              return date;
+            })()
+          : undefined;
+
+        // Enforce limit bounds (1-100) to prevent excessive queries
+        const boundedLimit = Math.max(1, Math.min(100, p_limit ?? 20));
+
+        // OPTIMIZATION: Use select to fetch only needed fields (9 fields)
         // This reduces data transfer significantly (from 30+ fields to 9 fields per content item)
         // Fields match mapRecentContent and edge function requirements
-        let query = `
-          SELECT 
-            category,
-            author,
-            created_at,
-            date_added,
-            description,
-            slug,
-            tags,
-            title,
-            display_title
-          FROM public.content
-          WHERE 1=1
-        `;
-        const params: unknown[] = [];
-        let paramIndex = 1;
-        
-        // Category filter (if provided)
-        if (p_category) {
-          query += ` AND category = $${paramIndex}::public.content_category`;
-          params.push(p_category);
-          paramIndex++;
-        }
-        
-        // Date filter (if p_days provided) - using SQL INTERVAL
-        if (p_days) {
-          query += ` AND date_added >= NOW() - INTERVAL '${p_days} days'`;
-        }
-        
-        query += ` ORDER BY date_added DESC LIMIT $${paramIndex}::integer`;
-        params.push(p_limit);
-        
-        // Execute raw SQL query
-        const results = await prisma.$queryRawUnsafe<contentModel[]>(query, ...params);
-        
-        // Return results (already filtered and ordered by database)
-        return results;
+        const results = await prisma.content.findMany({
+          where: {
+            ...(p_category && { category: p_category as content_category }),
+            ...(dateThreshold && { date_added: { gte: dateThreshold } }),
+          },
+          select: {
+            category: true,
+            author: true,
+            created_at: true,
+            date_added: true,
+            description: true,
+            slug: true,
+            tags: true,
+            title: true,
+            display_title: true,
+          },
+          orderBy: { date_added: 'desc' },
+          take: boundedLimit,
+        });
+
+        return results as contentModel[];
       },
       args
     );
   }
 
-  async getTrendingContent(
-    args: GetTrendingContentArgs
-  ): Promise<GetTrendingContentReturns> {
-    return this.callRpc<GetTrendingContentReturns>(
-      'get_trending_content',
-      args,
-      { methodName: 'getTrendingContent' }
-    );
+  async getTrendingContent(args: GetTrendingContentArgs): Promise<GetTrendingContentReturns> {
+    return this.callRpc<GetTrendingContentReturns>('get_trending_content', args, {
+      methodName: 'getTrendingContent',
+    });
   }
 
   async getTrendingMetricsFormatted(
@@ -156,41 +147,42 @@ export class TrendingService extends BasePrismaService {
   async getPopularContentFormatted(
     args: GetPopularContentFormattedArgs
   ): Promise<GetPopularContentFormattedReturns> {
-    return this.callRpc<GetPopularContentFormattedReturns>(
-      'get_popular_content_formatted',
-      args,
-      { methodName: 'getPopularContentFormatted' }
-    );
+    // get_popular_content_formatted returns RETURNS TABLE (SETOF), so it's an array return
+    return this.callRpc<GetPopularContentFormattedReturns>('get_popular_content_formatted', args, {
+      methodName: 'getPopularContentFormatted',
+      returnType: 'array', // RETURNS TABLE functions return arrays
+    });
   }
 
   async getRecentContentFormatted(
     args: GetRecentContentFormattedArgs
   ): Promise<GetRecentContentFormattedReturns> {
-    return this.callRpc<GetRecentContentFormattedReturns>(
-      'get_recent_content_formatted',
-      args,
-      { methodName: 'getRecentContentFormatted' }
-    );
+    // get_recent_content_formatted returns RETURNS TABLE (SETOF), so it's an array return
+    return this.callRpc<GetRecentContentFormattedReturns>('get_recent_content_formatted', args, {
+      methodName: 'getRecentContentFormatted',
+      returnType: 'array', // RETURNS TABLE functions return arrays
+    });
   }
 
   async getSidebarTrendingFormatted(
     args: GetSidebarTrendingFormattedArgs
   ): Promise<GetSidebarTrendingFormattedReturns> {
+    // get_sidebar_trending_formatted returns RETURNS TABLE (SETOF), so it's an array return
     return this.callRpc<GetSidebarTrendingFormattedReturns>(
       'get_sidebar_trending_formatted',
       args,
-      { methodName: 'getSidebarTrendingFormatted' }
+      { methodName: 'getSidebarTrendingFormatted', returnType: 'array' } // RETURNS TABLE functions return arrays
     );
   }
 
   async getSidebarRecentFormatted(
     args: GetSidebarRecentFormattedArgs
   ): Promise<GetSidebarRecentFormattedReturns> {
-    return this.callRpc<GetSidebarRecentFormattedReturns>(
-      'get_sidebar_recent_formatted',
-      args,
-      { methodName: 'getSidebarRecentFormatted' }
-    );
+    // get_sidebar_recent_formatted returns RETURNS TABLE (SETOF), so it's an array return
+    return this.callRpc<GetSidebarRecentFormattedReturns>('get_sidebar_recent_formatted', args, {
+      methodName: 'getSidebarRecentFormatted',
+      returnType: 'array', // RETURNS TABLE functions return arrays
+    });
   }
 
   // Removed: calculate_content_time_metrics RPC function was removed in migration 20251217000229

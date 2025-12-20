@@ -22,7 +22,7 @@ test.describe('/account/companies/[id]/edit', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (navigation handled per test with different IDs)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });

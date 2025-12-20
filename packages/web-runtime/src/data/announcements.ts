@@ -1,6 +1,8 @@
 import 'server-only';
 
-import { type announcementsModel } from '@heyclaude/database-types/prisma/models';
+import type { Prisma } from '@prisma/client';
+
+type announcementsModel = Prisma.announcementsGetPayload<{}>;
 
 import { createDataFunction } from './cached-data-factory.ts';
 

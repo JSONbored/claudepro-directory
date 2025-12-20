@@ -31,6 +31,7 @@ export default defineConfig({
   // Cache is invalidated when test files or dependencies change
   // Note: Playwright doesn't have built-in caching like Vitest, but we can use sharding
   reporter: [
+    // Enhanced HTML reporter with better visualization
     ['html', { outputFolder: 'test-results/html-report', open: 'never' }],
     [
       'json',
@@ -51,6 +52,13 @@ export default defineConfig({
     // Keep traces for all failures (better debugging than on-first-retry)
     trace: 'retain-on-failure',
   },
+  // Global setup for accessibility testing with @axe-core/playwright
+  globalSetup: path.resolve(__dirname, './playwright-global-setup.ts'),
+  // Playwright test coverage configuration
+  // Note: playwright-test-coverage requires additional setup in test files
+  // See: https://github.com/anishkny/playwright-test-coverage
+  // For now, coverage is handled by Vitest for unit tests
+  // Playwright coverage can be enabled per-test using playwright-test-coverage
   projects: [
     {
       name: 'chromium',

@@ -39,9 +39,7 @@ describe('useLocalStorage', () => {
   });
 
   it('should initialize with default value when no stored value', () => {
-    const { result } = renderHook(() =>
-      useLocalStorage('test-key', { defaultValue: 'default' })
-    );
+    const { result } = renderHook(() => useLocalStorage('test-key', { defaultValue: 'default' }));
 
     expect(result.current.value).toBe('default');
   });
@@ -49,17 +47,13 @@ describe('useLocalStorage', () => {
   it('should load value from localStorage', () => {
     window.localStorage.setItem('test-key', JSON.stringify('stored-value'));
 
-    const { result } = renderHook(() =>
-      useLocalStorage('test-key', { defaultValue: 'default' })
-    );
+    const { result } = renderHook(() => useLocalStorage('test-key', { defaultValue: 'default' }));
 
     expect(result.current.value).toBe('stored-value');
   });
 
   it('should update localStorage when value changes', () => {
-    const { result } = renderHook(() =>
-      useLocalStorage('test-key', { defaultValue: 'initial' })
-    );
+    const { result } = renderHook(() => useLocalStorage('test-key', { defaultValue: 'initial' }));
 
     act(() => {
       result.current.setValue('updated');
@@ -72,9 +66,7 @@ describe('useLocalStorage', () => {
   it('should remove value from localStorage', () => {
     window.localStorage.setItem('test-key', JSON.stringify('value'));
 
-    const { result } = renderHook(() =>
-      useLocalStorage('test-key', { defaultValue: 'default' })
-    );
+    const { result } = renderHook(() => useLocalStorage('test-key', { defaultValue: 'default' }));
 
     act(() => {
       result.current.removeValue();
@@ -85,9 +77,7 @@ describe('useLocalStorage', () => {
   });
 
   it('should handle functional updates', () => {
-    const { result } = renderHook(() =>
-      useLocalStorage('test-key', { defaultValue: 0 })
-    );
+    const { result } = renderHook(() => useLocalStorage('test-key', { defaultValue: 0 }));
 
     act(() => {
       result.current.setValue((prev) => (prev as number) + 1);
@@ -163,9 +153,7 @@ describe('useLocalStorage', () => {
       throw new Error('QuotaExceededError');
     });
 
-    const { result } = renderHook(() =>
-      useLocalStorage('test-key', { defaultValue: 'default' })
-    );
+    const { result } = renderHook(() => useLocalStorage('test-key', { defaultValue: 'default' }));
 
     act(() => {
       result.current.setValue('new-value');
@@ -204,9 +192,7 @@ describe('useLocalStorage', () => {
     const originalWindow = global.window;
     delete (global as any).window;
 
-    const { result } = renderHook(() =>
-      useLocalStorage('test-key', { defaultValue: 'default' })
-    );
+    const { result } = renderHook(() => useLocalStorage('test-key', { defaultValue: 'default' }));
 
     expect(result.current.value).toBe('default');
 

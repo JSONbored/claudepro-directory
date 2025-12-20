@@ -8,13 +8,17 @@
  * Optimized: Increased from 30 minutes (analytics can be slightly delayed).
  */
 
-import type { JsonValue } from '@heyclaude/data-layer/prisma';
+import {
+  Prisma,
+  content_category as ContentCategory,
+  interaction_type as InteractionType,
+} from '@prisma/client';
+import type { content_category, interaction_type } from '@prisma/client';
 import type {
   SearchQueryInput,
   UserInteractionInput,
 } from '@heyclaude/database-types/postgres-types';
-import type { content_category, interaction_type } from '@heyclaude/data-layer/prisma';
-import { ContentCategory, InteractionType } from '@heyclaude/data-layer/prisma';
+type JsonValue = Prisma.JsonValue;
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -38,18 +42,14 @@ interface PulseEvent {
 type PulseQueueMessage = PgmqMessage<PulseEvent>;
 
 // Type guards
-function isValidContentCategory(
-  value: unknown
-): value is content_category {
+function isValidContentCategory(value: unknown): value is content_category {
   if (typeof value !== 'string') return false;
 
   const validValues = Object.values(ContentCategory) as readonly content_category[];
   return validValues.includes(value as content_category);
 }
 
-function isValidInteractionType(
-  value: unknown
-): value is interaction_type {
+function isValidInteractionType(value: unknown): value is interaction_type {
   if (typeof value !== 'string') return false;
   const validValues = Object.values(InteractionType) as readonly interaction_type[];
   return validValues.includes(value as interaction_type);
@@ -77,7 +77,6 @@ export const processPulseQueue = inngest.createFunction(
 
     logger.info(logContext, 'Pulse queue processing started');
 
-
     // Step 1: Read messages from queue
     const messages = await step.run('read-queue', async (): Promise<PulseQueueMessage[]> => {
       try {
@@ -93,8 +92,10 @@ export const processPulseQueue = inngest.createFunction(
         // Filter valid pulse events
         return data.filter((msg) => isValidPulseEvent(msg.message));
       } catch (error) {
-        logger.warn({ ...logContext,
-          errorMessage: normalizeError(error, 'Queue read failed').message, }, 'Failed to read pulse queue');
+        logger.warn(
+          { ...logContext, errorMessage: normalizeError(error, 'Queue read failed').message },
+          'Failed to read pulse queue'
+        );
         return [];
       }
     });
@@ -104,27 +105,29 @@ export const processPulseQueue = inngest.createFunction(
       return { processed: 0, inserted: 0, failed: 0 };
     }
 
-    logger.info({ ...logContext,
-      messageCount: messages.length, }, 'Processing pulse events');
+    logger.info({ ...logContext, messageCount: messages.length }, 'Processing pulse events');
 
     // Step 2: Separate events by type
-    const { searchEvents, interactionEvents } = await step.run('categorize-events', async (): Promise<{
-      searchEvents: PulseQueueMessage[];
-      interactionEvents: PulseQueueMessage[];
-    }> => {
-      const searchEvents: PulseQueueMessage[] = [];
-      const interactionEvents: PulseQueueMessage[] = [];
+    const { searchEvents, interactionEvents } = await step.run(
+      'categorize-events',
+      async (): Promise<{
+        searchEvents: PulseQueueMessage[];
+        interactionEvents: PulseQueueMessage[];
+      }> => {
+        const searchEvents: PulseQueueMessage[] = [];
+        const interactionEvents: PulseQueueMessage[] = [];
 
-      for (const msg of messages) {
-        if (msg.message['interaction_type'] === 'search') {
-          searchEvents.push(msg);
-        } else {
-          interactionEvents.push(msg);
+        for (const msg of messages) {
+          if (msg.message['interaction_type'] === 'search') {
+            searchEvents.push(msg);
+          } else {
+            interactionEvents.push(msg);
+          }
         }
-      }
 
-      return { searchEvents, interactionEvents };
-    });
+        return { searchEvents, interactionEvents };
+      }
+    );
 
     let totalInserted = 0;
     let totalFailed = 0;
@@ -132,60 +135,71 @@ export const processPulseQueue = inngest.createFunction(
 
     // Step 3: Process search events
     if (searchEvents.length > 0) {
-      const searchResult = await step.run('process-search-events', async (): Promise<{
-        inserted: number;
-        failed: number;
-      }> => {
-        try {
-          const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-          const isValidUUID = (value: string | null | undefined): value is string =>
-            typeof value === 'string' && UUID_REGEX.test(value);
+      const searchResult = await step.run(
+        'process-search-events',
+        async (): Promise<{
+          inserted: number;
+          failed: number;
+        }> => {
+          try {
+            const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            const isValidUUID = (value: string | null | undefined): value is string =>
+              typeof value === 'string' && UUID_REGEX.test(value);
 
-          const searchQueries = searchEvents.map((msg) => {
-            const event = msg.message;
+            const searchQueries = searchEvents.map((msg) => {
+              const event = msg.message;
               const metadata = event['metadata'] as Record<string, unknown> | null;
 
-            return {
-              query: typeof metadata?.['query'] === 'string' ? metadata['query'] : null,
-              filters: (metadata?.['filters'] && typeof metadata['filters'] === 'object' && !Array.isArray(metadata['filters']))
-                ? (metadata['filters'] as Record<string, unknown>)
-                : null,
-              result_count: typeof metadata?.['result_count'] === 'number' ? metadata['result_count'] : null,
-              user_id: event['user_id'] && isValidUUID(event['user_id']) ? event['user_id'] : null,
-              session_id: event.session_id && isValidUUID(event.session_id) ? event.session_id : null,
-            };
-          });
+              return {
+                query: typeof metadata?.['query'] === 'string' ? metadata['query'] : null,
+                filters:
+                  metadata?.['filters'] &&
+                  typeof metadata['filters'] === 'object' &&
+                  !Array.isArray(metadata['filters'])
+                    ? (metadata['filters'] as Record<string, unknown>)
+                    : null,
+                result_count:
+                  typeof metadata?.['result_count'] === 'number' ? metadata['result_count'] : null,
+                user_id:
+                  event['user_id'] && isValidUUID(event['user_id']) ? event['user_id'] : null,
+                session_id:
+                  event.session_id && isValidUUID(event.session_id) ? event.session_id : null,
+              };
+            });
 
-          // Prepare search query inputs for batch RPC
-          const searchQueryInputs: SearchQueryInput[] = searchQueries.map((q) => ({
-            query: q.query,
-            filters: q.filters,
-            result_count: q.result_count,
-            user_id: q.user_id,
-            session_id: q.session_id,
-          }));
+            // Prepare search query inputs for batch RPC
+            const searchQueryInputs: SearchQueryInput[] = searchQueries.map((q) => ({
+              query: q.query,
+              filters: q.filters,
+              result_count: q.result_count,
+              user_id: q.user_id,
+              session_id: q.session_id,
+            }));
 
-          const service = await getService('search');
-          const result = await service.batchInsertSearchQueries({
-            p_queries: searchQueryInputs,
-          });
+            const service = await getService('search');
+            const result = await service.batchInsertSearchQueries({
+              p_queries: searchQueryInputs,
+            });
 
-          // Mark these messages as processed
-          for (const msg of searchEvents) {
-            processedMsgIds.push(msg.msg_id);
+            // Mark these messages as processed
+            for (const msg of searchEvents) {
+              processedMsgIds.push(msg.msg_id);
+            }
+
+            const inserted = result?.inserted ?? 0;
+            const failed = result?.failed ?? 0;
+
+            return { inserted, failed };
+          } catch (error) {
+            const normalized = normalizeError(error, 'Search events batch insert failed');
+            logger.warn(
+              { ...logContext, errorMessage: normalized.message },
+              'Search events batch insert failed'
+            );
+            return { inserted: 0, failed: searchEvents.length };
           }
-
-          const inserted = result?.inserted ?? 0;
-          const failed = result?.failed ?? 0;
-
-          return { inserted, failed };
-        } catch (error) {
-          const normalized = normalizeError(error, 'Search events batch insert failed');
-          logger.warn({ ...logContext,
-            errorMessage: normalized.message, }, 'Search events batch insert failed');
-          return { inserted: 0, failed: searchEvents.length };
         }
-      });
+      );
 
       totalInserted += searchResult.inserted;
       totalFailed += searchResult.failed;
@@ -193,74 +207,91 @@ export const processPulseQueue = inngest.createFunction(
 
     // Step 4: Process interaction events
     if (interactionEvents.length > 0) {
-      const interactionResult = await step.run('process-interaction-events', async (): Promise<{
-        inserted: number;
-        failed: number;
-      }> => {
-        try {
-          const interactions: UserInteractionInput[] = [];
-          const validMsgIds: bigint[] = [];
-          const invalidMsgIds: bigint[] = [];
+      const interactionResult = await step.run(
+        'process-interaction-events',
+        async (): Promise<{
+          inserted: number;
+          failed: number;
+        }> => {
+          try {
+            const interactions: UserInteractionInput[] = [];
+            const validMsgIds: bigint[] = [];
+            const invalidMsgIds: bigint[] = [];
 
-          for (const msg of interactionEvents) {
-            const event = msg.message;
+            for (const msg of interactionEvents) {
+              const event = msg.message;
 
-            if (!isValidInteractionType(event.interaction_type)) {
-              // Log invalid interaction types and mark for cleanup
-              logger.warn({ ...logContext,
-                msgId: String(msg.msg_id),
-                interactionType: String(event.interaction_type ?? 'undefined'), }, 'Invalid interaction type, marking for deletion');
-              invalidMsgIds.push(msg.msg_id);
-              continue;
+              if (!isValidInteractionType(event.interaction_type)) {
+                // Log invalid interaction types and mark for cleanup
+                logger.warn(
+                  {
+                    ...logContext,
+                    msgId: String(msg.msg_id),
+                    interactionType: String(event.interaction_type ?? 'undefined'),
+                  },
+                  'Invalid interaction type, marking for deletion'
+                );
+                invalidMsgIds.push(msg.msg_id);
+                continue;
+              }
+
+              const interaction: UserInteractionInput = {
+                user_id: event.user_id ?? null,
+                content_type: isValidContentCategory(event.content_type)
+                  ? (event.content_type as content_category)
+                  : null,
+                content_slug: event.content_slug ?? null,
+                interaction_type: isValidInteractionType(event.interaction_type)
+                  ? (event.interaction_type as interaction_type)
+                  : null,
+                session_id: event.session_id ?? null,
+                metadata:
+                  event.metadata &&
+                  typeof event.metadata === 'object' &&
+                  !Array.isArray(event.metadata)
+                    ? (event.metadata as Record<string, unknown>)
+                    : null,
+              };
+
+              interactions.push(interaction);
+              validMsgIds.push(msg.msg_id);
             }
 
-            const interaction: UserInteractionInput = {
-              user_id: event.user_id ?? null,
-              content_type: isValidContentCategory(event.content_type) ? event.content_type : null,
-              content_slug: event.content_slug ?? null,
-              interaction_type: event.interaction_type,
-              session_id: event.session_id ?? null,
-              metadata: (event.metadata && typeof event.metadata === 'object' && !Array.isArray(event.metadata))
-                ? (event.metadata as Record<string, unknown>)
-                : null,
-            };
+            // Delete invalid messages (they won't succeed on retry)
+            for (const msgId of invalidMsgIds) {
+              processedMsgIds.push(msgId);
+            }
 
-            interactions.push(interaction);
-            validMsgIds.push(msg.msg_id);
+            if (interactions.length === 0) {
+              // All interactions were invalid - mark all as processed (to delete)
+              return { inserted: 0, failed: invalidMsgIds.length };
+            }
+
+            // Use AccountService for proper data layer architecture
+            const accountService = await getService('account');
+            const result = await accountService.batchInsertUserInteractions({
+              p_interactions: interactions,
+            });
+
+            // Mark valid messages as processed (invalid ones already added)
+            for (const msgId of validMsgIds) {
+              processedMsgIds.push(msgId);
+            }
+
+            const inserted = result?.inserted ?? 0;
+            const failed = result?.failed ?? 0;
+
+            return { inserted, failed };
+          } catch (error) {
+            const normalized = normalizeError(error, 'Interaction events batch insert failed');
+            logger.warn(
+              { ...logContext, errorMessage: normalized.message },
+              'Interaction events batch insert failed'
+            );
+            return { inserted: 0, failed: interactionEvents.length };
           }
-
-          // Delete invalid messages (they won't succeed on retry)
-          for (const msgId of invalidMsgIds) {
-            processedMsgIds.push(msgId);
-          }
-
-          if (interactions.length === 0) {
-            // All interactions were invalid - mark all as processed (to delete)
-            return { inserted: 0, failed: invalidMsgIds.length };
-          }
-
-          // Use AccountService for proper data layer architecture
-          const accountService = await getService('account');
-          const result = await accountService.batchInsertUserInteractions({
-            p_interactions: interactions,
-          });
-
-          // Mark valid messages as processed (invalid ones already added)
-          for (const msgId of validMsgIds) {
-            processedMsgIds.push(msgId);
-          }
-
-          const inserted = result?.inserted ?? 0;
-          const failed = result?.failed ?? 0;
-
-          return { inserted, failed };
-        } catch (error) {
-          const normalized = normalizeError(error, 'Interaction events batch insert failed');
-          logger.warn({ ...logContext,
-            errorMessage: normalized.message, }, 'Interaction events batch insert failed');
-          return { inserted: 0, failed: interactionEvents.length };
         }
-      });
+      );
 
       totalInserted += interactionResult.inserted;
       totalFailed += interactionResult.failed;
@@ -273,7 +304,7 @@ export const processPulseQueue = inngest.createFunction(
         // Process in parallel batches to avoid overwhelming database
         const BATCH_SIZE = 10;
         const batches: bigint[][] = [];
-        
+
         // Create batches
         for (let i = 0; i < processedMsgIds.length; i += BATCH_SIZE) {
           batches.push(processedMsgIds.slice(i, i + BATCH_SIZE));
@@ -299,20 +330,18 @@ export const processPulseQueue = inngest.createFunction(
     }
 
     // Step 6: Handle failed messages that exceeded retry attempts
-    const failedMessages = messages.filter(
-      (msg) => {
-        const msgIdStr = String(msg.msg_id);
-        const isProcessed = processedMsgIds.some((id) => String(id) === msgIdStr);
-        return !isProcessed && msg.read_ct >= MAX_RETRY_ATTEMPTS;
-      }
-    );
+    const failedMessages = messages.filter((msg) => {
+      const msgIdStr = String(msg.msg_id);
+      const isProcessed = processedMsgIds.some((id) => String(id) === msgIdStr);
+      return !isProcessed && msg.read_ct >= MAX_RETRY_ATTEMPTS;
+    });
 
     if (failedMessages.length > 0) {
       await step.run('cleanup-failed-messages', async () => {
         // OPTIMIZATION: Parallel batch deletion for better performance
         const BATCH_SIZE = 10;
         const batches = [];
-        
+
         // Create batches
         for (let i = 0; i < failedMessages.length; i += BATCH_SIZE) {
           batches.push(failedMessages.slice(i, i + BATCH_SIZE));
@@ -340,11 +369,16 @@ export const processPulseQueue = inngest.createFunction(
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      processed: messages.length,
-      inserted: totalInserted,
-      failed: totalFailed, }, 'Pulse queue processing completed');
+    logger.info(
+      {
+        ...logContext,
+        durationMs,
+        processed: messages.length,
+        inserted: totalInserted,
+        failed: totalFailed,
+      },
+      'Pulse queue processing completed'
+    );
 
     const result = {
       processed: messages.length,

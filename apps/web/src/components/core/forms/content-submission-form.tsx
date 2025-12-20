@@ -11,9 +11,12 @@
  * - Mobile: Single column, optimized spacing
  */
 
-import { SubmissionType, SubmissionStatus } from '@heyclaude/data-layer/prisma';
+import {
+  submission_type as SubmissionType,
+  submission_status as SubmissionStatus,
+} from '@prisma/client';
 import { submission_statusSchema } from '@heyclaude/web-runtime/prisma-zod-schemas';
-import type { submission_status, content_category } from '@heyclaude/data-layer/prisma';
+import type { submission_status, content_category } from '@prisma/client';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions/submit-content-for-review';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
@@ -183,7 +186,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         // Use Prisma enum object directly (no type assertion needed)
         const validatedStatus = submission_statusSchema.parse(SubmissionStatus.pending);
         setSubmissionResult({
-          submission_id: (typeof data.submission_id === 'string' ? data.submission_id : 'unknown'),
+          submission_id: typeof data.submission_id === 'string' ? data.submission_id : 'unknown',
           status: validatedStatus,
           message: 'Your submission has been received and is pending review!',
         });
@@ -219,7 +222,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
   /** Animation configs from design system */
   const springSmooth = SPRING.smooth;
   const springBouncy = SPRING.bouncy;
-  
+
   const { user, status } = useAuthenticatedUser({
     context: 'ContentSubmissionForm',
     subscribe: false,
@@ -363,129 +366,146 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
       // User is authenticated - proceed with submission
       const formData = new FormData(event.currentTarget);
 
-            /**
-             * DATABASE-FIRST SUBMISSION
-             * Extract form fields and call RPC directly.
-             * Database validates via CHECK constraints.
-             */
-            const submissionData: Record<string, unknown> = {};
+      /**
+       * DATABASE-FIRST SUBMISSION
+       * Extract form fields and call RPC directly.
+       * Database validates via CHECK constraints.
+       */
+      const submissionData: Record<string, unknown> = {};
 
-            // Extract all form fields generically
-            for (const [key, value] of formData.entries()) {
-              // Handle examples JSON parsing
-              if (key === 'examples') {
-                // Type guard: value is string from FormData
-                const examplesJson = typeof value === 'string' ? value : '';
-                if (examplesJson && examplesJson !== '[]') {
-                  try {
-                    submissionData['examples'] = safeParse(examplesJson, examplesArraySchema, {
-                      strategy: ParseStrategy.VALIDATED_JSON,
-                    });
-                  } catch (error) {
-                    const normalized = normalizeError(error, 'Failed to parse examples JSON');
-                    logClientWarn(
-                      '[Form] Failed to parse examples JSON',
-                      normalized,
-                      'SubmitFormClient.parseExamples',
-                      {
-                        component: 'SubmitFormClient',
-                        action: 'parse-examples',
-                        category: 'form',
-                        error: normalized.message,
-                      }
-                    );
-                    toasts.raw.warning('Examples field could not be parsed and will be omitted');
-                    submissionData['examples'] = undefined;
-                  }
+      // Extract all form fields generically
+      for (const [key, value] of formData.entries()) {
+        // Handle examples JSON parsing
+        if (key === 'examples') {
+          // Type guard: value is string from FormData
+          const examplesJson = typeof value === 'string' ? value : '';
+          if (examplesJson && examplesJson !== '[]') {
+            try {
+              submissionData['examples'] = safeParse(examplesJson, examplesArraySchema, {
+                strategy: ParseStrategy.VALIDATED_JSON,
+              });
+            } catch (error) {
+              const normalized = normalizeError(error, 'Failed to parse examples JSON');
+              logClientWarn(
+                '[Form] Failed to parse examples JSON',
+                normalized,
+                'SubmitFormClient.parseExamples',
+                {
+                  component: 'SubmitFormClient',
+                  action: 'parse-examples',
+                  category: 'form',
+                  error: normalized.message,
                 }
-                continue;
-              }
-
-              submissionData[key] = value || undefined;
+              );
+              toasts.raw.warning('Examples field could not be parsed and will be omitted');
+              submissionData['examples'] = undefined;
             }
+          }
+          continue;
+        }
 
-            // Collect all required fields dynamically from form config
-            const activeSection = getSection(contentType);
-            const allFields = [
-              ...(activeSection.nameField ? [activeSection.nameField] : []),
-              ...activeSection.common,
-              ...activeSection.typeSpecific,
-              ...activeSection.tags,
-            ];
-            const requiredFieldNames = new Set(
-              allFields.filter((field) => field.required).map((field) => field.name)
-            );
+        submissionData[key] = value || undefined;
+      }
 
-            // Validate all required fields (including dynamic ones from config)
-            for (const fieldName of requiredFieldNames) {
-              const value = submissionData[fieldName];
-              if (value === undefined || value === null || value === '') {
-                const field = allFields.find((f) => f.name === fieldName);
-                const fieldLabel = field?.label || fieldName;
-                toasts.error.submissionFailed(`Missing required field: ${fieldLabel}`);
-                throw new Error(`Missing required field: ${fieldLabel}`);
-              }
-            }
+      // Collect all required fields dynamically from form config
+      const activeSection = getSection(contentType);
+      const allFields = [
+        ...(activeSection.nameField ? [activeSection.nameField] : []),
+        ...activeSection.common,
+        ...activeSection.typeSpecific,
+        ...activeSection.tags,
+      ];
+      const requiredFieldNames = new Set(
+        allFields.filter((field) => field.required).map((field) => field.name)
+      );
 
-            // Extract specific fields for RPC parameters
-            const extractedFields = [
-              'name',
-              'description',
-              'category',
-              'author',
-              'author_profile_url',
-              'github_url',
-              'tags',
-            ] as const;
+      // Validate all required fields (including dynamic ones from config)
+      for (const fieldName of requiredFieldNames) {
+        const value = submissionData[fieldName];
+        if (value === undefined || value === null || value === '') {
+          const field = allFields.find((f) => f.name === fieldName);
+          const fieldLabel = field?.label || fieldName;
+          toasts.error.submissionFailed(`Missing required field: ${fieldLabel}`);
+          throw new Error(`Missing required field: ${fieldLabel}`);
+        }
+      }
 
-            // Type guard for extractedFields
-            function isExtractedField(key: string): key is (typeof extractedFields)[number] {
-              // Type narrowing: extractedFields is readonly array, check if key is in it
-              return (extractedFields as readonly string[]).includes(key);
-            }
+      // Extract specific fields for RPC parameters
+      const extractedFields = [
+        'name',
+        'description',
+        'category',
+        'author',
+        'author_profile_url',
+        'github_url',
+        'tags',
+      ] as const;
 
-            // Filter out extracted fields from content_data to avoid duplicates
-            const contentData: Record<string, unknown> = {};
-            for (const [key, value] of Object.entries(submissionData)) {
-              if (!isExtractedField(key)) {
-                contentData[key] = value;
-              }
-            }
+      // Type guard for extractedFields
+      function isExtractedField(key: string): key is (typeof extractedFields)[number] {
+        // Type narrowing: extractedFields is readonly array, check if key is in it
+        return (extractedFields as readonly string[]).includes(key);
+      }
 
-            // Server action call - database validates everything
-            // Type guard: tags is string from FormData
-            const tagsValue = submissionData['tags'];
-            const tags = typeof tagsValue === 'string' && tagsValue.trim().length > 0
-              ? tagsValue
-                  .split(',')
-                  .map((tag) => tag.trim())
-                  .filter((tag) => tag.length > 0)
-              : undefined;
+      // Filter out extracted fields from content_data to avoid duplicates
+      const contentData: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(submissionData)) {
+        if (!isExtractedField(key)) {
+          contentData[key] = value;
+        }
+      }
 
-            // Type guards for submission data
-            const name = typeof submissionData['name'] === 'string' ? submissionData['name'] : '';
-            const description = typeof submissionData['description'] === 'string' ? submissionData['description'] : '';
-            const categoryValue = typeof submissionData['category'] === 'string' && isValidCategory(submissionData['category'])
-              ? submissionData['category']
-              : 'agents' satisfies content_category; // Fallback to valid category
-            const author = typeof submissionData['author'] === 'string' ? submissionData['author'] : '';
-            const authorProfileUrl = typeof submissionData['author_profile_url'] === 'string' ? submissionData['author_profile_url'] : '';
-            const githubUrl = typeof submissionData['github_url'] === 'string' ? submissionData['github_url'] : '';
+      // Server action call - database validates everything
+      // Type guard: tags is string from FormData
+      const tagsValue = submissionData['tags'];
+      const tags =
+        typeof tagsValue === 'string' && tagsValue.trim().length > 0
+          ? tagsValue
+              .split(',')
+              .map((tag) => tag.trim())
+              .filter((tag) => tag.length > 0)
+          : undefined;
 
-            // Execute the action using useSafeAction's executeAsync
-            executeSubmit({
-              submission_type: contentType,
-              name,
-              description,
-              category: categoryValue,
-              author,
-              author_profile_url: authorProfileUrl,
-              github_url: githubUrl,
-              tags: tags || [],
-              content_data: contentData,
-            });
+      // Type guards for submission data
+      const name = typeof submissionData['name'] === 'string' ? submissionData['name'] : '';
+      const description =
+        typeof submissionData['description'] === 'string' ? submissionData['description'] : '';
+      const categoryValue =
+        typeof submissionData['category'] === 'string' &&
+        isValidCategory(submissionData['category'])
+          ? submissionData['category']
+          : ('agents' satisfies content_category); // Fallback to valid category
+      const author = typeof submissionData['author'] === 'string' ? submissionData['author'] : '';
+      const authorProfileUrl =
+        typeof submissionData['author_profile_url'] === 'string'
+          ? submissionData['author_profile_url']
+          : '';
+      const githubUrl =
+        typeof submissionData['github_url'] === 'string' ? submissionData['github_url'] : '';
+
+      // Execute the action using useSafeAction's executeAsync
+      executeSubmit({
+        submission_type: contentType,
+        name,
+        description,
+        category: categoryValue,
+        author,
+        author_profile_url: authorProfileUrl,
+        github_url: githubUrl,
+        tags: tags || [],
+        content_data: contentData,
+      });
     },
-    [user, status, openAuthModal, pathname, contentType, executeSubmit, celebrateSubmission, setSubmissionResult]
+    [
+      user,
+      status,
+      openAuthModal,
+      pathname,
+      contentType,
+      executeSubmit,
+      celebrateSubmission,
+      setSubmissionResult,
+    ]
   );
 
   const getSection = (type: SubmissionContentType): SubmissionFormSection => {
@@ -519,9 +539,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, rotate: 0 }}
                   transition={{ ...springBouncy, delay: STAGGER.default }}
                 >
-                  <CheckCircle
-                    className="h-6 w-6 text-green-500 flex-shrink-0 mt-0.5"
-                  />
+                  <CheckCircle className="mt-0.5 h-6 w-6 flex-shrink-0 text-green-500" />
                 </motion.div>
                 <div className="min-w-0 flex-1">
                   <motion.p
@@ -533,7 +551,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     Submission Successful! 🎉
                   </motion.p>
                   <motion.p
-                    className="text-muted-foreground text-sm mt-1"
+                    className="text-muted-foreground mt-1 text-sm"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: STAGGER.relaxed }}
@@ -584,13 +602,18 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   onChange={(e) => {
                     // Type guard: validate e.target.value is SubmissionContentType
                     const value = e.target.value;
-                    if (value === 'agents' || value === 'rules' || value === 'mcp' || value === 'commands') {
+                    if (
+                      value === 'agents' ||
+                      value === 'rules' ||
+                      value === 'mcp' ||
+                      value === 'commands'
+                    ) {
                       setContentType(value as SubmissionContentType);
                     }
                     setName(''); // Reset name when type changes
                   }}
                   required
-                  className="flex h-10 w-full rounded-lg border border-input bg-background py-1 pl-4 pr-3 text-sm"
+                  className="border-input bg-background flex h-10 w-full rounded-lg border py-1 pr-3 pl-4 text-sm"
                 >
                   {SUBMISSION_CONTENT_TYPES.map((type) => (
                     <option key={type} value={type}>
@@ -684,7 +707,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                 <TabsContent value="preview" className="mt-2">
                   <div
                     className={cn(
-                      'min-h-[150px] rounded-lg border border-input bg-background p-4',
+                      'border-input bg-background min-h-[150px] rounded-lg border p-4',
                       'prose prose-sm dark:prose-invert max-w-none'
                     )}
                   >
@@ -746,7 +769,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
         {/* Enhanced Submit Button */}
         <motion.div
-          className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-1 sm:pt-4"
+          className="flex flex-col gap-2 pt-1 sm:flex-row sm:gap-3 sm:pt-4"
           whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
           whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
         >
@@ -755,7 +778,9 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
               <>
                 <motion.div
                   className="mr-1"
-                  animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [1, 0.5, 1], rotate: [0, 360] }}
+                  animate={
+                    shouldReduceMotion ? { opacity: 1 } : { opacity: [1, 0.5, 1], rotate: [0, 360] }
+                  }
                   transition={
                     shouldReduceMotion
                       ? {}
@@ -772,7 +797,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
               </>
             ) : (
               <>
-                <Send className="h-4 w-4 mr-2" />
+                <Send className="mr-2 h-4 w-4" />
                 Submit for Review
               </>
             )}
@@ -782,10 +807,10 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         {/* Info Box */}
         <div className="card-base border-blue-500/20 bg-blue-500/10 p-3 sm:p-4">
           <div className="flex gap-1 sm:gap-2">
-            <Github className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
+            <Github className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-400" />
             <div className="min-w-0 flex-1">
               <p className="text-sm-medium text-blue-400">How it works</p>
-              <p className="text-muted-foreground text-sm mt-1">
+              <p className="text-muted-foreground mt-1 text-sm">
                 We'll automatically create a Pull Request with your submission. Our team reviews for
                 quality and accuracy, then merges it to make your contribution live!
               </p>

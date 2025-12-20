@@ -43,7 +43,7 @@ import { ThemeToggleLayout } from './theme-toggle-layout.tsx';
  *
  * Sun/Moon toggle with beautiful Motion.dev animations for
  * smooth, natural theme transitions with circle expansion effect.
- * 
+ *
  * Enhanced with useTernaryDarkMode (Phase 2):
  * - Supports light/dark/system modes
  * - Automatically syncs with OS preference when in 'system' mode
@@ -55,7 +55,7 @@ export function ThemeToggle() {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const [, animate] = useAnimate();
   const shouldReduceMotion = useReducedMotion();
-  
+
   // Use ternary dark mode hook for light/dark/system support
   const { isDarkMode, ternaryDarkMode, toggleTernaryDarkMode } = useTernaryDarkMode({
     defaultValue: 'system',
@@ -93,7 +93,7 @@ export function ThemeToggle() {
   /**
    * Handle theme toggle with beautiful Motion.dev animation
    * Creates smooth circle expansion from click position
-   * 
+   *
    * Cycles through: light -> system -> dark -> light
    *
    * Animation approach:
@@ -113,11 +113,12 @@ export function ThemeToggle() {
     const position = getClickPosition(event);
 
     // Calculate new theme
-    const newIsDarkMode = ternaryDarkMode === 'light' 
-      ? false // light -> system (will compute based on OS)
-      : ternaryDarkMode === 'system'
-      ? true // system -> dark
-      : false; // dark -> light
+    const newIsDarkMode =
+      ternaryDarkMode === 'light'
+        ? false // light -> system (will compute based on OS)
+        : ternaryDarkMode === 'system'
+          ? true // system -> dark
+          : false; // dark -> light
     const newTheme = newIsDarkMode ? 'dark' : 'light';
 
     // Get theme background colors (matching your design system)
@@ -177,13 +178,14 @@ export function ThemeToggle() {
   // Determine toggle checked state and label
   // When in 'system' mode, show the computed isDarkMode state
   const toggleChecked = isDarkMode;
-  const ariaLabel = ternaryDarkMode === 'system' 
-    ? 'System theme (follows OS preference)' 
-    : `Switch to ${ternaryDarkMode === 'light' ? 'dark' : 'light'} mode`;
+  const ariaLabel =
+    ternaryDarkMode === 'system'
+      ? 'System theme (follows OS preference)'
+      : `Switch to ${ternaryDarkMode === 'light' ? 'dark' : 'light'} mode`;
 
   return (
     <div ref={containerRef} className="flex items-center gap-2">
-      <Sun className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+      <Sun className="text-muted-foreground h-4 w-4" aria-hidden="true" />
       <ThemeToggleLayout
         checked={toggleChecked}
         onCheckedChange={(_checked, event) => {
@@ -192,7 +194,7 @@ export function ThemeToggle() {
         }}
         aria-label={ariaLabel}
       />
-      <Moon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+      <Moon className="text-muted-foreground h-4 w-4" aria-hidden="true" />
     </div>
   );
 }

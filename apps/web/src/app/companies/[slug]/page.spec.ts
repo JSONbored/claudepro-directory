@@ -3,7 +3,7 @@ import { setupTestWithErrorTracking } from '../../../../config/tests/utils/error
 
 /**
  * Comprehensive Company Detail Page E2E Tests
- * 
+ *
  * Tests ALL functionality on the company detail page ([slug]) with strict error checking:
  * - Page rendering without errors
  * - Company details display (name, logo, description, website, etc.)
@@ -23,7 +23,7 @@ test.describe('Company Detail Page', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (navigation handled per test with different slugs)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -39,7 +39,7 @@ test.describe('Company Detail Page', () => {
   test('should render company detail page without errors', async ({ page }) => {
     // Use a test company slug (adjust based on actual companies)
     const testSlug = 'test-company';
-    
+
     await page.goto(`/companies/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -55,15 +55,18 @@ test.describe('Company Detail Page', () => {
 
   test('should display company name and description', async ({ page }) => {
     const testSlug = 'test-company';
-    
+
     await page.goto(`/companies/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
     // Check for company heading
     const heading = page.getByRole('heading', { level: 1 });
-    const hasHeading = await heading.first().isVisible().catch(() => false);
-    
+    const hasHeading = await heading
+      .first()
+      .isVisible()
+      .catch(() => false);
+
     // Heading may or may not be visible depending on data
     // But page should render
     const main = page.getByRole('main');
@@ -72,7 +75,7 @@ test.describe('Company Detail Page', () => {
 
   test('should return 404 for invalid company slug', async ({ page }) => {
     const invalidSlug = 'non-existent-company-12345';
-    
+
     await page.goto(`/companies/${invalidSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -80,14 +83,14 @@ test.describe('Company Detail Page', () => {
     // Should show 404 page
     const notFound = page.getByText(/not found|404|page not found/i);
     const hasNotFound = await notFound.isVisible().catch(() => false);
-    
+
     // May show 404 message or redirect
     expect(hasNotFound || page.url().includes('404')).toBe(true);
   });
 
   test('should be accessible', async ({ page }) => {
     const testSlug = 'test-company';
-    
+
     await page.goto(`/companies/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -104,7 +107,7 @@ test.describe('Company Detail Page', () => {
 
   test('should be responsive on mobile viewport', async ({ page }) => {
     const testSlug = 'test-company';
-    
+
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto(`/companies/${testSlug}`);
     await page.waitForLoadState('networkidle');
@@ -117,18 +120,18 @@ test.describe('Company Detail Page', () => {
 
   test('should handle loading states', async ({ page }) => {
     const testSlug = 'test-company';
-    
+
     await page.goto(`/companies/${testSlug}`);
-    
+
     // Check for loading indicators (may flash quickly)
     const loadingIndicator = page.locator('[aria-busy="true"], [data-loading="true"]');
     const hasLoading = await loadingIndicator.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });
@@ -138,7 +141,7 @@ test.describe('Company Detail Page', () => {
     // The component calls notFound() when profile?.company is null
     // In E2E, we can verify graceful handling (404 page)
     const invalidSlug = 'non-existent-company-12345';
-    
+
     await page.goto(`/companies/${invalidSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -146,7 +149,7 @@ test.describe('Company Detail Page', () => {
     // Should show 404 page
     const notFound = page.getByText(/not found|404|page not found/i);
     const hasNotFound = await notFound.isVisible().catch(() => false);
-    
+
     // May show 404 message or redirect
     expect(hasNotFound || page.url().includes('404')).toBe(true);
   });
@@ -156,7 +159,7 @@ test.describe('Company Detail Page', () => {
     // The component doesn't have explicit error handling, but Next.js handles it
     // In E2E, we can verify graceful handling (error boundary or error message)
     const testSlug = 'test-company';
-    
+
     await page.goto(`/companies/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -164,8 +167,11 @@ test.describe('Company Detail Page', () => {
     // Page should render or show error boundary, but not crash
     const main = page.getByRole('main');
     const hasMain = await main.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error boundary, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -174,7 +180,7 @@ test.describe('Company Detail Page', () => {
     // This tests the edge case where company is null in CompanyHeader
     // The component checks if (!company) and handles it
     const testSlug = 'test-company';
-    
+
     await page.goto(`/companies/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -184,9 +190,12 @@ test.describe('Company Detail Page', () => {
     const hasMain = await main.isVisible().catch(() => false);
     const notFound = page.getByText(/not found|404/i);
     const hasNotFound = await notFound.isVisible().catch(() => false);
-    
+
     // Should either render main or show 404, but not have unhandled error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -194,7 +203,7 @@ test.describe('Company Detail Page', () => {
     // This tests the edge case where company is null in CompanyStats
     // The component checks if (!company) and handles it
     const testSlug = 'test-company';
-    
+
     await page.goto(`/companies/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -204,9 +213,12 @@ test.describe('Company Detail Page', () => {
     const hasMain = await main.isVisible().catch(() => false);
     const notFound = page.getByText(/not found|404/i);
     const hasNotFound = await notFound.isVisible().catch(() => false);
-    
+
     // Should either render main or show 404, but not have unhandled error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -214,7 +226,7 @@ test.describe('Company Detail Page', () => {
     // This tests the edge case where getSafeWebsiteUrl returns null
     // The component returns null (doesn't render link) when safeUrl is null
     const testSlug = 'test-company';
-    
+
     await page.goto(`/companies/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -224,7 +236,10 @@ test.describe('Company Detail Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -232,7 +247,7 @@ test.describe('Company Detail Page', () => {
     // This tests the error path when generatePageMetadata fails
     // The function doesn't have explicit error handling, but Next.js handles it
     const testSlug = 'test-company';
-    
+
     await page.goto(`/companies/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -250,7 +265,7 @@ test.describe('Company Detail Page', () => {
     // This tests that generateStaticParams handles errors
     // The function catches getCompaniesList errors and returns placeholder
     const testSlug = 'test-company';
-    
+
     await page.goto(`/companies/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -260,7 +275,10 @@ test.describe('Company Detail Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -268,7 +286,7 @@ test.describe('Company Detail Page', () => {
     // This tests that the placeholder slug returned by generateStaticParams is handled
     // The component should call notFound() for placeholder slug
     const placeholderSlug = 'placeholder';
-    
+
     await page.goto(`/companies/${placeholderSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -276,7 +294,7 @@ test.describe('Company Detail Page', () => {
     // Should show 404 for placeholder slug
     const notFound = page.getByText(/not found|404/i);
     const hasNotFound = await notFound.isVisible().catch(() => false);
-    
+
     // May show 404 message or redirect
     expect(hasNotFound || page.url().includes('404')).toBe(true);
   });
@@ -285,7 +303,7 @@ test.describe('Company Detail Page', () => {
     // This tests that companies without slugs are filtered out
     // The function filters: Boolean(company.slug)
     const testSlug = 'test-company';
-    
+
     await page.goto(`/companies/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -295,7 +313,10 @@ test.describe('Company Detail Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -303,7 +324,7 @@ test.describe('Company Detail Page', () => {
     // This tests edge cases where company fields are null/undefined
     // The component uses optional chaining and conditional rendering
     const testSlug = 'test-company';
-    
+
     await page.goto(`/companies/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -313,7 +334,10 @@ test.describe('Company Detail Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -321,7 +345,7 @@ test.describe('Company Detail Page', () => {
     // This tests the edge case where company has no jobs
     // The component should handle empty jobs array gracefully
     const testSlug = 'test-company';
-    
+
     await page.goto(`/companies/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -331,7 +355,10 @@ test.describe('Company Detail Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -339,7 +366,7 @@ test.describe('Company Detail Page', () => {
     // This tests the edge case where company.stats is null/undefined
     // The component uses optional chaining for stats fields
     const testSlug = 'test-company';
-    
+
     await page.goto(`/companies/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -349,7 +376,10 @@ test.describe('Company Detail Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 });

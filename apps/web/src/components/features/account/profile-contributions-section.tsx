@@ -2,7 +2,7 @@
 
 /**
  * Profile Contributions Section
- * 
+ *
  * Client component for displaying user's contributions with hover animations
  */
 
@@ -20,7 +20,7 @@ import { motion } from 'motion/react';
 import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import type { GetUserProfileReturns } from '@heyclaude/database-types/postgres-types';
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 
 export interface ProfileContributionsSectionProps {
   contributions: GetUserProfileReturns['contributions'];
@@ -69,7 +69,7 @@ export function ProfileContributionsSection({
               whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
               transition={MICROINTERACTIONS.card.transition}
             >
-              <Card className="cursor-pointer border-border/50">
+              <Card className="border-border/50 cursor-pointer">
                 <NavLink href={safeContentUrl}>
                   <CardHeader>
                     <div className="mb-2 flex items-center justify-between">
@@ -88,7 +88,7 @@ export function ProfileContributionsSection({
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className={cn('flex items-center gap-1 text-muted-foreground text-xs')}>
+                    <div className={cn('text-muted-foreground flex items-center gap-1 text-xs')}>
                       <span>{item.view_count ?? 0} views</span>
                       <span>•</span>
                       <span>{item.download_count ?? 0} downloads</span>

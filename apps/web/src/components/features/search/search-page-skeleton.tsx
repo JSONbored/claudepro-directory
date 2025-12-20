@@ -2,7 +2,7 @@
 
 /**
  * Search Page Skeleton
- * 
+ *
  * Perfectly matches the structure of /search page:
  * - Header with title
  * - Two-column layout: Main (ContentSearchClient) + Sidebar (ContentSidebar)
@@ -22,7 +22,7 @@ const KEYS_9 = Array.from({ length: 9 }, (_, i) => `skeleton-${i + 1}`);
  */
 export function SearchPageSkeleton() {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <motion.main
       className="container mx-auto px-4 py-8"
@@ -77,8 +77,13 @@ export function SearchPageSkeleton() {
                       <CardContent className="p-6">
                         <div className="space-y-3">
                           <div className="flex items-start gap-2">
-                            <Skeleton size="md" width="md" rounded="md" className="h-8 w-8 shrink-0" />
-                            <div className="flex flex-col gap-2 flex-1">
+                            <Skeleton
+                              size="md"
+                              width="md"
+                              rounded="md"
+                              className="h-8 w-8 shrink-0"
+                            />
+                            <div className="flex flex-1 flex-col gap-2">
                               <Skeleton size="md" width="3/4" />
                               <Skeleton size="sm" width="3xl" />
                             </div>
@@ -131,7 +136,7 @@ export function SearchPageSkeleton() {
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <Skeleton size="sm" width="sm" rounded="md" className="h-10 w-10" />
-                    <div className="flex flex-col gap-1 flex-1">
+                    <div className="flex flex-1 flex-col gap-1">
                       <Skeleton size="sm" width="2/3" />
                       <Skeleton size="xs" width="xs" />
                     </div>

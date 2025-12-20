@@ -49,7 +49,7 @@ import { Button } from '../button.tsx';
 import { AnimatePresence, motion } from 'motion/react';
 import { MICROINTERACTIONS } from '../../../design-system/index.ts';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../tooltip.tsx';
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 
 /**
  * BookmarkButton Props
@@ -145,8 +145,14 @@ export function BookmarkButton({
               });
 
               // Response schema is now properly extracted
-              if (result && typeof result === 'object' && 'data' in result && 
-                  result.data && typeof result.data === 'object' && 'success' in result.data) {
+              if (
+                result &&
+                typeof result === 'object' &&
+                'data' in result &&
+                result.data &&
+                typeof result.data === 'object' &&
+                'success' in result.data
+              ) {
                 const success = result.data['success'];
                 if (success === true) {
                   setIsBookmarked(false);
@@ -164,11 +170,16 @@ export function BookmarkButton({
                         error,
                         'BookmarkButton: bookmark removal tracking failed'
                       );
-                      logClientWarn('BookmarkButton: bookmark removal tracking failed', normalized, 'BookmarkButton.handleToggle', {
-                        component: 'BookmarkButton',
-                        contentType,
-                        contentSlug,
-                      });
+                      logClientWarn(
+                        'BookmarkButton: bookmark removal tracking failed',
+                        normalized,
+                        'BookmarkButton.handleToggle',
+                        {
+                          component: 'BookmarkButton',
+                          contentType,
+                          contentSlug,
+                        }
+                      );
                     });
                 }
               }
@@ -192,8 +203,14 @@ export function BookmarkButton({
               });
 
               // Response schema is now properly extracted
-              if (result && typeof result === 'object' && 'data' in result && 
-                  result.data && typeof result.data === 'object' && 'success' in result.data) {
+              if (
+                result &&
+                typeof result === 'object' &&
+                'data' in result &&
+                result.data &&
+                typeof result.data === 'object' &&
+                'success' in result.data
+              ) {
                 const success = result.data['success'];
                 if (success === true) {
                   setIsBookmarked(true);
@@ -211,11 +228,16 @@ export function BookmarkButton({
                         error,
                         'BookmarkButton: bookmark addition tracking failed'
                       );
-                      logClientWarn('BookmarkButton: bookmark addition tracking failed', normalized, 'BookmarkButton.handleToggle', {
-                        component: 'BookmarkButton',
-                        contentType,
-                        contentSlug,
-                      });
+                      logClientWarn(
+                        'BookmarkButton: bookmark addition tracking failed',
+                        normalized,
+                        'BookmarkButton.handleToggle',
+                        {
+                          component: 'BookmarkButton',
+                          contentType,
+                          contentSlug,
+                        }
+                      );
                     });
 
                   // Check confetti enabled (static config)
@@ -305,10 +327,7 @@ export function BookmarkButton({
                   transition={MICROINTERACTIONS.iconTransition.transition}
                   className="text-color-accent-primary"
                 >
-                  <BookmarkCheck
-                    className="h-3 w-3 fill-current"
-                    aria-hidden="true"
-                  />
+                  <BookmarkCheck className="h-3 w-3 fill-current" aria-hidden="true" />
                 </motion.div>
               ) : (
                 <motion.div
@@ -329,7 +348,7 @@ export function BookmarkButton({
         </TooltipTrigger>
         <TooltipContent>
           <p>{isBookmarked ? 'Remove from library' : 'Save to library'}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {isBookmarked ? 'Unsave this item' : 'Requires account'}
           </p>
         </TooltipContent>

@@ -1,4 +1,6 @@
-import { type job_plan, type job_tier, type jobsModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma, job_plan, job_tier } from '@prisma/client';
+
+type jobsModel = Prisma.jobsGetPayload<{}>;
 import { type GetUserCompleteDataReturns } from '@heyclaude/data-layer';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
@@ -51,11 +53,11 @@ import JobsListLoading from './loading-list';
 const JOB_PLAN_LABELS: Record<job_plan, string> = {
   'one-time': 'One-Time',
   subscription: 'Subscription',
-};
+} as const;
 const JOB_TIER_LABELS: Record<job_tier, string> = {
   featured: 'Featured',
   standard: 'Standard',
-};
+} as const;
 const USD_FORMATTER = new Intl.NumberFormat('en-US', {
   currency: 'USD',
   maximumFractionDigits: 0,
@@ -113,7 +115,7 @@ function humanizeStatus(value?: null | string): string {
  */
 function resolvePlanLabel(plan?: job_plan | null): string {
   if (!plan) {
-    return JOB_PLAN_LABELS['one-time'];
+    return JOB_PLAN_LABELS['one-time' as job_plan];
   }
   return JOB_PLAN_LABELS[plan];
 }
@@ -128,7 +130,7 @@ function resolvePlanLabel(plan?: job_plan | null): string {
  */
 function resolveTierLabel(tier?: job_tier | null): string {
   if (!tier) {
-    return JOB_TIER_LABELS.standard;
+    return JOB_TIER_LABELS['standard' as job_tier];
   }
   return JOB_TIER_LABELS[tier];
 }
@@ -159,7 +161,9 @@ const jobStatusBadgeMap: Record<JobStatus, string> = {
 };
 
 function getStatusColor(status: JobStatus): string {
-  return jobStatusBadgeMap[status];
+  const color = jobStatusBadgeMap[status];
+  if (color) return color;
+  return jobStatusBadgeMap['draft'] as string;
 }
 
 /**
@@ -615,7 +619,7 @@ async function JobsListWithBilling({
     }
   }
 
-  const getPlanBadge = (plan: job_plan | null | undefined, tier?: job_tier | null) => {
+  const getPlanBadge = (plan: job_plan | null | undefined, tier?: job_tier | null): React.JSX.Element | null => {
     if (tier === 'featured') {
       return (
         <UnifiedBadge className="border-blue-500/20 bg-blue-500/10 text-blue-400" variant="base">
@@ -678,11 +682,11 @@ async function JobsListWithBilling({
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <UnifiedBadge
-                      className={getStatusColor(job.status)}
+                      className={getStatusColor(job.status ?? 'draft')}
                       style="outline"
                       variant="base"
                     >
-                      {job.status}
+                      {job.status ?? 'draft'}
                     </UnifiedBadge>
                     {getPlanBadge(job.plan, job.tier)}
                   </div>

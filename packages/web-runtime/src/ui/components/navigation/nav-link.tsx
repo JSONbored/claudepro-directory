@@ -90,7 +90,7 @@ export function NavLink({
     <span className="relative inline-block">
       {children}
       <span
-        className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-300 ease-out ${
+        className={`bg-accent absolute bottom-0 left-0 h-[2px] transition-all duration-300 ease-out ${
           active ? 'w-full' : 'w-0 group-hover:w-full'
         }`}
         aria-hidden="true"
@@ -101,9 +101,9 @@ export function NavLink({
   if (external) {
     // Check if this is a mailto link
     const isMailto = typeof href === 'string' && href.trim().toLowerCase().startsWith('mailto:');
-    
+
     let safeUrl: string | null = null;
-    
+
     if (isMailto) {
       // Extract email from mailto: URL and validate
       const email = href.trim().substring(7); // Remove 'mailto:' prefix
@@ -112,7 +112,7 @@ export function NavLink({
       // Validate and sanitize external website URL using shared utility
       safeUrl = getSafeExternalUrl(href);
     }
-    
+
     if (!safeUrl) {
       // Don't render unsafe external links - log for debugging
       logger.warn(
@@ -126,7 +126,7 @@ export function NavLink({
       );
       return <span className={`group ${className}`}>{content}</span>;
     }
-    
+
     // For mailto links, don't add target="_blank" or rel="noopener noreferrer"
     // (mailto links open email client, not a new tab)
     const linkProps = isMailto
@@ -137,7 +137,7 @@ export function NavLink({
           rel: 'noopener noreferrer',
           ...(props as ComponentProps<'a'>),
         };
-    
+
     return (
       <a className={`group ${className}`} {...linkProps}>
         {content}
@@ -148,14 +148,14 @@ export function NavLink({
   // Validate internal path
   if (!isValidInternalPath(href)) {
     // Don't render unsafe internal links - log for debugging
-      logger.warn(
-        {
-          component: 'NavLink',
-          href: String(href),
-          external: false,
-        },
-        'NavLink: Unsafe internal path rejected'
-      );
+    logger.warn(
+      {
+        component: 'NavLink',
+        href: String(href),
+        external: false,
+      },
+      'NavLink: Unsafe internal path rejected'
+    );
     return <span className={`group ${className}`}>{content}</span>;
   }
 

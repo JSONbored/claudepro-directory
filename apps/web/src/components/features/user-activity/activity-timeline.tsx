@@ -19,9 +19,22 @@ function formatActivityDate(dateString: string): string {
     const year = date.getUTCFullYear();
     const month = date.getUTCMonth(); // 0-11
     const day = date.getUTCDate();
-    
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    
+
+    const monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
     return `${monthNames[month]} ${day}, ${year}`;
   } catch {
     return dateString;

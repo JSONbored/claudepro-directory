@@ -14,10 +14,8 @@
  * We use @prisma/adapter-pg with the pg driver for PostgreSQL.
  */
 
-// Import PrismaClient from generated location
-// Use client.ts explicitly for backend (has PrismaClient and all server types)
-import { PrismaClient } from '@heyclaude/database-types/prisma/client';
-// Prisma namespace is exported from client.ts and used for type annotations
+// Import PrismaClient from default Prisma location
+import { PrismaClient } from '@prisma/client';
 
 // Import PostgreSQL adapter (Prisma 7.1.0+ requirement)
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -49,7 +47,9 @@ export const prisma =
       // Only throw if we're in Vercel (production deployment) - not during local builds
       // Local builds with Infisical will have DATABASE_URL injected, so this check is for Vercel only
       if (process.env['VERCEL']) {
-        throw new Error('DATABASE_URL is required for Prisma Client. Set it in your environment variables.');
+        throw new Error(
+          'DATABASE_URL is required for Prisma Client. Set it in your environment variables.'
+        );
       }
       // During local build (even with NODE_ENV=production), allow missing DATABASE_URL
       // This allows the build to complete even if DATABASE_URL is not set
@@ -153,10 +153,7 @@ export const prisma =
     // Initialize Prisma Client with adapter
     return new PrismaClient({
       adapter,
-      log:
-        process.env['NODE_ENV'] === 'development'
-          ? ['query', 'error', 'warn']
-          : ['error'],
+      log: process.env['NODE_ENV'] === 'development' ? ['query', 'error', 'warn'] : ['error'],
     });
   })();
 

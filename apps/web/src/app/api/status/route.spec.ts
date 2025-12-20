@@ -147,13 +147,13 @@ test.describe('GET /api/status', () => {
     // The route should parse it and extract the actual status value
     // In E2E, we can't easily mock the service response, but we can verify
     // the route handles the response correctly regardless of format
-    
+
     const response = await request.get('/api/v1/status');
-    
+
     expect([200, 503]).toContain(response.status());
-    
+
     const data = await response.json();
-    
+
     // Status should be a simple string, not a composite type string
     expect(typeof data.status).toBe('string');
     expect(data.status).not.toMatch(/^\(/); // Should not start with '('
@@ -164,11 +164,11 @@ test.describe('GET /api/status', () => {
     // This tests that if the service returns a composite type string for status,
     // the route fixes it in the response
     const response = await request.get('/api/v1/status');
-    
+
     expect([200, 503]).toContain(response.status());
-    
+
     const data = await response.json();
-    
+
     // Response data should have a clean status field (not composite string)
     expect(data.status).not.toMatch(/^\(/);
     expect(typeof data.status).toBe('string');
@@ -178,10 +178,10 @@ test.describe('GET /api/status', () => {
     // This tests that getCachedApiHealthFormatted errors are handled
     // The route doesn't catch errors (factory handles them)
     const response = await request.get('/api/v1/status');
-    
+
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
-    
+
     const data = await response.json();
     expect(data).toHaveProperty('status');
   });
@@ -190,10 +190,10 @@ test.describe('GET /api/status', () => {
     // This tests that service.getApiHealthFormatted errors are handled
     // The route doesn't catch errors (factory handles them)
     const response = await request.get('/api/v1/status');
-    
+
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
-    
+
     const data = await response.json();
     expect(data).toHaveProperty('status');
   });
@@ -202,10 +202,10 @@ test.describe('GET /api/status', () => {
     // This tests that null data is handled
     // The route checks if (typeof data === 'object' && data !== null && 'status' in data)
     const response = await request.get('/api/v1/status');
-    
+
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
-    
+
     const data = await response.json();
     expect(data).toHaveProperty('status');
   });
@@ -214,10 +214,10 @@ test.describe('GET /api/status', () => {
     // This tests that non-object data is handled
     // The route checks if (typeof data === 'object' && data !== null)
     const response = await request.get('/api/v1/status');
-    
+
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
-    
+
     const data = await response.json();
     expect(data).toHaveProperty('status');
   });
@@ -226,10 +226,10 @@ test.describe('GET /api/status', () => {
     // This tests that missing status field is handled
     // The route checks if ('status' in data)
     const response = await request.get('/api/v1/status');
-    
+
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
-    
+
     const data = await response.json();
     expect(data).toHaveProperty('status');
   });
@@ -238,10 +238,10 @@ test.describe('GET /api/status', () => {
     // This tests that regex match for composite type string works
     // The route uses statusValue.match(/^\((\w+),/)
     const response = await request.get('/api/v1/status');
-    
+
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
-    
+
     const data = await response.json();
     expect(data).toHaveProperty('status');
     expect(typeof data.status).toBe('string');
@@ -251,10 +251,10 @@ test.describe('GET /api/status', () => {
     // This tests that regex match returning null is handled
     // The route uses match?.[1] ? match[1] : 'unhealthy'
     const response = await request.get('/api/v1/status');
-    
+
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
-    
+
     const data = await response.json();
     expect(data).toHaveProperty('status');
   });
@@ -263,9 +263,9 @@ test.describe('GET /api/status', () => {
     // This tests that statusCode is calculated correctly
     // The route uses status === 'healthy' ? 200 : status === 'degraded' ? 200 : 503
     const response = await request.get('/api/v1/status');
-    
+
     const data = await response.json();
-    
+
     if (data.status === 'healthy' || data.status === 'degraded') {
       expect(response.status()).toBe(200);
     } else {
@@ -277,10 +277,10 @@ test.describe('GET /api/status', () => {
     // This tests that responseData spread works correctly
     // The route uses {...data, status} when fixing composite string
     const response = await request.get('/api/v1/status');
-    
+
     // Should return 200 (healthy/degraded) or 503 (unhealthy/error)
     expect([200, 503]).toContain(response.status());
-    
+
     const data = await response.json();
     expect(data).toHaveProperty('status');
     expect(typeof data.status).toBe('string');

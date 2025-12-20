@@ -3,8 +3,10 @@
  * Uses edge function for syntax highlighting (cached, fast)
  */
 
-import { ContentCategory } from '@heyclaude/data-layer/prisma';
-import type { contentModel, content_category } from '@heyclaude/data-layer/prisma';
+import { content_category as ContentCategory } from '@prisma/client';
+import type { Prisma, content_category } from '@prisma/client';
+
+type contentModel = Prisma.contentGetPayload<{}>;
 import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
 import {
   highlightCode,
@@ -13,11 +15,11 @@ import {
   generateHookFilename,
   extractMarkdownHeadings,
 } from '@heyclaude/shared-runtime';
-import { extractCodeBlocksFromMarkdown, type ExtractedCodeBlock } from '@heyclaude/web-runtime/utils/markdown-code-extractor';
 import {
-  ensureStringArray,
-  getMetadata,
-} from '@heyclaude/web-runtime/utils/content-helpers';
+  extractCodeBlocksFromMarkdown,
+  type ExtractedCodeBlock,
+} from '@heyclaude/web-runtime/utils/markdown-code-extractor';
+import { ensureStringArray, getMetadata } from '@heyclaude/web-runtime/utils/content-helpers';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { transformMcpConfigForDisplay } from '@heyclaude/web-runtime/content';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
@@ -37,17 +39,22 @@ import dynamic from 'next/dynamic';
 
 // Lazy load large components to reduce initial bundle size
 const JSONSectionRenderer = dynamic(
-  () => import('@/src/components/content/json-to-sections').then((mod) => ({ default: mod.JSONSectionRenderer })),
+  () =>
+    import('@/src/components/content/json-to-sections').then((mod) => ({
+      default: mod.JSONSectionRenderer,
+    })),
   { ssr: true }
 );
 
-const UnifiedSection = dynamic(
-  () => import('@/src/components/content/sections/unified-section'),
-  { ssr: true }
-);
+const UnifiedSection = dynamic(() => import('@/src/components/content/sections/unified-section'), {
+  ssr: true,
+});
 // Dynamic import for ReviewListSection (624 lines) - lazy load for code splitting
 const ReviewListSection = dynamic(
-  () => import('@/src/components/core/domain/reviews/review-list-section').then((mod) => ({ default: mod.ReviewListSection })),
+  () =>
+    import('@/src/components/core/domain/reviews/review-list-section').then((mod) => ({
+      default: mod.ReviewListSection,
+    })),
   { ssr: true }
 );
 import { NewsletterScrollTrigger } from '@/src/components/features/growth/newsletter/newsletter-scroll-trigger';
@@ -72,16 +79,9 @@ export interface UnifiedDetailPageProps {
   collectionSections?: React.ReactNode;
   copyCount?: number;
   copyCountPromise?: Promise<number>;
-  item:
-    | (GetContentDetailCompleteReturns['content'] & contentModel)
-    | contentModel;
-  relatedItems?:
-    | ContentItem[]
-    | GetContentDetailCompleteReturns['related'];
-  relatedItemsPromise?: Promise<
-    | ContentItem[]
-    | GetContentDetailCompleteReturns['related']
-  >;
+  item: (GetContentDetailCompleteReturns['content'] & contentModel) | contentModel;
+  relatedItems?: ContentItem[] | GetContentDetailCompleteReturns['related'];
+  relatedItemsPromise?: Promise<ContentItem[] | GetContentDetailCompleteReturns['related']>;
   tabsEnabled?: boolean;
   viewCount?: number;
   viewCountPromise?: Promise<number>;
@@ -103,9 +103,7 @@ export interface UnifiedDetailPageProps {
 function logDetailProcessingWarning(
   section: string,
   error: unknown,
-  item:
-    | (GetContentDetailCompleteReturns['content'] & contentModel)
-    | contentModel
+  item: (GetContentDetailCompleteReturns['content'] & contentModel) | contentModel
 ): void {
   const normalized = normalizeError(error, `${section} processing failed`);
   logger.warn(
@@ -130,9 +128,7 @@ function logDetailProcessingWarning(
  * @returns The configuration serialized as a string, or `null` if no configuration is available
  */
 function getConfigurationAsString(
-  item:
-    | (GetContentDetailCompleteReturns['content'] & contentModel)
-    | contentModel,
+  item: (GetContentDetailCompleteReturns['content'] & contentModel) | contentModel,
   metadata: Record<string, unknown>
 ): null | string {
   // Type narrowing: Both union members have 'configuration' property
@@ -174,9 +170,7 @@ async function ViewCountMetadata({
 }: {
   copyCount?: number;
   copyCountPromise?: Promise<number>;
-  item:
-    | (GetContentDetailCompleteReturns['content'] & contentModel)
-    | contentModel;
+  item: (GetContentDetailCompleteReturns['content'] & contentModel) | contentModel;
   viewCountPromise: Promise<number>;
 }) {
   const [viewCount, resolvedCopyCount] = await Promise.all([
@@ -212,13 +206,8 @@ async function SidebarWithRelated({
         };
     typeName: string;
   };
-  item:
-    | (GetContentDetailCompleteReturns['content'] & contentModel)
-    | contentModel;
-  relatedItemsPromise: Promise<
-    | ContentItem[]
-    | GetContentDetailCompleteReturns['related']
-  >;
+  item: (GetContentDetailCompleteReturns['content'] & contentModel) | contentModel;
+  relatedItemsPromise: Promise<ContentItem[] | GetContentDetailCompleteReturns['related']>;
 }) {
   const relatedItems = await relatedItemsPromise;
   return (
@@ -274,13 +263,19 @@ export async function UnifiedDetailPage({
   };
 
   // Extract all data fields efficiently (replaces 6 IIFEs with cleaner helper)
-  const installation = getField<InstallationSteps | undefined>('installation', (val) => 
-    val && typeof val === 'object' && !Array.isArray(val) ? val as InstallationSteps : undefined
+  const installation = getField<InstallationSteps | undefined>('installation', (val) =>
+    val && typeof val === 'object' && !Array.isArray(val) ? (val as InstallationSteps) : undefined
   );
   const useCases = getField<string[]>('use_cases', ensureStringArray);
   const features = getField<string[]>('features', ensureStringArray);
-  const troubleshooting = getField<Array<string | { answer: string; question: string } | { issue: string; solution: string }>>('troubleshooting', (val) => 
-    Array.isArray(val) && val.length > 0 ? val as Array<string | { answer: string; question: string } | { issue: string; solution: string }> : []
+  const troubleshooting = getField<
+    Array<string | { answer: string; question: string } | { issue: string; solution: string }>
+  >('troubleshooting', (val) =>
+    Array.isArray(val) && val.length > 0
+      ? (val as Array<
+          string | { answer: string; question: string } | { issue: string; solution: string }
+        >)
+      : []
   );
   const requirements = getField<string[]>('requirements', ensureStringArray);
   const securityItems = getField<string[]>('security', ensureStringArray);
@@ -292,9 +287,11 @@ export async function UnifiedDetailPage({
   function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null && !Array.isArray(value);
   }
-  
+
   const quickActionsMcpServers = isRecord(metadata['mcpServers']) ? metadata['mcpServers'] : null;
-  const quickActionsConfiguration = isRecord(metadata['configuration']) ? metadata['configuration'] : null;
+  const quickActionsConfiguration = isRecord(metadata['configuration'])
+    ? metadata['configuration']
+    : null;
   const shouldRenderQuickActionsBar =
     Boolean(quickActionsPackageName) ||
     Boolean(quickActionsMcpServers) ||
@@ -359,8 +356,11 @@ export async function UnifiedDetailPage({
                 item: {
                   category: item.category,
                   slug: item.slug ?? null,
-                  name: ('name' in item && typeof item['name'] === 'string') ? item['name'] : null,
-                  hook_type: ('hook_type' in item && typeof item['hook_type'] === 'string') ? item['hook_type'] : null,
+                  name: 'name' in item && typeof item['name'] === 'string' ? item['name'] : null,
+                  hook_type:
+                    'hook_type' in item && typeof item['hook_type'] === 'string'
+                      ? item['hook_type']
+                      : null,
                 },
                 language: detectedLanguage,
               });
@@ -371,12 +371,14 @@ export async function UnifiedDetailPage({
               // Map HeadingMetadata to ContentHeadingMetadata (same structure)
               const contentHeadings: ContentHeadingMetadata[] | undefined =
                 headings.length > 0
-                  ? headings.map((h: { id: string; anchor: string; title: string; level: number }) => ({
-                      id: h.id,
-                      anchor: h.anchor,
-                      title: h.title,
-                      level: h.level,
-                    }))
+                  ? headings.map(
+                      (h: { id: string; anchor: string; title: string; level: number }) => ({
+                        id: h.id,
+                        anchor: h.anchor,
+                        title: h.title,
+                        level: h.level,
+                      })
+                    )
                   : undefined;
 
               return {
@@ -413,24 +415,26 @@ export async function UnifiedDetailPage({
           markdownAfter?: string;
           markdownBefore?: string;
         };
-        const typedBlocks: ProcessedBlock[] = validBlocks.map((block: NonNullable<(typeof processedBlocks)[0]>) => {
-          const result: ProcessedBlock = {
-            code: block.code,
-            filename: block.filename,
-            html: block.html,
-            language: block.language,
-          };
-          if (block.headings !== undefined && block.headings !== null) {
-            result.headings = block.headings;
+        const typedBlocks: ProcessedBlock[] = validBlocks.map(
+          (block: NonNullable<(typeof processedBlocks)[0]>) => {
+            const result: ProcessedBlock = {
+              code: block.code,
+              filename: block.filename,
+              html: block.html,
+              language: block.language,
+            };
+            if (block.headings !== undefined && block.headings !== null) {
+              result.headings = block.headings;
+            }
+            if (block.markdownAfter !== undefined && block.markdownAfter !== null) {
+              result.markdownAfter = block.markdownAfter;
+            }
+            if (block.markdownBefore !== undefined && block.markdownBefore !== null) {
+              result.markdownBefore = block.markdownBefore;
+            }
+            return result;
           }
-          if (block.markdownAfter !== undefined && block.markdownAfter !== null) {
-            result.markdownAfter = block.markdownAfter;
-          }
-          if (block.markdownBefore !== undefined && block.markdownBefore !== null) {
-            result.markdownBefore = block.markdownBefore;
-          }
-          return result;
-        });
+        );
         // Return type must match ProcessedSectionData['contentData'] which is a union
         // of single object, array, or null
         if (typedBlocks.length === 0) {
@@ -445,7 +449,8 @@ export async function UnifiedDetailPage({
       }
 
       // Fallback: If no code blocks found, process entire content as single block
-      const languageHint = ('language' in item && typeof item['language'] === 'string') ? item['language'] : undefined;
+      const languageHint =
+        'language' in item && typeof item['language'] === 'string' ? item['language'] : undefined;
 
       // Use shared-runtime utilities directly (no edge function call)
       const detectedLanguage = detectLanguage(content, languageHint);
@@ -453,8 +458,9 @@ export async function UnifiedDetailPage({
         item: {
           category: item.category,
           slug: item.slug ?? null,
-                  name: ('name' in item && typeof item['name'] === 'string') ? item['name'] : null,
-                  hook_type: ('hook_type' in item && typeof item['hook_type'] === 'string') ? item['hook_type'] : null,
+          name: 'name' in item && typeof item['name'] === 'string' ? item['name'] : null,
+          hook_type:
+            'hook_type' in item && typeof item['hook_type'] === 'string' ? item['hook_type'] : null,
         },
         language: detectedLanguage,
       });
@@ -528,8 +534,11 @@ export async function UnifiedDetailPage({
               item: {
                 category: item.category,
                 slug: item.slug ?? null,
-                  name: ('name' in item && typeof item['name'] === 'string') ? item['name'] : null,
-                  hook_type: ('hook_type' in item && typeof item['hook_type'] === 'string') ? item['hook_type'] : null,
+                name: 'name' in item && typeof item['name'] === 'string' ? item['name'] : null,
+                hook_type:
+                  'hook_type' in item && typeof item['hook_type'] === 'string'
+                    ? item['hook_type']
+                    : null,
               },
               language: 'json',
               format: 'multi',
@@ -556,13 +565,22 @@ export async function UnifiedDetailPage({
     if (format === 'hook') {
       // Type narrowing: configuration is already validated as object
       // Extract properties safely - need to check configuration is object before using 'in'
-      const hookConfigRaw = typeof configuration === 'object' && configuration !== null && !Array.isArray(configuration) && 'hookConfig' in configuration
-        ? configuration['hookConfig']
-        : undefined;
-      const scriptContentRaw = typeof configuration === 'object' && configuration !== null && !Array.isArray(configuration) && 'scriptContent' in configuration && typeof configuration['scriptContent'] === 'string'
-        ? configuration['scriptContent']
-        : undefined;
-      
+      const hookConfigRaw =
+        typeof configuration === 'object' &&
+        configuration !== null &&
+        !Array.isArray(configuration) &&
+        'hookConfig' in configuration
+          ? configuration['hookConfig']
+          : undefined;
+      const scriptContentRaw =
+        typeof configuration === 'object' &&
+        configuration !== null &&
+        !Array.isArray(configuration) &&
+        'scriptContent' in configuration &&
+        typeof configuration['scriptContent'] === 'string'
+          ? configuration['scriptContent']
+          : undefined;
+
       // Type guard for hookConfig
       function isHookConfig(value: unknown): value is { hooks?: Record<string, unknown> } {
         return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -573,8 +591,9 @@ export async function UnifiedDetailPage({
         const itemData = {
           category: item.category,
           slug: item.slug ?? null,
-                  name: ('name' in item && typeof item['name'] === 'string') ? item['name'] : null,
-                  hook_type: ('hook_type' in item && typeof item['hook_type'] === 'string') ? item['hook_type'] : null,
+          name: 'name' in item && typeof item['name'] === 'string' ? item['name'] : null,
+          hook_type:
+            'hook_type' in item && typeof item['hook_type'] === 'string' ? item['hook_type'] : null,
         };
 
         // Use shared-runtime utilities directly
@@ -597,13 +616,14 @@ export async function UnifiedDetailPage({
 
         return {
           format: 'hook' as const,
-          hookConfig: highlightedHookConfig && hookConfig
-            ? {
-                html: highlightedHookConfig,
-                code: JSON.stringify(hookConfig, null, 2),
-                filename: hookConfigFilename || 'hook-config.json',
-              }
-            : null,
+          hookConfig:
+            highlightedHookConfig && hookConfig
+              ? {
+                  html: highlightedHookConfig,
+                  code: JSON.stringify(hookConfig, null, 2),
+                  filename: hookConfigFilename || 'hook-config.json',
+                }
+              : null,
           scriptContent:
             highlightedScript && scriptContentRaw
               ? {
@@ -628,8 +648,9 @@ export async function UnifiedDetailPage({
         item: {
           category: item.category,
           slug: item.slug ?? null,
-                  name: ('name' in item && typeof item['name'] === 'string') ? item['name'] : null,
-                  hook_type: ('hook_type' in item && typeof item['hook_type'] === 'string') ? item['hook_type'] : null,
+          name: 'name' in item && typeof item['name'] === 'string' ? item['name'] : null,
+          hook_type:
+            'hook_type' in item && typeof item['hook_type'] === 'string' ? item['hook_type'] : null,
         },
         language: 'json',
       });
@@ -695,7 +716,10 @@ export async function UnifiedDetailPage({
           // Validate required fields before processing
           if (!isValidExample(example)) {
             // Type guard for error message - example is already validated as object in isValidExample
-            const exampleRecord: Record<string, unknown> = typeof example === 'object' && example !== null && !Array.isArray(example) ? example : {};
+            const exampleRecord: Record<string, unknown> =
+              typeof example === 'object' && example !== null && !Array.isArray(example)
+                ? example
+                : {};
             logDetailProcessingWarning(
               'examplesData',
               new Error(
@@ -708,7 +732,9 @@ export async function UnifiedDetailPage({
 
           try {
             // Use shared-runtime utilities directly
-            const html = await highlightCode(example.code, example.language, { showLineNumbers: true });
+            const html = await highlightCode(example.code, example.language, {
+              showLineNumbers: true,
+            });
             // Generate filename from title
             const languageExtensionMap: Record<string, string> = {
               typescript: 'ts',
@@ -730,7 +756,9 @@ export async function UnifiedDetailPage({
             return {
               // Type narrowing: Already validated above that these are strings
               title: example.title,
-              ...(example.description && typeof example.description === 'string' ? { description: example.description } : {}),
+              ...(example.description && typeof example.description === 'string'
+                ? { description: example.description }
+                : {}),
               html,
               code: example.code,
               language: example.language,
@@ -745,7 +773,7 @@ export async function UnifiedDetailPage({
 
       // Filter out null results after Promise.all resolves
       const highlightedExamples = highlightedExamplesResults.filter(
-        (r: unknown): r is NonNullable<typeof highlightedExamplesResults[0]> => r !== null
+        (r: unknown): r is NonNullable<(typeof highlightedExamplesResults)[0]> => r !== null
       );
 
       return highlightedExamples;
@@ -772,9 +800,15 @@ export async function UnifiedDetailPage({
         'mcpb_storage_url' in item &&
         item.mcpb_storage_url &&
         typeof item.mcpb_storage_url === 'string';
-      const mcpbStepsFromMetadata = ('mcpb' in installation && installation.mcpb && typeof installation.mcpb === 'object' && !Array.isArray(installation.mcpb) && 'steps' in installation.mcpb && Array.isArray(installation.mcpb.steps))
-        ? installation.mcpb.steps
-        : [];
+      const mcpbStepsFromMetadata =
+        'mcpb' in installation &&
+        installation.mcpb &&
+        typeof installation.mcpb === 'object' &&
+        !Array.isArray(installation.mcpb) &&
+        'steps' in installation.mcpb &&
+        Array.isArray(installation.mcpb.steps)
+          ? installation.mcpb.steps
+          : [];
       const shouldAutoGenerateMcpbSteps = hasMcpbPackage && mcpbStepsFromMetadata.length === 0;
 
       // Use shared-runtime utilities directly (async, need Promise.all)
@@ -791,15 +825,33 @@ export async function UnifiedDetailPage({
       };
 
       // Type guards for installation properties
-      const claudeCodeStepsRaw = ('claudeCode' in installation && installation.claudeCode && typeof installation.claudeCode === 'object' && !Array.isArray(installation.claudeCode) && 'steps' in installation.claudeCode && Array.isArray(installation.claudeCode.steps))
-        ? installation.claudeCode.steps
-        : null;
-      const claudeDesktopStepsRaw = ('claudeDesktop' in installation && installation.claudeDesktop && typeof installation.claudeDesktop === 'object' && !Array.isArray(installation.claudeDesktop) && 'steps' in installation.claudeDesktop && Array.isArray(installation.claudeDesktop.steps))
-        ? installation.claudeDesktop.steps
-        : null;
-      const sdkStepsRaw = ('sdk' in installation && installation.sdk && typeof installation.sdk === 'object' && !Array.isArray(installation.sdk) && 'steps' in installation.sdk && Array.isArray(installation.sdk.steps))
-        ? installation.sdk.steps
-        : null;
+      const claudeCodeStepsRaw =
+        'claudeCode' in installation &&
+        installation.claudeCode &&
+        typeof installation.claudeCode === 'object' &&
+        !Array.isArray(installation.claudeCode) &&
+        'steps' in installation.claudeCode &&
+        Array.isArray(installation.claudeCode.steps)
+          ? installation.claudeCode.steps
+          : null;
+      const claudeDesktopStepsRaw =
+        'claudeDesktop' in installation &&
+        installation.claudeDesktop &&
+        typeof installation.claudeDesktop === 'object' &&
+        !Array.isArray(installation.claudeDesktop) &&
+        'steps' in installation.claudeDesktop &&
+        Array.isArray(installation.claudeDesktop.steps)
+          ? installation.claudeDesktop.steps
+          : null;
+      const sdkStepsRaw =
+        'sdk' in installation &&
+        installation.sdk &&
+        typeof installation.sdk === 'object' &&
+        !Array.isArray(installation.sdk) &&
+        'steps' in installation.sdk &&
+        Array.isArray(installation.sdk.steps)
+          ? installation.sdk.steps
+          : null;
 
       const [claudeCodeSteps, claudeDesktopSteps, sdkSteps, mcpbSteps] = await Promise.all([
         claudeCodeStepsRaw ? processSteps(claudeCodeStepsRaw) : Promise.resolve(null),
@@ -827,18 +879,37 @@ export async function UnifiedDetailPage({
       function isRecordStringString(value: unknown): value is Record<string, string> {
         return typeof value === 'object' && value !== null && !Array.isArray(value);
       }
-      const claudeCodeConfigPath = ('claudeCode' in installation && installation.claudeCode && typeof installation.claudeCode === 'object' && !Array.isArray(installation.claudeCode) && 'configPath' in installation.claudeCode && isRecordStringString(installation.claudeCode.configPath))
-        ? installation.claudeCode.configPath
-        : undefined;
-      const claudeCodeConfigFormat = ('claudeCode' in installation && installation.claudeCode && typeof installation.claudeCode === 'object' && !Array.isArray(installation.claudeCode) && 'configFormat' in installation.claudeCode && typeof installation.claudeCode.configFormat === 'string')
-        ? installation.claudeCode.configFormat
-        : undefined;
-      const claudeDesktopConfigPath = ('claudeDesktop' in installation && installation.claudeDesktop && typeof installation.claudeDesktop === 'object' && !Array.isArray(installation.claudeDesktop) && 'configPath' in installation.claudeDesktop && isRecordStringString(installation.claudeDesktop.configPath))
-        ? installation.claudeDesktop.configPath
-        : undefined;
-      const installationRequirements = ('requirements' in installation && installation.requirements)
-        ? installation.requirements
-        : undefined;
+      const claudeCodeConfigPath =
+        'claudeCode' in installation &&
+        installation.claudeCode &&
+        typeof installation.claudeCode === 'object' &&
+        !Array.isArray(installation.claudeCode) &&
+        'configPath' in installation.claudeCode &&
+        isRecordStringString(installation.claudeCode.configPath)
+          ? installation.claudeCode.configPath
+          : undefined;
+      const claudeCodeConfigFormat =
+        'claudeCode' in installation &&
+        installation.claudeCode &&
+        typeof installation.claudeCode === 'object' &&
+        !Array.isArray(installation.claudeCode) &&
+        'configFormat' in installation.claudeCode &&
+        typeof installation.claudeCode.configFormat === 'string'
+          ? installation.claudeCode.configFormat
+          : undefined;
+      const claudeDesktopConfigPath =
+        'claudeDesktop' in installation &&
+        installation.claudeDesktop &&
+        typeof installation.claudeDesktop === 'object' &&
+        !Array.isArray(installation.claudeDesktop) &&
+        'configPath' in installation.claudeDesktop &&
+        isRecordStringString(installation.claudeDesktop.configPath)
+          ? installation.claudeDesktop.configPath
+          : undefined;
+      const installationRequirements =
+        'requirements' in installation && installation.requirements
+          ? installation.requirements
+          : undefined;
 
       // Build return object matching ProcessedSectionData['installationData'] type
       const result: NonNullable<ProcessedSectionData['installationData']> = {
@@ -857,7 +928,8 @@ export async function UnifiedDetailPage({
           : null,
         sdk: sdkSteps ? { steps: sdkSteps } : null,
         ...(mcpbSteps !== null && { mcpb: { steps: mcpbSteps } }),
-        ...(installationRequirements !== undefined && Array.isArray(installationRequirements) && { requirements: installationRequirements }),
+        ...(installationRequirements !== undefined &&
+          Array.isArray(installationRequirements) && { requirements: installationRequirements }),
       };
       return result;
     } catch (error) {
@@ -875,11 +947,12 @@ export async function UnifiedDetailPage({
     const itemMetadata = getMetadata(item);
     if (!(itemMetadata?.['sections'] && Array.isArray(itemMetadata['sections']))) {
       // Log warning if sections are missing for guides
-      logger.warn({ 
-        category: item.category,
-        slug: item.slug,
-        hasMetadata: !!itemMetadata,
-        sectionsType: itemMetadata?.['sections'] ? typeof itemMetadata['sections'] : 'undefined',
+      logger.warn(
+        {
+          category: item.category,
+          slug: item.slug,
+          hasMetadata: !!itemMetadata,
+          sectionsType: itemMetadata?.['sections'] ? typeof itemMetadata['sections'] : 'undefined',
         },
         'Guides content missing sections in metadata'
       );
@@ -1128,14 +1201,14 @@ export async function UnifiedDetailPage({
               />
             </div>
 
-          {/* Sidebars - TOC + Related content + Recently Viewed */}
-          <aside className="space-y-6 lg:self-start">
-            {/* On This Page - Scroll-aware TOC (hides on scroll down, shows on scroll up) */}
-            {headingMetadata && headingMetadata.length >= 2 ? (
-              <ScrollAwareToc>
-                <SidebarToc headings={headingMetadata} />
-              </ScrollAwareToc>
-            ) : null}
+            {/* Sidebars - TOC + Related content + Recently Viewed */}
+            <aside className="space-y-6 lg:self-start">
+              {/* On This Page - Scroll-aware TOC (hides on scroll down, shows on scroll up) */}
+              {headingMetadata && headingMetadata.length >= 2 ? (
+                <ScrollAwareToc>
+                  <SidebarToc headings={headingMetadata} />
+                </ScrollAwareToc>
+              ) : null}
 
               {/* Detail Sidebar - Related content */}
               {relatedItemsPromise && config ? (

@@ -50,11 +50,7 @@ function getPathDefinition(path: string, method: string): any {
 /**
  * Get expected response schema for a status code
  */
-function getResponseSchema(
-  path: string,
-  method: string,
-  statusCode: number
-): any {
+function getResponseSchema(path: string, method: string, statusCode: number): any {
   const pathDef = getPathDefinition(path, method);
   if (!pathDef) {
     return null;
@@ -94,9 +90,7 @@ export async function validateOpenApiResponse(
   const pathDef = getPathDefinition(path, method);
   if (!pathDef) {
     if (strict) {
-      throw new Error(
-        `Path ${path} with method ${method} not found in OpenAPI spec`
-      );
+      throw new Error(`Path ${path} with method ${method} not found in OpenAPI spec`);
     }
     return; // Skip validation if path not in spec
   }
@@ -116,9 +110,7 @@ export async function validateOpenApiResponse(
   const schema = getResponseSchema(path, method, statusCode);
   if (!schema) {
     // No schema defined - that's okay, just log a warning
-    console.warn(
-      `No response schema defined for ${method} ${path} ${statusCode} in OpenAPI spec`
-    );
+    console.warn(`No response schema defined for ${method} ${path} ${statusCode} in OpenAPI spec`);
     return;
   }
 

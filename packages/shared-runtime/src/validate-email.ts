@@ -73,12 +73,15 @@ export function validateEmail(
 
   // Check length
   if (trimmed.length > maxLength) {
-    logger.warn({
-      function: 'validate-email',
-      operation: 'email-too-long',
-      email_length: trimmed.length,
-      max_length: maxLength,
-    }, 'Email address too long');
+    logger.warn(
+      {
+        function: 'validate-email',
+        operation: 'email-too-long',
+        email_length: trimmed.length,
+        max_length: maxLength,
+      },
+      'Email address too long'
+    );
     return {
       valid: false,
       error: `Email address too long (max ${maxLength} characters)`,
@@ -87,11 +90,14 @@ export function validateEmail(
 
   // Validate format
   if (!EMAIL_REGEX.test(trimmed)) {
-    logger.warn({
-      function: 'validate-email',
-      operation: 'invalid-format',
-      email_preview: trimmed.slice(0, 50), // Log first 50 chars for debugging
-    }, 'Invalid email format');
+    logger.warn(
+      {
+        function: 'validate-email',
+        operation: 'invalid-format',
+        email_preview: trimmed.slice(0, 50), // Log first 50 chars for debugging
+      },
+      'Invalid email format'
+    );
     return {
       valid: false,
       error: 'Invalid email address format',
@@ -104,11 +110,14 @@ export function validateEmail(
   // Additional security checks
   // Prevent null bytes
   if (normalized.includes('\0')) {
-    logger.warn({
-      function: 'validate-email',
-      operation: 'security-check-failed',
-      check: 'null_bytes',
-    }, 'Security check failed: null bytes detected');
+    logger.warn(
+      {
+        function: 'validate-email',
+        operation: 'security-check-failed',
+        check: 'null_bytes',
+      },
+      'Security check failed: null bytes detected'
+    );
     return {
       valid: false,
       error: 'Email address contains invalid characters',
@@ -117,11 +126,14 @@ export function validateEmail(
 
   // Prevent path traversal attempts
   if (normalized.includes('..') || normalized.includes('//')) {
-    logger.warn({
-      function: 'validate-email',
-      operation: 'security-check-failed',
-      check: 'path_traversal',
-    }, 'Security check failed: path traversal detected');
+    logger.warn(
+      {
+        function: 'validate-email',
+        operation: 'security-check-failed',
+        check: 'path_traversal',
+      },
+      'Security check failed: path traversal detected'
+    );
     return {
       valid: false,
       error: 'Email address contains invalid characters',

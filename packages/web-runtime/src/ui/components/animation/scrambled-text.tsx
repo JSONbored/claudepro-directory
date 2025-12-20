@@ -44,12 +44,12 @@ export function ScrambledText({
     const container = containerRef.current;
     let charElements: HTMLSpanElement[] = [];
     let animationTimers: Array<() => void> = [];
-    
+
     // Process text into character spans
     const processText = (): HTMLSpanElement[] => {
       const text = container.textContent || '';
       if (!text.trim()) return []; // Don't process if no text
-      
+
       const chars = text.split('');
 
       // Create character spans
@@ -82,7 +82,7 @@ export function ScrambledText({
       if (charElements.length === 0) {
         charElements = processText();
       }
-      
+
       // Clear existing animations
       animationTimers.forEach((cleanup) => cleanup());
       animationTimers = [];
@@ -110,9 +110,7 @@ export function ScrambledText({
           const scramble = () => {
             if (frame < scrambleDuration * 60) {
               const randomChar =
-                scrambleChars[
-                  Math.floor(Math.random() * scrambleChars.length)
-                ] ?? '';
+                scrambleChars[Math.floor(Math.random() * scrambleChars.length)] ?? '';
               charEl.textContent = randomChar;
               frame++;
               scrambleInterval = setTimeout(scramble, 1000 / 60 / scrambleSpeed);
@@ -145,11 +143,7 @@ export function ScrambledText({
   }, [children, radius, duration, speed, scrambleChars, shouldReduceMotion]);
 
   return (
-    <span
-      ref={containerRef}
-      className={cn(className)}
-      style={style}
-    >
+    <span ref={containerRef} className={cn(className)} style={style}>
       {children}
     </span>
   );

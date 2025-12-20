@@ -21,7 +21,7 @@ test.describe('/account/companies/new', () => {
     // Set up error tracking and navigate to new company page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/account/companies/new');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });

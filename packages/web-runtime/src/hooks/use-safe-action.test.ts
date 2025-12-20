@@ -7,21 +7,23 @@ const mockExecute = vi.hoisted(() => vi.fn());
 const mockExecuteAsync = vi.hoisted(() => vi.fn());
 const mockReset = vi.hoisted(() => vi.fn());
 
-const mockUseAction = vi.hoisted(() => vi.fn(() => ({
-  execute: mockExecute,
-  executeAsync: mockExecuteAsync,
-  input: undefined,
-  result: {},
-  reset: mockReset,
-  status: 'idle' as const,
-  isIdle: true,
-  isExecuting: false,
-  isTransitioning: false,
-  isPending: false,
-  hasSucceeded: false,
-  hasErrored: false,
-  hasNavigated: false,
-})));
+const mockUseAction = vi.hoisted(() =>
+  vi.fn(() => ({
+    execute: mockExecute,
+    executeAsync: mockExecuteAsync,
+    input: undefined,
+    result: {},
+    reset: mockReset,
+    status: 'idle' as const,
+    isIdle: true,
+    isExecuting: false,
+    isTransitioning: false,
+    isPending: false,
+    hasSucceeded: false,
+    hasErrored: false,
+    hasNavigated: false,
+  }))
+);
 
 vi.mock('next-safe-action/hooks', () => ({
   useAction: mockUseAction,
@@ -164,9 +166,11 @@ describe('useSafeAction', () => {
       id: string;
     }
 
-    const mockAction = vi.fn(async (input: ActionInput): Promise<{ data?: ActionOutput }> => ({
-      data: { success: true, id: '123' },
-    }));
+    const mockAction = vi.fn(
+      async (input: ActionInput): Promise<{ data?: ActionOutput }> => ({
+        data: { success: true, id: '123' },
+      })
+    );
 
     const { result } = renderHook(() => useSafeAction(mockAction));
 

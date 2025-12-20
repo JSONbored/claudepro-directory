@@ -43,35 +43,43 @@ export const sendWeeklyDigest = inngest.createFunction(
     logger.info(logContext, 'Weekly digest started');
 
     // Step 1: Check rate limiting
-    const rateLimitCheck = await step.run('check-rate-limit', async (): Promise<{
-      rateLimited: boolean;
-      hoursSinceLastRun?: number;
-      nextAllowedAt?: string;
-    }> => {
-      const service = await getService('misc');
-      const lastRunData = await service.getAppSetting('last_digest_email_timestamp');
+    const rateLimitCheck = await step.run(
+      'check-rate-limit',
+      async (): Promise<{
+        rateLimited: boolean;
+        hoursSinceLastRun?: number;
+        nextAllowedAt?: string;
+      }> => {
+        const service = await getService('misc');
+        const lastRunData = await service.getAppSetting('last_digest_email_timestamp');
 
-      if (lastRunData?.setting_value) {
-        const lastRunTimestamp = new Date(lastRunData.setting_value as string);
-        const hoursSinceLastRun = (Date.now() - lastRunTimestamp.getTime()) / (1000 * 60 * 60);
+        if (lastRunData?.setting_value) {
+          const lastRunTimestamp = new Date(lastRunData.setting_value as string);
+          const hoursSinceLastRun = (Date.now() - lastRunTimestamp.getTime()) / (1000 * 60 * 60);
 
-        if (hoursSinceLastRun < 24) {
-          const nextAllowedAt = new Date(lastRunTimestamp.getTime() + 24 * 60 * 60 * 1000);
-          return {
-            rateLimited: true,
-            hoursSinceLastRun,
-            nextAllowedAt: nextAllowedAt.toISOString(),
-          };
+          if (hoursSinceLastRun < 24) {
+            const nextAllowedAt = new Date(lastRunTimestamp.getTime() + 24 * 60 * 60 * 1000);
+            return {
+              rateLimited: true,
+              hoursSinceLastRun,
+              nextAllowedAt: nextAllowedAt.toISOString(),
+            };
+          }
         }
-      }
 
-      return { rateLimited: false };
-    });
+        return { rateLimited: false };
+      }
+    );
 
     if (rateLimitCheck.rateLimited) {
-      logger.info({ ...logContext,
-        hoursSinceLastRun: rateLimitCheck.hoursSinceLastRun?.toFixed(1),
-        nextAllowedAt: rateLimitCheck.nextAllowedAt, }, 'Digest rate limited');
+      logger.info(
+        {
+          ...logContext,
+          hoursSinceLastRun: rateLimitCheck.hoursSinceLastRun?.toFixed(1),
+          nextAllowedAt: rateLimitCheck.nextAllowedAt,
+        },
+        'Digest rate limited'
+      );
       return {
         skipped: true,
         reason: 'rate_limited',
@@ -81,29 +89,33 @@ export const sendWeeklyDigest = inngest.createFunction(
     }
 
     // Step 2: Fetch digest content
-    const digestData = await step.run('fetch-digest-content', async (): Promise<WeeklyDigestData | null> => {
-      const previousWeekStart = getPreviousWeekStart();
-      
-      try {
-        const contentService = await getService('content');
-        const digest = await contentService.getWeeklyDigest({
-          p_week_start: previousWeekStart,
-        });
-        return digest;
-      } catch (error) {
-        const normalized = normalizeError(error, 'Failed to fetch weekly digest');
-        logger.warn({ ...logContext,
-          err: normalized, }, 'Failed to fetch weekly digest');
-        return null;
+    const digestData = await step.run(
+      'fetch-digest-content',
+      async (): Promise<WeeklyDigestData | null> => {
+        const previousWeekStart = getPreviousWeekStart();
+
+        try {
+          const contentService = await getService('content');
+          const digest = await contentService.getWeeklyDigest({
+            p_week_start: previousWeekStart,
+          });
+          return digest;
+        } catch (error) {
+          const normalized = normalizeError(error, 'Failed to fetch weekly digest');
+          logger.warn({ ...logContext, err: normalized }, 'Failed to fetch weekly digest');
+          return null;
+        }
       }
-    });
+    );
 
     if (!digestData) {
       return { skipped: true, reason: 'invalid_data' };
     }
 
-    const hasNewContent = Array.isArray(digestData.new_content) && digestData.new_content.length > 0;
-    const hasTrendingContent = Array.isArray(digestData.trending_content) && digestData.trending_content.length > 0;
+    const hasNewContent =
+      Array.isArray(digestData.new_content) && digestData.new_content.length > 0;
+    const hasTrendingContent =
+      Array.isArray(digestData.trending_content) && digestData.trending_content.length > 0;
 
     if (!(hasNewContent || hasTrendingContent)) {
       logger.info(logContext, 'Digest skipped - no content');
@@ -119,8 +131,7 @@ export const sendWeeklyDigest = inngest.createFunction(
         return data || [];
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to fetch subscribers');
-        logger.warn({ ...logContext,
-          err: normalized, }, 'Failed to fetch subscribers');
+        logger.warn({ ...logContext, err: normalized }, 'Failed to fetch subscribers');
         return [];
       }
     });
@@ -130,23 +141,28 @@ export const sendWeeklyDigest = inngest.createFunction(
       return { skipped: true, reason: 'no_subscribers' };
     }
 
-    logger.info({ ...logContext,
-      subscriberCount: subscribers.length, }, 'Sending digest to subscribers');
+    logger.info(
+      { ...logContext, subscriberCount: subscribers.length },
+      'Sending digest to subscribers'
+    );
 
     // Step 4: Send batch digest emails
-    const sendResults = await step.run('send-batch-emails', async (): Promise<{
-      success: number;
-      failed: number;
-      successRate: string;
-    }> => {
-      return sendBatchDigest(subscribers, digestData, logContext);
-    });
+    const sendResults = await step.run(
+      'send-batch-emails',
+      async (): Promise<{
+        success: number;
+        failed: number;
+        successRate: string;
+      }> => {
+        return sendBatchDigest(subscribers, digestData, logContext);
+      }
+    );
 
     // Step 5: Update last run timestamp
     await step.run('update-timestamp', async () => {
       const service = await getService('misc');
       const currentTimestamp = new Date().toISOString();
-      
+
       try {
         await service.upsertAppSetting({
           setting_key: 'last_digest_email_timestamp',
@@ -160,17 +176,21 @@ export const sendWeeklyDigest = inngest.createFunction(
         });
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to update digest timestamp');
-        logger.warn({ ...logContext,
-          err: normalized, }, 'Failed to update digest timestamp');
+        logger.warn({ ...logContext, err: normalized }, 'Failed to update digest timestamp');
       }
     });
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      sent: sendResults.success,
-      failed: sendResults.failed,
-      successRate: sendResults.successRate, }, 'Weekly digest completed');
+    logger.info(
+      {
+        ...logContext,
+        durationMs,
+        sent: sendResults.success,
+        failed: sendResults.failed,
+        successRate: sendResults.successRate,
+      },
+      'Weekly digest completed'
+    );
 
     const result = {
       sent: sendResults.success,
@@ -244,19 +264,24 @@ async function sendBatchDigest(
 
       if (result.error) {
         failed += batch.length;
-        logger.warn({ ...logContext,
-          batchStart: i,
-          batchSize: batch.length,
-          errorMessage: result.error.message, }, 'Batch send failed');
+        logger.warn(
+          {
+            ...logContext,
+            batchStart: i,
+            batchSize: batch.length,
+            errorMessage: result.error.message,
+          },
+          'Batch send failed'
+        );
       } else {
         success += batch.length;
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Batch send failed');
-      logger.warn({ ...logContext,
-        batchStart: i,
-        batchSize: batch.length,
-        errorMessage: normalized.message, }, 'Batch send exception');
+      logger.warn(
+        { ...logContext, batchStart: i, batchSize: batch.length, errorMessage: normalized.message },
+        'Batch send exception'
+      );
       failed += batch.length;
     }
   }
@@ -316,15 +341,23 @@ function buildDigestHtml(digestData: WeeklyDigestData): string {
     <h1 style="font-size: 24px; margin: 0 0 8px;">This Week in Claude</h1>
     <p style="color: #666; margin: 0 0 24px;">Week of ${digestData.week_of}</p>
     
-    ${newContentHtml ? `
+    ${
+      newContentHtml
+        ? `
     <h2 style="font-size: 18px; margin: 24px 0 16px; color: #333;">✨ New This Week</h2>
     ${newContentHtml}
-    ` : ''}
+    `
+        : ''
+    }
     
-    ${trendingContentHtml ? `
+    ${
+      trendingContentHtml
+        ? `
     <h2 style="font-size: 18px; margin: 24px 0 16px; color: #333;">🔥 Trending</h2>
     ${trendingContentHtml}
-    ` : ''}
+    `
+        : ''
+    }
     
     <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
     

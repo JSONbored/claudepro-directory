@@ -2,12 +2,12 @@ import 'server-only';
 
 import { type IsBookmarkedBatchReturns, type IsFollowingBatchReturns } from '@heyclaude/data-layer';
 import {
-  type bookmarksModel,
-  type content_category,
-  type jobsModel,
-  type user_tier,
-} from '@heyclaude/data-layer/prisma';
-import { UserTier } from '@heyclaude/data-layer/prisma';
+} from '@prisma/client';
+import { Prisma, user_tier as UserTier } from '@prisma/client';
+import type { content_category, user_tier } from '@prisma/client';
+
+type bookmarksModel = Prisma.bookmarksGetPayload<{}>;
+type jobsModel = Prisma.jobsGetPayload<{}>;
 import {
   type GetAccountDashboardReturns,
   type GetCollectionDetailWithItemsReturns,
@@ -62,7 +62,7 @@ export async function getUserBookmarksForCollections(userId: string): Promise<bo
   // OPTIMIZATION: Use getUserCompleteData directly instead of wrapper
   const completeData = await getUserCompleteData(userId);
   const bookmarksArray = completeData?.user_library?.bookmarks ?? [];
-    return bookmarksArray
+  return bookmarksArray
     .filter(
       (
         b: (typeof bookmarksArray)[number]
@@ -79,15 +79,25 @@ export async function getUserBookmarksForCollections(userId: string): Promise<bo
         b.content_slug !== null &&
         b.created_at !== null
     )
-    .map((b: { content_slug: string; content_type: string; created_at: string; id: string; updated_at?: string; user_id: string; notes?: string | null }) => ({
-      content_slug: b.content_slug,
-      content_type: b.content_type as bookmarksModel['content_type'], // RPC returns string, Prisma expects enum
-      created_at: new Date(b.created_at), // Convert string to Date for Prisma type
-      id: b.id,
-      notes: b.notes ?? null,
-      updated_at: b.updated_at ? new Date(b.updated_at) : new Date(b.created_at), // Convert string to Date for Prisma type, fallback to created_at
-      user_id: b.user_id,
-    }));
+    .map(
+      (b: {
+        content_slug: string;
+        content_type: string;
+        created_at: string;
+        id: string;
+        updated_at?: string;
+        user_id: string;
+        notes?: string | null;
+      }) => ({
+        content_slug: b.content_slug,
+        content_type: b.content_type as bookmarksModel['content_type'], // RPC returns string, Prisma expects enum
+        created_at: new Date(b.created_at), // Convert string to Date for Prisma type
+        id: b.id,
+        notes: b.notes ?? null,
+        updated_at: b.updated_at ? new Date(b.updated_at) : new Date(b.created_at), // Convert string to Date for Prisma type, fallback to created_at
+        user_id: b.user_id,
+      })
+    );
 }
 
 /**

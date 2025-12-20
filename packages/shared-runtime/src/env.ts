@@ -19,11 +19,11 @@ const envCache = new Map<string, string | undefined>();
  * NEXT_PUBLIC_* variables must be explicitly referenced for Next.js to inline them.
  * Next.js replaces `process.env.NEXT_PUBLIC_X` at build time, but NOT dynamic access
  * like `process.env[name]` or `{...process.env}`.
- * 
+ *
  * This object provides explicit references that Next.js can inline at build time.
  * IMPORTANT: Must use bracket notation for TypeScript index signature compliance,
  * but Next.js still inlines these because the string literals are statically analyzable.
- * 
+ *
  * MAINTENANCE: When adding new NEXT_PUBLIC_* env vars, add them here too!
  * @see https://nextjs.org/docs/basic-features/environment-variables#exposing-environment-variables-to-the-browser
  */
@@ -119,10 +119,11 @@ export function getBooleanEnvVar(name: string, fallback?: boolean): boolean | un
 export function getEnvObject(): EnvRecord {
   // Check if we're in build phase - during build, Next.js may have inlined truncated values
   // Read directly from process.env instead of using inlined NEXT_PUBLIC_ENV_VARS
-  const isBuildPhase = typeof process !== 'undefined' && process.env && (
-    process.env['NEXT_PHASE'] === 'phase-production-build' ||
-    process.env['NEXT_PHASE'] === 'phase-production-server'
-  );
+  const isBuildPhase =
+    typeof process !== 'undefined' &&
+    process.env &&
+    (process.env['NEXT_PHASE'] === 'phase-production-build' ||
+      process.env['NEXT_PHASE'] === 'phase-production-server');
 
   // During build, read directly from process.env to avoid using truncated inlined values
   // At runtime, use inlined values for client-side compatibility

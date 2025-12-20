@@ -14,14 +14,14 @@ describe('useIsomorphicLayoutEffect', () => {
   it('should be useLayoutEffect in browser environment', () => {
     // In browser (window is defined), should use useLayoutEffect
     expect(typeof window).not.toBe('undefined');
-    
+
     // The hook should be defined
     expect(typeof useIsomorphicLayoutEffect).toBe('function');
-    
+
     // Test that it executes (useLayoutEffect behavior)
     const effect = vi.fn();
     const cleanup = vi.fn();
-    
+
     renderHook(() => {
       useIsomorphicLayoutEffect(() => {
         effect();

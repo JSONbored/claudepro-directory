@@ -1,6 +1,6 @@
 /**
  * API Versioning Configuration
- * 
+ *
  * Centralized versioning strategy for API routes.
  * All routes should use the current API version.
  */
@@ -12,7 +12,7 @@ export const API_VERSION = 'v1';
 
 /**
  * API version prefix for routes
- * 
+ *
  * @example
  * ```ts
  * route: `${API_VERSION_PREFIX}/status`
@@ -28,10 +28,10 @@ export const API_BASE_PATH = '/api';
 
 /**
  * Get versioned route path
- * 
+ *
  * @param path - Route path without /api prefix (e.g., 'status', 'content/sitewide')
  * @returns Versioned route path (e.g., '/api/v1/status')
- * 
+ *
  * @example
  * ```ts
  * const route = getVersionedRoute('status');

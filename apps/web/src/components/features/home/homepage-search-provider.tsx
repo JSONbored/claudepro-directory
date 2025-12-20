@@ -23,7 +23,7 @@ interface HomepageSearchProviderProps {
 
 /**
  * HomepageSearchProvider - Provides SearchProvider context for entire homepage
- * 
+ *
  * Wraps both hero and content sections so search functionality is available everywhere.
  */
 export function HomepageSearchProvider({ children }: HomepageSearchProviderProps) {
@@ -40,7 +40,7 @@ export function HomepageSearchProvider({ children }: HomepageSearchProviderProps
     async (query: string, filters: FilterState) => {
       const searchStart = Date.now();
       const trimmedQuery = query.trim();
-      
+
       // OPTIMIZATION: Only log in development to reduce production overhead
       if (process.env.NODE_ENV === 'development') {
         logClientInfo(
@@ -56,7 +56,7 @@ export function HomepageSearchProvider({ children }: HomepageSearchProviderProps
           }
         );
       }
-      
+
       try {
         const results = await searchFunction(query, filters);
 
@@ -111,7 +111,7 @@ export function HomepageSearchProvider({ children }: HomepageSearchProviderProps
       } catch (error) {
         // Always log errors (even in production)
         const normalized = normalizeError(error, 'handleSearch failed');
-        
+
         logClientError(
           '[HomepageSearchProvider] handleSearch error',
           normalized,
@@ -126,7 +126,7 @@ export function HomepageSearchProvider({ children }: HomepageSearchProviderProps
             timestamp: Date.now(),
           }
         );
-        
+
         throw normalized;
       }
     },
@@ -134,11 +134,7 @@ export function HomepageSearchProvider({ children }: HomepageSearchProviderProps
   );
 
   return (
-    <SearchProvider
-      onSearch={handleSearch}
-      defaultQuery=""
-      defaultFilters={{}}
-    >
+    <SearchProvider onSearch={handleSearch} defaultQuery="" defaultFilters={{}}>
       {children}
     </SearchProvider>
   );

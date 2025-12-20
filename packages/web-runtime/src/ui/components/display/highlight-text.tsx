@@ -61,10 +61,7 @@ function HighlightText({
         color: '#FFFFFF',
         ...props.style,
       }}
-      className={cn(
-        'relative inline-block',
-        className
-      )}
+      className={cn('relative inline-block', className)}
       {...props}
     >
       {text}

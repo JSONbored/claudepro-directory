@@ -2,7 +2,7 @@
 
 /**
  * Profile Stats Card Component
- * 
+ *
  * Client component for user profile stats with animated counters
  */
 

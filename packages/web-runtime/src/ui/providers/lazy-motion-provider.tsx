@@ -1,11 +1,11 @@
 /**
  * LazyMotion Provider
- * 
+ *
  * Reduces Motion.dev bundle size from ~34kb to ~4.6kb for initial render.
  * Features are loaded on-demand, improving Core Web Vitals and initial load performance.
- * 
+ *
  * @module web-runtime/ui/providers/lazy-motion-provider
- * 
+ *
  * @example
  * ```tsx
  * // In root layout
@@ -42,16 +42,16 @@ export interface LazyMotionProviderProps {
 
 /**
  * Provider component that wraps the app with LazyMotion for bundle size optimization.
- * 
+ *
  * This reduces the initial Motion.dev bundle from ~34kb to ~4.6kb by lazy-loading
  * animation features. Features are loaded on-demand, improving initial page load.
- * 
+ *
  * **Important:** Existing `motion` imports will continue to work. For new components,
  * consider using `m` from `motion/react-m` for even better code splitting.
- * 
+ *
  * @param props - Provider props
  * @returns LazyMotion wrapper component
- * 
+ *
  * @see https://motion.dev/docs/react/lazy-motion
  */
 export function LazyMotionProvider({

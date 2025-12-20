@@ -6,7 +6,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks/use-copy-to-clipboard';
 import { Copy, Check, AlertCircle, RefreshCw } from '@heyclaude/web-runtime/icons';
@@ -47,13 +47,13 @@ function ErrorCodeBlock({ content }: { content: string }) {
 
   return (
     <div className="relative">
-      <pre className="max-w-full break-all whitespace-pre-wrap rounded-lg border border-border bg-background/50 p-3 pr-10 text-xs text-destructive">
+      <pre className="border-border bg-background/50 text-destructive max-w-full rounded-lg border p-3 pr-10 text-xs break-all whitespace-pre-wrap">
         {content}
       </pre>
       <Button
         variant="ghost"
         size="sm"
-        className="absolute right-2 top-2 h-6 w-6 p-4"
+        className="absolute top-2 right-2 h-6 w-6 p-4"
         onClick={() => copy(content)}
         aria-label={copied ? 'Copied!' : 'Copy error message'}
       >
@@ -98,7 +98,7 @@ export function SegmentErrorFallback({
           <CardHeader>
             <div className="mb-4 flex justify-center">
               <motion.div
-                className="rounded-full bg-destructive/10 p-3"
+                className="bg-destructive/10 rounded-full p-3"
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ ...SPRING.bouncy, delay: 0.1 }}
@@ -112,7 +112,7 @@ export function SegmentErrorFallback({
           <CardContent className="space-y-6">
             {onReset ? (
               <motion.div
-                className={`flex flex-col sm:flex-row gap-3 sm:gap-4`}
+                className={`flex flex-col gap-3 sm:flex-row sm:gap-4`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ ...SPRING.smooth, delay: 0.3 }}
@@ -130,7 +130,7 @@ export function SegmentErrorFallback({
             ) : null}
             {links.length > 0 && (
               <motion.div
-                className={`flex flex-col sm:flex-row gap-3 sm:gap-4`}
+                className={`flex flex-col gap-3 sm:flex-row sm:gap-4`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ ...SPRING.smooth, delay: 0.3 }}
@@ -156,12 +156,12 @@ export function SegmentErrorFallback({
             )}
             {isDevelopment && error ? (
               <motion.div
-                className="card-base border-dashed border-muted-foreground/30 bg-muted/30 p-4"
+                className="card-base border-muted-foreground/30 bg-muted/30 border-dashed p-4"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ ...SPRING.smooth, delay: 0.4 }}
               >
-                <p className="mb-2 text-muted-foreground text-sm font-semibold">Error details</p>
+                <p className="text-muted-foreground mb-2 text-sm font-semibold">Error details</p>
                 <ErrorCodeBlock content={error.message} />
                 {error.stack ? (
                   <details className="mt-2 text-xs">
@@ -172,7 +172,7 @@ export function SegmentErrorFallback({
                   </details>
                 ) : null}
                 {error.digest ? (
-                  <p className="mt-2 break-words font-mono text-muted-foreground text-xs">
+                  <p className="text-muted-foreground mt-2 font-mono text-xs break-words">
                     Digest: {error.digest}
                   </p>
                 ) : null}

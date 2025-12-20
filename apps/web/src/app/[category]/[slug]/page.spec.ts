@@ -26,7 +26,7 @@ test.describe('Content Detail Page', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (navigation handled per test with different category/slug combinations)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -58,7 +58,7 @@ test.describe('Content Detail Page', () => {
     // This tests that invalid categories trigger notFound()
     // The component checks isValidCategory() and calls notFound() if invalid
     const response = await page.goto('/invalid-category-123/test-slug');
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -92,9 +92,9 @@ test.describe('Content Detail Page', () => {
     // This tests that null coreData triggers notFound()
     // The component checks if (!coreData) and calls notFound()
     const invalidSlug = 'non-existent-content-12345';
-    
+
     const response = await page.goto(`/agents/${invalidSlug}`);
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -108,9 +108,15 @@ test.describe('Content Detail Page', () => {
 
     // Page should render or show error boundary, but not crash
     const main = page.getByRole('main').or(page.locator('body'));
-    const hasMain = await main.first().isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasMain = await main
+      .first()
+      .isVisible()
+      .catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error boundary, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -119,9 +125,9 @@ test.describe('Content Detail Page', () => {
     // This tests that null fullItem triggers notFound()
     // The component checks if (!fullItem) and calls notFound()
     const invalidSlug = 'non-existent-content-12345';
-    
+
     const response = await page.goto(`/agents/${invalidSlug}`);
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -138,7 +144,10 @@ test.describe('Content Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -154,7 +163,10 @@ test.describe('Content Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -170,7 +182,10 @@ test.describe('Content Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -186,7 +201,10 @@ test.describe('Content Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -199,15 +217,15 @@ test.describe('Content Detail Page', () => {
     // Find bookmark/pin button in DetailHeaderActions
     const bookmarkButton = page.getByRole('button', { name: /bookmark|pin|unpin/i }).first();
     const hasBookmarkButton = await bookmarkButton.isVisible().catch(() => false);
-    
+
     if (hasBookmarkButton) {
       await bookmarkButton.click();
       await page.waitForTimeout(500);
-      
+
       // Should show toast
       const toast = page.getByText(/pinned|unpinned|bookmarked|saved/i);
       const hasToast = await toast.isVisible().catch(() => false);
-      
+
       if (hasToast) {
         await expect(toast).toBeVisible();
       }
@@ -222,15 +240,15 @@ test.describe('Content Detail Page', () => {
     // Find share/copy button
     const shareButton = page.getByRole('button', { name: /share|copy link/i }).first();
     const hasShareButton = await shareButton.isVisible().catch(() => false);
-    
+
     if (hasShareButton) {
       await shareButton.click();
       await page.waitForTimeout(500);
-      
+
       // Should show toast
       const toast = page.getByText(/copied|link copied/i);
       const hasToast = await toast.isVisible().catch(() => false);
-      
+
       if (hasToast) {
         await expect(toast).toBeVisible();
       }
@@ -246,7 +264,7 @@ test.describe('Content Detail Page', () => {
     // Find download button
     const downloadButton = page.getByRole('button', { name: /download|\.mcpb|\.zip/i }).first();
     const hasDownloadButton = await downloadButton.isVisible().catch(() => false);
-    
+
     if (hasDownloadButton) {
       // Monitor network requests for download
       const downloadRequests: string[] = [];
@@ -255,14 +273,14 @@ test.describe('Content Detail Page', () => {
           downloadRequests.push(request.url());
         }
       });
-      
+
       await downloadButton.click();
       await page.waitForTimeout(1000);
-      
+
       // Should trigger download request or show toast
       const toast = page.getByText(/download|downloading/i);
       const hasToast = await toast.isVisible().catch(() => false);
-      
+
       // Either download request triggered or toast shown
       expect(downloadRequests.length > 0 || hasToast).toBe(true);
     }
@@ -276,30 +294,30 @@ test.describe('Content Detail Page', () => {
     // Find "More actions" menu button
     const moreMenuButton = page.getByRole('button', { name: /more|menu/i }).first();
     const hasMoreMenu = await moreMenuButton.isVisible().catch(() => false);
-    
+
     if (hasMoreMenu) {
       await moreMenuButton.click();
       await page.waitForTimeout(300);
-      
+
       // Check for share options in dropdown
       const twitterOption = page.getByText(/twitter|share on x/i);
       const linkedinOption = page.getByText(/linkedin/i);
       const copyLinkOption = page.getByText(/copy link/i);
-      
+
       const hasTwitter = await twitterOption.isVisible().catch(() => false);
       const hasLinkedIn = await linkedinOption.isVisible().catch(() => false);
       const hasCopyLink = await copyLinkOption.isVisible().catch(() => false);
-      
+
       // At least one share option should be available
       if (hasTwitter || hasLinkedIn || hasCopyLink) {
         // Test copy link option
         if (hasCopyLink) {
           await copyLinkOption.click();
           await page.waitForTimeout(500);
-          
+
           const toast = page.getByText(/copied|link copied/i);
           const hasToast = await toast.isVisible().catch(() => false);
-          
+
           if (hasToast) {
             await expect(toast).toBeVisible();
           }
@@ -316,26 +334,26 @@ test.describe('Content Detail Page', () => {
     // Find "More actions" menu button
     const moreMenuButton = page.getByRole('button', { name: /more|menu/i }).first();
     const hasMoreMenu = await moreMenuButton.isVisible().catch(() => false);
-    
+
     if (hasMoreMenu) {
       await moreMenuButton.click();
       await page.waitForTimeout(300);
-      
+
       // Check for copy options
       const copyForAIOption = page.getByText(/copy for ai|llms\.txt/i);
       const copyMarkdownOption = page.getByText(/copy markdown/i);
-      
+
       const hasCopyForAI = await copyForAIOption.isVisible().catch(() => false);
       const hasCopyMarkdown = await copyMarkdownOption.isVisible().catch(() => false);
-      
+
       // Test copy markdown if available
       if (hasCopyMarkdown) {
         await copyMarkdownOption.click();
         await page.waitForTimeout(500);
-        
+
         const toast = page.getByText(/copied markdown/i);
         const hasToast = await toast.isVisible().catch(() => false);
-        
+
         if (hasToast) {
           await expect(toast).toBeVisible();
         }
@@ -355,7 +373,10 @@ test.describe('Content Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -371,7 +392,10 @@ test.describe('Content Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -387,7 +411,10 @@ test.describe('Content Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -403,7 +430,10 @@ test.describe('Content Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -427,7 +457,7 @@ test.describe('Content Detail Page', () => {
     // This tests that generateMetadata handles invalid categories
     // The function checks isValidCategory and calls generatePageMetadata with category
     const response = await page.goto('/invalid-category-123/test-slug');
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -444,7 +474,10 @@ test.describe('Content Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -452,7 +485,7 @@ test.describe('Content Detail Page', () => {
     // This tests that placeholder params are handled
     // The function returns [{ category: 'agents', slug: 'placeholder' }] when no params found
     const response = await page.goto('/agents/placeholder');
-    
+
     // Should return 404 for placeholder
     expect(response?.status()).toBe(404);
   });
@@ -469,7 +502,10 @@ test.describe('Content Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -485,7 +521,10 @@ test.describe('Content Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -501,7 +540,10 @@ test.describe('Content Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -517,7 +559,10 @@ test.describe('Content Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -525,16 +570,16 @@ test.describe('Content Detail Page', () => {
     // This tests that Loading component is shown during Suspense
     // The component uses Suspense with Loading fallback
     await page.goto('/agents/test-agent');
-    
+
     // Check for loading state (may flash quickly)
     const loading = page.locator('[data-loading], [aria-busy="true"]');
     const hasLoading = await loading.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main').or(page.locator('body'));
     await expect(main.first()).toBeVisible();
   });
@@ -548,9 +593,15 @@ test.describe('Content Detail Page', () => {
 
     // Page should render or show error boundary, but not crash
     const main = page.getByRole('main').or(page.locator('body'));
-    const hasMain = await main.first().isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasMain = await main
+      .first()
+      .isVisible()
+      .catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error boundary, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });

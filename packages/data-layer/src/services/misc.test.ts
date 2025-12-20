@@ -1,14 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import type { MockPrismaClient } from '../test-utils/prisma-mock.ts';
 import { MiscService } from './misc.ts';
+import { prisma } from '../prisma/client.ts';
+import type { PrismaClient } from '@prisma/client';
 
-// Mock the prisma singleton with Prismock (async to avoid Node.js TS processing issue)
-vi.mock('../prisma/client.ts', async () => {
-  const { setupPrismockMockAsync } = await import('../test-utils/prisma-mock.ts');
-  return {
-    prisma: await setupPrismockMockAsync(),
-  };
-});
+// Prismock is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from '../prisma/client.ts' will automatically use PrismockClient
 
 // Mock the RPC error logging utility
 vi.mock('../utils/rpc-error-logging.ts', () => ({
@@ -22,15 +18,50 @@ vi.mock('../utils/request-cache.ts', () => ({
 
 describe('MiscService', () => {
   let miscService: MiscService;
-  let prismock: MockPrismaClient;
+  let prismock: PrismaClient;
+  let queryRawUnsafeSpy: ReturnType<typeof vi.fn>;
+
+  /**
+   * Helper to safely mock Prismock model methods
+   */
+  function mockPrismockMethod<T>(
+    model: any,
+    method: string,
+    returnValue: T
+  ): ReturnType<typeof vi.fn> {
+    if (!model) {
+      throw new Error(`Prismock model does not exist - check if model name matches schema.prisma`);
+    }
+    const mockFn = vi.fn().mockResolvedValue(returnValue as any);
+    model[method] = mockFn;
+    return mockFn;
+  }
 
   beforeEach(async () => {
-    // Get the mocked prisma instance (Prismock)
-    const { prisma } = await import('../prisma/client.ts');
-    prismock = prisma as MockPrismaClient;
+    // Get the prisma instance (automatically PrismockClient via __mocks__/@prisma/client.ts)
+    prismock = prisma;
 
     // Reset Prismock data before each test
-    prismock.reset();
+    if ('reset' in prismock && typeof prismock.reset === 'function') {
+      prismock.reset();
+    }
+
+    // Prismock doesn't support $queryRawUnsafe, so we add it as a mock function
+    queryRawUnsafeSpy = vi.fn().mockResolvedValue([]);
+    (prismock as any).$queryRawUnsafe = queryRawUnsafeSpy;
+
+    // Ensure Prismock models are initialized
+    void prismock.notifications;
+    void prismock.announcements;
+    void prismock.contact_commands;
+    void prismock.form_field_configs;
+    void prismock.content_submissions;
+    void prismock.content;
+    void prismock.sponsored_content;
+    void prismock.app_settings;
+    void prismock.email_engagement_summary;
+    void prismock.email_blocklist;
+    void prismock.webhook_events;
 
     miscService = new MiscService();
   });
@@ -46,9 +77,7 @@ describe('MiscService', () => {
         },
       ];
 
-      vi.mocked(prismock.notifications.findMany).mockResolvedValue(
-        mockNotifications as any
-      );
+      mockPrismockMethod(prismock.notifications, 'findMany', mockNotifications);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -62,7 +91,7 @@ describe('MiscService', () => {
     });
 
     it('should filter dismissed notifications', async () => {
-      vi.mocked(prismock.notifications.findMany).mockResolvedValue([]);
+      mockPrismockMethod(prismock.notifications, 'findMany', []);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -89,9 +118,7 @@ describe('MiscService', () => {
         active: true,
       };
 
-      vi.mocked(prismock.announcements.findFirst).mockResolvedValue(
-        mockAnnouncement as any
-      );
+      mockPrismockMethod(prismock.announcements, 'findFirst', mockAnnouncement);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -103,7 +130,7 @@ describe('MiscService', () => {
     });
 
     it('should return null when no active announcement', async () => {
-      vi.mocked(prismock.announcements.findFirst).mockResolvedValue(null);
+      mockPrismockMethod(prismock.announcements, 'findFirst', null);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -131,9 +158,7 @@ describe('MiscService', () => {
         },
       ];
 
-      vi.mocked(prismock.contact_commands.findMany).mockResolvedValue(
-        mockCommands as any
-      );
+      mockPrismockMethod(prismock.contact_commands, 'findMany', mockCommands);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -154,40 +179,91 @@ describe('MiscService', () => {
 
   describe('getFormFieldConfig', () => {
     it('should return form field config', async () => {
-      const mockData = {
-        fields: [],
-      };
+      // getFormFieldConfig uses prisma.form_field_configs.findMany with select
+      const mockConfigs = [
+        {
+          field_name: 'title',
+          field_label: 'Title',
+          field_type: 'text',
+          required: true,
+          placeholder: 'Enter title',
+          help_text: 'The title of your submission',
+          default_value: null,
+          grid_column: null,
+          icon_name: null,
+          icon_position: null,
+          config: null,
+          field_group: 'basic',
+          display_order: 1,
+        },
+      ];
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      mockPrismockMethod(prismock.form_field_configs, 'findMany', mockConfigs);
+
+      const { withSmartCache } = await import('../utils/request-cache.ts');
+      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
 
       const result = await miscService.getFormFieldConfig({
         p_form_type: 'content_submission',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_form_field_config')
-      );
-      expect(result).toEqual(mockData);
+      expect(prismock.form_field_configs.findMany).toHaveBeenCalledWith({
+        where: {
+          form_type: 'content_submission',
+          enabled: true,
+        },
+        select: expect.objectContaining({
+          field_name: true,
+          field_label: true,
+          field_type: true,
+        }),
+        orderBy: [{ field_group: 'asc' }, { display_order: 'asc' }],
+      });
+      expect(result).toHaveProperty('form_type', 'content_submission');
+      expect(result).toHaveProperty('fields');
+      expect(Array.isArray(result.fields)).toBe(true);
+      if (result.fields && result.fields.length > 0) {
+        expect(result.fields[0]).toHaveProperty('name', 'title');
+        expect(result.fields[0]).toHaveProperty('label', 'Title');
+        expect(result.fields[0]).toHaveProperty('type', 'text');
+      }
     });
   });
 
   describe('getSocialProofStats', () => {
     it('should return social proof stats', async () => {
-      const mockData = {
-        contributors: { count: 100, names: [] },
-        submissions: 500,
-        successRate: 0.8,
-        totalUsers: 1000,
-      };
+      // getSocialProofStats uses Prisma queries: count, groupBy, and content.count
+      const mockRecentCount = 50;
+      const mockMonthSubmissions = [
+        { status: 'merged' as const, _count: { id: 40 } },
+        { status: 'pending' as const, _count: { id: 10 } },
+      ];
+      const mockTopContributors = [
+        { author: 'user1@example.com', _count: { id: 5 } },
+        { author: 'user2@example.com', _count: { id: 3 } },
+      ];
+      const mockTotalContent = 1000;
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      mockPrismockMethod(prismock.content_submissions, 'count', mockRecentCount);
+      const groupByMock = vi.fn()
+        .mockResolvedValueOnce(mockMonthSubmissions)
+        .mockResolvedValueOnce(mockTopContributors);
+      prismock.content_submissions.groupBy = groupByMock;
+      mockPrismockMethod(prismock.content, 'count', mockTotalContent);
+
+      const { withSmartCache } = await import('../utils/request-cache.ts');
+      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
 
       const result = await miscService.getSocialProofStats();
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_social_proof_stats')
-      );
-      expect(result).toEqual(mockData);
+      expect(prismock.content_submissions.count).toHaveBeenCalled();
+      expect(prismock.content_submissions.groupBy).toHaveBeenCalledTimes(2);
+      expect(prismock.content.count).toHaveBeenCalled();
+      
+      expect(result).toHaveLength(1);
+      expect(result[0]).toHaveProperty('submission_count', 50);
+      expect(result[0]).toHaveProperty('contributor_count', 2);
+      expect(result[0]).toHaveProperty('total_users', 1000);
     });
   });
 
@@ -198,7 +274,7 @@ describe('MiscService', () => {
         database: 'connected',
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await miscService.getApiHealth();
 
@@ -217,7 +293,7 @@ describe('MiscService', () => {
         timestamp: '2025-12-07T00:00:00Z',
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await miscService.getApiHealthFormatted();
 
@@ -234,7 +310,7 @@ describe('MiscService', () => {
         urls: ['https://example.com/page1', 'https://example.com/page2'],
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await miscService.getSiteUrls();
 
@@ -252,14 +328,16 @@ describe('MiscService', () => {
         meta: {},
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await miscService.getSiteUrlsFormatted({
         p_format: 'json',
       });
 
+      // callRpc formats the SQL as: SELECT * FROM get_site_urls_formatted(p_format => $1)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_site_urls_formatted')
+        expect.stringContaining('get_site_urls_formatted'),
+        'json'
       );
       expect(result).toEqual(mockData);
     });
@@ -271,7 +349,7 @@ describe('MiscService', () => {
         xml: '<?xml version="1.0"?><urlset>...</urlset>',
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await miscService.generateSitemapXml();
 
@@ -284,14 +362,12 @@ describe('MiscService', () => {
 
   describe('getSponsoredContentById', () => {
     it('should return sponsored content', async () => {
+      // getSponsoredContentById only selects content_type, so mock should only return that
       const mockData = {
-        id: 'sponsored-1',
-        content_type: 'agents',
+        content_type: 'agents' as const,
       };
 
-      vi.mocked(prismock.sponsored_content.findUnique).mockResolvedValue(
-        mockData as any
-      );
+      mockPrismockMethod(prismock.sponsored_content, 'findUnique', mockData);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -302,20 +378,21 @@ describe('MiscService', () => {
         where: { id: 'sponsored-1' },
         select: { content_type: true },
       });
+      // getSponsoredContentById returns only content_type (select: { content_type: true })
       expect(result).toEqual({ content_type: 'agents' });
+      expect(result).not.toHaveProperty('id'); // Only content_type is selected
     });
   });
 
   describe('getAppSetting', () => {
     it('should return app setting', async () => {
+      // getAppSetting uses prisma.app_settings.findUnique with select
       const mockData = {
-        key: 'test_key',
-        value: 'test_value',
+        setting_value: { test: 'value' },
+        updated_at: new Date('2024-01-01T00:00:00Z'),
       };
 
-      vi.mocked(prismock.app_settings.findUnique).mockResolvedValue(
-        mockData as any
-      );
+      mockPrismockMethod(prismock.app_settings, 'findUnique', mockData);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -323,7 +400,11 @@ describe('MiscService', () => {
       const result = await miscService.getAppSetting('test_key');
 
       expect(prismock.app_settings.findUnique).toHaveBeenCalledWith({
-        where: { key: 'test_key' },
+        where: { setting_key: 'test_key' },
+        select: {
+          setting_value: true,
+          updated_at: true,
+        },
       });
       expect(result).toEqual(mockData);
     });
@@ -331,40 +412,41 @@ describe('MiscService', () => {
 
   describe('upsertAppSetting', () => {
     it('should upsert app setting (mutation)', async () => {
-      const mockData = {
-        key: 'test_key',
-        value: 'new_value',
+      // upsertAppSetting uses prisma.app_settings.upsert with AppSettingCreateInput
+      const mockSetting = {
+        setting_key: 'test_key',
+        setting_value: { test: 'new_value' },
       };
 
-      vi.mocked(prismock.app_settings.upsert).mockResolvedValue(mockData as any);
+      mockPrismockMethod(prismock.app_settings, 'upsert', mockSetting);
 
-      await miscService.upsertAppSetting('test_key', 'new_value');
+      await miscService.upsertAppSetting(mockSetting);
 
       expect(prismock.app_settings.upsert).toHaveBeenCalledWith({
-        where: { key: 'test_key' },
-        update: { value: 'new_value', updated_at: expect.any(Date) },
-        create: {
-          key: 'test_key',
-          value: 'new_value',
-          created_at: expect.any(Date),
-          updated_at: expect.any(Date),
-        },
+        where: { setting_key: 'test_key' },
+        update: mockSetting,
+        create: mockSetting,
       });
     });
   });
 
   describe('getEmailEngagementSummary', () => {
     it('should return email engagement summary', async () => {
+      // getEmailEngagementSummary uses prisma.email_engagement_summary.findUnique with select (10 fields)
       const mockData = {
         email: 'test@example.com',
-        total_sent: 10,
-        total_opened: 8,
-        total_clicked: 5,
+        emails_sent: 10,
+        emails_delivered: 9,
+        emails_opened: 8,
+        emails_clicked: 5,
+        last_sent_at: new Date('2024-01-01T00:00:00Z'),
+        last_delivered_at: new Date('2024-01-01T00:00:00Z'),
+        last_opened_at: new Date('2024-01-01T00:00:00Z'),
+        last_clicked_at: new Date('2024-01-01T00:00:00Z'),
+        last_bounced_at: null,
       };
 
-      vi.mocked(prismock.email_engagement_summary.findUnique).mockResolvedValue(
-        mockData as any
-      );
+      mockPrismockMethod(prismock.email_engagement_summary, 'findUnique', mockData);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -373,6 +455,11 @@ describe('MiscService', () => {
 
       expect(prismock.email_engagement_summary.findUnique).toHaveBeenCalledWith({
         where: { email: 'test@example.com' },
+        select: expect.objectContaining({
+          email: true,
+          emails_sent: true,
+          emails_delivered: true,
+        }),
       });
       expect(result).toEqual(mockData);
     });
@@ -380,48 +467,63 @@ describe('MiscService', () => {
 
   describe('upsertEmailEngagementSummary', () => {
     it('should upsert email engagement summary (mutation)', async () => {
-      const mockData = {
+      // upsertEmailEngagementSummary uses prisma.email_engagement_summary.upsert with EmailEngagementSummaryCreateInput
+      const mockEngagement = {
         email: 'test@example.com',
-        total_sent: 10,
+        emails_sent: 10,
+        emails_delivered: 9,
+        emails_opened: 8,
+        emails_clicked: 5,
       };
 
-      vi.mocked(prismock.email_engagement_summary.upsert).mockResolvedValue(
-        mockData as any
-      );
+      mockPrismockMethod(prismock.email_engagement_summary, 'upsert', mockEngagement);
 
-      await miscService.upsertEmailEngagementSummary('test@example.com', {
-        total_sent: 10,
+      await miscService.upsertEmailEngagementSummary(mockEngagement);
+
+      expect(prismock.email_engagement_summary.upsert).toHaveBeenCalledWith({
+        where: { email: 'test@example.com' },
+        update: mockEngagement,
+        create: mockEngagement,
       });
-
-      expect(prismock.email_engagement_summary.upsert).toHaveBeenCalled();
     });
   });
 
   describe('upsertEmailBlocklist', () => {
     it('should upsert email blocklist entry (mutation)', async () => {
-      vi.mocked(prismock.email_blocklist.upsert).mockResolvedValue({
+      // upsertEmailBlocklist uses prisma.email_blocklist.upsert with EmailBlocklistCreateInput
+      const mockBlocklistEntry = {
         email: 'blocked@example.com',
-      } as any);
+        reason: 'bounce' as const,
+      };
 
-      await miscService.upsertEmailBlocklist('blocked@example.com', 'bounce');
+      mockPrismockMethod(prismock.email_blocklist, 'upsert', mockBlocklistEntry);
 
-      expect(prismock.email_blocklist.upsert).toHaveBeenCalled();
+      await miscService.upsertEmailBlocklist(mockBlocklistEntry);
+
+      expect(prismock.email_blocklist.upsert).toHaveBeenCalledWith({
+        where: { email: 'blocked@example.com' },
+        update: mockBlocklistEntry,
+        create: mockBlocklistEntry,
+      });
     });
   });
 
   describe('updateWebhookEventStatus', () => {
     it('should update webhook event status (mutation)', async () => {
-      vi.mocked(prismock.webhook_events.updateMany).mockResolvedValue({
-        count: 1,
-      });
+      // After migration: Uses Prisma update instead of $executeRawUnsafe
+      mockPrismockMethod(prismock.webhook_events, 'update', {
+        id: 'webhook-123',
+        processed: true,
+        processed_at: new Date(),
+      } as any);
 
       await miscService.updateWebhookEventStatus('webhook-123');
 
-      expect(prismock.webhook_events.updateMany).toHaveBeenCalledWith({
+      expect(prismock.webhook_events.update).toHaveBeenCalledWith({
         where: { id: 'webhook-123' },
         data: {
-          status: 'processed',
-          updated_at: expect.any(Date),
+          processed: true,
+          processed_at: expect.any(Date),
         },
       });
     });
@@ -435,7 +537,7 @@ describe('MiscService', () => {
         message: 'Test message',
       };
 
-      vi.mocked(prismock.notifications.upsert).mockResolvedValue(mockData as any);
+      mockPrismockMethod(prismock.notifications, 'upsert', mockData);
 
       await miscService.upsertNotification({
         id: 'notif-1',
@@ -454,7 +556,7 @@ describe('MiscService', () => {
         title: 'Test',
       };
 
-      vi.mocked(prismock.notifications.create).mockResolvedValue(mockData as any);
+      mockPrismockMethod(prismock.notifications, 'create', mockData);
 
       await miscService.insertNotification({
         title: 'Test',
@@ -467,24 +569,27 @@ describe('MiscService', () => {
 
   describe('getWebhookEventBySvixId', () => {
     it('should return webhook event by Svix ID', async () => {
+      // getWebhookEventBySvixId uses prisma.webhook_events.findFirst with select { id: true }
       const mockData = {
         id: 'webhook-1',
-        svix_id: 'svix-123',
-        source: 'polar',
       };
 
-      vi.mocked(prismock.webhook_events.findFirst).mockResolvedValue(mockData as any);
+      mockPrismockMethod(prismock.webhook_events, 'findFirst', mockData);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
 
-      const result = await miscService.getWebhookEventBySvixId('svix-123', 'polar');
+      const result = await miscService.getWebhookEventBySvixId({
+        p_svix_id: 'svix-123',
+        p_source: 'polar',
+      });
 
       expect(prismock.webhook_events.findFirst).toHaveBeenCalledWith({
         where: {
           svix_id: 'svix-123',
           source: 'polar',
         },
+        select: { id: true },
       });
       expect(result).toEqual(mockData);
     });
@@ -497,7 +602,7 @@ describe('MiscService', () => {
         svix_id: 'svix-123',
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       await miscService.insertWebhookEvent({
         p_svix_id: 'svix-123',
@@ -505,23 +610,30 @@ describe('MiscService', () => {
         p_payload: {},
       });
 
+      // callRpc formats the SQL as: SELECT * FROM insert_webhook_event(p_svix_id => $1, p_source => $2, p_payload => $3)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('insert_webhook_event')
+        expect.stringContaining('insert_webhook_event'),
+        'svix-123',
+        'polar',
+        {}
       );
     });
   });
 
   describe('handlePolarWebhookRpc', () => {
     it('should handle Polar webhook RPC (mutation)', async () => {
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(undefined as any);
+      queryRawUnsafeSpy.mockResolvedValue(undefined as any);
 
-      await miscService.handlePolarWebhookRpc({
-        p_event_type: 'subscription.created',
-        p_payload: {},
+      await miscService.handlePolarWebhookRpc('handle_polar_webhook', {
+        webhook_id: 'webhook-123',
+        webhook_data: {},
       });
 
+      // callRpc formats the SQL as: SELECT * FROM handle_polar_webhook(webhook_id => $1, webhook_data => $2)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('handle_polar_webhook')
+        expect.stringContaining('handle_polar_webhook'),
+        'webhook-123',
+        {}
       );
     });
   });

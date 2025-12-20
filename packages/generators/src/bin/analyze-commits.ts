@@ -24,10 +24,8 @@ import { runAnalyzeCommits } from '../commands/analyze-commits.ts';
 import { logger } from '../toolkit/logger.ts';
 
 runAnalyzeCommits().catch((error) => {
-  logger.error(
-    '❌ Unhandled error in main',
-    normalizeError(error, 'Commit analysis failed'),
-    { command: 'analyze-commits' }
-  );
+  logger.error('❌ Unhandled error in main', normalizeError(error, 'Commit analysis failed'), {
+    command: 'analyze-commits',
+  });
   process.exit(1);
 });

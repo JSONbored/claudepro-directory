@@ -37,12 +37,12 @@ export async function pgmqSend(
 ): Promise<{ msg_id: bigint } | null> {
   try {
     const query = `SELECT * FROM pgmq_public.send($1, $2, $3)`;
-    const result = await prisma.$queryRawUnsafe(
+    const result = (await prisma.$queryRawUnsafe(
       query,
       queueName,
       JSON.stringify(msg),
       options?.sleepSeconds ?? 0
-    ) as Array<{ msg_id: bigint }> | null;
+    )) as Array<{ msg_id: bigint }> | null;
 
     if (Array.isArray(result) && result.length > 0) {
       return result[0] ?? null;
@@ -71,12 +71,12 @@ export async function pgmqRead<T = Record<string, unknown>>(
   try {
     // pgmq_public.read uses 'sleep_seconds' (visibility timeout) and 'n' (batch size)
     const query = `SELECT * FROM pgmq_public.read($1, $2, $3)`;
-    const result = await prisma.$queryRawUnsafe(
+    const result = (await prisma.$queryRawUnsafe(
       query,
       queueName,
       options?.vt ?? 30,
       options?.qty ?? 10
-    ) as Array<{
+    )) as Array<{
       msg_id: bigint;
       read_ct: number;
       enqueued_at: string;
@@ -85,16 +85,18 @@ export async function pgmqRead<T = Record<string, unknown>>(
     }> | null;
 
     if (result && result.length > 0) {
-      return result.map((msg: {
-        msg_id: bigint;
-        read_ct: number;
-        enqueued_at: string;
-        vt: string;
-        message: Record<string, unknown>;
-      }) => ({
-        ...msg,
-        message: msg.message as T,
-      }));
+      return result.map(
+        (msg: {
+          msg_id: bigint;
+          read_ct: number;
+          enqueued_at: string;
+          vt: string;
+          message: Record<string, unknown>;
+        }) => ({
+          ...msg,
+          message: msg.message as T,
+        })
+      );
     }
 
     return null;
@@ -117,11 +119,7 @@ export async function pgmqRead<T = Record<string, unknown>>(
 export async function pgmqDelete(queueName: string, msgId: bigint): Promise<boolean | null> {
   try {
     const query = `SELECT * FROM pgmq_public.delete($1, $2)`;
-    const result = await prisma.$queryRawUnsafe(
-      query,
-      queueName,
-      msgId
-    ) as Array<boolean> | null;
+    const result = (await prisma.$queryRawUnsafe(query, queueName, msgId)) as Array<boolean> | null;
 
     if (Array.isArray(result) && result.length > 0) {
       return result[0] ?? null;
@@ -141,23 +139,16 @@ export async function pgmqDelete(queueName: string, msgId: bigint): Promise<bool
  * @param msgIds - Array of message IDs to delete
  * @returns Number of successfully deleted messages
  */
-export async function pgmqDeleteBatch(
-  queueName: string,
-  msgIds: bigint[]
-): Promise<number> {
+export async function pgmqDeleteBatch(queueName: string, msgIds: bigint[]): Promise<number> {
   let deleted = 0;
 
   // Process in chunks to avoid overwhelming the database
   const BATCH_SIZE = 10;
   for (let i = 0; i < msgIds.length; i += BATCH_SIZE) {
     const chunk = msgIds.slice(i, i + BATCH_SIZE);
-    const results = await Promise.allSettled(
-      chunk.map((msgId) => pgmqDelete(queueName, msgId))
-    );
+    const results = await Promise.allSettled(chunk.map((msgId) => pgmqDelete(queueName, msgId)));
 
-    deleted += results.filter(
-      (r) => r.status === 'fulfilled' && r.value === true
-    ).length;
+    deleted += results.filter((r) => r.status === 'fulfilled' && r.value === true).length;
   }
 
   return deleted;

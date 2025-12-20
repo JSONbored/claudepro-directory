@@ -3,8 +3,11 @@
  * All stats/recent/contributors from data layer with edge caching.
  */
 
-import { ContentCategory, SubmissionType } from '@heyclaude/data-layer/prisma';
-import { type content_category, type submission_type } from '@heyclaude/data-layer/prisma';
+import {
+  content_category as ContentCategory,
+  submission_type as SubmissionType,
+} from '@prisma/client';
+import { type content_category, type submission_type } from '@prisma/client';
 import { getSubmissionDashboard } from '@heyclaude/web-runtime/data/account';
 import { getContentTemplates } from '@heyclaude/web-runtime/data/content/templates';
 import { getSubmissionFormFields } from '@heyclaude/web-runtime/data/forms/submission-form-fields';

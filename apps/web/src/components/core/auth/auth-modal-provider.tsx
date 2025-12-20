@@ -55,7 +55,11 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
   const { value: isOpen, setTrue: setIsOpenTrue, setValue: setIsOpen } = useBoolean();
   const [valueProposition, setValueProposition] = useState<string>('Sign in to continue');
   const [redirectTo, setRedirectTo] = useState<string | undefined>();
-  const { value: shouldReset, setTrue: setShouldResetTrue, setFalse: setShouldResetFalse } = useBoolean();
+  const {
+    value: shouldReset,
+    setTrue: setShouldResetTrue,
+    setFalse: setShouldResetFalse,
+  } = useBoolean();
   const isClient = useIsClient();
 
   // Lazy-load pathname and searchParams only when needed (inside openAuthModal)
@@ -110,13 +114,16 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
   }, [setShouldResetTrue]);
 
   // Reset state after animation completes (300ms) when modal closes
-  useTimeout(() => {
-    if (shouldReset) {
-      setValueProposition('Sign in to continue');
-      setRedirectTo(undefined);
-      setShouldResetFalse();
-    }
-  }, shouldReset ? 300 : null);
+  useTimeout(
+    () => {
+      if (shouldReset) {
+        setValueProposition('Sign in to continue');
+        setRedirectTo(undefined);
+        setShouldResetFalse();
+      }
+    },
+    shouldReset ? 300 : null
+  );
 
   const contextValue: AuthModalContextType = {
     openAuthModal,

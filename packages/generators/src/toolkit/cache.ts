@@ -212,9 +212,10 @@ export function printCache(): void {
       time: new Date(entry.timestamp).toLocaleString(),
       ...(entry.metadata?.reason && { reason: entry.metadata.reason }),
       ...(entry.metadata?.duration && { duration: `${entry.metadata.duration}ms` }),
-      ...(entry.metadata?.files && entry.metadata.files.length > 0 && {
-        files: entry.metadata.files.join(', '),
-      }),
+      ...(entry.metadata?.files &&
+        entry.metadata.files.length > 0 && {
+          files: entry.metadata.files.join(', '),
+        }),
     });
   }
 }

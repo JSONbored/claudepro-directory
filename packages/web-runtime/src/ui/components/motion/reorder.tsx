@@ -1,11 +1,11 @@
 /**
  * Reorder Components
- * 
+ *
  * Drag-to-reorder list components for creating reorderable lists like tabs, todo items,
  * or collection items. Handles layout animations automatically.
- * 
+ *
  * @module web-runtime/ui/components/motion/reorder
- * 
+ *
  * @example
  * ```tsx
  * function ReorderableList({ items, onReorder }) {
@@ -104,9 +104,9 @@ export interface ReorderItemProps {
 
 /**
  * Group component for reorderable lists.
- * 
+ *
  * Wraps Reorder.Item components and manages the reordering state.
- * 
+ *
  * @see https://motion.dev/docs/react/reorder
  */
 export function ReorderGroup({
@@ -136,9 +136,9 @@ export function ReorderGroup({
 
 /**
  * Item component for reorderable lists.
- * 
+ *
  * Represents a single item in a reorderable list. Must be a child of ReorderGroup.
- * 
+ *
  * @see https://motion.dev/docs/react/reorder
  */
 export function ReorderItem({

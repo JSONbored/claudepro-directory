@@ -17,10 +17,12 @@ interface HeroSearchConnectionContextValue {
   /** Set search focus state */
   setSearchFocused: (focused: boolean) => void;
   /** Search props for rendering search in hero */
-  searchProps?: Omit<UnifiedSearchProps, 'placeholder'> & {
-    placeholder?: string;
-    onFocusChange?: (isFocused: boolean) => void;
-  } | undefined;
+  searchProps?:
+    | (Omit<UnifiedSearchProps, 'placeholder'> & {
+        placeholder?: string;
+        onFocusChange?: (isFocused: boolean) => void;
+      })
+    | undefined;
   /** Set search props */
   setSearchProps: (props: HeroSearchConnectionContextValue['searchProps']) => void;
 }

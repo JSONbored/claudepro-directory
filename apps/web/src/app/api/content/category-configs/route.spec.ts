@@ -45,7 +45,9 @@ test.describe('GET /api/content/category-configs', () => {
 
     if (response.status() === 200) {
       expect(response.headers()['x-generated-by']).toBeDefined();
-      expect(response.headers()['x-generated-by']).toContain('prisma.rpc.get_category_configs_with_features');
+      expect(response.headers()['x-generated-by']).toContain(
+        'prisma.rpc.get_category_configs_with_features'
+      );
     }
   });
 
@@ -100,9 +102,7 @@ test.describe('GET /api/content/category-configs', () => {
 
   test('should handle rapid consecutive requests', async ({ request }) => {
     // Make multiple rapid requests
-    const promises = Array.from({ length: 5 }, () =>
-      request.get('/api/content/category-configs')
-    );
+    const promises = Array.from({ length: 5 }, () => request.get('/api/content/category-configs'));
 
     const responses = await Promise.all(promises);
 

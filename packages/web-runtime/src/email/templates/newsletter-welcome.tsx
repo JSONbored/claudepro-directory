@@ -146,7 +146,9 @@ export function NewsletterWelcome({ email }: NewsletterWelcomeProps) {
       <Section style={ctaStripStyle}>
         <div>
           <Text style={ctaStripTitle}>Ready when you are</Text>
-          <Text style={ctaStripSubtitle}>Start bookmarking favorites so we can personalize drops.</Text>
+          <Text style={ctaStripSubtitle}>
+            Start bookmarking favorites so we can personalize drops.
+          </Text>
         </div>
         <a
           href={buildEmailCtaUrl(`${baseUrl}/u/library`, utm, {

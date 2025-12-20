@@ -373,13 +373,9 @@ export async function runGenerateChangelog() {
       script: 'changelog-generate-entry',
     });
   } catch (error) {
-    logger.error(
-      '❌ Generation failed',
-      normalizeError(error, 'Changelog generation failed'),
-      {
-        script: 'changelog-generate-entry',
-      }
-    );
+    logger.error('❌ Generation failed', normalizeError(error, 'Changelog generation failed'), {
+      script: 'changelog-generate-entry',
+    });
     process.exit(1);
   }
 }

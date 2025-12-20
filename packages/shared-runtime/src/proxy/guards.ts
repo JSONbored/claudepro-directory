@@ -1,4 +1,3 @@
-
 const UUID_REGEX = /\/api\/[^/]*\/[a-f0-9-]{36}/gi;
 const NUMERIC_ID_REGEX = /\/api\/[^/]*\/\d+/gi;
 const QUERY_STRING_REGEX = /\?.*$/;
@@ -41,9 +40,7 @@ export function sanitizePathForLogging(path: string): string {
 
 export function getClientInfo(request: Request): { ip: string; userAgent: string } {
   const ip =
-    request.headers.get('x-forwarded-for') ??
-    request.headers.get('x-real-ip') ??
-    'unknown';
+    request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'unknown';
   const userAgent = request.headers.get('user-agent') ?? 'unknown';
   return {
     ip,

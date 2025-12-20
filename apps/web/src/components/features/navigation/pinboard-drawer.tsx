@@ -47,21 +47,17 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
   // Log drawer state for debugging (only when open)
   useEffect(() => {
     if (!open) return;
-    
-    logClientInfo(
-      '[PinboardDrawer] Render',
-      'PinboardDrawer.render',
-      {
-        component: 'PinboardDrawer',
-        action: 'render',
-        category: 'navigation',
-        open,
-        isOpen,
-        isLoaded,
-        pinnedItemsCount: pinnedItems.length,
-        hasOnOpenChange: Boolean(onOpenChange),
-      }
-    );
+
+    logClientInfo('[PinboardDrawer] Render', 'PinboardDrawer.render', {
+      component: 'PinboardDrawer',
+      action: 'render',
+      category: 'navigation',
+      open,
+      isOpen,
+      isLoaded,
+      pinnedItemsCount: pinnedItems.length,
+      hasOnOpenChange: Boolean(onOpenChange),
+    });
   }, [open, isOpen, isLoaded, pinnedItems.length, onOpenChange]);
 
   // Defensive check: Ensure onOpenChange is provided
@@ -77,46 +73,57 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
       }
     );
     // Return Sheet with open=false instead of null to maintain hook consistency
-    return <Sheet open={false} onOpenChange={() => {}}><SheetContent side="right" /></Sheet>;
+    return (
+      <Sheet open={false} onOpenChange={() => {}}>
+        <SheetContent side="right" />
+      </Sheet>
+    );
   }
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent 
-        side="right" 
+      <SheetContent
+        side="right"
         className={cn(
           // Premium drawer design - beautiful, modern, Vercel/Linear quality
           'w-full sm:max-w-[440px]', // Slightly wider for better content display
           'overflow-y-auto',
           'rounded-l-2xl', // Larger radius for premium feel
-          'border-l border-border/80',
+          'border-border/80 border-l',
           'bg-background/98 backdrop-blur-xl', // Enhanced glass morphism
           'shadow-2xl', // Premium shadow
           'p-6', // Generous padding for premium feel
-          'shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.05)]',
+          'shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.05)]'
         )}
       >
-        <SheetHeader className={cn('mb-6', 'pb-4', 'border-b border-border/50')}>
+        <SheetHeader className={cn('mb-6', 'pb-4', 'border-border/50 border-b')}>
           <SheetTitle className={cn('flex items-center gap-2 text-left text-lg font-semibold')}>
-            <BookmarkPlus className="h-4 w-4 mr-2" />
+            <BookmarkPlus className="mr-2 h-4 w-4" />
             Pinned
           </SheetTitle>
-          <SheetDescription className={cn('text-left text-muted-foreground text-sm', 'mt-1')}>
+          <SheetDescription className={cn('text-muted-foreground text-left text-sm', 'mt-1')}>
             Your saved items for quick access
           </SheetDescription>
         </SheetHeader>
 
         {/* Compact header with count and clear action */}
-        <div className={cn('flex items-center justify-between', 'mb-4', 'text-xs', 'text-muted-foreground')}>
+        <div
+          className={cn(
+            'flex items-center justify-between',
+            'mb-4',
+            'text-xs',
+            'text-muted-foreground'
+          )}
+        >
           <span className={cn('font-medium')}>
             {hasPins ? `${pinnedItems.length} item${pinnedItems.length !== 1 ? 's' : ''}` : 'Empty'}
           </span>
           {hasPins ? (
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={clearAll}
-              className={cn('text-xs h-7', 'px-3', 'hover:text-destructive')}
+              className={cn('h-7 text-xs', 'px-3', 'hover:text-destructive')}
             >
               Clear all
             </Button>
@@ -130,18 +137,16 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
               initial={shouldReduceMotion ? {} : { opacity: 0, y: 10 }}
               animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
               transition={SPRING.smooth}
-              className={cn('rounded-lg border border-dashed border-border/60 p-3', 'space-y-2')}
+              className={cn('border-border/60 rounded-lg border border-dashed p-3', 'space-y-2')}
             >
-              <div className={cn('h-3 w-2/3 animate-pulse rounded bg-muted/60')} />
-              <div className={cn('h-2.5 w-5/6 animate-pulse rounded bg-muted/40')} />
-              <div className={cn('h-2.5 w-1/2 animate-pulse rounded bg-muted/30')} />
+              <div className={cn('bg-muted/60 h-3 w-2/3 animate-pulse rounded')} />
+              <div className={cn('bg-muted/40 h-2.5 w-5/6 animate-pulse rounded')} />
+              <div className={cn('bg-muted/30 h-2.5 w-1/2 animate-pulse rounded')} />
             </motion.div>
           )}
 
           {isLoaded && hasPins ? (
-            <motion.ul 
-              className={cn('space-y-2', 'perspective-[1000px]')}
-            >
+            <motion.ul className={cn('space-y-2', 'perspective-[1000px]')}>
               <AnimatePresence mode="popLayout">
                 {pinnedItems.map((item, index) => (
                   <motion.li
@@ -159,7 +164,7 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
                       '[transform-style:preserve-3d]',
                       // Premium card design - beautiful, modern, Vercel/Linear quality
                       'rounded-xl', // Larger radius for premium feel
-                      'border border-border/60',
+                      'border-border/60 border',
                       'p-4',
                       'bg-background/60 backdrop-blur-md', // Enhanced glass effect
                       'group',
@@ -168,13 +173,17 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
                       'hover:shadow-lg',
                       'hover:scale-[1.02]', // Subtle scale on hover
                       'active:scale-[0.98]', // Press feedback
-                      'transition-all duration-200 ease-out', // Smooth transitions
+                      'transition-all duration-200 ease-out' // Smooth transitions
                     )}
                   >
                     <div className={cn('flex items-start justify-between gap-3')}>
-                      <div className={cn('flex-1 min-w-0')}>
+                      <div className={cn('min-w-0 flex-1')}>
                         <div className={cn('flex items-center gap-1.5', 'mb-1')}>
-                          <p className={cn('text-muted-foreground text-xs uppercase tracking-wide truncate')}>
+                          <p
+                            className={cn(
+                              'text-muted-foreground truncate text-xs tracking-wide uppercase'
+                            )}
+                          >
                             {item.category}
                             {item.typeName ? ` • ${item.typeName}` : ''}
                           </p>
@@ -182,7 +191,7 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
                         <Link
                           href={`/${item.category}/${item.slug}`}
                           className={cn(
-                            'block font-medium text-sm',
+                            'block text-sm font-medium',
                             'hover:text-accent transition-colors duration-200',
                             'truncate',
                             'mb-1'
@@ -192,7 +201,7 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
                           {item.title}
                         </Link>
                         {item.description ? (
-                          <p className={cn('text-muted-foreground text-xs line-clamp-1', 'mb-1')}>
+                          <p className={cn('text-muted-foreground line-clamp-1 text-xs', 'mb-1')}>
                             {item.description}
                           </p>
                         ) : null}
@@ -210,7 +219,10 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
                           size="icon"
                           onClick={() => unpinItem(item.category, item.slug)}
                           aria-label={`Unpin ${item.title}`}
-                          className={cn('h-7 w-7 flex-shrink-0', 'opacity-0 group-hover:opacity-100 transition-opacity duration-200')}
+                          className={cn(
+                            'h-7 w-7 flex-shrink-0',
+                            'opacity-0 transition-opacity duration-200 group-hover:opacity-100'
+                          )}
                         >
                           <BookmarkMinus className={cn('h-3.5 w-3.5')} />
                         </Button>
@@ -227,7 +239,7 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
               initial={shouldReduceMotion ? {} : { opacity: 0, scale: 0.95 }}
               animate={shouldReduceMotion ? {} : { opacity: 1, scale: 1 }}
               transition={SPRING.smooth}
-              className={cn('rounded-lg border border-dashed border-border/60 p-6 text-center')}
+              className={cn('border-border/60 rounded-lg border border-dashed p-6 text-center')}
             >
               <p className={cn('font-medium', 'mb-2')}>Nothing pinned yet</p>
               <p className={cn('text-muted-foreground text-sm')}>

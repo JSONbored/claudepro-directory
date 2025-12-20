@@ -174,7 +174,9 @@ test.describe('GET /api/search/autocomplete', () => {
     expect(response.status()).toBe(400);
   });
 
-  test('should handle non-array data from getCachedSearchSuggestionsFormatted', async ({ request }) => {
+  test('should handle non-array data from getCachedSearchSuggestionsFormatted', async ({
+    request,
+  }) => {
     // This tests the edge case where getCachedSearchSuggestionsFormatted returns non-array
     // The route uses Array.isArray(data) ? data : [] to handle this defensively
     // In E2E, we can't easily mock, but we can verify graceful handling
@@ -200,7 +202,9 @@ test.describe('GET /api/search/autocomplete', () => {
     expect(data).toHaveProperty('error');
   });
 
-  test('should handle getCachedSearchSuggestionsFormatted errors gracefully', async ({ request }) => {
+  test('should handle getCachedSearchSuggestionsFormatted errors gracefully', async ({
+    request,
+  }) => {
     // This tests that getCachedSearchSuggestionsFormatted errors are handled
     // The route doesn't catch errors (factory handles them)
     const response = await request.get('/api/search/autocomplete?q=react&limit=10');
@@ -243,7 +247,9 @@ test.describe('GET /api/search/autocomplete', () => {
     }
   });
 
-  test('should handle undefined data from getCachedSearchSuggestionsFormatted', async ({ request }) => {
+  test('should handle undefined data from getCachedSearchSuggestionsFormatted', async ({
+    request,
+  }) => {
     // This tests that undefined data is handled
     // The route uses Array.isArray(data) ? data : []
     const response = await request.get('/api/search/autocomplete?q=react&limit=10');

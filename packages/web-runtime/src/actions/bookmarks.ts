@@ -1,6 +1,6 @@
 /**
  * Bookmarks Actions - Consolidated
- * 
+ *
  * All bookmark operations (add, remove) in one file.
  * Uses next-safe-action directly with factory helpers for business logic.
  */
@@ -18,13 +18,13 @@ import { authedAction } from './safe-action';
 const addBookmarkSchema = z.object({
   content_type: content_categorySchema,
   content_slug: z.string(),
-  notes: z.string().optional()
+  notes: z.string().optional(),
 });
 
 // Remove bookmark schema
 const removeBookmarkSchema = z.object({
   content_type: content_categorySchema,
-  content_slug: z.string()
+  content_slug: z.string(),
 });
 
 // Export input types (can't export from 'use server' files, but types are OK)
@@ -38,23 +38,19 @@ export const addBookmark = authedAction
   .action(async ({ parsedInput, ctx }): Promise<z.infer<typeof addBookmarkReturnsSchema>> => {
     const { runRpc } = await import('./run-rpc-instance.ts');
     const { revalidatePath, revalidateTag } = await import('next/cache');
-    
+
     const args = {
-      'p_user_id': ctx.userId,
-      'p_content_type': parsedInput.content_type,
-      'p_content_slug': parsedInput.content_slug,
-      'p_notes': parsedInput.notes,
+      p_user_id: ctx.userId,
+      p_content_type: parsedInput.content_type,
+      p_content_slug: parsedInput.content_slug,
+      p_notes: parsedInput.notes,
     };
-    
-    const result = await runRpc<z.infer<typeof addBookmarkReturnsSchema>>(
-      'add_bookmark',
-      args,
-      {
-        action: 'addBookmark.rpc',
-        userId: ctx.userId,
-      }
-    );
-    
+
+    const result = await runRpc<z.infer<typeof addBookmarkReturnsSchema>>('add_bookmark', args, {
+      action: 'addBookmark.rpc',
+      userId: ctx.userId,
+    });
+
     // Cache invalidation
     revalidatePath('/account');
     revalidatePath('/account/library');
@@ -62,7 +58,7 @@ export const addBookmark = authedAction
     revalidateTag('users', 'default');
     revalidateTag(`user-${ctx.userId}`, 'default');
     revalidateTag(`content-${parsedInput.content_slug}`, 'default');
-    
+
     return result;
   });
 
@@ -73,13 +69,13 @@ export const removeBookmark = authedAction
   .action(async ({ parsedInput, ctx }): Promise<z.infer<typeof removeBookmarkReturnsSchema>> => {
     const { runRpc } = await import('./run-rpc-instance.ts');
     const { revalidatePath, revalidateTag } = await import('next/cache');
-    
+
     const args = {
-      'p_user_id': ctx.userId,
-      'p_content_type': parsedInput.content_type,
-      'p_content_slug': parsedInput.content_slug,
+      p_user_id: ctx.userId,
+      p_content_type: parsedInput.content_type,
+      p_content_slug: parsedInput.content_slug,
     };
-    
+
     const result = await runRpc<z.infer<typeof removeBookmarkReturnsSchema>>(
       'remove_bookmark',
       args,
@@ -88,7 +84,7 @@ export const removeBookmark = authedAction
         userId: ctx.userId,
       }
     );
-    
+
     // Cache invalidation
     revalidatePath('/account');
     revalidatePath('/account/library');
@@ -96,6 +92,6 @@ export const removeBookmark = authedAction
     revalidateTag('users', 'default');
     revalidateTag(`user-${ctx.userId}`, 'default');
     revalidateTag(`content-${parsedInput.content_slug}`, 'default');
-    
+
     return result;
   });

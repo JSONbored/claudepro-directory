@@ -1,10 +1,16 @@
-import { SubmissionStatus, SubmissionType } from '@heyclaude/data-layer/prisma';
 import {
-  type content_category,
-  type submission_status,
-  type submission_type,
-} from '@heyclaude/data-layer/prisma';
-import { type GetUserCompleteDataReturns, type GetUserDashboardReturns } from '@heyclaude/data-layer';
+  submission_type as SubmissionType,
+  submission_status as SubmissionStatus,
+} from '@prisma/client';
+import type {
+  content_category,
+  submission_status,
+  submission_type,
+} from '@prisma/client';
+import {
+  type GetUserCompleteDataReturns,
+  type GetUserDashboardReturns,
+} from '@heyclaude/data-layer';
 type UserDashboardSubmission = GetUserDashboardReturns['submissions'][number];
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';

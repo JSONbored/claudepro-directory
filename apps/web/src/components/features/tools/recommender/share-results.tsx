@@ -68,15 +68,11 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               iconClassName="h-4 w-4"
               ariaLabel="Copy share link"
               onCopySuccess={() => {
-                logClientInfo(
-                  'Share link copied',
-                  'ShareResults.copyLink',
-                  {
-                    component: 'ShareResults',
-                    action: 'copy-link',
-                    from: 'share-results-dialog',
-                  }
-                );
+                logClientInfo('Share link copied', 'ShareResults.copyLink', {
+                  component: 'ShareResults',
+                  action: 'copy-link',
+                  from: 'share-results-dialog',
+                });
               }}
             />
           </div>
@@ -89,15 +85,11 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
-                  logClientInfo(
-                    'Recommendation results shared',
-                    'ShareResults.share',
-                    {
-                      component: 'ShareResults',
-                      action: 'share',
-                      platform: 'twitter',
-                    }
-                  );
+                  logClientInfo('Recommendation results shared', 'ShareResults.share', {
+                    component: 'ShareResults',
+                    action: 'share',
+                    platform: 'twitter',
+                  });
                 }}
               >
                 <Twitter className="h-4 w-4" />
@@ -111,15 +103,11 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
-                  logClientInfo(
-                    'Recommendation results shared',
-                    'ShareResults.share',
-                    {
-                      component: 'ShareResults',
-                      action: 'share',
-                      platform: 'linkedin',
-                    }
-                  );
+                  logClientInfo('Recommendation results shared', 'ShareResults.share', {
+                    component: 'ShareResults',
+                    action: 'share',
+                    platform: 'linkedin',
+                  });
                 }}
               >
                 <Linkedin className="h-4 w-4" />
@@ -133,15 +121,11 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
-                  logClientInfo(
-                    'Recommendation results shared',
-                    'ShareResults.share',
-                    {
-                      component: 'ShareResults',
-                      action: 'share',
-                      platform: 'facebook',
-                    }
-                  );
+                  logClientInfo('Recommendation results shared', 'ShareResults.share', {
+                    component: 'ShareResults',
+                    action: 'share',
+                    platform: 'facebook',
+                  });
                 }}
               >
                 <Facebook className="h-4 w-4" />
@@ -153,15 +137,11 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               <a
                 href={shareLinks.email}
                 onClick={() => {
-                  logClientInfo(
-                    'Recommendation results shared',
-                    'ShareResults.share',
-                    {
-                      component: 'ShareResults',
-                      action: 'share',
-                      platform: 'email',
-                    }
-                  );
+                  logClientInfo('Recommendation results shared', 'ShareResults.share', {
+                    component: 'ShareResults',
+                    action: 'share',
+                    platform: 'email',
+                  });
                 }}
               >
                 <Mail className="h-4 w-4" />

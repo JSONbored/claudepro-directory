@@ -87,9 +87,7 @@ export interface ScreenInfo {
  * if (!screen) return <Loading />;
  * ```
  */
-export function useScreen(
-  options: UseScreenOptions = {}
-): ScreenInfo | undefined {
+export function useScreen(options: UseScreenOptions = {}): ScreenInfo | undefined {
   const { initializeWithValue = true, debounceDelay } = options;
 
   const [screenInfo, setScreenInfo] = useState<ScreenInfo | undefined>(() => {

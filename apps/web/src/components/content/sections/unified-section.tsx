@@ -1,6 +1,6 @@
 'use client';
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
@@ -42,7 +42,10 @@ import dynamic from 'next/dynamic';
 
 // Lazy load large code block component (889 lines) - only loads when code blocks are rendered
 const ProductionCodeBlock = dynamic(
-  () => import('@/src/components/content/interactive-code-block').then((mod) => ({ default: mod.ProductionCodeBlock })),
+  () =>
+    import('@/src/components/content/interactive-code-block').then((mod) => ({
+      default: mod.ProductionCodeBlock,
+    })),
   { ssr: true }
 );
 import { CodeTabs } from '@/src/components/ui/code-tabs';
@@ -429,7 +432,9 @@ function Platform({
         {steps.map((step, index) =>
           step.type === 'command' ? (
             <div key={getStepKey(step, index)} className="space-y-2">
-              <div className={cn('text-muted-foreground text-sm')}>Step {index + 1}: Run command</div>
+              <div className={cn('text-muted-foreground text-sm')}>
+                Step {index + 1}: Run command
+              </div>
               <ProductionCodeBlock
                 html={step.html}
                 code={step.code}
@@ -448,13 +453,13 @@ function Platform({
       </div>
       {paths ? (
         <div>
-          <h5 className="mb-2 text-sm-medium">Configuration Paths</h5>
+          <h5 className="text-sm-medium mb-2">Configuration Paths</h5>
           <div className="space-y-2 text-sm">
             {Object.entries(paths).map(([k, p]) => {
               const pathValue = String(p);
               return (
                 <div key={k} className="flex items-center gap-1">
-                  <UnifiedBadge variant="base" style="outline" className="capitalize shrink-0">
+                  <UnifiedBadge variant="base" style="outline" className="shrink-0 capitalize">
                     {k}
                   </UnifiedBadge>
                   <Snippet defaultValue={k} className="flex-1">
@@ -466,7 +471,7 @@ function Platform({
                       </SnippetTabsList>
                       <SnippetCopyButton value={pathValue} />
                     </SnippetHeader>
-                    <SnippetTabsContent value={k} className="text-xs py-2">
+                    <SnippetTabsContent value={k} className="py-2 text-xs">
                       {pathValue}
                     </SnippetTabsContent>
                   </Snippet>
@@ -914,7 +919,17 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           {...(props.category && { category: props.category })}
           {...(props.className && { className: props.className })}
         >
-          <div className={cn('prose prose-slate dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed', 'prose-ul:my-4', 'prose-ol:my-4', 'prose-li:my-1', 'prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary', 'prose-blockquote:pl-4', 'prose-blockquote:italic max-w-none')}>
+          <div
+            className={cn(
+              'prose prose-slate dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed',
+              'prose-ul:my-4',
+              'prose-ol:my-4',
+              'prose-li:my-1',
+              'prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary',
+              'prose-blockquote:pl-4',
+              'prose-blockquote:italic max-w-none'
+            )}
+          >
             <TrustedHTML html={props.html} />
           </div>
         </Wrapper>

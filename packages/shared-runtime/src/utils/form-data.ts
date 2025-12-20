@@ -18,10 +18,7 @@
  * const name = getFormDataString(formData, 'name') ?? 'Unknown';
  * ```
  */
-export function getFormDataString(
-  formData: FormData,
-  key: string
-): string | null {
+export function getFormDataString(formData: FormData, key: string): string | null {
   const value = formData.get(key);
   if (value === null || value === undefined) {
     return null;
@@ -47,10 +44,7 @@ export function getFormDataString(
  * const name = getFormDataStringRequired(formData, 'name');
  * ```
  */
-export function getFormDataStringRequired(
-  formData: FormData,
-  key: string
-): string {
+export function getFormDataStringRequired(formData: FormData, key: string): string {
   const value = getFormDataString(formData, key);
   if (value === null) {
     throw new Error(`Required form field '${key}' is missing or empty`);

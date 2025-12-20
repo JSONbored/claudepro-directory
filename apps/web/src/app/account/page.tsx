@@ -1,4 +1,6 @@
-import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma, content_category } from '@prisma/client';
+
+type contentModel = Prisma.contentGetPayload<{}>;
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getAccountDashboardBundle } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';

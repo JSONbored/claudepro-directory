@@ -54,8 +54,12 @@ describe('buildReadmeMarkdown', () => {
       expect(result).toContain('2+ expert rules');
       expect(result).toContain('## ⚙️ MCP Servers (2)');
       expect(result).toContain('Model Context Protocol servers');
-      expect(result).toContain('**[Filesystem MCP](https://claudepro.directory/mcp-servers/filesystem)** - Access local files');
-      expect(result).toContain('**[Database MCP](https://claudepro.directory/mcp-servers/database)** - Query databases');
+      expect(result).toContain(
+        '**[Filesystem MCP](https://claudepro.directory/mcp-servers/filesystem)** - Access local files'
+      );
+      expect(result).toContain(
+        '**[Database MCP](https://claudepro.directory/mcp-servers/database)** - Query databases'
+      );
       expect(result).toContain('## 📈 Activity');
     });
 
@@ -407,9 +411,7 @@ describe('buildReadmeMarkdown', () => {
             description: 'Test',
             icon_name: 'Code',
             url_slug: 'test',
-            items: [
-              { slug: 'no-desc', title: 'No Description', description: null },
-            ],
+            items: [{ slug: 'no-desc', title: 'No Description', description: null }],
           },
         ],
         total_count: 1,
@@ -530,9 +532,7 @@ describe('buildReadmeMarkdown', () => {
             description: 'Custom skills',
             icon_name: 'Terminal',
             url_slug: 'skills',
-            items: [
-              { slug: 'python', title: 'Python Expert', description: 'Python development' },
-            ],
+            items: [{ slug: 'python', title: 'Python Expert', description: 'Python development' }],
           },
         ],
         total_count: 6,

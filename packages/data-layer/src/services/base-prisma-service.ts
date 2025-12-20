@@ -10,13 +10,13 @@
  */
 
 // Import prisma from data-layer/prisma export
-import { prisma } from '../prisma/client.ts';
+import { prisma as defaultPrisma } from '../prisma/client.ts';
 import { logRpcError } from '../utils/rpc-error-logging.ts';
 import { withSmartCache } from '../utils/request-cache.ts';
-import type { Prisma } from '@heyclaude/database-types/prisma';
+import type { Prisma, PrismaClient } from '@prisma/client';
 // Extract TransactionClient type from prisma.$transaction method
 // This avoids namespace import issues while still getting the correct type
-type TransactionClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
+type TransactionClient = Parameters<Parameters<PrismaClient['$transaction']>[0]>[0];
 
 /**
  * Base class for Prisma-based services
@@ -27,22 +27,44 @@ type TransactionClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0
  * - Error handling and logging
  * - Request-scoped caching (via withSmartCache)
  *
+ * Supports both singleton Prisma client (default) and injected Prisma client (for Cloudflare Workers).
+ *
  * @example
  * ```typescript
+ * // Default: Uses singleton Prisma client
  * export class CompaniesPrismaService extends BasePrismaService {
  *   async getCompanyProfile(slug: string) {
- *     // Option 1: Use Prisma query directly
- *     return prisma.companies.findUnique({
- *       where: { slug },
- *     });
+ *     return this.callRpc('get_company_profile', { p_slug: slug });
+ *   }
+ * }
  *
- *     // Option 2: Use RPC wrapper for complex RPCs
+ * // With injected Prisma client (for Cloudflare Workers)
+ * export class CompaniesPrismaService extends BasePrismaService {
+ *   constructor(prismaClient?: PrismaClient) {
+ *     super(prismaClient);
+ *   }
+ *   async getCompanyProfile(slug: string) {
  *     return this.callRpc('get_company_profile', { p_slug: slug });
  *   }
  * }
  * ```
  */
 export abstract class BasePrismaService {
+  /**
+   * Prisma client instance
+   * Uses injected client if provided, otherwise falls back to singleton
+   */
+  protected readonly prisma: PrismaClient;
+
+  /**
+   * Constructor
+   *
+   * @param prismaClient - Optional Prisma client instance (for Cloudflare Workers)
+   *                       If not provided, uses the singleton Prisma client
+   */
+  constructor(prismaClient?: PrismaClient) {
+    this.prisma = prismaClient ?? defaultPrisma;
+  }
   /**
    * Call PostgreSQL RPC function
    *
@@ -83,14 +105,14 @@ export abstract class BasePrismaService {
         // Build parameterized query with named parameters using PostgreSQL's => syntax
         // This ensures parameters are passed in the correct order regardless of object key order
         // Format: function_name(p_param1 => $1, p_param2 => $2, ...)
-        const namedParams = argNames.length > 0
-          ? argNames.map((name, i) => `${name} => $${i + 1}`).join(', ')
-          : '';
-        const query = argNames.length === 0
-          ? `SELECT * FROM ${functionName}()`
-          : `SELECT * FROM ${functionName}(${namedParams})`;
+        const namedParams =
+          argNames.length > 0 ? argNames.map((name, i) => `${name} => $${i + 1}`).join(', ') : '';
+        const query =
+          argNames.length === 0
+            ? `SELECT * FROM ${functionName}()`
+            : `SELECT * FROM ${functionName}(${namedParams})`;
 
-        const result = await prisma.$queryRawUnsafe(query, ...argValues);
+        const result = await this.prisma.$queryRawUnsafe(query, ...argValues);
 
         // Prisma $queryRawUnsafe always returns arrays for SELECT * FROM function()
         // Handle unwrapping based on returnType option
@@ -98,15 +120,39 @@ export abstract class BasePrismaService {
           return result as T;
         }
 
+        // Handle empty arrays for single-return functions
+        if (result.length === 0) {
+          // For single-return functions, empty array means no data - return undefined
+          // For array-return functions, empty array is valid - return []
+          const isArrayReturn =
+            returnType === 'array' ||
+            (returnType === 'auto' &&
+              (functionName.includes('list') ||
+                functionName.includes('search') ||
+                functionName.includes('_content')));
+          if (!isArrayReturn) {
+            return undefined as T;
+          }
+          return result as T;
+        }
+
         // Determine if we should unwrap single-element arrays
-        const shouldUnwrap = returnType === 'single' || 
-          (returnType === 'auto' && result.length === 1 && 
-           typeof result[0] === 'object' && 
-           !Array.isArray(result[0]) &&
-           // Simple heuristic: functions with 'list', 'search', or returning arrays typically return arrays
-           !functionName.includes('list') && 
-           !functionName.includes('search') &&
-           !functionName.includes('_content'));
+        // Heuristic: functions with 'list' in name typically return arrays
+        // Functions with 'search' can return either arrays OR composite types (objects)
+        // We check if result[0] is a primitive (string, number, boolean) or object (not array) to determine if it's a single return
+        // If result[0] is an object (not array), it's a composite type and should be unwrapped even for 'search' functions
+        const shouldUnwrap =
+          returnType === 'single' ||
+          (returnType === 'auto' &&
+            result.length === 1 &&
+            // Allow unwrapping for primitives (string, number, boolean) or objects (not arrays)
+            (typeof result[0] !== 'object' || (typeof result[0] === 'object' && !Array.isArray(result[0]))) &&
+            // Simple heuristic: functions with 'list' typically return arrays
+            // Functions with 'search' can return composite types (objects) which should be unwrapped
+            // Only exclude unwrapping if result[0] is an array (indicating array return type)
+            !(functionName.includes('list') && Array.isArray(result[0])));
+            // Note: We allow unwrapping for 'search' functions if result[0] is an object (composite type)
+            // This fixes issues with search_content_optimized, search_unified which return composite types
 
         if (shouldUnwrap && result.length === 1) {
           return result[0] as T;
@@ -151,14 +197,11 @@ export abstract class BasePrismaService {
    * );
    * ```
    */
-  protected async executeRaw<T = unknown>(
-    query: string,
-    ...params: unknown[]
-  ): Promise<T> {
+  protected async executeRaw<T = unknown>(query: string, ...params: unknown[]): Promise<T> {
     try {
       // OPTIMIZATION: Explicit type assertion for better type safety
       // Prisma $queryRawUnsafe returns unknown[], so we assert to T
-      const result = await prisma.$queryRawUnsafe(query, ...params);
+      const result = await this.prisma.$queryRawUnsafe(query, ...params);
       return result as T;
     } catch (error) {
       logRpcError(error, {
@@ -202,7 +245,7 @@ export abstract class BasePrismaService {
     // OPTIMIZATION: Add timeout to prevent hanging transactions
     // Default timeout: 30 seconds (matches query timeout)
     const timeout = options?.timeout ?? 30000;
-    
+
     // Build transaction options, only including isolationLevel if provided
     const transactionOptions: {
       maxWait: number;
@@ -212,12 +255,12 @@ export abstract class BasePrismaService {
       maxWait: timeout, // Maximum time to wait for a transaction slot
       timeout, // Maximum time the transaction can run
     };
-    
+
     // Only add isolationLevel if provided (handles undefined properly with exactOptionalPropertyTypes)
     if (options?.isolationLevel !== undefined) {
       transactionOptions.isolationLevel = options.isolationLevel;
     }
-    
-    return prisma.$transaction(callback, transactionOptions);
+
+    return this.prisma.$transaction(callback, transactionOptions);
   }
 }

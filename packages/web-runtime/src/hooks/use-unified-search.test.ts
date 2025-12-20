@@ -186,7 +186,10 @@ describe('useUnifiedSearch', () => {
     const { result } = renderHook(() => useUnifiedSearch());
 
     act(() => {
-      result.current.handleFilterChange('dateRange', { from: '2024-01-01', to: '2024-12-31' } as any);
+      result.current.handleFilterChange('dateRange', {
+        from: '2024-01-01',
+        to: '2024-12-31',
+      } as any);
     });
 
     expect(result.current.activeFilterCount).toBe(1);

@@ -22,7 +22,9 @@
  * - Responsive design
  */
 
-import { type changelogModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type changelogModel = Prisma.changelogGetPayload<{}>;
 import { getChangelogOverview } from '@heyclaude/web-runtime/data/changelog';
 import { APP_CONFIG, QUERY_LIMITS } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';

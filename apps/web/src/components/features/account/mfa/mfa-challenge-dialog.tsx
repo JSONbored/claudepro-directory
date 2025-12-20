@@ -5,7 +5,12 @@
 
 'use client';
 
-import { type MFAFactor, createMFAChallenge, listMFAFactors, verifyMFAChallenge } from '@heyclaude/web-runtime/auth/mfa';
+import {
+  type MFAFactor,
+  createMFAChallenge,
+  listMFAFactors,
+  verifyMFAChallenge,
+} from '@heyclaude/web-runtime/auth/mfa';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/supabase/browser';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
 import { AlertCircle, Loader2, Shield } from '@heyclaude/web-runtime/icons';
@@ -169,7 +174,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
         </DialogHeader>
 
         {error ? (
-          <div className="flex items-center gap-1 rounded-md bg-destructive/10 p-2 text-sm text-destructive">
+          <div className="bg-destructive/10 text-destructive flex items-center gap-1 rounded-md p-2 text-sm">
             <AlertCircle className="h-4 w-4" />
             <span>{error}</span>
           </div>
@@ -177,7 +182,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
 
         {loading && factors.length === 0 ? (
           <div className="flex-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
           </div>
         ) : (
           <div className="space-y-6">
@@ -190,7 +195,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
                     const factor = factors.find((f: MFAFactor) => f.id === e.target.value);
                     setSelectedFactor(factor || null);
                   }}
-                  className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                  className="border-input bg-background ring-offset-background flex h-10 w-full rounded-lg border px-3 py-2 text-sm"
                   disabled={loading}
                 >
                   {factors.map((factor) => (

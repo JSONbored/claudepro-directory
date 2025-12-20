@@ -1,9 +1,9 @@
 /**
  * MSW (Mock Service Worker) Setup for API Mocking
- * 
+ *
  * Provides MSW setup for both Playwright and Vitest tests.
  * Allows network-level API mocking without a server.
- * 
+ *
  * @module config/tests/fixtures/msw-setup
  */
 
@@ -13,7 +13,7 @@ import { setupWorker } from 'msw/browser';
 
 /**
  * Common API response handlers for testing
- * 
+ *
  * These can be extended or overridden in individual test files.
  */
 export const defaultHandlers: HttpHandler[] = [
@@ -26,18 +26,18 @@ export const defaultHandlers: HttpHandler[] = [
 
 /**
  * Setup MSW server for Node.js tests (Vitest)
- * 
+ *
  * @param handlers - Additional handlers to use (merged with defaultHandlers)
  * @returns MSW server instance
- * 
+ *
  * @example
  * ```typescript
  * import { setupMswServer } from '@/config/tests/fixtures/msw-setup';
- * 
+ *
  * const server = setupMswServer([
  *   http.get('/api/users', () => HttpResponse.json({ users: [] })),
  * ]);
- * 
+ *
  * beforeAll(() => server.listen());
  * afterEach(() => server.resetHandlers());
  * afterAll(() => server.close());
@@ -49,14 +49,14 @@ export function setupMswServer(handlers: HttpHandler[] = []) {
 
 /**
  * Setup MSW worker for browser tests (Playwright)
- * 
+ *
  * @param handlers - Additional handlers to use (merged with defaultHandlers)
  * @returns MSW worker instance
- * 
+ *
  * @example
  * ```typescript
  * import { setupMswWorker } from '@/config/tests/fixtures/msw-setup';
- * 
+ *
  * test.beforeAll(async () => {
  *   const worker = setupMswWorker([
  *     http.get('/api/users', () => HttpResponse.json({ users: [] })),

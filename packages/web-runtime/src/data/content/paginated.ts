@@ -1,5 +1,7 @@
 import 'server-only';
-import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
+import { Prisma } from '@prisma/client';
+import type { content_category } from '@prisma/client';
+type contentModel = Prisma.contentGetPayload<{}>;
 
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 
@@ -35,7 +37,7 @@ export interface PaginatedContentParameters {
 function toContentCategory(value: null | string | undefined): content_category | undefined {
   if (!value) return undefined;
   const normalized = value.trim().toLowerCase();
-  return isValidCategory(normalized) ? normalized : undefined;
+  return isValidCategory(normalized) ? (normalized as content_category) : undefined;
 }
 
 /**

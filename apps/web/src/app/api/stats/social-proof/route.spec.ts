@@ -113,9 +113,7 @@ test.describe('GET /api/stats/social-proof', () => {
 
   test('should handle rapid consecutive requests', async ({ request }) => {
     // Make multiple rapid requests
-    const promises = Array.from({ length: 5 }, () =>
-      request.get('/api/stats/social-proof')
-    );
+    const promises = Array.from({ length: 5 }, () => request.get('/api/stats/social-proof'));
 
     const responses = await Promise.all(promises);
 
@@ -171,9 +169,9 @@ test.describe('GET /api/stats/social-proof', () => {
       // All numeric fields should be numbers or null
       expect(typeof data.stats.contributors.count).toBe('number');
       expect(typeof data.stats.submissions).toBe('number');
-      expect(
-        data.stats.successRate === null || typeof data.stats.successRate === 'number'
-      ).toBe(true);
+      expect(data.stats.successRate === null || typeof data.stats.successRate === 'number').toBe(
+        true
+      );
       expect(data.stats.totalUsers === null || typeof data.stats.totalUsers === 'number').toBe(
         true
       );

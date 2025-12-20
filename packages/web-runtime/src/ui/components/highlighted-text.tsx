@@ -69,22 +69,35 @@ export const HighlightedText = memo(({ html, fallback, className = '' }: Highlig
             setSafeHtml(sanitized);
           } catch (error) {
             // Log sanitization errors but don't crash the component
-            const normalized = normalizeError(error, 'HighlightedText: DOMPurify sanitization failed');
-            logger.warn({ err: normalized,
-              category: 'sanitize',
-              component: 'HighlightedText',
-              recoverable: true,
-              htmlLength: html.length,
-              hasFallback: Boolean(fallback), }, '[Sanitize] Failed to sanitize HTML');
+            const normalized = normalizeError(
+              error,
+              'HighlightedText: DOMPurify sanitization failed'
+            );
+            logger.warn(
+              {
+                err: normalized,
+                category: 'sanitize',
+                component: 'HighlightedText',
+                recoverable: true,
+                htmlLength: html.length,
+                hasFallback: Boolean(fallback),
+              },
+              '[Sanitize] Failed to sanitize HTML'
+            );
             setSafeHtml(null); // Trigger fallback rendering
           }
         })
         .catch((error) => {
           const normalized = normalizeError(error, 'Failed to load DOMPurify');
-          logger.warn({ err: normalized,
-            category: 'sanitize',
-            component: 'HighlightedText',
-            recoverable: true, }, '[Sanitize] Failed to load DOMPurify');
+          logger.warn(
+            {
+              err: normalized,
+              category: 'sanitize',
+              component: 'HighlightedText',
+              recoverable: true,
+            },
+            '[Sanitize] Failed to load DOMPurify'
+          );
           setSafeHtml(null); // Trigger fallback rendering
         });
     }
@@ -95,7 +108,13 @@ export const HighlightedText = memo(({ html, fallback, className = '' }: Highlig
     if (fallback) {
       return <span className={className}>{fallback}</span>;
     }
-    return <span className={className} dangerouslySetInnerHTML={{ __html: html }} suppressHydrationWarning={true} />;
+    return (
+      <span
+        className={className}
+        dangerouslySetInnerHTML={{ __html: html }}
+        suppressHydrationWarning={true}
+      />
+    );
   }
 
   // Render fallback if no HTML or sanitization failed

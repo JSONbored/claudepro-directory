@@ -10,10 +10,10 @@ import { rateLimitedAction } from './safe-action.ts';
 
 /**
  * Get Popular Searches
- * 
+ *
  * OPTIMIZATION: Returns top 100 popular search queries from trending_searches
  * These can be cached with longer TTL since they change slowly
- * 
+ *
  * Uses get_trending_searches RPC which queries the trending_searches materialized view
  * Returns: Array of { query: string, count: number, label: string }
  */

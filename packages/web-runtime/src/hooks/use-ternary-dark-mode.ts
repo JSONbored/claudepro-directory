@@ -86,9 +86,7 @@ export interface TernaryDarkModeOptions {
  * if (isDarkMode === undefined) return <Loading />;
  * ```
  */
-export function useTernaryDarkMode(
-  options: TernaryDarkModeOptions = {}
-): {
+export function useTernaryDarkMode(options: TernaryDarkModeOptions = {}): {
   isDarkMode: boolean;
   ternaryDarkMode: TernaryDarkMode;
   setTernaryDarkMode: React.Dispatch<React.SetStateAction<TernaryDarkMode>>;
@@ -130,8 +128,7 @@ export function useTernaryDarkMode(
 
   // Compute isDarkMode based on mode and system preference
   const isDarkMode =
-    ternaryDarkMode === 'dark' ||
-    (ternaryDarkMode === 'system' && systemPreference);
+    ternaryDarkMode === 'dark' || (ternaryDarkMode === 'system' && systemPreference);
 
   // useLocalStorage handles persistence automatically, no need for separate useEffect
 

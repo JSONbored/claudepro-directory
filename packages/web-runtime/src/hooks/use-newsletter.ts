@@ -27,7 +27,7 @@
 
 'use client';
 
-import type { newsletter_source, copy_type, content_category } from '@heyclaude/data-layer/prisma';
+import type { newsletter_source, copy_type, content_category } from '@prisma/client';
 import { logClientError, logClientWarn } from '../utils/client-logger.ts';
 import { usePulse } from './use-pulse.ts';
 import { toasts } from '../client/toast.ts';
@@ -119,7 +119,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
 
         // Import and call the server action
         const { subscribeNewsletterAction } = await import('../actions/newsletter.ts');
-        
+
         const result = await subscribeNewsletterAction({
           email: normalizedEmail,
           source,
@@ -154,10 +154,15 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
               },
             }),
           ]).catch((trackingError: unknown) => {
-            logClientWarn('useNewsletter: signup success tracking failed', trackingError, 'useNewsletter.trackSuccess', {
-              source,
-              email: normalizedEmail,
-            });
+            logClientWarn(
+              'useNewsletter: signup success tracking failed',
+              trackingError,
+              'useNewsletter.trackSuccess',
+              {
+                source,
+                email: normalizedEmail,
+              }
+            );
           });
 
           reset();
@@ -186,15 +191,25 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
               },
             })
             .catch((trackingError: unknown) => {
-              logClientWarn('useNewsletter: signup error tracking failed', trackingError, 'useNewsletter.trackError', { source });
+              logClientWarn(
+                'useNewsletter: signup error tracking failed',
+                trackingError,
+                'useNewsletter.trackError',
+                { source }
+              );
             });
 
-          logClientError('Newsletter subscription failed', errorMessage, 'useNewsletter.subscribe', {
-            component: 'useNewsletter',
-            source,
-            email: `${email.substring(0, 3)}***`,
-            ...logContext,
-          });
+          logClientError(
+            'Newsletter subscription failed',
+            errorMessage,
+            'useNewsletter.subscribe',
+            {
+              component: 'useNewsletter',
+              source,
+              email: `${email.substring(0, 3)}***`,
+              ...logContext,
+            }
+          );
         }
       } catch (err) {
         const errorMessage =
@@ -228,7 +243,12 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             },
           })
           .catch((trackingError: unknown) => {
-            logClientWarn('useNewsletter: exception tracking failed', trackingError, 'useNewsletter.trackException', { source });
+            logClientWarn(
+              'useNewsletter: exception tracking failed',
+              trackingError,
+              'useNewsletter.trackException',
+              { source }
+            );
           });
 
         logClientError('Newsletter subscription error', err, 'useNewsletter.subscribe', {

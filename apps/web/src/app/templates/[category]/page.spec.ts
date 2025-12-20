@@ -19,7 +19,7 @@ test.describe('Templates Page (/templates/[category])', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (navigation handled per test with different categories)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -101,7 +101,7 @@ test.describe('Templates Page (/templates/[category])', () => {
     // Should show 404 or handle gracefully
     const notFound = page.getByText(/not found|404/i);
     const hasNotFound = await notFound.isVisible().catch(() => false);
-    
+
     // May show 404 message or redirect
     expect(hasNotFound || page.url().includes('404')).toBe(true);
   });
@@ -140,7 +140,7 @@ test.describe('Templates Page (/templates/[category])', () => {
     // Should show 404 for invalid category
     const notFound = page.getByText(/not found|404/i);
     const hasNotFound = await notFound.isVisible().catch(() => false);
-    
+
     // May show 404 message or redirect
     expect(hasNotFound || page.url().includes('404')).toBe(true);
   });
@@ -156,7 +156,7 @@ test.describe('Templates Page (/templates/[category])', () => {
     // Page should render or show 404, but not crash
     const response = await page.goto('/templates/agents', { waitUntil: 'networkidle' });
     const status = response?.status();
-    
+
     // Should either return 200 (valid) or 404 (invalid), but not 500
     expect(status).toBeGreaterThanOrEqual(200);
     expect(status).toBeLessThan(500);

@@ -1,24 +1,22 @@
 /**
  * Shared Zod Schemas for API Routes
- * 
+ *
  * These schemas are used across all API routes for consistent validation.
  * They enable automatic OpenAPI generation and reduce duplication.
- * 
+ *
  * **OpenAPI Support:**
  * - Uses `.meta()` for OpenAPI metadata (description, example, format)
  * - Compatible with `zod-openapi` v5
  * - All schemas include descriptions for OpenAPI docs
- * 
+ *
  * @module web-runtime/api/schemas
  */
 
 // Import zod-openapi for TypeScript type augmentation (enables .meta() OpenAPI support)
 import 'zod-openapi';
-import {
-  experience_levelSchema,
-} from '../prisma-zod-schemas.ts';
+import { experience_levelSchema } from '../prisma-zod-schemas.ts';
 import { jobCategorySchema, jobTypeSchema } from '../prisma-zod-schemas.ts';
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import { z } from 'zod';
 
 // =============================================================================
@@ -27,7 +25,7 @@ import { z } from 'zod';
 
 /**
  * Pagination schema for limit/offset queries
- * 
+ *
  * @example
  * ```ts
  * const schema = paginationSchema.extend({ category: categorySchema.optional() });
@@ -62,7 +60,7 @@ export const paginationSchema = z.object({
 
 /**
  * Content category enum schema
- * 
+ *
  * @example
  * ```ts
  * const schema = z.object({ category: categorySchema.optional() });
@@ -75,7 +73,19 @@ export const categorySchema = z
     // Transform 'all' or empty to null
     if (!val || val === 'all') return null;
     // Validate it's a valid content_category
-    const validCategories: content_category[] = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog'];
+    const validCategories: content_category[] = [
+      'agents',
+      'mcp',
+      'rules',
+      'commands',
+      'hooks',
+      'statuslines',
+      'skills',
+      'collections',
+      'guides',
+      'jobs',
+      'changelog',
+    ];
     if (validCategories.includes(val as content_category)) {
       return val as content_category;
     }
@@ -100,11 +110,13 @@ export const jobEmploymentSchema = jobTypeSchema.optional().describe('Job employ
 /**
  * Job experience level enum schema
  */
-export const jobExperienceSchema = experience_levelSchema.optional().describe('Job experience level filter');
+export const jobExperienceSchema = experience_levelSchema
+  .optional()
+  .describe('Job experience level filter');
 
 /**
  * Slug validation schema
- * 
+ *
  * @example
  * ```ts
  * const schema = z.object({ slug: slugSchema });
@@ -118,7 +130,7 @@ export const slugSchema = z
 
 /**
  * Search autocomplete query schema
- * 
+ *
  * @example
  * ```ts
  * const schema = z.object({ q: z.string().min(2), limit: z.coerce.number().int().min(1).max(20).default(10) });
@@ -151,7 +163,7 @@ export const searchAutocompleteQuerySchema = z.object({
 
 /**
  * Query string validation schema
- * 
+ *
  * @example
  * ```ts
  * const schema = z.object({ q: queryStringSchema.optional() });
@@ -166,7 +178,7 @@ export const queryStringSchema = z
 
 /**
  * Comma-separated list schema (for tags, authors, entities, etc.)
- * 
+ *
  * @example
  * ```ts
  * const schema = z.object({ tags: csvListSchema.optional() });
@@ -187,7 +199,7 @@ export const csvListSchema = z
 
 /**
  * Boolean query parameter schema (handles "true"/"false" strings)
- * 
+ *
  * @example
  * ```ts
  * const schema = z.object({ remote: booleanQuerySchema.optional() });
@@ -206,10 +218,10 @@ export const booleanQuerySchema = z
 
 /**
  * Optional URL schema - accepts empty string or valid URL
- * 
+ *
  * Validates that a string is either empty or a valid URL.
  * Useful for optional URL fields in forms (website, social links, etc.).
- * 
+ *
  * @example
  * ```ts
  * const schema = z.object({ website: optionalUrlSchema });
@@ -246,7 +258,7 @@ export const entitiesSchema = z
 
 /**
  * Changelog format schema
- * 
+ *
  * @example
  * ```ts
  * const schema = z.object({ format: changelogFormatSchema });
@@ -265,7 +277,7 @@ export const changelogFormatSchema = z
 
 /**
  * Changelog entry format schema
- * 
+ *
  * @example
  * ```ts
  * const schema = z.object({ format: changelogEntryFormatSchema });
@@ -284,7 +296,7 @@ export const changelogEntryFormatSchema = z
 
 /**
  * OG image query schema
- * 
+ *
  * @example
  * ```ts
  * const schema = z.object({ ...ogImageQuerySchema.shape });
@@ -294,19 +306,15 @@ export const ogImageQuerySchema = z.object({
   title: z.string().optional().describe('Title text to render on OG image'),
   description: z.string().optional().describe('Descriptive subtitle for OG image'),
   type: z.string().optional().describe('Badge text rendered at the top of OG image'),
-  tags: z
-    .string()
-    .optional()
-    .describe('Comma-separated list of tags (up to 5 rendered)')
-    .meta({
-      description: 'Comma-separated list of tags (up to 5 rendered)',
-      example: 'ai,agents,automation',
-    }),
+  tags: z.string().optional().describe('Comma-separated list of tags (up to 5 rendered)').meta({
+    description: 'Comma-separated list of tags (up to 5 rendered)',
+    example: 'ai,agents,automation',
+  }),
 });
 
 /**
  * Sitemap format schema
- * 
+ *
  * @example
  * ```ts
  * const schema = z.object({ format: sitemapFormatSchema });
@@ -323,10 +331,9 @@ export const sitemapFormatSchema = z
     enum: ['xml', 'json'],
   });
 
-
 /**
  * Sitewide content format schema
- * 
+ *
  * @example
  * ```ts
  * const schema = z.object({ format: sitewideFormatSchema });
@@ -343,30 +350,26 @@ export const sitewideFormatSchema = z
     enum: ['llms', 'llms-txt', 'readme', 'json'],
   });
 
-
 // =============================================================================
 // Composite Schemas
 // =============================================================================
 
 /**
  * Search query schema
- * 
+ *
  * Comprehensive schema for the unified search API with support for content, jobs, companies, and users.
  * Combines query, filters, pagination, and sorting.
- * 
+ *
  * @example
  * ```ts
  * const schema = searchQuerySchema;
  * ```
  */
 export const searchQuerySchema = paginationSchema.extend({
-  q: queryStringSchema
-    .default('')
-    .describe('Search query string')
-    .meta({
-      description: 'Search query string',
-      example: 'ai agents',
-    }),
+  q: queryStringSchema.default('').describe('Search query string').meta({
+    description: 'Search query string',
+    example: 'ai agents',
+  }),
   categories: csvListSchema
     .optional()
     .describe('Comma-separated list of content categories to filter by')
@@ -374,13 +377,10 @@ export const searchQuerySchema = paginationSchema.extend({
       description: 'Comma-separated list of content categories to filter by',
       example: 'agents,mcp',
     }),
-  tags: csvListSchema
-    .optional()
-    .describe('Comma-separated list of tags to filter by')
-    .meta({
-      description: 'Comma-separated list of tags to filter by',
-      example: 'ai,automation',
-    }),
+  tags: csvListSchema.optional().describe('Comma-separated list of tags to filter by').meta({
+    description: 'Comma-separated list of tags to filter by',
+    example: 'ai,automation',
+  }),
   authors: csvListSchema
     .optional()
     .describe('Comma-separated list of author slugs to filter by')
@@ -406,47 +406,32 @@ export const searchQuerySchema = paginationSchema.extend({
       description: 'Entity types to include in search',
       example: ['content', 'job'],
     }),
-  sort: sortSchema
-    .default('relevance')
-    .describe('Sort order for results')
-    .meta({
-      description: 'Sort order for results',
-      example: 'relevance',
-    }),
+  sort: sortSchema.default('relevance').describe('Sort order for results').meta({
+    description: 'Sort order for results',
+    example: 'relevance',
+  }),
   // Job filters
-  job_category: jobCategorySchemaLocal
-    .optional()
-    .describe('Job category filter')
-    .meta({
-      description: 'Job category filter',
-      example: 'engineering',
-    }),
-  job_employment: jobEmploymentSchema
-    .optional()
-    .describe('Job employment type filter')
-    .meta({
-      description: 'Job employment type filter',
-      example: 'full-time',
-    }),
-  job_experience: jobExperienceSchema
-    .optional()
-    .describe('Job experience level filter')
-    .meta({
-      description: 'Job experience level filter',
-      example: 'mid-level',
-    }),
-  job_remote: booleanQuerySchema
-    .optional()
-    .describe('Filter for remote jobs (true/false)')
-    .meta({
-      description: 'Filter for remote jobs (true/false)',
-      example: true,
-    }),
+  job_category: jobCategorySchemaLocal.optional().describe('Job category filter').meta({
+    description: 'Job category filter',
+    example: 'engineering',
+  }),
+  job_employment: jobEmploymentSchema.optional().describe('Job employment type filter').meta({
+    description: 'Job employment type filter',
+    example: 'full-time',
+  }),
+  job_experience: jobExperienceSchema.optional().describe('Job experience level filter').meta({
+    description: 'Job experience level filter',
+    example: 'mid-level',
+  }),
+  job_remote: booleanQuerySchema.optional().describe('Filter for remote jobs (true/false)').meta({
+    description: 'Filter for remote jobs (true/false)',
+    example: true,
+  }),
 });
 
 /**
  * Content export format schema
- * 
+ *
  * @example
  * ```ts
  * const schema = z.object({ format: contentFormatSchema });
@@ -464,7 +449,7 @@ export const contentFormatSchema = z
 
 /**
  * Content detail query schema (for /api/content/[category]/[slug])
- * 
+ *
  * @example
  * ```ts
  * const schema = contentDetailQuerySchema;
@@ -506,7 +491,7 @@ export const contentDetailQuerySchema = z.object({
 
 /**
  * Category content format schema
- * 
+ *
  * @example
  * ```ts
  * const schema = z.object({ format: categoryContentFormatSchema });
@@ -538,7 +523,7 @@ export const feedTypeSchema = z
 
 /**
  * Feed query parameters schema
- * 
+ *
  * @example
  * ```ts
  * const schema = feedQuerySchema;
@@ -555,9 +540,12 @@ export const feedQuerySchema = z.object({
       return val.trim().toLowerCase();
     })
     .nullable()
-    .describe('Content category filter (use "changelog" for changelog feeds, omit or "all" for all content)')
+    .describe(
+      'Content category filter (use "changelog" for changelog feeds, omit or "all" for all content)'
+    )
     .meta({
-      description: 'Content category filter (use "changelog" for changelog feeds, omit or "all" for all content)',
+      description:
+        'Content category filter (use "changelog" for changelog feeds, omit or "all" for all content)',
       example: 'skills',
     }),
 });
@@ -577,7 +565,7 @@ export const trendingTabSchema = z
 
 /**
  * Trending query parameters schema
- * 
+ *
  * @example
  * ```ts
  * const schema = trendingQuerySchema;

@@ -6,11 +6,7 @@ import {
   primaryButtonStyle,
   secondaryButtonStyle,
 } from '../common-styles';
-import {
-  type EmailCtaPreset,
-  type EmailCtaPresetId,
-  getCtaPreset,
-} from '../config/cta-presets';
+import { type EmailCtaPreset, type EmailCtaPresetId, getCtaPreset } from '../config/cta-presets';
 import { buildEmailCtaUrl } from '../cta';
 import type { EmailUTMParams } from '../utm-templates';
 
@@ -23,7 +19,12 @@ export interface EmailCtaButtonProps {
   overrides?: Partial<EmailCtaPreset>;
 }
 
-export function EmailCtaButton({ utm, preset, variant = 'primary', overrides }: EmailCtaButtonProps) {
+export function EmailCtaButton({
+  utm,
+  preset,
+  variant = 'primary',
+  overrides,
+}: EmailCtaButtonProps) {
   const presetConfig = { ...getCtaPreset(preset), ...(overrides ?? {}) };
   const href = buildEmailCtaUrl(
     presetConfig.href,
@@ -40,7 +41,10 @@ export function EmailCtaButton({ utm, preset, variant = 'primary', overrides }: 
   );
 }
 
-export interface EmailCtaSectionButtonConfig extends Omit<EmailCtaButtonProps, 'utm' | 'overrides'> {
+export interface EmailCtaSectionButtonConfig extends Omit<
+  EmailCtaButtonProps,
+  'utm' | 'overrides'
+> {
   overrides?: Partial<EmailCtaPreset>;
   // Note: 'key' is a special React prop and should NOT be included in this interface
   // It's handled separately in the map function

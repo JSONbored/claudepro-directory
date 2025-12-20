@@ -43,9 +43,7 @@ describe('useScrollLock', () => {
   });
 
   it('should initialize with isLocked=false when autoLock is false', () => {
-    const { result } = renderHook(() =>
-      useScrollLock({ autoLock: false } as UseScrollLockOptions)
-    );
+    const { result } = renderHook(() => useScrollLock({ autoLock: false } as UseScrollLockOptions));
 
     expect(result.current.isLocked).toBe(false);
     expect(mockBody.style.overflow).toBe('');
@@ -58,9 +56,7 @@ describe('useScrollLock', () => {
   });
 
   it('should unlock scroll on unmount when autoLock is true', () => {
-    const { unmount } = renderHook(() =>
-      useScrollLock({ autoLock: true } as UseScrollLockOptions)
-    );
+    const { unmount } = renderHook(() => useScrollLock({ autoLock: true } as UseScrollLockOptions));
 
     expect(mockBody.style.overflow).toBe('hidden');
 
@@ -70,9 +66,7 @@ describe('useScrollLock', () => {
   });
 
   it('should lock scroll when lock is called', () => {
-    const { result } = renderHook(() =>
-      useScrollLock({ autoLock: false } as UseScrollLockOptions)
-    );
+    const { result } = renderHook(() => useScrollLock({ autoLock: false } as UseScrollLockOptions));
 
     expect(result.current.isLocked).toBe(false);
 
@@ -85,9 +79,7 @@ describe('useScrollLock', () => {
   });
 
   it('should unlock scroll when unlock is called', () => {
-    const { result } = renderHook(() =>
-      useScrollLock({ autoLock: false } as UseScrollLockOptions)
-    );
+    const { result } = renderHook(() => useScrollLock({ autoLock: false } as UseScrollLockOptions));
 
     act(() => {
       result.current.lock();
@@ -107,9 +99,7 @@ describe('useScrollLock', () => {
   it('should restore original overflow style on unlock', () => {
     mockBody.style.overflow = 'scroll';
 
-    const { result } = renderHook(() =>
-      useScrollLock({ autoLock: false } as UseScrollLockOptions)
-    );
+    const { result } = renderHook(() => useScrollLock({ autoLock: false } as UseScrollLockOptions));
 
     act(() => {
       result.current.lock();
@@ -127,9 +117,7 @@ describe('useScrollLock', () => {
   it('should restore original paddingRight style on unlock', () => {
     mockBody.style.paddingRight = '20px';
 
-    const { result } = renderHook(() =>
-      useScrollLock({ autoLock: false } as UseScrollLockOptions)
-    );
+    const { result } = renderHook(() => useScrollLock({ autoLock: false } as UseScrollLockOptions));
 
     act(() => {
       result.current.lock();
@@ -264,9 +252,7 @@ describe('useScrollLock', () => {
     // @ts-expect-error - Intentionally setting document to undefined for SSR test
     global.document = undefined;
 
-    const { result } = renderHook(() =>
-      useScrollLock({ autoLock: false } as UseScrollLockOptions)
-    );
+    const { result } = renderHook(() => useScrollLock({ autoLock: false } as UseScrollLockOptions));
 
     expect(result.current.isLocked).toBe(false);
 
@@ -282,9 +268,7 @@ describe('useScrollLock', () => {
   });
 
   it('should handle multiple lock/unlock cycles', () => {
-    const { result } = renderHook(() =>
-      useScrollLock({ autoLock: false } as UseScrollLockOptions)
-    );
+    const { result } = renderHook(() => useScrollLock({ autoLock: false } as UseScrollLockOptions));
 
     act(() => {
       result.current.lock();
@@ -329,9 +313,7 @@ describe('useScrollLock', () => {
   });
 
   it('should handle unlock when never locked', () => {
-    const { result } = renderHook(() =>
-      useScrollLock({ autoLock: false } as UseScrollLockOptions)
-    );
+    const { result } = renderHook(() => useScrollLock({ autoLock: false } as UseScrollLockOptions));
 
     act(() => {
       result.current.unlock();

@@ -31,9 +31,9 @@ import { actionClient } from '@heyclaude/web-runtime/actions';
 
 ### Directory Structure
 
--   `src/app/`: Next.js App Router files (`page.tsx`, `layout.tsx`, `route.ts`).
--   `src/components/`: **Visual-only** components specific to this app.
--   `public/`: Static assets.
+- `src/app/`: Next.js App Router files (`page.tsx`, `layout.tsx`, `route.ts`).
+- `src/components/`: **Visual-only** components specific to this app.
+- `public/`: Static assets.
 
 ## Development
 

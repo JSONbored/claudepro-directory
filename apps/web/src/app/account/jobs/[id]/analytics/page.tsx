@@ -68,7 +68,9 @@ const jobStatusBadgeMap: Record<JobStatus, string> = {
 };
 
 function getStatusColor(status: JobStatus): string {
-  return jobStatusBadgeMap[status];
+  const color = jobStatusBadgeMap[status];
+  if (color) return color;
+  return jobStatusBadgeMap['draft'] as string;
 }
 
 /**
@@ -208,7 +210,7 @@ async function JobAnalyticsPageContent({
   const clickCount = job.click_count ?? 0;
   const ctr = viewCount > 0 ? ((clickCount / viewCount) * 100).toFixed(2) : '0.00';
 
-  const status: JobStatus = job.status;
+  const status: JobStatus = job.status ?? 'draft';
 
   // Final summary log
   userLogger.info(

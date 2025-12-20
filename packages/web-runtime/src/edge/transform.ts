@@ -1,6 +1,6 @@
 'use server';
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
 import type { ContentHeadingMetadata } from '../types/component.types.ts';
@@ -72,9 +72,10 @@ export async function highlightCodeEdge(
     return await highlightCode(code, language, { showLineNumbers });
   } catch (error) {
     const normalized = normalizeError(error, 'Local highlighting failed, using fallback');
-    logger.warn({ err: normalized,
-      language,
-      codePreview: code.slice(0, 80), }, 'Local highlighting failed, using fallback');
+    logger.warn(
+      { err: normalized, language, codePreview: code.slice(0, 80) },
+      'Local highlighting failed, using fallback'
+    );
 
     const escapedCode = code
       .replace(/&/g, '&amp;')

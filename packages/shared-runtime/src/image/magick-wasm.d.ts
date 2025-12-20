@@ -19,10 +19,7 @@ declare module '@imagemagick/magick-wasm' {
   }
 
   export const ImageMagick: {
-    read(
-      data: Uint8Array,
-      callback: (img: IMagickImage) => Uint8Array
-    ): Uint8Array;
+    read(data: Uint8Array, callback: (img: IMagickImage) => Uint8Array): Uint8Array;
   };
 
   export function initializeImageMagick(wasmBytes: Uint8Array): Promise<void>;

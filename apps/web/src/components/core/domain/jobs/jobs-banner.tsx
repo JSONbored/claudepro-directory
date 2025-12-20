@@ -6,19 +6,13 @@
 
 'use client';
 
-import type { newsletter_source } from '@heyclaude/data-layer/prisma';
+import type { newsletter_source } from '@prisma/client';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useConfetti } from '@heyclaude/web-runtime/hooks/use-confetti';
 import { useNewsletter } from '@heyclaude/web-runtime/hooks/use-newsletter';
 import { Check, ChevronUp, Loader2, Mail, Send, TrendingUp } from '@heyclaude/web-runtime/icons';
-import {
-  cn,
-  Button,
-  Card,
-  CardContent,
-  Input,
-} from '@heyclaude/web-runtime/ui';
+import { cn, Button, Card, CardContent, Input } from '@heyclaude/web-runtime/ui';
 import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
@@ -48,7 +42,11 @@ const isValidEmail = (email: string): boolean => {
  */
 export function JobsPromo() {
   const { fireConfetti } = useConfetti();
-  const { value: showNewsletterForm, toggle: toggleShowNewsletterForm, setFalse: setShowNewsletterFormFalse } = useBoolean();
+  const {
+    value: showNewsletterForm,
+    toggle: toggleShowNewsletterForm,
+    setFalse: setShowNewsletterFormFalse,
+  } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
 
   const { email, setEmail, isSubmitting, subscribe, error, reset } = useNewsletter({
@@ -118,11 +116,7 @@ export function JobsPromo() {
 
           {/* Growth Metrics */}
           <motion.div
-            className={cn(
-              'space-y-2',
-              'bg-card/50 card-base border-border/50',
-              'p-3'
-            )}
+            className={cn('space-y-2', 'bg-card/50 card-base border-border/50', 'p-3')}
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
             transition={{ delay: STAGGER.relaxed, ...SPRING.smooth }}
@@ -170,9 +164,7 @@ export function JobsPromo() {
                 animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                 transition={{ delay: STAGGER.loose + i * STAGGER.fast }}
               >
-                <Check
-                  className={cn('flex-shrink-0', 'mt-0.5', 'h-4 w-4', 'text-accent')}
-                />
+                <Check className={cn('flex-shrink-0', 'mt-0.5', 'h-4 w-4', 'text-accent')} />
                 <span className="text-sm">{text}</span>
               </motion.div>
             ))}
@@ -190,7 +182,7 @@ export function JobsPromo() {
                   ...SPRING.gentle,
                   mass: 0.8,
                 }}
-                className="border-border/50 space-y-3 card-base bg-card/30 p-4 overflow-hidden"
+                className="border-border/50 card-base bg-card/30 space-y-3 overflow-hidden p-4"
               >
                 <div className="space-y-1">
                   <h4 className="text-sm font-semibold">Get job alerts</h4>
@@ -214,7 +206,8 @@ export function JobsPromo() {
                         'border-border bg-background',
                         'transition-all duration-200 ease-out',
                         'focus:border-accent focus:ring-accent/20 focus:ring-2',
-                        error && 'border-destructive focus:border-destructive focus:ring-destructive/20',
+                        error &&
+                          'border-destructive focus:border-destructive focus:ring-destructive/20',
                         isSubmitting && 'cursor-not-allowed opacity-60',
                         showSubmitButton && 'pr-14'
                       )}
@@ -231,7 +224,7 @@ export function JobsPromo() {
                           type="button"
                           disabled
                           className={cn(
-                            'absolute right-2 top-1/2 -translate-y-1/2',
+                            'absolute top-1/2 right-2 -translate-y-1/2',
                             'flex h-8 w-8 items-center justify-center rounded-md',
                             'bg-color-newsletter-bg text-background',
                             'cursor-not-allowed'
@@ -249,17 +242,23 @@ export function JobsPromo() {
                           key="submit"
                           type="submit"
                           className={cn(
-                            'absolute right-2 top-1/2 -translate-y-1/2',
+                            'absolute top-1/2 right-2 -translate-y-1/2',
                             'flex h-8 w-8 items-center justify-center rounded-md',
                             'bg-color-newsletter-bg text-background',
                             'shadow-sm transition-all duration-200',
                             'hover:bg-color-newsletter-bg-hover hover:shadow-md',
-                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-color-newsletter-bg focus-visible:ring-offset-2',
+                            'focus-visible:ring-color-newsletter-bg focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
                             'active:scale-95'
                           )}
-                          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }}
-                          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }}
-                          exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }}
+                          initial={
+                            shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }
+                          }
+                          animate={
+                            shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }
+                          }
+                          exit={
+                            shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }
+                          }
                           transition={SPRING.loading}
                           whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
                           whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
@@ -312,7 +311,7 @@ export function JobsPromo() {
             >
               <Button
                 asChild
-                className="w-full bg-color-newsletter-bg text-background hover:bg-color-newsletter-bg-hover"
+                className="bg-color-newsletter-bg text-background hover:bg-color-newsletter-bg-hover w-full"
               >
                 <Link href={ROUTES.PARTNER}>View Pricing & Post Job</Link>
               </Button>

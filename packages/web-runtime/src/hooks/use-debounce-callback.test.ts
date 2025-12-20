@@ -68,9 +68,7 @@ describe('useDebounceCallback', () => {
 
   it('should handle leading edge execution', () => {
     const callback = vi.fn();
-    const { result } = renderHook(() =>
-      useDebounceCallback(callback, 500, { leading: true })
-    );
+    const { result } = renderHook(() => useDebounceCallback(callback, 500, { leading: true }));
 
     result.current('arg1');
 
@@ -80,9 +78,7 @@ describe('useDebounceCallback', () => {
 
   it('should handle maxWait option', () => {
     const callback = vi.fn();
-    const { result } = renderHook(() =>
-      useDebounceCallback(callback, 1000, { maxWait: 2000 })
-    );
+    const { result } = renderHook(() => useDebounceCallback(callback, 1000, { maxWait: 2000 }));
 
     result.current('arg1');
 

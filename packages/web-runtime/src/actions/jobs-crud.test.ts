@@ -1,21 +1,44 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { workplace_type, job_plan, job_tier } from '@prisma/client';
 
-// Mock safe-action middleware
-vi.mock('./safe-action.ts', () => {
-  const createActionMock = (schema: any) => ({
-    action: vi.fn((handler) => {
+// Mock safe-action middleware - standardized pattern
+// Pattern: authedAction.inputSchema().metadata().action()
+vi.mock('./safe-action.ts', async () => {
+  // Import mocked logActionFailure
+  const { logActionFailure } = await import('../errors.ts');
+  
+  // Define all factory functions inside the mock factory to avoid hoisting issues
+  const createActionHandler = (inputSchema: any) => {
+    return vi.fn((handler: any) => {
       return async (input: unknown) => {
-        const parsed = schema.parse(input);
-        return handler({ parsedInput: parsed, ctx: { userId: 'test-user-id' } });
+        try {
+          const parsed = inputSchema ? inputSchema.parse(input) : input;
+          const result = await handler({
+            parsedInput: parsed,
+            ctx: { userId: 'test-user-id', userEmail: 'test@example.com', authToken: 'test-token' },
+          });
+          return result;
+        } catch (error) {
+          // Simulate middleware error handling - logActionFailure is called by middleware
+          logActionFailure('jobsCrud', error, { userId: 'test-user-id' });
+          throw error;
+        }
       };
-    }),
+    });
+  };
+
+  const createMetadataResult = (inputSchema: any) => ({
+    action: createActionHandler(inputSchema),
+  });
+
+  const createInputSchemaResult = (inputSchema: any) => ({
+    metadata: vi.fn((metadata: any) => createMetadataResult(inputSchema)),
+    action: createActionHandler(inputSchema),
   });
 
   return {
     authedAction: {
-      metadata: vi.fn(() => ({
-        inputSchema: vi.fn((schema) => createActionMock(schema)),
-      })),
+      inputSchema: vi.fn((schema: any) => createInputSchemaResult(schema)),
     },
   };
 });
@@ -37,6 +60,10 @@ vi.mock('../errors.ts', () => ({
     const err = error instanceof Error ? error : new Error(String(error));
     err.name = actionName;
     return err;
+  }),
+  normalizeError: vi.fn((error: unknown, message?: string) => {
+    if (error instanceof Error) return error;
+    return new Error(message || String(error));
   }),
 }));
 
@@ -66,14 +93,25 @@ describe('jobs-crud', () => {
         const { createJob } = await import('./jobs-crud.ts');
         const { runRpc } = await import('./run-rpc-instance.ts');
 
+        // Mock result must match CreateJobWithPaymentReturns structure
         vi.mocked(runRpc).mockResolvedValue({
-          job_id: 'job-123',
-          company_id: 'company-123',
+          success: true,
+          job_id: '123e4567-e89b-12d3-a456-426614174000',
+          company_id: '223e4567-e89b-12d3-a456-426614174001',
+          payment_amount: null,
+          requires_payment: null,
+          tier: 'standard' as const,
+          plan: 'one-time' as const,
         } as any);
 
+        // Use valid enum values from Prisma
+        const validTier = Object.values(job_tier)[0];
+        const validPlan = Object.values(job_plan)[0];
+        const validWorkplace = Object.values(workplace_type)[0];
+        
         const result = await createJob({
-          tier: 'standard',
-          plan: 'monthly',
+          tier: validTier,
+          plan: validPlan,
           title: 'Test Job',
           description: 'Test description',
           company: 'Test Company',
@@ -84,8 +122,8 @@ describe('jobs-crud', () => {
           location: 'Remote',
           salary: '$100k',
           remote: true,
-          workplace: 'remote',
-          experience: 'mid',
+          workplace: validWorkplace,
+          experience: 'intermediate',
           tags: ['react', 'typescript'],
           requirements: ['5 years experience'],
           benefits: ['health insurance'],
@@ -104,14 +142,14 @@ describe('jobs-crud', () => {
         const { runRpc } = await import('./run-rpc-instance.ts');
 
         const mockResult = {
-          job_id: 'job-123',
+          job_id: '123e4567-e89b-12d3-a456-426614174000',
           company_id: 'company-123',
         };
         vi.mocked(runRpc).mockResolvedValue(mockResult as any);
 
         await createJob({
           tier: 'standard',
-          plan: 'monthly',
+          plan: 'one-time',
           title: 'Test Job',
           company: 'Test Company',
         });
@@ -121,7 +159,7 @@ describe('jobs-crud', () => {
           expect.objectContaining({
             p_user_id: 'test-user-id',
             p_tier: 'standard',
-            p_plan: 'monthly',
+            p_plan: 'one-time',
             p_job_data: expect.objectContaining({
               title: 'Test Job',
               company: 'Test Company',
@@ -145,7 +183,7 @@ describe('jobs-crud', () => {
         await expect(
           createJob({
             tier: 'standard',
-            plan: 'monthly',
+            plan: 'one-time',
           })
         ).rejects.toThrow();
 
@@ -159,21 +197,27 @@ describe('jobs-crud', () => {
         const { runRpc } = await import('./run-rpc-instance.ts');
         const { revalidatePath, revalidateTag } = await import('next/cache');
 
+        // Mock result must match CreateJobWithPaymentReturns structure
         vi.mocked(runRpc).mockResolvedValue({
-          job_id: 'job-123',
-          company_id: 'company-123',
+          success: true,
+          job_id: '123e4567-e89b-12d3-a456-426614174000',
+          company_id: '223e4567-e89b-12d3-a456-426614174001',
+          payment_amount: null,
+          requires_payment: null,
+          tier: 'standard' as const,
+          plan: 'one-time' as const,
         } as any);
 
         await createJob({
           tier: 'standard',
-          plan: 'monthly',
+          plan: 'one-time',
         });
 
         expect(revalidatePath).toHaveBeenCalledWith('/jobs');
         expect(revalidatePath).toHaveBeenCalledWith('/account/jobs');
-        expect(revalidateTag).toHaveBeenCalledWith('job-job-123', 'default');
-        expect(revalidateTag).toHaveBeenCalledWith('company-company-123', 'default');
-        expect(revalidateTag).toHaveBeenCalledWith('company-id-company-123', 'default');
+        expect(revalidateTag).toHaveBeenCalledWith('job-123e4567-e89b-12d3-a456-426614174000', 'default');
+        expect(revalidateTag).toHaveBeenCalledWith('company-223e4567-e89b-12d3-a456-426614174001', 'default');
+        expect(revalidateTag).toHaveBeenCalledWith('company-id-223e4567-e89b-12d3-a456-426614174001', 'default');
         expect(revalidateTag).toHaveBeenCalledWith('jobs', 'default');
         expect(revalidateTag).toHaveBeenCalledWith('companies', 'default');
       });
@@ -186,7 +230,7 @@ describe('jobs-crud', () => {
         const { onJobCreated } = await import('./hooks/job-hooks.ts');
 
         const mockResult = {
-          job_id: 'job-123',
+          job_id: '123e4567-e89b-12d3-a456-426614174000',
           company_id: 'company-123',
         };
         vi.mocked(runRpc).mockResolvedValue(mockResult as any);
@@ -194,7 +238,7 @@ describe('jobs-crud', () => {
 
         await createJob({
           tier: 'standard',
-          plan: 'monthly',
+          plan: 'one-time',
         });
 
         expect(onJobCreated).toHaveBeenCalled();
@@ -219,7 +263,12 @@ describe('jobs-crud', () => {
         const { updateJob } = await import('./jobs-crud.ts');
         const { runRpc } = await import('./run-rpc-instance.ts');
 
-        vi.mocked(runRpc).mockResolvedValue({ success: true } as any);
+        // Mock result must match UpdateJobResult structure
+        vi.mocked(runRpc).mockResolvedValue({
+          success: true,
+          job_id: '123e4567-e89b-12d3-a456-426614174000',
+          message: null,
+        } as any);
 
         await updateJob({
           job_id: '123e4567-e89b-12d3-a456-426614174000',
@@ -235,17 +284,22 @@ describe('jobs-crud', () => {
         const { updateJob } = await import('./jobs-crud.ts');
         const { runRpc } = await import('./run-rpc-instance.ts');
 
-        vi.mocked(runRpc).mockResolvedValue({ success: true } as any);
+        // Mock result must match UpdateJobResult structure
+        vi.mocked(runRpc).mockResolvedValue({
+          success: true,
+          job_id: '123e4567-e89b-12d3-a456-426614174000',
+          message: null,
+        } as any);
 
         await updateJob({
-          job_id: 'job-123',
+          job_id: '123e4567-e89b-12d3-a456-426614174000',
           updates: { title: 'New Title' },
         });
 
         expect(runRpc).toHaveBeenCalledWith(
           'update_job',
           {
-            p_job_id: 'job-123',
+            p_job_id: '123e4567-e89b-12d3-a456-426614174000',
             p_user_id: 'test-user-id',
             p_updates: { title: 'New Title' },
           },
@@ -263,17 +317,23 @@ describe('jobs-crud', () => {
         const { runRpc } = await import('./run-rpc-instance.ts');
         const { revalidatePath, revalidateTag } = await import('next/cache');
 
-        vi.mocked(runRpc).mockResolvedValue({ success: true } as any);
+        // Mock result must match UpdateJobResult structure
+        vi.mocked(runRpc).mockResolvedValue({
+          success: true,
+          job_id: '123e4567-e89b-12d3-a456-426614174000',
+          message: null,
+        } as any);
 
         await updateJob({
-          job_id: 'job-123',
+          job_id: '123e4567-e89b-12d3-a456-426614174000',
           updates: {},
         });
 
         expect(revalidatePath).toHaveBeenCalledWith('/account/jobs');
-        expect(revalidatePath).toHaveBeenCalledWith('/account/jobs/job-123/edit');
+        expect(revalidatePath).toHaveBeenCalledWith('/account/jobs/123e4567-e89b-12d3-a456-426614174000/edit');
         expect(revalidatePath).toHaveBeenCalledWith('/jobs');
-        expect(revalidateTag).toHaveBeenCalledWith('job-job-123', 'default');
+        // Tags: ['job-${job_id}', 'jobs', 'companies']
+        expect(revalidateTag).toHaveBeenCalledWith('job-123e4567-e89b-12d3-a456-426614174000', 'default');
         expect(revalidateTag).toHaveBeenCalledWith('jobs', 'default');
         expect(revalidateTag).toHaveBeenCalledWith('companies', 'default');
       });
@@ -298,16 +358,21 @@ describe('jobs-crud', () => {
         const { deleteJob } = await import('./jobs-crud.ts');
         const { runRpc } = await import('./run-rpc-instance.ts');
 
-        vi.mocked(runRpc).mockResolvedValue({ success: true } as any);
+        // Mock result must match UpdateJobResult structure
+        vi.mocked(runRpc).mockResolvedValue({
+          success: true,
+          job_id: '123e4567-e89b-12d3-a456-426614174000',
+          message: null,
+        } as any);
 
         await deleteJob({
-          job_id: 'job-123',
+          job_id: '123e4567-e89b-12d3-a456-426614174000',
         });
 
         expect(runRpc).toHaveBeenCalledWith(
           'delete_job',
           {
-            p_job_id: 'job-123',
+            p_job_id: '123e4567-e89b-12d3-a456-426614174000',
             p_user_id: 'test-user-id',
           },
           expect.objectContaining({
@@ -324,15 +389,21 @@ describe('jobs-crud', () => {
         const { runRpc } = await import('./run-rpc-instance.ts');
         const { revalidatePath, revalidateTag } = await import('next/cache');
 
-        vi.mocked(runRpc).mockResolvedValue({ success: true } as any);
+        // Mock result must match DeleteJobResult structure
+        vi.mocked(runRpc).mockResolvedValue({
+          success: true,
+          job_id: '123e4567-e89b-12d3-a456-426614174000',
+          message: null,
+        } as any);
 
         await deleteJob({
-          job_id: 'job-123',
+          job_id: '123e4567-e89b-12d3-a456-426614174000',
         });
 
         expect(revalidatePath).toHaveBeenCalledWith('/jobs');
         expect(revalidatePath).toHaveBeenCalledWith('/account/jobs');
-        expect(revalidateTag).toHaveBeenCalledWith('job-job-123', 'default');
+        // Tags: ['job-${job_id}', 'jobs', 'companies']
+        expect(revalidateTag).toHaveBeenCalledWith('job-123e4567-e89b-12d3-a456-426614174000', 'default');
         expect(revalidateTag).toHaveBeenCalledWith('jobs', 'default');
         expect(revalidateTag).toHaveBeenCalledWith('companies', 'default');
       });

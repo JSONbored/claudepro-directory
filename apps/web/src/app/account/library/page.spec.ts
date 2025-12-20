@@ -3,7 +3,7 @@ import { setupTestWithErrorTracking } from '../../../../../config/tests/utils/er
 
 /**
  * Comprehensive Account Library Page E2E Tests
- * 
+ *
  * Tests ALL functionality on the account library page with strict error checking:
  * - Authentication flow (redirect to login if not authenticated)
  * - Tab navigation (Bookmarks, Collections)
@@ -26,7 +26,7 @@ test.describe('Account Library Page', () => {
     // Set up error tracking and navigate to library page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/account/library');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -43,13 +43,13 @@ test.describe('Account Library Page', () => {
     // Check for sign-in prompt or redirect
     const signInPrompt = page.getByText(/sign in required|please sign in/i);
     const signInButton = page.getByRole('button', { name: /sign in|go to login/i });
-    
+
     // Either sign-in prompt should be visible, or we should be redirected
     const hasSignInPrompt = await signInPrompt.isVisible().catch(() => false);
     const hasSignInButton = await signInButton.isVisible().catch(() => false);
     const currentUrl = page.url();
     const isRedirected = currentUrl.includes('/login') || currentUrl.includes('/auth');
-    
+
     // Should have sign-in prompt OR be redirected
     expect(hasSignInPrompt || hasSignInButton || isRedirected).toBe(true);
   });
@@ -57,7 +57,7 @@ test.describe('Account Library Page', () => {
   test('should render library page when authenticated', async ({ page }) => {
     // Note: This test assumes user is authenticated
     // In a real scenario, you'd set up authentication state first
-    
+
     // Check main element is present
     const mainElement = page.getByRole('main');
     await expect(mainElement).toBeVisible();
@@ -70,18 +70,18 @@ test.describe('Account Library Page', () => {
   test('should display tab navigation (Bookmarks, Collections)', async ({ page }) => {
     // Wait for tabs to load
     await page.waitForTimeout(2000);
-    
+
     // Check for tablist
     const tabsList = page.getByRole('tablist');
     const hasTabs = await tabsList.isVisible().catch(() => false);
-    
+
     if (hasTabs) {
       await expect(tabsList).toBeVisible();
-      
+
       // Check for common tab names
       const bookmarksTab = page.getByRole('tab', { name: /bookmarks/i });
       const collectionsTab = page.getByRole('tab', { name: /collections/i });
-      
+
       // At least one tab should be visible
       const tabCount = await page.getByRole('tab').count();
       expect(tabCount).toBeGreaterThan(0);
@@ -91,23 +91,23 @@ test.describe('Account Library Page', () => {
   test('should switch between Bookmarks and Collections tabs', async ({ page }) => {
     // Wait for tabs to load
     await page.waitForTimeout(2000);
-    
+
     const tabsList = page.getByRole('tablist');
     const hasTabs = await tabsList.isVisible().catch(() => false);
-    
+
     if (hasTabs) {
       const tabs = page.getByRole('tab');
       const tabCount = await tabs.count();
-      
+
       if (tabCount > 1) {
         // Click second tab
         const secondTab = tabs.nth(1);
         await secondTab.click();
         await page.waitForTimeout(500);
-        
+
         // Verify tab is selected
         await expect(secondTab).toHaveAttribute('aria-selected', 'true');
-        
+
         // Verify content changed (tab panel should update)
         const tabPanel = page.getByRole('tabpanel');
         await expect(tabPanel).toBeVisible();
@@ -118,11 +118,11 @@ test.describe('Account Library Page', () => {
   test('should display bookmarks when on Bookmarks tab', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for bookmarks section
     const bookmarksSection = page.getByText(/bookmarks|saved items/i);
     const hasBookmarks = await bookmarksSection.isVisible().catch(() => false);
-    
+
     // Section may or may not be visible depending on data
     // But page should render
     const main = page.getByRole('main');
@@ -132,19 +132,19 @@ test.describe('Account Library Page', () => {
   test('should display collections when on Collections tab', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Switch to Collections tab if available
     const collectionsTab = page.getByRole('tab', { name: /collections/i });
     const hasCollectionsTab = await collectionsTab.isVisible().catch(() => false);
-    
+
     if (hasCollectionsTab) {
       await collectionsTab.click();
       await page.waitForTimeout(500);
-      
+
       // Check for collections section
       const collectionsSection = page.getByText(/collections|your collections/i);
       const hasCollections = await collectionsSection.isVisible().catch(() => false);
-      
+
       // Section may or may not be visible depending on data
       // But page should render
       const main = page.getByRole('main');
@@ -155,34 +155,40 @@ test.describe('Account Library Page', () => {
   test('should handle empty state for bookmarks', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for empty state message (if no bookmarks)
     const emptyState = page.getByText(/no bookmarks|no saved items|start bookmarking/i);
     const hasEmptyState = await emptyState.isVisible().catch(() => false);
-    
+
     // Empty state may or may not be visible, but page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
   test('should handle empty state for collections', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Switch to Collections tab if available
     const collectionsTab = page.getByRole('tab', { name: /collections/i });
     const hasCollectionsTab = await collectionsTab.isVisible().catch(() => false);
-    
+
     if (hasCollectionsTab) {
       await collectionsTab.click();
       await page.waitForTimeout(500);
-      
+
       // Check for empty state message (if no collections)
       const emptyState = page.getByText(/no collections|create your first collection/i);
       const hasEmptyState = await emptyState.isVisible().catch(() => false);
-      
+
       // Empty state may or may not be visible, but page should not error
-      const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+      const hasError = await page
+        .locator('[data-nextjs-error]')
+        .isVisible()
+        .catch(() => false);
       expect(hasError).toBe(false);
     }
   });
@@ -190,19 +196,21 @@ test.describe('Account Library Page', () => {
   test('should display create collection button', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Switch to Collections tab if available
     const collectionsTab = page.getByRole('tab', { name: /collections/i });
     const hasCollectionsTab = await collectionsTab.isVisible().catch(() => false);
-    
+
     if (hasCollectionsTab) {
       await collectionsTab.click();
       await page.waitForTimeout(500);
-      
+
       // Check for create collection button
-      const createButton = page.getByRole('button', { name: /create|new collection|add collection/i });
+      const createButton = page.getByRole('button', {
+        name: /create|new collection|add collection/i,
+      });
       const hasCreateButton = await createButton.isVisible().catch(() => false);
-      
+
       // Create button may or may not be visible depending on implementation
       // But page should render
       const main = page.getByRole('main');
@@ -232,7 +240,7 @@ test.describe('Account Library Page', () => {
     // Check tabs are accessible on mobile
     const tabsList = page.getByRole('tablist');
     const hasTabs = await tabsList.isVisible().catch(() => false);
-    
+
     if (hasTabs) {
       await expect(tabsList).toBeVisible();
     }
@@ -241,16 +249,16 @@ test.describe('Account Library Page', () => {
   test('should handle loading states', async ({ page }) => {
     // Navigate to page
     await page.goto('/account/library');
-    
+
     // Check for loading indicators (may flash quickly)
     const loadingIndicator = page.locator('[aria-busy="true"], [data-loading="true"]');
     const hasLoading = await loadingIndicator.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });
@@ -267,8 +275,11 @@ test.describe('Account Library Page', () => {
     const hasMain = await main.isVisible().catch(() => false);
     const errorCard = page.getByText(/unable to load your library|couldn.*t load/i);
     const hasErrorCard = await errorCard.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error card, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -285,8 +296,11 @@ test.describe('Account Library Page', () => {
     const hasMain = await main.isVisible().catch(() => false);
     const errorCard = page.getByText(/unable to load your library|couldn.*t load/i);
     const hasErrorCard = await errorCard.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error card, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -303,7 +317,10 @@ test.describe('Account Library Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -319,7 +336,10 @@ test.describe('Account Library Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -335,7 +355,10 @@ test.describe('Account Library Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -351,7 +374,10 @@ test.describe('Account Library Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -367,7 +393,10 @@ test.describe('Account Library Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -391,16 +420,16 @@ test.describe('Account Library Page', () => {
     // This tests that Loading component is shown during Suspense
     // The component uses Suspense with Loading fallback
     await page.goto('/account/library');
-    
+
     // Check for loading state (may flash quickly)
     const loading = page.locator('[data-loading], [aria-busy="true"]');
     const hasLoading = await loading.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });
@@ -417,7 +446,10 @@ test.describe('Account Library Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 });

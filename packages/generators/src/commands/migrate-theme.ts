@@ -1,9 +1,9 @@
 #!/usr/bin/env tsx
 /**
  * Theme Migration Command
- * 
+ *
  * Safely migrates CSS files from data-theme to .dark class system
- * 
+ *
  * Usage:
  *   pnpm exec heyclaude-migrate-theme --dry-run  # Analyze only
  *   pnpm exec heyclaude-migrate-theme              # Apply changes
@@ -15,7 +15,9 @@ import { fileURLToPath } from 'node:url';
 import * as postcss from 'postcss';
 
 import { logger } from '../toolkit/logger.ts';
-import themeMigrationPlugin, { transformations } from '../utils/css-migration/postcss-theme-migration.ts';
+import themeMigrationPlugin, {
+  transformations,
+} from '../utils/css-migration/postcss-theme-migration.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const SCRIPT_DIR = join(__filename, '..');
@@ -43,7 +45,7 @@ function findCSSFiles(dir: string, fileList: string[] = []): string[] {
 
 export async function runMigrateTheme(dryRun: boolean = false): Promise<void> {
   const cssFiles = findCSSFiles(join(PROJECT_ROOT, 'apps/web/src'));
-  
+
   logger.info(`Found ${cssFiles.length} CSS files`);
 
   if (dryRun) {
@@ -63,12 +65,12 @@ export async function runMigrateTheme(dryRun: boolean = false): Promise<void> {
       // Clear transformations for this file
       transformations.length = 0;
 
-      const result = await postcss.default([
-        themeMigrationPlugin({ dryRun, verbose: true }),
-      ]).process(content, {
-        from: file,
-        to: file,
-      });
+      const result = await postcss
+        .default([themeMigrationPlugin({ dryRun, verbose: true })])
+        .process(content, {
+          from: file,
+          to: file,
+        });
 
       const fileTransformations = transformations.length;
       totalTransformations += fileTransformations;

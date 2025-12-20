@@ -40,8 +40,8 @@ const SheetOverlay = ({
   <SheetPrimitive.Overlay
     className={cn(
       'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[60]',
-              // Vercel's minimal backdrop
-              'bg-black/50 backdrop-blur-sm', // Subtle blur
+      // Vercel's minimal backdrop
+      'bg-black/50 backdrop-blur-sm', // Subtle blur
       'will-change-opacity',
       'data-[state=closed]:animate-out data-[state=open]:animate-in',
       'data-[state=closed]:duration-200 data-[state=open]:duration-300',
@@ -73,7 +73,8 @@ const sheetVariants = cva(
 );
 
 interface SheetContentProps
-  extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
+  extends
+    React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {}
 
 /** Spring animation config from design system */
@@ -90,16 +91,16 @@ const SheetContent = ({
 }) => {
   // Internal ref to monitor data-state attribute
   const internalRef = useRef<React.ElementRef<typeof SheetPrimitive.Content> | null>(null);
-  
+
   // Scroll lock: Lock body scroll when sheet is open
   // Use manual control to sync with Radix's open state via data-state attribute
   const { lock, unlock } = useScrollLock({ autoLock: false });
-  
+
   // Monitor data-state attribute to sync scroll lock with sheet open state
   useEffect(() => {
     const element = internalRef.current;
     if (!element) return;
-    
+
     // Check initial state
     const isOpen = element.getAttribute('data-state') === 'open';
     if (isOpen) {
@@ -107,7 +108,7 @@ const SheetContent = ({
     } else {
       unlock();
     }
-    
+
     // Watch for state changes
     const observer = new MutationObserver(() => {
       const currentState = element.getAttribute('data-state');
@@ -117,30 +118,35 @@ const SheetContent = ({
         unlock();
       }
     });
-    
+
     observer.observe(element, {
       attributes: true,
       attributeFilter: ['data-state'],
     });
-    
+
     return () => {
       observer.disconnect();
       unlock(); // Ensure unlock on unmount
     };
   }, [lock, unlock]);
-  
+
   // Combine refs: support both internal and external refs
-  const combinedRef = useCallback((node: React.ElementRef<typeof SheetPrimitive.Content> | null) => {
-    internalRef.current = node;
-    if (ref) {
-      if (typeof ref === 'function') {
-        ref(node);
-      } else {
-        (ref as React.MutableRefObject<React.ElementRef<typeof SheetPrimitive.Content> | null>).current = node;
+  const combinedRef = useCallback(
+    (node: React.ElementRef<typeof SheetPrimitive.Content> | null) => {
+      internalRef.current = node;
+      if (ref) {
+        if (typeof ref === 'function') {
+          ref(node);
+        } else {
+          (
+            ref as React.MutableRefObject<React.ElementRef<typeof SheetPrimitive.Content> | null>
+          ).current = node;
+        }
       }
-    }
-  }, [ref]);
-  
+    },
+    [ref]
+  );
+
   // Drag controls for gesture handling
   const dragControls = useDragControls();
 
@@ -208,8 +214,8 @@ const SheetContent = ({
           dragMomentum={false}
           onDragEnd={handleDragEnd}
           transition={springSmooth}
-          {...(sheetSide === 'left' || sheetSide === 'right' 
-            ? { 
+          {...(sheetSide === 'left' || sheetSide === 'right'
+            ? {
                 initial: { y: '-50%' },
                 animate: { y: '-50%' },
               }
@@ -218,7 +224,7 @@ const SheetContent = ({
           {children}
           <SheetPrimitive.Close
             data-radix-sheet-close={true}
-            className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
+            className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none"
           >
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
@@ -231,10 +237,7 @@ const SheetContent = ({
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn('flex flex-col space-y-2 text-center sm:text-left', className)}
-    {...props}
-  />
+  <div className={cn('flex flex-col space-y-2 text-center sm:text-left', className)} {...props} />
 );
 SheetHeader.displayName = 'SheetHeader';
 
@@ -255,7 +258,7 @@ const SheetTitle = ({
 }) => (
   <SheetPrimitive.Title
     ref={ref}
-    className={cn('font-semibold text-foreground text-lg', className)}
+    className={cn('text-foreground text-lg font-semibold', className)}
     {...props}
   />
 );

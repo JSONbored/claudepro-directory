@@ -6,11 +6,11 @@ import { motion } from 'motion/react';
 import * as React from 'react';
 import { MICROINTERACTIONS } from '../../design-system/index.ts';
 
-const TooltipProvider = ({ 
-  children, 
+const TooltipProvider = ({
+  children,
   delayDuration = 300,
   skipDelayDuration = 0,
-  ...props 
+  ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Provider>) => {
   // Ensure consistent defaults to prevent hydration mismatches
   return (
@@ -25,9 +25,7 @@ const TooltipProvider = ({
 };
 
 const Tooltip = ({ children, ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) => (
-  <TooltipPrimitive.Root {...props}>
-    {children}
-  </TooltipPrimitive.Root>
+  <TooltipPrimitive.Root {...props}>{children}</TooltipPrimitive.Root>
 );
 
 const TooltipTrigger = TooltipPrimitive.Trigger;
@@ -37,18 +35,14 @@ const TooltipContent = ({
   sideOffset = 4,
   ...props
 }: React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>) => (
-  <TooltipPrimitive.Content
-    sideOffset={sideOffset}
-    asChild
-    {...props}
-  >
+  <TooltipPrimitive.Content sideOffset={sideOffset} asChild {...props}>
     <motion.div
       initial={MICROINTERACTIONS.tooltip.initial}
       animate={MICROINTERACTIONS.tooltip.animate}
       exit={MICROINTERACTIONS.tooltip.exit}
       transition={MICROINTERACTIONS.tooltip.transition}
       className={cn(
-        'z-50 overflow-hidden rounded-md border border-border/50 bg-popover px-3 py-1.5 text-popover-foreground text-sm shadow-lg shadow-black/20 dark:shadow-black/40 backdrop-blur-sm',
+        'border-border/50 bg-popover text-popover-foreground z-50 overflow-hidden rounded-md border px-3 py-1.5 text-sm shadow-lg shadow-black/20 backdrop-blur-sm dark:shadow-black/40',
         className
       )}
     >

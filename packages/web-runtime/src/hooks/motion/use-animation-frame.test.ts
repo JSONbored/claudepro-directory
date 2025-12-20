@@ -32,10 +32,9 @@ describe('useAnimationFrame', () => {
     const callback1 = vi.fn();
     const callback2 = vi.fn();
 
-    const { rerender } = renderHook(
-      ({ cb }) => useAnimationFrame(cb),
-      { initialProps: { cb: callback1 } }
-    );
+    const { rerender } = renderHook(({ cb }) => useAnimationFrame(cb), {
+      initialProps: { cb: callback1 },
+    });
 
     expect(mockUseAnimationFrame).toHaveBeenCalledWith(callback1);
 

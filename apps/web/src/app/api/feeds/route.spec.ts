@@ -243,7 +243,9 @@ test.describe('GET /api/feeds', () => {
     }
   });
 
-  test('should handle invalid category (not changelog and not valid content category)', async ({ request }) => {
+  test('should handle invalid category (not changelog and not valid content category)', async ({
+    request,
+  }) => {
     // This tests the validation: category && category !== 'changelog' && !toContentCategory(category)
     const response = await request.get('/api/feeds?type=rss&category=invalid-category-123');
 
@@ -272,7 +274,9 @@ test.describe('GET /api/feeds', () => {
     expect(contentType).toContain('application/atom+xml');
   });
 
-  test('should handle all feed generation paths (content RSS with category)', async ({ request }) => {
+  test('should handle all feed generation paths (content RSS with category)', async ({
+    request,
+  }) => {
     const response = await request.get('/api/feeds?type=rss&category=skills');
 
     // Should return 200 (success) or 400 (if category invalid)
@@ -284,7 +288,9 @@ test.describe('GET /api/feeds', () => {
     }
   });
 
-  test('should handle all feed generation paths (content Atom with category)', async ({ request }) => {
+  test('should handle all feed generation paths (content Atom with category)', async ({
+    request,
+  }) => {
     const response = await request.get('/api/feeds?type=atom&category=skills');
 
     // Should return 200 (success) or 400 (if category invalid)
@@ -296,7 +302,9 @@ test.describe('GET /api/feeds', () => {
     }
   });
 
-  test('should handle all feed generation paths (content RSS without category)', async ({ request }) => {
+  test('should handle all feed generation paths (content RSS without category)', async ({
+    request,
+  }) => {
     const response = await request.get('/api/feeds?type=rss');
 
     expect(response.status()).toBe(200);
@@ -305,7 +313,9 @@ test.describe('GET /api/feeds', () => {
     expect(contentType).toContain('application/rss+xml');
   });
 
-  test('should handle all feed generation paths (content Atom without category)', async ({ request }) => {
+  test('should handle all feed generation paths (content Atom without category)', async ({
+    request,
+  }) => {
     const response = await request.get('/api/feeds?type=atom');
 
     expect(response.status()).toBe(200);

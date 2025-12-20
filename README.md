@@ -91,7 +91,6 @@ Browse specialized AI agents designed for specific tasks and workflows using Cla
 - **[UI UX Design Expert Agent](https://claudepro.directory/agents/ui-ux-design-expert-agent)** - Specialized in creating beautiful, intuitive user interfaces and exceptional user experiences
 - **[Web Async Agent Coordinator](https://claudepro.directory/agents/web-async-agent-coordinator)** - Web-based asynchronous agent coordinator leveraging Claude Code for Web's browser interface for managing long-running autonomous coding tasks with async workflows.
 
-
 ## 📦 Collections (9)
 
 Curated bundles of related content items organized by theme, use case, or workflow for easy discovery.
@@ -105,7 +104,6 @@ Curated bundles of related content items organized by theme, use case, or workfl
 - **[Debugging & Troubleshooting System](https://claudepro.directory/collections/debugging-troubleshooting-system)** - Complete debugging toolkit for identifying, analyzing, and resolving complex software issues. Combines AI-assisted debugging with powerful diagnostic commands.
 - **[Developer Productivity Booster](https://claudepro.directory/collections/developer-productivity-booster)** - Maximize your development efficiency with automated workflows, smart backups, code formatting, and enhanced visual feedback. This collection combines productivity hooks, informative statuslines, and time-saving commands for a streamlined development experience.
 - **[Production Readiness Toolkit](https://claudepro.directory/collections/production-readiness-toolkit)** - Comprehensive system for ensuring code quality, security, and compliance before production deployment. Includes automated code reviews, complexity monitoring, backup strategies, and production-grade rules for professional development teams.
-
 
 ## 🔧 Commands (27)
 
@@ -138,7 +136,6 @@ Custom slash commands to enhance your Claude Code workflow with reusable prompts
 - **[Test Advanced](https://claudepro.directory/commands/test-advanced)** - Advanced test suite generator with property-based testing, mutation testing, and intelligent test case discovery
 - **[V0 Generate](https://claudepro.directory/commands/v0-generate)** - Generate production-ready React components from natural language using V0.dev patterns with shadcn/ui, TailwindCSS, and TypeScript
 - **[Zod Audit](https://claudepro.directory/commands/zod-audit)** - Production codebase auditor specialized in Zod schema validation coverage, security vulnerability detection, and dead code elimination
-
 
 ## 🪝 Hooks (66)
 
@@ -211,7 +208,6 @@ Event-driven automation hooks that trigger during Claude Code operations.
 - **[Webpack Bundle Analyzer](https://claudepro.directory/hooks/webpack-bundle-analyzer)** - Analyzes webpack bundle size when webpack config or entry files are modified
 - **[Workflow Completion Report](https://claudepro.directory/hooks/workflow-completion-report)** - Generates a comprehensive report when Claude Code workflow stops, including files modified, tests run, and git status
 
-
 ## ⚙️ MCP Servers (40)
 
 Model Context Protocol servers that extend Claude's capabilities with external tools and data sources.
@@ -257,7 +253,6 @@ Model Context Protocol servers that extend Claude's capabilities with external t
 - **[Workato MCP Server](https://claudepro.directory/mcp/workato-mcp-server)** - Access any application, workflows, or data via Workato's integration platform
 - **[Zapier MCP Server](https://claudepro.directory/mcp/zapier-mcp-server)** - Connect to nearly 8,000 apps through Zapier's automation platform
 
-
 ## 📜 Rules (31)
 
 Custom rules to guide Claude's behavior and responses in your projects.
@@ -294,7 +289,6 @@ Custom rules to guide Claude's behavior and responses in your projects.
 - **[Wcag Accessibility Auditor](https://claudepro.directory/rules/wcag-accessibility-auditor)** - Expert in WCAG 2.2 Level AA accessibility compliance, automated testing tools, ARIA patterns, and inclusive design for web applications
 - **[Windsurf AI Native IDE Patterns](https://claudepro.directory/rules/windsurf-ai-native-ide-patterns)** - Windsurf AI-native IDE specialist with Cascade AI, multi-file context awareness, and Flow collaboration patterns for Claude integration
 
-
 ## 🤖 Skills (26)
 
 Task-focused capability guides for Claude (PDF, DOCX, PPTX, XLSX, and more) with requirements and runnable examples.
@@ -325,7 +319,6 @@ Task-focused capability guides for Claude (PDF, DOCX, PPTX, XLSX, and more) with
 - **[Website Content Crawler and Summarizer](https://claudepro.directory/skills/website-crawler-summarizer)** - Crawl domains respectfully, extract readable content, dedupe, and generate structured summaries.
 - **[Windsurf AI-Native Collaborative Development](https://claudepro.directory/skills/windsurf-collaborative-development)** - Master collaborative AI-assisted development with Windsurf IDE's Cascade AI, multi-file context awareness, and Flow patterns for team workflows.
 - **[Zod Schema Validator](https://claudepro.directory/skills/zod-schema-validator)** - Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference.
-
 
 ## 🔧 Statuslines (26)
 
@@ -358,15 +351,13 @@ Customizable status line configurations for Claude Code CLI with real-time sessi
 - **[Starship Powerline Theme](https://claudepro.directory/statuslines/starship-powerline-theme)** - Starship-inspired powerline statusline with Nerd Font glyphs, modular segments, and Git integration for Claude Code
 - **[Workspace Project Depth Indicator](https://claudepro.directory/statuslines/workspace-project-depth-indicator)** - Claude Code workspace depth tracker showing monorepo navigation level, project root detection, and directory depth visualization for context awareness.
 
-
-
 ---
 
 <div align="center">
 
 ## 📈 Activity
 
-![RepoBeats Analytics](https://repobeats.axiom.co/api/embed/c2b1b7e36103fba7a650c6d7f2777cba7338a1f7.svg "Repobeats analytics image")
+![RepoBeats Analytics](https://repobeats.axiom.co/api/embed/c2b1b7e36103fba7a650c6d7f2777cba7338a1f7.svg 'Repobeats analytics image')
 
 ## 👥 Contributors
 

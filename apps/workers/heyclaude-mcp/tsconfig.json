@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../../config/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    // Note: rootDir removed to allow importing from packages/database-types
+    // TypeScript will infer rootDir from included files
+    "types": ["@cloudflare/workers-types"],
+    "composite": false,
+    "skipLibCheck": true,
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "paths": {
+      "@heyclaude/database-types/postgres-types": ["../../../packages/database-types/src/postgres-types/index.ts"],
+      "@heyclaude/database-types/postgres-types/*": ["../../../packages/database-types/src/postgres-types/*"]
+    }
+  },
+  "include": ["src/**/*", "src/types/**/*.d.ts"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
+  "references": [
+    {
+      "path": "../../../packages/database-types/tsconfig.json"
+    }
+  ]
+}

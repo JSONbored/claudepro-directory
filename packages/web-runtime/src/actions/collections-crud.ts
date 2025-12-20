@@ -1,6 +1,6 @@
 /**
  * Collections CRUD Actions - Generated from single config
- * 
+ *
  * Consolidated create/update/delete actions using createCrudActionHandlers factory.
  * Uses next-safe-action directly with factory helpers for business logic.
  * Eliminates ~200 lines of repetitive boilerplate.
@@ -56,42 +56,42 @@ const crudHandlers = createCrudActionHandlers<
   },
   transformArgs: {
     create: (input, ctx) => ({
-      'p_action': 'create',
-      'p_user_id': ctx.userId,
-      'p_create_data': {
-        'name': input.name,
-        'slug': input.slug,
-        'description': input.description,
-        'is_public': input.is_public,
+      p_action: 'create',
+      p_user_id: ctx.userId,
+      p_create_data: {
+        name: input.name,
+        slug: input.slug,
+        description: input.description,
+        is_public: input.is_public,
       },
-      'p_update_data': null,
-      'p_delete_id': null,
-      'p_add_item_data': null,
-      'p_remove_item_id': null,
+      p_update_data: null,
+      p_delete_id: null,
+      p_add_item_data: null,
+      p_remove_item_id: null,
     }),
     update: (input, ctx) => ({
-      'p_action': 'update',
-      'p_user_id': ctx.userId,
-      'p_create_data': null,
-      'p_update_data': {
-        'id': input.id,
-        'name': input.name,
-        'slug': input.slug,
-        'description': input.description,
-        'is_public': input.is_public,
+      p_action: 'update',
+      p_user_id: ctx.userId,
+      p_create_data: null,
+      p_update_data: {
+        id: input.id,
+        name: input.name,
+        slug: input.slug,
+        description: input.description,
+        is_public: input.is_public,
       },
-      'p_delete_id': null,
-      'p_add_item_data': null,
-      'p_remove_item_id': null,
+      p_delete_id: null,
+      p_add_item_data: null,
+      p_remove_item_id: null,
     }),
     delete: (input, ctx) => ({
-      'p_action': 'delete',
-      'p_user_id': ctx.userId,
-      'p_create_data': null,
-      'p_update_data': null,
-      'p_delete_id': input.delete_id,
-      'p_add_item_data': null,
-      'p_remove_item_id': null,
+      p_action: 'delete',
+      p_user_id: ctx.userId,
+      p_create_data: null,
+      p_update_data: null,
+      p_delete_id: input.delete_id,
+      p_add_item_data: null,
+      p_remove_item_id: null,
     }),
   },
   cacheInvalidation: {

@@ -19,7 +19,7 @@ export const AnimatedSpan = ({ children, delay = 0, className, ...props }: Anima
     initial={{ opacity: 0, y: -5 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: DURATION.default, delay: delay / 1000 }}
-    className={cn('grid font-normal text-sm tracking-tight', className)}
+    className={cn('grid text-sm font-normal tracking-tight', className)}
     {...props}
   >
     {children}
@@ -67,18 +67,21 @@ export const TypingAnimation = ({
   }, delay);
 
   // Use useInterval for typing animation
-  useInterval(() => {
-    if (!started) return;
-    if (typingIndex < children.length) {
-      setDisplayedText(children.substring(0, typingIndex + 1));
-      setTypingIndex((prev) => prev + 1);
-    }
-  }, started && typingIndex < children.length ? duration : null);
+  useInterval(
+    () => {
+      if (!started) return;
+      if (typingIndex < children.length) {
+        setDisplayedText(children.substring(0, typingIndex + 1));
+        setTypingIndex((prev) => prev + 1);
+      }
+    },
+    started && typingIndex < children.length ? duration : null
+  );
 
   return (
     <MotionComponent
       ref={elementRef}
-      className={cn('font-normal text-sm tracking-tight', className)}
+      className={cn('text-sm font-normal tracking-tight', className)}
       {...props}
     >
       {displayedText}
@@ -95,11 +98,11 @@ export const Terminal = ({ children, className }: TerminalProps) => {
   return (
     <div
       className={cn(
-        'z-0 w-full overflow-hidden rounded-xl border border-border bg-background',
+        'border-border bg-background z-0 w-full overflow-hidden rounded-xl border',
         className
       )}
     >
-      <div className="flex flex-col gap-y-2 border-border border-b p-4">
+      <div className="border-border flex flex-col gap-y-2 border-b p-4">
         <div className="flex flex-row gap-x-2">
           <div className="h-2 w-2 rounded-full bg-red-500" />
           <div className="h-2 w-2 rounded-full bg-yellow-500" />

@@ -1,5 +1,5 @@
 import 'server-only';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@prisma/client';
 import { type GetRelatedContentReturns } from '@heyclaude/database-types/postgres-types';
 
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';

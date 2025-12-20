@@ -24,7 +24,7 @@ test.describe('GET /api/company', () => {
     if (response.status() === 200) {
       // Validate response matches OpenAPI spec
       await expectOpenApiResponse(response, '/api/v1/company', 'GET');
-      
+
       const data = await response.json();
 
       // Validate response structure

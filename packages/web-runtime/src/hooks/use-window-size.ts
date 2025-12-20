@@ -82,9 +82,7 @@ export interface WindowSize {
  * if (!width || !height) return <Loading />;
  * ```
  */
-export function useWindowSize(
-  options: UseWindowSizeOptions = {}
-): WindowSize {
+export function useWindowSize(options: UseWindowSizeOptions = {}): WindowSize {
   const { initializeWithValue = true, debounceDelay } = options;
 
   const [size, setSize] = useState<WindowSize>(() => {

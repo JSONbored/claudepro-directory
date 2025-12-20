@@ -82,18 +82,18 @@ export function ParticlesBackground({
     const setCanvasSize = () => {
       const baseWidth = canvas.offsetWidth;
       const baseHeight = canvas.offsetHeight;
-      
+
       // Calculate scaled dimensions
       const scaledWidth = baseWidth * window.devicePixelRatio;
       const scaledHeight = baseHeight * window.devicePixelRatio;
-      
+
       // Cap dimensions to browser maximum
       const cappedWidth = Math.min(scaledWidth, MAX_CANVAS_SIZE);
       const cappedHeight = Math.min(scaledHeight, MAX_CANVAS_SIZE);
-      
+
       canvas.width = cappedWidth;
       canvas.height = cappedHeight;
-      
+
       // Only scale if dimensions are within limits
       if (scaledWidth <= MAX_CANVAS_SIZE && scaledHeight <= MAX_CANVAS_SIZE) {
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
@@ -152,7 +152,7 @@ export function ParticlesBackground({
       ? () => {
           const canvas = canvasRef.current;
           if (!canvas) return;
-          
+
           const ctx = canvas.getContext('2d');
           if (!ctx) return;
 
@@ -183,12 +183,7 @@ export function ParticlesBackground({
       : undefined
   );
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="pointer-events-none absolute inset-0 z-0 opacity-50"
-    />
-  );
+  return <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 z-0 opacity-50" />;
 }
 
 /**

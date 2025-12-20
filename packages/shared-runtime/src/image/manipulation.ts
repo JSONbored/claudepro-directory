@@ -1,12 +1,12 @@
 /**
  * Image Manipulation Utilities
- * 
+ *
  * Core wrappers for magick-wasm (ImageMagick WebAssembly) operations.
  * These utilities are designed for use in Supabase Edge Functions (Deno runtime).
- * 
+ *
  * Based on Supabase Edge Functions image manipulation guide:
  * https://supabase.com/docs/guides/functions/examples/image-manipulation
- * 
+ *
  * NOTE: This file uses Deno-only APIs and packages. Type checking is relaxed
  * for this file since it's only used in Edge Functions (Deno runtime).
  */
@@ -57,10 +57,7 @@ export async function ensureImageMagickInitialized(): Promise<void> {
     // Load WASM bytes from the package (following Supabase example pattern)
     // Deno.readFile is available via the Deno namespace declaration above
     const wasmBytes = await Deno.readFile(
-      new URL(
-        'magick.wasm',
-        import.meta.resolve('@imagemagick/magick-wasm'),
-      ),
+      new URL('magick.wasm', import.meta.resolve('@imagemagick/magick-wasm'))
     );
     await initializeImageMagick(wasmBytes);
     initialized = true;
@@ -84,14 +81,14 @@ export interface ImageProcessOptions {
   /** Quality for JPEG/WebP (1-100, default: 85) */
   quality?: number;
   /** Resize dimensions (width, height). If only one provided, maintains aspect ratio. */
-  resize?: { height?: number; width?: number; };
+  resize?: { height?: number; width?: number };
   /** Strip metadata (default: true) */
   stripMetadata?: boolean;
 }
 
 /**
  * Process an image with various transformations
- * 
+ *
  * @param imageData - Input image as Uint8Array
  * @param options - Processing options
  * @returns Processed image as Uint8Array
@@ -144,7 +141,7 @@ export async function processImage(
 /**
  * Optimize an image (resize, compress, strip metadata)
  * Useful for logos, thumbnails, etc.
- * 
+ *
  * @param imageData - Input image as Uint8Array
  * @param maxDimension - Maximum width or height (maintains aspect ratio)
  * @param format - Output format (default: PNG - matches Supabase example)
@@ -168,7 +165,7 @@ export async function optimizeImage(
 
 /**
  * Resize an image to specific dimensions
- * 
+ *
  * @param imageData - Input image as Uint8Array
  * @param width - Target width
  * @param height - Target height
@@ -189,16 +186,16 @@ export async function resizeImage(
 
 /**
  * Get image dimensions without processing
- * 
+ *
  * @param imageData - Input image as Uint8Array
  * @returns Object with width and height
  */
 export async function getImageDimensions(
   imageData: Uint8Array
-): Promise<{ height: number; width: number; }> {
+): Promise<{ height: number; width: number }> {
   await ensureImageMagickInitialized();
 
-  let dimensions: null | { height: number; width: number; } = null;
+  let dimensions: null | { height: number; width: number } = null;
 
   ImageMagick.read(imageData, (img: IMagickImage) => {
     dimensions = {
@@ -220,7 +217,7 @@ export async function getImageDimensions(
 
 /**
  * Convert image format
- * 
+ *
  * @param imageData - Input image as Uint8Array
  * @param targetFormat - Target format
  * @param quality - Quality for JPEG/WebP (default: 85)

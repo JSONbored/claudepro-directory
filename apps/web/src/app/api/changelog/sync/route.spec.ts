@@ -312,11 +312,11 @@ test.describe('POST /api/changelog/sync', () => {
 
     if (response.status() === 200) {
       const data = await response.json();
-      
+
       // Should have success and id
       expect(data).toHaveProperty('success');
       expect(data).toHaveProperty('id');
-      
+
       // May have different messages for new vs existing entries
       expect(data).toHaveProperty('message');
     }

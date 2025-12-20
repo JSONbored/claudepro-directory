@@ -22,10 +22,13 @@
  */
 
 import 'server-only';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@prisma/client';
 import { APP_CONFIG } from '@heyclaude/shared-runtime';
 import {
-  createOptionsHandler as createApiOptionsHandler, createFormatHandlerRoute, type FormatHandlerConfig, type RouteHandlerContext,
+  createOptionsHandler as createApiOptionsHandler,
+  createFormatHandlerRoute,
+  type FormatHandlerConfig,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { contentDetailQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import {
@@ -446,19 +449,22 @@ export const GET = createFormatHandlerRoute<ContentDetailFormat, ContentDetailQu
           contentDetailResponseSchema,
           changelogResponseSchema,
           z.string().describe('Markdown or LLMs.txt format (plain text)'),
-          z.object({
-            bucket: z.string(),
-            category: z.string(),
-            download_url: z.string().url(),
-            note: z.string(),
-            object_path: z.string(),
-            slug: z.string(),
-          }).describe('Storage metadata format'),
+          z
+            .object({
+              bucket: z.string(),
+              category: z.string(),
+              download_url: z.string().url(),
+              note: z.string(),
+              object_path: z.string(),
+              slug: z.string(),
+            })
+            .describe('Storage metadata format'),
         ]),
         headers: {
           'Content-Type': {
             schema: { type: 'string' },
-            description: 'Content type (application/json for json, text/markdown for markdown, text/plain for llms, application/json for storage)',
+            description:
+              'Content type (application/json for json, text/markdown for markdown, text/plain for llms, application/json for storage)',
           },
           'Cache-Control': {
             schema: { type: 'string' },

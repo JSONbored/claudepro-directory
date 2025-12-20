@@ -25,10 +25,7 @@ import { sendJobLifecycleEmail } from './functions/email/job-lifecycle';
 import { handleResendWebhook } from './functions/resend/webhook';
 
 // Dynamic drip campaigns
-import {
-  newsletterDripCampaign,
-  jobPostingDripCampaign,
-} from './functions/email/drip-campaigns';
+import { newsletterDripCampaign, jobPostingDripCampaign } from './functions/email/drip-campaigns';
 
 // Analytics functions (Phase 3)
 import { processPulseQueue } from './functions/analytics/pulse';

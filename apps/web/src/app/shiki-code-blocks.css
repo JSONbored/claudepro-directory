@@ -18,21 +18,23 @@
 .shiki {
   /* Base typography - using design tokens for consistency */
   /* Matches SEMANTIC_TYPOGRAPHY.code.block from design system */
-  font-family: "GeistMono", var(--font-geist-mono), ui-monospace, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-family:
+    'GeistMono', var(--font-geist-mono), ui-monospace, 'SF Mono', Consolas, 'Liberation Mono',
+    Menlo, monospace;
   font-size: 0.8125rem; /* 13px - matches FONT_SIZES.sm from design tokens */
   line-height: 1.625; /* ~1.6 - matches LINE_HEIGHTS.relaxed for code blocks (fixed terrible line spacing issue) */
   font-weight: 400; /* FONT_WEIGHTS.normal */
   letter-spacing: 0; /* LETTER_SPACING.normal */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  
+
   /* Layout - using design system spacing */
   margin: 0;
   padding: 0.75rem 0; /* 12px vertical padding */
   overflow-x: auto;
   background: transparent;
   color: inherit;
-  
+
   /* Code block container - using design system radius */
   border-radius: 0.5rem; /* 8px - matches standard code block radius */
 }
@@ -126,7 +128,7 @@
   padding: 0.75rem 0;
   overflow-x: auto;
   background: hsl(var(--background));
-  font-family: "GeistMono", var(--font-geist-mono), ui-monospace, "SF Mono", Consolas, monospace;
+  font-family: 'GeistMono', var(--font-geist-mono), ui-monospace, 'SF Mono', Consolas, monospace;
   font-size: 13px;
   line-height: 1.6; /* Fixed: Proper line spacing */
   -webkit-font-smoothing: antialiased;

@@ -1,15 +1,18 @@
 generator client {
   provider = "prisma-client"
-  output   = "../packages/database-types/src/prisma"
   engineType = "client"
   moduleFormat = "esm"
+  output   = "../node_modules/.prisma/client"
   // Preview features:
+  // - views: Enable support for database views (regular views, not materialized)
   // - relationJoins: Enable SQL JOINs for relation loading (performance optimization)
   // - schemaEngineDriverAdapters: Required for @prisma/adapter-pg compatibility
   // - postgresqlExtensions: Better support for PostgreSQL extensions (uuid-ossp, vector, pg_trgm, etc.)
   // Note: Prisma metrics ($metrics API) is available without a preview feature in Prisma 7.1.0+
-  previewFeatures = ["relationJoins", "schemaEngineDriverAdapters", "postgresqlExtensions"]
+  previewFeatures = ["views", "relationJoins", "schemaEngineDriverAdapters", "postgresqlExtensions"]
   // Note: improvedQueryRaw is now stable in Prisma 7.1.0+ and doesn't need to be in previewFeatures
+  // Note: Explicitly set to default output path (node_modules/.prisma/client) for standard Prisma setup
+  // Prisma 7.2.0 requires explicit output path even for default location
 }
 
 generator zod {
@@ -2774,5 +2777,56 @@ enum workplace_type {
   On_site @map("On site")
   Hybrid
 
+  @@schema("public")
+}
+
+// ============================================================================
+// Views (Regular views that read from materialized views for Prisma type safety)
+// ============================================================================
+// These views provide type-safe access to materialized views via Prisma Client.
+// The underlying materialized views (mv_content_list_slim, trending_searches)
+// must be refreshed manually for data updates.
+
+/// Regular view that reads from mv_content_list_slim materialized view.
+/// Used by Prisma for type-safe queries. The materialized view must be
+/// refreshed manually for data updates.
+view v_content_list_slim {
+  id                String   @db.Uuid
+  slug              String
+  title             String
+  display_title     String?
+  description       String?
+  author            String?
+  author_profile_url String?
+  category          String   // Cast from enum to text in materialized view
+  tags              String[]
+  source            String?  // Cast from enum to text in materialized view
+  source_table      String
+  created_at        DateTime @db.Timestamptz(6)
+  updated_at        DateTime @db.Timestamptz(6)
+  date_added        DateTime @db.Timestamptz(6)
+  view_count        Int      @default(0)
+  copy_count        Int      @default(0)
+  bookmark_count    Int      @default(0)
+  popularity_score  Decimal  @db.Decimal
+  trending_score    Int      @default(0)
+  sponsored_content_id String? @db.Uuid
+  sponsorship_tier   String?
+  is_sponsored      Boolean  @default(false)
+
+  @@map("v_content_list_slim")
+  @@schema("public")
+}
+
+/// Regular view that reads from trending_searches materialized view.
+/// Used by Prisma for type-safe queries. The materialized view must be
+/// refreshed manually for data updates.
+view v_trending_searches {
+  search_query  String
+  search_count  BigInt
+  last_searched DateTime @db.Timestamptz(6)
+  unique_users  BigInt
+
+  @@map("v_trending_searches")
   @@schema("public")
 }

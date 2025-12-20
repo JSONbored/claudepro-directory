@@ -28,7 +28,7 @@ test.describe('User Profile Page', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (navigation handled per test with different slugs)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -59,7 +59,7 @@ test.describe('User Profile Page', () => {
     // The component checks isValidSlug() and calls notFound() if invalid
     const invalidSlug = 'invalid-slug!!!';
     const response = await page.goto(`/u/${invalidSlug}`);
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -81,7 +81,7 @@ test.describe('User Profile Page', () => {
     // The component checks if (!profileData) and calls notFound()
     const invalidSlug = 'non-existent-user-12345';
     const response = await page.goto(`/u/${invalidSlug}`);
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -95,9 +95,15 @@ test.describe('User Profile Page', () => {
 
     // Page should render or show error boundary, but not crash
     const main = page.getByRole('main').or(page.locator('body'));
-    const hasMain = await main.first().isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasMain = await main
+      .first()
+      .isVisible()
+      .catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error boundary, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -114,7 +120,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -130,7 +139,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -146,7 +158,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -162,7 +177,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -178,7 +196,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -194,7 +215,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -210,7 +234,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -226,7 +253,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -242,7 +272,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -259,7 +292,10 @@ test.describe('User Profile Page', () => {
 
     // Follow button may or may not be visible depending on conditions
     // But page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -275,7 +311,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -291,7 +330,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -315,16 +357,16 @@ test.describe('User Profile Page', () => {
     // This tests that Loading component is shown during Suspense
     // The component uses Suspense with Loading fallback
     await page.goto('/u/test-user');
-    
+
     // Check for loading state (may flash quickly)
     const loading = page.locator('[data-loading], [aria-busy="true"]');
     const hasLoading = await loading.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main').or(page.locator('body'));
     await expect(main.first()).toBeVisible();
   });
@@ -341,7 +383,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -357,7 +402,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -373,7 +421,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -389,7 +440,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -405,7 +459,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -421,7 +478,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -437,7 +497,10 @@ test.describe('User Profile Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -454,7 +517,10 @@ test.describe('User Profile Page', () => {
 
     // Website link may or may not be visible depending on data
     // But page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -471,7 +537,10 @@ test.describe('User Profile Page', () => {
 
     // Contributions section may or may not be visible depending on data
     // But page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 

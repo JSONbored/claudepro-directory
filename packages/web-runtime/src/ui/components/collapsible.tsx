@@ -8,11 +8,12 @@ import { cn } from '../utils.ts';
 import { useBoolean } from '../../hooks/use-boolean.ts';
 import * as React from 'react';
 
-const Collapsible = ({ children, ...props }: React.ComponentProps<typeof CollapsiblePrimitive.Root>) => (
+const Collapsible = ({
+  children,
+  ...props
+}: React.ComponentProps<typeof CollapsiblePrimitive.Root>) => (
   <LayoutGroup>
-    <CollapsiblePrimitive.Root {...props}>
-      {children}
-    </CollapsiblePrimitive.Root>
+    <CollapsiblePrimitive.Root {...props}>{children}</CollapsiblePrimitive.Root>
   </LayoutGroup>
 );
 
@@ -27,7 +28,7 @@ const CollapsibleContent = ({
   // Radix sets data-state="open" when content is visible
   const { value: isOpen, setValue: setIsOpen } = useBoolean();
   const contentRef = React.useRef<HTMLDivElement>(null);
-  
+
   React.useEffect(() => {
     if (!contentRef.current) return;
     const observer = new MutationObserver(() => {
@@ -40,7 +41,7 @@ const CollapsibleContent = ({
     setIsOpen(state === 'open');
     return () => observer.disconnect();
   }, [setIsOpen]);
-  
+
   return (
     <CollapsiblePrimitive.CollapsibleContent {...props} asChild>
       <motion.div

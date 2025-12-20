@@ -3,8 +3,8 @@
  * Single RPC call to get_user_profile() replaces 6+ separate queries
  */
 
-import { ContentCategory } from '@heyclaude/data-layer/prisma';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import { content_category as ContentCategory } from '@prisma/client';
+import type { content_category } from '@prisma/client';
 import { type GetUserProfileReturns } from '@heyclaude/database-types/postgres-types';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { sanitizeSlug } from '@heyclaude/web-runtime/content';

@@ -1,4 +1,4 @@
-import type { job_plan, job_tier } from '@heyclaude/data-layer/prisma';
+import type { job_plan, job_tier } from '@prisma/client';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { normalizeError } from '../../errors';
 import { logger } from '../../logging/server.ts';
@@ -10,9 +10,18 @@ import { getService } from '../../data/service-factory';
  * Handles Polar checkout creation and emits job lifecycle events to Inngest
  */
 export async function onJobCreated(
-  result: { job_id: string | null; requires_payment: boolean | null; slug?: string | null | undefined },
+  result: {
+    job_id: string | null;
+    requires_payment: boolean | null;
+    slug?: string | null | undefined;
+  },
   ctx: { userId: string; userEmail?: string | undefined },
-  input: { plan?: string | null | undefined; tier?: string | null | undefined; title?: string | null | undefined; company?: string | null | undefined }
+  input: {
+    plan?: string | null | undefined;
+    tier?: string | null | undefined;
+    title?: string | null | undefined;
+    company?: string | null | undefined;
+  }
 ) {
   const jobId = result.job_id;
   const requiresPayment = result.requires_payment;
@@ -27,22 +36,27 @@ export async function onJobCreated(
   if (requiresPayment && jobId) {
     try {
       // Dynamic import to avoid circular deps or load issues
-      const { createPolarCheckout, getPolarProductPriceId } = await import(
-        '../../integrations/polar.ts'
-      );
+      const { createPolarCheckout, getPolarProductPriceId } =
+        await import('../../integrations/polar.ts');
 
       const productPriceId = getPolarProductPriceId(plan, tier);
 
       if (productPriceId) {
-        const baseUrl = getEnvVar('NEXT_PUBLIC_BASE_URL') || (env as Record<string, unknown>)['NEXT_PUBLIC_BASE_URL'] as string | undefined;
-        
+        const baseUrl =
+          getEnvVar('NEXT_PUBLIC_BASE_URL') ||
+          ((env as Record<string, unknown>)['NEXT_PUBLIC_BASE_URL'] as string | undefined);
+
         if (!baseUrl) {
-          const configError = new Error('NEXT_PUBLIC_BASE_URL environment variable is required for payment checkout');
-          logger.error({ err: configError, jobId,
-            userId: ctx.userId, }, 'NEXT_PUBLIC_BASE_URL is not configured');
+          const configError = new Error(
+            'NEXT_PUBLIC_BASE_URL environment variable is required for payment checkout'
+          );
+          logger.error(
+            { err: configError, jobId, userId: ctx.userId },
+            'NEXT_PUBLIC_BASE_URL is not configured'
+          );
           throw configError;
         }
-        
+
         const checkoutResult = await createPolarCheckout({
           productPriceId,
           jobId,
@@ -58,22 +72,23 @@ export async function onJobCreated(
             checkoutResult.error,
             'Failed to create Polar checkout'
           );
-          logger.error({ err: normalized, jobId,
-            userId: ctx.userId, }, 'Failed to create Polar checkout');
+          logger.error(
+            { err: normalized, jobId, userId: ctx.userId },
+            'Failed to create Polar checkout'
+          );
         } else {
           checkoutUrl = checkoutResult.url;
-          logger.info({ jobId,
-            sessionId: checkoutResult.sessionId,
-            checkoutUrl: checkoutResult.url, }, 'Polar checkout session created');
+          logger.info(
+            { jobId, sessionId: checkoutResult.sessionId, checkoutUrl: checkoutResult.url },
+            'Polar checkout session created'
+          );
         }
       } else {
-        logger.warn({ plan,
-          tier, }, 'Polar product price ID not configured');
+        logger.warn({ plan, tier }, 'Polar product price ID not configured');
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Polar integration error');
-      logger.error({ err: normalized, jobId,
-        userId: ctx.userId, }, 'Polar integration error');
+      logger.error({ err: normalized, jobId, userId: ctx.userId }, 'Polar integration error');
     }
   }
 
@@ -82,7 +97,7 @@ export async function onJobCreated(
   if (jobId) {
     try {
       const { inngest } = await import('../../inngest/client.ts');
-      
+
       await inngest.send({
         name: 'email/job-lifecycle',
         data: {
@@ -95,13 +110,11 @@ export async function onJobCreated(
         },
       });
 
-      logger.info({ jobId,
-        requiresPayment, }, 'Job created event sent to Inngest');
+      logger.info({ jobId, requiresPayment }, 'Job created event sent to Inngest');
     } catch (eventError) {
       // Log but don't throw - job was created successfully
       const normalized = normalizeError(eventError, 'Job created event failed');
-      logger.warn({ err: normalized,
-        jobId, }, 'Failed to send job created event to Inngest');
+      logger.warn({ err: normalized, jobId }, 'Failed to send job created event to Inngest');
     }
   }
 
@@ -123,12 +136,12 @@ export async function onJobUpdated(
 ) {
   try {
     const { inngest } = await import('../../inngest/client.ts');
-    
+
     // Check if this is a status change to 'active' (job published after payment)
     if (input.updates['status'] === 'active') {
       // Get job title: prefer result.title, then updates.title, then fetch from DB
       let jobTitle = result.title || String(input.updates['title'] || '');
-      
+
       if (!jobTitle) {
         // Fetch the actual title from the database using JobsService
         try {
@@ -141,7 +154,7 @@ export async function onJobUpdated(
           jobTitle = 'Job Listing';
         }
       }
-      
+
       // Emit job published event - triggers drip campaign
       await inngest.send({
         name: 'job/published',
@@ -154,12 +167,11 @@ export async function onJobUpdated(
         },
       });
 
-      logger.info({ jobId: result.job_id, }, 'Job published event sent to Inngest');
+      logger.info({ jobId: result.job_id }, 'Job published event sent to Inngest');
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Job update event failed');
-    logger.warn({ err: normalized,
-      jobId: result.job_id, }, 'Failed to send job update event');
+    logger.warn({ err: normalized, jobId: result.job_id }, 'Failed to send job update event');
   }
 
   return result;
@@ -174,8 +186,7 @@ export async function onJobDeleted(
   input: { job_id: string }
 ) {
   if (result.success) {
-    logger.info({ jobId: input.job_id,
-      userId: ctx.userId, }, 'Job deleted');
+    logger.info({ jobId: input.job_id, userId: ctx.userId }, 'Job deleted');
   }
 
   return result;
@@ -191,17 +202,17 @@ export async function onJobStatusToggled(
 ) {
   try {
     const { inngest } = await import('../../inngest/client.ts');
-    
+
     // Map status to lifecycle action
     const actionMap: Record<string, string> = {
-      'active': 'activated',
-      'paused': 'paused',
-      'expired': 'expired',
-      'draft': 'draft',
+      active: 'activated',
+      paused: 'paused',
+      expired: 'expired',
+      draft: 'draft',
     };
 
     const action = actionMap[input.new_status];
-    
+
     if (action) {
       await inngest.send({
         name: 'email/job-lifecycle',
@@ -212,14 +223,14 @@ export async function onJobStatusToggled(
         },
       });
 
-      logger.info({ jobId: result.job_id,
-        newStatus: input.new_status,
-        action, }, 'Job status change event sent to Inngest');
+      logger.info(
+        { jobId: result.job_id, newStatus: input.new_status, action },
+        'Job status change event sent to Inngest'
+      );
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Job status event failed');
-    logger.warn({ err: normalized,
-      jobId: result.job_id, }, 'Failed to send job status event');
+    logger.warn({ err: normalized, jobId: result.job_id }, 'Failed to send job status event');
   }
 
   return result;

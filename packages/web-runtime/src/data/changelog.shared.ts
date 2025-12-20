@@ -1,5 +1,5 @@
-import { type changelog_category } from '@heyclaude/data-layer/prisma';
-import { ChangelogCategory } from '@heyclaude/data-layer/prisma';
+import { changelog_category as ChangelogCategory } from '@prisma/client';
+import type { changelog_category } from '@prisma/client';
 import { z } from 'zod';
 
 import { normalizeError } from '../errors.ts';
@@ -29,6 +29,7 @@ const changesSchema = z
     Removed: z.array(changeItemSchemaTransformed).optional(),
     Security: z.array(changeItemSchemaTransformed).optional(),
   })
+  .strict() // Reject extra keys - this ensures invalid category keys are caught
   .refine(
     (data) => {
       const dataKeys = Object.keys(data);

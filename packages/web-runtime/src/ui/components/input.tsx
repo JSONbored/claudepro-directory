@@ -14,14 +14,18 @@ export interface InputProps extends React.ComponentProps<'input'> {
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, error, errorId, onFocus, onBlur, ...props }, ref) => {
-    const { value: isFocused, setTrue: setIsFocusedTrue, setFalse: setIsFocusedFalse } = useBoolean();
+    const {
+      value: isFocused,
+      setTrue: setIsFocusedTrue,
+      setFalse: setIsFocusedFalse,
+    } = useBoolean();
 
     return (
       <div className="relative">
         {/* Beautiful orange glow effect on focus - HeyClaude brand color */}
         {isFocused && (
           <motion.div
-            className="absolute -inset-0.5 -z-10 rounded-md bg-gradient-to-r from-accent/60 via-accent/40 to-accent/20 blur-md"
+            className="from-accent/60 via-accent/40 to-accent/20 absolute -inset-0.5 -z-10 rounded-md bg-gradient-to-r blur-md"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -31,9 +35,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           type={type}
           className={cn(
-            'relative flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background transition-all duration-200 ease-out file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed md:text-sm',
+            'border-input bg-background ring-offset-background file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring relative flex h-12 w-full rounded-md border px-3 py-2 text-base transition-all duration-200 ease-out file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
             // Beautiful orange focus border and ring
-            isFocused && !error && 'border-accent/60 focus-visible:ring-accent/30 focus-visible:ring-2',
+            isFocused &&
+              !error &&
+              'border-accent/60 focus-visible:ring-accent/30 focus-visible:ring-2',
             error && 'border-destructive focus-visible:ring-destructive',
             className
           )}

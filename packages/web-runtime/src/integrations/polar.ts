@@ -12,7 +12,7 @@
  */
 
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import type { job_plan, job_tier } from '@heyclaude/data-layer/prisma';
+import type { job_plan, job_tier } from '@prisma/client';
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
 
@@ -80,16 +80,19 @@ export async function createPolarCheckout(
     if (!response.ok) {
       const errorText = await response.text();
       const normalized = normalizeError(response.statusText, 'Polar checkout creation failed');
-      logger.error({ err: normalized, status: response.status,
-        error: errorText, }, 'Polar checkout creation failed');
+      logger.error(
+        { err: normalized, status: response.status, error: errorText },
+        'Polar checkout creation failed'
+      );
       return { error: `Payment setup failed: ${response.statusText}` };
     }
 
     const session = (await response.json()) as PolarCheckoutResponse;
 
-    logger.info({ sessionId: session.id,
-      jobId: params.jobId,
-      userId: params.userId, }, 'Polar checkout session created');
+    logger.info(
+      { sessionId: session.id, jobId: params.jobId, userId: params.userId },
+      'Polar checkout session created'
+    );
 
     return {
       url: session.url,
@@ -113,17 +116,22 @@ export async function createPolarCheckout(
  *
  * @returns Polar product price ID or null if not configured
  */
-export function getPolarProductPriceId(
-  plan: job_plan,
-  tier: job_tier
-): string | null {
+export function getPolarProductPriceId(plan: job_plan, tier: job_tier): string | null {
   const productPriceIds = {
     // One-time payments
-    'one-time_standard': (env as Record<string, unknown>)['POLAR_PRODUCT_PRICE_ONETIME_STANDARD'] as string | undefined,
-    'one-time_featured': (env as Record<string, unknown>)['POLAR_PRODUCT_PRICE_ONETIME_FEATURED'] as string | undefined,
+    'one-time_standard': (env as Record<string, unknown>)[
+      'POLAR_PRODUCT_PRICE_ONETIME_STANDARD'
+    ] as string | undefined,
+    'one-time_featured': (env as Record<string, unknown>)[
+      'POLAR_PRODUCT_PRICE_ONETIME_FEATURED'
+    ] as string | undefined,
     // Subscription payments
-    subscription_standard: (env as Record<string, unknown>)['POLAR_PRODUCT_PRICE_SUBSCRIPTION_STANDARD'] as string | undefined,
-    subscription_featured: (env as Record<string, unknown>)['POLAR_PRODUCT_PRICE_SUBSCRIPTION_FEATURED'] as string | undefined,
+    subscription_standard: (env as Record<string, unknown>)[
+      'POLAR_PRODUCT_PRICE_SUBSCRIPTION_STANDARD'
+    ] as string | undefined,
+    subscription_featured: (env as Record<string, unknown>)[
+      'POLAR_PRODUCT_PRICE_SUBSCRIPTION_FEATURED'
+    ] as string | undefined,
   };
 
   const key = `${plan}_${tier}` as keyof typeof productPriceIds;

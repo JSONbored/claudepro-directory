@@ -49,7 +49,7 @@ export const SEARCH = {
    * Uses COLORS tokens for consistent brand color
    * Uses SPRING.hover for fast, responsive feel
    * BEAUTIFUL: Vibrant orange focus with higher opacity for visibility
-   * 
+   *
    * NOTE: Uses RGB colors for Motion.dev animations (OKLCH not animatable)
    * OKLCH versions available as CSS variables in globals.css @theme block
    */

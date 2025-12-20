@@ -3,7 +3,7 @@ import { setupTestWithErrorTracking } from '../../../../config/tests/utils/error
 
 /**
  * Comprehensive Command Palette (CMDK) E2E Tests
- * 
+ *
  * Tests ALL functionality with strict error checking:
  * - Command palette open/close (⌘K)
  * - Search functionality
@@ -21,7 +21,7 @@ test.describe('Command Palette (CMDK)', () => {
     // Set up error tracking and navigate to homepage
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -37,36 +37,37 @@ test.describe('Command Palette (CMDK)', () => {
   test('should open command palette with ⌘K keyboard shortcut', async ({ page, browserName }) => {
     // Use appropriate modifier key based on platform
     const modifier = browserName === 'webkit' ? 'Meta' : 'Control';
-    
+
     // Press ⌘K or Ctrl+K
     await page.keyboard.press(`${modifier}+KeyK`);
-    
+
     // Wait for command palette to open
     await page.waitForTimeout(500);
-    
+
     // Check command palette is visible
-    const commandPalette = page.locator('[role="dialog"], [cmdk-root]').or(
-      page.getByPlaceholder(/search navigation/i)
-    );
+    const commandPalette = page
+      .locator('[role="dialog"], [cmdk-root]')
+      .or(page.getByPlaceholder(/search navigation/i));
     await expect(commandPalette).toBeVisible();
   });
 
   test('should open command palette when search icon is clicked', async ({ page }) => {
     // Find and click the search button in secondary navbar
-    const searchButton = page.getByRole('button', { name: /search|command/i }).or(
-      page.locator('button[aria-label*="search" i], button[aria-label*="command" i]')
-    ).first();
-    
+    const searchButton = page
+      .getByRole('button', { name: /search|command/i })
+      .or(page.locator('button[aria-label*="search" i], button[aria-label*="command" i]'))
+      .first();
+
     await expect(searchButton).toBeVisible();
     await searchButton.click();
-    
+
     // Wait for command palette to open
     await page.waitForTimeout(500);
-    
+
     // Check command palette is visible
-    const commandPalette = page.locator('[role="dialog"], [cmdk-root]').or(
-      page.getByPlaceholder(/search navigation/i)
-    );
+    const commandPalette = page
+      .locator('[role="dialog"], [cmdk-root]')
+      .or(page.getByPlaceholder(/search navigation/i));
     await expect(commandPalette).toBeVisible();
   });
 
@@ -75,11 +76,11 @@ test.describe('Command Palette (CMDK)', () => {
     const modifier = browserName === 'webkit' ? 'Meta' : 'Control';
     await page.keyboard.press(`${modifier}+KeyK`);
     await page.waitForTimeout(500);
-    
+
     // Press Escape
     await page.keyboard.press('Escape');
     await page.waitForTimeout(500);
-    
+
     // Check command palette is closed
     const commandPalette = page.locator('[role="dialog"][data-state="open"]');
     await expect(commandPalette).not.toBeVisible();
@@ -90,7 +91,7 @@ test.describe('Command Palette (CMDK)', () => {
     const modifier = browserName === 'webkit' ? 'Meta' : 'Control';
     await page.keyboard.press(`${modifier}+KeyK`);
     await page.waitForTimeout(500);
-    
+
     // Check search input is visible with placeholder
     const searchInput = page.getByPlaceholder(/search navigation/i);
     await expect(searchInput).toBeVisible();
@@ -102,12 +103,12 @@ test.describe('Command Palette (CMDK)', () => {
     const modifier = browserName === 'webkit' ? 'Meta' : 'Control';
     await page.keyboard.press(`${modifier}+KeyK`);
     await page.waitForTimeout(500);
-    
+
     // Type in search input
     const searchInput = page.getByPlaceholder(/search navigation/i);
     await searchInput.fill('agents');
     await page.waitForTimeout(500);
-    
+
     // Check that results are filtered (either search results or filtered navigation)
     const results = page.locator('[cmdk-item], [role="option"]');
     const count = await results.count();
@@ -119,13 +120,15 @@ test.describe('Command Palette (CMDK)', () => {
     const modifier = browserName === 'webkit' ? 'Meta' : 'Control';
     await page.keyboard.press(`${modifier}+KeyK`);
     await page.waitForTimeout(500);
-    
+
     // Press down arrow to navigate
     await page.keyboard.press('ArrowDown');
     await page.waitForTimeout(200);
-    
+
     // Check that an item is selected/highlighted
-    const selectedItem = page.locator('[cmdk-item][data-selected="true"], [role="option"][aria-selected="true"]');
+    const selectedItem = page.locator(
+      '[cmdk-item][data-selected="true"], [role="option"][aria-selected="true"]'
+    );
     await expect(selectedItem).toBeVisible();
   });
 
@@ -134,15 +137,15 @@ test.describe('Command Palette (CMDK)', () => {
     const modifier = browserName === 'webkit' ? 'Meta' : 'Control';
     await page.keyboard.press(`${modifier}+KeyK`);
     await page.waitForTimeout(500);
-    
+
     // Navigate to first item
     await page.keyboard.press('ArrowDown');
     await page.waitForTimeout(200);
-    
+
     // Press Enter to select
     await page.keyboard.press('Enter');
     await page.waitForTimeout(500);
-    
+
     // Command palette should close and navigation should occur
     const commandPalette = page.locator('[role="dialog"][data-state="open"]');
     await expect(commandPalette).not.toBeVisible();
@@ -152,16 +155,16 @@ test.describe('Command Palette (CMDK)', () => {
     // Open command palette
     const modifier = browserName === 'webkit' ? 'Meta' : 'Control';
     await page.keyboard.press(`${modifier}+KeyK`);
-    
+
     // Check that modal animates in smoothly (no jank)
     const commandPalette = page.locator('[role="dialog"]');
-    
+
     // Wait for animation to complete
     await page.waitForTimeout(500);
-    
+
     // Verify it's visible and positioned correctly
     await expect(commandPalette).toBeVisible();
-    
+
     // Check that it has proper styling (centered, rounded, shadow)
     const boundingBox = await commandPalette.boundingBox();
     expect(boundingBox).not.toBeNull();
@@ -172,20 +175,20 @@ test.describe('Command Palette (CMDK)', () => {
     const modifier = browserName === 'webkit' ? 'Meta' : 'Control';
     await page.keyboard.press(`${modifier}+KeyK`);
     await page.waitForTimeout(500);
-    
+
     // Find first item
     const firstItem = page.locator('[cmdk-item], [role="option"]').first();
-    
+
     if (await firstItem.isVisible()) {
       // Hover over item
       await firstItem.hover();
       await page.waitForTimeout(300);
-      
+
       // Check that item has hover state (background color change)
       const backgroundColor = await firstItem.evaluate((el) => {
         return window.getComputedStyle(el).backgroundColor;
       });
-      
+
       // Background should not be transparent (indicates hover state)
       expect(backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
     }
@@ -196,16 +199,16 @@ test.describe('Command Palette (CMDK)', () => {
     const modifier = browserName === 'webkit' ? 'Meta' : 'Control';
     await page.keyboard.press(`${modifier}+KeyK`);
     await page.waitForTimeout(500);
-    
+
     // Check for proper ARIA attributes
     const dialog = page.locator('[role="dialog"]');
     await expect(dialog).toBeVisible();
-    
+
     // Check input has proper label/aria-label
     const searchInput = page.getByPlaceholder(/search navigation/i);
-    await expect(searchInput).toHaveAttribute('aria-label').or(
-      expect(searchInput).toHaveAttribute('aria-labelledby')
-    );
+    await expect(searchInput)
+      .toHaveAttribute('aria-label')
+      .or(expect(searchInput).toHaveAttribute('aria-labelledby'));
   });
 
   test('should respect reduced motion preferences', async ({ page, context, browserName }) => {
@@ -225,16 +228,16 @@ test.describe('Command Palette (CMDK)', () => {
         }),
       });
     });
-    
+
     // Reload page with reduced motion
     await page.reload();
     await page.waitForLoadState('networkidle');
-    
+
     // Open command palette
     const modifier = browserName === 'webkit' ? 'Meta' : 'Control';
     await page.keyboard.press(`${modifier}+KeyK`);
     await page.waitForTimeout(500);
-    
+
     // With reduced motion, animations should be minimal or disabled
     // Just verify command palette still works
     const commandPalette = page.locator('[role="dialog"]');
@@ -246,18 +249,18 @@ test.describe('Command Palette (CMDK)', () => {
     const modifier = browserName === 'webkit' ? 'Meta' : 'Control';
     await page.keyboard.press(`${modifier}+KeyK`);
     await page.waitForTimeout(500);
-    
+
     // Type search query
     const searchInput = page.getByPlaceholder(/search navigation/i);
     await searchInput.fill('test query');
-    
+
     // Check for loading indicator (if search is async)
-    const loadingIndicator = page.locator('[aria-busy="true"], [data-loading="true"]').or(
-      page.getByText(/searching/i)
-    );
-    
+    const loadingIndicator = page
+      .locator('[aria-busy="true"], [data-loading="true"]')
+      .or(page.getByText(/searching/i));
+
     // Loading indicator may appear briefly, so check if it exists
-    const hasLoading = await loadingIndicator.count() > 0;
+    const hasLoading = (await loadingIndicator.count()) > 0;
     // Just verify search input is working
     await expect(searchInput).toHaveValue('test query');
   });

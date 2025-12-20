@@ -70,11 +70,7 @@ class EnhancedSearchCache {
   /**
    * Store results in cache
    */
-  set(
-    query: string,
-    filters: FilterState,
-    results: DisplayableContent[]
-  ): void {
+  set(query: string, filters: FilterState, results: DisplayableContent[]): void {
     const key = this.getKey(query, filters);
 
     // Enforce max cache size (remove oldest entry)
@@ -171,7 +167,10 @@ export const enhancedSearchCache = new EnhancedSearchCache();
 
 // Clean up expired entries periodically (every 5 minutes)
 if (typeof window !== 'undefined') {
-  setInterval(() => {
-    enhancedSearchCache.clearExpired();
-  }, 5 * 60 * 1000);
+  setInterval(
+    () => {
+      enhancedSearchCache.clearExpired();
+    },
+    5 * 60 * 1000
+  );
 }

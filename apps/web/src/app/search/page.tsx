@@ -2,8 +2,8 @@
  * Search Page - Database-First RPC via search_content_optimized()
  */
 
-import { ContentCategory } from '@heyclaude/data-layer/prisma';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import { content_category as ContentCategory } from '@prisma/client';
+import type { content_category } from '@prisma/client';
 import { type SearchContentOptimizedArgs } from '@heyclaude/database-types/postgres-types';
 import { getHomepageCategoryIds } from '@heyclaude/web-runtime/data/config/category';
 import { getHomepageData } from '@heyclaude/web-runtime/data/content/homepage';

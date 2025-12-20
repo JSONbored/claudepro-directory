@@ -1,21 +1,52 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-// Mock safe-action middleware
-vi.mock('./safe-action.ts', () => {
-  const createActionMock = (schema: any) => ({
-    action: vi.fn((handler) => {
+// Mock safe-action middleware - standardized pattern
+// Pattern: authedAction.inputSchema().outputSchema().metadata().action()
+vi.mock('./safe-action.ts', async () => {
+  // Import mocked logActionFailure
+  const { logActionFailure } = await import('../errors.ts');
+  
+  // Define all factory functions inside the mock factory to avoid hoisting issues
+  const createActionHandler = (inputSchema: any, outputSchema?: any) => {
+    return vi.fn((handler: any) => {
       return async (input: unknown) => {
-        const parsed = schema.parse(input);
-        return handler({ parsedInput: parsed, ctx: { userId: 'test-user-id' } });
+        try {
+          const parsed = inputSchema ? inputSchema.parse(input) : input;
+          const result = await handler({
+            parsedInput: parsed,
+            ctx: { userId: 'test-user-id', userEmail: 'test@example.com', authToken: 'test-token' },
+          });
+          if (outputSchema) {
+            return outputSchema.parse(result);
+          }
+          return result;
+        } catch (error) {
+          // Simulate middleware error handling - logActionFailure is called by middleware
+          logActionFailure('collectionItems', error, { userId: 'test-user-id' });
+          throw error;
+        }
       };
-    }),
+    });
+  };
+
+  const createMetadataResult = (inputSchema: any, outputSchema?: any) => ({
+    action: createActionHandler(inputSchema, outputSchema),
+  });
+
+  const createOutputSchemaResult = (inputSchema: any, outputSchema?: any) => ({
+    metadata: vi.fn((metadata: any) => createMetadataResult(inputSchema, outputSchema)),
+    action: createActionHandler(inputSchema, outputSchema),
+  });
+
+  const createInputSchemaResult = (inputSchema: any) => ({
+    metadata: vi.fn((metadata: any) => createMetadataResult(inputSchema)),
+    outputSchema: vi.fn((outputSchema: any) => createOutputSchemaResult(inputSchema, outputSchema)),
+    action: createActionHandler(inputSchema),
   });
 
   return {
     authedAction: {
-      metadata: vi.fn(() => ({
-        inputSchema: vi.fn((schema) => createActionMock(schema)),
-      })),
+      inputSchema: vi.fn((schema: any) => createInputSchemaResult(schema)),
     },
   };
 });
@@ -38,6 +69,10 @@ vi.mock('../errors.ts', () => ({
     err.name = actionName;
     return err;
   }),
+  normalizeError: vi.fn((error: unknown, message?: string) => {
+    if (error instanceof Error) return error;
+    return new Error(message || String(error));
+  }),
 }));
 
 describe('collection-items', () => {
@@ -50,12 +85,29 @@ describe('collection-items', () => {
       const { addItemToCollection } = await import('./collection-items.ts');
       const { runRpc } = await import('./run-rpc-instance.ts');
 
+      const collectionId = '123e4567-e89b-12d3-a456-426614174000';
+      // Mock result must match manageCollectionReturnsSchema structure
+      // collection must match userCollectionsSchema (all required fields)
       vi.mocked(runRpc).mockResolvedValue({
-        collection: { id: 'collection-123', slug: 'test-collection' },
+        success: true,
+        collection: {
+          id: collectionId,
+          user_id: '123e4567-e89b-12d3-a456-426614174000', // Must be valid UUID
+          name: 'Test Collection',
+          slug: 'test-collection',
+          description: null,
+          is_public: false,
+          view_count: 0,
+          bookmark_count: 0,
+          item_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        item: null,
       } as any);
 
       await addItemToCollection({
-        collection_id: 'collection-123',
+        collection_id: collectionId,
         content_type: 'agents',
         content_slug: 'test-agent',
         notes: 'Test note',
@@ -68,7 +120,7 @@ describe('collection-items', () => {
           p_action: 'add_item',
           p_user_id: 'test-user-id',
           p_add_item_data: expect.objectContaining({
-            collection_id: 'collection-123',
+            collection_id: '123e4567-e89b-12d3-a456-426614174000',
             content_type: 'agents',
             content_slug: 'test-agent',
             notes: 'Test note',
@@ -87,12 +139,29 @@ describe('collection-items', () => {
       const { runRpc } = await import('./run-rpc-instance.ts');
       const { revalidatePath, revalidateTag } = await import('next/cache');
 
+      const collectionId = '123e4567-e89b-12d3-a456-426614174000';
+      // Mock result must match manageCollectionReturnsSchema structure
+      // collection must match userCollectionsSchema (all required fields)
       vi.mocked(runRpc).mockResolvedValue({
-        collection: { id: 'collection-123', slug: 'test-collection' },
+        success: true,
+        collection: {
+          id: collectionId,
+          user_id: '123e4567-e89b-12d3-a456-426614174000', // Must be valid UUID
+          name: 'Test Collection',
+          slug: 'test-collection',
+          description: null,
+          is_public: false,
+          view_count: 0,
+          bookmark_count: 0,
+          item_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        item: null,
       } as any);
 
       await addItemToCollection({
-        collection_id: 'collection-123',
+        collection_id: collectionId,
         content_type: 'agents',
         content_slug: 'test-agent',
       });
@@ -109,12 +178,29 @@ describe('collection-items', () => {
       const { removeItemFromCollection } = await import('./collection-items.ts');
       const { runRpc } = await import('./run-rpc-instance.ts');
 
+      const collectionId = '123e4567-e89b-12d3-a456-426614174000';
+      // Mock result must match manageCollectionReturnsSchema structure
+      // collection must match userCollectionsSchema (all required fields)
       vi.mocked(runRpc).mockResolvedValue({
-        collection: { id: 'collection-123', slug: 'test-collection' },
+        success: true,
+        collection: {
+          id: collectionId,
+          user_id: '123e4567-e89b-12d3-a456-426614174000', // Must be valid UUID
+          name: 'Test Collection',
+          slug: 'test-collection',
+          description: null,
+          is_public: false,
+          view_count: 0,
+          bookmark_count: 0,
+          item_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        item: null,
       } as any);
 
       await removeItemFromCollection({
-        remove_item_id: 'item-123',
+        remove_item_id: '223e4567-e89b-12d3-a456-426614174001',
       });
 
       expect(runRpc).toHaveBeenCalledWith(
@@ -122,7 +208,7 @@ describe('collection-items', () => {
         expect.objectContaining({
           p_action: 'remove_item',
           p_user_id: 'test-user-id',
-          p_remove_item_id: 'item-123',
+          p_remove_item_id: '223e4567-e89b-12d3-a456-426614174001',
         }),
         expect.objectContaining({
           action: 'removeItemFromCollection.rpc',
@@ -136,12 +222,29 @@ describe('collection-items', () => {
       const { runRpc } = await import('./run-rpc-instance.ts');
       const { revalidatePath, revalidateTag } = await import('next/cache');
 
+      const collectionId = '123e4567-e89b-12d3-a456-426614174000';
+      // Mock result must match manageCollectionReturnsSchema structure
+      // collection must match userCollectionsSchema (all required fields)
       vi.mocked(runRpc).mockResolvedValue({
-        collection: { id: 'collection-123', slug: 'test-collection' },
+        success: true,
+        collection: {
+          id: collectionId,
+          user_id: '123e4567-e89b-12d3-a456-426614174000', // Must be valid UUID
+          name: 'Test Collection',
+          slug: 'test-collection',
+          description: null,
+          is_public: false,
+          view_count: 0,
+          bookmark_count: 0,
+          item_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        item: null,
       } as any);
 
       await removeItemFromCollection({
-        remove_item_id: 'item-123',
+        remove_item_id: '223e4567-e89b-12d3-a456-426614174001',
       });
 
       expect(revalidatePath).toHaveBeenCalledWith('/account/library');
@@ -156,19 +259,23 @@ describe('collection-items', () => {
       const { reorderCollectionItems } = await import('./collection-items.ts');
       const { runRpc } = await import('./run-rpc-instance.ts');
 
+      // Mock result must match reorderCollectionItemsReturnsSchema structure
       vi.mocked(runRpc).mockResolvedValue({
         success: true,
+        updated: 2,
+        error: null,
+        errors: null,
       } as any);
 
       await reorderCollectionItems({
-        collection_id: 'collection-123',
+        collection_id: '123e4567-e89b-12d3-a456-426614174000',
         items: [{ id: 'item-1' }, { id: 'item-2' }],
       });
 
       expect(runRpc).toHaveBeenCalledWith(
         'reorder_collection_items',
         {
-          p_collection_id: 'collection-123',
+          p_collection_id: '123e4567-e89b-12d3-a456-426614174000',
           p_user_id: 'test-user-id',
           p_items: [{ id: 'item-1' }, { id: 'item-2' }],
         },
@@ -184,12 +291,16 @@ describe('collection-items', () => {
       const { runRpc } = await import('./run-rpc-instance.ts');
       const { revalidatePath, revalidateTag } = await import('next/cache');
 
+      // Mock result must match reorderCollectionItemsReturnsSchema structure
       vi.mocked(runRpc).mockResolvedValue({
         success: true,
+        updated: 0,
+        error: null,
+        errors: null,
       } as any);
 
       await reorderCollectionItems({
-        collection_id: 'collection-123',
+        collection_id: '123e4567-e89b-12d3-a456-426614174000',
         items: [],
       });
 

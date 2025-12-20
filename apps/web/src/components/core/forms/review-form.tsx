@@ -43,7 +43,11 @@ export function ReviewForm({
   const [rating, setRating] = useState(existingReview?.rating || 0);
   const [reviewText, setReviewText] = useState(existingReview?.review_text || '');
   const [isPending, startTransition] = useTransition();
-  const { value: showRatingError, setTrue: setShowRatingErrorTrue, setFalse: setShowRatingErrorFalse } = useBoolean();
+  const {
+    value: showRatingError,
+    setTrue: setShowRatingErrorTrue,
+    setFalse: setShowRatingErrorFalse,
+  } = useBoolean();
   const router = useRouter();
   const pathname = usePathname();
   const { user, status } = useAuthenticatedUser({ context: 'ReviewForm' });
@@ -91,76 +95,93 @@ export function ReviewForm({
 
       // User is authenticated - proceed with review submission
       startTransition(async () => {
-      try {
-        await runLoggedAsync(
-          async () => {
-            if (isEditing) {
-              const result = await updateReview({
-                review_id: existingReview.id,
-                rating,
-                review_text: reviewText.trim() || undefined,
-              });
+        try {
+          await runLoggedAsync(
+            async () => {
+              if (isEditing) {
+                const result = await updateReview({
+                  review_id: existingReview.id,
+                  rating,
+                  review_text: reviewText.trim() || undefined,
+                });
 
-              if (result?.data?.success) {
-                toasts.success.itemUpdated('Review');
-                router.refresh();
-                onSuccess?.();
+                if (result?.data?.success) {
+                  toasts.success.itemUpdated('Review');
+                  router.refresh();
+                  onSuccess?.();
+                } else {
+                  throw new Error('Review update returned success: false');
+                }
               } else {
-                throw new Error('Review update returned success: false');
-              }
-            } else {
-              const result = await createReview({
-                content_type: contentType,
-                content_slug: contentSlug,
-                rating,
-                review_text: reviewText.trim() || undefined,
-              });
+                const result = await createReview({
+                  content_type: contentType,
+                  content_slug: contentSlug,
+                  rating,
+                  review_text: reviewText.trim() || undefined,
+                });
 
-              if (result?.data?.success) {
-                toasts.success.itemCreated('Review');
-                setRating(0);
-                setReviewText('');
-                router.refresh();
-                onSuccess?.();
-              } else {
-                throw new Error('Review creation returned success: false');
+                if (result?.data?.success) {
+                  toasts.success.itemCreated('Review');
+                  setRating(0);
+                  setReviewText('');
+                  router.refresh();
+                  onSuccess?.();
+                } else {
+                  throw new Error('Review creation returned success: false');
+                }
               }
-            }
-          },
-          {
-            message: isEditing ? 'Review update failed' : 'Review creation failed',
-            context: {
-              contentType,
-              contentSlug,
-              isEditing,
             },
-          }
-        );
-      } catch (error) {
-        // Error already logged by useLoggedAsync
-        if (error instanceof Error && error.message.includes('signed in')) {
-          // Auth error - show modal (shouldn't happen due to proactive check, but handle as fallback)
-          openAuthModal({
-            valueProposition: 'Sign in to write a review',
-            redirectTo: pathname ?? undefined,
-          });
-        } else if (error instanceof Error && error.message.includes('already reviewed')) {
-          toasts.error.validation('You have already reviewed this content');
-        } else {
-          // Non-auth errors - show toast with retry option
-          toasts.raw.error('Failed to submit review', {
-            action: {
-              label: 'Retry',
-              onClick: () => {
-                handleSubmit(e);
+            {
+              message: isEditing ? 'Review update failed' : 'Review creation failed',
+              context: {
+                contentType,
+                contentSlug,
+                isEditing,
               },
-            },
-          });
+            }
+          );
+        } catch (error) {
+          // Error already logged by useLoggedAsync
+          if (error instanceof Error && error.message.includes('signed in')) {
+            // Auth error - show modal (shouldn't happen due to proactive check, but handle as fallback)
+            openAuthModal({
+              valueProposition: 'Sign in to write a review',
+              redirectTo: pathname ?? undefined,
+            });
+          } else if (error instanceof Error && error.message.includes('already reviewed')) {
+            toasts.error.validation('You have already reviewed this content');
+          } else {
+            // Non-auth errors - show toast with retry option
+            toasts.raw.error('Failed to submit review', {
+              action: {
+                label: 'Retry',
+                onClick: () => {
+                  handleSubmit(e);
+                },
+              },
+            });
+          }
         }
-      }
-    });
+      });
     },
-    [user, status, openAuthModal, pathname, isValid, isEditing, contentType, contentSlug, rating, reviewText, existingReview, router, onSuccess, runLoggedAsync, setShowRatingErrorTrue, setShowRatingErrorFalse]
+    [
+      user,
+      status,
+      openAuthModal,
+      pathname,
+      isValid,
+      isEditing,
+      contentType,
+      contentSlug,
+      rating,
+      reviewText,
+      existingReview,
+      router,
+      onSuccess,
+      runLoggedAsync,
+      setShowRatingErrorTrue,
+      setShowRatingErrorFalse,
+    ]
   );
 
   return (
@@ -211,7 +232,7 @@ export function ReviewForm({
             Review text cannot exceed {MAX_REVIEW_LENGTH} characters
           </p>
         ) : null}
-        <div className="flex items-center justify-between mt-1">
+        <div className="mt-1 flex items-center justify-between">
           <p className="text-muted-foreground text-xs">
             Help others by sharing details about your experience
           </p>

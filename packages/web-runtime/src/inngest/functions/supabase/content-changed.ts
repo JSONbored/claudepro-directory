@@ -16,7 +16,9 @@
  * @see https://supabase.com/docs/guides/database/webhooks
  */
 
-import type { contentModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type contentModel = Prisma.contentGetPayload<{}>;
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -60,8 +62,8 @@ async function triggerGitHubWorkflow(
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${githubToken}`,
-        'Accept': 'application/vnd.github.v3+json',
+        Authorization: `Bearer ${githubToken}`,
+        Accept: 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
         'User-Agent': 'HeyClaude-Inngest/1.0',
       },
@@ -114,44 +116,44 @@ export const handleSupabaseContentChanged = inngest.createFunction(
 
     const { webhookId, eventType, category, contentId, slug, record } = event.data;
 
-    logger.info({ ...logContext,
-      eventType,
-      category,
-      contentId,
-      slug: slug ?? null,
-      webhookId, }, 'Processing Supabase content changed event');
+    logger.info(
+      { ...logContext, eventType, category, contentId, slug: slug ?? null, webhookId },
+      'Processing Supabase content changed event'
+    );
 
     // Step 1: Validate event type
-    const validation = await step.run('validate-event', async (): Promise<{
-      valid: boolean;
-      reason?: string;
-    }> => {
-      // Only process INSERT and UPDATE events
-      if (eventType === 'DELETE') {
-        return {
-          valid: false,
-          reason: 'DELETE events do not require package generation',
-        };
-      }
+    const validation = await step.run(
+      'validate-event',
+      async (): Promise<{
+        valid: boolean;
+        reason?: string;
+      }> => {
+        // Only process INSERT and UPDATE events
+        if (eventType === 'DELETE') {
+          return {
+            valid: false,
+            reason: 'DELETE events do not require package generation',
+          };
+        }
 
-      if (eventType !== 'INSERT' && eventType !== 'UPDATE') {
-        return {
-          valid: false,
-          reason: `Unsupported event type: ${eventType}`,
-        };
-      }
+        if (eventType !== 'INSERT' && eventType !== 'UPDATE') {
+          return {
+            valid: false,
+            reason: `Unsupported event type: ${eventType}`,
+          };
+        }
 
-      // Accept all content categories
-      // Package generation only applies to skills/mcp, but README updates apply to all
-      return { valid: true };
-    });
+        // Accept all content categories
+        // Package generation only applies to skills/mcp, but README updates apply to all
+        return { valid: true };
+      }
+    );
 
     if (!validation.valid) {
-      logger.info({ ...logContext,
-        eventType,
-        category,
-        contentId,
-        reason: validation.reason, }, 'Supabase content event skipped');
+      logger.info(
+        { ...logContext, eventType, category, contentId, reason: validation.reason },
+        'Supabase content event skipped'
+      );
 
       return {
         success: true,
@@ -164,87 +166,102 @@ export const handleSupabaseContentChanged = inngest.createFunction(
     }
 
     // Step 2: Check if package generation is needed (only for skills/mcp)
-    const packageWorkflowResult = await step.run('trigger-package-workflow', async (): Promise<WorkflowTriggerResult> => {
-      // Only trigger package generation for skills and mcp categories
-      if (category !== 'skills' && category !== 'mcp') {
-        return { success: true, skipped: true, reason: 'not_package_category' };
+    const packageWorkflowResult = await step.run(
+      'trigger-package-workflow',
+      async (): Promise<WorkflowTriggerResult> => {
+        // Only trigger package generation for skills and mcp categories
+        if (category !== 'skills' && category !== 'mcp') {
+          return { success: true, skipped: true, reason: 'not_package_category' };
+        }
+
+        // Check if package generation is needed
+        // Inngest serializes Date objects to strings, so we need to cast
+        const contentRecord = record as unknown as Partial<ContentRow>;
+
+        let needsGeneration = false;
+        if (category === 'skills') {
+          const storageUrl = contentRecord.storage_url;
+          needsGeneration = !storageUrl || storageUrl.trim() === '';
+        } else if (category === 'mcp') {
+          const mcpbStorageUrl = contentRecord.mcpb_storage_url;
+          needsGeneration = !mcpbStorageUrl || mcpbStorageUrl.trim() === '';
+        }
+
+        if (!needsGeneration) {
+          logger.info(
+            { ...logContext, category, contentId, slug: slug ?? null },
+            'Package already exists, skipping workflow trigger'
+          );
+          return { success: true, skipped: true, reason: 'package_already_exists' };
+        }
+
+        const workflowEventType =
+          category === 'skills' ? 'skill-package-needed' : 'mcpb-package-needed';
+
+        logger.info(
+          { ...logContext, workflowEventType, category, contentId, slug: slug ?? null },
+          'Triggering package generation workflow'
+        );
+
+        return await triggerGitHubWorkflow(workflowEventType, contentId, slug);
       }
+    );
 
-      // Check if package generation is needed
-      // Inngest serializes Date objects to strings, so we need to cast
-      const contentRecord = record as unknown as Partial<ContentRow>;
-      
-      let needsGeneration = false;
-      if (category === 'skills') {
-        const storageUrl = contentRecord.storage_url;
-        needsGeneration = !storageUrl || storageUrl.trim() === '';
-      } else if (category === 'mcp') {
-        const mcpbStorageUrl = contentRecord.mcpb_storage_url;
-        needsGeneration = !mcpbStorageUrl || mcpbStorageUrl.trim() === '';
-      }
-
-      if (!needsGeneration) {
-        logger.info({ ...logContext,
-          category,
-          contentId,
-          slug: slug ?? null, }, 'Package already exists, skipping workflow trigger');
-        return { success: true, skipped: true, reason: 'package_already_exists' };
-      }
-
-      const workflowEventType = category === 'skills' 
-        ? 'skill-package-needed' 
-        : 'mcpb-package-needed';
-
-      logger.info({ ...logContext,
-        workflowEventType,
-        category,
-        contentId,
-        slug: slug ?? null, }, 'Triggering package generation workflow');
-
-      return await triggerGitHubWorkflow(workflowEventType, contentId, slug);
-    });
-
-    if (!packageWorkflowResult.success && !('skipped' in packageWorkflowResult && packageWorkflowResult.skipped)) {
-      const errorMessage = 'error' in packageWorkflowResult ? packageWorkflowResult.error : 'Unknown error';
-      logger.error({ err: undefined, ...logContext,
-        category,
-        contentId,
-        error: errorMessage, }, 'Failed to trigger package generation workflow');
+    if (
+      !packageWorkflowResult.success &&
+      !('skipped' in packageWorkflowResult && packageWorkflowResult.skipped)
+    ) {
+      const errorMessage =
+        'error' in packageWorkflowResult ? packageWorkflowResult.error : 'Unknown error';
+      logger.error(
+        { err: undefined, ...logContext, category, contentId, error: errorMessage },
+        'Failed to trigger package generation workflow'
+      );
       // Don't fail - continue to README update
     }
 
     // Step 4: Also trigger README update for any content changes (title, description, slug, category)
     // This ensures README stays in sync with database content
-    const readmeTriggerResult = await step.run('trigger-readme-update', async (): Promise<WorkflowTriggerResult> => {
-      // Check if content metadata changed (title, description, slug, category)
-      // Inngest serializes Date objects to strings, so we need to cast
-      const contentRecord = record as unknown as Partial<ContentRow>;
-      const oldContentRecord = event.data.oldRecord ? (event.data.oldRecord as unknown as Partial<ContentRow>) : undefined;
+    const readmeTriggerResult = await step.run(
+      'trigger-readme-update',
+      async (): Promise<WorkflowTriggerResult> => {
+        // Check if content metadata changed (title, description, slug, category)
+        // Inngest serializes Date objects to strings, so we need to cast
+        const contentRecord = record as unknown as Partial<ContentRow>;
+        const oldContentRecord = event.data.oldRecord
+          ? (event.data.oldRecord as unknown as Partial<ContentRow>)
+          : undefined;
 
-      const metadataChanged =
-        !oldContentRecord ||
-        contentRecord.title !== oldContentRecord.title ||
-        contentRecord.description !== oldContentRecord.description ||
-        contentRecord.slug !== oldContentRecord.slug ||
-        contentRecord.category !== oldContentRecord.category;
+        const metadataChanged =
+          !oldContentRecord ||
+          contentRecord.title !== oldContentRecord.title ||
+          contentRecord.description !== oldContentRecord.description ||
+          contentRecord.slug !== oldContentRecord.slug ||
+          contentRecord.category !== oldContentRecord.category;
 
-      if (!metadataChanged && eventType === 'UPDATE') {
-        logger.info({ ...logContext,
-          category,
-          contentId, }, 'Content metadata unchanged, skipping README update');
-        return { success: true, skipped: true };
+        if (!metadataChanged && eventType === 'UPDATE') {
+          logger.info(
+            { ...logContext, category, contentId },
+            'Content metadata unchanged, skipping README update'
+          );
+          return { success: true, skipped: true };
+        }
+
+        logger.info(
+          { ...logContext, category, contentId, slug: slug ?? null },
+          'Triggering README update workflow'
+        );
+
+        return await triggerGitHubWorkflow('readme-update-needed', contentId, slug);
       }
+    );
 
-      logger.info({ ...logContext,
-        category,
-        contentId,
-        slug: slug ?? null, }, 'Triggering README update workflow');
-
-      return await triggerGitHubWorkflow('readme-update-needed', contentId, slug);
-    });
-
-    if (!readmeTriggerResult.success && !('skipped' in readmeTriggerResult && readmeTriggerResult.skipped)) {
-      const errorMessage = 'error' in readmeTriggerResult ? readmeTriggerResult.error : 'Unknown error';
+    if (
+      !readmeTriggerResult.success &&
+      !('skipped' in readmeTriggerResult && readmeTriggerResult.skipped)
+    ) {
+      const errorMessage =
+        'error' in readmeTriggerResult ? readmeTriggerResult.error : 'Unknown error';
       logger.warn(
         {
           ...logContext,
@@ -258,14 +275,19 @@ export const handleSupabaseContentChanged = inngest.createFunction(
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      eventType,
-      category,
-      contentId,
-      slug: slug ?? null,
-      webhookId,
-      durationMs,
-      action: 'workflow_triggered', }, 'Supabase content changed event processed');
+    logger.info(
+      {
+        ...logContext,
+        eventType,
+        category,
+        contentId,
+        slug: slug ?? null,
+        webhookId,
+        durationMs,
+        action: 'workflow_triggered',
+      },
+      'Supabase content changed event processed'
+    );
 
     return {
       success: true,

@@ -20,16 +20,12 @@ export function SearchTrigger({
   className = '',
 }: SearchTriggerProps) {
   const handleClick = () => {
-    logClientInfo(
-      '[SearchTrigger] Clicked',
-      'SearchTrigger.onClick',
-      {
-        component: 'SearchTrigger',
-        action: 'click',
-        category: 'navigation',
-        hasOnClick: Boolean(onClick),
-      }
-    );
+    logClientInfo('[SearchTrigger] Clicked', 'SearchTrigger.onClick', {
+      component: 'SearchTrigger',
+      action: 'click',
+      category: 'navigation',
+      hasOnClick: Boolean(onClick),
+    });
     onClick?.();
   };
   const sizeClasses = {
@@ -43,15 +39,13 @@ export function SearchTrigger({
       <button
         type="button"
         onClick={handleClick}
-        className={`flex w-full max-w-md cursor-pointer items-center gap-3 border-border bg-background px-4 py-2.5 text-muted-foreground transition-colors hover:border-border/80 hover:text-foreground card-base group ${className}`}
+        className={`border-border bg-background text-muted-foreground hover:border-border/80 hover:text-foreground card-base group flex w-full max-w-md cursor-pointer items-center gap-3 px-4 py-2.5 transition-colors ${className}`}
       >
-        <Search
-          className="h-4 w-4 text-muted-foreground group-hover:text-accent"
-        />
+        <Search className="text-muted-foreground group-hover:text-accent h-4 w-4" />
         <span className="flex-1 text-left text-sm">Search content...</span>
         {showShortcut ? (
           <div className="flex items-center gap-1 text-xs">
-            <kbd className="rounded-lg border bg-muted px-1.5 py-0.5 text-xs">⌘K</kbd>
+            <kbd className="bg-muted rounded-lg border px-1.5 py-0.5 text-xs">⌘K</kbd>
           </div>
         ) : null}
       </button>
@@ -64,7 +58,7 @@ export function SearchTrigger({
       <span className="sr-only">Search</span>
       {showShortcut && size !== 'sm' ? (
         <div className="ml-2 flex items-center gap-0.5">
-          <kbd className="hidden rounded-lg border bg-muted px-1.5 py-0.5 text-xs sm:inline-block">
+          <kbd className="bg-muted hidden rounded-lg border px-1.5 py-0.5 text-xs sm:inline-block">
             ⌘K
           </kbd>
         </div>

@@ -20,7 +20,7 @@ test.describe('Config Recommender Landing Page (/tools/config-recommender)', () 
     // Set up error tracking and navigate to config recommender page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/tools/config-recommender');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -80,9 +80,9 @@ test.describe('Config Recommender Landing Page (/tools/config-recommender)', () 
     await page.waitForTimeout(1000);
 
     // Quiz form should be present (client component)
-    const quizForm = page.locator('[data-testid="quiz-form"]').or(
-      page.locator('form').filter({ hasText: /use case|experience/i })
-    );
+    const quizForm = page
+      .locator('[data-testid="quiz-form"]')
+      .or(page.locator('form').filter({ hasText: /use case|experience/i }));
     await expect(quizForm.first()).toBeVisible();
   });
 
@@ -99,12 +99,12 @@ test.describe('Config Recommender Landing Page (/tools/config-recommender)', () 
     await expect(steps.first()).toBeVisible();
   });
 
-  test('should display What You\'ll Get section', async ({ page }) => {
+  test("should display What You'll Get section", async ({ page }) => {
     await page.goto('/tools/config-recommender');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
 
-    const featuresSection = page.locator('text=/What You\'ll Get/i');
+    const featuresSection = page.locator("text=/What You'll Get/i");
     await expect(featuresSection).toBeVisible();
   });
 
@@ -151,16 +151,16 @@ test.describe('Config Recommender Landing Page (/tools/config-recommender)', () 
     // This tests that QuizForm is shown during Suspense
     // The component uses Suspense with fallback
     await page.goto('/tools/config-recommender');
-    
+
     // Check for loading state (may flash quickly)
     const loading = page.locator('[data-loading], [aria-busy="true"]');
     const hasLoading = await loading.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main').or(page.locator('body'));
     await expect(main.first()).toBeVisible();
   });
@@ -174,9 +174,15 @@ test.describe('Config Recommender Landing Page (/tools/config-recommender)', () 
 
     // Page should render or show error boundary, but not crash
     const main = page.getByRole('main').or(page.locator('body'));
-    const hasMain = await main.first().isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasMain = await main
+      .first()
+      .isVisible()
+      .catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error boundary, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });

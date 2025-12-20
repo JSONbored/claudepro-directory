@@ -14,8 +14,10 @@
  * @module components/domain/profile-card
  */
 
-import type { user_tier } from '@heyclaude/data-layer/prisma';
-import type { public_usersModel } from '@heyclaude/data-layer/prisma';
+import type { user_tier } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
+
+type public_usersModel = Prisma.public_usersGetPayload<{}>;
 import { Award, Users } from '@heyclaude/web-runtime/icons';
 import {
   UnifiedBadge,
@@ -81,7 +83,8 @@ const getMemberBadge = (user: UserProfile) => {
   if (user.company) {
     return {
       label: 'Company Owner',
-      className: 'bg-color-badge-membertype-owner-bg text-color-badge-membertype-owner-text border-color-badge-membertype-owner-border',
+      className:
+        'bg-color-badge-membertype-owner-bg text-color-badge-membertype-owner-text border-color-badge-membertype-owner-border',
     };
   }
 
@@ -90,14 +93,16 @@ const getMemberBadge = (user: UserProfile) => {
   if (contributionCount >= 10) {
     return {
       label: 'Contributor',
-      className: 'bg-color-badge-membertype-contributor-bg text-color-badge-membertype-contributor-text border-color-badge-membertype-contributor-border',
+      className:
+        'bg-color-badge-membertype-contributor-bg text-color-badge-membertype-contributor-text border-color-badge-membertype-contributor-border',
     };
   }
 
   // Default: Member
   return {
     label: 'Member',
-    className: 'text-color-badge-membertype-member-text border-color-badge-membertype-member-border',
+    className:
+      'text-color-badge-membertype-member-text border-color-badge-membertype-member-border',
   };
 };
 
@@ -145,10 +150,10 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
           {/* Avatar */}
           <Avatar className="ring-accent/20 ring-offset-background h-16 w-16 ring-2 ring-offset-2">
             {user.image ? (
-              <AvatarImage 
-                src={optimizeAvatarUrl(user.image, 64) ?? user.image} 
-                alt={`${username}'s avatar`} 
-                className="object-cover" 
+              <AvatarImage
+                src={optimizeAvatarUrl(user.image, 64) ?? user.image}
+                alt={`${username}'s avatar`}
+                className="object-cover"
               />
             ) : null}
             <AvatarFallback className="bg-accent/10 text-accent text-lg font-semibold">
@@ -160,7 +165,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
           <div className="w-full min-w-0">
             <h3 className="truncate text-base font-semibold">{username}</h3>
             {user.work ? (
-              <p className="text-muted-foreground text-sm mt-1 truncate">{user.work}</p>
+              <p className="text-muted-foreground mt-1 truncate text-sm">{user.work}</p>
             ) : null}
           </div>
         </div>
@@ -182,7 +187,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               key={interest}
               variant="base"
               style="secondary"
-              className="text-xs font-semibold border-primary/20 text-primary"
+              className="border-primary/20 text-primary text-xs font-semibold"
             >
               {interest}
             </UnifiedBadge>
@@ -196,7 +201,10 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className={cn('border-primary/20 bg-primary/10 text-primary h-7 font-medium', 'gap-1.5')}
+              className={cn(
+                'border-primary/20 bg-primary/10 text-primary h-7 font-medium',
+                'gap-1.5'
+              )}
             >
               <Award className="h-3 w-3" aria-hidden="true" />
               <span className="text-xs font-semibold">{user.total_contributions}</span>
@@ -251,7 +259,14 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn('h-7', 'px-3', 'text-xs', 'gap-1', 'hover:bg-accent/10', 'hover:text-accent')}
+                className={cn(
+                  'h-7',
+                  'px-3',
+                  'text-xs',
+                  'gap-1',
+                  'hover:bg-accent/10',
+                  'hover:text-accent'
+                )}
                 onClick={(e) => {
                   e.stopPropagation();
                   globalThis.location.href = safeProfileUrl;

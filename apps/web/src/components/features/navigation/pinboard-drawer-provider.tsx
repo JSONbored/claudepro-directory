@@ -3,11 +3,18 @@
 import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
 import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
-import { logClientWarn, logClientInfo, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import {
+  logClientWarn,
+  logClientInfo,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/client';
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import { createContext, useCallback, useContext, useMemo } from 'react';
 
-import { PinboardDrawer, type PinboardDrawerProps } from '@/src/components/features/navigation/pinboard-drawer';
+import {
+  PinboardDrawer,
+  type PinboardDrawerProps,
+} from '@/src/components/features/navigation/pinboard-drawer';
 
 /**
  * PinboardDrawer wrapper with error handling
@@ -19,14 +26,17 @@ function PinboardDrawerWithErrorHandling({
   ...props
 }: PinboardDrawerProps & { onError?: (error: Error) => void }) {
   // Wrap onOpenChange to also call onError handler if needed
-  const handleOpenChange = useCallback((open: boolean) => {
-    try {
-      onOpenChange(open);
-    } catch (error) {
-      const normalized = normalizeError(error, 'PinboardDrawer onOpenChange error');
-      onError?.(normalized);
-    }
-  }, [onOpenChange, onError]);
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      try {
+        onOpenChange(open);
+      } catch (error) {
+        const normalized = normalizeError(error, 'PinboardDrawer onOpenChange error');
+        onError?.(normalized);
+      }
+    },
+    [onOpenChange, onError]
+  );
 
   return <PinboardDrawer {...props} onOpenChange={handleOpenChange} />;
 }
@@ -41,7 +51,13 @@ interface PinboardDrawerContextValue {
 const PinboardDrawerContext = createContext<null | PinboardDrawerContextValue>(null);
 
 export function PinboardDrawerProvider({ children }: { children: React.ReactNode }) {
-  const { value: isOpen, setTrue: setIsOpenTrue, setFalse: setIsOpenFalse, setValue: setIsOpen, toggle: toggleIsOpen } = useBoolean();
+  const {
+    value: isOpen,
+    setTrue: setIsOpenTrue,
+    setFalse: setIsOpenFalse,
+    setValue: setIsOpen,
+    toggle: toggleIsOpen,
+  } = useBoolean();
   const pulse = usePulse();
 
   const trackDrawerEvent = useCallback(
@@ -155,11 +171,11 @@ export function PinboardDrawerProvider({ children }: { children: React.ReactNode
 export function usePinboardDrawer(): PinboardDrawerContextValue {
   const ctx = useContext(PinboardDrawerContext);
   const isClient = useIsClient();
-  
+
   if (!ctx) {
     // During SSR, the provider isn't available yet (it's in client-side LayoutContent)
     // This is expected and handled gracefully with a no-op fallback
-    
+
     if (isClient) {
       // Only log warning on client-side (not during SSR)
       // SSR warnings are expected and handled by fallback

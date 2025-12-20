@@ -7,7 +7,7 @@
  * Uses web-runtime utilities for logging and configuration
  */
 
-import type { confetti_variant } from '@heyclaude/data-layer/prisma';
+import type { confetti_variant } from '@prisma/client';
 // Import directly from source files to avoid indirect imports through entries/core.ts
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
@@ -16,77 +16,82 @@ import confetti from 'canvas-confetti';
 import { useCallback } from 'react';
 
 export function useConfetti() {
-  const fireConfetti = useCallback(
-    (variant: confetti_variant = 'success') => {
-      try {
-        const configs: Record<confetti_variant, confetti.Options> = {
-          // Green + gold for success actions (bookmark, save, etc)
-          success: {
-            particleCount: CONFETTI_CONFIG['success.particle_count'],
-            spread: CONFETTI_CONFIG['success.spread'],
-            origin: { y: 0.6 },
-            colors: ['#10b981', '#fbbf24', '#34d399'],
-            ticks: CONFETTI_CONFIG['success.ticks'],
-          },
+  const fireConfetti = useCallback((variant: confetti_variant = 'success') => {
+    try {
+      const configs: Record<confetti_variant, confetti.Options> = {
+        // Green + gold for success actions (bookmark, save, etc)
+        success: {
+          particleCount: CONFETTI_CONFIG['success.particle_count'],
+          spread: CONFETTI_CONFIG['success.spread'],
+          origin: { y: 0.6 },
+          colors: ['#10b981', '#fbbf24', '#34d399'],
+          ticks: CONFETTI_CONFIG['success.ticks'],
+        },
 
-          // Rainbow confetti for major milestones (submission approved, profile complete)
-          celebration: {
-            particleCount: CONFETTI_CONFIG['celebration.particle_count'],
-            spread: CONFETTI_CONFIG['celebration.spread'],
-            origin: { y: 0.6 },
-            colors: ['#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b'],
-            ticks: CONFETTI_CONFIG['celebration.ticks'],
-          },
+        // Rainbow confetti for major milestones (submission approved, profile complete)
+        celebration: {
+          particleCount: CONFETTI_CONFIG['celebration.particle_count'],
+          spread: CONFETTI_CONFIG['celebration.spread'],
+          origin: { y: 0.6 },
+          colors: ['#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b'],
+          ticks: CONFETTI_CONFIG['celebration.ticks'],
+        },
 
-          // Star emoji confetti for achievements
-          milestone: {
-            particleCount: CONFETTI_CONFIG['milestone.particle_count'],
-            spread: CONFETTI_CONFIG['milestone.spread'],
-            origin: { y: 0.6 },
-            shapes: ['star'],
-            colors: ['#fbbf24', '#f59e0b', '#fcd34d'],
-            ticks: CONFETTI_CONFIG['milestone.ticks'],
-            scalar: CONFETTI_CONFIG['milestone.scalar'],
-          },
+        // Star emoji confetti for achievements
+        milestone: {
+          particleCount: CONFETTI_CONFIG['milestone.particle_count'],
+          spread: CONFETTI_CONFIG['milestone.spread'],
+          origin: { y: 0.6 },
+          shapes: ['star'],
+          colors: ['#fbbf24', '#f59e0b', '#fcd34d'],
+          ticks: CONFETTI_CONFIG['milestone.ticks'],
+          scalar: CONFETTI_CONFIG['milestone.scalar'],
+        },
 
-          // Subtle burst for low-key actions (newsletter signup)
-          subtle: {
-            particleCount: CONFETTI_CONFIG['subtle.particle_count'],
-            spread: CONFETTI_CONFIG['subtle.spread'],
-            origin: { y: 0.7 },
-            colors: ['#3b82f6', '#8b5cf6'],
-            ticks: CONFETTI_CONFIG['subtle.ticks'],
-            startVelocity: 20,
-          },
-        };
+        // Subtle burst for low-key actions (newsletter signup)
+        subtle: {
+          particleCount: CONFETTI_CONFIG['subtle.particle_count'],
+          spread: CONFETTI_CONFIG['subtle.spread'],
+          origin: { y: 0.7 },
+          colors: ['#3b82f6', '#8b5cf6'],
+          ticks: CONFETTI_CONFIG['subtle.ticks'],
+          startVelocity: 20,
+        },
+      };
 
-        const variantConfig = configs[variant];
-        confetti(variantConfig);
-      } catch (error) {
-        const normalized = normalizeError(error, `useConfetti: fireConfetti failed for variant ${variant}`);
-        logger.warn({ err: normalized,
+      const variantConfig = configs[variant];
+      confetti(variantConfig);
+    } catch (error) {
+      const normalized = normalizeError(
+        error,
+        `useConfetti: fireConfetti failed for variant ${variant}`
+      );
+      logger.warn(
+        {
+          err: normalized,
           category: 'animation',
           component: 'useConfetti',
           nonCritical: true,
-          variant, }, '[Animation] Confetti failed');
-      }
-    },
-    []
-  );
+          variant,
+        },
+        '[Animation] Confetti failed'
+      );
+    }
+  }, []);
 
   // Preset functions for common actions (now synchronous)
   const celebrateBookmark = useCallback(() => {
     fireConfetti('success');
   }, [fireConfetti]);
-  
+
   const celebrateSubmission = useCallback(() => {
     fireConfetti('celebration');
   }, [fireConfetti]);
-  
+
   const celebrateMilestone = useCallback(() => {
     fireConfetti('milestone');
   }, [fireConfetti]);
-  
+
   const celebrateSignup = useCallback(() => {
     fireConfetti('subtle');
   }, [fireConfetti]);

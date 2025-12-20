@@ -33,7 +33,7 @@
  * @see {@link file://../../lib/content-loaders.ts} - Content loading with caching
  */
 
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@prisma/client';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { getContentByCategory } from '@heyclaude/web-runtime/data/content';
@@ -160,7 +160,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   }
 
   // Type narrowing: after isValidCategory check, we know category is a valid enum value
-  const typedCategory = category;
+  const typedCategory = category as content_category;
 
   // Category config is from a generated file (static), so it can be in the static shell
   const config = getCategoryConfig(typedCategory);
@@ -238,7 +238,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     <div className="bg-background min-h-screen">
       {/* Static Hero Section - Renders immediately (config is from generated file) */}
       <CategoryHeroShell
-        category={category}
+        category={typedCategory}
         description={config.description}
         icon={iconName}
         title={config.pluralTitle}

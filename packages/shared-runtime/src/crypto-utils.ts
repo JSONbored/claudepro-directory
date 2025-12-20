@@ -1,11 +1,11 @@
 /**
  * Timing-safe string comparison to prevent timing attacks
  * Uses constant-time comparison by XORing all character codes
- * 
+ *
  * @param a - First string to compare
  * @param b - Second string to compare
  * @returns true if strings are equal, false otherwise
- * 
+ *
  * @remarks
  * This function performs a constant-time comparison to prevent timing attacks.
  * It returns false immediately if the lengths differ, then compares all characters

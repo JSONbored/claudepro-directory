@@ -5,12 +5,13 @@
  * Used for system announcements, feature releases, etc.
  */
 
-import type { notification_type, notification_priority } from '@heyclaude/data-layer/prisma';
-import type { notificationsCreateInput } from '@heyclaude/database-types/prisma';
 import {
-  NotificationType,
-  NotificationPriority,
-} from '@heyclaude/data-layer/prisma';
+  Prisma,
+  notification_type as NotificationTypeEnum,
+  notification_priority as NotificationPriorityEnum,
+} from '@prisma/client';
+import type { notification_type, notification_priority } from '@prisma/client';
+type notificationsCreateInput = Prisma.notificationsCreateInput;
 
 import { inngest } from '../../client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
@@ -21,12 +22,12 @@ type NotificationPriority = 'high' | 'medium' | 'low';
 
 // Type guards
 function isValidNotificationType(value: string): value is notification_type {
-  const validTypes = Object.values(NotificationType) as readonly notification_type[];
+  const validTypes = Object.values(NotificationTypeEnum) as readonly notification_type[];
   return validTypes.includes(value as notification_type);
 }
 
 function isValidNotificationPriority(value: string): value is notification_priority {
-  const validPriorities = Object.values(NotificationPriority) as readonly notification_priority[];
+  const validPriorities = Object.values(NotificationPriorityEnum) as readonly notification_priority[];
   return validPriorities.includes(value as notification_priority);
 }
 
@@ -51,14 +52,17 @@ export const createNotification = inngest.createFunction(
   { event: 'notification/create' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const logContext = createWebAppContextWithId('/inngest/notifications/create', 'createNotification');
+    const logContext = createWebAppContextWithId(
+      '/inngest/notifications/create',
+      'createNotification'
+    );
 
     const { title, message, type, priority, action_label, action_href, id } = event.data;
 
-    logger.info({ ...logContext,
-      title,
-      type: type ?? 'info',
-      priority: priority ?? 'normal', }, 'Creating notification');
+    logger.info(
+      { ...logContext, title, type: type ?? 'info', priority: priority ?? 'normal' },
+      'Creating notification'
+    );
 
     // Validate required fields
     if (!title || typeof title !== 'string') {
@@ -76,62 +80,71 @@ export const createNotification = inngest.createFunction(
       try {
         const url = new URL(action_href);
         if (!['http:', 'https:'].includes(url.protocol)) {
-          logger.warn({ ...logContext,
-            action_href, }, 'Invalid action_href: only http/https allowed');
+          logger.warn(
+            { ...logContext, action_href },
+            'Invalid action_href: only http/https allowed'
+          );
           throw new Error('Invalid action_href: only http and https URLs are allowed');
         }
       } catch (urlError) {
         if (urlError instanceof Error && urlError.message.includes('only http')) {
           throw urlError; // Re-throw our validation error
         }
-        logger.warn({ ...logContext,
-          action_href, }, 'Invalid action_href: invalid URL format');
+        logger.warn({ ...logContext, action_href }, 'Invalid action_href: invalid URL format');
         throw new Error('Invalid action_href: must be a valid URL');
       }
     }
 
     // Step 1: Create the notification
-    const notification = await step.run('create-notification', async (): Promise<{
-      id: string;
-    }> => {
-      // Use provided ID or generate new one
-      const notificationId = id ?? crypto.randomUUID();
+    const notification = await step.run(
+      'create-notification',
+      async (): Promise<{
+        id: string;
+      }> => {
+        // Use provided ID or generate new one
+        const notificationId = id ?? crypto.randomUUID();
 
-      // Build notification data carefully to avoid exactOptionalPropertyTypes issues
-      const notificationData: notificationsCreateInput = {
-        id: notificationId,
-        title: title.trim(),
-        message: message.trim(),
-        type: (type && isValidNotificationType(type) ? type : 'announcement') as NotificationType,
-        priority: (priority && isValidNotificationPriority(priority) ? priority : 'medium') as NotificationPriority,
-      };
+        // Build notification data carefully to avoid exactOptionalPropertyTypes issues
+        const notificationData: notificationsCreateInput = {
+          id: notificationId,
+          title: title.trim(),
+          message: message.trim(),
+          type: (type && isValidNotificationType(type) ? type : 'announcement') as NotificationType,
+          priority: (priority && isValidNotificationPriority(priority)
+            ? priority
+            : 'medium') as NotificationPriority,
+        };
 
-      // Add optional fields only if they have values
-      if (action_label) {
-        notificationData.action_label = action_label;
+        // Add optional fields only if they have values
+        if (action_label) {
+          notificationData.action_label = action_label;
+        }
+        if (action_href) {
+          notificationData.action_href = action_href;
+        }
+
+        const service = await getService('misc');
+        // Type assertion needed due to exactOptionalPropertyTypes mismatch between dist/src types
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data = await service.insertNotification(notificationData as any);
+
+        return { id: data.id };
       }
-      if (action_href) {
-        notificationData.action_href = action_href;
-      }
-
-      const service = await getService('misc');
-      // Type assertion needed due to exactOptionalPropertyTypes mismatch between dist/src types
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await service.insertNotification(notificationData as any);
-
-      return { id: data.id };
-    });
+    );
 
     // Step 2: Log the notification creation
     await step.run('log-notification', async () => {
-      logger.info({ ...logContext,
-        notificationId: notification.id, }, 'Notification created successfully');
+      logger.info(
+        { ...logContext, notificationId: notification.id },
+        'Notification created successfully'
+      );
     });
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      notificationId: notification.id, }, 'Create notification function completed');
+    logger.info(
+      { ...logContext, durationMs, notificationId: notification.id },
+      'Create notification function completed'
+    );
 
     return {
       success: true,
@@ -155,13 +168,17 @@ export const broadcastNotification = inngest.createFunction(
   { event: 'notification/broadcast' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const logContext = createWebAppContextWithId('/inngest/notifications/broadcast', 'broadcastNotification');
+    const logContext = createWebAppContextWithId(
+      '/inngest/notifications/broadcast',
+      'broadcastNotification'
+    );
 
     const { title, message, type, priority, action_label, action_href } = event.data;
 
-    logger.info({ ...logContext,
-      title,
-      type: type ?? 'announcement', }, 'Broadcasting notification');
+    logger.info(
+      { ...logContext, title, type: type ?? 'announcement' },
+      'Broadcasting notification'
+    );
 
     // Validate required fields
     if (!title || typeof title !== 'string') {
@@ -179,61 +196,70 @@ export const broadcastNotification = inngest.createFunction(
       try {
         const url = new URL(action_href);
         if (!['http:', 'https:'].includes(url.protocol)) {
-          logger.warn({ ...logContext,
-            action_href, }, 'Invalid action_href: only http/https allowed');
+          logger.warn(
+            { ...logContext, action_href },
+            'Invalid action_href: only http/https allowed'
+          );
           throw new Error('Invalid action_href: only http and https URLs are allowed');
         }
       } catch (urlError) {
         if (urlError instanceof Error && urlError.message.includes('only http')) {
           throw urlError; // Re-throw our validation error
         }
-        logger.warn({ ...logContext,
-          action_href, }, 'Invalid action_href: invalid URL format');
+        logger.warn({ ...logContext, action_href }, 'Invalid action_href: invalid URL format');
         throw new Error('Invalid action_href: must be a valid URL');
       }
     }
 
     // Step 1: Create the notification
-    const notification = await step.run('create-broadcast-notification', async (): Promise<{
-      id: string;
-    }> => {
-      const notificationId = crypto.randomUUID();
+    const notification = await step.run(
+      'create-broadcast-notification',
+      async (): Promise<{
+        id: string;
+      }> => {
+        const notificationId = crypto.randomUUID();
 
-      // Build notification data carefully to avoid exactOptionalPropertyTypes issues
-      const notificationData: notificationsCreateInput = {
-        id: notificationId,
-        title: title.trim(),
-        message: message.trim(),
-        type: (type && isValidNotificationType(type) ? type : 'announcement') as NotificationType,
-        priority: (priority && isValidNotificationPriority(priority) ? priority : 'high') as NotificationPriority,
-      };
+        // Build notification data carefully to avoid exactOptionalPropertyTypes issues
+        const notificationData: notificationsCreateInput = {
+          id: notificationId,
+          title: title.trim(),
+          message: message.trim(),
+          type: (type && isValidNotificationType(type) ? type : 'announcement') as NotificationType,
+          priority: (priority && isValidNotificationPriority(priority)
+            ? priority
+            : 'high') as NotificationPriority,
+        };
 
-      // Add optional fields only if they have values
-      if (action_label) {
-        notificationData.action_label = action_label;
+        // Add optional fields only if they have values
+        if (action_label) {
+          notificationData.action_label = action_label;
+        }
+        if (action_href) {
+          notificationData.action_href = action_href;
+        }
+
+        const service = await getService('misc');
+        // Type assertion needed due to exactOptionalPropertyTypes mismatch between dist/src types
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data = await service.insertNotification(notificationData as any);
+
+        return { id: data.id };
       }
-      if (action_href) {
-        notificationData.action_href = action_href;
-      }
-
-      const service = await getService('misc');
-      // Type assertion needed due to exactOptionalPropertyTypes mismatch between dist/src types
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await service.insertNotification(notificationData as any);
-
-      return { id: data.id };
-    });
+    );
 
     // Step 2: Log the broadcast (actual delivery handled by notification system)
     await step.run('log-broadcast', async () => {
-      logger.info({ ...logContext,
-        notificationId: notification.id, }, 'Broadcast notification created');
+      logger.info(
+        { ...logContext, notificationId: notification.id },
+        'Broadcast notification created'
+      );
     });
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      notificationId: notification.id, }, 'Broadcast notification completed');
+    logger.info(
+      { ...logContext, durationMs, notificationId: notification.id },
+      'Broadcast notification completed'
+    );
 
     return {
       success: true,

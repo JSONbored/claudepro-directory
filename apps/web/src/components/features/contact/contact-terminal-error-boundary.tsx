@@ -77,7 +77,7 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
                 <p className="text-muted-foreground text-sm">
                   Something went wrong with the interactive terminal.
                   {this.state.error?.message ? (
-                    <span className="mt-2 block max-w-full break-all font-mono text-xs text-destructive">
+                    <span className="text-destructive mt-2 block max-w-full font-mono text-xs break-all">
                       {this.state.error.message}
                     </span>
                   ) : null}
@@ -97,7 +97,9 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
                     this.setState({ isResetting: true, hasError: false, error: null });
                   }}
                 >
-                  <RefreshCw className={`mr-2 h-4 w-4 ${this.state.isResetting ? 'animate-spin' : ''}`} />
+                  <RefreshCw
+                    className={`mr-2 h-4 w-4 ${this.state.isResetting ? 'animate-spin' : ''}`}
+                  />
                   {this.state.isResetting ? 'Retrying...' : 'Try Again'}
                 </Button>
                 <Button variant="outline" size="lg" onClick={() => globalThis.location.reload()}>

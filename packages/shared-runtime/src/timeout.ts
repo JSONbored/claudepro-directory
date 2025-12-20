@@ -36,7 +36,7 @@ export function withTimeout<T>(
 
   return new Promise<T>((resolve, reject) => {
     let settled = false;
-    
+
     const timeoutId = setTimeout(() => {
       if (!settled) {
         settled = true;
@@ -45,7 +45,7 @@ export function withTimeout<T>(
         );
       }
     }, timeoutMs);
-    
+
     promise.then(
       (result) => {
         if (!settled) {

@@ -51,7 +51,12 @@ export function Checklist(props: ChecklistProps) {
     validItems.length > 0 ? Math.round((checkedItems.size / validItems.length) * 100) : 0;
 
   const priorityColors = {
-    critical: cn('text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/20', 'px-3', 'py-1', 'rounded'),
+    critical: cn(
+      'text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/20',
+      'px-3',
+      'py-1',
+      'rounded'
+    ),
     high: 'text-red-600 dark:text-red-400',
     medium: 'text-yellow-600 dark:text-yellow-400',
     low: 'text-green-600 dark:text-green-400',
@@ -81,7 +86,7 @@ export function Checklist(props: ChecklistProps) {
         <div className="mb-4">
           <div className="bg-muted h-2 w-full rounded-full">
             <div
-              className={cn("bg-primary h-2 rounded-full", "transition-all")}
+              className={cn('bg-primary h-2 rounded-full', 'transition-all')}
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -108,7 +113,7 @@ export function Checklist(props: ChecklistProps) {
                   }`}
                 >
                   {checkedItems.has(index) && (
-                    <CheckCircle className="h-3 w-3 text-primary-foreground" />
+                    <CheckCircle className="text-primary-foreground h-3 w-3" />
                   )}
                 </div>
               </button>
@@ -127,7 +132,7 @@ export function Checklist(props: ChecklistProps) {
                   ) : null}
                 </div>
                 {item.description ? (
-                  <p className="text-muted-foreground text-sm mt-1" itemProp="description">
+                  <p className="text-muted-foreground mt-1 text-sm" itemProp="description">
                     {item.description}
                   </p>
                 ) : null}

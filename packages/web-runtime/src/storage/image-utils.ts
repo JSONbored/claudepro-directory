@@ -29,7 +29,7 @@ export function validateImageBuffer(
   }
 
   const sizeInBytes =
-    (typeof Buffer !== 'undefined' && buffer instanceof Buffer)
+    typeof Buffer !== 'undefined' && buffer instanceof Buffer
       ? buffer.byteLength
       : buffer instanceof Uint8Array
         ? buffer.byteLength

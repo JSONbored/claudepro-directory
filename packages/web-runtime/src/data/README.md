@@ -27,7 +27,7 @@ export async function getData() {
   cacheLife('medium'); // Use named profile from next.config.mjs
   cacheTag('data');
   cacheTag(`data-${id}`); // Include dynamic identifiers in tags
-  
+
   // Your data fetching code
   return data;
 }
@@ -37,16 +37,17 @@ Available `cacheLife` profiles (configured in `next.config.mjs`):
 
 ### Profile Reference
 
-| Profile | Stale | Revalidate | Expire | Use Cases |
-|---------|-------|------------|--------|-----------|
-| `'short'` | 15min (900s) | 5min (300s) | 2hr (7200s) | Frequently changing data (search results, newsletter counts, health status) |
-| `'medium'` | 1hr (3600s) | 15min (900s) | 1 day (86400s) | Moderately changing data (content detail, jobs, companies, content lists, templates) |
-| `'long'` | 1 day (86400s) | 6hr (21600s) | 30 days (2592000s) | Rarely changing data (SEO metadata, paginated content, navigation, site config) |
-| `'userProfile'` | 1min (60s) | 5min (300s) | 30min (1800s) | User-specific data (account pages, user profiles, personalized content) |
+| Profile         | Stale          | Revalidate   | Expire             | Use Cases                                                                            |
+| --------------- | -------------- | ------------ | ------------------ | ------------------------------------------------------------------------------------ |
+| `'short'`       | 15min (900s)   | 5min (300s)  | 2hr (7200s)        | Frequently changing data (search results, newsletter counts, health status)          |
+| `'medium'`      | 1hr (3600s)    | 15min (900s) | 1 day (86400s)     | Moderately changing data (content detail, jobs, companies, content lists, templates) |
+| `'long'`        | 1 day (86400s) | 6hr (21600s) | 30 days (2592000s) | Rarely changing data (SEO metadata, paginated content, navigation, site config)      |
+| `'userProfile'` | 1min (60s)     | 5min (300s)  | 30min (1800s)      | User-specific data (account pages, user profiles, personalized content)              |
 
 ### When to Use Each Profile
 
 **`'short'`** - Use for data that changes frequently (every 5-15 minutes):
+
 - Search results (`getSearchResults`, `getSearchAutocomplete`)
 - Newsletter subscriber counts (`getNewsletterCount`)
 - Health status (`getApiHealthFormatted`)
@@ -54,6 +55,7 @@ Available `cacheLife` profiles (configured in `next.config.mjs`):
 - Any data that needs near-real-time freshness
 
 **`'medium'`** - Use for data that changes moderately (every 1-6 hours):
+
 - Content detail pages (`getContentDetail`, `getContentDetailCore`, `getContentAnalytics`)
 - Content templates (`getContentTemplates`)
 - Job listings (`getJobs`, `getJobBySlug`, `getFeaturedJobs`)
@@ -66,6 +68,7 @@ Available `cacheLife` profiles (configured in `next.config.mjs`):
 - Contact commands (`getContactCommands`)
 
 **`'long'`** - Use for data that rarely changes (daily or weekly):
+
 - SEO metadata (`generatePageMetadata`)
 - Paginated content (`getContentPaginated`)
 - Navigation menus (`getLayoutData`)
@@ -82,6 +85,7 @@ Available `cacheLife` profiles (configured in `next.config.mjs`):
 - Static pages (terms, privacy, help, etc.)
 
 **`'userProfile'`** - Use for user-specific data:
+
 - SEO metadata (`getPageMetadata`, `getPageMetadataWithSchemas`)
 - Paginated content (`getPaginatedContent`)
 - Data that can be cached for extended periods
@@ -97,6 +101,7 @@ cacheTag(`user-${userId}`);
 ```
 
 This pattern is used for:
+
 - Account dashboard data (`getUserCompleteData` - returns `account_dashboard` and `user_dashboard`)
 - User library/bookmarks (`getUserCompleteData` - returns `user_library`, `getUserBookmarksForCollections`)
 - User settings (`getUserCompleteData` - returns `user_settings`)
@@ -111,6 +116,7 @@ This pattern is used for:
 **Why custom values?** User-specific data needs shorter cache times (1min stale, 5min revalidate, 30min expire) to ensure users see their own updates quickly while still benefiting from cross-request caching.
 
 **Note:** For user-specific data, you can also use the `userProfile` profile:
+
 ```ts
 'use cache: private';
 cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire
@@ -128,7 +134,10 @@ The `createCachedDataFunction` factory eliminates repetitive caching, logging, e
 ```ts
 import { createCachedDataFunction, generateContentTags } from '../cached-data-factory.ts';
 
-export const getContentByCategory = createCachedDataFunction<content_category, EnrichedContentItem[]>({
+export const getContentByCategory = createCachedDataFunction<
+  content_category,
+  EnrichedContentItem[]
+>({
   serviceKey: 'content',
   methodName: 'getEnrichedContentList',
   cacheMode: 'public',
@@ -150,6 +159,7 @@ export const getContentByCategory = createCachedDataFunction<content_category, E
 ```
 
 **Benefits:**
+
 - ✅ Automatic caching with `'use cache'` or `'use cache: private'`
 - ✅ Automatic `cacheLife()` and `cacheTag()` configuration
 - ✅ Automatic error handling and logging
@@ -158,12 +168,14 @@ export const getContentByCategory = createCachedDataFunction<content_category, E
 - ✅ Request-scoped logging with proper context
 
 **When to Use:**
+
 - ✅ For all new data fetching functions
 - ✅ When migrating existing functions
 - ✅ For simple RPC/service method calls
 - ✅ When you need consistent caching and error handling
 
 **When NOT to Use:**
+
 - ❌ For complex aggregation functions (e.g., `getTrendingPageData`, `getContentBatchBySlugs`)
 - ❌ For functions that read from local config files (e.g., `getPartnerPricing`)
 - ❌ For functions with complex conditional logic that doesn't fit the factory pattern
@@ -185,6 +197,7 @@ const service = new ContentService();
 ```
 
 **Benefits:**
+
 - ✅ Singleton pattern (services are stateless, so singletons are safe)
 - ✅ Lazy loading (services only loaded when needed)
 - ✅ Type-safe service keys
@@ -192,6 +205,7 @@ const service = new ContentService();
 - ✅ Automatic service registry
 
 **Available Services:**
+
 - `'account'` - AccountService
 - `'changelog'` - ChangelogService
 - `'companies'` - CompaniesService
@@ -257,7 +271,7 @@ import { revalidateTag } from 'next/cache';
 
 export async function updateContent() {
   // Update data...
-  
+
   // Invalidate related cache tags
   revalidateTag('content');
   revalidateTag(`content-${category}`);
@@ -276,7 +290,7 @@ PPR enables immediate rendering of static shells while dynamic content streams i
 ```tsx
 export default async function CategoryPage({ params }) {
   const config = getCategoryConfig(category); // Static config from generated file
-  
+
   // Static shell renders immediately
   return (
     <div>
@@ -308,12 +322,12 @@ export default async function CompanyPage({ params }) {
         <Suspense fallback={<HeaderSkeleton />}>
           <CompanyHeader slug={slug} />
         </Suspense>
-        
+
         <div className="grid">
           <Suspense fallback={<JobsSkeleton />}>
             <CompanyJobsList slug={slug} />
           </Suspense>
-          
+
           <Suspense fallback={<StatsSkeleton />}>
             <CompanyStats slug={slug} />
           </Suspense>
@@ -333,14 +347,14 @@ export default async function CompanyPage({ params }) {
 ```tsx
 export default async function DetailPage({ params }) {
   const { category, slug } = await params;
-  
+
   // Core content fetched blocking for optimal LCP
   const coreContent = await getContentDetailCore(category, slug);
-  
+
   // Secondary data as promises for streaming
   const analyticsPromise = getContentAnalytics(category, slug);
   const relatedPromise = getRelatedContent(category, slug);
-  
+
   return (
     <div>
       {/* Core content renders immediately */}
@@ -349,7 +363,7 @@ export default async function DetailPage({ params }) {
         <Suspense fallback={null}>
           <ViewCountMetadata promise={analyticsPromise} />
         </Suspense>
-        
+
         {/* Related content streams in Suspense */}
         <Suspense fallback={null}>
           <SidebarWithRelated promise={relatedPromise} />
@@ -373,12 +387,10 @@ export default async function JobsPage({ searchParams }) {
     <div>
       <HeroSection /> {/* Static */}
       <FilterForm searchParams={searchParams} /> {/* Static */}
-      
       {/* Dynamic content streams */}
       <Suspense fallback={<CountSkeleton />}>
         <JobsCountBadge />
       </Suspense>
-      
       <Suspense fallback={<ListSkeleton />}>
         <JobsListSection searchParams={searchParams} />
       </Suspense>

@@ -30,13 +30,7 @@ import { useCopyToClipboard } from '../../hooks/use-copy-to-clipboard.ts';
 // Removed deprecated responsive utility - using direct Tailwind classes
 import { Copy, Check, AlertCircle, RefreshCw } from '../../icons.tsx';
 import { Button } from './button.tsx';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from './card.tsx';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card.tsx';
 import { SPRING } from '../../design-system/index.ts';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -86,7 +80,7 @@ function ErrorCodeBlock({ content }: { content: string }) {
 
   return (
     <div className="relative">
-      <pre className="max-w-full break-all whitespace-pre-wrap text-destructive text-xs bg-background/50 rounded border border-border p-3 pr-10">
+      <pre className="text-destructive bg-background/50 border-border max-w-full rounded border p-3 pr-10 text-xs break-all whitespace-pre-wrap">
         {content}
       </pre>
       <Button
@@ -125,7 +119,7 @@ function SegmentErrorFallbackUI({
    */
   const handleReset = useCallback(() => {
     setIsResettingTrue();
-    
+
     // Track recovery attempt via click interaction
     pulse
       .click({
@@ -222,34 +216,32 @@ function SegmentErrorFallbackUI({
               </motion.div>
             )}
 
-          {isDevelopment && error && (
-            <motion.div
-              className="rounded-lg border border-muted-foreground/30 border-dashed bg-muted/30 p-4"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ ...SPRING.smooth, delay: 0.4 }}
-            >
-              <p className="mb-2 font-semibold text-muted-foreground text-sm">
-                Error details
-              </p>
-              <ErrorCodeBlock content={error.message} />
-              {error.stack ? (
-                <details className="mt-2 text-xs">
-                  <summary className="cursor-pointer font-semibold">► Stack Trace</summary>
-                  <div className="mt-2">
-                    <ErrorCodeBlock content={error.stack} />
-                  </div>
-                </details>
-              ) : null}
-              {error.digest && (
-                <p className="mt-2 font-mono text-muted-foreground text-xs">
-                  Digest: {error.digest}
-                </p>
-              )}
-            </motion.div>
-          )}
-        </CardContent>
-      </Card>
+            {isDevelopment && error && (
+              <motion.div
+                className="border-muted-foreground/30 bg-muted/30 rounded-lg border border-dashed p-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...SPRING.smooth, delay: 0.4 }}
+              >
+                <p className="text-muted-foreground mb-2 text-sm font-semibold">Error details</p>
+                <ErrorCodeBlock content={error.message} />
+                {error.stack ? (
+                  <details className="mt-2 text-xs">
+                    <summary className="cursor-pointer font-semibold">► Stack Trace</summary>
+                    <div className="mt-2">
+                      <ErrorCodeBlock content={error.stack} />
+                    </div>
+                  </details>
+                ) : null}
+                {error.digest && (
+                  <p className="text-muted-foreground mt-2 font-mono text-xs">
+                    Digest: {error.digest}
+                  </p>
+                )}
+              </motion.div>
+            )}
+          </CardContent>
+        </Card>
       </motion.div>
     </motion.div>
   );

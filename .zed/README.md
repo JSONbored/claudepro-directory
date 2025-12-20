@@ -27,6 +27,7 @@ The `.zed/debug.json` file contains debug configurations for runtime debugging (
 ### Static Analysis Tools
 
 Your project uses:
+
 - **TypeScript** - Type checking (shows in Problems panel automatically)
 - **ESLint** - Linting and code quality (shows in Problems panel automatically)
 - **Deno** - For edge functions (shows in Problems panel automatically)
@@ -43,6 +44,7 @@ Your project uses:
 ### Full Workspace Analysis
 
 **Issue**: TypeScript language server typically only checks files that are:
+
 - Currently open in the editor
 - Referenced by open files
 - Part of the project's include paths
@@ -80,6 +82,7 @@ pnpm lint:edge
 #### Option 3: Use Problems Panel After Full Check
 
 After running a full check via tasks or commands:
+
 1. The terminal will show all errors
 2. Some errors may also appear in the Problems panel
 3. You can search/filter the terminal output for specific files
@@ -96,11 +99,13 @@ After running a full check via tasks or commands:
 ## Troubleshooting
 
 If the debugger doesn't work:
+
 1. Ensure Node.js is installed and in PATH
 2. Check that `tsx` is installed (`pnpm add -g tsx` for global installation or via package.json)
 3. Verify the debug adapter is working (check debug panel logs)
 
 If static analysis doesn't work:
+
 1. Restart Zed
 2. Restart TypeScript server
 3. Check that `tsconfig.json` is valid

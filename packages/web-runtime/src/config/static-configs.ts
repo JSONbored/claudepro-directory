@@ -123,7 +123,8 @@ const NEWSLETTER_CONFIG_COMPAT = {
   'newsletter.footer_text': NEWSLETTER_CTA.footer_text,
   'newsletter.show_subscriber_count': NEWSLETTER_BEHAVIOR.show_subscriber_count,
   'newsletter.footer_bar.show_after_delay_ms': NEWSLETTER_BEHAVIOR.footer_bar_show_after_delay_ms,
-  'newsletter.scroll_trigger.min_scroll_height_px': NEWSLETTER_BEHAVIOR.scroll_trigger_min_scroll_height_px,
+  'newsletter.scroll_trigger.min_scroll_height_px':
+    NEWSLETTER_BEHAVIOR.scroll_trigger_min_scroll_height_px,
   'newsletter.max_retries': NEWSLETTER_BEHAVIOR.max_retries,
   'newsletter.initial_retry_delay_ms': NEWSLETTER_BEHAVIOR.initial_retry_delay_ms,
   'newsletter.retry_backoff_multiplier': NEWSLETTER_BEHAVIOR.retry_backoff_multiplier,

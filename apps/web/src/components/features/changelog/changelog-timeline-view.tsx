@@ -10,7 +10,9 @@
 
 'use client';
 
-import type { changelogModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type changelogModel = Prisma.changelogGetPayload<{}>;
 import { useInfiniteScroll } from '@heyclaude/web-runtime/hooks/use-infinite-scroll';
 import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { getChangelogPath } from '@heyclaude/web-runtime/utils/changelog';
@@ -19,7 +21,6 @@ import Link from 'next/link';
 import { ChangelogContent } from './changelog-content';
 
 type ChangelogEntry = changelogModel;
-
 
 interface ChangelogTimelineViewProps {
   entries: ChangelogEntry[];
@@ -86,15 +87,15 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
 
         return (
           <div key={entry.slug} className="relative">
-            <div className="flex flex-col md:flex-row gap-y-6">
-              <div className="md:w-48 flex-shrink-0">
-                <div className="md:sticky md:top-8 pb-4">
-                  <time className="mb-2 block text-muted-foreground text-sm font-medium">
+            <div className="flex flex-col gap-y-6 md:flex-row">
+              <div className="flex-shrink-0 md:w-48">
+                <div className="pb-4 md:sticky md:top-8">
+                  <time className="text-muted-foreground mb-2 block text-sm font-medium">
                     {formattedDate}
                   </time>
 
                   {version && (
-                    <div className="relative z-10 inline-flex h-10 w-10 items-center justify-center card-base border-border text-sm font-bold text-foreground">
+                    <div className="card-base border-border text-foreground relative z-10 inline-flex h-10 w-10 items-center justify-center text-sm font-bold">
                       {version}
                     </div>
                   )}
@@ -104,18 +105,18 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
               {/* Right side - Content */}
               <div className="relative flex-1 pb-4 md:pl-8">
                 {/* Vertical timeline line */}
-                <div className="absolute left-0 top-2 hidden h-full w-px bg-border md:block">
+                <div className="bg-border absolute top-2 left-0 hidden h-full w-px md:block">
                   {/* Timeline dot */}
-                  <div className="absolute z-10 size-3 -translate-x-1/2 rounded-full bg-primary md:block" />
+                  <div className="bg-primary absolute z-10 size-3 -translate-x-1/2 rounded-full md:block" />
                 </div>
 
                 <div className="space-y-6">
                   <div className="relative z-10 flex flex-col gap-1">
                     <Link
                       href={getChangelogPath(entry.slug)}
-                      className="block transition-colors hover:text-primary"
+                      className="hover:text-primary block transition-colors"
                     >
-                      <h2 className="text-balance text-2xl font-semibold tracking-tight">
+                      <h2 className="text-2xl font-semibold tracking-tight text-balance">
                         {entry.title}
                       </h2>
                     </Link>
@@ -126,7 +127,7 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
                         {tags.map((tag: string) => (
                           <span
                             key={tag}
-                            className="flex h-6 w-fit items-center justify-center rounded-full border bg-muted px-1 text-xs-medium text-muted-foreground"
+                            className="bg-muted text-xs-medium text-muted-foreground flex h-6 w-fit items-center justify-center rounded-full border px-1"
                           >
                             {tag}
                           </span>
@@ -134,7 +135,7 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
                       </div>
                     )}
                   </div>
-                  <div className="prose max-w-none prose-headings:scroll-mt-8 prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-balance prose-p:tracking-tight prose-p:text-balance prose-a:no-underline dark:prose-invert">
+                  <div className="prose prose-headings:scroll-mt-8 prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-balance prose-p:tracking-tight prose-p:text-balance prose-a:no-underline dark:prose-invert max-w-none">
                     <ChangelogContent entry={entry} hideHeader={true} onHeaderRef={() => {}} />
                   </div>
                 </div>

@@ -161,11 +161,14 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
       throw new TypeError('API response missing categories array');
     }
 
-    logger.info(`✅ Fetched data: ${data.total_count ?? 0} total items, ${data.categories?.length ?? 0} categories`, {
-      script: 'generate-readme',
-      totalCount: data.total_count ?? 0,
-      categoriesCount: data.categories?.length ?? 0,
-    });
+    logger.info(
+      `✅ Fetched data: ${data.total_count ?? 0} total items, ${data.categories?.length ?? 0} categories`,
+      {
+        script: 'generate-readme',
+        totalCount: data.total_count ?? 0,
+        categoriesCount: data.categories?.length ?? 0,
+      }
+    );
 
     // Format the data into markdown using the CLI utility
     const formattedMarkdown = buildReadmeMarkdown(data);

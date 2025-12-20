@@ -10,7 +10,7 @@
 
   button:active,
   a:active,
-  [role="button"]:active {
+  [role='button']:active {
     opacity: 0.7;
     transform: scale(0.98);
     transition:
@@ -20,7 +20,7 @@
 
   /* Prevent double-tap zoom on buttons */
   button,
-  [role="button"] {
+  [role='button'] {
     touch-action: manipulation;
   }
 }
@@ -35,8 +35,8 @@ a,
 input,
 textarea,
 select,
-[role="button"],
-[role="link"] {
+[role='button'],
+[role='link'] {
   transition-property: transform, opacity, box-shadow, background-color, border-color;
   transition-duration: var(--duration-quick);
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -60,25 +60,25 @@ select,
 /* Interactive cursors */
 button:not(:disabled),
 a,
-[role="button"]:not([aria-disabled="true"]),
-input[type="checkbox"],
-input[type="radio"],
+[role='button']:not([aria-disabled='true']),
+input[type='checkbox'],
+input[type='radio'],
 select {
   cursor: pointer;
 }
 
 /* Disabled state cursor */
 button:disabled,
-[aria-disabled="true"] {
+[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
 /* Text selection cursor */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="search"],
-input[type="url"],
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='search'],
+input[type='url'],
 textarea {
   cursor: text;
 }
@@ -88,13 +88,13 @@ textarea {
  * =========================== */
 
 /* Orange accent underline animation for text links - matches navigation style */
-a:not([class*="button"]):not([class*="btn"]):not(.no-underline) {
+a:not([class*='button']):not([class*='btn']):not(.no-underline) {
   position: relative;
   text-decoration: none;
 }
 
-a:not([class*="button"]):not([class*="btn"]):not(.no-underline)::after {
-  content: "";
+a:not([class*='button']):not([class*='btn']):not(.no-underline)::after {
+  content: '';
   position: absolute;
   bottom: 0;
   left: 0;
@@ -106,7 +106,7 @@ a:not([class*="button"]):not([class*="btn"]):not(.no-underline)::after {
   transition: transform var(--duration-default) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-a:not([class*="button"]):not([class*="btn"]):not(.no-underline):hover::after {
+a:not([class*='button']):not([class*='btn']):not(.no-underline):hover::after {
   transform: scaleX(1);
   transform-origin: left;
 }
@@ -116,8 +116,8 @@ a:not([class*="button"]):not([class*="btn"]):not(.no-underline):hover::after {
  * =========================== */
 
 /* Checkbox and radio button scale on check */
-input[type="checkbox"]:checked,
-input[type="radio"]:checked {
+input[type='checkbox']:checked,
+input[type='radio']:checked {
   animation: checkScale var(--duration-quick) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -143,8 +143,8 @@ select:focus {
  * =========================== */
 
 /* Subtle pulse for notification badges */
-[class*="badge"][data-notification="true"],
-[class*="Badge"][data-notification="true"] {
+[class*='badge'][data-notification='true'],
+[class*='Badge'][data-notification='true'] {
   animation: badgePulse var(--duration-maximum) cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
@@ -165,8 +165,8 @@ select:focus {
  * =========================== */
 
 /* Subtle pulse for loading elements */
-[aria-busy="true"],
-[data-loading="true"] {
+[aria-busy='true'],
+[data-loading='true'] {
   animation: loadingPulse var(--duration-very-extended) cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
@@ -185,7 +185,7 @@ select:focus {
  * =========================== */
 
 /* Smooth tooltip appearance */
-[role="tooltip"] {
+[role='tooltip'] {
   animation: tooltipSlide var(--duration-quick) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -205,8 +205,8 @@ select:focus {
  * =========================== */
 
 /* Enhanced shimmer effect for skeleton loading */
-[class*="skeleton"]::before,
-[class*="Skeleton"]::before {
+[class*='skeleton']::before,
+[class*='Skeleton']::before {
   background: linear-gradient(90deg, transparent, hsl(var(--border) / 0.05), transparent);
 }
 
@@ -247,7 +247,7 @@ a:not([data-no-transition]),
 input:not([data-no-transition]),
 textarea:not([data-no-transition]),
 select:not([data-no-transition]),
-[role="button"]:not([data-no-transition]),
+[role='button']:not([data-no-transition]),
 nav,
 header,
 footer,
@@ -259,16 +259,16 @@ aside,
 }
 
 /* Cards: exclude border-color from transitions (Motion.dev handles border animations) */
-[class*="card"]:not([data-no-transition]),
-[class*="Card"]:not([data-no-transition]) {
+[class*='card']:not([data-no-transition]),
+[class*='Card']:not([data-no-transition]) {
   transition-property: background-color, color, fill, stroke;
   transition-duration: var(--duration-fast);
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Don't transition transforms/opacity (used for animations) */
-*[class*="motion-"],
-*[class*="animate-"] {
+*[class*='motion-'],
+*[class*='animate-'] {
   transition-property: none;
 }
 
@@ -279,9 +279,9 @@ aside,
 /* GPU acceleration for animations */
 button,
 a,
-[role="button"],
-[class*="card"],
-[class*="Card"] {
+[role='button'],
+[class*='card'],
+[class*='Card'] {
   will-change: transform;
   backface-visibility: hidden;
   -webkit-font-smoothing: antialiased;
@@ -290,6 +290,6 @@ a,
 /* Remove will-change after interaction */
 button:not(:hover):not(:focus),
 a:not(:hover):not(:focus),
-[role="button"]:not(:hover):not(:focus) {
+[role='button']:not(:hover):not(:focus) {
   will-change: auto;
 }

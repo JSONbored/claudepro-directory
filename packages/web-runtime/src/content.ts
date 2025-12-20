@@ -1,4 +1,4 @@
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 
 export function formatViewCount(count: number): string {
   if (count >= 1000) {

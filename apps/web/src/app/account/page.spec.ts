@@ -3,7 +3,7 @@ import { setupTestWithErrorTracking } from '../../../../../config/tests/utils/er
 
 /**
  * Comprehensive Account Dashboard E2E Tests
- * 
+ *
  * Tests ALL functionality on the account dashboard page with strict error checking:
  * - Authentication flow (redirect to login if not authenticated)
  * - Dashboard rendering (stats cards, quick actions, tabs)
@@ -26,7 +26,7 @@ test.describe('Account Dashboard', () => {
     // Set up error tracking and navigate to account dashboard
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/account');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -43,13 +43,13 @@ test.describe('Account Dashboard', () => {
     // Check for sign-in prompt or redirect
     const signInPrompt = page.getByText(/sign in required|please sign in/i);
     const signInButton = page.getByRole('button', { name: /sign in|go to login/i });
-    
+
     // Either sign-in prompt should be visible, or we should be redirected
     const hasSignInPrompt = await signInPrompt.isVisible().catch(() => false);
     const hasSignInButton = await signInButton.isVisible().catch(() => false);
     const currentUrl = page.url();
     const isRedirected = currentUrl.includes('/login') || currentUrl.includes('/auth');
-    
+
     // Should have sign-in prompt OR be redirected
     expect(hasSignInPrompt || hasSignInButton || isRedirected).toBe(true);
   });
@@ -57,7 +57,7 @@ test.describe('Account Dashboard', () => {
   test('should render dashboard when authenticated', async ({ page }) => {
     // Note: This test assumes user is authenticated
     // In a real scenario, you'd set up authentication state first
-    
+
     // Check main element is present
     const mainElement = page.getByRole('main');
     await expect(mainElement).toBeVisible();
@@ -67,14 +67,14 @@ test.describe('Account Dashboard', () => {
     await expect(errorOverlay).not.toBeVisible();
 
     // Check for dashboard heading
-    const heading = page.getByRole('heading', { 
+    const heading = page.getByRole('heading', {
       level: 1,
-      name: /dashboard/i 
+      name: /dashboard/i,
     });
-    
+
     // Heading may or may not be visible depending on auth state
     const hasHeading = await heading.isVisible().catch(() => false);
-    
+
     // If authenticated, should have heading
     if (hasHeading) {
       await expect(heading).toBeVisible();
@@ -84,11 +84,11 @@ test.describe('Account Dashboard', () => {
   test('should display stats cards (bookmarks, tier, member since)', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for stats cards
     const statsSection = page.getByText(/bookmarks|tier|member since/i);
     const hasStats = await statsSection.isVisible().catch(() => false);
-    
+
     // Stats may or may not be visible depending on auth state
     // But page should render
     const main = page.getByRole('main');
@@ -98,11 +98,11 @@ test.describe('Account Dashboard', () => {
   test('should display quick actions section', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for quick actions
     const quickActions = page.getByText(/quick actions|common tasks/i);
     const hasQuickActions = await quickActions.isVisible().catch(() => false);
-    
+
     // Quick actions may or may not be visible depending on auth state
     // But page should render
     const main = page.getByRole('main');
@@ -112,19 +112,19 @@ test.describe('Account Dashboard', () => {
   test('should display tab navigation (Overview, Bookmarks, Recommendations)', async ({ page }) => {
     // Wait for tabs to load
     await page.waitForTimeout(2000);
-    
+
     // Check for tablist
     const tabsList = page.getByRole('tablist');
     const hasTabs = await tabsList.isVisible().catch(() => false);
-    
+
     if (hasTabs) {
       await expect(tabsList).toBeVisible();
-      
+
       // Check for common tab names
       const overviewTab = page.getByRole('tab', { name: /overview/i });
       const bookmarksTab = page.getByRole('tab', { name: /bookmarks/i });
       const recommendationsTab = page.getByRole('tab', { name: /recommendations/i });
-      
+
       // At least one tab should be visible
       const tabCount = await page.getByRole('tab').count();
       expect(tabCount).toBeGreaterThan(0);
@@ -134,25 +134,25 @@ test.describe('Account Dashboard', () => {
   test('should switch between tabs correctly', async ({ page }) => {
     // Wait for tabs to load
     await page.waitForTimeout(2000);
-    
+
     const tabsList = page.getByRole('tablist');
     const hasTabs = await tabsList.isVisible().catch(() => false);
-    
+
     if (hasTabs) {
       const tabs = page.getByRole('tab');
       const tabCount = await tabs.count();
-      
+
       if (tabCount > 1) {
         // Click second tab
         const secondTab = tabs.nth(1);
         const tabName = await secondTab.textContent();
-        
+
         await secondTab.click();
         await page.waitForTimeout(500);
-        
+
         // Verify tab is selected
         await expect(secondTab).toHaveAttribute('aria-selected', 'true');
-        
+
         // Verify content changed (tab panel should update)
         const tabPanel = page.getByRole('tabpanel');
         await expect(tabPanel).toBeVisible();
@@ -163,32 +163,34 @@ test.describe('Account Dashboard', () => {
   test('should handle bookmark management (add/remove bookmarks)', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Navigate to Bookmarks tab if available
     const bookmarksTab = page.getByRole('tab', { name: /bookmarks/i });
     const hasBookmarksTab = await bookmarksTab.isVisible().catch(() => false);
-    
+
     if (hasBookmarksTab) {
       await bookmarksTab.click();
       await page.waitForTimeout(1000);
-      
+
       // Find bookmark items
       const bookmarkItems = page.locator('[data-testid="bookmark-item"], article');
       const bookmarkCount = await bookmarkItems.count();
-      
+
       if (bookmarkCount > 0) {
         // Test remove bookmark button
-        const removeButton = bookmarkItems.first().getByRole('button', { name: /remove|delete|unbookmark/i });
+        const removeButton = bookmarkItems
+          .first()
+          .getByRole('button', { name: /remove|delete|unbookmark/i });
         const hasRemoveButton = await removeButton.isVisible().catch(() => false);
-        
+
         if (hasRemoveButton) {
           await removeButton.click();
           await page.waitForTimeout(500);
-          
+
           // Should show toast or update UI
           const toast = page.getByText(/removed|deleted|unbookmarked/i);
           const hasToast = await toast.isVisible().catch(() => false);
-          
+
           if (hasToast) {
             await expect(toast).toBeVisible();
           }
@@ -200,31 +202,33 @@ test.describe('Account Dashboard', () => {
   test('should handle collection management', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for collection-related UI elements
     const collectionSection = page.getByText(/collections|my collections/i);
     const hasCollectionSection = await collectionSection.isVisible().catch(() => false);
-    
+
     if (hasCollectionSection) {
       // Find "Create collection" or "New collection" button
-      const createCollectionButton = page.getByRole('button', { name: /create collection|new collection|add collection/i });
+      const createCollectionButton = page.getByRole('button', {
+        name: /create collection|new collection|add collection/i,
+      });
       const hasCreateButton = await createCollectionButton.isVisible().catch(() => false);
-      
+
       if (hasCreateButton) {
         // Verify button is clickable
         await expect(createCollectionButton).toBeEnabled();
       }
-      
+
       // Check for existing collections
       const collectionItems = page.locator('[data-testid="collection-item"], article');
       const collectionCount = await collectionItems.count();
-      
+
       if (collectionCount > 0) {
         // Test collection item interactions
         const firstCollection = collectionItems.first();
         const collectionLink = firstCollection.getByRole('link').first();
         const hasLink = await collectionLink.isVisible().catch(() => false);
-        
+
         if (hasLink) {
           const href = await collectionLink.getAttribute('href');
           expect(href).toBeTruthy();
@@ -237,11 +241,11 @@ test.describe('Account Dashboard', () => {
   test('should display recently saved section', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for recently saved section
     const recentlySaved = page.getByText(/recently saved|latest bookmarks/i);
     const hasRecentlySaved = await recentlySaved.isVisible().catch(() => false);
-    
+
     // Section may or may not be visible depending on data
     // But page should render
     const main = page.getByRole('main');
@@ -251,11 +255,11 @@ test.describe('Account Dashboard', () => {
   test('should display recommendations section', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for recommendations section
     const recommendations = page.getByText(/recommended|suggestions/i);
     const hasRecommendations = await recommendations.isVisible().catch(() => false);
-    
+
     // Section may or may not be visible depending on data
     // But page should render
     const main = page.getByRole('main');
@@ -265,13 +269,16 @@ test.describe('Account Dashboard', () => {
   test('should handle empty state for bookmarks', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for empty state message (if no bookmarks)
     const emptyState = page.getByText(/no saved configs|no bookmarks|start bookmarking/i);
     const hasEmptyState = await emptyState.isVisible().catch(() => false);
-    
+
     // Empty state may or may not be visible, but page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -284,10 +291,13 @@ test.describe('Account Dashboard', () => {
     await page.keyboard.press('Tab');
     const focused = page.locator(':focus');
     await expect(focused).toBeVisible();
-    
+
     // Check for proper heading hierarchy
     const heading = page.getByRole('heading', { level: 1 });
-    const hasHeading = await heading.first().isVisible().catch(() => false);
+    const hasHeading = await heading
+      .first()
+      .isVisible()
+      .catch(() => false);
     if (hasHeading) {
       await expect(heading.first()).toBeVisible();
     }
@@ -304,7 +314,7 @@ test.describe('Account Dashboard', () => {
     // Check tabs are accessible on mobile
     const tabsList = page.getByRole('tablist');
     const hasTabs = await tabsList.isVisible().catch(() => false);
-    
+
     if (hasTabs) {
       await expect(tabsList).toBeVisible();
     }
@@ -313,23 +323,23 @@ test.describe('Account Dashboard', () => {
   test('should handle loading states', async ({ page }) => {
     // Navigate to page
     await page.goto('/account');
-    
+
     // Check for loading indicators (may flash quickly)
     const loadingIndicator = page.locator('[aria-busy="true"], [data-loading="true"]');
     const hasLoading = await loadingIndicator.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });
 
   test('should handle error states gracefully', async ({ page }) => {
     // Intercept API calls to simulate error
-    await page.route('/api/**', route => {
+    await page.route('/api/**', (route) => {
       route.fulfill({
         status: 500,
         body: JSON.stringify({ error: 'Internal server error' }),
@@ -344,9 +354,12 @@ test.describe('Account Dashboard', () => {
     // Page should still render (error boundary or error message)
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
-    
+
     // Should show error message or handle gracefully
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     // Error overlay may or may not be visible, but page should not crash
     expect(typeof hasError).toBe('boolean');
   });
@@ -354,18 +367,18 @@ test.describe('Account Dashboard', () => {
   test('should navigate to quick action links', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for quick action links
     const quickActionLinks = page.getByRole('link', { name: /open|view|manage/i });
     const linkCount = await quickActionLinks.count();
-    
+
     if (linkCount > 0) {
       // Click first link
       const firstLink = quickActionLinks.first();
       const href = await firstLink.getAttribute('href');
-      
+
       expect(href).toBeTruthy();
-      
+
       // Verify link is clickable
       await expect(firstLink).toBeVisible();
     }
@@ -374,11 +387,11 @@ test.describe('Account Dashboard', () => {
   test('should display welcome message with user name', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for welcome message
     const welcomeMessage = page.getByText(/welcome back/i);
     const hasWelcome = await welcomeMessage.isVisible().catch(() => false);
-    
+
     // Welcome message may or may not be visible depending on auth state
     // But page should render
     const main = page.getByRole('main');
@@ -388,14 +401,14 @@ test.describe('Account Dashboard', () => {
   test('should display dashboard heading', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for dashboard heading
-    const heading = page.getByRole('heading', { 
+    const heading = page.getByRole('heading', {
       level: 1,
-      name: /dashboard/i 
+      name: /dashboard/i,
     });
     const hasHeading = await heading.isVisible().catch(() => false);
-    
+
     // Heading may or may not be visible depending on auth state
     // But page should render
     const main = page.getByRole('main');
@@ -405,12 +418,12 @@ test.describe('Account Dashboard', () => {
   test('should display all three stats cards (Bookmarks, Tier, Member Since)', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for stats cards
     const bookmarksCard = page.getByText(/bookmarks|saved items/i);
     const tierCard = page.getByText(/tier|membership level/i);
     const memberSinceCard = page.getByText(/member since|days active/i);
-    
+
     // Stats cards may or may not be visible depending on auth state
     // But page should render
     const main = page.getByRole('main');
@@ -420,11 +433,11 @@ test.describe('Account Dashboard', () => {
   test('should display quick actions card with all actions', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for quick actions card
     const quickActionsCard = page.getByText(/quick actions|common tasks/i);
     const hasQuickActions = await quickActionsCard.isVisible().catch(() => false);
-    
+
     // Quick actions may or may not be visible depending on auth state
     // But page should render
     const main = page.getByRole('main');
@@ -434,11 +447,11 @@ test.describe('Account Dashboard', () => {
   test('should display resume latest bookmark action when bookmarks exist', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for resume bookmark action
     const resumeAction = page.getByText(/resume latest bookmark|continue where you left off/i);
     const hasResumeAction = await resumeAction.isVisible().catch(() => false);
-    
+
     // Resume action may or may not be visible depending on bookmarks
     // But page should render
     const main = page.getByRole('main');
@@ -448,11 +461,11 @@ test.describe('Account Dashboard', () => {
   test('should display view all bookmarks action', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for view all bookmarks action
     const viewAllBookmarks = page.getByText(/view all bookmarks/i);
     const hasViewAll = await viewAllBookmarks.isVisible().catch(() => false);
-    
+
     // Action may or may not be visible depending on auth state
     // But page should render
     const main = page.getByRole('main');
@@ -462,11 +475,11 @@ test.describe('Account Dashboard', () => {
   test('should display manage profile action', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for manage profile action
     const manageProfile = page.getByText(/manage profile|update your settings/i);
     const hasManageProfile = await manageProfile.isVisible().catch(() => false);
-    
+
     // Action may or may not be visible depending on auth state
     // But page should render
     const main = page.getByRole('main');
@@ -476,11 +489,13 @@ test.describe('Account Dashboard', () => {
   test('should display recently saved grid with content items', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for recently saved grid
-    const recentlySavedGrid = page.locator('[data-testid*="config-card"], article, [role="article"]');
+    const recentlySavedGrid = page.locator(
+      '[data-testid*="config-card"], article, [role="article"]'
+    );
     const itemCount = await recentlySavedGrid.count();
-    
+
     // May have 0 or more items depending on data
     expect(itemCount).toBeGreaterThanOrEqual(0);
   });
@@ -488,11 +503,13 @@ test.describe('Account Dashboard', () => {
   test('should display recommendations with explore links', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for recommendations section
-    const recommendations = page.getByText(/recommended next|suggestions based on your saved tags/i);
+    const recommendations = page.getByText(
+      /recommended next|suggestions based on your saved tags/i
+    );
     const hasRecommendations = await recommendations.isVisible().catch(() => false);
-    
+
     // Recommendations may or may not be visible depending on data
     // But page should render
     const main = page.getByRole('main');
@@ -502,11 +519,11 @@ test.describe('Account Dashboard', () => {
   test('should handle recommendations with explore similar links', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for explore similar links
     const exploreSimilarLinks = page.getByRole('link', { name: /explore similar/i });
     const linkCount = await exploreSimilarLinks.count();
-    
+
     // May have 0 or more links depending on recommendations
     expect(linkCount).toBeGreaterThanOrEqual(0);
   });
@@ -559,9 +576,12 @@ test.describe('Account Dashboard', () => {
     // Page should still render (error boundary or error message)
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
-    
+
     // Should show error message or handle gracefully
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     // Error overlay may or may not be visible, but page should not crash
     expect(typeof hasError).toBe('boolean');
   });
@@ -569,43 +589,53 @@ test.describe('Account Dashboard', () => {
   test('should display empty state when no bookmarks exist', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for empty state message
     const emptyState = page.getByText(/no saved configs yet|start bookmarking/i);
     const hasEmptyState = await emptyState.isVisible().catch(() => false);
-    
+
     // Empty state may or may not be visible, but page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
-  test('should display empty recommendations state when no recommendations available', async ({ page }) => {
+  test('should display empty recommendations state when no recommendations available', async ({
+    page,
+  }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for empty recommendations message
-    const emptyRecommendations = page.getByText(/start bookmarking configs to receive personalized recommendations/i);
+    const emptyRecommendations = page.getByText(
+      /start bookmarking configs to receive personalized recommendations/i
+    );
     const hasEmptyRecs = await emptyRecommendations.isVisible().catch(() => false);
-    
+
     // Empty state may or may not be visible, but page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
   test('should navigate to content detail from recently saved items', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for content cards in recently saved
     const contentCards = page.locator('[data-testid*="config-card"], article, [role="article"]');
     const cardCount = await contentCards.count();
-    
+
     if (cardCount > 0) {
       // Click first card
       const firstCard = contentCards.first();
       const cardLink = firstCard.getByRole('link').first();
       const hasLink = await cardLink.isVisible().catch(() => false);
-      
+
       if (hasLink) {
         const href = await cardLink.getAttribute('href');
         expect(href).toBeTruthy();
@@ -617,11 +647,11 @@ test.describe('Account Dashboard', () => {
   test('should navigate to recommendations explore links', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for explore links in recommendations
     const exploreLinks = page.getByRole('link', { name: /explore/i });
     const linkCount = await exploreLinks.count();
-    
+
     if (linkCount > 0) {
       // Check first explore link
       const firstLink = exploreLinks.first();
@@ -633,25 +663,25 @@ test.describe('Account Dashboard', () => {
   test('should handle tab content switching correctly', async ({ page }) => {
     // Wait for tabs to load
     await page.waitForTimeout(2000);
-    
+
     const tabsList = page.getByRole('tablist');
     const hasTabs = await tabsList.isVisible().catch(() => false);
-    
+
     if (hasTabs) {
       const tabs = page.getByRole('tab');
       const tabCount = await tabs.count();
-      
+
       // Test all three tabs
       const tabNames = ['overview', 'bookmarks', 'recommendations'];
-      
+
       for (let i = 0; i < Math.min(tabCount, tabNames.length); i++) {
         const tab = tabs.nth(i);
         await tab.click();
         await page.waitForTimeout(500);
-        
+
         // Verify tab is selected
         await expect(tab).toHaveAttribute('aria-selected', 'true');
-        
+
         // Verify tab panel is visible
         const tabPanel = page.getByRole('tabpanel');
         await expect(tabPanel).toBeVisible();
@@ -662,11 +692,11 @@ test.describe('Account Dashboard', () => {
   test('should display account age in days correctly', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for member since card with days
     const memberSinceCard = page.getByText(/member since|days active/i);
     const hasMemberSince = await memberSinceCard.isVisible().catch(() => false);
-    
+
     // Member since card may or may not be visible depending on auth state
     // But page should render
     const main = page.getByRole('main');
@@ -676,11 +706,11 @@ test.describe('Account Dashboard', () => {
   test('should display tier badge correctly (Free/Pro)', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for tier badge
     const tierBadge = page.getByText(/free|pro|tier/i);
     const hasTierBadge = await tierBadge.isVisible().catch(() => false);
-    
+
     // Tier badge may or may not be visible depending on auth state
     // But page should render
     const main = page.getByRole('main');
@@ -690,13 +720,16 @@ test.describe('Account Dashboard', () => {
   test('should handle recently saved content with missing details gracefully', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Page should render even if some content details fail to load
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
-    
+
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -711,8 +744,11 @@ test.describe('Account Dashboard', () => {
     // Page should render or show error boundary, but not crash
     const main = page.getByRole('main');
     const hasMain = await main.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error boundary, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -732,13 +768,18 @@ test.describe('Account Dashboard', () => {
     // Check for error card if dashboard data is null
     const errorCard = page.getByText(/dashboard unavailable|couldn.*t load your account data/i);
     const hasErrorCard = await errorCard.isVisible().catch(() => false);
-    
+
     // Error card may or may not be visible, but page should not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 
-  test('should handle individual getContentDetailCore failures in Promise.all', async ({ page }) => {
+  test('should handle individual getContentDetailCore failures in Promise.all', async ({
+    page,
+  }) => {
     // This tests the error path when individual getContentDetailCore calls fail
     // The component catches errors, logs warnings, and returns null for failed items
     // In E2E, we can verify graceful handling (page renders, failed items are filtered out)
@@ -751,11 +792,16 @@ test.describe('Account Dashboard', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
-  test('should handle null/undefined homepageData.content in extractHomepageCategoryData', async ({ page }) => {
+  test('should handle null/undefined homepageData.content in extractHomepageCategoryData', async ({
+    page,
+  }) => {
     // This tests the edge case where homepageData.content is null/undefined
     // The function returns empty object, recommendations section shows empty state
     // In E2E, we can verify graceful handling
@@ -770,9 +816,12 @@ test.describe('Account Dashboard', () => {
     // Recommendations section should show empty state or handle gracefully
     const recommendations = page.getByText(/recommended next|start bookmarking configs/i);
     const hasRecommendations = await recommendations.isVisible().catch(() => false);
-    
+
     // Recommendations may or may not be visible, but page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -790,9 +839,12 @@ test.describe('Account Dashboard', () => {
     // Should show default values (User, Free) if profile is null
     const welcomeMessage = page.getByText(/welcome back/i);
     const hasWelcome = await welcomeMessage.isVisible().catch(() => false);
-    
+
     // Welcome message may or may not be visible, but page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -810,9 +862,12 @@ test.describe('Account Dashboard', () => {
     // Should show empty state for bookmarks if libraryData is null
     const emptyState = page.getByText(/no saved configs yet/i);
     const hasEmptyState = await emptyState.isVisible().catch(() => false);
-    
+
     // Empty state may or may not be visible, but page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -830,9 +885,12 @@ test.describe('Account Dashboard', () => {
     // Should show 0 days if created_at is null
     const memberSinceCard = page.getByText(/member since|days active/i);
     const hasMemberSince = await memberSinceCard.isVisible().catch(() => false);
-    
+
     // Member since card may or may not be visible, but page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -848,7 +906,10 @@ test.describe('Account Dashboard', () => {
     await expect(main).toBeVisible();
 
     // Should not show invalid bookmarks
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -866,9 +927,12 @@ test.describe('Account Dashboard', () => {
     // Should show recommendations from all homepage items if no saved tags
     const recommendations = page.getByText(/recommended next|start bookmarking/i);
     const hasRecommendations = await recommendations.isVisible().catch(() => false);
-    
+
     // Recommendations may or may not be visible, but page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -884,7 +948,10 @@ test.describe('Account Dashboard', () => {
     await expect(main).toBeVisible();
 
     // Should not show invalid recommendations
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -916,7 +983,10 @@ test.describe('Account Dashboard', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -932,11 +1002,16 @@ test.describe('Account Dashboard', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
-  test('should handle null latestBookmark.content_slug/content_type gracefully', async ({ page }) => {
+  test('should handle null latestBookmark.content_slug/content_type gracefully', async ({
+    page,
+  }) => {
     // This tests that null content_slug/content_type in latestBookmark is handled
     // The component checks latestBookmark?.content_slug && latestBookmark.content_type
     await page.goto('/account');
@@ -948,7 +1023,10 @@ test.describe('Account Dashboard', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -964,7 +1042,10 @@ test.describe('Account Dashboard', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -980,7 +1061,10 @@ test.describe('Account Dashboard', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -988,16 +1072,16 @@ test.describe('Account Dashboard', () => {
     // This tests that Loading component is shown during Suspense
     // The component uses Suspense with Loading fallback
     await page.goto('/account');
-    
+
     // Check for loading state (may flash quickly)
     const loading = page.locator('[data-loading], [aria-busy="true"]');
     const hasLoading = await loading.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });
@@ -1014,7 +1098,10 @@ test.describe('Account Dashboard', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -1030,7 +1117,10 @@ test.describe('Account Dashboard', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 });

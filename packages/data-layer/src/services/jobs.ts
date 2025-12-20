@@ -17,7 +17,21 @@ type GetJobsListReturns = Array<{
   remote: boolean;
   salary: string | null;
   type: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship' | null;
-  category: 'engineering' | 'design' | 'product' | 'marketing' | 'sales' | 'support' | 'research' | 'data' | 'operations' | 'leadership' | 'consulting' | 'education' | 'other' | null;
+  category:
+    | 'engineering'
+    | 'design'
+    | 'product'
+    | 'marketing'
+    | 'sales'
+    | 'support'
+    | 'research'
+    | 'data'
+    | 'operations'
+    | 'leadership'
+    | 'consulting'
+    | 'education'
+    | 'other'
+    | null;
   tags: string[];
   requirements: string[] | null;
   benefits: string[] | null;
@@ -26,7 +40,15 @@ type GetJobsListReturns = Array<{
   posted_at: string | null;
   expires_at: string | null;
   active: boolean;
-  status: 'draft' | 'pending_payment' | 'pending_review' | 'active' | 'expired' | 'rejected' | 'deleted' | null;
+  status:
+    | 'draft'
+    | 'pending_payment'
+    | 'pending_review'
+    | 'active'
+    | 'expired'
+    | 'rejected'
+    | 'deleted'
+    | null;
   plan: 'one-time' | 'subscription' | null;
   tier: 'standard' | 'featured' | null;
   order: number;
@@ -68,7 +90,7 @@ type JobBillingSummary = {
   subscription_status: 'active' | 'cancelled' | 'past_due' | 'paused' | 'revoked' | null;
   subscription_renews_at: string | null;
 };
-import type { job_category } from '@heyclaude/data-layer/prisma';
+import type { job_category } from '@prisma/client';
 
 // Local types for migrated RPCs (RPCs removed, using Prisma directly)
 type GetJobTitleByIdArgs = {
@@ -94,7 +116,21 @@ type GetJobDetailReturns = {
   remote: boolean | null;
   salary: string | null;
   type: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship' | null;
-  category: 'engineering' | 'design' | 'product' | 'marketing' | 'sales' | 'support' | 'research' | 'data' | 'operations' | 'leadership' | 'consulting' | 'education' | 'other' | null;
+  category:
+    | 'engineering'
+    | 'design'
+    | 'product'
+    | 'marketing'
+    | 'sales'
+    | 'support'
+    | 'research'
+    | 'data'
+    | 'operations'
+    | 'leadership'
+    | 'consulting'
+    | 'education'
+    | 'other'
+    | null;
   tags: string[] | null;
   requirements: string[] | null;
   benefits: string[] | null;
@@ -103,7 +139,15 @@ type GetJobDetailReturns = {
   posted_at: string | null;
   expires_at: string | null;
   active: boolean | null;
-  status: 'draft' | 'pending_payment' | 'pending_review' | 'active' | 'expired' | 'rejected' | 'deleted' | null;
+  status:
+    | 'draft'
+    | 'pending_payment'
+    | 'pending_review'
+    | 'active'
+    | 'expired'
+    | 'rejected'
+    | 'deleted'
+    | null;
   plan: 'one-time' | 'subscription' | null;
   tier: 'standard' | 'featured' | null;
   order: number | null;
@@ -120,7 +164,13 @@ type GetPaymentPlanCatalogReturns = Array<{
   job_expiry_days: number | null;
   description: string | null;
   benefits: Record<string, unknown> | null;
-  product_type: 'job_listing' | 'mcp_listing' | 'user_content' | 'subscription' | 'premium_membership' | null;
+  product_type:
+    | 'job_listing'
+    | 'mcp_listing'
+    | 'user_content'
+    | 'subscription'
+    | 'premium_membership'
+    | null;
 }>;
 
 import { prisma } from '../prisma/client.ts';
@@ -132,11 +182,11 @@ type Job = NonNullable<Awaited<ReturnType<typeof prisma.jobs.findUnique>>>;
 export class JobsService extends BasePrismaService {
   /**
    * Get active jobs list
-   * 
+   *
    * OPTIMIZATION: Converted from RPC to Prisma query for better type safety and performance.
    * NOTE: This method is currently not used in the codebase (getFilteredJobs uses SearchService instead).
    * Keeping for API compatibility.
-   * 
+   *
    * Returns active jobs ordered by order DESC, posted_at DESC.
    */
   async getJobs(): Promise<GetJobsListReturns> {
@@ -149,10 +199,7 @@ export class JobsService extends BasePrismaService {
             status: 'active',
             active: true,
           },
-          orderBy: [
-            { order: 'desc' },
-            { posted_at: 'desc' },
-          ],
+          orderBy: [{ order: 'desc' }, { posted_at: 'desc' }],
           select: {
             id: true,
             slug: true,
@@ -217,17 +264,15 @@ export class JobsService extends BasePrismaService {
 
   /**
    * Get job by slug
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was returning a composite type (JobDetailResult), but we can use Prisma
    * to fetch the job and transform to match the RPC return structure.
-   * 
+   *
    * @param args - Arguments with slug
    * @returns Job detail matching RPC return structure
    */
-  async getJobBySlug(
-    args: GetJobDetailArgs
-  ): Promise<GetJobDetailReturns | null> {
+  async getJobBySlug(args: GetJobDetailArgs): Promise<GetJobDetailReturns | null> {
     return withSmartCache(
       'getJobBySlug',
       'getJobBySlug',
@@ -267,7 +312,7 @@ export class JobsService extends BasePrismaService {
               },
             },
           },
-          relationLoadStrategy: 'join' // Use JOIN for better performance (requires relationJoins preview feature)
+          relationLoadStrategy: 'join', // Use JOIN for better performance (requires relationJoins preview feature)
         });
 
         if (!job) {
@@ -366,10 +411,7 @@ export class JobsService extends BasePrismaService {
               featured: true,
               order: true,
             },
-            orderBy: [
-              { order: 'desc' },
-              { posted_at: 'desc' },
-            ],
+            orderBy: [{ order: 'desc' }, { posted_at: 'desc' }],
             take: 6,
           }),
           neededPlaceholders > 0
@@ -400,11 +442,7 @@ export class JobsService extends BasePrismaService {
                   featured: true,
                   order: true,
                 },
-                orderBy: [
-                  { featured: 'desc' },
-                  { order: 'desc' },
-                  { created_at: 'desc' },
-                ],
+                orderBy: [{ featured: 'desc' }, { order: 'desc' }, { created_at: 'desc' }],
                 take: neededPlaceholders,
               })
             : Promise.resolve([]),
@@ -412,7 +450,7 @@ export class JobsService extends BasePrismaService {
 
         // Combine and sort: real jobs first, then placeholders
         const combined = [...realJobs, ...placeholderJobs];
-        
+
         // Sort combined result: placeholders last, then by featured, order, posted_at
         combined.sort((a, b) => {
           // Placeholders go last
@@ -461,9 +499,7 @@ export class JobsService extends BasePrismaService {
    * @param args - Arguments with p_category
    * @returns Array of jobs in the specified category
    */
-  async getJobsByCategory(
-    args: GetJobsByCategoryArgs
-  ) {
+  async getJobsByCategory(args: GetJobsByCategoryArgs) {
     return withSmartCache(
       'getJobsByCategory',
       'getJobsByCategory',
@@ -493,11 +529,7 @@ export class JobsService extends BasePrismaService {
             description: true,
             salary: true,
           },
-          orderBy: [
-            { featured: 'desc' },
-            { order: 'desc' },
-            { posted_at: 'desc' },
-          ],
+          orderBy: [{ featured: 'desc' }, { order: 'desc' }, { posted_at: 'desc' }],
         });
         return jobs;
       },
@@ -562,10 +594,10 @@ export class JobsService extends BasePrismaService {
 
   /**
    * Get payment plan catalog
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a simple SELECT from payment_plan_catalog, which Prisma handles perfectly.
-   * 
+   *
    * @returns Array of payment plan catalog entries
    */
   async getPaymentPlanCatalog(): Promise<GetPaymentPlanCatalogReturns> {
@@ -587,10 +619,7 @@ export class JobsService extends BasePrismaService {
             benefits: true,
             product_type: true,
           },
-          orderBy: [
-            { plan: 'asc' },
-            { tier: 'asc' },
-          ],
+          orderBy: [{ plan: 'asc' }, { tier: 'asc' }],
         });
 
         // Transform to match RPC return structure (GetPaymentPlanCatalogReturnRow[])
@@ -612,13 +641,13 @@ export class JobsService extends BasePrismaService {
 
   /**
    * Get job billing summaries for a list of job IDs
-   * 
+   *
    * OPTIMIZATION: Uses Prisma $queryRaw to query job_billing_summary view directly.
    * The RPC was just filtering the view by job_ids, which we can do directly.
-   * 
+   *
    * The view uses LATERAL joins to get latest payment and subscription, which is
    * complex to replicate in Prisma, so we query the view directly.
-   * 
+   *
    * @param args - Arguments with p_job_ids array
    * @returns Array of job billing summary records
    */
@@ -661,16 +690,14 @@ export class JobsService extends BasePrismaService {
 
   /**
    * Get job title by ID
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a simple SELECT title FROM jobs WHERE id = ?, which Prisma handles perfectly.
-   * 
+   *
    * @param args - Arguments with job_id
    * @returns Job title string or null if not found
    */
-  async getJobTitleById(
-    args: GetJobTitleByIdArgs
-  ): Promise<string | null> {
+  async getJobTitleById(args: GetJobTitleByIdArgs): Promise<string | null> {
     return withSmartCache(
       'getJobTitleById',
       'getJobTitleById',
@@ -687,10 +714,10 @@ export class JobsService extends BasePrismaService {
 
   /**
    * Get active job slugs for static generation
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better performance.
    * Only fetches slugs needed for generateStaticParams, avoiding unnecessary data processing.
-   * 
+   *
    * @param limit - Maximum number of slugs to return
    * @returns Array of job slugs
    */

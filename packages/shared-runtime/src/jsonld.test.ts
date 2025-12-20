@@ -122,9 +122,7 @@ describe('serializeJsonLd', () => {
       const data: Json = {
         '@context': 'https://schema.org',
         '@type': 'ItemList',
-        itemListElement: [
-          { '@type': 'ListItem', url: 'javascript:alert(1)' },
-        ],
+        itemListElement: [{ '@type': 'ListItem', url: 'javascript:alert(1)' }],
       };
       expect(() => serializeJsonLd(data)).toThrow('JavaScript protocol not allowed');
     });

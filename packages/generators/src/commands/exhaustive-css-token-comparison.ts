@@ -1,13 +1,13 @@
 #!/usr/bin/env tsx
 /**
  * Exhaustive CSS vs Design Tokens Comparison
- * 
+ *
  * This tool performs DEEP comparison between:
  * 1. CSS variables (old system) vs CSS variables (new tweakcn theme)
  * 2. CSS variables vs Design Tokens (SPACING, TYPOGRAPHY, COLORS, SHADOWS)
  * 3. CSS variables vs UI_CLASSES (Tailwind class strings)
  * 4. Exact value matches, near-matches, and consolidation opportunities
- * 
+ *
  * This is the MOST EXHAUSTIVE analysis - finds every possible overlap and duplication.
  */
 
@@ -74,12 +74,12 @@ function loadCSSVariables(): Map<string, { value: string; context: string }> {
 // Load design tokens - SPACING
 function loadSpacingTokens(): Map<string, string> {
   const tokens = new Map<string, string>();
-  
+
   try {
     const scalePath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-tokens/spacing/scale.ts');
     const scaleContent = readFileSync(scalePath, 'utf-8');
     const scaleMatch = scaleContent.match(/export const SPACING_SCALE = \{([^}]+)\}/s);
-    
+
     if (scaleMatch && scaleMatch[1]) {
       const entries = scaleMatch[1].matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
       for (const match of entries) {
@@ -102,12 +102,15 @@ function loadSpacingTokens(): Map<string, string> {
 // Load design tokens - TYPOGRAPHY
 function loadTypographyTokens(): Map<string, string> {
   const tokens = new Map<string, string>();
-  
+
   try {
-    const fontSizePath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-tokens/typography/font-sizes.ts');
+    const fontSizePath = join(
+      PROJECT_ROOT,
+      'packages/web-runtime/src/design-tokens/typography/font-sizes.ts'
+    );
     const fontSizeContent = readFileSync(fontSizePath, 'utf-8');
     const fontSizeMatch = fontSizeContent.match(/export const FONT_SIZES = \{([^}]+)\}/s);
-    
+
     if (fontSizeMatch && fontSizeMatch[1]) {
       const entries = fontSizeMatch[1].matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
       for (const match of entries) {
@@ -126,11 +129,14 @@ function loadTypographyTokens(): Map<string, string> {
 // Load design tokens - SHADOWS
 function loadShadowTokens(): Map<string, string> {
   const tokens = new Map<string, string>();
-  
+
   try {
-    const shadowPath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-tokens/shadows/elevation.ts');
+    const shadowPath = join(
+      PROJECT_ROOT,
+      'packages/web-runtime/src/design-tokens/shadows/elevation.ts'
+    );
     const shadowContent = readFileSync(shadowPath, 'utf-8');
-    
+
     // Extract dark shadows
     const darkMatch = shadowContent.match(/dark:\s*\{([^}]+)\}/s);
     if (darkMatch && darkMatch[1]) {
@@ -141,7 +147,7 @@ function loadShadowTokens(): Map<string, string> {
         }
       }
     }
-    
+
     // Extract light shadows
     const lightMatch = shadowContent.match(/light:\s*\{([^}]+)\}/s);
     if (lightMatch && lightMatch[1]) {
@@ -162,11 +168,14 @@ function loadShadowTokens(): Map<string, string> {
 // Load design tokens - COLORS
 function loadColorTokens(): Map<string, string> {
   const tokens = new Map<string, string>();
-  
+
   try {
-    const palettePath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-tokens/colors/palette.ts');
+    const palettePath = join(
+      PROJECT_ROOT,
+      'packages/web-runtime/src/design-tokens/colors/palette.ts'
+    );
     const paletteContent = readFileSync(palettePath, 'utf-8');
-    
+
     // Extract BRAND_COLORS
     const brandMatch = paletteContent.match(/export const BRAND_COLORS = \{([^}]+)\}/s);
     if (brandMatch && brandMatch[1]) {
@@ -177,7 +186,7 @@ function loadColorTokens(): Map<string, string> {
         }
       }
     }
-    
+
     // Extract NEUTRAL_COLORS.dark
     const neutralDarkMatch = paletteContent.match(/dark:\s*\{([^}]+)\}/s);
     if (neutralDarkMatch && neutralDarkMatch[1]) {
@@ -188,7 +197,7 @@ function loadColorTokens(): Map<string, string> {
         }
       }
     }
-    
+
     // Extract NEUTRAL_COLORS.light
     const neutralLightMatch = paletteContent.match(/light:\s*\{([^}]+)\}/s);
     if (neutralLightMatch && neutralLightMatch[1]) {
@@ -209,11 +218,11 @@ function loadColorTokens(): Map<string, string> {
 // Load UI_CLASSES (Tailwind class strings)
 function loadUIClasses(): Map<string, string> {
   const classes = new Map<string, string>();
-  
+
   try {
     const constantsPath = join(PROJECT_ROOT, 'packages/web-runtime/src/ui/constants.ts');
     const constantsContent = readFileSync(constantsPath, 'utf-8');
-    
+
     // Extract UI_CLASSES object
     const uiClassesMatch = constantsContent.match(/export const UI_CLASSES = \{([^}]+)\}/s);
     if (uiClassesMatch && uiClassesMatch[1]) {
@@ -235,16 +244,16 @@ function loadUIClasses(): Map<string, string> {
 function normalizeValue(value: string): string {
   // Remove whitespace
   let normalized = value.trim();
-  
+
   // Normalize var() references - extract the referenced variable name
   const varMatch = normalized.match(/var\(--([^)]+)\)/);
   if (varMatch && varMatch[1]) {
     normalized = varMatch[1]; // Use the variable name for comparison
   }
-  
+
   // Normalize OKLCH - remove extra spaces
   normalized = normalized.replace(/\s+/g, ' ');
-  
+
   return normalized;
 }
 
@@ -254,16 +263,25 @@ function compareSpacing(
   spacingTokens: Map<string, string>
 ): ValueMatch[] {
   const matches: ValueMatch[] = [];
-  
+
   // Find CSS spacing variables
   for (const [cssVar, { value }] of cssVariables.entries()) {
-    if (cssVar.includes('spacing') || cssVar.includes('margin') || cssVar.includes('padding') || cssVar.includes('gap')) {
+    if (
+      cssVar.includes('spacing') ||
+      cssVar.includes('margin') ||
+      cssVar.includes('padding') ||
+      cssVar.includes('gap')
+    ) {
       // Parse value
       const parsed = valueParser(value);
       let numericValue: string | null = null;
-      
+
       parsed.walk((node) => {
-        if (node.type === 'word' && typeof node.value === 'string' && /^\d+(\.\d+)?(rem|px|em)$/.test(node.value)) {
+        if (
+          node.type === 'word' &&
+          typeof node.value === 'string' &&
+          /^\d+(\.\d+)?(rem|px|em)$/.test(node.value)
+        ) {
           numericValue = node.value as string;
         }
       });
@@ -291,7 +309,7 @@ function compareSpacing(
           tokenPath: bestMatch?.path,
           tokenValue: bestMatch?.value,
           matchType: bestMatch ? 'exact' : 'none',
-          recommendation: bestMatch 
+          recommendation: bestMatch
             ? `Use ${bestMatch.path} design token instead of ${cssVar}`
             : `No matching design token found for ${cssVar}`,
         });
@@ -308,16 +326,20 @@ function compareTypography(
   typographyTokens: Map<string, string>
 ): ValueMatch[] {
   const matches: ValueMatch[] = [];
-  
+
   // Find CSS font-size variables
   for (const [cssVar, { value }] of cssVariables.entries()) {
     if (cssVar.includes('font-size') || cssVar.includes('fontSize')) {
       // Parse value
       const parsed = valueParser(value);
       let fontSizeValue: string | null = null;
-      
+
       parsed.walk((node) => {
-        if (node.type === 'word' && typeof node.value === 'string' && /^\d+(\.\d+)?(rem|px|em)$/.test(node.value)) {
+        if (
+          node.type === 'word' &&
+          typeof node.value === 'string' &&
+          /^\d+(\.\d+)?(rem|px|em)$/.test(node.value)
+        ) {
           fontSizeValue = node.value as string;
         }
       });
@@ -345,7 +367,7 @@ function compareTypography(
           tokenPath: bestMatch?.path,
           tokenValue: bestMatch?.value,
           matchType: bestMatch ? 'exact' : 'none',
-          recommendation: bestMatch 
+          recommendation: bestMatch
             ? `Use ${bestMatch.path} design token instead of ${cssVar}`
             : `No matching design token found for ${cssVar}`,
         });
@@ -362,12 +384,19 @@ function compareShadows(
   shadowTokens: Map<string, string>
 ): ValueMatch[] {
   const matches: ValueMatch[] = [];
-  
+
   // Find CSS shadow variables
   for (const [cssVar, { value }] of cssVariables.entries()) {
-    if (cssVar.includes('shadow') && !cssVar.includes('shadow-color') && !cssVar.includes('shadow-opacity') && !cssVar.includes('shadow-blur') && !cssVar.includes('shadow-spread') && !cssVar.includes('shadow-offset')) {
+    if (
+      cssVar.includes('shadow') &&
+      !cssVar.includes('shadow-color') &&
+      !cssVar.includes('shadow-opacity') &&
+      !cssVar.includes('shadow-blur') &&
+      !cssVar.includes('shadow-spread') &&
+      !cssVar.includes('shadow-offset')
+    ) {
       const normalized = normalizeValue(value);
-      
+
       // Find matching token
       let bestMatch: { path: string; value: string } | null = null;
       for (const [tokenPath, tokenValue] of shadowTokens.entries()) {
@@ -382,9 +411,11 @@ function compareShadows(
         cssVariable: cssVar,
         cssValue: value.substring(0, 80) + (value.length > 80 ? '...' : ''),
         tokenPath: bestMatch?.path,
-        tokenValue: bestMatch ? (bestMatch.value.substring(0, 80) + (bestMatch.value.length > 80 ? '...' : '')) : undefined,
+        tokenValue: bestMatch
+          ? bestMatch.value.substring(0, 80) + (bestMatch.value.length > 80 ? '...' : '')
+          : undefined,
         matchType: bestMatch ? 'exact' : 'none',
-        recommendation: bestMatch 
+        recommendation: bestMatch
           ? `Use ${bestMatch.path} design token instead of ${cssVar}`
           : `No matching design token found for ${cssVar}`,
       });
@@ -400,14 +431,14 @@ function compareRadius(
   _uiClasses: Map<string, string>
 ): ValueMatch[] {
   const matches: ValueMatch[] = [];
-  
+
   // Find CSS radius variables
   for (const [cssVar, { value }] of cssVariables.entries()) {
     if (cssVar.includes('radius')) {
       // Parse value
       const parsed = valueParser(value);
       let radiusValue: string | null = null;
-      
+
       parsed.walk((node) => {
         if (node.type === 'word' && /^\d+(\.\d+)?(rem|px)$/.test(node.value)) {
           radiusValue = node.value;
@@ -426,14 +457,14 @@ function compareRadius(
         };
 
         const roundedClass = radiusMap[radiusValue];
-        
+
         matches.push({
           cssVariable: cssVar,
           cssValue: radiusValue,
           uiClass: roundedClass ? `rounded-*` : undefined,
           uiClassValue: roundedClass,
           matchType: roundedClass ? 'exact' : 'none',
-          recommendation: roundedClass 
+          recommendation: roundedClass
             ? `Use Tailwind class ${roundedClass} instead of CSS variable ${cssVar}`
             : `No matching Tailwind class found for ${cssVar}`,
         });
@@ -450,14 +481,14 @@ function compareWithUIClasses(
   uiClasses: Map<string, string>
 ): ValueMatch[] {
   const matches: ValueMatch[] = [];
-  
+
   // For spacing variables, check if there's a UI_CLASSES equivalent
   for (const [cssVar, { value }] of cssVariables.entries()) {
     if (cssVar.includes('spacing') || cssVar.includes('margin') || cssVar.includes('padding')) {
       // Parse value
       const parsed = valueParser(value);
       let numericValue: string | null = null;
-      
+
       parsed.walk((node) => {
         if (node.type === 'word' && /^\d+(\.\d+)?(rem|px)$/.test(node.value)) {
           numericValue = node.value;
@@ -468,14 +499,14 @@ function compareWithUIClasses(
         // Map to Tailwind classes
         const tailwindMap: Record<string, string> = {
           '0.125rem': '0.5', // mb-0.5
-          '0.25rem': '1',     // mb-1
-          '0.5rem': '2',      // mb-2
-          '0.75rem': '3',     // mb-3
-          '1rem': '4',        // mb-4
-          '1.5rem': '6',      // mb-6
-          '2rem': '8',        // mb-8
-          '3rem': '12',       // mb-12
-          '4rem': '16',       // mb-16
+          '0.25rem': '1', // mb-1
+          '0.5rem': '2', // mb-2
+          '0.75rem': '3', // mb-3
+          '1rem': '4', // mb-4
+          '1.5rem': '6', // mb-6
+          '2rem': '8', // mb-8
+          '3rem': '12', // mb-12
+          '4rem': '16', // mb-16
         };
 
         const tailwindNum = tailwindMap[numericValue];
@@ -520,7 +551,9 @@ async function runExhaustiveComparison(): Promise<void> {
     const colorTokens = loadColorTokens();
     const uiClasses = loadUIClasses();
 
-    logger.info(`Loaded ${cssVariables.size} CSS variables, ${spacingTokens.size} spacing tokens, ${typographyTokens.size} typography tokens, ${shadowTokens.size} shadow tokens, ${colorTokens.size} color tokens, ${uiClasses.size} UI_CLASSES`);
+    logger.info(
+      `Loaded ${cssVariables.size} CSS variables, ${spacingTokens.size} spacing tokens, ${typographyTokens.size} typography tokens, ${shadowTokens.size} shadow tokens, ${colorTokens.size} color tokens, ${uiClasses.size} UI_CLASSES`
+    );
 
     // Compare everything
     const spacingMatches = compareSpacing(cssVariables, spacingTokens);
@@ -531,11 +564,11 @@ async function runExhaustiveComparison(): Promise<void> {
 
     // Count matches
     const exactMatches = [
-      ...spacingMatches.filter(m => m.matchType === 'exact'),
-      ...typographyMatches.filter(m => m.matchType === 'exact'),
-      ...shadowMatches.filter(m => m.matchType === 'exact'),
-      ...radiusMatches.filter(m => m.matchType === 'exact'),
-      ...uiClassMatches.filter(m => m.matchType === 'exact'),
+      ...spacingMatches.filter((m) => m.matchType === 'exact'),
+      ...typographyMatches.filter((m) => m.matchType === 'exact'),
+      ...shadowMatches.filter((m) => m.matchType === 'exact'),
+      ...radiusMatches.filter((m) => m.matchType === 'exact'),
+      ...uiClassMatches.filter((m) => m.matchType === 'exact'),
     ].length;
 
     const report: ExhaustiveReport = {
@@ -547,7 +580,8 @@ async function runExhaustiveComparison(): Promise<void> {
       uiClassMatches,
       summary: {
         totalCSSVariables: cssVariables.size,
-        totalDesignTokens: spacingTokens.size + typographyTokens.size + shadowTokens.size + colorTokens.size,
+        totalDesignTokens:
+          spacingTokens.size + typographyTokens.size + shadowTokens.size + colorTokens.size,
         exactMatches,
         nearMatches: 0, // TODO: Implement near-match detection
         consolidationOpportunities: exactMatches,
@@ -593,7 +627,10 @@ async function runExhaustiveComparison(): Promise<void> {
     }
 
     // Write report
-    const reportPath = join(PROJECT_ROOT, '.cursor/tailwind-cleanup/exhaustive-css-token-comparison.md');
+    const reportPath = join(
+      PROJECT_ROOT,
+      '.cursor/tailwind-cleanup/exhaustive-css-token-comparison.md'
+    );
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, md, 'utf-8');
 

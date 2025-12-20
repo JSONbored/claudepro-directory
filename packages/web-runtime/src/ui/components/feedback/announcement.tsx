@@ -1,6 +1,6 @@
 'use client';
 
-import type { announcement_variant } from '@heyclaude/data-layer/prisma';
+import type { announcement_variant } from '@prisma/client';
 import { baseBadgeVariants } from '../badges/unified-badge.tsx';
 // Removed deprecated design system utilities - using direct Tailwind classes
 import { cn } from '../../utils.ts';
@@ -91,7 +91,7 @@ export function AnnouncementTag({ className, ...props }: AnnouncementTagProps) {
         // Base styles
         'inline-flex items-center justify-center',
         'px-1.5 py-0.5',
-        'font-semibold text-[10px] uppercase tracking-wide',
+        'text-[10px] font-semibold tracking-wide uppercase',
         'rounded',
         'bg-accent text-accent-foreground',
         'shrink-0',
@@ -114,7 +114,7 @@ export function AnnouncementTitle({ className, ...props }: AnnouncementTitleProp
     <span
       className={cn(
         // Typography
-        'font-medium text-sm',
+        'text-sm font-medium',
         // Layout
         'inline-flex items-center gap-1',
         // Responsive

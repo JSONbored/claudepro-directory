@@ -66,9 +66,7 @@ import { useCallback, useState } from 'react';
  */
 export function useBoolean(defaultValue: boolean = false) {
   if (typeof defaultValue !== 'boolean') {
-    throw new Error(
-      `useBoolean: defaultValue must be a boolean, received ${typeof defaultValue}`
-    );
+    throw new Error(`useBoolean: defaultValue must be a boolean, received ${typeof defaultValue}`);
   }
 
   const [value, setValue] = useState<boolean>(defaultValue);
@@ -114,7 +112,11 @@ export function useBoolean(defaultValue: boolean = false) {
     1: () => void;
     2: React.Dispatch<React.SetStateAction<boolean>>;
     length: 3;
-    [Symbol.iterator]: () => Generator<boolean | (() => void) | React.Dispatch<React.SetStateAction<boolean>>, void, unknown>;
+    [Symbol.iterator]: () => Generator<
+      boolean | (() => void) | React.Dispatch<React.SetStateAction<boolean>>,
+      void,
+      unknown
+    >;
   } & [boolean, () => void, React.Dispatch<React.SetStateAction<boolean>>];
 
   return result;

@@ -95,7 +95,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
   return (
     <motion.div
       className={cn(
-        'relative mb-8 overflow-hidden rounded-2xl border border-border/50 bg-card py-8',
+        'border-border/50 bg-card relative mb-8 overflow-hidden rounded-2xl border py-8',
         className
       )}
       initial="hidden"
@@ -112,24 +112,27 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
           <motion.div variants={createItemVariants(shouldReduceMotion)}>
             <div
               className={cn(
-                'inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm'
+                'border-primary/20 bg-primary/10 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm'
               )}
             >
               <motion.div variants={createIconVariants(shouldReduceMotion)}>
-                <Sparkles className="h-4 w-4 text-primary" />
+                <Sparkles className="text-primary h-4 w-4" />
               </motion.div>
-              <span className="font-medium text-primary">Community Contributions</span>
+              <span className="text-primary font-medium">Community Contributions</span>
             </div>
           </motion.div>
 
           {/* Title */}
-          <motion.h1 className="text-4xl font-bold lg:text-5xl" variants={createItemVariants(shouldReduceMotion)}>
+          <motion.h1
+            className="text-4xl font-bold lg:text-5xl"
+            variants={createItemVariants(shouldReduceMotion)}
+          >
             Share Your Configuration
           </motion.h1>
 
           {/* Description */}
           <motion.p
-            className={cn('max-w-2xl text-lg leading-relaxed text-muted-foreground')}
+            className={cn('text-muted-foreground max-w-2xl text-lg leading-relaxed')}
             variants={createItemVariants(shouldReduceMotion)}
           >
             Contribute to the largest Claude configuration library. No JSON formatting required - we
@@ -138,7 +141,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
 
           {/* Feature badges */}
           <motion.div
-            className={cn('flex flex-wrap items-center gap-3 text-muted-foreground text-sm')}
+            className={cn('text-muted-foreground flex flex-wrap items-center gap-3 text-sm')}
             variants={createItemVariants(shouldReduceMotion)}
           >
             <div className="flex items-center gap-[6px]">
@@ -168,10 +171,10 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
           >
             <div
               className={cn(
-                'flex h-32 w-32 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10'
+                'border-primary/20 bg-primary/10 flex h-32 w-32 items-center justify-center rounded-2xl border'
               )}
             >
-              <Send className="h-16 w-16 text-primary" />
+              <Send className="text-primary h-16 w-16" />
             </div>
 
             {/* Animated pulse ring */}

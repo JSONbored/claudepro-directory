@@ -1,13 +1,14 @@
 # Supabase Directory
 
 <!--toc:start-->
+
 - [Supabase Directory](#supabase-directory)
   - [Structure](#structure)
   - [Purpose](#purpose)
   - [Migration Files](#migration-files)
   - [Related Directories](#related-directories)
   - [Setup](#setup)
-<!--toc:end-->
+  <!--toc:end-->
 
 This directory contains Supabase configuration and migrations for GitHub Integration and branch management.
 
@@ -27,6 +28,7 @@ This directory is used by:
 ## Migration Files
 
 Migration files in `migrations/` are:
+
 - Generated from production database using `supabase db pull --linked`
 - Applied automatically to preview branches when created
 - Committed to git for version control

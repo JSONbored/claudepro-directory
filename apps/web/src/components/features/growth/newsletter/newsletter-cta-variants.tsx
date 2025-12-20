@@ -1,6 +1,6 @@
 'use client';
 
-import type { newsletter_source } from '@heyclaude/data-layer/prisma';
+import type { newsletter_source } from '@prisma/client';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
 import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/config/marketing-client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
@@ -176,7 +176,9 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
 
         {/* Description */}
         <motion.p
-          className={cn('text-muted-foreground text-sm mx-auto mb-6 max-w-lg leading-relaxed md:text-base')}
+          className={cn(
+            'text-muted-foreground mx-auto mb-6 max-w-lg text-sm leading-relaxed md:text-base'
+          )}
           initial={shouldReduceMotion ? { opacity: 0 } : { y: 10, opacity: 0 }}
           whileInView={shouldReduceMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
           viewport={{ once: true }}
@@ -211,10 +213,14 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
                 <span className="bg-muted/50 inline-block h-3 w-14 animate-pulse rounded" />
               </span>
             ) : (
-              <span className={cn('text-muted-foreground', 'text-xs')}>{subscriberCount} subscribers</span>
+              <span className={cn('text-muted-foreground', 'text-xs')}>
+                {subscriberCount} subscribers
+              </span>
             )}
           </div>
-          <p className={cn('text-muted-foreground/60', 'text-xs')}>{NEWSLETTER_CTA_CONFIG.footerText}</p>
+          <p className={cn('text-muted-foreground/60', 'text-xs')}>
+            {NEWSLETTER_CTA_CONFIG.footerText}
+          </p>
         </motion.div>
       </div>
     );
@@ -222,17 +228,11 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
 
   if (variant === 'inline') {
     return (
-      <Card
-        className={cn(
-          'border-border bg-card',
-          'shadow-lg',
-          className
-        )}
-      >
+      <Card className={cn('border-border bg-card', 'shadow-lg', className)}>
         <CardHeader className="pb-4">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="mb-4 flex items-center gap-3">
             <div className="border-primary/20 bg-primary/10 card-base p-2.5">
-              <Mail className="h-5 w-5 text-primary" aria-hidden="true" />
+              <Mail className="text-primary h-5 w-5" aria-hidden="true" />
             </div>
             <CardTitle className="text-lg font-bold">{finalHeadline}</CardTitle>
           </div>
@@ -259,16 +259,16 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
           className
         )}
       >
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <Mail className="h-5 w-5 text-primary shrink-0" aria-hidden="true" />
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <Mail className="text-primary h-5 w-5 shrink-0" aria-hidden="true" />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm-medium">{finalHeadline}</p>
+            <p className="text-sm-medium truncate">{finalHeadline}</p>
             <p className={cn('text-muted-foreground', 'truncate', 'text-xs')}>{finalDescription}</p>
           </div>
         </div>
         <NewsletterForm
           source={source}
-          className="w-full sm:w-auto sm:min-w-[320px] sm:max-w-[400px]"
+          className="w-full sm:w-auto sm:max-w-[400px] sm:min-w-[320px]"
         />
       </div>
     );
@@ -276,17 +276,11 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
 
   if (variant === 'card') {
     return (
-      <Card
-        className={cn(
-          'border-border bg-card flex h-full flex-col',
-          'shadow-lg',
-          className
-        )}
-      >
+      <Card className={cn('border-border bg-card flex h-full flex-col', 'shadow-lg', className)}>
         <CardHeader className="flex-1">
           <div className="mb-4">
-            <div className="border-primary/20 bg-primary/10 inline-flex card-base p-3">
-              <Mail className="h-6 w-6 text-primary" aria-hidden="true" />
+            <div className="border-primary/20 bg-primary/10 card-base inline-flex p-3">
+              <Mail className="text-primary h-6 w-6" aria-hidden="true" />
             </div>
           </div>
           <CardTitle className="mb-4 text-lg font-bold">{finalHeadline}</CardTitle>
@@ -295,7 +289,9 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
         <CardContent className="space-y-4">
           <NewsletterForm source={source} />
           <div className="text-center">
-            <p className={cn('text-muted-foreground', 'text-xs')}>{NEWSLETTER_CTA_CONFIG.footerText}</p>
+            <p className={cn('text-muted-foreground', 'text-xs')}>
+              {NEWSLETTER_CTA_CONFIG.footerText}
+            </p>
           </div>
         </CardContent>
       </Card>

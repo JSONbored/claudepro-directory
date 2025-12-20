@@ -25,15 +25,12 @@ import { fetchCached } from '@heyclaude/web-runtime';
 
 // Server Component / Server Action
 export async function getLatestPosts() {
-  return fetchCached(
-    (client) => new ContentService(client).getLatestPosts(),
-    {
-      key: 'latest-posts',
-      tags: ['content'],
-      ttlKey: 'cache.content_list.ttl_seconds',
-      fallback: []
-    }
-  );
+  return fetchCached((client) => new ContentService(client).getLatestPosts(), {
+    key: 'latest-posts',
+    tags: ['content'],
+    ttlKey: 'cache.content_list.ttl_seconds',
+    fallback: [],
+  });
 }
 ```
 
@@ -49,7 +46,7 @@ Deno.serve(async (req) => {
   const supabase = createClient(...);
   const service = new ContentService(supabase);
   const posts = await service.getLatestPosts();
-  
+
   return new Response(JSON.stringify(posts));
 });
 ```

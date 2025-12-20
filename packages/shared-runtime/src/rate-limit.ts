@@ -41,9 +41,7 @@ function cleanupOldEntries(): void {
     }
     // If still at capacity, remove oldest 10% of entries
     if (requestCounts.size >= MAX_RATE_LIMITER_ENTRIES) {
-      const entries = [...requestCounts.entries()].toSorted(
-        (a, b) => a[1].resetAt - b[1].resetAt
-      );
+      const entries = [...requestCounts.entries()].toSorted((a, b) => a[1].resetAt - b[1].resetAt);
       const toRemove = Math.floor(entries.length * 0.1);
       for (let i = 0; i < toRemove; i++) {
         const entry = entries[i];

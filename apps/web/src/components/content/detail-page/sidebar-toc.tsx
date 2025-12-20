@@ -56,17 +56,23 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
 
   const baseLevel = useMemo(() => {
     if (normalizedHeadings.length === 0) return 2;
-    return normalizedHeadings.reduce((min: number, heading: NormalizedHeading) => Math.min(min, heading.level), 6);
+    return normalizedHeadings.reduce(
+      (min: number, heading: NormalizedHeading) => Math.min(min, heading.level),
+      6
+    );
   }, [normalizedHeadings]);
 
-  const updateHash = useCallback((id: string) => {
-    if (!isClient || !id) return;
-    const { pathname, search } = window.location;
-    const currentHash = window.location.hash.replace('#', '');
-    if (currentHash === id) return;
-    const nextUrl = `${pathname}${search ? search : ''}#${id}`;
-    window.history.replaceState(null, '', nextUrl);
-  }, [isClient]);
+  const updateHash = useCallback(
+    (id: string) => {
+      if (!isClient || !id) return;
+      const { pathname, search } = window.location;
+      const currentHash = window.location.hash.replace('#', '');
+      if (currentHash === id) return;
+      const nextUrl = `${pathname}${search ? search : ''}#${id}`;
+      window.history.replaceState(null, '', nextUrl);
+    },
+    [isClient]
+  );
 
   // Initialize active heading from URL hash or first heading
   useEffect(() => {
@@ -100,7 +106,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
   // Use requestAnimationFrame to batch intersection updates
   useEffect(() => {
     if (entries.size === 0) return;
-    
+
     // Defer processing to next animation frame to avoid blocking scroll
     const rafId = requestAnimationFrame(() => {
       // Find most visible element (same logic as getMostVisibleId but computed here)
@@ -172,7 +178,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
   return (
     <nav className={cn('py-2', className)} aria-label="On this page">
       {/* Header - Supabase style uppercase */}
-      <p className="text-muted-foreground mb-2 text-xs-medium tracking-wider uppercase">
+      <p className="text-muted-foreground text-xs-medium mb-2 tracking-wider uppercase">
         On this page
       </p>
 
@@ -188,7 +194,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
                 type="button"
                 onClick={() => handleHeadingClick(heading)}
                 className={cn(
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                  'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
                   'group relative w-full py-1.5 text-left text-[13px] leading-snug transition-colors',
                   'hover:text-foreground',
                   isActive ? 'text-foreground' : 'text-muted-foreground'

@@ -1,9 +1,9 @@
 /**
  * Platform Abstraction Layer
- * 
+ *
  * Provides platform-agnostic utilities for deployment environment detection,
  * environment variable access, and platform-specific configurations.
- * 
+ *
  * @module platform
  */
 

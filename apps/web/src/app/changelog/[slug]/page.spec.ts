@@ -3,7 +3,7 @@ import { setupErrorTracking } from '../../../../config/tests/utils/error-trackin
 
 /**
  * Comprehensive Changelog Detail Page E2E Tests
- * 
+ *
  * Tests ALL functionality on the changelog detail page ([slug]) with strict error checking:
  * - Page rendering without errors
  * - Changelog entry display (title, date, category, content)
@@ -23,7 +23,7 @@ test.describe('Changelog Detail Page', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (navigation handled per test with different slugs)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -39,7 +39,7 @@ test.describe('Changelog Detail Page', () => {
   test('should render changelog detail page without errors', async ({ page }) => {
     // Use a test changelog slug (adjust based on actual changelog entries)
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -55,15 +55,18 @@ test.describe('Changelog Detail Page', () => {
 
   test('should display changelog entry title and date', async ({ page }) => {
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
     // Check for changelog heading
     const heading = page.getByRole('heading', { level: 1 });
-    const hasHeading = await heading.first().isVisible().catch(() => false);
-    
+    const hasHeading = await heading
+      .first()
+      .isVisible()
+      .catch(() => false);
+
     // Heading may or may not be visible depending on data
     // But page should render
     const main = page.getByRole('main');
@@ -72,7 +75,7 @@ test.describe('Changelog Detail Page', () => {
 
   test('should return 404 for invalid changelog slug', async ({ page }) => {
     const invalidSlug = 'non-existent-changelog-12345';
-    
+
     await page.goto(`/changelog/${invalidSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -80,14 +83,14 @@ test.describe('Changelog Detail Page', () => {
     // Should show 404 page
     const notFound = page.getByText(/not found|404|page not found/i);
     const hasNotFound = await notFound.isVisible().catch(() => false);
-    
+
     // May show 404 message or redirect
     expect(hasNotFound || page.url().includes('404')).toBe(true);
   });
 
   test('should be accessible', async ({ page }) => {
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -104,7 +107,7 @@ test.describe('Changelog Detail Page', () => {
 
   test('should be responsive on mobile viewport', async ({ page }) => {
     const testSlug = 'test-changelog-entry';
-    
+
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto(`/changelog/${testSlug}`);
     await page.waitForLoadState('networkidle');
@@ -117,18 +120,18 @@ test.describe('Changelog Detail Page', () => {
 
   test('should handle loading states', async ({ page }) => {
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
-    
+
     // Check for loading indicators (may flash quickly)
     const loadingIndicator = page.locator('[aria-busy="true"], [data-loading="true"]');
     const hasLoading = await loadingIndicator.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });
@@ -143,7 +146,7 @@ test.describe('Changelog Detail Page', () => {
     // Should show 404 page
     const notFound = page.getByText(/not found|404|page not found/i);
     const hasNotFound = await notFound.isVisible().catch(() => false);
-    
+
     // May show 404 message or redirect
     expect(hasNotFound || page.url().includes('404')).toBe(true);
   });
@@ -153,7 +156,7 @@ test.describe('Changelog Detail Page', () => {
     // The component catches error, logs it, and throws normalized error
     // In E2E, we can verify graceful handling (page renders or shows error, no crash)
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -161,8 +164,11 @@ test.describe('Changelog Detail Page', () => {
     // Page should render or show 404, but not crash
     const main = page.getByRole('main');
     const hasMain = await main.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show 404, but not have error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -171,7 +177,7 @@ test.describe('Changelog Detail Page', () => {
     // This tests the error path when getChangelogEntryBySlug returns null
     // The component calls notFound() which shows 404
     const invalidSlug = 'non-existent-changelog-12345';
-    
+
     await page.goto(`/changelog/${invalidSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -179,7 +185,7 @@ test.describe('Changelog Detail Page', () => {
     // Should show 404 page
     const notFound = page.getByText(/not found|404|page not found/i);
     const hasNotFound = await notFound.isVisible().catch(() => false);
-    
+
     // May show 404 message or redirect
     expect(hasNotFound || page.url().includes('404')).toBe(true);
   });
@@ -189,7 +195,7 @@ test.describe('Changelog Detail Page', () => {
     // The function returns metadata with item: null
     // In E2E, we can verify page still renders
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -208,7 +214,7 @@ test.describe('Changelog Detail Page', () => {
     // The component uses formatChangelogDate(entry.release_date)
     // and checks entry.release_date instanceof Date
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -218,14 +224,17 @@ test.describe('Changelog Detail Page', () => {
     await expect(main).toBeVisible();
 
     // Should not crash on date formatting
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
   test('should display changelog entry content sections', async ({ page }) => {
     // This tests that ChangelogContent component renders entry sections
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -236,14 +245,17 @@ test.describe('Changelog Detail Page', () => {
 
     // Content sections may or may not be visible depending on data
     // But page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
   test('should display breadcrumbs and navigation', async ({ page }) => {
     // This tests that breadcrumbs and navigation links render
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -254,7 +266,10 @@ test.describe('Changelog Detail Page', () => {
 
     // Navigation elements may or may not be visible depending on implementation
     // But page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -263,7 +278,7 @@ test.describe('Changelog Detail Page', () => {
     // The component awaits params, so Next.js handles this
     // We can't easily test null params in E2E, but we can verify robustness
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -277,7 +292,7 @@ test.describe('Changelog Detail Page', () => {
     // This tests that generateStaticParams handles errors
     // The function catches getPublishedChangelogSlugs errors and returns placeholder
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -287,7 +302,10 @@ test.describe('Changelog Detail Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -295,7 +313,7 @@ test.describe('Changelog Detail Page', () => {
     // This tests that empty slugs array returns placeholder
     // The function checks params.length === 0 and returns [{ slug: 'placeholder' }]
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -305,7 +323,10 @@ test.describe('Changelog Detail Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -313,7 +334,7 @@ test.describe('Changelog Detail Page', () => {
     // This tests that getChangelogUrl handles edge cases
     // The component uses getChangelogUrl(entry.slug)
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -323,7 +344,10 @@ test.describe('Changelog Detail Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -331,18 +355,18 @@ test.describe('Changelog Detail Page', () => {
     // This tests that ChangelogEntryLoading is shown during Suspense
     // The component uses Suspense with ChangelogEntryLoading fallback
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
-    
+
     // Check for loading state (may flash quickly)
     const loading = page.locator('[data-loading], [aria-busy="true"]');
     const hasLoading = await loading.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });
@@ -351,7 +375,7 @@ test.describe('Changelog Detail Page', () => {
     // This tests that null entry fields are handled
     // The component uses optional chaining and nullish coalescing
     const testSlug = 'test-changelog-entry';
-    
+
     await page.goto(`/changelog/${testSlug}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -361,7 +385,10 @@ test.describe('Changelog Detail Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 });

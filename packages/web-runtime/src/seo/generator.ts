@@ -1,6 +1,6 @@
 /**
  * Metadata Generator - Builds Next.js Metadata from SEO data
- * 
+ *
  * Simplified version that directly uses getSEOMetadata() and builds Metadata objects.
  */
 
@@ -16,16 +16,16 @@ interface MetadataContext {
 
 /**
  * Generate page metadata for a route
- * 
+ *
  * Resolves route parameters, fetches SEO metadata from the database RPC,
  * and builds a Next.js Metadata object.
- * 
+ *
  * **Build-Time Optimization:**
  * - This function is called from `generateMetadata()` which uses `'use cache'`
  * - During build: RPC call executes (deterministic - uses stored database data)
  * - At runtime: Uses cached result from Next.js cache (no RPC call if cache valid)
  * - No `connection()` needed: RPC is STABLE and request cache skips Date.now() during build
- * 
+ *
  * @param route - Route pattern (e.g., '/changelog/:slug' or '/changelog/[slug]')
  * @param context - Optional context with params to resolve route
  * @returns Next.js Metadata object

@@ -19,7 +19,8 @@
  * @see https://docs.polar.sh/integrate/webhooks/events
  */
 
-import type { Json } from '@heyclaude/data-layer/prisma';
+import { Prisma } from '@prisma/client';
+type Json = Prisma.JsonValue;
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -85,10 +86,10 @@ export const handlePolarWebhook = inngest.createFunction(
         context.error = error instanceof Error ? error.message : String(error);
       }
       sendCriticalFailureHeartbeat('BETTERSTACK_HEARTBEAT_CRITICAL_FAILURE', context);
-      
+
       // Log for observability
       logger.error(
-        { 
+        {
           event: event ? JSON.stringify(event) : 'unknown',
           error: error ? (error instanceof Error ? error.message : String(error)) : 'unknown',
         },
@@ -99,19 +100,14 @@ export const handlePolarWebhook = inngest.createFunction(
   { event: 'polar/webhook' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const logContext = createWebAppContextWithId(
-      '/inngest/polar/webhook',
-      'handlePolarWebhook'
-    );
+    const logContext = createWebAppContextWithId('/inngest/polar/webhook', 'handlePolarWebhook');
 
     const { eventType, webhookId, svixId, payload, jobId, userId } = event.data;
 
-    logger.info({ ...logContext,
-      eventType,
-      webhookId,
-      svixId,
-      jobId: jobId ?? null,
-      userId: userId ?? null, }, 'Processing Polar webhook via Inngest');
+    logger.info(
+      { ...logContext, eventType, webhookId, svixId, jobId: jobId ?? null, userId: userId ?? null },
+      'Processing Polar webhook via Inngest'
+    );
 
     // Step 1: Classify the event type
     const classification = await step.run('classify-event', async () => {
@@ -132,12 +128,10 @@ export const handlePolarWebhook = inngest.createFunction(
         const amount = typeof data?.['amount'] === 'number' ? data['amount'] : null;
         const currency = String(data?.['currency'] ?? '');
 
-        logger.info({ ...logContext,
-          eventType,
-          webhookId,
-          amount,
-          currency,
-          status: 'logged', }, 'Polar informational event received');
+        logger.info(
+          { ...logContext, eventType, webhookId, amount, currency, status: 'logged' },
+          'Polar informational event received'
+        );
 
         return { logged: true };
       });
@@ -153,10 +147,15 @@ export const handlePolarWebhook = inngest.createFunction(
 
     // Step 3: Handle unsupported events
     if (!classification.isSupported || !classification.rpcName) {
-      logger.info({ ...logContext,
-        eventType,
-        webhookId,
-        supportedEvents: Object.keys(POLAR_EVENT_RPC_MAP).join(', '), }, 'Polar event type has no handler');
+      logger.info(
+        {
+          ...logContext,
+          eventType,
+          webhookId,
+          supportedEvents: Object.keys(POLAR_EVENT_RPC_MAP).join(', '),
+        },
+        'Polar event type has no handler'
+      );
 
       return {
         success: true,
@@ -170,9 +169,10 @@ export const handlePolarWebhook = inngest.createFunction(
     // Step 4: Validate required data for order events
     if (eventType.startsWith('order.') && !jobId) {
       const validationResult = await step.run('validate-order-metadata', async () => {
-        logger.warn({ ...logContext,
-          eventType,
-          webhookId, }, 'Polar order webhook missing job_id in metadata');
+        logger.warn(
+          { ...logContext, eventType, webhookId },
+          'Polar order webhook missing job_id in metadata'
+        );
 
         return {
           valid: false,
@@ -192,46 +192,52 @@ export const handlePolarWebhook = inngest.createFunction(
     }
 
     // Step 5: Execute the database RPC function
-    const rpcResult = await step.run('execute-rpc', async (): Promise<{
-      success: boolean;
-      rpcName: string;
-      error?: string;
-    }> => {
-      logger.info({ ...logContext,
-        rpcName: classification.rpcName,
-        webhookId,
-        jobId: jobId ?? null, }, 'Calling Polar RPC handler');
-
-      try {
-        // Use MiscService to call the Polar webhook RPC function
-        // The RPC functions handle their own idempotency via the webhook_id
-        const service = await getService('misc');
-        await service.handlePolarWebhookRpc(
-          classification.rpcName!,
-          {
-            webhook_id: webhookId,
-            webhook_data: payload as Json,
-          }
+    const rpcResult = await step.run(
+      'execute-rpc',
+      async (): Promise<{
+        success: boolean;
+        rpcName: string;
+        error?: string;
+      }> => {
+        logger.info(
+          { ...logContext, rpcName: classification.rpcName, webhookId, jobId: jobId ?? null },
+          'Calling Polar RPC handler'
         );
 
-        return {
-          success: true,
-          rpcName: classification.rpcName!,
-        };
-      } catch (error) {
-        const normalized = normalizeError(error, 'Polar RPC call failed');
-        logger.error({ err: normalized, ...logContext,
-          rpcName: classification.rpcName,
-          webhookId,
-          jobId: jobId ?? null, }, 'Polar RPC call failed');
+        try {
+          // Use MiscService to call the Polar webhook RPC function
+          // The RPC functions handle their own idempotency via the webhook_id
+          const service = await getService('misc');
+          await service.handlePolarWebhookRpc(classification.rpcName!, {
+            webhook_id: webhookId,
+            webhook_data: payload as Json,
+          });
 
-        return {
-          success: false,
-          rpcName: classification.rpcName!,
-          error: normalized.message,
-        };
+          return {
+            success: true,
+            rpcName: classification.rpcName!,
+          };
+        } catch (error) {
+          const normalized = normalizeError(error, 'Polar RPC call failed');
+          logger.error(
+            {
+              err: normalized,
+              ...logContext,
+              rpcName: classification.rpcName,
+              webhookId,
+              jobId: jobId ?? null,
+            },
+            'Polar RPC call failed'
+          );
+
+          return {
+            success: false,
+            rpcName: classification.rpcName!,
+            error: normalized.message,
+          };
+        }
       }
-    });
+    );
 
     // Step 6: Update webhook event status in database
     if (rpcResult.success) {
@@ -240,26 +246,30 @@ export const handlePolarWebhook = inngest.createFunction(
           const service = await getService('misc');
           await service.updateWebhookEventStatus(webhookId);
 
-          logger.info({ ...logContext,
-            webhookId,
-            status: 'processed', }, 'Webhook status updated');
+          logger.info({ ...logContext, webhookId, status: 'processed' }, 'Webhook status updated');
         } catch (error) {
           // Non-critical: Log but don't fail the function
           const normalized = normalizeError(error, 'Failed to update webhook status');
-          logger.warn({ ...logContext,
-            webhookId,
-            errorMessage: normalized.message, }, 'Failed to update webhook status');
+          logger.warn(
+            { ...logContext, webhookId, errorMessage: normalized.message },
+            'Failed to update webhook status'
+          );
         }
       });
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      eventType,
-      webhookId,
-      rpcName: classification.rpcName,
-      success: rpcResult.success, }, 'Polar webhook processing completed');
+    logger.info(
+      {
+        ...logContext,
+        durationMs,
+        eventType,
+        webhookId,
+        rpcName: classification.rpcName,
+        success: rpcResult.success,
+      },
+      'Polar webhook processing completed'
+    );
 
     if (!rpcResult.success) {
       // Throw to trigger retry

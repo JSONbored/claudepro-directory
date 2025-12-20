@@ -1,9 +1,8 @@
 import 'server-only';
-import {
-  type changelog_category,
-  type changelogModel,
-  type JsonValue,
-} from '@heyclaude/data-layer/prisma';
+import { Prisma } from '@prisma/client';
+import type { changelog_category } from '@prisma/client';
+type changelogModel = Prisma.changelogGetPayload<{}>;
+type JsonValue = Prisma.JsonValue;
 import { type GetChangelogOverviewReturns } from '@heyclaude/database-types/postgres-types';
 
 import { createDataFunction } from './cached-data-factory.ts';

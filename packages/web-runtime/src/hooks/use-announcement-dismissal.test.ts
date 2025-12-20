@@ -178,12 +178,8 @@ describe('useAnnouncementDismissal', () => {
     };
 
     // Re-render to get updated state
-    const { result: result1Updated } = renderHook(() =>
-      useAnnouncementDismissal('announcement-1')
-    );
-    const { result: result2Updated } = renderHook(() =>
-      useAnnouncementDismissal('announcement-2')
-    );
+    const { result: result1Updated } = renderHook(() => useAnnouncementDismissal('announcement-1'));
+    const { result: result2Updated } = renderHook(() => useAnnouncementDismissal('announcement-2'));
 
     expect(result1Updated.current.isDismissed).toBe(true);
     expect(result2Updated.current.isDismissed).toBe(false);

@@ -56,9 +56,7 @@ import { useEffect, useState, type RefObject } from 'react';
  * </button>
  * ```
  */
-export function useHover<T extends HTMLElement = HTMLElement>(
-  elementRef: RefObject<T>
-): boolean {
+export function useHover<T extends HTMLElement = HTMLElement>(elementRef: RefObject<T>): boolean {
   const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {

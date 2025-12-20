@@ -143,9 +143,14 @@ export async function enrollTOTPFactor(
     }
 
     // Log successful MFA enrollment (audit trail)
-    logger.info({ audit: true, // Structured tag for audit trail filtering
-      factorId: data.id,
-      operation: 'mfa_enroll', }, 'MFA: TOTP factor enrolled');
+    logger.info(
+      {
+        audit: true, // Structured tag for audit trail filtering
+        factorId: data.id,
+        operation: 'mfa_enroll',
+      },
+      'MFA: TOTP factor enrolled'
+    );
 
     return {
       data: {
@@ -189,7 +194,10 @@ export async function createMFAChallenge(
     return {
       data: {
         id: data.id,
-        expires_at: typeof data.expires_at === 'string' ? data.expires_at : new Date(data.expires_at * 1000).toISOString(),
+        expires_at:
+          typeof data.expires_at === 'string'
+            ? data.expires_at
+            : new Date(data.expires_at * 1000).toISOString(),
       },
       error: null,
     };
@@ -218,19 +226,29 @@ export async function verifyMFAChallenge(
 
     if (error) {
       const normalized = normalizeError(error, 'Failed to verify MFA challenge');
-      logger.warn({ securityEvent: true, // Structured tag for security event filtering
-        factorId,
-        challengeId,
-        operation: 'mfa_verify_failed',
-        error: normalized.message, }, 'MFA: verification failed');
+      logger.warn(
+        {
+          securityEvent: true, // Structured tag for security event filtering
+          factorId,
+          challengeId,
+          operation: 'mfa_verify_failed',
+          error: normalized.message,
+        },
+        'MFA: verification failed'
+      );
       return { success: false, error: normalized };
     }
 
     // Log successful MFA verification (audit trail)
-    logger.info({ audit: true, // Structured tag for audit trail filtering
-      factorId,
-      challengeId,
-      operation: 'mfa_verify_success', }, 'MFA: verification successful');
+    logger.info(
+      {
+        audit: true, // Structured tag for audit trail filtering
+        factorId,
+        challengeId,
+        operation: 'mfa_verify_success',
+      },
+      'MFA: verification successful'
+    );
 
     return { success: true, error: null };
   } catch (error) {
@@ -257,10 +275,15 @@ export async function unenrollMFAFactor(
     }
 
     // Log successful MFA unenrollment (audit trail - security-relevant change)
-    logger.info({ audit: true, // Structured tag for audit trail filtering
-      securityEvent: true, // Also a security event (reducing security level)
-      factorId,
-      operation: 'mfa_unenroll', }, 'MFA: factor unenrolled');
+    logger.info(
+      {
+        audit: true, // Structured tag for audit trail filtering
+        securityEvent: true, // Also a security event (reducing security level)
+        factorId,
+        operation: 'mfa_unenroll',
+      },
+      'MFA: factor unenrolled'
+    );
 
     return { success: true, error: null };
   } catch (error) {
@@ -280,10 +303,7 @@ export async function getAuthenticatorAssuranceLevel(
     const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
     if (error) {
-      const normalized = normalizeError(
-        error,
-        'Failed to get authenticator assurance level'
-      );
+      const normalized = normalizeError(error, 'Failed to get authenticator assurance level');
       logger.error({ err: normalized }, 'MFA: getAuthenticatorAssuranceLevel failed');
       return { data: null, error: normalized };
     }

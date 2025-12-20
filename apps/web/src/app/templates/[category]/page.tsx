@@ -9,7 +9,7 @@
  * Cache: Handled by getContentTemplates data layer function
  */
 
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@prisma/client';
 import { getContentTemplates } from '@heyclaude/web-runtime/data/content/templates';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/utils/category-validation';

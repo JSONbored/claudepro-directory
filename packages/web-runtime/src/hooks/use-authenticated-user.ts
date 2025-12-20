@@ -30,7 +30,9 @@ export function useAuthenticatedUser(
 ): UseAuthenticatedUserResult {
   const contextLabel = options?.context ?? 'useAuthenticatedUser';
   const subscribe = options?.subscribe ?? true;
-  const [supabase, setSupabase] = useState<ReturnType<typeof createSupabaseBrowserClient> | null>(null);
+  const [supabase, setSupabase] = useState<ReturnType<typeof createSupabaseBrowserClient> | null>(
+    null
+  );
   const [user, setUser] = useState<User | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [error, setError] = useState<Error | null>(null);
@@ -60,13 +62,17 @@ export function useAuthenticatedUser(
       const { data, error: authError } = await supabase.auth.getUser();
       if (authError) {
         // Don't log network errors as errors - they're expected in some cases
-        const isNetworkError = authError.message?.includes('fetch') || authError.message?.includes('network');
+        const isNetworkError =
+          authError.message?.includes('fetch') || authError.message?.includes('network');
         const normalized = new Error(authError.message ?? 'Failed to fetch authenticated user');
-        
+
         if (!isNetworkError) {
           logger.error({ err: normalized }, `${contextLabel}: supabase auth getUser failed`);
         } else {
-          logger.debug({ err: normalized }, `${contextLabel}: supabase auth getUser network error (expected)`);
+          logger.debug(
+            { err: normalized },
+            `${contextLabel}: supabase auth getUser network error (expected)`
+          );
         }
         return { user: null, error: normalized };
       }
@@ -77,7 +83,8 @@ export function useAuthenticatedUser(
           ? caught
           : new Error(typeof caught === 'string' ? caught : 'Unknown auth error');
       // Only log unexpected errors, not network issues
-      const isNetworkError = normalized.message?.includes('fetch') || normalized.message?.includes('network');
+      const isNetworkError =
+        normalized.message?.includes('fetch') || normalized.message?.includes('network');
       if (!isNetworkError) {
         logger.error({ err: normalized }, `${contextLabel}: unexpected auth getUser failure`);
       }
@@ -113,10 +120,15 @@ export function useAuthenticatedUser(
 
     init().catch((error) => {
       if (active) {
-        logClientWarn('useAuthenticatedUser: initial fetch failed', error, 'useAuthenticatedUser.init', {
-          component: 'useAuthenticatedUser',
-          context: contextLabel,
-        });
+        logClientWarn(
+          'useAuthenticatedUser: initial fetch failed',
+          error,
+          'useAuthenticatedUser.init',
+          {
+            component: 'useAuthenticatedUser',
+            context: contextLabel,
+          }
+        );
         setStatus('unauthenticated');
         setError(error instanceof Error ? error : new Error('Initial fetch failed'));
       }
@@ -125,17 +137,22 @@ export function useAuthenticatedUser(
     let subscription: { unsubscribe: () => void } | undefined;
     if (subscribe) {
       try {
-        const { data } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
-          if (!active) return;
-          setUser(session?.user ?? null);
-          setStatus(session?.user ? 'authenticated' : 'unauthenticated');
-          setError(null);
-        });
+        const { data } = supabase.auth.onAuthStateChange(
+          (_event: string, session: Session | null) => {
+            if (!active) return;
+            setUser(session?.user ?? null);
+            setStatus(session?.user ? 'authenticated' : 'unauthenticated');
+            setError(null);
+          }
+        );
         subscription = data.subscription;
       } catch (err) {
         // Gracefully handle subscription errors
         const normalized = normalizeError(err, 'Failed to subscribe to auth state changes');
-        logger.debug({ err: normalized }, `${contextLabel}: failed to subscribe to auth state changes`);
+        logger.debug(
+          { err: normalized },
+          `${contextLabel}: failed to subscribe to auth state changes`
+        );
       }
     }
 

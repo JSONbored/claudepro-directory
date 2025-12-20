@@ -2,11 +2,11 @@
 
 /**
  * All Content Section - Simplified Homepage Content Display
- * 
+ *
  * Displays ALL category content across the site in optimized batches.
  * Uses Intersection Observer to only fetch when section scrolls into viewport.
  * Implements infinite scroll for progressive content loading.
- * 
+ *
  * OPTIMIZATION: Zero function calls until user scrolls to this section.
  * This eliminates unnecessary function invocations for users who don't scroll.
  */
@@ -40,9 +40,13 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
   const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
   const isMounted = useIsMounted();
-  
+
   const [allConfigs, setAllConfigs] = useState<DisplayableContent[]>([]);
-  const { value: isLoadingAllConfigs, setTrue: setIsLoadingAllConfigsTrue, setFalse: setIsLoadingAllConfigsFalse } = useBoolean();
+  const {
+    value: isLoadingAllConfigs,
+    setTrue: setIsLoadingAllConfigsTrue,
+    setFalse: setIsLoadingAllConfigsFalse,
+  } = useBoolean();
   const { value: hasMoreAllConfigs, setValue: setHasMoreAllConfigs } = useBoolean(true);
   const hasTriggeredRef = useRef(false);
 
@@ -72,16 +76,11 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
 
         if (result?.serverError) {
           // Error already logged by safe-action middleware
-          trackHomepageSectionError(
-            'all-content',
-            'fetch-paginated-content',
-            result.serverError,
-            {
-              offset,
-              limit,
-              source: 'fetchAllConfigs',
-            }
-          );
+          trackHomepageSectionError('all-content', 'fetch-paginated-content', result.serverError, {
+            offset,
+            limit,
+            source: 'fetchAllConfigs',
+          });
           throw new Error(result.serverError);
         }
 
@@ -100,7 +99,7 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
           // Deduplicate items by slug to prevent duplicate keys
           // Create a Set of existing slugs for O(1) lookup
           const existingSlugs = new Set(prev.map((item) => item.slug).filter(Boolean));
-          
+
           // Filter out items that already exist
           const uniqueNewItems = newItems.filter((item) => {
             if (!item.slug) return true; // Keep items without slugs (shouldn't happen, but defensive)
@@ -110,7 +109,7 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
             existingSlugs.add(item.slug);
             return true;
           });
-          
+
           const updated = [...prev, ...uniqueNewItems];
           return updated;
         });
@@ -139,7 +138,13 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
         }
       }
     },
-    [hasMoreAllConfigs, setIsLoadingAllConfigsTrue, setIsLoadingAllConfigsFalse, isMounted, isLoadingAllConfigs]
+    [
+      hasMoreAllConfigs,
+      setIsLoadingAllConfigsTrue,
+      setIsLoadingAllConfigsFalse,
+      isMounted,
+      isLoadingAllConfigs,
+    ]
   );
 
   const handleFetchMore = useCallback(async () => {
@@ -151,7 +156,12 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
   // Use useCallback to stabilize the onChange handler
   const handleIntersection = useCallback(
     (isIntersecting: boolean) => {
-      if (isIntersecting && !hasTriggeredRef.current && allConfigs.length === 0 && !isLoadingAllConfigs) {
+      if (
+        isIntersecting &&
+        !hasTriggeredRef.current &&
+        allConfigs.length === 0 &&
+        !isLoadingAllConfigs
+      ) {
         hasTriggeredRef.current = true;
         fetchAllConfigs(0).catch((error) => {
           trackHomepageSectionError('all-content', 'initial-fetch', error, {});
@@ -177,16 +187,13 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
   const trendingSlugs = useMemo(() => getTrendingSlugs(allConfigs, 6), [allConfigs]);
 
   // OPTIMIZATION: Memoize keyExtractor to prevent recreation on every render
-  const keyExtractor = useCallback(
-    (item: DisplayableContent, index: number) => {
-      // Use slug for unique keys
-      // DisplayableContent doesn't have an id property
-      // Use index as fallback instead of Math.random() to prevent hydration mismatches
-      const uniqueId = item.slug ?? `item-${index}`;
-      return `all-${uniqueId}`;
-    },
-    []
-  );
+  const keyExtractor = useCallback((item: DisplayableContent, index: number) => {
+    // Use slug for unique keys
+    // DisplayableContent doesn't have an id property
+    // Use index as fallback instead of Math.random() to prevent hydration mismatches
+    const uniqueId = item.slug ?? `item-${index}`;
+    return `all-${uniqueId}`;
+  }, []);
 
   // OPTIMIZATION: Memoize renderCard function to prevent recreation on every render
   const renderCard = useCallback(
@@ -207,7 +214,7 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
                         <UnifiedBadge
                           variant="base"
                           style="secondary"
-                          className={cn('text-[10px] uppercase pointer-events-auto')}
+                          className={cn('pointer-events-auto text-[10px] uppercase')}
                         >
                           New this week
                         </UnifiedBadge>
@@ -225,7 +232,7 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
                         <UnifiedBadge
                           variant="base"
                           style="outline"
-                          className={cn('text-[10px] uppercase pointer-events-auto')}
+                          className={cn('pointer-events-auto text-[10px] uppercase')}
                         >
                           Trending
                         </UnifiedBadge>
@@ -260,7 +267,7 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
     >
       <div className="mb-8">
         <h2 className="text-3xl font-bold">All Configurations</h2>
-        <p className="mt-2 text-muted-foreground">
+        <p className="text-muted-foreground mt-2">
           Browse all configurations across all categories
         </p>
       </div>
@@ -270,7 +277,9 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
         variant="normal"
         infiniteScroll
         batchSize={30}
-        emptyMessage={isLoadingAllConfigs ? 'Loading configurations...' : 'No configurations found.'}
+        emptyMessage={
+          isLoadingAllConfigs ? 'Loading configurations...' : 'No configurations found.'
+        }
         ariaLabel="All configurations"
         loading={isLoadingAllConfigs}
         onFetchMore={handleFetchMore}

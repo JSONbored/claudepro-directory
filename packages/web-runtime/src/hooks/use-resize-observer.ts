@@ -123,7 +123,7 @@ export function useResizeObserver<T extends HTMLElement = HTMLElement>(
     const observer = new ResizeObserver((entries) => {
       const [entry] = entries;
       if (!entry) return;
-      
+
       let width: number | undefined;
       let height: number | undefined;
 

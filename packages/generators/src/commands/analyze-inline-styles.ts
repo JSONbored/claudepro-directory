@@ -1,12 +1,12 @@
 #!/usr/bin/env tsx
 /**
  * Inline Styles Analysis Command
- * 
+ *
  * Analyzes TSX/TS files to find:
  * - Inline Tailwind classes that should use design system utilities
  * - Patterns that match design system utility patterns
  * - Opportunities for migration to semantic utilities
- * 
+ *
  * This is a read-only analysis tool.
  */
 
@@ -263,17 +263,20 @@ const PATTERNS = {
     reason: 'Consider using semantic select utility if available',
   },
   bgColor: {
-    regex: /\bbg-(primary|secondary|muted|accent|destructive|foreground|background|card|popover)\b(?!\/)/g,
+    regex:
+      /\bbg-(primary|secondary|muted|accent|destructive|foreground|background|card|popover)\b(?!\/)/g,
     recommended: 'bgColor.* (or keep as-is if no semantic utility)',
     reason: 'Consider using semantic background color utility if available',
   },
   textColor: {
-    regex: /\btext-(primary|secondary|accent|destructive|foreground|background|card-foreground|popover-foreground)\b(?!\/)/g,
+    regex:
+      /\btext-(primary|secondary|accent|destructive|foreground|background|card-foreground|popover-foreground)\b(?!\/)/g,
     recommended: 'textColor.* (or keep as-is if no semantic utility)',
     reason: 'Consider using semantic text color utility if available',
   },
   borderColor: {
-    regex: /\bborder-(primary|secondary|muted|accent|destructive|foreground|background|border)\b(?!\/)/g,
+    regex:
+      /\bborder-(primary|secondary|muted|accent|destructive|foreground|background|border)\b(?!\/)/g,
     recommended: 'borderColor.* (or keep as-is if no semantic utility)',
     reason: 'Consider using semantic border color utility if available',
   },
@@ -318,12 +321,14 @@ const PATTERNS = {
     reason: 'Consider using semantic position offset utility if available',
   },
   borderVariant: {
-    regex: /\bborder-(t|b|l|r|x|y)-(\d+|primary|secondary|muted|accent|destructive|foreground|background|border)\b/g,
+    regex:
+      /\bborder-(t|b|l|r|x|y)-(\d+|primary|secondary|muted|accent|destructive|foreground|background|border)\b/g,
     recommended: 'borderVariant.* (or keep as-is if no semantic utility)',
     reason: 'Consider using semantic border variant utility if available',
   },
   display: {
-    regex: /\b(block|inline|inline-block|flex|grid|table|contents|list-item|hidden|visible|invisible)\b(?!-)/g,
+    regex:
+      /\b(block|inline|inline-block|flex|grid|table|contents|list-item|hidden|visible|invisible)\b(?!-)/g,
     recommended: 'display.* (or keep as-is if no semantic utility)',
     reason: 'Consider using semantic display utility if available',
   },
@@ -377,21 +382,21 @@ function extractClassNames(content: string, file: string): InlineStylePattern[] 
   // Check all patterns
   for (let lineNum = 0; lineNum < lines.length; lineNum++) {
     const line = lines[lineNum];
-    
+
     // Extract className values
     const classNames: string[] = [];
-    
+
     // String literals
     let match;
     while ((match = classNameRegex.exec(line)) !== null) {
       classNames.push(match[1]);
     }
-    
+
     // Template literals
     while ((match = classNameTemplateRegex.exec(line)) !== null) {
       classNames.push(match[1]);
     }
-    
+
     // Expressions (cn(), etc.) - extract string parts
     while ((match = classNameExpressionRegex.exec(line)) !== null) {
       // Extract string literals from expressions
@@ -627,7 +632,7 @@ function extractClassNames(content: string, file: string): InlineStylePattern[] 
         const beforeGap = className.substring(0, className.indexOf(gapPattern));
         const isFlexColGap = /\bflex\s+flex-col\s+gap-/.test(className);
         const isFlexCenterGap = /\bflex\s+items-center\s+gap-/.test(className);
-        
+
         if (!isFlexColGap && !isFlexCenterGap) {
           patterns.push({
             pattern: 'gap',
@@ -684,9 +689,11 @@ function extractClassNames(content: string, file: string): InlineStylePattern[] 
       for (const heightMatch of heightMatches) {
         // Skip if it's part of an icon sizing pattern (h-X w-Y)
         const heightPattern = heightMatch[0];
-        const afterHeight = className.substring(className.indexOf(heightPattern) + heightPattern.length);
+        const afterHeight = className.substring(
+          className.indexOf(heightPattern) + heightPattern.length
+        );
         const isIconPattern = /\s+w-\d+/.test(afterHeight);
-        
+
         if (!isIconPattern) {
           patterns.push({
             pattern: 'height',
@@ -1102,7 +1109,7 @@ function extractClassNames(content: string, file: string): InlineStylePattern[] 
 // Main analysis function
 async function analyzeInlineStyles(): Promise<InlineStyleReport> {
   const tsxFiles = findTSXFiles(join(PROJECT_ROOT, 'apps/web/src'));
-  
+
   logger.info(`Analyzing ${tsxFiles.length} TSX/TS files for inline styles...`);
 
   const report: InlineStyleReport = {
@@ -1329,7 +1336,7 @@ async function analyzeInlineStyles(): Promise<InlineStyleReport> {
     }
   }
 
-  report.totalPatterns = 
+  report.totalPatterns =
     report.marginBottom.length +
     report.marginTop.length +
     report.spaceY.length +
@@ -1512,7 +1519,8 @@ function generateReport(report: InlineStyleReport): string {
   md += `## Files with Inline Style Patterns\n\n`;
   for (const [file, patterns] of Array.from(byFile.entries()).sort()) {
     md += `### \`${file}\` (${patterns.length} pattern(s))\n\n`;
-    for (const pattern of patterns.slice(0, 10)) { // Limit to 10 per file
+    for (const pattern of patterns.slice(0, 10)) {
+      // Limit to 10 per file
       md += `- **Line ${pattern.line}:** \`${pattern.className}\`\n`;
       md += `  - Recommended: \`${pattern.recommended}\`\n`;
       md += `  - Reason: ${pattern.reason}\n`;
@@ -1531,16 +1539,16 @@ export async function runAnalyzeInlineStyles(): Promise<void> {
   try {
     const report = await analyzeInlineStyles();
     const markdown = generateReport(report);
-    
+
     console.log(markdown);
-    
+
     // Write report to file
     const { writeFileSync, mkdirSync } = await import('node:fs');
     const { dirname, join } = await import('node:path');
     const reportPath = join(PROJECT_ROOT, '.cursor/tailwind-cleanup/inline-styles-report.md');
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, markdown, 'utf-8');
-    
+
     logger.info(`Analysis complete! Report saved to: ${reportPath}`);
   } catch (error) {
     logger.error('Analysis failed', { error });

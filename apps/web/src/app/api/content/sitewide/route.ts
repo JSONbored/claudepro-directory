@@ -25,7 +25,10 @@
 
 import 'server-only';
 import {
-  createFormatHandlerRoute, createOptionsHandler as createApiOptionsHandler, type FormatHandlerConfig, type RouteHandlerContext,
+  createFormatHandlerRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  type FormatHandlerConfig,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { sitewideFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import {
@@ -153,7 +156,8 @@ export const GET = createFormatHandlerRoute<SitewideFormat, { format?: SitewideF
         headers: {
           'Content-Type': {
             schema: { type: 'string' },
-            description: 'Content type (text/plain for llms formats, application/json for json/readme)',
+            description:
+              'Content type (text/plain for llms formats, application/json for json/readme)',
           },
           'Cache-Control': {
             schema: { type: 'string' },
@@ -164,7 +168,8 @@ export const GET = createFormatHandlerRoute<SitewideFormat, { format?: SitewideF
             description: 'Source of the response data',
           },
         },
-        example: '# Sitewide Content\n\n## Skills\n- Example Skill 1\n- Example Skill 2\n\n## Agents\n- Example Agent 1',
+        example:
+          '# Sitewide Content\n\n## Skills\n- Example Skill 1\n- Example Skill 2\n\n## Agents\n- Example Agent 1',
       },
       400: {
         description: 'Invalid format parameter',

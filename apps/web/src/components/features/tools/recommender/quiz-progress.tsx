@@ -30,7 +30,7 @@ export function QuizProgress({
           </UnifiedBadge>
         </div>
         {percentComplete === 100 && (
-          <div className="flex items-center gap-2 text-primary text-sm">
+          <div className="text-primary flex items-center gap-2 text-sm">
             <CheckCircle className="h-4 w-4" />
             <span>Complete!</span>
           </div>
@@ -40,7 +40,7 @@ export function QuizProgress({
       {/* Progress bar */}
       <div className="bg-muted relative h-2 w-full overflow-hidden rounded-full">
         <div
-          className="absolute top-0 left-0 bg-primary h-full transition-all duration-300 ease-in-out"
+          className="bg-primary absolute top-0 left-0 h-full transition-all duration-300 ease-in-out"
           style={{ width: `${percentComplete}%` }}
           role="progressbar"
           aria-valuenow={percentComplete}
@@ -55,7 +55,7 @@ export function QuizProgress({
         {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((step) => (
           <div
             key={step}
-            className={`flex h-8 w-8 items-center justify-center rounded-full text-xs-medium transition-colors ${
+            className={`text-xs-medium flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
               step < currentQuestion
                 ? 'bg-primary text-primary-foreground'
                 : step === currentQuestion

@@ -26,7 +26,7 @@ test.describe('Collection Detail Page', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (navigation handled per test with different slugs)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -44,7 +44,7 @@ test.describe('Collection Detail Page', () => {
     // The component checks if (!user) and calls redirect('/login')
     const testSlug = 'test-collection-slug';
     await page.goto(`/account/library/${testSlug}`);
-    
+
     // Should redirect to login
     await page.waitForURL(/\/login/, { timeout: 5000 });
     expect(page.url()).toContain('/login');
@@ -55,7 +55,7 @@ test.describe('Collection Detail Page', () => {
     // The component checks if (!collectionData) and calls notFound()
     const invalidSlug = 'non-existent-collection-12345';
     const response = await page.goto(`/account/library/${invalidSlug}`);
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -65,7 +65,7 @@ test.describe('Collection Detail Page', () => {
     // The component checks if (!collection) and calls notFound()
     const invalidSlug = 'invalid-collection-slug';
     const response = await page.goto(`/account/library/${invalidSlug}`);
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -80,11 +80,17 @@ test.describe('Collection Detail Page', () => {
 
     // Page should render or show error card, but not crash
     const main = page.getByRole('main').or(page.locator('body'));
-    const hasMain = await main.first().isVisible().catch(() => false);
+    const hasMain = await main
+      .first()
+      .isVisible()
+      .catch(() => false);
     const errorCard = page.getByText(/collection unavailable|couldn.*t load this collection/i);
     const hasErrorCard = await errorCard.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error card, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -115,7 +121,10 @@ test.describe('Collection Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -132,7 +141,10 @@ test.describe('Collection Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -149,7 +161,10 @@ test.describe('Collection Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -166,7 +181,10 @@ test.describe('Collection Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -183,7 +201,10 @@ test.describe('Collection Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -200,7 +221,10 @@ test.describe('Collection Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -217,7 +241,10 @@ test.describe('Collection Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -234,7 +261,10 @@ test.describe('Collection Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -251,7 +281,10 @@ test.describe('Collection Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -268,7 +301,10 @@ test.describe('Collection Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -285,7 +321,10 @@ test.describe('Collection Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -311,16 +350,16 @@ test.describe('Collection Detail Page', () => {
     // The component uses Suspense with Loading fallback
     const testSlug = 'test-collection-slug';
     await page.goto(`/account/library/${testSlug}`);
-    
+
     // Check for loading state (may flash quickly)
     const loading = page.locator('[data-loading], [aria-busy="true"]');
     const hasLoading = await loading.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main').or(page.locator('body'));
     await expect(main.first()).toBeVisible();
   });
@@ -338,7 +377,10 @@ test.describe('Collection Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -355,7 +397,10 @@ test.describe('Collection Detail Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 

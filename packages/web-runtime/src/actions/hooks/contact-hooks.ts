@@ -13,7 +13,7 @@ export async function onContactSubmission(
   try {
     // Send event to Inngest for durable email processing
     const { inngest } = await import('../../inngest/client.ts');
-    
+
     await inngest.send({
       name: 'email/contact',
       data: {
@@ -25,14 +25,18 @@ export async function onContactSubmission(
       },
     });
 
-    logger.info({ submissionId: result.submission_id,
-      category: input.category, }, 'Contact form email event sent to Inngest');
+    logger.info(
+      { submissionId: result.submission_id, category: input.category },
+      'Contact form email event sent to Inngest'
+    );
   } catch (error) {
     // Log but don't throw - submission was already saved to database
     const normalized = normalizeError(error, 'Contact form email event failed');
-    logger.warn({ err: normalized,
-      submissionId: result.submission_id, }, 'Contact form email event failed (submission saved)');
+    logger.warn(
+      { err: normalized, submissionId: result.submission_id },
+      'Contact form email event failed (submission saved)'
+    );
   }
-  
+
   return null;
 }

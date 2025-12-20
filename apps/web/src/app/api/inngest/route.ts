@@ -10,7 +10,8 @@
 import 'server-only';
 
 import {
-  createApiRoute, createOptionsHandler as createApiOptionsHandler,
+  createApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
 } from '@heyclaude/web-runtime/api/route-factory';
 import {
   errorResponseSchema,

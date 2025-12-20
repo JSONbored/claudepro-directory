@@ -202,7 +202,11 @@ export function ExamplesArrayInput({
   };
 
   // Update example field
-  const updateExample = (index: number, field: keyof UsageExample, value: string | ExampleLanguage) => {
+  const updateExample = (
+    index: number,
+    field: keyof UsageExample,
+    value: string | ExampleLanguage
+  ) => {
     setExamples(examples.map((ex, i) => (i === index ? { ...ex, [field]: value } : ex)));
   };
 
@@ -267,7 +271,7 @@ export function ExamplesArrayInput({
                   <button
                     type="button"
                     onClick={() => toggleExpanded(index)}
-                    className="flex items-center gap-2 flex-1 text-left transition-opacity hover:opacity-70"
+                    className="flex flex-1 items-center gap-2 text-left transition-opacity hover:opacity-70"
                   >
                     {isExpanded ? (
                       <ChevronUp className="h-4 w-4" />
@@ -321,7 +325,9 @@ export function ExamplesArrayInput({
                       value={example.language}
                       onValueChange={(value) => {
                         // Type guard: validate value is ExampleLanguage
-                        const validLanguages: readonly ExampleLanguage[] = SUPPORTED_LANGUAGES.map((l) => l.value);
+                        const validLanguages: readonly ExampleLanguage[] = SUPPORTED_LANGUAGES.map(
+                          (l) => l.value
+                        );
                         if (validLanguages.includes(value as ExampleLanguage)) {
                           updateExample(index, 'language', value as ExampleLanguage);
                         }

@@ -4,9 +4,9 @@ export {};
 /**
  * PrismaJson namespace for custom JSON type definitions
  * Used by prisma-json-types-generator to provide strongly typed Json fields
- * 
+ *
  * See: https://github.com/olivierwilkinson/prisma-json-types-generator
- * 
+ *
  * This file uses TypeScript declaration merging to extend the PrismaJson namespace
  * that is created by prisma-json-types-generator. The generator reads AST comments
  * from schema.prisma (e.g., /// [TypeName]) and applies these types to Json fields.

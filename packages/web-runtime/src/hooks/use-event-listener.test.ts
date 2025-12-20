@@ -47,10 +47,9 @@ describe('useEventListener', () => {
     const handler1 = vi.fn();
     const handler2 = vi.fn();
 
-    const { rerender } = renderHook(
-      ({ handler }) => useEventListener('resize', handler),
-      { initialProps: { handler: handler1 } }
-    );
+    const { rerender } = renderHook(({ handler }) => useEventListener('resize', handler), {
+      initialProps: { handler: handler1 },
+    });
 
     window.dispatchEvent(new Event('resize'));
     expect(handler1).toHaveBeenCalledTimes(1);

@@ -1,0 +1,25 @@
+# Cloudflare Workers Local Development Environment Variables
+# Copy this file to .dev.vars (gitignored) for local development
+#
+# IMPORTANT: For production, use Cloudflare Secrets Store bindings configured in wrangler.jsonc
+# These .dev.vars are ONLY for local development with `wrangler dev`
+#
+# To set secrets for local development:
+# wrangler secret put SUPABASE_URL
+# wrangler secret put SUPABASE_ANON_KEY
+# wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+#
+# Or use Infisical to inject secrets:
+# infisical run --env=dev -- wrangler dev
+
+# Non-sensitive environment variables (can be in .dev.vars)
+NODE_ENV=development
+NEXT_PUBLIC_SITE_URL=https://claudepro.directory
+APP_URL=https://claudepro.directory
+NEWSLETTER_COUNT_TTL_S=300
+
+# Sensitive values - DO NOT put in .dev.vars
+# Use `wrangler secret put` or Secrets Store bindings instead:
+# SUPABASE_URL=your-supabase-url
+# SUPABASE_ANON_KEY=your-anon-key
+# SUPABASE_SERVICE_ROLE_KEY=your-service-role-key

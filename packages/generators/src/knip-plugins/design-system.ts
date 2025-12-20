@@ -1,14 +1,14 @@
 #!/usr/bin/env tsx
 /**
  * Knip Plugin: Design System Analysis
- * 
+ *
  * Finds deprecated semantic utility usage and flags files that need migration to Direct Tailwind.
- * 
+ *
  * Analyzes:
  * - Files importing from @heyclaude/web-runtime/design-system (deprecated semantic utilities)
  * - Files using old constants (DIMENSIONS, ANIMATION_CONSTANTS, etc.)
  * - CSS variables in @theme block (for reference)
- * 
+ *
  * Usage:
  *   knip --plugins packages/generators/src/knip-plugins/design-system.ts
  */
@@ -70,10 +70,13 @@ function findSemanticUtilityUsage(): DeprecatedUsage[] {
 
             if (namedImports) {
               // Parse named imports
-              const namedList = namedImports.split(',').map((imp) => {
-                const parts = imp.trim().split(/\s+as\s+/);
-                return parts[0]?.trim() || '';
-              }).filter(Boolean);
+              const namedList = namedImports
+                .split(',')
+                .map((imp) => {
+                  const parts = imp.trim().split(/\s+as\s+/);
+                  return parts[0]?.trim() || '';
+                })
+                .filter(Boolean);
 
               imports.push(...namedList);
             }
@@ -81,13 +84,37 @@ function findSemanticUtilityUsage(): DeprecatedUsage[] {
             // Filter to only style utilities (not animations/microinteractions)
             const styleUtilities = imports.filter((imp) => {
               const styleUtils = [
-                'marginBottom', 'marginTop', 'spaceY', 'spaceX', 'padding',
-                'stack', 'cluster', 'row', 'center', 'between', 'wrap',
-                'muted', 'size', 'weight', 'leading', 'tracking', 'truncate',
-                'iconSize', 'iconSizeRect', 'iconLeading',
-                'border', 'radius',
-                'hoverBg', 'hoverText', 'focusRing', 'transition', 'interactive', 'link',
-                'animate', 'animateIn', 'animateDuration',
+                'marginBottom',
+                'marginTop',
+                'spaceY',
+                'spaceX',
+                'padding',
+                'stack',
+                'cluster',
+                'row',
+                'center',
+                'between',
+                'wrap',
+                'muted',
+                'size',
+                'weight',
+                'leading',
+                'tracking',
+                'truncate',
+                'iconSize',
+                'iconSizeRect',
+                'iconLeading',
+                'border',
+                'radius',
+                'hoverBg',
+                'hoverText',
+                'focusRing',
+                'transition',
+                'interactive',
+                'link',
+                'animate',
+                'animateIn',
+                'animateDuration',
               ];
               return styleUtils.includes(imp);
             });
@@ -215,7 +242,7 @@ function loadCSSVariables(): CSSVariable[] {
     for (let i = 0; i < lines.length; i++) {
       const lineContent = lines[i];
       if (!lineContent) continue;
-      
+
       if (lineContent.includes('@theme')) {
         inThemeBlock = true;
         continue;

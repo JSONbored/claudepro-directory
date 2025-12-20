@@ -59,6 +59,10 @@ import eslintPluginSonarjs from 'eslint-plugin-sonarjs';
 import eslintPluginTurbo from 'eslint-plugin-turbo';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import eslintPluginVitest from 'eslint-plugin-vitest';
+import eslintPluginTestingLibrary from 'eslint-plugin-testing-library';
+import eslintPluginPlaywright from 'eslint-plugin-playwright';
+import eslintPluginNoOnlyTests from 'eslint-plugin-no-only-tests';
+import eslintPluginMarkdown from 'eslint-plugin-markdown';
 import importPlugin from 'eslint-plugin-import-x';
 import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
 import nextPlugin from '@next/eslint-plugin-next';
@@ -154,6 +158,10 @@ export default tseslint.config(
       security: eslintPluginSecurity,
       sonarjs: eslintPluginSonarjs,
       turbo: eslintPluginTurbo,
+      'testing-library': eslintPluginTestingLibrary,
+      playwright: eslintPluginPlaywright,
+      'no-only-tests': eslintPluginNoOnlyTests,
+      markdown: eslintPluginMarkdown,
       // Note: unicorn plugin is already included via eslintPluginUnicorn.configs.recommended
     },
     settings: {
@@ -1250,6 +1258,142 @@ export default tseslint.config(
       // Disable rules that conflict with Vitest autofix rules
       '@typescript-eslint/no-unnecessary-condition': 'off', // Conflicts with prefer-comparison-matcher
       'unicorn/no-immediate-mutation': 'off', // Conflicts with prefer-spy-on
+    },
+  },
+  // ============================================
+  // Testing Library Configuration (React Testing Library)
+  // ============================================
+  {
+    files: ['**/*.test.tsx', '**/*.test.ts'],
+    plugins: {
+      'testing-library': eslintPluginTestingLibrary,
+      'no-only-tests': eslintPluginNoOnlyTests,
+    },
+    rules: {
+      // Testing Library best practices
+      'testing-library/await-async-query': 'error',
+      'testing-library/await-async-utils': 'error',
+      'testing-library/no-await-sync-query': 'error',
+      'testing-library/no-container': 'error',
+      'testing-library/no-debugging-utils': 'warn',
+      'testing-library/no-dom-import': 'error',
+      'testing-library/no-node-access': 'error',
+      'testing-library/no-promise-in-fire-event': 'error',
+      'testing-library/no-render-in-setup': 'error',
+      'testing-library/no-unnecessary-act': 'warn',
+      'testing-library/no-wait-for-empty-callback': 'error',
+      'testing-library/no-wait-for-multiple-assertions': 'error',
+      'testing-library/no-wait-for-side-effects': 'error',
+      'testing-library/no-wait-for-snapshot': 'error',
+      'testing-library/prefer-find-by': 'warn',
+      'testing-library/prefer-presence-queries': 'warn',
+      'testing-library/prefer-query-by-disappearance': 'warn',
+      'testing-library/prefer-screen-queries': 'error',
+      'testing-library/render-result-naming-convention': 'warn',
+      // No-only-tests: Prevents committing focused tests
+      'no-only-tests/no-only-tests': 'error',
+    },
+  },
+  // ============================================
+  // Playwright Configuration (E2E Tests)
+  // ============================================
+  {
+    files: ['**/*.spec.ts', '**/*.spec.tsx'],
+    plugins: {
+      playwright: eslintPluginPlaywright,
+      'no-only-tests': eslintPluginNoOnlyTests,
+    },
+    rules: {
+      // Playwright best practices
+      'playwright/expect-expect': 'error',
+      'playwright/missing-playwright-await': 'error',
+      'playwright/no-element-handle': 'error',
+      'playwright/no-eval': 'error',
+      'playwright/no-focused-test': 'error',
+      'playwright/no-force-option': 'warn',
+      'playwright/no-get-by-role-to-throw': 'error',
+      'playwright/no-nested-step': 'error',
+      'playwright/no-page-pause': 'error',
+      'playwright/no-skipped-test': 'warn',
+      'playwright/no-useless-attribute': 'warn',
+      'playwright/no-useless-not': 'warn',
+      'playwright/no-wait-for-timeout': 'error',
+      'playwright/prefer-lowercase-title': 'warn',
+      'playwright/prefer-strict-equal': 'warn',
+      'playwright/prefer-to-be': 'warn',
+      'playwright/prefer-to-have-count': 'warn',
+      'playwright/prefer-to-have-length': 'warn',
+      'playwright/prefer-to-have-text': 'warn',
+      'playwright/require-top-level-describe': 'warn',
+      'playwright/valid-expect': 'error',
+      'playwright/valid-title': 'error',
+      // No-only-tests: Prevents committing focused tests
+      'no-only-tests/no-only-tests': 'error',
+    },
+  },
+  // ============================================
+  // Markdown Configuration (Code blocks in .md files)
+  // ============================================
+  {
+    files: ['**/*.md'],
+    plugins: {
+      markdown: eslintPluginMarkdown,
+    },
+    processor: 'markdown/markdown',
+    rules: {
+      // Apply TypeScript rules to code blocks in markdown
+      '@typescript-eslint/no-unused-vars': 'warn',
+      'no-console': 'warn',
+    },
+  },
+  {
+    files: ['**/*.md/**'],
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
+  },
+  // ============================================
+  // Enhanced JSX A11y Rules
+  // ============================================
+  {
+    files: ['**/*.tsx', '**/*.jsx'],
+    rules: {
+      // Additional jsx-a11y rules for better accessibility
+      'jsx-a11y/alt-text': 'error',
+      'jsx-a11y/anchor-has-content': 'error',
+      'jsx-a11y/anchor-is-valid': 'error',
+      'jsx-a11y/aria-activedescendant-has-tabindex': 'error',
+      'jsx-a11y/aria-props': 'error',
+      'jsx-a11y/aria-proptypes': 'error',
+      'jsx-a11y/aria-role': 'error',
+      'jsx-a11y/aria-unsupported-elements': 'error',
+      'jsx-a11y/autocomplete-valid': 'error',
+      'jsx-a11y/click-events-have-key-events': 'warn',
+      'jsx-a11y/control-has-associated-label': 'warn',
+      'jsx-a11y/heading-has-content': 'error',
+      'jsx-a11y/html-has-lang': 'error',
+      'jsx-a11y/iframe-has-title': 'error',
+      'jsx-a11y/img-redundant-alt': 'warn',
+      'jsx-a11y/interactive-supports-focus': 'warn',
+      'jsx-a11y/label-has-associated-control': 'error',
+      'jsx-a11y/media-has-caption': 'warn',
+      'jsx-a11y/mouse-events-have-key-events': 'warn',
+      'jsx-a11y/no-access-key': 'warn',
+      'jsx-a11y/no-aria-hidden-on-focusable': 'error',
+      'jsx-a11y/no-autofocus': 'warn',
+      'jsx-a11y/no-distracting-elements': 'error',
+      'jsx-a11y/no-interactive-element-to-noninteractive-role': 'warn',
+      'jsx-a11y/no-noninteractive-element-interactions': 'warn',
+      'jsx-a11y/no-noninteractive-element-to-interactive-role': 'warn',
+      'jsx-a11y/no-noninteractive-tabindex': 'warn',
+      'jsx-a11y/no-redundant-roles': 'warn',
+      'jsx-a11y/no-static-element-interactions': 'warn',
+      'jsx-a11y/prefer-tag-over-role': 'warn',
+      'jsx-a11y/scope': 'error',
+      'jsx-a11y/tabindex-no-positive': 'warn',
     },
   },
   // ============================================

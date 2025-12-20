@@ -23,7 +23,7 @@ function shouldRateLimit(pathname: string): boolean {
  *
  * Migrated from middleware.ts to proxy.ts per Next.js 16 requirements.
  * Proxy always runs on Node.js runtime (cannot be changed).
- * 
+ *
  * IMPORTANT: This file is NOT middleware - it's a proxy handler.
  * Netlify should not bundle this as an edge function.
  * Set NEXT_DISABLE_NETLIFY_EDGE=true in Netlify UI to disable edge function bundling.

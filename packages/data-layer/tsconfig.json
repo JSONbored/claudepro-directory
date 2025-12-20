@@ -14,7 +14,14 @@
     "allowImportingTsExtensions": true
   },
   "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
+  ],
   "references": [
     { "path": "../database-types/tsconfig.json" },
     { "path": "../shared-runtime/tsconfig.json" },

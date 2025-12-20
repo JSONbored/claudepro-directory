@@ -6,20 +6,27 @@
  */
 
 import {
-  JobType,
-  JobCategory,
-  WorkplaceType,
-  ExperienceLevel,
-} from '@heyclaude/data-layer/prisma';
-import { job_plan as jobPlanEnum } from '@heyclaude/database-types/prisma';
+  job_type as JobType,
+  job_category as JobCategory,
+  workplace_type as WorkplaceType,
+  experience_level as ExperienceLevel,
+  job_plan as jobPlanEnum,
+} from '@prisma/client';
+
 import type {
   job_plan,
   job_type,
   job_category,
   workplace_type,
   experience_level,
-} from '@heyclaude/data-layer/prisma';
-import { normalizeError, getFormDataString, getFormDataStringRequired, getFormDataEnum, getFormDataBoolean } from '@heyclaude/shared-runtime';
+} from '@prisma/client';
+import {
+  normalizeError,
+  getFormDataString,
+  getFormDataStringRequired,
+  getFormDataEnum,
+  getFormDataBoolean,
+} from '@heyclaude/shared-runtime';
 import { type CreateJobInput } from '@heyclaude/web-runtime/actions/jobs-crud';
 import { type PaymentPlanCatalogEntry } from '@heyclaude/web-runtime/data/payments';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -131,9 +138,7 @@ function isWorkplaceType(value: unknown): value is workplace_type {
 /**
  * Helper function to check if value is a valid ExperienceLevel
  */
-function isExperienceLevel(
-  value: unknown
-): value is experience_level {
+function isExperienceLevel(value: unknown): value is experience_level {
   if (typeof value !== 'string') {
     return false;
   }
@@ -283,139 +288,148 @@ export function JobForm({
         } upgrade`
       : null;
 
-  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
 
-    // Proactive auth check - show modal before attempting action
-    if (status === 'loading') {
-      // Wait for auth check to complete
-      return;
-    }
-
-    if (!user) {
-      // User is not authenticated - show auth modal
-      openAuthModal({
-        valueProposition: 'Sign in to post jobs',
-        redirectTo: pathname ?? undefined,
-      });
-      return;
-    }
-
-    const formData = new FormData(e.currentTarget);
-
-    // OPTIMIZATION: Use type-safe FormData utilities instead of type assertions
-    const location = getFormDataString(formData, 'location');
-    const salary = getFormDataString(formData, 'salary');
-    const contactEmail = getFormDataString(formData, 'contact_email');
-    const companyLogo = getFormDataString(formData, 'company_logo');
-
-    // Validate workplace type using type guard
-    const workplace = getFormDataEnum(formData, 'workplace', isWorkplaceType);
-
-    // Validate experience level using type guard
-    const experience = getFormDataEnum(formData, 'experience', isExperienceLevel);
-
-    // Validate job type using type guard
-    function isJobType(value: unknown): value is job_type {
-      return typeof value === 'string' && Object.values(JobType).includes(value as job_type);
-    }
-
-    // Validate job category using type guard
-    function isJobCategory(value: unknown): value is job_category {
-      return typeof value === 'string' && Object.values(JobCategory).includes(value as job_category);
-    }
-
-    const jobType = getFormDataEnum(formData, 'type', isJobType);
-    const category = getFormDataEnum(formData, 'category', isJobCategory);
-
-    if (!jobType || !category) {
-      throw new Error('Invalid job type or category');
-    }
-
-    const jobData: CreateJobInput = {
-      title: getFormDataStringRequired(formData, 'title'),
-      company: companyName,
-      company_id: companyId || undefined,
-      location: location || undefined,
-      description: getFormDataStringRequired(formData, 'description'),
-      salary: salary || undefined,
-      remote: getFormDataBoolean(formData, 'remote'),
-      type: jobType,
-      workplace: workplace || undefined,
-      experience: experience || undefined,
-      category: category,
-      tags,
-      requirements,
-      benefits,
-      link: getFormDataString(formData, 'link') || '',
-      plan: (() => {
-        const planRaw = getFormDataString(formData, 'plan');
-        if (planRaw && isJobPlan(planRaw)) {
-          return planRaw;
-        }
-        throw new Error('Invalid job plan');
-      })(),
-      tier: isFeatured ? 'featured' : 'standard',
-      contact_email: contactEmail || undefined,
-      company_logo: companyLogo || undefined,
-    } satisfies CreateJobInput;
-
-    startTransition(async () => {
-      try {
-        await runLoggedAsync(
-          async () => {
-            const result = await onSubmit(jobData);
-
-            if (result?.success) {
-              toasts.success.actionCompleted(
-                result.requiresPayment
-                  ? 'Job created! Contact us for payment.'
-                  : 'Job posted successfully!'
-              );
-            } else {
-              // Handle case when server action returns { success: false }
-              throw new Error('Job submission returned success: false');
-            }
-          },
-          {
-            message: 'Job submission failed',
-            context: {
-              title: jobData.title ?? '',
-              company: jobData.company ?? '',
-              plan: jobData.plan ?? '',
-            },
-          }
-        );
-      } catch (error) {
-        // Error already logged by useLoggedAsync
-        const normalized = normalizeError(error, 'Failed to save job');
-        const errorMessage = normalized.message;
-        
-        // Check if error is auth-related and show modal if so
-        if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
-          openAuthModal({
-            valueProposition: 'Sign in to post jobs',
-            redirectTo: pathname ?? undefined,
-          });
-        } else {
-          // Non-auth errors - show toast with retry option
-          toasts.raw.error('Failed to save job', {
-            action: {
-              label: 'Retry',
-              onClick: () => {
-                // Trigger form submission again
-                const form = e.currentTarget;
-                if (form) {
-                  const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-                  form.dispatchEvent(submitEvent);
-                }
-              },
-            },
-          });
-        }
+      // Proactive auth check - show modal before attempting action
+      if (status === 'loading') {
+        // Wait for auth check to complete
+        return;
       }
-    });
-  }, [user, status, openAuthModal, pathname, onSubmit, runLoggedAsync]);
+
+      if (!user) {
+        // User is not authenticated - show auth modal
+        openAuthModal({
+          valueProposition: 'Sign in to post jobs',
+          redirectTo: pathname ?? undefined,
+        });
+        return;
+      }
+
+      const formData = new FormData(e.currentTarget);
+
+      // OPTIMIZATION: Use type-safe FormData utilities instead of type assertions
+      const location = getFormDataString(formData, 'location');
+      const salary = getFormDataString(formData, 'salary');
+      const contactEmail = getFormDataString(formData, 'contact_email');
+      const companyLogo = getFormDataString(formData, 'company_logo');
+
+      // Validate workplace type using type guard
+      const workplace = getFormDataEnum(formData, 'workplace', isWorkplaceType);
+
+      // Validate experience level using type guard
+      const experience = getFormDataEnum(formData, 'experience', isExperienceLevel);
+
+      // Validate job type using type guard
+      function isJobType(value: unknown): value is job_type {
+        return typeof value === 'string' && Object.values(JobType).includes(value as job_type);
+      }
+
+      // Validate job category using type guard
+      function isJobCategory(value: unknown): value is job_category {
+        return (
+          typeof value === 'string' && Object.values(JobCategory).includes(value as job_category)
+        );
+      }
+
+      const jobType = getFormDataEnum(formData, 'type', isJobType);
+      const category = getFormDataEnum(formData, 'category', isJobCategory);
+
+      if (!jobType || !category) {
+        throw new Error('Invalid job type or category');
+      }
+
+      const jobData: CreateJobInput = {
+        title: getFormDataStringRequired(formData, 'title'),
+        company: companyName,
+        company_id: companyId || undefined,
+        location: location || undefined,
+        description: getFormDataStringRequired(formData, 'description'),
+        salary: salary || undefined,
+        remote: getFormDataBoolean(formData, 'remote'),
+        type: jobType,
+        workplace: workplace || undefined,
+        experience: experience || undefined,
+        category: category,
+        tags,
+        requirements,
+        benefits,
+        link: getFormDataString(formData, 'link') || '',
+        plan: (() => {
+          const planRaw = getFormDataString(formData, 'plan');
+          if (planRaw && isJobPlan(planRaw)) {
+            return planRaw;
+          }
+          throw new Error('Invalid job plan');
+        })(),
+        tier: isFeatured ? 'featured' : 'standard',
+        contact_email: contactEmail || undefined,
+        company_logo: companyLogo || undefined,
+      } satisfies CreateJobInput;
+
+      startTransition(async () => {
+        try {
+          await runLoggedAsync(
+            async () => {
+              const result = await onSubmit(jobData);
+
+              if (result?.success) {
+                toasts.success.actionCompleted(
+                  result.requiresPayment
+                    ? 'Job created! Contact us for payment.'
+                    : 'Job posted successfully!'
+                );
+              } else {
+                // Handle case when server action returns { success: false }
+                throw new Error('Job submission returned success: false');
+              }
+            },
+            {
+              message: 'Job submission failed',
+              context: {
+                title: jobData.title ?? '',
+                company: jobData.company ?? '',
+                plan: jobData.plan ?? '',
+              },
+            }
+          );
+        } catch (error) {
+          // Error already logged by useLoggedAsync
+          const normalized = normalizeError(error, 'Failed to save job');
+          const errorMessage = normalized.message;
+
+          // Check if error is auth-related and show modal if so
+          if (
+            errorMessage.includes('signed in') ||
+            errorMessage.includes('auth') ||
+            errorMessage.includes('unauthorized')
+          ) {
+            openAuthModal({
+              valueProposition: 'Sign in to post jobs',
+              redirectTo: pathname ?? undefined,
+            });
+          } else {
+            // Non-auth errors - show toast with retry option
+            toasts.raw.error('Failed to save job', {
+              action: {
+                label: 'Retry',
+                onClick: () => {
+                  // Trigger form submission again
+                  const form = e.currentTarget;
+                  if (form) {
+                    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                    form.dispatchEvent(submitEvent);
+                  }
+                },
+              },
+            });
+          }
+        }
+      });
+    },
+    [user, status, openAuthModal, pathname, onSubmit, runLoggedAsync]
+  );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -681,11 +695,11 @@ export function JobForm({
             </SelectContent>
           </Select>
           {selectedPlanOption ? (
-            <div className="border-border/50 bg-muted/20 mt-4 card-base p-4 text-sm">
+            <div className="border-border/50 bg-muted/20 card-base mt-4 p-4 text-sm">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="font-semibold">{PLAN_LABELS[selectedPlanOption.plan]}</div>
-                  <p className="text-muted-foreground text-xs mt-1">
+                  <p className="text-muted-foreground mt-1 text-xs">
                     {selectedPlanOption.description ??
                       PLAN_DESCRIPTION_FALLBACK[selectedPlanOption.plan]}
                   </p>
@@ -700,10 +714,19 @@ export function JobForm({
                 )}
               </div>
               {planInfoSubtitle ? (
-                <p className="text-muted-foreground text-xs mt-2">{planInfoSubtitle}</p>
+                <p className="text-muted-foreground mt-2 text-xs">{planInfoSubtitle}</p>
               ) : null}
               {selectedPlanOption.benefits ? (
-                <ul className={cn('text-muted-foreground', 'mt-4', 'list-disc', 'space-y-1', 'pl-4', 'text-xs')}>
+                <ul
+                  className={cn(
+                    'text-muted-foreground',
+                    'mt-4',
+                    'list-disc',
+                    'space-y-1',
+                    'pl-4',
+                    'text-xs'
+                  )}
+                >
                   {selectedPlanOption.benefits.map((benefit) => (
                     <li key={benefit}>{benefit}</li>
                   ))}
@@ -711,12 +734,12 @@ export function JobForm({
               ) : null}
             </div>
           ) : null}
-          <p className="text-muted-foreground text-xs mt-2">
+          <p className="text-muted-foreground mt-2 text-xs">
             Payment via Polar.sh after submission. Job goes live immediately after payment
             confirmation.
           </p>
 
-          <div className="mt-4 card-base border-orange-500/30 bg-orange-500/5 p-4">
+          <div className="card-base mt-4 border-orange-500/30 bg-orange-500/5 p-4">
             <div className="flex items-start gap-3">
               <Checkbox
                 id={featuredCheckboxId}
@@ -731,9 +754,9 @@ export function JobForm({
                   <Star className="h-4 w-4 text-orange-500" />
                   Make this a Featured Listing
                 </Label>
-                <p className="text-muted-foreground text-xs mt-1">{featuredUpsellDescription}</p>
+                <p className="text-muted-foreground mt-1 text-xs">{featuredUpsellDescription}</p>
                 {featuredUpgradeLabel ? (
-                  <p className="mt-2 text-sm-medium text-orange-600 dark:text-orange-400">
+                  <p className="text-sm-medium mt-2 text-orange-600 dark:text-orange-400">
                     {featuredUpgradeLabel}
                   </p>
                 ) : null}

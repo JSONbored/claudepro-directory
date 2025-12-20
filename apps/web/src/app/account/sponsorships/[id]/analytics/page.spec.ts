@@ -25,7 +25,7 @@ test.describe('Sponsorship Analytics Page', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (navigation handled per test with different IDs)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -42,13 +42,13 @@ test.describe('Sponsorship Analytics Page', () => {
     // Check for sign-in prompt or redirect
     const signInPrompt = page.getByText(/sign in required|please sign in/i);
     const signInButton = page.getByRole('button', { name: /sign in|go to sign in/i });
-    
+
     // Either sign-in prompt should be visible, or we should be redirected
     const hasSignInPrompt = await signInPrompt.isVisible().catch(() => false);
     const hasSignInButton = await signInButton.isVisible().catch(() => false);
     const currentUrl = page.url();
     const isRedirected = currentUrl.includes('/login') || currentUrl.includes('/auth');
-    
+
     // Should have sign-in prompt OR be redirected
     expect(hasSignInPrompt || hasSignInButton || isRedirected).toBe(true);
   });
@@ -58,7 +58,7 @@ test.describe('Sponsorship Analytics Page', () => {
     // The component checks if (!analyticsData) and calls notFound()
     const invalidId = 'non-existent-sponsorship-12345';
     const response = await page.goto(`/account/sponsorships/${invalidId}/analytics`);
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -68,7 +68,7 @@ test.describe('Sponsorship Analytics Page', () => {
     // The component checks if (!sponsorship || !daily_stats || !computed_metrics) and calls notFound()
     const invalidId = 'invalid-sponsorship-id';
     const response = await page.goto(`/account/sponsorships/${invalidId}/analytics`);
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -78,7 +78,7 @@ test.describe('Sponsorship Analytics Page', () => {
     // The component checks if (!sponsorship || !daily_stats || !computed_metrics) and calls notFound()
     const invalidId = 'invalid-sponsorship-id';
     const response = await page.goto(`/account/sponsorships/${invalidId}/analytics`);
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -88,7 +88,7 @@ test.describe('Sponsorship Analytics Page', () => {
     // The component checks if (!sponsorship || !daily_stats || !computed_metrics) and calls notFound()
     const invalidId = 'invalid-sponsorship-id';
     const response = await page.goto(`/account/sponsorships/${invalidId}/analytics`);
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -103,9 +103,15 @@ test.describe('Sponsorship Analytics Page', () => {
 
     // Page should render or show error boundary, but not crash
     const main = page.getByRole('main').or(page.locator('body'));
-    const hasMain = await main.first().isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasMain = await main
+      .first()
+      .isVisible()
+      .catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error boundary, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -123,7 +129,10 @@ test.describe('Sponsorship Analytics Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -140,7 +149,10 @@ test.describe('Sponsorship Analytics Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -157,7 +169,10 @@ test.describe('Sponsorship Analytics Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -174,7 +189,10 @@ test.describe('Sponsorship Analytics Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -191,7 +209,10 @@ test.describe('Sponsorship Analytics Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -208,7 +229,10 @@ test.describe('Sponsorship Analytics Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -247,16 +271,16 @@ test.describe('Sponsorship Analytics Page', () => {
     // The component uses Suspense with Loading fallback
     const testId = 'test-sponsorship-id';
     await page.goto(`/account/sponsorships/${testId}/analytics`);
-    
+
     // Check for loading state (may flash quickly)
     const loading = page.locator('[data-loading], [aria-busy="true"]');
     const hasLoading = await loading.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main').or(page.locator('body'));
     await expect(main.first()).toBeVisible();
   });
@@ -274,7 +298,10 @@ test.describe('Sponsorship Analytics Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -291,7 +318,10 @@ test.describe('Sponsorship Analytics Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -308,7 +338,10 @@ test.describe('Sponsorship Analytics Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -325,7 +358,10 @@ test.describe('Sponsorship Analytics Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -342,7 +378,10 @@ test.describe('Sponsorship Analytics Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 

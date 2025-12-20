@@ -56,7 +56,13 @@ export function SignInButton({
   }, [openAuthModal, valueProposition, redirectTo, pathname]);
 
   return (
-    <Button onClick={handleClick} className={className} variant={variant} size={size} {...buttonProps}>
+    <Button
+      onClick={handleClick}
+      className={className}
+      variant={variant}
+      size={size}
+      {...buttonProps}
+    >
       {children}
     </Button>
   );

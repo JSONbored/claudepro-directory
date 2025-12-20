@@ -201,7 +201,18 @@
           "enable": true,
           "mode": "all"
         },
-        "validate": ["typescript", "typescriptreact", "javascript", "javascriptreact", "html", "css", "json", "jsonc", "markdown", "yaml"],
+        "validate": [
+          "typescript",
+          "typescriptreact",
+          "javascript",
+          "javascriptreact",
+          "html",
+          "css",
+          "json",
+          "jsonc",
+          "markdown",
+          "yaml"
+        ],
         "run": "onType"
       }
     },

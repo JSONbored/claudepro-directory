@@ -12,7 +12,6 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execFileSync } from 'node:child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,7 +26,10 @@ if (!existsSync(join(PROJECT_ROOT, 'apps/web'))) {
 }
 
 const OPENAPI_JSON_PATH = join(PROJECT_ROOT, 'openapi.json');
-const OUTPUT_PATH = join(PROJECT_ROOT, 'packages/database-types/src/api-client/client.generated.ts');
+const OUTPUT_PATH = join(
+  PROJECT_ROOT,
+  'packages/database-types/src/api-client/client.generated.ts'
+);
 
 /**
  * Generate TypeScript client from OpenAPI spec
@@ -35,9 +37,7 @@ const OUTPUT_PATH = join(PROJECT_ROOT, 'packages/database-types/src/api-client/c
 export async function generateApiClient(): Promise<void> {
   // Verify openapi.json exists
   if (!existsSync(OPENAPI_JSON_PATH)) {
-    console.warn(
-      `⚠️  OpenAPI spec not found at ${OPENAPI_JSON_PATH}. Generating it now...`
-    );
+    console.warn(`⚠️  OpenAPI spec not found at ${OPENAPI_JSON_PATH}. Generating it now...`);
     // Try to generate OpenAPI spec first
     try {
       const { execSync } = await import('node:child_process');
@@ -61,7 +61,7 @@ export async function generateApiClient(): Promise<void> {
     // The CLI generates a client with Zod validation using zodios
     // Use spawn with proper argument array to handle paths with spaces
     const { spawnSync } = await import('node:child_process');
-    
+
     const args = [
       'openapi-zod-client',
       OPENAPI_JSON_PATH,
@@ -73,7 +73,7 @@ export async function generateApiClient(): Promise<void> {
       '--base-url',
       '/api/v1',
     ];
-    
+
     const result = spawnSync('npx', args, {
       cwd: PROJECT_ROOT,
       stdio: 'inherit',
@@ -83,18 +83,18 @@ export async function generateApiClient(): Promise<void> {
       },
       shell: false, // Don't use shell - pass args directly
     });
-    
+
     if (result.error) {
       throw result.error;
     }
-    
+
     if (result.status !== 0) {
       throw new Error(`openapi-zod-client exited with code ${result.status}`);
     }
 
     // Read generated file and fix issues
     let generatedContent = readFileSync(OUTPUT_PATH, 'utf-8');
-    
+
     // Fix: openapi-zod-client doesn't escape quotes in .describe() calls
     // Pattern: .describe("text with "quotes" inside")
     // TypeScript needs: .describe("text with \"quotes\" inside")
@@ -107,14 +107,14 @@ export async function generateApiClient(): Promise<void> {
         fixedContent += generatedContent.substring(i);
         break;
       }
-      
+
       // Add everything before the .describe("
       fixedContent += generatedContent.substring(i, describeStart + '.describe("'.length);
-      
+
       // Find the closing ")" by looking for quote followed by )
       let j = describeStart + '.describe("'.length;
       const descriptionStart = j;
-      
+
       while (j < generatedContent.length) {
         if (generatedContent[j] === '"' && generatedContent[j + 1] === ')') {
           // Found closing quote - escape all quotes in the description
@@ -126,24 +126,21 @@ export async function generateApiClient(): Promise<void> {
         }
         j++;
       }
-      
+
       i = j;
     }
-    
+
     generatedContent = fixedContent;
-    
+
     // Fix: openapi-zod-client generates z.record() with only 1 argument (value schema)
     // Zod requires 2 arguments: key schema and value schema
     // Pattern: z.record(z.array(z.string()))
     // Fix: z.record(z.string(), z.array(z.string()))
-    generatedContent = generatedContent.replace(
-      /z\.record\(([^,)]+)\)/g,
-      (match, valueSchema) => {
-        // Add default key schema (z.string()) when only value schema is provided
-        return `z.record(z.string(), ${valueSchema})`;
-      }
-    );
-    
+    generatedContent = generatedContent.replace(/z\.record\(([^,)]+)\)/g, (_match, valueSchema) => {
+      // Add default key schema (z.string()) when only value schema is provided
+      return `z.record(z.string(), ${valueSchema})`;
+    });
+
     // Add header comment
     const header = `/**
  * Generated API Client
@@ -164,7 +161,7 @@ export async function generateApiClient(): Promise<void> {
     if (!generatedContent.includes('@generated')) {
       generatedContent = header + generatedContent;
     }
-    
+
     // Write the fixed content
     writeFileSync(OUTPUT_PATH, generatedContent, 'utf-8');
 

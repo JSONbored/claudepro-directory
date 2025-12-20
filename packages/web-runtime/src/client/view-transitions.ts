@@ -144,7 +144,6 @@ export function navigateWithTransition(
   }
 }
 
-
 /**
  * Apply view transition name to element
  *

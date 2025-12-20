@@ -2,23 +2,23 @@
 
 /**
  * Magnetic Component
- * 
+ *
  * A component that creates a magnetic attraction effect when the mouse cursor approaches.
  * Perfect for buttons, cards, and interactive elements that need extra engagement.
- * 
+ *
  * @example
  * ```tsx
  * <Magnetic strength={0.5} range={120}>
  *   <Button>Hover me!</Button>
  * </Magnetic>
  * ```
- * 
+ *
  * **When to use:**
  * - CTA buttons: Make important buttons more engaging
  * - Interactive cards: Add playful hover effects
  * - Navigation elements: Enhance interactivity
  * - Hero sections: Eye-catching elements
- * 
+ *
  * **Key features:**
  * - Smooth spring-based animation
  * - Configurable strength and range
@@ -37,7 +37,7 @@ import {
 } from 'motion/react';
 import { useMediaQuery } from '@heyclaude/web-runtime/hooks/use-media-query';
 import { useIsClient } from '@heyclaude/web-runtime/hooks/use-is-client';
- 
+
 type MagneticProps = {
   children: React.ReactElement;
   strength?: number;
@@ -46,7 +46,7 @@ type MagneticProps = {
   onlyOnHover?: boolean;
   disableOnTouch?: boolean;
 } & HTMLMotionProps<'div'>;
- 
+
 function Magnetic({
   ref,
   children,
@@ -63,20 +63,27 @@ function Magnetic({
 }: MagneticProps) {
   const localRef = React.useRef<HTMLDivElement>(null);
   React.useImperativeHandle(ref as any, () => localRef.current as HTMLDivElement);
-  
+
   // Use useMediaQuery for touch device detection (replaces window.matchMedia)
   const isTouchDevice = useMediaQuery('(pointer:coarse)');
   const isClient = useIsClient();
- 
+
   const [active, setActive] = React.useState(!onlyOnHover);
- 
+
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
   const x = useSpring(rawX, springOptions);
   const y = useSpring(rawY, springOptions);
- 
+
   // Cache element bounds to avoid forced reflows
-  const boundsRef = React.useRef<{ left: number; top: number; width: number; height: number; cx: number; cy: number } | null>(null);
+  const boundsRef = React.useRef<{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    cx: number;
+    cy: number;
+  } | null>(null);
   const updateBoundsRef = React.useCallback(() => {
     if (!localRef.current) {
       boundsRef.current = null;
@@ -96,18 +103,18 @@ function Magnetic({
   // Update bounds on mount and resize (batched via ResizeObserver)
   React.useEffect(() => {
     if (!isClient || (disableOnTouch && isTouchDevice)) return;
-    
+
     updateBoundsRef();
-    
+
     const resizeObserver = new ResizeObserver(() => {
       // Batch bounds updates to avoid forced reflows
       requestAnimationFrame(updateBoundsRef);
     });
-    
+
     if (localRef.current) {
       resizeObserver.observe(localRef.current);
     }
-    
+
     return () => {
       resizeObserver.disconnect();
     };
@@ -119,7 +126,7 @@ function Magnetic({
         updateBoundsRef();
         if (!boundsRef.current) return;
       }
-      
+
       const { cx, cy } = boundsRef.current;
       const dx = e.clientX - cx;
       const dy = e.clientY - cy;
@@ -134,16 +141,16 @@ function Magnetic({
         rawY.set(0);
       }
     },
-    [active, onlyOnHover, range, strength, rawX, rawY, updateBoundsRef],
+    [active, onlyOnHover, range, strength, rawX, rawY, updateBoundsRef]
   );
- 
+
   React.useEffect(() => {
     if (!isClient || (disableOnTouch && isTouchDevice)) return;
     const handle = (e: MouseEvent) => compute(e);
     window.addEventListener('mousemove', handle);
     return () => window.removeEventListener('mousemove', handle);
   }, [compute, disableOnTouch, isTouchDevice, isClient]);
- 
+
   return (
     <motion.div
       ref={localRef}
@@ -175,5 +182,5 @@ function Magnetic({
     </motion.div>
   );
 }
- 
+
 export { Magnetic, type MagneticProps };

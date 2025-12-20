@@ -5,10 +5,8 @@ import { runGenerateChangelog } from '../commands/changelog.ts';
 import { logger } from '../toolkit/logger.ts';
 
 runGenerateChangelog().catch((error) => {
-  logger.error(
-    '❌ Unhandled error in main',
-    normalizeError(error, 'Changelog generation failed'),
-    { command: 'changelog' }
-  );
+  logger.error('❌ Unhandled error in main', normalizeError(error, 'Changelog generation failed'), {
+    command: 'changelog',
+  });
   process.exit(1);
 });

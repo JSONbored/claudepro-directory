@@ -39,7 +39,7 @@
  * using the database's build_breadcrumb_json_ld RPC function
  */
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import Link from 'next/link';
@@ -111,7 +111,7 @@ function generateBreadcrumbs(
     // Default: use category config if segment is a valid category, otherwise format the segment
     else {
       const label = isValidCategory(segment)
-        ? getCategoryConfig(segment as content_category)?.typeName ?? formatSegmentLabel(segment)
+        ? (getCategoryConfig(segment as content_category)?.typeName ?? formatSegmentLabel(segment))
         : formatSegmentLabel(segment);
       items.push({ label, href: currentPath });
     }
@@ -183,13 +183,13 @@ export function Breadcrumbs({
 
               {/* Ellipsis (non-interactive) */}
               {isEllipsis ? (
-                <span className="px-1 text-muted-foreground/30" aria-hidden="true">
+                <span className="text-muted-foreground/30 px-1" aria-hidden="true">
                   …
                 </span>
               ) : isLast ? (
                 /* Current page (non-interactive) */
                 <span
-                  className="max-w-[200px] truncate font-medium text-foreground/70"
+                  className="text-foreground/70 max-w-[200px] truncate font-medium"
                   aria-current="page"
                 >
                   {item.label}
@@ -199,8 +199,8 @@ export function Breadcrumbs({
                 <Link
                   href={item.href}
                   className={cn(
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                    'rounded-sm text-muted-foreground/50 transition-colors hover:text-foreground/80'
+                    'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                    'text-muted-foreground/50 hover:text-foreground/80 rounded-sm transition-colors'
                   )}
                 >
                   {item.label}

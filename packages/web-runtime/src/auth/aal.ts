@@ -60,12 +60,13 @@ export const AAL_RLS_CHECK = {
    * SQL snippet to check for AAL2 in RLS policy
    */
   AAL2_ONLY: "(select auth.jwt()->>'aal') = 'aal2'",
-  
+
   /**
    * SQL snippet to check for AAL1 or AAL2 (any authenticated user)
    */
-  AAL1_OR_AAL2: "(select auth.jwt()->>'aal') IN ('aal1', 'aal2') OR (select auth.jwt()->>'aal') IS NULL",
-  
+  AAL1_OR_AAL2:
+    "(select auth.jwt()->>'aal') IN ('aal1', 'aal2') OR (select auth.jwt()->>'aal') IS NULL",
+
   /**
    * SQL snippet to check if user has enrolled MFA factors
    * Use this for "enforce only for users that have opted-in" policy
@@ -81,7 +82,7 @@ export const AAL_RLS_CHECK = {
       where ((select auth.uid()) = user_id) and status = 'verified'
     )
   `,
-  
+
   /**
    * SQL snippet to enforce AAL2 for new users only
    * Replace '2022-12-12T00:00:00Z' with your cutoff date

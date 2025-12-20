@@ -18,9 +18,7 @@ import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 
 export interface DetailMetadataProps {
   copyCount?: number | undefined;
-  item:
-    | ContentItem
-    | (ContentItem & GetContentDetailCompleteReturns['content']);
+  item: ContentItem | (ContentItem & GetContentDetailCompleteReturns['content']);
   viewCount?: number | undefined;
 }
 
@@ -56,9 +54,7 @@ const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
  * @see SOCIAL_LINK_SNAPSHOT
  */
 function getSafeAuthorProfileHref(
-  item:
-    | ContentItem
-    | (ContentItem & GetContentDetailCompleteReturns['content'])
+  item: ContentItem | (ContentItem & GetContentDetailCompleteReturns['content'])
 ): string {
   // Cast item to handle both ContentItem and RPC return types
   // Type narrowing: item is ContentItem or compatible, extend with additional properties
@@ -205,7 +201,7 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
     <div className="container mx-auto px-4">
       {/* Author, Date & View Count Metadata */}
       {hasMetadata ? (
-        <div className="text-muted-foreground text-sm mb-4 flex flex-wrap gap-3">
+        <div className="text-muted-foreground mb-4 flex flex-wrap gap-3 text-sm">
           {'author' in item && item.author
             ? (() => {
                 // Get safe author profile URL - this function validates and sanitizes the URL
@@ -266,7 +262,7 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
       {/* Tags */}
       {hasTags && tags.length > 0 ? (
         <div className="flex flex-wrap gap-2">
-          <Tag className="h-4 w-4 text-muted-foreground" />
+          <Tag className="text-muted-foreground h-4 w-4" />
           {tags.map((tag) => (
             <UnifiedBadge key={tag} variant="base" style="outline" className="text-xs">
               {tag}

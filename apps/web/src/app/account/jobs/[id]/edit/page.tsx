@@ -3,8 +3,10 @@
  * Uses updateJob server action (calls update_job RPC)
  */
 
-import { JobCategory, JobType } from '@heyclaude/data-layer/prisma';
-import { type job_category, type job_type, type jobsModel } from '@heyclaude/data-layer/prisma';
+import { Prisma, job_type as JobType, job_category as JobCategory } from '@prisma/client';
+import type { job_type, job_category } from '@prisma/client';
+
+type jobsModel = Prisma.jobsGetPayload<{}>;
 import { type CreateJobInput, updateJob } from '@heyclaude/web-runtime/actions/jobs-crud';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserJobById } from '@heyclaude/web-runtime/data/account';

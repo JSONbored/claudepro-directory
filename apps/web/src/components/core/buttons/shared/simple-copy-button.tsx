@@ -88,11 +88,14 @@ export function SimpleCopyButton({
   }, [content, label]);
 
   // Use useTimeout for automatic reset
-  useTimeout(() => {
-    if (copied) {
-      setCopiedFalse();
-    }
-  }, copied ? resetDelay : null);
+  useTimeout(
+    () => {
+      if (copied) {
+        setCopiedFalse();
+      }
+    },
+    copied ? resetDelay : null
+  );
 
   const handleCopy = async (event?: React.MouseEvent) => {
     event?.stopPropagation(); // Prevent parent click handlers
@@ -104,20 +107,15 @@ export function SimpleCopyButton({
       onCopySuccess?.();
     } catch (error) {
       const normalizedError = normalizeError(error, 'Copy operation failed');
-      logClientWarn(
-        '[Clipboard] Copy failed',
-        normalizedError,
-        'SimpleCopyButton.handleCopy',
-        {
-          component: 'SimpleCopyButton',
-          action: 'copy',
-          category: 'clipboard',
-          recoverable: true,
-          userRetryable: true,
-          hasContent: Boolean(content),
-          label: label ?? 'unnamed',
-        }
-      );
+      logClientWarn('[Clipboard] Copy failed', normalizedError, 'SimpleCopyButton.handleCopy', {
+        component: 'SimpleCopyButton',
+        action: 'copy',
+        category: 'clipboard',
+        recoverable: true,
+        userRetryable: true,
+        hasContent: Boolean(content),
+        label: label ?? 'unnamed',
+      });
       // Show error toast with "Retry" button
       toasts.raw.error(errorMessage, {
         action: {
@@ -141,7 +139,10 @@ export function SimpleCopyButton({
     >
       {showIcon ? (
         copied ? (
-          <Check className={`${iconClassName} text-color-social-copy-text-dark`} aria-hidden="true" />
+          <Check
+            className={`${iconClassName} text-color-social-copy-text-dark`}
+            aria-hidden="true"
+          />
         ) : (
           <Copy className={iconClassName} aria-hidden="true" />
         )

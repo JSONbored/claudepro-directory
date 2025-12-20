@@ -1,14 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { PrismockClient } from 'prismock';
 import { NewsletterService } from './newsletter.ts';
+import { prisma } from '../prisma/client.ts';
+import type { PrismaClient } from '@prisma/client';
 
-// Mock the prisma singleton with Prismock (async to avoid Node.js TS processing issue)
-vi.mock('../prisma/client.ts', async () => {
-  const { setupPrismockMockAsync } = await import('../test-utils/prisma-mock.ts');
-  return {
-    prisma: await setupPrismockMockAsync(),
-  };
-});
+// Prismock is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from '../prisma/client.ts' will automatically use PrismockClient
 
 // Mock the RPC error logging utility
 vi.mock('../utils/rpc-error-logging.ts', () => ({
@@ -22,33 +18,58 @@ vi.mock('../utils/request-cache.ts', () => ({
 
 describe('NewsletterService', () => {
   let newsletterService: NewsletterService;
-  let prismock: PrismockClient;
+  let prismock: PrismaClient;
+  let queryRawUnsafeSpy: ReturnType<typeof vi.fn>;
+
+  /**
+   * Helper to safely mock Prismock model methods
+   */
+  function mockPrismockMethod<T>(
+    model: any,
+    method: string,
+    returnValue: T
+  ): ReturnType<typeof vi.fn> {
+    if (!model) {
+      throw new Error(`Prismock model does not exist - check if model name matches schema.prisma`);
+    }
+    const mockFn = vi.fn().mockResolvedValue(returnValue as any);
+    model[method] = mockFn;
+    return mockFn;
+  }
 
   beforeEach(async () => {
-    // Get the mocked prisma instance (Prismock)
-    const { prisma } = await import('../prisma/client.ts');
-    prismock = prisma as PrismockClient;
-    
+    // Get the prisma instance (automatically PrismockClient via __mocks__/@prisma/client.ts)
+    prismock = prisma;
+
     // Reset Prismock data before each test
-    prismock.reset();
-    
+    if ('reset' in prismock && typeof prismock.reset === 'function') {
+      prismock.reset();
+    }
+
+    // Prismock doesn't support $queryRawUnsafe, so we add it as a mock function
+    queryRawUnsafeSpy = vi.fn().mockResolvedValue([]);
+    (prismock as any).$queryRawUnsafe = queryRawUnsafeSpy;
+
+    // Ensure Prismock models are initialized
+    void prismock.newsletter_subscriptions;
+
     newsletterService = new NewsletterService();
   });
 
   describe('subscribeNewsletter', () => {
     it('should successfully subscribe with valid args', async () => {
       const mockData = { success: true, subscription_id: 'sub_123', was_resubscribed: false };
-      const args = { 
+      const args = {
         p_email: 'test@example.com',
-        p_copy_category: 'agents' as const, 
-        p_copy_slug: 'test-agent' 
+        p_copy_category: 'agents' as const,
+        p_copy_slug: 'test-agent',
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await newsletterService.subscribeNewsletter(args);
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('subscribe_newsletter'),
         'test@example.com',
         'agents',
@@ -59,21 +80,23 @@ describe('NewsletterService', () => {
 
     it('should handle duplicate subscription gracefully', async () => {
       const mockError = new Error('Email already subscribed');
-      const args = { 
+      const args = {
         p_email: 'test@example.com',
-        p_copy_category: 'agents' as const 
+        p_copy_category: 'agents' as const,
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
+      queryRawUnsafeSpy.mockRejectedValue(mockError);
 
-      await expect(newsletterService.subscribeNewsletter(args)).rejects.toThrow('Email already subscribed');
+      await expect(newsletterService.subscribeNewsletter(args)).rejects.toThrow(
+        'Email already subscribed'
+      );
     });
 
     it('should handle RPC errors', async () => {
       const mockError = new Error('Invalid request');
       const args = { p_email: 'test@example.com' };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
+      queryRawUnsafeSpy.mockRejectedValue(mockError);
 
       await expect(newsletterService.subscribeNewsletter(args)).rejects.toThrow('Invalid request');
     });
@@ -81,7 +104,7 @@ describe('NewsletterService', () => {
 
   describe('getNewsletterSubscriberCount', () => {
     it('should return subscriber count', async () => {
-      vi.mocked(prismock.newsletter_subscriptions.count).mockResolvedValue(42);
+      mockPrismockMethod(prismock.newsletter_subscriptions, 'count', 42);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -99,7 +122,7 @@ describe('NewsletterService', () => {
     });
 
     it('should return 0 when no subscribers', async () => {
-      vi.mocked(prismock.newsletter_subscriptions.count).mockResolvedValue(0);
+      mockPrismockMethod(prismock.newsletter_subscriptions, 'count', 0);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -117,9 +140,7 @@ describe('NewsletterService', () => {
         { email: 'user3@example.com' },
       ];
 
-      vi.mocked(prismock.newsletter_subscriptions.findMany).mockResolvedValue(
-        mockSubscribers as any
-      );
+      mockPrismockMethod(prismock.newsletter_subscriptions, 'findMany', mockSubscribers);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -147,9 +168,7 @@ describe('NewsletterService', () => {
         status: 'active',
       };
 
-      vi.mocked(prismock.newsletter_subscriptions.findUnique).mockResolvedValue(
-        mockSubscription as any
-      );
+      mockPrismockMethod(prismock.newsletter_subscriptions, 'findUnique', mockSubscription);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -163,7 +182,7 @@ describe('NewsletterService', () => {
     });
 
     it('should return null for non-existent subscription', async () => {
-      vi.mocked(prismock.newsletter_subscriptions.findUnique).mockResolvedValue(null);
+      mockPrismockMethod(prismock.newsletter_subscriptions, 'findUnique', null);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -177,9 +196,7 @@ describe('NewsletterService', () => {
     it('should return subscription status by email', async () => {
       const mockSubscription = { status: 'active' };
 
-      vi.mocked(prismock.newsletter_subscriptions.findUnique).mockResolvedValue(
-        mockSubscription as any
-      );
+      mockPrismockMethod(prismock.newsletter_subscriptions, 'findUnique', mockSubscription);
 
       const result = await newsletterService.getSubscriptionStatusByEmail('test@example.com');
 
@@ -191,9 +208,10 @@ describe('NewsletterService', () => {
     });
 
     it('should return null for non-existent email', async () => {
-      vi.mocked(prismock.newsletter_subscriptions.findUnique).mockResolvedValue(null);
+      mockPrismockMethod(prismock.newsletter_subscriptions, 'findUnique', null);
 
-      const result = await newsletterService.getSubscriptionStatusByEmail('nonexistent@example.com');
+      const result =
+        await newsletterService.getSubscriptionStatusByEmail('nonexistent@example.com');
       expect(result).toBeNull();
     });
   });
@@ -202,9 +220,7 @@ describe('NewsletterService', () => {
     it('should return engagement score by email', async () => {
       const mockSubscription = { engagement_score: 0.85 };
 
-      vi.mocked(prismock.newsletter_subscriptions.findUnique).mockResolvedValue(
-        mockSubscription as any
-      );
+      mockPrismockMethod(prismock.newsletter_subscriptions, 'findUnique', mockSubscription);
 
       const result = await newsletterService.getSubscriptionEngagementScore('test@example.com');
 
@@ -218,7 +234,7 @@ describe('NewsletterService', () => {
 
   describe('updateLastEmailSentAt', () => {
     it('should update last email sent timestamp', async () => {
-      vi.mocked(prismock.newsletter_subscriptions.update).mockResolvedValue({} as any);
+      mockPrismockMethod(prismock.newsletter_subscriptions, 'update', {});
 
       await newsletterService.updateLastEmailSentAt('test@example.com');
 
@@ -226,6 +242,7 @@ describe('NewsletterService', () => {
         where: { email: 'test@example.com' },
         data: {
           last_email_sent_at: expect.any(Date),
+          updated_at: expect.any(Date),
         },
       });
     });
@@ -234,11 +251,11 @@ describe('NewsletterService', () => {
       const { logRpcError } = await import('../utils/rpc-error-logging.ts');
       const mockError = new Error('Update failed');
 
-      vi.mocked(prismock.newsletter_subscriptions.update).mockRejectedValue(mockError);
+      mockPrismockMethod(prismock.newsletter_subscriptions, 'update', Promise.reject(mockError));
 
-      await expect(
-        newsletterService.updateLastEmailSentAt('test@example.com')
-      ).rejects.toThrow('Update failed');
+      await expect(newsletterService.updateLastEmailSentAt('test@example.com')).rejects.toThrow(
+        'Update failed'
+      );
 
       expect(logRpcError).toHaveBeenCalledWith(mockError, {
         rpcName: 'newsletter_subscriptions.update',
@@ -250,7 +267,7 @@ describe('NewsletterService', () => {
 
   describe('updateLastActiveAt', () => {
     it('should update last active timestamp', async () => {
-      vi.mocked(prismock.newsletter_subscriptions.update).mockResolvedValue({} as any);
+      mockPrismockMethod(prismock.newsletter_subscriptions, 'update', {});
 
       await newsletterService.updateLastActiveAt('test@example.com');
 
@@ -258,6 +275,7 @@ describe('NewsletterService', () => {
         where: { email: 'test@example.com' },
         data: {
           last_active_at: expect.any(Date),
+          updated_at: expect.any(Date),
         },
       });
     });
@@ -265,7 +283,7 @@ describe('NewsletterService', () => {
 
   describe('updateSubscriptionStatus', () => {
     it('should update subscription status', async () => {
-      vi.mocked(prismock.newsletter_subscriptions.update).mockResolvedValue({} as any);
+      mockPrismockMethod(prismock.newsletter_subscriptions, 'update', {});
 
       await newsletterService.updateSubscriptionStatus('test@example.com', 'unsubscribed');
 
@@ -280,7 +298,7 @@ describe('NewsletterService', () => {
 
   describe('updateEngagementScore', () => {
     it('should update engagement score', async () => {
-      vi.mocked(prismock.newsletter_subscriptions.update).mockResolvedValue({} as any);
+      mockPrismockMethod(prismock.newsletter_subscriptions, 'update', {});
 
       await newsletterService.updateEngagementScore('test@example.com', 0.9);
 
@@ -296,16 +314,14 @@ describe('NewsletterService', () => {
 
   describe('unsubscribeWithTimestamp', () => {
     it('should unsubscribe and update timestamp', async () => {
-      vi.mocked(prismock.newsletter_subscriptions.update)
-        .mockResolvedValueOnce({} as any)
-        .mockResolvedValueOnce({} as any);
+      mockPrismockMethod(prismock.newsletter_subscriptions, 'update', {});
 
       await newsletterService.unsubscribeWithTimestamp('test@example.com');
 
-      expect(prismock.newsletter_subscriptions.update).toHaveBeenCalledTimes(2);
-      expect(prismock.newsletter_subscriptions.update).toHaveBeenNthCalledWith(1, {
+      expect(prismock.newsletter_subscriptions.update).toHaveBeenCalledWith({
         where: { email: 'test@example.com' },
         data: {
+          status: 'unsubscribed',
           unsubscribed_at: expect.any(Date),
           updated_at: expect.any(Date),
         },
@@ -315,9 +331,11 @@ describe('NewsletterService', () => {
 
   describe('edge cases', () => {
     it('should handle database timeout', async () => {
-      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(new Error('Query timeout'));
+      queryRawUnsafeSpy.mockRejectedValue(new Error('Query timeout'));
 
-      await expect(newsletterService.subscribeNewsletter({ p_email: 'test@example.com' })).rejects.toThrow('Query timeout');
+      await expect(
+        newsletterService.subscribeNewsletter({ p_email: 'test@example.com' })
+      ).rejects.toThrow('Query timeout');
     });
   });
 });

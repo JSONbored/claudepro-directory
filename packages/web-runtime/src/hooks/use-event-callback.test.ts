@@ -38,10 +38,9 @@ describe('useEventCallback', () => {
     const fn1 = vi.fn(() => 'first');
     const fn2 = vi.fn(() => 'second');
 
-    const { result, rerender } = renderHook(
-      ({ fn }) => useEventCallback(fn),
-      { initialProps: { fn: fn1 } }
-    );
+    const { result, rerender } = renderHook(({ fn }) => useEventCallback(fn), {
+      initialProps: { fn: fn1 },
+    });
 
     act(() => {
       result.current();

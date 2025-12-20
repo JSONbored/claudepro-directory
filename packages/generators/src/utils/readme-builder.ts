@@ -27,9 +27,7 @@ const ICON_EMOJI_MAP: Record<string, string> = {
  * @example
  * // const md = buildReadmeMarkdown(rpcResult);
  */
-export function buildReadmeMarkdown(
-  data: GenerateReadmeDataReturns
-): string {
+export function buildReadmeMarkdown(data: GenerateReadmeDataReturns): string {
   // Composite type fields are snake_case as defined in the database
   // Supabase RPC returns them as snake_case in JSON
   const categories = data.categories ?? [];
@@ -44,9 +42,10 @@ export function buildReadmeMarkdown(
 
       const emoji = ICON_EMOJI_MAP[cat.icon_name ?? ''] ?? '📄';
       // Pluralize category name (handles consonant+y -> ies, but not vowel+y)
-      const categoryName = cat.title.endsWith('y') && !/[aeiou]y$/i.test(cat.title)
-        ? `${cat.title.slice(0, -1)}ies`
-        : `${cat.title}s`;
+      const categoryName =
+        cat.title.endsWith('y') && !/[aeiou]y$/i.test(cat.title)
+          ? `${cat.title.slice(0, -1)}ies`
+          : `${cat.title}s`;
 
       let section = `## ${emoji} ${categoryName} (${cat.items.length})\n\n`;
       section += `${cat.description ?? ''}\n\n`;

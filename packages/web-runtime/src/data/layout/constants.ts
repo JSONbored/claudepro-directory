@@ -1,4 +1,6 @@
-import { type announcementsModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type announcementsModel = Prisma.announcementsGetPayload<{}>;
 
 /**
  * Layout data interface

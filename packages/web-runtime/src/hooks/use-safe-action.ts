@@ -48,10 +48,7 @@ export interface SafeActionCallbacks<TInput, TData> {
     error: { serverError?: string; validationErrors?: unknown };
     input: TInput;
   }) => void;
-  onSettled?: (args: {
-    result: { data?: TData; serverError?: string };
-    input: TInput;
-  }) => void;
+  onSettled?: (args: { result: { data?: TData; serverError?: string }; input: TInput }) => void;
   onExecute?: (args: { input: TInput }) => void;
 }
 

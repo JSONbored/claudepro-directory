@@ -27,7 +27,7 @@ test.describe('OAuth Link Callback Page', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (navigation handled per test with different providers)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -51,9 +51,12 @@ test.describe('OAuth Link Callback Page', () => {
     // Should show error message
     const errorMessage = page.getByText(/invalid oauth provider|account linking failed/i);
     const hasErrorMessage = await errorMessage.isVisible().catch(() => false);
-    
+
     // Should either show error or redirect, but not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 
@@ -70,7 +73,7 @@ test.describe('OAuth Link Callback Page', () => {
     const isRedirected = currentUrl.includes('/login');
     const errorMessage = page.getByText(/you must be signed in|redirecting to login/i);
     const hasErrorMessage = await errorMessage.isVisible().catch(() => false);
-    
+
     // Should either redirect or show error message
     expect(isRedirected || hasErrorMessage).toBe(true);
   });
@@ -86,8 +89,11 @@ test.describe('OAuth Link Callback Page', () => {
     // Should show error message or redirect, but not crash
     const errorMessage = page.getByText(/failed to link account|account linking failed/i);
     const hasErrorMessage = await errorMessage.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either show error message or redirect, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -103,8 +109,11 @@ test.describe('OAuth Link Callback Page', () => {
     // Should show error message or redirect, but not crash
     const errorMessage = page.getByText(/unexpected response|account linking failed/i);
     const hasErrorMessage = await errorMessage.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either show error message or redirect, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -120,7 +129,10 @@ test.describe('OAuth Link Callback Page', () => {
 
     // Should use safe default '/account/connected-accounts' instead of invalid next
     // Page should render or redirect, but not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 
@@ -133,7 +145,10 @@ test.describe('OAuth Link Callback Page', () => {
     await page.waitForTimeout(2000);
 
     // Page should render or redirect, but not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 
@@ -146,7 +161,10 @@ test.describe('OAuth Link Callback Page', () => {
     await page.waitForTimeout(2000);
 
     // Page should render or redirect, but not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 
@@ -160,7 +178,10 @@ test.describe('OAuth Link Callback Page', () => {
     await page.waitForTimeout(2000);
 
     // Should show error message or redirect, but not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 
@@ -175,8 +196,11 @@ test.describe('OAuth Link Callback Page', () => {
     // Should show error message or redirect, but not crash
     const errorMessage = page.getByText(/unexpected error|account linking failed/i);
     const hasErrorMessage = await errorMessage.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either show error message or redirect, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -186,16 +210,16 @@ test.describe('OAuth Link Callback Page', () => {
     // The component starts with status='loading'
     const validProvider = 'github';
     await page.goto(`/auth/link/${validProvider}/callback`);
-    
+
     // Check for loading state (may flash quickly)
     const loadingCard = page.getByText(/linking account|please wait/i);
     const hasLoadingCard = await loadingCard.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load or show error
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     // Should either show loading, error, or redirect
     const body = page.locator('body');
     await expect(body).toBeVisible();
@@ -210,7 +234,10 @@ test.describe('OAuth Link Callback Page', () => {
     await page.waitForTimeout(2000);
 
     // Page should render or redirect, but not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 
@@ -223,7 +250,10 @@ test.describe('OAuth Link Callback Page', () => {
     await page.waitForTimeout(2000);
 
     // Page should render or redirect, but not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 
@@ -236,7 +266,10 @@ test.describe('OAuth Link Callback Page', () => {
     await page.waitForTimeout(2000);
 
     // Page should render or redirect, but not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 
@@ -249,7 +282,10 @@ test.describe('OAuth Link Callback Page', () => {
     await page.waitForTimeout(2000);
 
     // Page should render or redirect, but not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 
@@ -262,7 +298,10 @@ test.describe('OAuth Link Callback Page', () => {
     await page.waitForTimeout(2000);
 
     // Page should render or redirect, but not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 
@@ -275,7 +314,10 @@ test.describe('OAuth Link Callback Page', () => {
     await page.waitForTimeout(2000);
 
     // Page should render or redirect, but not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 
@@ -292,7 +334,7 @@ test.describe('OAuth Link Callback Page', () => {
     const isRedirected = currentUrl.includes('/login');
     const errorMessage = page.getByText(/account linking failed/i);
     const hasErrorMessage = await errorMessage.isVisible().catch(() => false);
-    
+
     // Should either redirect or show error
     expect(isRedirected || hasErrorMessage).toBe(true);
   });
@@ -306,7 +348,10 @@ test.describe('OAuth Link Callback Page', () => {
     await page.waitForTimeout(2000);
 
     // Page should render or redirect, but not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 
@@ -320,7 +365,10 @@ test.describe('OAuth Link Callback Page', () => {
     await page.waitForTimeout(2000);
 
     // Page should render or redirect, but not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 

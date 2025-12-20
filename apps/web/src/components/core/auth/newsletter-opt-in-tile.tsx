@@ -67,11 +67,11 @@ export function NewsletterOptInTile({
       whileHover={shouldReduceMotion ? {} : { scale: 1.01 }}
       whileTap={shouldReduceMotion ? {} : { scale: 0.99 }}
       className={cn(
-        'group relative w-full overflow-hidden rounded-2xl border p-6 text-left transition-all duration-300 cursor-pointer',
+        'group relative w-full cursor-pointer overflow-hidden rounded-2xl border p-6 text-left transition-all duration-300',
         'from-card/80 via-card/60 to-card/30 bg-linear-to-br backdrop-blur-xl',
         checked
           ? 'border-accent/70 shadow-shadow-glow-orange-large'
-          : 'hover:border-accent/40 border-white/10 hover:shadow-shadow-glow-orange-large-hover'
+          : 'hover:border-accent/40 hover:shadow-shadow-glow-orange-large-hover border-white/10'
       )}
     >
       <div className="flex flex-col gap-6">

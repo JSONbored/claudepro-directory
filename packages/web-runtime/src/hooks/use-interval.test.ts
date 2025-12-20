@@ -37,10 +37,9 @@ describe('useInterval', () => {
     const callback1 = vi.fn();
     const callback2 = vi.fn();
 
-    const { rerender } = renderHook(
-      ({ callback }) => useInterval(callback, 1000),
-      { initialProps: { callback: callback1 } }
-    );
+    const { rerender } = renderHook(({ callback }) => useInterval(callback, 1000), {
+      initialProps: { callback: callback1 },
+    });
 
     vi.advanceTimersByTime(1000);
     expect(callback1).toHaveBeenCalledTimes(1);
@@ -55,10 +54,9 @@ describe('useInterval', () => {
   it('should restart interval when delay changes', () => {
     const callback = vi.fn();
 
-    const { rerender } = renderHook(
-      ({ delay }) => useInterval(callback, delay),
-      { initialProps: { delay: 1000 } }
-    );
+    const { rerender } = renderHook(({ delay }) => useInterval(callback, delay), {
+      initialProps: { delay: 1000 },
+    });
 
     vi.advanceTimersByTime(500);
     expect(callback).not.toHaveBeenCalled();
@@ -83,10 +81,9 @@ describe('useInterval', () => {
   it('should handle rapid delay changes', () => {
     const callback = vi.fn();
 
-    const { rerender } = renderHook(
-      ({ delay }) => useInterval(callback, delay),
-      { initialProps: { delay: 1000 } }
-    );
+    const { rerender } = renderHook(({ delay }) => useInterval(callback, delay), {
+      initialProps: { delay: 1000 },
+    });
 
     rerender({ delay: 500 });
     rerender({ delay: 2000 });

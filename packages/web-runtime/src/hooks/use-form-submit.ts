@@ -180,10 +180,7 @@ export function useFormSubmit<TResult = unknown>(
           }
         } catch (error) {
           // Error escaped runLoggedAsync (shouldn't happen with defaultRethrow: false)
-          const normalized = normalizeError(
-            error,
-            messages.errorTitle ?? 'Operation failed'
-          );
+          const normalized = normalizeError(error, messages.errorTitle ?? 'Operation failed');
           // Show error toast with "Retry" button
           // Note: Retry will call the operation again
           toasts.raw.error(messages.errorTitle ?? 'Operation failed', {

@@ -46,7 +46,7 @@ export function createErrorBoundaryFallback(
     const errorType = determineErrorType(error);
     const route = typeof window !== 'undefined' ? window.location.pathname : 'unknown';
     const normalized = normalizeError(error, 'React error boundary triggered');
-    
+
     // Create standardized log context (client-safe version)
     const logContext = createWebAppContextWithIdClient(route, 'ReactErrorBoundary', {
       errorType,
@@ -55,7 +55,7 @@ export function createErrorBoundaryFallback(
       userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',
       url: typeof window !== 'undefined' ? window.location?.href || '' : '',
     });
-    
+
     // Use structured logging instead of console.error
     logClientErrorBoundary(
       'React error boundary caught error',
@@ -67,7 +67,7 @@ export function createErrorBoundaryFallback(
         ...logContext,
       }
     );
-    
+
     return {
       success: false,
       error: error.name || 'React Error',

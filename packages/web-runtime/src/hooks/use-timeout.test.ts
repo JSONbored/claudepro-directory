@@ -34,10 +34,9 @@ describe('useTimeout', () => {
     const callback1 = vi.fn();
     const callback2 = vi.fn();
 
-    const { rerender } = renderHook(
-      ({ callback }) => useTimeout(callback, 1000),
-      { initialProps: { callback: callback1 } }
-    );
+    const { rerender } = renderHook(({ callback }) => useTimeout(callback, 1000), {
+      initialProps: { callback: callback1 },
+    });
 
     vi.advanceTimersByTime(1000);
     expect(callback1).toHaveBeenCalledTimes(1);
@@ -54,10 +53,9 @@ describe('useTimeout', () => {
   it('should restart timeout when delay changes', () => {
     const callback = vi.fn();
 
-    const { rerender } = renderHook(
-      ({ delay }) => useTimeout(callback, delay),
-      { initialProps: { delay: 1000 } }
-    );
+    const { rerender } = renderHook(({ delay }) => useTimeout(callback, delay), {
+      initialProps: { delay: 1000 },
+    });
 
     vi.advanceTimersByTime(500);
     expect(callback).not.toHaveBeenCalled();
@@ -82,10 +80,9 @@ describe('useTimeout', () => {
   it('should cancel timeout when delay changes to null', () => {
     const callback = vi.fn();
 
-    const { rerender } = renderHook(
-      ({ delay }) => useTimeout(callback, delay),
-      { initialProps: { delay: 1000 } }
-    );
+    const { rerender } = renderHook(({ delay }) => useTimeout(callback, delay), {
+      initialProps: { delay: 1000 },
+    });
 
     vi.advanceTimersByTime(500);
     rerender({ delay: null });

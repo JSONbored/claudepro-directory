@@ -12,7 +12,7 @@
  * **Architecture:**
  * - Located in `shared-runtime` because it's isomorphic (works in Browser/Edge/Node)
  * - Used by the user serializer in logger config to automatically hash userId fields
- * - Available to all runtimes (web-runtime, edge-runtime, data-layer) via barrel exports
+ * - Available to all runtimes (web-runtime, data-layer) via barrel exports
  *
  * @module shared-runtime/privacy
  * @see {@link ../logger/config | Logger Config} - User serializer uses this
@@ -21,7 +21,6 @@
 // Note: We don't import User type here to keep this module isomorphic
 // The getUserHash function accepts unknown and uses type guards for safety
 // This allows it to work with any user-like object without requiring Supabase types
-
 
 /**
  * Hash a user ID for privacy-compliant logging
@@ -63,7 +62,6 @@ export function hashUserId(userId: string): string {
   // Convert to unsigned 32-bit integer and then to hex
   return (hash >>> 0).toString(16);
 }
-
 
 /**
  * Hash email address for privacy-compliant logging
@@ -112,5 +110,3 @@ export function hashEmail(email: string, preserveDomain = false): string {
 
   return `${hashedLocal}@${domainPart}`;
 }
-
-

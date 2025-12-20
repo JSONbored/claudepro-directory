@@ -1,14 +1,14 @@
 /**
  * Discord Embed Builders
- * 
+ *
  * Type-safe builders for Discord embed objects.
  * These are runtime-agnostic and can be used by any system that sends Discord webhooks.
  */
 
 import { DISCORD_COLORS, DISCORD_EMOJI, DISCORD_LIMITS } from './constants.ts';
-import { 
-  sanitizeForDiscord, 
-  sanitizeEmbedTitle, 
+import {
+  sanitizeForDiscord,
+  sanitizeEmbedTitle,
   sanitizeEmbedDescription,
   sanitizeFieldValue,
   sanitizeErrorForCodeBlock,
@@ -35,11 +35,13 @@ export interface DiscordEmbed {
   fields?: DiscordEmbedField[] | undefined;
   footer?: { text: string } | undefined;
   timestamp?: string | undefined;
-  author?: {
-    name: string;
-    url?: string | undefined;
-    icon_url?: string | undefined;
-  } | undefined;
+  author?:
+    | {
+        name: string;
+        url?: string | undefined;
+        icon_url?: string | undefined;
+      }
+    | undefined;
   thumbnail?: { url: string } | undefined;
   image?: { url: string } | undefined;
 }
@@ -62,7 +64,7 @@ export interface JobEmbedData {
 
 /**
  * Build a Discord embed for a job listing
- * 
+ *
  * @param job - Job data
  * @param options - Build options
  * @returns Discord embed object, or null if job data is invalid
@@ -75,60 +77,58 @@ export function buildJobEmbed(
   } = {}
 ): DiscordEmbed | null {
   const { isNew = true, siteUrl = 'https://claudepro.directory' } = options;
-  
+
   // Validate slug for URL safety
   if (!isValidSlug(job.slug)) {
     return null;
   }
-  
+
   const fields: DiscordEmbedField[] = [];
-  
+
   // Add fields in order of importance (max 6 for readability)
   if (job.company) {
-    fields.push({ 
-      name: `${DISCORD_EMOJI.company} Company`, 
-      value: sanitizeFieldValue(job.company), 
-      inline: true 
+    fields.push({
+      name: `${DISCORD_EMOJI.company} Company`,
+      value: sanitizeFieldValue(job.company),
+      inline: true,
     });
   }
-  
+
   if (job.location) {
-    fields.push({ 
-      name: `${DISCORD_EMOJI.location} Location`, 
-      value: sanitizeFieldValue(job.location), 
-      inline: true 
+    fields.push({
+      name: `${DISCORD_EMOJI.location} Location`,
+      value: sanitizeFieldValue(job.location),
+      inline: true,
     });
   }
-  
+
   if (job.type) {
-    fields.push({ 
-      name: `${DISCORD_EMOJI.type} Type`, 
-      value: sanitizeFieldValue(job.type), 
-      inline: true 
+    fields.push({
+      name: `${DISCORD_EMOJI.type} Type`,
+      value: sanitizeFieldValue(job.type),
+      inline: true,
     });
   }
-  
+
   if (job.salary) {
-    fields.push({ 
-      name: `${DISCORD_EMOJI.salary} Salary`, 
-      value: sanitizeFieldValue(job.salary), 
-      inline: true 
+    fields.push({
+      name: `${DISCORD_EMOJI.salary} Salary`,
+      value: sanitizeFieldValue(job.salary),
+      inline: true,
     });
   }
-  
+
   if (job.tier) {
-    fields.push({ 
-      name: `${DISCORD_EMOJI.tier} Tier`, 
-      value: sanitizeFieldValue(job.tier), 
-      inline: true 
+    fields.push({
+      name: `${DISCORD_EMOJI.tier} Tier`,
+      value: sanitizeFieldValue(job.tier),
+      inline: true,
     });
   }
-  
+
   // Determine color based on tier
-  const color = job.tier === 'featured' 
-    ? DISCORD_COLORS.tier.featured 
-    : DISCORD_COLORS.content.job;
-  
+  const color = job.tier === 'featured' ? DISCORD_COLORS.tier.featured : DISCORD_COLORS.content.job;
+
   return {
     title: sanitizeEmbedTitle(job.title) || 'New Job Listing',
     description: sanitizeEmbedDescription(job.description) || 'No description provided.',
@@ -136,7 +136,9 @@ export function buildJobEmbed(
     color,
     fields: fields.slice(0, DISCORD_LIMITS.fieldsPerEmbed),
     footer: {
-      text: isNew ? 'New job posted on Claude Pro Directory' : 'Job updated on Claude Pro Directory',
+      text: isNew
+        ? 'New job posted on Claude Pro Directory'
+        : 'Job updated on Claude Pro Directory',
     },
     timestamp: new Date().toISOString(),
   };
@@ -159,7 +161,7 @@ export interface SubmissionEmbedData {
 
 /**
  * Build a Discord embed for a content submission
- * 
+ *
  * @param submission - Submission data
  * @param options - Build options
  * @returns Discord embed object
@@ -171,9 +173,9 @@ export function buildSubmissionEmbed(
   } = {}
 ): DiscordEmbed {
   const { siteUrl = 'https://claudepro.directory' } = options;
-  
+
   const fields: DiscordEmbedField[] = [];
-  
+
   if (submission.category) {
     fields.push({
       name: 'Category',
@@ -181,7 +183,7 @@ export function buildSubmissionEmbed(
       inline: true,
     });
   }
-  
+
   if (submission.submission_type) {
     fields.push({
       name: 'Type',
@@ -189,7 +191,7 @@ export function buildSubmissionEmbed(
       inline: true,
     });
   }
-  
+
   if (submission.author) {
     fields.push({
       name: 'Submitted by',
@@ -197,7 +199,7 @@ export function buildSubmissionEmbed(
       inline: true,
     });
   }
-  
+
   if (submission.url) {
     fields.push({
       name: `${DISCORD_EMOJI.link} URL`,
@@ -205,13 +207,14 @@ export function buildSubmissionEmbed(
       inline: false,
     });
   }
-  
+
   return {
     title: sanitizeEmbedTitle(submission.title) || 'New Submission',
     description: sanitizeEmbedDescription(submission.description) || 'No description provided.',
-    url: submission.slug && isValidSlug(submission.slug) && submission.category
-      ? `${siteUrl}/${encodeURIComponent(submission.category)}/${encodeURIComponent(submission.slug)}`
-      : undefined,
+    url:
+      submission.slug && isValidSlug(submission.slug) && submission.category
+        ? `${siteUrl}/${encodeURIComponent(submission.category)}/${encodeURIComponent(submission.slug)}`
+        : undefined,
     color: DISCORD_COLORS.content.submission,
     fields: fields.slice(0, DISCORD_LIMITS.fieldsPerEmbed),
     footer: {
@@ -233,13 +236,13 @@ export interface ErrorEmbedData {
 
 /**
  * Build a Discord embed for an error notification
- * 
+ *
  * @param errorData - Error data
  * @returns Discord embed object
  */
 export function buildErrorEmbed(errorData: ErrorEmbedData): DiscordEmbed {
   const fields: DiscordEmbedField[] = [];
-  
+
   if (errorData.source) {
     fields.push({
       name: 'Source',
@@ -247,7 +250,7 @@ export function buildErrorEmbed(errorData: ErrorEmbedData): DiscordEmbed {
       inline: true,
     });
   }
-  
+
   // Add context fields if present
   if (errorData.context) {
     const contextEntries = Object.entries(errorData.context).slice(0, 3);
@@ -259,7 +262,7 @@ export function buildErrorEmbed(errorData: ErrorEmbedData): DiscordEmbed {
       });
     }
   }
-  
+
   return {
     title: `${DISCORD_EMOJI.error} ${sanitizeEmbedTitle(errorData.title)}`,
     description: `\`\`\`\n${sanitizeErrorForCodeBlock(errorData.error, 1000)}\n\`\`\``,
@@ -285,7 +288,7 @@ export interface ChangelogEmbedData {
 
 /**
  * Build a Discord embed for a changelog entry
- * 
+ *
  * @param changelog - Changelog data
  * @param options - Build options
  * @returns Discord embed object
@@ -297,17 +300,17 @@ export function buildChangelogEmbed(
   } = {}
 ): DiscordEmbed {
   const { siteUrl = 'https://claudepro.directory' } = options;
-  
+
   const fields: DiscordEmbedField[] = [];
-  
+
   // Add sections as fields
   if (changelog.sections) {
     for (const section of changelog.sections.slice(0, 4)) {
       const items = section.items
         .slice(0, 5)
-        .map(item => `• ${sanitizeForDiscord(item, 100)}`)
+        .map((item) => `• ${sanitizeForDiscord(item, 100)}`)
         .join('\n');
-      
+
       if (items) {
         fields.push({
           name: sanitizeForDiscord(section.title, DISCORD_LIMITS.fieldName),
@@ -317,13 +320,11 @@ export function buildChangelogEmbed(
       }
     }
   }
-  
+
   return {
     title: `${DISCORD_EMOJI.changelog} ${sanitizeEmbedTitle(changelog.title)}`,
-    description: changelog.tldr 
-      ? sanitizeEmbedDescription(changelog.tldr) 
-      : undefined,
-    url: isValidSlug(changelog.slug) 
+    description: changelog.tldr ? sanitizeEmbedDescription(changelog.tldr) : undefined,
+    url: isValidSlug(changelog.slug)
       ? `${siteUrl}/changelog/${encodeURIComponent(changelog.slug)}`
       : undefined,
     color: DISCORD_COLORS.content.changelog,

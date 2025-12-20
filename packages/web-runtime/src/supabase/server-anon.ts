@@ -29,14 +29,14 @@ export function createSupabaseAnonClient(): SupabaseAnonClient {
   if (!supabaseUrl) {
     throw new Error(
       `Missing NEXT_PUBLIC_SUPABASE_URL environment variable${buildPhase}. ` +
-      `Please ensure this is set in your environment variables. During build, this must be available and valid.`
+        `Please ensure this is set in your environment variables. During build, this must be available and valid.`
     );
   }
 
   if (!supabaseAnonKey) {
     throw new Error(
       `Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable${buildPhase}. ` +
-      `Please ensure this is set in your environment variables. During build, this must be available and valid.`
+        `Please ensure this is set in your environment variables. During build, this must be available and valid.`
     );
   }
 

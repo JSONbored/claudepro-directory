@@ -197,13 +197,16 @@ export default async function OAuthConsentPage({
     );
 
     // Map authDetails to expected format for client component
+    // Include all available fields from getAuthorizationDetails response
     const clientAuthDetails = {
       client: {
         client_id: authDetails.client.id,
         name: authDetails.client.name,
+        description: authDetails.client.description ?? null, // May be available for MCP clients
       },
       redirect_uri: authDetails.redirect_url ?? '',
-      scopes: authDetails.scope ? [authDetails.scope] : null,
+      scopes: authDetails.scope ? authDetails.scope.split(' ').filter(Boolean) : null, // Split space-separated scopes
+      resource: authDetails.resource ?? null, // RFC 8707 resource parameter (MCP server URL)
     };
 
     return (

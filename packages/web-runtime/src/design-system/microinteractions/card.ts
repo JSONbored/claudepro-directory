@@ -32,10 +32,10 @@ export const CARD = {
    * Hover state for cards
    * Forward tilt animation creates "entering" feeling with 3D perspective
    * Uses semantic design tokens for consistent colors
-   * 
+   *
    * IMPORTANT: This borderColor is applied via motion.dev whileHover and takes precedence
    * over CSS hover classes. Ensure no conflicting hover:border-* classes are applied.
-   * 
+   *
    * Requires parent container with perspective: '1000px' and transformStyle: 'preserve-3d'
    */
   hover: {

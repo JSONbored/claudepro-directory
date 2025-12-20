@@ -4,18 +4,18 @@
  */
 
 import {
-  ExperienceLevel,
-  FocusAreaType,
-  IntegrationType,
-  UseCaseType,
-} from '@heyclaude/data-layer/prisma';
+  experience_level as ExperienceLevel,
+  focus_area_type as FocusAreaType,
+  integration_type as IntegrationType,
+  use_case_type as UseCaseType,
+} from '@prisma/client';
 import {
   type content_category,
   type experience_level,
   type focus_area_type,
   type integration_type,
   type use_case_type,
-} from '@heyclaude/data-layer/prisma';
+} from '@prisma/client';
 import {
   type GetRecommendationsReturns,
   type RecommendationItem,

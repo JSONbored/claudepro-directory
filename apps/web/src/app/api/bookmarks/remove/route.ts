@@ -19,7 +19,8 @@ import 'server-only';
 
 import { removeBookmark } from '@heyclaude/web-runtime/actions/bookmarks';
 import {
-  createApiRoute, createOptionsHandler as createApiOptionsHandler,
+  createApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
 } from '@heyclaude/web-runtime/api/route-factory';
 import {
   bookmarkResponseSchema,

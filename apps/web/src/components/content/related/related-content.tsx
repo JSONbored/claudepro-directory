@@ -5,7 +5,7 @@
  */
 
 import type { RelatedContentItem } from '@heyclaude/database-types/postgres-types';
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import { getContentItemUrl } from '@heyclaude/web-runtime/content';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { getRelatedContent } from '@heyclaude/web-runtime/data/content/related';
@@ -19,10 +19,12 @@ import { useEffect, useState, useRef } from 'react';
 
 // Use the new composite type from @heyclaude/data-layer
 type RelatedContentItemWithUI = RelatedContentItem & {
-  matchDetails?: {
-    matchedKeywords: string[];
-    matchedTags: string[];
-  } | undefined;
+  matchDetails?:
+    | {
+        matchedKeywords: string[];
+        matchedTags: string[];
+      }
+    | undefined;
   matchType?: string | undefined;
 };
 
@@ -52,11 +54,15 @@ function getCategoryBadgeClass(category: string): string {
     rules: 'bg-transparent text-category-rules border-category-rules-border font-semibold',
     commands: 'bg-transparent text-category-commands border-category-commands-border font-semibold',
     hooks: 'bg-transparent text-category-hooks border-category-hooks-border font-semibold',
-    tutorials: 'bg-transparent text-category-tutorials border-category-tutorials-border font-semibold',
+    tutorials:
+      'bg-transparent text-category-tutorials border-category-tutorials-border font-semibold',
     comparisons: 'bg-primary/20 text-primary border-primary/30',
-    workflows: 'bg-transparent text-category-workflows border-category-workflows-border font-semibold',
-    'use-cases': 'bg-transparent text-category-use-cases border-category-use-cases-border font-semibold',
-    troubleshooting: 'bg-transparent text-category-troubleshooting border-category-troubleshooting-border font-semibold',
+    workflows:
+      'bg-transparent text-category-workflows border-category-workflows-border font-semibold',
+    'use-cases':
+      'bg-transparent text-category-use-cases border-category-use-cases-border font-semibold',
+    troubleshooting:
+      'bg-transparent text-category-troubleshooting border-category-troubleshooting-border font-semibold',
   };
 
   return classes[category] || 'bg-muted/20 text-muted border-muted/30';
@@ -129,8 +135,7 @@ export function RelatedContentClient({
   const { value: loading, setFalse: setLoadingFalse } = useBoolean(true);
   const isClient = useIsClient();
   const isMounted = useIsMounted();
-  const pathname: string =
-    providedPathname ?? (isClient ? window.location.pathname : '/');
+  const pathname: string = providedPathname ?? (isClient ? window.location.pathname : '/');
 
   // Use refs to track previous values and prevent unnecessary re-fetches
   // Only trigger effect when values actually change (deep comparison)
@@ -152,7 +157,14 @@ export function RelatedContentClient({
     const limitChanged = prevLimitRef.current !== limit;
 
     // Skip fetch if nothing has changed
-    if (!excludeChanged && !currentTagsChanged && !currentKeywordsChanged && !pathnameChanged && !featuredChanged && !limitChanged) {
+    if (
+      !excludeChanged &&
+      !currentTagsChanged &&
+      !currentKeywordsChanged &&
+      !pathnameChanged &&
+      !featuredChanged &&
+      !limitChanged
+    ) {
       return;
     }
 
@@ -205,13 +217,15 @@ export function RelatedContentClient({
               score: item.score ?? 0,
               match_type: item.match_type ?? '',
               views: item.views ?? 0,
-              ...(item.match_type ? {
-                matchType: item.match_type,
-                matchDetails: {
-                  matchedKeywords: [],
-                  matchedTags: item.tags ?? [],
-                },
-              } : {}),
+              ...(item.match_type
+                ? {
+                    matchType: item.match_type,
+                    matchDetails: {
+                      matchedKeywords: [],
+                      matchedTags: item.tags ?? [],
+                    },
+                  }
+                : {}),
               matched_tags: item.matched_tags ?? [],
             };
             if (item.match_type !== null && item.match_type !== undefined) {
@@ -238,7 +252,7 @@ export function RelatedContentClient({
           }
         );
         setItems([]);
-        } finally {
+      } finally {
         if (isMounted()) {
           setLoadingFalse();
         }
@@ -269,11 +283,15 @@ export function RelatedContentClient({
       aria-label="Related content"
     >
       {showTitle ? (
-        <div className={`border-primary/20 from-primary/5 to-primary/10 mb-8 rounded-xl border bg-linear-to-r p-4 sm:p-6`}>
-          <div className={`flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center`}>
+        <div
+          className={`border-primary/20 from-primary/5 to-primary/10 mb-8 rounded-xl border bg-linear-to-r p-4 sm:p-6`}
+        >
+          <div
+            className={`flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center`}
+          >
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="bg-primary/10 shrink-0 rounded-lg p-2">
-                <Sparkles className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
+                <Sparkles className="text-primary h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div className="min-w-0">
                 <h2 className="text-foreground mb-1 text-xl font-bold sm:text-2xl" itemProp="name">
@@ -287,7 +305,7 @@ export function RelatedContentClient({
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="shrink-0 border-primary/30 bg-primary/10 text-primary px-2 py-1 text-xs font-medium sm:px-3 sm:text-sm"
+              className="border-primary/30 bg-primary/10 text-primary shrink-0 px-2 py-1 text-xs font-medium sm:px-3 sm:text-sm"
             >
               AI Powered
             </UnifiedBadge>
@@ -304,9 +322,11 @@ export function RelatedContentClient({
         renderCard={(item) => {
           // Type narrowing: item is DisplayableContent, cast to RelatedContentItemWithUI
           const relatedItem = item as RelatedContentItemWithUI;
-          const matchBadge = getMatchTypeBadge(relatedItem.matchType ?? (relatedItem as RelatedContentItem).match_type ?? 'unknown');
+          const matchBadge = getMatchTypeBadge(
+            relatedItem.matchType ?? (relatedItem as RelatedContentItem).match_type ?? 'unknown'
+          );
           const categoryBadge = getCategoryBadgeClass(relatedItem.category ?? 'unknown');
-          
+
           // Type narrowing: Ensure category is valid content_category
           const itemCategory = relatedItem.category ?? 'agents';
           const validCategory = isValidCategory(itemCategory) ? itemCategory : 'agents';
@@ -327,7 +347,10 @@ export function RelatedContentClient({
               renderTopBadges={() => (
                 <div className={`flex w-full items-center justify-between gap-2`}>
                   <UnifiedBadge
-                    className={cn(categoryBadge, 'shrink-0 border px-3 py-2 text-xs font-medium sm:px-3 sm:text-sm')}
+                    className={cn(
+                      categoryBadge,
+                      'shrink-0 border px-3 py-2 text-xs font-medium sm:px-3 sm:text-sm'
+                    )}
                     variant="base"
                     style="secondary"
                   >

@@ -49,10 +49,13 @@ function safeDate(value: unknown): string {
 }
 
 // Job lifecycle action configurations
-const JOB_EMAIL_CONFIGS: Record<string, {
-  buildSubject: (payload: Record<string, unknown>) => string;
-  buildHtml: (payload: Record<string, unknown>) => string;
-}> = {
+const JOB_EMAIL_CONFIGS: Record<
+  string,
+  {
+    buildSubject: (payload: Record<string, unknown>) => string;
+    buildHtml: (payload: Record<string, unknown>) => string;
+  }
+> = {
   'job-submitted': {
     buildSubject: (p) => `Job Submitted: ${p['jobTitle']}`,
     buildHtml: buildJobSubmittedHtml,
@@ -105,12 +108,16 @@ export const sendJobLifecycleEmail = inngest.createFunction(
         context.error = error instanceof Error ? error.message : String(error);
       }
       sendCriticalFailureHeartbeat('BETTERSTACK_HEARTBEAT_CRITICAL_FAILURE', context);
-      
+
       // Log for observability
       logger.error(
-        { 
+        {
           functionName: 'sendJobLifecycleEmail',
-          errorMessage: error ? (error instanceof Error ? error.message : String(error)) : 'unknown',
+          errorMessage: error
+            ? error instanceof Error
+              ? error.message
+              : String(error)
+            : 'unknown',
         },
         'Job lifecycle email function failed after all retries'
       );
@@ -119,20 +126,22 @@ export const sendJobLifecycleEmail = inngest.createFunction(
   { event: 'email/job-lifecycle' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const logContext = createWebAppContextWithId('/inngest/email/job-lifecycle', 'sendJobLifecycleEmail');
+    const logContext = createWebAppContextWithId(
+      '/inngest/email/job-lifecycle',
+      'sendJobLifecycleEmail'
+    );
 
     const { action, employerEmail, jobId, payload, jobTitle, company } = event.data;
 
-    logger.info({ ...logContext,
-      action,
-      jobId, }, 'Job lifecycle email request received');
+    logger.info({ ...logContext, action, jobId }, 'Job lifecycle email request received');
 
     // Validate action
     const config = JOB_EMAIL_CONFIGS[action];
     if (!config) {
-      logger.warn({ ...logContext,
-        action,
-        availableActions: Object.keys(JOB_EMAIL_CONFIGS).join(', '), }, 'Unknown job lifecycle action');
+      logger.warn(
+        { ...logContext, action, availableActions: Object.keys(JOB_EMAIL_CONFIGS).join(', ') },
+        'Unknown job lifecycle action'
+      );
       throw new Error(`Unknown job lifecycle action: ${action}`);
     }
 
@@ -145,59 +154,68 @@ export const sendJobLifecycleEmail = inngest.createFunction(
     };
 
     // Step 1: Send the email
-    const emailResult = await step.run('send-email', async (): Promise<{
-      sent: boolean;
-      emailId: string | null;
-    }> => {
-      // Skip if no employer email provided
-      if (!employerEmail) {
-        logger.info({ ...logContext,
-          action,
-          jobId, }, 'No employer email provided, skipping job lifecycle email');
-        return { sent: false, emailId: null };
-      }
-
-      try {
-        const subject = config.buildSubject(emailPayload);
-        const html = config.buildHtml(emailPayload);
-
-        const { data: sendData, error: sendError } = await sendEmail(
-          {
-            from: JOBS_FROM,
-            to: employerEmail,
-            subject,
-            html,
-            tags: [{ name: 'type', value: action }],
-          },
-          `Resend job lifecycle email (${action}) send timed out`
-        );
-
-        if (sendError) {
-          logger.warn({ ...logContext,
-            action,
-            jobId,
-            errorMessage: sendError.message, }, 'Job lifecycle email failed');
+    const emailResult = await step.run(
+      'send-email',
+      async (): Promise<{
+        sent: boolean;
+        emailId: string | null;
+      }> => {
+        // Skip if no employer email provided
+        if (!employerEmail) {
+          logger.info(
+            { ...logContext, action, jobId },
+            'No employer email provided, skipping job lifecycle email'
+          );
           return { sent: false, emailId: null };
         }
 
-        return { sent: true, emailId: sendData?.id ?? null };
-      } catch (error) {
-        const normalized = normalizeError(error, 'Job lifecycle email failed');
-        logger.warn({ ...logContext,
-          action,
-          jobId,
-          errorMessage: normalized.message, }, 'Job lifecycle email failed');
-        return { sent: false, emailId: null };
+        try {
+          const subject = config.buildSubject(emailPayload);
+          const html = config.buildHtml(emailPayload);
+
+          const { data: sendData, error: sendError } = await sendEmail(
+            {
+              from: JOBS_FROM,
+              to: employerEmail,
+              subject,
+              html,
+              tags: [{ name: 'type', value: action }],
+            },
+            `Resend job lifecycle email (${action}) send timed out`
+          );
+
+          if (sendError) {
+            logger.warn(
+              { ...logContext, action, jobId, errorMessage: sendError.message },
+              'Job lifecycle email failed'
+            );
+            return { sent: false, emailId: null };
+          }
+
+          return { sent: true, emailId: sendData?.id ?? null };
+        } catch (error) {
+          const normalized = normalizeError(error, 'Job lifecycle email failed');
+          logger.warn(
+            { ...logContext, action, jobId, errorMessage: normalized.message },
+            'Job lifecycle email failed'
+          );
+          return { sent: false, emailId: null };
+        }
       }
-    });
+    );
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      action,
-      jobId,
-      sent: emailResult.sent,
-      emailId: emailResult.emailId, }, 'Job lifecycle email completed');
+    logger.info(
+      {
+        ...logContext,
+        durationMs,
+        action,
+        jobId,
+        sent: emailResult.sent,
+        emailId: emailResult.emailId,
+      },
+      'Job lifecycle email completed'
+    );
 
     return {
       success: emailResult.sent,
@@ -305,7 +323,10 @@ function buildJobApprovedHtml(p: Record<string, unknown>): string {
 
 function buildJobRejectedHtml(p: Record<string, unknown>): string {
   const jobTitle = safeString(p['jobTitle'], 'Your Job');
-  const rejectionReason = safeString(p['rejectionReason'], 'Please review our guidelines and resubmit.');
+  const rejectionReason = safeString(
+    p['rejectionReason'],
+    'Please review our guidelines and resubmit.'
+  );
   const jobId = safeString(p['jobId'], '');
   const editUrl = `${BASE_URL}/account/jobs/${encodeURIComponent(jobId)}/edit`;
 

@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@prisma/client';
 import {
   type GetContentAnalyticsReturns,
   type GetContentDetailCompleteReturns,

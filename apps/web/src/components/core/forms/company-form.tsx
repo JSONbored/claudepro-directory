@@ -14,12 +14,14 @@
  */
 
 import type { UserCompaniesCompany } from '@heyclaude/data-layer';
-import type { company_size } from '@heyclaude/database-types/prisma';
-import { normalizeError, getFormDataString, getFormDataStringRequired, getFormDataEnum } from '@heyclaude/shared-runtime';
+import type { company_size } from '@prisma/client';
 import {
-  createCompany,
-  updateCompany,
-} from '@heyclaude/web-runtime/actions/companies-crud';
+  normalizeError,
+  getFormDataString,
+  getFormDataStringRequired,
+  getFormDataEnum,
+} from '@heyclaude/shared-runtime';
+import { createCompany, updateCompany } from '@heyclaude/web-runtime/actions/companies-crud';
 import { uploadCompanyLogoAction } from '@heyclaude/web-runtime/actions/companies';
 import { FORM_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -104,7 +106,11 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const pathname = usePathname();
   const { user, status } = useAuthenticatedUser({ context: 'CompanyForm' });
   const { openAuthModal } = useAuthModal();
-  const { value: isUploadingLogo, setTrue: setIsUploadingLogoTrue, setFalse: setIsUploadingLogoFalse } = useBoolean();
+  const {
+    value: isUploadingLogo,
+    setTrue: setIsUploadingLogoTrue,
+    setFalse: setIsUploadingLogoFalse,
+  } = useBoolean();
   const [logoUrl, setLogoUrl] = useState<null | string>(initialData?.logo || null);
   const [logoPreview, setLogoPreview] = useState<null | string>(initialData?.logo || null);
   const [useCursorDate, setUseCursorDate] = useState<boolean>(!!initialData?.using_cursor_since);
@@ -113,17 +119,24 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const { executeAsync: uploadLogo } = useSafeAction(uploadCompanyLogoAction);
 
   // Custom error handler for form submission (handles auth errors)
-  const handleFormError = useCallback((error: Error) => {
-    // Custom error handling for auth errors
-    const errorMessage = error.message;
-    if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
-      openAuthModal({
-        valueProposition: 'Sign in to manage companies',
-        redirectTo: pathname ?? undefined,
-      });
-    }
-    // useFormSubmit already shows error toast, so we don't need to show another one
-  }, [openAuthModal, pathname]);
+  const handleFormError = useCallback(
+    (error: Error) => {
+      // Custom error handling for auth errors
+      const errorMessage = error.message;
+      if (
+        errorMessage.includes('signed in') ||
+        errorMessage.includes('auth') ||
+        errorMessage.includes('unauthorized')
+      ) {
+        openAuthModal({
+          valueProposition: 'Sign in to manage companies',
+          redirectTo: pathname ?? undefined,
+        });
+      }
+      // useFormSubmit already shows error toast, so we don't need to show another one
+    },
+    [openAuthModal, pathname]
+  );
 
   // Use standardized form submission hook
   const { isPending, handleSubmit, router } = useFormSubmit({
@@ -155,220 +168,261 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     setMaxDimension(FORM_CONFIG.max_image_dimension_px);
   }, []);
 
-  const handleLogoUpload = useCallback(async (file: File) => {
-    // Proactive auth check - show modal before attempting action
-    if (status === 'loading') {
-      // Wait for auth check to complete
-      return;
-    }
-
-    if (!user) {
-      // User is not authenticated - show auth modal
-      openAuthModal({
-        valueProposition: 'Sign in to upload company logos',
-        redirectTo: pathname ?? undefined,
-      });
-      return;
-    }
-
-    // Client-side validation
-    if (file.size > maxFileSize) {
-      toasts.error.actionFailed(`File too large. Maximum size is ${maxFileSize / 1024}KB.`);
-      return;
-    }
-
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      toasts.error.actionFailed('Invalid file type. Only JPG, PNG, and WebP are allowed.');
-      return;
-    }
-
-    // Verify actual file content matches MIME type (magic bytes check)
-    try {
-      const buffer = await file.slice(0, 12).arrayBuffer();
-      const bytes = new Uint8Array(buffer);
-      const isValidImage =
-        // JPEG: FF D8 FF
-        (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) ||
-        // PNG: 89 50 4E 47
-        (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) ||
-        // WebP: 52 49 46 46 ... 57 45 42 50
-        (bytes[0] === 0x52 &&
-          bytes[1] === 0x49 &&
-          bytes[2] === 0x46 &&
-          bytes[3] === 0x46 &&
-          bytes[8] === 0x57 &&
-          bytes[9] === 0x45 &&
-          bytes[10] === 0x42 &&
-          bytes[11] === 0x50);
-
-      if (!isValidImage) {
-        toasts.error.actionFailed(
-          'Invalid image file. File content does not match expected format.'
-        );
+  const handleLogoUpload = useCallback(
+    async (file: File) => {
+      // Proactive auth check - show modal before attempting action
+      if (status === 'loading') {
+        // Wait for auth check to complete
         return;
       }
-    } catch {
-      toasts.error.actionFailed('Failed to validate image file.');
-      return;
-    }
 
-    // Check dimensions using createImageBitmap
-    try {
-      const bitmap = await createImageBitmap(file);
-      const { width, height } = bitmap;
-      bitmap.close();
-
-      if (width > maxDimension || height > maxDimension) {
-        toasts.error.actionFailed(
-          `Image too large. Maximum dimensions are ${maxDimension}x${maxDimension}px.`
-        );
-        return;
-      }
-    } catch {
-      toasts.error.actionFailed('Failed to read image dimensions.');
-      return;
-    }
-
-    // Upload to edge function
-    setIsUploadingLogoTrue();
-
-    try {
-      await runLoggedAsync(
-        async () => {
-          const fileBase64 = await fileToBase64(file);
-          const result = await uploadLogo({
-            fileName: file.name,
-            mimeType: (file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp')
-              ? file.type
-              : 'image/png' satisfies AllowedImageMimeType,
-            fileBase64,
-            companyId: initialData?.id ?? undefined,
-            oldLogoUrl: logoUrl ?? undefined,
-          });
-
-          if (result?.serverError) {
-            throw new Error(result.serverError);
-          }
-
-          if (result?.validationErrors) {
-            throw new Error('Logo upload failed validation.');
-          }
-
-          const uploaded = result?.data;
-          if (!uploaded?.publicUrl) {
-            throw new Error('Upload response was missing a public URL.');
-          }
-
-          setLogoUrl(uploaded.publicUrl);
-          setLogoPreview(uploaded.publicUrl);
-          toasts.success.actionCompleted('Logo uploaded successfully!');
-        },
-        {
-          message: 'Logo upload failed',
-          context: {
-            fileName: file.name,
-            companyId: initialData?.id ?? undefined,
-          },
-        }
-      );
-    } catch (error) {
-      const normalized = normalizeError(error, 'Failed to upload logo');
-      const errorMessage = normalized.message;
-      
-      // Check if error is auth-related and show modal if so
-      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+      if (!user) {
+        // User is not authenticated - show auth modal
         openAuthModal({
           valueProposition: 'Sign in to upload company logos',
           redirectTo: pathname ?? undefined,
         });
-      } else {
-        // Non-auth errors - show toast with retry option
-        toasts.raw.error('Failed to upload logo', {
-          action: {
-            label: 'Retry',
-            onClick: () => {
-              handleLogoUpload(file);
-            },
+        return;
+      }
+
+      // Client-side validation
+      if (file.size > maxFileSize) {
+        toasts.error.actionFailed(`File too large. Maximum size is ${maxFileSize / 1024}KB.`);
+        return;
+      }
+
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        toasts.error.actionFailed('Invalid file type. Only JPG, PNG, and WebP are allowed.');
+        return;
+      }
+
+      // Verify actual file content matches MIME type (magic bytes check)
+      try {
+        const buffer = await file.slice(0, 12).arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const isValidImage =
+          // JPEG: FF D8 FF
+          (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) ||
+          // PNG: 89 50 4E 47
+          (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) ||
+          // WebP: 52 49 46 46 ... 57 45 42 50
+          (bytes[0] === 0x52 &&
+            bytes[1] === 0x49 &&
+            bytes[2] === 0x46 &&
+            bytes[3] === 0x46 &&
+            bytes[8] === 0x57 &&
+            bytes[9] === 0x45 &&
+            bytes[10] === 0x42 &&
+            bytes[11] === 0x50);
+
+        if (!isValidImage) {
+          toasts.error.actionFailed(
+            'Invalid image file. File content does not match expected format.'
+          );
+          return;
+        }
+      } catch {
+        toasts.error.actionFailed('Failed to validate image file.');
+        return;
+      }
+
+      // Check dimensions using createImageBitmap
+      try {
+        const bitmap = await createImageBitmap(file);
+        const { width, height } = bitmap;
+        bitmap.close();
+
+        if (width > maxDimension || height > maxDimension) {
+          toasts.error.actionFailed(
+            `Image too large. Maximum dimensions are ${maxDimension}x${maxDimension}px.`
+          );
+          return;
+        }
+      } catch {
+        toasts.error.actionFailed('Failed to read image dimensions.');
+        return;
+      }
+
+      // Upload to edge function
+      setIsUploadingLogoTrue();
+
+      try {
+        await runLoggedAsync(
+          async () => {
+            const fileBase64 = await fileToBase64(file);
+            const result = await uploadLogo({
+              fileName: file.name,
+              mimeType:
+                file.type === 'image/jpeg' ||
+                file.type === 'image/png' ||
+                file.type === 'image/webp'
+                  ? file.type
+                  : ('image/png' satisfies AllowedImageMimeType),
+              fileBase64,
+              companyId: initialData?.id ?? undefined,
+              oldLogoUrl: logoUrl ?? undefined,
+            });
+
+            if (result?.serverError) {
+              throw new Error(result.serverError);
+            }
+
+            if (result?.validationErrors) {
+              throw new Error('Logo upload failed validation.');
+            }
+
+            const uploaded = result?.data;
+            if (!uploaded?.publicUrl) {
+              throw new Error('Upload response was missing a public URL.');
+            }
+
+            setLogoUrl(uploaded.publicUrl);
+            setLogoPreview(uploaded.publicUrl);
+            toasts.success.actionCompleted('Logo uploaded successfully!');
           },
-        });
+          {
+            message: 'Logo upload failed',
+            context: {
+              fileName: file.name,
+              companyId: initialData?.id ?? undefined,
+            },
+          }
+        );
+      } catch (error) {
+        const normalized = normalizeError(error, 'Failed to upload logo');
+        const errorMessage = normalized.message;
+
+        // Check if error is auth-related and show modal if so
+        if (
+          errorMessage.includes('signed in') ||
+          errorMessage.includes('auth') ||
+          errorMessage.includes('unauthorized')
+        ) {
+          openAuthModal({
+            valueProposition: 'Sign in to upload company logos',
+            redirectTo: pathname ?? undefined,
+          });
+        } else {
+          // Non-auth errors - show toast with retry option
+          toasts.raw.error('Failed to upload logo', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                handleLogoUpload(file);
+              },
+            },
+          });
+        }
+      } finally {
+        setIsUploadingLogoFalse();
       }
-    } finally {
-      setIsUploadingLogoFalse();
-    }
-  }, [user, status, openAuthModal, pathname, maxFileSize, maxDimension, uploadLogo, runLoggedAsync, initialData?.id, logoUrl]);
+    },
+    [
+      user,
+      status,
+      openAuthModal,
+      pathname,
+      maxFileSize,
+      maxDimension,
+      uploadLogo,
+      runLoggedAsync,
+      initialData?.id,
+      logoUrl,
+    ]
+  );
 
-  const onSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
 
-    // Proactive auth check - show modal before attempting action
-    if (status === 'loading') {
-      // Wait for auth check to complete
-      return;
-    }
+      // Proactive auth check - show modal before attempting action
+      if (status === 'loading') {
+        // Wait for auth check to complete
+        return;
+      }
 
-    if (!user) {
-      // User is not authenticated - show auth modal
-      openAuthModal({
-        valueProposition: 'Sign in to manage companies',
-        redirectTo: pathname ?? undefined,
+      if (!user) {
+        // User is not authenticated - show auth modal
+        openAuthModal({
+          valueProposition: 'Sign in to manage companies',
+          redirectTo: pathname ?? undefined,
+        });
+        return;
+      }
+
+      const formData = new FormData(e.currentTarget);
+
+      // Type guard for company_size enum (using Prisma-generated enum values)
+      function isCompanySize(value: unknown): value is company_size {
+        if (typeof value !== 'string') return false;
+        // Use Prisma-generated enum values from @prisma/client
+        const validSizes: company_size[] = [
+          'just_me',
+          '2-10',
+          '11-50',
+          '51-200',
+          '201-500',
+          '500+',
+        ];
+        // Type narrowing: value is string, check against valid enum values
+        return validSizes.includes(value as company_size);
+      }
+
+      // OPTIMIZATION: Use type-safe FormData utilities instead of type assertions
+      const sizeValue = getFormDataString(formData, 'size');
+      const data = {
+        name: getFormDataStringRequired(formData, 'name'),
+        website: getFormDataString(formData, 'website'),
+        logo: logoUrl,
+        description: getFormDataString(formData, 'description'),
+        size: sizeValue ? getFormDataEnum(formData, 'size', isCompanySize) : null,
+        industry: getFormDataString(formData, 'industry'),
+        using_cursor_since: useCursorDate
+          ? getFormDataString(formData, 'using_cursor_since')
+          : null,
+      };
+
+      // User is authenticated - proceed with form submission
+      await handleSubmit(async () => {
+        if (mode === 'create') {
+          const result = await createCompany(data);
+
+          if (result?.serverError || result?.validationErrors) {
+            throw new Error(result.serverError || 'Validation failed');
+          }
+
+          return result;
+        } else {
+          const companyId = initialData?.id;
+          if (!companyId) {
+            throw new Error('Company ID is required for updates');
+          }
+
+          const result = await updateCompany({
+            id: companyId,
+            ...data,
+          });
+
+          if (result?.serverError || result?.validationErrors) {
+            throw new Error(result.serverError || 'Validation failed');
+          }
+
+          return result;
+        }
       });
-      return;
-    }
-
-    const formData = new FormData(e.currentTarget);
-
-    // Type guard for company_size enum (using Prisma-generated enum values)
-    function isCompanySize(value: unknown): value is company_size {
-      if (typeof value !== 'string') return false;
-      // Use Prisma-generated enum values from @heyclaude/database-types/prisma
-      const validSizes: company_size[] = ['just_me', '2-10', '11-50', '51-200', '201-500', '500+'];
-      // Type narrowing: value is string, check against valid enum values
-      return validSizes.includes(value as company_size);
-    }
-
-    // OPTIMIZATION: Use type-safe FormData utilities instead of type assertions
-    const sizeValue = getFormDataString(formData, 'size');
-    const data = {
-      name: getFormDataStringRequired(formData, 'name'),
-      website: getFormDataString(formData, 'website'),
-      logo: logoUrl,
-      description: getFormDataString(formData, 'description'),
-      size: sizeValue ? getFormDataEnum(formData, 'size', isCompanySize) : null,
-      industry: getFormDataString(formData, 'industry'),
-      using_cursor_since: useCursorDate
-        ? getFormDataString(formData, 'using_cursor_since')
-        : null,
-    };
-
-    // User is authenticated - proceed with form submission
-    await handleSubmit(async () => {
-      if (mode === 'create') {
-        const result = await createCompany(data);
-
-        if (result?.serverError || result?.validationErrors) {
-          throw new Error(result.serverError || 'Validation failed');
-        }
-
-        return result;
-      } else {
-        const companyId = initialData?.id;
-        if (!companyId) {
-          throw new Error('Company ID is required for updates');
-        }
-
-        const result = await updateCompany({
-          id: companyId,
-          ...data,
-        });
-
-        if (result?.serverError || result?.validationErrors) {
-          throw new Error(result.serverError || 'Validation failed');
-        }
-
-        return result;
-      }
-    });
-  }, [user, status, openAuthModal, pathname, mode, handleSubmit, logoUrl, useCursorDate, initialData?.id]);
+    },
+    [
+      user,
+      status,
+      openAuthModal,
+      pathname,
+      mode,
+      handleSubmit,
+      logoUrl,
+      useCursorDate,
+      initialData?.id,
+    ]
+  );
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
@@ -407,7 +461,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
 
             {logoPreview ? (
               <div className="flex items-start gap-3">
-                <div className="relative h-24 w-24 overflow-hidden card-base">
+                <div className="card-base relative h-24 w-24 overflow-hidden">
                   <Image
                     src={logoPreview}
                     alt="Company logo preview"
@@ -444,8 +498,11 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                 </div>
               </div>
             ) : (
-              <label htmlFor={logoUploadId} className="border-border bg-muted/50 hover:bg-muted/80 flex cursor-pointer flex-col items-center justify-center card-base border-2 border-dashed p-8 transition-colors">
-                <div className="flex flex-col gap-2 items-center text-center">
+              <label
+                htmlFor={logoUploadId}
+                className="border-border bg-muted/50 hover:bg-muted/80 card-base flex cursor-pointer flex-col items-center justify-center border-2 border-dashed p-8 transition-colors"
+              >
+                <div className="flex flex-col items-center gap-2 text-center">
                   <FileText className="text-muted-foreground h-8 w-8" />
                   <div>
                     <p className="text-sm-medium">
@@ -479,9 +536,13 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                     );
                     const normalized = normalizeError(error, 'Failed to upload logo');
                     const errorMessage = normalized.message;
-                    
+
                     // Check if error is auth-related and show modal if so
-                    if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+                    if (
+                      errorMessage.includes('signed in') ||
+                      errorMessage.includes('auth') ||
+                      errorMessage.includes('unauthorized')
+                    ) {
                       openAuthModal({
                         valueProposition: 'Sign in to upload company logos',
                         redirectTo: pathname ?? undefined,
@@ -549,7 +610,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
           />
 
           <div className="space-y-2">
-            <label className="flex items-center gap-1 text-sm-medium">
+            <label className="text-sm-medium flex items-center gap-1">
               <input
                 type="checkbox"
                 checked={useCursorDate}
@@ -563,7 +624,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                 type="date"
                 name="using_cursor_since"
                 defaultValue={initialData?.using_cursor_since || ''}
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-1 text-sm ring-offset-background placeholder:text-muted-foreground file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-lg border px-3 py-1 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               />
             ) : null}
           </div>

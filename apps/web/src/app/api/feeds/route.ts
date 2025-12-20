@@ -24,9 +24,12 @@
  */
 
 import 'server-only';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@prisma/client';
 import {
-  createFormatHandlerRoute, createOptionsHandler as createApiOptionsHandler, type FormatHandlerConfig, type RouteHandlerContext,
+  createFormatHandlerRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  type FormatHandlerConfig,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { feedQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import {
@@ -44,7 +47,7 @@ type FeedType = 'atom' | 'rss';
 function toContentCategory(value: null | string): content_category | null {
   if (!value) return null;
   const normalized = value.trim().toLowerCase();
-  return isValidCategory(normalized) ? normalized : null;
+  return isValidCategory(normalized) ? (normalized as content_category) : null;
 }
 
 // Shared method args builder
@@ -181,29 +184,30 @@ export const GET = createFormatHandlerRoute<FeedType, { category?: null | string
               schema: { type: 'string' },
               description: 'Robots meta tag directive',
             },
+          },
+          example:
+            '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Claude Pro Directory</title><link>https://claudepro.directory</link><description>Community-driven directory of Claude configurations</description><item><title>Example Content</title><link>https://claudepro.directory/skills/example</link><description>Example content description</description></item></channel></rss>',
         },
-        example: '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Claude Pro Directory</title><link>https://claudepro.directory</link><description>Community-driven directory of Claude configurations</description><item><title>Example Content</title><link>https://claudepro.directory/skills/example</link><description>Example content description</description></item></channel></rss>',
-      },
-      400: {
-        description: 'Invalid type or category parameter',
-        schema: errorResponseSchema,
-        example: {
-          error: 'Invalid type or category parameter',
-          message: 'Invalid feed type. Valid types: rss, atom',
+        400: {
+          description: 'Invalid type or category parameter',
+          schema: errorResponseSchema,
+          example: {
+            error: 'Invalid type or category parameter',
+            message: 'Invalid feed type. Valid types: rss, atom',
+          },
+        },
+        500: {
+          description: 'Internal server error',
+          schema: errorResponseSchema,
+          example: {
+            error: 'Internal server error',
+            message: 'An unexpected error occurred while generating the feed',
+          },
         },
       },
-      500: {
-        description: 'Internal server error',
-        schema: errorResponseSchema,
-        example: {
-          error: 'Internal server error',
-          message: 'An unexpected error occurred while generating the feed',
-        },
-      },
+      summary: 'Generate RSS or Atom feeds',
+      tags: ['feeds', 'rss', 'atom'],
     },
-    summary: 'Generate RSS or Atom feeds',
-    tags: ['feeds', 'rss', 'atom'],
-  },
     operation: 'FeedsAPI',
     querySchema: feedQuerySchema, // Type compatibility with exactOptionalPropertyTypes
     route: getVersionedRoute('feeds'),

@@ -148,12 +148,9 @@ describe('useMediaQuery', () => {
   it('should update when query string changes', () => {
     mockMediaQueryList.matches = false;
 
-    const { result, rerender } = renderHook(
-      ({ query }) => useMediaQuery(query),
-      {
-        initialProps: { query: '(min-width: 768px)' },
-      }
-    );
+    const { result, rerender } = renderHook(({ query }) => useMediaQuery(query), {
+      initialProps: { query: '(min-width: 768px)' },
+    });
 
     expect(result.current).toBe(false);
 
@@ -174,12 +171,8 @@ describe('useMediaQuery', () => {
   });
 
   it('should handle multiple media queries', () => {
-    const { result: result1 } = renderHook(() =>
-      useMediaQuery('(min-width: 768px)')
-    );
-    const { result: result2 } = renderHook(() =>
-      useMediaQuery('(prefers-color-scheme: dark)')
-    );
+    const { result: result1 } = renderHook(() => useMediaQuery('(min-width: 768px)'));
+    const { result: result2 } = renderHook(() => useMediaQuery('(prefers-color-scheme: dark)'));
 
     expect(mockMatchMedia).toHaveBeenCalledTimes(2);
     expect(result1.current).toBeDefined();

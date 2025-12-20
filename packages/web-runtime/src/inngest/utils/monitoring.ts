@@ -1,9 +1,9 @@
 /**
  * BetterStack Monitoring Utilities
- * 
+ *
  * Modular, feature-flagged monitoring system for Inngest functions and API endpoints.
  * Can be enabled/disabled via feature flags without code changes.
- * 
+ *
  * @module web-runtime/inngest/utils/monitoring
  */
 
@@ -14,7 +14,7 @@ import { logger } from '../../logging/server';
 
 /**
  * Check if BetterStack monitoring is enabled
- * 
+ *
  * Master switch: Checks 'monitoring.betterstack.enabled' flag
  * If disabled, all monitoring functions return early (no-op)
  */
@@ -66,16 +66,22 @@ export function isApiEndpointMonitoringEnabled(): boolean {
 
 /**
  * Send BetterStack heartbeat (non-blocking, feature-flagged)
- * 
+ *
  * Follows the same pattern as existing Vercel cron job heartbeats.
  * Heartbeat failures are silent to avoid breaking function execution.
- * 
+ *
  * @param envVarName - Environment variable name containing heartbeat URL
  * @param context - Optional context for logging (function name, etc.)
  */
 export function sendBetterStackHeartbeat(
   envVarName: string,
-  context?: { functionName?: string; eventType?: string; route?: string; method?: string; duration?: number }
+  context?: {
+    functionName?: string;
+    eventType?: string;
+    route?: string;
+    method?: string;
+    duration?: number;
+  }
 ): void {
   // Feature flag check - early return if disabled
   if (!isBetterStackMonitoringEnabled()) {
@@ -86,10 +92,7 @@ export function sendBetterStackHeartbeat(
   if (!heartbeatUrl) {
     // Only log in development to avoid noise
     if (isDevelopment) {
-      logger.debug(
-        { envVarName, ...context },
-        'BetterStack heartbeat URL not configured'
-      );
+      logger.debug({ envVarName, ...context }, 'BetterStack heartbeat URL not configured');
     }
     return;
   }
@@ -106,10 +109,10 @@ export function sendBetterStackHeartbeat(
 
 /**
  * Send BetterStack heartbeat for critical function failures
- * 
+ *
  * Used in Inngest onFailure callbacks.
  * Only sends if critical failure monitoring is enabled.
- * 
+ *
  * @param envVarName - Environment variable name (e.g., 'BETTERSTACK_HEARTBEAT_CRITICAL_FAILURE')
  * @param context - Context for logging
  */
@@ -134,10 +137,10 @@ export function sendCriticalFailureHeartbeat(
 
 /**
  * Send BetterStack heartbeat for successful cron function execution
- * 
+ *
  * Used at the end of cron-triggered Inngest functions.
  * Only sends if cron success monitoring is enabled.
- * 
+ *
  * @param envVarName - Environment variable name (e.g., 'BETTERSTACK_HEARTBEAT_INNGEST_CRON')
  * @param context - Context for logging
  */
@@ -154,10 +157,10 @@ export function sendCronSuccessHeartbeat(
 
 /**
  * Send BetterStack heartbeat for API endpoint success
- * 
+ *
  * Used in API route handlers for endpoint monitoring.
  * Only sends if API endpoint monitoring is enabled.
- * 
+ *
  * @param envVarName - Environment variable name (e.g., 'BETTERSTACK_HEARTBEAT_API_SEARCH')
  * @param context - Context for logging
  */

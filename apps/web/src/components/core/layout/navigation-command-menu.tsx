@@ -2,7 +2,11 @@
 
 import * as Icons from '@heyclaude/web-runtime/icons';
 import { getCommandMenuNavigationData } from '@heyclaude/web-runtime/config/navigation';
-import { logClientWarn, logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import {
+  logClientWarn,
+  logClientError,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/client';
 import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
 import {
   CommandDialog,
@@ -27,7 +31,7 @@ type NavigationMenuItem = {
 
 /**
  * Command palette with navigation + content search (like Vercel)
- * 
+ *
  * Features:
  * - Navigation items (static)
  * - Content search results (from Supabase API)
@@ -47,7 +51,11 @@ export function NavigationCommandMenu({
   const { value: internalOpen, setValue: setInternalOpen } = useBoolean();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<DisplayableContent[]>([]);
-  const { value: isSearching, setTrue: setIsSearchingTrue, setFalse: setIsSearchingFalse } = useBoolean();
+  const {
+    value: isSearching,
+    setTrue: setIsSearchingTrue,
+    setFalse: setIsSearchingFalse,
+  } = useBoolean();
   const router = useRouter();
   const inputId = useId();
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -161,43 +169,51 @@ export function NavigationCommandMenu({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [open, setOpen]);
 
-  const handleSelect = useCallback((path: string) => {
-    setOpen(false);
-    setSearchQuery('');
-    setSearchResults([]);
-    // Strip query parameters added for uniqueness (section/group params)
-    const cleanPath = path.split('?')[0];
-    if (cleanPath) {
-      router.push(cleanPath);
-    }
-  }, [router, setOpen]);
+  const handleSelect = useCallback(
+    (path: string) => {
+      setOpen(false);
+      setSearchQuery('');
+      setSearchResults([]);
+      // Strip query parameters added for uniqueness (section/group params)
+      const cleanPath = path.split('?')[0];
+      if (cleanPath) {
+        router.push(cleanPath);
+      }
+    },
+    [router, setOpen]
+  );
 
   // Render search result item - MUST be before any conditional returns (React hooks rule)
-  const renderSearchResult = useCallback((result: DisplayableContent, index: number) => {
-    const href = `/${result.category}/${result.slug}`;
-    // Use slug as unique key (id may not exist on DisplayableContent)
-    const uniqueKey = result.slug ? `search-${result.category}-${result.slug}-${index}` : `search-${index}`;
-    return (
-      <CommandItem
-        key={uniqueKey}
-        onSelect={() => handleSelect(href)}
-        className="group cursor-pointer"
-      >
-        <span className="flex items-center gap-2">
-          {getIcon('FileText')}
-          <div className="min-w-0 flex-1 flex flex-col items-start">
-            <span className="w-full truncate">{result.title}</span>
-            {result.description ? (
-              <span className="line-clamp-1 text-muted-foreground text-xs transition-colors group-hover:text-accent">
-                {result.description}
-              </span>
-            ) : null}
-            <span className="text-xs capitalize text-muted-foreground">{result.category}</span>
-          </div>
-        </span>
-      </CommandItem>
-    );
-  }, [handleSelect]);
+  const renderSearchResult = useCallback(
+    (result: DisplayableContent, index: number) => {
+      const href = `/${result.category}/${result.slug}`;
+      // Use slug as unique key (id may not exist on DisplayableContent)
+      const uniqueKey = result.slug
+        ? `search-${result.category}-${result.slug}-${index}`
+        : `search-${index}`;
+      return (
+        <CommandItem
+          key={uniqueKey}
+          onSelect={() => handleSelect(href)}
+          className="group cursor-pointer"
+        >
+          <span className="flex items-center gap-2">
+            {getIcon('FileText')}
+            <div className="flex min-w-0 flex-1 flex-col items-start">
+              <span className="w-full truncate">{result.title}</span>
+              {result.description ? (
+                <span className="text-muted-foreground group-hover:text-accent line-clamp-1 text-xs transition-colors">
+                  {result.description}
+                </span>
+              ) : null}
+              <span className="text-muted-foreground text-xs capitalize">{result.category}</span>
+            </div>
+          </span>
+        </CommandItem>
+      );
+    },
+    [handleSelect]
+  );
 
   // Dynamic icon mapper
   const getIcon = (icon_name: null | string | undefined) => {
@@ -208,7 +224,7 @@ export function NavigationCommandMenu({
     // Type guard: check if it's a valid React component
     if (typeof Icon === 'function') {
       const IconComponent = Icon as React.ComponentType<{ className?: string }>;
-      return <IconComponent className="h-4 w-4 shrink-0 text-muted-foreground" />;
+      return <IconComponent className="text-muted-foreground h-4 w-4 shrink-0" />;
     }
     return null;
   };
@@ -220,15 +236,17 @@ export function NavigationCommandMenu({
     // This prevents duplicate keys when the same path appears in multiple groups
     const uniqueKey = `${groupName}-${path}-${item.title}-${index}`;
     return (
-      <CommandItem key={uniqueKey} onSelect={() => handleSelect(path)} className="group cursor-pointer">
+      <CommandItem
+        key={uniqueKey}
+        onSelect={() => handleSelect(path)}
+        className="group cursor-pointer"
+      >
         <span className="flex items-center gap-2">
           {getIcon(item.icon_name)}
           <div className="flex flex-col items-start">
             <span>{item.title}</span>
             {item.description ? (
-              <span
-                className="text-muted-foreground text-xs transition-colors group-hover:text-accent"
-              >
+              <span className="text-muted-foreground group-hover:text-accent text-xs transition-colors">
                 {item.description}
               </span>
             ) : null}
@@ -263,63 +281,69 @@ export function NavigationCommandMenu({
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput
-          id={inputId}
-          name="command-search"
-          placeholder="Search navigation and content... (⌘K)"
-          value={searchQuery}
-          onValueChange={setSearchQuery}
-          className="group"
-        />
-        <CommandList>
-          {hasSearchQuery && isSearching && (
-            <CommandEmpty className="text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-                Searching...
-              </span>
-            </CommandEmpty>
-          )}
-          
-          {hasSearchQuery && !isSearching && searchResults.length === 0 && (
-            <CommandEmpty className="text-muted-foreground">No results found.</CommandEmpty>
-          )}
+      <CommandInput
+        id={inputId}
+        name="command-search"
+        placeholder="Search navigation and content... (⌘K)"
+        value={searchQuery}
+        onValueChange={setSearchQuery}
+        className="group"
+      />
+      <CommandList>
+        {hasSearchQuery && isSearching && (
+          <CommandEmpty className="text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <span className="border-accent h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+              Searching...
+            </span>
+          </CommandEmpty>
+        )}
 
-          {/* Search Results - Show first when user is searching */}
-          {hasSearchQuery && searchResults.length > 0 && (
-            <>
-              <CommandGroup heading="Search Results">
-                {searchResults.map((result, index) => renderSearchResult(result, index))}
-              </CommandGroup>
-              {showNavigation && <CommandSeparator />}
-            </>
-          )}
+        {hasSearchQuery && !isSearching && searchResults.length === 0 && (
+          <CommandEmpty className="text-muted-foreground">No results found.</CommandEmpty>
+        )}
 
-          {/* Navigation Items - Show when no search or after search results */}
-          {showNavigation && navigationData.primary && navigationData.primary.length > 0 && (
-            <>
-              <CommandGroup heading="Primary Navigation">
-                {navigationData.primary.map((item, index) => renderItem(item, index, 'primary')).filter(Boolean)}
-              </CommandGroup>
-              <CommandSeparator />
-            </>
-          )}
-
-          {showNavigation && navigationData.secondary && navigationData.secondary.length > 0 && (
-            <>
-              <CommandGroup heading="More">
-                {navigationData.secondary.map((item, index) => renderItem(item, index, 'secondary')).filter(Boolean)}
-              </CommandGroup>
-              <CommandSeparator />
-            </>
-          )}
-
-          {showNavigation && navigationData.actions && navigationData.actions.length > 0 && (
-            <CommandGroup heading="Actions">
-              {navigationData.actions.map((item, index) => renderItem(item, index, 'actions')).filter(Boolean)}
+        {/* Search Results - Show first when user is searching */}
+        {hasSearchQuery && searchResults.length > 0 && (
+          <>
+            <CommandGroup heading="Search Results">
+              {searchResults.map((result, index) => renderSearchResult(result, index))}
             </CommandGroup>
-          )}
-        </CommandList>
-      </CommandDialog>
+            {showNavigation && <CommandSeparator />}
+          </>
+        )}
+
+        {/* Navigation Items - Show when no search or after search results */}
+        {showNavigation && navigationData.primary && navigationData.primary.length > 0 && (
+          <>
+            <CommandGroup heading="Primary Navigation">
+              {navigationData.primary
+                .map((item, index) => renderItem(item, index, 'primary'))
+                .filter(Boolean)}
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        )}
+
+        {showNavigation && navigationData.secondary && navigationData.secondary.length > 0 && (
+          <>
+            <CommandGroup heading="More">
+              {navigationData.secondary
+                .map((item, index) => renderItem(item, index, 'secondary'))
+                .filter(Boolean)}
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        )}
+
+        {showNavigation && navigationData.actions && navigationData.actions.length > 0 && (
+          <CommandGroup heading="Actions">
+            {navigationData.actions
+              .map((item, index) => renderItem(item, index, 'actions'))
+              .filter(Boolean)}
+          </CommandGroup>
+        )}
+      </CommandList>
+    </CommandDialog>
   );
 }

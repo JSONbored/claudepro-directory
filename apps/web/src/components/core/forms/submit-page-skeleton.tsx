@@ -2,7 +2,7 @@
 
 /**
  * Submit Page Skeleton
- * 
+ *
  * Perfectly matches /submit structure:
  * - Hero section (with stats badges)
  * - Two-column layout: Form (left) + Sidebar (right)
@@ -48,7 +48,7 @@ export function SubmitPageSkeleton() {
       >
         {/* Form Section (Left) */}
         <motion.div
-          className="min-w-0 w-full"
+          className="w-full min-w-0"
           initial={!prefersReducedMotion ? { opacity: 0, x: -20 } : false}
           animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
           transition={{ ...SPRING.smooth, delay: 0.3 }}

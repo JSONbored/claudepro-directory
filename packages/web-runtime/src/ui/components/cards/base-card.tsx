@@ -47,7 +47,10 @@ import { motion } from 'motion/react';
 import { MICROINTERACTIONS } from '../../../design-system/index.ts';
 import { useReducedMotion } from '../../../hooks/motion/index.ts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../card.tsx';
-import { type UseCardNavigationOptions, useCardNavigation } from '../../../hooks/use-card-navigation.ts';
+import {
+  type UseCardNavigationOptions,
+  useCardNavigation,
+} from '../../../hooks/use-card-navigation.ts';
 // COLORS removed - border colors handled via className
 // useTheme removed - reserved for future use
 import { logger } from '../../../logger.ts';
@@ -64,7 +67,6 @@ export interface BaseCardComponentProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export interface BaseCardProps {
-
   /**
    * Target path for card navigation (optional for review cards)
    * @example "/agents/code-reviewer"
@@ -169,7 +171,6 @@ export interface BaseCardProps {
    * (e.g., "50% popular", "5-10 min")
    */
   customMetadataText?: ReactNode;
-
 
   /**
    * Custom click handler (called before navigation)
@@ -321,9 +322,7 @@ export const BaseCard = memo(
         <>
           {/* Top accent border for related content */}
           {topAccent && (
-            <div
-              className="absolute top-0 right-0 left-0 h-px bg-border opacity-70 transition-opacity group-hover:opacity-100"
-            />
+            <div className="bg-border absolute top-0 right-0 left-0 h-px opacity-70 transition-opacity group-hover:opacity-100" />
           )}
 
           <CardHeaderComponent
@@ -338,21 +337,23 @@ export const BaseCard = memo(
                 <div className="flex-1 overflow-visible">
                   {/* Top badges slot (type, difficulty, sponsored, etc.) */}
                   {renderTopBadges && (
-                    <div className="mb-1 flex items-center flex-wrap gap-2 overflow-visible">
+                    <div className="mb-1 flex flex-wrap items-center gap-2 overflow-visible">
                       {renderTopBadges()}
                     </div>
                   )}
 
                   {/* Title */}
                   <CardTitleComponent
-                    className={`text-lg font-semibold text-foreground ${disableNavigation ? '' : 'transition-colors-smooth'}`}
+                    className={`text-foreground text-lg font-semibold ${disableNavigation ? '' : 'transition-colors-smooth'}`}
                   >
                     {displayTitle}
                   </CardTitleComponent>
 
                   {/* Description */}
                   {description && (
-                    <CardDescriptionComponent className={'mt-1 line-clamp-2 text-muted-foreground text-sm'}>
+                    <CardDescriptionComponent
+                      className={'text-muted-foreground mt-1 line-clamp-2 text-sm'}
+                    >
                       {description}
                     </CardDescriptionComponent>
                   )}
@@ -412,7 +413,7 @@ export const BaseCard = memo(
                   <UnifiedBadge
                     variant="base"
                     style="outline"
-                    className="border-muted-foreground/20 text-xs font-semibold text-muted-foreground"
+                    className="border-muted-foreground/20 text-muted-foreground text-xs font-semibold"
                   >
                     +{overflowCount}
                   </UnifiedBadge>
@@ -424,47 +425,45 @@ export const BaseCard = memo(
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               {/* Left side: Author and custom metadata */}
               {(showAuthor && author) || customMetadataText ? (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  {showAuthor && author && (() => {
-                    // Only show profile link if authorProfileUrl is explicitly provided
-                    // Don't fallback to default - if no profile URL exists, don't show a link
-                    if (authorProfileUrl) {
-                      // Check if this is an internal user profile link
-                      const isInternalProfile = authorProfileUrl.startsWith('/u/');
-                      
-                      return (
-                        <span>
-                          by{' '}
-                          {isInternalProfile ? (
-                            <a
-                              href={authorProfileUrl}
-                              className="transition-colors hover:text-foreground hover:underline"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {typeof author === 'string' ? author : author}
-                            </a>
-                          ) : (
-                            <a
-                              href={authorProfileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="transition-colors hover:text-foreground hover:underline"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {typeof author === 'string' ? author : author}
-                            </a>
-                          )}
-                        </span>
-                      );
-                    }
-                    
-                    // No profile URL - just show author name without link
-                    return (
-                      <span>
-                        by {typeof author === 'string' ? author : author}
-                      </span>
-                    );
-                  })()}
+                <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                  {showAuthor &&
+                    author &&
+                    (() => {
+                      // Only show profile link if authorProfileUrl is explicitly provided
+                      // Don't fallback to default - if no profile URL exists, don't show a link
+                      if (authorProfileUrl) {
+                        // Check if this is an internal user profile link
+                        const isInternalProfile = authorProfileUrl.startsWith('/u/');
+
+                        return (
+                          <span>
+                            by{' '}
+                            {isInternalProfile ? (
+                              <a
+                                href={authorProfileUrl}
+                                className="hover:text-foreground transition-colors hover:underline"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {typeof author === 'string' ? author : author}
+                              </a>
+                            ) : (
+                              <a
+                                href={authorProfileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-foreground transition-colors hover:underline"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {typeof author === 'string' ? author : author}
+                              </a>
+                            )}
+                          </span>
+                        );
+                      }
+
+                      // No profile URL - just show author name without link
+                      return <span>by {typeof author === 'string' ? author : author}</span>;
+                    })()}
                   {customMetadataText}
                 </div>
               ) : (
@@ -472,7 +471,7 @@ export const BaseCard = memo(
               )}
 
               {/* Right side: Metadata badges and actions */}
-              <div className="flex items-center gap-2 text-xs flex-nowrap">
+              <div className="flex flex-nowrap items-center gap-2 text-xs">
                 {/* Metadata badges slot (view count, item count, etc.) */}
                 {renderMetadataBadges?.()}
 
@@ -488,13 +487,16 @@ export const BaseCard = memo(
       // For non-navigation cards, use CardComponent. For interactive cards, use motion.div with Card styling
       // Motion.dev handles hover border color via whileHover - no CSS hover classes needed
       // Base classes: layout, border width, background, text - border color comes from CARD_INTERACTIVE for interactive cards
-      const cardBaseClasses = 'flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm';
+      const cardBaseClasses =
+        'flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm';
       // For non-interactive cards, add border color explicitly
       // For interactive cards, CARD_INTERACTIVE provides border-border/50
       const cardBorderColor = disableNavigation ? 'border-border/50' : '';
-      const cardInteractiveClasses = disableNavigation ? '' : 'card-gradient transition-smooth group cursor-pointer border-border/50';
+      const cardInteractiveClasses = disableNavigation
+        ? ''
+        : 'card-gradient transition-smooth group cursor-pointer border-border/50';
       const cardClassName = `${cardBaseClasses} ${cardBorderColor} ${cardInteractiveClasses} ${variant === 'detailed' ? 'p-6' : ''} ${variant === 'review' ? 'rounded-lg border border-border/50 p-4' : ''} ${compactMode ? 'p-4' : ''} ${className || ''} relative`;
-      
+
       const cardElement = disableNavigation ? (
         <CardComponent
           className={cardClassName}
@@ -518,12 +520,14 @@ export const BaseCard = memo(
             transformStyle: 'preserve-3d',
           }}
           initial={false}
-          whileHover={shouldReduceMotion
-            ? {}
-            : {
-                ...MICROINTERACTIONS.card.hover,
-                // Border color on hover handled via className (NO inline styles)
-              }}
+          whileHover={
+            shouldReduceMotion
+              ? {}
+              : {
+                  ...MICROINTERACTIONS.card.hover,
+                  // Border color on hover handled via className (NO inline styles)
+                }
+          }
           whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
           transition={MICROINTERACTIONS.card.transition}
           onClick={handleCardClick}
@@ -553,17 +557,22 @@ export const BaseCard = memo(
       return finalCardContent;
     } catch (error) {
       const normalized = normalizeError(error, 'BaseCard: Rendering failed');
-      logger.warn({ err: normalized,
-        category: 'render',
-        component: 'BaseCard',
-        recoverable: true,
-        targetPath,
-        hasTitle: Boolean(displayTitle), }, '[Render] BaseCard rendering failed');
+      logger.warn(
+        {
+          err: normalized,
+          category: 'render',
+          component: 'BaseCard',
+          recoverable: true,
+          targetPath,
+          hasTitle: Boolean(displayTitle),
+        },
+        '[Render] BaseCard rendering failed'
+      );
       // Return a minimal fallback
       return (
         <div className="rounded-lg border p-4" role="article" aria-label={ariaLabel}>
           <h3 className="font-semibold">{displayTitle}</h3>
-          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          {description && <p className="text-muted-foreground text-sm">{description}</p>}
         </div>
       );
     }

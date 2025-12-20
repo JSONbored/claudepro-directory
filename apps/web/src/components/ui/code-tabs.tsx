@@ -2,10 +2,10 @@
 
 /**
  * Code Tabs Component
- * 
+ *
  * A tabbed interface for displaying multiple code snippets with syntax highlighting.
  * Perfect for showing installation commands, configuration examples, or multi-file code samples.
- * 
+ *
  * @example
  * ```tsx
  * <CodeTabs
@@ -18,13 +18,13 @@
  *   copyButton={true}
  * />
  * ```
- * 
+ *
  * **When to use:**
  * - Installation instructions: Show commands for different package managers
  * - Configuration examples: Multiple config file formats
  * - Multi-file code samples: Related code files in tabs
  * - Documentation: Alternative approaches or examples
- * 
+ *
  * **Key features:**
  * - Tab-based navigation between code snippets
  * - Syntax highlighting via Shiki
@@ -72,10 +72,7 @@ function CodeTabsContent({
 }) {
   const { resolvedTheme } = useTheme();
 
-  const [highlightedCodes, setHighlightedCodes] = React.useState<Record<
-    string,
-    string
-  >>(codes); // Start with raw codes for instant rendering
+  const [highlightedCodes, setHighlightedCodes] = React.useState<Record<string, string>>(codes); // Start with raw codes for instant rendering
 
   React.useEffect(() => {
     async function loadHighlightedCode() {
@@ -109,14 +106,14 @@ function CodeTabsContent({
     <>
       <TabsList
         data-slot="install-tabs-list"
-        className="relative flex h-10 w-full justify-between rounded-none border-b border-border/75 bg-muted px-4 py-4 text-current dark:border-border/50"
+        className="border-border/75 bg-muted dark:border-border/50 relative flex h-10 w-full justify-between rounded-none border-b px-4 py-4 text-current"
       >
         <div className="flex h-full gap-x-3">
           {Object.keys(codes).map((code) => (
             <TabsTrigger
               key={code}
               value={code}
-              className="px-4 text-muted-foreground data-[state=active]:text-current"
+              className="text-muted-foreground px-4 data-[state=active]:text-current"
             >
               {code}
             </TabsTrigger>
@@ -140,7 +137,7 @@ function CodeTabsContent({
           className="flex w-full items-center overflow-auto p-4 text-sm"
           value={code}
         >
-          <div className="w-full [&>pre]:m-0 [&>pre]:p-4 [&>pre]:bg-transparent! [&>pre]:border-none [&>pre]:text-[13px] [&>pre]:leading-relaxed [&_code]:text-[13px] [&_code]:leading-relaxed [&_code]:bg-transparent! [&_.shiki]:bg-transparent!">
+          <div className="w-full [&_.shiki]:bg-transparent! [&_code]:bg-transparent! [&_code]:text-[13px] [&_code]:leading-relaxed [&>pre]:m-0 [&>pre]:border-none [&>pre]:bg-transparent! [&>pre]:p-4 [&>pre]:text-[13px] [&>pre]:leading-relaxed">
             {highlightedCodes[code] !== undefined && highlightedCodes[code] !== rawCode ? (
               <div dangerouslySetInnerHTML={{ __html: highlightedCodes[code]! }} />
             ) : (
@@ -177,23 +174,24 @@ function CodeTabs({
   }, [value]);
 
   // Handle value changes
-  const handleValueChange = React.useCallback((newValue: string) => {
-    setActiveValue(newValue);
-    onValueChange?.(newValue);
-  }, [onValueChange]);
+  const handleValueChange = React.useCallback(
+    (newValue: string) => {
+      setActiveValue(newValue);
+      onValueChange?.(newValue);
+    },
+    [onValueChange]
+  );
 
   // Handle controlled vs uncontrolled properly
-  const finalTabsProps = value !== undefined
-    ? { value, onValueChange: handleValueChange }
-    : { defaultValue: defaultValue ?? firstKey, onValueChange: handleValueChange };
+  const finalTabsProps =
+    value !== undefined
+      ? { value, onValueChange: handleValueChange }
+      : { defaultValue: defaultValue ?? firstKey, onValueChange: handleValueChange };
 
   return (
     <Tabs
       data-slot="install-tabs"
-      className={cn(
-        'w-full gap-0 bg-muted/50 rounded-xl border overflow-hidden',
-        className,
-      )}
+      className={cn('bg-muted/50 w-full gap-0 overflow-hidden rounded-xl border', className)}
       {...finalTabsProps}
     >
       <CodeTabsContent

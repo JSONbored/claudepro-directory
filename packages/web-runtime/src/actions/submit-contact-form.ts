@@ -18,65 +18,75 @@ export const submitContactForm = authedAction
   .inputSchema(submitContactFormSchema)
   .outputSchema(insertContactSubmissionReturnsSchema)
   .metadata({ actionName: 'submitContactForm', category: 'form' })
-  .action(async ({ parsedInput, ctx }): Promise<z.infer<typeof insertContactSubmissionReturnsSchema>> => {
-    const { runRpc } = await import('./run-rpc-instance.ts');
-    const { revalidatePath, revalidateTag } = await import('next/cache');
-    
-    const args = {
-      'p_name': parsedInput.name,
-      'p_email': parsedInput.email,
-      'p_category': parsedInput.category,
-      'p_message': parsedInput.message,
-      'p_metadata': parsedInput.metadata,
-    };
-    
-    const rawResult = await runRpc<z.infer<typeof insertContactSubmissionReturnsSchema>>(
-      'insert_contact_submission',
-      args,
-      {
-        action: 'submitContactForm.rpc',
-        userId: ctx.userId,
+  .action(
+    async ({ parsedInput, ctx }): Promise<z.infer<typeof insertContactSubmissionReturnsSchema>> => {
+      const { runRpc } = await import('./run-rpc-instance.ts');
+      const { revalidatePath, revalidateTag } = await import('next/cache');
+
+      const args = {
+        p_name: parsedInput.name,
+        p_email: parsedInput.email,
+        p_category: parsedInput.category,
+        p_message: parsedInput.message,
+        p_metadata: parsedInput.metadata,
+      };
+
+      const rawResult = await runRpc<z.infer<typeof insertContactSubmissionReturnsSchema>>(
+        'insert_contact_submission',
+        args,
+        {
+          action: 'submitContactForm.rpc',
+          userId: ctx.userId,
+        }
+      );
+
+      // insertContactSubmissionReturnsSchema is an array
+      const result: z.infer<typeof insertContactSubmissionReturnsSchema> = rawResult;
+
+      // Execute post-action hook
+      try {
+        const firstElement = result[0];
+        const id = firstElement?.submission_id;
+        if (id) {
+          const { onContactSubmission } = await import('./hooks/contact-hooks.ts');
+          await onContactSubmission(
+            { submission_id: id },
+            ctx,
+            {
+              name: parsedInput.name,
+              email: parsedInput.email,
+              category: parsedInput.category,
+              message: parsedInput.message,
+            }
+          );
+          // Hook doesn't modify the result array, just processes side effects
+        }
+      } catch (hookError) {
+        // Log hook errors but don't fail the action
+        const { logger } = await import('../logger.ts');
+        const { normalizeError } = await import('../errors.ts');
+        const normalized = normalizeError(hookError, 'Hook onContactSubmission failed');
+        logger.error(
+          {
+            err: normalized,
+            hookName: 'onContactSubmission',
+            actionName: 'submitContactForm',
+            userId: ctx.userId,
+          },
+          'Post-action hook onContactSubmission failed'
+        );
       }
-    );
-    
-    // insertContactSubmissionReturnsSchema is an array
-    const result: z.infer<typeof insertContactSubmissionReturnsSchema> = rawResult;
-    
-    // Execute post-action hook
-    try {
+
+      // Cache invalidation
+      revalidatePath('/admin/contact-submissions');
       const firstElement = result[0];
       const id = firstElement?.submission_id;
       if (id) {
-        const { onContactSubmission } = await import('./hooks/contact-hooks.ts');
-        await onContactSubmission(
-          { submission_id: id },
-          ctx,
-          parsedInput
-        );
-        // Hook doesn't modify the result array, just processes side effects
+        revalidateTag(`contact-submission-${id}`, 'default');
       }
-    } catch (hookError) {
-      // Log hook errors but don't fail the action
-      const { logger } = await import('../logger.ts');
-      const { normalizeError } = await import('../errors.ts');
-      const normalized = normalizeError(hookError, 'Hook onContactSubmission failed');
-      logger.error({
-        err: normalized,
-        hookName: 'onContactSubmission',
-        actionName: 'submitContactForm',
-        userId: ctx.userId,
-      }, 'Post-action hook onContactSubmission failed');
+      revalidateTag('contact', 'default');
+      revalidateTag('submissions', 'default');
+
+      return result;
     }
-    
-    // Cache invalidation
-    revalidatePath('/admin/contact-submissions');
-    const firstElement = result[0];
-    const id = firstElement?.submission_id;
-    if (id) {
-      revalidateTag(`contact-submission-${id}`, 'default');
-    }
-    revalidateTag('contact', 'default');
-    revalidateTag('submissions', 'default');
-    
-    return result;
-  });
+  );

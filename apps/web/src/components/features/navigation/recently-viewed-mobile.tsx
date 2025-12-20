@@ -1,6 +1,9 @@
 'use client';
 
-import { useRecentlyViewed, getCategoryRoute } from '@heyclaude/web-runtime/hooks/use-recently-viewed';
+import {
+  useRecentlyViewed,
+  getCategoryRoute,
+} from '@heyclaude/web-runtime/hooks/use-recently-viewed';
 import { useLocalStorage } from '@heyclaude/web-runtime/hooks/use-local-storage';
 import { Clock, Trash, X } from '@heyclaude/web-runtime/icons';
 import {
@@ -32,7 +35,7 @@ const DISMISS_KEY = 'heyclaude_recently_viewed_mobile_dismissed';
 export function RecentlyViewedMobileTray() {
   const { recentlyViewed, isLoaded, removeItem, clearAll } = useRecentlyViewed();
   const { value: open, setTrue: setOpenTrue, setFalse: setOpenFalse } = useBoolean();
-  
+
   // Use useLocalStorage for dismiss state
   const { value: dismissedValue, setValue: setDismissedValue } = useLocalStorage<string | null>(
     DISMISS_KEY,
@@ -41,7 +44,7 @@ export function RecentlyViewedMobileTray() {
       syncAcrossTabs: false,
     }
   );
-  
+
   const dismissed = dismissedValue === 'true';
 
   useEffect(() => {
@@ -67,21 +70,21 @@ export function RecentlyViewedMobileTray() {
     <>
       <button
         type="button"
-        className="fixed bottom-20 left-1/2 z-40 flex -translate-x-1/2 items-center gap-1 rounded-full border border-border/60 bg-card/90 px-4 py-2 text-sm shadow-lg backdrop-blur md:hidden"
+        className="border-border/60 bg-card/90 fixed bottom-20 left-1/2 z-40 flex -translate-x-1/2 items-center gap-1 rounded-full border px-4 py-2 text-sm shadow-lg backdrop-blur md:hidden"
         onClick={setOpenTrue}
       >
         <Clock className="h-4 w-4" aria-hidden="true" />
         Recently viewed ({recentlyViewed.length})
       </button>
 
-      <Sheet open={open} onOpenChange={(open) => open ? setOpenTrue() : setOpenFalse()}>
+      <Sheet open={open} onOpenChange={(open) => (open ? setOpenTrue() : setOpenFalse())}>
         <SheetContent side="bottom" className="h-[80vh] overflow-y-auto px-4 md:hidden">
           <SheetHeader className="px-6">
             <SheetTitle>Recently Viewed</SheetTitle>
             <SheetDescription>Your locally saved browsing history.</SheetDescription>
           </SheetHeader>
           <div className="space-y-6 px-6 pb-6">
-            <div className="flex items-center gap-1 text-muted-foreground text-sm">
+            <div className="text-muted-foreground flex items-center gap-1 text-sm">
               <Button variant="ghost" size="sm" onClick={clearAll} className="gap-1">
                 <Trash className="h-4 w-4" aria-hidden="true" />
                 Clear all
@@ -95,7 +98,7 @@ export function RecentlyViewedMobileTray() {
               {sortedItems.map((item) => (
                 <li
                   key={`${item.category}-${item.slug}`}
-                  className="rounded-xl border border-border/50 p-4"
+                  className="border-border/50 rounded-xl border p-4"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -118,14 +121,14 @@ export function RecentlyViewedMobileTray() {
                     </button>
                   </div>
                   {item.description ? (
-                    <p className="mt-2 line-clamp-3 text-muted-foreground text-sm">
+                    <p className="text-muted-foreground mt-2 line-clamp-3 text-sm">
                       {item.description}
                     </p>
                   ) : null}
                   {item.tags && item.tags.length > 0 ? (
-                    <div className="mt-4 flex flex-wrap gap-1 text-muted-foreground text-xs">
+                    <div className="text-muted-foreground mt-4 flex flex-wrap gap-1 text-xs">
                       {item.tags.slice(0, 3).map((tag) => (
-                        <span key={tag} className={cn('rounded-full bg-muted', 'px-1 py-[6px]')}>
+                        <span key={tag} className={cn('bg-muted rounded-full', 'px-1 py-[6px]')}>
                           #{tag}
                         </span>
                       ))}

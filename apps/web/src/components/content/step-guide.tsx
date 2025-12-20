@@ -6,19 +6,16 @@
 import { highlightCodeEdge } from '@heyclaude/web-runtime/edge/transform';
 import { Zap } from '@heyclaude/web-runtime/icons';
 import { type StepByStepGuideProps } from '@heyclaude/web-runtime/types/component.types';
-import {
-  UnifiedBadge,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@heyclaude/web-runtime/ui';
+import { UnifiedBadge, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
 import dynamic from 'next/dynamic';
 
 // Lazy load large code block component (889 lines) - only loads when code blocks are rendered
 const ProductionCodeBlock = dynamic(
-  () => import('@/src/components/content/interactive-code-block').then((mod) => ({ default: mod.ProductionCodeBlock })),
+  () =>
+    import('@/src/components/content/interactive-code-block').then((mod) => ({
+      default: mod.ProductionCodeBlock,
+    })),
   { ssr: true }
 );
 import { UnifiedContentBox } from '@/src/components/core/domain/content/featured-content-box';
@@ -65,7 +62,7 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
           </p>
         ) : null}
         {totalTime ? (
-          <div className="text-muted-foreground text-sm flex items-center gap-1">
+          <div className="text-muted-foreground flex items-center gap-1 text-sm">
             <Zap className="h-4 w-4" />
             <span itemProp="totalTime">Total time: {totalTime}</span>
           </div>

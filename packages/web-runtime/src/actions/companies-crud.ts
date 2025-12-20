@@ -1,6 +1,6 @@
 /**
  * Companies CRUD Actions - Generated from single config
- * 
+ *
  * Consolidated create/update/delete actions using createCrudActionHandlers factory.
  * Uses next-safe-action directly with factory helpers for business logic.
  * Eliminates ~200 lines of repetitive boilerplate.
@@ -68,39 +68,39 @@ const crudHandlers = createCrudActionHandlers<
   },
   transformArgs: {
     create: (input, ctx) => ({
-      'p_action': 'create',
-      'p_user_id': ctx.userId,
-      'p_create_data': {
-        'name': input.name,
-        'slug': input.slug,
-        'logo': input.logo,
-        'website': input.website,
-        'description': input.description,
-        'size': input.size,
-        'industry': input.industry,
-        'using_cursor_since': input.using_cursor_since,
+      p_action: 'create',
+      p_user_id: ctx.userId,
+      p_create_data: {
+        name: input.name,
+        slug: input.slug,
+        logo: input.logo,
+        website: input.website,
+        description: input.description,
+        size: input.size,
+        industry: input.industry,
+        using_cursor_since: input.using_cursor_since,
       },
-      'p_update_data': null,
+      p_update_data: null,
     }),
     update: (input, ctx) => ({
-      'p_action': 'update',
-      'p_user_id': ctx.userId,
-      'p_create_data': null,
-      'p_update_data': {
-        'id': input.id,
-        'name': input.name,
-        'slug': input.slug,
-        'logo': input.logo,
-        'website': input.website,
-        'description': input.description,
-        'size': input.size,
-        'industry': input.industry,
-        'using_cursor_since': input.using_cursor_since,
+      p_action: 'update',
+      p_user_id: ctx.userId,
+      p_create_data: null,
+      p_update_data: {
+        id: input.id,
+        name: input.name,
+        slug: input.slug,
+        logo: input.logo,
+        website: input.website,
+        description: input.description,
+        size: input.size,
+        industry: input.industry,
+        using_cursor_since: input.using_cursor_since,
       },
     }),
     delete: (input, ctx) => ({
-      'p_company_id': input.company_id,
-      'p_user_id': ctx.userId,
+      p_company_id: input.company_id,
+      p_user_id: ctx.userId,
     }),
   },
   cacheInvalidation: {

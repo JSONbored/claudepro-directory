@@ -1,6 +1,6 @@
 /**
  * Generate Zod schemas for PostgreSQL enums
- * 
+ *
  * Matches the format of prisma-zod-generator but uses actual database enum values
  * (from introspection) instead of Prisma enum names, properly handling @map() directives.
  */
@@ -9,7 +9,7 @@ import type { GeneratorConfig, GeneratorOutput } from './types.ts';
 
 /**
  * Generate Zod schemas for all enums in the same format as prisma-zod-generator
- * 
+ *
  * Output format matches: packages/generators/dist/prisma/zod/schemas/enums/{enum_name}.schema.ts
  */
 export function generateEnumSchemas(
@@ -32,7 +32,7 @@ export function generateEnumSchemas(
 
     // Generate schema file matching prisma-zod-generator format
     const content = generateEnumSchemaFile(enumName, enumValues);
-    
+
     // Use snake_case filename to match prisma-zod-generator format
     const fileName = `${enumName}.schema.ts`;
     files[fileName] = content;
@@ -44,7 +44,7 @@ export function generateEnumSchemas(
 
 /**
  * Generate a single enum schema file matching prisma-zod-generator format
- * 
+ *
  * Uses Prisma enum objects to create Zod schemas that validate against database values,
  * while exporting the actual Prisma enum type (not an inferred string literal union).
  */
@@ -53,10 +53,10 @@ function generateEnumSchemaFile(enumName: string, _enumValues: string[]): string
   // The enum object contains the actual database values (handles @map() directives)
   // Use a different import name to avoid duplicate identifier with the type
   const enumObjectName = `${enumName}Enum`;
-  
+
   // Note: _enumValues is used for validation (checking if empty) but not in the generated code
   // We use Object.values() of the Prisma enum object at runtime instead
-  
+
   // Generate file content that:
   // 1. Imports the Prisma enum object for runtime validation
   // 2. Creates Zod schema using z.string().refine() with type assertion to ensure it infers the Prisma enum type
@@ -65,12 +65,12 @@ function generateEnumSchemaFile(enumName: string, _enumValues: string[]): string
     "import * as z from 'zod';",
     // Import the Prisma enum object (value object) for runtime validation
     // This object contains the actual database values, properly handling @map() directives
-    // The enum objects are exported from @heyclaude/database-types/prisma (snake_case)
+    // The enum objects are exported from @prisma/client (default Prisma location)
     // Use alias to avoid duplicate identifier with type import
-    `import { ${enumName} as ${enumObjectName} } from '@heyclaude/database-types/prisma';`,
+    `import { ${enumName} as ${enumObjectName} } from '@prisma/client';`,
     // Import the Prisma enum type for type annotation
-    // Enum types are exported from @heyclaude/database-types/prisma (enums.ts)
-    `import type { ${enumName} } from '@heyclaude/database-types/prisma';`,
+    // Enum types are exported from @prisma/client (default Prisma location)
+    `import type { ${enumName} } from '@prisma/client';`,
     '',
     // Create Zod schema using z.string().pipe() with transform to ensure correct type inference
     // This validates against the actual database values (handles @map() correctly)

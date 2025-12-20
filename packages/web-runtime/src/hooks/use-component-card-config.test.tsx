@@ -2,7 +2,10 @@ import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { render } from '@testing-library/react';
-import { useComponentCardConfig, ComponentConfigContextProvider } from './use-component-card-config';
+import {
+  useComponentCardConfig,
+  ComponentConfigContextProvider,
+} from './use-component-card-config';
 import type { ComponentCardConfig } from './use-component-card-config';
 
 describe('useComponentCardConfig', () => {
@@ -38,9 +41,7 @@ describe('useComponentCardConfig', () => {
 
   it('should use default config when provider value is undefined', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <ComponentConfigContextProvider>
-        {children}
-      </ComponentConfigContextProvider>
+      <ComponentConfigContextProvider>{children}</ComponentConfigContextProvider>
     );
 
     const { result } = renderHook(() => useComponentCardConfig(), { wrapper });

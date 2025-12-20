@@ -60,7 +60,7 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
         {/* Right: Auth card - centered with Claude orange accent */}
         <div className="flex min-h-dvh min-h-screen items-center justify-center px-8">
           <motion.div
-            className="w-full max-w-md rounded-2xl bg-card p-4 shadow-2xl xl:p-12"
+            className="bg-card w-full max-w-md rounded-2xl p-4 shadow-2xl xl:p-12"
             style={cardBorderStyle}
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
@@ -75,7 +75,7 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
       <div className="flex min-h-dvh min-h-screen flex-col lg:hidden">
         {mobileHeader}
         <div className="flex flex-1 items-center justify-center p-6">
-          <div className="w-full max-w-md rounded-2xl bg-card p-8" style={cardBorderStyle}>
+          <div className="bg-card w-full max-w-md rounded-2xl p-8" style={cardBorderStyle}>
             {authPanel}
           </div>
         </div>

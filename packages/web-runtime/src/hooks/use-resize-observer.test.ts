@@ -46,9 +46,7 @@ describe('useResizeObserver', () => {
     const element = document.createElement('div');
     const ref = { current: element };
 
-    renderHook(() =>
-      useResizeObserver({ ref } as UseResizeObserverOptions<HTMLElement>)
-    );
+    renderHook(() => useResizeObserver({ ref } as UseResizeObserverOptions<HTMLElement>));
 
     expect(mockResizeObserver).toHaveBeenCalled();
     expect(mockObserve).toHaveBeenCalledWith(element, { box: 'content-box' });
@@ -85,9 +83,7 @@ describe('useResizeObserver', () => {
     const element = document.createElement('div');
     const ref = { current: element };
 
-    renderHook(() =>
-      useResizeObserver({ ref } as UseResizeObserverOptions<HTMLElement>)
-    );
+    renderHook(() => useResizeObserver({ ref } as UseResizeObserverOptions<HTMLElement>));
 
     expect(mockObserve).toHaveBeenCalledWith(element, { box: 'content-box' });
   });

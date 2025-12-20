@@ -23,7 +23,7 @@
  * @module hooks/use-pulse
  */
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import {
   type NewsletterEventType,
   trackInteraction,
@@ -76,7 +76,12 @@ export interface PulseScreenshotParams {
 export interface PulseDownloadParams {
   category: content_category;
   slug: string;
-  action_type?: 'download_zip' | 'download_markdown' | 'llmstxt' | 'download_mcpb' | 'download_code';
+  action_type?:
+    | 'download_zip'
+    | 'download_markdown'
+    | 'llmstxt'
+    | 'download_mcpb'
+    | 'download_code';
 }
 
 /**

@@ -31,8 +31,8 @@ async function revalidateMFAPages() {
  * List all MFA factors for the current user
  */
 export const listMFAAction = authedAction
-  .metadata({ actionName: 'listMFA', category: 'mfa' })
   .inputSchema(z.void())
+  .metadata({ actionName: 'listMFA', category: 'mfa' })
   .action(async () => {
     const supabase = await createSupabaseServerClient();
     const { factors, error } = await listMFAFactors(supabase);
@@ -44,8 +44,8 @@ export const listMFAAction = authedAction
  * Enroll a new TOTP factor
  */
 export const enrollTOTPAction = authedAction
-  .metadata({ actionName: 'enrollTOTP', category: 'mfa' })
   .inputSchema(z.void())
+  .metadata({ actionName: 'enrollTOTP', category: 'mfa' })
   .action(async () => {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await enrollTOTPFactor(supabase);
@@ -58,8 +58,8 @@ export const enrollTOTPAction = authedAction
  * Create an MFA challenge
  */
 export const createMFAChallengeAction = authedAction
-  .metadata({ actionName: 'createMFAChallenge', category: 'mfa' })
   .inputSchema(z.object({ factorId: z.string().uuid('Invalid factor ID') }))
+  .metadata({ actionName: 'createMFAChallenge', category: 'mfa' })
   .action(async ({ parsedInput }) => {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await createMFAChallenge(supabase, parsedInput.factorId);
@@ -72,14 +72,17 @@ export const createMFAChallengeAction = authedAction
  * Verify an MFA challenge
  */
 export const verifyMFAChallengeAction = authedAction
-  .metadata({ actionName: 'verifyMFAChallenge', category: 'mfa' })
   .inputSchema(
     z.object({
       factorId: z.string().uuid('Invalid factor ID'),
       challengeId: z.string().uuid('Invalid challenge ID'),
-      code: z.string().length(6, 'Code must be 6 digits').regex(/^\d{6}$/, 'Code must be numeric'),
+      code: z
+        .string()
+        .length(6, 'Code must be 6 digits')
+        .regex(/^\d{6}$/, 'Code must be numeric'),
     })
   )
+  .metadata({ actionName: 'verifyMFAChallenge', category: 'mfa' })
   .action(async ({ parsedInput }) => {
     const supabase = await createSupabaseServerClient();
     const { success, error } = await verifyMFAChallenge(
@@ -102,8 +105,8 @@ export const verifyMFAChallengeAction = authedAction
  * Unenroll an MFA factor
  */
 export const unenrollMFAAction = authedAction
-  .metadata({ actionName: 'unenrollMFA', category: 'mfa' })
   .inputSchema(z.object({ factorId: z.string().uuid('Invalid factor ID') }))
+  .metadata({ actionName: 'unenrollMFA', category: 'mfa' })
   .action(async ({ parsedInput }) => {
     const supabase = await createSupabaseServerClient();
 
@@ -128,8 +131,8 @@ export const unenrollMFAAction = authedAction
  * Get Authenticator Assurance Level
  */
 export const getAALAction = authedAction
-  .metadata({ actionName: 'getAAL', category: 'mfa' })
   .inputSchema(z.void())
+  .metadata({ actionName: 'getAAL', category: 'mfa' })
   .action(async () => {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await getAuthenticatorAssuranceLevel(supabase);
@@ -142,8 +145,8 @@ export const getAALAction = authedAction
  * Check if MFA challenge is required
  */
 export const checkMFARequiredAction = authedAction
-  .metadata({ actionName: 'checkMFARequired', category: 'mfa' })
   .inputSchema(z.void())
+  .metadata({ actionName: 'checkMFARequired', category: 'mfa' })
   .action(async () => {
     const supabase = await createSupabaseServerClient();
     const { requires, error } = await requiresMFAChallenge(supabase);

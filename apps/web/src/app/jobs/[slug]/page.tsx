@@ -2,7 +2,8 @@
  * Job Detail Page - Database-first job listing display
  */
 
-import { type content_category, ContentCategory } from '@heyclaude/data-layer/prisma';
+import { content_category as ContentCategory } from '@prisma/client';
+import type { content_category } from '@prisma/client';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { getJobBySlug } from '@heyclaude/web-runtime/data/jobs';

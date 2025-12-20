@@ -1,0 +1,58 @@
+/**
+ * MCP Server Factory
+ *
+ * Creates and configures the MCP server instance with all tools and resources.
+ */
+
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { PrismaClient } from '@prisma/client';
+import type { User } from '@supabase/supabase-js';
+import type { ExtendedEnv } from '@heyclaude/cloudflare-runtime/config/env';
+import type { Logger } from '@heyclaude/cloudflare-runtime/logging/pino';
+
+import { MCP_SERVER_VERSION } from '../lib/types.js';
+import { registerAllTools } from './tools/index.js';
+import { registerAllResources } from './resources/index.js';
+import { registerAllPrompts } from './prompts/index.js';
+
+/**
+ * MCP Server configuration options
+ */
+export interface McpServerOptions {
+  prisma: PrismaClient;
+  user: User;
+  token: string;
+  env: ExtendedEnv;
+  logger: Logger;
+}
+
+/**
+ * Create and configure MCP server instance
+ *
+ * @param options - Server configuration options
+ * @returns Configured MCP server instance
+ */
+export function createMcpServer(options: McpServerOptions): McpServer {
+  const { prisma, user, token, env, logger } = options;
+
+  // Create MCP server instance
+  // Note: capabilities are declared via registerTool/registerResource/registerPrompt calls
+  // The SDK automatically infers capabilities from what's registered
+  const mcpServer = new McpServer({
+    name: 'heyclaude-mcp',
+    version: MCP_SERVER_VERSION,
+    // Note: schemaAdapter is not needed with @modelcontextprotocol/sdk
+    // The SDK handles Zod schema conversion automatically
+  });
+
+  // Register all tools
+  registerAllTools(mcpServer, { prisma, user, token, env, logger });
+
+  // Register all resources
+  registerAllResources(mcpServer, { prisma, user, token, env, logger });
+
+  // Register all prompts
+  registerAllPrompts(mcpServer, { prisma, user, token, env, logger });
+
+  return mcpServer;
+}

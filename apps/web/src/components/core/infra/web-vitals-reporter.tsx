@@ -2,10 +2,10 @@
 
 /**
  * Web Vitals Reporter Component
- * 
+ *
  * Client-side component that reports Core Web Vitals metrics.
  * This component should be included in the root layout.
- * 
+ *
  * @see https://web.dev/vitals/
  */
 
@@ -13,7 +13,7 @@ import { useEffect } from 'react';
 
 /**
  * WebVitalsReporter - Reports Core Web Vitals metrics
- * 
+ *
  * This component initializes web-vitals reporting when mounted.
  * It only runs in the browser and silently fails if web-vitals can't be loaded.
  */

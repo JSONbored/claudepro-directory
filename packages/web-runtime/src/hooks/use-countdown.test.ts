@@ -41,18 +41,14 @@ describe('useCountdown', () => {
   });
 
   it('should initialize with countStart value', () => {
-    const { result } = renderHook(() =>
-      useCountdown({ countStart: 60 } as UseCountdownOptions)
-    );
+    const { result } = renderHook(() => useCountdown({ countStart: 60 } as UseCountdownOptions));
 
     const [count] = result.current;
     expect(count).toBe(60);
   });
 
   it('should initialize with default countStop of 0', () => {
-    const { result } = renderHook(() =>
-      useCountdown({ countStart: 10 } as UseCountdownOptions)
-    );
+    const { result } = renderHook(() => useCountdown({ countStart: 10 } as UseCountdownOptions));
 
     const [count, actions] = result.current;
     expect(count).toBe(10);

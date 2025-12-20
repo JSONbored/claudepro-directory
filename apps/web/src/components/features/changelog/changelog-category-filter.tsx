@@ -4,8 +4,8 @@
 
 'use client';
 
-import { ChangelogCategory } from '@heyclaude/data-layer/prisma';
-import type { changelog_category } from '@heyclaude/data-layer/prisma';
+import { changelog_category as ChangelogCategory } from '@prisma/client';
+import type { changelog_category } from '@prisma/client';
 import { UnifiedBadge, TabsList, TabsTrigger, cn } from '@heyclaude/web-runtime/ui';
 
 // Use Prisma enum values
@@ -23,7 +23,11 @@ export function CategoryFilter({ activeCategory, categoryCounts }: CategoryFilte
   return (
     <TabsList className={`grid w-full gap-1 lg:w-auto lg:auto-cols-fr lg:grid-flow-col`}>
       {FILTER_CATEGORIES.map((category) => (
-        <TabsTrigger key={category} value={category} className={cn('flex items-center gap-2', 'gap-2', 'text-sm')}>
+        <TabsTrigger
+          key={category}
+          value={category}
+          className={cn('flex items-center gap-2', 'gap-2', 'text-sm')}
+        >
           <span>{category}</span>
           <UnifiedBadge
             variant="base"

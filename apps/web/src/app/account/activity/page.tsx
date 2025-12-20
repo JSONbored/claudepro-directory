@@ -1,4 +1,7 @@
-import type { GetUserCompleteDataReturns, GetUserActivityTimelineReturns } from '@heyclaude/data-layer';
+import type {
+  GetUserCompleteDataReturns,
+  GetUserActivityTimelineReturns,
+} from '@heyclaude/data-layer';
 type UserActivityTimelineItem = GetUserActivityTimelineReturns['activities'][number];
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';

@@ -129,7 +129,10 @@ export function BaseLayout({
                       Email Preferences
                     </Link>
                     {' · '}
-                    <Link href={utmLink(`${baseUrl}/privacy`, 'footer_privacy')} style={footerLinkStyle}>
+                    <Link
+                      href={utmLink(`${baseUrl}/privacy`, 'footer_privacy')}
+                      style={footerLinkStyle}
+                    >
                       Privacy Policy
                     </Link>
                   </Text>
@@ -155,7 +158,7 @@ export async function renderEmailTemplate<TProps>(
   props?: TProps
 ): Promise<string> {
   const { isValidElement, createElement } = await import('react');
-  
+
   if (isValidElement(template)) {
     return render(template);
   }

@@ -83,19 +83,14 @@ export function OAuthProviderButton({
     if (error) {
       // Log error for observability
       const normalized = normalizeError(error, 'OAuth sign-in failed');
-      logClientError(
-        'OAuth sign-in failed',
-        normalized,
-        'OAuthProviderButton.handleSignIn',
-        {
-          component: 'OAuthProviderButton',
-          action: 'sign-in',
-          provider,
-          redirectTo: redirectTo ?? undefined,
-          newsletterOptIn,
-          category: 'auth',
-        }
-      );
+      logClientError('OAuth sign-in failed', normalized, 'OAuthProviderButton.handleSignIn', {
+        component: 'OAuthProviderButton',
+        action: 'sign-in',
+        provider,
+        redirectTo: redirectTo ?? undefined,
+        newsletterOptIn,
+        category: 'auth',
+      });
 
       // Show error toast with "Retry" button
       toasts.raw.error(`Sign in failed: ${error.message}`, {
@@ -150,8 +145,8 @@ export function OAuthProviderButton({
             }
           />
         ) : (
-          <div className="h-7 w-7 text-foreground">
-            <IconComponent className="h-7 w-7 block" />
+          <div className="text-foreground h-7 w-7">
+            <IconComponent className="block h-7 w-7" />
           </div>
         )}
       </motion.div>

@@ -21,10 +21,7 @@
 
 import { MICROINTERACTIONS, SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 // COLORS removed - using CSS variables in Tailwind arbitrary values for dynamic gradients
-import {
-  useReducedMotion,
-  usePageInView,
-} from '@heyclaude/web-runtime/hooks/motion';
+import { useReducedMotion, usePageInView } from '@heyclaude/web-runtime/hooks/motion';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'motion/react';
 import { frame } from 'motion';
 import { useEffect, useRef, useMemo } from 'react';
@@ -104,11 +101,11 @@ export function AnimatedSearchBar({
   // PERFORMANCE FIX: Disable particles during rapid typing
   const { query } = useSearchContext();
   const { value: isTyping, setTrue: setIsTypingTrue, setFalse: setIsTypingFalse } = useBoolean();
-  
+
   useEffect(() => {
     const hasValue = query.length > 0;
     setHasValue(hasValue);
-    
+
     // Mark as typing when query changes, clear after 300ms (reduced for better particle visibility)
     if (hasValue) {
       setIsTypingTrue();
@@ -123,7 +120,13 @@ export function AnimatedSearchBar({
   // Optimized mouse tracking with frame utility (prevents layout thrashing)
   // PERFORMANCE FIX: Throttle mouse events, only listen when hovering, pause when page hidden
   useEffect(() => {
-    if (!enableMagnetic || !containerRef.current || shouldReduceMotion || !isPageInView || isTyping) {
+    if (
+      !enableMagnetic ||
+      !containerRef.current ||
+      shouldReduceMotion ||
+      !isPageInView ||
+      isTyping
+    ) {
       // Reset to center when disabled
       if (enableMagnetic && containerRef.current) {
         frame.update(() => {
@@ -161,7 +164,7 @@ export function AnimatedSearchBar({
     // Throttled mouse move handler
     const handleMouseMove = (e: MouseEvent) => {
       if (!isHovering) return; // Only process when hovering
-      
+
       const now = performance.now();
       if (now - lastUpdateTime < THROTTLE_MS) return; // Throttle to ~60fps
       lastUpdateTime = now;
@@ -188,7 +191,7 @@ export function AnimatedSearchBar({
       const distance = Math.sqrt(x * x + y * y);
       let newTiltX = 0;
       let newTiltY = 0;
-      
+
       if (distance < maxDistance) {
         const tiltAmount = (1 - distance / maxDistance) * maxTilt;
         newTiltX = (-y / maxDistance) * tiltAmount;
@@ -229,7 +232,19 @@ export function AnimatedSearchBar({
         rotateY.set(0);
       });
     };
-  }, [enableMagnetic, mouseX, mouseY, rotateX, rotateY, isFocused, shouldReduceMotion, isPageInView, isTyping, maxDistance, maxTilt]);
+  }, [
+    enableMagnetic,
+    mouseX,
+    mouseY,
+    rotateX,
+    rotateY,
+    isFocused,
+    shouldReduceMotion,
+    isPageInView,
+    isTyping,
+    maxDistance,
+    maxTilt,
+  ]);
 
   // Handle focus state changes from SearchBar
   const handleFocusChange = (focused: boolean) => {
@@ -338,12 +353,10 @@ export function AnimatedSearchBar({
           // Set initial borderColor and backgroundColor in style to match SSR
           // This ensures SSR and client render the same initial styles (prevents hydration mismatch)
           // Only set these when not mounted (SSR) or when not focused (initial state)
-          borderColor: !isMounted || !isFocused
-            ? MICROINTERACTIONS.search.initial.borderColor
-            : undefined, // Let animate handle focused state after mount
-          backgroundColor: !isMounted || !isFocused
-            ? MICROINTERACTIONS.search.initial.backgroundColor
-            : undefined, // Let animate handle focused state after mount
+          borderColor:
+            !isMounted || !isFocused ? MICROINTERACTIONS.search.initial.borderColor : undefined, // Let animate handle focused state after mount
+          backgroundColor:
+            !isMounted || !isFocused ? MICROINTERACTIONS.search.initial.backgroundColor : undefined, // Let animate handle focused state after mount
         }}
       >
         {/* Beautiful orange focus glow effect - More vibrant and visible */}
@@ -373,7 +386,7 @@ export function AnimatedSearchBar({
         {/* Uses design tokens for consistent colors */}
         <AnimatePresence>
           {isFocused && hasValue && enableParticles && !isTyping && (
-            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
+            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
               {particlePositions.map((pos, i) => (
                 <motion.div
                   key={i}
@@ -391,9 +404,7 @@ export function AnimatedSearchBar({
                     boxShadow: `0 0 8px ${particleShadowColor}`,
                   }}
                   initial={
-                    shouldReduceMotion
-                      ? { opacity: 0 }
-                      : { opacity: 0, scale: 0, x: 0, y: 0 }
+                    shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0, x: 0, y: 0 }
                   }
                   animate={
                     shouldReduceMotion
@@ -420,11 +431,7 @@ export function AnimatedSearchBar({
 
         {/* SearchBar component */}
         <div className={className}>
-          <SearchBar
-            {...searchBarProps}
-            variant="magnetic"
-            onFocusChange={handleFocusChange}
-          />
+          <SearchBar {...searchBarProps} variant="magnetic" onFocusChange={handleFocusChange} />
         </div>
       </motion.div>
     </motion.div>

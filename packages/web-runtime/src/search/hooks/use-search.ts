@@ -25,10 +25,7 @@ import { syncSearchStateFromURL, syncSearchStateToURL } from '../utils/search-st
 export interface UseSearchOptions {
   debounceMs?: number;
   minQueryLength?: number;
-  onSearch?: (
-    query: string,
-    filters: FilterState
-  ) => Promise<DisplayableContent[]>;
+  onSearch?: (query: string, filters: FilterState) => Promise<DisplayableContent[]>;
   cache?: boolean;
 }
 
@@ -117,8 +114,7 @@ export function useSearch({
 
       // Check if we need to search
       const shouldSearch =
-        searchQuery.trim().length >= minQueryLength ||
-        Object.keys(searchFilters).length > 0;
+        searchQuery.trim().length >= minQueryLength || Object.keys(searchFilters).length > 0;
 
       if (!shouldSearch) {
         setResults([]);
@@ -145,7 +141,7 @@ export function useSearch({
 
             try {
               const searchResults = await onSearch(searchQuery, searchFilters);
-              
+
               // Check if request was aborted
               if (controller.signal.aborted) {
                 throw new Error('Request aborted');
@@ -265,8 +261,7 @@ export function useSearch({
       setDebouncedQuery(urlQuery);
     }
 
-    const filtersChanged =
-      JSON.stringify(urlFilters) !== JSON.stringify(filters);
+    const filtersChanged = JSON.stringify(urlFilters) !== JSON.stringify(filters);
     if (filtersChanged) {
       setFiltersState(urlFilters);
     }

@@ -83,9 +83,6 @@ export function extractFirstFieldFromTuple(tupleString: string): string | null {
  */
 export function isPostgresTupleString(value: unknown): value is string {
   return (
-    typeof value === 'string' &&
-    value.startsWith('(') &&
-    value.includes(',') &&
-    value.length > 2
+    typeof value === 'string' && value.startsWith('(') && value.includes(',') && value.length > 2
   );
 }

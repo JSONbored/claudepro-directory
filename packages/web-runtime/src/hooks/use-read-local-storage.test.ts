@@ -69,9 +69,7 @@ describe('useReadLocalStorage', () => {
     const deserializer = (value: string) => ({ id: Number(value) });
     window.localStorage.setItem('test-key', '42');
 
-    const { result } = renderHook(() =>
-      useReadLocalStorage('test-key', { deserializer })
-    );
+    const { result } = renderHook(() => useReadLocalStorage('test-key', { deserializer }));
 
     expect(result.current).toEqual({ id: 42 });
   });

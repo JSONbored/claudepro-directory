@@ -1,6 +1,6 @@
 'use client';
 
-import { ExperienceLevel } from '@heyclaude/data-layer/prisma';
+import { experience_level as ExperienceLevel } from '@prisma/client';
 import { useNewsletter } from '@heyclaude/web-runtime/hooks/use-newsletter';
 import {
   cn,
@@ -96,7 +96,7 @@ export function JobAlertsCard({
   };
 
   return (
-    <Card className="border border-border/60">
+    <Card className="border-border/60 border">
       <CardHeader>
         <CardTitle className="text-lg">Job alerts</CardTitle>
         <p className="text-muted-foreground text-sm">

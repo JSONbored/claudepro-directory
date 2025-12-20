@@ -107,9 +107,7 @@ export interface UseIntersectionObserverOptions {
  * });
  * ```
  */
-export function useIntersectionObserver(
-  options: UseIntersectionObserverOptions = {}
-): {
+export function useIntersectionObserver(options: UseIntersectionObserverOptions = {}): {
   ref: (node?: Element | null) => void;
   isIntersecting: boolean;
   entry: IntersectionObserverEntry | undefined;
@@ -147,7 +145,7 @@ export function useIntersectionObserver(
       (entries) => {
         const [entry] = entries;
         if (!entry) return;
-        
+
         const isElementIntersecting = entry.isIntersecting;
 
         if (freezeOnceVisible && isElementIntersecting) {

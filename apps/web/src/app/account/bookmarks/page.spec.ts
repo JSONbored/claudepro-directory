@@ -16,7 +16,7 @@ test.describe('/account/bookmarks', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (navigation handled per test due to redirect)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });

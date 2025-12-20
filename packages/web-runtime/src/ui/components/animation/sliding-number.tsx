@@ -32,12 +32,7 @@ type SlidingNumberRollerProps = {
   transition: SpringOptions;
 };
 
-function SlidingNumberRoller({
-  prevValue,
-  value,
-  place,
-  transition,
-}: SlidingNumberRollerProps) {
+function SlidingNumberRoller({ prevValue, value, place, transition }: SlidingNumberRollerProps) {
   const startNumber = Math.floor(prevValue / place) % 10;
   const targetNumber = Math.floor(value / place) % 10;
   const animatedValue = useSpring(startNumber, transition);
@@ -134,7 +129,7 @@ export function SlidingNumber({
   ...props
 }: SlidingNumberProps) {
   const localRef = useRef<HTMLSpanElement>(null);
-  
+
   // Handle forwarded ref
   useEffect(() => {
     if (forwardedRef) {
@@ -160,22 +155,17 @@ export function SlidingNumber({
   );
 
   const formatNumber = useCallback(
-    (num: number) =>
-      decimalPlaces != null ? num.toFixed(decimalPlaces) : num.toString(),
+    (num: number) => (decimalPlaces != null ? num.toFixed(decimalPlaces) : num.toString()),
     [decimalPlaces]
   );
 
   const numberStr = formatNumber(effectiveNumber);
   const [newIntStrRaw, newDecStrRaw = ''] = numberStr.split('.');
-  const newIntStr =
-    padStart && newIntStrRaw?.length === 1 ? '0' + newIntStrRaw : newIntStrRaw;
+  const newIntStr = padStart && newIntStrRaw?.length === 1 ? '0' + newIntStrRaw : newIntStrRaw;
 
   const prevFormatted = formatNumber(prevNumberRef.current);
   const [prevIntStrRaw = '', prevDecStrRaw = ''] = prevFormatted.split('.');
-  const prevIntStr =
-    padStart && prevIntStrRaw.length === 1
-      ? '0' + prevIntStrRaw
-      : prevIntStrRaw;
+  const prevIntStr = padStart && prevIntStrRaw.length === 1 ? '0' + prevIntStrRaw : prevIntStrRaw;
 
   const adjustedPrevInt = useMemo(() => {
     return prevIntStr.length > (newIntStr?.length ?? 0)
@@ -196,10 +186,7 @@ export function SlidingNumber({
 
   const intDigitCount = newIntStr?.length ?? 0;
   const intPlaces = useMemo(
-    () =>
-      Array.from({ length: intDigitCount }, (_, i) =>
-        Math.pow(10, intDigitCount - i - 1)
-      ),
+    () => Array.from({ length: intDigitCount }, (_, i) => Math.pow(10, intDigitCount - i - 1)),
     [intDigitCount]
   );
   const decPlaces = useMemo(

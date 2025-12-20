@@ -1,6 +1,6 @@
 /**
  * Playwright Accessibility Testing Helpers
- * 
+ *
  * Provides utilities for automated accessibility testing using @axe-core/playwright.
  * Integrates axe-core accessibility engine with Playwright for WCAG compliance checking.
  */
@@ -11,7 +11,7 @@ import type { AxeResults } from 'axe-core';
 
 /**
  * Accessibility test configuration
- * 
+ *
  * Configure which rules to run and how to handle violations.
  * See: https://github.com/dequelabs/axe-core/blob/develop/doc/API.md#options-parameter
  */
@@ -21,19 +21,19 @@ export interface A11yConfig {
    * Default: ['wcag2a', 'wcag2aa', 'wcag21aa'] for WCAG 2.1 Level A and AA compliance
    */
   tags?: string[];
-  
+
   /**
    * Rules to exclude (by rule ID)
    * Use this to exclude known issues that are being addressed separately
    */
   exclude?: string[];
-  
+
   /**
    * Rules to include (by rule ID)
    * If specified, only these rules will run
    */
   include?: string[];
-  
+
   /**
    * Impact level to check ('minor', 'moderate', 'serious', 'critical')
    * Default: 'minor' (checks all issues)
@@ -43,7 +43,7 @@ export interface A11yConfig {
 
 /**
  * Default accessibility configuration
- * 
+ *
  * Checks WCAG 2.1 Level A and AA compliance
  */
 const DEFAULT_A11Y_CONFIG: A11yConfig = {
@@ -53,14 +53,14 @@ const DEFAULT_A11Y_CONFIG: A11yConfig = {
 
 /**
  * Inject axe-core into the page and check accessibility
- * 
+ *
  * This is the main helper function for accessibility testing.
  * It injects axe-core, runs accessibility checks, and reports violations.
- * 
+ *
  * @param page - Playwright page instance
  * @param config - Accessibility test configuration
  * @param context - Optional context selector to check (defaults to entire page)
- * 
+ *
  * @example
  * ```typescript
  * test('homepage should be accessible', async ({ page }) => {
@@ -68,7 +68,7 @@ const DEFAULT_A11Y_CONFIG: A11yConfig = {
  *   await checkAccessibility(page);
  * });
  * ```
- * 
+ *
  * @example
  * ```typescript
  * test('form should be accessible', async ({ page }) => {
@@ -83,29 +83,29 @@ export async function checkAccessibility(
   context?: string
 ): Promise<void> {
   const builder = new AxeBuilder({ page });
-  
+
   // Include context if specified
   if (context) {
     builder.include(context);
   }
-  
+
   // Configure tags
   if (config.tags) {
     builder.withTags(config.tags);
   }
-  
+
   // Configure rules
   if (config.exclude) {
     builder.disableRules(config.exclude);
   }
-  
+
   if (config.include) {
     builder.withRules(config.include);
   }
-  
+
   // Run analysis and check for violations
   const results = await builder.analyze();
-  
+
   // Filter by impact level if specified
   const filteredViolations = config.impactLevel
     ? results.violations.filter((violation) => {
@@ -115,13 +115,15 @@ export async function checkAccessibility(
         return violationIndex <= minIndex;
       })
     : results.violations;
-  
+
   // Fail test if violations found
   if (filteredViolations.length > 0) {
-    const violationMessages = filteredViolations.map((violation) => {
-      return `\n  - ${violation.id}: ${violation.description}\n    Help: ${violation.helpUrl}`;
-    }).join('\n');
-    
+    const violationMessages = filteredViolations
+      .map((violation) => {
+        return `\n  - ${violation.id}: ${violation.description}\n    Help: ${violation.helpUrl}`;
+      })
+      .join('\n');
+
     throw new Error(
       `Accessibility violations found (${filteredViolations.length}):${violationMessages}`
     );
@@ -130,14 +132,14 @@ export async function checkAccessibility(
 
 /**
  * Get accessibility violations without failing the test
- * 
+ *
  * Useful for logging violations or conditional assertions.
- * 
+ *
  * @param page - Playwright page instance
  * @param config - Accessibility test configuration
  * @param context - Optional context selector to check
  * @returns Array of accessibility violations
- * 
+ *
  * @example
  * ```typescript
  * test('check accessibility violations', async ({ page }) => {
@@ -153,25 +155,25 @@ export async function getAccessibilityViolations(
   context?: string
 ): Promise<AxeResults['violations']> {
   const builder = new AxeBuilder({ page });
-  
+
   if (context) {
     builder.include(context);
   }
-  
+
   if (config.tags) {
     builder.withTags(config.tags);
   }
-  
+
   if (config.exclude) {
     builder.disableRules(config.exclude);
   }
-  
+
   if (config.include) {
     builder.withRules(config.include);
   }
-  
+
   const results = await builder.analyze();
-  
+
   // Filter by impact level if specified
   if (config.impactLevel) {
     const impactLevels = ['critical', 'serious', 'moderate', 'minor'];
@@ -181,19 +183,19 @@ export async function getAccessibilityViolations(
       return violationIndex <= minIndex;
     });
   }
-  
+
   return results.violations;
 }
 
 /**
  * Check accessibility for a specific element
- * 
+ *
  * Convenience function for checking accessibility of a single element.
- * 
+ *
  * @param page - Playwright page instance
  * @param selector - CSS selector or Playwright locator string
  * @param config - Accessibility test configuration
- * 
+ *
  * @example
  * ```typescript
  * test('button should be accessible', async ({ page }) => {
@@ -221,7 +223,7 @@ export const A11Y_PRESETS = {
     tags: ['wcag2a', 'wcag21a'],
     impactLevel: 'minor' as const,
   },
-  
+
   /**
    * WCAG 2.1 Level AA compliance (includes Level A)
    */
@@ -229,7 +231,7 @@ export const A11Y_PRESETS = {
     tags: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'],
     impactLevel: 'minor' as const,
   },
-  
+
   /**
    * Best practices only (non-WCAG rules)
    */
@@ -237,7 +239,7 @@ export const A11Y_PRESETS = {
     tags: ['best-practice'],
     impactLevel: 'minor' as const,
   },
-  
+
   /**
    * Critical and serious issues only
    */

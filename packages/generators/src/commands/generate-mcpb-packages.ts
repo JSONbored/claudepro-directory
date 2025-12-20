@@ -4,7 +4,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { performance } from 'node:perf_hooks';
 
-import type { contentModel, JsonValue } from '@heyclaude/database-types/prisma';
+import type { Prisma } from '@prisma/client';
+
+type contentModel = Prisma.contentGetPayload<{}>;
+type JsonValue = Prisma.JsonValue;
 
 type Json = JsonValue;
 
@@ -69,7 +72,7 @@ export async function runGenerateMcpbPackages(): Promise<void> {
   logger.info(`✅ Found ${mcps.length} MCP servers in database\n`, { mcpCount: mcps.length });
 
   logger.info('🔍 Computing content hashes and filtering changed MCP servers...');
-  const mcpsToRebuild: Array<{ hash: string; mcp: McpRow; packageContent: string; }> = [];
+  const mcpsToRebuild: Array<{ hash: string; mcp: McpRow; packageContent: string }> = [];
 
   for (const mcp of mcps) {
     const packageContent = JSON.stringify({
@@ -100,7 +103,7 @@ export async function runGenerateMcpbPackages(): Promise<void> {
   });
   logger.info('═'.repeat(80));
 
-  const allResults: Array<{ message: string; slug: string; status: 'error' | 'success'; }> = [];
+  const allResults: Array<{ message: string; slug: string; status: 'error' | 'success' }> = [];
 
   for (let i = 0; i < mcpsToRebuild.length; i += CONCURRENCY) {
     const batch = mcpsToRebuild.slice(i, i + CONCURRENCY);
@@ -655,9 +658,9 @@ function needsRebuild(mcp: McpRow, packageContent: string): boolean {
 
 /**
  * Uploads a generated .mcpb package to Supabase Storage.
- * 
+ *
  * Uses direct Supabase Storage API (same pattern as skills packages).
- * 
+ *
  * @param supabase - Supabase service role client
  * @param mcp - The MCP content row
  * @param mcpbFilePath - Path to the generated .mcpb file
@@ -674,11 +677,13 @@ async function uploadToStorage(
   const mcpbBuffer = await readFile(mcpbFilePath);
   const fileName = `packages/${mcp.slug}.mcpb`;
 
-  const { error: uploadError } = await supabase.storage.from('mcpb-packages').upload(fileName, mcpbBuffer, {
-    contentType: 'application/zip',
-    cacheControl: '3600',
-    upsert: true,
-  });
+  const { error: uploadError } = await supabase.storage
+    .from('mcpb-packages')
+    .upload(fileName, mcpbBuffer, {
+      contentType: 'application/zip',
+      cacheControl: '3600',
+      upsert: true,
+    });
 
   if (uploadError) {
     throw new Error(`Storage upload failed: ${uploadError.message}`);
@@ -704,9 +709,9 @@ async function uploadToStorage(
 }
 
 async function processBatch(
-  mcps: Array<{ hash: string; mcp: McpRow; packageContent: string; }>,
+  mcps: Array<{ hash: string; mcp: McpRow; packageContent: string }>,
   supabase: ReturnType<typeof createServiceRoleClient>
-): Promise<Array<{ message: string; slug: string; status: 'error' | 'success'; }>> {
+): Promise<Array<{ message: string; slug: string; status: 'error' | 'success' }>> {
   const results = await Promise.allSettled(
     mcps.map(async ({ mcp, packageContent: _packageContent, hash }) => {
       const buildStartTime = performance.now();

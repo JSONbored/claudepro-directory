@@ -104,7 +104,7 @@ export function CollectionItemManager({
   const shouldReduceMotion = useReducedMotion();
   const [items, setItems] = useState(initialItems);
   const [selectedBookmarkId, setSelectedBookmarkId] = useState<string>('');
-  
+
   // Use useSafeAction hooks - this properly infers types from next-safe-action
   const { executeAsync: executeAddItem, isPending: isAdding } = useSafeAction(addItemToCollection, {
     onSuccess: ({ data }: { data?: { success: boolean | null } }) => {
@@ -116,7 +116,11 @@ export function CollectionItemManager({
     },
     onError: ({ error }: { error: { serverError?: string; validationErrors?: unknown } }) => {
       const errorMessage = error.serverError || 'Failed to add item to collection';
-      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+      if (
+        errorMessage.includes('signed in') ||
+        errorMessage.includes('auth') ||
+        errorMessage.includes('unauthorized')
+      ) {
         openAuthModal({
           valueProposition: 'Sign in to add items to collections',
           redirectTo: pathname ?? undefined,
@@ -133,46 +137,52 @@ export function CollectionItemManager({
       }
     },
   });
-  
-  const { executeAsync: executeRemoveItem, isPending: isRemoving } = useSafeAction(removeItemFromCollection, {
-    onSuccess: ({ data }: { data?: { success: boolean | null } }) => {
-      if (data?.success) {
-        toasts.success.actionCompleted('Item removed from collection');
+
+  const { executeAsync: executeRemoveItem, isPending: isRemoving } = useSafeAction(
+    removeItemFromCollection,
+    {
+      onSuccess: ({ data }: { data?: { success: boolean | null } }) => {
+        if (data?.success) {
+          toasts.success.actionCompleted('Item removed from collection');
+          router.refresh();
+        }
+      },
+      onError: () => {
+        // Error handling is done in the hook's onError callback
+        toasts.raw.error('Failed to remove item', {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              // Will be handled by the caller
+            },
+          },
+        });
+      },
+    }
+  );
+
+  const { executeAsync: executeReorderItems, isPending: isReordering } = useSafeAction(
+    reorderCollectionItems,
+    {
+      onSuccess: () => {
+        toasts.success.actionCompleted('Items reordered');
         router.refresh();
-      }
-    },
-    onError: () => {
-      // Error handling is done in the hook's onError callback
-      toasts.raw.error('Failed to remove item', {
-        action: {
-          label: 'Retry',
-          onClick: () => {
-            // Will be handled by the caller
+      },
+      onError: () => {
+        // Revert on error
+        setItems(items);
+        toasts.raw.error('Failed to reorder items', {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              // Will be handled by the caller
+            },
           },
-        },
-      });
-    },
-  });
-  
-  const { executeAsync: executeReorderItems, isPending: isReordering } = useSafeAction(reorderCollectionItems, {
-    onSuccess: () => {
-      toasts.success.actionCompleted('Items reordered');
-      router.refresh();
-    },
-    onError: () => {
-      // Revert on error
-      setItems(items);
-      toasts.raw.error('Failed to reorder items', {
-        action: {
-          label: 'Retry',
-          onClick: () => {
-            // Will be handled by the caller
-          },
-        },
-      });
-    },
-  });
-  
+        });
+      },
+    }
+  );
+
   const isPending = isAdding || isRemoving || isReordering;
 
   // Filter out bookmarks that are already in the collection
@@ -216,14 +226,28 @@ export function CollectionItemManager({
       content_slug: bookmark.content_slug,
       order: items.length, // Add to end
     });
-  }, [user, status, openAuthModal, pathname, selectedBookmarkId, availableBookmarks, collectionId, items.length, router, executeAddItem]);
+  }, [
+    user,
+    status,
+    openAuthModal,
+    pathname,
+    selectedBookmarkId,
+    availableBookmarks,
+    collectionId,
+    items.length,
+    router,
+    executeAddItem,
+  ]);
 
-  const handleRemove = useCallback(async (itemId: string) => {
-    // Execute the action using useSafeAction's executeAsync
-    executeRemoveItem({
-      remove_item_id: itemId,
-    });
-  }, [executeRemoveItem]);
+  const handleRemove = useCallback(
+    async (itemId: string) => {
+      // Execute the action using useSafeAction's executeAsync
+      executeRemoveItem({
+        remove_item_id: itemId,
+      });
+    },
+    [executeRemoveItem]
+  );
 
   const handleReorder = useCallback(
     (newOrder: unknown[]) => {
@@ -253,7 +277,7 @@ export function CollectionItemManager({
       {/* Add Item Section */}
       <div className={cn('flex items-end', 'gap-2', 'pb-4')}>
         <div className={`flex-1`}>
-          <div className={`mb-2 block text-sm-medium`}>Add Bookmark to Collection</div>
+          <div className={`text-sm-medium mb-2 block`}>Add Bookmark to Collection</div>
           <Select value={selectedBookmarkId} onValueChange={setSelectedBookmarkId}>
             <SelectTrigger>
               <SelectValue placeholder="Select a bookmark to add" />
@@ -267,7 +291,11 @@ export function CollectionItemManager({
                 availableToAdd.map((bookmark) => (
                   <SelectItem key={bookmark.id} value={bookmark.id}>
                     <div className="flex items-center gap-2">
-                      <UnifiedBadge variant="base" style="outline" className="text-[10px] capitalize">
+                      <UnifiedBadge
+                        variant="base"
+                        style="outline"
+                        className="text-[10px] capitalize"
+                      >
                         {bookmark.content_type}
                       </UnifiedBadge>
                       {bookmark.content_slug}
@@ -320,15 +348,17 @@ export function CollectionItemManager({
               key={item.id}
               value={item}
               as="div"
-              className="flex items-center gap-3 bg-card hover:bg-accent/50 card-base p-3 transition-colors ${
-                shouldReduceMotion || isPending ? '' : 'cursor-grab active:cursor-grabbing'
-              }"
+              className="bg-card hover:bg-accent/50 card-base ${ shouldReduceMotion || isPending ? '' : 'cursor-grab active:cursor-grabbing' } flex items-center gap-3 p-3 transition-colors"
               dragListener={!shouldReduceMotion && !isPending}
             >
               {/* Drag Handle - Only visible when drag is enabled */}
               {!shouldReduceMotion && !isPending && (
                 <div
-                  className={cn('text-muted-foreground', 'flex flex-col', 'gap-3.5 cursor-grab active:cursor-grabbing touch-none')}
+                  className={cn(
+                    'text-muted-foreground',
+                    'flex flex-col',
+                    'cursor-grab touch-none gap-3.5 active:cursor-grabbing'
+                  )}
                   aria-label="Drag handle"
                 >
                   <div className="h-0.5 w-3 rounded-full bg-current" />
@@ -338,7 +368,9 @@ export function CollectionItemManager({
               )}
 
               {/* Order Number */}
-              <div className={cn('text-muted-foreground text-sm', 'w-8 text-center', 'font-medium')}>
+              <div
+                className={cn('text-muted-foreground text-sm', 'w-8 text-center', 'font-medium')}
+              >
                 #{index + 1}
               </div>
 
@@ -375,7 +407,7 @@ export function CollectionItemManager({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 text-destructive hover:text-destructive p-0"
+                  className="text-destructive hover:text-destructive h-8 w-8 p-0"
                   onClick={() => handleRemove(item.id)}
                   disabled={isPending}
                   aria-label="Remove item"

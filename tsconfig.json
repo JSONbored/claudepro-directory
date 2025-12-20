@@ -11,10 +11,7 @@
     "noEmit": true,
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
-    "typeRoots": [
-      "./node_modules/@types",
-      "./packages/edge-runtime/src/types"
-    ],
+    "typeRoots": ["./node_modules/@types"],
     "plugins": [
       {
         "name": "next"
@@ -34,7 +31,8 @@
     "packages/generators/src/**/*.ts",
     "packages/database-types/**/*.ts",
     "packages/database-types/src/prisma-json-types.ts",
-    "packages/edge-runtime/src/types/**/*.d.ts",
+    "packages/cloudflare-runtime/src/**/*.ts",
+    "apps/workers/**/src/**/*.ts",
     "types/**/*.d.ts"
   ],
   "exclude": [
@@ -44,15 +42,6 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "apps/edge/functions",
-    "packages/edge-runtime/src/utils/email",
-    "packages/edge-runtime/src/utils/email/**",
-    "packages/edge-runtime/src/utils/email/**/*",
-    "packages/edge-runtime/src/app.ts",
-    "packages/edge-runtime/src/utils/integrations/resend.ts",
-    "packages/edge-runtime/src/utils/webhook/auth-hook.ts",
-    "packages/edge-runtime/src/utils/email/digest-helpers.ts",
-    "packages/edge-runtime/src/utils/email/sequence-helpers.ts"
+    "**/*.spec.tsx"
   ]
 }

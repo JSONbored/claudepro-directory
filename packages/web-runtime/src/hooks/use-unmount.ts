@@ -67,9 +67,7 @@ import { useEffect, useRef } from 'react';
  */
 export function useUnmount(fn: () => void): void {
   if (typeof fn !== 'function') {
-    throw new Error(
-      `useUnmount: Expected a function, received ${typeof fn}`
-    );
+    throw new Error(`useUnmount: Expected a function, received ${typeof fn}`);
   }
 
   const fnRef = useRef(fn);

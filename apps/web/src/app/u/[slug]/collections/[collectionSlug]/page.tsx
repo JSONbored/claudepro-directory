@@ -3,7 +3,7 @@
  * Single RPC call to get_user_collection_detail() replaces 3 separate queries
  */
 
-import { ContentCategory } from '@heyclaude/data-layer/prisma';
+import { content_category as ContentCategory } from '@prisma/client';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { type CollectionDetailData } from '@heyclaude/web-runtime/data/community';
 import { getPublicCollectionDetail } from '@heyclaude/web-runtime/data/community';
@@ -129,8 +129,8 @@ function isValidSlug(slug: string): boolean {
  * @param {{ content_slug: string; content_type: string }} item Parameter description
  * @param {{ content_slug: string; content_type: string }} item Parameter description
  * @param {{ content_slug: string; content_type: string }} item Parameter description
-  * @param {{ content_slug: string; content_type: string }} item Parameter description
-*/
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ */
 function getSafeContentLink(item: { content_slug: string; content_type: string }): null | string {
   if (isValidContentType(item.content_type) && isValidSlug(item.content_slug)) {
     return `/${item.content_type}/${item.content_slug}`;

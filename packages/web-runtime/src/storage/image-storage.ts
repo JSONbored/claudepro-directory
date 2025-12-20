@@ -4,7 +4,6 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { createSupabaseAdminClient } from '../supabase/admin.ts';
 import { type AllowedImageMimeType, type ImageUploadResult } from './image-utils.ts';
 
-
 interface UploadParams {
   bucket: string;
   data: Buffer;

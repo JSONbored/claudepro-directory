@@ -13,8 +13,9 @@
  */
 
 import { EventSchemas, Inngest } from 'inngest';
-import type { content_category } from '@heyclaude/data-layer/prisma';
-import type { contentModel } from '@heyclaude/data-layer/prisma';
+import { Prisma } from '@prisma/client';
+import type { content_category } from '@prisma/client';
+type contentModel = Prisma.contentGetPayload<{}>;
 import {
   getDeploymentEnv,
   getDeploymentPullRequestId,
@@ -348,16 +349,17 @@ const inngestEnv = getInngestEnv();
 const schemas = new EventSchemas().fromRecord<Events>();
 
 // Create client with conditional env property
-export const inngest = inngestEnv !== undefined
-  ? new Inngest({
-      id: 'heyclaude',
-      schemas,
-      env: inngestEnv,
-    })
-  : new Inngest({
-      id: 'heyclaude',
-      schemas,
-    });
+export const inngest =
+  inngestEnv !== undefined
+    ? new Inngest({
+        id: 'heyclaude',
+        schemas,
+        env: inngestEnv,
+      })
+    : new Inngest({
+        id: 'heyclaude',
+        schemas,
+      });
 
 // Re-export for convenience
 export type { Events as InngestEvents };

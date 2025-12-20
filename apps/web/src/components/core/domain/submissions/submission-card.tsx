@@ -1,5 +1,5 @@
-import { SubmissionStatus } from '@heyclaude/data-layer/prisma';
-import type { submission_status, submission_type } from '@heyclaude/data-layer/prisma';
+import { submission_status as SubmissionStatus } from '@prisma/client';
+import type { submission_status, submission_type } from '@prisma/client';
 import type { UserDashboardSubmission } from '@heyclaude/data-layer';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -27,9 +27,7 @@ interface SubmissionCardProps {
   getStatusBadge: (status: submission_status) => ReactElement;
   getTypeLabel: (type: submission_type) => string;
   index: number;
-  isValidSubmissionStatus: (
-    status: unknown
-  ) => status is submission_status;
+  isValidSubmissionStatus: (status: unknown) => status is submission_status;
   isValidSubmissionType: (type: unknown) => type is submission_type;
   submission: UserSubmission;
   VALID_SUBMISSION_STATUSES: submission_status[];
@@ -78,11 +76,12 @@ export function SubmissionCard({
     if (isValidSubmissionStatus(submission.status)) {
       status = submission.status;
     } else {
-      logger.warn({ 
-        submissionId,
-        invalidStatus: submission.status,
-        validStatuses: VALID_SUBMISSION_STATUSES,
-        error: `Invalid status: ${submission.status}`,
+      logger.warn(
+        {
+          submissionId,
+          invalidStatus: submission.status,
+          validStatuses: VALID_SUBMISSION_STATUSES,
+          error: `Invalid status: ${submission.status}`,
         },
         'SubmissionsPage: Invalid submission status'
       );
@@ -97,11 +96,12 @@ export function SubmissionCard({
     if (isValidSubmissionType(submission.content_type)) {
       type = submission.content_type;
     } else {
-      logger.warn({ 
-        submissionId,
-        invalidContentType: submission.content_type,
-        validContentTypes: VALID_SUBMISSION_TYPES,
-        error: `Invalid content_type: ${submission.content_type}`,
+      logger.warn(
+        {
+          submissionId,
+          invalidContentType: submission.content_type,
+          validContentTypes: VALID_SUBMISSION_TYPES,
+          error: `Invalid content_type: ${submission.content_type}`,
         },
         'SubmissionsPage: Invalid submission content_type'
       );
@@ -161,7 +161,7 @@ export function SubmissionCard({
       </CardHeader>
 
       <CardContent>
-        <div className="text-muted-foreground text-sm mb-4 flex flex-wrap gap-3">
+        <div className="text-muted-foreground mb-4 flex flex-wrap gap-3 text-sm">
           <div>
             Submitted {submission.created_at ? formatSubmissionDate(submission.created_at) : 'N/A'}
           </div>
@@ -181,7 +181,7 @@ export function SubmissionCard({
 
         {status === SubmissionStatus.rejected && submission.rejection_reason ? (
           <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 p-3">
-            <p className="mb-1 text-sm-medium text-red-400">Rejection Reason:</p>
+            <p className="text-sm-medium mb-1 text-red-400">Rejection Reason:</p>
             <p className="text-muted-foreground text-sm">{submission.rejection_reason}</p>
           </div>
         ) : null}

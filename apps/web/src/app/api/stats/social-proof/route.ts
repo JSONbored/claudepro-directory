@@ -30,7 +30,9 @@ import 'server-only';
 
 import { type GetSocialProofStatsReturnRow } from '@heyclaude/data-layer';
 import {
-  createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext,
+  createOptionsHandler as createApiOptionsHandler,
+  createCachedApiRoute,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import {
   errorResponseSchema,
@@ -96,7 +98,7 @@ const responseHandler = async (
       timestamp,
     },
     200,
-    {},
+    ctx.cors, // Use CORS headers from context (set by route factory based on cors: 'anon')
     {
       ETag: etag,
       'Last-Modified': new Date(timestamp).toUTCString(),
@@ -118,7 +120,7 @@ export const GET = createCachedApiRoute({
         description: 'Social proof statistics retrieved successfully',
         schema: socialProofStatsResponseSchema,
         headers: {
-          'ETag': {
+          ETag: {
             schema: { type: 'string' },
             description: 'Entity tag for conditional requests',
           },

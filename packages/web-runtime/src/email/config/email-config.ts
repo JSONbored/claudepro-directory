@@ -110,7 +110,7 @@ export function getEmailConfig(template: EmailTemplate) {
 
 /**
  * Resend environment variables - lazy loaded to avoid errors during build
- * 
+ *
  * @remarks
  * Returns undefined for missing required keys so callers can fail explicitly.
  * Use validateEmailEnvironment() to check for required keys at startup.
@@ -127,7 +127,7 @@ export function getResendEnv() {
  * Validate environment variables are present
  * Fails fast on startup if misconfigured
  */
-export function validateEmailEnvironment(required: ('resend')[]) {
+export function validateEmailEnvironment(required: 'resend'[]) {
   const missing: string[] = [];
 
   if (required.includes('resend')) {

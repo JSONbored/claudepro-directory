@@ -60,10 +60,7 @@ export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps)
           <ChevronDown className="h-4 w-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        className="w-[280px] sm:w-[380px]"
-      >
+      <DropdownMenuContent align="start" className="w-[280px] sm:w-[380px]">
         {templates.map((template) => (
           <DropdownMenuItem
             key={template.id}
@@ -71,7 +68,9 @@ export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps)
             className="cursor-pointer flex-col items-start py-2"
           >
             <div className="font-medium">{template.name}</div>
-            <div className={cn('text-muted-foreground', 'mt-4.5', 'text-xs')}>{template.description}</div>
+            <div className={cn('text-muted-foreground', 'mt-4.5', 'text-xs')}>
+              {template.description}
+            </div>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

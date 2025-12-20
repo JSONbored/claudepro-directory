@@ -7,7 +7,7 @@
  * Inspired by modern developer-focused footers
  */
 
-import type { newsletter_source } from '@heyclaude/data-layer/prisma';
+import type { newsletter_source } from '@prisma/client';
 import { useNewsletter } from '@heyclaude/web-runtime/hooks/use-newsletter';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { ArrowRight, Loader2, Mail } from '@heyclaude/web-runtime/icons';
@@ -63,8 +63,10 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
     const loadAndSanitize = async () => {
       try {
         const { highlightCode } = await import('@heyclaude/shared-runtime');
-        const rawHighlightedCode = await highlightCode(MCP_COMMAND, 'bash', { showLineNumbers: false });
-        
+        const rawHighlightedCode = await highlightCode(MCP_COMMAND, 'bash', {
+          showLineNumbers: false,
+        });
+
         // Sanitize highlighted code with DOMPurify for XSS protection
         // Even though input is hardcoded, sanitization provides defense-in-depth
         if (typeof window !== 'undefined' && rawHighlightedCode) {
@@ -118,7 +120,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
               transition={{ duration: DURATION.moderate }}
             >
               <div className="space-y-2">
-                <h2 className="text-foreground text-2xl font-bold leading-tight md:text-3xl">
+                <h2 className="text-foreground text-2xl leading-tight font-bold md:text-3xl">
                   Create what's exciting. Maintain what's essential.
                 </h2>
                 <p className="text-muted-foreground text-base leading-relaxed md:text-lg">
@@ -130,7 +132,9 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
               <div className="relative">
                 <div className="border-border/50 bg-card/50 card-base p-4">
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-muted-foreground text-sm font-medium">Get Claude Code</span>
+                    <span className="text-muted-foreground text-sm font-medium">
+                      Get Claude Code
+                    </span>
                     <SimpleCopyButton
                       content={MCP_COMMAND}
                       label=""
@@ -148,11 +152,11 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                     dangerouslySetInnerHTML={{ __html: sanitizedCode }}
                   />
                 </div>
-                <p className="text-muted-foreground text-sm mt-4">
+                <p className="text-muted-foreground mt-4 text-sm">
                   Or{' '}
                   <a
                     href="/docs"
-                    className="text-foreground hover:underline font-medium underline-offset-4"
+                    className="text-foreground font-medium underline-offset-4 hover:underline"
                   >
                     read the documentation
                   </a>
@@ -182,7 +186,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
               </motion.div>
 
               {/* Headline */}
-              <h2 className="text-foreground text-2xl font-bold leading-tight md:text-3xl">
+              <h2 className="text-foreground text-2xl leading-tight font-bold md:text-3xl">
                 Get the developer newsletter
               </h2>
 
@@ -207,11 +211,12 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                     disabled={isSubmitting}
                     autoComplete="email"
                     className={cn(
-                      'h-14 w-full card-base px-4 pr-14 text-base',
+                      'card-base h-14 w-full px-4 pr-14 text-base',
                       'border-border bg-background',
                       'transition-all duration-200 ease-out',
-                      'focus:border-color-newsletter-border focus:ring-2 focus:ring-color-newsletter-ring focus:outline-none',
-                      error && 'border-destructive focus:border-destructive focus:ring-destructive/20',
+                      'focus:border-color-newsletter-border focus:ring-color-newsletter-ring focus:ring-2 focus:outline-none',
+                      error &&
+                        'border-destructive focus:border-destructive focus:ring-destructive/20',
                       isSubmitting && 'cursor-not-allowed opacity-60'
                     )}
                     aria-label="Email address"
@@ -248,12 +253,18 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                           'bg-color-newsletter-bg text-background',
                           'shadow-sm transition-all duration-200',
                           'hover:bg-color-newsletter-bg-hover hover:shadow-md',
-                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-color-newsletter-bg focus-visible:ring-offset-2',
+                          'focus-visible:ring-color-newsletter-bg focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
                           'active:scale-95'
                         )}
-                        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }}
-                        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }}
-                        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }}
+                        initial={
+                          shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }
+                        }
+                        animate={
+                          shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }
+                        }
+                        exit={
+                          shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }
+                        }
                         transition={SPRING.loading}
                         whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
                         whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}

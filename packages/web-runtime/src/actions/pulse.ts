@@ -5,8 +5,9 @@
  * Consolidated event tracking and recommendations
  */
 
-import type { JsonValue } from '@heyclaude/data-layer/prisma';
-import type { user_interactionsCreateInput } from '@heyclaude/database-types/prisma';
+import { Prisma } from '@prisma/client';
+type JsonValue = Prisma.JsonValue;
+type user_interactionsCreateInput = Prisma.user_interactionsCreateInput;
 // Enum value objects not needed - using Zod schemas directly
 // Keep imports minimal - only import what's actually used
 // Import Zod schemas from re-export helper (works around TypeScript rootDir restrictions)
@@ -88,7 +89,14 @@ const trackTerminalFormSubmissionSchema = z.object({
 const trackUsageSchema = z.object({
   content_type: content_categorySchema,
   content_slug: z.string(),
-  action_type: z.enum(['copy', 'download_zip', 'download_markdown', 'llmstxt', 'download_mcpb', 'download_code']),
+  action_type: z.enum([
+    'copy',
+    'download_zip',
+    'download_markdown',
+    'llmstxt',
+    'download_mcpb',
+    'download_code',
+  ]),
 });
 
 // getSimilarConfigsSchema removed - embedding generation system has been deleted
@@ -310,8 +318,14 @@ export const generateConfigRecommendationsAction = rateLimitedAction
     } catch (error) {
       // If getConfigRecommendations throws, return error response
       const normalized = normalizeError(error, 'Failed to generate recommendations');
-      logger.error({ err: normalized, useCase: parsedInput.useCase,
-          experienceLevel: parsedInput.experienceLevel, }, 'generateConfigRecommendationsAction: getConfigRecommendations threw');
+      logger.error(
+        {
+          err: normalized,
+          useCase: parsedInput.useCase,
+          experienceLevel: parsedInput.experienceLevel,
+        },
+        'generateConfigRecommendationsAction: getConfigRecommendations threw'
+      );
 
       // Return error response instead of throwing (graceful degradation)
       // Match the RecommendationsPayload type structure (snake_case)

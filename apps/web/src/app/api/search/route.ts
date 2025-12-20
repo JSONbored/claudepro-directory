@@ -27,17 +27,21 @@ import {
   type experience_level,
   type job_category,
   type job_type,
-  type Json,
-} from '@heyclaude/data-layer/prisma';
+} from '@prisma/client';
+import type { Prisma } from '@prisma/client';
+
+type Json = Prisma.JsonValue;
 import {
   type SearchContentOptimizedArgs,
   type SearchContentOptimizedRow,
   type SearchUnifiedRow,
 } from '@heyclaude/database-types/postgres-types';
-import { type jobsModel } from '@heyclaude/database-types/prisma/models';
+
+type jobsModel = Prisma.jobsGetPayload<{}>;
 import { normalizeError } from '@heyclaude/shared-runtime';
 import {
-  createOptionsHandler as createApiOptionsHandler, createApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  createApiRoute,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { searchQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import {
@@ -125,9 +129,9 @@ export const GET = createApiRoute({
 
     const searchType: SearchType = hasJobFilters
       ? 'jobs'
-      : (entitiesArray && entitiesArray.length > 0
+      : entitiesArray && entitiesArray.length > 0
         ? 'unified'
-        : 'content');
+        : 'content';
 
     logger.info(
       {
@@ -315,7 +319,8 @@ export const GET = createApiRoute({
         schema: errorResponseSchema,
         example: {
           error: 'Invalid query parameters',
-          message: 'Invalid categories. Valid values: agents, mcp, rules, commands, hooks, statuslines, skills, collections, guides, jobs, changelog',
+          message:
+            'Invalid categories. Valid values: agents, mcp, rules, commands, hooks, statuslines, skills, collections, guides, jobs, changelog',
         },
       },
       500: {

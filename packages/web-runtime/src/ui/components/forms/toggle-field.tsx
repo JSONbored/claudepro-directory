@@ -134,13 +134,13 @@ export function ToggleField({
         <Label
           htmlFor={id}
           className={cn(
-            'font-medium text-base',
+            'text-base font-medium',
             disabled ? 'cursor-not-allowed' : 'cursor-pointer'
           )}
         >
           {label}
         </Label>
-        {description && <p className="mt-1 text-muted-foreground text-xs">{description}</p>}
+        {description && <p className="text-muted-foreground mt-1 text-xs">{description}</p>}
       </div>
 
       {/* Switch */}

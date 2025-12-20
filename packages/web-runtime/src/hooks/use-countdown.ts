@@ -99,40 +99,36 @@ export interface UseCountdownActions {
  * const [breakTime, breakControls] = useCountdown({ countStart: 300 }); // 5 minutes
  * ```
  */
-export function useCountdown(
-  options: UseCountdownOptions
-): [number, UseCountdownActions] {
-  const {
-    countStart,
-    countStop = 0,
-    intervalMs = 1000,
-    isIncrement = false,
-  } = options;
+export function useCountdown(options: UseCountdownOptions): [number, UseCountdownActions] {
+  const { countStart, countStop = 0, intervalMs = 1000, isIncrement = false } = options;
 
   const [count, setCount] = useState(countStart);
   const { value: isRunning, setTrue: startRunning, setFalse: stopRunning } = useBoolean();
 
   // Use useInterval for countdown logic
-  useInterval(() => {
-    setCount((prev) => {
-      const next = isIncrement ? prev + 1 : prev - 1;
+  useInterval(
+    () => {
+      setCount((prev) => {
+        const next = isIncrement ? prev + 1 : prev - 1;
 
-      // Check if we've reached the stop value
-      if (isIncrement) {
-        if (countStop !== -Infinity && next >= countStop) {
-          stopRunning();
-          return countStop;
+        // Check if we've reached the stop value
+        if (isIncrement) {
+          if (countStop !== -Infinity && next >= countStop) {
+            stopRunning();
+            return countStop;
+          }
+        } else {
+          if (next <= countStop) {
+            stopRunning();
+            return countStop;
+          }
         }
-      } else {
-        if (next <= countStop) {
-          stopRunning();
-          return countStop;
-        }
-      }
 
-      return next;
-    });
-  }, isRunning ? intervalMs : null);
+        return next;
+      });
+    },
+    isRunning ? intervalMs : null
+  );
 
   const startCountdown = useCallback(() => {
     if (isRunning) {

@@ -1,6 +1,6 @@
 import 'server-only';
-import { type content_category } from '@heyclaude/data-layer/prisma';
-import { ContentCategory } from '@heyclaude/data-layer/prisma';
+import { content_category as ContentCategory } from '@prisma/client';
+import type { content_category } from '@prisma/client';
 
 import { isBuildTime } from '../../build-time.ts';
 import { getHomepageConfigBundle } from '../../config/static-configs.ts';

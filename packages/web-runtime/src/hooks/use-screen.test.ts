@@ -120,9 +120,7 @@ describe('useScreen', () => {
   });
 
   it('should debounce resize events when debounceDelay is provided', () => {
-    const { result } = renderHook(() =>
-      useScreen({ debounceDelay: 100 } as UseScreenOptions)
-    );
+    const { result } = renderHook(() => useScreen({ debounceDelay: 100 } as UseScreenOptions));
 
     expect(result.current?.width).toBe(1920);
 
@@ -147,9 +145,7 @@ describe('useScreen', () => {
   });
 
   it('should cancel previous debounce when new resize occurs', () => {
-    const { result } = renderHook(() =>
-      useScreen({ debounceDelay: 100 } as UseScreenOptions)
-    );
+    const { result } = renderHook(() => useScreen({ debounceDelay: 100 } as UseScreenOptions));
 
     act(() => {
       window.dispatchEvent(new Event('resize'));
@@ -198,10 +194,7 @@ describe('useScreen', () => {
     unmount();
 
     expect(removeEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function));
-    expect(removeEventListenerSpy).toHaveBeenCalledWith(
-      'orientationchange',
-      expect.any(Function)
-    );
+    expect(removeEventListenerSpy).toHaveBeenCalledWith('orientationchange', expect.any(Function));
 
     if (mockScreen.orientation) {
       expect(mockScreen.orientation.removeEventListener).toHaveBeenCalledWith(

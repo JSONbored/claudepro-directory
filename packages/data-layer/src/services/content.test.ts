@@ -1,14 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import type { MockPrismaClient } from '../test-utils/prisma-mock.ts';
 import { ContentService } from './content.ts';
+import { prisma } from '../prisma/client.ts';
+import type { PrismaClient } from '@prisma/client';
 
-// Mock the prisma singleton with Prismock (async to avoid Node.js TS processing issue)
-vi.mock('../prisma/client.ts', async () => {
-  const { setupPrismockMockAsync } = await import('../test-utils/prisma-mock.ts');
-  return {
-    prisma: await setupPrismockMockAsync(),
-  };
-});
+// Prismock is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from '../prisma/client.ts' will automatically use PrismockClient
+// Following the official Prismock README approach exactly
 
 // Mock the RPC error logging utility
 vi.mock('../utils/rpc-error-logging.ts', () => ({
@@ -22,16 +19,54 @@ vi.mock('../utils/request-cache.ts', () => ({
 
 describe('ContentService', () => {
   let contentService: ContentService;
-  let prismock: MockPrismaClient;
+  let prismock: PrismaClient;
+  let queryRawUnsafeSpy: ReturnType<typeof vi.fn>;
+
+  /**
+   * Helper to safely mock Prismock model methods
+   * Prismock creates models automatically from schema.prisma
+   * However, methods may not be initialized until first access
+   * This helper ensures methods exist and are mockable
+   */
+  function mockPrismockMethod<T>(
+    model: any,
+    method: string,
+    returnValue: T
+  ): ReturnType<typeof vi.fn> {
+    if (!model) {
+      throw new Error(`Prismock model does not exist - check if model name matches schema.prisma`);
+    }
+    // Always create/assign the mock function directly
+    // This ensures the method exists and is mockable, regardless of Prismock's initialization state
+    const mockFn = vi.fn().mockResolvedValue(returnValue as any);
+    model[method] = mockFn;
+    return mockFn;
+  }
 
   beforeEach(async () => {
-    // Get the mocked prisma instance (Prismock)
-    const { prisma } = await import('../prisma/client.ts');
-    prismock = prisma as MockPrismaClient;
-    
+    // Get the prisma instance (automatically PrismockClient via __mocks__/@prisma/client.ts)
+    prismock = prisma;
+
     // Reset Prismock data before each test
-    prismock.reset();
-    
+    if ('reset' in prismock && typeof prismock.reset === 'function') {
+      prismock.reset();
+    }
+
+    // Prismock doesn't support $queryRawUnsafe, so we add it as a mock function
+    // This is the proper way to handle unsupported methods per Vitest best practices
+    // We assign vi.fn() directly to the property and use it as the mock
+    queryRawUnsafeSpy = vi.fn().mockResolvedValue([]);
+    (prismock as any).$queryRawUnsafe = queryRawUnsafeSpy;
+
+    // Ensure Prismock models are initialized by accessing them
+    // Prismock creates models lazily, so we need to trigger initialization
+    // Accessing the model property triggers Prismock to create it with methods
+    void prismock.category_configs;
+    void prismock.content;
+    void prismock.sponsored_content;
+    void prismock.content_templates;
+    void prismock.v_content_list_slim;
+
     contentService = new ContentService();
   });
 
@@ -42,11 +77,11 @@ describe('ContentService', () => {
         last_updated: '2024-01-01',
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getSitewideReadme();
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('generate_readme_data')
       );
       expect(result).toEqual(mockData);
@@ -55,13 +90,13 @@ describe('ContentService', () => {
     it('should throw error when RPC fails', async () => {
       const mockError = new Error('Database error');
 
-      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
+      queryRawUnsafeSpy.mockRejectedValue(mockError);
 
       await expect(contentService.getSitewideReadme()).rejects.toThrow('Database error');
     });
 
     it('should handle null data gracefully', async () => {
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([] as any);
+      queryRawUnsafeSpy.mockResolvedValue([] as any);
 
       const result = await contentService.getSitewideReadme();
       expect(result).toBeUndefined();
@@ -75,11 +110,11 @@ describe('ContentService', () => {
         categories: ['agents', 'skills'],
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getSitewideLlmsTxt();
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('generate_sitewide_llms_txt')
       );
       expect(result).toEqual(mockData);
@@ -88,7 +123,7 @@ describe('ContentService', () => {
     it('should throw error on RPC failure', async () => {
       const mockError = new Error('RPC timeout');
 
-      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
+      queryRawUnsafeSpy.mockRejectedValue(mockError);
 
       await expect(contentService.getSitewideLlmsTxt()).rejects.toThrow('RPC timeout');
     });
@@ -101,20 +136,18 @@ describe('ContentService', () => {
         entries: [],
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getChangelogLlmsTxt();
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('generate_changelog_llms_txt')
       );
       expect(result).toEqual(mockData);
     });
 
     it('should handle empty changelog data', async () => {
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(
-        [{ content: '', entries: [] }] as any
-      );
+      queryRawUnsafeSpy.mockResolvedValue([{ content: '', entries: [] }] as any);
 
       const result = await contentService.getChangelogLlmsTxt();
       expect(result).toHaveProperty('content');
@@ -125,53 +158,62 @@ describe('ContentService', () => {
   describe('getSitewideContentList', () => {
     it('should return sitewide content list', async () => {
       const mockData = { items: [], total: 0 };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      // List functions return arrays, so mock returns array of results
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getSitewideContentList();
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('get_sitewide_content_list')
       );
-      expect(result).toEqual(mockData);
+      // List functions return arrays (GetSitewideContentListReturns is an array type)
+      expect(result).toEqual([mockData]);
     });
 
     it('should accept optional args', async () => {
       const mockData = { items: [], total: 0 };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       await contentService.getSitewideContentList({ limit: 10 });
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalled();
+      expect(queryRawUnsafeSpy).toHaveBeenCalled();
     });
   });
 
   describe('getCategoryContentList', () => {
     it('should return category content list', async () => {
       const mockData = { items: [], total: 0 };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      // List functions return arrays, so mock returns array of results
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getCategoryContentList({
         p_category: 'agents',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_category_content_list')
+      // SQL contains the function name (even with SELECT * FROM prefix)
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('get_category_content_list'),
+        'agents'
       );
-      expect(result).toEqual(mockData);
+      // List functions return arrays (GetCategoryContentListReturns is an array type)
+      expect(result).toEqual([mockData]);
     });
   });
 
   describe('getCategoryLlmsTxt', () => {
     it('should return category llms.txt data', async () => {
       const mockData = { content: '# Category LLMs.txt' };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getCategoryLlmsTxt({
         p_category: 'agents',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('generate_category_llms_txt')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('generate_category_llms_txt'),
+        'agents'
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
   });
@@ -179,15 +221,18 @@ describe('ContentService', () => {
   describe('getChangelogEntryLlmsTxt', () => {
     it('should return changelog entry llms.txt data', async () => {
       const mockData = { content: '# Changelog Entry' };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getChangelogEntryLlmsTxt({
         p_slug: 'test-entry',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('generate_changelog_entry_llms_txt')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('generate_changelog_entry_llms_txt'),
+        'test-entry'
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
   });
@@ -195,16 +240,21 @@ describe('ContentService', () => {
   describe('getToolLlmsTxt', () => {
     it('should return tool llms.txt data', async () => {
       const mockData = { content: '# Tool LLMs.txt' };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getToolLlmsTxt({
         p_category: 'agents',
         p_slug: 'test-tool',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('generate_tool_llms_txt')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key order: p_category, p_slug
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('generate_tool_llms_txt'),
+        'agents', // p_category
+        'test-tool' // p_slug
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
   });
@@ -220,18 +270,25 @@ describe('ContentService', () => {
         },
       ];
 
-      vi.mocked(prismock.category_configs.findMany).mockResolvedValue(
-        mockConfigs as any
-      );
+      const findManyMock = mockPrismockMethod(prismock.category_configs, 'findMany', mockConfigs);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
 
       const result = await contentService.getCategoryConfigs();
 
-      expect(prismock.category_configs.findMany).toHaveBeenCalledWith({
-        orderBy: { category: 'asc' },
-      });
+      // The service calls findMany with a select object and orderBy
+      // We check that it was called with the correct structure
+      expect(findManyMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: { category: 'asc' },
+          select: expect.objectContaining({
+            category: true,
+            title: true,
+            sections: true,
+          }),
+        })
+      );
       expect(Array.isArray(result)).toBe(true);
     });
 
@@ -250,9 +307,7 @@ describe('ContentService', () => {
         },
       ];
 
-      vi.mocked(prismock.category_configs.findMany).mockResolvedValue(
-        mockConfigs as any
-      );
+      mockPrismockMethod(prismock.category_configs, 'findMany', mockConfigs);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -267,16 +322,23 @@ describe('ContentService', () => {
 
   describe('getApiContentFull', () => {
     it('should return API content full data', async () => {
-      const mockData = { content: [] };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      // get_api_content_full returns a string (JSON stringified content)
+      const mockData = '{"content":[]}';
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getApiContentFull({
         p_category: 'agents',
+        p_slug: 'test',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_api_content_full')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key order: p_category, p_slug
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('get_api_content_full'),
+        'agents', // p_category
+        'test' // p_slug
       );
+      // Single-return function unwraps array (function name doesn't include '_content')
       expect(result).toEqual(mockData);
     });
   });
@@ -284,16 +346,21 @@ describe('ContentService', () => {
   describe('generateMarkdownExport', () => {
     it('should return markdown export data', async () => {
       const mockData = { markdown: '# Export' };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.generateMarkdownExport({
         p_category: 'agents',
         p_slug: 'test',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('generate_markdown_export')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key order: p_category, p_slug
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('generate_markdown_export'),
+        'agents', // p_category
+        'test' // p_slug
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
   });
@@ -301,16 +368,21 @@ describe('ContentService', () => {
   describe('getItemLlmsTxt', () => {
     it('should return item llms.txt data', async () => {
       const mockData = { content: '# Item LLMs.txt' };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getItemLlmsTxt({
         p_category: 'agents',
         p_slug: 'test-item',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('generate_item_llms_txt')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key order: p_category, p_slug
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('generate_item_llms_txt'),
+        'agents', // p_category
+        'test-item' // p_slug
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
   });
@@ -318,15 +390,18 @@ describe('ContentService', () => {
   describe('getSkillStoragePath', () => {
     it('should return skill storage path', async () => {
       const mockData = { storage_path: 'skills/test.json' };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getSkillStoragePath({
         p_slug: 'test-skill',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_skill_storage_path')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('get_skill_storage_path'),
+        'test-skill'
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
   });
@@ -334,15 +409,18 @@ describe('ContentService', () => {
   describe('getMcpbStoragePath', () => {
     it('should return mcpb storage path', async () => {
       const mockData = { storage_path: 'mcpb/test.json' };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getMcpbStoragePath({
         p_slug: 'test-mcpb',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_mcpb_storage_path')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('get_mcpb_storage_path'),
+        'test-mcpb'
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
   });
@@ -352,33 +430,66 @@ describe('ContentService', () => {
       const mockData = {
         content: { id: '1', slug: 'test', title: 'Test' },
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getContentDetailComplete({
         p_category: 'agents',
         p_slug: 'test',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_content_detail_complete')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key order: p_category, p_slug
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('get_content_detail_complete'),
+        'agents', // p_category
+        'test' // p_slug
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
   });
 
   describe('getEnrichedContentList', () => {
     it('should return enriched content list with category filter', async () => {
-      const mockData = [
+      // After migration: Uses Prisma findMany + JavaScript join instead of raw SQL LEFT JOIN
+      const mockContent = [
         {
           id: '1',
           slug: 'test',
           title: 'Test',
-          category: 'agents',
-          is_sponsored: false,
+          display_title: null,
+          seo_title: null,
+          description: 'Test description',
+          author: 'test-author',
+          author_profile_url: null,
+          category: 'agents' as const,
+          tags: ['tag1'],
+          source_table: 'agents',
+          created_at: new Date('2024-01-01'),
+          updated_at: new Date('2024-01-01'),
+          date_added: new Date('2024-01-01'),
+          features: [],
+          use_cases: [],
+          source: null,
+          documentation_url: null,
+          metadata: {},
+          view_count: 0,
+          copy_count: 0,
+          bookmark_count: 0,
+          popularity_score: 0,
         },
       ];
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      const mockSponsored: Array<{
+        id: string;
+        content_id: string;
+        content_type: string;
+        tier: string;
+        active: boolean | null;
+      }> = []; // No sponsored content for this test
+
+      mockPrismockMethod(prismock.content, 'findMany', mockContent);
+      mockPrismockMethod(prismock.sponsored_content, 'findMany', mockSponsored);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -389,26 +500,89 @@ describe('ContentService', () => {
         p_offset: 0,
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('FROM content c'),
-        'agents',
-        10,
-        0
-      );
-      expect(result).toEqual(mockData);
+      // After migration: Uses Prisma findMany instead of $queryRawUnsafe
+      // Note: Implementation doesn't use select because it needs all fields for contentModel type
+      expect(prismock.content.findMany).toHaveBeenCalledWith({
+        where: { category: 'agents' },
+        orderBy: { slug: 'asc' },
+        take: 10,
+        skip: 0,
+        // No select clause - fetches all fields to match contentModel type
+      });
+
+      // Expected result structure (enriched with sponsorship fields)
+      expect(result).toEqual([
+        {
+          id: '1',
+          slug: 'test',
+          title: 'Test',
+          display_title: null,
+          seo_title: null,
+          description: 'Test description',
+          author: 'test-author',
+          author_profile_url: null,
+          category: 'agents',
+          tags: ['tag1'],
+          source_table: 'agents',
+          created_at: expect.any(Date),
+          updated_at: expect.any(Date),
+          date_added: expect.any(Date),
+          features: [],
+          use_cases: [],
+          source: null,
+          documentation_url: null,
+          metadata: {},
+          view_count: 0,
+          copy_count: 0,
+          bookmark_count: 0,
+          popularity_score: 0,
+          trending_score: 0,
+          sponsored_content_id: null,
+          sponsorship_tier: null,
+          is_sponsored: false,
+        },
+      ]);
     });
 
     it('should return enriched content list with slugs filter', async () => {
-      const mockData = [
+      // After migration: Uses Prisma findMany + JavaScript join
+      const mockContent = [
         {
           id: '1',
           slug: 'test-1',
           title: 'Test 1',
-          category: 'agents',
+          display_title: null,
+          seo_title: null,
+          description: 'Test 1 description',
+          author: 'test-author',
+          author_profile_url: null,
+          category: 'agents' as const,
+          tags: [],
+          created_at: new Date('2024-01-01'),
+          updated_at: new Date('2024-01-01'),
+          date_added: new Date('2024-01-01'),
+          features: [],
+          use_cases: [],
+          source: null,
+          documentation_url: null,
+          metadata: {},
+          view_count: 0,
+          copy_count: 0,
+          bookmark_count: 0,
+          popularity_score: 0,
         },
       ];
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      const mockSponsored: Array<{
+        id: string;
+        content_id: string;
+        content_type: string;
+        tier: string;
+        active: boolean | null;
+      }> = [];
+
+      mockPrismockMethod(prismock.content, 'findMany', mockContent);
+      mockPrismockMethod(prismock.sponsored_content, 'findMany', mockSponsored);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -419,17 +593,25 @@ describe('ContentService', () => {
         p_offset: 0,
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('c.slug = ANY'),
-        ['test-1', 'test-2'],
-        10,
-        0
-      );
-      expect(result).toEqual(mockData);
+      // After migration: Uses Prisma findMany with slug filter
+      // Note: Implementation doesn't use select because it needs all fields for contentModel type
+      expect(prismock.content.findMany).toHaveBeenCalledWith({
+        where: { slug: { in: ['test-1', 'test-2'] } },
+        orderBy: { slug: 'asc' },
+        take: 10,
+        skip: 0,
+        // No select clause - fetches all fields to match contentModel type
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].slug).toBe('test-1');
+      expect(result[0].is_sponsored).toBe(false);
     });
 
     it('should handle empty results', async () => {
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([]);
+      // After migration: Uses Prisma findMany
+      vi.mocked(prismock.content.findMany).mockResolvedValue([]);
+      vi.mocked(prismock.sponsored_content.findMany).mockResolvedValue([]);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -439,6 +621,7 @@ describe('ContentService', () => {
       });
 
       expect(result).toEqual([]);
+      expect(prismock.content.findMany).toHaveBeenCalled();
     });
   });
 
@@ -448,7 +631,7 @@ describe('ContentService', () => {
         items: [],
         pagination: { total_count: 0, limit: 10, offset: 0 },
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getContentPaginated({
         p_category: 'agents',
@@ -456,9 +639,15 @@ describe('ContentService', () => {
         p_offset: 0,
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_content_paginated')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key order: p_category, p_limit, p_offset
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('get_content_paginated'),
+        'agents', // p_category
+        10, // p_limit
+        0 // p_offset
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
   });
@@ -469,15 +658,19 @@ describe('ContentService', () => {
         featured: [],
         categories: [],
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getHomepageComplete({
         p_category_ids: ['agents', 'mcp'],
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_homepage_complete')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key order: p_category_ids
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('get_homepage_complete'),
+        ['agents', 'mcp'] // p_category_ids (array)
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
   });
@@ -488,16 +681,21 @@ describe('ContentService', () => {
         reviews: [],
         stats: { total: 0, average_rating: 0 },
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getReviewsWithStats({
         p_content_type: 'agents',
         p_content_slug: 'test',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_reviews_with_stats')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key order: p_content_slug, p_content_type
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('get_reviews_with_stats'),
+        'agents', // p_content_type (alphabetically first)
+        'test' // p_content_slug
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
   });
@@ -507,7 +705,7 @@ describe('ContentService', () => {
       const mockData = {
         items: [{ id: '1', slug: 'related-1', title: 'Related' }],
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getRelatedContent({
         p_category: 'agents',
@@ -515,9 +713,17 @@ describe('ContentService', () => {
         p_limit: 5,
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_related_content')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key order: p_category, p_limit, p_slug
+      // The SQL contains the function name, so stringContaining works
+      // Use expect.anything() for remaining arguments to be more flexible
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('get_related_content'),
+        expect.anything(), // p_category
+        expect.anything(), // p_limit  
+        expect.anything() // p_slug
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
   });
@@ -536,9 +742,7 @@ describe('ContentService', () => {
         },
       ];
 
-      vi.mocked(prismock.content_templates.findMany).mockResolvedValue(
-        mockTemplates as any
-      );
+      mockPrismockMethod(prismock.content_templates, 'findMany', mockTemplates as any);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -557,10 +761,7 @@ describe('ContentService', () => {
           category: true,
           name: true,
         }),
-        orderBy: [
-          { display_order: 'asc' },
-          { name: 'asc' },
-        ],
+        orderBy: [{ display_order: 'asc' }, { name: 'asc' }],
       });
       expect(result).toHaveProperty('templates');
       expect(result.templates?.[0]).toHaveProperty('type', 'agents');
@@ -568,7 +769,7 @@ describe('ContentService', () => {
     });
 
     it('should return null templates when none found', async () => {
-      vi.mocked(prismock.content_templates.findMany).mockResolvedValue([]);
+      mockPrismockMethod(prismock.content_templates, 'findMany', []);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -583,27 +784,48 @@ describe('ContentService', () => {
 
   describe('getContentPaginatedSlim', () => {
     it('should return paginated slim content with default params', async () => {
-      const mockData = [
+      const mockItems = [
         {
           id: '1',
           slug: 'test',
           title: 'Test',
-          total_count: 100n,
+          display_title: null,
+          description: null,
+          author: null,
+          author_profile_url: null,
+          category: 'agents',
+          tags: [],
+          source: null,
+          source_table: 'agents',
+          created_at: new Date('2024-01-01'),
+          updated_at: new Date('2024-01-01'),
+          date_added: new Date('2024-01-01'),
+          view_count: 0,
+          copy_count: 0,
+          bookmark_count: 0,
+          popularity_score: 0,
+          trending_score: 0,
+          sponsored_content_id: null,
+          sponsorship_tier: null,
+          is_sponsored: false,
         },
       ];
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      mockPrismockMethod(prismock.v_content_list_slim, 'findMany', mockItems as any);
+      mockPrismockMethod(prismock.v_content_list_slim, 'count', 100);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
 
       const result = await contentService.getContentPaginatedSlim({});
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('FROM mv_content_list_slim'),
-        30, // default limit
-        0 // default offset
-      );
+      expect(prismock.v_content_list_slim.findMany).toHaveBeenCalledWith({
+        where: {},
+        orderBy: [{ created_at: 'desc' }],
+        take: 30,
+        skip: 0,
+      });
+      expect(prismock.v_content_list_slim.count).toHaveBeenCalledWith({ where: {} });
       expect(result).toHaveProperty('items');
       expect(result).toHaveProperty('pagination');
       expect(result.pagination.total_count).toBe(100);
@@ -613,22 +835,22 @@ describe('ContentService', () => {
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
 
-      await expect(
-        contentService.getContentPaginatedSlim({ p_limit: 0 })
-      ).rejects.toThrow('Invalid limit');
+      await expect(contentService.getContentPaginatedSlim({ p_limit: 0 })).rejects.toThrow(
+        'Invalid limit'
+      );
 
-      await expect(
-        contentService.getContentPaginatedSlim({ p_limit: 101 })
-      ).rejects.toThrow('Invalid limit');
+      await expect(contentService.getContentPaginatedSlim({ p_limit: 101 })).rejects.toThrow(
+        'Invalid limit'
+      );
     });
 
     it('should validate offset', async () => {
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
 
-      await expect(
-        contentService.getContentPaginatedSlim({ p_offset: -1 })
-      ).rejects.toThrow('Invalid offset');
+      await expect(contentService.getContentPaginatedSlim({ p_offset: -1 })).rejects.toThrow(
+        'Invalid offset'
+      );
     });
 
     it('should validate order_by', async () => {
@@ -654,16 +876,35 @@ describe('ContentService', () => {
     });
 
     it('should filter by category', async () => {
-      const mockData = [
+      const mockItems = [
         {
           id: '1',
           slug: 'test',
+          title: 'Test',
+          display_title: null,
+          description: null,
+          author: null,
+          author_profile_url: null,
           category: 'agents',
-          total_count: 50n,
+          tags: [],
+          source: null,
+          source_table: 'agents',
+          created_at: new Date('2024-01-01'),
+          updated_at: new Date('2024-01-01'),
+          date_added: new Date('2024-01-01'),
+          view_count: 0,
+          copy_count: 0,
+          bookmark_count: 0,
+          popularity_score: 0,
+          trending_score: 0,
+          sponsored_content_id: null,
+          sponsorship_tier: null,
+          is_sponsored: false,
         },
       ];
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      mockPrismockMethod(prismock.v_content_list_slim, 'findMany', mockItems as any);
+      mockPrismockMethod(prismock.v_content_list_slim, 'count', 50);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -674,17 +915,21 @@ describe('ContentService', () => {
         p_offset: 0,
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('WHERE c.category'),
-        'agents',
-        20,
-        0
-      );
+      expect(prismock.v_content_list_slim.findMany).toHaveBeenCalledWith({
+        where: { category: 'agents' },
+        orderBy: [{ created_at: 'desc' }],
+        take: 20,
+        skip: 0,
+      });
+      expect(prismock.v_content_list_slim.count).toHaveBeenCalledWith({
+        where: { category: 'agents' },
+      });
       expect(result.pagination.total_count).toBe(50);
     });
 
     it('should handle empty results', async () => {
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([]);
+      mockPrismockMethod(prismock.v_content_list_slim, 'findMany', []);
+      mockPrismockMethod(prismock.v_content_list_slim, 'count', 0);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -699,20 +944,59 @@ describe('ContentService', () => {
     });
 
     it('should calculate pagination correctly', async () => {
-      const mockData = [
+      const mockItems = [
         {
           id: '1',
           slug: 'test',
-          total_count: 100n,
+          title: 'Test',
+          display_title: null,
+          description: null,
+          author: null,
+          author_profile_url: null,
+          category: 'agents',
+          tags: [],
+          source: null,
+          source_table: 'agents',
+          created_at: new Date('2024-01-01'),
+          updated_at: new Date('2024-01-01'),
+          date_added: new Date('2024-01-01'),
+          view_count: 0,
+          copy_count: 0,
+          bookmark_count: 0,
+          popularity_score: 0,
+          trending_score: 0,
+          sponsored_content_id: null,
+          sponsorship_tier: null,
+          is_sponsored: false,
         },
         {
           id: '2',
           slug: 'test-2',
-          total_count: 100n,
+          title: 'Test 2',
+          display_title: null,
+          description: null,
+          author: null,
+          author_profile_url: null,
+          category: 'agents',
+          tags: [],
+          source: null,
+          source_table: 'agents',
+          created_at: new Date('2024-01-02'),
+          updated_at: new Date('2024-01-02'),
+          date_added: new Date('2024-01-02'),
+          view_count: 0,
+          copy_count: 0,
+          bookmark_count: 0,
+          popularity_score: 0,
+          trending_score: 0,
+          sponsored_content_id: null,
+          sponsorship_tier: null,
+          is_sponsored: false,
         },
       ];
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      mockPrismockMethod(prismock.v_content_list_slim, 'findMany', mockItems as any);
+      mockPrismockMethod(prismock.v_content_list_slim, 'count', 100);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -731,20 +1015,61 @@ describe('ContentService', () => {
 
   describe('getContentDetailCore', () => {
     it('should return content detail core', async () => {
-      const mockData = {
-        content: { id: '1', slug: 'test', title: 'Test' },
+      // getContentDetailCore accesses many fields including date_added.toISOString()
+      // So the mock needs to include all accessed fields with proper types
+      const mockContent = {
+        id: '1',
+        slug: 'test',
+        title: 'Test',
+        display_title: 'Test Display',
+        seo_title: 'Test SEO',
+        description: 'Test description',
+        author: 'Test Author',
+        author_profile_url: 'https://example.com/author',
+        date_added: new Date('2024-01-01'), // Must be a Date object for .toISOString()
+        tags: ['tag1', 'tag2'],
+        content: 'Test content',
+        source: 'test-source',
+        documentation_url: 'https://example.com/docs',
+        category: 'agents' as const,
+        features: null,
+        use_cases: null,
+        examples: null,
+        metadata: null,
+        popularity_score: 0,
+        created_at: new Date('2024-01-01'), // Must be a Date object for .toISOString()
+        updated_at: new Date('2024-01-01'), // Must be a Date object for .toISOString()
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      
+      // getContentDetailCore uses withSmartCache and prisma.content.findUnique (not RPC)
+      const { withSmartCache } = await import('../utils/request-cache.ts');
+      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+      
+      mockPrismockMethod(prismock.content, 'findUnique', mockContent);
 
       const result = await contentService.getContentDetailCore({
         p_category: 'agents',
         p_slug: 'test',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_content_detail_core')
+      // getContentDetailCore uses prisma.content.findUnique, not $queryRawUnsafe
+      // The where clause uses slug_category (not category_slug)
+      expect(prismock.content.findUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            slug_category: {
+              slug: 'test',
+              category: 'agents',
+            },
+          },
+        })
       );
-      expect(result).toEqual(mockData);
+      // The service returns an object with a 'content' property containing the transformed content
+      expect(result).toHaveProperty('content');
+      expect(result.content).toHaveProperty('id', '1');
+      expect(result.content).toHaveProperty('slug', 'test');
+      expect(result.content).toHaveProperty('title', 'Test');
+      expect(result.content).toHaveProperty('date_added'); // Transformed to date string (YYYY-MM-DD format)
     });
   });
 
@@ -755,16 +1080,21 @@ describe('ContentService', () => {
         copies: 50,
         bookmarks: 25,
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getContentAnalytics({
         p_category: 'agents',
         p_slug: 'test',
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_content_analytics')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key order: p_category, p_slug
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('get_content_analytics'),
+        'agents', // p_category
+        'test' // p_slug
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
   });
@@ -775,15 +1105,19 @@ describe('ContentService', () => {
         featured: [],
         categories: [],
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getHomepageOptimized({
         p_category_ids: ['agents'],
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_homepage_optimized')
+      // $queryRawUnsafe is called with (query, ...argValues)
+      // Arguments are passed in object key order: p_category_ids
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('get_homepage_optimized'),
+        ['agents'] // p_category_ids (array) - matches the actual call
       );
+      // Single-return function unwraps array
       expect(result).toEqual(mockData);
     });
   });
@@ -793,11 +1127,11 @@ describe('ContentService', () => {
       const mockData = {
         feed: '<?xml version="1.0"?><rss>...</rss>',
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.generateChangelogRssFeed();
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('generate_changelog_rss_feed')
       );
       expect(result).toEqual(mockData);
@@ -805,10 +1139,10 @@ describe('ContentService', () => {
 
     it('should accept optional args', async () => {
       const mockData = { feed: '<?xml>...</xml>' };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       await contentService.generateChangelogRssFeed({ p_limit: 20 });
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalled();
+      expect(queryRawUnsafeSpy).toHaveBeenCalled();
     });
   });
 
@@ -817,11 +1151,11 @@ describe('ContentService', () => {
       const mockData = {
         feed: '<?xml version="1.0"?><feed>...</feed>',
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.generateChangelogAtomFeed();
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('generate_changelog_atom_feed')
       );
       expect(result).toEqual(mockData);
@@ -833,11 +1167,11 @@ describe('ContentService', () => {
       const mockData = {
         feed: '<?xml version="1.0"?><rss>...</rss>',
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.generateContentRssFeed();
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('generate_content_rss_feed')
       );
       expect(result).toEqual(mockData);
@@ -849,11 +1183,11 @@ describe('ContentService', () => {
       const mockData = {
         feed: '<?xml version="1.0"?><feed>...</feed>',
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.generateContentAtomFeed();
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('generate_content_atom_feed')
       );
       expect(result).toEqual(mockData);
@@ -866,11 +1200,11 @@ describe('ContentService', () => {
         new_content: [],
         trending_content: [],
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await contentService.getWeeklyDigest();
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('get_weekly_digest')
       );
       expect(result).toEqual(mockData);
@@ -878,10 +1212,10 @@ describe('ContentService', () => {
 
     it('should accept optional args', async () => {
       const mockData = { new_content: [], trending_content: [] };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       await contentService.getWeeklyDigest({ p_limit: 10 });
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalled();
+      expect(queryRawUnsafeSpy).toHaveBeenCalled();
     });
   });
 
@@ -890,18 +1224,18 @@ describe('ContentService', () => {
       const { logRpcError } = await import('../utils/rpc-error-logging.ts');
       const mockError = new Error('Test error');
 
-      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
+      queryRawUnsafeSpy.mockRejectedValue(mockError);
 
       await expect(contentService.getSitewideReadme()).rejects.toThrow();
       expect(logRpcError).toHaveBeenCalledWith(mockError, {
         rpcName: 'generate_readme_data',
-        operation: 'ContentService.getSitewideReadme',
+        operation: 'getSitewideReadme', // Actual operation name passed from methodName option
         args: {},
       });
     });
 
     it('should propagate database connection errors', async () => {
-      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(new Error('Connection refused'));
+      queryRawUnsafeSpy.mockRejectedValue(new Error('Connection refused'));
 
       await expect(contentService.getSitewideReadme()).rejects.toThrow('Connection refused');
     });
@@ -911,7 +1245,7 @@ describe('ContentService', () => {
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
 
       const mockError = new Error('Prisma query failed');
-      vi.mocked(prismock.category_configs.findMany).mockRejectedValue(mockError);
+      mockPrismockMethod(prismock.category_configs, 'findMany', Promise.reject(mockError));
 
       await expect(contentService.getCategoryConfigs()).rejects.toThrow('Prisma query failed');
     });

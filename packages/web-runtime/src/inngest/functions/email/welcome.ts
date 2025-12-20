@@ -12,10 +12,7 @@ import { inngest } from '../../client';
 import { renderEmailTemplate } from '../../../email/base-template';
 import { NewsletterWelcome } from '../../../email/templates/newsletter-welcome';
 import { HELLO_FROM } from '../../../email/config/email-config';
-import {
-  sendEmail,
-  enrollInOnboardingSequence,
-} from '../../../integrations/resend';
+import { sendEmail, enrollInOnboardingSequence } from '../../../integrations/resend';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 /**
@@ -41,75 +38,90 @@ export const sendWelcomeEmail = inngest.createFunction(
 
     const { email, subscriptionId, triggerSource } = event.data;
 
-    logger.info({ ...logContext,
-      email,
-      triggerSource,
-      subscriptionId: subscriptionId ?? null, }, 'Welcome email request received');
+    logger.info(
+      { ...logContext, email, triggerSource, subscriptionId: subscriptionId ?? null },
+      'Welcome email request received'
+    );
 
     // Step 1: Render and send the appropriate welcome email
-    const emailResult = await step.run('send-welcome-email', async (): Promise<{
-      sent: boolean;
-      emailId: string | null;
-    }> => {
-      try {
-        // For now, both trigger sources use the same newsletter welcome template
-        // In the future, OAuth signup could use a different template
-        const html = await renderEmailTemplate(NewsletterWelcome, {
-          email,
-        });
+    const emailResult = await step.run(
+      'send-welcome-email',
+      async (): Promise<{
+        sent: boolean;
+        emailId: string | null;
+      }> => {
+        try {
+          // For now, both trigger sources use the same newsletter welcome template
+          // In the future, OAuth signup could use a different template
+          const html = await renderEmailTemplate(NewsletterWelcome, {
+            email,
+          });
 
-        const { data: emailData, error: emailError } = await sendEmail(
-          {
-            from: HELLO_FROM,
-            to: email,
-            subject: 'Welcome to Claude Pro Directory! 🎉',
-            html,
-            tags: [
-              { name: 'type', value: triggerSource === 'auth_signup' ? 'auth-signup' : 'newsletter' },
-            ],
-          },
-          'Resend welcome email send timed out'
-        );
+          const { data: emailData, error: emailError } = await sendEmail(
+            {
+              from: HELLO_FROM,
+              to: email,
+              subject: 'Welcome to Claude Pro Directory! 🎉',
+              html,
+              tags: [
+                {
+                  name: 'type',
+                  value: triggerSource === 'auth_signup' ? 'auth-signup' : 'newsletter',
+                },
+              ],
+            },
+            'Resend welcome email send timed out'
+          );
 
-        if (emailError) {
-          logger.warn({ ...logContext,
-            errorMessage: emailError.message, }, 'Welcome email failed');
+          if (emailError) {
+            logger.warn(
+              { ...logContext, errorMessage: emailError.message },
+              'Welcome email failed'
+            );
+            return { sent: false, emailId: null };
+          }
+
+          logger.info(
+            { ...logContext, emailId: emailData?.id ?? null },
+            'Welcome email sent successfully'
+          );
+
+          return { sent: true, emailId: emailData?.id ?? null };
+        } catch (error) {
+          const normalized = normalizeError(error, 'Welcome email failed');
+          logger.warn({ ...logContext, errorMessage: normalized.message }, 'Welcome email failed');
           return { sent: false, emailId: null };
         }
-
-        logger.info({ ...logContext,
-          emailId: emailData?.id ?? null, }, 'Welcome email sent successfully');
-
-        return { sent: true, emailId: emailData?.id ?? null };
-      } catch (error) {
-        const normalized = normalizeError(error, 'Welcome email failed');
-        logger.warn({ ...logContext,
-          errorMessage: normalized.message, }, 'Welcome email failed');
-        return { sent: false, emailId: null };
       }
-    });
+    );
 
     // Step 2: Enroll in onboarding sequence (only if welcome email was sent)
     if (emailResult.sent) {
       await step.run('enroll-onboarding', async () => {
         try {
           await enrollInOnboardingSequence(email);
-          logger.info({ ...logContext,
-            email, }, 'Enrolled in onboarding sequence');
+          logger.info({ ...logContext, email }, 'Enrolled in onboarding sequence');
         } catch (error) {
           const normalized = normalizeError(error, 'Onboarding enrollment failed');
-          logger.warn({ ...logContext,
-            errorMessage: normalized.message, }, 'Onboarding enrollment failed');
+          logger.warn(
+            { ...logContext, errorMessage: normalized.message },
+            'Onboarding enrollment failed'
+          );
         }
       });
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      sent: emailResult.sent,
-      emailId: emailResult.emailId,
-      triggerSource, }, 'Welcome email completed');
+    logger.info(
+      {
+        ...logContext,
+        durationMs,
+        sent: emailResult.sent,
+        emailId: emailResult.emailId,
+        triggerSource,
+      },
+      'Welcome email completed'
+    );
 
     return {
       success: emailResult.sent,

@@ -3,16 +3,14 @@
  * Functions that use static configuration values (server-only)
  */
 
-import {
-  DATE_CONFIG,
-} from '../data/config/constants.ts';
+import { DATE_CONFIG } from '../data/config/constants.ts';
 
 import {
   getAnimationConfig,
   getAppSettings,
   getPollingConfig,
   getTimeoutConfig,
-} from "./static-configs.ts";
+} from './static-configs.ts';
 
 /**
  * Get current date configuration from database

@@ -22,7 +22,7 @@ test.describe('/partner', () => {
     // Set up error tracking and navigate to partner page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/partner');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -74,8 +74,11 @@ test.describe('/partner', () => {
   test('should display pricing information', async ({ page }) => {
     // Should show pricing cards/sections
     const pricingSection = page.locator('text=/pricing|price|cost/i');
-    const hasPricing = await pricingSection.first().isVisible().catch(() => false);
-    
+    const hasPricing = await pricingSection
+      .first()
+      .isVisible()
+      .catch(() => false);
+
     // Pricing may or may not be visible, but page should render
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
@@ -84,8 +87,11 @@ test.describe('/partner', () => {
   test('should display hero statistics', async ({ page }) => {
     // Should show stats (visitors, page views, configurations)
     const statsSection = page.locator('text=/visitors|page views|configurations/i');
-    const hasStats = await statsSection.first().isVisible().catch(() => false);
-    
+    const hasStats = await statsSection
+      .first()
+      .isVisible()
+      .catch(() => false);
+
     // Stats may or may not be visible, but page should render
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
@@ -94,8 +100,11 @@ test.describe('/partner', () => {
   test('should display contact channels', async ({ page }) => {
     // Should show contact information (email, etc.)
     const contactSection = page.locator('text=/contact|email|reach out/i');
-    const hasContact = await contactSection.first().isVisible().catch(() => false);
-    
+    const hasContact = await contactSection
+      .first()
+      .isVisible()
+      .catch(() => false);
+
     // Contact info may or may not be visible, but page should render
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
@@ -103,9 +112,11 @@ test.describe('/partner', () => {
 
   test('should display CTA buttons', async ({ page }) => {
     // Should show call-to-action buttons
-    const ctaButtons = page.getByRole('button', { name: /get started|contact|learn more|partner/i });
+    const ctaButtons = page.getByRole('button', {
+      name: /get started|contact|learn more|partner/i,
+    });
     const buttonCount = await ctaButtons.count();
-    
+
     // May have CTAs or not, but page should render
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
@@ -116,10 +127,10 @@ test.describe('/partner', () => {
     // the page uses fallback defaults and still renders
     // In E2E, we can't easily mock the data fetches, but we can verify
     // the page renders even if data is missing
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
-    
+
     // Page should render without crashing even if data fetches fail
     const errorOverlay = page.locator('[data-nextjs-error]');
     await expect(errorOverlay).not.toBeVisible();
@@ -137,7 +148,10 @@ test.describe('/partner', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -153,7 +167,10 @@ test.describe('/partner', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -169,7 +186,10 @@ test.describe('/partner', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -185,7 +205,10 @@ test.describe('/partner', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -201,7 +224,10 @@ test.describe('/partner', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -217,7 +243,10 @@ test.describe('/partner', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -233,7 +262,10 @@ test.describe('/partner', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -249,7 +281,10 @@ test.describe('/partner', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -265,7 +300,10 @@ test.describe('/partner', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 });

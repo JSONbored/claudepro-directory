@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
  * Comprehensive CSS Analysis Command
- * 
+ *
  * Exhaustively analyzes:
  * 1. All CSS variables (old system vs new tweakcn theme)
  * 2. All design tokens (what actually exists)
@@ -10,7 +10,7 @@
  * 5. Spacing value comparisons (CSS vs design tokens)
  * 6. Color value comparisons (CSS vs design tokens)
  * 7. Typography value comparisons (CSS vs design tokens)
- * 
+ *
  * This is a read-only analysis tool - it doesn't modify files.
  */
 
@@ -143,61 +143,77 @@ function extractCSSVariables(css: string, file: string): CSSVariable[] {
       if (decl.prop.startsWith('--')) {
         const name = decl.prop;
         const value = decl.value.trim();
-        
+
         // Determine context (old vs new)
         let context: 'old' | 'new' | 'both' | 'unknown' = 'unknown';
-        
+
         // Old system patterns
-        if (name.startsWith('--color-') || 
-            name.startsWith('--dark-') || 
-            name.startsWith('--light-') ||
-            name.startsWith('--claude-') ||
-            name.startsWith('--font-size-') ||
-            name.startsWith('--font-weight-') ||
-            name.startsWith('--leading-') ||
-            name.startsWith('--tracking-') ||
-            name.startsWith('--spacing-') ||
-            name.startsWith('--radius-') ||
-            name.startsWith('--duration-') ||
-            name.startsWith('--ease-') ||
-            name.startsWith('--shadow-') && !name.startsWith('--shadow-color')) {
+        if (
+          name.startsWith('--color-') ||
+          name.startsWith('--dark-') ||
+          name.startsWith('--light-') ||
+          name.startsWith('--claude-') ||
+          name.startsWith('--font-size-') ||
+          name.startsWith('--font-weight-') ||
+          name.startsWith('--leading-') ||
+          name.startsWith('--tracking-') ||
+          name.startsWith('--spacing-') ||
+          name.startsWith('--radius-') ||
+          name.startsWith('--duration-') ||
+          name.startsWith('--ease-') ||
+          (name.startsWith('--shadow-') && !name.startsWith('--shadow-color'))
+        ) {
           context = 'old';
         }
-        
+
         // New tweakcn theme patterns
-        if (name === '--background' ||
-            name === '--foreground' ||
-            name === '--card' ||
-            name === '--card-foreground' ||
-            name === '--popover' ||
-            name === '--popover-foreground' ||
-            name === '--primary' ||
-            name === '--primary-foreground' ||
-            name === '--secondary' ||
-            name === '--secondary-foreground' ||
-            name === '--muted' ||
-            name === '--muted-foreground' ||
-            name === '--accent' ||
-            name === '--accent-foreground' ||
-            name === '--destructive' ||
-            name === '--destructive-foreground' ||
-            name === '--border' ||
-            name === '--input' ||
-            name === '--ring' ||
-            name.startsWith('--chart-') ||
-            name.startsWith('--sidebar') ||
-            name === '--radius' ||
-            name.startsWith('--shadow-') && (name.includes('xs') || name.includes('sm') || name.includes('md') || name.includes('lg') || name.includes('xl') || name.includes('2xl')) ||
-            name === '--tracking-normal' ||
-            name === '--spacing' ||
-            name === '--font-sans' ||
-            name === '--font-serif' ||
-            name === '--font-mono') {
+        if (
+          name === '--background' ||
+          name === '--foreground' ||
+          name === '--card' ||
+          name === '--card-foreground' ||
+          name === '--popover' ||
+          name === '--popover-foreground' ||
+          name === '--primary' ||
+          name === '--primary-foreground' ||
+          name === '--secondary' ||
+          name === '--secondary-foreground' ||
+          name === '--muted' ||
+          name === '--muted-foreground' ||
+          name === '--accent' ||
+          name === '--accent-foreground' ||
+          name === '--destructive' ||
+          name === '--destructive-foreground' ||
+          name === '--border' ||
+          name === '--input' ||
+          name === '--ring' ||
+          name.startsWith('--chart-') ||
+          name.startsWith('--sidebar') ||
+          name === '--radius' ||
+          (name.startsWith('--shadow-') &&
+            (name.includes('xs') ||
+              name.includes('sm') ||
+              name.includes('md') ||
+              name.includes('lg') ||
+              name.includes('xl') ||
+              name.includes('2xl'))) ||
+          name === '--tracking-normal' ||
+          name === '--spacing' ||
+          name === '--font-sans' ||
+          name === '--font-serif' ||
+          name === '--font-mono'
+        ) {
           context = 'new';
         }
-        
+
         // Both (in @theme inline)
-        if (name.startsWith('--color-') && (name.includes('background') || name.includes('foreground') || name.includes('primary') || name.includes('secondary'))) {
+        if (
+          name.startsWith('--color-') &&
+          (name.includes('background') ||
+            name.includes('foreground') ||
+            name.includes('primary') ||
+            name.includes('secondary'))
+        ) {
           context = 'both';
         }
 
@@ -217,7 +233,7 @@ function extractCSSVariables(css: string, file: string): CSSVariable[] {
 
 /**
  * Enhanced CSS Variable Analysis using CSS Tree (AST-level)
- * 
+ *
  * Uses CSS Tree to:
  * - Find unused CSS variables
  * - Analyze CSS variable dependencies
@@ -247,7 +263,7 @@ function analyzeCSSVariableUsageWithCSSTree(
   allVariables: CSSVariable[]
 ): CSSVariableUsage[] {
   const usages: CSSVariableUsage[] = [];
-  
+
   try {
     const ast = csstree.parse(css, {
       parseValue: true,
@@ -267,12 +283,12 @@ function analyzeCSSVariableUsageWithCSSTree(
         if (node.property && node.property.startsWith('--')) {
           const varName = node.property;
           const varValue = csstree.generate(node.value);
-          
+
           // Find matching variable definition
-          const variable = allVariables.find(v => v.name === varName && v.file === file);
+          const variable = allVariables.find((v) => v.name === varName && v.file === file);
           if (variable) {
             variableDefinitions.set(varName, variable);
-            
+
             // Parse value to find dependencies (other CSS variables used in this value)
             csstree.walk(node.value, {
               visit: 'Function',
@@ -286,7 +302,7 @@ function analyzeCSSVariableUsageWithCSSTree(
                         variableDependencies.set(varName, new Set());
                       }
                       variableDependencies.get(varName)!.add(depVarName);
-                      
+
                       if (!variableDependents.has(depVarName)) {
                         variableDependents.set(depVarName, new Set());
                       }
@@ -321,7 +337,7 @@ function analyzeCSSVariableUsageWithCSSTree(
     });
 
     // Build usage report
-    for (const variable of allVariables.filter(v => v.file === file)) {
+    for (const variable of allVariables.filter((v) => v.file === file)) {
       const used = variableUsages.has(variable.name);
       const usedIn = used ? Array.from(variableUsages.get(variable.name)!) : [];
       const dependencies = Array.from(variableDependencies.get(variable.name) || []);
@@ -347,7 +363,7 @@ function analyzeCSSVariableUsageWithCSSTree(
  */
 function findDuplicateCSSRules(cssFiles: string[]): CSSRuleDuplicate[] {
   const ruleMap = new Map<string, CSSRuleDuplicate>();
-  
+
   for (const file of cssFiles) {
     try {
       const css = readFileSync(file, 'utf-8');
@@ -397,7 +413,7 @@ function findDuplicateCSSRules(cssFiles: string[]): CSSRuleDuplicate[] {
   }
 
   // Return only duplicates (more than one occurrence)
-  return Array.from(ruleMap.values()).filter(rule => rule.occurrences.length > 1);
+  return Array.from(ruleMap.values()).filter((rule) => rule.occurrences.length > 1);
 }
 
 /**
@@ -428,7 +444,7 @@ function generateCSSVariableDependencyGraph(
         enter(node) {
           if (node.property && node.property.startsWith('--')) {
             const varName = node.property;
-            
+
             // Find dependencies in the value
             csstree.walk(node.value, {
               visit: 'Function',
@@ -437,10 +453,14 @@ function generateCSSVariableDependencyGraph(
                   const args = funcNode.children;
                   if (args && args.head) {
                     const depVarName = csstree.generate(args.head.data);
-                    if (depVarName.startsWith('--') && graph.has(varName) && graph.has(depVarName)) {
+                    if (
+                      depVarName.startsWith('--') &&
+                      graph.has(varName) &&
+                      graph.has(depVarName)
+                    ) {
                       const varNode = graph.get(varName)!;
                       const depNode = graph.get(depVarName)!;
-                      
+
                       if (!varNode.dependencies.includes(depVarName)) {
                         varNode.dependencies.push(depVarName);
                       }
@@ -481,10 +501,13 @@ async function loadDesignTokens(): Promise<{
 
   try {
     // Load spacing tokens from design system
-    const spacingPath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-system/styles/spacing.ts');
+    const spacingPath = join(
+      PROJECT_ROOT,
+      'packages/web-runtime/src/design-system/styles/spacing.ts'
+    );
     if (statSync(spacingPath).isFile()) {
       const spacingContent = readFileSync(spacingPath, 'utf-8');
-      
+
       // Extract marginBottom values (e.g., 'mb-4', 'mb-6')
       const marginBottomMatch = spacingContent.match(/export const marginBottom = \{([^}]+)\}/s);
       if (marginBottomMatch) {
@@ -532,10 +555,13 @@ async function loadDesignTokens(): Promise<{
     }
 
     // Load typography tokens from design system
-    const typographyPath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-system/styles/typography.ts');
+    const typographyPath = join(
+      PROJECT_ROOT,
+      'packages/web-runtime/src/design-system/styles/typography.ts'
+    );
     if (statSync(typographyPath).isFile()) {
       const typographyContent = readFileSync(typographyPath, 'utf-8');
-      
+
       // Extract size values (e.g., 'text-sm', 'text-base')
       const sizeMatch = typographyContent.match(/export const size = \{([^}]+)\}/s);
       if (sizeMatch) {
@@ -572,12 +598,14 @@ async function loadDesignTokens(): Promise<{
     const iconsPath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-system/styles/icons.ts');
     if (statSync(iconsPath).isFile()) {
       const iconsContent = readFileSync(iconsPath, 'utf-8');
-      
+
       // Extract iconSize values (e.g., 'h-4 w-4', 'h-5 w-5')
       const iconSizeMatch = iconsContent.match(/export const iconSize = \{([^}]+)\}/s);
       if (iconSizeMatch) {
         const iconSizeContent = iconSizeMatch[1];
-        const iconSizeEntries = iconSizeContent.matchAll(/(\w+(?:\.\d+)?|'[^']+'):\s*['"]([^'"]+)['"]/g);
+        const iconSizeEntries = iconSizeContent.matchAll(
+          /(\w+(?:\.\d+)?|'[^']+'):\s*['"]([^'"]+)['"]/g
+        );
         for (const match of iconSizeEntries) {
           const key = match[1].replace(/['"]/g, '');
           tokens.other.push({
@@ -591,15 +619,20 @@ async function loadDesignTokens(): Promise<{
     }
 
     // Load border/radius tokens from design system
-    const bordersPath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-system/styles/borders.ts');
+    const bordersPath = join(
+      PROJECT_ROOT,
+      'packages/web-runtime/src/design-system/styles/borders.ts'
+    );
     if (statSync(bordersPath).isFile()) {
       const bordersContent = readFileSync(bordersPath, 'utf-8');
-      
+
       // Extract radius values (e.g., 'rounded-lg', 'rounded-md')
       const radiusMatch = bordersContent.match(/export const radius = \{([^}]+)\}/s);
       if (radiusMatch) {
         const radiusContent = radiusMatch[1];
-        const radiusEntries = radiusContent.matchAll(/(\w+(?:\.\d+)?|'[^']+'):\s*['"]([^'"]+)['"]/g);
+        const radiusEntries = radiusContent.matchAll(
+          /(\w+(?:\.\d+)?|'[^']+'):\s*['"]([^'"]+)['"]/g
+        );
         for (const match of radiusEntries) {
           const key = match[1].replace(/['"]/g, '');
           tokens.other.push({
@@ -611,10 +644,11 @@ async function loadDesignTokens(): Promise<{
         }
       }
     }
-
   } catch (error) {
     // Design tokens loading is optional - continue if files don't exist
-    logger.warn('Error loading design tokens (this is optional)', { error: error instanceof Error ? error.message : String(error) });
+    logger.warn('Error loading design tokens (this is optional)', {
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 
   return tokens;
@@ -626,21 +660,20 @@ function compareSpacingValues(
   designTokens: DesignToken[]
 ): ComprehensiveReport['spacingComparison'] {
   const comparison: ComprehensiveReport['spacingComparison'] = [];
-  
+
   // Extract spacing values from CSS (look for --spacing-* variables)
-  const cssSpacingVars = cssVariables.filter(v => 
-    v.name.startsWith('--spacing-') || 
-    v.name === '--spacing'
+  const cssSpacingVars = cssVariables.filter(
+    (v) => v.name.startsWith('--spacing-') || v.name === '--spacing'
   );
 
   // Extract spacing tokens
-  const spacingTokens = designTokens.filter(t => t.type === 'spacing');
+  const spacingTokens = designTokens.filter((t) => t.type === 'spacing');
 
   for (const cssVar of cssSpacingVars) {
     // Parse CSS value to get numeric value
     const parsed = valueParser(cssVar.value);
     let numericValue: string | null = null;
-    
+
     parsed.walk((node) => {
       if (node.type === 'word' && /^\d+(\.\d+)?(rem|px|em)$/.test(node.value)) {
         numericValue = node.value;
@@ -649,19 +682,23 @@ function compareSpacingValues(
 
     if (numericValue) {
       // Normalize to rem for comparison
-      const normalizedValue = numericValue.endsWith('px') 
+      const normalizedValue = numericValue.endsWith('px')
         ? `${parseFloat(numericValue) / 16}rem`
         : numericValue;
 
       // Find matching token
-      const matchingToken = spacingTokens.find(t => {
+      const matchingToken = spacingTokens.find((t) => {
         const tokenValue = typeof t.value === 'string' ? t.value : '';
         return tokenValue === normalizedValue || tokenValue === numericValue;
       });
 
       comparison.push({
         cssValue: numericValue,
-        tokenValue: matchingToken ? (typeof matchingToken.value === 'string' ? matchingToken.value : '') : undefined,
+        tokenValue: matchingToken
+          ? typeof matchingToken.value === 'string'
+            ? matchingToken.value
+            : ''
+          : undefined,
         match: !!matchingToken,
         cssVariable: cssVar.name,
         tokenPath: matchingToken?.path,
@@ -678,35 +715,41 @@ function compareColorValues(
   designTokens: DesignToken[]
 ): ComprehensiveReport['colorComparison'] {
   const comparison: ComprehensiveReport['colorComparison'] = [];
-  
+
   // Extract color values from CSS (look for OKLCH colors)
-  const cssColorVars = cssVariables.filter(v => 
-    v.value.includes('oklch') || 
-    v.name.includes('color') ||
-    v.name.includes('accent') ||
-    v.name.includes('primary') ||
-    v.name.includes('background') ||
-    v.name.includes('foreground')
+  const cssColorVars = cssVariables.filter(
+    (v) =>
+      v.value.includes('oklch') ||
+      v.name.includes('color') ||
+      v.name.includes('accent') ||
+      v.name.includes('primary') ||
+      v.name.includes('background') ||
+      v.name.includes('foreground')
   );
 
   // Extract color tokens
-  const colorTokens = designTokens.filter(t => t.type === 'color');
+  const colorTokens = designTokens.filter((t) => t.type === 'color');
 
-  for (const cssVar of cssColorVars.slice(0, 50)) { // Limit to first 50 for performance
+  for (const cssVar of cssColorVars.slice(0, 50)) {
+    // Limit to first 50 for performance
     // Extract OKLCH value
     const oklchMatch = cssVar.value.match(/oklch\([^)]+\)/);
     if (oklchMatch) {
       const oklchValue = oklchMatch[0];
-      
+
       // Find matching token
-      const matchingToken = colorTokens.find(t => {
+      const matchingToken = colorTokens.find((t) => {
         const tokenValue = typeof t.value === 'string' ? t.value : '';
         return tokenValue.includes(oklchValue) || tokenValue === oklchValue;
       });
 
       comparison.push({
         cssValue: oklchValue,
-        tokenValue: matchingToken ? (typeof matchingToken.value === 'string' ? matchingToken.value : '') : undefined,
+        tokenValue: matchingToken
+          ? typeof matchingToken.value === 'string'
+            ? matchingToken.value
+            : ''
+          : undefined,
         match: !!matchingToken,
         cssVariable: cssVar.name,
         tokenPath: matchingToken?.path,
@@ -733,7 +776,7 @@ function findDuplicates(variables: CSSVariable[]): DuplicateValue[] {
   for (const [value, vars] of valueMap.entries()) {
     if (vars.length > 1) {
       // Only include if variables have different names
-      const uniqueNames = new Set(vars.map(v => v.name));
+      const uniqueNames = new Set(vars.map((v) => v.name));
       if (uniqueNames.size > 1) {
         // Recommend shortest or most semantic name
         const recommended = vars.reduce((prev, curr) => {
@@ -741,7 +784,7 @@ function findDuplicates(variables: CSSVariable[]): DuplicateValue[] {
           if (prev.context === 'new') return prev;
           return curr.name.length < prev.name.length ? curr : prev;
         });
-        
+
         duplicates.push({
           value: value.substring(0, 100) + (value.length > 100 ? '...' : ''),
           variables: vars,
@@ -755,10 +798,7 @@ function findDuplicates(variables: CSSVariable[]): DuplicateValue[] {
 }
 
 // Find variable mappings (old → new)
-function findMappings(
-  oldVariables: CSSVariable[],
-  newVariables: CSSVariable[]
-): VariableMapping[] {
+function findMappings(oldVariables: CSSVariable[], newVariables: CSSVariable[]): VariableMapping[] {
   const mappings: VariableMapping[] = [];
 
   // Known mappings
@@ -792,7 +832,7 @@ function findMappings(
   for (const oldVar of oldVariables) {
     for (const rule of mappingRules) {
       if (rule.oldPattern.test(oldVar.name)) {
-        const newVar = newVariables.find(v => v.name === rule.newName);
+        const newVar = newVariables.find((v) => v.name === rule.newName);
         if (newVar) {
           const exactMatch = oldVar.value === newVar.value;
           mappings.push({
@@ -801,7 +841,7 @@ function findMappings(
             oldValue: oldVar.value,
             newValue: newVar.value,
             exactMatch,
-            recommendation: exactMatch 
+            recommendation: exactMatch
               ? `Exact match - can safely replace ${oldVar.name} with ${rule.newName}`
               : `Values differ - need to decide which to keep or merge`,
           });
@@ -816,7 +856,7 @@ function findMappings(
 // Generate comprehensive report
 async function generateComprehensiveReport(): Promise<ComprehensiveReport> {
   const cssFiles = findCSSFiles(join(PROJECT_ROOT, 'apps/web/src'));
-  
+
   logger.info(`Analyzing ${cssFiles.length} CSS files...`);
 
   // Extract all CSS variables
@@ -836,10 +876,10 @@ async function generateComprehensiveReport(): Promise<ComprehensiveReport> {
   }
 
   // Separate old and new
-  const oldVariables = allVariables.filter(v => v.context === 'old');
-  const newVariables = allVariables.filter(v => v.context === 'new');
-  const bothVariables = allVariables.filter(v => v.context === 'both');
-  const unknownVariables = allVariables.filter(v => v.context === 'unknown');
+  const oldVariables = allVariables.filter((v) => v.context === 'old');
+  const newVariables = allVariables.filter((v) => v.context === 'new');
+  const bothVariables = allVariables.filter((v) => v.context === 'both');
+  const unknownVariables = allVariables.filter((v) => v.context === 'unknown');
 
   // Load design tokens
   const designTokens = await loadDesignTokens();
@@ -858,8 +898,8 @@ async function generateComprehensiveReport(): Promise<ComprehensiveReport> {
 
   // Find conflicts
   const conflicts = mappings
-    .filter(m => !m.exactMatch)
-    .map(m => ({
+    .filter((m) => !m.exactMatch)
+    .map((m) => ({
       oldName: m.oldName,
       newName: m.newName,
       oldValue: m.oldValue,
@@ -871,11 +911,12 @@ async function generateComprehensiveReport(): Promise<ComprehensiveReport> {
   const opportunities: ConsolidationOpportunity[] = [];
 
   // Duplicate opportunities
-  for (const dup of duplicates.slice(0, 50)) { // Limit to top 50
+  for (const dup of duplicates.slice(0, 50)) {
+    // Limit to top 50
     opportunities.push({
       type: 'duplicate',
       description: `${dup.variables.length} variables use the same value`,
-      variables: dup.variables.map(v => v.name),
+      variables: dup.variables.map((v) => v.name),
       recommendation: dup.recommendation,
       priority: dup.variables.length > 3 ? 'high' : 'medium',
     });
@@ -915,11 +956,13 @@ async function generateComprehensiveReport(): Promise<ComprehensiveReport> {
     }
   }
 
-  const unusedVariables = cssTreeUsages.filter(u => !u.used);
+  const unusedVariables = cssTreeUsages.filter((u) => !u.used);
   const dependencyGraph = generateCSSVariableDependencyGraph(allVariables, cssFiles);
   const duplicateRules = findDuplicateCSSRules(cssFiles);
 
-  logger.info(`CSS Tree analysis complete: ${unusedVariables.length} unused variables, ${duplicateRules.length} duplicate rules`);
+  logger.info(
+    `CSS Tree analysis complete: ${unusedVariables.length} unused variables, ${duplicateRules.length} duplicate rules`
+  );
 
   return {
     cssVariables: {
@@ -970,7 +1013,7 @@ function generateMarkdownReport(report: ComprehensiveReport): string {
   md += `### Old System Variables (${report.cssVariables.old})\n\n`;
   const oldVars = Array.from(report.cssVariables.byFile.values())
     .flat()
-    .filter(v => v.context === 'old')
+    .filter((v) => v.context === 'old')
     .slice(0, 30);
   for (const var_ of oldVars) {
     md += `- \`${var_.name}\` = \`${var_.value.substring(0, 60)}${var_.value.length > 60 ? '...' : ''}\` (${var_.file})\n`;
@@ -982,7 +1025,7 @@ function generateMarkdownReport(report: ComprehensiveReport): string {
   md += `\n### New Tweakcn Theme Variables (${report.cssVariables.new})\n\n`;
   const newVars = Array.from(report.cssVariables.byFile.values())
     .flat()
-    .filter(v => v.context === 'new')
+    .filter((v) => v.context === 'new')
     .slice(0, 30);
   for (const var_ of newVars) {
     md += `- \`${var_.name}\` = \`${var_.value.substring(0, 60)}${var_.value.length > 60 ? '...' : ''}\` (${var_.file})\n`;
@@ -1011,7 +1054,7 @@ function generateMarkdownReport(report: ComprehensiveReport): string {
   md += `\n## Duplicate Values (Top 20)\n\n`;
   for (const dup of report.duplicates.slice(0, 20)) {
     md += `### Value: \`${dup.value}\`\n\n`;
-    md += `- **Variables:** ${dup.variables.map(v => `\`${v.name}\``).join(', ')}\n`;
+    md += `- **Variables:** ${dup.variables.map((v) => `\`${v.name}\``).join(', ')}\n`;
     md += `- **Recommendation:** ${dup.recommendation}\n\n`;
   }
 
@@ -1054,36 +1097,36 @@ function generateMarkdownReport(report: ComprehensiveReport): string {
   }
 
   md += `\n## Consolidation Opportunities (Priority Order)\n\n`;
-  const highPriority = report.opportunities.filter(o => o.priority === 'high');
-  const mediumPriority = report.opportunities.filter(o => o.priority === 'medium');
-  const lowPriority = report.opportunities.filter(o => o.priority === 'low');
+  const highPriority = report.opportunities.filter((o) => o.priority === 'high');
+  const mediumPriority = report.opportunities.filter((o) => o.priority === 'medium');
+  const lowPriority = report.opportunities.filter((o) => o.priority === 'low');
 
   md += `### High Priority (${highPriority.length})\n\n`;
   for (const opp of highPriority.slice(0, 20)) {
     md += `- **[${opp.type.toUpperCase()}]** ${opp.description}\n`;
-    md += `  - Variables: ${opp.variables.map(v => `\`${v}\``).join(', ')}\n`;
+    md += `  - Variables: ${opp.variables.map((v) => `\`${v}\``).join(', ')}\n`;
     md += `  - Recommendation: ${opp.recommendation}\n\n`;
   }
 
   md += `### Medium Priority (${mediumPriority.length})\n\n`;
   for (const opp of mediumPriority.slice(0, 10)) {
     md += `- **[${opp.type.toUpperCase()}]** ${opp.description}\n`;
-    md += `  - Variables: ${opp.variables.map(v => `\`${v}\``).join(', ')}\n`;
+    md += `  - Variables: ${opp.variables.map((v) => `\`${v}\``).join(', ')}\n`;
     md += `  - Recommendation: ${opp.recommendation}\n\n`;
   }
 
   md += `\n## Files with CSS Variables\n\n`;
   for (const [file, vars] of Array.from(report.cssVariables.byFile.entries()).sort()) {
     md += `### \`${file}\` (${vars.length} variables)\n\n`;
-    const oldCount = vars.filter(v => v.context === 'old').length;
-    const newCount = vars.filter(v => v.context === 'new').length;
-    const bothCount = vars.filter(v => v.context === 'both').length;
+    const oldCount = vars.filter((v) => v.context === 'old').length;
+    const newCount = vars.filter((v) => v.context === 'new').length;
+    const bothCount = vars.filter((v) => v.context === 'both').length;
     md += `- Old: ${oldCount}, New: ${newCount}, Both: ${bothCount}\n\n`;
   }
 
   // CSS Tree Analysis Section
   md += `\n## CSS Tree AST Analysis (Enhanced)\n\n`;
-  
+
   md += `### Unused CSS Variables (${report.cssTreeAnalysis.unusedVariables.length})\n\n`;
   if (report.cssTreeAnalysis.unusedVariables.length > 0) {
     md += `| Variable | File | Line | Dependencies | Dependents |\n`;
@@ -1106,9 +1149,9 @@ function generateMarkdownReport(report: ComprehensiveReport): string {
     .filter(([, deps]) => deps.dependencies.length > 0)
     .slice(0, 20);
   for (const [varName, deps] of varsWithDeps) {
-    md += `- \`${varName}\` depends on: ${deps.dependencies.map(d => `\`${d}\``).join(', ')}\n`;
+    md += `- \`${varName}\` depends on: ${deps.dependencies.map((d) => `\`${d}\``).join(', ')}\n`;
     if (deps.dependents.length > 0) {
-      md += `  - Used by: ${deps.dependents.map(d => `\`${d}\``).join(', ')}\n`;
+      md += `  - Used by: ${deps.dependents.map((d) => `\`${d}\``).join(', ')}\n`;
     }
   }
 
@@ -1142,16 +1185,18 @@ export async function runComprehensiveAnalysis(): Promise<void> {
     logger.info('Starting comprehensive CSS analysis...');
     const report = await generateComprehensiveReport();
     const markdown = generateMarkdownReport(report);
-    
+
     // Write report to file
     const reportPath = join(PROJECT_ROOT, '.cursor/tailwind-cleanup/comprehensive-css-analysis.md');
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, markdown, 'utf-8');
-    
+
     console.log(markdown);
-    
+
     logger.info(`Comprehensive analysis complete! Report saved to: ${reportPath}`);
-    logger.info(`Found ${report.cssVariables.total} CSS variables, ${report.duplicates.length} duplicates, ${report.mappings.length} mappings`);
+    logger.info(
+      `Found ${report.cssVariables.total} CSS variables, ${report.duplicates.length} duplicates, ${report.mappings.length} mappings`
+    );
   } catch (error) {
     logger.error('Comprehensive analysis failed', { error });
     throw error;

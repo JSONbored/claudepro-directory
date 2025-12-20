@@ -3,7 +3,7 @@ import { setupTestWithErrorTracking } from '../../../../config/tests/utils/error
 
 /**
  * Comprehensive Jobs Listing Page E2E Tests
- * 
+ *
  * Tests ALL functionality on the jobs listing page with strict error checking:
  * - Page rendering without errors
  * - Jobs list display
@@ -27,7 +27,7 @@ test.describe('Jobs Listing Page', () => {
     // Set up error tracking and navigate to jobs page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/jobs');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -50,31 +50,30 @@ test.describe('Jobs Listing Page', () => {
     await expect(errorOverlay).not.toBeVisible();
 
     // Check no hydration errors
-    const hydrationErrors = consoleErrors.filter(err => 
-      err.includes('Hydration') || 
-      err.includes('hydration')
+    const hydrationErrors = consoleErrors.filter(
+      (err) => err.includes('Hydration') || err.includes('hydration')
     );
     expect(hydrationErrors.length).toBe(0);
   });
 
   test('should display jobs heading', async ({ page }) => {
     // Check for jobs heading
-    const heading = page.getByRole('heading', { 
+    const heading = page.getByRole('heading', {
       level: 1,
-      name: /jobs|job board/i 
+      name: /jobs|job board/i,
     });
-    
+
     await expect(heading.first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should display jobs list', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for jobs list
     const jobsList = page.locator('article, [role="article"], [data-testid*="job-card"]');
     const jobCount = await jobsList.count();
-    
+
     // May have 0 or more jobs depending on data
     expect(jobCount).toBeGreaterThanOrEqual(0);
   });
@@ -82,13 +81,11 @@ test.describe('Jobs Listing Page', () => {
   test('should display job filters', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for filter controls
-    const filters = page.getByRole('combobox').or(
-      page.getByRole('button', { name: /filter/i })
-    );
+    const filters = page.getByRole('combobox').or(page.getByRole('button', { name: /filter/i }));
     const filterCount = await filters.count();
-    
+
     // Filters may or may not be visible depending on implementation
     // But page should render
     const main = page.getByRole('main');
@@ -98,18 +95,19 @@ test.describe('Jobs Listing Page', () => {
   test('should handle search functionality', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Look for search input
-    const searchInput = page.getByPlaceholder(/search/i).or(
-      page.locator('input[type="search"]')
-    ).first();
-    
+    const searchInput = page
+      .getByPlaceholder(/search/i)
+      .or(page.locator('input[type="search"]'))
+      .first();
+
     const hasSearch = await searchInput.isVisible().catch(() => false);
-    
+
     if (hasSearch) {
       await searchInput.fill('developer');
       await page.waitForTimeout(1000);
-      
+
       // Verify search executed
       await expect(searchInput).toHaveValue('developer');
     }
@@ -118,18 +116,21 @@ test.describe('Jobs Listing Page', () => {
   test('should handle empty state for jobs', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for empty state message (if no jobs)
     const jobsList = page.locator('article, [role="article"]');
     const jobCount = await jobsList.count();
-    
+
     if (jobCount === 0) {
       // Should show empty state message
       const emptyState = page.getByText(/no jobs|no job listings/i);
       const hasEmptyState = await emptyState.isVisible().catch(() => false);
-      
+
       // Empty state may or may not be visible, but page should not error
-      const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+      const hasError = await page
+        .locator('[data-nextjs-error]')
+        .isVisible()
+        .catch(() => false);
       expect(hasError).toBe(false);
     }
   });
@@ -143,7 +144,7 @@ test.describe('Jobs Listing Page', () => {
     await page.keyboard.press('Tab');
     const focused = page.locator(':focus');
     await expect(focused).toBeVisible();
-    
+
     // Check for proper heading hierarchy
     const heading = page.getByRole('heading', { level: 1 });
     await expect(heading.first()).toBeVisible();
@@ -161,16 +162,16 @@ test.describe('Jobs Listing Page', () => {
   test('should handle loading states', async ({ page }) => {
     // Navigate to page
     await page.goto('/jobs');
-    
+
     // Check for loading indicators (may flash quickly)
     const loadingIndicator = page.locator('[aria-busy="true"], [data-loading="true"]');
     const hasLoading = await loadingIndicator.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });
@@ -178,11 +179,11 @@ test.describe('Jobs Listing Page', () => {
   test('should display jobs count badge', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for jobs count badge
     const badge = page.getByText(/jobs available/i);
     const hasBadge = await badge.isVisible().catch(() => false);
-    
+
     // Badge may or may not be visible, but page should render
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
@@ -195,11 +196,11 @@ test.describe('Jobs Listing Page', () => {
     await page.goto('/jobs');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     // Page should render even if badge fails
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
-    
+
     // Should not show error overlay
     const errorOverlay = page.locator('[data-nextjs-error]');
     await expect(errorOverlay).not.toBeVisible();
@@ -212,11 +213,11 @@ test.describe('Jobs Listing Page', () => {
     await page.goto('/jobs');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     // Page should render even if jobs list fails
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
-    
+
     // Should not show error overlay
     const errorOverlay = page.locator('[data-nextjs-error]');
     await expect(errorOverlay).not.toBeVisible();
@@ -225,11 +226,11 @@ test.describe('Jobs Listing Page', () => {
   test('should display total empty state when no jobs exist', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for total empty state (total_count === 0)
     const totalEmptyState = page.getByText(/no jobs available yet/i);
     const hasTotalEmpty = await totalEmptyState.isVisible().catch(() => false);
-    
+
     // Total empty state may or may not be visible depending on data
     // But page should render
     const main = page.getByRole('main');
@@ -239,11 +240,11 @@ test.describe('Jobs Listing Page', () => {
   test('should display filtered empty state when filters match no jobs', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for filtered empty state (jobs.length === 0 but total_count > 0)
     const filteredEmptyState = page.getByText(/no jobs found/i);
     const hasFilteredEmpty = await filteredEmptyState.isVisible().catch(() => false);
-    
+
     // Filtered empty state may or may not be visible depending on data
     // But page should render
     const main = page.getByRole('main');
@@ -253,13 +254,13 @@ test.describe('Jobs Listing Page', () => {
   test('should handle filter combinations', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Test that filters work together
     // Navigate with multiple filters
     await page.goto('/jobs?category=engineering&remote=true&employment=full-time');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     // Page should render with filters applied
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
@@ -277,7 +278,10 @@ test.describe('Jobs Listing Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -293,7 +297,10 @@ test.describe('Jobs Listing Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -309,7 +316,10 @@ test.describe('Jobs Listing Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -325,7 +335,10 @@ test.describe('Jobs Listing Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -341,7 +354,10 @@ test.describe('Jobs Listing Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -373,7 +389,10 @@ test.describe('Jobs Listing Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -389,7 +408,10 @@ test.describe('Jobs Listing Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -405,7 +427,10 @@ test.describe('Jobs Listing Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -421,14 +446,21 @@ test.describe('Jobs Listing Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
-  test('should handle invalid category/employment/experience parameters gracefully', async ({ page }) => {
+  test('should handle invalid category/employment/experience parameters gracefully', async ({
+    page,
+  }) => {
     // This tests that invalid filter values are handled
     // The component passes them to getFilteredJobs which handles validation
-    await page.goto('/jobs?category=invalid-category&employment=invalid-employment&experience=invalid-experience');
+    await page.goto(
+      '/jobs?category=invalid-category&employment=invalid-employment&experience=invalid-experience'
+    );
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
@@ -437,7 +469,10 @@ test.describe('Jobs Listing Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 });

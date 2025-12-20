@@ -78,12 +78,25 @@ export function useSearchAPI(options: UseSearchAPIOptions = {}) {
         tags?: string;
         authors?: string;
         entities?: string;
-        job_category?: 'engineering' | 'design' | 'product' | 'marketing' | 'sales' | 'support' | 'research' | 'data' | 'operations' | 'leadership' | 'consulting' | 'education' | 'other';
+        job_category?:
+          | 'engineering'
+          | 'design'
+          | 'product'
+          | 'marketing'
+          | 'sales'
+          | 'support'
+          | 'research'
+          | 'data'
+          | 'operations'
+          | 'leadership'
+          | 'consulting'
+          | 'education'
+          | 'other';
         job_employment?: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship';
         job_experience?: string;
         job_remote?: 'true' | 'false';
       } = {};
-      
+
       // Only add properties that have values (exactOptionalPropertyTypes requirement)
       if (query.trim()) {
         searchParams.q = query.trim();
@@ -121,10 +134,15 @@ export function useSearchAPI(options: UseSearchAPIOptions = {}) {
 
       // Extract results from API response
       // Response schema is now properly extracted and typed
-      if (result && typeof result === 'object' && 'results' in result && Array.isArray(result.results)) {
+      if (
+        result &&
+        typeof result === 'object' &&
+        'results' in result &&
+        Array.isArray(result.results)
+      ) {
         return result.results as DisplayableContent[];
       }
-      
+
       return [];
     } catch (error) {
       // Ignore AbortError
@@ -134,16 +152,11 @@ export function useSearchAPI(options: UseSearchAPIOptions = {}) {
 
       // Log other errors
       const normalized = normalizeError(error, 'Search API call failed');
-      logClientError(
-        '[useSearchAPI] Search failed',
-        normalized,
-        'useSearchAPI.search',
-        {
-          component: 'useSearchAPI',
-          action: 'search-error',
-          query: query.trim().slice(0, 100),
-        }
-      );
+      logClientError('[useSearchAPI] Search failed', normalized, 'useSearchAPI.search', {
+        component: 'useSearchAPI',
+        action: 'search-error',
+        query: query.trim().slice(0, 100),
+      });
 
       throw normalized;
     }

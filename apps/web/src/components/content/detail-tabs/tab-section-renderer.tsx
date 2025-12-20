@@ -21,12 +21,18 @@ import { Suspense } from 'react';
 
 // Dynamic import for JSONSectionRenderer (822 lines) - lazy load for code splitting
 const JSONSectionRenderer = dynamic(
-  () => import('@/src/components/content/json-to-sections').then((mod) => ({ default: mod.JSONSectionRenderer })),
+  () =>
+    import('@/src/components/content/json-to-sections').then((mod) => ({
+      default: mod.JSONSectionRenderer,
+    })),
   { ssr: true }
 );
 // Dynamic import for ReviewListSection (624 lines) - lazy load for code splitting
 const ReviewListSection = dynamic(
-  () => import('@/src/components/core/domain/reviews/review-list-section').then((mod) => ({ default: mod.ReviewListSection })),
+  () =>
+    import('@/src/components/core/domain/reviews/review-list-section').then((mod) => ({
+      default: mod.ReviewListSection,
+    })),
   { ssr: true }
 );
 import { markdownToHtml } from '@/src/lib/utils/markdown-to-html';
@@ -49,10 +55,7 @@ export interface TabSectionRendererProps {
     };
     typeName: string;
   };
-  item:
-    | ContentItem
-    | (ContentItem &
-        NonNullable<GetContentDetailCompleteReturns['content']>);
+  item: ContentItem | (ContentItem & NonNullable<GetContentDetailCompleteReturns['content']>);
   sectionData: ProcessedSectionData;
   sectionId: SectionId;
 }

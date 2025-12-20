@@ -214,7 +214,7 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
 
   // Calculate grid columns for row-based virtualization
   const gridColumns = getGridColumns(variant);
-  
+
   // Group items into rows based on grid columns (responsive)
   // We'll use desktop columns (3-4) as the estimate, virtualization will handle responsive
   const columnsPerRow = gridColumns.desktop;
@@ -257,9 +257,7 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   };
 
   const itemVariants = {
-    hidden: shouldReduceMotion
-      ? { opacity: 0 }
-      : { opacity: 0, y: 20 },
+    hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
@@ -282,7 +280,7 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   if (safeItems.length === 0 && !loading) {
     return (
       <output className="flex items-center justify-center py-12" aria-live="polite">
-        <p className="text-lg text-muted-foreground">{emptyMessage}</p>
+        <p className="text-muted-foreground text-lg">{emptyMessage}</p>
       </output>
     );
   }
@@ -290,7 +288,7 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   if (loading) {
     return (
       <output className="flex items-center justify-center py-12" aria-live="polite">
-        <p className="text-lg text-muted-foreground">{loadingMessage}</p>
+        <p className="text-muted-foreground text-lg">{loadingMessage}</p>
       </output>
     );
   }
@@ -306,20 +304,13 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
       // Use provided cardComponent or default to ConfigCard
       const CardComponent = props.cardComponent || ConfigCard;
       cardContent = (
-        <CardComponent
-          item={item}
-          variant="default"
-          showCategory={true}
-          showActions={true}
-        />
+        <CardComponent item={item} variant="default" showCategory={true} showActions={true} />
       );
     }
 
     return (
       <ErrorBoundary key={getKey(item, index)}>
-        <motion.div variants={itemVariants}>
-          {cardContent}
-        </motion.div>
+        <motion.div variants={itemVariants}>{cardContent}</motion.div>
       </ErrorBoundary>
     );
   };
@@ -386,11 +377,11 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
         {infiniteScroll && (hasMore || serverHasMore) && (
           <div
             ref={sentinelRef}
-            className="flex items-center justify-center py-8 min-h-[100px]"
+            className="flex min-h-[100px] items-center justify-center py-8"
             aria-live="polite"
             aria-busy={isLoading}
           >
-            {isLoading && <p className="text-sm text-muted-foreground">{loadingMessage}</p>}
+            {isLoading && <p className="text-muted-foreground text-sm">{loadingMessage}</p>}
           </div>
         )}
       </section>
@@ -412,11 +403,11 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
       {infiniteScroll && (hasMore || serverHasMore) && (
         <div
           ref={sentinelRef}
-          className="flex items-center justify-center py-8 min-h-[100px]"
+          className="flex min-h-[100px] items-center justify-center py-8"
           aria-live="polite"
           aria-busy={isLoading}
         >
-          {isLoading && <p className="text-sm text-muted-foreground">{loadingMessage}</p>}
+          {isLoading && <p className="text-muted-foreground text-sm">{loadingMessage}</p>}
         </div>
       )}
     </section>

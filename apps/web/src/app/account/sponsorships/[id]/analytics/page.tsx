@@ -1,6 +1,7 @@
-import { type sponsorship_tier } from '@heyclaude/data-layer/prisma';
+import { sponsorship_tier as SponsorshipTierEnum } from '@prisma/client';
 import { type GetSponsorshipAnalyticsReturns } from '@heyclaude/data-layer';
-import { sponsorship_tier as sponsorshipTierEnum } from '@heyclaude/database-types/prisma';
+
+import type { sponsorship_tier } from '@prisma/client';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getSponsorshipAnalytics } from '@heyclaude/web-runtime/data/account';
 import { formatDate } from '@heyclaude/web-runtime/data/utils';
@@ -190,7 +191,7 @@ async function SponsorshipAnalyticsPageContent({
   // After null check, TypeScript narrows types - use generated types directly
   // Validate tier value at runtime using Prisma enum object
   const rawTier = sponsorship.tier as string; // Widen to string for validation
-  const validTiers = Object.values(sponsorshipTierEnum) as readonly sponsorship_tier[];
+  const validTiers = Object.values(SponsorshipTierEnum) as readonly sponsorship_tier[];
 
   // Type guard to check if tier is a valid enum value
   // Uses database enum constants directly - leverages readonly array includes
@@ -269,7 +270,7 @@ async function SponsorshipAnalyticsPageContent({
             change: 'Clicks / Impressions',
             label: 'Click-Through Rate',
             trend:
-              Number.parseFloat(ctr) > 2 ? 'up' : (Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down'),
+              Number.parseFloat(ctr) > 2 ? 'up' : Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down',
             value: `${ctr}%`,
           },
           {

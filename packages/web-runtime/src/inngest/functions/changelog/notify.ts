@@ -5,7 +5,8 @@
  * Runs as a cron job to process notification queue.
  */
 
-import type { notificationsCreateInput } from '@heyclaude/database-types/prisma';
+import { Prisma } from '@prisma/client';
+type notificationsCreateInput = Prisma.notificationsCreateInput;
 import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 import { revalidateTag } from 'next/cache';
 
@@ -83,34 +84,43 @@ export const processChangelogNotifyQueue = inngest.createFunction(
   { cron: '*/30 * * * *' }, // Every 30 minutes
   async ({ step }) => {
     const startTime = Date.now();
-    const logContext = createWebAppContextWithId('/inngest/changelog/notify', 'processChangelogNotifyQueue');
+    const logContext = createWebAppContextWithId(
+      '/inngest/changelog/notify',
+      'processChangelogNotifyQueue'
+    );
 
     logger.info(logContext, 'Changelog notify queue processing started');
 
     // Step 1: Read messages from queue
-    const messages = await step.run('read-queue', async (): Promise<PgmqMessage<ChangelogReleaseJob>[]> => {
-      try {
-        const data = await pgmqRead<ChangelogReleaseJob>(CHANGELOG_NOTIFY_QUEUE, {
-          vt: 300,
-          qty: BATCH_SIZE,
-        });
+    const messages = await step.run(
+      'read-queue',
+      async (): Promise<PgmqMessage<ChangelogReleaseJob>[]> => {
+        try {
+          const data = await pgmqRead<ChangelogReleaseJob>(CHANGELOG_NOTIFY_QUEUE, {
+            vt: 300,
+            qty: BATCH_SIZE,
+          });
 
-        if (!data || data.length === 0) {
+          if (!data || data.length === 0) {
+            return [];
+          }
+
+          // Filter valid changelog release jobs
+          return data.filter(
+            (msg) =>
+              msg.message &&
+              typeof msg.message.entryId === 'string' &&
+              typeof msg.message.slug === 'string'
+          );
+        } catch (error) {
+          logger.warn(
+            { ...logContext, errorMessage: normalizeError(error, 'Queue read failed').message },
+            'Failed to read changelog notify queue'
+          );
           return [];
         }
-
-        // Filter valid changelog release jobs
-        return data.filter((msg) =>
-          msg.message && 
-          typeof msg.message.entryId === 'string' && 
-          typeof msg.message.slug === 'string'
-        );
-      } catch (error) {
-        logger.warn({ ...logContext,
-          errorMessage: normalizeError(error, 'Queue read failed').message, }, 'Failed to read changelog notify queue');
-        return [];
       }
-    });
+    );
 
     if (messages.length === 0) {
       logger.info(logContext, 'No messages in changelog notify queue');
@@ -125,91 +135,102 @@ export const processChangelogNotifyQueue = inngest.createFunction(
       const msg = messages[i];
       if (!msg) continue;
 
-      const result = await step.run(`notify-changelog-${i}`, async (): Promise<{
-        success: boolean;
-        discordSent: boolean;
-        notificationInserted: boolean;
-      }> => {
-        const job = msg.message;
-        let discordSent = false;
-        let notificationInserted = false;
+      const result = await step.run(
+        `notify-changelog-${i}`,
+        async (): Promise<{
+          success: boolean;
+          discordSent: boolean;
+          notificationInserted: boolean;
+        }> => {
+          const job = msg.message;
+          let discordSent = false;
+          let notificationInserted = false;
 
-        try {
-          // 1. Send Discord webhook
-          const discordWebhookUrl = getEnvVar('DISCORD_CHANGELOG_WEBHOOK_URL');
-          if (discordWebhookUrl) {
-            try {
-              const embed = buildDiscordEmbed(job);
-              const discordResponse = await fetch(discordWebhookUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  content: '🚀 **New Release Deployed**',
-                  embeds: [embed],
-                }),
-              });
-
-              if (discordResponse.ok) {
-                discordSent = true;
-                logger.info({ ...logContext,
-                  slug: job.slug, }, 'Discord webhook sent');
-              } else {
-                logger.warn({ ...logContext,
-                  status: discordResponse.status, }, 'Discord webhook failed');
-              }
-            } catch (error) {
-              logger.warn({ ...logContext,
-                errorMessage: normalizeError(error, 'Discord failed').message, }, 'Discord webhook error');
-            }
-          }
-
-          // 2. Insert notification (critical path)
-          // Build notification data carefully to avoid exactOptionalPropertyTypes issues
-          const notificationInsert: notificationsCreateInput = {
-            id: job.entryId,
-            title: job.title,
-            message: job.tldr || 'We just shipped a fresh Claude Pro Directory release.',
-            type: 'announcement',
-            priority: 'high',
-            action_label: 'Read release notes',
-            action_href: `/changelog/${job.slug}`,
-          };
-
-          const service = await getService('misc');
-          // Type assertion needed due to exactOptionalPropertyTypes mismatch between dist/src types
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await service.upsertNotification(notificationInsert as any);
-
-          notificationInserted = true;
-          logger.info({ ...logContext,
-            entryId: job.entryId, }, 'Notification inserted');
-
-          // 3. Invalidate cache tags
-          // Using 'max' profile for stale-while-revalidate semantics (Next.js 16+)
           try {
-            revalidateTag('changelog', 'max');
-            revalidateTag(`changelog-${job.slug}`, 'max');
-            logger.info(
-              {
-                ...logContext,
-                tags: ['changelog', `changelog-${job.slug}`],
-              },
-              'Cache invalidated'
-            );
-          } catch (error) {
-            logger.warn({ ...logContext,
-              errorMessage: normalizeError(error, 'Cache invalidation failed').message, }, 'Cache invalidation failed');
-          }
+            // 1. Send Discord webhook
+            const discordWebhookUrl = getEnvVar('DISCORD_CHANGELOG_WEBHOOK_URL');
+            if (discordWebhookUrl) {
+              try {
+                const embed = buildDiscordEmbed(job);
+                const discordResponse = await fetch(discordWebhookUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    content: '🚀 **New Release Deployed**',
+                    embeds: [embed],
+                  }),
+                });
 
-          return { success: true, discordSent, notificationInserted };
-        } catch (error) {
-          const normalized = normalizeError(error, 'Changelog notification failed');
-          logger.warn({ ...logContext,
-            entryId: job.entryId,
-            errorMessage: normalized.message, }, 'Changelog notification failed');
-          return { success: notificationInserted, discordSent, notificationInserted };
+                if (discordResponse.ok) {
+                  discordSent = true;
+                  logger.info({ ...logContext, slug: job.slug }, 'Discord webhook sent');
+                } else {
+                  logger.warn(
+                    { ...logContext, status: discordResponse.status },
+                    'Discord webhook failed'
+                  );
+                }
+              } catch (error) {
+                logger.warn(
+                  { ...logContext, errorMessage: normalizeError(error, 'Discord failed').message },
+                  'Discord webhook error'
+                );
+              }
+            }
+
+            // 2. Insert notification (critical path)
+            // Build notification data carefully to avoid exactOptionalPropertyTypes issues
+            const notificationInsert: notificationsCreateInput = {
+              id: job.entryId,
+              title: job.title,
+              message: job.tldr || 'We just shipped a fresh Claude Pro Directory release.',
+              type: 'announcement',
+              priority: 'high',
+              action_label: 'Read release notes',
+              action_href: `/changelog/${job.slug}`,
+            };
+
+            const service = await getService('misc');
+            // Type assertion needed due to exactOptionalPropertyTypes mismatch between dist/src types
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await service.upsertNotification(notificationInsert as any);
+
+            notificationInserted = true;
+            logger.info({ ...logContext, entryId: job.entryId }, 'Notification inserted');
+
+            // 3. Invalidate cache tags
+            // Using 'max' profile for stale-while-revalidate semantics (Next.js 16+)
+            try {
+              revalidateTag('changelog', 'max');
+              revalidateTag(`changelog-${job.slug}`, 'max');
+              logger.info(
+                {
+                  ...logContext,
+                  tags: ['changelog', `changelog-${job.slug}`],
+                },
+                'Cache invalidated'
+              );
+            } catch (error) {
+              logger.warn(
+                {
+                  ...logContext,
+                  errorMessage: normalizeError(error, 'Cache invalidation failed').message,
+                },
+                'Cache invalidation failed'
+              );
+            }
+
+            return { success: true, discordSent, notificationInserted };
+          } catch (error) {
+            const normalized = normalizeError(error, 'Changelog notification failed');
+            logger.warn(
+              { ...logContext, entryId: job.entryId, errorMessage: normalized.message },
+              'Changelog notification failed'
+            );
+            return { success: notificationInserted, discordSent, notificationInserted };
+          }
         }
-      });
+      );
 
       if (result.success) {
         processedMsgIds.push(msg.msg_id);
@@ -229,10 +250,10 @@ export const processChangelogNotifyQueue = inngest.createFunction(
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      processed: messages.length,
-      notified: notifiedCount, }, 'Changelog notify queue processing completed');
+    logger.info(
+      { ...logContext, durationMs, processed: messages.length, notified: notifiedCount },
+      'Changelog notify queue processing completed'
+    );
 
     const result = {
       processed: messages.length,

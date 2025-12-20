@@ -10,7 +10,10 @@ describe('useMap', () => {
   });
 
   it('should initialize with Map instance', () => {
-    const initialMap = new Map([['a', 1], ['b', 2]]);
+    const initialMap = new Map([
+      ['a', 1],
+      ['b', 2],
+    ]);
     const [map] = renderHook(() => useMap(initialMap)).result.current;
 
     expect(map.size).toBe(2);
@@ -19,7 +22,10 @@ describe('useMap', () => {
   });
 
   it('should initialize with entries array', () => {
-    const entries: Array<[string, number]> = [['a', 1], ['b', 2]];
+    const entries: Array<[string, number]> = [
+      ['a', 1],
+      ['b', 2],
+    ];
     const [map] = renderHook(() => useMap(entries)).result.current;
 
     expect(map.size).toBe(2);
@@ -80,7 +86,10 @@ describe('useMap', () => {
       actions.set('key1', 100);
     });
 
-    const newMap = new Map([['key2', 200], ['key3', 300]]);
+    const newMap = new Map([
+      ['key2', 200],
+      ['key3', 300],
+    ]);
     act(() => {
       actions.setAll(newMap);
     });
@@ -95,7 +104,10 @@ describe('useMap', () => {
     const { result } = renderHook(() => useMap<string, number>());
     const [, actions] = result.current;
 
-    const entries: Array<[string, number]> = [['key1', 100], ['key2', 200]];
+    const entries: Array<[string, number]> = [
+      ['key1', 100],
+      ['key2', 200],
+    ];
     act(() => {
       actions.setAll(entries);
     });

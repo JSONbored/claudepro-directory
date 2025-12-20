@@ -2,10 +2,10 @@
 
 /**
  * Navigation 3D Card Component
- * 
+ *
  * Interactive 3D card matching shadcn 3d-pin design exactly.
  * Cards tilt forward on hover like opening a door, with perspective-based depth.
- * 
+ *
  * Features:
  * - Fixed forward tilt on hover (rotateX 20deg, scale 0.95)
  * - Perspective container for 3D viewing angle
@@ -15,7 +15,7 @@
  * - Hardware-accelerated transforms
  */
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import type { LucideIcon } from '@heyclaude/web-runtime/icons';
 import {
   UnifiedBadge,
@@ -41,10 +41,7 @@ export interface Navigation3DCardProps {
 /**
  * Category color configuration for gradient blocks (shadcn 3d-pin style)
  */
-const categoryGradients: Record<
-  content_category,
-  string
-> = {
+const categoryGradients: Record<content_category, string> = {
   agents: 'from-violet-500 via-purple-500 to-blue-500',
   mcp: 'from-cyan-500 via-blue-500 to-indigo-500',
   commands: 'from-blue-500 via-cyan-500 to-teal-500',
@@ -69,13 +66,15 @@ export function Navigation3DCard({
 }: Navigation3DCardProps) {
   const { value: isHovered, setTrue: setIsHoveredTrue, setFalse: setIsHoveredFalse } = useBoolean();
 
-  const gradient = category
-    ? categoryGradients[category] ?? defaultGradient
-    : defaultGradient;
+  const gradient = category ? (categoryGradients[category] ?? defaultGradient) : defaultGradient;
 
   const cardContent = (
     <div
-      className={cn('relative group/pin cursor-pointer h-full w-full perspective-[1000px]', 'flex items-center justify-center', className)}
+      className={cn(
+        'group/pin relative h-full w-full cursor-pointer perspective-[1000px]',
+        'flex items-center justify-center',
+        className
+      )}
       onMouseEnter={setIsHoveredTrue}
       onMouseLeave={setIsHoveredFalse}
     >
@@ -89,14 +88,29 @@ export function Navigation3DCard({
           transformOrigin: 'center bottom',
         }}
         className={cn(
-          'w-[120px] h-[70px] rounded-2xl',
-          'shadow-[0_8px_16px_rgb(0_0_0/0.4)] bg-black border border-white/[0.1]',
-          'group-hover/pin:border-white/[0.2] transition-all duration-700 overflow-hidden'
+          'h-[70px] w-[120px] rounded-2xl',
+          'border border-white/[0.1] bg-black shadow-[0_8px_16px_rgb(0_0_0/0.4)]',
+          'overflow-hidden transition-all duration-700 group-hover/pin:border-white/[0.2]'
         )}
       >
-        <div className={cn('flex flex-col', 'basis-full', 'p-2', 'tracking-tight text-slate-100/50 w-full h-full')}>
+        <div
+          className={cn(
+            'flex flex-col',
+            'basis-full',
+            'p-2',
+            'h-full w-full tracking-tight text-slate-100/50'
+          )}
+        >
           {/* Title */}
-          <h3 className={cn('max-w-xs', 'pb-0.5', '!m-0 font-bold', 'text-[10px]', 'text-slate-100 leading-tight')}>
+          <h3
+            className={cn(
+              'max-w-xs',
+              'pb-0.5',
+              '!m-0 font-bold',
+              'text-[10px]',
+              'leading-tight text-slate-100'
+            )}
+          >
             {label}
           </h3>
 
@@ -114,12 +128,7 @@ export function Navigation3DCard({
 
           {/* Gradient block at bottom (shadcn 3d-pin style) */}
           <div
-            className={cn(
-              'flex flex-1 w-full rounded-lg',
-              'mt-1',
-              'bg-gradient-to-br',
-              gradient
-            )}
+            className={cn('flex w-full flex-1 rounded-lg', 'mt-1', 'bg-gradient-to-br', gradient)}
           />
         </div>
       </div>

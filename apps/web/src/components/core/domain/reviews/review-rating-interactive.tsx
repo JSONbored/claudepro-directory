@@ -53,7 +53,7 @@ export function ReviewRatingInteractive({
         ))}
       </Rating>
       {showValue ? (
-        <span className="text-muted-foreground text-sm ml-0.5 font-medium">{value.toFixed(1)}</span>
+        <span className="text-muted-foreground ml-0.5 text-sm font-medium">{value.toFixed(1)}</span>
       ) : null}
     </div>
   );

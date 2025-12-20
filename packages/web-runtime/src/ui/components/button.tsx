@@ -36,7 +36,8 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-accent text-accent-foreground hover:bg-accent/90',
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-        outline: 'border border-input bg-background hover:bg-accent/10 hover:text-accent-foreground',
+        outline:
+          'border border-input bg-background hover:bg-accent/10 hover:text-accent-foreground',
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         ghost: 'hover:bg-accent/10 hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
@@ -56,8 +57,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 
@@ -111,11 +111,7 @@ const Button = ({
   // This prevents hydration mismatches when Button is used with Radix UI components
   if (asChild) {
     return (
-      <Comp 
-        className={cn(buttonVariants({ variant, size, className }))} 
-        ref={ref} 
-        {...props}
-      />
+      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
     );
   }
 

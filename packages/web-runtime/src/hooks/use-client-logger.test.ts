@@ -9,20 +9,24 @@ vi.mock('../utils/client-session', () => ({
   getOrCreateSessionId: mockGetOrCreateSessionId,
 }));
 
-const mockCreateClientLogContext = vi.hoisted(() => vi.fn((operation: string, context: any) => ({
-  operation,
-  ...context,
-})));
+const mockCreateClientLogContext = vi.hoisted(() =>
+  vi.fn((operation: string, context: any) => ({
+    operation,
+    ...context,
+  }))
+);
 vi.mock('../utils/client-logger', () => ({
   createClientLogContext: mockCreateClientLogContext,
 }));
 
-const mockChild = vi.hoisted(() => vi.fn((bindings: any) => ({
-  error: vi.fn(),
-  warn: vi.fn(),
-  info: vi.fn(),
-  debug: vi.fn(),
-})));
+const mockChild = vi.hoisted(() =>
+  vi.fn((bindings: any) => ({
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  }))
+);
 const mockLogger = vi.hoisted(() => ({
   child: mockChild,
   error: vi.fn(),

@@ -1,22 +1,22 @@
 /**
  * Playwright Error Tracking Utilities
- * 
+ *
  * Provides shared error tracking setup for Playwright tests to eliminate
  * duplication across 61+ test files. Tracks console errors/warnings and
  * network failures, with configurable filtering for acceptable errors.
- * 
+ *
  * @example
  * ```typescript
  * import { setupErrorTracking } from '@/config/tests/utils/error-tracking';
- * 
+ *
  * test.describe('MyPage', () => {
  *   let cleanupErrorTracking: (() => void) | undefined;
- * 
+ *
  *   test.beforeEach(async ({ page }) => {
  *     cleanupErrorTracking = setupErrorTracking(page);
  *     await page.goto('/my-page');
  *   });
- * 
+ *
  *   test.afterEach(async () => {
  *     if (cleanupErrorTracking) {
  *       cleanupErrorTracking();
@@ -37,13 +37,13 @@ export interface ErrorTrackingOptions {
    * Default: Common acceptable errors like metadata warnings
    */
   acceptableErrors?: string[];
-  
+
   /**
    * List of warning message substrings to ignore (case-insensitive)
    * Default: Common acceptable warnings like hydration mismatches
    */
   acceptableWarnings?: string[];
-  
+
   /**
    * List of URL substrings to ignore for network failures (case-insensitive)
    * Default: Non-critical URLs like analytics, favicon
@@ -53,7 +53,7 @@ export interface ErrorTrackingOptions {
 
 /**
  * Default acceptable error filters
- * 
+ *
  * These are common errors that are acceptable in tests and don't indicate
  * actual problems with the application.
  */
@@ -66,7 +66,7 @@ const DEFAULT_ACCEPTABLE_ERRORS = [
 
 /**
  * Default acceptable warning filters
- * 
+ *
  * These are common warnings that are acceptable in tests and don't indicate
  * actual problems with the application.
  */
@@ -79,33 +79,28 @@ const DEFAULT_ACCEPTABLE_WARNINGS = [
 
 /**
  * Default non-critical URL filters
- * 
+ *
  * These URLs are not critical for test functionality and can fail without
  * indicating a problem with the application.
  */
-const DEFAULT_NON_CRITICAL_URLS = [
-  'analytics',
-  'umami',
-  'vercel',
-  'favicon',
-] as const;
+const DEFAULT_NON_CRITICAL_URLS = ['analytics', 'umami', 'vercel', 'favicon'] as const;
 
 /**
  * Set up error tracking for a Playwright page
- * 
+ *
  * Tracks:
  * - Console errors (filtered by acceptableErrors)
  * - Console warnings (filtered by acceptableWarnings)
  * - Page errors (uncaught exceptions)
  * - Network failures (filtered by nonCriticalUrls)
- * 
+ *
  * Returns a cleanup function that should be called in `afterEach` to
  * check for errors and throw if any are found.
- * 
+ *
  * @param page - Playwright page instance
  * @param options - Configuration options for error tracking
  * @returns Cleanup function that throws if errors are detected
- * 
+ *
  * @example
  * ```typescript
  * test.beforeEach(async ({ page }) => {
@@ -113,17 +108,14 @@ const DEFAULT_NON_CRITICAL_URLS = [
  *   // Store cleanup for afterEach
  *   (page as any).__errorTrackingCleanup = cleanup;
  * });
- * 
+ *
  * test.afterEach(async ({ page }) => {
  *   const cleanup = (page as any).__errorTrackingCleanup;
  *   if (cleanup) cleanup();
  * });
  * ```
  */
-export function setupErrorTracking(
-  page: Page,
-  options: ErrorTrackingOptions = {}
-): () => void {
+export function setupErrorTracking(page: Page, options: ErrorTrackingOptions = {}): () => void {
   const consoleErrors: string[] = [];
   const consoleWarnings: string[] = [];
   const networkErrors: string[] = [];
@@ -135,7 +127,7 @@ export function setupErrorTracking(
 
   // Helper to check if text matches any filter (case-insensitive)
   const matchesFilter = (text: string, filters: readonly string[]): boolean => {
-    return filters.some(filter => text.toLowerCase().includes(filter.toLowerCase()));
+    return filters.some((filter) => text.toLowerCase().includes(filter.toLowerCase()));
   };
 
   // Track console errors
@@ -186,15 +178,15 @@ export function setupErrorTracking(
 
 /**
  * Convenience function for test setup with error tracking
- * 
+ *
  * Sets up error tracking and returns both the cleanup function and
  * a helper to navigate and wait for page load.
- * 
+ *
  * @param page - Playwright page instance
  * @param url - URL to navigate to (optional)
  * @param options - Error tracking options
  * @returns Object with cleanup function and navigation helper
- * 
+ *
  * @example
  * ```typescript
  * test.beforeEach(async ({ page }) => {

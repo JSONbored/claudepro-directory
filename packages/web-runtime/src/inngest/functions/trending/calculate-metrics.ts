@@ -39,18 +39,21 @@ export const calculateTrendingMetrics = inngest.createFunction(
     // NOTE: calculateContentTimeMetrics RPC was removed in migration 20251217000229
     // The materialized view refresh is sufficient for trending metrics
     // If time-windowed metrics are needed in the future, implement using Prisma queries directly
-    const metricsResult = await step.run('calculate-time-metrics', async (): Promise<{
-      updated: number;
-      created: number;
-    }> => {
-      // Return zero metrics since the RPC was removed
-      // The materialized view refresh below will update trending scores
-      logger.info(logContext, 'Time-windowed metrics calculation skipped (RPC removed)');
-      return {
-        updated: 0,
-        created: 0,
-      };
-    });
+    const metricsResult = await step.run(
+      'calculate-time-metrics',
+      async (): Promise<{
+        updated: number;
+        created: number;
+      }> => {
+        // Return zero metrics since the RPC was removed
+        // The materialized view refresh below will update trending scores
+        logger.info(logContext, 'Time-windowed metrics calculation skipped (RPC removed)');
+        return {
+          updated: 0,
+          created: 0,
+        };
+      }
+    );
 
     // Step 2: Refresh materialized view with updated metrics
     await step.run('refresh-materialized-view', async () => {

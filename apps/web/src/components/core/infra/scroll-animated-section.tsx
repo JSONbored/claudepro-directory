@@ -176,7 +176,7 @@ function LazySectionComponent({
   const { value: isMounted, setTrue: setIsMountedTrue } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
   const baseVariantConfig = ANIMATION_VARIANTS[variant];
-  
+
   // Remove transforms when reduced motion is enabled
   const variantConfig = shouldReduceMotion
     ? {
@@ -212,10 +212,7 @@ function LazySectionComponent({
   // We match the client structure exactly to prevent hydration mismatch
   if (!isMounted) {
     return (
-      <div
-        className={className}
-        style={{ opacity: variantConfig.initial['opacity'] ?? 1 }}
-      >
+      <div className={className} style={{ opacity: variantConfig.initial['opacity'] ?? 1 }}>
         {children}
       </div>
     );

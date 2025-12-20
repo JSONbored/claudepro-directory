@@ -22,7 +22,7 @@ test.describe('/account/activity', () => {
     // Set up error tracking and navigate to account activity page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/account/activity');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });

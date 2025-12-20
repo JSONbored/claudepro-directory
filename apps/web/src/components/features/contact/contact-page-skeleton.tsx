@@ -2,7 +2,7 @@
 
 /**
  * Contact Page Skeleton
- * 
+ *
  * Perfectly matches /contact structure:
  * - Centered header (title + description)
  * - Cards grid (2 columns) with contact options

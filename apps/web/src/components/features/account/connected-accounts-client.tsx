@@ -5,7 +5,7 @@
  * Database-first: displays data from get_user_identities() RPC
  */
 
-import type { oauth_provider } from '@heyclaude/data-layer/prisma';
+import type { oauth_provider } from '@prisma/client';
 import type { GetUserIdentitiesReturns } from '@heyclaude/data-layer';
 import { unlinkOAuthProvider } from '@heyclaude/web-runtime/actions/unlink-oauth-provider';
 import { formatDate } from '@heyclaude/web-runtime/data/utils';
@@ -83,9 +83,13 @@ const PROVIDER_CONFIG: Record<
  * @see unlinkOAuthProvider
  */
 export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientProps) {
-  const { value: unlinkDialogOpen, setTrue: setUnlinkDialogOpenTrue, setFalse: setUnlinkDialogOpenFalse } = useBoolean();
+  const {
+    value: unlinkDialogOpen,
+    setTrue: setUnlinkDialogOpenTrue,
+    setFalse: setUnlinkDialogOpenFalse,
+  } = useBoolean();
   const [providerToUnlink, setProviderToUnlink] = useState<oauth_provider | null>(null);
-  
+
   // Use useSafeAction hook - this properly infers types from next-safe-action
   const { executeAsync: executeUnlink, isPending } = useSafeAction(unlinkOAuthProvider, {
     onSuccess: ({ data }: { data?: { success: boolean | null; error?: string } }) => {
@@ -95,10 +99,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
         setProviderToUnlink(null);
         // Page will auto-revalidate via server action
       } else {
-        errorToasts.actionFailed(
-          'unlink provider',
-          data?.error || 'An unexpected error occurred'
-        );
+        errorToasts.actionFailed('unlink provider', data?.error || 'An unexpected error occurred');
       }
     },
     onError: ({ error }: { error: { serverError?: string; validationErrors?: unknown } }) => {
@@ -166,7 +167,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
         return (
           <div
             key={provider}
-            className="hover:bg-accent/5 flex items-center justify-between card-base p-4 transition-colors"
+            className="hover:bg-accent/5 card-base flex items-center justify-between p-4 transition-colors"
           >
             <div className="flex items-center gap-4">
               <div className="bg-accent/5 rounded-full border p-2">
@@ -183,7 +184,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
                   ) : null}
                 </div>
                 {identity ? (
-                  <div className="text-muted-foreground text-sm mt-2">
+                  <div className="text-muted-foreground mt-2 text-sm">
                     <p>{identity.email ?? 'No email'}</p>
                     <p className="text-xs">
                       {identity.last_sign_in_at
@@ -222,9 +223,9 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
         );
       })}
 
-      <div className="bg-muted/30 mt-6 card-base p-4">
-        <h4 className="mb-3 text-sm-medium">How it works</h4>
-        <ul className="text-muted-foreground text-sm space-y-1">
+      <div className="bg-muted/30 card-base mt-6 p-4">
+        <h4 className="text-sm-medium mb-3">How it works</h4>
+        <ul className="text-muted-foreground space-y-1 text-sm">
           <li>• Link multiple OAuth providers to your account</li>
           <li>• Sign in with any connected provider to access the same account</li>
           <li>• Your data stays unified across all login methods</li>
@@ -233,7 +234,10 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
       </div>
 
       {/* Unlink Confirmation Dialog */}
-      <Dialog open={unlinkDialogOpen} onOpenChange={(open) => open ? setUnlinkDialogOpenTrue() : setUnlinkDialogOpenFalse()}>
+      <Dialog
+        open={unlinkDialogOpen}
+        onOpenChange={(open) => (open ? setUnlinkDialogOpenTrue() : setUnlinkDialogOpenFalse())}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -250,11 +254,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={setUnlinkDialogOpenFalse}
-              disabled={isPending}
-            >
+            <Button variant="outline" onClick={setUnlinkDialogOpenFalse} disabled={isPending}>
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleUnlinkConfirm} disabled={isPending}>

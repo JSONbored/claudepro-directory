@@ -1,6 +1,6 @@
 /**
  * Jobs CRUD Actions - Generated from single config
- * 
+ *
  * Consolidated create/update/delete actions using createCrudActionHandlers factory.
  * Uses next-safe-action directly with factory helpers for business logic.
  * Eliminates ~200 lines of repetitive boilerplate.
@@ -83,37 +83,37 @@ const crudHandlers = createCrudActionHandlers<
   },
   transformArgs: {
     create: (input, ctx) => ({
-      'p_user_id': ctx.userId,
-      'p_job_data': {
-        'company': input.company,
-        'company_id': input.company_id,
-        'title': input.title,
-        'description': input.description,
-        'type': input.type,
-        'category': input.category,
-        'link': input.link,
-        'location': input.location,
-        'salary': input.salary,
-        'remote': input.remote,
-        'workplace': input.workplace,
-        'experience': input.experience,
-        'tags': input.tags,
-        'requirements': input.requirements,
-        'benefits': input.benefits,
-        'contact_email': input.contact_email,
-        'company_logo': input.company_logo,
+      p_user_id: ctx.userId,
+      p_job_data: {
+        company: input.company,
+        company_id: input.company_id,
+        title: input.title,
+        description: input.description,
+        type: input.type,
+        category: input.category,
+        link: input.link,
+        location: input.location,
+        salary: input.salary,
+        remote: input.remote,
+        workplace: input.workplace,
+        experience: input.experience,
+        tags: input.tags,
+        requirements: input.requirements,
+        benefits: input.benefits,
+        contact_email: input.contact_email,
+        company_logo: input.company_logo,
       },
-      'p_tier': input.tier,
-      'p_plan': input.plan,
+      p_tier: input.tier,
+      p_plan: input.plan,
     }),
     update: (input, ctx) => ({
-      'p_job_id': input.job_id,
-      'p_user_id': ctx.userId,
-      'p_updates': input.updates,
+      p_job_id: input.job_id,
+      p_user_id: ctx.userId,
+      p_updates: input.updates,
     }),
     delete: (input, ctx) => ({
-      'p_job_id': input.job_id,
-      'p_user_id': ctx.userId,
+      p_job_id: input.job_id,
+      p_user_id: ctx.userId,
     }),
   },
   cacheInvalidation: {
@@ -132,30 +132,18 @@ const crudHandlers = createCrudActionHandlers<
     update: {
       paths: (_result, args) => {
         const a = args as z.infer<typeof updateJobSchema> | undefined;
-        return [
-          '/account/jobs',
-          ...(a?.job_id ? [`/account/jobs/${a.job_id}/edit`] : []),
-          '/jobs',
-        ];
+        return ['/account/jobs', ...(a?.job_id ? [`/account/jobs/${a.job_id}/edit`] : []), '/jobs'];
       },
       tags: (_result, args) => {
         const a = args as z.infer<typeof updateJobSchema> | undefined;
-        return [
-          ...(a?.job_id ? [`job-${a.job_id}`] : []),
-          'jobs',
-          'companies',
-        ];
+        return [...(a?.job_id ? [`job-${a.job_id}`] : []), 'jobs', 'companies'];
       },
     },
     delete: {
       paths: ['/jobs', '/account/jobs'],
       tags: (_result, args) => {
         const a = args as z.infer<typeof deleteJobSchema> | undefined;
-        return [
-          ...(a?.job_id ? [`job-${a.job_id}`] : []),
-          'jobs',
-          'companies',
-        ];
+        return [...(a?.job_id ? [`job-${a.job_id}`] : []), 'jobs', 'companies'];
       },
     },
   },
@@ -170,7 +158,11 @@ const crudHandlers = createCrudActionHandlers<
           // result is already CreateJobWithPaymentReturns from the RPC call
           // Use 'unknown' first to avoid unsafe type assertions when passing to hook
           await onJobCreated(
-            result as unknown as { job_id: string | null; requires_payment: boolean | null; slug?: string | null },
+            result as unknown as {
+              job_id: string | null;
+              requires_payment: boolean | null;
+              slug?: string | null;
+            },
             ctx,
             args
           );

@@ -97,7 +97,11 @@ describe('useWindowSize', () => {
     // Rapid resize events
     act(() => {
       window.dispatchEvent(new Event('resize'));
-      Object.defineProperty(window, 'innerWidth', { value: 800, writable: true, configurable: true });
+      Object.defineProperty(window, 'innerWidth', {
+        value: 800,
+        writable: true,
+        configurable: true,
+      });
     });
 
     // Should not update immediately
@@ -118,7 +122,11 @@ describe('useWindowSize', () => {
 
     act(() => {
       window.dispatchEvent(new Event('resize'));
-      Object.defineProperty(window, 'innerWidth', { value: 800, writable: true, configurable: true });
+      Object.defineProperty(window, 'innerWidth', {
+        value: 800,
+        writable: true,
+        configurable: true,
+      });
     });
 
     act(() => {
@@ -127,7 +135,11 @@ describe('useWindowSize', () => {
 
     act(() => {
       window.dispatchEvent(new Event('resize'));
-      Object.defineProperty(window, 'innerWidth', { value: 600, writable: true, configurable: true });
+      Object.defineProperty(window, 'innerWidth', {
+        value: 600,
+        writable: true,
+        configurable: true,
+      });
     });
 
     act(() => {

@@ -36,9 +36,8 @@ function buildErrorEmbed(payload: ErrorWebhookPayload): Record<string, unknown> 
   const errorText = payload.error ?? 'No error message provided';
   // Truncate error message if too long and replace triple backticks to prevent code block injection
   const sanitizedError = errorText.replace(/```/g, "'''");
-  const errorMessage = sanitizedError.length > 1000 
-    ? sanitizedError.slice(0, 997) + '...' 
-    : sanitizedError;
+  const errorMessage =
+    sanitizedError.length > 1000 ? sanitizedError.slice(0, 997) + '...' : sanitizedError;
 
   return {
     title: '⚠️ Webhook Error',
@@ -73,7 +72,7 @@ export const processDiscordErrorsQueue = inngest.createFunction(
     // Step 1: Read messages from queue
     const messages = await step.run('read-queue', async () => {
       logger.info(logContext, 'Reading discord_errors queue');
-      
+
       const result = await pgmqRead<ErrorWebhookPayload>(DISCORD_ERRORS_QUEUE, {
         vt: 120, // 2 minutes to process batch of 10 messages safely
         qty: BATCH_SIZE,
@@ -87,8 +86,10 @@ export const processDiscordErrorsQueue = inngest.createFunction(
       return { processed: 0 };
     }
 
-    logger.info({ ...logContext,
-      messageCount: messages.length, }, 'Processing discord error messages');
+    logger.info(
+      { ...logContext, messageCount: messages.length },
+      'Processing discord error messages'
+    );
 
     // Step 2: Get Discord webhook URL
     const webhookUrl = await step.run('get-webhook-url', async () => {
@@ -104,15 +105,16 @@ export const processDiscordErrorsQueue = inngest.createFunction(
 
     for (const msg of messages) {
       const msgId = String(msg.msg_id);
-      
+
       const result = await step.run(`process-error-${msgId}`, async () => {
         try {
           // Check if message has exceeded max retries
           const readCount = msg.read_ct ?? 0;
           if (readCount > MAX_RETRY_COUNT) {
-            logger.warn({ ...logContext,
-              msgId,
-              readCount, }, 'Message exceeded max retries, deleting');
+            logger.warn(
+              { ...logContext, msgId, readCount },
+              'Message exceeded max retries, deleting'
+            );
             await pgmqDelete(DISCORD_ERRORS_QUEUE, msg.msg_id);
             return { msgId, success: false, error: 'Max retries exceeded' };
           }
@@ -151,15 +153,18 @@ export const processDiscordErrorsQueue = inngest.createFunction(
           // Delete message from queue on success
           await pgmqDelete(DISCORD_ERRORS_QUEUE, msg.msg_id);
 
-          logger.info({ ...logContext,
-            msgId,
-            webhookEventId: payload.webhook_event_id, }, 'Discord error notification sent');
+          logger.info(
+            { ...logContext, msgId, webhookEventId: payload.webhook_event_id },
+            'Discord error notification sent'
+          );
 
           return { msgId, success: true };
         } catch (error) {
           const normalized = normalizeError(error, 'Failed to send Discord error notification');
-          logger.error({ err: normalized, ...logContext,
-            msgId, }, 'Discord error notification failed');
+          logger.error(
+            { err: normalized, ...logContext, msgId },
+            'Discord error notification failed'
+          );
           return { msgId, success: false, error: normalized.message };
         }
       });
@@ -170,10 +175,10 @@ export const processDiscordErrorsQueue = inngest.createFunction(
     const successCount = results.filter((r) => r.success).length;
     const failedCount = results.filter((r) => !r.success).length;
 
-    logger.info({ ...logContext,
-      successCount,
-      failedCount,
-      totalProcessed: messages.length, }, 'Discord errors queue processing complete');
+    logger.info(
+      { ...logContext, successCount, failedCount, totalProcessed: messages.length },
+      'Discord errors queue processing complete'
+    );
 
     const result = {
       processed: messages.length,

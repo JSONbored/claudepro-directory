@@ -16,7 +16,7 @@ export async function HomepageSearchFacetsServer(): Promise<SearchFilterOptions>
   const { connection } = await import('next/server');
   await connection();
 
-  const facetData = await getSearchFacets().catch((error: unknown) => {
+  const facetData = (await getSearchFacets().catch((error: unknown) => {
     trackRPCFailure('get_search_facets', error, {
       section: 'search-facets',
     });
@@ -27,7 +27,7 @@ export async function HomepageSearchFacetsServer(): Promise<SearchFilterOptions>
       authors: [],
       categories: [],
     };
-  }) ?? {
+  })) ?? {
     facets: [],
     tags: [],
     authors: [],

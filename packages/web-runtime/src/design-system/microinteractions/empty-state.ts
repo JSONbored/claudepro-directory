@@ -23,7 +23,7 @@ const SPRING_BOUNCY: Transition = SPRING.bouncy;
 
 /**
  * Empty State Microinteractions
- * 
+ *
  * Uses array syntax for motion values to avoid TypeScript export naming issues
  * Type assertion prevents exposing internal motion-dom types
  */
@@ -73,10 +73,26 @@ export const EMPTY_STATE = {
    */
   transition: SPRING_SMOOTH,
 } as {
-  readonly fadeIn: { readonly opacity: readonly [number, number]; readonly y: readonly [number, number]; readonly transition: Transition };
-  readonly iconBounce: { readonly scale: readonly [number, number, number]; readonly rotate: readonly [number, number]; readonly transition: Transition };
-  readonly textStaggerTitle: { readonly opacity: readonly [number, number]; readonly y: readonly [number, number]; readonly transition: Transition };
-  readonly textStaggerDescription: { readonly opacity: readonly [number, number]; readonly y: readonly [number, number]; readonly transition: Transition };
+  readonly fadeIn: {
+    readonly opacity: readonly [number, number];
+    readonly y: readonly [number, number];
+    readonly transition: Transition;
+  };
+  readonly iconBounce: {
+    readonly scale: readonly [number, number, number];
+    readonly rotate: readonly [number, number];
+    readonly transition: Transition;
+  };
+  readonly textStaggerTitle: {
+    readonly opacity: readonly [number, number];
+    readonly y: readonly [number, number];
+    readonly transition: Transition;
+  };
+  readonly textStaggerDescription: {
+    readonly opacity: readonly [number, number];
+    readonly y: readonly [number, number];
+    readonly transition: Transition;
+  };
   readonly transition: Transition;
 };
 

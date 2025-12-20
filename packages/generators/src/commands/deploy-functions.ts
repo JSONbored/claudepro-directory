@@ -36,7 +36,7 @@ const DEFAULT_IMPORT_MAP_PATH = path.posix.join('supabase', 'deno.json');
  */
 function parseConfigToml(): Map<string, string> {
   const importMaps = new Map<string, string>();
-  
+
   if (!existsSync(CONFIG_TOML_PATH)) {
     logger.warn(`config.toml not found at ${CONFIG_TOML_PATH}, using default import map.`, {
       command: 'deploy-functions',
@@ -49,7 +49,7 @@ function parseConfigToml(): Map<string, string> {
     const config = TOML.parse(content) as {
       functions?: Record<string, { import_map?: string }>;
     };
-    
+
     if (config.functions && typeof config.functions === 'object') {
       for (const [functionName, functionConfig] of Object.entries(config.functions)) {
         if (functionConfig && typeof functionConfig === 'object' && functionConfig.import_map) {
@@ -62,11 +62,14 @@ function parseConfigToml(): Map<string, string> {
       }
     }
   } catch (error) {
-    logger.warn(`Failed to parse config.toml: ${error instanceof Error ? error.message : String(error)}. Using default import map.`, {
-      command: 'deploy-functions',
-    });
+    logger.warn(
+      `Failed to parse config.toml: ${error instanceof Error ? error.message : String(error)}. Using default import map.`,
+      {
+        command: 'deploy-functions',
+      }
+    );
   }
-  
+
   return importMaps;
 }
 
@@ -239,24 +242,16 @@ export function runDeployFunctions(): void {
 
   for (const fnName of functionsToDeploy) {
     const importMapPath = getImportMapPath(fnName, configImportMaps);
-    
+
     logger.info(`🚀 Deploying edge function "${fnName}" with import map: ${importMapPath}...`, {
       command: 'deploy-functions',
       fnName,
       importMapPath,
     });
-    
+
     const result = spawnSync(
       'supabase',
-      [
-        'functions',
-        'deploy',
-        fnName,
-        '--project-ref',
-        projectRef,
-        '--import-map',
-        importMapPath,
-      ],
+      ['functions', 'deploy', fnName, '--project-ref', projectRef, '--import-map', importMapPath],
       {
         cwd: EDGE_ROOT,
         stdio: 'inherit',
@@ -276,5 +271,8 @@ export function runDeployFunctions(): void {
     logger.info(`✅ "${fnName}" deployed successfully.`, { command: 'deploy-functions', fnName });
   }
 
-  logger.info('✨ All requested edge functions deployed.', { command: 'deploy-functions', count: functionsToDeploy.length });
+  logger.info('✨ All requested edge functions deployed.', {
+    command: 'deploy-functions',
+    count: functionsToDeploy.length,
+  });
 }

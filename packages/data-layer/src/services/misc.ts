@@ -28,9 +28,8 @@ import type {
   GetRecommendationsReturns,
   EnrollInEmailSequenceArgs,
 } from '@heyclaude/database-types/postgres-types';
-import type { webhook_source } from '@heyclaude/data-layer/prisma';
-// Use explicit Prisma model type to avoid conflicts with postgres-types composite types
-import type { announcementsModel } from '@heyclaude/database-types/prisma/models';
+import type { Prisma, webhook_source } from '@prisma/client';
+type announcementsModel = Prisma.announcementsGetPayload<{}>;
 
 // Local types for converted RPCs (RPCs removed, using Prisma directly)
 type DueSequenceEmailItem = {
@@ -100,7 +99,9 @@ type GetActiveNotificationsArgs = {
 };
 
 // Use Prisma model type instead of postgres-types composite type
-import type { notificationsModel } from '@heyclaude/database-types/prisma/models';
+// Prisma namespace already imported above
+
+type notificationsModel = Prisma.notificationsGetPayload<{}>;
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
 import { logRpcError } from '../utils/rpc-error-logging.ts';
@@ -133,7 +134,9 @@ export type GetQuizConfigurationReturns = QuizConfigurationQuestion[];
 
 // Type helpers: Extract input types from Prisma operations
 type AppSettingCreateInput = Parameters<typeof prisma.app_settings.create>[0]['data'];
-type EmailEngagementSummaryCreateInput = Parameters<typeof prisma.email_engagement_summary.create>[0]['data'];
+type EmailEngagementSummaryCreateInput = Parameters<
+  typeof prisma.email_engagement_summary.create
+>[0]['data'];
 type EmailBlocklistCreateInput = Parameters<typeof prisma.email_blocklist.create>[0]['data'];
 type NotificationCreateInput = Parameters<typeof prisma.notifications.create>[0]['data'];
 
@@ -165,62 +168,25 @@ export class MiscService extends BasePrismaService {
       'getActiveNotifications',
       'getActiveNotifications',
       async () => {
-        // Use raw SQL with database NOW() for date comparison (eliminates new Date() call)
-        // More efficient: database handles date comparison natively
-        // OPTIMIZATION: Select only needed fields instead of SELECT * to reduce data transfer
-        if (p_dismissed_ids.length > 0) {
-          // Use parameterized query for dismissed_ids
-          const notifications = await prisma.$queryRawUnsafe<notificationsModel[]>(
-            `
-            SELECT 
-              id,
-              type,
-              priority,
-              active,
-              expires_at,
-              title,
-              message,
-              action_label,
-              action_href,
-              action_onclick,
-              icon,
-              created_at,
-              updated_at
-            FROM public.notifications
-            WHERE active = true
-              AND (expires_at IS NULL OR expires_at > NOW())
-              AND id != ALL($1::text[])
-            ORDER BY created_at DESC
-            `,
-            p_dismissed_ids
-          );
-          return notifications;
-        } else {
-          // No dismissed_ids - simpler query
-          const notifications = await prisma.$queryRawUnsafe<notificationsModel[]>(
-            `
-            SELECT 
-              id,
-              type,
-              priority,
-              active,
-              expires_at,
-              title,
-              message,
-              action_label,
-              action_href,
-              action_onclick,
-              icon,
-              created_at,
-              updated_at
-            FROM public.notifications
-            WHERE active = true
-              AND (expires_at IS NULL OR expires_at > NOW())
-            ORDER BY created_at DESC
-            `
-          );
-          return notifications;
-        }
+        // OPTIMIZATION: Use Prisma query builder instead of raw SQL for better type safety and maintainability
+        // Since we're in withSmartCache (skips during build), Date.now() is safe here
+        const now = new Date();
+        
+        const notifications = await prisma.notifications.findMany({
+          where: {
+            active: true,
+            OR: [
+              { expires_at: null },
+              { expires_at: { gt: now } },
+            ],
+            ...(p_dismissed_ids.length > 0 && {
+              id: { notIn: p_dismissed_ids },
+            }),
+          },
+          orderBy: { created_at: 'desc' },
+        });
+        
+        return notifications;
       },
       args
     );
@@ -243,33 +209,35 @@ export class MiscService extends BasePrismaService {
       'getActiveAnnouncement',
       'getActiveAnnouncement',
       async () => {
-        // Use raw SQL with database NOW() for date comparison (more efficient, eliminates Date.now())
-        // OPTIMIZATION: Select only needed fields instead of SELECT * to reduce data transfer
-        const result = await prisma.$queryRawUnsafe<announcementsModel[]>(
-          `
-          SELECT 
-            id,
-            variant,
-            tag,
-            title,
-            href,
-            icon,
-            start_date,
-            end_date,
-            priority,
-            dismissible,
-            active,
-            created_at,
-            updated_at
-          FROM public.announcements
-          WHERE active = true
-            AND (start_date IS NULL OR start_date <= NOW())
-            AND (end_date IS NULL OR end_date >= NOW())
-          ORDER BY priority DESC, start_date DESC NULLS LAST
-          LIMIT 1
-          `
-        );
-        return result[0] ?? null;
+        // OPTIMIZATION: Use Prisma query builder instead of raw SQL for better type safety and maintainability
+        // Since we're in withSmartCache (skips during build), Date.now() is safe here
+        const now = new Date();
+        
+        const result = await prisma.announcements.findFirst({
+          where: {
+            active: true,
+            AND: [
+              {
+                OR: [
+                  { start_date: null },
+                  { start_date: { lte: now } },
+                ],
+              },
+              {
+                OR: [
+                  { end_date: null },
+                  { end_date: { gte: now } },
+                ],
+              },
+            ],
+          },
+          orderBy: [
+            { priority: 'desc' },
+            { start_date: { sort: 'desc', nulls: 'last' } },
+          ],
+        });
+        
+        return result;
       },
       args
     );
@@ -277,29 +245,31 @@ export class MiscService extends BasePrismaService {
 
   /**
    * Get contact commands
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was returning a nested array structure (ContactCommandResult[][]), but we can
    * return a simple array directly. Transform Prisma model to match RPC composite type structure.
-   * 
+   *
    * Note: The RPC returned ContactCommandResult[][] (array of arrays), but consumers
    * access it as result?.[0] (first array). We return an array that matches ContactCommandResult
    * structure (with `text` field instead of `command_text`).
-   * 
+   *
    * @returns Array of contact commands (transformed to match RPC structure)
    */
-  async getContactCommands(): Promise<Array<{
-    id: string | null;
-    text: string | null;
-    description: string | null;
-    category: string | null;
-    icon_name: string | null;
-    action_type: string | null;
-    action_value: string | null;
-    confetti_variant: string | null;
-    requires_auth: boolean | null;
-    aliases: string[] | null;
-  }>> {
+  async getContactCommands(): Promise<
+    Array<{
+      id: string | null;
+      text: string | null;
+      description: string | null;
+      category: string | null;
+      icon_name: string | null;
+      action_type: string | null;
+      action_value: string | null;
+      confetti_variant: string | null;
+      requires_auth: boolean | null;
+      aliases: string[] | null;
+    }>
+  > {
     return withSmartCache(
       'getContactCommands',
       'getContactCommands',
@@ -348,16 +318,14 @@ export class MiscService extends BasePrismaService {
 
   /**
    * Get form field configuration
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a simple SELECT with WHERE/ORDER BY, which Prisma handles perfectly.
-   * 
+   *
    * @param args - Arguments with p_form_type
    * @returns Array of form field configurations
    */
-  async getFormFieldConfig(
-    args: GetFormFieldConfigArgs
-  ): Promise<GetFormFieldConfigReturns> {
+  async getFormFieldConfig(args: GetFormFieldConfigArgs): Promise<GetFormFieldConfigReturns> {
     return withSmartCache(
       'getFormFieldConfig',
       'getFormFieldConfig',
@@ -384,10 +352,7 @@ export class MiscService extends BasePrismaService {
             display_order: true,
             // Exclude: id, form_type, created_at, updated_at, enabled (not used in transformation)
           },
-          orderBy: [
-            { field_group: 'asc' },
-            { display_order: 'asc' },
-          ],
+          orderBy: [{ field_group: 'asc' }, { display_order: 'asc' }],
         });
 
         // Transform Prisma model to match RPC return structure
@@ -408,11 +373,14 @@ export class MiscService extends BasePrismaService {
             icon_name: config.icon_name,
             icon_position: config.icon_position,
             rows: typeof configData['rows'] === 'number' ? configData['rows'] : null,
-            monospace: typeof configData['monospace'] === 'boolean' ? configData['monospace'] : null,
+            monospace:
+              typeof configData['monospace'] === 'boolean' ? configData['monospace'] : null,
             min_value: typeof configData['min_value'] === 'number' ? configData['min_value'] : null,
             max_value: typeof configData['max_value'] === 'number' ? configData['max_value'] : null,
-            step_value: typeof configData['step_value'] === 'number' ? configData['step_value'] : null,
-            select_options: (configData['select_options'] as Record<string, unknown> | null) ?? null,
+            step_value:
+              typeof configData['step_value'] === 'number' ? configData['step_value'] : null,
+            select_options:
+              (configData['select_options'] as Record<string, unknown> | null) ?? null,
             field_group: config.field_group,
             display_order: config.display_order,
           };
@@ -429,10 +397,10 @@ export class MiscService extends BasePrismaService {
 
   /**
    * Get social proof stats
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing aggregations and counts, which Prisma handles perfectly.
-   * 
+   *
    * @returns Social proof statistics (contributor count, names, submission count, success rate, total users)
    */
   async getSocialProofStats(): Promise<GetSocialProofStatsReturns> {
@@ -440,69 +408,60 @@ export class MiscService extends BasePrismaService {
       'getSocialProofStats',
       'getSocialProofStats',
       async () => {
-        // Use database date calculations with SQL INTERVAL (eliminates new Date() calls)
-        // More efficient: database handles date arithmetic natively
+        // OPTIMIZATION: Calculate dates once before Promise.all (since we're in withSmartCache, Date.now() is safe)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        // OPTIMIZATION: Use Prisma queries instead of raw SQL for better type safety
         const [
-          recentSubmissionsCountResult,
+          recentSubmissionsCount,
           monthSubmissionsResult,
           topContributorsResult,
           totalContentCount,
         ] = await Promise.all([
-          // Recent submissions count (last 7 days) - using SQL NOW() - INTERVAL
-          prisma.$queryRawUnsafe<Array<{ count: bigint }>>(
-            `SELECT COUNT(*)::bigint as count FROM public.content_submissions WHERE created_at >= NOW() - INTERVAL '7 days'`
-          ),
-          // Month submissions and success rate - using SQL NOW() - INTERVAL
-          prisma.$queryRawUnsafe<Array<{ status: string | null; count: bigint }>>(
-            `
-            SELECT status, COUNT(*)::bigint as count
-            FROM public.content_submissions
-            WHERE created_at >= NOW() - INTERVAL '30 days'
-            GROUP BY status
-            `
-          ),
-          // Top 5 contributors this week - using SQL NOW() - INTERVAL
-          prisma.$queryRawUnsafe<Array<{ author: string | null; count: bigint }>>(
-            `
-            SELECT author, COUNT(*)::bigint as count
-            FROM public.content_submissions
-            WHERE created_at >= NOW() - INTERVAL '7 days'
-            GROUP BY author
-            ORDER BY count DESC
-            LIMIT 5
-            `
-          ),
+          // Recent submissions count (last 7 days)
+          prisma.content_submissions.count({
+            where: { created_at: { gte: sevenDaysAgo } },
+          }),
+          // Month submissions and success rate - use Prisma groupBy
+          prisma.content_submissions.groupBy({
+            by: ['status'],
+            where: { created_at: { gte: thirtyDaysAgo } },
+            _count: { id: true },
+          }),
+          // Top 5 contributors this week - use Prisma groupBy
+          prisma.content_submissions.groupBy({
+            by: ['author'],
+            where: { created_at: { gte: sevenDaysAgo } },
+            _count: { id: true },
+            orderBy: { _count: { id: 'desc' } },
+            take: 5,
+          }),
           // Total content count (proxy for total users)
           prisma.content.count(),
         ]);
 
         // Transform results to match expected structure
-        const recentSubmissionsCount = Number(recentSubmissionsCountResult[0]?.count ?? 0);
-        const monthSubmissions = monthSubmissionsResult.map((r) => ({
-          status: r.status,
-          _count: { id: Number(r.count) },
-        }));
-        const topContributors = topContributorsResult.map((r) => ({
-          author: r.author,
-          _count: { id: Number(r.count) },
-        }));
+        // recentSubmissionsCount is already a number from count()
+        // monthSubmissionsResult and topContributorsResult are already in the correct format from groupBy
 
         // OPTIMIZATION: Calculate month submissions count and success rate from groupBy results
         // groupBy already provides counts per status, so we can sum them directly
-        const monthSubmissionsCount = monthSubmissions.reduce(
+        const monthSubmissionsCount = monthSubmissionsResult.reduce(
           (sum, stat) => sum + stat._count.id,
           0
         );
-        const approvedCount = monthSubmissions.find(
-          (stat) => stat.status === 'merged'
-        )?._count.id ?? 0;
+        const approvedCount =
+          monthSubmissionsResult.find((stat) => stat.status === 'merged')?._count.id ?? 0;
         const successRate =
           monthSubmissionsCount > 0
             ? Math.round((approvedCount / monthSubmissionsCount) * 100)
             : null;
 
         // Process contributor names (extract username from email if needed)
-        const contributorNames = topContributors
+        const contributorNames = topContributorsResult
           .map((contributor) => {
             if (!contributor.author) return null;
             // Extract username: handle both email and non-email formats
@@ -517,7 +476,7 @@ export class MiscService extends BasePrismaService {
         // Return single row result (matching RPC return structure)
         return [
           {
-            contributor_count: topContributors.length,
+            contributor_count: topContributorsResult.length,
             contributor_names: contributorNames.length > 0 ? contributorNames : null,
             submission_count: recentSubmissionsCount,
             success_rate: successRate,
@@ -530,11 +489,7 @@ export class MiscService extends BasePrismaService {
   }
 
   async getApiHealth(): Promise<GetApiHealthReturns> {
-    return this.callRpc<GetApiHealthReturns>(
-      'get_api_health',
-      {},
-      { methodName: 'getApiHealth' }
-    );
+    return this.callRpc<GetApiHealthReturns>('get_api_health', {}, { methodName: 'getApiHealth' });
   }
 
   async getApiHealthFormatted(): Promise<GetApiHealthFormattedReturns> {
@@ -546,36 +501,24 @@ export class MiscService extends BasePrismaService {
   }
 
   async getSiteUrls(): Promise<GetSiteUrlsReturns> {
-    return this.callRpc<GetSiteUrlsReturns>(
-      'get_site_urls',
-      {},
-      { methodName: 'getSiteUrls' }
-    );
+    return this.callRpc<GetSiteUrlsReturns>('get_site_urls', {}, { methodName: 'getSiteUrls' });
   }
 
-  async getSiteUrlsFormatted(
-    args: GetSiteUrlsFormattedArgs
-  ): Promise<GetSiteUrlsFormattedReturns> {
-    return this.callRpc<GetSiteUrlsFormattedReturns>(
-      'get_site_urls_formatted',
-      args,
-      { methodName: 'getSiteUrlsFormatted' }
-    );
+  async getSiteUrlsFormatted(args: GetSiteUrlsFormattedArgs): Promise<GetSiteUrlsFormattedReturns> {
+    return this.callRpc<GetSiteUrlsFormattedReturns>('get_site_urls_formatted', args, {
+      methodName: 'getSiteUrlsFormatted',
+    });
   }
 
-  async generateSitemapXml(
-    args?: GenerateSitemapXmlArgs
-  ): Promise<GenerateSitemapXmlReturns> {
-    return this.callRpc<GenerateSitemapXmlReturns>(
-      'generate_sitemap_xml',
-      args ?? {},
-      { methodName: 'generateSitemapXml' }
-    );
+  async generateSitemapXml(args?: GenerateSitemapXmlArgs): Promise<GenerateSitemapXmlReturns> {
+    return this.callRpc<GenerateSitemapXmlReturns>('generate_sitemap_xml', args ?? {}, {
+      methodName: 'generateSitemapXml',
+    });
   }
 
   /**
    * Get sponsored content by ID
-   * 
+   *
    * OPTIMIZATION: Uses request-scoped caching to prevent duplicate queries in same request.
    */
   async getSponsoredContentById(sponsoredId: string): Promise<{
@@ -597,7 +540,7 @@ export class MiscService extends BasePrismaService {
 
   /**
    * Get app setting by key
-   * 
+   *
    * OPTIMIZATION: Uses request-scoped caching to prevent duplicate queries in same request.
    */
   async getAppSetting(settingKey: string): Promise<{
@@ -621,9 +564,7 @@ export class MiscService extends BasePrismaService {
     );
   }
 
-  async upsertAppSetting(
-    setting: AppSettingCreateInput
-  ): Promise<void> {
+  async upsertAppSetting(setting: AppSettingCreateInput): Promise<void> {
     try {
       await prisma.app_settings.upsert({
         where: { setting_key: setting.setting_key },
@@ -642,7 +583,7 @@ export class MiscService extends BasePrismaService {
 
   /**
    * Get email engagement summary by email
-   * 
+   *
    * OPTIMIZATION: Uses request-scoped caching to prevent duplicate queries in same request.
    */
   async getEmailEngagementSummary(email: string) {
@@ -674,9 +615,7 @@ export class MiscService extends BasePrismaService {
     );
   }
 
-  async upsertEmailEngagementSummary(
-    engagement: EmailEngagementSummaryCreateInput
-  ): Promise<void> {
+  async upsertEmailEngagementSummary(engagement: EmailEngagementSummaryCreateInput): Promise<void> {
     try {
       await prisma.email_engagement_summary.upsert({
         where: { email: engagement.email },
@@ -693,9 +632,7 @@ export class MiscService extends BasePrismaService {
     }
   }
 
-  async upsertEmailBlocklist(
-    blocklistEntry: EmailBlocklistCreateInput
-  ): Promise<void> {
+  async upsertEmailBlocklist(blocklistEntry: EmailBlocklistCreateInput): Promise<void> {
     try {
       await prisma.email_blocklist.upsert({
         where: { email: blocklistEntry.email },
@@ -712,13 +649,23 @@ export class MiscService extends BasePrismaService {
     }
   }
 
+  /**
+   * Update webhook event status
+   *
+   * OPTIMIZATION: Uses Prisma update instead of raw SQL for better type safety.
+   * Uses new Date() for timestamp (safe for mutations which don't use caching).
+   *
+   * @param webhookId - Webhook event ID
+   */
   async updateWebhookEventStatus(webhookId: string): Promise<void> {
     try {
-      // Use database NOW() for timestamp (eliminates new Date() call)
-      await prisma.$executeRawUnsafe(
-        `UPDATE public.webhook_events SET processed = true, processed_at = NOW() WHERE id = $1::uuid`,
-        webhookId
-      );
+      await prisma.webhook_events.update({
+        where: { id: webhookId },
+        data: {
+          processed: true,
+          processed_at: new Date(), // Use JavaScript Date for mutations (not in cache context)
+        },
+      });
     } catch (error) {
       logRpcError(error, {
         rpcName: 'webhook_events.update',
@@ -729,9 +676,7 @@ export class MiscService extends BasePrismaService {
     }
   }
 
-  async upsertNotification(
-    notification: NotificationCreateInput
-  ): Promise<void> {
+  async upsertNotification(notification: NotificationCreateInput): Promise<void> {
     try {
       await prisma.notifications.upsert({
         where: { id: notification.id },
@@ -748,9 +693,7 @@ export class MiscService extends BasePrismaService {
     }
   }
 
-  async insertNotification(
-    notification: NotificationCreateInput
-  ): Promise<Notification> {
+  async insertNotification(notification: NotificationCreateInput): Promise<Notification> {
     try {
       const result = await prisma.notifications.create({
         data: notification,
@@ -768,17 +711,15 @@ export class MiscService extends BasePrismaService {
 
   /**
    * Get webhook event by Svix ID
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a simple SELECT id FROM webhook_events WHERE svix_id = ? AND source = ?,
    * which Prisma handles perfectly. This eliminates the array unwrapping logic.
-   * 
+   *
    * @param args - Arguments with svix_id and source
    * @returns Webhook event ID or null if not found
    */
-  async getWebhookEventBySvixId(
-    args: GetWebhookEventBySvixIdArgs
-  ): Promise<{ id: string } | null> {
+  async getWebhookEventBySvixId(args: GetWebhookEventBySvixIdArgs): Promise<{ id: string } | null> {
     return withSmartCache(
       'getWebhookEventBySvixId',
       'getWebhookEventBySvixId',
@@ -796,15 +737,12 @@ export class MiscService extends BasePrismaService {
     );
   }
 
-  async insertWebhookEvent(
-    args: InsertWebhookEventArgs
-  ): Promise<InsertWebhookEventReturns> {
+  async insertWebhookEvent(args: InsertWebhookEventArgs): Promise<InsertWebhookEventReturns> {
     // Mutations don't use caching
-    return this.callRpc<InsertWebhookEventReturns>(
-      'insert_webhook_event',
-      args,
-      { methodName: 'insertWebhookEvent', useCache: false }
-    );
+    return this.callRpc<InsertWebhookEventReturns>('insert_webhook_event', args, {
+      methodName: 'insertWebhookEvent',
+      useCache: false,
+    });
   }
 
   /**
@@ -825,11 +763,10 @@ export class MiscService extends BasePrismaService {
     }
   ): Promise<void> {
     // Mutations don't use caching
-    await this.callRpc<void>(
-      rpcName,
-      args,
-      { methodName: 'handlePolarWebhookRpc', useCache: false }
-    );
+    await this.callRpc<void>(rpcName, args, {
+      methodName: 'handlePolarWebhookRpc',
+      useCache: false,
+    });
   }
 
   // ============================================================================
@@ -839,73 +776,63 @@ export class MiscService extends BasePrismaService {
 
   /**
    * Generate SEO metadata (from SeoService)
-   * 
+   *
    * @param args - Arguments with p_route and p_include
    * @returns SEO metadata with optional schemas
    */
   async generateMetadata(
     args: GenerateMetadataCompleteArgs
   ): Promise<GenerateMetadataCompleteReturns> {
-    return this.callRpc<GenerateMetadataCompleteReturns>(
-      'generate_metadata_complete',
-      args,
-      { methodName: 'generateMetadata' }
-    );
+    return this.callRpc<GenerateMetadataCompleteReturns>('generate_metadata_complete', args, {
+      methodName: 'generateMetadata',
+    });
   }
 
   /**
    * Get community directory (from CommunityService)
-   * 
+   *
    * @param args - Arguments with p_limit
    * @returns Community directory data
    */
   async getCommunityDirectory(
     args: GetCommunityDirectoryArgs
   ): Promise<GetCommunityDirectoryReturns> {
-    return this.callRpc<GetCommunityDirectoryReturns>(
-      'get_community_directory',
-      args,
-      { methodName: 'getCommunityDirectory' }
-    );
+    return this.callRpc<GetCommunityDirectoryReturns>('get_community_directory', args, {
+      methodName: 'getCommunityDirectory',
+    });
   }
 
   /**
    * Get user profile (from CommunityService)
-   * 
+   *
    * @param args - Arguments with p_user_slug and optional p_viewer_id
    * @returns User profile data
    */
-  async getUserProfile(
-    args: GetUserProfileArgs
-  ): Promise<GetUserProfileReturns> {
-    return this.callRpc<GetUserProfileReturns>(
-      'get_user_profile',
-      args,
-      { methodName: 'getUserProfile' }
-    );
+  async getUserProfile(args: GetUserProfileArgs): Promise<GetUserProfileReturns> {
+    return this.callRpc<GetUserProfileReturns>('get_user_profile', args, {
+      methodName: 'getUserProfile',
+    });
   }
 
   /**
    * Get user collection detail (from CommunityService)
-   * 
+   *
    * @param args - Arguments with p_collection_slug, p_user_slug, and optional p_viewer_id
    * @returns User collection detail data
    */
   async getUserCollectionDetail(
     args: GetUserCollectionDetailArgs
   ): Promise<GetUserCollectionDetailReturns> {
-    return this.callRpc<GetUserCollectionDetailReturns>(
-      'get_user_collection_detail',
-      args,
-      { methodName: 'getUserCollectionDetail' }
-    );
+    return this.callRpc<GetUserCollectionDetailReturns>('get_user_collection_detail', args, {
+      methodName: 'getUserCollectionDetail',
+    });
   }
 
   /**
    * Get quiz configuration (from QuizService)
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
-   * 
+   *
    * @returns Array of quiz questions with nested options
    */
   async getQuizConfiguration(): Promise<GetQuizConfigurationReturns> {
@@ -938,23 +865,25 @@ export class MiscService extends BasePrismaService {
           orderBy: {
             display_order: 'asc',
           },
-          relationLoadStrategy: 'join' // Use JOIN for better performance (requires relationJoins preview feature)
+          relationLoadStrategy: 'join', // Use JOIN for better performance (requires relationJoins preview feature)
         });
 
         // Transform to match RPC return structure (QuizConfigurationQuestion[])
-        const transformed: QuizConfigurationQuestion[] = questions.map((q: typeof questions[number]) => ({
-          id: q.question_id,
-          question: q.question_text,
-          description: q.description,
-          required: q.required ?? false,
-          display_order: q.display_order,
-          options: q.quiz_options.map((opt: typeof q.quiz_options[number]) => ({
-            value: opt.value,
-            label: opt.label,
-            description: opt.description,
-            icon_name: opt.icon_name,
-          })),
-        }));
+        const transformed: QuizConfigurationQuestion[] = questions.map(
+          (q: (typeof questions)[number]) => ({
+            id: q.question_id,
+            question: q.question_text,
+            description: q.description,
+            required: q.required ?? false,
+            display_order: q.display_order,
+            options: q.quiz_options.map((opt: (typeof q.quiz_options)[number]) => ({
+              value: opt.value,
+              label: opt.label,
+              description: opt.description,
+              icon_name: opt.icon_name,
+            })),
+          })
+        );
 
         return transformed;
       },
@@ -964,48 +893,45 @@ export class MiscService extends BasePrismaService {
 
   /**
    * Get recommendations (from QuizService)
-   * 
+   *
    * @param args - Arguments for recommendations
    * @returns Recommendations data
    */
-  async getRecommendations(
-    args: GetRecommendationsArgs
-  ): Promise<GetRecommendationsReturns> {
-    return this.callRpc<GetRecommendationsReturns>(
-      'get_recommendations',
-      args,
-      { methodName: 'getRecommendations' }
-    );
+  async getRecommendations(args: GetRecommendationsArgs): Promise<GetRecommendationsReturns> {
+    return this.callRpc<GetRecommendationsReturns>('get_recommendations', args, {
+      methodName: 'getRecommendations',
+    });
   }
 
   /**
    * Get due sequence emails (from EmailService)
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
-   * 
+   *
    * @returns Array of due sequence email items
    */
   async getDueSequenceEmails(): Promise<DueSequenceEmailItem[]> {
-    // Use database NOW() for date comparison (eliminates new Date() call)
-    // More efficient: database handles date comparison natively
-    const dueSchedules = await prisma.$queryRawUnsafe<Array<{
-      id: string;
-      sequence_id: string;
-      email: string;
-      due_at: Date;
-      processed: boolean;
-      step: number;
-    }>>(
-      `
-      SELECT id, sequence_id, email, due_at, processed, step
-      FROM public.email_sequence_schedule
-      WHERE sequence_id = 'onboarding'
-        AND processed = false
-        AND due_at <= NOW()
-      ORDER BY due_at ASC
-      LIMIT 100
-      `
-    );
+    // OPTIMIZATION: Use Prisma query builder instead of raw SQL for better type safety and maintainability
+    // Since this is not in withSmartCache, we can safely use new Date()
+    const now = new Date();
+    
+    const dueSchedules = await prisma.email_sequence_schedule.findMany({
+      where: {
+        sequence_id: 'onboarding',
+        processed: false,
+        due_at: { lte: now },
+      },
+      orderBy: { due_at: 'asc' },
+      take: 100,
+      select: {
+        id: true,
+        sequence_id: true,
+        email: true,
+        due_at: true,
+        processed: true,
+        step: true,
+      },
+    });
 
     if (dueSchedules.length === 0) {
       // Return empty array matching DueSequenceEmailItem[] type
@@ -1014,7 +940,7 @@ export class MiscService extends BasePrismaService {
     }
 
     // Fetch active sequences for the emails (step 2)
-    const emails = dueSchedules.map((s: typeof dueSchedules[number]) => s.email);
+    const emails = dueSchedules.map((s: (typeof dueSchedules)[number]) => s.email);
     const activeSequences = await prisma.email_sequences.findMany({
       where: {
         sequence_id: 'onboarding',
@@ -1029,13 +955,15 @@ export class MiscService extends BasePrismaService {
     });
 
     // Create a Set of active email addresses for fast lookup
-    const activeEmailsSet = new Set(activeSequences.map((s: typeof activeSequences[number]) => s.email));
+    const activeEmailsSet = new Set(
+      activeSequences.map((s: (typeof activeSequences)[number]) => s.email)
+    );
 
     // Filter schedules to only those with active sequences and transform to match RPC return structure
     // DueSequenceEmailItem has all fields nullable
     const result: DueSequenceEmailItem[] = dueSchedules
-      .filter((schedule: typeof dueSchedules[number]) => activeEmailsSet.has(schedule.email))
-      .map((schedule: typeof dueSchedules[number]) => ({
+      .filter((schedule: (typeof dueSchedules)[number]) => activeEmailsSet.has(schedule.email))
+      .map((schedule: (typeof dueSchedules)[number]) => ({
         id: schedule.id ?? null,
         sequence_id: schedule.sequence_id ?? null,
         email: schedule.email ?? null,
@@ -1043,7 +971,7 @@ export class MiscService extends BasePrismaService {
         processed: schedule.processed ?? null,
         step: schedule.step ?? null,
       }));
-    
+
     return result;
   }
 
@@ -1051,7 +979,7 @@ export class MiscService extends BasePrismaService {
    * Claims an email sequence step (idempotent update) (from EmailService)
    * Updates current_step only if it matches the expected value (prevents duplicate sends)
    * Returns the updated record if successful, null if already claimed
-   * 
+   *
    * OPTIMIZATION: Uses transaction for atomic operation (update + fetch in same transaction)
    */
   async claimEmailSequenceStep(
@@ -1059,47 +987,57 @@ export class MiscService extends BasePrismaService {
     expectedStep: number
   ): Promise<EmailSequence | null> {
     // OPTIMIZATION: Use transaction for atomic operation
-    return this.transaction(async (tx) => {
-      // Step 1: Update (atomic check + update)
-      const result = await tx.email_sequences.updateMany({
-        where: {
-          id: sequenceId,
-          current_step: expectedStep, // Only update if step hasn't changed (idempotency check)
-        },
-        data: {
-          current_step: expectedStep + 1,
-          // Use database NOW() for updated_at (eliminates new Date() call)
-          // Note: Prisma doesn't support SQL functions in data, so we use raw SQL for the entire update
-        },
-      });
-      // Update updated_at separately using raw SQL with NOW() (within transaction)
-      await tx.$executeRawUnsafe(
-        `UPDATE public.email_sequences SET updated_at = NOW() WHERE id = $1::uuid`,
-        sequenceId
-      );
+    return this.transaction(
+      async (tx) => {
+        // Step 1: Update (atomic check + update)
+        const result = await tx.email_sequences.updateMany({
+          where: {
+            id: sequenceId,
+            current_step: expectedStep, // Only update if step hasn't changed (idempotency check)
+          },
+          data: {
+            current_step: expectedStep + 1,
+            // Use database NOW() for updated_at (eliminates new Date() call)
+            // Note: Prisma doesn't support SQL functions in data, so we use raw SQL for the entire update
+          },
+        });
+        // Update updated_at using Prisma update (within transaction)
+        await tx.email_sequences.update({
+          where: { id: sequenceId },
+          data: { updated_at: new Date() },
+        });
 
-      // Step 2: Fetch updated record (in same transaction)
-      if (result.count === 0) {
-        return null; // Step was already claimed
-      }
+        // Step 2: Fetch updated record (in same transaction)
+        if (result.count === 0) {
+          return null; // Step was already claimed
+        }
 
-      const updated = await tx.email_sequences.findUnique({
-        where: { id: sequenceId },
-      });
+        const updated = await tx.email_sequences.findUnique({
+          where: { id: sequenceId },
+        });
 
-      return updated ?? null;
-    }, { timeout: 10000 }); // 10 second timeout for email sequence operations
+        return updated ?? null;
+      },
+      { timeout: 10000 }
+    ); // 10 second timeout for email sequence operations
   }
 
   /**
    * Updates email sequence last_sent_at timestamp (from EmailService)
    */
+  /**
+   * Update email sequence last_sent_at timestamp
+   *
+   * OPTIMIZATION: Uses Prisma update instead of raw SQL for better type safety.
+   * Uses new Date() for timestamp (safe for mutations which don't use caching).
+   *
+   * @param sequenceId - Email sequence ID
+   */
   async updateEmailSequenceLastSent(sequenceId: string): Promise<void> {
-    // Use database NOW() for timestamp (eliminates new Date() call)
-    await prisma.$executeRawUnsafe(
-      `UPDATE public.email_sequences SET last_sent_at = NOW() WHERE id = $1::uuid`,
-      sequenceId
-    );
+    await prisma.email_sequences.update({
+      where: { id: sequenceId },
+      data: { last_sent_at: new Date() },
+    });
   }
 
   /**
@@ -1107,13 +1045,10 @@ export class MiscService extends BasePrismaService {
    * Uses the database RPC to create/update the email sequence record
    * This is a mutation, so it does NOT use request-scoped caching
    */
-  async enrollInEmailSequence(
-    args: EnrollInEmailSequenceArgs
-  ): Promise<void> {
-    await this.callRpc<void>(
-      'enroll_in_email_sequence',
-      args,
-      { methodName: 'enrollInEmailSequence', useCache: false }
-    );
+  async enrollInEmailSequence(args: EnrollInEmailSequenceArgs): Promise<void> {
+    await this.callRpc<void>('enroll_in_email_sequence', args, {
+      methodName: 'enrollInEmailSequence',
+      useCache: false,
+    });
   }
 }

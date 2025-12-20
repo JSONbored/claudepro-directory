@@ -3,8 +3,8 @@
  * Server component uses getTrendingPageData (cached RPC). Data API exposes the same payload for external consumers.
  */
 
-import { type content_category } from '@heyclaude/data-layer/prisma';
-import { ContentCategory } from '@heyclaude/data-layer/prisma';
+import { content_category as ContentCategory } from '@prisma/client';
+import type { content_category } from '@prisma/client';
 import { getTrendingPageData } from '@heyclaude/web-runtime/data/content';
 import { Clock, Star, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';

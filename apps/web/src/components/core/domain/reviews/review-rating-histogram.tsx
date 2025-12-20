@@ -5,12 +5,7 @@
 
 import { Star } from '@heyclaude/web-runtime/icons';
 import { type ReviewHistogramProps } from '@heyclaude/web-runtime/types/component.types';
-import {
-  ChartContainer,
-  HorizontalBarChart,
-  StarDisplay,
-  Card,
-} from '@heyclaude/web-runtime/ui';
+import { ChartContainer, HorizontalBarChart, StarDisplay, Card } from '@heyclaude/web-runtime/ui';
 
 /**
  * Server component that renders an average rating and a horizontal bar chart showing the rating distribution.
@@ -57,8 +52,8 @@ export function ReviewRatingHistogram({
     return (
       <Card className="bg-muted/50 p-6">
         <div className="text-center">
-          <div className="flex items-center gap-2 mb-2 justify-center">
-            <Star className="h-8 w-8 text-muted-foreground/30" aria-hidden="true" />
+          <div className="mb-2 flex items-center justify-center gap-2">
+            <Star className="text-muted-foreground/30 h-8 w-8" aria-hidden="true" />
           </div>
           <p className="text-muted-foreground text-sm">No reviews yet. Be the first to review!</p>
         </div>
@@ -70,7 +65,7 @@ export function ReviewRatingHistogram({
     <Card className="p-6">
       {/* Header: Average Rating */}
       <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="mb-2 flex items-center gap-3">
           <div className="text-4xl font-bold">{averageRating.toFixed(1)}</div>
           <div className="flex items-center gap-1">
             <StarDisplay rating={averageRating} size="md" />

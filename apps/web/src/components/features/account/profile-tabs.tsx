@@ -2,7 +2,7 @@
 
 /**
  * Profile Tabs Component
- * 
+ *
  * Client component for organizing user profile content with tabs
  */
 
@@ -29,11 +29,7 @@ export interface ProfileTabsProps {
 /**
  * Tabbed profile content organizer
  */
-export function ProfileTabs({
-  overview,
-  collections,
-  contributions,
-}: ProfileTabsProps) {
+export function ProfileTabs({ overview, collections, contributions }: ProfileTabsProps) {
   return (
     <LayoutGroup>
       <Tabs defaultValue="overview" className="w-full">

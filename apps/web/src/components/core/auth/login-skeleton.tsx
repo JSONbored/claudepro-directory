@@ -2,7 +2,7 @@
 
 /**
  * Login Page Skeleton
- * 
+ *
  * Perfectly matches /login structure:
  * - SplitAuthLayout: Brand panel (left) + Auth card (right) on desktop
  * - Stacked layout on mobile with mobile header
@@ -60,7 +60,7 @@ export function LoginSkeleton() {
         {/* Right: Auth card */}
         <div className="flex min-h-dvh min-h-screen items-center justify-center px-8">
           <motion.div
-            className="bg-card w-full max-w-md rounded-2xl p-4 shadow-2xl xl:p-12 border border-color-accent-primary"
+            className="bg-card border-color-accent-primary w-full max-w-md rounded-2xl border p-4 shadow-2xl xl:p-12"
             initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
             animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
             transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
@@ -88,7 +88,7 @@ export function LoginSkeleton() {
 
               {/* Newsletter opt-in tile */}
               <motion.div
-                className="mt-8 space-y-3 card-base p-4"
+                className="card-base mt-8 space-y-3 p-4"
                 initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
                 animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
                 transition={{ ...SPRING.loading, delay: 0.5 }}
@@ -120,7 +120,7 @@ export function LoginSkeleton() {
 
         {/* Auth card */}
         <div className="flex flex-1 items-center justify-center p-6">
-          <div className="bg-card w-full max-w-md rounded-2xl p-8 border border-color-accent-primary">
+          <div className="bg-card border-color-accent-primary w-full max-w-md rounded-2xl border p-8">
             <div className="w-full space-y-8">
               {/* Title and description */}
               <div className="mb-12 space-y-4 text-center">
@@ -136,7 +136,7 @@ export function LoginSkeleton() {
               </div>
 
               {/* Newsletter opt-in tile */}
-              <div className="mt-8 space-y-3 card-base p-4">
+              <div className="card-base mt-8 space-y-3 p-4">
                 <Skeleton size="md" width="md" className="h-6" />
                 <Skeleton size="sm" width="3xl" className="h-4" />
                 <Skeleton size="sm" width="2xl" className="h-4" />

@@ -135,10 +135,9 @@ export async function runBumpVersion() {
       script: 'bump-version',
       providedType: type,
     });
-    logger.info(
-      '\nUsage: pnpm exec heyclaude-bump-version [major|minor|patch]\n',
-      { script: 'bump-version' }
-    );
+    logger.info('\nUsage: pnpm exec heyclaude-bump-version [major|minor|patch]\n', {
+      script: 'bump-version',
+    });
     logger.info(
       '\nOr use shortcuts: pnpm bump:patch | pnpm bump:minor | pnpm bump:major | pnpm bump:auto\n',
       { script: 'bump-version' }

@@ -43,7 +43,7 @@ export function AuthFormPanel({
         transition={{ duration: DURATION.moderate, delay: STAGGER.slow }}
       >
         <h2 className="mb-4 text-center text-3xl font-bold">{title}</h2>
-        <p className="text-center text-muted-foreground text-sm">{description}</p>
+        <p className="text-muted-foreground text-center text-sm">{description}</p>
       </motion.div>
 
       {/* Icon grid - 3 columns */}

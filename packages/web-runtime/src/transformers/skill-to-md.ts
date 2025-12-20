@@ -1,9 +1,11 @@
-import type { contentModel } from '@heyclaude/database-types/prisma';
+import type { Prisma } from '@prisma/client';
+
+type contentModel = Prisma.contentGetPayload<{}>;
 
 export type SkillRow = contentModel & { category: 'skills' };
 
 // Define types for JSON fields based on PrismaJson namespace
-// These match the types defined in @heyclaude/database-types/prisma-json-types
+// These match the types defined in @prisma/client-json-types
 type SkillExample = {
   title: string;
   code: string;

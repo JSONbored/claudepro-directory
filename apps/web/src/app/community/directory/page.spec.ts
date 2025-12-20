@@ -22,7 +22,7 @@ test.describe('Community Directory Page (/community/directory)', () => {
     // Set up error tracking and navigate to community directory page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/community/directory');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -89,9 +89,9 @@ test.describe('Community Directory Page (/community/directory)', () => {
     await page.waitForTimeout(2000);
 
     // Sidebar may be hidden on mobile, visible on desktop
-    const sidebar = page.locator('[data-testid="contributors-sidebar"]').or(
-      page.locator('text=/Top Contributors|New Members/i')
-    );
+    const sidebar = page
+      .locator('[data-testid="contributors-sidebar"]')
+      .or(page.locator('text=/Top Contributors|New Members/i'));
     // May or may not be visible depending on implementation
     await expect(sidebar.first().or(page.locator('body'))).toBeVisible();
   });
@@ -125,9 +125,15 @@ test.describe('Community Directory Page (/community/directory)', () => {
 
     // Page should render or show error boundary, but not crash
     const main = page.getByRole('main').or(page.locator('body'));
-    const hasMain = await main.first().isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasMain = await main
+      .first()
+      .isVisible()
+      .catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error boundary, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -142,7 +148,10 @@ test.describe('Community Directory Page (/community/directory)', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -156,7 +165,10 @@ test.describe('Community Directory Page (/community/directory)', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -170,7 +182,10 @@ test.describe('Community Directory Page (/community/directory)', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -198,7 +213,10 @@ test.describe('Community Directory Page (/community/directory)', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -212,7 +230,10 @@ test.describe('Community Directory Page (/community/directory)', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 });

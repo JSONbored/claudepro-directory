@@ -94,7 +94,7 @@ export const RatingButton = ({
     <button
       aria-label={`${index + 1} ${index + 1 === 1 ? 'star' : 'stars'}`}
       className={cn(
-        'rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        'focus-visible:ring-ring rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
         'p-0.5',
         readOnly && 'cursor-default',
         className

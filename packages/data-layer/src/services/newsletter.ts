@@ -10,15 +10,21 @@ import type {
   SubscribeNewsletterArgs,
   SubscribeNewsletterReturns,
 } from '@heyclaude/database-types/postgres-types';
-import type { newsletter_subscriptionsModel } from '@heyclaude/database-types/prisma/models';
+import type { Prisma } from '@prisma/client';
+
+type newsletter_subscriptionsModel = Prisma.newsletter_subscriptionsGetPayload<{}>;
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
 import { logRpcError } from '../utils/rpc-error-logging.ts';
 import { withSmartCache } from '../utils/request-cache.ts';
 
 // Type helpers: Extract model types from Prisma query results
-type NewsletterSubscription = Awaited<ReturnType<typeof prisma.newsletter_subscriptions.findUnique>>;
-type NewsletterSubscriptionUpdateInput = Parameters<typeof prisma.newsletter_subscriptions.update>[0]['data'];
+type NewsletterSubscription = Awaited<
+  ReturnType<typeof prisma.newsletter_subscriptions.findUnique>
+>;
+type NewsletterSubscriptionUpdateInput = Parameters<
+  typeof prisma.newsletter_subscriptions.update
+>[0]['data'];
 
 export type SubscriberResult = SubscribeNewsletterReturns;
 export type SubscriberArgs = SubscribeNewsletterArgs;
@@ -35,19 +41,18 @@ export type SubscriberArgs = SubscribeNewsletterArgs;
 export class NewsletterService extends BasePrismaService {
   async subscribeNewsletter(args: SubscriberArgs): Promise<SubscriberResult> {
     // Mutations don't use caching
-    return this.callRpc<SubscriberResult>(
-      'subscribe_newsletter',
-      args,
-      { methodName: 'subscribeNewsletter', useCache: false }
-    );
+    return this.callRpc<SubscriberResult>('subscribe_newsletter', args, {
+      methodName: 'subscribeNewsletter',
+      useCache: false,
+    });
   }
 
   /**
    * Get newsletter subscriber count
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a simple COUNT, which Prisma handles perfectly.
-   * 
+   *
    * @returns Number of active subscribers
    */
   async getNewsletterSubscriberCount(): Promise<number> {
@@ -69,10 +74,10 @@ export class NewsletterService extends BasePrismaService {
 
   /**
    * Get active subscribers
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was using ARRAY_AGG(email), which we can do in TypeScript with better type safety.
-   * 
+   *
    * @returns Array of active subscriber emails
    */
   async getActiveSubscribers(): Promise<string[]> {
@@ -89,7 +94,7 @@ export class NewsletterService extends BasePrismaService {
           select: { email: true },
           orderBy: { subscribed_at: 'desc' },
         });
-        return subscribers.map(s => s.email);
+        return subscribers.map((s) => s.email);
       },
       {}
     );
@@ -97,16 +102,14 @@ export class NewsletterService extends BasePrismaService {
 
   /**
    * Get subscription by ID
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a simple SELECT by ID, which Prisma handles perfectly.
-   * 
+   *
    * @param id - Subscription ID
    * @returns Newsletter subscription or null if not found
    */
-  async getSubscriptionById(
-    id: string
-  ): Promise<newsletter_subscriptionsModel | null> {
+  async getSubscriptionById(id: string): Promise<newsletter_subscriptionsModel | null> {
     return withSmartCache(
       'getSubscriptionById',
       'getSubscriptionById',
@@ -141,12 +144,13 @@ export class NewsletterService extends BasePrismaService {
 
   async updateLastEmailSentAt(email: string): Promise<void> {
     try {
-      // Use database NOW() for timestamp (eliminates new Date() call)
-      // More efficient: database handles timestamp natively
-      await prisma.$executeRawUnsafe(
-        `UPDATE public.newsletter_subscriptions SET last_email_sent_at = NOW() WHERE email = $1`,
-        email
-      );
+      await prisma.newsletter_subscriptions.update({
+        where: { email },
+        data: {
+          last_email_sent_at: new Date(),
+          updated_at: new Date(),
+        },
+      });
     } catch (error) {
       logRpcError(error, {
         rpcName: 'newsletter_subscriptions.update',
@@ -159,11 +163,13 @@ export class NewsletterService extends BasePrismaService {
 
   async updateLastActiveAt(email: string): Promise<void> {
     try {
-      // Use database NOW() for timestamp (eliminates new Date() call)
-      await prisma.$executeRawUnsafe(
-        `UPDATE public.newsletter_subscriptions SET last_active_at = NOW() WHERE email = $1`,
-        email
-      );
+      await prisma.newsletter_subscriptions.update({
+        where: { email },
+        data: {
+          last_active_at: new Date(),
+          updated_at: new Date(),
+        },
+      });
     } catch (error) {
       logRpcError(error, {
         rpcName: 'newsletter_subscriptions.update',
@@ -197,12 +203,13 @@ export class NewsletterService extends BasePrismaService {
 
   async updateEngagementScore(email: string, engagementScore: number): Promise<void> {
     try {
-      // Use database NOW() for updated_at (eliminates new Date() call)
-      await prisma.$executeRawUnsafe(
-        `UPDATE public.newsletter_subscriptions SET engagement_score = $1, updated_at = NOW() WHERE email = $2`,
-        engagementScore,
-        email
-      );
+      await prisma.newsletter_subscriptions.update({
+        where: { email },
+        data: {
+          engagement_score: engagementScore,
+          updated_at: new Date(),
+        },
+      });
     } catch (error) {
       logRpcError(error, {
         rpcName: 'newsletter_subscriptions.update',
@@ -215,17 +222,19 @@ export class NewsletterService extends BasePrismaService {
 
   /**
    * Unsubscribe with timestamp
-   * 
-   * OPTIMIZATION: Combined both updates into a single update operation instead of two separate calls.
-   * This reduces database round-trips from 2 queries to 1 query.
+   *
+   * Updates subscription status to 'unsubscribed' and sets unsubscribed_at timestamp.
    */
   async unsubscribeWithTimestamp(email: string): Promise<void> {
     try {
-      // Use database NOW() for timestamps (eliminates new Date() calls)
-      await prisma.$executeRawUnsafe(
-        `UPDATE public.newsletter_subscriptions SET unsubscribed_at = NOW(), updated_at = NOW(), status = 'unsubscribed' WHERE email = $1`,
-        email
-      );
+      await prisma.newsletter_subscriptions.update({
+        where: { email },
+        data: {
+          status: 'unsubscribed',
+          unsubscribed_at: new Date(),
+          updated_at: new Date(),
+        },
+      });
     } catch (error) {
       logRpcError(error, {
         rpcName: 'newsletter_subscriptions.update',

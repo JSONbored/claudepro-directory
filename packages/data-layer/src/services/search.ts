@@ -38,12 +38,8 @@ export type GetTrendingSearchesReturns = Array<{
   count: number; // Converted from bigint to number in transformation
   label: string;
 }>;
-import {
-  type experience_level,
-  type job_category,
-  type job_type,
-} from '@heyclaude/data-layer/prisma';
-import { type jobsModel } from '@heyclaude/database-types/prisma/models';
+import type { Prisma, PrismaClient, experience_level, job_category, job_type } from '@prisma/client';
+type jobsModel = Prisma.jobsGetPayload<{}>;
 import { BasePrismaService } from './base-prisma-service.ts';
 import { prisma } from '../prisma/client.ts';
 import { withSmartCache } from '../utils/request-cache.ts';
@@ -63,6 +59,10 @@ export const DEFAULT_ENTITIES = ['content', 'company', 'job', 'user'] as const;
  * - Same public API as Supabase-based service
  */
 export class SearchService extends BasePrismaService {
+  constructor(prismaClient?: PrismaClient) {
+    super(prismaClient);
+  }
+
   /**
    * Calls the database RPC: search_unified
    * The database function returns a composite type with results array and total_count
@@ -70,11 +70,9 @@ export class SearchService extends BasePrismaService {
   async searchUnified(
     args: SearchUnifiedArgs
   ): Promise<{ data: SearchUnifiedResult['results']; total_count: number }> {
-    const result = await this.callRpc<SearchUnifiedReturns | null>(
-      'search_unified',
-      args,
-      { methodName: 'searchUnified' }
-    );
+    const result = await this.callRpc<SearchUnifiedReturns | null>('search_unified', args, {
+      methodName: 'searchUnified',
+    });
     const rows = result?.results ?? [];
     const totalCount = result?.total_count ? Number(result.total_count) : rows.length;
     return { data: rows, total_count: totalCount };
@@ -97,22 +95,14 @@ export class SearchService extends BasePrismaService {
     return { data: rows, total_count: totalCount };
   }
 
-  async filterJobs(
-    args: FilterJobsArgs
-  ): Promise<FilterJobsReturns> {
-    return this.callRpc<FilterJobsReturns>(
-      'filter_jobs',
-      args,
-      { methodName: 'filterJobs' }
-    );
+  async filterJobs(args: FilterJobsArgs): Promise<FilterJobsReturns> {
+    return this.callRpc<FilterJobsReturns>('filter_jobs', args, { methodName: 'filterJobs' });
   }
 
   async getSearchFacets(): Promise<GetSearchFacetsReturns> {
-    return this.callRpc<GetSearchFacetsReturns>(
-      'get_search_facets',
-      {} as GetSearchFacetsArgs,
-      { methodName: 'getSearchFacets' }
-    );
+    return this.callRpc<GetSearchFacetsReturns>('get_search_facets', {} as GetSearchFacetsArgs, {
+      methodName: 'getSearchFacets',
+    });
   }
 
   async getSearchFacetsFormatted(): Promise<GetSearchFacetsFormattedReturns> {
@@ -147,52 +137,42 @@ export class SearchService extends BasePrismaService {
     args: BatchInsertSearchQueriesArgs
   ): Promise<BatchInsertSearchQueriesReturns> {
     // Mutations don't use caching
-    return this.callRpc<BatchInsertSearchQueriesReturns>(
-      'batch_insert_search_queries',
-      args,
-      { methodName: 'batchInsertSearchQueries', useCache: false }
-    );
+    return this.callRpc<BatchInsertSearchQueriesReturns>('batch_insert_search_queries', args, {
+      methodName: 'batchInsertSearchQueries',
+      useCache: false,
+    });
   }
 
   /**
    * Get trending searches
-   * 
+   *
    * OPTIMIZATION: Uses Prisma raw query instead of RPC for better type safety and performance.
    * The RPC queries a materialized view (trending_searches), which we access via $queryRawUnsafe.
-   * 
+   *
    * @param args - Optional arguments with limit_count (defaults to 5)
    * @returns Array of trending search results
    */
-  async getTrendingSearches(
-    args?: GetTrendingSearchesArgs
-  ): Promise<GetTrendingSearchesReturns> {
+  async getTrendingSearches(args?: GetTrendingSearchesArgs): Promise<GetTrendingSearchesReturns> {
     return withSmartCache(
       'get_trending_searches',
       'getTrendingSearches',
       async () => {
         const limit = args?.limit_count ?? 5;
 
-        // Query materialized view directly (not in Prisma schema, so use raw query)
-        const results = await prisma.$queryRawUnsafe<Array<{
-          query: string;
-          count: bigint;
-          label: string;
-        }>>(
-          `SELECT
-            search_query as query,
-            search_count as count,
-            '🔥 ' || search_query || ' (' || search_count || ' searches)' as label
-          FROM public.trending_searches
-          ORDER BY search_count DESC
-          LIMIT $1`,
-          limit
-        );
+        // Query using Prisma view (type-safe, no raw SQL)
+        const results = await prisma.v_trending_searches.findMany({
+          orderBy: {
+            search_count: 'desc',
+          },
+          take: limit,
+        });
 
         // Transform to match RPC return structure (table row format)
-        return results.map((row: (typeof results)[number]) => ({
-          query: row.query,
-          count: Number(row.count), // Convert bigint to number
-          label: row.label,
+        // Add computed label field (not in view, computed in application layer)
+        return results.map((row) => ({
+          query: row.search_query,
+          count: Number(row.search_count), // Convert bigint to number
+          label: `🔥 ${row.search_query} (${row.search_count} searches)`,
         })) as GetTrendingSearchesReturns;
       },
       args ?? {}
@@ -204,10 +184,7 @@ export class SearchService extends BasePrismaService {
    * Database RPCs provide highlighting when p_highlight_query is passed.
    * This function simply passes through the database-provided highlighted fields.
    */
-  static highlightResults(
-    results: SearchResultRow[],
-    query: string
-  ): SearchResultRow[] {
+  static highlightResults(results: SearchResultRow[], query: string): SearchResultRow[] {
     if (!query.trim()) {
       return results.map((result) => ({ ...result }));
     }
@@ -273,7 +250,10 @@ export class SearchService extends BasePrismaService {
         jobArgs.p_remote_only = jobRemote;
       }
 
-      const result = await this.filterJobs(jobArgs) as { jobs?: unknown[] | null; total_count?: number | null };
+      const result = (await this.filterJobs(jobArgs)) as {
+        jobs?: unknown[] | null;
+        total_count?: number | null;
+      };
       const jobs = (result?.jobs ?? []) as SearchResultRow[];
       const totalCount = typeof result?.total_count === 'number' ? result.total_count : jobs.length;
 

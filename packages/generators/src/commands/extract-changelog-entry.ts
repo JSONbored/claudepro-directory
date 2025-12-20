@@ -70,9 +70,7 @@ function extractLatestEntry(): string {
   // Extract everything from this entry until the next ## or end of file
   const entryStart = (entryMatch.index ?? 0) + entryMatch[0].length;
   const nextEntryMatch = content.slice(entryStart).match(/^##\s+/m);
-  const entryEnd = nextEntryMatch
-    ? entryStart + (nextEntryMatch.index ?? 0)
-    : content.length;
+  const entryEnd = nextEntryMatch ? entryStart + (nextEntryMatch.index ?? 0) : content.length;
 
   const entryContent = content.slice(entryStart, entryEnd).trim();
 
@@ -88,7 +86,7 @@ function extractLatestEntry(): string {
 
   while ((sectionMatch = sectionRegex.exec(entryContent)) !== null) {
     const sectionTitle = sectionMatch[1]?.trim();
-    
+
     // Skip metadata sections (they're not part of the structured changes)
     if (!sectionTitle || metadataSections.includes(sectionTitle)) {
       continue;

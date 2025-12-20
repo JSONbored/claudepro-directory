@@ -5,7 +5,9 @@
  * Uses React Hook Form + generated Zod schema for validation.
  */
 
-import type { public_usersModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type public_usersModel = Prisma.public_usersGetPayload<{}>;
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { refreshProfileFromOAuth, updateProfile } from '@heyclaude/web-runtime/actions/user';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
@@ -140,81 +142,88 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const isPublic = watch('public');
   const followEmail = watch('follow_email');
 
-  const onSubmit = useCallback((data: ProfileFormData) => {
-    // Proactive auth check - show modal before attempting action
-    if (status === 'loading') {
-      // Wait for auth check to complete
-      return;
-    }
-
-    if (!user) {
-      // User is not authenticated - show auth modal
-      openAuthModal({
-        valueProposition: 'Sign in to update your profile',
-        redirectTo: pathname ?? undefined,
-      });
-      return;
-    }
-
-    // User is authenticated - proceed with profile update
-    startTransition(async () => {
-      try {
-        await runLoggedAsync(
-          async () => {
-            const result = await updateProfile({
-              display_name: data.name || undefined,
-              ...(data.username && { username: data.username }),
-              bio: data.bio || '',
-              work: data.work || '',
-              website: data['website'] || '',
-              social_x_link: data['social_x_link'] || '',
-              interests: data.interests,
-              profile_public: data.public,
-              follow_email: data.follow_email,
-            });
-
-            if (result?.data?.success) {
-              toasts.success.profileUpdated();
-              reset(data);
-            } else if (result?.serverError) {
-              throw new Error(result.serverError);
-            } else {
-              throw new Error('Profile update returned unexpected response');
-            }
-          },
-          {
-            message: 'Profile update failed',
-            context: {
-              hasName: !!data.name,
-              hasBio: !!data.bio,
-            },
-          }
-        );
-      } catch (error) {
-        // Error already logged by useLoggedAsync
-        const normalized = normalizeError(error, 'Failed to update profile');
-        const errorMessage = normalized.message;
-        
-        // Check if error is auth-related and show modal if so
-        if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
-          openAuthModal({
-            valueProposition: 'Sign in to update your profile',
-            redirectTo: pathname ?? undefined,
-          });
-        } else {
-          // Non-auth errors - show toast with retry option
-          toasts.raw.error('Failed to update profile', {
-            action: {
-              label: 'Retry',
-              onClick: () => {
-                onSubmit(data);
-              },
-            },
-          });
-        }
+  const onSubmit = useCallback(
+    (data: ProfileFormData) => {
+      // Proactive auth check - show modal before attempting action
+      if (status === 'loading') {
+        // Wait for auth check to complete
+        return;
       }
-    });
-  }, [user, status, openAuthModal, pathname, runLoggedAsync, reset]);
+
+      if (!user) {
+        // User is not authenticated - show auth modal
+        openAuthModal({
+          valueProposition: 'Sign in to update your profile',
+          redirectTo: pathname ?? undefined,
+        });
+        return;
+      }
+
+      // User is authenticated - proceed with profile update
+      startTransition(async () => {
+        try {
+          await runLoggedAsync(
+            async () => {
+              const result = await updateProfile({
+                display_name: data.name || undefined,
+                ...(data.username && { username: data.username }),
+                bio: data.bio || '',
+                work: data.work || '',
+                website: data['website'] || '',
+                social_x_link: data['social_x_link'] || '',
+                interests: data.interests,
+                profile_public: data.public,
+                follow_email: data.follow_email,
+              });
+
+              if (result?.data?.success) {
+                toasts.success.profileUpdated();
+                reset(data);
+              } else if (result?.serverError) {
+                throw new Error(result.serverError);
+              } else {
+                throw new Error('Profile update returned unexpected response');
+              }
+            },
+            {
+              message: 'Profile update failed',
+              context: {
+                hasName: !!data.name,
+                hasBio: !!data.bio,
+              },
+            }
+          );
+        } catch (error) {
+          // Error already logged by useLoggedAsync
+          const normalized = normalizeError(error, 'Failed to update profile');
+          const errorMessage = normalized.message;
+
+          // Check if error is auth-related and show modal if so
+          if (
+            errorMessage.includes('signed in') ||
+            errorMessage.includes('auth') ||
+            errorMessage.includes('unauthorized')
+          ) {
+            openAuthModal({
+              valueProposition: 'Sign in to update your profile',
+              redirectTo: pathname ?? undefined,
+            });
+          } else {
+            // Non-auth errors - show toast with retry option
+            toasts.raw.error('Failed to update profile', {
+              action: {
+                label: 'Retry',
+                onClick: () => {
+                  onSubmit(data);
+                },
+              },
+            });
+          }
+        }
+      });
+    },
+    [user, status, openAuthModal, pathname, runLoggedAsync, reset]
+  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -355,7 +364,11 @@ export function RefreshProfileButton({ providerLabel }: { providerLabel: string 
           } else if (result?.serverError) {
             // Check if server error is auth-related
             const serverError = result.serverError || '';
-            if (serverError.includes('signed in') || serverError.includes('auth') || serverError.includes('unauthorized')) {
+            if (
+              serverError.includes('signed in') ||
+              serverError.includes('auth') ||
+              serverError.includes('unauthorized')
+            ) {
               openAuthModal({
                 valueProposition: 'Sign in to update your profile',
                 redirectTo: pathname ?? undefined,

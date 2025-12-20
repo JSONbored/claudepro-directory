@@ -316,19 +316,23 @@ async function CollectionDetailContent({
         </CardHeader>
         <CardContent>
           <CollectionItemManager
-            availableBookmarks={(bookmarks ?? []).map((b) => ({ 
-              ...b, 
-              notes: b.notes ?? '',
-              // Ensure content_type is not null (composite type requires it)
-              content_type: b.content_type ?? 'agents',
-            })) as Bookmarks[]}
+            availableBookmarks={
+              (bookmarks ?? []).map((b) => ({
+                ...b,
+                notes: b.notes ?? '',
+                // Ensure content_type is not null (composite type requires it)
+                content_type: b.content_type ?? 'agents',
+              })) as Bookmarks[]
+            }
             collectionId={collection.id}
-            items={(items ?? []).map((item) => ({ 
-              ...item, 
-              notes: item.notes ?? '',
-              // Ensure content_type is not null (composite type requires it)
-              content_type: item.content_type ?? 'agents',
-            })) as CollectionItems[]}
+            items={
+              (items ?? []).map((item) => ({
+                ...item,
+                notes: item.notes ?? '',
+                // Ensure content_type is not null (composite type requires it)
+                content_type: item.content_type ?? 'agents',
+              })) as CollectionItems[]
+            }
           />
         </CardContent>
       </Card>

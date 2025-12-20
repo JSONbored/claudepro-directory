@@ -3,7 +3,7 @@
  *
  * Handles applying templates to submission forms.
  * Parses template data and maps it to form fields intelligently.
- * 
+ *
  * Note: Originally used by wizard page (now deleted), but hook is still useful for regular submit form.
  */
 

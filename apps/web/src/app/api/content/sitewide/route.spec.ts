@@ -86,7 +86,9 @@ test.describe('GET /api/content/sitewide', () => {
 
     if (response.status() === 200) {
       expect(response.headers()['x-generated-by']).toBeDefined();
-      expect(response.headers()['x-generated-by']).toContain('prisma.rpc.generate_sitewide_llms_txt');
+      expect(response.headers()['x-generated-by']).toContain(
+        'prisma.rpc.generate_sitewide_llms_txt'
+      );
     }
   });
 
@@ -95,7 +97,9 @@ test.describe('GET /api/content/sitewide', () => {
 
     if (response.status() === 200) {
       expect(response.headers()['x-generated-by']).toBeDefined();
-      expect(response.headers()['x-generated-by']).toContain('prisma.rpc.get_sitewide_content_list');
+      expect(response.headers()['x-generated-by']).toContain(
+        'prisma.rpc.get_sitewide_content_list'
+      );
     }
   });
 

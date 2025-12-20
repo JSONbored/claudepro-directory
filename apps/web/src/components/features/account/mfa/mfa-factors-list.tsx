@@ -34,9 +34,18 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
   const [factors, setFactors] = useState<MFAFactor[]>([]);
   const { value: loading, setTrue: setLoadingTrue, setFalse: setLoadingFalse } = useBoolean(true);
   const [error, setError] = useState<null | string>(null);
-  const { value: unenrollDialogOpen, setTrue: setUnenrollDialogOpenTrue, setFalse: setUnenrollDialogOpenFalse, setValue: setUnenrollDialogOpen } = useBoolean();
+  const {
+    value: unenrollDialogOpen,
+    setTrue: setUnenrollDialogOpenTrue,
+    setFalse: setUnenrollDialogOpenFalse,
+    setValue: setUnenrollDialogOpen,
+  } = useBoolean();
   const [factorToUnenroll, setFactorToUnenroll] = useState<MFAFactor | null>(null);
-  const { value: unenrolling, setTrue: setUnenrollingTrue, setFalse: setUnenrollingFalse } = useBoolean();
+  const {
+    value: unenrolling,
+    setTrue: setUnenrollingTrue,
+    setFalse: setUnenrollingFalse,
+  } = useBoolean();
 
   const supabase = createSupabaseBrowserClient();
   const runLoggedAsync = useLoggedAsync({
@@ -153,14 +162,14 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
   if (loading) {
     return (
       <div className="flex-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="card-base border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+      <div className="card-base border-destructive/50 bg-destructive/10 text-destructive p-4 text-sm">
         {error}
       </div>
     );
@@ -168,7 +177,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
 
   if (factors.length === 0) {
     return (
-      <div className="card-base bg-muted/30 p-4 text-center text-muted-foreground text-sm">
+      <div className="card-base bg-muted/30 text-muted-foreground p-4 text-center text-sm">
         No MFA factors enrolled. Enable two-factor authentication to get started.
       </div>
     );
@@ -180,10 +189,10 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
         {factors.map((factor) => (
           <div
             key={factor.id}
-            className="flex items-center justify-between card-base p-4 transition-colors hover:bg-accent/5"
+            className="card-base hover:bg-accent/5 flex items-center justify-between p-4 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="rounded-full border bg-accent/5 p-2">
+              <div className="bg-accent/5 rounded-full border p-2">
                 <Shield className="h-6 w-6" />
               </div>
               <div>
@@ -202,14 +211,12 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
                     </UnifiedBadge>
                   )}
                 </div>
-                <div className="mt-1 text-muted-foreground text-sm">
+                <div className="text-muted-foreground mt-1 text-sm">
                   <p>Type: {factor.factor_type.toUpperCase()}</p>
                   {factor.factor_type === 'phone' && factor.phone ? (
                     <p>Phone: {factor.phone}</p>
                   ) : null}
-                  <p className="text-xs">
-                    Added: {formatDate(factor.created_at)}
-                  </p>
+                  <p className="text-xs">Added: {formatDate(factor.created_at)}</p>
                 </div>
               </div>
             </div>
@@ -253,11 +260,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={setUnenrollDialogOpenFalse}
-              disabled={unenrolling}
-            >
+            <Button variant="outline" onClick={setUnenrollDialogOpenFalse} disabled={unenrolling}>
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleUnenroll} disabled={unenrolling}>

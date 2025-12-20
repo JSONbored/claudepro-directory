@@ -33,18 +33,13 @@ async function getCachedNewsletterCount(): Promise<number> {
  */
 export async function handleEmailCount(_request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
-  const logContext = createWebAppContextWithId(
-    '/api/flux/email/count',
-    'handleEmailCount'
-  );
+  const logContext = createWebAppContextWithId('/api/flux/email/count', 'handleEmailCount');
 
   try {
     const count = await getCachedNewsletterCount();
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      count, }, 'Newsletter count retrieved');
+    logger.info({ ...logContext, durationMs, count }, 'Newsletter count retrieved');
 
     // Cache Components handles HTTP-level caching automatically
     // Additional cache headers for CDN/edge caching

@@ -3,7 +3,7 @@ import { setupTestWithErrorTracking } from '../../../../../config/tests/utils/er
 
 /**
  * Comprehensive Account Settings Page E2E Tests
- * 
+ *
  * Tests ALL functionality on the account settings page with strict error checking:
  * - Authentication flow (redirect to login if not authenticated)
  * - Profile display and editing
@@ -24,7 +24,7 @@ test.describe('Account Settings Page', () => {
     // Set up error tracking and navigate to settings page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/account/settings');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -41,13 +41,13 @@ test.describe('Account Settings Page', () => {
     // Check for sign-in prompt or redirect
     const signInPrompt = page.getByText(/sign in required|please sign in/i);
     const signInButton = page.getByRole('button', { name: /sign in|go to login/i });
-    
+
     // Either sign-in prompt should be visible, or we should be redirected
     const hasSignInPrompt = await signInPrompt.isVisible().catch(() => false);
     const hasSignInButton = await signInButton.isVisible().catch(() => false);
     const currentUrl = page.url();
     const isRedirected = currentUrl.includes('/login') || currentUrl.includes('/auth');
-    
+
     // Should have sign-in prompt OR be redirected
     expect(hasSignInPrompt || hasSignInButton || isRedirected).toBe(true);
   });
@@ -55,7 +55,7 @@ test.describe('Account Settings Page', () => {
   test('should render settings page when authenticated', async ({ page }) => {
     // Note: This test assumes user is authenticated
     // In a real scenario, you'd set up authentication state first
-    
+
     // Check main element is present
     const mainElement = page.getByRole('main');
     await expect(mainElement).toBeVisible();
@@ -68,11 +68,11 @@ test.describe('Account Settings Page', () => {
   test('should display profile edit form', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for profile form
     const profileForm = page.getByText(/profile|settings|edit profile/i);
     const hasProfileForm = await profileForm.isVisible().catch(() => false);
-    
+
     // Profile form may or may not be visible depending on auth state
     // But page should render
     const main = page.getByRole('main');
@@ -102,16 +102,16 @@ test.describe('Account Settings Page', () => {
   test('should handle loading states', async ({ page }) => {
     // Navigate to page
     await page.goto('/account/settings');
-    
+
     // Check for loading indicators (may flash quickly)
     const loadingIndicator = page.locator('[aria-busy="true"], [data-loading="true"]');
     const hasLoading = await loadingIndicator.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });
@@ -128,8 +128,11 @@ test.describe('Account Settings Page', () => {
     const hasMain = await main.isVisible().catch(() => false);
     const errorCard = page.getByText(/couldn.*t load your account settings|unable to load/i);
     const hasErrorCard = await errorCard.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error card, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -146,8 +149,11 @@ test.describe('Account Settings Page', () => {
     const hasMain = await main.isVisible().catch(() => false);
     const errorCard = page.getByText(/couldn.*t load your account settings|unable to load/i);
     const hasErrorCard = await errorCard.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error card, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -164,8 +170,11 @@ test.describe('Account Settings Page', () => {
     const hasMain = await main.isVisible().catch(() => false);
     const errorMessage = page.getByText(/profile data format error|serialization error/i);
     const hasErrorMessage = await errorMessage.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error message, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -182,7 +191,10 @@ test.describe('Account Settings Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -198,7 +210,10 @@ test.describe('Account Settings Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -214,7 +229,10 @@ test.describe('Account Settings Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -230,7 +248,10 @@ test.describe('Account Settings Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -244,8 +265,11 @@ test.describe('Account Settings Page', () => {
     // Page should render or show error, but not crash
     const main = page.getByRole('main');
     const hasMain = await main.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -262,8 +286,11 @@ test.describe('Account Settings Page', () => {
     const hasMain = await main.isVisible().catch(() => false);
     const errorMessage = page.getByText(/unable to load profile|profile missing/i);
     const hasErrorMessage = await errorMessage.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error message, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -280,7 +307,10 @@ test.describe('Account Settings Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -296,7 +326,10 @@ test.describe('Account Settings Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -312,7 +345,10 @@ test.describe('Account Settings Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -328,7 +364,10 @@ test.describe('Account Settings Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -344,7 +383,10 @@ test.describe('Account Settings Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -360,7 +402,10 @@ test.describe('Account Settings Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -376,7 +421,10 @@ test.describe('Account Settings Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -392,11 +440,16 @@ test.describe('Account Settings Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
-  test('should handle getUserCompleteData returning null after ensureUserRecord', async ({ page }) => {
+  test('should handle getUserCompleteData returning null after ensureUserRecord', async ({
+    page,
+  }) => {
     // This tests that null refreshedCompleteData.user_settings is handled
     // The component checks if (!refreshed) and logs warning
     await page.goto('/account/settings');
@@ -406,8 +459,11 @@ test.describe('Account Settings Page', () => {
     // Page should render or show error, but not crash
     const main = page.getByRole('main');
     const hasMain = await main.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });

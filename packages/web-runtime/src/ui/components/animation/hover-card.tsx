@@ -1,6 +1,6 @@
 /**
  * HoverCard - Reusable hover animation wrapper with gentle/strong variants
- * 
+ *
  * Enhanced with semantic design tokens for consistent microinteractions.
  * Uses MICROINTERACTIONS.card tokens for hover/tap animations.
  */
@@ -54,10 +54,10 @@ export function HoverCard({ children, variant = 'gentle', className, disabled }:
   const config = VARIANTS[variant];
 
   return (
-    <motion.div 
+    <motion.div
       className={className}
       initial={false}
-      whileHover={config.hover} 
+      whileHover={config.hover}
       whileTap={config.tap}
       transition={MICROINTERACTIONS.card.transition}
     >

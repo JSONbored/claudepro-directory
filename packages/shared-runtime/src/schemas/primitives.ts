@@ -7,7 +7,6 @@ import { z } from 'zod';
 
 import { SECURITY_CONFIG } from '../config/security.ts';
 
-
 export const nonEmptyString = z.string().min(1);
 export const shortString = z.string().min(1).max(100);
 // urlString: validates URLs, but treats empty strings as invalid (they should be normalized to undefined first)
@@ -63,7 +62,9 @@ export const requiredTagArray = z.array(nonEmptyString).min(1);
 export const MAX_STACK_TRACE_LENGTH = 5000;
 
 /** Schema for error type strings - sanitizes special characters */
-export const errorTypeSchema = nonEmptyString.max(100).transform((val: string) => val.replaceAll(/[^\w\s-]/g, ''));
+export const errorTypeSchema = nonEmptyString
+  .max(100)
+  .transform((val: string) => val.replaceAll(/[^\w\s-]/g, ''));
 
 /** Schema for error severity levels */
 export const errorSeveritySchema = z.enum(['low', 'medium', 'high', 'critical']).default('medium');

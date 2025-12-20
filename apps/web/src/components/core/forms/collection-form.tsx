@@ -15,8 +15,13 @@
  * ```
  */
 
-import type { bookmarksModel, user_collectionsModel } from '@heyclaude/data-layer/prisma';
-import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions/collections-crud';
+import type { Prisma } from '@prisma/client';
+
+type bookmarksModel = Prisma.bookmarksGetPayload<{}>;
+import {
+  createCollection,
+  updateCollection,
+} from '@heyclaude/web-runtime/actions/collections-crud';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import { useFormSubmit } from '@heyclaude/web-runtime/hooks/use-form-submit';
 import {
@@ -33,7 +38,7 @@ import { useId, useState } from 'react';
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
 type Bookmark = bookmarksModel;
-type CollectionData = user_collectionsModel;
+type CollectionData = Prisma.user_collectionsGetPayload<{}>;
 
 interface CollectionFormProps {
   /** User's existing bookmarks to optionally add to collection */
@@ -225,7 +230,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       />
 
       {/* Public Toggle */}
-      <div className="flex items-center gap-3 card-base p-4">
+      <div className="card-base flex items-center gap-3 p-4">
         <Checkbox
           id={isPublicId}
           checked={isPublic}
@@ -247,15 +252,15 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
         <div className="space-y-4">
           <div>
             <Label className="text-base">Add Bookmarks (Optional)</Label>
-            <p className="text-muted-foreground text-sm mt-1">
+            <p className="text-muted-foreground mt-1 text-sm">
               Select bookmarks to add to this collection. You can add more later.
             </p>
           </div>
-          <div className="max-h-64 space-y-2 overflow-y-auto card-base p-4">
+          <div className="card-base max-h-64 space-y-2 overflow-y-auto p-4">
             {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className="flex items-start gap-3 hover:bg-accent rounded-md p-2"
+                className="hover:bg-accent flex items-start gap-3 rounded-md p-2"
               >
                 <Checkbox
                   id={bookmark.id}
@@ -275,7 +280,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                 <div className="flex-1">
                   <Label
                     htmlFor={bookmark.id}
-                    className="cursor-pointer text-sm font-normal flex items-center gap-2"
+                    className="flex cursor-pointer items-center gap-2 text-sm font-normal"
                   >
                     <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                       {bookmark.content_type}

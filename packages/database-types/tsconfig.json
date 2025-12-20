@@ -17,9 +17,6 @@
     "src/**/*",
     "src/prisma-json-types.ts",
     "src/prisma/index.ts",
-    "src/prisma/client.ts",
-    "src/prisma/enums.ts",
-    "src/prisma/models.ts",
     "src/prisma/internal/prismaNamespace.ts",
     "src/prisma/pjtg.ts"
   ],

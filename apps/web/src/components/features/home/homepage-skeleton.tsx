@@ -2,7 +2,7 @@
 
 /**
  * Homepage Skeleton
- * 
+ *
  * Perfectly matches the structure of / page:
  * - Hero section: Title (2 lines), description, search bar, category stats, partner marquee
  * - Featured sections: 8 category sections (6 items each) + Featured Jobs (6 items)
@@ -23,7 +23,7 @@ const COMMUNITY_MEMBERS_COUNT = 6;
 
 /**
  * Homepage Skeleton
- * 
+ *
  * Matches the exact layout and structure of the homepage:
  * 1. Hero section with all elements
  * 2. Featured category sections (8 sections × 6 items)
@@ -33,7 +33,7 @@ const COMMUNITY_MEMBERS_COUNT = 6;
  */
 export function HomepageSkeleton() {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <motion.div
       className={`bg-background min-h-screen`}
@@ -44,45 +44,43 @@ export function HomepageSkeleton() {
       <div className="relative overflow-hidden">
         {/* Hero Section - Matches HomepageHeroClient exactly */}
         <motion.section
-          className="border-border/50 relative border-b overflow-hidden bg-background"
+          className="border-border/50 bg-background relative overflow-hidden border-b"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...SPRING.smooth, delay: 0.1 }}
         >
-          <motion.div
-            className="relative z-10 flex flex-col pt-16 pb-12 sm:pt-20 sm:pb-16 lg:pt-28 lg:pb-20"
-          >
+          <motion.div className="relative z-10 flex flex-col pt-16 pb-12 sm:pt-20 sm:pb-16 lg:pt-28 lg:pb-20">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="mx-auto max-w-4xl">
                 <div className="text-center">
                   {/* Main Heading - 2 lines matching hero */}
                   <div className="mb-4 sm:mb-6 lg:mb-8">
-                    <Skeleton 
-                      size="xl" 
-                      width="2xl" 
-                      className="mx-auto h-7 sm:h-8 lg:h-12 mb-1 max-w-[600px]"
+                    <Skeleton
+                      size="xl"
+                      width="2xl"
+                      className="mx-auto mb-1 h-7 max-w-[600px] sm:h-8 lg:h-12"
                     />
-                    <Skeleton 
-                      size="xl" 
-                      width="xl" 
-                      className="mx-auto h-7 sm:h-8 lg:h-12 max-w-[400px]"
+                    <Skeleton
+                      size="xl"
+                      width="xl"
+                      className="mx-auto h-7 max-w-[400px] sm:h-8 lg:h-12"
                     />
                   </div>
-                  
+
                   {/* Description */}
-                  <Skeleton 
-                    size="md" 
-                    width="2xl" 
-                    className="mx-auto h-5 sm:h-6 lg:h-7 mb-6 sm:mb-12 lg:mb-16 max-w-[700px]"
+                  <Skeleton
+                    size="md"
+                    width="2xl"
+                    className="mx-auto mb-6 h-5 max-w-[700px] sm:mb-12 sm:h-6 lg:mb-16 lg:h-7"
                   />
-                  
+
                   {/* Search Bar */}
-                  <Skeleton 
-                    size="xl" 
-                    width="2xl" 
-                    className="mx-auto h-12 sm:h-14 mb-4 sm:mb-6 max-w-[700px]"
+                  <Skeleton
+                    size="xl"
+                    width="2xl"
+                    className="mx-auto mb-4 h-12 max-w-[700px] sm:mb-6 sm:h-14"
                   />
-                  
+
                   {/* Category Stats Section - Mobile horizontal scroll */}
                   <div className="flex gap-1 overflow-x-auto pb-2 md:hidden">
                     {Array.from({ length: 8 }).map((_, i) => (
@@ -95,7 +93,7 @@ export function HomepageSkeleton() {
                       />
                     ))}
                   </div>
-                  
+
                   {/* Category Stats Section - Desktop flex-wrap */}
                   <div className="hidden flex-wrap justify-center gap-1 md:flex lg:gap-1">
                     {Array.from({ length: 8 }).map((_, i) => (
@@ -108,18 +106,13 @@ export function HomepageSkeleton() {
                       />
                     ))}
                   </div>
-                  
+
                   {/* Partner Marquee - Feature-flagged, may not always show */}
                   <div className="mt-8">
-                    <Skeleton size="xs" width="xs" className="mx-auto h-4 mb-4" />
+                    <Skeleton size="xs" width="xs" className="mx-auto mb-4 h-4" />
                     <div className="flex items-center justify-center gap-8">
                       {Array.from({ length: 3 }).map((_, i) => (
-                        <Skeleton
-                          key={`partner-${i}`}
-                          size="md"
-                          width="lg"
-                          className="h-12 w-32"
-                        />
+                        <Skeleton key={`partner-${i}`} size="md" width="lg" className="h-12 w-32" />
                       ))}
                     </div>
                   </div>
@@ -156,7 +149,7 @@ export function HomepageSkeleton() {
                   </div>
 
                   {/* Content Grid - Matches UnifiedCardGrid variant="normal" (grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6) */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {Array.from({ length: ITEMS_PER_CATEGORY }).map((_, itemIndex) => (
                       <motion.div
                         key={`category-${sectionIndex}-item-${itemIndex}`}
@@ -172,8 +165,13 @@ export function HomepageSkeleton() {
                           <CardContent className="p-6">
                             <div className="space-y-3">
                               <div className="flex items-start gap-2">
-                                <Skeleton size="md" width="md" rounded="md" className={cn('h-12 w-12', 'shrink-0')} />
-                                <div className="flex flex-col gap-2 flex-1">
+                                <Skeleton
+                                  size="md"
+                                  width="md"
+                                  rounded="md"
+                                  className={cn('h-12 w-12', 'shrink-0')}
+                                />
+                                <div className="flex flex-1 flex-col gap-2">
                                   <Skeleton size="md" width="3/4" />
                                   <Skeleton size="sm" width="3xl" />
                                 </div>
@@ -207,7 +205,7 @@ export function HomepageSkeleton() {
                 </div>
 
                 {/* Jobs Grid - Matches featured jobs grid: grid-cols-1 md:grid-cols-2 lg:grid-cols-3 */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 gap-4 gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {Array.from({ length: FEATURED_JOBS_COUNT }).map((_, jobIndex) => (
                     <motion.div
                       key={`job-${jobIndex}`}
@@ -235,19 +233,19 @@ export function HomepageSkeleton() {
 
             {/* All Content Section - Matches AllContentSection */}
             <motion.section
-              className="container mx-auto px-4 pb-4 space-y-8"
+              className="container mx-auto space-y-8 px-4 pb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...SPRING.smooth, delay: 0.6 }}
             >
               {/* Section Header */}
               <div className="mb-8">
-                <Skeleton size="xl" width="lg" className="h-9 mb-1" />
+                <Skeleton size="xl" width="lg" className="mb-1 h-9" />
                 <Skeleton size="md" width="xl" className="h-5" />
               </div>
 
               {/* All Content Grid - Matches UnifiedCardGrid variant="normal" */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 9 }).map((_, itemIndex) => (
                   <motion.div
                     key={`all-content-${itemIndex}`}
@@ -262,7 +260,12 @@ export function HomepageSkeleton() {
                       <CardContent className="p-6">
                         <div className="space-y-3">
                           <div className="flex items-start gap-2">
-                            <Skeleton size="md" width="md" rounded="md" className={cn('h-12 w-12', 'shrink-0')} />
+                            <Skeleton
+                              size="md"
+                              width="md"
+                              rounded="md"
+                              className={cn('h-12 w-12', 'shrink-0')}
+                            />
                             <div className="flex-1 space-y-2">
                               <Skeleton size="md" width="3/4" />
                               <Skeleton size="sm" width="3xl" />
@@ -284,7 +287,7 @@ export function HomepageSkeleton() {
 
         {/* New Community Members - Matches TopContributors exactly */}
         <motion.section
-          className="border-border/50 border-t bg-muted/30 py-12"
+          className="border-border/50 bg-muted/30 border-t py-12"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ ...SPRING.smooth, delay: 0.8 }}
@@ -292,7 +295,7 @@ export function HomepageSkeleton() {
           <div className="container mx-auto px-4">
             {/* Section Header - Matches TopContributors header */}
             <div className="mb-6 flex items-center gap-2">
-              <Users className="h-8 w-8 text-accent" />
+              <Users className="text-accent h-8 w-8" />
               <Skeleton size="xl" width="lg" className="h-8" />
             </div>
 
@@ -317,11 +320,14 @@ export function HomepageSkeleton() {
                           size="md"
                           width="md"
                           rounded="full"
-                          className={cn('h-12 w-12', 'ring-2 ring-accent/20 ring-offset-2 ring-offset-background')}
+                          className={cn(
+                            'h-12 w-12',
+                            'ring-accent/20 ring-offset-background ring-2 ring-offset-2'
+                          )}
                         />
                         {/* Username */}
                         <div className="w-full min-w-0">
-                          <Skeleton size="md" width="3xl" className="h-5 mb-0.5" />
+                          <Skeleton size="md" width="3xl" className="mb-0.5 h-5" />
                           <Skeleton size="sm" width="2/3" className="mx-auto h-4" />
                         </div>
                       </div>

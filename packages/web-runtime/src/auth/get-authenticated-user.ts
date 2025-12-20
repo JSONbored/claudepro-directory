@@ -84,7 +84,10 @@ export async function getAuthenticatedUserFromClient(
     };
   } catch (error) {
     const normalized = normalizeError(error, 'Unexpected auth guard failure');
-    logger.error({ err: normalized }, `${contextLabel}: unexpected error retrieving authenticated user`);
+    logger.error(
+      { err: normalized },
+      `${contextLabel}: unexpected error retrieving authenticated user`
+    );
     if (options?.requireUser) {
       throw normalized;
     }

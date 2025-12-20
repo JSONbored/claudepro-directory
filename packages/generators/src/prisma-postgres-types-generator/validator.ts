@@ -30,18 +30,16 @@ export async function validateGeneratedTypes(
 
     // Try to compile with TypeScript (type check only)
     try {
-      execSync(
-        `npx tsc --noEmit --skipLibCheck ${mainIndex}`,
-        {
-          cwd: outputDir,
-          stdio: 'pipe',
-          encoding: 'utf-8',
-        }
-      );
+      execSync(`npx tsc --noEmit --skipLibCheck ${mainIndex}`, {
+        cwd: outputDir,
+        stdio: 'pipe',
+        encoding: 'utf-8',
+      });
     } catch (error) {
-      const errorOutput = (error as { stdout?: string; stderr?: string }).stderr || 
-                         (error as { stdout?: string; stderr?: string }).stdout || 
-                         String(error);
+      const errorOutput =
+        (error as { stdout?: string; stderr?: string }).stderr ||
+        (error as { stdout?: string; stderr?: string }).stdout ||
+        String(error);
       errors.push(`TypeScript compilation failed: ${errorOutput}`);
     }
 
@@ -58,15 +56,13 @@ export async function validateGeneratedTypes(
 /**
  * Validate that generated Zod schemas are valid
  */
-export function validateZodSchemas(
-  outputDir: string
-): { valid: boolean; errors: string[] } {
+export function validateZodSchemas(outputDir: string): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   // Basic validation - check that schema files exist and have valid syntax
   // Full runtime validation would require importing and testing the schemas
   // This is a basic check that can be expanded later
-  
+
   // Check if composites directory exists (where Zod schemas are generated)
   const compositesDir = join(outputDir, 'composites');
   if (!existsSync(compositesDir)) {

@@ -10,13 +10,9 @@ import type {
   content_category,
   newsletter_source,
   newsletter_interest,
-} from '@heyclaude/data-layer/prisma';
-import type {
-  newsletter_sync_status,
-} from '@heyclaude/database-types/prisma';
-import {
-  newsletter_interest as NewsletterInterest,
-} from '@heyclaude/database-types/prisma';
+} from '@prisma/client';
+import type { newsletter_sync_status } from '@prisma/client';
+import { newsletter_interest as NewsletterInterest } from '@prisma/client';
 import type { EnrollInEmailSequenceArgs } from '@heyclaude/database-types/postgres-types';
 import { withTimeout, TIMEOUT_PRESETS } from '@heyclaude/shared-runtime';
 import { normalizeError } from '../errors';
@@ -160,9 +156,15 @@ export async function callResendApi<T>({
 
     if (error instanceof ResendApiError) {
       // Log Resend API errors with status and response body
-      logger.error({ err: errorObj, ...toLogContext(logContext),
-        status: error.status ?? 0,
-        responseBody: error.rawBody ?? '', }, 'Resend API call failed');
+      logger.error(
+        {
+          err: errorObj,
+          ...toLogContext(logContext),
+          status: error.status ?? 0,
+          responseBody: error.rawBody ?? '',
+        },
+        'Resend API call failed'
+      );
       // normalizeError returns the error as-is if it's already an Error instance
       // So errorObj is the same as error here, but we throw errorObj for consistency
       throw errorObj;
@@ -222,7 +224,9 @@ export const RESEND_TOPIC_IDS = {
   platform_updates: 'f84d94d8-76aa-4abf-8ff6-3dfd916b56e6',
 } as const;
 
-const NEWSLETTER_INTEREST_VALUES = Object.values(NewsletterInterest) as readonly newsletter_interest[];
+const NEWSLETTER_INTEREST_VALUES = Object.values(
+  NewsletterInterest
+) as readonly newsletter_interest[];
 const NEWSLETTER_INTEREST_SET = new Set(NEWSLETTER_INTEREST_VALUES);
 
 export function resolveNewsletterInterest(
@@ -305,22 +309,27 @@ async function assignTopicsToContact(
         attempts: 3,
         baseDelayMs: 500,
         onRetry(attempt, error, delay) {
-          logger.warn({ ...logContext,
-            attempt,
-            delay,
-            reason: error.message, }, '[resend] topic assignment throttled');
+          logger.warn(
+            { ...logContext, attempt, delay, reason: error.message },
+            '[resend] topic assignment throttled'
+          );
         },
       }
     );
 
-    logger.info({ ...logContext,
-      topic_count: topicIds.length, }, 'Topics assigned successfully');
+    logger.info({ ...logContext, topic_count: topicIds.length }, 'Topics assigned successfully');
   } catch (error) {
     const errorObj = normalizeError(error, 'Failed to assign topics');
     if (error instanceof ResendApiError) {
-      logger.error({ err: errorObj, ...logContext,
-        status: error.status ?? 0,
-        response_body: error.rawBody ?? '', }, 'Failed to assign topics');
+      logger.error(
+        {
+          err: errorObj,
+          ...logContext,
+          status: error.status ?? 0,
+          response_body: error.rawBody ?? '',
+        },
+        'Failed to assign topics'
+      );
     } else {
       logger.error({ err: errorObj, ...logContext }, 'Failed to assign topics');
     }
@@ -483,15 +492,16 @@ export async function syncContactSegment(
         attempts: 3,
         baseDelayMs: 500,
         onRetry(attempt, error, delay) {
-          logger.warn({ ...logContext,
-            attempt,
-            delay,
-            reason: error.message, }, '[resend] segment list throttled');
+          logger.warn(
+            { ...logContext, attempt, delay, reason: error.message },
+            '[resend] segment list throttled'
+          );
         },
       });
 
       for (const segmentId of currentSegmentIds) {
-        const typedSegmentId = segmentId as (typeof RESEND_SEGMENT_IDS)[keyof typeof RESEND_SEGMENT_IDS];
+        const typedSegmentId =
+          segmentId as (typeof RESEND_SEGMENT_IDS)[keyof typeof RESEND_SEGMENT_IDS];
         if (typedSegmentId !== targetSegment && managedSegmentIds.has(typedSegmentId)) {
           await runWithRetry(
             async () => {
@@ -507,10 +517,10 @@ export async function syncContactSegment(
               attempts: 3,
               baseDelayMs: 500,
               onRetry(attempt, error, delay) {
-                logger.warn({ ...logContext,
-                  attempt,
-                  delay,
-                  reason: error.message, }, '[resend] segment removal throttled');
+                logger.warn(
+                  { ...logContext, attempt, delay, reason: error.message },
+                  '[resend] segment removal throttled'
+                );
               },
             }
           );
@@ -537,10 +547,10 @@ export async function syncContactSegment(
           attempts: 3,
           baseDelayMs: 500,
           onRetry(attempt, error, delay) {
-            logger.warn({ ...logContext,
-              attempt,
-              delay,
-              reason: error.message, }, '[resend] segment add throttled');
+            logger.warn(
+              { ...logContext, attempt, delay, reason: error.message },
+              '[resend] segment add throttled'
+            );
           },
         }
       );
@@ -548,9 +558,10 @@ export async function syncContactSegment(
   } catch (err) {
     const errorObj = normalizeError(err, 'Segment sync failed');
     if (err instanceof ResendApiError) {
-      logger.error({ err: errorObj, ...logContext,
-        status: err.status ?? 0,
-        response_body: err.rawBody ?? '', }, 'Segment sync failed');
+      logger.error(
+        { err: errorObj, ...logContext, status: err.status ?? 0, response_body: err.rawBody ?? '' },
+        'Segment sync failed'
+      );
     } else {
       logger.error({ err: errorObj, ...logContext }, 'Segment sync failed');
     }
@@ -559,7 +570,13 @@ export async function syncContactSegment(
 
 export function calculateEngagementChange(
   currentScore: number,
-  activityType: 'email_open' | 'email_click' | 'email_bounce' | 'email_complaint' | 'copy_content' | 'visit_page'
+  activityType:
+    | 'email_open'
+    | 'email_click'
+    | 'email_bounce'
+    | 'email_complaint'
+    | 'copy_content'
+    | 'visit_page'
 ): number {
   let newScore = currentScore;
 
@@ -590,7 +607,13 @@ export function calculateEngagementChange(
 export async function updateContactEngagement(
   resend: Resend,
   email: string,
-  activityType: 'email_open' | 'email_click' | 'email_bounce' | 'email_complaint' | 'copy_content' | 'visit_page'
+  activityType:
+    | 'email_open'
+    | 'email_click'
+    | 'email_bounce'
+    | 'email_complaint'
+    | 'copy_content'
+    | 'visit_page'
 ): Promise<void> {
   const logContext: LogContext = {
     utility: 'resend',
@@ -720,17 +743,17 @@ async function sendEmailInternal(
   )) as { data: { id: string } | null; error: { message: string } | null };
 
   if (error) {
-    logger.error({ err: new Error(error.message), ...toLogContext(logContext) }, 'Email send failed');
+    logger.error(
+      { err: new Error(error.message), ...toLogContext(logContext) },
+      'Email send failed'
+    );
   }
 
   return { data, error };
 }
 
 // Import email safety utilities
-import {
-  checkEmailSafety,
-  logBlockedEmail,
-} from '../email/config/email-safety';
+import { checkEmailSafety, logBlockedEmail } from '../email/config/email-safety';
 
 /**
  * Send an email through Resend with safety checks.
@@ -888,7 +911,10 @@ export async function syncContactToResend(
     );
 
     if (resendError) {
-      if (resendError.message?.includes('already exists') || resendError.message?.includes('duplicate')) {
+      if (
+        resendError.message?.includes('already exists') ||
+        resendError.message?.includes('duplicate')
+      ) {
         logger.info(
           {
             ...logContext,
@@ -981,7 +1007,6 @@ export async function enrollInOnboardingSequence(email: string): Promise<void> {
     logger.info(logContext, 'Enrolled in onboarding sequence');
   } catch (sequenceError) {
     const errorObj = normalizeError(sequenceError, 'Sequence enrollment failed');
-    logger.warn({ ...logContext,
-      errorMessage: errorObj.message, }, 'Sequence enrollment failed');
+    logger.warn({ ...logContext, errorMessage: errorObj.message }, 'Sequence enrollment failed');
   }
 }

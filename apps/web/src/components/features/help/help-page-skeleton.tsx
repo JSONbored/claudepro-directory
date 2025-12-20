@@ -2,7 +2,7 @@
 
 /**
  * Help Page Skeleton
- * 
+ *
  * Perfectly matches /help structure:
  * - Centered header (title + description)
  * - Help Topics Grid (4 columns)

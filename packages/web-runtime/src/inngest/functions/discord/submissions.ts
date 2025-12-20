@@ -5,7 +5,9 @@
  * Handles INSERT (new submission) and UPDATE (status changes, especially merged) events.
  */
 
-import type { content_submissionsModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type content_submissionsModel = Prisma.content_submissionsGetPayload<{}>;
 import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -26,7 +28,10 @@ interface SubmissionWebhookPayload {
   old_record: ContentSubmission | null;
 }
 
-function buildSubmissionEmbed(submission: ContentSubmission, isNew: boolean): Record<string, unknown> {
+function buildSubmissionEmbed(
+  submission: ContentSubmission,
+  isNew: boolean
+): Record<string, unknown> {
   const siteUrl = getEnvVar('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
 
   const fields: Array<{ name: string; value: string; inline?: boolean }> = [];
@@ -83,7 +88,8 @@ function buildMergedEmbed(submission: ContentSubmission): Record<string, unknown
 
   return {
     title: `🎉 ${submission.name || 'New Content'} is now live!`,
-    description: submission.description?.slice(0, 300) || 'Check out this new addition to the directory.',
+    description:
+      submission.description?.slice(0, 300) || 'Check out this new addition to the directory.',
     url: contentUrl,
     color: 0x22c55e, // Green
     fields: [
@@ -118,7 +124,10 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
   { cron: '*/30 * * * *' }, // Every 30 minutes
   async ({ step }) => {
     const startTime = Date.now();
-    const logContext = createWebAppContextWithId('/inngest/discord/submissions', 'processDiscordSubmissionsQueue');
+    const logContext = createWebAppContextWithId(
+      '/inngest/discord/submissions',
+      'processDiscordSubmissionsQueue'
+    );
 
     logger.info(logContext, 'Discord submissions queue processing started');
 
@@ -131,27 +140,32 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
     }
 
     // Step 1: Read messages from queue
-    const messages = await step.run('read-queue', async (): Promise<PgmqMessage<SubmissionWebhookPayload>[]> => {
-      try {
-        const data = await pgmqRead<SubmissionWebhookPayload>(DISCORD_SUBMISSIONS_QUEUE, {
-          vt: 60,
-          qty: BATCH_SIZE,
-        });
+    const messages = await step.run(
+      'read-queue',
+      async (): Promise<PgmqMessage<SubmissionWebhookPayload>[]> => {
+        try {
+          const data = await pgmqRead<SubmissionWebhookPayload>(DISCORD_SUBMISSIONS_QUEUE, {
+            vt: 60,
+            qty: BATCH_SIZE,
+          });
 
-        if (!data || data.length === 0) {
+          if (!data || data.length === 0) {
+            return [];
+          }
+
+          // Filter valid webhook payloads
+          return data.filter(
+            (msg) => msg.message && ['INSERT', 'UPDATE', 'DELETE'].includes(msg.message.type)
+          );
+        } catch (error) {
+          logger.warn(
+            { ...logContext, errorMessage: normalizeError(error, 'Queue read failed').message },
+            'Failed to read Discord submissions queue'
+          );
           return [];
         }
-
-        // Filter valid webhook payloads
-        return data.filter((msg) =>
-          msg.message && ['INSERT', 'UPDATE', 'DELETE'].includes(msg.message.type)
-        );
-      } catch (error) {
-        logger.warn({ ...logContext,
-          errorMessage: normalizeError(error, 'Queue read failed').message, }, 'Failed to read Discord submissions queue');
-        return [];
       }
-    });
+    );
 
     if (messages.length === 0) {
       logger.info(logContext, 'No messages in Discord submissions queue');
@@ -166,86 +180,39 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
       const msg = messages[i];
       if (!msg) continue;
 
-      const result = await step.run(`process-submission-${i}`, async (): Promise<{
-        success: boolean;
-        sent: boolean;
-        reason?: string;
-      }> => {
-        const payload = msg.message;
+      const result = await step.run(
+        `process-submission-${i}`,
+        async (): Promise<{
+          success: boolean;
+          sent: boolean;
+          reason?: string;
+        }> => {
+          const payload = msg.message;
 
-        try {
-          // Skip DELETE events
-          if (payload['type'] === 'DELETE') {
-            return { success: true, sent: false, reason: 'delete_event' };
-          }
-
-          const submission = payload['record'] as ContentSubmission;
-
-          // Handle INSERT - new submission notification (admin channel)
-          if (payload['type'] === 'INSERT' && adminWebhookUrl) {
-            // Inngest serializes Date objects to strings, so we need to cast
-            const embed = buildSubmissionEmbed(submission, true);
-            
-            // Send with timeout to avoid hanging
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-            let response: Response;
-            try {
-              response = await fetch(adminWebhookUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  content: '📬 **New Content Submission**',
-                  embeds: [embed],
-                }),
-                signal: controller.signal,
-              });
-            } catch (fetchError) {
-              clearTimeout(timeoutId);
-              if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-                logger.warn({ ...logContext,
-                  submissionId: String(submission['id']), }, 'Discord submission notification timed out');
-              }
-              return { success: false, sent: false };
-            }
-            clearTimeout(timeoutId);
-
-            if (!response.ok) {
-              logger.warn({ ...logContext,
-                submissionId: String(submission['id']),
-                status: response.status, }, 'Discord submission notification failed');
-              return { success: false, sent: false };
+          try {
+            // Skip DELETE events
+            if (payload['type'] === 'DELETE') {
+              return { success: true, sent: false, reason: 'delete_event' };
             }
 
-            logger.info({ ...logContext,
-              submissionId: String(submission['id']), }, 'Discord submission notification sent');
+            const submission = payload['record'] as ContentSubmission;
 
-            return { success: true, sent: true };
-          }
-
-          // Handle UPDATE - check if status changed to 'merged'
-          if (payload['type'] === 'UPDATE') {
-            const oldRecord = payload['old_record'] as ContentSubmission | undefined;
-            
-            // Check if status changed to 'merged'
-            const wasMerged = oldRecord?.['status'] !== 'merged' && submission['status'] === 'merged';
-
-            if (wasMerged && announcementWebhookUrl) {
+            // Handle INSERT - new submission notification (admin channel)
+            if (payload['type'] === 'INSERT' && adminWebhookUrl) {
               // Inngest serializes Date objects to strings, so we need to cast
-              const embed = buildMergedEmbed(submission as unknown as ContentSubmission);
-              
+              const embed = buildSubmissionEmbed(submission, true);
+
               // Send with timeout to avoid hanging
               const controller = new AbortController();
               const timeoutId = setTimeout(() => controller.abort(), 10000);
 
               let response: Response;
               try {
-                response = await fetch(announcementWebhookUrl, {
+                response = await fetch(adminWebhookUrl, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
-                    content: '🎉 **New Content Published**',
+                    content: '📬 **New Content Submission**',
                     embeds: [embed],
                   }),
                   signal: controller.signal,
@@ -253,38 +220,109 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
               } catch (fetchError) {
                 clearTimeout(timeoutId);
                 if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-                  logger.warn({ ...logContext,
-                    submissionId: String(submission['id']), }, 'Discord merged notification timed out');
+                  logger.warn(
+                    { ...logContext, submissionId: String(submission['id']) },
+                    'Discord submission notification timed out'
+                  );
                 }
                 return { success: false, sent: false };
               }
               clearTimeout(timeoutId);
 
               if (!response.ok) {
-                logger.warn({ ...logContext,
-                  submissionId: String(submission['id']),
-                  status: response.status, }, 'Discord merged notification failed');
+                logger.warn(
+                  {
+                    ...logContext,
+                    submissionId: String(submission['id']),
+                    status: response.status,
+                  },
+                  'Discord submission notification failed'
+                );
                 return { success: false, sent: false };
               }
 
-              logger.info({ ...logContext,
-                submissionId: String(submission['id']), }, 'Discord merged notification sent');
+              logger.info(
+                { ...logContext, submissionId: String(submission['id']) },
+                'Discord submission notification sent'
+              );
 
               return { success: true, sent: true };
             }
 
-            // Status didn't change to merged, just acknowledge
-            return { success: true, sent: false, reason: 'no_merge_transition' };
-          }
+            // Handle UPDATE - check if status changed to 'merged'
+            if (payload['type'] === 'UPDATE') {
+              const oldRecord = payload['old_record'] as ContentSubmission | undefined;
 
-          return { success: true, sent: false, reason: 'unhandled_type' };
-        } catch (error) {
-          const normalized = normalizeError(error, 'Discord submission notification failed');
-          logger.warn({ ...logContext,
-            errorMessage: normalized.message, }, 'Discord submission notification failed');
-          return { success: false, sent: false };
+              // Check if status changed to 'merged'
+              const wasMerged =
+                oldRecord?.['status'] !== 'merged' && submission['status'] === 'merged';
+
+              if (wasMerged && announcementWebhookUrl) {
+                // Inngest serializes Date objects to strings, so we need to cast
+                const embed = buildMergedEmbed(submission as unknown as ContentSubmission);
+
+                // Send with timeout to avoid hanging
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+                let response: Response;
+                try {
+                  response = await fetch(announcementWebhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      content: '🎉 **New Content Published**',
+                      embeds: [embed],
+                    }),
+                    signal: controller.signal,
+                  });
+                } catch (fetchError) {
+                  clearTimeout(timeoutId);
+                  if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+                    logger.warn(
+                      { ...logContext, submissionId: String(submission['id']) },
+                      'Discord merged notification timed out'
+                    );
+                  }
+                  return { success: false, sent: false };
+                }
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                  logger.warn(
+                    {
+                      ...logContext,
+                      submissionId: String(submission['id']),
+                      status: response.status,
+                    },
+                    'Discord merged notification failed'
+                  );
+                  return { success: false, sent: false };
+                }
+
+                logger.info(
+                  { ...logContext, submissionId: String(submission['id']) },
+                  'Discord merged notification sent'
+                );
+
+                return { success: true, sent: true };
+              }
+
+              // Status didn't change to merged, just acknowledge
+              return { success: true, sent: false, reason: 'no_merge_transition' };
+            }
+
+            return { success: true, sent: false, reason: 'unhandled_type' };
+          } catch (error) {
+            const normalized = normalizeError(error, 'Discord submission notification failed');
+            logger.warn(
+              { ...logContext, errorMessage: normalized.message },
+              'Discord submission notification failed'
+            );
+            return { success: false, sent: false };
+          }
         }
-      });
+      );
 
       if (result.success) {
         processedMsgIds.push(msg.msg_id);
@@ -304,10 +342,10 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      processed: messages.length,
-      sent: sentCount, }, 'Discord submissions queue processing completed');
+    logger.info(
+      { ...logContext, durationMs, processed: messages.length, sent: sentCount },
+      'Discord submissions queue processing completed'
+    );
 
     const result = {
       processed: messages.length,

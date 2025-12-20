@@ -68,7 +68,11 @@ export function TypingPlaceholder({
 }: TypingPlaceholderProps) {
   const [displayedText, setDisplayedText] = useState('');
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
-  const { value: isDeleting, setTrue: setIsDeletingTrue, setFalse: setIsDeletingFalse } = useBoolean();
+  const {
+    value: isDeleting,
+    setTrue: setIsDeletingTrue,
+    setFalse: setIsDeletingFalse,
+  } = useBoolean();
   const { value: isStarted, setTrue: setIsStartedTrue } = useBoolean();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -166,7 +170,18 @@ export function TypingPlaceholder({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [isStarted, texts, typingSpeed, deletingSpeed, pauseDuration, loop, onTextChange, prefersReducedMotion, setIsDeletingTrue, setIsDeletingFalse]);
+  }, [
+    isStarted,
+    texts,
+    typingSpeed,
+    deletingSpeed,
+    pauseDuration,
+    loop,
+    onTextChange,
+    prefersReducedMotion,
+    setIsDeletingTrue,
+    setIsDeletingFalse,
+  ]);
 
   // Initialize with first text if reduced motion
   useEffect(() => {
@@ -180,7 +195,7 @@ export function TypingPlaceholder({
       <span className="inline">{displayedText}</span>
       {showCursor && (
         <motion.span
-          className="inline-block ml-0.5 text-accent"
+          className="text-accent ml-0.5 inline-block"
           animate={{ opacity: [1, 0, 1] }}
           transition={{
             duration: DURATION.long,

@@ -26,10 +26,7 @@ export interface DetailHeaderProps {
     secondaryActions?: SerializableAction[];
   };
   displayTitle: string;
-  item:
-    | ContentItem
-    | (ContentItem &
-        NonNullable<GetContentDetailCompleteReturns['content']>);
+  item: ContentItem | (ContentItem & NonNullable<GetContentDetailCompleteReturns['content']>);
   onCopyContent?: (() => Promise<void>) | undefined;
 }
 
@@ -50,7 +47,9 @@ export interface DetailHeaderProps {
 export function DetailHeader({ displayTitle, item, config, onCopyContent }: DetailHeaderProps) {
   const hasContent = Boolean(
     ('content' in item && typeof item.content === 'string') ||
-    ('configuration' in item && typeof item['configuration'] === 'object' && item['configuration'] !== null)
+    ('configuration' in item &&
+      typeof item['configuration'] === 'object' &&
+      item['configuration'] !== null)
   );
 
   // Config already provides properly typed SerializableAction (no transformation needed)

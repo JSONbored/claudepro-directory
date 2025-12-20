@@ -15,7 +15,8 @@ import { handleExternalWebhook } from './handlers/webhook';
 const DEFAULT_CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Discord-Notification-Type, X-Webhook-Source, X-Signature',
+  'Access-Control-Allow-Headers':
+    'Content-Type, Authorization, X-Discord-Notification-Type, X-Webhook-Source, X-Signature',
 };
 
 /**
@@ -55,7 +56,7 @@ export async function routeFluxRequest(
       }
       return NextResponse.json(
         { error: 'Method not allowed', path: route, method, allowedMethods: ['GET'] },
-        { status: 405, headers: { ...DEFAULT_CORS_HEADERS, 'Allow': 'GET' } }
+        { status: 405, headers: { ...DEFAULT_CORS_HEADERS, Allow: 'GET' } }
       );
 
     case 'discord/direct':
@@ -64,7 +65,7 @@ export async function routeFluxRequest(
       }
       return NextResponse.json(
         { error: 'Method not allowed', path: route, method, allowedMethods: ['POST'] },
-        { status: 405, headers: { ...DEFAULT_CORS_HEADERS, 'Allow': 'POST' } }
+        { status: 405, headers: { ...DEFAULT_CORS_HEADERS, Allow: 'POST' } }
       );
 
     case 'webhook/external':
@@ -73,7 +74,7 @@ export async function routeFluxRequest(
       }
       return NextResponse.json(
         { error: 'Method not allowed', path: route, method, allowedMethods: ['POST'] },
-        { status: 405, headers: { ...DEFAULT_CORS_HEADERS, 'Allow': 'POST' } }
+        { status: 405, headers: { ...DEFAULT_CORS_HEADERS, Allow: 'POST' } }
       );
   }
 

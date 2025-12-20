@@ -172,8 +172,13 @@ export function safeParse<T = unknown>(
       }
 
       if (opts.enableLogging) {
-        logger.info({ primaryStrategy: String(opts.strategy),
-          fallbackStrategy: String(opts.fallbackStrategy), }, 'Fallback parse strategy succeeded');
+        logger.info(
+          {
+            primaryStrategy: String(opts.strategy),
+            fallbackStrategy: String(opts.fallbackStrategy),
+          },
+          'Fallback parse strategy succeeded'
+        );
       }
 
       return result;
@@ -219,10 +224,10 @@ export interface RelativeDateOptions {
 
 /**
  * Format a date deterministically using UTC to prevent hydration mismatches.
- * 
+ *
  * This function uses UTC methods to ensure server and client produce identical output,
  * preventing React hydration errors caused by timezone differences.
- * 
+ *
  * @param date - Date string or Date object to format
  * @param style - Format style ('long', 'short', or 'iso')
  * @returns Formatted date string (e.g., "Jan 15, 2024" or "January 15, 2024")
@@ -242,57 +247,86 @@ export function formatDate(date: string | Date, style: DateFormatStyle = 'long')
     const month = dateObj.getUTCMonth(); // 0-11
     const day = dateObj.getUTCDate();
 
-    const monthNames = style === 'long'
-      ? ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-      : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames =
+      style === 'long'
+        ? [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
+          ]
+        : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     return `${monthNames[month]} ${day}, ${year}`;
   } catch (error) {
     const normalized = normalizeError(error, 'formatDate failed');
-    logger.warn({ err: normalized,
-      input: typeof date === 'string' ? date : date.toString(),
-      style, }, 'formatDate failed');
+    logger.warn(
+      { err: normalized, input: typeof date === 'string' ? date : date.toString(), style },
+      'formatDate failed'
+    );
     return typeof date === 'string' ? date : date.toString();
   }
 }
 
 /**
  * Format a date and time deterministically using UTC to prevent hydration mismatches.
- * 
+ *
  * Replaces `toLocaleString()` with deterministic UTC-based formatting.
- * 
+ *
  * @param date - Date string or Date object to format
  * @returns Formatted date/time string (e.g., "Jan 15, 2024, 3:45 PM")
  */
 export function formatDateTime(date: string | Date): string {
   try {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
-    
+
     // Use UTC methods for deterministic output
     const year = dateObj.getUTCFullYear();
     const month = dateObj.getUTCMonth(); // 0-11
     const day = dateObj.getUTCDate();
     const hours = dateObj.getUTCHours();
     const minutes = dateObj.getUTCMinutes();
-    
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    const monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     const ampm = hours >= 12 ? 'PM' : 'AM';
     const displayHours = hours % 12 || 12;
     const displayMinutes = minutes.toString().padStart(2, '0');
-    
+
     return `${monthNames[month]} ${day}, ${year}, ${displayHours}:${displayMinutes} ${ampm}`;
   } catch (error) {
     const normalized = normalizeError(error, 'formatDateTime failed');
-    logger.warn({ err: normalized,
-      input: typeof date === 'string' ? date : date.toString(),
-    }, 'formatDateTime failed');
+    logger.warn(
+      { err: normalized, input: typeof date === 'string' ? date : date.toString() },
+      'formatDateTime failed'
+    );
     return typeof date === 'string' ? date : date.toString();
   }
 }
 
 /**
  * Format a date as a relative time string (e.g., "2 days ago", "just now").
- * 
+ *
  * **Build-Time Safety:**
  * - Accepts optional `now` parameter for deterministic builds
  * - If `now` is not provided, uses current time (runtime-only, not build-time safe)
@@ -300,32 +334,35 @@ export function formatDateTime(date: string | Date): string {
  *   1. Provide `now` parameter (deterministic)
  *   2. Use after `connection()` (deferred to request time)
  *   3. Move to client components (client-side only)
- * 
+ *
  * @param date - Date string or Date object to format
  * @param options - Formatting options
  * @param options.style - Style of relative date ('simple' or 'detailed', default: 'detailed')
  * @param options.maxDays - Maximum days before switching to absolute date format
  * @param options.now - Optional current time (Date object or timestamp) for deterministic builds
  * @returns Relative time string (e.g., "just now", "2 minutes ago", "3 days ago", "Today")
- * 
+ *
  * @example
  * ```ts
  * // Runtime usage (after connection() or in client component)
  * formatRelativeDate('2024-01-13T00:00:00Z', { style: 'simple' })
- * 
+ *
  * // Build-time safe usage (deterministic)
- * formatRelativeDate('2024-01-13T00:00:00Z', { 
+ * formatRelativeDate('2024-01-13T00:00:00Z', {
  *   style: 'simple',
  *   now: new Date('2024-01-15T00:00:00Z') // Explicit current time
  * })
  * ```
  */
-export function formatRelativeDate(date: string | Date, options: RelativeDateOptions & { now?: Date | number } = {}): string {
+export function formatRelativeDate(
+  date: string | Date,
+  options: RelativeDateOptions & { now?: Date | number } = {}
+): string {
   const { style = 'detailed', maxDays, now } = options;
 
   try {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
-    
+
     // CRITICAL: `now` parameter is REQUIRED to avoid new Date() calls
     // Next.js statically detects `new Date()` calls even if they're in conditional branches
     // If `now` is not provided, return formatted date instead (build-safe fallback)
@@ -335,7 +372,7 @@ export function formatRelativeDate(date: string | Date, options: RelativeDateOpt
       // This prevents Next.js from detecting any new Date() calls in this function
       return formatDate(dateObj);
     }
-    
+
     const nowTime = typeof now === 'number' ? now : now.getTime();
     const diffMs = nowTime - dateObj.getTime();
     const diffSeconds = Math.floor(diffMs / 1000);
@@ -380,9 +417,10 @@ export function formatRelativeDate(date: string | Date, options: RelativeDateOpt
     return `${diffYears} ${diffYears === 1 ? 'year' : 'years'} ago`;
   } catch (error) {
     const normalized = normalizeError(error, 'formatRelativeDate failed');
-    logger.warn({ err: normalized,
-      input: typeof date === 'string' ? date : date.toString(),
-      style, }, 'formatRelativeDate failed');
+    logger.warn(
+      { err: normalized, input: typeof date === 'string' ? date : date.toString(), style },
+      'formatRelativeDate failed'
+    );
     return typeof date === 'string' ? date : date.toString();
   }
 }
@@ -394,9 +432,9 @@ export function formatDistanceToNow(date: Date): string {
 /**
  * Get formatted last updated date for legal pages (cookies, privacy, terms)
  * Returns static date from DATE_CONFIG (build-time safe, no new Date() calls)
- * 
+ *
  * This date should be updated in unified-config.ts when legal pages are modified.
- * 
+ *
  * @returns Formatted date string (e.g., "November 15, 2025")
  */
 export function getLastUpdatedDate(): string {

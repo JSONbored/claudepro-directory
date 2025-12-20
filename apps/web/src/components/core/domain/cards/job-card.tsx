@@ -119,8 +119,12 @@ export function JobCard({ job }: JobCardProps) {
     >
       {isFeatured ? (
         <div className="absolute -top-2 -right-2 z-10">
-          <UnifiedBadge variant="base" style="default" className="bg-orange-500 text-white border-orange-500">
-            <Star className="h-3 w-3 mr-1" />
+          <UnifiedBadge
+            variant="base"
+            style="default"
+            className="border-orange-500 bg-orange-500 text-white"
+          >
+            <Star className="mr-1 h-3 w-3" />
             Featured
           </UnifiedBadge>
         </div>
@@ -129,7 +133,7 @@ export function JobCard({ job }: JobCardProps) {
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="mb-2 flex items-center gap-3">
               {job.company_logo ? (
                 <Image
                   src={job.company_logo}
@@ -141,21 +145,17 @@ export function JobCard({ job }: JobCardProps) {
                 />
               ) : null}
               <div>
-                <CardTitle
-                  className="text-lg font-semibold transition-colors-smooth group-hover:text-accent text-xl"
-                >
+                <CardTitle className="transition-colors-smooth group-hover:text-accent text-lg text-xl font-semibold">
                   <Link href={`/jobs/${job.slug}`}>{highlightedTitle}</Link>
                 </CardTitle>
-                <div
-                  className="flex items-center gap-2 text-muted-foreground text-xs"
-                >
+                <div className="text-muted-foreground flex items-center gap-2 text-xs">
                   <Building className="h-4 w-4" />
                   <span className="font-medium">{job.company}</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3 text-muted-foreground text-sm">
+            <div className="text-muted-foreground flex flex-wrap gap-3 text-sm">
               <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
                 {job.location}
@@ -181,13 +181,19 @@ export function JobCard({ job }: JobCardProps) {
                 variant="base"
                 style="default"
                 className={
-                  job.type === 'full-time' ? 'bg-color-badge-jobtype-fulltime-bg text-color-badge-jobtype-fulltime-text border-color-badge-jobtype-fulltime-border' :
-                  job.type === 'part-time' ? 'bg-color-badge-jobtype-parttime-bg text-color-badge-jobtype-parttime-text border-color-badge-jobtype-parttime-border' :
-                  job.type === 'contract' ? 'bg-color-badge-jobtype-contract-bg text-color-badge-jobtype-contract-text border-color-badge-jobtype-contract-border' :
-                  job.type === 'freelance' ? 'bg-color-badge-jobtype-freelance-bg text-color-badge-jobtype-freelance-text border-color-badge-jobtype-freelance-border' :
-                  job.type === 'internship' ? 'bg-color-badge-jobtype-internship-bg text-color-badge-jobtype-internship-text border-color-badge-jobtype-internship-border' :
-                  job.type === 'remote' ? 'bg-color-badge-jobtype-remote-bg text-color-badge-jobtype-remote-text border-color-badge-jobtype-remote-border' :
-                  'bg-muted text-muted-foreground'
+                  job.type === 'full-time'
+                    ? 'bg-color-badge-jobtype-fulltime-bg text-color-badge-jobtype-fulltime-text border-color-badge-jobtype-fulltime-border'
+                    : job.type === 'part-time'
+                      ? 'bg-color-badge-jobtype-parttime-bg text-color-badge-jobtype-parttime-text border-color-badge-jobtype-parttime-border'
+                      : job.type === 'contract'
+                        ? 'bg-color-badge-jobtype-contract-bg text-color-badge-jobtype-contract-text border-color-badge-jobtype-contract-border'
+                        : job.type === 'freelance'
+                          ? 'bg-color-badge-jobtype-freelance-bg text-color-badge-jobtype-freelance-text border-color-badge-jobtype-freelance-border'
+                          : job.type === 'internship'
+                            ? 'bg-color-badge-jobtype-internship-bg text-color-badge-jobtype-internship-text border-color-badge-jobtype-internship-border'
+                            : job.type === 'remote'
+                              ? 'bg-color-badge-jobtype-remote-bg text-color-badge-jobtype-remote-text border-color-badge-jobtype-remote-border'
+                              : 'bg-muted text-muted-foreground'
                 }
               >
                 {job.type.replace('-', ' ')}
@@ -218,7 +224,11 @@ export function JobCard({ job }: JobCardProps) {
               </UnifiedBadge>
             ))}
             {Array.isArray(job.tags) && job.tags.length > 4 && (
-              <UnifiedBadge variant="base" style="outline" className="text-xs font-semibold text-foreground">
+              <UnifiedBadge
+                variant="base"
+                style="outline"
+                className="text-foreground text-xs font-semibold"
+              >
                 +{job.tags.length - 4} more
               </UnifiedBadge>
             )}

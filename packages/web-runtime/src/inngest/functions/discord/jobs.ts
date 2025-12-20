@@ -5,7 +5,9 @@
  * Handles INSERT and UPDATE events for the jobs table.
  */
 
-import type { jobsModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type jobsModel = Prisma.jobsGetPayload<{}>;
 import { normalizeError, getEnvVar, sanitizeForDiscord } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -109,7 +111,10 @@ export const processDiscordJobsQueue = inngest.createFunction(
   { cron: '*/30 * * * *' }, // Every 30 minutes
   async ({ step }) => {
     const startTime = Date.now();
-    const logContext = createWebAppContextWithId('/inngest/discord/jobs', 'processDiscordJobsQueue');
+    const logContext = createWebAppContextWithId(
+      '/inngest/discord/jobs',
+      'processDiscordJobsQueue'
+    );
 
     logger.info(logContext, 'Discord jobs queue processing started');
 
@@ -121,27 +126,32 @@ export const processDiscordJobsQueue = inngest.createFunction(
     }
 
     // Step 1: Read messages from queue
-    const messages = await step.run('read-queue', async (): Promise<PgmqMessage<JobWebhookPayload>[]> => {
-      try {
-        const data = await pgmqRead<JobWebhookPayload>(DISCORD_JOBS_QUEUE, {
-          vt: 60,
-          qty: BATCH_SIZE,
-        });
+    const messages = await step.run(
+      'read-queue',
+      async (): Promise<PgmqMessage<JobWebhookPayload>[]> => {
+        try {
+          const data = await pgmqRead<JobWebhookPayload>(DISCORD_JOBS_QUEUE, {
+            vt: 60,
+            qty: BATCH_SIZE,
+          });
 
-        if (!data || data.length === 0) {
+          if (!data || data.length === 0) {
+            return [];
+          }
+
+          // Filter valid webhook payloads
+          return data.filter(
+            (msg) => msg.message && ['INSERT', 'UPDATE', 'DELETE'].includes(msg.message.type)
+          );
+        } catch (error) {
+          logger.warn(
+            { ...logContext, errorMessage: normalizeError(error, 'Queue read failed').message },
+            'Failed to read Discord jobs queue'
+          );
           return [];
         }
-
-        // Filter valid webhook payloads
-        return data.filter((msg) =>
-          msg.message && ['INSERT', 'UPDATE', 'DELETE'].includes(msg.message.type)
-        );
-      } catch (error) {
-        logger.warn({ ...logContext,
-          errorMessage: normalizeError(error, 'Queue read failed').message, }, 'Failed to read Discord jobs queue');
-        return [];
       }
-    });
+    );
 
     if (messages.length === 0) {
       logger.info(logContext, 'No messages in Discord jobs queue');
@@ -156,81 +166,87 @@ export const processDiscordJobsQueue = inngest.createFunction(
       const msg = messages[i];
       if (!msg) continue;
 
-      const result = await step.run(`process-job-${i}`, async (): Promise<{
-        success: boolean;
-        sent: boolean;
-        reason?: string;
-      }> => {
-        const payload = msg.message;
+      const result = await step.run(
+        `process-job-${i}`,
+        async (): Promise<{
+          success: boolean;
+          sent: boolean;
+          reason?: string;
+        }> => {
+          const payload = msg.message;
 
-        try {
-          // Skip DELETE events
-          if (payload['type'] === 'DELETE') {
-            return { success: true, sent: false, reason: 'delete_event' };
-          }
-
-          const job = payload['record'] as JobRow;
-
-          // Skip drafts and placeholders for INSERT
-          if (payload['type'] === 'INSERT') {
-            if (job['status'] === 'draft' || job['is_placeholder']) {
-              return { success: true, sent: false, reason: 'draft_or_placeholder' };
-            }
-          }
-
-          // For UPDATE, check if monitored fields changed
-          if (payload['type'] === 'UPDATE') {
-            const oldRecord = payload['old_record'] as JobRow | undefined;
-            if (!oldRecord) {
-              return { success: true, sent: false, reason: 'no_old_record' };
+          try {
+            // Skip DELETE events
+            if (payload['type'] === 'DELETE') {
+              return { success: true, sent: false, reason: 'delete_event' };
             }
 
-            const fieldsChanged = MONITORED_FIELDS.some(
-              (field) => oldRecord[field] !== job[field]
+            const job = payload['record'] as JobRow;
+
+            // Skip drafts and placeholders for INSERT
+            if (payload['type'] === 'INSERT') {
+              if (job['status'] === 'draft' || job['is_placeholder']) {
+                return { success: true, sent: false, reason: 'draft_or_placeholder' };
+              }
+            }
+
+            // For UPDATE, check if monitored fields changed
+            if (payload['type'] === 'UPDATE') {
+              const oldRecord = payload['old_record'] as JobRow | undefined;
+              if (!oldRecord) {
+                return { success: true, sent: false, reason: 'no_old_record' };
+              }
+
+              const fieldsChanged = MONITORED_FIELDS.some(
+                (field) => oldRecord[field] !== job[field]
+              );
+
+              if (!fieldsChanged) {
+                return { success: true, sent: false, reason: 'no_monitored_fields_changed' };
+              }
+            }
+
+            // Build and send Discord embed
+            // Inngest serializes Date objects to strings, so we need to cast
+            const embed = buildJobEmbed(job, payload['type'] === 'INSERT');
+            if (!embed) {
+              return { success: true, sent: false, reason: 'invalid_slug' };
+            }
+
+            const discordResponse = await fetch(discordWebhookUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                content:
+                  payload['type'] === 'INSERT' ? '🎉 **New Job Posted**' : '📝 **Job Updated**',
+                embeds: [embed],
+              }),
+            });
+
+            if (!discordResponse.ok) {
+              logger.warn(
+                { ...logContext, jobId: String(job['id']), status: discordResponse.status },
+                'Discord webhook failed'
+              );
+              return { success: false, sent: false };
+            }
+
+            logger.info(
+              { ...logContext, jobId: String(job['id']), type: String(payload['type']) },
+              'Discord job notification sent'
             );
 
-            if (!fieldsChanged) {
-              return { success: true, sent: false, reason: 'no_monitored_fields_changed' };
-            }
-          }
-
-          // Build and send Discord embed
-          // Inngest serializes Date objects to strings, so we need to cast
-          const embed = buildJobEmbed(job, payload['type'] === 'INSERT');
-          if (!embed) {
-            return { success: true, sent: false, reason: 'invalid_slug' };
-          }
-          
-          const discordResponse = await fetch(discordWebhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              content: payload['type'] === 'INSERT'
-                ? '🎉 **New Job Posted**'
-                : '📝 **Job Updated**',
-              embeds: [embed],
-            }),
-          });
-
-          if (!discordResponse.ok) {
-            logger.warn({ ...logContext,
-              jobId: String(job['id']),
-              status: discordResponse.status, }, 'Discord webhook failed');
+            return { success: true, sent: true };
+          } catch (error) {
+            const normalized = normalizeError(error, 'Discord job notification failed');
+            logger.warn(
+              { ...logContext, errorMessage: normalized.message },
+              'Discord job notification failed'
+            );
             return { success: false, sent: false };
           }
-
-          logger.info({ ...logContext,
-            jobId: String(job['id']),
-            type: String(payload['type']), }, 'Discord job notification sent');
-
-          return { success: true, sent: true };
-        } catch (error) {
-          const normalized = normalizeError(error, 'Discord job notification failed');
-          logger.warn({ ...logContext,
-            errorMessage: normalized.message, }, 'Discord job notification failed');
-          return { success: false, sent: false };
         }
-      });
+      );
 
       if (result.success) {
         processedMsgIds.push(msg.msg_id);
@@ -250,10 +266,10 @@ export const processDiscordJobsQueue = inngest.createFunction(
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      processed: messages.length,
-      sent: sentCount, }, 'Discord jobs queue processing completed');
+    logger.info(
+      { ...logContext, durationMs, processed: messages.length, sent: sentCount },
+      'Discord jobs queue processing completed'
+    );
 
     const result = {
       processed: messages.length,

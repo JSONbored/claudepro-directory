@@ -13,12 +13,8 @@ runGenerateSkillPackages()
     process.exit(0);
   })
   .catch((error: unknown) => {
-    logger.error(
-      '💥 Skills generation failed',
-      normalizeError(error, 'Skills generation failed'),
-      {
-        script: 'generate-skills',
-      }
-    );
+    logger.error('💥 Skills generation failed', normalizeError(error, 'Skills generation failed'), {
+      script: 'generate-skills',
+    });
     process.exit(1);
   });

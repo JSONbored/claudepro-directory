@@ -4006,6 +4006,106 @@ components:
         - attempt_count
         - updated_at
         - webhook_event_runs
+    v_content_list_slim:
+      type: object
+      description: |-
+        Regular view that reads from mv_content_list_slim materialized view.
+        Used by Prisma for type-safe queries. The materialized view must be
+        refreshed manually for data updates.
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        display_title:
+          type: string
+        description:
+          type: string
+        author:
+          type: string
+        author_profile_url:
+          type: string
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        source:
+          type: string
+        source_table:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        date_added:
+          type: string
+          format: date-time
+        view_count:
+          type: integer
+          format: int32
+        copy_count:
+          type: integer
+          format: int32
+        bookmark_count:
+          type: integer
+          format: int32
+        popularity_score:
+          type: number
+          format: double
+        trending_score:
+          type: integer
+          format: int32
+        sponsored_content_id:
+          type: string
+        sponsorship_tier:
+          type: string
+        is_sponsored:
+          type: boolean
+      required:
+        - id
+        - slug
+        - title
+        - category
+        - tags
+        - source_table
+        - created_at
+        - updated_at
+        - date_added
+        - view_count
+        - copy_count
+        - bookmark_count
+        - popularity_score
+        - trending_score
+        - is_sponsored
+    v_trending_searches:
+      type: object
+      description: |-
+        Regular view that reads from trending_searches materialized view.
+        Used by Prisma for type-safe queries. The materialized view must be
+        refreshed manually for data updates.
+      properties:
+        search_query:
+          type: string
+        search_count:
+          type: integer
+          format: int64
+        last_searched:
+          type: string
+          format: date-time
+        unique_users:
+          type: integer
+          format: int64
+      required:
+        - search_query
+        - search_count
+        - last_searched
+        - unique_users
     aal_level:
       type: string
       enum:

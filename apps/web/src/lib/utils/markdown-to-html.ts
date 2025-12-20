@@ -58,7 +58,7 @@ export function markdownToHtml(markdown: null | string | undefined): string {
     // Note: Logging removed to support both server and client contexts
     // Errors are handled gracefully by returning empty string
     const normalized = normalizeError(error, 'Failed to parse markdown');
-    
+
     // Only log in development to avoid exposing errors in production
     // Use console.error as fallback since this utility is used in both contexts
     if (process.env.NODE_ENV === 'development') {
@@ -67,7 +67,7 @@ export function markdownToHtml(markdown: null | string | undefined): string {
         markdownLength: markdown.length,
       });
     }
-    
+
     return '';
   }
 }

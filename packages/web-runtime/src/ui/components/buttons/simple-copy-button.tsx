@@ -95,11 +95,14 @@ export function SimpleCopyButton({
   const { value: copied, setTrue: setCopiedTrue, setFalse: setCopiedFalse } = useBoolean();
 
   // Reset copy state after timeout when copied is true
-  useTimeout(() => {
-    if (copied) {
-      setCopiedFalse();
-    }
-  }, copied ? UI_TIMEOUTS.clipboard_reset_delay_ms : null);
+  useTimeout(
+    () => {
+      if (copied) {
+        setCopiedFalse();
+      }
+    },
+    copied ? UI_TIMEOUTS.clipboard_reset_delay_ms : null
+  );
 
   const handleCopy = async (event?: React.MouseEvent) => {
     event?.stopPropagation(); // Prevent parent click handlers
@@ -111,13 +114,18 @@ export function SimpleCopyButton({
       onCopySuccess?.();
     } catch (error) {
       const normalized = normalizeError(error, 'SimpleCopyButton: clipboard write failed');
-      logger.warn({ err: normalized,
-        category: 'clipboard',
-        component: 'SimpleCopyButton',
-        recoverable: true,
-        userRetryable: true,
-        hasContent: Boolean(content),
-        label: label ?? 'unnamed', }, '[Clipboard] Copy failed');
+      logger.warn(
+        {
+          err: normalized,
+          category: 'clipboard',
+          component: 'SimpleCopyButton',
+          recoverable: true,
+          userRetryable: true,
+          hasContent: Boolean(content),
+          label: label ?? 'unnamed',
+        },
+        '[Clipboard] Copy failed'
+      );
       // Show error toast with "Retry" button
       toasts.raw.error(errorMessage, {
         action: {

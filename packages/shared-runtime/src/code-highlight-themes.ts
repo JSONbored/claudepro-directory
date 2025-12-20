@@ -1,9 +1,9 @@
 /**
  * Shiki Theme Configuration
- * 
+ *
  * Centralized theme management for code highlighting.
  * Change themes in ONE place to update all code blocks across the application.
- * 
+ *
  * Popular theme options:
  * - 'github-light' / 'github-dark' - GitHub's theme (clean, readable)
  * - 'vitesse-light' / 'vitesse-dark' - Modern, high contrast (used by Vite, Vue)
@@ -13,33 +13,33 @@
  * - 'one-dark-pro' - Popular VS Code theme
  * - 'dracula' - Popular dark theme
  * - 'material-theme' - Google Material Design theme
- * 
+ *
  * Next.js docs typically use: vitesse-light / vitesse-dark or custom themes
  * Supabase docs typically use: vitesse-light / vitesse-dark or nord
- * 
+ *
  * To change themes globally, update the THEME_CONFIG object below.
- * 
+ *
  * @module shared-runtime/code-highlight-themes
  */
 
 /**
  * Theme Configuration
- * 
+ *
  * Single source of truth for all code highlighting themes.
  * Change these values to switch themes across the entire application.
- * 
+ *
  * Recommended themes matching Next.js/Supabase style:
  * - vitesse-light / vitesse-dark (current) - Modern, high contrast, used by Vite/Vue
  * - github-light / github-dark - Clean, readable, used by GitHub
  * - github-light / nord - Beautiful blue-based dark (Supabase style)
- * 
+ *
  * To change themes globally, simply update the values below.
  */
 export const THEME_CONFIG = {
   /**
    * Light theme name
    * Popular options: 'github-light', 'vitesse-light', 'min-light', 'light-plus'
-   * 
+   *
    * Next.js docs: Typically use 'vitesse-light'
    * Supabase docs: Typically use 'vitesse-light' or 'github-light'
    */
@@ -48,7 +48,7 @@ export const THEME_CONFIG = {
   /**
    * Dark theme name
    * Popular options: 'github-dark', 'vitesse-dark', 'nord', 'dark-plus', 'one-dark-pro'
-   * 
+   *
    * Next.js docs: Typically use 'vitesse-dark'
    * Supabase docs: Typically use 'vitesse-dark' or 'nord' (beautiful blue-based)
    */
@@ -62,9 +62,9 @@ export type ThemeName = typeof THEME_CONFIG.light | typeof THEME_CONFIG.dark | s
 
 /**
  * Get theme configuration for Shiki
- * 
+ *
  * @returns Theme configuration object with light and dark theme names
- * 
+ *
  * @example
  * ```ts
  * const themes = getThemeConfig();
@@ -80,10 +80,10 @@ export function getThemeConfig(): { light: string; dark: string } {
 
 /**
  * Available Shiki Themes (as of Dec 2025)
- * 
+ *
  * This is a reference list of popular themes available in Shiki.
  * All themes are bundled with Shiki and can be used by name.
- * 
+ *
  * Light Themes:
  * - github-light - GitHub's light theme (clean, readable)
  * - vitesse-light - Modern, high contrast (Vite/Vue style)
@@ -91,7 +91,7 @@ export function getThemeConfig(): { light: string; dark: string } {
  * - light-plus - VS Code default light theme
  * - solarized-light - Solarized light theme
  * - catppuccin-latte - Catppuccin latte theme
- * 
+ *
  * Dark Themes:
  * - github-dark - GitHub's dark theme
  * - vitesse-dark - Modern, high contrast dark (Vite/Vue style) - RECOMMENDED
@@ -105,7 +105,7 @@ export function getThemeConfig(): { light: string; dark: string } {
  * - catppuccin-mocha - Catppuccin mocha theme
  * - tokyo-night - Tokyo Night theme
  * - gruvbox-dark - Gruvbox dark theme
- * 
+ *
  * Resources:
  * - View all themes: https://github.com/shikijs/shiki/blob/main/docs/themes.md
  * - Theme preview: https://shiki.matsu.io/themes
@@ -138,7 +138,7 @@ export const AVAILABLE_THEMES = {
 
 /**
  * Recommended theme combinations
- * 
+ *
  * These are popular, well-tested theme pairs that work well together.
  */
 export const RECOMMENDED_THEMES = {

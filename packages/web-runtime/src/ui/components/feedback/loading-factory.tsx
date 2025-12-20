@@ -95,7 +95,7 @@ export function CategoryLoading({
     >
       {/* CategoryHeroShell - Hero section with icon, title, description, badges, submit button */}
       <motion.section
-        className="border-border border-b backdrop-blur-sm bg-color-bg-code/30"
+        className="border-border bg-color-bg-code/30 border-b backdrop-blur-sm"
         initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.1 }}
@@ -178,9 +178,7 @@ export function CategoryLoading({
           >
             <div className="space-y-8">
               {/* UnifiedSearch - Search bar */}
-              {showSearch && (
-                <Skeleton size="xl" width="3xl" className="h-14" />
-              )}
+              {showSearch && <Skeleton size="xl" width="3xl" className="h-14" />}
 
               {/* Filters/Quick tags */}
               <div className="flex flex-wrap gap-2">
@@ -221,7 +219,7 @@ export function CategoryLoading({
           >
             {/* JobsPromo card */}
             <motion.div
-              className="rounded-lg border p-6 space-y-4"
+              className="space-y-4 rounded-lg border p-6"
               initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
               animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
               transition={{ ...SPRING.loading, delay: 0.55 }}
@@ -234,7 +232,7 @@ export function CategoryLoading({
 
             {/* RecentlyViewedSidebar */}
             <motion.div
-              className="rounded-lg border p-4 space-y-3"
+              className="space-y-3 rounded-lg border p-4"
               initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
               animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
               transition={{ ...SPRING.loading, delay: 0.6 }}
@@ -267,7 +265,7 @@ export function CategoryLoading({
 export function DetailPageLoading() {
   return (
     <motion.div
-      className="min-h-screen bg-background"
+      className="bg-background min-h-screen"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={SPRING.smooth}
@@ -362,7 +360,7 @@ export function DetailPageLoading() {
       >
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Main content - TabbedDetailLayout */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             {/* Tabs */}
             <div className="flex gap-2 border-b pb-2">
               <Skeleton size="md" width="lg" rounded="md" className="h-10" />
@@ -445,13 +443,13 @@ export function GuideDetailLoading() {
 
   return (
     <motion.div
-      className="min-h-screen bg-background"
+      className="bg-background min-h-screen"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={SPRING.smooth}
     >
       <motion.div
-        className="border-border/50 border-b bg-card/30"
+        className="border-border/50 bg-card/30 border-b"
         initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.1 }}
@@ -532,7 +530,7 @@ export function GuideDetailLoading() {
 /**
  * Search results loading
  * Matches structure of search page with filters
- * 
+ *
  * NOTE: The actual search page uses SearchPageSkeleton directly.
  * This factory function is kept for backwards compatibility with getLoadingComponent('/search').
  */
@@ -557,7 +555,7 @@ export function SearchResultsLoading() {
 
       {/* Results grid */}
       <motion.div
-        className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+        className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
         initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.2 }}
@@ -579,7 +577,7 @@ export function SearchResultsLoading() {
 
 /**
  * Homepage loading (complex with multiple sections)
- * 
+ *
  * NOTE: The actual homepage uses HomepageSkeleton directly.
  * This factory function is kept for backwards compatibility with getLoadingComponent('/').
  */
@@ -588,7 +586,7 @@ export function HomePageLoading() {
 
   return (
     <motion.div
-      className="min-h-screen bg-background"
+      className="bg-background min-h-screen"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={SPRING.smooth}
@@ -601,11 +599,7 @@ export function HomePageLoading() {
         transition={{ ...SPRING.smooth, delay: 0.1 }}
       >
         <div className="container mx-auto px-4 py-16 text-center">
-          <Skeleton
-            size="xl"
-            width="3/4"
-            className="mx-auto mb-6 h-16"
-          />
+          <Skeleton size="xl" width="3/4" className="mx-auto mb-6 h-16" />
           <Skeleton size="md" width="2/3" className="mx-auto" />
         </div>
       </motion.section>
@@ -680,7 +674,7 @@ export function HomePageLoading() {
  * Changelog list loading
  * Matches the changelog page structure with header and timeline view
  * Uses the same structure as ChangelogContentSkeleton component
- * 
+ *
  * NOTE: The actual changelog page uses ChangelogContentSkeleton directly in Suspense.
  * This factory function is kept for backwards compatibility with getLoadingComponent('/changelog').
  */
@@ -743,9 +737,9 @@ export function ChangelogListLoading() {
                 {/* Right: Content */}
                 <div className="relative flex-1 pb-10 pl-0 md:pl-8">
                   {/* Vertical timeline line */}
-                  <div className="hidden md:block absolute top-2 left-0 w-px h-full bg-border">
+                  <div className="bg-border absolute top-2 left-0 hidden h-full w-px md:block">
                     {/* Timeline dot */}
-                    <div className="hidden md:block absolute -translate-x-1/2 size-3 bg-primary rounded-full z-10" />
+                    <div className="bg-primary absolute z-10 hidden size-3 -translate-x-1/2 rounded-full md:block" />
                   </div>
 
                   <div className="relative z-10 space-y-6">
@@ -781,7 +775,7 @@ export function ChangelogListLoading() {
 /**
  * Submit page loading
  * Perfectly matches the submit page structure: hero, form (left), sidebar (right)
- * 
+ *
  * NOTE: The actual submit page uses SubmitPageSkeleton directly.
  * This factory function is kept for backwards compatibility with getLoadingComponent('/submit').
  */
@@ -800,7 +794,7 @@ export function SubmitPageLoading() {
         initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.1 }}
-        className="border-border/50 bg-card relative overflow-hidden rounded-2xl border p-8 mb-8"
+        className="border-border/50 bg-card relative mb-8 overflow-hidden rounded-2xl border p-8"
       >
         <div className="relative z-10 grid gap-6 lg:grid-cols-[1fr_auto]">
           <div className="space-y-4">
@@ -842,7 +836,7 @@ export function SubmitPageLoading() {
           animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
           transition={{ ...SPRING.smooth, delay: 0.3 }}
         >
-          <div className="bg-muted/20 rounded-lg p-6 space-y-6">
+          <div className="bg-muted/20 space-y-6 rounded-lg p-6">
             <div className="space-y-4">
               <Skeleton size="lg" width="md" className="h-8" />
               <Skeleton size="sm" width="3xl" className="h-5" />
@@ -873,7 +867,7 @@ export function SubmitPageLoading() {
         >
           {/* JobsPromo card */}
           <motion.div
-            className="rounded-lg border p-6 space-y-4"
+            className="space-y-4 rounded-lg border p-6"
             initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
             animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
             transition={{ ...SPRING.loading, delay: 0.5 }}
@@ -886,7 +880,7 @@ export function SubmitPageLoading() {
 
           {/* RecentlyViewedSidebar */}
           <motion.div
-            className="rounded-lg border p-4 space-y-3"
+            className="space-y-3 rounded-lg border p-4"
             initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
             animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
             transition={{ ...SPRING.loading, delay: 0.6 }}
@@ -907,7 +901,7 @@ export function SubmitPageLoading() {
 
           {/* Submit page-specific sidebar */}
           <motion.div
-            className="rounded-lg border p-4 space-y-3"
+            className="space-y-3 rounded-lg border p-4"
             initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
             animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
             transition={{ ...SPRING.loading, delay: 0.7 }}
@@ -1014,7 +1008,7 @@ export function CompanyProfileLoading() {
                           }
                         : {}
                     }
-                    className="rounded-lg border p-6 space-y-4"
+                    className="space-y-4 rounded-lg border p-6"
                   >
                     <Skeleton size="md" width="md" />
                     <Skeleton size="sm" width="3xl" />
@@ -1033,13 +1027,13 @@ export function CompanyProfileLoading() {
               transition={
                 !prefersReducedMotion
                   ? {
-                  ...SPRING.default,
-                  mass: 0.5,
-                  delay: STAGGER.slow,
+                      ...SPRING.default,
+                      mass: 0.5,
+                      delay: STAGGER.slow,
                     }
                   : {}
               }
-              className="rounded-lg border p-6 space-y-4"
+              className="space-y-4 rounded-lg border p-6"
             >
               <div className="space-y-2">
                 <Skeleton size="md" width="sm" />
@@ -1102,7 +1096,7 @@ export function InlineSpinner({
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <output
-        className={`${sizeClasses[size]} ${borderClasses[size]} animate-spin rounded-full border-primary border-t-transparent`}
+        className={`${sizeClasses[size]} ${borderClasses[size]} border-primary animate-spin rounded-full border-t-transparent`}
         aria-label={message || 'Loading'}
         aria-live="polite"
       />
@@ -1290,7 +1284,7 @@ export function createFormPageLoading(config: FormPageLoadingConfig = {}) {
 
     return (
       <motion.div
-        className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-6`}
+        className={`container mx-auto ${maxWidthClasses[maxWidth]} space-y-6 px-4 py-8`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={SPRING.smooth}
@@ -1338,7 +1332,7 @@ export function createFormPageLoading(config: FormPageLoadingConfig = {}) {
                 animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
                 transition={{ ...SPRING.loading, delay: 0.2 + cardIndex * STAGGER.micro }}
               >
-                <div className="border-b p-6 space-y-2">
+                <div className="space-y-2 border-b p-6">
                   {cardTitle ? (
                     <>
                       <Skeleton size="md" width="md" className="h-6" />
@@ -1351,7 +1345,7 @@ export function createFormPageLoading(config: FormPageLoadingConfig = {}) {
                     </>
                   )}
                 </div>
-                <div className="p-6 space-y-4">
+                <div className="space-y-4 p-6">
                   {Array.from({ length: fieldCount }).map((_, fieldIndex) => (
                     <motion.div
                       key={`field-${fieldIndex}`}
@@ -1392,9 +1386,7 @@ export function createFormPageLoading(config: FormPageLoadingConfig = {}) {
     );
   }
 
-  FormPageLoading.displayName = title
-    ? `${title.replace(/\s+/g, '')}Loading`
-    : 'FormPageLoading';
+  FormPageLoading.displayName = title ? `${title.replace(/\s+/g, '')}Loading` : 'FormPageLoading';
 
   return FormPageLoading;
 }
@@ -1479,7 +1471,7 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
     const prefersReducedMotion = useReducedMotion();
 
     return (
-      <div className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-6`}>
+      <div className={`container mx-auto ${maxWidthClasses[maxWidth]} space-y-6 px-4 py-8`}>
         {/* Header */}
         <motion.div
           initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
@@ -1525,7 +1517,6 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
         {/* Content Grid/List */}
         <div className={columns === 1 ? 'grid gap-4' : gridClasses[columns]}>
           {Array.from({ length: itemCount }).map((_, i) => {
-
             if (variant === 'list') {
               return (
                 <motion.div
@@ -1541,7 +1532,7 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
                         }
                       : {}
                   }
-                  className="rounded-lg border p-4 space-y-3"
+                  className="space-y-3 rounded-lg border p-4"
                 >
                   <Skeleton size="md" width="md" />
                   <Skeleton size="sm" width="3xl" />
@@ -1575,14 +1566,19 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
                     <div className="flex items-start justify-between">
                       <div className="flex flex-1 items-start gap-4">
                         {/* Logo/Icon skeleton - matches 64x64 logo */}
-                        <Skeleton size="lg" width="lg" rounded="lg" className="h-16 w-16 shrink-0" />
+                        <Skeleton
+                          size="lg"
+                          width="lg"
+                          rounded="lg"
+                          className="h-16 w-16 shrink-0"
+                        />
                         <div className="flex-1 space-y-2">
                           <Skeleton size="md" width="md" />
                           <Skeleton size="sm" width="sm" />
                         </div>
                       </div>
                       {/* Action buttons skeleton */}
-                      <div className="flex gap-2 shrink-0">
+                      <div className="flex shrink-0 gap-2">
                         <Skeleton size="sm" width="xs" rounded="md" />
                         <Skeleton size="sm" width="xs" rounded="md" />
                       </div>
@@ -1614,7 +1610,7 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
                       }
                     : {}
                 }
-                className="rounded-lg border p-4 space-y-3"
+                className="space-y-3 rounded-lg border p-4"
               >
                 <Skeleton size="md" width="md" />
                 <Skeleton size="sm" width="3xl" />
@@ -1631,9 +1627,7 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
     );
   }
 
-  ListPageLoading.displayName = title
-    ? `${title.replace(/\s+/g, '')}Loading`
-    : 'ListPageLoading';
+  ListPageLoading.displayName = title ? `${title.replace(/\s+/g, '')}Loading` : 'ListPageLoading';
 
   return ListPageLoading;
 }
@@ -1713,7 +1707,7 @@ export function createDetailPageLoading(config: DetailPageLoadingConfig = {}) {
 
     return (
       <motion.div
-        className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-6`}
+        className={`container mx-auto ${maxWidthClasses[maxWidth]} space-y-6 px-4 py-8`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={SPRING.smooth}
@@ -1760,7 +1754,7 @@ export function createDetailPageLoading(config: DetailPageLoadingConfig = {}) {
             {Array.from({ length: statsCount }).map((_, i) => (
               <motion.div
                 key={`stat-${i}`}
-                className="rounded-lg border p-6 space-y-2"
+                className="space-y-2 rounded-lg border p-6"
                 initial={!prefersReducedMotion ? { opacity: 0, scale: 0.95 } : false}
                 animate={!prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
                 transition={{ ...SPRING.loading, delay: 0.3 + i * STAGGER.micro }}
@@ -1781,7 +1775,7 @@ export function createDetailPageLoading(config: DetailPageLoadingConfig = {}) {
             animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
             transition={{ ...SPRING.loading, delay: 0.4 + cardIndex * STAGGER.micro }}
           >
-            <div className="border-b p-6 space-y-2">
+            <div className="space-y-2 border-b p-6">
               <Skeleton size="md" width="md" className="h-6" />
               <Skeleton size="sm" width="2xl" className="h-4" />
             </div>
@@ -1824,7 +1818,7 @@ export function createDetailPageLoading(config: DetailPageLoadingConfig = {}) {
         {/* Chart Area (optional) */}
         {showChart && (
           <motion.div
-            className="rounded-lg border p-6 space-y-4"
+            className="space-y-4 rounded-lg border p-6"
             initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
             animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
             transition={{ ...SPRING.loading, delay: 0.6 + cardCount * STAGGER.micro }}
@@ -1922,7 +1916,7 @@ export function createStaticPageLoading(config: StaticPageLoadingConfig = {}) {
       >
         {/* Header */}
         <motion.div
-          className={centered ? 'text-center mb-8' : 'mb-8'}
+          className={centered ? 'mb-8 text-center' : 'mb-8'}
           initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
           animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
           transition={{ ...SPRING.smooth, delay: 0.1 }}
@@ -1951,7 +1945,7 @@ export function createStaticPageLoading(config: StaticPageLoadingConfig = {}) {
             {Array.from({ length: cardsPerRow * 2 }).map((_, i) => (
               <motion.div
                 key={`card-${i}`}
-                className="rounded-lg border p-6 space-y-3"
+                className="space-y-3 rounded-lg border p-6"
                 initial={!prefersReducedMotion ? { opacity: 0, scale: 0.95 } : false}
                 animate={!prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
                 transition={{ ...SPRING.loading, delay: 0.3 + i * STAGGER.micro }}
@@ -2180,7 +2174,7 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
 
     return (
       <motion.div
-        className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-6`}
+        className={`container mx-auto ${maxWidthClasses[maxWidth]} space-y-6 px-4 py-8`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={SPRING.smooth}
@@ -2220,7 +2214,7 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
                   <div className="border-b p-6">
                     <Skeleton size="sm" width="xs" />
                   </div>
-                  <div className="p-6 space-y-2">
+                  <div className="space-y-2 p-6">
                     <div className="flex items-center gap-2">
                       <Skeleton size="md" width="md" rounded="full" />
                       <Skeleton size="xl" width="sm" />
@@ -2249,11 +2243,11 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
             }
             className="rounded-lg border"
           >
-            <div className="border-b p-6 space-y-2">
+            <div className="space-y-2 border-b p-6">
               <Skeleton size="md" width="md" />
               <Skeleton size="sm" width="2xl" />
             </div>
-            <div className="p-6 space-y-3">
+            <div className="space-y-3 p-6">
               {Array.from({ length: quickActionsCount }).map((_, i) => (
                 <motion.div
                   key={`action-${i}`}
@@ -2262,13 +2256,13 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
                   transition={
                     !prefersReducedMotion
                       ? {
-                        ...SPRING.default,
-                        mass: 0.5,
-                        delay: STAGGER.slow + i * STAGGER.micro,
+                          ...SPRING.default,
+                          mass: 0.5,
+                          delay: STAGGER.slow + i * STAGGER.micro,
                         }
                       : {}
                   }
-                  className="flex items-center justify-between p-4 rounded-lg border"
+                  className="flex items-center justify-between rounded-lg border p-4"
                 >
                   <div className="space-y-2">
                     <Skeleton size="md" width="md" />
@@ -2300,11 +2294,11 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
                 }
               >
                 <div className="rounded-lg border">
-                  <div className="border-b p-6 space-y-2">
+                  <div className="space-y-2 border-b p-6">
                     <Skeleton size="md" width="md" />
                     <Skeleton size="sm" width="2xl" />
                   </div>
-                  <div className="p-6 space-y-4">
+                  <div className="space-y-4 p-6">
                     {Array.from({ length: 5 }).map((_, j) => (
                       <div key={`item-${j}`} className="flex items-start gap-3">
                         <Skeleton size="sm" width="xs" rounded="full" />
@@ -2403,7 +2397,7 @@ export function createProfilePageLoading(config: ProfilePageLoadingConfig = {}) 
 
     return (
       <motion.div
-        className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-6`}
+        className={`container mx-auto ${maxWidthClasses[maxWidth]} space-y-6 px-4 py-8`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={SPRING.smooth}
@@ -2486,15 +2480,15 @@ export function createProfilePageLoading(config: ProfilePageLoadingConfig = {}) 
                   transition={
                     !prefersReducedMotion
                       ? {
-                        ...SPRING.default,
-                        mass: 0.5,
-                        delay: STAGGER.default + cardIndex * STAGGER.fast,
+                          ...SPRING.default,
+                          mass: 0.5,
+                          delay: STAGGER.default + cardIndex * STAGGER.fast,
                         }
                       : {}
                   }
                   className="rounded-lg border"
                 >
-                  <div className="border-b p-6 space-y-2">
+                  <div className="space-y-2 border-b p-6">
                     {cardTitle ? (
                       <>
                         <Skeleton size="md" width="md" />
@@ -2507,9 +2501,12 @@ export function createProfilePageLoading(config: ProfilePageLoadingConfig = {}) 
                       </>
                     )}
                   </div>
-                  <div className="p-6 space-y-4">
+                  <div className="space-y-4 p-6">
                     {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={`item-${i}`} className="flex items-center justify-between p-4 rounded-lg border">
+                      <div
+                        key={`item-${i}`}
+                        className="flex items-center justify-between rounded-lg border p-4"
+                      >
                         <div className="flex items-center gap-4">
                           <Skeleton size="lg" width="lg" rounded="full" />
                           <div className="space-y-2">

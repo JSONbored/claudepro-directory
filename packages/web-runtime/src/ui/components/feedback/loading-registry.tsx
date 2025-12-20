@@ -308,9 +308,10 @@ function getCustomComponent(name: string): ComponentType {
 export function getLoadingComponent(route: string): ComponentType {
   // Normalize route (ensure leading slash, no trailing slash)
   const normalizedRoute = route.startsWith('/') ? route : `/${route}`;
-  const cleanRoute = normalizedRoute.endsWith('/') && normalizedRoute !== '/'
-    ? normalizedRoute.slice(0, -1)
-    : normalizedRoute;
+  const cleanRoute =
+    normalizedRoute.endsWith('/') && normalizedRoute !== '/'
+      ? normalizedRoute.slice(0, -1)
+      : normalizedRoute;
 
   // Try to find matching config
   const pattern = findMatchingPattern(cleanRoute);

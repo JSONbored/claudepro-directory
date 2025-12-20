@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import type { newsletter_source } from '@heyclaude/data-layer/prisma';
+import type { newsletter_source } from '@prisma/client';
 import { rateLimitedAction } from './safe-action.ts';
 import { newsletter_sourceSchema } from '../prisma-zod-schemas.ts';
 
@@ -54,21 +54,21 @@ async function subscribeToNewsletter(
   metadata?: Record<string, unknown>
 ) {
   const { inngest } = await import('../inngest/client.ts');
-  
-      await inngest.send({
-        name: 'email/subscribe',
-        data: {
-          email: email.toLowerCase().trim(),
-          source,
-          referrer: metadata?.['referrer'] as string | undefined,
-          metadata,
-        },
-      });
+
+  await inngest.send({
+    name: 'email/subscribe',
+    data: {
+      email: email.toLowerCase().trim(),
+      source,
+      referrer: metadata?.['referrer'] as string | undefined,
+      metadata,
+    },
+  });
 }
 
 /**
  * Subscribe to newsletter via Inngest
- * 
+ *
  * This action sends an event to Inngest which handles:
  * - Adding to Resend audience
  * - Database subscription record
@@ -79,13 +79,9 @@ export const subscribeNewsletterAction = rateLimitedAction
   .inputSchema(subscribeSchema)
   .metadata({ actionName: 'newsletter.subscribe', category: 'form' })
   .action(async ({ parsedInput }) => {
-    await subscribeToNewsletter(
-      parsedInput.email,
-      parsedInput.source,
-      parsedInput.metadata
-    );
+    await subscribeToNewsletter(parsedInput.email, parsedInput.source, parsedInput.metadata);
 
-    return { 
+    return {
       success: true,
       message: 'Subscription request received',
     };
@@ -99,14 +95,10 @@ export const subscribeViaOAuthAction = rateLimitedAction
   .inputSchema(subscribeViaOAuthSchema)
   .metadata({ actionName: 'newsletter.subscribeViaOAuth', category: 'form' })
   .action(async ({ parsedInput }) => {
-    await subscribeToNewsletter(
-      parsedInput.email,
-      'oauth_signup',
-      {
-        trigger_source: parsedInput.metadata?.trigger_source,
-        referrer: parsedInput.metadata?.referrer,
-      }
-    );
+    await subscribeToNewsletter(parsedInput.email, 'oauth_signup', {
+      trigger_source: parsedInput.metadata?.trigger_source,
+      referrer: parsedInput.metadata?.referrer,
+    });
 
     return { success: true };
   });

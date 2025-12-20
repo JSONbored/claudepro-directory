@@ -1,6 +1,6 @@
 /**
  * Reviews CRUD Actions - Generated from single config
- * 
+ *
  * Consolidated create/update/delete actions using createCrudActionHandlers factory.
  * Uses next-safe-action directly with factory helpers for business logic.
  * Eliminates ~200 lines of repetitive boilerplate.
@@ -57,36 +57,36 @@ const crudHandlers = createCrudActionHandlers<
   },
   transformArgs: {
     create: (input, ctx) => ({
-      'p_action': 'create',
-      'p_user_id': ctx.userId,
-      'p_create_data': {
-        'content_type': input.content_type,
-        'content_slug': input.content_slug,
-        'rating': input.rating,
-        'review_text': input.review_text,
+      p_action: 'create',
+      p_user_id: ctx.userId,
+      p_create_data: {
+        content_type: input.content_type,
+        content_slug: input.content_slug,
+        rating: input.rating,
+        review_text: input.review_text,
       },
-      'p_update_data': null,
-      'p_delete_id': null,
+      p_update_data: null,
+      p_delete_id: null,
     }),
     update: (input, ctx) => ({
-      'p_action': 'update',
-      'p_user_id': ctx.userId,
-      'p_create_data': null,
-      'p_update_data': {
-        'review_id': input.review_id,
-        'content_type': input.content_type,
-        'content_slug': input.content_slug,
-        'rating': input.rating,
-        'review_text': input.review_text,
+      p_action: 'update',
+      p_user_id: ctx.userId,
+      p_create_data: null,
+      p_update_data: {
+        review_id: input.review_id,
+        content_type: input.content_type,
+        content_slug: input.content_slug,
+        rating: input.rating,
+        review_text: input.review_text,
       },
-      'p_delete_id': null,
+      p_delete_id: null,
     }),
     delete: (input, ctx) => ({
-      'p_action': 'delete',
-      'p_user_id': ctx.userId,
-      'p_create_data': null,
-      'p_update_data': null,
-      'p_delete_id': input.delete_id,
+      p_action: 'delete',
+      p_user_id: ctx.userId,
+      p_create_data: null,
+      p_update_data: null,
+      p_delete_id: input.delete_id,
     }),
   },
   cacheInvalidation: {

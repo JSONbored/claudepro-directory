@@ -4,7 +4,9 @@ import {
   type FilterJobsArgs,
   type FilterJobsReturns,
 } from '@heyclaude/database-types/postgres-types';
-import { type jobsModel } from '@heyclaude/database-types/prisma/models';
+import type { Prisma } from '@prisma/client';
+
+type jobsModel = Prisma.jobsGetPayload<{}>;
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { logger } from '../logger.ts';
@@ -15,6 +17,7 @@ import {
   isValidJobType,
 } from '../utils/type-guards.ts';
 
+import { QUERY_LIMITS } from './config/constants.ts';
 import { createDataFunction } from './cached-data-factory.ts';
 import { getService } from './service-factory.ts';
 
@@ -38,7 +41,7 @@ export interface JobsFilterOptions {
  * @param {JobsFilterOptions} options
  * @returns {FilterJobsArgs} Return value description
  */
-function buildFilterJobsArgs(options: JobsFilterOptions): FilterJobsArgs {
+export function buildFilterJobsArgs(options: JobsFilterOptions): FilterJobsArgs {
   const { category, employment, experience, limit, offset, remote, searchQuery } = options;
   const rpcArguments: FilterJobsArgs = {};
 
@@ -154,7 +157,12 @@ export async function getFilteredJobs(
   // If no filters, use standard list (cached)
   if (!hasFilters) {
     try {
-      return await getJobsListCached({ limit: limit ?? 0, offset: offset ?? 0 });
+      // BUG FIX: Use default limit instead of 0 when limit is undefined
+      // limit ?? 0 would return 0 results, which is not intended
+      return await getJobsListCached({
+        limit: limit ?? QUERY_LIMITS.pagination.default,
+        offset: offset ?? 0,
+      });
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to fetch jobs list');
       reqLogger.error({ err: normalized }, 'getFilteredJobs: failed to fetch jobs list');

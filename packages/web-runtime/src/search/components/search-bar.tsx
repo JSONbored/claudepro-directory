@@ -68,11 +68,11 @@ export function SearchBar({
 }: SearchBarProps) {
   const { query, setQuery } = useSearchContext();
   const inputRef = useRef<HTMLInputElement>(null);
-  
+
   // CRITICAL FIX: Use uncontrolled input with local state
   // This prevents value mismatch where URL sync overwrites user input
   const [localQuery, setLocalQuery] = useState(query);
-  
+
   // Sync from context to local state (only when context changes externally, not from user input)
   useEffect(() => {
     // Only sync if local state differs and it's not from user typing
@@ -90,10 +90,10 @@ export function SearchBar({
       setLocalQuery(query);
     }
   }, [query, localQuery]); // Include localQuery in deps for proper comparison
-  
+
   // Debounced sync from local state to context (for search execution)
   const [debouncedLocalQuery] = useDebounceValue(localQuery, 300);
-  
+
   // CRITICAL FIX: Sync debounced query to context to trigger search
   useEffect(() => {
     // Only update if debounced value differs from context query
@@ -162,7 +162,7 @@ export function SearchBar({
   if (variant === 'minimal') {
     return (
       <div className="relative">
-        <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+        <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <div className="pl-10">{inputElement}</div>
       </div>
     );
@@ -173,12 +173,12 @@ export function SearchBar({
     return (
       <>
         {/* Search icon */}
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
+        <div className="absolute top-1/2 left-3 z-10 -translate-y-1/2">
           <Search className="text-muted-foreground h-4 w-4" />
         </div>
 
         {/* Input */}
-        <div className="pl-10 pr-4">{inputElement}</div>
+        <div className="pr-4 pl-10">{inputElement}</div>
       </>
     );
   }
@@ -186,7 +186,7 @@ export function SearchBar({
   // Default variant - standard input with icon
   return (
     <div className="relative">
-      <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+      <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
       <div className="pl-10">{inputElement}</div>
     </div>
   );

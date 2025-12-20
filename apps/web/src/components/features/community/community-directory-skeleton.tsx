@@ -2,7 +2,7 @@
 
 /**
  * Community Directory Skeleton
- * 
+ *
  * Perfectly matches the structure of /community/directory page:
  * - Header with title and description (centered, max-w-3xl)
  * - Two-column layout: Main (3 cols) + Sidebar (1 col, desktop only)
@@ -30,7 +30,7 @@ function ProfileCardSkeleton() {
           {/* Avatar */}
           <Skeleton size="lg" width="lg" rounded="full" className="h-12 w-12 shrink-0" />
           {/* Content */}
-          <div className="flex flex-col gap-2 flex-1">
+          <div className="flex flex-1 flex-col gap-2">
             <Skeleton size="md" width="2/3" />
             <Skeleton size="sm" width="3xl" />
             <div className="flex gap-1">
@@ -49,7 +49,7 @@ function ProfileCardSkeleton() {
  */
 function DirectoryTabsSkeleton() {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <div className="w-full">
       {/* Tabs list */}
@@ -86,7 +86,7 @@ function DirectoryTabsSkeleton() {
  */
 function ContributorsSidebarSkeleton() {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <aside className="space-y-6">
       {/* Trending Contributors Card */}
@@ -120,11 +120,11 @@ function ContributorsSidebarSkeleton() {
                       size="xs"
                       width="xs"
                       rounded="full"
-                      className="absolute -bottom-1 -right-1 h-3 w-3"
+                      className="absolute -right-1 -bottom-1 h-3 w-3"
                     />
                   )}
                 </div>
-                <div className="min-w-0 flex flex-col gap-1 flex-1">
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
                   <Skeleton size="sm" width="2/3" />
                   <Skeleton size="xs" width="xs" />
                 </div>
@@ -156,7 +156,7 @@ function ContributorsSidebarSkeleton() {
                 }}
               >
                 <Skeleton size="md" width="md" rounded="full" className="h-8 w-8 shrink-0" />
-                <div className="min-w-0 flex flex-col gap-1 flex-1">
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
                   <Skeleton size="sm" width="2/3" />
                   <Skeleton size="xs" width="xs" />
                 </div>

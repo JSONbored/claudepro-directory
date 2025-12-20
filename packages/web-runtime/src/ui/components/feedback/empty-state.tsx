@@ -39,10 +39,7 @@
  * ```
  */
 
-import {
-  AlertCircle,
-  AlertTriangle,
-} from '../../../icons.tsx';
+import { AlertCircle, AlertTriangle } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
 // TOKENS removed - using direct Tailwind utilities
 import { SPRING, STAGGER } from '../../../design-system/index.ts';
@@ -156,7 +153,7 @@ export function EmptyState({
       return (
         <Link
           href={actionHref}
-          className="inline-flex items-center justify-center rounded-md bg-accent px-6 py-3 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="bg-accent text-accent-foreground hover:bg-accent/90 focus:ring-ring inline-flex items-center justify-center rounded-md px-6 py-3 text-sm font-medium transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none"
         >
           {actionLabel}
         </Link>
@@ -175,7 +172,7 @@ export function EmptyState({
       return (
         <Link
           href={secondaryActionHref}
-          className="inline-flex items-center justify-center rounded-md border border-input bg-background px-6 py-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="border-input bg-background hover:bg-accent hover:text-accent-foreground focus:ring-ring inline-flex items-center justify-center rounded-md border px-6 py-3 text-sm font-medium transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none"
         >
           {secondaryActionLabel}
         </Link>
@@ -190,25 +187,19 @@ export function EmptyState({
       className={cn('flex flex-col items-center justify-center px-4 py-16 text-center', className)}
     >
       {/* Animated Icon */}
-      <motion.div
-        {...iconAnimation}
-        className={cn("mb-6 rounded-full p-6", colors.iconBgClass)}
-      >
+      <motion.div {...iconAnimation} className={cn('mb-6 rounded-full p-6', colors.iconBgClass)}>
         <Icon className={cn('h-12 w-12', colors.iconColorClass)} aria-hidden="true" />
       </motion.div>
 
       {/* Title */}
-      <h3 className="mb-2 font-semibold text-foreground text-xl">{title}</h3>
+      <h3 className="text-foreground mb-2 text-xl font-semibold">{title}</h3>
 
       {/* Description */}
-      <p className="mb-6 max-w-md text-muted-foreground leading-relaxed">{description}</p>
+      <p className="text-muted-foreground mb-6 max-w-md leading-relaxed">{description}</p>
 
       {/* Action Buttons */}
       {(actionLabel || secondaryActionLabel || renderAction || renderSecondaryAction) && (
-        <motion.div
-          {...ctaAnimation}
-          className={cn('flex flex-col gap-3 sm:flex-row')}
-        >
+        <motion.div {...ctaAnimation} className={cn('flex flex-col gap-3 sm:flex-row')}>
           {renderActionButton()}
           {renderSecondaryActionButton()}
         </motion.div>
@@ -235,15 +226,10 @@ export function CompactEmptyState({
     <div
       className={cn('flex flex-col items-center justify-center px-4 py-8 text-center', className)}
     >
-      <div
-        className="mb-3 rounded-full p-3 bg-color-accent-primary/10"
-      >
-        <Icon
-          className="h-6 w-6 text-color-accent-primary"
-          aria-hidden="true"
-        />
+      <div className="bg-color-accent-primary/10 mb-3 rounded-full p-3">
+        <Icon className="text-color-accent-primary h-6 w-6" aria-hidden="true" />
       </div>
-      <h4 className="mb-1 font-medium text-foreground text-sm">{title}</h4>
+      <h4 className="text-foreground mb-1 text-sm font-medium">{title}</h4>
       <p className="text-muted-foreground text-xs leading-relaxed">{description}</p>
     </div>
   );
@@ -296,7 +282,8 @@ export function NotFoundEmpty({
   const props: EmptyStateProps = {
     icon: AlertCircle,
     title: 'Page not found',
-    description: "The page you're looking for doesn't exist or has been moved. Let's get you back on track!",
+    description:
+      "The page you're looking for doesn't exist or has been moved. Let's get you back on track!",
     actionLabel: 'Go to Homepage',
     actionHref: '/',
     secondaryActionLabel: 'Browse Configs',

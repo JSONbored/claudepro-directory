@@ -56,14 +56,11 @@ describe('useMultipleIntersectionObserver', () => {
   it('should create IntersectionObserver with default options', () => {
     renderHook(() => useMultipleIntersectionObserver());
 
-    expect(mockIntersectionObserver).toHaveBeenCalledWith(
-      expect.any(Function),
-      {
-        threshold: 0,
-        root: null,
-        rootMargin: '0%',
-      }
-    );
+    expect(mockIntersectionObserver).toHaveBeenCalledWith(expect.any(Function), {
+      threshold: 0,
+      root: null,
+      rootMargin: '0%',
+    });
   });
 
   it('should create IntersectionObserver with custom options', () => {
@@ -75,14 +72,11 @@ describe('useMultipleIntersectionObserver', () => {
       } as UseMultipleIntersectionObserverOptions)
     );
 
-    expect(mockIntersectionObserver).toHaveBeenCalledWith(
-      expect.any(Function),
-      {
-        threshold: [0, 0.5, 1],
-        root: document.body,
-        rootMargin: '-20% 0px',
-      }
-    );
+    expect(mockIntersectionObserver).toHaveBeenCalledWith(expect.any(Function), {
+      threshold: [0, 0.5, 1],
+      root: document.body,
+      rootMargin: '-20% 0px',
+    });
   });
 
   it('should observe elements when observeElements is called', () => {

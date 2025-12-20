@@ -78,7 +78,10 @@ export async function proxyStorageFile(options: StorageProxyOptions): Promise<Ne
     const { data, error } = await supabase.storage.from(bucket).download(path);
 
     if (error || !data) {
-      logger.error({ err: error || new Error('No data returned'), ...logContext }, 'Storage file not found');
+      logger.error(
+        { err: error || new Error('No data returned'), ...logContext },
+        'Storage file not found'
+      );
 
       return NextResponse.json(
         {
@@ -102,10 +105,10 @@ export async function proxyStorageFile(options: StorageProxyOptions): Promise<Ne
     const resolvedFileName = fileName ?? path.split('/').pop() ?? 'download';
     const safeFileName = sanitizeContentDispositionFilename(resolvedFileName);
 
-    logger.info({ ...logContext,
-      size: data.size,
-      contentType: detectedContentType,
-      cacheControl, }, 'Proxy download');
+    logger.info(
+      { ...logContext, size: data.size, contentType: detectedContentType, cacheControl },
+      'Proxy download'
+    );
 
     const arrayBuffer = await data.arrayBuffer();
 
@@ -125,7 +128,10 @@ export async function proxyStorageFile(options: StorageProxyOptions): Promise<Ne
       },
     });
   } catch (error) {
-    logger.error({ err: normalizeError(error, 'Storage proxy error'), ...logContext }, 'Proxy error');
+    logger.error(
+      { err: normalizeError(error, 'Storage proxy error'), ...logContext },
+      'Proxy error'
+    );
 
     return NextResponse.json(
       {

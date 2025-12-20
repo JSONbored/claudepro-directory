@@ -28,11 +28,11 @@ export const OG_IMAGE_DIMENSIONS = {
  */
 export function generateOGImageUrl(path: string): string {
   const baseUrl = APP_CONFIG.url;
-  
+
   // Path parameter is accepted for API consistency but currently unused
   // (reserved for future dynamic OG image generation if needed)
   void path;
-  
+
   return `${baseUrl}/og-images/og-image.webp`;
 }
 

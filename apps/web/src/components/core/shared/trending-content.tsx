@@ -81,13 +81,13 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
       >
         {TAB_CONFIGS.map((config) => {
           const Icon = config.icon;
-          const tooltipContent = 
+          const tooltipContent =
             config.value === 'trending'
               ? 'Most viewed and copied configurations this week'
               : config.value === 'popular'
-              ? 'All-time most popular configurations based on views and engagement'
-              : 'Recently added or updated configurations';
-          
+                ? 'All-time most popular configurations based on views and engagement'
+                : 'Recently added or updated configurations';
+
           return (
             <TooltipProvider key={config.value}>
               <Tooltip>
@@ -152,19 +152,19 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                                   style="default"
                                   aria-label={`Rank ${index + 1}`}
                                 >
-                                  <Award className="mr-0.5 h-3 w-3" aria-hidden="true" />
-                                  #{index + 1}
+                                  <Award className="mr-0.5 h-3 w-3" aria-hidden="true" />#
+                                  {index + 1}
                                 </UnifiedBadge>
                               </div>
                             </TooltipTrigger>
                             <TooltipContent>
                               <p>Rank #{index + 1}</p>
                               <p className="text-muted-foreground text-xs">
-                                {index === 0 
+                                {index === 0
                                   ? 'Most trending this week'
                                   : index === 1
-                                  ? 'Second most trending'
-                                  : 'Third most trending'}
+                                    ? 'Second most trending'
+                                    : 'Third most trending'}
                               </p>
                             </TooltipContent>
                           </Tooltip>

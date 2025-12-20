@@ -2,7 +2,7 @@
 
 /** Homepage client consuming homepageConfigs for runtime-tunable featured categories */
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import { getHomepageConfigBundle } from '@heyclaude/web-runtime/config/static-configs';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { trackMissingData } from '@heyclaude/web-runtime/utils/homepage-error-tracking';
@@ -42,18 +42,14 @@ function HomePageClientContent({
 
   // Initialize featuredCategories from server data immediately
   // This ensures content renders even if static config is unavailable
-  const [featuredCategories, setFeaturedCategories] = useState<
-    readonly content_category[]
-  >(() => {
+  const [featuredCategories, setFeaturedCategories] = useState<readonly content_category[]>(() => {
     // First, try using keys from initialData (most reliable - these are categories that have data)
     // Validate categories using isValidCategory (which uses Prisma enum)
     // Type guard: isValidCategory ensures type safety, no assertion needed
-    const categoriesFromData = Object.keys(initialData).filter(
-      (cat): cat is content_category => {
-        const data = initialData[cat];
-        return Array.isArray(data) && data.length > 0 && isValidCategory(cat);
-      }
-    );
+    const categoriesFromData = Object.keys(initialData).filter((cat): cat is content_category => {
+      const data = initialData[cat];
+      return Array.isArray(data) && data.length > 0 && isValidCategory(cat);
+    });
 
     if (categoriesFromData.length > 0) {
       return categoriesFromData;
@@ -63,8 +59,8 @@ function HomePageClientContent({
     // Validate serverCategoryIds using isValidCategory
     if (serverCategoryIds && serverCategoryIds.length > 0) {
       // Type guard: isValidCategory ensures type safety, no assertion needed
-      const validServerCategories = serverCategoryIds.filter(
-        (cat): cat is content_category => isValidCategory(cat)
+      const validServerCategories = serverCategoryIds.filter((cat): cat is content_category =>
+        isValidCategory(cat)
       );
       if (validServerCategories.length > 0) {
         return validServerCategories;
@@ -88,7 +84,7 @@ function HomePageClientContent({
           note: 'Stats data is empty',
         });
       };
-      
+
       // Defer to idle time to avoid blocking main thread
       if ('requestIdleCallback' in globalThis) {
         requestIdleCallback(trackMissing, { timeout: 5000 });
@@ -148,8 +144,9 @@ function HomePageClientContent({
   // Use static categories if available, otherwise fall back to server-provided categoryIds
   // Filter to only include categories that have data in initialData
   const validCategories = useMemo(() => {
-    const categoriesToFilter = configCategories.length > 0 ? configCategories : (serverCategoryIds ?? []);
-    
+    const categoriesToFilter =
+      configCategories.length > 0 ? configCategories : (serverCategoryIds ?? []);
+
     // Type guard: isValidCategory ensures type safety, no assertion needed
     return categoriesToFilter.filter((cat): cat is content_category => {
       if (!isValidCategory(cat)) {
@@ -176,7 +173,13 @@ function HomePageClientContent({
         {/* Search Results Section - Show at top when there's an active search query */}
         {query.trim().length > 0 && (
           <div className="mb-8">
-            <Suspense fallback={<div className="text-muted-foreground p-8 text-center">Loading search results...</div>}>
+            <Suspense
+              fallback={
+                <div className="text-muted-foreground p-8 text-center">
+                  Loading search results...
+                </div>
+              }
+            >
               <SearchResults
                 showCategory
                 showActions
@@ -202,9 +205,7 @@ function HomePageClientContent({
         />
 
         {/* All Content Section - Scroll-triggered loading (only fetches when section enters viewport) */}
-        <LazyAllContentSection
-          {...(weekStart ? { weekStart } : {})}
-        />
+        <LazyAllContentSection {...(weekStart ? { weekStart } : {})} />
       </section>
     </>
   );
@@ -215,7 +216,7 @@ const HomePageClientContentMemo = memo(HomePageClientContent);
 
 /**
  * HomePageClient - Content component (SearchProvider now at page level)
- * 
+ *
  * NOTE: SearchProvider is now provided at page level via HomepageSearchProvider
  * This allows hero section to also access SearchProvider context.
  */

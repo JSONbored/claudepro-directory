@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@prisma/client';
 import { type GetSearchFacetsReturns } from '@heyclaude/database-types/postgres-types';
 import { type GetTrendingSearchesReturns } from '@heyclaude/data-layer';
 

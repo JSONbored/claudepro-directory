@@ -90,11 +90,14 @@ export function useCopyToClipboard(
   }, []);
 
   // Reset copy state after timeout when copied is true
-  useTimeout(() => {
-    if (copied) {
-      setCopiedFalse();
-    }
-  }, copied ? resetDelay : null);
+  useTimeout(
+    () => {
+      if (copied) {
+        setCopiedFalse();
+      }
+    },
+    copied ? resetDelay : null
+  );
 
   const reset = useCallback(() => {
     setCopiedFalse();
@@ -119,13 +122,18 @@ export function useCopyToClipboard(
         setError(normalized);
         setCopiedFalse();
 
-        logger.warn({ err: normalized,
-          category: 'clipboard',
-          component: context?.component ?? 'useCopyToClipboard',
-          recoverable: true,
-          userRetryable: true,
-          action: context?.action ?? 'copy',
-          textLength: text.length, }, '[Clipboard] Copy failed');
+        logger.warn(
+          {
+            err: normalized,
+            category: 'clipboard',
+            component: context?.component ?? 'useCopyToClipboard',
+            recoverable: true,
+            userRetryable: true,
+            action: context?.action ?? 'copy',
+            textLength: text.length,
+          },
+          '[Clipboard] Copy failed'
+        );
 
         onError?.(normalized);
         return false;
@@ -206,11 +214,14 @@ export function useButtonSuccess(options: UseButtonSuccessOptions = {}): UseButt
   const { value: isSuccess, setTrue: setIsSuccessTrue, setFalse: setIsSuccessFalse } = useBoolean();
 
   // Reset success state after timeout when isSuccess is true
-  useTimeout(() => {
-    if (isSuccess) {
-      setIsSuccessFalse();
-    }
-  }, isSuccess ? actualDuration : null);
+  useTimeout(
+    () => {
+      if (isSuccess) {
+        setIsSuccessFalse();
+      }
+    },
+    isSuccess ? actualDuration : null
+  );
 
   const triggerSuccess = useCallback(() => {
     setIsSuccessTrue();

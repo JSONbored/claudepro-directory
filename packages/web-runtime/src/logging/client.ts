@@ -1,18 +1,18 @@
 /**
  * Client-Side Logging Barrel Export
- * 
+ *
  * Centralized barrel export for all client-side logging and error instrumentation utilities.
  * This module is safe to import in client components (`'use client'`).
- * 
+ *
  * **⚠️ IMPORTANT: Client-Only Module**
  * - ✅ **SAFE** to import in client components (`'use client'`)
  * - ❌ **DO NOT** import server-only utilities from this barrel
  * - All exports in this barrel are client-safe (no server-only dependencies)
- * 
+ *
  * **Usage:**
  * ```typescript
  * 'use client';
- * 
+ *
  * import {
  *   useClientLogger,
  *   logClientError,
@@ -21,18 +21,18 @@
  *   normalizeError,
  * } from '@heyclaude/web-runtime/logging/client';
  * ```
- * 
+ *
  * **What's Included:**
  * - React hook for component-level logging (`useClientLogger`)
  * - Client-side logging utilities (`logClientError`, `logClientWarn`, etc.)
  * - Session ID management (`getOrCreateSessionId`)
  * - Error normalization (`normalizeError`)
- * 
+ *
  * **Related Modules:**
  * - {@link ../logging/server | Server Logging Barrel} - Server-side logging utilities
  * - {@link ../logger | Logger Instance} - Main logger instance (used internally)
  * - {@link @heyclaude/shared-runtime/logger/config | Pino Configuration} - Centralized logger config
- * 
+ *
  * @module web-runtime/logging/client
  * @see {@link ../logging/server | Server Logging Barrel} - Server-side logging utilities
  * @see {@link ../utils/client-logger | Client Logger Utilities} - Lower-level utilities
@@ -42,7 +42,11 @@
 'use client';
 
 // React hook for component-level logging
-export { useClientLogger, type UseClientLoggerOptions, type ClientLogger } from '../hooks/use-client-logger.ts';
+export {
+  useClientLogger,
+  type UseClientLoggerOptions,
+  type ClientLogger,
+} from '../hooks/use-client-logger.ts';
 
 // Client-side logging utilities
 export {
@@ -58,7 +62,6 @@ export {
 
 // Session ID management
 export { getOrCreateSessionId, clearSessionId } from '../utils/client-session.ts';
-
 
 // Error normalization (client-safe, works in all contexts)
 export { normalizeError } from '../errors.ts';

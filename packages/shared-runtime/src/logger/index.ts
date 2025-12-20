@@ -1,11 +1,11 @@
 /**
  * Shared Runtime Logger
- * 
+ *
  * **Unified logging solution with perfect Pino alignment.**
- * 
+ *
  * This module provides a single, unified logger that perfectly aligns with Pino's native API.
  * All packages should use this for consistent logging across the codebase.
- * 
+ *
  * **Key Features:**
  * - ✅ Pino native API (object-first pattern)
  * - ✅ Error normalization (`normalizeError` - Pino doesn't have this)
@@ -14,11 +14,11 @@
  * - ✅ Formatters (log structure)
  * - ✅ Child logger support (request-scoped context)
  * - ✅ Vercel compatibility (proper log level routing)
- * 
+ *
  * **Quick Start:**
  * ```typescript
  * import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
- * 
+ *
  * try {
  *   // Your code
  * } catch (error) {
@@ -26,9 +26,9 @@
  *   logger.error({ err: normalized, operation: 'MyOp' }, 'Operation failed');
  * }
  * ```
- * 
+ *
  * **Usage Patterns:**
- * 
+ *
  * 1. **Default Logger (Most Common)**
  *    - Use the default `logger` instance for most cases
  *    - Already configured and ready to use
@@ -36,7 +36,7 @@
  *    import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
  *    logger.info({ operation: 'MyOp' }, 'Info message');
  *    ```
- * 
+ *
  * 2. **Request-Scoped Logging (Server Components, API Routes)**
  *    - Use `logger.child()` to create request-scoped loggers
  *    - Adds context that appears in all logs from that child
@@ -47,7 +47,7 @@
  *    });
  *    reqLogger.info({ section: 'data-loading' }, 'Loading data');
  *    ```
- * 
+ *
  * 3. **Custom Logger Instances (Rare Cases)**
  *    - Use `createLogger()` to create NEW logger instances with custom config
  *    - Use cases: enabling timestamps (if needed), custom levels
@@ -56,29 +56,29 @@
  *    import { stdTimeFunctions } from 'pino';
  *    const loggerWithTimestamps = createLogger({ timestamp: stdTimeFunctions.isoTime });
  *    ```
- * 
+ *
  * **Important Distinctions:**
- * 
+ *
  * - **`logger` (default instance)**: Use for most cases - already configured
  * - **`logger.child({ context })`**: Creates child logger with request-scoped context (adds to existing logger)
  * - **`createLogger({ options })`**: Creates NEW logger instance with custom configuration (different service, level, etc.)
- * 
+ *
  * **Error Normalization:**
- * 
+ *
  * Pino does NOT normalize errors - it only serializes Error objects. Use `normalizeError()` to handle:
  * - Error instances (returns as-is)
  * - Strings (wraps in Error)
  * - Objects (JSON stringifies)
  * - Unknown types (uses fallback message)
- * 
+ *
  * **Always normalize errors before logging:**
  * ```typescript
  * const normalized = normalizeError(error, 'Fallback message');
  * logger.error({ err: normalized }, 'Error message');
  * ```
- * 
+ *
  * **Common Scenarios:**
- * 
+ *
  * See detailed examples below for:
  * - Server Components (Next.js pages)
  * - API Routes
@@ -87,12 +87,12 @@
  * - Cached Components
  * - Data Layer Functions
  * - Inngest Functions
- * 
+ *
  * **Vercel Compatibility:**
  * - Uses level-routing destination to ensure warn/error logs go to stderr
  * - Vercel categorizes logs by output stream: stdout=info, stderr=error
  * - This ensures warn/error logs appear correctly in Vercel's log dashboard
- * 
+ *
  * @module shared-runtime/logger
  * @see {@link https://getpino.io/ | Pino Documentation}
  */
@@ -127,32 +127,32 @@ let hasLoggedPinoPretty = false;
 function createVercelCompatibleDestination(): pino.DestinationStream | undefined {
   // Only use in Node.js server environment
   // Browser environment already uses console methods via Pino's browser config
-   
+
   if (globalThis.window !== undefined) {
     return undefined;
   }
-  
+
   return {
     write(chunk: string) {
       // Quick regex to find levelValue in the JSON (added by our formatter)
       // Our formatter outputs: { "level": "info", "levelValue": 30, ... }
       // Level values: trace=10, debug=20, info=30, warn=40, error=50, fatal=60
       const levelMatch = /"levelValue"\s*:\s*(\d+)/.exec(chunk);
-      const levelValue = levelMatch?.[1] === undefined 
-        ? 30 
-        : Number.parseInt(levelMatch[1], 10);
-      
+      const levelValue = levelMatch?.[1] === undefined ? 30 : Number.parseInt(levelMatch[1], 10);
+
       // Remove trailing newline for cleaner console output
       const logLine = chunk.trimEnd();
-      
+
       // Use console methods for proper Vercel log level detection
       // console.warn → warning (orange) in streaming functions
       // console.error → error (red)
       // console.log → info (gray)
       /* eslint-disable architectural-rules/no-console-in-production-enhanced -- Required for Vercel log level detection */
-      if (levelValue >= 50) { // error=50, fatal=60
+      if (levelValue >= 50) {
+        // error=50, fatal=60
         console.error(logLine);
-      } else if (levelValue >= 40) { // warn=40
+      } else if (levelValue >= 40) {
+        // warn=40
         console.warn(logLine);
       } else {
         console.log(logLine);
@@ -164,11 +164,11 @@ function createVercelCompatibleDestination(): pino.DestinationStream | undefined
 
 /**
  * Create a NEW logger instance - **ONLY for cache-safe logging.**
- * 
+ *
  * **⚠️ CRITICAL: Use the default `logger` instance for 99% of cases!**
- * 
+ *
  * **When to Use `createLogger()`:**
- * 
+ *
  * ✅ **Rarely needed** - The default logger already has timestamps disabled (platforms add them)
  *    - Only use if you need to enable application-level timestamps (rare)
  *    ```typescript
@@ -176,27 +176,27 @@ function createVercelCompatibleDestination(): pino.DestinationStream | undefined
  *    import { stdTimeFunctions } from 'pino';
  *    const loggerWithTimestamps = createLogger({ timestamp: stdTimeFunctions.isoTime });
  *    ```
- * 
+ *
  * **When NOT to Use `createLogger()`:**
- * 
+ *
  * ❌ **For request-scoped context** → Use `logger.child({ context })` instead
  * ❌ **For most cases** → Use the default `logger` instance
  * ❌ **For different service names** → Use the default `logger` (service is set automatically)
  * ❌ **For custom log levels** → Use the default `logger` (level is set via env)
  * ❌ **For adding context** → Use `logger.child()` instead
- * 
+ *
  * **Why consistency matters:**
  * - All logs should use the same configuration
  * - Same redaction rules, same serializers, same format
  * - Easier debugging and log analysis
  * - Prevents configuration drift
- * 
+ *
  * **Examples:**
- * 
+ *
  * ```typescript
  * // ✅ CORRECT: Use default logger (timestamps already disabled)
  * import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
- * 
+ *
  * export default async function CachedPage() {
  *   try {
  *     // ...
@@ -206,15 +206,15 @@ function createVercelCompatibleDestination(): pino.DestinationStream | undefined
  *   }
  * }
  * ```
- * 
+ *
  * ```typescript
  * // ❌ WRONG: Don't create new logger for request context
  * const reqLogger = createLogger({ service: 'my-service' });
- * 
+ *
  * // ✅ CORRECT: Use child logger for request context
  * const reqLogger = logger.child({ operation: 'MyPage', route: '/my-page' });
  * ```
- * 
+ *
  * @param {Parameters<typeof createPinoConfig>[0]} options - Optional Pino configuration overrides. **Timestamps are disabled by default (platforms add them). Only enable if you need application-level timestamps.**
  * @param {pino.DestinationStream} [destination] - Optional Pino destination stream (e.g., `pino.destination()` or `pino.multistream()`); when provided it is passed directly to `pino(config, destination)`.
  * @returns {pino.Logger} A Pino logger instance configured with the provided options and destination (or the module's default/vercel-compatible destination when `destination` is not supplied).
@@ -234,25 +234,34 @@ export function createLogger(
   destination?: pino.DestinationStream
 ): pino.Logger {
   const config = createPinoConfig(options);
-  
+
   // If custom destination provided, use it
   if (destination) {
     // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
     return pino(config, destination);
   }
-  
+
   // CRITICAL: Pino does NOT support using both transport and destination together!
   // When a destination is passed to pino(), it overrides any transport.
   // Strategy:
   // - Development: Use pino-pretty as a stream (colored, readable logs) - same as old logger
   // - Production: Use Vercel-compatible destination (proper log level routing for Vercel)
-  const isDevelopment = typeof process !== 'undefined' && process.env?.['NODE_ENV'] !== 'production';
+  const isDevelopment =
+    typeof process !== 'undefined' && process.env?.['NODE_ENV'] !== 'production';
   const isServer = typeof window === 'undefined';
   const hasTransport = config.transport !== undefined;
-  
+
   // Use pino-pretty as a stream in development (same pattern as old logger)
   // This avoids worker thread issues and ensures colored output works correctly
-  if (isServer && isDevelopment && hasTransport && config.transport && typeof config.transport === 'object' && 'target' in config.transport && config.transport.target === 'pino-pretty') {
+  if (
+    isServer &&
+    isDevelopment &&
+    hasTransport &&
+    config.transport &&
+    typeof config.transport === 'object' &&
+    'target' in config.transport &&
+    config.transport.target === 'pino-pretty'
+  ) {
     // Try to load pino-pretty dynamically to avoid Next.js bundling issues
     // Use the same pattern as the old logger for consistency
     let prettyStream: ReturnType<typeof require> | null = null;
@@ -261,12 +270,15 @@ export function createLogger(
       // Turbopack can't analyze string concatenation in this context
       const moduleNameParts = ['pino', '-', 'pretty'];
       const moduleName = moduleNameParts.join('');
-      
+
       // Use eval to create a truly dynamic require that Next.js can't analyze
       // This is safe because we're only requiring a known dev dependency
       // eslint-disable-next-line @typescript-eslint/no-implied-eval, @typescript-eslint/no-require-imports, no-eval -- Dynamic require to avoid Next.js/Turbopack static analysis
       const pretty = eval(`require('${moduleName}')`);
-      const transportOptions = 'options' in config.transport && typeof config.transport.options === 'object' ? config.transport.options : {};
+      const transportOptions =
+        'options' in config.transport && typeof config.transport.options === 'object'
+          ? config.transport.options
+          : {};
       prettyStream = pretty({
         colorize: true,
         translateTime: 'SYS:standard',
@@ -289,10 +301,18 @@ export function createLogger(
 
       // Increase max listeners on the stream to prevent MaxListenersExceededWarning
       // This is safe because we're using a singleton pattern - only one logger instance exists
-      if (typeof process !== 'undefined' && process.stdout && typeof process.stdout.setMaxListeners === 'function') {
+      if (
+        typeof process !== 'undefined' &&
+        process.stdout &&
+        typeof process.stdout.setMaxListeners === 'function'
+      ) {
         process.stdout.setMaxListeners(20);
       }
-      if (typeof process !== 'undefined' && process.stderr && typeof process.stderr.setMaxListeners === 'function') {
+      if (
+        typeof process !== 'undefined' &&
+        process.stderr &&
+        typeof process.stderr.setMaxListeners === 'function'
+      ) {
         process.stderr.setMaxListeners(20);
       }
 
@@ -309,24 +329,24 @@ export function createLogger(
       return pino(configWithoutTransport, prettyStream);
     }
   }
-  
+
   // If custom transport is provided (not pino-pretty), use it as transport
   if (hasTransport && isDevelopment && !isServer) {
     // Browser/Edge: Use transport if configured
     // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
     return pino(config);
   }
-  
+
   // Production Axiom integration: Multi-stream (Vercel console + Axiom)
   // Only enable in production when Axiom env vars are set
   const isProduction = typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'production';
   const axiomDataset = typeof process !== 'undefined' ? process.env?.['AXIOM_DATASET'] : undefined;
   const axiomToken = typeof process !== 'undefined' ? process.env?.['AXIOM_TOKEN'] : undefined;
-  
+
   if (isProduction && isServer && axiomDataset && axiomToken) {
     // Multi-stream: Send to both Vercel console (for immediate visibility) and Axiom (for long-term storage)
     const vercelDest = createVercelCompatibleDestination();
-    
+
     if (vercelDest) {
       // Create Axiom transport
       // Pino transports are loaded in a worker thread, so we can pass the target string directly
@@ -338,7 +358,7 @@ export function createLogger(
           token: axiomToken,
         },
       });
-      
+
       // Multi-stream: Vercel console (all levels) + Axiom (all levels)
       const streams = [
         {
@@ -350,23 +370,31 @@ export function createLogger(
           stream: axiomTransport,
         },
       ];
-      
+
       const configWithoutTransport = { ...config };
       delete configWithoutTransport.transport;
-      
+
       // Increase max listeners to prevent MaxListenersExceededWarning
-      if (typeof process !== 'undefined' && process.stdout && typeof process.stdout.setMaxListeners === 'function') {
+      if (
+        typeof process !== 'undefined' &&
+        process.stdout &&
+        typeof process.stdout.setMaxListeners === 'function'
+      ) {
         process.stdout.setMaxListeners(20);
       }
-      if (typeof process !== 'undefined' && process.stderr && typeof process.stderr.setMaxListeners === 'function') {
+      if (
+        typeof process !== 'undefined' &&
+        process.stderr &&
+        typeof process.stderr.setMaxListeners === 'function'
+      ) {
         process.stderr.setMaxListeners(20);
       }
-      
+
       // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
       return pino(configWithoutTransport, pino.multistream(streams));
     }
   }
-  
+
   // Production or no transport: Use Vercel-compatible destination
   // This ensures Vercel properly detects log levels via console methods:
   // - console.error() → error (red)
@@ -381,7 +409,7 @@ export function createLogger(
     // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
     return pino(configWithoutTransport, vercelDest);
   }
-  
+
   // Browser/Edge fallback: use default Pino destination (stdout)
   // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
   return pino(configWithoutTransport);
@@ -389,25 +417,25 @@ export function createLogger(
 
 /**
  * Default logger instance - Use this for most cases.
- * 
+ *
  * **When to Use:**
  * - ✅ Most logging needs (already configured and ready)
  * - ✅ Simple logging without request context
  * - ✅ Utility functions, helpers, shared code
- * 
+ *
  * **When NOT to Use:**
  * - ❌ Request-scoped logging → Use `logger.child({ context })` instead
  * - ❌ Cache-safe logging → Default logger is already cache-safe (timestamps disabled)
  * - ❌ Custom service names → Use `createLogger({ service: 'name' })` instead
- * 
+ *
  * **Basic Usage:**
  * ```typescript
  * import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
- * 
+ *
  * // Simple logging
  * logger.info({ operation: 'MyOp' }, 'Info message');
  * logger.warn({ operation: 'MyOp' }, 'Warning message');
- * 
+ *
  * // Error logging (always normalize first)
  * try {
  *   // ...
@@ -416,7 +444,7 @@ export function createLogger(
  *   logger.error({ err: normalized, operation: 'MyOp' }, 'Operation failed');
  * }
  * ```
- * 
+ *
  * **Creating Request-Scoped Loggers:**
  * ```typescript
  * // Create child logger with request context
@@ -424,24 +452,24 @@ export function createLogger(
  *   operation: 'MyPage',
  *   route: '/my-route',
  * });
- * 
+ *
  * // All logs from child include the context
  * reqLogger.info({ section: 'data-loading' }, 'Loading data');
  * // Log includes: operation, route, section
  * ```
- * 
+ *
  * **Vercel Compatibility:**
  * - Uses level-routing destination by default
  * - warn/error/fatal logs go to stderr (shown as error in Vercel)
  * - trace/debug/info logs go to stdout (shown as info in Vercel)
- * 
+ *
  * @example
  * ```typescript
  * import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
- * 
+ *
  * // Simple logging
  * logger.info({ operation: 'MyOp' }, 'Hello world');
- * 
+ *
  * // Error logging
  * try {
  *   // ...
@@ -449,7 +477,7 @@ export function createLogger(
  *   const normalized = normalizeError(error, 'Operation failed');
  *   logger.error({ err: normalized, operation: 'MyOp' }, 'Error occurred');
  * }
- * 
+ *
  * // Request-scoped logging
  * const reqLogger = logger.child({ operation: 'MyOp', route: '/my-route' });
  * reqLogger.info({ step: 'step1' }, 'Processing');
@@ -458,48 +486,48 @@ export function createLogger(
 export const logger = createLogger();
 
 // Re-export config for advanced usage
-export { 
-  createPinoConfig, 
-  SENSITIVE_PATTERNS, 
+export {
+  createPinoConfig,
+  SENSITIVE_PATTERNS,
   BASE_CONTEXT,
-  type PinoConfigOptions 
+  type PinoConfigOptions,
 } from './config.ts';
 
 // Re-export Pino utilities for advanced usage
-export { 
+export {
   destination as pinoDestination,
   multistream as pinoMultistream,
   transport as pinoTransport,
   stdSerializers,
-  stdTimeFunctions
+  stdTimeFunctions,
 } from 'pino';
 
 /**
  * About pino-pretty:
- * 
+ *
  * pino-pretty is a development tool that formats Pino's JSON logs into human-readable, colorized output.
- * 
+ *
  * **Usage:**
  * - Development only (not for production)
  * - As transport: `transport: { target: 'pino-pretty', options: { colorize: true } }`
  * - As CLI: `node app.js | pino-pretty`
- * 
+ *
  * **Installation:** `npm install -D pino-pretty`
- * 
+ *
  * @see {@link https://github.com/pinojs/pino-pretty | pino-pretty GitHub}
- * 
+ *
  * About pino-final:
- * 
+ *
  * pino-final is a separate package for handling logger finalization on process exit.
  * It ensures logs are flushed before the process exits.
- * 
+ *
  * **Note:** Pino v7+ transports already handle this automatically via `process.on('beforeExit')` and `process.on('exit')` listeners.
  * You only need pino-final if:
  * - You're using Pino v6 or earlier
  * - You need custom exit handling beyond what transports provide
- * 
+ *
  * **Installation:** `npm install pino-final`
- * 
+ *
  * **Usage:**
  * ```typescript
  * import pinoFinal from 'pino-final';
@@ -508,7 +536,7 @@ export {
  *   process.exit(err ? 1 : 0);
  * });
  * ```
- * 
+ *
  * @see {@link https://github.com/pinojs/pino-final | pino-final GitHub}
  */
 
@@ -530,19 +558,20 @@ function flushAndExit(signal: string): void {
   // Suppress shutdown log for CLI tools (generators) to reduce noise
   // Only log for beforeExit in non-CLI contexts (web servers, API routes, etc.)
   // Check for pnpm-specific env vars or generator/bin script paths
-  const isCliTool = process.env['PNPM_SCRIPT_SRC_DIR'] !== undefined ||
-                    process.env['PNPM_PACKAGE_NAME'] !== undefined ||
-                    process.argv[1]?.includes('generators') ||
-                    process.argv[1]?.includes('bin/');
-  
+  const isCliTool =
+    process.env['PNPM_SCRIPT_SRC_DIR'] !== undefined ||
+    process.env['PNPM_PACKAGE_NAME'] !== undefined ||
+    process.argv[1]?.includes('generators') ||
+    process.argv[1]?.includes('bin/');
+
   // Only log shutdown message for non-CLI tools or for actual termination signals (SIGTERM/SIGINT)
-  if (!isCliTool || (signal !== 'beforeExit')) {
+  if (!isCliTool || signal !== 'beforeExit') {
     // Log the shutdown signal (this log will be flushed)
     // Pino API is object-first, but we structure it to emphasize the message
     // eslint-disable-next-line architectural-rules/enforce-message-first-logger-api -- Pino's native API is object-first
     logger.info({ signal }, 'Process shutting down, flushing logs...');
   }
-  
+
   // Flush all buffered logs
   logger.flush((err?: Error) => {
     if (err) {
@@ -550,7 +579,7 @@ function flushAndExit(signal: string): void {
       // This is inside a flush callback, so the rule allows it (checks for 'flush' in surrounding text)
       console.error('Failed to flush logs on shutdown:', err);
     }
-    
+
     // Exit process after flush completes (only for termination signals, not beforeExit)
     if (signal === 'SIGTERM' || signal === 'SIGINT') {
       // eslint-disable-next-line unicorn/no-process-exit, n/no-process-exit -- Intentional process termination after signal
@@ -561,16 +590,16 @@ function flushAndExit(signal: string): void {
 
 /**
  * Register graceful shutdown handlers for the logger
- * 
+ *
  * This ensures all buffered logs are flushed before the process exits.
  * Handlers are registered for:
  * - `beforeExit`: Normal exit (all work done, event loop empty)
  * - `SIGTERM`: Container/orchestrator shutdown signal
  * - `SIGINT`: Ctrl+C interrupt signal
- * 
+ *
  * **Note:** These handlers are automatically registered when this module is imported.
  * They are idempotent (only registered once even if module is imported multiple times).
- * 
+ *
  * **Vercel Note:** Vercel's infrastructure handles log flushing automatically,
  * but these handlers provide additional safety for local development and
  * self-hosted deployments.
@@ -609,16 +638,16 @@ registerShutdownHandlers();
 
 /**
  * Manually flush all buffered logs
- * 
+ *
  * Use this in critical paths (e.g., before throwing an error that will crash the process)
  * to ensure all logs are written.
- * 
+ *
  * @param callback - Optional callback when flush completes
- * 
+ *
  * @example
  * ```typescript
  * import { flushLogs } from '@heyclaude/shared-runtime/logger';
- * 
+ *
  * // Flush before critical error
  * logger.error('Critical error occurred');
  * flushLogs(() => {
@@ -636,36 +665,36 @@ export function flushLogs(callback?: (err?: Error) => void): void {
 
 /**
  * @fileoverview Conditional Logging
- * 
+ *
  * **Use Pino's native API directly - no wrappers needed:**
- * 
+ *
  * Pino provides all level checking methods natively:
- * 
+ *
  * ```typescript
  * import { logger } from '@heyclaude/shared-runtime/logger';
- * 
+ *
  * // Check if level is enabled (Pino native)
  * if (logger.isLevelEnabled('debug')) {
  *   const debugData = computeExpensiveDebugInfo();
  *   logger.debug({ data: debugData }, 'Debug info');
  * }
- * 
+ *
  * // Get current level (Pino native)
  * const currentLevel = logger.level;    // 'info' (string)
  * const levelValue = logger.levelVal;    // 30 (number)
  * ```
- * 
+ *
  * **Available Pino Native Methods:**
  * - `logger.isLevelEnabled(level)` - Check if a level is enabled
  * - `logger.level` - Current level name (string: 'trace', 'debug', 'info', 'warn', 'error', 'fatal')
  * - `logger.levelVal` - Current level value (number: 10, 20, 30, 40, 50, 60)
  * - `logger.child({ context })` - Create child logger with context
- * 
+ *
  * **Why no wrappers?**
  * - Pino already provides all these methods natively
  * - Wrappers add unnecessary complexity and maintenance burden
  * - Direct Pino API is more maintainable and aligns with Pino best practices
- * 
+ *
  * @see {@link https://getpino.io/#/docs/api#logger-islevelenabled-level | Pino isLevelEnabled}
  * @see {@link https://getpino.io/#/docs/api#logger-level | Pino level property}
  * @see {@link https://getpino.io/#/docs/api#logger-child | Pino child logger}
@@ -677,16 +706,16 @@ export function flushLogs(callback?: (err?: Error) => void): void {
 
 /**
  * Normalize any error value into an Error instance.
- * 
+ *
  * **Why this is needed:**
  * - Pino has `stdSerializers.err` (serializes Error objects)
  * - Pino does NOT normalize unknown types → Error
  * - This function fills that gap
- * 
+ *
  * **Always normalize errors before logging:**
  * ```typescript
  * import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
- * 
+ *
  * try {
  *   // ...
  * } catch (error) {
@@ -694,31 +723,31 @@ export function flushLogs(callback?: (err?: Error) => void): void {
  *   logger.error({ err: normalized, operation: 'MyOp' }, 'Operation failed');
  * }
  * ```
- * 
+ *
  * **Handles all error types:**
  * - ✅ Error instances → Returns as-is
  * - ✅ Strings → Wraps in new Error
  * - ✅ Objects → JSON stringifies
  * - ✅ Unknown types → Uses fallback message
- * 
+ *
  * @param error - The error to normalize (can be any type: Error, string, object, unknown)
  * @param fallbackMessage - Message to use if error cannot be converted (default: 'Unknown error')
  * @returns An Error instance that can be safely logged with Pino
- * 
+ *
  * @example
  * ```typescript
  * // Error instance
  * const err1 = normalizeError(new Error('Something went wrong'), 'Fallback');
  * // Returns: Error('Something went wrong')
- * 
+ *
  * // String
  * const err2 = normalizeError('String error', 'Fallback');
  * // Returns: Error('String error')
- * 
+ *
  * // Object
  * const err3 = normalizeError({ code: 500, message: 'Server error' }, 'Fallback');
  * // Returns: Error('{"code":500,"message":"Server error"}')
- * 
+ *
  * // Unknown type
  * const err4 = normalizeError(null, 'Fallback');
  * // Returns: Error('Fallback')
@@ -734,34 +763,34 @@ export function normalizeError(error: unknown, fallbackMessage = 'Unknown error'
 
 /**
  * @fileoverview Comprehensive Usage Patterns
- * 
+ *
  * This section documents common usage patterns for different scenarios.
  * All examples use Pino's native object-first API.
- * 
+ *
  * **Key Principles:**
  * 1. Always normalize errors before logging
  * 2. Use object-first API: `logger.error({ err, ...context }, 'message')`
  * 3. Use `logger.child()` for request-scoped context (not `createLogger()`)
  * 4. Use `createLogger()` only for custom logger instances (cache-safe, different service, etc.)
- * 
+ *
  * **Pattern 1: Server Components (Next.js Pages)**
- * 
+ *
  * Use request-scoped child logger for proper context tracking:
- * 
+ *
  * ```typescript
  * import { connection } from 'next/server';
  * import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
- * 
+ *
  * export default async function MyPage() {
  *   // Defer to request time (required for Cache Components)
  *   await connection();
- * 
+ *
  *   // Create request-scoped logger with context
  *   const reqLogger = logger.child({
  *     operation: 'MyPage',
  *     route: '/my-page',
  *   });
- * 
+ *
  *   try {
  *     reqLogger.info({ section: 'data-loading' }, 'Loading data');
  *     const data = await fetchData();
@@ -774,22 +803,22 @@ export function normalizeError(error: unknown, fallbackMessage = 'Unknown error'
  *   }
  * }
  * ```
- * 
+ *
  * **Pattern 2: API Routes**
- * 
+ *
  * Use request-scoped logger with route context:
- * 
+ *
  * ```typescript
  * import { NextRequest, NextResponse } from 'next/server';
  * import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
- * 
+ *
  * export async function POST(request: NextRequest) {
  *   const reqLogger = logger.child({
  *     operation: 'POST',
  *     route: '/api/endpoint',
  *     method: 'POST',
  *   });
- * 
+ *
  *   try {
  *     const body = await request.json();
  *     reqLogger.info({ bodySize: JSON.stringify(body).length }, 'Processing request');
@@ -802,43 +831,43 @@ export function normalizeError(error: unknown, fallbackMessage = 'Unknown error'
  *   }
  * }
  * ```
- * 
+ *
  * **Pattern 3: Edge Functions**
- * 
+ *
  * Use request-scoped logger and flush before returning:
- * 
+ *
  * ```typescript
  * import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
- * 
+ *
  * export async function handler(request: Request) {
  *   const reqLogger = logger.child({
  *     function: 'my-handler',
  *   });
- * 
+ *
  *   try {
  *     // ...
  *     return Response.json({ success: true });
  *   } catch (error) {
  *     const normalized = normalizeError(error, 'Handler failed');
  *     reqLogger.error({ err: normalized }, 'Handler failed');
- *     
+ *
  *     // Flush before returning (edge functions may terminate quickly)
  *     await new Promise<void>((resolve) => {
  *       reqLogger.flush(() => resolve());
  *     });
- *     
+ *
  *     return Response.json({ error: 'Failed' }, { status: 500 });
  *   }
  * }
  * ```
- * 
+ *
  * **Pattern 4: Cached Components (Default Logger is Cache-Safe)**
- * 
+ *
  * The default logger already has timestamps disabled, so it's safe for cached components:
- * 
+ *
  * ```typescript
  * import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
- * 
+ *
  * // Default logger is cache-safe (no timestamps, no Date.now() calls)
  * export default async function CachedPage() {
  *   try {
@@ -851,14 +880,14 @@ export function normalizeError(error: unknown, fallbackMessage = 'Unknown error'
  *   }
  * }
  * ```
- * 
+ *
  * **Pattern 5: Data Layer Functions**
- * 
+ *
  * Receive request-scoped logger from parent component:
- * 
+ *
  * ```typescript
  * import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
- * 
+ *
  * export async function fetchUserData(
  *   userId: string,
  *   reqLogger: ReturnType<typeof logger.child>
@@ -866,59 +895,59 @@ export function normalizeError(error: unknown, fallbackMessage = 'Unknown error'
  *   try {
  *     reqLogger.info({ rpcName: 'get_user', userId }, 'Calling RPC');
  *     const { data, error } = await supabase.rpc('get_user', { user_id: userId });
- *     
+ *
  *     if (error) throw error;
- *     
+ *
  *     reqLogger.info({ rpcName: 'get_user', userId }, 'RPC completed');
  *     return data;
  *   } catch (error) {
  *     const normalized = normalizeError(error, 'RPC failed');
- *     reqLogger.error({ 
- *       err: normalized, 
- *       rpcName: 'get_user', 
- *       userId 
+ *     reqLogger.error({
+ *       err: normalized,
+ *       rpcName: 'get_user',
+ *       userId
  *     }, 'RPC failed');
  *     throw normalized;
  *   }
  * }
- * 
+ *
  * // Usage in parent component:
  * const reqLogger = logger.child({ operation: 'MyPage', route: '/my-page' });
  * const userData = await fetchUserData(userId, reqLogger);
  * ```
- * 
+ *
  * **Pattern 6: Client Components**
- * 
+ *
  * Use `useLoggedAsync` hook for automatic error logging:
- * 
+ *
  * ```typescript
  * 'use client';
- * 
+ *
  * import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
- * 
+ *
  * export function MyComponent() {
  *   const runLoggedAsync = useLoggedAsync({
  *     scope: 'MyComponent',
  *     defaultMessage: 'Action failed',
  *   });
- * 
+ *
  *   const handleClick = async () => {
  *     await runLoggedAsync(async () => {
  *       await doSomething();
  *     });
  *   };
- * 
+ *
  *   return <button onClick={handleClick}>Click</button>;
  * }
  * ```
- * 
+ *
  * **Pattern 7: Inngest Functions**
- * 
+ *
  * Use request-scoped logger with function context:
- * 
+ *
  * ```typescript
  * import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
- * 
+ *
  * export const myFunction = inngest.createFunction(
  *   { id: 'my-function' },
  *   { event: 'my.event' },
@@ -927,7 +956,7 @@ export function normalizeError(error: unknown, fallbackMessage = 'Unknown error'
  *       functionId: 'my-function',
  *       eventId: event.id,
  *     });
- * 
+ *
  *     try {
  *       reqLogger.info({ step: 'processing' }, 'Processing event');
  *       // ...
@@ -939,14 +968,14 @@ export function normalizeError(error: unknown, fallbackMessage = 'Unknown error'
  *   }
  * );
  * ```
- * 
+ *
  * **Pattern 8: Utility Functions (No Request Context)**
- * 
+ *
  * Use default logger for simple utilities:
- * 
+ *
  * ```typescript
  * import { logger, normalizeError } from '@heyclaude/shared-runtime/logger';
- * 
+ *
  * export function myUtility(input: string) {
  *   try {
  *     logger.debug({ input }, 'Processing utility');
@@ -959,40 +988,40 @@ export function normalizeError(error: unknown, fallbackMessage = 'Unknown error'
  *   }
  * }
  * ```
- * 
+ *
  * **Common Mistakes to Avoid:**
- * 
+ *
  * ❌ **Don't use `createLogger()` for request context:**
  * ```typescript
  * // WRONG - creates new logger instance
  * const reqLogger = createLogger({ operation: 'MyPage' });
- * 
+ *
  * // CORRECT - creates child logger with context
  * const reqLogger = logger.child({ operation: 'MyPage', route: '/my-page' });
  * ```
- * 
+ *
  * ❌ **Don't use message-first API:**
  * ```typescript
  * // WRONG - message-first (contradicts Pino)
  * logger.error('Message', error, { context });
- * 
+ *
  * // CORRECT - object-first (Pino native)
  * const normalized = normalizeError(error, 'Message');
  * logger.error({ err: normalized, ...context }, 'Message');
  * ```
- * 
+ *
  * ❌ **Don't skip error normalization:**
  * ```typescript
  * // WRONG - may fail if error is not Error instance
  * logger.error({ err: error }, 'Failed');
- * 
+ *
  * // CORRECT - always normalize first
  * const normalized = normalizeError(error, 'Failed');
  * logger.error({ err: normalized }, 'Failed');
  * ```
- * 
+ *
  * **Summary:**
- * 
+ *
  * - **Default logger**: Use for most cases
  * - **`logger.child({ context })`**: Use for request-scoped logging (adds context)
  * - **`createLogger({ options })`**: Use for custom logger instances (cache-safe, different service, etc.)

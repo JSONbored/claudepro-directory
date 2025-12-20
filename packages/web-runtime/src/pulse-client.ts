@@ -7,7 +7,7 @@ import type {
   focus_area_type,
   interaction_type,
   content_category,
-} from '@heyclaude/data-layer/prisma';
+} from '@prisma/client';
 import { logger } from './logger.ts';
 
 // Lazy import server actions to avoid client/server boundary issues during HMR
@@ -34,7 +34,7 @@ export async function trackInteraction(params: {
 }): Promise<void> {
   // Lazy import to avoid HMR issues with server actions
   const { trackInteractionAction } = await import('./actions/pulse.ts');
-  
+
   // Automatically populate session_id if not provided (for better analytics tracking)
   let sessionId = params.session_id;
   if (!sessionId && typeof window !== 'undefined') {
@@ -45,7 +45,7 @@ export async function trackInteraction(params: {
       // Silently fail if session ID generation fails (non-critical)
     }
   }
-  
+
   const result = await trackInteractionAction({
     interaction_type: params.interaction_type,
     content_type: params.content_type ?? null,
@@ -120,7 +120,13 @@ export async function trackNewsletterEvent(
 export async function trackUsage(params: {
   content_type: content_category;
   content_slug: string;
-  action_type: 'copy' | 'download_zip' | 'download_markdown' | 'llmstxt' | 'download_mcpb' | 'download_code';
+  action_type:
+    | 'copy'
+    | 'download_zip'
+    | 'download_markdown'
+    | 'llmstxt'
+    | 'download_mcpb'
+    | 'download_code';
 }): Promise<void> {
   // Lazy import to avoid HMR issues with server actions
   const { trackUsageAction } = await import('./actions/pulse.ts');

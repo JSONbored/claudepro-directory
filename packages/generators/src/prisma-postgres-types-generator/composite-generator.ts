@@ -23,7 +23,7 @@ interface CompositeDependencies {
 
 /**
  * Generate TypeScript types and Zod schemas for all composite types
- * 
+ *
  * Generates files in dependency order to ensure nested composites are available.
  */
 export async function generateCompositeTypes(
@@ -176,20 +176,16 @@ function generateCompositeFile(
   if (config.generateZod) {
     // Import zod - use direct import since generated files will be used in packages that have zod
     lines.push("import { z } from 'zod';", '');
-    
+
     // Import nested composite types and schemas
     if (dependencies.imports.size > 0) {
       for (const depName of Array.from(dependencies.imports).sort()) {
         const depSafeName = toSafeIdentifier(depName);
         const depTypeName = toPascalCase(depSafeName);
         const depSchemaName = `${toCamelCase(depSafeName)}Schema`;
-        lines.push(
-          `import type { ${depTypeName} } from './${depSafeName}';`
-        );
+        lines.push(`import type { ${depTypeName} } from './${depSafeName}';`);
         if (config.generateZod) {
-          lines.push(
-            `import { ${depSchemaName} } from './${depSafeName}';`
-          );
+          lines.push(`import { ${depSchemaName} } from './${depSafeName}';`);
         }
       }
       lines.push('');
@@ -202,19 +198,14 @@ function generateCompositeFile(
     lines.push(`export type ${typeName} = {`);
 
     for (const attr of attributes) {
-      const tsType = mapPostgresTypeToTypeScript(
-        attr.udtName,
-        attr.nullable,
-        false,
-        context
-      );
+      const tsType = mapPostgresTypeToTypeScript(attr.udtName, attr.nullable, false, context);
 
       // Handle nested composite types and arrays of composites
       // Note: mapPostgresTypeToTypeScript already handles composites and arrays,
       // but we need to override for proper type references
       // IMPORTANT: We need to preserve nullable handling when overriding
       let finalType = tsType;
-      
+
       // Check if attribute is an array of composite
       if (attr.udtName.startsWith('_')) {
         const baseType = attr.udtName.slice(1);
@@ -251,11 +242,7 @@ function generateCompositeFile(
     lines.push(`export const ${schemaName} = z.object({`);
 
     for (const attr of attributes) {
-      const zodType = generateZodTypeForAttribute(
-        attr,
-        allCompositeTypes,
-        enums
-      );
+      const zodType = generateZodTypeForAttribute(attr, allCompositeTypes, enums);
       const description = `Attribute: ${attr.name}`;
       lines.push(`  /** ${description} */`);
       lines.push(`  ${toSafeIdentifier(attr.name)}: ${zodType},`);
@@ -266,19 +253,11 @@ function generateCompositeFile(
     // Type inference from Zod
     if (config.generateTypes) {
       // Type was already defined above, add alias from Zod for validation
-      lines.push(
-        '/**',
-        ' * Type inference from Zod schema (should match type above)',
-        ' */'
-      );
+      lines.push('/**', ' * Type inference from Zod schema (should match type above)', ' */');
       lines.push(`export type ${typeName}FromZod = z.infer<typeof ${schemaName}>;`);
     } else {
       // Only Zod generated, create the type from Zod
-      lines.push(
-        '/**',
-        ' * Type inference from Zod schema',
-        ' */'
-      );
+      lines.push('/**', ' * Type inference from Zod schema', ' */');
       lines.push(`export type ${typeName} = z.infer<typeof ${schemaName}>;`);
     }
     lines.push('');

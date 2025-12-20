@@ -18,7 +18,8 @@
  * @see https://resend.com/docs/webhooks
  */
 
-import type { email_engagement_summaryCreateInput } from '@heyclaude/database-types/prisma';
+import { Prisma } from '@prisma/client';
+type email_engagement_summaryCreateInput = Prisma.email_engagement_summaryCreateInput;
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest, type ResendEmailEventData } from '../../client';
@@ -85,9 +86,9 @@ async function incrementEngagementCounter(
 
   if (healthStatus) updateData.health_status = healthStatus;
 
-      // Type assertion needed due to exactOptionalPropertyTypes mismatch between dist/src types
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await service.upsertEmailEngagementSummary(updateData as any);
+  // Type assertion needed due to exactOptionalPropertyTypes mismatch between dist/src types
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await service.upsertEmailEngagementSummary(updateData as any);
 }
 
 /**
@@ -117,20 +118,16 @@ export const handleResendWebhook = inngest.createFunction(
     const eventName = event.name as ResendEventType;
     const action = getEventAction(eventName);
 
-    const logContext = createWebAppContextWithId(
-      '/inngest/resend/webhook',
-      'handleResendWebhook'
-    );
+    const logContext = createWebAppContextWithId('/inngest/resend/webhook', 'handleResendWebhook');
 
     const emailData = event.data as ResendEmailEventData;
     const emails = emailData.to || [];
     const emailId = emailData.email_id;
 
-    logger.info({ ...logContext,
-      eventName,
-      action,
-      emailId,
-      emailCount: emails.length, }, 'Processing Resend webhook');
+    logger.info(
+      { ...logContext, eventName, action, emailId, emailCount: emails.length },
+      'Processing Resend webhook'
+    );
 
     // Route to appropriate handler based on event type
     switch (action) {
@@ -239,9 +236,10 @@ export const handleResendWebhook = inngest.createFunction(
 
       case 'complained':
         // Blocklist, unsubscribe immediately - this is critical for sender reputation
-        logger.warn({ ...logContext,
-          emailId,
-          emailCount: emails.length, }, 'Processing email complaint - sender reputation impact');
+        logger.warn(
+          { ...logContext, emailId, emailCount: emails.length },
+          'Processing email complaint - sender reputation impact'
+        );
 
         for (const email of emails) {
           await step.run(`blocklist-complaint-${email}`, async () => {
@@ -255,7 +253,10 @@ export const handleResendWebhook = inngest.createFunction(
               });
             } catch (error) {
               const normalized = normalizeError(error, 'Failed to add complaint to blocklist');
-              logger.error({ err: normalized, ...logContext }, 'Blocklist update failed for complaint');
+              logger.error(
+                { err: normalized, ...logContext },
+                'Blocklist update failed for complaint'
+              );
             }
           });
 
@@ -282,10 +283,10 @@ export const handleResendWebhook = inngest.createFunction(
 
       case 'delivery_delayed':
         // Log for monitoring - delays might indicate ISP issues
-        logger.warn({ ...logContext,
-          emailId,
-          emails,
-          subject: emailData.subject, }, 'Email delivery delayed');
+        logger.warn(
+          { ...logContext, emailId, emails, subject: emailData.subject },
+          'Email delivery delayed'
+        );
         // No action taken, just tracking
         break;
 
@@ -294,11 +295,10 @@ export const handleResendWebhook = inngest.createFunction(
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      action,
-      emailId,
-      processedCount: emails.length, }, 'Resend webhook processed');
+    logger.info(
+      { ...logContext, durationMs, action, emailId, processedCount: emails.length },
+      'Resend webhook processed'
+    );
 
     return {
       success: true,

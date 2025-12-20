@@ -1,17 +1,17 @@
 /**
  * Error Normalization Utilities
- * 
+ *
  * Provides error normalization functions that work in both client and server contexts.
- * 
+ *
  * **⚠️ IMPORTANT: Universal Module (Client & Server Compatible)**
  * - ✅ **SAFE** to import in client components (`'use client'`)
  * - ✅ **SAFE** to import in server components (server-only)
  * - Error normalization is context-agnostic (no browser or server APIs)
- * 
+ *
  * **Usage:**
  * - **Client components**: Import from {@link ../logging/client | Client Logging Barrel}
  * - **Server components**: Import from {@link ../logging/server | Server Logging Barrel}
- * 
+ *
  * @module web-runtime/errors
  * @see {@link ../logging/client | Client Logging Barrel} - Client-side logging utilities
  * @see {@link ../logging/server | Server Logging Barrel} - Server-side logging utilities
@@ -36,24 +36,24 @@ function sanitizeContext(context: ContextInput): LoggerContext | undefined {
 
 /**
  * Normalize unknown error types to Error objects
- * 
+ *
  * **Universal Function (Client & Server Compatible)**
  * - ✅ **SAFE** to call from client components
  * - ✅ **SAFE** to call from server components
  * - No browser or server-specific dependencies
- * 
+ *
  * **Usage:**
  * - **Client components**: Import from {@link ../logging/client | Client Logging Barrel}
  * - **Server components**: Import from {@link ../logging/server | Server Logging Barrel}
- * 
+ *
  * **Implementation:**
  * - Re-exports `normalizeError` from `@heyclaude/shared-runtime`
  * - Provides full PostgrestError handling and proper error normalization
- * 
+ *
  * @param error - Unknown error value (Error, string, object, PostgrestError, etc.)
  * @param fallbackMessage - Fallback message if error cannot be converted
  * @returns Normalized Error object
- * 
+ *
  * @see {@link ../logging/client | Client Logging Barrel} - Client-side logging utilities
  * @see {@link ../logging/server | Server Logging Barrel} - Server-side logging utilities
  * @see {@link @heyclaude/shared-runtime | Shared Runtime} - Full implementation
@@ -68,7 +68,7 @@ export function logActionFailure(
   context?: ContextInput
 ): Error {
   const normalized = normalizeError(error);
-  
+
   // Note: Errors are logged with operation and context
   // Client-side errors (client components)
   // Server actions will have context from their logger
@@ -82,11 +82,7 @@ export function logActionFailure(
   return normalized;
 }
 
-export function logClientWarning(
-  message: string,
-  error: unknown,
-  context?: ContextInput
-): Error {
+export function logClientWarning(message: string, error: unknown, context?: ContextInput): Error {
   const normalized = normalizeError(error);
   const sanitized = sanitizeContext(context);
   // Pino's stdSerializers.err automatically handles error serialization

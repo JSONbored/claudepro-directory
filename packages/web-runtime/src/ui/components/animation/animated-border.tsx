@@ -46,7 +46,7 @@ export function AnimatedBorder({
         maskComposite: 'exclude',
       }}
     >
-      <div className="h-full w-full rounded-[inherit] bg-background" />
+      <div className="bg-background h-full w-full rounded-[inherit]" />
     </div>
   );
 }

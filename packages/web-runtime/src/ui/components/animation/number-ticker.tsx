@@ -67,7 +67,7 @@ function NumberTickerComponent({
 }: NumberTickerProps) {
   const shouldReduceMotion = useReducedMotion();
   const isPageInView = usePageInView();
-  
+
   // For reduced motion, display value instantly without animation
   const [displayValue, setDisplayValue] = useState(
     `${prefix}${value.toFixed(decimalPlaces)}${suffix}`
@@ -109,11 +109,14 @@ function NumberTickerComponent({
   }, [value, shouldReduceMotion, isPageInView, prefix, suffix, decimalPlaces]);
 
   // Use useTimeout for animation delay (handles delay === 0 as immediate execution)
-  useTimeout(() => {
-    if (!shouldReduceMotion && isPageInView) {
-      springRef.current.set(value);
-    }
-  }, !shouldReduceMotion && isPageInView && delay >= 0 ? delay : null);
+  useTimeout(
+    () => {
+      if (!shouldReduceMotion && isPageInView) {
+        springRef.current.set(value);
+      }
+    },
+    !shouldReduceMotion && isPageInView && delay >= 0 ? delay : null
+  );
 
   return (
     <span

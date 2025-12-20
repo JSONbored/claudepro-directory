@@ -28,10 +28,8 @@ import { runBumpVersion } from '../commands/bump-version.ts';
 import { logger } from '../toolkit/logger.ts';
 
 runBumpVersion().catch((error) => {
-  logger.error(
-    '❌ Unhandled error in main',
-    normalizeError(error, 'Version bump failed'),
-    { command: 'bump-version' }
-  );
+  logger.error('❌ Unhandled error in main', normalizeError(error, 'Version bump failed'), {
+    command: 'bump-version',
+  });
   process.exit(1);
 });

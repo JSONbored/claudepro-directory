@@ -40,8 +40,11 @@
  * ```
  */
 
-import type { experience_level, content_category } from '@heyclaude/data-layer/prisma';
-import { ExperienceLevel, ContentCategory } from '@heyclaude/data-layer/prisma';
+import {
+  experience_level as ExperienceLevel,
+  content_category as ContentCategory,
+} from '@prisma/client';
+import type { experience_level, content_category } from '@prisma/client';
 import { ensureStringArray, getMetadata } from '../../../utils/content-helpers.ts';
 import { getCategoryDisplayName } from '../../../utils/category-display-names.ts';
 // Import client-safe utilities directly from content.ts
@@ -105,14 +108,9 @@ export interface GenericConfigCardProps extends ConfigCardProps {
 }
 
 // Experience level validation helper
-function isExperienceLevel(
-  value: unknown
-): value is experience_level {
+function isExperienceLevel(value: unknown): value is experience_level {
   const EXPERIENCE_LEVEL_VALUES = Object.values(ExperienceLevel) as readonly experience_level[];
-  return (
-    typeof value === 'string' &&
-    EXPERIENCE_LEVEL_VALUES.includes(value as experience_level)
-  );
+  return typeof value === 'string' && EXPERIENCE_LEVEL_VALUES.includes(value as experience_level);
 }
 
 /**
@@ -140,11 +138,12 @@ export const ConfigCard = memo(
         slug: 'slug' in item ? (typeof item.slug === 'string' ? item.slug : null) : null,
         category: 'category' in item && isValidCategory(item.category) ? item.category : null,
       });
+      const defaultCategoryValue = 'agents' as content_category;
       const cardCategory: content_category = isValidCategory(
-        item.category ?? ContentCategory.agents
+        item.category ?? defaultCategoryValue
       )
-        ? ((item.category ?? ContentCategory.agents) as content_category)
-        : ContentCategory.agents;
+        ? ((item.category ?? defaultCategoryValue) as content_category)
+        : defaultCategoryValue;
       const cardSlug = typeof item.slug === 'string' ? item.slug : null;
       const { togglePin, isPinned } = usePinboard();
       const cardConfig = useComponentCardConfig();
@@ -153,7 +152,9 @@ export const ConfigCard = memo(
       // Use pre-highlighted HTML from edge function (unified-search)
       const highlightedTitle = useMemo(() => {
         if ('title_highlighted' in item && item.title_highlighted) {
-          return <HighlightedText html={item.title_highlighted as string} fallback={displayTitle} />;
+          return (
+            <HighlightedText html={item.title_highlighted as string} fallback={displayTitle} />
+          );
         }
         return displayTitle;
       }, [displayTitle, item]);
@@ -183,7 +184,9 @@ export const ConfigCard = memo(
           const highlightedTagsArray = item.tags_highlighted as string[];
           return tags.map((tag: string, index: number) => ({
             original: tag,
-            highlighted: <HighlightedText html={highlightedTagsArray[index] || tag} fallback={tag} />,
+            highlighted: (
+              <HighlightedText html={highlightedTagsArray[index] || tag} fallback={tag} />
+            ),
           }));
         }
 
@@ -200,7 +203,9 @@ export const ConfigCard = memo(
         }
 
         if ('author_highlighted' in item && item.author_highlighted) {
-          return <HighlightedText html={item.author_highlighted as string} fallback={item.author} />;
+          return (
+            <HighlightedText html={item.author_highlighted as string} fallback={item.author} />
+          );
         }
 
         return item.author;
@@ -233,9 +238,10 @@ export const ConfigCard = memo(
       // Track card clicks
       const handleCardClickPulse = useCallback(() => {
         if (!item.slug) return;
-        const category = isValidCategory(item.category ?? ContentCategory.agents)
-          ? (item.category ?? ContentCategory.agents)
-          : ContentCategory.agents;
+        const defaultCategoryValue = 'agents' as content_category;
+        const category = isValidCategory(item.category ?? defaultCategoryValue)
+          ? ((item.category ?? defaultCategoryValue) as content_category)
+          : defaultCategoryValue;
         pulse
           .click({
             category: category as content_category,
@@ -248,10 +254,15 @@ export const ConfigCard = memo(
             },
           })
           .catch((error) => {
-            logClientError('ConfigCard: card click pulse failed', normalizeError(error), 'ConfigCard.handleCardClick', {
-              category: (item.category ?? ContentCategory.agents) as content_category,
-              slug: item.slug ?? '',
-            });
+            logClientError(
+              'ConfigCard: card click pulse failed',
+              normalizeError(error),
+              'ConfigCard.handleCardClick',
+              {
+                category: (item.category ?? ContentCategory.agents) as content_category,
+                slug: item.slug ?? '',
+              }
+            );
           });
       }, [pulse, item.category, item.slug, position, searchQuery]);
 
@@ -274,11 +285,13 @@ export const ConfigCard = memo(
                 slug: item.slug,
                 query: searchQuery.trim(),
                 metadata: {
-                  has_title_highlight: Boolean('title_highlighted' in item && item.title_highlighted),
+                  has_title_highlight: Boolean(
+                    'title_highlighted' in item && item.title_highlighted
+                  ),
                   has_description_highlight: Boolean(
                     'description_highlighted' in item &&
-                      item.description_highlighted &&
-                      item.description
+                    item.description_highlighted &&
+                    item.description
                   ),
                   has_tag_highlight: Boolean('tags_highlighted' in item && item.tags_highlighted),
                   has_author_highlight: Boolean(
@@ -287,10 +300,15 @@ export const ConfigCard = memo(
                 },
               })
               .catch((error) => {
-                logClientError('ConfigCard: highlight analytics pulse failed', normalizeError(error), 'ConfigCard.handleHighlight', {
-                  category: category as content_category,
-                  slug: item.slug ?? '',
-                });
+                logClientError(
+                  'ConfigCard: highlight analytics pulse failed',
+                  normalizeError(error),
+                  'ConfigCard.handleHighlight',
+                  {
+                    category: category as content_category,
+                    slug: item.slug ?? '',
+                  }
+                );
               });
           }
         }
@@ -299,9 +317,11 @@ export const ConfigCard = memo(
       // Compute targetPath early
       const targetPath = item.slug
         ? getContentItemUrl({
-            category: (isValidCategory(item.category ?? ContentCategory.agents)
-              ? (item.category ?? ContentCategory.agents)
-              : ContentCategory.agents) as content_category,
+            category: (() => {
+              const defaultCategoryValue = 'agents' as content_category;
+              const cat = item.category ?? defaultCategoryValue;
+              return isValidCategory(cat) ? (cat as content_category) : defaultCategoryValue;
+            })(),
             slug: item.slug,
             subcategory:
               'subcategory' in item ? (item.subcategory as string | null | undefined) : undefined,
@@ -314,19 +334,25 @@ export const ConfigCard = memo(
         const url = `${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`;
         await copyLink(url);
 
-        const category = isValidCategory(item.category ?? ContentCategory.agents)
-          ? (item.category ?? ContentCategory.agents)
-          : ContentCategory.agents;
+        const defaultCategoryValue = 'agents' as content_category;
+        const category = isValidCategory(item.category ?? defaultCategoryValue)
+          ? ((item.category ?? defaultCategoryValue) as content_category)
+          : defaultCategoryValue;
         pulse
           .copy({
             category: category as content_category,
             slug: item.slug,
           })
           .catch((error) => {
-            logClientError('ConfigCard: swipe copy pulse failed', normalizeError(error), 'ConfigCard.handleSwipeLeftCopy', {
-              category: category as content_category,
-              slug: item.slug ?? undefined,
-            });
+            logClientError(
+              'ConfigCard: swipe copy pulse failed',
+              normalizeError(error),
+              'ConfigCard.handleSwipeLeftCopy',
+              {
+                category: category as content_category,
+                slug: item.slug ?? undefined,
+              }
+            );
           });
 
         toasts.success.copied();
@@ -361,17 +387,23 @@ export const ConfigCard = memo(
           return;
         }
 
-        const categoryValue = item.category ?? ContentCategory.agents;
+        const defaultCategoryValue = 'agents' as content_category;
+        const categoryValue = item.category ?? defaultCategoryValue;
         if (!isValidCategory(categoryValue)) {
           const normalized = normalizeError(
             'Invalid content type',
             'Invalid content type for bookmark'
           );
-          logClientError('Invalid content type for bookmark', normalized, 'ConfigCard.handleSwipeLeftBookmark', {
-            component: 'ConfigCard',
-            contentType: categoryValue,
-            contentSlug: item.slug,
-          });
+          logClientError(
+            'Invalid content type for bookmark',
+            normalized,
+            'ConfigCard.handleSwipeLeftBookmark',
+            {
+              component: 'ConfigCard',
+              contentType: categoryValue,
+              contentSlug: item.slug,
+            }
+          );
           toasts.error.fromError(new Error(`Invalid content type: ${categoryValue}`));
           return;
         }
@@ -391,9 +423,15 @@ export const ConfigCard = memo(
           });
 
           // Response schema is now properly extracted
-          if (result && typeof result === 'object' && 'data' in result && 
-              result.data && typeof result.data === 'object' && 'success' in result.data &&
-              result.data['success'] === true) {
+          if (
+            result &&
+            typeof result === 'object' &&
+            'data' in result &&
+            result.data &&
+            typeof result.data === 'object' &&
+            'success' in result.data &&
+            result.data['success'] === true
+          ) {
             toasts.success.bookmarkAdded();
 
             pulse
@@ -403,21 +441,31 @@ export const ConfigCard = memo(
                 action: 'add',
               })
               .catch((error) => {
-                logClientWarn('ConfigCard: bookmark addition pulse failed', error, 'ConfigCard.handleSwipeLeftBookmark', {
-                  category: validatedCategory,
-                  slug: item.slug ?? undefined,
-                });
+                logClientWarn(
+                  'ConfigCard: bookmark addition pulse failed',
+                  error,
+                  'ConfigCard.handleSwipeLeftBookmark',
+                  {
+                    category: validatedCategory,
+                    slug: item.slug ?? undefined,
+                  }
+                );
               });
 
             router.refresh();
           }
         } catch (error) {
           const normalized = normalizeError(error, 'ConfigCard: Failed to add bookmark via swipe');
-          logClientError('ConfigCard: Failed to add bookmark via swipe', normalized, 'ConfigCard.handleSwipeLeftBookmark', {
-            component: 'ConfigCard',
-            contentType: validatedCategory,
-            contentSlug: item.slug,
-          });
+          logClientError(
+            'ConfigCard: Failed to add bookmark via swipe',
+            normalized,
+            'ConfigCard.handleSwipeLeftBookmark',
+            {
+              component: 'ConfigCard',
+              contentType: validatedCategory,
+              contentSlug: item.slug,
+            }
+          );
           if (error instanceof Error && error.message.includes('signed in')) {
             // Auth error - use callback if provided, otherwise show toast with action button
             if (onAuthRequired) {
@@ -467,24 +515,34 @@ export const ConfigCard = memo(
                 })
                 .catch((error) => {
                   const normalized = normalizeError(error, 'Failed to track copy action');
-                  logClientWarn('[Clipboard] Failed to track copy action', normalized, 'ConfigCard.copyInlineValue', {
-                    category: 'clipboard',
-                    component: 'ConfigCard',
-                    nonCritical: true,
-                    context: 'config_card_quick_copy',
-                    itemCategory: cardCategory,
-                    itemSlug: cardSlug,
-                  });
+                  logClientWarn(
+                    '[Clipboard] Failed to track copy action',
+                    normalized,
+                    'ConfigCard.copyInlineValue',
+                    {
+                      category: 'clipboard',
+                      component: 'ConfigCard',
+                      nonCritical: true,
+                      context: 'config_card_quick_copy',
+                      itemCategory: cardCategory,
+                      itemSlug: cardSlug,
+                    }
+                  );
                 });
             }
           } catch (error) {
             const normalized = normalizeError(error, 'ConfigCard: quick action copy failed');
-            logClientWarn('[Clipboard] Quick action copy failed', normalized, 'ConfigCard.copyInlineValue', {
-              category: 'clipboard',
-              component: 'ConfigCard',
-              recoverable: true,
-              userRetryable: true,
-            });
+            logClientWarn(
+              '[Clipboard] Quick action copy failed',
+              normalized,
+              'ConfigCard.copyInlineValue',
+              {
+                category: 'clipboard',
+                component: 'ConfigCard',
+                recoverable: true,
+                userRetryable: true,
+              }
+            );
             // Show error toast with "Retry" button
             // Note: Retry will attempt to copy the same value again
             toasts.raw.error('Copy failed', {
@@ -532,9 +590,14 @@ export const ConfigCard = memo(
             });
           } catch (error) {
             const normalized = normalizeError(error, 'ConfigCard: failed to toggle pinboard state');
-            logClientError('ConfigCard: failed to toggle pinboard state', normalized, 'ConfigCard.handlePinToggle', {
-              component: 'ConfigCard',
-            });
+            logClientError(
+              'ConfigCard: failed to toggle pinboard state',
+              normalized,
+              'ConfigCard.handlePinToggle',
+              {
+                component: 'ConfigCard',
+              }
+            );
             // Show error toast with "Retry" button
             toasts.raw.error('Unable to update pinboard', {
               description: 'Please try again.',
@@ -551,10 +614,18 @@ export const ConfigCard = memo(
                     });
                   } catch (retryError) {
                     // Error will be handled by the toast above if it fails again
-                    const retryNormalized = normalizeError(retryError, 'ConfigCard: retry pinboard toggle failed');
-                    logClientError('ConfigCard: retry pinboard toggle failed', retryNormalized, 'ConfigCard.handlePinToggle.retry', {
-                      component: 'ConfigCard',
-                    });
+                    const retryNormalized = normalizeError(
+                      retryError,
+                      'ConfigCard: retry pinboard toggle failed'
+                    );
+                    logClientError(
+                      'ConfigCard: retry pinboard toggle failed',
+                      retryNormalized,
+                      'ConfigCard.handlePinToggle.retry',
+                      {
+                        component: 'ConfigCard',
+                      }
+                    );
                   }
                 },
               },
@@ -595,7 +666,7 @@ export const ConfigCard = memo(
       const hasRating = ratingData && ratingData.count > 0;
 
       // Extract collection-specific metadata
-      const isCollection = item.category === ContentCategory.collections;
+      const isCollection = item.category === ('collections' as content_category);
       const collectionType = 'collectionType' in item ? item.collectionType : undefined;
       const collectionDifficulty = 'difficulty' in item ? item.difficulty : undefined;
       const itemCount = 'itemCount' in item ? item.itemCount : undefined;
@@ -639,12 +710,11 @@ export const ConfigCard = memo(
         ...(item.slug ? { viewTransitionSlug: item.slug } : {}),
         onBeforeNavigate: handleCardClickPulse,
         renderTopBadges: () => {
-          const rawCategory = item.category ?? ContentCategory.agents;
-          const category: content_category = isValidCategory(
-            rawCategory
-          )
+          const defaultCategoryValue = 'agents' as content_category;
+          const rawCategory = item.category ?? defaultCategoryValue;
+          const category: content_category = isValidCategory(rawCategory)
             ? (rawCategory as content_category)
-            : ContentCategory.agents;
+            : defaultCategoryValue;
           return (
             <>
               {showCategory && (
@@ -659,7 +729,7 @@ export const ConfigCard = memo(
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>{getCategoryDisplayName(category).pluralTitle}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {getCategoryDisplayName(category).description}
                       </p>
                     </TooltipContent>
@@ -677,21 +747,36 @@ export const ConfigCard = memo(
                           variant="base"
                           style="outline"
                           className={`text-xs font-semibold ${
-                            collectionType === 'starter-kit' ? 'bg-color-badge-collectiontype-starter-kit-bg text-color-badge-collectiontype-starter-kit-text border-color-badge-collectiontype-starter-kit-border' :
-                            collectionType === 'workflow' ? 'bg-color-badge-collectiontype-workflow-bg text-color-badge-collectiontype-workflow-text border-color-badge-collectiontype-workflow-border' :
-                            collectionType === 'advanced-system' ? 'bg-color-badge-collectiontype-advanced-system-bg text-color-badge-collectiontype-advanced-system-text border-color-badge-collectiontype-advanced-system-border' :
-                            collectionType === 'use-case' ? 'bg-color-badge-collectiontype-use-case-bg text-color-badge-collectiontype-use-case-text border-color-badge-collectiontype-use-case-border' :
-                            ''
+                            collectionType === 'starter-kit'
+                              ? 'bg-color-badge-collectiontype-starter-kit-bg text-color-badge-collectiontype-starter-kit-text border-color-badge-collectiontype-starter-kit-border'
+                              : collectionType === 'workflow'
+                                ? 'bg-color-badge-collectiontype-workflow-bg text-color-badge-collectiontype-workflow-text border-color-badge-collectiontype-workflow-border'
+                                : collectionType === 'advanced-system'
+                                  ? 'bg-color-badge-collectiontype-advanced-system-bg text-color-badge-collectiontype-advanced-system-text border-color-badge-collectiontype-advanced-system-border'
+                                  : collectionType === 'use-case'
+                                    ? 'bg-color-badge-collectiontype-use-case-bg text-color-badge-collectiontype-use-case-text border-color-badge-collectiontype-use-case-border'
+                                    : ''
                           }`}
                         >
                           <Layers className="mr-1 h-3 w-3" aria-hidden="true" />
-                          {COLLECTION_TYPE_LABELS[collectionType as keyof typeof COLLECTION_TYPE_LABELS]}
+                          {
+                            COLLECTION_TYPE_LABELS[
+                              collectionType as keyof typeof COLLECTION_TYPE_LABELS
+                            ]
+                          }
                         </UnifiedBadge>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Collection type: {COLLECTION_TYPE_LABELS[collectionType as keyof typeof COLLECTION_TYPE_LABELS]}</p>
-                      <p className="text-xs text-muted-foreground">Type of collection content</p>
+                      <p>
+                        Collection type:{' '}
+                        {
+                          COLLECTION_TYPE_LABELS[
+                            collectionType as keyof typeof COLLECTION_TYPE_LABELS
+                          ]
+                        }
+                      </p>
+                      <p className="text-muted-foreground text-xs">Type of collection content</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -709,10 +794,13 @@ export const ConfigCard = memo(
                             variant="base"
                             style="outline"
                             className={`text-xs font-semibold ${
-                              collectionDifficulty === 'beginner' ? 'bg-color-badge-difficulty-beginner-bg text-color-badge-difficulty-beginner-text border-color-badge-difficulty-beginner-border' :
-                              collectionDifficulty === 'intermediate' ? 'bg-color-badge-difficulty-intermediate-bg text-color-badge-difficulty-intermediate-text border-color-badge-difficulty-intermediate-border' :
-                              collectionDifficulty === 'advanced' ? 'bg-color-badge-difficulty-advanced-bg text-color-badge-difficulty-advanced-text border-color-badge-difficulty-advanced-border' :
-                              ''
+                              collectionDifficulty === 'beginner'
+                                ? 'bg-color-badge-difficulty-beginner-bg text-color-badge-difficulty-beginner-text border-color-badge-difficulty-beginner-border'
+                                : collectionDifficulty === 'intermediate'
+                                  ? 'bg-color-badge-difficulty-intermediate-bg text-color-badge-difficulty-intermediate-text border-color-badge-difficulty-intermediate-border'
+                                  : collectionDifficulty === 'advanced'
+                                    ? 'bg-color-badge-difficulty-advanced-bg text-color-badge-difficulty-advanced-text border-color-badge-difficulty-advanced-border'
+                                    : ''
                             }`}
                           >
                             {collectionDifficulty}
@@ -721,12 +809,12 @@ export const ConfigCard = memo(
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>Experience level: {collectionDifficulty}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {collectionDifficulty === 'beginner' 
+                        <p className="text-muted-foreground text-xs">
+                          {collectionDifficulty === 'beginner'
                             ? 'Suitable for users new to Claude'
                             : collectionDifficulty === 'intermediate'
-                            ? 'Requires some Claude experience'
-                            : 'For power users and developers'}
+                              ? 'Requires some Claude experience'
+                              : 'For power users and developers'}
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -741,14 +829,16 @@ export const ConfigCard = memo(
                         <UnifiedBadge
                           variant="base"
                           style="outline"
-                          className="border-muted-foreground/20 text-xs font-semibold text-muted-foreground"
+                          className="border-muted-foreground/20 text-muted-foreground text-xs font-semibold"
                         >
                           {itemCount} {itemCount === 1 ? 'item' : 'items'}
                         </UnifiedBadge>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Collection contains {itemCount} {itemCount === 1 ? 'item' : 'items'}</p>
+                      <p>
+                        Collection contains {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -759,31 +849,28 @@ export const ConfigCard = memo(
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div
-                        className="isolate text-color-featured-text-dark border-color-featured-border bg-gradient-to-r from-color-featured-gradient-from to-color-featured-gradient-to"
-                      >
+                      <div className="text-color-featured-text-dark border-color-featured-border from-color-featured-gradient-from to-color-featured-gradient-to isolate bg-gradient-to-r">
                         <UnifiedBadge
                           variant="base"
                           style="secondary"
                           className="fade-in slide-in-from-top-2 animate-in gap-1 font-semibold shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md"
                         >
                           {featuredRank && featuredRank <= 3 ? (
-                            <Award
-                              className="h-3 w-3 text-amber-500"
-                              aria-hidden="true"
-                            />
+                            <Award className="h-3 w-3 text-amber-500" aria-hidden="true" />
                           ) : (
                             <Sparkles className="h-3 w-3" aria-hidden="true" />
                           )}
                           Featured
-                          {featuredRank && <span className="text-xs opacity-75">#{featuredRank}</span>}
+                          {featuredRank && (
+                            <span className="text-xs opacity-75">#{featuredRank}</span>
+                          )}
                         </UnifiedBadge>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Featured by our team</p>
-                      <p className="text-xs text-muted-foreground">
-                        {featuredRank 
+                      <p className="text-muted-foreground text-xs">
+                        {featuredRank
                           ? `Ranked #${featuredRank} in featured content`
                           : 'Hand-picked by our team'}
                       </p>
@@ -798,12 +885,18 @@ export const ConfigCard = memo(
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div>
-                        <UnifiedBadge variant="new-indicator" label="New content" className="ml-0.5" />
+                        <UnifiedBadge
+                          variant="new-indicator"
+                          label="New content"
+                          className="ml-0.5"
+                        />
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>New content</p>
-                      <p className="text-xs text-muted-foreground">Added or updated within the last 7 days</p>
+                      <p className="text-muted-foreground text-xs">
+                        Added or updated within the last 7 days
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -838,10 +931,10 @@ export const ConfigCard = memo(
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Average rating: {ratingData.average.toFixed(1)}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-muted-foreground text-xs">
                       Based on {ratingData.count} {ratingData.count === 1 ? 'review' : 'reviews'}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">Click to view reviews</p>
+                    <p className="text-muted-foreground mt-1 text-xs">Click to view reviews</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -854,59 +947,69 @@ export const ConfigCard = memo(
             <div className="flex items-center gap-1">
               {'repository' in item && item.repository ? (
                 <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!item.slug) return;
-                        const category = isValidCategory(item.category ?? ContentCategory.agents)
-                          ? (item.category ?? ContentCategory.agents)
-                          : ContentCategory.agents;
-                        pulse
-                          .click({
-                            category: category as content_category,
-                            slug: item.slug,
-                            metadata: {
-                              action: 'external_link',
-                              link_type: 'github',
-                              target_url: item.repository as string,
-                            },
-                          })
-                          .catch((error) => {
-                            logClientError('ConfigCard: GitHub link click pulse failed', normalizeError(error), 'ConfigCard.handleGitHubClick', {
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="hover:bg-accent/10 hover:text-accent h-7 w-7 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!item.slug) return;
+                          const category = isValidCategory(item.category ?? ContentCategory.agents)
+                            ? (item.category ?? ContentCategory.agents)
+                            : ContentCategory.agents;
+                          pulse
+                            .click({
                               category: category as content_category,
-                              slug: item.slug ?? undefined,
+                              slug: item.slug,
+                              metadata: {
+                                action: 'external_link',
+                                link_type: 'github',
+                                target_url: item.repository as string,
+                              },
+                            })
+                            .catch((error) => {
+                              logClientError(
+                                'ConfigCard: GitHub link click pulse failed',
+                                normalizeError(error),
+                                'ConfigCard.handleGitHubClick',
+                                {
+                                  category: category as content_category,
+                                  slug: item.slug ?? undefined,
+                                }
+                              );
                             });
-                          });
-                        const safeRepoUrl = getSafeRepositoryUrl(item.repository as string);
-                        if (safeRepoUrl) {
-                          window.open(safeRepoUrl, '_blank');
-                          toasts.raw.success('Opening repository', {
-                            description: 'Opening in new tab...',
-                          });
-                        } else {
-                          logClientWarn('ConfigCard: Unsafe repository URL blocked', undefined, 'ConfigCard.handleRepositoryClick', {
-                            url: item.repository,
-                            slug: item.slug,
-                          });
-                          toasts.raw.error('Repository link is invalid or untrusted.');
-                        }
-                      }}
-                      aria-label={`View ${displayTitle} repository on GitHub`}
-                    >
-                      <Github className="h-3 w-3" aria-hidden="true" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>View repository on GitHub</p>
-                    <p className="text-xs text-muted-foreground">Opens in new tab</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                          const safeRepoUrl = getSafeRepositoryUrl(item.repository as string);
+                          if (safeRepoUrl) {
+                            window.open(safeRepoUrl, '_blank');
+                            toasts.raw.success('Opening repository', {
+                              description: 'Opening in new tab...',
+                            });
+                          } else {
+                            logClientWarn(
+                              'ConfigCard: Unsafe repository URL blocked',
+                              undefined,
+                              'ConfigCard.handleRepositoryClick',
+                              {
+                                url: item.repository,
+                                slug: item.slug,
+                              }
+                            );
+                            toasts.raw.error('Repository link is invalid or untrusted.');
+                          }
+                        }}
+                        aria-label={`View ${displayTitle} repository on GitHub`}
+                      >
+                        <Github className="h-3 w-3" aria-hidden="true" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>View repository on GitHub</p>
+                      <p className="text-muted-foreground text-xs">Opens in new tab</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               ) : null}
 
               {'documentation_url' in item && item.documentation_url ? (
@@ -916,7 +1019,7 @@ export const ConfigCard = memo(
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
+                        className="hover:bg-accent/10 hover:text-accent h-7 w-7 p-0"
                         onClick={(e) => {
                           e.stopPropagation();
                           if (!item.slug) return;
@@ -934,21 +1037,33 @@ export const ConfigCard = memo(
                               },
                             })
                             .catch((error) => {
-                              logClientError('ConfigCard: documentation link click pulse failed', normalizeError(error), 'ConfigCard.handleDocClick', {
-                                category,
-                                slug: item.slug ?? undefined,
-                              });
+                              logClientError(
+                                'ConfigCard: documentation link click pulse failed',
+                                normalizeError(error),
+                                'ConfigCard.handleDocClick',
+                                {
+                                  category,
+                                  slug: item.slug ?? undefined,
+                                }
+                              );
                             });
-                          const safeDocUrl = isTrustedDocumentationUrl(item.documentation_url as string);
+                          const safeDocUrl = isTrustedDocumentationUrl(
+                            item.documentation_url as string
+                          );
                           if (safeDocUrl) {
                             window.open(safeDocUrl, '_blank');
                             toasts.raw.success('Opening documentation', {
                               description: 'Opening in new tab...',
                             });
                           } else {
-                            logClientWarn('ConfigCard: Blocked untrusted documentation URL', undefined, 'ConfigCard.handleDocumentationClick', {
-                              url: item.documentation_url,
-                            });
+                            logClientWarn(
+                              'ConfigCard: Blocked untrusted documentation URL',
+                              undefined,
+                              'ConfigCard.handleDocumentationClick',
+                              {
+                                url: item.documentation_url,
+                              }
+                            );
                             toasts.raw.error?.('Invalid or unsafe documentation link.', {
                               description: 'Documentation link is not available.',
                             });
@@ -961,7 +1076,7 @@ export const ConfigCard = memo(
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>View documentation</p>
-                      <p className="text-xs text-muted-foreground">Opens in new tab</p>
+                      <p className="text-muted-foreground text-xs">Opens in new tab</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -971,208 +1086,238 @@ export const ConfigCard = memo(
             {/* Group 2: Primary Actions (Bookmark, Pin) */}
             <div className="flex items-center gap-1">
               {/* Bookmark button */}
-            {cardConfig.showBookmark && (
-              <div className="relative">
-                {item.slug && (
-                  <BookmarkButton
-                    contentType={
-                      isValidCategory(item.category ?? ContentCategory.agents)
-                        ? (item.category as content_category)
-                        : ContentCategory.agents
-                    }
-                    contentSlug={item.slug}
-                    {...(initialBookmarked !== undefined ? { initialBookmarked } : {})}
-                    {...(onAuthRequired ? { onAuthRequired } : {})}
-                  />
-                )}
-                {bookmarkCount !== undefined && bookmarkCount > 0 && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div>
-                          <UnifiedBadge
-                            variant="notification-count"
-                            count={bookmarkCount}
-                            type="bookmark"
-                          />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{bookmarkCount} {bookmarkCount === 1 ? 'user has' : 'users have'} bookmarked this</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
-            )}
+              {cardConfig.showBookmark && (
+                <div className="relative">
+                  {item.slug && (
+                    <BookmarkButton
+                      contentType={(() => {
+                        const defaultCategoryValue = 'agents' as content_category;
+                        const cat = item.category ?? defaultCategoryValue;
+                        return isValidCategory(cat) ? (cat as content_category) : defaultCategoryValue;
+                      })()}
+                      contentSlug={item.slug}
+                      {...(initialBookmarked !== undefined ? { initialBookmarked } : {})}
+                      {...(onAuthRequired ? { onAuthRequired } : {})}
+                    />
+                  )}
+                  {bookmarkCount !== undefined && bookmarkCount > 0 && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <UnifiedBadge
+                              variant="notification-count"
+                              count={bookmarkCount}
+                              type="bookmark"
+                            />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>
+                            {bookmarkCount} {bookmarkCount === 1 ? 'user has' : 'users have'}{' '}
+                            bookmarked this
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+              )}
 
-            {/* Pin button */}
-            <div className="relative">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant={pinned ? 'secondary' : 'ghost'}
-                      size="sm"
-                      className={`h-7 w-7 p-0 ${pinned ? '' : 'hover:bg-accent/10 hover:text-accent'}`}
-                      onClick={handlePinToggle}
-                      aria-label={pinned ? 'Unpin from pinboard' : 'Pin to pinboard'}
-                    >
-                      <AnimatePresence mode="wait">
-                        {pinned ? (
-                          <motion.div
-                            key="pinned"
-                            initial={MICROINTERACTIONS.iconTransition.initial}
-                            animate={MICROINTERACTIONS.iconTransition.animate}
-                            exit={MICROINTERACTIONS.iconTransition.exit}
-                            transition={MICROINTERACTIONS.iconTransition.transition}
-                            className="text-color-accent-primary"
-                          >
-                            <Pin className="h-3 w-3" fill="currentColor" aria-hidden="true" />
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            key="unpinned"
-                            initial={MICROINTERACTIONS.iconTransition.initial}
-                            animate={MICROINTERACTIONS.iconTransition.animate}
-                            exit={MICROINTERACTIONS.iconTransition.exit}
-                            transition={MICROINTERACTIONS.iconTransition.transition}
-                          >
-                            <Pin className="h-3 w-3" aria-hidden="true" />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{pinned ? 'Unpin from pinboard' : 'Pin to pinboard'}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {pinned ? 'Remove from saved items' : 'Save for later without an account'}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+              {/* Pin button */}
+              <div className="relative">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant={pinned ? 'secondary' : 'ghost'}
+                        size="sm"
+                        className={`h-7 w-7 p-0 ${pinned ? '' : 'hover:bg-accent/10 hover:text-accent'}`}
+                        onClick={handlePinToggle}
+                        aria-label={pinned ? 'Unpin from pinboard' : 'Pin to pinboard'}
+                      >
+                        <AnimatePresence mode="wait">
+                          {pinned ? (
+                            <motion.div
+                              key="pinned"
+                              initial={MICROINTERACTIONS.iconTransition.initial}
+                              animate={MICROINTERACTIONS.iconTransition.animate}
+                              exit={MICROINTERACTIONS.iconTransition.exit}
+                              transition={MICROINTERACTIONS.iconTransition.transition}
+                              className="text-color-accent-primary"
+                            >
+                              <Pin className="h-3 w-3" fill="currentColor" aria-hidden="true" />
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="unpinned"
+                              initial={MICROINTERACTIONS.iconTransition.initial}
+                              animate={MICROINTERACTIONS.iconTransition.animate}
+                              exit={MICROINTERACTIONS.iconTransition.exit}
+                              transition={MICROINTERACTIONS.iconTransition.transition}
+                            >
+                              <Pin className="h-3 w-3" aria-hidden="true" />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{pinned ? 'Unpin from pinboard' : 'Pin to pinboard'}</p>
+                      <p className="text-muted-foreground text-xs">
+                        {pinned ? 'Remove from saved items' : 'Save for later without an account'}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
 
             {/* Group 3: Copy Actions */}
             <div className="flex items-center gap-1">
               {/* Config copy button */}
-            {configurationObject && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        copyInlineValue(
-                          JSON.stringify(configurationObject, null, 2),
-                          'Configuration JSON copied',
-                          {
-                            action_type: 'copy_configuration',
-                          }
-                        ).catch((error) => {
-                          const normalized = normalizeError(error, 'Failed to copy configuration');
-                          logClientWarn('[Clipboard] Copy configuration failed', normalized, 'ConfigCard.handleConfigCopy', {
-                            category: 'clipboard',
-                            component: 'ConfigCard',
-                            recoverable: true,
-                            userRetryable: true,
-                          });
-                        });
-                      }}
-                      aria-label="Copy configuration JSON"
-                    >
-                      <FileJson className="h-3 w-3" aria-hidden="true" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Copy configuration JSON</p>
-                    <p className="text-xs text-muted-foreground">Copies the full config to clipboard</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-
-            {/* Copy button */}
-            {cardConfig.showCopyButton && (
-              <div className="relative">
+              {configurationObject && (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div>
-                        <SimpleCopyButton
-                          content={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
-                          successMessage="Link copied to clipboard!"
-                          errorMessage="Failed to copy link"
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0"
-                          iconClassName="h-3 w-3"
-                          ariaLabel={`Copy link to ${displayTitle}`}
-                          onCopySuccess={() => {
-                            const category: content_category =
-                              isValidCategory(item.category ?? ContentCategory.agents)
-                                ? (item.category as content_category)
-                                : ContentCategory.agents;
-                            if (item.slug) {
-                              pulse.copy({ category, slug: item.slug }).catch((error) => {
-                                logClientError('ConfigCard: copy button pulse failed', normalizeError(error), 'ConfigCard.handleCopyButton', {
-                                  category,
-                                  slug: item.slug ?? undefined,
-                                });
-                              });
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="hover:bg-accent/10 hover:text-accent h-7 w-7 p-0"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          copyInlineValue(
+                            JSON.stringify(configurationObject, null, 2),
+                            'Configuration JSON copied',
+                            {
+                              action_type: 'copy_configuration',
                             }
-                          }}
-                        />
-                      </div>
+                          ).catch((error) => {
+                            const normalized = normalizeError(
+                              error,
+                              'Failed to copy configuration'
+                            );
+                            logClientWarn(
+                              '[Clipboard] Copy configuration failed',
+                              normalized,
+                              'ConfigCard.handleConfigCopy',
+                              {
+                                category: 'clipboard',
+                                component: 'ConfigCard',
+                                recoverable: true,
+                                userRetryable: true,
+                              }
+                            );
+                          });
+                        }}
+                        aria-label="Copy configuration JSON"
+                      >
+                        <FileJson className="h-3 w-3" aria-hidden="true" />
+                      </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Copy link</p>
-                      <p className="text-xs text-muted-foreground">Share this item</p>
+                      <p>Copy configuration JSON</p>
+                      <p className="text-muted-foreground text-xs">
+                        Copies the full config to clipboard
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                {cardConfig.showCopyCount && copyCount !== undefined && copyCount > 0 && (
-                  <UnifiedBadge variant="notification-count" count={copyCount} type="copy" />
-                )}
-              </div>
-            )}
+              )}
+
+              {/* Copy button */}
+              {cardConfig.showCopyButton && (
+                <div className="relative">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div>
+                          <SimpleCopyButton
+                            content={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
+                            successMessage="Link copied to clipboard!"
+                            errorMessage="Failed to copy link"
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            iconClassName="h-3 w-3"
+                            ariaLabel={`Copy link to ${displayTitle}`}
+                            onCopySuccess={() => {
+                              const defaultCategoryValue = 'agents' as content_category;
+                              const category: content_category = isValidCategory(
+                                item.category ?? defaultCategoryValue
+                              )
+                                ? ((item.category ?? defaultCategoryValue) as content_category)
+                                : defaultCategoryValue;
+                              if (item.slug) {
+                                pulse.copy({ category, slug: item.slug }).catch((error) => {
+                                  logClientError(
+                                    'ConfigCard: copy button pulse failed',
+                                    normalizeError(error),
+                                    'ConfigCard.handleCopyButton',
+                                    {
+                                      category,
+                                      slug: item.slug ?? undefined,
+                                    }
+                                  );
+                                });
+                              }
+                            }}
+                          />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Copy link</p>
+                        <p className="text-muted-foreground text-xs">Share this item</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  {cardConfig.showCopyCount && copyCount !== undefined && copyCount > 0 && (
+                    <UnifiedBadge variant="notification-count" count={copyCount} type="copy" />
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Group 4: View Action */}
             <div className="flex items-center gap-1">
               {/* View button */}
-            <div className="relative">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (isSafeCategoryAndSlug(item.category, item.slug)) {
-                          if (!isValidInternalPath(targetPath)) {
-                            logClientWarn('ConfigCard: Blocked invalid internal path', undefined, 'ConfigCard.handleInternalLinkClick', {
-                              attemptedCategory: item.category,
-                              attemptedSlug: item.slug,
-                              targetPath,
-                            });
-                            return;
+              <div className="relative">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="hover:bg-accent/10 hover:text-accent h-7 w-7 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (isSafeCategoryAndSlug(item.category, item.slug)) {
+                            if (!isValidInternalPath(targetPath)) {
+                              logClientWarn(
+                                'ConfigCard: Blocked invalid internal path',
+                                undefined,
+                                'ConfigCard.handleInternalLinkClick',
+                                {
+                                  attemptedCategory: item.category,
+                                  attemptedSlug: item.slug,
+                                  targetPath,
+                                }
+                              );
+                              return;
+                            }
+                            window.location.href = targetPath;
+                          } else {
+                            logClientWarn(
+                              'ConfigCard: Blocked potentially unsafe redirect',
+                              undefined,
+                              'ConfigCard.handleInternalLinkClick',
+                              {
+                                attemptedCategory: item.category,
+                                attemptedSlug: item.slug,
+                                targetPath,
+                              }
+                            );
                           }
-                          window.location.href = targetPath;
-                        } else {
-                          logClientWarn('ConfigCard: Blocked potentially unsafe redirect', undefined, 'ConfigCard.handleInternalLinkClick', {
-                      attemptedCategory: item.category,
-                      attemptedSlug: item.slug,
-                      targetPath,
-                    });
-                  }
                         }}
                         aria-label={`View details for ${displayTitle}${cardConfig.showViewCount && viewCount !== undefined && typeof viewCount === 'number' ? ` - ${formatViewCount(viewCount)}` : ''}`}
                       >
@@ -1181,8 +1326,10 @@ export const ConfigCard = memo(
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>View details</p>
-                      <p className="text-xs text-muted-foreground">
-                        {cardConfig.showViewCount && viewCount !== undefined && typeof viewCount === 'number'
+                      <p className="text-muted-foreground text-xs">
+                        {cardConfig.showViewCount &&
+                        viewCount !== undefined &&
+                        typeof viewCount === 'number'
                           ? `Viewed ${viewCount.toLocaleString()} ${viewCount === 1 ? 'time' : 'times'}`
                           : 'Open full page'}
                       </p>
@@ -1199,9 +1346,7 @@ export const ConfigCard = memo(
             </div>
           </>
         ),
-        ...(viewCount === undefined &&
-        'popularity' in item &&
-        typeof item.popularity === 'number'
+        ...(viewCount === undefined && 'popularity' in item && typeof item.popularity === 'number'
           ? {
               customMetadataText: (
                 <>
@@ -1245,7 +1390,7 @@ export const ConfigCard = memo(
             {'title' in item && typeof item.title === 'string' ? item.title : 'Content'}
           </h3>
           {'description' in item && item.description && (
-            <p className="text-sm text-muted-foreground">{item.description}</p>
+            <p className="text-muted-foreground text-sm">{item.description}</p>
           )}
         </div>
       );

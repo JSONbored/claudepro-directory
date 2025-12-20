@@ -2,7 +2,7 @@
 
 /**
  * Library Page Skeleton
- * 
+ *
  * Perfectly matches /account/library structure:
  * - Header (title + counts + "New Collection" button)
  * - Tabs (Bookmarks/Collections)
@@ -50,7 +50,7 @@ export function LibrarySkeleton() {
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.2 }}
       >
-        <div className="grid w-full max-w-md grid-cols-2 gap-1 card-base p-0.5">
+        <div className="card-base grid w-full max-w-md grid-cols-2 gap-1 p-0.5">
           <Skeleton size="md" width="3xl" rounded="md" className="h-10" />
           <Skeleton size="md" width="3xl" rounded="md" className="h-10" />
         </div>
@@ -73,7 +73,7 @@ export function LibrarySkeleton() {
             <Card>
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div className="flex flex-col gap-2 flex-1">
+                  <div className="flex flex-1 flex-col gap-2">
                     <div className="flex items-center gap-1">
                       <Skeleton size="sm" width="xs" rounded="full" className="h-6" />
                       <Skeleton size="md" width="md" className="h-6" />

@@ -1,0 +1,444 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HeyClaude MCP Server API",
+    "version": "1.1.0",
+    "description": "Model Context Protocol (MCP) server for Claude Pro Directory. Provides tools, resources, and prompts for accessing directory content. Protocol version: 2025-11-25."
+  },
+  "servers": [
+    {
+      "url": "https://mcp.claudepro.directory",
+      "description": "Production MCP server"
+    },
+    {
+      "url": "https://mcp-dev.claudepro.directory",
+      "description": "Development MCP server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "mcp",
+      "description": "MCP Protocol endpoints"
+    },
+    {
+      "name": "oauth",
+      "description": "OAuth 2.1 authentication endpoints"
+    },
+    {
+      "name": "health",
+      "description": "Health check endpoints"
+    }
+  ],
+  "paths": {
+    "/mcp": {
+      "post": {
+        "summary": "MCP Protocol Endpoint",
+        "description": "JSON-RPC 2.0 endpoint for MCP protocol. All tool calls, resource requests, and prompt requests are sent to this single endpoint.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "jsonrpc",
+                  "method",
+                  "id"
+                ],
+                "properties": {
+                  "jsonrpc": {
+                    "type": "string",
+                    "enum": [
+                      "2.0"
+                    ]
+                  },
+                  "method": {
+                    "type": "string"
+                  },
+                  "params": {
+                    "type": "object"
+                  },
+                  "id": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "JSON-RPC 2.0 response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "jsonrpc",
+                    "id"
+                  ],
+                  "properties": {
+                    "jsonrpc": {
+                      "type": "string",
+                      "enum": [
+                        "2.0"
+                      ]
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "data": {
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "id": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Returns server health status and version information",
+        "responses": {
+          "200": {
+            "description": "Server is healthy"
+          }
+        }
+      }
+    },
+    "/.well-known/oauth-authorization-server": {
+      "get": {
+        "summary": "OAuth Authorization Server Metadata",
+        "description": "RFC 8414 OAuth 2.0 Authorization Server Metadata",
+        "responses": {
+          "200": {
+            "description": "OAuth server metadata"
+          }
+        }
+      }
+    },
+    "/.well-known/oauth-protected-resource": {
+      "get": {
+        "summary": "OAuth Protected Resource Metadata",
+        "description": "RFC 9728 OAuth 2.0 Protected Resource Metadata",
+        "responses": {
+          "200": {
+            "description": "Protected resource metadata"
+          }
+        }
+      }
+    },
+    "/oauth/authorize": {
+      "get": {
+        "summary": "OAuth Authorization Endpoint",
+        "description": "OAuth 2.1 authorization endpoint (proxies to Supabase Auth)",
+        "responses": {
+          "302": {
+            "description": "Redirect to Supabase Auth"
+          }
+        }
+      }
+    },
+    "/oauth/token": {
+      "post": {
+        "summary": "OAuth Token Endpoint",
+        "description": "OAuth 2.1 token exchange endpoint (proxies to Supabase Auth)",
+        "responses": {
+          "200": {
+            "description": "Token response"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "JsonRpcRequest": {
+        "type": "object",
+        "required": [
+          "jsonrpc",
+          "method",
+          "id"
+        ],
+        "properties": {
+          "jsonrpc": {
+            "type": "string",
+            "enum": [
+              "2.0"
+            ]
+          },
+          "method": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object"
+          },
+          "id": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          }
+        }
+      },
+      "JsonRpcResponse": {
+        "type": "object",
+        "required": [
+          "jsonrpc",
+          "id"
+        ],
+        "properties": {
+          "jsonrpc": {
+            "type": "string",
+            "enum": [
+              "2.0"
+            ]
+          },
+          "result": {
+            "type": "object"
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer"
+              },
+              "message": {
+                "type": "string"
+              },
+              "data": {
+                "type": "object"
+              }
+            }
+          },
+          "id": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          }
+        }
+      },
+      "listCategoriesInput": {
+        "type": "object",
+        "description": "Input schema for listCategories tool"
+      },
+      "searchContentInput": {
+        "type": "object",
+        "description": "Input schema for searchContent tool"
+      },
+      "getContentDetailInput": {
+        "type": "object",
+        "description": "Input schema for getContentDetail tool"
+      },
+      "getTrendingInput": {
+        "type": "object",
+        "description": "Input schema for getTrending tool"
+      },
+      "getFeaturedInput": {
+        "type": "object",
+        "description": "Input schema for getFeatured tool"
+      },
+      "getPopularInput": {
+        "type": "object",
+        "description": "Input schema for getPopular tool"
+      },
+      "getRecentInput": {
+        "type": "object",
+        "description": "Input schema for getRecent tool"
+      },
+      "getTemplatesInput": {
+        "type": "object",
+        "description": "Input schema for getTemplates tool"
+      },
+      "getCategoryConfigsInput": {
+        "type": "object",
+        "description": "Input schema for getCategoryConfigs tool"
+      },
+      "getChangelogInput": {
+        "type": "object",
+        "description": "Input schema for getChangelog tool"
+      },
+      "getSearchFacetsInput": {
+        "type": "object",
+        "description": "Input schema for getSearchFacets tool"
+      },
+      "getSearchSuggestionsInput": {
+        "type": "object",
+        "description": "Input schema for getSearchSuggestions tool"
+      },
+      "getMcpServersInput": {
+        "type": "object",
+        "description": "Input schema for getMcpServers tool"
+      },
+      "getRelatedContentInput": {
+        "type": "object",
+        "description": "Input schema for getRelatedContent tool"
+      },
+      "getContentByTagInput": {
+        "type": "object",
+        "description": "Input schema for getContentByTag tool"
+      },
+      "downloadContentForPlatformInput": {
+        "type": "object",
+        "description": "Input schema for downloadContentForPlatform tool"
+      },
+      "getSocialProofStatsInput": {
+        "type": "object",
+        "description": "Input schema for getSocialProofStats tool"
+      },
+      "submitContentInput": {
+        "type": "object",
+        "description": "Input schema for submitContent tool"
+      },
+      "createAccountInput": {
+        "type": "object",
+        "description": "Input schema for createAccount tool"
+      },
+      "subscribeNewsletterInput": {
+        "type": "object",
+        "description": "Input schema for subscribeNewsletter tool"
+      },
+      "contentResource": {
+        "type": "object",
+        "description": "Export content in various formats (llms.txt, markdown, json, rss, atom). Supports all content categories.",
+        "properties": {
+          "uri": {
+            "type": "string",
+            "format": "uri"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "categoryResource": {
+        "type": "object",
+        "description": "Export all content in a category in various formats (llms.txt, markdown, json, rss, atom).",
+        "properties": {
+          "uri": {
+            "type": "string",
+            "format": "uri"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "sitewideResource": {
+        "type": "object",
+        "description": "Export all content across all categories in various formats (llms.txt, markdown, json, rss, atom).",
+        "properties": {
+          "uri": {
+            "type": "string",
+            "format": "uri"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "submit-content-guideArgs": {
+        "type": "object",
+        "description": "Arguments for submit-content-guide prompt"
+      },
+      "format-content-for-platformArgs": {
+        "type": "object",
+        "description": "Arguments for format-content-for-platform prompt"
+      },
+      "search-optimization-tipsArgs": {
+        "type": "object",
+        "description": "Arguments for search-optimization-tips prompt"
+      },
+      "content-discovery-guideArgs": {
+        "type": "object",
+        "description": "Arguments for content-discovery-guide prompt"
+      },
+      "mcp-server-setup-guideArgs": {
+        "type": "object",
+        "description": "Arguments for mcp-server-setup-guide prompt"
+      },
+      "content-submission-best-practicesArgs": {
+        "type": "object",
+        "description": "Arguments for content-submission-best-practices prompt"
+      },
+      "tool-usage-guideArgs": {
+        "type": "object",
+        "description": "Arguments for tool-usage-guide prompt"
+      },
+      "resource-access-guideArgs": {
+        "type": "object",
+        "description": "Arguments for resource-access-guide prompt"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

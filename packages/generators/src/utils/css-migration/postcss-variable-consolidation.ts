@@ -1,12 +1,12 @@
 /**
  * PostCSS Plugin: CSS Variable Consolidation
- * 
+ *
  * Consolidates CSS variables by:
  * - Deduplicating variables with the same value (keeps one, removes duplicates)
  * - Mapping old variable names to new tweakcn theme names
  * - Updating all variable references (var(--old-name) → var(--new-name))
  * - Removing old variable declarations after mapping
- * 
+ *
  * Safety features:
  * - Preserves all unique values (never loses a unique value)
  * - Only removes true duplicates
@@ -15,9 +15,7 @@
  */
 
 import type { Plugin } from 'postcss';
-import type {
-  ConsolidationReport,
-} from './variable-consolidation.ts';
+import type { ConsolidationReport } from './variable-consolidation.ts';
 
 interface VariableConsolidationOptions {
   /** Consolidation report with mappings, duplicates, removable */
@@ -67,7 +65,7 @@ function buildConsolidationPlan(report: ConsolidationReport): {
   // Build duplicate consolidation plan
   for (const dup of report.duplicates) {
     const recommendedName = dup.recommendedName;
-    
+
     // Keep the recommended name, remove others
     for (const varName of dup.variables) {
       if (varName !== recommendedName) {
@@ -104,7 +102,10 @@ function updateVariableReferences(
   // Update mapped variable references (old → new)
   for (const [oldName, newName] of nameMappings.entries()) {
     // Match var(--old-name) or var(--old-name, fallback)
-    const regex = new RegExp(`var\\(${oldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:,\\s*[^)]+)?\\)`, 'g');
+    const regex = new RegExp(
+      `var\\(${oldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:,\\s*[^)]+)?\\)`,
+      'g'
+    );
     updated = updated.replace(regex, (match) => {
       return match.replace(oldName, newName);
     });
@@ -112,7 +113,10 @@ function updateVariableReferences(
 
   // Update duplicate variable references (duplicate → keeper)
   for (const [duplicateName, keeperName] of duplicateKeepers.entries()) {
-    const regex = new RegExp(`var\\(${duplicateName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:,\\s*[^)]+)?\\)`, 'g');
+    const regex = new RegExp(
+      `var\\(${duplicateName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:,\\s*[^)]+)?\\)`,
+      'g'
+    );
     updated = updated.replace(regex, (match) => {
       return match.replace(duplicateName, keeperName);
     });
@@ -121,16 +125,14 @@ function updateVariableReferences(
   return updated;
 }
 
-function variableConsolidationPlugin(
-  options: VariableConsolidationOptions
-): Plugin {
+function variableConsolidationPlugin(options: VariableConsolidationOptions): Plugin {
   const { report, dryRun = false, verbose = false } = options;
 
   const plan = buildConsolidationPlan(report);
 
   return {
     postcssPlugin: 'variable-consolidation',
-    
+
     Declaration(decl) {
       const prop = decl.prop;
       const value = decl.value;
@@ -140,7 +142,7 @@ function variableConsolidationPlugin(
         // Check if this variable should be mapped (old → new)
         if (plan.nameMappings.has(prop)) {
           const newName = plan.nameMappings.get(prop)!;
-          
+
           const transformation: Transformation = {
             type: 'map',
             original: `${prop}: ${value}`,
@@ -203,7 +205,9 @@ function variableConsolidationPlugin(
           transformations.push(transformation);
 
           if (verbose) {
-            console.log(`  [${transformation.line}] Update reference: ${value.substring(0, 40)}...`);
+            console.log(
+              `  [${transformation.line}] Update reference: ${value.substring(0, 40)}...`
+            );
           }
 
           if (!dryRun) {

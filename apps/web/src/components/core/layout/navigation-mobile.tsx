@@ -46,7 +46,13 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: cn('group relative', 'px-3', 'py-2', 'text-xs-medium', 'transition-all duration-200 ease-out', 'no-underline',
+    className: cn(
+      'group relative',
+      'px-3',
+      'py-2',
+      'text-xs-medium',
+      'transition-all duration-200 ease-out',
+      'no-underline',
       active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground',
       className
     ),
@@ -62,7 +68,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
       <span className="relative inline-block">
         {children}
         <span
-          className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-300 ease-out ${
+          className={`bg-accent absolute bottom-0 left-0 h-[2px] transition-all duration-300 ease-out ${
             active ? 'w-full' : 'w-0 group-hover:w-full'
           }`}
           aria-hidden="true"
@@ -92,7 +98,13 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
   // Don't render Sheet until mounted to prevent Radix UI ID hydration mismatch
   if (!isMounted) {
     return (
-      <Button variant="ghost" size="sm" className="md:hidden" aria-label="Open mobile menu" disabled>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="md:hidden"
+        aria-label="Open mobile menu"
+        disabled
+      >
         <Menu className="h-6 w-6" />
       </Button>
     );
@@ -105,13 +117,10 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent
-        side="right"
-        className="border-border/50 w-full border-l sm:w-[380px]"
-      >
+      <SheetContent side="right" className="border-border/50 w-full border-l sm:w-[380px]">
         {/* Swipe-to-close indicator */}
         <motion.div
-          className="absolute top-1/2 bg-border/50 left-1/2 h-1 w-12 -translate-x-1/2 cursor-grab rounded-full active:cursor-grabbing"
+          className="bg-border/50 absolute top-1/2 left-1/2 h-1 w-12 -translate-x-1/2 cursor-grab rounded-full active:cursor-grabbing"
           drag={shouldReduceMotion ? false : 'y'}
           dragControls={shouldReduceMotion ? undefined : dragControls}
           dragListener={!shouldReduceMotion}
@@ -158,11 +167,18 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                       <Link
                         href={link.href}
                         onClick={() => onOpenChange(false)}
-                        className={cn('border-accent bg-accent text-accent-foreground flex w-full items-center justify-center rounded-xl border-2', 'px-5', 'py-4', 'text-base font-semibold', 'transition-all duration-200 ease-out', 'hover:bg-accent/90')}
+                        className={cn(
+                          'border-accent bg-accent text-accent-foreground flex w-full items-center justify-center rounded-xl border-2',
+                          'px-5',
+                          'py-4',
+                          'text-base font-semibold',
+                          'transition-all duration-200 ease-out',
+                          'hover:bg-accent/90'
+                        )}
                       >
-                      {ActionIcon ? <ActionIcon className="mr-2 h-5 w-5 shrink-0" /> : null}
-                      <span>{link.label}</span>
-                    </Link>
+                        {ActionIcon ? <ActionIcon className="mr-2 h-5 w-5 shrink-0" /> : null}
+                        <span>{link.label}</span>
+                      </Link>
                     </motion.div>
                   </motion.div>
                 );
@@ -187,17 +203,24 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                         href={link.href}
                         isActive={isActive}
                         onClick={() => onOpenChange(false)}
-                        className={cn('border-border bg-card flex w-full items-center rounded-xl border', 'px-5', 'py-4', 'text-base font-medium', 'transition-all duration-200 ease-out', 'hover:border-accent/50 hover:bg-accent/10')}
+                        className={cn(
+                          'border-border bg-card flex w-full items-center rounded-xl border',
+                          'px-5',
+                          'py-4',
+                          'text-base font-medium',
+                          'transition-all duration-200 ease-out',
+                          'hover:border-accent/50 hover:bg-accent/10'
+                        )}
                       >
-                      {IconComponent ? <IconComponent className="mr-2 h-5 w-5 shrink-0" /> : null}
-                      <span>{link.label}</span>
-                      {link.isNew ? (
-                        <UnifiedBadge
-                          variant="new-indicator"
-                          label={`New: ${link.label}`}
-                          className="ml-auto"
-                        />
-                      ) : null}
+                        {IconComponent ? <IconComponent className="mr-2 h-5 w-5 shrink-0" /> : null}
+                        <span>{link.label}</span>
+                        {link.isNew ? (
+                          <UnifiedBadge
+                            variant="new-indicator"
+                            label={`New: ${link.label}`}
+                            className="ml-auto"
+                          />
+                        ) : null}
                       </NavLink>
                     </motion.div>
                   </motion.div>
@@ -220,7 +243,8 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                           initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
                           animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                           transition={{
-                            delay: STAGGER.medium + (PRIMARY_NAVIGATION.length + index) * STAGGER.micro,
+                            delay:
+                              STAGGER.medium + (PRIMARY_NAVIGATION.length + index) * STAGGER.micro,
                           }}
                         >
                           <motion.div
@@ -231,7 +255,14 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                               href={link.href}
                               isActive={isActive}
                               onClick={() => onOpenChange(false)}
-                              className={cn('border-border/40 bg-card/50 text-muted-foreground flex w-full items-center rounded-xl border', 'px-5', 'py-4', 'text-sm font-medium', 'transition-all duration-200 ease-out', 'hover:border-accent/30 hover:bg-accent/5 hover:text-foreground')}
+                              className={cn(
+                                'border-border/40 bg-card/50 text-muted-foreground flex w-full items-center rounded-xl border',
+                                'px-5',
+                                'py-4',
+                                'text-sm font-medium',
+                                'transition-all duration-200 ease-out',
+                                'hover:border-accent/30 hover:bg-accent/5 hover:text-foreground'
+                              )}
                             >
                               {IconComponent ? (
                                 <IconComponent className="mr-2 h-4 w-4 shrink-0" />

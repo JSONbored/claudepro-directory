@@ -85,7 +85,7 @@ export interface Position {
  */
 export function useMousePosition<T extends HTMLElement = HTMLElement>(): [
   Position,
-  RefObject<T | null>
+  RefObject<T | null>,
 ] {
   const [position, setPosition] = useState<Position>({
     x: 0,

@@ -25,7 +25,9 @@ import 'server-only';
 import { type GetSearchSuggestionsFormattedArgs } from '@heyclaude/database-types/postgres-types';
 // OPTIMIZATION: Removed unused imports - factory handles errors automatically
 import {
-  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+  createCachedApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { searchAutocompleteQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import {

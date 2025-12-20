@@ -75,8 +75,7 @@ export function useSearchStandalone({
 
       // Check if we need to search
       const shouldSearch =
-        searchQuery.trim().length >= minQueryLength ||
-        Object.keys(searchFilters).length > 0;
+        searchQuery.trim().length >= minQueryLength || Object.keys(searchFilters).length > 0;
 
       if (!shouldSearch) {
         setResults([]);
@@ -223,8 +222,7 @@ export function useSearchStandalone({
       setDebouncedQuery(urlQuery);
     }
 
-    const filtersChanged =
-      JSON.stringify(urlFilters) !== JSON.stringify(filters);
+    const filtersChanged = JSON.stringify(urlFilters) !== JSON.stringify(filters);
     if (filtersChanged) {
       setFiltersState(urlFilters);
     }

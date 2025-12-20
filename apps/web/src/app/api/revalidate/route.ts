@@ -31,7 +31,8 @@
 import 'server-only';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import {
-  createApiRoute, createOptionsHandler as createApiOptionsHandler,
+  createApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
 } from '@heyclaude/web-runtime/api/route-factory';
 import {
   errorResponseSchema,
@@ -155,7 +156,8 @@ export const POST = createApiRoute({
     operationId: 'revalidate',
     security: [{ bearerAuth: [] }],
     requestBody: {
-      description: 'Revalidation request with secret token, optional category/slug for path revalidation, and optional tags for cache invalidation',
+      description:
+        'Revalidation request with secret token, optional category/slug for path revalidation, and optional tags for cache invalidation',
       required: true,
     },
     responses: {

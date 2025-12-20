@@ -3,7 +3,10 @@ import { logger, normalizeError } from '../logger/index.ts';
 type GlobalWithBuffer = typeof globalThis & {
   Buffer?: {
     [index: number]: number;
-    from(input: string | Uint8Array, encoding?: string): {
+    from(
+      input: string | Uint8Array,
+      encoding?: string
+    ): {
       [index: number]: number;
       length: number;
       toString(encoding?: string): string;
@@ -114,11 +117,14 @@ export async function verifySvixSignature({
     return signatures.includes(expectedSignature);
   } catch (error) {
     const normalized = normalizeError(error, 'Svix signature verification error');
-    logger.error({
-      err: normalized,
-      function: 'webhook-crypto',
-      operation: 'verify-svix-signature',
-    }, 'Svix signature verification error');
+    logger.error(
+      {
+        err: normalized,
+        function: 'webhook-crypto',
+        operation: 'verify-svix-signature',
+      },
+      'Svix signature verification error'
+    );
     return false;
   }
 }
@@ -133,7 +139,7 @@ export interface SupabaseDatabaseWebhookVerificationInput {
 /**
  * Verify Supabase database webhook signature using HMAC-SHA256
  * Supports both simple payload signing and timestamp-based signing for replay attack prevention
- * 
+ *
  * @param input - Verification parameters
  * @returns true if signature is valid, false otherwise
  */
@@ -165,11 +171,7 @@ export async function verifySupabaseDatabaseWebhook({
     const signedContent = timestamp ? `${timestamp}.${rawBody}` : rawBody;
 
     // Compute expected signature
-    const signatureBuffer = await crypto.subtle.sign(
-      'HMAC',
-      key,
-      encoder.encode(signedContent)
-    );
+    const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(signedContent));
     const expectedSignature = encodeBase64(new Uint8Array(signatureBuffer));
 
     // Constant-time comparison to prevent timing attacks
@@ -185,11 +187,14 @@ export async function verifySupabaseDatabaseWebhook({
     return result === 0;
   } catch (error) {
     const normalized = normalizeError(error, 'Supabase database webhook verification error');
-    logger.error({
-      err: normalized,
-      function: 'webhook-crypto',
-      operation: 'verify-supabase-database-webhook',
-    }, 'Supabase database webhook verification error');
+    logger.error(
+      {
+        err: normalized,
+        function: 'webhook-crypto',
+        operation: 'verify-supabase-database-webhook',
+      },
+      'Supabase database webhook verification error'
+    );
     return false;
   }
 }
@@ -205,7 +210,7 @@ export interface DiscordWebhookVerificationInput {
  * Verify Discord webhook signature using Ed25519
  * Discord uses Ed25519 signatures with X-Signature-Ed25519 and X-Signature-Timestamp headers
  * The signature is computed over: timestamp + rawBody
- * 
+ *
  * @param input - Verification parameters
  * @returns true if signature is valid, false otherwise
  */
@@ -262,11 +267,14 @@ export async function verifyDiscordWebhookSignature({
     return isValid;
   } catch (error) {
     const normalized = normalizeError(error, 'Discord webhook signature verification error');
-    logger.error({
-      err: normalized,
-      function: 'webhook-crypto',
-      operation: 'verify-discord-webhook-signature',
-    }, 'Discord webhook signature verification error');
+    logger.error(
+      {
+        err: normalized,
+        function: 'webhook-crypto',
+        operation: 'verify-discord-webhook-signature',
+      },
+      'Discord webhook signature verification error'
+    );
     return false;
   }
 }
@@ -278,12 +286,12 @@ export async function verifyDiscordWebhookSignature({
 function hexToBytes(hex: string): Uint8Array {
   // Remove any whitespace or 0x prefix
   const cleanHex = hex.replace(/^0x/i, '').replaceAll(/\s/g, '');
-  
+
   // Validate hex string format
   if (!/^[0-9a-fA-F]+$/.test(cleanHex)) {
     throw new Error('Invalid hex string: contains non-hexadecimal characters');
   }
-  
+
   if (cleanHex.length % 2 !== 0) {
     throw new Error('Invalid hex string: odd length');
   }

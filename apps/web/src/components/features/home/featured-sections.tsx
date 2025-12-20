@@ -2,8 +2,10 @@
 
 /** Featured sections consuming homepageConfigs for runtime-tunable categories */
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
-import type { jobsModel } from '@heyclaude/database-types/prisma/models';
+import type { content_category } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
+
+type jobsModel = Prisma.jobsGetPayload<{}>;
 
 // Use Prisma model type instead of excluded composite type
 type Jobs = jobsModel;
@@ -16,7 +18,17 @@ import {
   type DisplayableContent,
   type UnifiedCategoryConfig,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UnifiedBadge, UnifiedCardGrid, ConfigCard, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, BlurText, cn } from '@heyclaude/web-runtime/ui';
+import {
+  UnifiedBadge,
+  UnifiedCardGrid,
+  ConfigCard,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+  BlurText,
+  cn,
+} from '@heyclaude/web-runtime/ui';
 import { SPRING, TEXT_ANIMATIONS, STAGGER, VIEWPORT } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
@@ -102,16 +114,8 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
               <motion.div
                 key={`card-${item.slug || index}`}
                 className="relative h-full"
-                initial={
-                  shouldReduceMotion
-                    ? { opacity: 0 }
-                    : { opacity: 0, y: 20, scale: 0.98 }
-                }
-                animate={
-                  shouldReduceMotion
-                    ? { opacity: 1 }
-                    : { opacity: 1, y: 0, scale: 1 }
-                }
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20, scale: 0.98 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
                 transition={{
                   delay: index * STAGGER.default,
                   ...SPRING.smooth,
@@ -127,7 +131,11 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
                               <UnifiedBadge
                                 variant="base"
                                 style="secondary"
-                                className={cn('text-[10px]', 'tracking-wide', 'uppercase pointer-events-auto')}
+                                className={cn(
+                                  'text-[10px]',
+                                  'tracking-wide',
+                                  'pointer-events-auto uppercase'
+                                )}
                               >
                                 New this week
                               </UnifiedBadge>
@@ -145,7 +153,11 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
                               <UnifiedBadge
                                 variant="base"
                                 style="outline"
-                                className={cn('text-[10px]', 'tracking-wide', 'uppercase pointer-events-auto')}
+                                className={cn(
+                                  'text-[10px]',
+                                  'tracking-wide',
+                                  'pointer-events-auto uppercase'
+                                )}
                               >
                                 Trending
                               </UnifiedBadge>
@@ -165,7 +177,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
                   onAuthRequired={handleAuthRequired}
                   initialBookmarked={
                     item.slug && isValidCategory(item.category ?? 'agents')
-                      ? bookmarkStatusMap[`${item.category}:${item.slug}`] ?? false
+                      ? (bookmarkStatusMap[`${item.category}:${item.slug}`] ?? false)
                       : false
                   }
                 />
@@ -202,7 +214,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
   bookmarkStatusMap = {},
 }) => {
   const shouldReduceMotion = useReducedMotion();
-  
+
   // OPTIMIZATION: Memoize displayed jobs to prevent recreation on every render
   const displayedJobs = useMemo(() => featuredJobs.slice(0, 6), [featuredJobs]);
 
@@ -291,7 +303,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
               animationFrom={{ filter: 'blur(10px)', opacity: 0, y: -20 }}
               animationTo={[
                 { filter: 'blur(5px)', opacity: 0.7, y: 0 },
-                { filter: 'blur(0px)', opacity: 1, y: 0 }
+                { filter: 'blur(0px)', opacity: 1, y: 0 },
               ]}
               stepDuration={0.35}
             />
@@ -306,16 +318,8 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
             {displayedJobs.map((job, index) => (
               <motion.div
                 key={job.slug}
-                initial={
-                  shouldReduceMotion
-                    ? { opacity: 0 }
-                    : { opacity: 0, y: 20, scale: 0.98 }
-                }
-                animate={
-                  shouldReduceMotion
-                    ? { opacity: 1 }
-                    : { opacity: 1, y: 0, scale: 1 }
-                }
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20, scale: 0.98 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
                 transition={{
                   delay: index * STAGGER.default,
                   ...SPRING.smooth,
@@ -323,7 +327,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
               >
                 <JobCard job={job} />
               </motion.div>
-              ))}
+            ))}
           </div>
         </div>
       )}

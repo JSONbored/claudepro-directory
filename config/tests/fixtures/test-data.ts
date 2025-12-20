@@ -1,10 +1,10 @@
 /**
  * Centralized Test Data Factories
- * 
+ *
  * Provides reusable test data factories for common entities.
  * Uses Prismock-compatible data structures for database testing.
  * Optionally uses @faker-js/faker for realistic test data generation.
- * 
+ *
  * @module config/tests/fixtures/test-data
  */
 
@@ -13,27 +13,30 @@ import { faker } from '@faker-js/faker';
 
 /**
  * Factory for creating test user data
- * 
+ *
  * @param overrides - Partial user data to override defaults
  * @param useFaker - Whether to use faker for realistic data (default: false)
  */
-export function createTestUser(
-  overrides?: Partial<TestUser>,
-  useFaker = false
-): TestUser {
+export function createTestUser(overrides?: Partial<TestUser>, useFaker = false): TestUser {
   const baseData = useFaker
     ? {
         id: faker.string.uuid(),
         email: faker.internet.email(),
         display_name: faker.person.fullName(),
-        username: faker.internet.userName().toLowerCase().replace(/[^a-z0-9-]/g, '-'),
+        username: faker.internet
+          .userName()
+          .toLowerCase()
+          .replace(/[^a-z0-9-]/g, '-'),
         bio: faker.person.bio(),
         website: faker.internet.url(),
         social_x_link: `https://x.com/${faker.internet.userName()}`,
         work: faker.company.name(),
         profile_public: faker.datatype.boolean(),
         follow_email: faker.datatype.boolean(),
-        interests: faker.helpers.arrayElements(['ai', 'agents', 'automation', 'mcp', 'rules'], { min: 1, max: 3 }),
+        interests: faker.helpers.arrayElements(['ai', 'agents', 'automation', 'mcp', 'rules'], {
+          min: 1,
+          max: 3,
+        }),
         created_at: faker.date.past(),
         updated_at: faker.date.recent(),
       }
@@ -61,14 +64,11 @@ export function createTestUser(
 
 /**
  * Factory for creating test content data
- * 
+ *
  * @param overrides - Partial content data to override defaults
  * @param useFaker - Whether to use faker for realistic data (default: false)
  */
-export function createTestContent(
-  overrides?: Partial<TestContent>,
-  useFaker = false
-): TestContent {
+export function createTestContent(overrides?: Partial<TestContent>, useFaker = false): TestContent {
   const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'skills'];
   const baseData = useFaker
     ? {
@@ -78,7 +78,10 @@ export function createTestContent(
         category: faker.helpers.arrayElement(categories),
         description: faker.lorem.paragraph(),
         author_slug: faker.internet.userName().toLowerCase(),
-        tags: faker.helpers.arrayElements(['ai', 'automation', 'mcp', 'agents', 'claude'], { min: 1, max: 5 }),
+        tags: faker.helpers.arrayElements(['ai', 'automation', 'mcp', 'agents', 'claude'], {
+          min: 1,
+          max: 5,
+        }),
         source: faker.helpers.arrayElement(['github', 'website', 'documentation']),
         source_url: faker.internet.url(),
         popularity_score: faker.number.int({ min: 0, max: 1000 }),
@@ -110,14 +113,11 @@ export function createTestContent(
 
 /**
  * Factory for creating test job data
- * 
+ *
  * @param overrides - Partial job data to override defaults
  * @param useFaker - Whether to use faker for realistic data (default: false)
  */
-export function createTestJob(
-  overrides?: Partial<TestJob>,
-  useFaker = false
-): TestJob {
+export function createTestJob(overrides?: Partial<TestJob>, useFaker = false): TestJob {
   const baseData = useFaker
     ? {
         id: faker.string.uuid(),
@@ -160,14 +160,11 @@ export function createTestJob(
 
 /**
  * Factory for creating test company data
- * 
+ *
  * @param overrides - Partial company data to override defaults
  * @param useFaker - Whether to use faker for realistic data (default: false)
  */
-export function createTestCompany(
-  overrides?: Partial<TestCompany>,
-  useFaker = false
-): TestCompany {
+export function createTestCompany(overrides?: Partial<TestCompany>, useFaker = false): TestCompany {
   const baseData = useFaker
     ? {
         id: faker.string.uuid(),

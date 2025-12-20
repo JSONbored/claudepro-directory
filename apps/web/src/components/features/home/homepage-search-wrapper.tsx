@@ -23,9 +23,7 @@ export interface HomepageSearchBarProps {
  * HomepageSearchBar - Search bar component for homepage
  * Must be used within SearchProvider context
  */
-export function HomepageSearchBar({
-  onFocusChange,
-}: HomepageSearchBarProps) {
+export function HomepageSearchBar({ onFocusChange }: HomepageSearchBarProps) {
   const { setSearchFocused } = useHeroSearchConnection();
 
   // Handle focus change

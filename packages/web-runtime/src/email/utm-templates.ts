@@ -144,7 +144,10 @@ export function getUTMTemplate(
 /**
  * Create segment-specific UTM parameters
  */
-export function createSegmentedUTM(baseTemplate: EmailUTMTemplate, segment: string): EmailUTMParams {
+export function createSegmentedUTM(
+  baseTemplate: EmailUTMTemplate,
+  segment: string
+): EmailUTMParams {
   return {
     ...baseTemplate,
     term: `segment_${segment}`,

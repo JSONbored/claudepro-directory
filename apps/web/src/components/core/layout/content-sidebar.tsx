@@ -49,6 +49,6 @@ export function ContentSidebar() {
  */
 function RecentlyViewedSidebarSkeleton() {
   return (
-    <div className="hidden h-64 w-72 animate-pulse rounded-xl border border-border/50 bg-card/50 p-4 xl:block" />
+    <div className="border-border/50 bg-card/50 hidden h-64 w-72 animate-pulse rounded-xl border p-4 xl:block" />
   );
 }

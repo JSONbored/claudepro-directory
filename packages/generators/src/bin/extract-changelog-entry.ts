@@ -22,10 +22,8 @@ import { runExtractChangelogEntry } from '../commands/extract-changelog-entry.ts
 import { logger } from '../toolkit/logger.ts';
 
 runExtractChangelogEntry().catch((error) => {
-  logger.error(
-    '❌ Unhandled error in main',
-    normalizeError(error, 'Changelog extraction failed'),
-    { command: 'extract-changelog-entry' }
-  );
+  logger.error('❌ Unhandled error in main', normalizeError(error, 'Changelog extraction failed'), {
+    command: 'extract-changelog-entry',
+  });
   process.exit(1);
 });

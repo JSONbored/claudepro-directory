@@ -1,4 +1,4 @@
-import type { sponsorship_tier } from '@heyclaude/data-layer/prisma';
+import type { sponsorship_tier } from '@prisma/client';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -115,8 +115,8 @@ export async function generateMetadata(): Promise<Metadata> {
  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
-  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
-*/
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ */
 function isSponsorshipActive(
   sponsorship: { active: boolean | null; end_date: string; start_date: string },
   now: Date
@@ -286,12 +286,15 @@ async function SponsorshipsPageContent({
   }
 
   const orderedSponsorships = [...sponsorships].sort(
-    (a: SponsorshipItem, b: SponsorshipItem) => new Date(b.created_at as string).getTime() - new Date(a.created_at as string).getTime()
+    (a: SponsorshipItem, b: SponsorshipItem) =>
+      new Date(b.created_at as string).getTime() - new Date(a.created_at as string).getTime()
   );
 
   // Compute active count once using consistent logic
   const now = new Date();
-  const activeCount = orderedSponsorships.filter((s: SponsorshipItem) => isSponsorshipActive(s as { active: boolean | null; start_date: string; end_date: string }, now)).length;
+  const activeCount = orderedSponsorships.filter((s: SponsorshipItem) =>
+    isSponsorshipActive(s as { active: boolean | null; start_date: string; end_date: string }, now)
+  ).length;
 
   return (
     <div className="space-y-6">
@@ -311,22 +314,24 @@ async function SponsorshipsPageContent({
       </div>
 
       <div className="grid gap-4">
-            {orderedSponsorships.map((sponsorship: SponsorshipItem) => {
-              const isActive = isSponsorshipActive(sponsorship as { active: boolean | null; start_date: string; end_date: string }, now);
+        {orderedSponsorships.map((sponsorship: SponsorshipItem) => {
+          const isActive = isSponsorshipActive(
+            sponsorship as { active: boolean | null; start_date: string; end_date: string },
+            now
+          );
 
-          const impressionCount = (sponsorship['impression_count'] as number | null | undefined) ?? 0;
+          const impressionCount =
+            (sponsorship['impression_count'] as number | null | undefined) ?? 0;
           const clickCount = (sponsorship['click_count'] as number | null | undefined) ?? 0;
 
-          const impressionLimit = (sponsorship['impression_limit'] as number | null | undefined);
-          const hasHitLimit =
-            impressionLimit != null &&
-            impressionCount >= impressionLimit;
+          const impressionLimit = sponsorship['impression_limit'] as number | null | undefined;
+          const hasHitLimit = impressionLimit != null && impressionCount >= impressionLimit;
 
           const ctr =
             impressionCount > 0 ? ((clickCount / impressionCount) * 100).toFixed(2) : '0.00';
 
           // Use generated ENUM type directly - no validation needed
-          const safeTier = (sponsorship['tier'] as string | null) as sponsorship_tier | null;
+          const safeTier = sponsorship['tier'] as string | null as sponsorship_tier | null;
 
           return (
             <Card key={sponsorship.id}>
@@ -334,7 +339,11 @@ async function SponsorshipsPageContent({
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <UnifiedBadge showIcon tier={(safeTier ?? 'standard') as sponsorship_tier} variant="sponsored" />
+                      <UnifiedBadge
+                        showIcon
+                        tier={(safeTier ?? 'standard') as sponsorship_tier}
+                        variant="sponsored"
+                      />
                       {isActive ? (
                         <UnifiedBadge
                           className="border-green-500/20 bg-green-500/10 text-green-600 dark:text-green-400"
@@ -357,7 +366,8 @@ async function SponsorshipsPageContent({
                       ) : null}
                     </div>
                     <CardTitle className="mt-2">
-                      {(sponsorship['content_type'] as string | null) ?? 'Unknown'} - ID: {(sponsorship['content_id'] as string | null) ?? 'N/A'}
+                      {(sponsorship['content_type'] as string | null) ?? 'Unknown'} - ID:{' '}
+                      {(sponsorship['content_id'] as string | null) ?? 'N/A'}
                     </CardTitle>
                     <CardDescription>
                       {formatDate(sponsorship.start_date)} - {formatDate(sponsorship.end_date)}

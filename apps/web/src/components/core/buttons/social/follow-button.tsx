@@ -63,7 +63,7 @@ export function FollowButton({
   const { user, status } = useAuthenticatedUser({ context: 'FollowButton' });
   const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
-  
+
   // Use useSafeAction hook - this properly infers types from next-safe-action
   const { executeAsync, isPending } = useSafeAction(toggleFollow, {
     onSuccess: ({ data }: { data?: { success: boolean | null } }) => {
@@ -74,11 +74,15 @@ export function FollowButton({
     onError: ({ error }: { error: { serverError?: string; validationErrors?: unknown } }) => {
       // Rollback optimistic update on error
       setOptimisticIsFollowing(initialIsFollowing);
-      
+
       const errorMessage = error.serverError || 'Failed to update follow status';
-      
+
       // Check if error is auth-related and show modal if so
-      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+      if (
+        errorMessage.includes('signed in') ||
+        errorMessage.includes('auth') ||
+        errorMessage.includes('unauthorized')
+      ) {
         openAuthModal({
           valueProposition: 'Sign in to follow users',
           redirectTo: pathname ?? undefined,
@@ -124,7 +128,17 @@ export function FollowButton({
       slug: userSlug,
       action: newState ? 'follow' : 'unfollow',
     });
-  }, [user, status, openAuthModal, pathname, optimisticIsFollowing, setOptimisticIsFollowing, userId, userSlug, executeAsync]);
+  }, [
+    user,
+    status,
+    openAuthModal,
+    pathname,
+    optimisticIsFollowing,
+    setOptimisticIsFollowing,
+    userId,
+    userSlug,
+    executeAsync,
+  ]);
 
   return (
     <Button

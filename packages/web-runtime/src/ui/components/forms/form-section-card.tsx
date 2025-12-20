@@ -152,28 +152,17 @@ export function FormSectionCard({
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
             {/* Icon with step number */}
-            <div
-              className={cn(
-                'rounded-lg',
-                'p-1',
-                themeConfig.iconBg,
-                'flex-shrink-0'
-              )}
-            >
+            <div className={cn('rounded-lg', 'p-1', themeConfig.iconBg, 'flex-shrink-0')}>
               <Icon className={cn('h-5 w-5', themeConfig.iconText)} />
             </div>
 
             {/* Title and description */}
             <div className="flex-1">
-              <CardTitle
-                className={cn('flex items-center gap-2 text-lg font-semibold')}
-              >
+              <CardTitle className={cn('flex items-center gap-2 text-lg font-semibold')}>
                 <span className={cn('font-semibold', themeConfig.iconText)}>{step}.</span>
                 {title}
               </CardTitle>
-              <p className={cn('text-sm text-muted-foreground', 'mt-0.5')}>
-                {description}
-              </p>
+              <p className={cn('text-muted-foreground text-sm', 'mt-0.5')}>{description}</p>
             </div>
           </div>
         </CardHeader>

@@ -1,6 +1,6 @@
 /**
  * Error Context Utilities
- * 
+ *
  * Provides standardized error context creation for consistent logging
  * across all data fetching functions and API routes.
  */
@@ -19,7 +19,7 @@ export interface ErrorContextOptions {
  */
 export function createErrorContext(options: ErrorContextOptions): LogContext {
   const { operation, userId, additionalContext } = options;
-  
+
   return {
     operation,
     ...(userId && { userId }),

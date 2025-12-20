@@ -9,6 +9,7 @@
     "heyclaude-generate-mcpb": "./src/bin/generate-mcpb.ts",
     "heyclaude-generate-readme": "./src/bin/generate-readme.ts",
     "heyclaude-generate-openapi": "./src/bin/generate-openapi.ts",
+    "heyclaude-generate-mcp-openapi": "./src/bin/generate-mcp-openapi.ts",
     "heyclaude-cache": "./src/bin/cache.ts",
     "heyclaude-sync-db": "./src/bin/sync-db.ts",
     "heyclaude-lint-unused": "./src/bin/lint-unused.ts",
@@ -16,7 +17,6 @@
     "heyclaude-changelog": "./src/bin/changelog.ts",
     "heyclaude-analyze-dependencies": "./src/bin/analyze-dependencies.ts",
     "heyclaude-deploy-edge": "./src/bin/deploy-functions.ts",
-    "heyclaude-sync-email": "./src/bin/sync-email-templates.ts",
     "heyclaude-mcp-login": "./src/bin/mcp-login.ts",
     "heyclaude-bump-version": "./src/bin/bump-version.ts",
     "heyclaude-analyze-commits": "./src/bin/analyze-commits.ts",
@@ -54,7 +54,6 @@
   "dependencies": {
     "@heyclaude/data-layer": "workspace:*",
     "@heyclaude/database-types": "workspace:*",
-    "@heyclaude/edge-runtime": "workspace:*",
     "@heyclaude/shared-runtime": "workspace:*",
     "@heyclaude/web-runtime": "workspace:*",
     "@iarna/toml": "^2.2.5",
@@ -79,6 +78,7 @@
     "@types/escape-html": "^1.0.4",
     "@types/js-yaml": "^4.0.9",
     "@types/pg": "^8.16.0",
+    "esbuild": "^0.27.2",
     "js-yaml": "^4.1.1",
     "ts-morph": "^27.0.2"
   }

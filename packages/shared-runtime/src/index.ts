@@ -38,12 +38,12 @@ export * from './input-validation.ts';
 export * from './search-highlight.ts';
 export * from './error-handling.ts';
 // Export logger from logger/index.ts (unified logger with normalizeError)
-export { 
-  createLogger, 
-  logger, 
-  logger as pinoLogger, 
-  createPinoConfig, 
-  SENSITIVE_PATTERNS, 
+export {
+  createLogger,
+  logger,
+  logger as pinoLogger,
+  createPinoConfig,
+  SENSITIVE_PATTERNS,
   BASE_CONTEXT,
   normalizeError,
   flushLogs,
@@ -75,7 +75,7 @@ export {
   isDevelopment,
   isProduction,
   isVercel,
-  clearEnvCache
+  clearEnvCache,
 } from './env.ts';
 export * from './proxy/guards.ts';
 export * from './error/database-parser.ts';

@@ -15,11 +15,10 @@
 
 'use client';
 
-import type { content_category, copy_type } from '@heyclaude/data-layer/prisma';
+import type { content_category, copy_type } from '@prisma/client';
 import { type UseCopyToClipboardOptions } from '@heyclaude/web-runtime/hooks/use-copy-to-clipboard';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks/use-copy-to-clipboard';
 import { useCallback } from 'react';
-
 
 /**
  * Email capture context for copy actions

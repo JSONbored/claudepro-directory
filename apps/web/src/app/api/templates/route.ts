@@ -21,9 +21,11 @@
  * ```
  */
 import 'server-only';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@prisma/client';
 import {
-  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+  createCachedApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { categorySchema } from '@heyclaude/web-runtime/api/schemas';
 import {
@@ -112,7 +114,8 @@ export const GET = createCachedApiRoute({
         schema: errorResponseSchema,
         example: {
           error: 'Invalid category parameter',
-          message: 'Category parameter is required and cannot be "all". Valid categories: agents, mcp, rules, commands, hooks, statuslines, skills, collections, guides, jobs, changelog',
+          message:
+            'Category parameter is required and cannot be "all". Valid categories: agents, mcp, rules, commands, hooks, statuslines, skills, collections, guides, jobs, changelog',
         },
       },
       500: {

@@ -38,9 +38,7 @@ test.describe('GET /api/og', () => {
   });
 
   test('should generate OG image with custom description', async ({ request }) => {
-    const response = await request.get(
-      '/api/og?title=Test&description=Custom%20Description'
-    );
+    const response = await request.get('/api/og?title=Test&description=Custom%20Description');
 
     expect(response.status()).toBe(200);
 

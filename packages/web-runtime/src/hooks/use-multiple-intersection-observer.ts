@@ -72,12 +72,7 @@ export function useMultipleIntersectionObserver(
   entries: Map<string, IntersectionObserverEntry>;
   getMostVisibleId: () => string | null;
 } {
-  const {
-    threshold = 0,
-    root = null,
-    rootMargin = '0%',
-    onChange,
-  } = options;
+  const { threshold = 0, root = null, rootMargin = '0%', onChange } = options;
 
   const [entries, setEntries] = useState<Map<string, IntersectionObserverEntry>>(new Map());
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -93,7 +88,7 @@ export function useMultipleIntersectionObserver(
       (observerEntries) => {
         setEntries((prev) => {
           const newEntries = new Map(prev);
-          
+
           observerEntries.forEach((entry) => {
             const elementId = entry.target.id;
             if (elementId) {

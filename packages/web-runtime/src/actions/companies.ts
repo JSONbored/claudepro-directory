@@ -3,7 +3,7 @@
 /**
  * Companies Actions - Database-First Architecture
  * Thin orchestration layer calling PostgreSQL RPC functions (manage_company, delete_company)
- * 
+ *
  * IMPORTANT: Storage imports are lazy-loaded to prevent Turbopack from bundling
  * iceberg-js (nested dependency of @supabase/storage-js) in client bundles.
  */
@@ -15,11 +15,7 @@ import { authedAction, rateLimitedAction } from './safe-action.ts';
 //   uploadImageToStorage,
 //   deleteImageFromStorage,
 // } from '../storage/image-storage.ts';
-import {
-  validateImageBuffer,
-  extractPathFromUrl,
-  IMAGE_CONFIG,
-} from '../storage/image-utils.ts';
+import { validateImageBuffer, extractPathFromUrl, IMAGE_CONFIG } from '../storage/image-utils.ts';
 import { z } from 'zod';
 
 // UUID validation helper
@@ -55,16 +51,25 @@ const uploadLogoSchema = z.object({
 });
 
 export const searchCompaniesAction = authedAction
-  .metadata({ actionName: 'searchCompanies', category: 'content' })
   .inputSchema(companySearchSchema)
-  .action(async ({ parsedInput }) => {
+  .metadata({ actionName: 'searchCompanies', category: 'content' })
+  .action(async ({ parsedInput, ctx }) => {
     const { searchCompanies } = await import('../data/companies.ts');
     const { getTimeoutConfig } = await import('../config/static-configs.ts');
-    const limit = parsedInput.limit ?? 10;
-    const companies = await searchCompanies(parsedInput.query, limit);
-    const config = getTimeoutConfig();
-    const debounceMs = config['timeout.ui.form_debounce_ms'] ?? 300;
-    return { companies, debounceMs };
+    const { logActionFailure } = await import('../errors.ts');
+    
+    try {
+      const limit = parsedInput.limit ?? 10;
+      const companies = await searchCompanies(parsedInput.query, limit);
+      const config = getTimeoutConfig();
+      const debounceMs = config?.['timeout.ui.form_debounce_ms'] ?? 300;
+      return { companies, debounceMs };
+    } catch (error) {
+      throw logActionFailure('companies.searchCompanies', error, {
+        userId: ctx.userId,
+        query: parsedInput.query,
+      });
+    }
   });
 
 /**
@@ -77,32 +82,37 @@ export const getCompanyByIdAction = rateLimitedAction
   )
   .metadata({ actionName: 'companies.getCompanyById', category: 'content' })
   .action(async ({ parsedInput }) => {
-    const { getCompanyAdminProfile } = await import('../data/companies.ts');
-    const profile = await getCompanyAdminProfile(parsedInput.companyId);
-    if (!profile) {
+    try {
+      const { getCompanyAdminProfile } = await import('../data/companies.ts');
+      const profile = await getCompanyAdminProfile(parsedInput.companyId);
+      if (!profile) {
+        return null;
+      }
+
+      return {
+        id: profile.id ?? '',
+        name: profile.name ?? '',
+        slug: profile.slug ?? '',
+        logo: profile.logo ?? null,
+        website: profile.website ?? null,
+        description: profile.description ?? null,
+      };
+    } catch (error) {
+      // Return null on error instead of throwing
       return null;
     }
-
-    return {
-      id: profile.id ?? '',
-      name: profile.name ?? '',
-      slug: profile.slug ?? '',
-      logo: profile.logo ?? null,
-      website: profile.website ?? null,
-      description: profile.description ?? null,
-    };
   });
 
 export const uploadCompanyLogoAction = authedAction
-  .metadata({ actionName: 'uploadCompanyLogo', category: 'content' })
   .inputSchema(uploadLogoSchema)
+  .metadata({ actionName: 'uploadCompanyLogo', category: 'content' })
   .action(async ({ parsedInput, ctx }) => {
     const { companyId, oldLogoUrl, fileBase64, fileName, mimeType } = parsedInput;
 
     const buffer = Buffer.from(fileBase64, 'base64');
     const validation = validateImageBuffer(buffer, mimeType);
     if (!validation.valid) {
-      throw new Error(validation.error || 'Invalid image file');
+      throw new Error(validation.error || 'Invalid image format');
     }
 
     if (companyId) {
@@ -119,8 +129,9 @@ export const uploadCompanyLogoAction = authedAction
 
     try {
       // Lazy-load storage functions to prevent Turbopack from bundling iceberg-js client-side
-      const { uploadImageToStorage, deleteImageFromStorage } = await import('../storage/image-storage.ts');
-      
+      const { uploadImageToStorage, deleteImageFromStorage } =
+        await import('../storage/image-storage.ts');
+
       const supabaseAdmin = await createSupabaseAdminClient();
       const uploadResult = await uploadImageToStorage({
         bucket: 'company-logos',
@@ -132,7 +143,7 @@ export const uploadCompanyLogoAction = authedAction
       });
 
       if (!(uploadResult.success && uploadResult.publicUrl)) {
-        throw new Error(uploadResult.error || 'Failed to upload logo.');
+        throw new Error(uploadResult.error || 'Failed to upload logo');
       }
 
       if (oldLogoUrl) {

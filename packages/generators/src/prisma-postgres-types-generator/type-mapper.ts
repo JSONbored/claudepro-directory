@@ -1,6 +1,6 @@
 /**
  * Map PostgreSQL types to TypeScript types
- * 
+ *
  * Handles all PostgreSQL types including scalars, arrays, composites, enums, and domains.
  */
 
@@ -24,9 +24,7 @@ export function mapPostgresTypeToTypeScript(
 
   // Check for enums first
   if (context.enums[udtName]) {
-    const enumValues = context.enums[udtName]
-      .map((v) => `'${v}'`)
-      .join(' | ');
+    const enumValues = context.enums[udtName].map((v) => `'${v}'`).join(' | ');
     tsType = enumValues;
   }
   // Check for composite types
@@ -49,7 +47,7 @@ export function mapPostgresTypeToTypeScript(
       case 'int2':
       case 'int4':
       case 'int8':
-      case 'integer':  // Common alias
+      case 'integer': // Common alias
       case 'smallint':
       case 'bigint':
       case 'float4':
@@ -142,22 +140,12 @@ export function mapPostgresTypeToTypeScript(
         if (udtName.startsWith('_')) {
           const baseType = udtName.slice(1);
           // Recursively map base type (handles nested arrays)
-          const baseTsType = mapPostgresTypeToTypeScript(
-            baseType,
-            false,
-            false,
-            context
-          );
+          const baseTsType = mapPostgresTypeToTypeScript(baseType, false, false, context);
           tsType = `${baseTsType}[]`;
         } else if (udtName.includes('[]')) {
           // Handle explicit array notation (some PostgreSQL types)
           const baseType = udtName.replace('[]', '');
-          const baseTsType = mapPostgresTypeToTypeScript(
-            baseType,
-            false,
-            false,
-            context
-          );
+          const baseTsType = mapPostgresTypeToTypeScript(baseType, false, false, context);
           tsType = `${baseTsType}[]`;
         } else {
           // Unknown type - use unknown and log warning

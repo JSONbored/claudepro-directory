@@ -9,7 +9,7 @@ import type {
   BatchInsertUserInteractionsArgs,
   BatchInsertUserInteractionsReturns,
 } from '@heyclaude/database-types/postgres-types';
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import { prisma } from '../prisma/client.ts';
 
 // Local types for converted RPCs (RPCs removed, using Prisma directly)
@@ -347,7 +347,9 @@ type IsFollowingArgs = {
 // Exported for use in web-runtime
 export type IsBookmarkedBatchArgs = {
   p_user_id: string;
-  p_items: Array<{ content_type: content_category; content_slug: string }> | Record<string, unknown>;
+  p_items:
+    | Array<{ content_type: content_category; content_slug: string }>
+    | Record<string, unknown>;
 };
 
 export type IsBookmarkedBatchReturns = Array<{
@@ -379,43 +381,35 @@ import { withSmartCache } from '../utils/request-cache.ts';
 export class AccountService extends BasePrismaService {
   /**
    * Get account dashboard
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a simple SELECT from users table, which Prisma handles perfectly.
-   * 
+   *
    * @param args - Arguments with p_user_id
    * @returns Account dashboard data matching RPC return structure
    */
   async getAccountDashboard(
     args: GetAccountDashboardArgs
-  ): Promise<GetAccountDashboardReturns & { profile: (GetAccountDashboardReturns['profile'] & { account_age?: number }) | null }> {
+  ): Promise<
+    GetAccountDashboardReturns & {
+      profile: (GetAccountDashboardReturns['profile'] & { account_age?: number }) | null;
+    }
+  > {
     return withSmartCache(
       'getAccountDashboard',
       'getAccountDashboard',
       async () => {
-        // Use raw SQL to calculate account_age in database (eliminates Date.now() usage)
-        // Calculate account age using PostgreSQL date functions (database-native, most efficient)
-        const result = await prisma.$queryRawUnsafe<Array<{
-          bookmark_count: number | null;
-          name: string | null;
-          tier: string | null;
-          created_at: Date;
-          account_age: number;
-        }>>(
-          `
-          SELECT 
-            bookmark_count,
-            name,
-            tier,
-            created_at,
-            EXTRACT(DAY FROM (NOW() - created_at))::integer AS account_age
-          FROM public.users
-          WHERE id = $1::uuid
-          `,
-          args.p_user_id
-        );
-
-        const user = result[0];
+        // OPTIMIZATION: Use Prisma query builder instead of raw SQL for better type safety and maintainability
+        // Calculate account_age in JavaScript after fetching (since we're in withSmartCache, Date.now() is safe)
+        const user = await prisma.public_users.findUnique({
+          where: { id: args.p_user_id },
+          select: {
+            bookmark_count: true,
+            name: true,
+            tier: true,
+            created_at: true,
+          },
+        });
 
         // Return empty state if user not found (matching RPC behavior)
         if (!user) {
@@ -423,12 +417,21 @@ export class AccountService extends BasePrismaService {
             bookmark_count: 0,
             profile: {
               name: null,
-              tier: 'free' as GetAccountDashboardReturns['profile'] extends { tier: infer T } ? T : never,
+              tier: 'free' as GetAccountDashboardReturns['profile'] extends { tier: infer T }
+                ? T
+                : never,
               created_at: null, // Use null instead of current date for empty state
               account_age: 0,
             } as GetAccountDashboardReturns['profile'] & { account_age: number },
-          } as GetAccountDashboardReturns & { profile: (GetAccountDashboardReturns['profile'] & { account_age: number }) | null };
+          } as GetAccountDashboardReturns & {
+            profile: (GetAccountDashboardReturns['profile'] & { account_age: number }) | null;
+          };
         }
+
+        // Calculate account_age in JavaScript (days since account creation)
+        const accountAge = user.created_at
+          ? Math.floor((Date.now() - user.created_at.getTime()) / (1000 * 60 * 60 * 24))
+          : 0;
 
         // Transform to match RPC return structure (AccountDashboardResult) with account_age
         return {
@@ -437,9 +440,11 @@ export class AccountService extends BasePrismaService {
             name: user.name,
             tier: (user.tier ?? 'free') as 'free' | 'pro' | 'enterprise' | null,
             created_at: user.created_at.toISOString(),
-            account_age: user.account_age,
+            account_age: accountAge,
           } as GetAccountDashboardReturns['profile'] & { account_age: number },
-        } as GetAccountDashboardReturns & { profile: (GetAccountDashboardReturns['profile'] & { account_age: number }) | null };
+        } as GetAccountDashboardReturns & {
+          profile: (GetAccountDashboardReturns['profile'] & { account_age: number }) | null;
+        };
       },
       args
     );
@@ -447,16 +452,14 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Get user library
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing multiple queries (bookmarks, collections, stats), which we can do with Prisma.
-   * 
+   *
    * @param args - Arguments with p_user_id
    * @returns User library data matching RPC return structure
    */
-  async getUserLibrary(
-    args: GetUserLibraryArgs
-  ): Promise<GetUserLibraryReturns> {
+  async getUserLibrary(args: GetUserLibraryArgs): Promise<GetUserLibraryReturns> {
     return withSmartCache(
       'getUserLibrary',
       'getUserLibrary',
@@ -552,16 +555,14 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Get user dashboard
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing multiple queries (submissions, companies, jobs), which we can do with Prisma.
-   * 
+   *
    * @param args - Arguments with p_user_id
    * @returns User dashboard data matching RPC return structure
    */
-  async getUserDashboard(
-    args: GetUserDashboardArgs
-  ): Promise<GetUserDashboardReturns> {
+  async getUserDashboard(args: GetUserDashboardArgs): Promise<GetUserDashboardReturns> {
     return withSmartCache(
       'getUserDashboard',
       'getUserDashboard',
@@ -607,7 +608,7 @@ export class AccountService extends BasePrismaService {
           }),
           // OPTIMIZATION: Use select to fetch only needed job fields
           prisma.jobs.findMany({
-            where: { 
+            where: {
               user_id: args.p_user_id,
               status: { not: 'deleted' },
             },
@@ -664,7 +665,8 @@ export class AccountService extends BasePrismaService {
           // converted to match the JSONB structure. The actual usage expects an array-like structure
           // that can be parsed, so we cast the array to match the expected JSONB format.
           // TODO: Improve database type generation to properly type JSONB arrays
-          companies: companies.length > 0 ? (companies as unknown as Record<string, unknown>) : null,
+          companies:
+            companies.length > 0 ? (companies as unknown as Record<string, unknown>) : null,
           // Type assertion required: UserDashboardResult.jobs is Record<string, unknown> | null
           // because the RPC returns JSONB (jsonb_agg). Prisma returns jobs[], which needs to be
           // converted to match the JSONB structure. Note: job_billing_summary is a view, not a Prisma
@@ -679,10 +681,10 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Get collection detail with items
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing multiple queries (collection, items, bookmarks), which we can do with Prisma includes.
-   * 
+   *
    * @param args - Arguments with p_user_id and p_slug
    * @returns Collection detail with items and bookmarks matching RPC return structure
    */
@@ -728,7 +730,7 @@ export class AccountService extends BasePrismaService {
               },
             },
           },
-          relationLoadStrategy: 'join' // Use JOIN for better performance (requires relationJoins preview feature)
+          relationLoadStrategy: 'join', // Use JOIN for better performance (requires relationJoins preview feature)
         });
 
         if (!collection) {
@@ -800,16 +802,14 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Get user settings
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a simple SELECT from users table, which Prisma handles perfectly.
-   * 
+   *
    * @param args - Arguments with p_user_id
    * @returns User settings matching RPC return structure
    */
-  async getUserSettings(
-    args: GetUserSettingsArgs
-  ): Promise<GetUserSettingsReturns> {
+  async getUserSettings(args: GetUserSettingsArgs): Promise<GetUserSettingsReturns> {
     return withSmartCache(
       'getUserSettings',
       'getUserSettings',
@@ -870,19 +870,19 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Get sponsorship analytics
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing aggregations and filtering with date ranges, which we can replicate with Prisma.
-   * 
+   *
    * @param args - Arguments with p_user_id, p_start_date, p_end_date
    * @returns Sponsorship analytics data matching RPC return structure
    */
   /**
    * Get sponsorship analytics
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing complex date series generation and aggregations, which we replicate with Prisma queries.
-   * 
+   *
    * @param args - Arguments with p_sponsorship_id and p_user_id
    * @returns Sponsorship analytics data matching RPC return structure
    */
@@ -926,42 +926,72 @@ export class AccountService extends BasePrismaService {
           };
         }
 
-        // Use database NOW() and INTERVAL for date range (eliminates new Date() calls)
-        // More efficient: database handles date arithmetic natively
-        // OPTIMIZATION: Use groupBy with raw SQL for date grouping instead of fetching all records
-        // This is more efficient for large datasets and reduces data transfer
-        const [impressionsGrouped, clicksGrouped] = await Promise.all([
-          prisma.$queryRawUnsafe<Array<{ date: string; count: bigint }>>(
-            `
-            SELECT 
-              DATE(created_at)::text as date,
-              COUNT(*)::bigint as count
-            FROM public.user_interactions
-            WHERE interaction_type = 'sponsored_impression'
-              AND content_slug = $1
-              AND created_at >= DATE_TRUNC('day', NOW() - INTERVAL '29 days')
-              AND created_at <= DATE_TRUNC('day', NOW())
-            GROUP BY DATE(created_at)
-            ORDER BY date ASC
-            `,
-            args.p_sponsorship_id
-          ),
-          prisma.$queryRawUnsafe<Array<{ date: string; count: bigint }>>(
-            `
-            SELECT 
-              DATE(created_at)::text as date,
-              COUNT(*)::bigint as count
-            FROM public.user_interactions
-            WHERE interaction_type = 'sponsored_click'
-              AND content_slug = $1
-              AND created_at >= DATE_TRUNC('day', NOW() - INTERVAL '29 days')
-              AND created_at <= DATE_TRUNC('day', NOW())
-            GROUP BY DATE(created_at)
-            ORDER BY date ASC
-            `,
-            args.p_sponsorship_id
-          ),
+        // OPTIMIZATION: Use Prisma groupBy for date-based aggregations instead of raw SQL
+        // Calculate date range in JavaScript (safe within withSmartCache)
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now);
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29); // Last 30 days (0-29 = 30 days)
+        thirtyDaysAgo.setUTCHours(0, 0, 0, 0); // Start of day
+        const todayStart = new Date(now);
+        todayStart.setUTCHours(0, 0, 0, 0);
+
+        // OPTIMIZATION: Use Prisma groupBy to group by date (extract date from created_at)
+        // Prisma doesn't support DATE() function directly, so we'll fetch all records and group in JS
+        // OR we can use Prisma's date filtering and group in JavaScript
+        // Actually, let's use Prisma to fetch and group by date in JavaScript for better type safety
+        const [impressionsData, clicksData] = await Promise.all([
+          prisma.user_interactions.findMany({
+            where: {
+              interaction_type: 'sponsored_impression',
+              content_slug: args.p_sponsorship_id,
+              created_at: {
+                gte: thirtyDaysAgo,
+                lte: now,
+              },
+            },
+            select: {
+              created_at: true,
+            },
+          }),
+          prisma.user_interactions.findMany({
+            where: {
+              interaction_type: 'sponsored_click',
+              content_slug: args.p_sponsorship_id,
+              created_at: {
+                gte: thirtyDaysAgo,
+                lte: now,
+              },
+            },
+            select: {
+              created_at: true,
+            },
+          }),
         ]);
+
+        // Group by date in JavaScript (more efficient than fetching all records if we had to)
+        // But actually, we can use Prisma's groupBy if we add a computed field
+        // For now, group in JavaScript for type safety
+        const impressionsGrouped = Array.from(
+          impressionsData.reduce((map, item) => {
+            // created_at is always present since we select it
+            const dateKey = (item.created_at as Date).toISOString().split('T')[0]; // YYYY-MM-DD
+            if (dateKey) {
+              map.set(dateKey, (map.get(dateKey) || 0) + 1);
+            }
+            return map;
+          }, new Map<string, number>())
+        ).map(([date, count]) => ({ date, count: BigInt(count) }));
+
+        const clicksGrouped = Array.from(
+          clicksData.reduce((map, item) => {
+            // created_at is always present since we select it
+            const dateKey = (item.created_at as Date).toISOString().split('T')[0]; // YYYY-MM-DD
+            if (dateKey) {
+              map.set(dateKey, (map.get(dateKey) || 0) + 1);
+            }
+            return map;
+          }, new Map<string, number>())
+        ).map(([date, count]) => ({ date, count: BigInt(count) }));
 
         // Create a map of date -> { impressions, clicks }
         const dailyStatsMap = new Map<string, { impressions: number; clicks: number }>();
@@ -983,47 +1013,44 @@ export class AccountService extends BasePrismaService {
           });
         }
 
-        // Generate all dates in the last 30 days using database (eliminates new Date() loop)
-        // Use database to generate date range
-        const dateRangeResult = await prisma.$queryRawUnsafe<Array<{ date: string }>>(
-          `
-          SELECT (DATE_TRUNC('day', NOW()) - (i::text || ' days')::interval)::date::text as date
-          FROM generate_series(0, 29) AS i
-          ORDER BY date ASC
-          `
-        );
+        // Generate all dates in the last 30 days in JavaScript (safe within withSmartCache)
+        // More efficient than database generate_series for small ranges
+        const dateRange: string[] = [];
+        for (let i = 29; i >= 0; i--) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - i);
+          date.setUTCHours(0, 0, 0, 0);
+          const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+          if (dateStr) {
+            dateRange.push(dateStr);
+          }
+        }
+
         const dailyStats: Array<{
           date: string | null;
           impressions: number | null;
           clicks: number | null;
-        }> = dateRangeResult.map((row) => {
-          const stats = dailyStatsMap.get(row.date) || { impressions: 0, clicks: 0 };
+        }> = dateRange.map((dateStr) => {
+          const stats = dailyStatsMap.get(dateStr) || { impressions: 0, clicks: 0 };
           return {
-            date: row.date,
+            date: dateStr,
             impressions: stats.impressions,
             clicks: stats.clicks,
           };
         });
 
-        // Calculate computed metrics using database date calculation (eliminates new Date() calls)
-        const daysActiveResult = await prisma.$queryRawUnsafe<Array<{ days_active: number }>>(
-          `
-          SELECT GREATEST(0, EXTRACT(DAY FROM (DATE_TRUNC('day', NOW()) - DATE_TRUNC('day', $1::date)))::integer) as days_active
-          `,
-          sponsorship.start_date
-        );
-        const daysActive = daysActiveResult[0]?.days_active ?? 0;
+        // Calculate days active in JavaScript (safe within withSmartCache)
+        const daysActive = sponsorship.start_date
+          ? Math.max(0, Math.floor((now.getTime() - sponsorship.start_date.getTime()) / (1000 * 60 * 60 * 24)))
+          : 0;
 
         const impressionCount = sponsorship.impression_count ?? 0;
         const clickCount = sponsorship.click_count ?? 0;
 
         const ctr =
-          impressionCount > 0
-            ? Math.round((clickCount / impressionCount) * 100 * 100) / 100
-            : 0;
+          impressionCount > 0 ? Math.round((clickCount / impressionCount) * 100 * 100) / 100 : 0;
 
-        const avgImpressionsPerDay =
-          daysActive > 0 ? Math.round(impressionCount / daysActive) : 0;
+        const avgImpressionsPerDay = daysActive > 0 ? Math.round(impressionCount / daysActive) : 0;
 
         // Build result matching SponsorshipAnalyticsResult composite type
         return {
@@ -1056,16 +1083,14 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Get user companies
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was using LATERAL JOIN for job stats, which we can replicate with Prisma includes and aggregations.
-   * 
+   *
    * @param args - Arguments with p_user_id
    * @returns User companies with job stats matching RPC return structure
    */
-  async getUserCompanies(
-    args: GetUserCompaniesArgs
-  ): Promise<GetUserCompaniesReturns> {
+  async getUserCompanies(args: GetUserCompaniesArgs): Promise<GetUserCompaniesReturns> {
     return withSmartCache(
       'getUserCompanies',
       'getUserCompanies',
@@ -1098,7 +1123,7 @@ export class AccountService extends BasePrismaService {
             },
           },
           orderBy: { created_at: 'desc' },
-          relationLoadStrategy: 'join' // Use JOIN for better performance (requires relationJoins preview feature)
+          relationLoadStrategy: 'join', // Use JOIN for better performance (requires relationJoins preview feature)
         });
 
         // Transform to match RPC return structure (UserCompaniesResult)
@@ -1110,12 +1135,16 @@ export class AccountService extends BasePrismaService {
           const activeJobs = company.jobs.filter((j) => j.status === 'active').length;
           const totalViews = company.jobs.reduce((sum, j) => sum + (j.view_count ?? 0), 0);
           const totalClicks = company.jobs.reduce((sum, j) => sum + (j.click_count ?? 0), 0);
-          const latestJobPostedAt = company.jobs.length > 0
-            ? company.jobs.reduce((latest, j) => {
-                const jobDate = j.created_at;
-                return !latest || (jobDate && jobDate > latest) ? jobDate : latest;
-              }, null as Date | null)
-            : null;
+          const latestJobPostedAt =
+            company.jobs.length > 0
+              ? company.jobs.reduce(
+                  (latest, j) => {
+                    const jobDate = j.created_at;
+                    return !latest || (jobDate && jobDate > latest) ? jobDate : latest;
+                  },
+                  null as Date | null
+                )
+              : null;
 
           return {
             id: company.id,
@@ -1151,16 +1180,14 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Get user sponsorships
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a simple SELECT from sponsored_content, which Prisma handles perfectly.
-   * 
+   *
    * @param args - Arguments with p_user_id
    * @returns Array of sponsored content records (GetUserSponsorshipsReturns is unknown[], so we cast)
    */
-  async getUserSponsorships(
-    args: GetUserSponsorshipsArgs
-  ): Promise<GetUserSponsorshipsReturns> {
+  async getUserSponsorships(args: GetUserSponsorshipsArgs): Promise<GetUserSponsorshipsReturns> {
     return withSmartCache(
       'getUserSponsorships',
       'getUserSponsorships',
@@ -1195,7 +1222,7 @@ export class AccountService extends BasePrismaService {
           start_date: sponsorship.start_date.toISOString(),
           end_date: sponsorship.end_date.toISOString(),
         })) satisfies GetUserSponsorshipsReturns;
-        
+
         return transformed;
       },
       args
@@ -1204,10 +1231,10 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Get submission dashboard
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing aggregations and fetching recent merged submissions and top contributors.
-   * 
+   *
    * @param args - Arguments with p_recent_limit, p_contributors_limit
    * @returns Submission dashboard data matching RPC return structure
    */
@@ -1223,54 +1250,58 @@ export class AccountService extends BasePrismaService {
 
         // Use database DATE_TRUNC for week start (eliminates new Date() call)
         // More efficient: database handles date calculations natively
+        // OPTIMIZATION: Calculate week start once before Promise.all (since we're in withSmartCache, Date.now() is safe)
+        const weekStart = new Date();
+        weekStart.setUTCDate(weekStart.getUTCDate() - weekStart.getUTCDay()); // Start of week (Sunday)
+        weekStart.setUTCHours(0, 0, 0, 0);
+        
         // Fetch stats, recent merged submissions, and top contributors in parallel
-        const [totalCount, pendingCount, mergedThisWeekCountResult, recentMerged, topContributors] = await Promise.all([
-          prisma.content_submissions.count(),
-          prisma.content_submissions.count({
-            where: { status: 'pending' },
-          }),
-          // Use raw SQL with DATE_TRUNC for week start calculation
-          prisma.$queryRawUnsafe<Array<{ count: bigint }>>(
-            `
-            SELECT COUNT(*)::bigint as count
-            FROM public.content_submissions
-            WHERE status = 'approved'
-              AND created_at >= DATE_TRUNC('week', NOW())
-            `
-          ).then((result) => Number(result[0]?.count ?? 0)),
-          prisma.content_submissions.findMany({
-            where: { 
-              status: 'merged', // RPC SQL uses 'approved'::submission_status, but Prisma enum value is 'merged'
-              moderated_at: { not: null },
-            },
-            orderBy: { moderated_at: 'desc' },
-            take: recentLimit,
-            select: {
-              id: true,
-              name: true,
-              submission_type: true,
-              moderated_at: true,
-              submitter_id: true,
-            },
-          }),
-          // Get top contributors (users with most merged submissions)
-          prisma.content_submissions.groupBy({
-            by: ['submitter_id'],
-            _count: {
-              id: true,
-            },
-            where: {
-              status: 'approved', // RPC SQL uses 'approved'::submission_status
-              submitter_id: { not: null },
-            },
-            orderBy: {
-              _count: {
-                id: 'desc',
+        const [totalCount, pendingCount, mergedThisWeekCountResult, recentMerged, topContributors] =
+          await Promise.all([
+            prisma.content_submissions.count(),
+            prisma.content_submissions.count({
+              where: { status: 'pending' },
+            }),
+            // OPTIMIZATION: Use Prisma count() with date calculation instead of raw SQL
+            prisma.content_submissions.count({
+              where: {
+                status: 'merged', // RPC uses 'approved' but Prisma enum is 'merged'
+                created_at: { gte: weekStart },
               },
-            },
-            take: contributorsLimit,
-          }),
-        ]);
+            }),
+            prisma.content_submissions.findMany({
+              where: {
+                status: 'merged', // RPC SQL uses 'approved'::submission_status, but Prisma enum value is 'merged'
+                moderated_at: { not: null },
+              },
+              orderBy: { moderated_at: 'desc' },
+              take: recentLimit,
+              select: {
+                id: true,
+                name: true,
+                submission_type: true,
+                moderated_at: true,
+                submitter_id: true,
+              },
+            }),
+            // Get top contributors (users with most merged submissions)
+            prisma.content_submissions.groupBy({
+              by: ['submitter_id'],
+              _count: {
+                id: true,
+              },
+              where: {
+                status: 'approved', // RPC SQL uses 'approved'::submission_status
+                submitter_id: { not: null },
+              },
+              orderBy: {
+                _count: {
+                  id: 'desc',
+                },
+              },
+              take: contributorsLimit,
+            }),
+          ]);
 
         // Fetch user details for recent merged submissions and top contributors
         const submitterIds = recentMerged
@@ -1279,23 +1310,24 @@ export class AccountService extends BasePrismaService {
         const contributorUserIds = topContributors
           .map((c) => c.submitter_id)
           .filter((id): id is string => id !== null);
-        
+
         const allUserIds = [...new Set([...submitterIds, ...contributorUserIds])];
-        
-        const users = allUserIds.length > 0
-          ? await prisma.public_users.findMany({
-              where: {
-                id: { in: allUserIds },
-                name: { not: null },
-                slug: { not: null },
-              },
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-              },
-            })
-          : [];
+
+        const users =
+          allUserIds.length > 0
+            ? await prisma.public_users.findMany({
+                where: {
+                  id: { in: allUserIds },
+                  name: { not: null },
+                  slug: { not: null },
+                },
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                },
+              })
+            : [];
 
         // Create maps for quick lookup
         const usersMap = new Map(users.map((u) => [u.id, u]));
@@ -1324,9 +1356,7 @@ export class AccountService extends BasePrismaService {
           }),
           contributors: topContributors
             .map((contributor, index) => {
-              const user = contributor.submitter_id
-                ? usersMap.get(contributor.submitter_id)
-                : null;
+              const user = contributor.submitter_id ? usersMap.get(contributor.submitter_id) : null;
               if (!user) return null;
               return {
                 rank: index + 1,
@@ -1344,16 +1374,14 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Check if content is bookmarked by user
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a simple EXISTS check, which Prisma handles perfectly.
-   * 
+   *
    * @param args - Arguments with user_id, content_type, and content_slug
    * @returns Boolean indicating if content is bookmarked
    */
-  async isBookmarked(
-    args: IsBookmarkedArgs
-  ): Promise<boolean> {
+  async isBookmarked(args: IsBookmarkedArgs): Promise<boolean> {
     return withSmartCache(
       'isBookmarked',
       'isBookmarked',
@@ -1374,17 +1402,15 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Batch check if multiple content items are bookmarked
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was processing a JSONB array and doing EXISTS checks for each item.
    * We can do this more efficiently with a single Prisma query using OR conditions.
-   * 
+   *
    * @param args - Arguments with user_id and items array (JSONB)
    * @returns Array of results with content_type, content_slug, and is_bookmarked flag
    */
-  async isBookmarkedBatch(
-    args: IsBookmarkedBatchArgs
-  ): Promise<IsBookmarkedBatchReturns> {
+  async isBookmarkedBatch(args: IsBookmarkedBatchArgs): Promise<IsBookmarkedBatchReturns> {
     return withSmartCache(
       'isBookmarkedBatch',
       'isBookmarkedBatch',
@@ -1396,9 +1422,15 @@ export class AccountService extends BasePrismaService {
           items = args.p_items;
         } else if (typeof args.p_items === 'object' && args.p_items !== null) {
           // If it's a JSONB object, try to extract array
-          if ('items' in args.p_items && Array.isArray((args.p_items as Record<string, unknown>)['items'])) {
+          if (
+            'items' in args.p_items &&
+            Array.isArray((args.p_items as Record<string, unknown>)['items'])
+          ) {
             // Validate and cast items from JSONB
-            const rawItems = (args.p_items as Record<string, unknown>)['items'] as Array<{ content_type: unknown; content_slug: unknown }>;
+            const rawItems = (args.p_items as Record<string, unknown>)['items'] as Array<{
+              content_type: unknown;
+              content_slug: unknown;
+            }>;
             items = rawItems.map((item) => ({
               content_type: item.content_type as content_category,
               content_slug: String(item.content_slug),
@@ -1406,10 +1438,12 @@ export class AccountService extends BasePrismaService {
           } else {
             // Single item wrapped in object - validate and cast
             const rawItem = args.p_items as { content_type: unknown; content_slug: unknown };
-            items = [{
-              content_type: rawItem.content_type as content_category,
-              content_slug: String(rawItem.content_slug),
-            }];
+            items = [
+              {
+                content_type: rawItem.content_type as content_category,
+                content_slug: String(rawItem.content_slug),
+              },
+            ];
           }
         } else {
           // Invalid format, return empty array
@@ -1439,9 +1473,7 @@ export class AccountService extends BasePrismaService {
         });
 
         // Build set of bookmarked items for fast lookup
-        const bookmarkSet = new Set(
-          bookmarks.map((b) => `${b.content_type}:${b.content_slug}`)
-        );
+        const bookmarkSet = new Set(bookmarks.map((b) => `${b.content_type}:${b.content_slug}`));
 
         // Build result array - types are already correct
         return items.map((item) => ({
@@ -1456,16 +1488,14 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Check if user is following another user
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a simple EXISTS check, which Prisma handles perfectly.
-   * 
+   *
    * @param args - Arguments with follower_id and following_id
    * @returns Boolean indicating if user is following
    */
-  async isFollowing(
-    args: IsFollowingArgs
-  ): Promise<boolean> {
+  async isFollowing(args: IsFollowingArgs): Promise<boolean> {
     return withSmartCache(
       'isFollowing',
       'isFollowing',
@@ -1485,17 +1515,15 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Batch check if user is following multiple users
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was processing a UUID array and doing EXISTS checks for each user.
    * We can do this more efficiently with a single Prisma query using IN condition.
-   * 
+   *
    * @param args - Arguments with follower_id and followed_user_ids array
    * @returns Array of results with followed_user_id and is_following flag
    */
-  async isFollowingBatch(
-    args: IsFollowingBatchArgs
-  ): Promise<IsFollowingBatchReturns> {
+  async isFollowingBatch(args: IsFollowingBatchArgs): Promise<IsFollowingBatchReturns> {
     return withSmartCache(
       'isFollowingBatch',
       'isFollowingBatch',
@@ -1532,10 +1560,10 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Get user activity summary
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing simple counts from users and content_submissions tables.
-   * 
+   *
    * @param args - Arguments with p_user_id
    * @returns User activity summary matching RPC return structure
    */
@@ -1593,10 +1621,10 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Get user activity timeline
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a query with CTEs and pagination, which we can replicate with Prisma.
-   * 
+   *
    * @param args - Arguments with p_user_id, p_type, p_limit, p_offset
    * @returns User activity timeline matching RPC return structure
    */
@@ -1674,16 +1702,14 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Get user identities
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a simple SELECT from auth.identities, which Prisma handles perfectly.
-   * 
+   *
    * @param args - Arguments with p_user_id
    * @returns User identities matching RPC return structure
    */
-  async getUserIdentities(
-    args: GetUserIdentitiesArgs
-  ): Promise<GetUserIdentitiesReturns> {
+  async getUserIdentities(args: GetUserIdentitiesArgs): Promise<GetUserIdentitiesReturns> {
     return withSmartCache(
       'getUserIdentities',
       'getUserIdentities',
@@ -1715,17 +1741,15 @@ export class AccountService extends BasePrismaService {
 
   /**
    * Get user complete data
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly by calling individual service methods instead of RPC.
    * The RPC was calling other RPCs (get_user_settings, get_user_identities, etc.) which have
    * all been converted to Prisma. This method now calls the Prisma-based service methods directly.
-   * 
+   *
    * @param args - Arguments with p_user_id, p_activity_limit, p_activity_offset, p_activity_type
    * @returns User complete data matching RPC return structure
    */
-  async getUserCompleteData(
-    args: GetUserCompleteDataArgs
-  ): Promise<GetUserCompleteDataReturns> {
+  async getUserCompleteData(args: GetUserCompleteDataArgs): Promise<GetUserCompleteDataReturns> {
     // Optimized: Use request-scoped caching to prevent duplicate calls within same request
     // This is especially important since getUserCompleteData is called by multiple
     // functions (getAccountDashboard, getUserLibrary, getUserSettings, etc.)

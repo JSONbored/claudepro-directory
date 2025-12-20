@@ -9,7 +9,11 @@ import { getQuizConfigurationAction } from '@heyclaude/web-runtime/actions/quiz'
 import { generateConfigRecommendations } from '@heyclaude/web-runtime/pulse-client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
 import { ArrowLeft, ArrowRight, Sparkles } from '@heyclaude/web-runtime/icons';
-import { logClientError, logClientInfo, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import {
+  logClientError,
+  logClientInfo,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/client';
 import {
   Button,
   Card,
@@ -27,8 +31,18 @@ import { z } from 'zod';
 import { QuestionCard } from './question-card';
 import { QuizProgress } from './quiz-progress';
 
-import { ExperienceLevel, FocusAreaType, IntegrationType, UseCaseType } from '@heyclaude/data-layer/prisma';
-import type { experience_level, focus_area_type, integration_type, use_case_type } from '@heyclaude/data-layer/prisma';
+import {
+  experience_level as ExperienceLevel,
+  focus_area_type as FocusAreaType,
+  integration_type as IntegrationType,
+  use_case_type as UseCaseType,
+} from '@prisma/client';
+import type {
+  experience_level,
+  focus_area_type,
+  integration_type,
+  use_case_type,
+} from '@prisma/client';
 import type { GetQuizConfigurationReturns } from '@heyclaude/data-layer';
 
 // Use enum values directly from Prisma enum objects
@@ -63,7 +77,7 @@ function mapQuizConfigToQuestions(config: null | QuizConfigurationResult): null 
   // Handle as single object (generated type says it's QuizConfigurationQuestion, not array)
   // If database actually returns array, generator needs fixing
   const questions = Array.isArray(config) ? config : [config];
-  
+
   if (questions.length === 0) {
     return null;
   }
@@ -85,30 +99,17 @@ function mapQuizConfigToQuestions(config: null | QuizConfigurationResult): null 
 
 // Manual Zod schema (database validates via RPC function)
 const quizAnswersSchema = z.object({
-  useCase: z.enum([...USE_CASE_TYPE_VALUES] as [
-    use_case_type,
-    ...use_case_type[],
-  ]),
+  useCase: z.enum([...USE_CASE_TYPE_VALUES] as [use_case_type, ...use_case_type[]]),
   experienceLevel: z.enum([...EXPERIENCE_LEVEL_VALUES] as [
     experience_level,
     ...experience_level[],
   ]),
   toolPreferences: z.array(z.string()).min(1).max(5),
   p_integrations: z
-    .array(
-      z.enum([...INTEGRATION_TYPE_VALUES] as [
-        integration_type,
-        ...integration_type[],
-      ])
-    )
+    .array(z.enum([...INTEGRATION_TYPE_VALUES] as [integration_type, ...integration_type[]]))
     .optional(),
   p_focus_areas: z
-    .array(
-      z.enum([...FOCUS_AREA_TYPE_VALUES] as [
-        focus_area_type,
-        ...focus_area_type[],
-      ])
-    )
+    .array(z.enum([...FOCUS_AREA_TYPE_VALUES] as [focus_area_type, ...focus_area_type[]]))
     .optional(),
   teamSize: z.string().optional(),
   timestamp: z.string().datetime().optional(),
@@ -147,10 +148,7 @@ export function QuizForm() {
       }
       if (result?.serverError) {
         // Error already logged by safe-action middleware
-        const normalized = normalizeError(
-          result.serverError,
-          'Failed to load quiz configuration'
-        );
+        const normalized = normalizeError(result.serverError, 'Failed to load quiz configuration');
         logClientError(
           '[Quiz] Failed to load quiz configuration',
           normalized,
@@ -286,17 +284,13 @@ export function QuizForm() {
                   `/tools/config-recommender/results/${result.recommendations.id}?answers=${encoded}`
                 );
 
-                logClientInfo(
-                  'Quiz completed',
-                  'QuizForm.handleSubmit',
-                  {
-                    component: 'QuizForm',
-                    action: 'submit',
-                    useCase: validatedAnswers.useCase,
-                    experienceLevel: validatedAnswers.experienceLevel,
-                    resultId: result.recommendations.id,
-                  }
-                );
+                logClientInfo('Quiz completed', 'QuizForm.handleSubmit', {
+                  component: 'QuizForm',
+                  action: 'submit',
+                  useCase: validatedAnswers.useCase,
+                  experienceLevel: validatedAnswers.experienceLevel,
+                  resultId: result.recommendations.id,
+                });
               } else {
                 throw new Error('Failed to generate recommendations');
               }
@@ -326,16 +320,11 @@ export function QuizForm() {
     } catch (error) {
       toasts.error.invalidInput();
       const normalized = normalizeError(error, 'Quiz validation failed');
-      logClientError(
-        '[Quiz] Validation failed',
-        normalized,
-        'QuizForm.validate',
-        {
-          component: 'QuizForm',
-          action: 'validate',
-          category: 'quiz',
-        }
-      );
+      logClientError('[Quiz] Validation failed', normalized, 'QuizForm.validate', {
+        component: 'QuizForm',
+        action: 'validate',
+        category: 'quiz',
+      });
     }
   };
 
@@ -437,12 +426,12 @@ export function QuizForm() {
                 <Card className="border-primary/20 bg-primary/5">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
-                      <Sparkles className="h-5 w-5 text-primary" />
+                      <Sparkles className="text-primary h-5 w-5" />
                       What happens next?
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className="text-muted-foreground text-sm space-y-2">
+                    <ul className="text-muted-foreground space-y-2 text-sm">
                       <li>? We'll analyze 147+ configurations</li>
                       <li>? Match them to your specific needs</li>
                       <li>? Show you the top 8-10 best fits</li>
@@ -498,7 +487,7 @@ export function QuizForm() {
                       }`}
                     >
                       <div className="font-medium">{option.label}</div>
-                      <div className="text-muted-foreground text-sm mt-1">{option.description}</div>
+                      <div className="text-muted-foreground mt-1 text-sm">{option.description}</div>
                     </button>
                   );
                 })}
@@ -517,7 +506,7 @@ export function QuizForm() {
               onClick={goToPrevious}
               disabled={currentQuestion === 1 || isPending}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="mr-2 h-4 w-4" />
               Previous
             </Button>
 
@@ -537,7 +526,7 @@ export function QuizForm() {
                   <InlineSpinner size="sm" message="Generating..." />
                 ) : (
                   <>
-                    <Sparkles className="h-4 w-4 mr-2" />
+                    <Sparkles className="mr-2 h-4 w-4" />
                     Get Results
                   </>
                 )}

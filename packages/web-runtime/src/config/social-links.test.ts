@@ -28,7 +28,7 @@ describe('SOCIAL_LINKS', () => {
 
   it('should have valid email addresses', () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
+
     expect(SOCIAL_LINKS.email).toMatch(emailRegex);
     expect(SOCIAL_LINKS.hiEmail).toMatch(emailRegex);
     expect(SOCIAL_LINKS.supportEmail).toMatch(emailRegex);
@@ -50,7 +50,7 @@ describe('SOCIAL_LINKS', () => {
 
   it('should have no trailing slashes in URLs', () => {
     const urlFields = ['github', 'twitter', 'discord', 'authorProfile'];
-    
+
     for (const field of urlFields) {
       const value = SOCIAL_LINKS[field as keyof typeof SOCIAL_LINKS];
       if (typeof value === 'string' && value.startsWith('http')) {

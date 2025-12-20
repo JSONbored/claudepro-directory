@@ -20,12 +20,7 @@ import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.
 import { Search, AlertCircle, RefreshCw } from '@heyclaude/web-runtime/icons';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
-import {
-  Button,
-  UnifiedCardGrid,
-  ConfigCard,
-  cn,
-} from '@heyclaude/web-runtime/ui';
+import { Button, UnifiedCardGrid, ConfigCard, cn } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useCallback } from 'react';
 
@@ -188,9 +183,7 @@ export function SearchResults({
             <Search className="h-12 w-12" />
           </motion.div>
           <h3 className="text-lg font-semibold">{emptyMessage}</h3>
-          <p className="text-sm">
-            Try different keywords or browse our featured content below
-          </p>
+          <p className="text-sm">Try different keywords or browse our featured content below</p>
         </div>
       </motion.div>
     );

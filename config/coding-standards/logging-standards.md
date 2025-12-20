@@ -6,7 +6,7 @@ This document defines the standards and patterns for logging and error handling 
 
 ## Core Principles
 
-1. **Structured Logging**: Always use structured logging (logger.*), never raw console.*
+1. **Structured Logging**: Always use structured logging (logger._), never raw console._
 2. **Request Correlation**: Always include requestId for log correlation
 3. **Context**: Always include route, operation, and relevant metadata
 4. **Performance Tracking**: Track performance metrics when needed (duration tracking removed - use external monitoring)
@@ -34,7 +34,7 @@ export default async function MyPage() {
   try {
     // Your code here
     const data = await fetchData();
-    
+
     logger.info(
       'MyPage: data loaded',
         {
@@ -80,7 +80,7 @@ import { generateRequestId } from '@heyclaude/web-runtime/core';
 
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
-  
+
   try {
     // Your code here
     return NextResponse.json({ success: true });

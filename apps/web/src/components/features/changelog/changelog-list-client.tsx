@@ -1,6 +1,8 @@
 'use client';
 
-import type { changelogModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type changelogModel = Prisma.changelogGetPayload<{}>;
 
 import { ChangelogTimelineView } from '@/src/components/features/changelog/changelog-timeline-view';
 
@@ -25,7 +27,7 @@ export function ChangelogListClient({ entries }: ChangelogListClientProps) {
     <div className="w-full">
       {entries.length === 0 ? (
         <output className="flex items-center justify-center py-12" aria-live="polite">
-          <p className="text-lg text-muted-foreground">No changelog entries found.</p>
+          <p className="text-muted-foreground text-lg">No changelog entries found.</p>
         </output>
       ) : (
         <ChangelogTimelineView entries={entries} />

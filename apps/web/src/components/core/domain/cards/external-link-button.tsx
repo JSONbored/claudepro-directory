@@ -33,7 +33,7 @@ export function ExternalLinkButton({
     <Button
       variant="ghost"
       size="sm"
-      className="flex items-center justify-center h-4 w-4 rounded-md hover:bg-accent/10"
+      className="hover:bg-accent/10 flex h-4 w-4 items-center justify-center rounded-md"
       onClick={(e) => {
         e.stopPropagation();
         pulse
@@ -48,13 +48,9 @@ export function ExternalLinkButton({
             },
           })
           .catch((error) => {
-            logUnhandledPromise(
-              `UserProfileCard: ${linkType} link click pulse failed`,
-              error,
-              {
-                user_slug: userSlug,
-              }
-            );
+            logUnhandledPromise(`UserProfileCard: ${linkType} link click pulse failed`, error, {
+              user_slug: userSlug,
+            });
           });
         window.open(safeUrl, '_blank');
       }}

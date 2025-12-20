@@ -76,20 +76,19 @@ export function SwipeableCardWrapper({
 }: SwipeableCardWrapperProps) {
   // Use useMediaQuery for responsive detection (replaces window.innerWidth checks)
   const isNarrowScreen = useMediaQuery('(max-width: 1023px)'); // lg breakpoint (1024px)
-  
+
   // Detect touch capability
   const hasTouchScreen = useMediaQuery('(pointer:coarse)');
-  
+
   // Mobile detection: touch-capable devices with narrow screens
   const isMobile = hasTouchScreen && isNarrowScreen;
-  
+
   // Use Motion.dev's useReducedMotion hook (replaces window.matchMedia for prefers-reduced-motion)
   const prefersReducedMotion = useReducedMotion();
-  
+
   const dragControls = useDragControls();
   // Spring animation config from design system
   const springSmooth = SPRING.smooth;
-
 
   // Motion values for drag tracking
   const x = useMotionValue(0);
@@ -120,7 +119,7 @@ export function SwipeableCardWrapper({
         className="pointer-events-none absolute inset-y-0 left-0 z-0 flex w-20 items-center justify-start pl-4"
         style={{ opacity: copyIndicatorOpacity }}
       >
-        <div className="rounded-lg p-3 text-color-swipe-copy-text-dark border-color-swipe-copy-border bg-color-swipe-copy-bg">
+        <div className="text-color-swipe-copy-text-dark border-color-swipe-copy-border bg-color-swipe-copy-bg rounded-lg p-3">
           <CopyIcon className="h-5 w-5" aria-hidden="true" />
         </div>
       </motion.div>
@@ -130,7 +129,7 @@ export function SwipeableCardWrapper({
         className="pointer-events-none absolute inset-y-0 right-0 z-0 flex w-20 items-center justify-end pr-4"
         style={{ opacity: bookmarkIndicatorOpacity }}
       >
-        <div className="rounded-lg p-3 text-color-swipe-bookmark-text-dark border-color-swipe-bookmark-border bg-color-swipe-bookmark-bg">
+        <div className="text-color-swipe-bookmark-text-dark border-color-swipe-bookmark-border bg-color-swipe-bookmark-bg rounded-lg p-3">
           <Bookmark className="h-5 w-5" aria-hidden="true" />
         </div>
       </motion.div>
@@ -152,11 +151,11 @@ export function SwipeableCardWrapper({
           try {
             const threshold = 100;
             const velocityThreshold = 500; // Minimum velocity for momentum-based swipe
-            
+
             // Check if swipe meets threshold OR has sufficient velocity (momentum-based)
             const hasRightMomentum = info.offset.x > 50 && info.velocity.x > velocityThreshold;
             const hasLeftMomentum = info.offset.x < -50 && info.velocity.x < -velocityThreshold;
-            
+
             // Swipe right threshold: 100px OR momentum-based
             if ((info.offset.x > threshold || hasRightMomentum) && onSwipeRight) {
               onSwipeRight();
@@ -176,8 +175,10 @@ export function SwipeableCardWrapper({
             }
           } catch (error) {
             const normalized = normalizeError(error, 'SwipeableCardWrapper: Swipe action failed');
-            logger.error({ err: normalized, component: 'SwipeableCardWrapper',
-              offsetX: info.offset.x, }, 'SwipeableCardWrapper: Swipe action failed');
+            logger.error(
+              { err: normalized, component: 'SwipeableCardWrapper', offsetX: info.offset.x },
+              'SwipeableCardWrapper: Swipe action failed'
+            );
             // Always snap back on error
             x.set(0);
           }

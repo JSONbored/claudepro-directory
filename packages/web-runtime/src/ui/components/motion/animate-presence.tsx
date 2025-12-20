@@ -1,11 +1,11 @@
 /**
  * AnimatePresence Component
- * 
+ *
  * Wrapper for Motion.dev's AnimatePresence component.
  * Provides exit animations for components that mount/unmount.
- * 
+ *
  * @module web-runtime/ui/components/motion/animate-presence
- * 
+ *
  * @example
  * ```tsx
  * function ToggleableContent({ isVisible }) {
@@ -33,16 +33,16 @@ import type { AnimatePresenceProps } from 'motion/react';
 
 /**
  * Component that enables exit animations for children.
- * 
+ *
  * AnimatePresence tracks components as they mount and unmount,
  * allowing exit animations to play before the component is removed.
- * 
+ *
  * This is a re-export of Motion.dev's AnimatePresence for consistency
  * and centralized imports.
- * 
+ *
  * @param props - AnimatePresence props (mode, initial, etc.)
  * @returns AnimatePresence wrapper component
- * 
+ *
  * @see https://motion.dev/docs/react/components/animate-presence
  */
 export const AnimatePresence = MotionAnimatePresence;

@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 
 export const ACRONYMS = [
   'API',
@@ -111,29 +111,29 @@ export function shallowEqual(objA: unknown, objB: unknown): boolean {
 
 /**
  * Deep equality comparison for arrays and objects.
- * 
+ *
  * Performs a deep comparison of two values, handling:
  * - Primitives (uses Object.is for strict equality)
  * - Arrays (compares length and elements recursively)
  * - Objects (compares keys and values recursively)
  * - Null/undefined values
- * 
+ *
  * **Performance:** Faster than JSON.stringify for memo comparisons.
  * **Use cases:** React.memo custom comparison, useMemo dependencies, array/object equality checks.
- * 
+ *
  * @param a - First value to compare
  * @param b - Second value to compare
  * @returns true if values are deeply equal
- * 
+ *
  * @example
  * ```typescript
  * import { deepEqual } from '@heyclaude/web-runtime/ui';
- * 
+ *
  * // In memo comparison
  * export const MyComponent = memo(Component, (prev, next) => {
  *   return deepEqual(prev.items, next.items);
  * });
- * 
+ *
  * // In useMemo dependency
  * const stableKey = useMemo(() => {
  *   return items; // Return original array, use deepEqual in dependency array

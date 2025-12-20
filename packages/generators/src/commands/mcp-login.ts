@@ -7,7 +7,7 @@
  * 2. OAuth browser flow (opens browser, captures token automatically)
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { homedir } from 'node:os';
 import path from 'node:path';
@@ -58,8 +58,8 @@ if (!SUPABASE_ANON_KEY) {
  * Save token to disk
  */
 function saveToken(
-  session: { access_token: string; expires_at: number; refresh_token: string; },
-  user: { email?: string; id: string; }
+  session: { access_token: string; expires_at: number; refresh_token: string },
+  user: { email?: string; id: string }
 ): void {
   try {
     mkdirSync(CONFIG_DIR, { recursive: true });
@@ -314,7 +314,7 @@ async function loginWithOAuth(): Promise<void> {
  */
 function displaySuccess(
   session: { access_token: string; expires_at: number },
-  user: { email?: string; id: string; }
+  user: { email?: string; id: string }
 ): void {
   logger.log('\n✅ Login successful!');
   logger.log('\n📋 Token Information:');

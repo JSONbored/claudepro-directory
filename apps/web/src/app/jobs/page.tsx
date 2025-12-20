@@ -3,7 +3,10 @@
  * Single RPC call to filter_jobs() - all filtering in PostgreSQL
  */
 
-import { ExperienceLevel, JobType } from '@heyclaude/data-layer/prisma';
+import {
+  experience_level as ExperienceLevel,
+  job_type as JobType,
+} from '@prisma/client';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { getFilteredJobs } from '@heyclaude/web-runtime/data/jobs';
@@ -601,9 +604,9 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                     <UnifiedBadge style="secondary" variant="base">
                       {experience === ExperienceLevel.beginner
                         ? 'Entry level'
-                        : (experience === ExperienceLevel.intermediate
+                        : experience === ExperienceLevel.intermediate
                           ? 'Mid level'
-                          : 'Senior level')}
+                          : 'Senior level'}
                       <Link
                         aria-label="Remove experience filter"
                         className="hover:text-destructive ml-0.5"
@@ -704,7 +707,7 @@ const SORT_VALUES = new Set<SortOption>(['newest', 'oldest', 'salary']);
  */
 function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption): JobCardJobType[] {
   if (!jobs || !Array.isArray(jobs)) return [];
-  
+
   // Type guard to ensure jobs are properly typed
   const typedJobs = jobs.filter((job): job is JobCardJobType => {
     return (
@@ -718,7 +721,7 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption): JobC
       typeof (job as { posted_at: unknown }).posted_at === 'string'
     );
   }) as JobCardJobType[];
-  
+
   if (sort === 'oldest') {
     return typedJobs.toSorted((a, b) => {
       const aDate = a.posted_at ? new Date(a.posted_at).getTime() : 0;

@@ -214,7 +214,13 @@ function FAQBox(props: FAQVariant) {
           <Card key={faq.question} className="border-border bg-code/50 border backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-start gap-2 text-lg font-semibold">
-                <div className={cn('bg-primary/10', 'mt-[18px]', 'flex h-6 w-6 shrink-0 items-center justify-center rounded-full')}>
+                <div
+                  className={cn(
+                    'bg-primary/10',
+                    'mt-[18px]',
+                    'flex h-6 w-6 shrink-0 items-center justify-center rounded-full'
+                  )}
+                >
                   <span className="text-primary text-sm font-bold">Q</span>
                 </div>
                 {faq.question}
@@ -285,13 +291,7 @@ function InfoBoxComponent(props: InfoBoxVariant) {
     <div
       itemScope
       itemType="https://schema.org/Note"
-      className={cn(
-        'my-6',
-        'rounded-r-lg border-l-4',
-        'p-6',
-        classes.borderClass,
-        classes.bgClass
-      )}
+      className={cn('my-6', 'rounded-r-lg border-l-4', 'p-6', classes.borderClass, classes.bgClass)}
     >
       {title ? (
         <div className={cn('flex items-center gap-2', 'mb-2')}>

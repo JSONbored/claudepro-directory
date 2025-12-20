@@ -1,14 +1,14 @@
 #!/usr/bin/env tsx
 /**
  * CSS Analysis Command - Read-Only Analysis Tool
- * 
+ *
  * Analyzes all CSS files to extract:
  * - CSS variables and their values
  * - Color values (OKLCH, hex, RGB, HSL)
  * - Spacing values
  * - Theme system patterns (data-theme usage)
  * - Duplicate values
- * 
+ *
  * This script does NOT modify any files - it's purely for analysis.
  */
 
@@ -112,9 +112,13 @@ function extractColors(css: string, file: string): ColorValue[] {
   const root = postcss.default.parse(css);
 
   root.walkDecls((decl) => {
-    if (decl.prop.includes('color') || decl.prop.includes('background') || decl.prop.includes('border')) {
+    if (
+      decl.prop.includes('color') ||
+      decl.prop.includes('background') ||
+      decl.prop.includes('border')
+    ) {
       const value = decl.value.toLowerCase().trim();
-      
+
       let format: ColorValue['format'] = 'unknown';
       if (value.startsWith('oklch(')) format = 'oklch';
       else if (value.startsWith('#')) format = 'hex';
@@ -143,9 +147,9 @@ function extractSpacing(css: string, file: string): SpacingValue[] {
 
   root.walkDecls((decl) => {
     const props = ['margin', 'padding', 'gap', 'top', 'right', 'bottom', 'left', 'width', 'height'];
-    if (props.some(prop => decl.prop.includes(prop))) {
+    if (props.some((prop) => decl.prop.includes(prop))) {
       const parsed = valueParser(decl.value);
-      
+
       parsed.walk((node) => {
         if (node.type === 'word' && /^\d+(\.\d+)?(px|rem|em|ch|vh|vw|%)$/.test(node.value)) {
           const match = node.value.match(/^(\d+(?:\.\d+)?)(px|rem|em|ch|vh|vw|%)$/);
@@ -172,7 +176,7 @@ function extractThemePatterns(css: string, file: string): ThemePattern[] {
 
   root.walkRules((rule) => {
     const selector = rule.selector;
-    
+
     if (selector.includes('[data-theme')) {
       patterns.push({
         type: 'data-theme',
@@ -268,7 +272,7 @@ function findDuplicates(result: AnalysisResult): AnalysisResult['duplicates'] {
 // Main analysis function
 async function analyzeCSS(): Promise<AnalysisResult> {
   const cssFiles = findCSSFiles(join(PROJECT_ROOT, 'apps/web/src'));
-  
+
   logger.info(`Analyzing ${cssFiles.length} CSS files...`);
 
   const result: AnalysisResult = {
@@ -308,23 +312,28 @@ function generateReport(result: AnalysisResult): string {
   report += `Generated: ${new Date().toISOString()}\n\n`;
 
   report += `## Summary\n\n`;
-  report += `- **CSS Files Analyzed:** ${new Set(result.variables.map(v => v.file)).size}\n`;
+  report += `- **CSS Files Analyzed:** ${new Set(result.variables.map((v) => v.file)).size}\n`;
   report += `- **CSS Variables Found:** ${result.variables.length}\n`;
   report += `- **Color Values Found:** ${result.colors.length}\n`;
   report += `- **Spacing Values Found:** ${result.spacing.length}\n`;
   report += `- **Theme Patterns Found:** ${result.themePatterns.length}\n\n`;
 
   report += `## Theme System Analysis\n\n`;
-  const themeTypes = result.themePatterns.reduce((acc, p) => {
-    acc[p.type] = (acc[p.type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  
+  const themeTypes = result.themePatterns.reduce(
+    (acc, p) => {
+      acc[p.type] = (acc[p.type] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+
   for (const [type, count] of Object.entries(themeTypes)) {
     report += `- **${type}**: ${count} occurrences\n`;
   }
   report += `\n### Files Using data-theme\n\n`;
-  const dataThemeFiles = [...new Set(result.themePatterns.filter(p => p.type === 'data-theme').map(p => p.file))];
+  const dataThemeFiles = [
+    ...new Set(result.themePatterns.filter((p) => p.type === 'data-theme').map((p) => p.file)),
+  ];
   for (const file of dataThemeFiles) {
     report += `- \`${file}\`\n`;
   }
@@ -355,8 +364,10 @@ function generateReport(result: AnalysisResult): string {
       uniqueVars.set(variable.name, variable);
     }
   }
-  
-  for (const variable of Array.from(uniqueVars.values()).sort((a, b) => a.name.localeCompare(b.name))) {
+
+  for (const variable of Array.from(uniqueVars.values()).sort((a, b) =>
+    a.name.localeCompare(b.name)
+  )) {
     report += `- \`${variable.name}\`: \`${variable.value.substring(0, 80)}${variable.value.length > 80 ? '...' : ''}\`\n`;
   }
 
@@ -368,14 +379,14 @@ export async function runAnalyzeCSS(): Promise<void> {
   try {
     const result = await analyzeCSS();
     const report = generateReport(result);
-    
+
     console.log(report);
-    
+
     // Write report to file
     const reportPath = join(PROJECT_ROOT, '.cursor/tailwind-cleanup/css-analysis-report.md');
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, report, 'utf-8');
-    
+
     logger.info(`Analysis complete! Report saved to: ${reportPath}`);
   } catch (error) {
     logger.error('Analysis failed', { error });

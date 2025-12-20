@@ -2,7 +2,7 @@ import type {
   config_format,
   primary_action_type,
   content_category,
-} from '@heyclaude/data-layer/prisma';
+} from '@prisma/client';
 import type { LucideIcon } from 'lucide-react';
 
 export type SectionId =

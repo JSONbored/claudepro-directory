@@ -19,7 +19,10 @@
 
 import 'server-only';
 import {
-  createOptionsHandler as createApiOptionsHandler, createFormatHandlerRoute, type FormatHandlerConfig, type RouteHandlerContext,
+  createOptionsHandler as createApiOptionsHandler,
+  createFormatHandlerRoute,
+  type FormatHandlerConfig,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { categoryContentFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import {

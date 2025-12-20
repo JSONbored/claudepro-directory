@@ -5,7 +5,13 @@ import { useEffect, useRef, type RefObject } from 'react';
 /**
  * Event types supported by useOnClickOutside
  */
-export type EventType = 'mousedown' | 'mouseup' | 'touchstart' | 'touchend' | 'focusin' | 'focusout';
+export type EventType =
+  | 'mousedown'
+  | 'mouseup'
+  | 'touchstart'
+  | 'touchend'
+  | 'focusin'
+  | 'focusout';
 
 /**
  * Options for useOnClickOutside hook

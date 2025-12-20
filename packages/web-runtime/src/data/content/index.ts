@@ -1,6 +1,8 @@
 import 'server-only';
 
-import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
+import { Prisma } from '@prisma/client';
+import type { content_category } from '@prisma/client';
+type contentModel = Prisma.contentGetPayload<{}>;
 import {
   type GetPopularContentReturns,
   type GetTrendingContentReturns,
@@ -74,8 +76,8 @@ export const getContentBySlug = createDataFunction<
  * @param {Array<{ category: content_category; slug: string }>} items Parameter description
  * @param {Array<{ category: content_category; slug: string }>} items Parameter description
  * @param {Array<{ category: content_category; slug: string }>} items Parameter description
-  * @param {Array<{ category: content_category; slug: string }>} items Parameter description
-*/
+ * @param {Array<{ category: content_category; slug: string }>} items Parameter description
+ */
 function groupItemsByCategory(
   items: Array<{ category: content_category; slug: string }>
 ): Map<content_category, string[]> {
@@ -107,7 +109,8 @@ export async function getContentBatchBySlugs(
     const service = await getService('content');
 
     // Fetch all categories in parallel
-    const categoryResults = await Promise.all(
+    // Use Promise.allSettled to preserve successful results even if some categories fail
+    const categoryResults = await Promise.allSettled(
       [...itemsByCategory.entries()].map(
         async ([category, slugs]) =>
           await service.getEnrichedContentList({
@@ -119,18 +122,41 @@ export async function getContentBatchBySlugs(
       )
     );
 
-    // Build result map
+    // Build result map from successful results
     const resultMap = new Map<string, EnrichedContentItem>();
-    for (const data of categoryResults) {
-      for (const item of data) {
-        if (item.slug) {
-          resultMap.set(item.slug, item);
+    let hasErrors = false;
+
+    for (const result of categoryResults) {
+      if (result.status === 'fulfilled') {
+        for (const item of result.value) {
+          if (item.slug) {
+            resultMap.set(item.slug, item);
+          }
         }
+      } else {
+        // Log individual category failures but continue processing other categories
+        hasErrors = true;
+        const normalized = normalizeError(
+          result.reason,
+          `getContentBatchBySlugs: failed to fetch category`
+        );
+        // Use logger directly for category-level warnings (not request-scoped)
+        logger.warn({ err: normalized }, 'getContentBatchBySlugs: category fetch failed');
       }
+    }
+
+    // Only log error if all categories failed
+    if (hasErrors && resultMap.size === 0) {
+      const normalized = normalizeError(
+        new Error('All category fetches failed'),
+        'getContentBatchBySlugs failed'
+      );
+      logger.error({ err: normalized, itemCount: items.length }, 'getContentBatchBySlugs: all fetches failed');
     }
 
     return resultMap;
   } catch (error) {
+    // Catch any unexpected errors (e.g., getService failure)
     const normalized = normalizeError(error, 'getContentBatchBySlugs failed');
     logger.error({ err: normalized, itemCount: items.length }, 'getContentBatchBySlugs: failed');
     return new Map(); // Return empty map on error

@@ -3,10 +3,10 @@
 /**
  * Navigation Hover Card Primitives
  * Accessible hover-triggered cards with smooth animations
- * 
+ *
  * Used for navigation dropdowns that open on hover (not click)
  * Provides better UX for desktop navigation
- * 
+ *
  * Note: This is different from the animation HoverCard component.
  * This uses Radix UI HoverCard for navigation menus.
  */
@@ -30,7 +30,7 @@ const NavigationHoverCardContent = React.forwardRef<
         sideOffset={sideOffset}
         align={align}
         className={cn(
-          'z-50 w-64 rounded-md border bg-popover p-2 text-popover-foreground shadow-lg',
+          'bg-popover text-popover-foreground z-50 w-64 rounded-md border p-2 shadow-lg',
           'overflow-hidden', // Prevent hover bleed outside container
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
@@ -38,7 +38,7 @@ const NavigationHoverCardContent = React.forwardRef<
           'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2',
           'data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
           // Enhanced entrance animation with spring-like timing
-          'data-[state=open]:duration-200 data-[state=closed]:duration-150',
+          'data-[state=closed]:duration-150 data-[state=open]:duration-200',
           className
         )}
         {...props}
@@ -52,8 +52,4 @@ const NavigationHoverCardContent = React.forwardRef<
 NavigationHoverCardContent.displayName = HoverCardPrimitive.Content.displayName;
 
 // Export with Navigation prefix to avoid conflict with animation HoverCard
-export {
-  NavigationHoverCard,
-  NavigationHoverCardTrigger,
-  NavigationHoverCardContent,
-};
+export { NavigationHoverCard, NavigationHoverCardTrigger, NavigationHoverCardContent };

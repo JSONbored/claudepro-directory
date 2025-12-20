@@ -48,13 +48,13 @@ const NavigationComponent = () => {
   // Motion.dev scroll-based animations (Phase 1.5 - October 2025)
   const shouldReduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
-  
+
   // Disable blur effect for reduced motion (opacity-only is fine)
   const backdropBlur = shouldReduceMotion
     ? useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(0px)'])
     : useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(12px)']);
   const navOpacity = useTransform(scrollY, [0, 50], [0.95, 1]);
-  
+
   // Scroll detection handled by Motion.dev animations (backdropBlur, navOpacity)
   // No need for isScrolled state - scroll-based styling handled via useTransform
 
@@ -67,7 +67,7 @@ const NavigationComponent = () => {
       {/* Skip to main content link for keyboard navigation (WCAG 2.1 AA) */}
       <a
         href="#main-content"
-        className="sr-only transition-all duration-200 ease-out focus:bg-accent focus:text-accent-foreground focus:ring-accent focus:ring-offset-background focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-100 focus:rounded-md focus:px-4 focus:py-2 focus:shadow-lg focus:ring-2 focus:ring-offset-2 focus:outline-none"
+        className="focus:bg-accent focus:text-accent-foreground focus:ring-accent focus:ring-offset-background sr-only transition-all duration-200 ease-out focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-100 focus:rounded-md focus:px-4 focus:py-2 focus:shadow-lg focus:ring-2 focus:ring-offset-2 focus:outline-none"
       >
         Skip to main content
       </a>
@@ -82,19 +82,17 @@ const NavigationComponent = () => {
       >
         <div className="container mx-auto">
           <motion.nav
-            className="bg-background/95 border-b border-border/50 backdrop-blur-xl transition-all duration-300 ease-out"
+            className="bg-background/95 border-border/50 border-b backdrop-blur-xl transition-all duration-300 ease-out"
             style={{ backdropFilter: backdropBlur }}
             aria-label="Main navigation container"
           >
             <div className="px-4 py-2">
-              <div
-                className="flex items-center justify-between transition-[height] transition-all duration-300 ease-out will-change-auto h-14 md:h-16"
-              >
+              <div className="flex h-14 items-center justify-between transition-[height] transition-all duration-300 ease-out will-change-auto md:h-16">
                 {/* Logo */}
                 <Link
                   href={ROUTES.HOME}
                   prefetch
-                  className={`flex items-center flex-shrink-0 no-underline`}
+                  className={`flex flex-shrink-0 items-center no-underline`}
                   aria-label="heyclaude - Go to homepage"
                 >
                   <HeyClaudeLogo size="md" duration={0} />
@@ -109,15 +107,17 @@ const NavigationComponent = () => {
                 <div className={cn('flex items-center gap-1', 'gap-1.5')}>
                   {/* Desktop Navigation - ONLY show at xl: (1280px+) */}
                   <Suspense fallback={<div className="h-10 w-32" />}>
-                    <NavigationDesktop
-                      isActive={isActive}
-                    />
+                    <NavigationDesktop isActive={isActive} />
                   </Suspense>
 
                   <UserMenu className={`hidden md:flex`} />
 
                   {/* Mobile Menu - Show ONLY below md: (< 768px) */}
-                  <NavigationMobile isActive={isActive} isOpen={isOpen} onOpenChange={setIsOpenValue} />
+                  <NavigationMobile
+                    isActive={isActive}
+                    isOpen={isOpen}
+                    onOpenChange={setIsOpenValue}
+                  />
                 </div>
               </div>
             </div>

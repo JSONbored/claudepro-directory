@@ -2,7 +2,7 @@
 
 /**
  * Animated Card Wrapper
- * 
+ *
  * Client component wrapper that adds hover/tap microinteractions to any Card.
  * This is a simple wrapper that applies motion to the card's container.
  */

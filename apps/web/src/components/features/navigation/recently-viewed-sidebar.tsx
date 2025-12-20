@@ -33,11 +33,7 @@ import {
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { ChevronDown, ChevronUp, Clock, Trash, X } from '@heyclaude/web-runtime/icons';
-import {
-  cn,
-  UnifiedBadge,
-  Button,
-} from '@heyclaude/web-runtime/ui';
+import { cn, UnifiedBadge, Button } from '@heyclaude/web-runtime/ui';
 import { MICROINTERACTIONS, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
@@ -80,7 +76,20 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
   else if (diffDays === 1) timeAgo = 'Yesterday';
   else if (diffDays < 7) timeAgo = `${diffDays}d ago`;
   else {
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     timeAgo = `${monthNames[viewedDate.getUTCMonth()]} ${viewedDate.getUTCDate()}`;
   }
 
@@ -114,45 +123,48 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
       >
         <Link
           href={href}
-          className={cn('flex flex-col gap-[6px] card-base border-border/50 bg-card', 'px-3 py-[6px]')}
+          className={cn(
+            'card-base border-border/50 bg-card flex flex-col gap-[6px]',
+            'px-3 py-[6px]'
+          )}
         >
-        {/* Header: Badge + Time */}
-        <div className="flex items-center justify-between">
-          <UnifiedBadge variant="base" style="outline" className="text-[10px]">
-            {(() => {
-              // Convert RecentlyViewedCategory (singular) to content_category (plural) for config lookup
-              const routeCategory = getCategoryRoute(item.category);
-              if (isValidCategory(routeCategory)) {
-                const config = getCategoryConfig(routeCategory);
-                return config?.typeName ?? routeCategory;
-              }
-              return routeCategory;
-            })()}
-          </UnifiedBadge>
-          <span className={cn('text-[10px] text-muted-foreground')}>{timeAgo}</span>
-        </div>
-
-        {/* Title */}
-        <h4 className="text-foreground line-clamp-1 text-sm-medium">{item.title}</h4>
-
-        {/* Description */}
-        <p className={cn('line-clamp-2 leading-tight text-[9px] text-muted-foreground')}>
-          {item.description}
-        </p>
-
-        {/* Tags (if present) */}
-        {item.tags && item.tags.length > 0 ? (
-          <div className="mt-1 flex flex-wrap gap-0.5">
-            {item.tags.slice(0, 2).map((tag) => (
-              <UnifiedBadge key={tag} variant="base" style="outline" className="text-[9px]">
-                {tag}
-              </UnifiedBadge>
-            ))}
-            {item.tags.length > 2 && (
-              <span className="text-muted-foreground text-[9px]">+{item.tags.length - 2}</span>
-            )}
+          {/* Header: Badge + Time */}
+          <div className="flex items-center justify-between">
+            <UnifiedBadge variant="base" style="outline" className="text-[10px]">
+              {(() => {
+                // Convert RecentlyViewedCategory (singular) to content_category (plural) for config lookup
+                const routeCategory = getCategoryRoute(item.category);
+                if (isValidCategory(routeCategory)) {
+                  const config = getCategoryConfig(routeCategory);
+                  return config?.typeName ?? routeCategory;
+                }
+                return routeCategory;
+              })()}
+            </UnifiedBadge>
+            <span className={cn('text-muted-foreground text-[10px]')}>{timeAgo}</span>
           </div>
-        ) : null}
+
+          {/* Title */}
+          <h4 className="text-foreground text-sm-medium line-clamp-1">{item.title}</h4>
+
+          {/* Description */}
+          <p className={cn('text-muted-foreground line-clamp-2 text-[9px] leading-tight')}>
+            {item.description}
+          </p>
+
+          {/* Tags (if present) */}
+          {item.tags && item.tags.length > 0 ? (
+            <div className="mt-1 flex flex-wrap gap-0.5">
+              {item.tags.slice(0, 2).map((tag) => (
+                <UnifiedBadge key={tag} variant="base" style="outline" className="text-[9px]">
+                  {tag}
+                </UnifiedBadge>
+              ))}
+              {item.tags.length > 2 && (
+                <span className="text-muted-foreground text-[9px]">+{item.tags.length - 2}</span>
+              )}
+            </div>
+          ) : null}
         </Link>
       </motion.div>
 
@@ -170,7 +182,7 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
               e.stopPropagation();
               onRemove(item.category, item.slug);
             }}
-            className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-lg border border-border/50 bg-background/95 backdrop-blur-sm hover:border-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="border-border/50 bg-background/95 hover:border-destructive hover:bg-destructive/10 hover:text-destructive absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-lg border backdrop-blur-sm"
             aria-label={`Remove ${item.title} from recently viewed`}
           >
             <X className="h-3 w-3" />
@@ -205,8 +217,8 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold text-foreground">Recently Viewed</h3>
+          <Clock className="text-muted-foreground h-4 w-4" />
+          <h3 className="text-foreground text-sm font-semibold">Recently Viewed</h3>
         </div>
         <div className="flex items-center gap-1">
           {/* Clear all button */}
@@ -246,16 +258,14 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
           >
             {!isLoaded ? (
               // Loading state
-              <div className="py-8 text-center text-muted-foreground text-sm">
-                Loading...
-              </div>
+              <div className="text-muted-foreground py-8 text-center text-sm">Loading...</div>
             ) : recentlyViewed.length === 0 ? (
               // Empty state - always show to maintain consistent sidebar
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: DURATION.default }}
-                className="flex flex-col items-center gap-2 card-base border-dashed border-border/30 p-6 text-center text-muted-foreground"
+                className="card-base border-border/30 text-muted-foreground flex flex-col items-center gap-2 border-dashed p-6 text-center"
               >
                 <Clock className="h-8 w-8 opacity-50" />
                 <div className="space-y-1">
@@ -288,7 +298,9 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: STAGGER.slow }}
-          className={cn('border-t border-border/30 pt-2 text-center text-[10px] text-muted-foreground')}
+          className={cn(
+            'border-border/30 text-muted-foreground border-t pt-2 text-center text-[10px]'
+          )}
         >
           Showing {recentlyViewed.length} of 10 max
         </motion.p>

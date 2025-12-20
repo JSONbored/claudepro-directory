@@ -2,10 +2,10 @@
 
 /**
  * Dialog Stack Component
- * 
+ *
  * A stack-based dialog system that allows multiple dialogs to be layered on top of each other.
  * Perfect for multi-step wizards, nested modals, and progressive disclosure patterns.
- * 
+ *
  * @example
  * ```tsx
  * <DialogStack>
@@ -27,13 +27,13 @@
  *   </DialogStackBody>
  * </DialogStack>
  * ```
- * 
+ *
  * **When to use:**
  * - Multi-step wizards: Onboarding flows, setup processes
  * - Nested modals: Complex interactions with multiple layers
  * - Progressive disclosure: Reveal information step-by-step
  * - Tutorial flows: Guided experiences
- * 
+ *
  * **Key features:**
  * - Stack-based navigation (next/previous)
  * - Visual depth with offset positioning
@@ -80,11 +80,11 @@ type DialogStackContextType = {
 
 const DialogStackContext = createContext<DialogStackContextType>({
   activeIndex: 0,
-  setActiveIndex: () => { },
+  setActiveIndex: () => {},
   totalDialogs: 0,
-  setTotalDialogs: () => { },
+  setTotalDialogs: () => {},
   isOpen: false,
-  setIsOpen: () => { },
+  setIsOpen: () => {},
   clickable: false,
 });
 
@@ -117,14 +117,14 @@ export const DialogStack = ({
 
   // Scroll lock: Lock body scroll when dialog stack is open
   const { lock, unlock } = useScrollLock({ autoLock: false });
-  
+
   useEffect(() => {
     if (isOpen) {
       lock();
     } else {
       unlock();
     }
-    
+
     return () => {
       unlock(); // Ensure unlock on unmount
     };
@@ -142,7 +142,7 @@ export const DialogStack = ({
         activeIndex,
         setActiveIndex,
         totalDialogs: 0,
-        setTotalDialogs: () => { },
+        setTotalDialogs: () => {},
         isOpen: isOpen ?? false,
         setIsOpen: (value) => setIsOpen(Boolean(value)),
         clickable,
@@ -155,10 +155,9 @@ export const DialogStack = ({
   );
 };
 
-export type DialogStackTriggerProps =
-  ButtonHTMLAttributes<HTMLButtonElement> & {
-    asChild?: boolean;
-  };
+export type DialogStackTriggerProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  asChild?: boolean;
+};
 
 export const DialogStackTrigger = ({
   children,
@@ -196,8 +195,8 @@ export const DialogStackTrigger = ({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium text-sm',
-        'ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2',
+        'inline-flex items-center justify-center rounded-md text-sm font-medium whitespace-nowrap',
+        'ring-offset-background transition-colors focus-visible:ring-2 focus-visible:outline-none',
         'focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
         'bg-primary text-primary-foreground hover:bg-primary/90',
         'h-10 px-4 py-2',
@@ -213,10 +212,7 @@ export const DialogStackTrigger = ({
 
 export type DialogStackOverlayProps = HTMLAttributes<HTMLDivElement>;
 
-export const DialogStackOverlay = ({
-  className,
-  ...props
-}: DialogStackOverlayProps) => {
+export const DialogStackOverlay = ({ className, ...props }: DialogStackOverlayProps) => {
   const context = useContext(DialogStackContext);
 
   if (!context) {
@@ -248,16 +244,10 @@ export const DialogStackOverlay = ({
 };
 
 export type DialogStackBodyProps = HTMLAttributes<HTMLDivElement> & {
-  children:
-  | ReactElement<DialogStackChildProps>[]
-  | ReactElement<DialogStackChildProps>;
+  children: ReactElement<DialogStackChildProps>[] | ReactElement<DialogStackChildProps>;
 };
 
-export const DialogStackBody = ({
-  children,
-  className,
-  ...props
-}: DialogStackBodyProps) => {
+export const DialogStackBody = ({ children, className, ...props }: DialogStackBodyProps) => {
   const context = useContext(DialogStackContext);
   const [totalDialogs, setTotalDialogs] = useState(Children.count(children));
   const bodyRef = useRef<HTMLDivElement | null>(null);
@@ -355,7 +345,7 @@ export const DialogStackContent = ({
     // biome-ignore lint/a11y/useKeyWithClickEvents: "This is a clickable dialog"
     <div
       className={cn(
-        'h-auto w-full card-base bg-background p-6 shadow-lg transition-all duration-300',
+        'card-base bg-background h-auto w-full p-6 shadow-lg transition-all duration-300',
         className
       )}
       onClick={handleClick}
@@ -366,18 +356,14 @@ export const DialogStackContent = ({
         zIndex: 50 - Math.abs(context.activeIndex - (index ?? 0)),
         position: distanceFromActive ? 'absolute' : 'relative',
         opacity: distanceFromActive > 0 ? 0 : 1,
-        cursor:
-          context.clickable && context.activeIndex > index
-            ? 'pointer'
-            : 'default',
+        cursor: context.clickable && context.activeIndex > index ? 'pointer' : 'default',
       }}
       {...(props as any)}
     >
       <div
         className={cn(
           'h-full w-full transition-all duration-300',
-          context.activeIndex !== index &&
-          'pointer-events-none select-none opacity-0'
+          context.activeIndex !== index && 'pointer-events-none opacity-0 select-none'
         )}
       >
         {children}
@@ -388,16 +374,9 @@ export const DialogStackContent = ({
 
 export type DialogStackTitleProps = HTMLAttributes<HTMLHeadingElement>;
 
-export const DialogStackTitle = ({
-  children,
-  className,
-  ...props
-}: DialogStackTitleProps) => (
+export const DialogStackTitle = ({ children, className, ...props }: DialogStackTitleProps) => (
   <h2
-    className={cn(
-      'font-semibold text-lg leading-none tracking-tight',
-      className
-    )}
+    className={cn('text-lg leading-none font-semibold tracking-tight', className)}
     {...(props as any)}
   >
     {children}
@@ -418,30 +397,17 @@ export const DialogStackDescription = ({
 
 export type DialogStackHeaderProps = HTMLAttributes<HTMLDivElement>;
 
-export const DialogStackHeader = ({
-  className,
-  ...props
-}: DialogStackHeaderProps) => (
+export const DialogStackHeader = ({ className, ...props }: DialogStackHeaderProps) => (
   <div
-    className={cn(
-      'flex flex-col gap-[6px] text-center sm:text-left',
-      className
-    )}
+    className={cn('flex flex-col gap-[6px] text-center sm:text-left', className)}
     {...(props as any)}
   />
 );
 
 export type DialogStackFooterProps = HTMLAttributes<HTMLDivElement>;
 
-export const DialogStackFooter = ({
-  children,
-  className,
-  ...props
-}: DialogStackFooterProps) => (
-  <div
-    className={cn('flex items-center justify-end gap-2 pt-4', className)}
-    {...(props as any)}
-  >
+export const DialogStackFooter = ({ children, className, ...props }: DialogStackFooterProps) => (
+  <div className={cn('flex items-center justify-end gap-2 pt-4', className)} {...(props as any)}>
     {children}
   </div>
 );
@@ -487,7 +453,7 @@ export const DialogStackNext = ({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+        'ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center rounded-md text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
         className
       )}
       disabled={context.activeIndex >= context.totalDialogs - 1}
@@ -500,10 +466,9 @@ export const DialogStackNext = ({
   );
 };
 
-export type DialogStackPreviousProps =
-  ButtonHTMLAttributes<HTMLButtonElement> & {
-    asChild?: boolean;
-  };
+export type DialogStackPreviousProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  asChild?: boolean;
+};
 
 export const DialogStackPrevious = ({
   children,
@@ -542,7 +507,7 @@ export const DialogStackPrevious = ({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+        'ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center rounded-md text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
         className
       )}
       disabled={context.activeIndex <= 0}

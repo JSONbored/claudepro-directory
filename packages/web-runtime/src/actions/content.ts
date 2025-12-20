@@ -27,11 +27,11 @@ const getReviewsSchema = z.object({
  * Replaces 2 queries with 1
  */
 export const getReviewsWithStats = optionalAuthAction
+  .inputSchema(getReviewsSchema)
   .metadata({
     actionName: 'getReviewsWithStats',
     category: 'content',
   })
-  .inputSchema(getReviewsSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
 
@@ -58,9 +58,7 @@ export const getReviewsWithStats = optionalAuthAction
 const fetchPaginatedContentSchema = z.object({
   offset: z.number().int().min(0).default(0),
   limit: z.number().int().min(1).max(100).default(30),
-  category: content_categorySchema
-    .nullable()
-    .default(null),
+  category: content_categorySchema.nullable().default(null),
 });
 
 /**
@@ -71,7 +69,8 @@ export const fetchPaginatedContent = rateLimitedAction
   .inputSchema(fetchPaginatedContentSchema)
   .metadata({ actionName: 'content.fetchPaginatedContent', category: 'content' })
   .action(async ({ parsedInput }) => {
-    const { getPaginatedContent: getPaginatedContentData } = await import('../data/content/paginated.ts');
+    const { getPaginatedContent: getPaginatedContentData } =
+      await import('../data/content/paginated.ts');
 
     const data = await getPaginatedContentData({
       category: parsedInput.category,
@@ -83,7 +82,7 @@ export const fetchPaginatedContent = rateLimitedAction
     if (!data?.items) {
       return [];
     }
-    
+
     // Type assertion: ContentPaginatedSlimItem[] is structurally compatible with DisplayableContent[]
     // DisplayableContent is a union type that includes EnrichedContentItem and other content types.
     // ContentPaginatedSlimItem has all required fields (slug, title, category, etc.) that DisplayableContent

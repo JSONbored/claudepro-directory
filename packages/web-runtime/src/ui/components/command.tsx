@@ -16,12 +16,7 @@ import type { DialogProps } from '@radix-ui/react-dialog';
 import { Command as CommandPrimitive } from 'cmdk';
 import type * as React from 'react';
 import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from './dialog.tsx';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from './dialog.tsx';
 
 const Command = ({
   className,
@@ -39,7 +34,7 @@ const Command = ({
       'rounded-xl', // 12px = rounded-xl
       'overflow-hidden',
       'bg-background text-foreground',
-      'border border-border', // 1px solid var(--gray6)
+      'border-border border', // 1px solid var(--gray6)
       'outline-none',
       className
     )}
@@ -88,13 +83,13 @@ const CommandDialog = ({ children, open, onOpenChange, ...props }: DialogProps) 
           'w-[calc(100vw-2rem)] sm:w-[640px]',
           'max-w-[640px]', // Never exceed 640px on any breakpoint
           'rounded-2xl', // Slightly larger radius for premium feel
-          'border border-border/80',
+          'border-border/80 border',
           'bg-background/95 backdrop-blur-xl', // Glass morphism effect
           'shadow-2xl', // Premium shadow
           // CRITICAL: Ensure proper centering - Dialog component handles this, but add explicit classes
-          '!fixed !top-[50%] !left-[50%] !right-auto !bottom-auto !-translate-x-1/2 !-translate-y-1/2 !z-[100] !m-0',
+          '!fixed !top-[50%] !right-auto !bottom-auto !left-[50%] !z-[100] !m-0 !-translate-x-1/2 !-translate-y-1/2'
         )}
-        style={{ 
+        style={{
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)',
           // CRITICAL: Inline styles as fallback for centering (Dialog component should handle this, but ensure it works)
           position: 'fixed',
@@ -118,7 +113,7 @@ const CommandDialog = ({ children, open, onOpenChange, ...props }: DialogProps) 
             // Group spacing: *:not([hidden]) + [cmdk-group] { margin-top: 8px }
             '[&_[cmdk-group]:not([hidden])_~[cmdk-group]]:mt-2',
             // Icon sizing: width: 18px; height: 18px
-            '[&_[cmdk-item]_svg]:w-[18px] [&_[cmdk-item]_svg]:h-[18px]'
+            '[&_[cmdk-item]_svg]:h-[18px] [&_[cmdk-item]_svg]:w-[18px]'
           )}
         >
           {children}
@@ -142,7 +137,7 @@ const CommandInput = ({
         // Premium input design - clean, modern
         'text-base', // Slightly larger for better readability
         'px-4 py-3 pb-4',
-        'border-b border-border/60 mb-4',
+        'border-border/60 mb-4 border-b',
         'bg-transparent',
         'text-foreground',
         'outline-none',
@@ -174,7 +169,7 @@ const CommandList = ({
         // Vercel exact pattern: height: min(330px, calc(var(--cmdk-list-height))), max-height: 400px
         'h-[min(330px,var(--cmdk-list-height,auto))]',
         'max-h-[400px]',
-        'overflow-y-auto overflow-x-hidden',
+        'overflow-x-hidden overflow-y-auto',
         'overscroll-contain',
         'transition-[height] duration-100 ease-out',
         className
@@ -200,7 +195,7 @@ const CommandEmpty = ({
       'h-12',
       'flex items-center justify-center',
       'whitespace-pre-wrap',
-      'text-muted-foreground',
+      'text-muted-foreground'
     )}
     {...props}
   />
@@ -218,7 +213,7 @@ const CommandGroup = ({
   <CommandPrimitive.Group
     ref={ref}
     className={cn(
-      'overflow-hidden text-foreground',
+      'text-foreground overflow-hidden',
       // Vercel exact pattern: Group heading - font-size: 12px, padding: 0 8px, margin-bottom: 8px
       '[&_[cmdk-group-heading]]:text-xs',
       '[&_[cmdk-group-heading]]:px-2', // 0 8px
@@ -288,7 +283,7 @@ const CommandItem = ({
       // Item spacing
       '[&+&]:mt-0.5',
       // Icon styling
-      '[&_svg]:w-[18px] [&_svg]:h-[18px] [&_svg]:shrink-0 [&_svg]:text-muted-foreground',
+      '[&_svg]:text-muted-foreground [&_svg]:h-[18px] [&_svg]:w-[18px] [&_svg]:shrink-0',
       'data-[selected=true]:[&_svg]:text-foreground',
       className
     )}
@@ -301,7 +296,7 @@ CommandItem.displayName = CommandPrimitive.Item.displayName;
 const CommandShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
     <span
-      className={cn('ml-auto text-muted-foreground text-xs tracking-widest', className)}
+      className={cn('text-muted-foreground ml-auto text-xs tracking-widest', className)}
       {...props}
     />
   );

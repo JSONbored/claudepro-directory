@@ -2,7 +2,7 @@
 
 /**
  * Animated Stats Card Component
- * 
+ *
  * Client component for dashboard stats cards with:
  * - Animated number counters (NumberTicker)
  * - Hover/tap microinteractions
@@ -98,7 +98,7 @@ export function AnimatedStatsCard({
             <div className="mt-2">{customContent}</div>
           ) : (
             <div className="flex items-center gap-2">
-              {Icon && <Icon className="h-5 w-5 text-primary" />}
+              {Icon && <Icon className="text-primary h-5 w-5" />}
               <span className="text-3xl font-bold">
                 <NumberTicker
                   value={value}
@@ -109,7 +109,7 @@ export function AnimatedStatsCard({
               </span>
             </div>
           )}
-          <p className={cn('mt-2 text-muted-foreground text-xs')}>{description}</p>
+          <p className={cn('text-muted-foreground mt-2 text-xs')}>{description}</p>
         </CardContent>
       </Card>
     </motion.div>

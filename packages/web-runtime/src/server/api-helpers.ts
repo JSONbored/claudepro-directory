@@ -1,6 +1,6 @@
 /**
  * API Route Helper Utilities
- * 
+ *
  * These are utility functions for Next.js API routes, NOT server actions.
  * Do not add 'use server' directive - these are used in route handlers.
  */
@@ -77,7 +77,7 @@ export type CachePresetKey = keyof typeof DEFAULT_CACHE_PRESETS;
  * ```ts
  * // DEPRECATED: Don't use in API routes with Cache Components
  * // const headers = buildCacheHeaders('search');
- * 
+ *
  * // Instead, use Cache Components:
  * // 'use cache';
  * // cacheLife('short');
@@ -167,20 +167,20 @@ export function handleOptionsRequest(
 
 /**
  * Creates a standardized 401 Unauthorized response
- * 
+ *
  * Returns a consistent error response for authentication failures.
  * Optionally includes login/signup URLs for user-facing endpoints.
- * 
+ *
  * @param message - Error message to return
  * @param authInfo - Optional authentication info (login/signup URLs for user-facing endpoints)
  * @param corsHeaders - CORS headers to include
  * @returns NextResponse with 401 status
- * 
+ *
  * @example
  * ```ts
  * // For automation endpoints (no user-facing message)
  * return unauthorizedResponse('Invalid or missing Bearer token', undefined, postCorsHeaders);
- * 
+ *
  * // For user-facing endpoints (with login/signup URLs)
  * return unauthorizedResponse('Authentication required', {
  *   loginUrl: '/login',
@@ -228,7 +228,7 @@ export function unauthorizedResponse(
 
 /**
  * Creates a standardized text/plain response (for LLMs.txt, Markdown, etc.)
- * 
+ *
  * @param content - Text content to return
  * @param status - HTTP status code (default: 200)
  * @param corsHeaders - CORS headers to include
@@ -254,7 +254,7 @@ export function textResponse(
 
 /**
  * Creates a standardized XML response (for RSS, Atom, Sitemap, etc.)
- * 
+ *
  * @param xml - XML content to return
  * @param contentType - Content type (e.g., 'application/rss+xml; charset=utf-8')
  * @param status - HTTP status code (default: 200)
@@ -282,7 +282,7 @@ export function xmlResponse(
 
 /**
  * Creates a standardized Markdown response with download headers
- * 
+ *
  * @param markdown - Markdown content to return
  * @param filename - Filename for download (e.g., 'content.md')
  * @param status - HTTP status code (default: 200)

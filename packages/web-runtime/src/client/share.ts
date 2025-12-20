@@ -119,9 +119,10 @@ export async function shareNative(options: ShareOptions): Promise<boolean> {
       return false;
     }
     const normalized = normalizeError(error, 'navigator.share failed');
-    logger.warn({ err: normalized,
-      platform: options.platform,
-      url: options.url, }, 'shareNative: navigator.share failed');
+    logger.warn(
+      { err: normalized, platform: options.platform, url: options.url },
+      'shareNative: navigator.share failed'
+    );
     // Fallback to copy link
     return await copyShareLink(options);
   }
@@ -141,9 +142,10 @@ export async function copyShareLink(options: ShareOptions): Promise<boolean> {
     return true;
   } catch (error) {
     const normalized = normalizeError(error, 'copyShareLink failed');
-    logger.warn({ err: normalized,
-      platform: options.platform,
-      url: options.url, }, 'copyShareLink failed');
+    logger.warn(
+      { err: normalized, platform: options.platform, url: options.url },
+      'copyShareLink failed'
+    );
     return false;
   }
 }
@@ -160,4 +162,3 @@ export async function getShareCount(
   // Would integrate with platform APIs or database RPC
   return null;
 }
-

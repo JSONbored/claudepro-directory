@@ -1,6 +1,6 @@
 'use client';
 
-import type { newsletter_source } from '@heyclaude/data-layer/prisma';
+import type { newsletter_source } from '@prisma/client';
 import { getAppSettings, getNewsletterConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { ensureStringArray } from '@heyclaude/web-runtime/utils/content-helpers';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
@@ -88,16 +88,22 @@ export function NewsletterFooterBar({
   }, [setIsClientTrue]);
 
   // Use useLocalStorage hook for dismiss state
-  const { value: isDismissed, setValue: setIsDismissed } = useLocalStorage<string | null>('newsletter-bar-dismissed', {
-    defaultValue: null,
-    syncAcrossTabs: false,
-  });
-  
-  useTimeout(() => {
-    if (!isDismissed || isDismissed !== 'true') {
-      setIsVisibleTrue();
+  const { value: isDismissed, setValue: setIsDismissed } = useLocalStorage<string | null>(
+    'newsletter-bar-dismissed',
+    {
+      defaultValue: null,
+      syncAcrossTabs: false,
     }
-  }, isDismissed === 'true' ? null : delayMs);
+  );
+
+  useTimeout(
+    () => {
+      if (!isDismissed || isDismissed !== 'true') {
+        setIsVisibleTrue();
+      }
+    },
+    isDismissed === 'true' ? null : delayMs
+  );
 
   const handleDismiss = () => {
     setIsVisibleFalse();
@@ -110,18 +116,16 @@ export function NewsletterFooterBar({
 
   return (
     <aside
-      className="slide-in-from-bottom fixed right-0 bottom-0 left-0 animate-in border-border-medium bg-bg-overlaydrop-blur-xl z-50 border-t-2 duration-300"
+      className="slide-in-from-bottom animate-in border-border-medium bg-bg-overlaydrop-blur-xl fixed right-0 bottom-0 left-0 z-50 border-t-2 duration-300"
       aria-label="Newsletter signup"
     >
-      <div
-        className="absolute top-0 right-0 left-0 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent"
-      />
+      <div className="via-accent/30 absolute top-0 right-0 left-0 h-px bg-gradient-to-r from-transparent to-transparent" />
       <div className="container mx-auto px-4 py-6 md:py-4">
         {/* Desktop layout */}
         <div className="mx-auto hidden max-w-5xl items-center justify-between gap-4 md:flex">
           <div className="flex shrink-0 items-center gap-2">
             <div className={cn('border-accent/20 bg-accent/10 card-base', 'p-2.5')}>
-              <Mail className="h-5 w-5 text-accent" aria-hidden="true" />
+              <Mail className="text-accent h-5 w-5" aria-hidden="true" />
             </div>
             <div>
               <p className="text-foreground text-base font-semibold">

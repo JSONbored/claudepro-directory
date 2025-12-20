@@ -1,6 +1,6 @@
 /** Homepage consuming homepageConfigs for runtime-tunable categories */
 
-import { type content_category, type user_tier } from '@heyclaude/data-layer/prisma';
+import { type content_category, type user_tier } from '@prisma/client';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { isBookmarkedBatch } from '@heyclaude/web-runtime/data/account';
 import { getHomepageCategoryIds } from '@heyclaude/web-runtime/data/config/category';
@@ -186,7 +186,7 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
 
             // Validate using isValidCategory (which uses Prisma enum), then narrow type
             if (!isValidCategory(categoryKey)) continue;
-            const category = categoryKey; // isValidCategory ensures type safety
+            const category = categoryKey as content_category; // isValidCategory ensures type safety
 
             // OPTIMIZATION: Use for...of with early continue for better performance
             for (const item of items) {

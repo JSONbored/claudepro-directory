@@ -96,17 +96,12 @@ export function PulseCannon() {
       setShouldLoadPulseTrue();
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to load pulse services');
-      logClientWarn(
-        '[Analytics] Pulse loading failed',
-        normalized,
-        'PulseCannon.loadAllPulse',
-        {
-          component: 'PulseCannon',
-          action: 'load-all-pulse',
-          category: 'analytics',
-          error: normalized.message,
-        }
-      );
+      logClientWarn('[Analytics] Pulse loading failed', normalized, 'PulseCannon.loadAllPulse', {
+        component: 'PulseCannon',
+        action: 'load-all-pulse',
+        category: 'analytics',
+        error: normalized.message,
+      });
     }
   }, [setShouldLoadPulseTrue]);
 
@@ -121,24 +116,27 @@ export function PulseCannon() {
       // Use useTimeout for delayed load when document is ready
       // This will be handled below
     } else {
-      (globalThis as unknown as Window).addEventListener(
-        'load',
-        loadAllPulse,
-        { once: true }
-      );
+      (globalThis as unknown as Window).addEventListener('load', loadAllPulse, { once: true });
     }
   }, [shouldLoadPulse, isClient, loadAllPulse]);
 
   // Use useTimeout for delayed load when document is ready (fallback for browsers without requestIdleCallback)
-  const shouldDelayLoad = isProduction && !shouldLoadPulse && isClient && 
-    typeof document !== 'undefined' && document.readyState === 'complete' &&
+  const shouldDelayLoad =
+    isProduction &&
+    !shouldLoadPulse &&
+    isClient &&
+    typeof document !== 'undefined' &&
+    document.readyState === 'complete' &&
     !('requestIdleCallback' in globalThis);
-  
-  useTimeout(() => {
-    if (shouldDelayLoad) {
-      loadAllPulse();
-    }
-  }, shouldDelayLoad ? 100 : null);
+
+  useTimeout(
+    () => {
+      if (shouldDelayLoad) {
+        loadAllPulse();
+      }
+    },
+    shouldDelayLoad ? 100 : null
+  );
 
   if (!shouldLoadPulse) {
     return null;

@@ -2,7 +2,7 @@
 
 /**
  * Submit Page Hero Skeleton
- * 
+ *
  * Perfectly matches SubmitPageHero structure:
  * - BorderBeam animated border
  * - Badge with icon
@@ -25,7 +25,7 @@ export function SubmitPageHeroSkeleton() {
 
   return (
     <motion.div
-      className="relative mb-8 overflow-hidden rounded-2xl border border-border/50 bg-card p-8"
+      className="border-border/50 bg-card relative mb-8 overflow-hidden rounded-2xl border p-8"
       initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
       animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
       transition={{ ...SPRING.smooth, delay: 0.1 }}

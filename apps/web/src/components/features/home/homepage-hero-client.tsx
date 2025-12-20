@@ -20,26 +20,31 @@
  * - Brand color consistency: member count and RollingText use exact logo color
  */
 
-import { 
-  NumberTicker, 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
+import {
+  NumberTicker,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
   UnifiedBadge,
   HighlightText,
   cn,
   ScrambledText,
 } from '@heyclaude/web-runtime/ui';
-import { 
-  SPRING, 
-  STAGGER, 
+import {
+  SPRING,
+  STAGGER,
   MICROINTERACTIONS,
-  VIEWPORT, gradient } from '@heyclaude/web-runtime/design-system';
+  VIEWPORT,
+  gradient,
+} from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { memo, useMemo } from 'react';
-import { getCategoryConfigs, getCategoryStatsConfig } from '@heyclaude/web-runtime/data/config/category';
+import {
+  getCategoryConfigs,
+  getCategoryStatsConfig,
+} from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import Link from 'next/link';
 
@@ -52,13 +57,10 @@ interface HomepageHeroClientProps {
   stats?: Record<string, { featured: number; total: number } | number>;
 }
 
-function HomepageHeroClientComponent({ 
-  memberCount,
-  stats,
-}: HomepageHeroClientProps) {
+function HomepageHeroClientComponent({ memberCount, stats }: HomepageHeroClientProps) {
   const { isSearchFocused, setSearchFocused } = useHeroSearchConnection();
   const shouldReduceMotion = useReducedMotion();
-  
+
   // OPTIMIZATION: Memoize category configs to avoid recreating on every render
   // React Compiler will automatically optimize this, but explicit memoization ensures stability
   const categoryStatsConfig = useMemo(() => getCategoryStatsConfig(), []);
@@ -66,12 +68,12 @@ function HomepageHeroClientComponent({
 
   return (
     <section
-      className="border-border/50 relative border-b overflow-hidden bg-background"
+      className="border-border/50 bg-background relative overflow-hidden border-b"
       aria-label="Homepage hero"
     >
       {/* Subtle Background Texture - Modern 2025 Pattern */}
       {!shouldReduceMotion && (
-        <div 
+        <div
           className={`absolute inset-0 opacity-[0.015] dark:opacity-[0.03] ${gradient.heroTexture}`}
           aria-hidden="true"
         />
@@ -102,7 +104,7 @@ function HomepageHeroClientComponent({
               {/* Main Heading - Stunning Typography */}
               <div className="mb-4 sm:mb-6 lg:mb-8">
                 <motion.h1
-                  className="flex-center text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-foreground mb-2 sm:mb-4"
+                  className="flex-center text-foreground mb-2 text-3xl leading-tight font-bold tracking-tight sm:mb-4 sm:text-4xl lg:text-5xl"
                   initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
                   animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                   transition={{
@@ -110,7 +112,7 @@ function HomepageHeroClientComponent({
                     delay: STAGGER.tight,
                   }}
                 >
-                  <motion.span 
+                  <motion.span
                     initial={shouldReduceMotion ? {} : { opacity: 0, y: 12 }}
                     animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
                     transition={{
@@ -122,7 +124,7 @@ function HomepageHeroClientComponent({
                   </motion.span>
                 </motion.h1>
                 <motion.h1
-                  className="flex-center text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-foreground gap-2"
+                  className="flex-center text-foreground gap-2 text-3xl leading-tight font-bold tracking-tight sm:text-4xl lg:text-5xl"
                   initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
                   animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                   transition={{
@@ -165,7 +167,7 @@ function HomepageHeroClientComponent({
 
               {/* Description - Enhanced Readability with Scrambled Text */}
               <motion.div
-                className="text-muted-foreground mx-auto max-w-2xl text-base sm:text-lg lg:text-xl leading-relaxed font-normal mb-6 sm:mb-12 lg:mb-16"
+                className="text-muted-foreground mx-auto mb-6 max-w-2xl text-base leading-relaxed font-normal sm:mb-12 sm:text-lg lg:mb-16 lg:text-xl"
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
                 animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                 transition={{
@@ -184,7 +186,7 @@ function HomepageHeroClientComponent({
                   <TooltipProvider delayDuration={300}>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="cursor-help font-semibold inline-block">
+                        <span className="inline-block cursor-help font-semibold">
                           <HighlightText
                             text={`${memberCount}+`}
                             inView={!shouldReduceMotion}
@@ -197,19 +199,20 @@ function HomepageHeroClientComponent({
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>
-                        Active community members who have contributed configurations, rules, or content to the directory
+                        Active community members who have contributed configurations, rules, or
+                        content to the directory
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>{' '}
-                  members discovering and sharing the best Claude configurations. Explore expert rules,
-                  powerful MCP servers, specialized agents, automation hooks, and connect with the
-                  community building the future of AI.
+                  members discovering and sharing the best Claude configurations. Explore expert
+                  rules, powerful MCP servers, specialized agents, automation hooks, and connect
+                  with the community building the future of AI.
                 </ScrambledText>
               </motion.div>
 
               {/* Search Bar - Integrated with Perfect Spacing */}
               <motion.div
-                className="mx-auto max-w-2xl mb-4 sm:mb-6"
+                className="mx-auto mb-4 max-w-2xl sm:mb-6"
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
                 animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                 transition={{
@@ -223,7 +226,7 @@ function HomepageHeroClientComponent({
               {/* Category Stats Section - Directly Below Search Bar */}
               {stats && typeof stats === 'object' && Object.keys(stats).length > 0 && (
                 <motion.div
-                  className="mx-auto max-w-4xl mb-6 sm:mb-12 lg:mb-16"
+                  className="mx-auto mb-6 max-w-4xl sm:mb-12 lg:mb-16"
                   initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
                   animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                   transition={{
@@ -245,14 +248,16 @@ function HomepageHeroClientComponent({
                         // Type guard: categoryId is already content_category from CategoryStatsConfig
                         // Map to ROUTES key safely
                         const routeKey = categoryId.toUpperCase() as keyof typeof ROUTES;
-                        const categoryRoute = routeKey in ROUTES ? ROUTES[routeKey] : `/${categoryId}`;
+                        const categoryRoute =
+                          routeKey in ROUTES ? ROUTES[routeKey] : `/${categoryId}`;
                         const count =
                           typeof stats[categoryId] === 'number'
                             ? stats[categoryId]
                             : stats[categoryId]?.total || 0;
                         // Type guard: categoryId is already content_category, no assertion needed
                         const categoryConfig = categoryConfigs[categoryId];
-                        const tooltipText = categoryConfig?.description || `View all ${categoryId} configurations`;
+                        const tooltipText =
+                          categoryConfig?.description || `View all ${categoryId} configurations`;
 
                         return (
                           <Tooltip key={categoryId}>
@@ -263,10 +268,17 @@ function HomepageHeroClientComponent({
                                 aria-label={`View all ${categoryId} configurations`}
                               >
                                 <motion.div
-                                  className={cn('flex min-w-fit items-center', 'gap-1.5', 'rounded-lg border border-border/30', 'px-1', 'py-1', 'whitespace-nowrap bg-transparent transition-colors cursor-help')}
+                                  className={cn(
+                                    'flex min-w-fit items-center',
+                                    'gap-1.5',
+                                    'border-border/30 rounded-lg border',
+                                    'px-1',
+                                    'py-1',
+                                    'cursor-help bg-transparent whitespace-nowrap transition-colors'
+                                  )}
                                   initial={{ opacity: 0, x: -8 }}
-                                  whileInView={{ 
-                                    opacity: 1, 
+                                  whileInView={{
+                                    opacity: 1,
                                     x: 0,
                                   }}
                                   viewport={VIEWPORT.default}
@@ -312,14 +324,16 @@ function HomepageHeroClientComponent({
                         // Type guard: categoryId is already content_category from CategoryStatsConfig
                         // Map to ROUTES key safely
                         const routeKey = categoryId.toUpperCase() as keyof typeof ROUTES;
-                        const categoryRoute = routeKey in ROUTES ? ROUTES[routeKey] : `/${categoryId}`;
+                        const categoryRoute =
+                          routeKey in ROUTES ? ROUTES[routeKey] : `/${categoryId}`;
                         const count =
                           typeof stats[categoryId] === 'number'
                             ? stats[categoryId]
                             : stats[categoryId]?.total || 0;
                         // Type guard: categoryId is already content_category, no assertion needed
                         const categoryConfig = categoryConfigs[categoryId];
-                        const tooltipText = categoryConfig?.description || `View all ${categoryId} configurations`;
+                        const tooltipText =
+                          categoryConfig?.description || `View all ${categoryId} configurations`;
 
                         return (
                           <Tooltip key={categoryId}>
@@ -330,10 +344,17 @@ function HomepageHeroClientComponent({
                                 aria-label={`View all ${categoryId} configurations`}
                               >
                                 <motion.div
-                                  className={cn('flex items-center', 'gap-1.5', 'rounded-lg border border-border/30', 'px-3', 'py-1.5', 'bg-transparent transition-colors cursor-help')}
+                                  className={cn(
+                                    'flex items-center',
+                                    'gap-1.5',
+                                    'border-border/30 rounded-lg border',
+                                    'px-3',
+                                    'py-1.5',
+                                    'cursor-help bg-transparent transition-colors'
+                                  )}
                                   initial={{ opacity: 0, y: 8 }}
-                                  whileInView={{ 
-                                    opacity: 1, 
+                                  whileInView={{
+                                    opacity: 1,
                                     y: 0,
                                   }}
                                   viewport={VIEWPORT.default}

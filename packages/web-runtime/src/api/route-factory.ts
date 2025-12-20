@@ -1,6 +1,6 @@
 /**
  * Enhanced API Route Factory
- * 
+ *
  * Creates standardized Next.js API route handlers with:
  * - Automatic Zod validation (query params + request body)
  * - Request-scoped logging
@@ -9,19 +9,19 @@
  * - OPTIONS handler generation
  * - Type-safe handlers
  * - OpenAPI-ready metadata
- * 
+ *
  * This factory eliminates ~30-40 lines of boilerplate per route handler
  * and enforces best practices across all API routes.
- * 
+ *
  * **OpenAPI Documentation:**
  * All routes using this factory are ready for OpenAPI generation:
  * - Zod schemas with `.describe()` are automatically converted to OpenAPI schemas
  * - OpenAPI metadata (summary, description, tags) can be provided in config
  * - Response schemas can be specified for documentation
  * - Future: Automatic OpenAPI spec generation from route configs
- * 
+ *
  * @module web-runtime/api/route-factory
- * 
+ *
  * @example
  * ```ts
  * // Simple GET route
@@ -35,7 +35,7 @@
  *     return jsonResponse(data, 200, getOnlyCorsHeaders);
  *   },
  * });
- * 
+ *
  * @example
  * ```ts
  * // GET route with query validation
@@ -55,7 +55,7 @@
  *     return jsonResponse(profile, 200, getOnlyCorsHeaders);
  *   },
  * });
- * 
+ *
  * @example
  * ```ts
  * // POST route with body validation and OpenAPI metadata
@@ -132,7 +132,7 @@ export interface RouteHandlerContext<TQuery = unknown, TBody = unknown> {
 
 /**
  * Route handler function signature
- * 
+ *
  * Note: Handlers can return either NextResponse or Response to support
  * delegation to external handlers (e.g., Inngest, Flux router).
  */
@@ -198,7 +198,10 @@ export interface ApiRouteConfig<TQuery = unknown, TBody = unknown> {
   /** Route handler function */
   handler: RouteHandler<TQuery, TBody>;
   /** Optional: Custom error handler (overrides default) */
-  onError?: (error: unknown, ctx: { route: string; operation: string; method: string }) => NextResponse;
+  onError?: (
+    error: unknown,
+    ctx: { route: string; operation: string; method: string }
+  ) => NextResponse;
   /** Optional: OpenAPI metadata for documentation generation */
   openapi?: OpenAPIMetadata;
   /** Optional: Require authentication (returns 401 if not authenticated) */
@@ -238,7 +241,10 @@ function getCorsHeaders(config: CorsConfig): Record<string, string> {
 /**
  * Parse query parameters from URL
  */
-function parseQueryParams<T>(url: URL, schema?: z.ZodSchema<T>): { data?: T; error?: NextResponse } {
+function parseQueryParams<T>(
+  url: URL,
+  schema?: z.ZodSchema<T>
+): { data?: T; error?: NextResponse } {
   if (!schema) {
     return { data: undefined as T };
   }
@@ -307,7 +313,7 @@ async function parseRequestBody<T>(
 
 /**
  * Creates a standardized API route handler with automatic validation and error handling
- * 
+ *
  * @param config - Route configuration
  * @returns Next.js route handler function
  */
@@ -369,11 +375,7 @@ export function createApiRoute<TQuery = unknown, TBody = unknown>(
 
           if (requireAuth && !authResult.user) {
             reqLogger.warn({}, 'Authentication required but user not authenticated');
-            return unauthorizedResponse(
-              'Authentication required',
-              authInfo,
-              corsHeaders
-            );
+            return unauthorizedResponse('Authentication required', authInfo, corsHeaders);
           }
 
           user = authResult.user ?? null;
@@ -382,11 +384,7 @@ export function createApiRoute<TQuery = unknown, TBody = unknown>(
           // This means authentication failed
           if (requireAuth) {
             reqLogger.warn({ err: normalizeError(error) }, 'Authentication failed');
-            return unauthorizedResponse(
-              'Authentication required',
-              authInfo,
-              corsHeaders
-            );
+            return unauthorizedResponse('Authentication required', authInfo, corsHeaders);
           }
           // For optionalAuth, just set user to null
           user = null;
@@ -451,10 +449,10 @@ export function createApiRoute<TQuery = unknown, TBody = unknown>(
 
 /**
  * Creates a standardized OPTIONS handler for CORS preflight requests
- * 
+ *
  * @param cors - CORS configuration
  * @returns Next.js OPTIONS handler
- * 
+ *
  * @example
  * ```ts
  * export const OPTIONS = createOptionsHandler('anon');
@@ -477,7 +475,7 @@ import { jsonResponse } from '../server/api-helpers';
 /**
  * Cache life profile options for cached API routes
  */
-type CacheLifeProfile = 
+type CacheLifeProfile =
   | 'short'
   | 'medium'
   | 'long'
@@ -495,20 +493,27 @@ interface ServiceMethodConfig<TQuery = unknown, TBody = unknown> {
   /** Arguments to pass to the service method (function that receives query/body and optionally route params) */
   methodArgs: (query: TQuery, body: TBody, routeParams?: Record<string, string>) => unknown[];
   /** Optional function to extract route params from nextContext (for dynamic routes) */
-  getRouteParams?: (nextContext: unknown) => Promise<Record<string, string>> | Record<string, string>;
+  getRouteParams?: (
+    nextContext: unknown
+  ) => Promise<Record<string, string>> | Record<string, string>;
 }
 
 /**
  * Configuration for creating a cached API route with service integration
- * 
+ *
  * Extends ApiRouteConfig with service and caching configuration.
  * Automatically handles service instantiation, caching, and common response patterns.
  */
-export interface CachedApiRouteConfig<TQuery = unknown, TBody = unknown> extends Omit<ApiRouteConfig<TQuery, TBody>, 'handler'> {
+export interface CachedApiRouteConfig<TQuery = unknown, TBody = unknown> extends Omit<
+  ApiRouteConfig<TQuery, TBody>,
+  'handler'
+> {
   /** Cache life profile */
   cacheLife: CacheLifeProfile;
   /** Optional cache tags for invalidation */
-  cacheTags?: string[] | ((query: TQuery, body: TBody, routeParams?: Record<string, string>) => string[]);
+  cacheTags?:
+    | string[]
+    | ((query: TQuery, body: TBody, routeParams?: Record<string, string>) => string[]);
   /** Service method configuration */
   service: ServiceMethodConfig<TQuery, TBody>;
   /** Optional: Transform service result before returning */
@@ -518,7 +523,12 @@ export interface CachedApiRouteConfig<TQuery = unknown, TBody = unknown> extends
   // Using 'any' here is necessary because different response types (NextResponse, Response) don't share
   // a common base type that TypeScript can infer. The handler is responsible for returning a valid Response.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  responseHandler?: (result: unknown, query: TQuery, body: TBody, ctx: RouteHandlerContext<TQuery, TBody>) => any;
+  responseHandler?: (
+    result: unknown,
+    query: TQuery,
+    body: TBody,
+    ctx: RouteHandlerContext<TQuery, TBody>
+  ) => any;
 }
 
 /**
@@ -532,16 +542,21 @@ const cachedServiceMethodConfigs = new WeakMap<
     methodName: string;
     methodArgs: (query: unknown, body: unknown, routeParams?: Record<string, string>) => unknown[];
     cacheLifeProfile: CacheLifeProfile;
-    cacheTags?: string[] | ((query: unknown, body: unknown, routeParams?: Record<string, string>) => string[]) | undefined;
-    getRouteParams?: ((nextContext: unknown) => Promise<Record<string, string>> | Record<string, string>) | undefined;
+    cacheTags?:
+      | string[]
+      | ((query: unknown, body: unknown, routeParams?: Record<string, string>) => string[])
+      | undefined;
+    getRouteParams?:
+      | ((nextContext: unknown) => Promise<Record<string, string>> | Record<string, string>)
+      | undefined;
   }
 >();
 
 /**
  * Creates a cached helper function for service method calls
- * 
+ *
  * This generates a function with 'use cache' at the top level, which is required by Next.js Cache Components.
- * 
+ *
  * Uses WeakMap pattern to avoid capturing function parameters in closures that Next.js analyzes during prerendering.
  * This prevents "Functions cannot be passed directly to Client Components" errors.
  */
@@ -550,49 +565,57 @@ function createCachedServiceMethod<TQuery, TBody>(
   methodName: string,
   methodArgs: (query: TQuery, body: TBody, routeParams?: Record<string, string>) => unknown[],
   cacheLifeProfile: CacheLifeProfile,
-  cacheTags?: string[] | ((query: TQuery, body: TBody, routeParams?: Record<string, string>) => string[]),
-  getRouteParams?: (nextContext: unknown) => Promise<Record<string, string>> | Record<string, string>
+  cacheTags?:
+    | string[]
+    | ((query: TQuery, body: TBody, routeParams?: Record<string, string>) => string[]),
+  getRouteParams?: (
+    nextContext: unknown
+  ) => Promise<Record<string, string>> | Record<string, string>
 ): (query: TQuery, body: TBody, nextContext?: unknown) => Promise<unknown> {
   // Create the cached function without capturing parameters in closure
   // We need to create it with unknown types for WeakMap compatibility, then cast the return type
-  const cachedFunctionBase = async (query: unknown, body: unknown, nextContext?: unknown): Promise<unknown> => {
+  const cachedFunctionBase = async (
+    query: unknown,
+    body: unknown,
+    nextContext?: unknown
+  ): Promise<unknown> => {
     'use cache';
-    
+
     // Retrieve configuration from WeakMap at runtime (not captured in closure)
     const config = cachedServiceMethodConfigs.get(cachedFunctionBase);
     if (!config) {
       throw new Error('Cached service method configuration not found');
     }
-    
+
     // Extract route params if getRouteParams is provided
-    const routeParams = config.getRouteParams && nextContext 
-      ? await config.getRouteParams(nextContext) 
-      : undefined;
-    
+    const routeParams =
+      config.getRouteParams && nextContext ? await config.getRouteParams(nextContext) : undefined;
+
     // Apply cache life profile
     if (typeof config.cacheLifeProfile === 'string') {
       cacheLife(config.cacheLifeProfile);
     } else {
       cacheLife(config.cacheLifeProfile);
     }
-    
+
     // Apply cache tags
     if (config.cacheTags) {
-      const tags = typeof config.cacheTags === 'function' 
-        ? config.cacheTags(query, body, routeParams) 
-        : config.cacheTags;
+      const tags =
+        typeof config.cacheTags === 'function'
+          ? config.cacheTags(query, body, routeParams)
+          : config.cacheTags;
       for (const tag of tags) {
         cacheTag(tag);
       }
     }
-    
+
     // Get service instance
     const serviceInstance = await getService(config.serviceKey);
-    
+
     // Get method arguments (including route params)
     // Cast query/body to unknown since config.methodArgs expects unknown
     const args = config.methodArgs(query, body, routeParams);
-    
+
     // Dynamic method access on service instances
     // Services are stored in a Map<ServiceKey, ServiceTypeMap[ServiceKey]> where ServiceTypeMap
     // is a union of all service types. TypeScript can't verify that a specific service has a
@@ -600,50 +623,66 @@ function createCachedServiceMethod<TQuery, TBody>(
     // The runtime check below (typeof method !== 'function') ensures safety.
     // Use 'unknown' first to avoid unsafe type assertions, then narrow with runtime check
     const serviceRecord = serviceInstance as unknown;
-    const serviceMethods = serviceRecord as Record<string, (...args: unknown[]) => Promise<unknown>>;
+    const serviceMethods = serviceRecord as Record<
+      string,
+      (...args: unknown[]) => Promise<unknown>
+    >;
     const method = serviceMethods[config.methodName];
     if (!method || typeof method !== 'function') {
       throw new Error(
         `Method '${config.methodName}' not found on service '${config.serviceKey}'. ` +
-        `Available methods: ${Object.getOwnPropertyNames(Object.getPrototypeOf(serviceInstance))
-          .filter(m => m !== 'constructor')
-          .join(', ')}`
+          `Available methods: ${Object.getOwnPropertyNames(Object.getPrototypeOf(serviceInstance))
+            .filter((m) => m !== 'constructor')
+            .join(', ')}`
       );
     }
-    
+
     return method.apply(serviceInstance, args);
   };
-  
+
   // Store configuration in WeakMap (not captured in closure)
   // Note: We store methodArgs with unknown types to avoid closure capture, but cast when retrieving
   cachedServiceMethodConfigs.set(cachedFunctionBase, {
     serviceKey,
     methodName,
-    methodArgs: methodArgs as (query: unknown, body: unknown, routeParams?: Record<string, string>) => unknown[],
+    methodArgs: methodArgs as (
+      query: unknown,
+      body: unknown,
+      routeParams?: Record<string, string>
+    ) => unknown[],
     cacheLifeProfile,
-    cacheTags: cacheTags ? (typeof cacheTags === 'function' 
-      ? (cacheTags as (query: unknown, body: unknown, routeParams?: Record<string, string>) => string[])
-      : cacheTags
-    ) : undefined,
+    cacheTags: cacheTags
+      ? typeof cacheTags === 'function'
+        ? (cacheTags as (
+            query: unknown,
+            body: unknown,
+            routeParams?: Record<string, string>
+          ) => string[])
+        : cacheTags
+      : undefined,
     getRouteParams: getRouteParams ?? undefined,
   });
-  
+
   // Return function with original generic types (cast to match expected signature)
-  return cachedFunctionBase as (query: TQuery, body: TBody, nextContext?: unknown) => Promise<unknown>;
+  return cachedFunctionBase as (
+    query: TQuery,
+    body: TBody,
+    nextContext?: unknown
+  ) => Promise<unknown>;
 }
 
 /**
  * Creates a cached API route with automatic service instantiation and caching
- * 
+ *
  * This factory eliminates the repetitive pattern of:
  * - Creating cached helper functions
  * - Manually instantiating services
  * - Calling service methods
  * - Formatting responses
- * 
+ *
  * @param config - Cached route configuration
  * @returns Next.js route handler function
- * 
+ *
  * @example
  * ```ts
  * // Simple cached route with service call
@@ -698,26 +737,26 @@ export function createCachedApiRoute<TQuery = unknown, TBody = unknown>(
   // Create handler
   const handler: RouteHandler<TQuery, TBody> = async (ctx) => {
     const { query, body, logger, nextContext } = ctx;
-    
+
     logger.info({}, `${operation}: executing cached service call`);
-    
+
     const result = await cachedServiceCall(query, body, nextContext);
-    
+
     // Transform result if provided
     const transformedResult = transformResult ? transformResult(result, query, body) : result;
-    
+
     logger.info(
       {
         hasResult: transformedResult !== null && transformedResult !== undefined,
       },
       `${operation}: service call completed`
     );
-    
+
     // Use custom response handler or default jsonResponse
     if (responseHandler) {
       return await responseHandler(transformedResult, query, body, ctx);
     }
-    
+
     return jsonResponse(transformedResult, 200, getCorsHeaders(cors));
   };
 
@@ -736,7 +775,7 @@ export function createCachedApiRoute<TQuery = unknown, TBody = unknown>(
     ...(authInfo && { authInfo }),
     ...(openapi && { openapi }),
   };
-  
+
   return createApiRoute(routeConfig);
 }
 
@@ -753,9 +792,16 @@ export interface FormatHandlerConfig<TFormat extends string, TQuery = unknown, T
   /** Service method name */
   methodName: string;
   /** Arguments for service method (receives format, query, body, routeParams) */
-  methodArgs: (format: TFormat, query: TQuery, body: TBody, routeParams?: Record<string, string>) => unknown[];
+  methodArgs: (
+    format: TFormat,
+    query: TQuery,
+    body: TBody,
+    routeParams?: Record<string, string>
+  ) => unknown[];
   /** Optional: Extract route params from nextContext */
-  getRouteParams?: (nextContext: unknown) => Promise<Record<string, string>> | Record<string, string>;
+  getRouteParams?: (
+    nextContext: unknown
+  ) => Promise<Record<string, string>> | Record<string, string>;
   /** Response handler for this format */
   responseHandler: (
     result: unknown,
@@ -768,15 +814,26 @@ export interface FormatHandlerConfig<TFormat extends string, TQuery = unknown, T
 
 /**
  * Configuration for creating a multi-format API route
- * 
+ *
  * This factory eliminates switch/if statements for format handling by using
  * a configuration map. Each format maps to a service method and response handler.
  */
-export interface FormatHandlerRouteConfig<TFormat extends string, TQuery = unknown, TBody = unknown> extends Omit<ApiRouteConfig<TQuery, TBody>, 'handler'> {
+export interface FormatHandlerRouteConfig<
+  TFormat extends string,
+  TQuery = unknown,
+  TBody = unknown,
+> extends Omit<ApiRouteConfig<TQuery, TBody>, 'handler'> {
   /** Cache life profile */
   cacheLife: CacheLifeProfile;
   /** Optional cache tags */
-  cacheTags?: string[] | ((format: TFormat, query: TQuery, body: TBody, routeParams?: Record<string, string>) => string[]);
+  cacheTags?:
+    | string[]
+    | ((
+        format: TFormat,
+        query: TQuery,
+        body: TBody,
+        routeParams?: Record<string, string>
+      ) => string[]);
   /** Format handler configurations (format -> handler config) */
   formats: Record<TFormat, FormatHandlerConfig<TFormat, TQuery, TBody>>;
   /** Default format if not specified in query */
@@ -787,14 +844,14 @@ export interface FormatHandlerRouteConfig<TFormat extends string, TQuery = unkno
 
 /**
  * Creates a multi-format API route handler
- * 
+ *
  * This factory eliminates the need for switch/if statements in routes that support
  * multiple formats (json, llms-txt, markdown, xml, etc.). Each format is configured
  * with its own service method and response handler.
- * 
+ *
  * @param config - Format handler route configuration
  * @returns Next.js route handler function
- * 
+ *
  * @example
  * ```ts
  * export const GET = createFormatHandlerRoute({
@@ -846,13 +903,16 @@ export function createFormatHandlerRoute<TFormat extends string, TQuery = unknow
   } = config;
 
   // Create cached service method callers for each format
-  const formatHandlers = (Object.entries(formats) as [TFormat, FormatHandlerConfig<TFormat, TQuery, TBody>][]).map(([format, formatConfig]) => {
+  const formatHandlers = (
+    Object.entries(formats) as [TFormat, FormatHandlerConfig<TFormat, TQuery, TBody>][]
+  ).map(([format, formatConfig]) => {
     // Create format-specific cache tags function
     const formatCacheTags = cacheTags
       ? (query: TQuery, body: TBody, routeParams?: Record<string, string>) => {
-          const tags = typeof cacheTags === 'function'
-            ? cacheTags(format, query, body, routeParams)
-            : cacheTags;
+          const tags =
+            typeof cacheTags === 'function'
+              ? cacheTags(format, query, body, routeParams)
+              : cacheTags;
           return tags;
         }
       : undefined;
@@ -876,11 +936,11 @@ export function createFormatHandlerRoute<TFormat extends string, TQuery = unknow
   // Create handler
   const handler: RouteHandler<TQuery, TBody> = async (ctx) => {
     const { query, body, logger, nextContext } = ctx;
-    
+
     // Extract format from query (with default)
     const queryRecord = query as Record<string, unknown>;
     const format = (queryRecord[formatParamName] as TFormat | undefined) ?? defaultFormat;
-    
+
     if (!format) {
       throw new Error(`Format parameter '${formatParamName}' is required`);
     }
@@ -894,10 +954,10 @@ export function createFormatHandlerRoute<TFormat extends string, TQuery = unknow
     }
 
     logger.info({ format }, `${operation}: executing format handler for ${format}`);
-    
+
     // Call cached service method
     const result = await formatHandler.cachedServiceCall(query, body, nextContext);
-    
+
     logger.info(
       {
         format,
@@ -905,7 +965,7 @@ export function createFormatHandlerRoute<TFormat extends string, TQuery = unknow
       },
       `${operation}: format handler completed`
     );
-    
+
     // Use format-specific response handler
     return await formatHandler.responseHandler(result, format, query, body, ctx);
   };
@@ -925,6 +985,6 @@ export function createFormatHandlerRoute<TFormat extends string, TQuery = unknow
     ...(authInfo && { authInfo }),
     ...(openapi && { openapi }),
   };
-  
+
   return createApiRoute(routeConfig);
 }

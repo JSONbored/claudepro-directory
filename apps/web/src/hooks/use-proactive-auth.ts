@@ -65,9 +65,7 @@ export interface UseProactiveAuthReturn {
  * };
  * ```
  */
-export function useProactiveAuth(
-  options?: UseProactiveAuthOptions
-): UseProactiveAuthReturn {
+export function useProactiveAuth(options?: UseProactiveAuthOptions): UseProactiveAuthReturn {
   const { user, status } = useAuthenticatedUser({
     context: options?.context || 'ProactiveAuth',
   });

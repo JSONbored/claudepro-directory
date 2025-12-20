@@ -10,6 +10,7 @@
 **Please use our web form instead:** [claudepro.directory/submit](https://claudepro.directory/submit)
 
 Our database-driven submission system provides:
+
 - ✅ Guided form with dynamic field validation
 - ✅ Template starter options from our database
 - ✅ Real-time duplicate detection
@@ -17,6 +18,7 @@ Our database-driven submission system provides:
 - ✅ Faster review process
 
 **Why use the web form?**
+
 - No need to manually format JSON
 - See exactly what fields are required for your content type
 - Get instant feedback on validation errors
@@ -33,6 +35,7 @@ Our database-driven submission system provides:
 <!-- Describe your code changes here -->
 
 **Type of change:**
+
 - [ ] Bug fix (non-breaking change fixing an issue)
 - [ ] New feature (non-breaking change adding functionality)
 - [ ] Breaking change (fix or feature causing existing functionality to change)
@@ -42,6 +45,7 @@ Our database-driven submission system provides:
 - [ ] Test coverage improvement
 
 **Testing:**
+
 - [ ] Build passes (`pnpm build`)
 - [ ] Linting passes (`pnpm lint`)
 - [ ] Type checking passes (`pnpm type-check`)
@@ -49,6 +53,7 @@ Our database-driven submission system provides:
 - [ ] Added/updated tests if applicable
 
 **Checklist:**
+
 - [ ] Code follows project style guide (database-first architecture)
 - [ ] Self-reviewed my code
 - [ ] Commented complex logic
@@ -57,6 +62,7 @@ Our database-driven submission system provides:
 - [ ] Verified against database schema if touching data layer
 
 **Database Changes (if applicable):**
+
 - [ ] Migration file included
 - [ ] RPC functions tested
 - [ ] RLS policies verified

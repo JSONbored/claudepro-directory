@@ -1,9 +1,9 @@
 /**
  * Platform-Agnostic Environment Variable Access
- * 
+ *
  * Provides standardized access to environment variables across all platforms.
  * Abstracts platform-specific environment variable names into a unified interface.
- * 
+ *
  * @module platform/env
  */
 
@@ -16,16 +16,16 @@ export type DeploymentEnv = 'production' | 'preview' | 'development' | 'build';
 
 /**
  * Gets the deployment environment in a platform-agnostic way.
- * 
+ *
  * Priority order:
  * 1. DEPLOYMENT_ENV (explicit, platform-agnostic)
  * 2. VERCEL_ENV (Vercel-specific)
  * 3. NETLIFY_CONTEXT (Netlify-specific)
  * 4. CF_PAGES_BRANCH (Cloudflare-specific)
  * 5. NODE_ENV (fallback)
- * 
+ *
  * @returns The deployment environment
- * 
+ *
  * @example
  * ```ts
  * const env = getDeploymentEnv();
@@ -140,13 +140,13 @@ export function getDeploymentEnv(): DeploymentEnv {
 
 /**
  * Gets the deployment URL in a platform-agnostic way.
- * 
+ *
  * Priority order:
  * 1. DEPLOYMENT_URL (explicit, platform-agnostic)
  * 2. Platform-specific URL variables
- * 
+ *
  * @returns The deployment URL, or undefined if not available
- * 
+ *
  * @example
  * ```ts
  * const url = getDeploymentUrl();
@@ -187,7 +187,7 @@ export function getDeploymentUrl(): string | undefined {
 
 /**
  * Gets the deployment branch name in a platform-agnostic way.
- * 
+ *
  * @returns The branch name, or undefined if not available
  */
 export function getDeploymentBranch(): string | undefined {
@@ -222,7 +222,7 @@ export function getDeploymentBranch(): string | undefined {
 
 /**
  * Gets the deployment commit SHA in a platform-agnostic way.
- * 
+ *
  * @returns The commit SHA, or undefined if not available
  */
 export function getDeploymentCommit(): string | undefined {
@@ -257,9 +257,9 @@ export function getDeploymentCommit(): string | undefined {
 
 /**
  * Gets the pull request ID in a platform-agnostic way.
- * 
+ *
  * This is primarily used for preview deployments to create isolated branch environments.
- * 
+ *
  * @returns The pull request ID, or undefined if not available
  */
 export function getDeploymentPullRequestId(): string | undefined {

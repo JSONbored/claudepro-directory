@@ -2,7 +2,7 @@
 
 /**
  * Jobs List Skeleton
- * 
+ *
  * Perfectly matches /account/jobs structure:
  * - Header (title + count + "Post a Job" button)
  * - List of job cards with status badges, title, company, description, actions
@@ -60,7 +60,7 @@ export function JobsListSkeleton() {
             <Card>
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div className="flex flex-col gap-3 flex-1">
+                  <div className="flex flex-1 flex-col gap-3">
                     <div className="flex items-center gap-1">
                       <Skeleton size="sm" width="xs" rounded="full" className="h-6" />
                       <Skeleton size="md" width="md" className="h-6" />

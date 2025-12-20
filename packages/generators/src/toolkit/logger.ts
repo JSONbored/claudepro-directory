@@ -1,15 +1,15 @@
 /**
  * Generators Logger
- * 
+ *
  * Pino logger instance for CLI generators with centralized configuration.
  * All generator commands should use this logger for consistent structured logging.
- * 
+ *
  * Uses Pino with centralized configuration for:
  * - Error serialization (via stdSerializers.err)
  * - Sensitive data redaction (via redact option in config)
  * - ISO timestamps
  * - Base context (env, service)
- * 
+ *
  * @module generators/toolkit/logger
  */
 

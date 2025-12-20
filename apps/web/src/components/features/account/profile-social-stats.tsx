@@ -2,7 +2,7 @@
 
 /**
  * Profile Social Stats Component
- * 
+ *
  * Client component for displaying follower/following counts with animated counters
  */
 
@@ -26,10 +26,7 @@ export interface ProfileSocialStatsProps {
 /**
  * Displays follower/following counts with animated counters
  */
-export function ProfileSocialStats({
-  followerCount,
-  followingCount,
-}: ProfileSocialStatsProps) {
+export function ProfileSocialStats({ followerCount, followingCount }: ProfileSocialStatsProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
 
@@ -37,20 +34,12 @@ export function ProfileSocialStats({
     <div ref={ref} className="mt-4 flex items-center gap-3 text-sm">
       <div className="flex items-center gap-1">
         <Users className="h-4 w-4" />
-        <NumberTicker
-          value={followerCount}
-          delay={isInView ? 200 : 0}
-          decimalPlaces={0}
-        />{' '}
+        <NumberTicker value={followerCount} delay={isInView ? 200 : 0} decimalPlaces={0} />{' '}
         followers
       </div>
       <span>•</span>
       <div>
-        <NumberTicker
-          value={followingCount}
-          delay={isInView ? 300 : 0}
-          decimalPlaces={0}
-        />{' '}
+        <NumberTicker value={followingCount} delay={isInView ? 300 : 0} decimalPlaces={0} />{' '}
         following
       </div>
     </div>

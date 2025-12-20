@@ -9,11 +9,13 @@ describe('useMousePosition', () => {
 
   beforeEach(() => {
     // Mock window.addEventListener to capture the handler
-    addEventListenerSpy = vi.spyOn(window, 'addEventListener').mockImplementation((event, handler) => {
-      if (event === 'mousemove') {
-        mouseMoveHandler = handler as (event: MouseEvent) => void;
-      }
-    });
+    addEventListenerSpy = vi
+      .spyOn(window, 'addEventListener')
+      .mockImplementation((event, handler) => {
+        if (event === 'mousemove') {
+          mouseMoveHandler = handler as (event: MouseEvent) => void;
+        }
+      });
 
     removeEventListenerSpy = vi.spyOn(window, 'removeEventListener').mockImplementation(() => {});
 

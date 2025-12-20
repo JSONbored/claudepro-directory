@@ -41,13 +41,14 @@ export function useOnboardingToasts({
   const [activeToasts] = useState<Set<string>>(new Set());
 
   // Use useLocalStorage for seen toasts data (stored as JSON object with context keys)
-  const { value: seenData, setValue: setSeenData, removeValue: removeSeenData } = useLocalStorage<Record<string, boolean>>(
-    STORAGE_KEY,
-    {
-      defaultValue: {},
-      syncAcrossTabs: false,
-    }
-  );
+  const {
+    value: seenData,
+    setValue: setSeenData,
+    removeValue: removeSeenData,
+  } = useLocalStorage<Record<string, boolean>>(STORAGE_KEY, {
+    defaultValue: {},
+    syncAcrossTabs: false,
+  });
 
   // Derive hasSeenToasts from seenData
   const hasSeenToasts = enabled ? Boolean(seenData[context]) : true;

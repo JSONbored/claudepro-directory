@@ -18,7 +18,10 @@
  */
 
 import { Search, Clock, TrendingUp } from '@heyclaude/web-runtime/icons';
-import type { DisplayableContent, SavedSearchPreset } from '@heyclaude/web-runtime/types/component.types';
+import type {
+  DisplayableContent,
+  SavedSearchPreset,
+} from '@heyclaude/web-runtime/types/component.types';
 import {
   CommandDialog,
   CommandEmpty,
@@ -77,10 +80,17 @@ export function CommandPalette({
   quickActions = [],
 }: CommandPaletteProps) {
   const { query, setQuery, results } = useSearchContext();
-  const { value: internalOpen, toggle: toggleInternalOpen, setValue: setInternalOpen } = useBoolean();
+  const {
+    value: internalOpen,
+    toggle: toggleInternalOpen,
+    setValue: setInternalOpen,
+  } = useBoolean();
 
   // Generate unique ID for the input (for autofill support)
-  const inputId = useMemo(() => `command-palette-input-${Math.random().toString(36).substring(2, 9)}`, []);
+  const inputId = useMemo(
+    () => `command-palette-input-${Math.random().toString(36).substring(2, 9)}`,
+    []
+  );
 
   // Use controlled or internal state
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
@@ -169,72 +179,70 @@ export function CommandPalette({
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
 
-            {/* Quick Actions */}
-            {quickActions.length > 0 && (
-              <CommandGroup heading="Quick Actions">
-                {quickActions.map((action) => (
-                  <CommandItem
-                    key={action.id}
-                    onSelect={() => handleQuickAction(action)}
-                    className="flex items-center gap-2"
-                  >
-                    {action.icon && <action.icon className="h-4 w-4" />}
-                    <span>{action.label}</span>
-                    {action.shortcut && (
-                      <CommandShortcut>{action.shortcut}</CommandShortcut>
-                    )}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
+        {/* Quick Actions */}
+        {quickActions.length > 0 && (
+          <CommandGroup heading="Quick Actions">
+            {quickActions.map((action) => (
+              <CommandItem
+                key={action.id}
+                onSelect={() => handleQuickAction(action)}
+                className="flex items-center gap-2"
+              >
+                {action.icon && <action.icon className="h-4 w-4" />}
+                <span>{action.label}</span>
+                {action.shortcut && <CommandShortcut>{action.shortcut}</CommandShortcut>}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
 
-            {/* Recent Searches */}
-            {recentSearches.length > 0 && (
-              <CommandGroup heading="Recent Searches">
-                {recentSearches.map((preset) => (
-                  <CommandItem
-                    key={preset.id}
-                    onSelect={() => handleRecentSearch(preset)}
-                    className="flex items-center gap-2"
-                  >
-                    <Clock className="text-muted-foreground h-4 w-4" />
-                    <span>{preset.label}</span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
+        {/* Recent Searches */}
+        {recentSearches.length > 0 && (
+          <CommandGroup heading="Recent Searches">
+            {recentSearches.map((preset) => (
+              <CommandItem
+                key={preset.id}
+                onSelect={() => handleRecentSearch(preset)}
+                className="flex items-center gap-2"
+              >
+                <Clock className="text-muted-foreground h-4 w-4" />
+                <span>{preset.label}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
 
-            {/* Suggestions */}
-            {suggestions.length > 0 && (
-              <CommandGroup heading="Suggestions">
-                {suggestions.slice(0, 5).map((item) => (
-                  <CommandItem
-                    key={item.slug || item.title}
-                    onSelect={() => handleSuggestion(item)}
-                    className="flex items-center gap-2"
-                  >
-                    <TrendingUp className="text-muted-foreground h-4 w-4" />
-                    <span>{item.title || item.slug}</span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
+        {/* Suggestions */}
+        {suggestions.length > 0 && (
+          <CommandGroup heading="Suggestions">
+            {suggestions.slice(0, 5).map((item) => (
+              <CommandItem
+                key={item.slug || item.title}
+                onSelect={() => handleSuggestion(item)}
+                className="flex items-center gap-2"
+              >
+                <TrendingUp className="text-muted-foreground h-4 w-4" />
+                <span>{item.title || item.slug}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
 
-            {/* Search Results */}
-            {results.length > 0 && (
-              <CommandGroup heading="Results">
-                {results.slice(0, 10).map((item) => (
-                  <CommandItem
-                    key={item.slug || item.title}
-                    onSelect={() => handleSuggestion(item)}
-                    className="flex items-center gap-2"
-                  >
-                    <Search className="text-muted-foreground h-4 w-4" />
-                    <span>{item.title || item.slug}</span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
+        {/* Search Results */}
+        {results.length > 0 && (
+          <CommandGroup heading="Results">
+            {results.slice(0, 10).map((item) => (
+              <CommandItem
+                key={item.slug || item.title}
+                onSelect={() => handleSuggestion(item)}
+                className="flex items-center gap-2"
+              >
+                <Search className="text-muted-foreground h-4 w-4" />
+                <span>{item.title || item.slug}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
       </CommandList>
     </CommandDialog>
   );

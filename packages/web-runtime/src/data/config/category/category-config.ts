@@ -11,8 +11,11 @@
  * To update: Edit this file and redeploy.
  */
 
-import { type content_category } from '@heyclaude/data-layer/prisma';
-import { ConfigFormat, PrimaryActionType } from '@heyclaude/data-layer/prisma';
+import {
+  config_format as ConfigFormat,
+  primary_action_type as PrimaryActionType,
+} from '@prisma/client';
+import type { content_category } from '@prisma/client';
 
 import {
   BookOpen,

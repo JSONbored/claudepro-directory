@@ -96,9 +96,10 @@ export function useCardNavigation(pathOrOptions: string | UseCardNavigationOptio
     } catch (error) {
       // Log navigation errors but don't crash
       const normalized = normalizeError(error, 'useCardNavigation: Navigation failed');
-      logger.error({ err: normalized, hook: 'useCardNavigation',
-        path,
-        useViewTransitions, }, 'useCardNavigation: Navigation failed');
+      logger.error(
+        { err: normalized, hook: 'useCardNavigation', path, useViewTransitions },
+        'useCardNavigation: Navigation failed'
+      );
     }
   }, [path, router, onBeforeNavigate, onAfterNavigate, useViewTransitions]);
 
@@ -134,9 +135,10 @@ export function useCardNavigation(pathOrOptions: string | UseCardNavigationOptio
       } catch (error) {
         // Log navigation errors but don't crash
         const normalized = normalizeError(error, 'useCardNavigation: Action navigation failed');
-        logger.error({ err: normalized, hook: 'useCardNavigation',
-          path,
-          useViewTransitions, }, 'useCardNavigation: Action navigation failed');
+        logger.error(
+          { err: normalized, hook: 'useCardNavigation', path, useViewTransitions },
+          'useCardNavigation: Action navigation failed'
+        );
       }
     },
     [path, router, onBeforeNavigate, onAfterNavigate, useViewTransitions]

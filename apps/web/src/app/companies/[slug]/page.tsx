@@ -11,7 +11,7 @@ import {
   type job_tier,
   type job_type,
   type workplace_type,
-} from '@heyclaude/data-layer/prisma';
+} from '@prisma/client';
 import { type CompanyProfileJobItem } from '@heyclaude/data-layer';
 import { type JobCardJobType } from '@heyclaude/web-runtime/types/component.types';
 import { getCompanyProfile } from '@heyclaude/web-runtime/data/companies';
@@ -290,7 +290,7 @@ function CompanyHeader({
         {company.logo ? (
           <Image
             alt={`${company.name} logo`}
-            className="border-background h-24 w-24 card-base border-4 object-cover"
+            className="border-background card-base h-24 w-24 border-4 object-cover"
             height={96}
             priority
             src={company.logo}
@@ -394,8 +394,8 @@ function CompanyJobsList({
   // Filter and type narrow active_jobs to ensure all required fields are present
   // Map to JobCardJobType format with proper type conversions
   const filteredActiveJobs: JobCardJobType[] =
-    active_jobs?.filter(
-      (job): job is CompanyProfileJobItem =>
+    active_jobs
+      ?.filter((job): job is CompanyProfileJobItem =>
         Boolean(
           job.id &&
           job.slug &&
@@ -409,29 +409,32 @@ function CompanyJobsList({
           typeof job.view_count === 'number' &&
           typeof job.click_count === 'number'
         )
-    ).map((job): JobCardJobType => ({
-      id: job.id,
-      slug: job.slug,
-      title: job.title,
-      company: job.company,
-      company_logo: job.company_logo,
-      location: job.location,
-      description: job.description,
-      salary: job.salary,
-      remote: job.remote,
-      type: job.type as job_type | null,
-      workplace: (job.workplace as workplace_type) ?? 'remote',
-      experience: (job.experience as experience_level) ?? 'beginner',
-      category: (job.category as job_category) ?? null,
-      tags: job.tags,
-      plan: (job.plan as job_plan) ?? 'free',
-      tier: job.tier as job_tier | null,
-      posted_at: job.posted_at ?? '',
-      expires_at: job.expires_at ?? '',
-      view_count: job.view_count,
-      click_count: job.click_count,
-      link: job.link,
-    })) ?? [];
+      )
+      .map(
+        (job): JobCardJobType => ({
+          id: job.id,
+          slug: job.slug,
+          title: job.title,
+          company: job.company,
+          company_logo: job.company_logo,
+          location: job.location,
+          description: job.description,
+          salary: job.salary,
+          remote: job.remote,
+          type: job.type as job_type | null,
+          workplace: (job.workplace as workplace_type) ?? 'remote',
+          experience: (job.experience as experience_level) ?? 'beginner',
+          category: (job.category as job_category) ?? null,
+          tags: job.tags,
+          plan: (job.plan as job_plan) ?? 'free',
+          tier: job.tier as job_tier | null,
+          posted_at: job.posted_at ?? '',
+          expires_at: job.expires_at ?? '',
+          view_count: job.view_count,
+          click_count: job.click_count,
+          link: job.link,
+        })
+      ) ?? [];
 
   return (
     <>

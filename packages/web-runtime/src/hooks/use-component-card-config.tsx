@@ -7,7 +7,7 @@
  * Generic pattern for feature flag-based UI visibility control
  */
 
-import { createContext, type ReactNode, useContext } from 'react';
+import React, { createContext, type ReactNode, useContext } from 'react';
 import {
   type ComponentCardConfig,
   DEFAULT_COMPONENT_CARD_CONFIG,

@@ -25,11 +25,7 @@ import {
   type FormFieldConfig,
   type GridColumn,
 } from '@heyclaude/web-runtime/types/component.types';
-import {
-  Input,
-  Label,
-  Textarea,
-} from '@heyclaude/web-runtime/ui';
+import { Input, Label, Textarea } from '@heyclaude/web-runtime/ui';
 
 // ============================================================================
 // GRID LAYOUT SYSTEM
@@ -79,9 +75,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
       {Icon ? (
         <div className="relative">
           {iconPosition === 'left' && (
-            <div
-              className="absolute top-1/2 left-3 text-muted-foreground -translate-y-1/2"
-            >
+            <div className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
               <Icon className="h-4 w-4" />
             </div>
           )}
@@ -94,9 +88,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
             className={iconPosition === 'left' ? 'pl-10' : iconPosition === 'right' ? 'pr-10' : ''}
           />
           {iconPosition === 'right' && (
-            <div
-              className="absolute top-1/2 right-3 text-muted-foreground -translate-y-1/2"
-            >
+            <div className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2">
               <Icon className="h-4 w-4" />
             </div>
           )}
@@ -214,7 +206,7 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
         name={field.name}
         required={field.required}
         defaultValue={field.defaultValue}
-        className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+        className="border-input bg-background flex h-10 w-full rounded-lg border px-3 py-2 text-sm"
       >
         {field.options.map((option) => (
           <option key={option.value} value={option.value}>

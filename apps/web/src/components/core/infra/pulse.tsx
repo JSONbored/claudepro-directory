@@ -21,7 +21,7 @@
  * @module components/infra/pulse
  */
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import { trackInteraction } from '@heyclaude/web-runtime/pulse-client';
 import { getOrCreateSessionId } from '@heyclaude/web-runtime/logging/client';
 import { getPollingConfig } from '@heyclaude/web-runtime/config/static-configs';
@@ -60,34 +60,24 @@ function useTrackingEffect(
         if (result instanceof Promise) {
           result.catch((error) => {
             const normalized = normalizeError(error, 'Analytics tracking failed');
-            logClientWarn(
-              '[Analytics] Tracking failed',
-              normalized,
-              'Pulse.useTrackingEffect',
-              {
-                component: 'Pulse',
-                action: 'track-immediate',
-                category: 'analytics',
-                source: 'Pulse',
-                error: normalized.message,
-              }
-            );
+            logClientWarn('[Analytics] Tracking failed', normalized, 'Pulse.useTrackingEffect', {
+              component: 'Pulse',
+              action: 'track-immediate',
+              category: 'analytics',
+              source: 'Pulse',
+              error: normalized.message,
+            });
           });
         }
       } catch (error) {
         const normalized = normalizeError(error, 'Analytics tracking failed');
-        logClientWarn(
-          '[Analytics] Tracking failed',
-          normalized,
-          'Pulse.useTrackingEffect',
-          {
-            component: 'Pulse',
-            action: 'track-immediate',
-            category: 'analytics',
-            source: 'Pulse',
-            error: normalized.message,
-          }
-        );
+        logClientWarn('[Analytics] Tracking failed', normalized, 'Pulse.useTrackingEffect', {
+          component: 'Pulse',
+          action: 'track-immediate',
+          category: 'analytics',
+          source: 'Pulse',
+          error: normalized.message,
+        });
       }
       return;
     }
@@ -98,34 +88,24 @@ function useTrackingEffect(
         if (result instanceof Promise) {
           result.catch((error) => {
             const normalized = normalizeError(error, 'Analytics tracking failed');
-            logClientWarn(
-              '[Analytics] Tracking failed',
-              normalized,
-              'Pulse.useTrackingEffect',
-              {
-                component: 'Pulse',
-                action: 'track-delayed',
-                category: 'analytics',
-                source: 'Pulse',
-                error: normalized.message,
-              }
-            );
+            logClientWarn('[Analytics] Tracking failed', normalized, 'Pulse.useTrackingEffect', {
+              component: 'Pulse',
+              action: 'track-delayed',
+              category: 'analytics',
+              source: 'Pulse',
+              error: normalized.message,
+            });
           });
         }
       } catch (error) {
         const normalized = normalizeError(error, 'Analytics tracking failed');
-        logClientWarn(
-          '[Analytics] Tracking failed',
-          normalized,
-          'Pulse.useTrackingEffect',
-          {
-            component: 'Pulse',
-            action: 'track-delayed',
-            category: 'analytics',
-            source: 'Pulse',
-            error: normalized.message,
-          }
-        );
+        logClientWarn('[Analytics] Tracking failed', normalized, 'Pulse.useTrackingEffect', {
+          component: 'Pulse',
+          action: 'track-delayed',
+          category: 'analytics',
+          source: 'Pulse',
+          error: normalized.message,
+        });
       }
     }, delay);
 

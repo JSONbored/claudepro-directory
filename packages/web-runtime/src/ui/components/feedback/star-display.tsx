@@ -65,7 +65,7 @@ export function StarDisplay({
           className={`${SIZE_CLASSES[size]} ${
             showFilled && i < Math.round(rating)
               ? 'fill-amber-400 text-amber-400'
-              : 'fill-none text-muted-foreground/30'
+              : 'text-muted-foreground/30 fill-none'
           }`}
           aria-hidden="true"
         />

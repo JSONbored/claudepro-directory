@@ -101,12 +101,17 @@ export function useReadLocalStorage<T>(
       return deserializer(item);
     } catch (error) {
       const errorObj = error instanceof Error ? error : new Error(String(error));
-      logger.warn({ err: errorObj,
-        category: 'storage',
-        component: 'useReadLocalStorage',
-        recoverable: true,
-        action: 'initialize',
-        key, }, `Error reading localStorage key "${key}"`);
+      logger.warn(
+        {
+          err: errorObj,
+          category: 'storage',
+          component: 'useReadLocalStorage',
+          recoverable: true,
+          action: 'initialize',
+          key,
+        },
+        `Error reading localStorage key "${key}"`
+      );
       return null;
     }
   });
@@ -126,12 +131,17 @@ export function useReadLocalStorage<T>(
         }
       } catch (error) {
         const errorObj = error instanceof Error ? error : new Error(String(error));
-        logger.warn({ err: errorObj,
-          category: 'storage',
-          component: 'useReadLocalStorage',
-          recoverable: true,
-          action: 'readValue',
-          key, }, `Error reading localStorage key "${key}"`);
+        logger.warn(
+          {
+            err: errorObj,
+            category: 'storage',
+            component: 'useReadLocalStorage',
+            recoverable: true,
+            action: 'readValue',
+            key,
+          },
+          `Error reading localStorage key "${key}"`
+        );
         setStoredValue(null);
       }
     };

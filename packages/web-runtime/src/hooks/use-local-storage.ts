@@ -174,13 +174,18 @@ export function useLocalStorage<T>(
   // Warn developers if they accidentally try to store sensitive data in localStorage
   if (isDevelopment && typeof window !== 'undefined') {
     if (containsSensitivePattern(key)) {
-      logger.warn({ component: 'useLocalStorage',
+      logger.warn(
+        {
+          component: 'useLocalStorage',
           key,
           matchedPatterns: PROHIBITED_LOCALSTORAGE_PATTERNS.filter((p) =>
             key.toLowerCase().includes(p)
           ).join(', '),
           guidance:
-            'localStorage is not encrypted; use HttpOnly cookies or server-side sessions for secrets.', }, 'localStorage key matches sensitive pattern. Avoid storing secrets in localStorage.');
+            'localStorage is not encrypted; use HttpOnly cookies or server-side sessions for secrets.',
+        },
+        'localStorage key matches sensitive pattern. Avoid storing secrets in localStorage.'
+      );
     }
   }
 
@@ -203,13 +208,18 @@ export function useLocalStorage<T>(
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
       const itemValue = window.localStorage.getItem(key);
-      logger.warn({ err: errorObj,
-        category: 'storage',
-        component: 'useLocalStorage',
-        recoverable: true,
-        action: 'initialize',
-        key,
-        item: itemValue ?? 'null', }, '[Storage] Failed to read from localStorage');
+      logger.warn(
+        {
+          err: errorObj,
+          category: 'storage',
+          component: 'useLocalStorage',
+          recoverable: true,
+          action: 'initialize',
+          key,
+          item: itemValue ?? 'null',
+        },
+        '[Storage] Failed to read from localStorage'
+      );
       setError(errorObj);
       return defaultValue as T;
     }
@@ -226,8 +236,10 @@ export function useLocalStorage<T>(
 
         // SSR check
         if (typeof window === 'undefined') {
-          logger.warn({ component: 'useLocalStorage',
-            key, }, 'Attempted to write to localStorage during SSR');
+          logger.warn(
+            { component: 'useLocalStorage', key },
+            'Attempted to write to localStorage during SSR'
+          );
           return;
         }
 
@@ -247,13 +259,18 @@ export function useLocalStorage<T>(
           errorType = 'SERIALIZATION_ERROR';
         }
 
-        logger.warn({ err: errorObj,
-          category: 'storage',
-          component: 'useLocalStorage',
-          recoverable: true,
-          action: 'setValue',
-          key,
-          errorType, }, '[Storage] Failed to write to localStorage');
+        logger.warn(
+          {
+            err: errorObj,
+            category: 'storage',
+            component: 'useLocalStorage',
+            recoverable: true,
+            action: 'setValue',
+            key,
+            errorType,
+          },
+          '[Storage] Failed to write to localStorage'
+        );
         setError(errorObj);
       }
     },
@@ -265,8 +282,10 @@ export function useLocalStorage<T>(
     try {
       // SSR check
       if (typeof window === 'undefined') {
-        logger.warn({ component: 'useLocalStorage',
-          key, }, 'Attempted to remove from localStorage during SSR');
+        logger.warn(
+          { component: 'useLocalStorage', key },
+          'Attempted to remove from localStorage during SSR'
+        );
         return;
       }
 
@@ -275,12 +294,17 @@ export function useLocalStorage<T>(
       setError(null);
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      logger.warn({ err: errorObj,
-        category: 'storage',
-        component: 'useLocalStorage',
-        recoverable: true,
-        action: 'removeValue',
-        key, }, '[Storage] Failed to remove from localStorage');
+      logger.warn(
+        {
+          err: errorObj,
+          category: 'storage',
+          component: 'useLocalStorage',
+          recoverable: true,
+          action: 'removeValue',
+          key,
+        },
+        '[Storage] Failed to remove from localStorage'
+      );
       setError(errorObj);
     }
   }, [key, defaultValue]);

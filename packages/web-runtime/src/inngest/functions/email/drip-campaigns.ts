@@ -16,7 +16,8 @@ import { getEnvVar, escapeHtml } from '@heyclaude/shared-runtime';
 import { getService } from '../../../data/service-factory';
 
 const BASE_URL = getEnvVar('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
-const FROM_EMAIL = getEnvVar('RESEND_FROM_EMAIL') || 'Claude Pro Directory <hello@claudepro.directory>';
+const FROM_EMAIL =
+  getEnvVar('RESEND_FROM_EMAIL') || 'Claude Pro Directory <hello@claudepro.directory>';
 
 /**
  * Safely serialize a string value for use in CEL (Common Expression Language) filters.
@@ -56,16 +57,12 @@ export const newsletterDripCampaign = inngest.createFunction(
 
     const { email, triggerSource } = event.data;
 
-    logger.info({ ...logContext,
-      email,
-      triggerSource, }, 'Starting newsletter drip campaign');
+    logger.info({ ...logContext, email, triggerSource }, 'Starting newsletter drip campaign');
 
     // Step 1: Welcome email is already sent by welcome.ts
     // We just note the campaign start time for tracking
     await step.run('record-campaign-start', async () => {
-      logger.info({ ...logContext,
-        email,
-        triggerSource, }, 'Newsletter drip campaign started');
+      logger.info({ ...logContext, email, triggerSource }, 'Newsletter drip campaign started');
     });
 
     // Step 2: Wait up to 3 days for user to click any link in emails
@@ -78,9 +75,10 @@ export const newsletterDripCampaign = inngest.createFunction(
 
     if (clickEvent) {
       // User is engaged! Send power user tips after 1 day
-      logger.info({ ...logContext,
-        email,
-        clickedLink: clickEvent.data.click?.link, }, 'User engaged with email, scheduling tips');
+      logger.info(
+        { ...logContext, email, clickedLink: clickEvent.data.click?.link },
+        'User engaged with email, scheduling tips'
+      );
 
       await step.sleep('delay-tips-email', '1 day');
 
@@ -93,17 +91,17 @@ export const newsletterDripCampaign = inngest.createFunction(
         });
 
         if (result.error) {
-          logger.warn({ ...logContext,
-            email,
-            errorMessage: result.error.message, }, 'Failed to send power user tips email');
+          logger.warn(
+            { ...logContext, email, errorMessage: result.error.message },
+            'Failed to send power user tips email'
+          );
         }
 
         return result.data?.id;
       });
     } else {
       // User didn't click - send a gentle nudge
-      logger.info({ ...logContext,
-        email, }, 'User not engaged, sending nudge email');
+      logger.info({ ...logContext, email }, 'User not engaged, sending nudge email');
 
       await step.run('send-nudge-email', async () => {
         const result = await sendEmail({
@@ -114,9 +112,10 @@ export const newsletterDripCampaign = inngest.createFunction(
         });
 
         if (result.error) {
-          logger.warn({ ...logContext,
-            email,
-            errorMessage: result.error.message, }, 'Failed to send nudge email');
+          logger.warn(
+            { ...logContext, email, errorMessage: result.error.message },
+            'Failed to send nudge email'
+          );
         }
 
         return result.data?.id;
@@ -149,10 +148,10 @@ export const newsletterDripCampaign = inngest.createFunction(
       });
     }
 
-    logger.info({ ...logContext,
-      email,
-      engaged: !!clickEvent,
-      stillSubscribed, }, 'Newsletter drip campaign completed');
+    logger.info(
+      { ...logContext, email, engaged: !!clickEvent, stillSubscribed },
+      'Newsletter drip campaign completed'
+    );
 
     return { email, engaged: !!clickEvent, completed: true };
   }
@@ -184,9 +183,7 @@ export const jobPostingDripCampaign = inngest.createFunction(
     const safeJobTitle = escapeHtml(jobTitle);
     const safeName = escapeHtml(employerName || 'there');
 
-    logger.info({ ...logContext,
-      jobId,
-      employerEmail, }, 'Starting job posting drip campaign');
+    logger.info({ ...logContext, jobId, employerEmail }, 'Starting job posting drip campaign');
 
     // Step 1: Send confirmation email
     await step.run('send-confirmation', async () => {
@@ -198,9 +195,10 @@ export const jobPostingDripCampaign = inngest.createFunction(
       });
 
       if (result.error) {
-        logger.warn({ ...logContext,
-          jobId,
-          errorMessage: result.error.message, }, 'Failed to send job confirmation email');
+        logger.warn(
+          { ...logContext, jobId, errorMessage: result.error.message },
+          'Failed to send job confirmation email'
+        );
       }
 
       return result.data?.id;
@@ -244,13 +242,7 @@ export const jobPostingDripCampaign = inngest.createFunction(
           to: employerEmail,
           from: FROM_EMAIL,
           subject: `📊 Your job posting stats: ${viewCount} views`,
-          html: buildPerformanceReportEmail(
-            safeJobTitle,
-            jobSlug,
-            safeName,
-            viewCount,
-            clickCount
-          ),
+          html: buildPerformanceReportEmail(safeJobTitle, jobSlug, safeName, viewCount, clickCount),
         });
 
         return result.data?.id;
@@ -281,9 +273,7 @@ export const jobPostingDripCampaign = inngest.createFunction(
       }
     }
 
-    logger.info({ ...logContext,
-      jobId,
-      employerEmail, }, 'Job posting drip campaign completed');
+    logger.info({ ...logContext, jobId, employerEmail }, 'Job posting drip campaign completed');
 
     return { jobId, employerEmail, completed: true };
   }
@@ -504,11 +494,15 @@ function buildPerformanceReportEmail(
     </div>
   </div>
   
-  ${views < 50 ? `
+  ${
+    views < 50
+      ? `
   <div style="background: #fef3c7; border-radius: 8px; padding: 16px; margin: 20px 0;">
     <p style="margin: 0;"><strong>💡 Tip:</strong> Consider upgrading to Featured to boost visibility by 3x!</p>
   </div>
-  ` : ''}
+  `
+      : ''
+  }
   
   <p style="margin-top: 30px;">
     <a href="${BASE_URL}/jobs/${jobSlug}" style="background: #ff6b35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">View Full Analytics</a>

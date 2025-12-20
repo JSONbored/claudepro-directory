@@ -10,6 +10,7 @@ This directory contains coding standards and guidelines for the codebase. These 
 ## Purpose
 
 These standards ensure:
+
 - ✅ Consistent logging and error handling across all code
 - ✅ Proper instrumentation for debugging and monitoring
 - ✅ Code quality and maintainability
@@ -18,6 +19,7 @@ These standards ensure:
 ## Usage
 
 These standards are automatically applied by:
+
 - **CodeRabbit** - Code review tool reads these files for review guidelines
 - **ESLint** - Custom rules enforce these patterns at build time
 - **Development Workflow** - Developers reference these when writing code

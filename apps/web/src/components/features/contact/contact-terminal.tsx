@@ -13,16 +13,16 @@
 
 'use client';
 
+import {
+  contact_action_type as ContactActionType,
+  contact_command_icon,
+} from '@prisma/client';
 import type {
   contact_action_type,
   contact_category,
   confetti_variant,
-  contact_command_icon,
-} from '@heyclaude/data-layer/prisma';
-import { ContactActionType } from '@heyclaude/data-layer/prisma';
-import {
-  getContactCommands,
-} from '@heyclaude/web-runtime/actions/contact';
+} from '@prisma/client';
+import { getContactCommands } from '@heyclaude/web-runtime/actions/contact';
 import { submitContactForm } from '@heyclaude/web-runtime/actions/submit-contact-form';
 import {
   trackTerminalCommandAction,
@@ -85,17 +85,34 @@ export function ContactTerminal() {
   const router = useRouter();
   const { fireConfetti } = useConfetti();
   const { value: mounted, setTrue: setMountedTrue } = useBoolean();
-  const { value: isLoading, setTrue: setIsLoadingTrue, setFalse: setIsLoadingFalse } = useBoolean(true);
+  const {
+    value: isLoading,
+    setTrue: setIsLoadingTrue,
+    setFalse: setIsLoadingFalse,
+  } = useBoolean(true);
   const [loadError, setLoadError] = useState<null | string>(null);
   const [commands, setCommands] = useState<ContactCommand[]>([]);
   const [input, setInput] = useState('');
   const [output, setOutput] = useState<OutputLine[]>([]);
-  const { value: showSuggestions, setFalse: setShowSuggestionsFalse, setValue: setShowSuggestions } = useBoolean();
-  const { value: isSheetOpen, setTrue: setIsSheetOpenTrue, setFalse: setIsSheetOpenFalse, setValue: setIsSheetOpenValue } = useBoolean();
+  const {
+    value: showSuggestions,
+    setFalse: setShowSuggestionsFalse,
+    setValue: setShowSuggestions,
+  } = useBoolean();
+  const {
+    value: isSheetOpen,
+    setTrue: setIsSheetOpenTrue,
+    setFalse: setIsSheetOpenFalse,
+    setValue: setIsSheetOpenValue,
+  } = useBoolean();
   const [selectedCategory, setSelectedCategory] = useState<contact_category>(
     'general' as contact_category
   );
-  const { value: isSubmitting, setTrue: setIsSubmittingTrue, setFalse: setIsSubmittingFalse } = useBoolean();
+  const {
+    value: isSubmitting,
+    setTrue: setIsSubmittingTrue,
+    setFalse: setIsSubmittingFalse,
+  } = useBoolean();
   const inputRef = useRef<HTMLInputElement>(null);
   const outputEndRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -132,7 +149,7 @@ export function ContactTerminal() {
             // Service returns commands array directly (migrated from RPC)
             // Type assertion needed because safe-action infers generic types
             // Convert through unknown first to avoid type overlap issues
-            const commandsArray = (result.data.commands as unknown) as Array<{
+            const commandsArray = result.data.commands as unknown as Array<{
               id: string | null;
               text: string | null;
               description: string | null;
@@ -150,9 +167,7 @@ export function ContactTerminal() {
               description: cmd.description ?? null,
               category: cmd.category ?? '',
               icon_name: (cmd.icon_name as contact_command_icon) ?? null,
-              action_type:
-                (cmd.action_type as contact_action_type) ??
-                ContactActionType.internal,
+              action_type: (cmd.action_type as contact_action_type) ?? ContactActionType.internal,
               action_value: cmd.action_value ?? null,
               confetti_variant: (cmd.confetti_variant as confetti_variant) ?? null,
               requires_auth: cmd.requires_auth ?? false,
@@ -268,9 +283,7 @@ export function ContactTerminal() {
 
         case 'sheet': {
           if (command.action_value) {
-            setSelectedCategory(
-              command.action_value as contact_category
-            );
+            setSelectedCategory(command.action_value as contact_category);
             setIsSheetOpenTrue();
             addOutput(
               'success',
@@ -296,7 +309,9 @@ export function ContactTerminal() {
       }
 
       // Use schema to validate and ensure proper type (contact_action_typeSchema outputs contact_action_type)
-      const actionType = contact_action_typeSchema.parse(command.action_type ?? ContactActionType.internal);
+      const actionType = contact_action_typeSchema.parse(
+        command.action_type ?? ContactActionType.internal
+      );
       trackTerminalCommandAction({
         command_id: command.id ?? '',
         action_type: actionType,
@@ -324,7 +339,9 @@ export function ContactTerminal() {
         }
       );
       // Use schema to validate and ensure proper type (contact_action_typeSchema outputs contact_action_type)
-      const actionType = contact_action_typeSchema.parse(command.action_type ?? ContactActionType.internal);
+      const actionType = contact_action_typeSchema.parse(
+        command.action_type ?? ContactActionType.internal
+      );
       trackTerminalCommandAction({
         command_id: command.id ?? '',
         action_type: actionType,
@@ -505,7 +522,7 @@ export function ContactTerminal() {
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             className="space-y-6 text-center"
           >
-            <X className="mx-auto h-8 w-8 text-destructive" />
+            <X className="text-destructive mx-auto h-8 w-8" />
             <div className="space-y-2">
               <div className="text-destructive text-sm-medium">{loadError}</div>
               <Button
@@ -564,7 +581,7 @@ export function ContactTerminal() {
         <div className="relative">
           {/* Suggestions Dropdown */}
           {showSuggestions && filteredCommands.length > 0 ? (
-            <div className="absolute bottom-full left-0 right-0 mb-2">
+            <div className="absolute right-0 bottom-full left-0 mb-2">
               <Command className="bg-popover card-base shadow-lg">
                 <CommandList className="max-h-[200px]">
                   <CommandEmpty>No commands found.</CommandEmpty>
@@ -580,7 +597,7 @@ export function ContactTerminal() {
                           <span className="text-primary font-mono text-xs">$</span>
                           <span className="text-sm-medium">{cmd.text}</span>
                           {cmd.description ? (
-                            <span className="ml-auto truncate text-muted-foreground text-xs">
+                            <span className="text-muted-foreground ml-auto truncate text-xs">
                               {cmd.description}
                             </span>
                           ) : null}
@@ -594,7 +611,7 @@ export function ContactTerminal() {
           ) : null}
 
           {/* Input Prompt */}
-          <div className="flex items-center gap-1 border-t border-border pt-4">
+          <div className="border-border flex items-center gap-1 border-t pt-4">
             <span className="text-primary text-sm font-semibold">$</span>
             <input
               ref={inputRef}

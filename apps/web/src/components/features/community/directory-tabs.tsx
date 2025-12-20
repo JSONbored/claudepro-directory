@@ -2,7 +2,7 @@
 
 /**
  * Community Directory Tabs Component
- * 
+ *
  * Client component for organizing community directory content with tabs
  */
 
@@ -29,11 +29,7 @@ export interface DirectoryTabsProps {
 /**
  * Tabbed community directory content organizer
  */
-export function DirectoryTabs({
-  allMembers,
-  contributors,
-  newMembers,
-}: DirectoryTabsProps) {
+export function DirectoryTabs({ allMembers, contributors, newMembers }: DirectoryTabsProps) {
   return (
     <LayoutGroup>
       <Tabs defaultValue="all" className="w-full">

@@ -19,25 +19,10 @@
       "types": "./dist/prisma/index.d.ts",
       "default": "./src/prisma/index.ts"
     },
-    "./prisma/client": {
-      "development": "./src/prisma/client.ts",
-      "types": "./dist/prisma/client.d.ts",
-      "default": "./src/prisma/client.ts"
-    },
     "./prisma/browser": {
       "development": "./src/prisma/browser.ts",
       "types": "./dist/prisma/browser.d.ts",
       "default": "./src/prisma/browser.ts"
-    },
-    "./prisma/enums": {
-      "development": "./src/prisma/enums.ts",
-      "types": "./dist/prisma/enums.d.ts",
-      "default": "./src/prisma/enums.ts"
-    },
-    "./prisma/models": {
-      "development": "./src/prisma/models.ts",
-      "types": "./dist/prisma/models.d.ts",
-      "default": "./src/prisma/models.ts"
     },
     "./prisma/zod": {
       "development": "./src/prisma/zod/index.ts",

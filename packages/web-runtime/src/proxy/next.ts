@@ -1,4 +1,3 @@
-
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 // Import directly from specific files to avoid pulling in pino via barrel exports
@@ -84,8 +83,7 @@ export function applyNextProxyGuards(
   const rateLimitOptions = options.rateLimit;
 
   if (rateLimitOptions) {
-    const shouldApply =
-      !rateLimitOptions.shouldApply || rateLimitOptions.shouldApply(pathname);
+    const shouldApply = !rateLimitOptions.shouldApply || rateLimitOptions.shouldApply(pathname);
 
     if (shouldApply) {
       rateLimitResult = checkRateLimit(request, rateLimitOptions.config);
@@ -102,8 +100,7 @@ export function applyNextProxyGuards(
         });
 
         const retryAfter =
-          rateLimitResult.retryAfter ??
-          Math.ceil(rateLimitOptions.config.windowMs / 1000);
+          rateLimitResult.retryAfter ?? Math.ceil(rateLimitOptions.config.windowMs / 1000);
 
         const response = new NextResponse('Too Many Requests', {
           status: 429,

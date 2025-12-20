@@ -1,21 +1,20 @@
 /**
  * Request-Scoped Cache Utility
- * 
+ *
  * Provides in-memory caching for RPC calls within a single request lifecycle.
  * This prevents duplicate RPC calls with the same arguments in the same request.
- * 
+ *
  * Cache is automatically cleared after request completes (no persistence).
- * 
+ *
  * **No TTL needed:** Since the cache is cleared after each request, TTL is unnecessary.
  * This eliminates all Date.now() calls and simplifies the implementation.
- * 
+ *
  * @module data-layer/utils/request-cache
  */
 
-
 /**
  * Cache entry (no TTL needed - cache is cleared after each request)
- * 
+ *
  * TTL is unnecessary because:
  * - Cache is request-scoped (cleared after request completes)
  * - Requests complete in milliseconds to seconds
@@ -27,13 +26,13 @@ interface CacheEntry<T> {
 
 /**
  * Request-scoped cache for RPC calls
- * 
+ *
  * Uses Map to store cache entries.
  * Cache key: `${rpcName}:${JSON.stringify(args)}`
- * 
+ *
  * **No TTL needed:** Cache is cleared after each request completes.
  * This eliminates all Date.now() calls and simplifies the implementation.
- * 
+ *
  * Why no TTL?
  * - Cache is request-scoped (cleared after request)
  * - Requests complete in milliseconds to seconds
@@ -53,7 +52,7 @@ class RequestCache {
 
   /**
    * Get cached value if available
-   * 
+   *
    * No TTL check needed - cache is cleared after each request.
    * This eliminates all Date.now() calls.
    */
@@ -71,7 +70,7 @@ class RequestCache {
 
   /**
    * Store value in cache
-   * 
+   *
    * No timestamp needed - cache is cleared after each request.
    * This eliminates all Date.now() calls.
    */
@@ -101,10 +100,10 @@ class RequestCache {
 
 /**
  * Global request cache instance
- * 
+ *
  * Note: In Next.js, each request gets a new execution context,
  * so this cache is effectively request-scoped.
- * 
+ *
  * For Edge Functions, each request also gets a new execution context.
  */
 const requestCache = new RequestCache();
@@ -125,15 +124,15 @@ export function clearRequestCache(): void {
 
 /**
  * Cache decorator for RPC calls
- * 
+ *
  * Wraps an RPC call with request-scoped caching.
  * Returns cached value if available, otherwise calls the RPC and caches the result.
- * 
+ *
  * @param rpcName - Name of the RPC function
  * @param rpcCall - The RPC call function
  * @param args - Arguments for the RPC call (used for cache key)
  * @returns Cached or fresh result
- * 
+ *
  * @example
  * ```typescript
  * const result = await withRequestCache(
@@ -149,7 +148,7 @@ export async function withRequestCache<T>(
   args?: Record<string, unknown> | undefined
 ): Promise<T> {
   const cache = getRequestCache();
-  
+
   // Check cache first
   const cached = cache.get<T>(rpcName, args);
   if (cached !== null) {
@@ -159,20 +158,19 @@ export async function withRequestCache<T>(
   // Call RPC and cache result
   const result = await rpcCall();
   cache.set(rpcName, args, result);
-  
+
   return result;
 }
 
 /**
  * Cache decorator for RPC calls with typed arguments
- * 
+ *
  * Same as withRequestCache but with better type safety for typed args
  */
-export async function withRequestCacheTyped<T, TArgs extends Record<string, unknown> | undefined = undefined>(
-  rpcName: string,
-  rpcCall: () => Promise<T>,
-  args?: TArgs
-): Promise<T> {
+export async function withRequestCacheTyped<
+  T,
+  TArgs extends Record<string, unknown> | undefined = undefined,
+>(rpcName: string, rpcCall: () => Promise<T>, args?: TArgs): Promise<T> {
   return withRequestCache(rpcName, rpcCall, args);
 }
 
@@ -183,7 +181,7 @@ export async function withRequestCacheTyped<T, TArgs extends Record<string, unkn
 function isMutation(rpcName: string, methodName?: string): boolean {
   const name = methodName || rpcName;
   const lowerName = name.toLowerCase();
-  
+
   // Check for mutation patterns
   return (
     lowerName.includes('insert') ||
@@ -206,16 +204,16 @@ function isMutation(rpcName: string, methodName?: string): boolean {
 
 /**
  * Smart cache wrapper that automatically excludes mutations
- * 
+ *
  * Use this for all service methods - it will cache read-only operations
  * and skip caching for mutations automatically.
- * 
+ *
  * @param rpcName - Name of the RPC function
  * @param methodName - Name of the service method (for mutation detection)
  * @param rpcCall - The RPC call function
  * @param args - Arguments for the RPC call (used for cache key)
  * @returns Cached or fresh result (mutations are never cached)
- * 
+ *
  * @example
  * ```typescript
  * // Read-only - will be cached
@@ -225,7 +223,7 @@ function isMutation(rpcName: string, methodName?: string): boolean {
  *   async () => await this.supabase.rpc('get_content_by_slug', args),
  *   args
  * );
- * 
+ *
  * // Mutation - will NOT be cached
  * return withSmartCache(
  *   'upsert_notification',
@@ -245,7 +243,7 @@ export async function withSmartCache<T>(
   if (isMutation(rpcName, methodName)) {
     return rpcCall();
   }
-  
+
   // Cache read-only operations
   return withRequestCache(rpcName, rpcCall, args);
 }

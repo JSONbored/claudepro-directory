@@ -2,7 +2,7 @@
 
 /**
  * Dashboard Tabs Component
- * 
+ *
  * Client component for organizing dashboard content with tabs
  */
 
@@ -29,11 +29,7 @@ export interface DashboardTabsProps {
 /**
  * Tabbed dashboard content organizer
  */
-export function DashboardTabs({
-  overview,
-  bookmarks,
-  recommendations,
-}: DashboardTabsProps) {
+export function DashboardTabs({ overview, bookmarks, recommendations }: DashboardTabsProps) {
   return (
     <LayoutGroup>
       <Tabs defaultValue="overview" className="w-full">

@@ -12,3 +12,7 @@ lifecycle-scripts-allow-list[]=lefthook
 public-hoist-pattern[]=next
 public-hoist-pattern[]=react
 public-hoist-pattern[]=react-dom
+# Hoist @prisma/client for Prismock compatibility
+# Prismock needs to resolve @prisma/client internally, and pnpm's virtual store
+# prevents this resolution. Hoisting ensures Prismock can find @prisma/client.
+public-hoist-pattern[]=@prisma/client

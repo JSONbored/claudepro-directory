@@ -2,7 +2,7 @@
 
 /**
  * Companies List Skeleton
- * 
+ *
  * Perfectly matches /account/companies structure:
  * - Header (title + count + "Add Company" button)
  * - List of company cards with logo, name, description, featured badge, stats, actions
@@ -63,7 +63,7 @@ export function CompaniesListSkeleton() {
                   <div className="flex flex-1 items-start gap-3">
                     {/* Logo */}
                     <Skeleton size="lg" width="lg" rounded="lg" className="h-12 w-12" />
-                    <div className="flex flex-col gap-2 flex-1">
+                    <div className="flex flex-1 flex-col gap-2">
                       <div className="flex items-center gap-1">
                         <Skeleton size="lg" width="md" className="h-7" />
                         <Skeleton size="sm" width="xs" rounded="full" className="h-6" />

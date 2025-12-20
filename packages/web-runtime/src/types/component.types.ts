@@ -2,9 +2,10 @@
  * Component Types - Consolidated Component Props and Types
  *
  * This file contains ALL component types, props, and related TypeScript definitions.
- * Prisma types are in @heyclaude/database-types/prisma (generated).
+ * Prisma types are in @prisma/client (generated).
  */
 
+import { Prisma } from '@prisma/client';
 import type {
   content_category,
   copy_type,
@@ -20,20 +21,19 @@ import type {
   submission_type,
   trending_period,
   workplace_type,
-  contentModel,
-} from '@heyclaude/data-layer/prisma';
+} from '@prisma/client';
 import type {
   RelatedContentItem,
   SearchContentOptimizedRow,
   SearchUnifiedRow,
 } from '@heyclaude/database-types/postgres-types';
+import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
+
+type contentModel = Prisma.contentGetPayload<{}>;
+type jobsModel = Prisma.jobsGetPayload<{}>;
 
 // EnrichedContentItem was removed - use contentModel instead
 type EnrichedContentItem = contentModel;
-import type {
-  GetContentDetailCompleteReturns,
-} from '@heyclaude/database-types/postgres-types';
-import type { jobsModel } from '@heyclaude/database-types/prisma/models';
 
 // Use Prisma model type instead of excluded composite type
 type Jobs = jobsModel;
@@ -43,16 +43,14 @@ type SearchResult = SearchContentOptimizedRow;
 type UnifiedSearchResult = SearchUnifiedRow;
 import type { LucideIcon } from '../icons.tsx';
 import type { ReactNode } from 'react';
-import type {
-  TabConfig,
-} from '../types/category.ts';
+import type { TabConfig } from '../types/category.ts';
 
 // Re-export category types
 export type {
   TabConfig,
   UnifiedCategoryConfig,
   SectionId,
-  CategoryStatsConfig
+  CategoryStatsConfig,
 } from '../types/category.ts';
 
 /**
@@ -274,9 +272,7 @@ export interface TrendingContentProps {
   period?: trending_period;
 }
 
-export type ContentListServerProps<
-  T extends DisplayableContent = EnrichedContentItem,
-> = {
+export type ContentListServerProps<T extends DisplayableContent = EnrichedContentItem> = {
   title: string;
   description: string;
   icon: string;
@@ -549,8 +545,10 @@ export type SubmissionContentType = submission_type;
  * Submission content types array (for runtime use, e.g., form dropdowns)
  * Uses Prisma enum object to ensure sync with database
  */
-import { SubmissionType as SubmissionTypeEnum } from '@heyclaude/data-layer/prisma';
-export const SUBMISSION_CONTENT_TYPES = Object.values(SubmissionTypeEnum) as readonly submission_type[];
+import { submission_type as SubmissionTypeEnum } from '@prisma/client';
+export const SUBMISSION_CONTENT_TYPES = Object.values(
+  SubmissionTypeEnum
+) as readonly submission_type[];
 
 export interface SubmissionFormSection {
   nameField: TextFieldDefinition | null;
@@ -811,9 +809,7 @@ export interface ProcessedSectionData {
   requirements?: string[];
   securityItems?: string[];
   troubleshooting?: Array<
-    | string
-    | { issue: string; solution: string }
-    | { question: string; answer: string }
+    string | { issue: string; solution: string } | { question: string; answer: string }
   >;
 
   // Special content types
@@ -828,9 +824,7 @@ export interface ProcessedSectionData {
  * So we narrow the type to exclude jobs to ensure proper type safety.
  */
 export interface TabbedDetailLayoutProps {
-  item:
-    | contentModel
-    | (GetContentDetailCompleteReturns['content'] & contentModel);
+  item: contentModel | (GetContentDetailCompleteReturns['content'] & contentModel);
   // ARCHITECTURAL FIX: Only pass serializable data, not entire config
   // TabbedDetailLayout only needs typeName and sections (no React components, no functions)
   config: {
@@ -849,9 +843,7 @@ export interface TabbedDetailLayoutProps {
   };
   tabs: ReadonlyArray<TabConfig>;
   sectionData: ProcessedSectionData;
-  relatedItems?:
-    | ContentItem[]
-    | GetContentDetailCompleteReturns['related'];
+  relatedItems?: ContentItem[] | GetContentDetailCompleteReturns['related'];
 }
 
 // ============================================================================
@@ -874,11 +866,7 @@ export type EnhancedListProps = BaseProps & {
   variant: 'enhanced-list';
   title: string;
   description?: string;
-  items: Array<
-    | string
-    | { issue: string; solution: string }
-    | { question: string; answer: string }
-  >;
+  items: Array<string | { issue: string; solution: string } | { question: string; answer: string }>;
   icon?: LucideIcon;
   dotColor?: string;
 };
@@ -974,9 +962,7 @@ export type InstallProps = BaseProps & {
     } | null;
     requirements?: string[];
   };
-  item:
-    | ContentItem
-    | (GetContentDetailCompleteReturns['content'] & ContentItem);
+  item: ContentItem | (GetContentDetailCompleteReturns['content'] & ContentItem);
 };
 
 export type TextProps = BaseProps & {

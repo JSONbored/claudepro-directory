@@ -86,22 +86,19 @@ export function useEventCallback<Args extends unknown[], R>(
   }, [fn]);
 
   // Return stable callback that always calls latest function
-  return useCallback(
-    (...args: Args) => {
-      // Safety check: prevent calling during render phase
-      if (typeof window === 'undefined' || typeof document === 'undefined') {
-        // Server-side or during SSR - safe to call
-        return fnRef.current(...args);
-      }
-
-      // Check if we're in render phase (development only)
-      if (isDevelopment) {
-        // This is a best-effort check - React doesn't expose render phase detection
-        // In practice, event callbacks should only be called from event handlers
-      }
-
+  return useCallback((...args: Args) => {
+    // Safety check: prevent calling during render phase
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      // Server-side or during SSR - safe to call
       return fnRef.current(...args);
-    },
-    []
-  );
+    }
+
+    // Check if we're in render phase (development only)
+    if (isDevelopment) {
+      // This is a best-effort check - React doesn't expose render phase detection
+      // In practice, event callbacks should only be called from event handlers
+    }
+
+    return fnRef.current(...args);
+  }, []);
 }

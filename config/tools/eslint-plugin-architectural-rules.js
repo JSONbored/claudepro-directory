@@ -10,7 +10,7 @@
  * - No console.* calls
  *
  * Located in config/tools/ to match codebase organization pattern
- * 
+ *
  * ALL RULES USE 100% AST TRAVERSAL - NO STRING MATCHING OR REGEX FOR CODE ANALYSIS
  */
 
@@ -26,13 +26,19 @@ function hasUseClientDirective(ast) {
       const value = comment.value || '';
       const trimmed = value.trim();
       // Check for exact patterns using AST properties only (no string includes)
-      if (value === "'use client'" || value === '"use client"' || value === 'use client' ||
-          trimmed === "'use client'" || trimmed === '"use client"' || trimmed === 'use client') {
+      if (
+        value === "'use client'" ||
+        value === '"use client"' ||
+        value === 'use client' ||
+        trimmed === "'use client'" ||
+        trimmed === '"use client"' ||
+        trimmed === 'use client'
+      ) {
         return true;
       }
     }
   }
-  
+
   // Check first statement for 'use client' directive (pure AST)
   if (ast.body && ast.body.length > 0) {
     const firstStatement = ast.body[0];
@@ -48,7 +54,7 @@ function hasUseClientDirective(ast) {
       }
     }
   }
-  
+
   return false;
 }
 
@@ -64,13 +70,19 @@ function hasUseServerDirective(ast) {
       const value = comment.value || '';
       const trimmed = value.trim();
       // Check for exact patterns using AST properties only (no string includes)
-      if (value === "'use server'" || value === '"use server"' || value === 'use server' ||
-          trimmed === "'use server'" || trimmed === '"use server"' || trimmed === 'use server') {
+      if (
+        value === "'use server'" ||
+        value === '"use server"' ||
+        value === 'use server' ||
+        trimmed === "'use server'" ||
+        trimmed === '"use server"' ||
+        trimmed === 'use server'
+      ) {
         return true;
       }
     }
   }
-  
+
   // Check first statement for 'use server' directive (pure AST)
   if (ast.body && ast.body.length > 0) {
     const firstStatement = ast.body[0];
@@ -86,7 +98,7 @@ function hasUseServerDirective(ast) {
       }
     }
   }
-  
+
   return false;
 }
 
@@ -102,10 +114,20 @@ function hasUseCacheDirective(comments) {
       const value = comment.value || '';
       const trimmed = value.trim();
       // Check for exact patterns using AST properties only (no string includes)
-      if (value === "'use cache'" || value === '"use cache"' || value === 'use cache' ||
-          value === "'use cache: private'" || value === '"use cache: private"' || value === 'use cache: private' ||
-          trimmed === "'use cache'" || trimmed === '"use cache"' || trimmed === 'use cache' ||
-          trimmed === "'use cache: private'" || trimmed === '"use cache: private"' || trimmed === 'use cache: private') {
+      if (
+        value === "'use cache'" ||
+        value === '"use cache"' ||
+        value === 'use cache' ||
+        value === "'use cache: private'" ||
+        value === '"use cache: private"' ||
+        value === 'use cache: private' ||
+        trimmed === "'use cache'" ||
+        trimmed === '"use cache"' ||
+        trimmed === 'use cache' ||
+        trimmed === "'use cache: private'" ||
+        trimmed === '"use cache: private"' ||
+        trimmed === 'use cache: private'
+      ) {
         return true;
       }
     }
@@ -140,8 +162,27 @@ export default {
         // Check for 'use client' directive using pure AST (no getText())
         const isClientComponent = hasUseClientDirective(ast);
 
-        const serverOnlyImports = ['next/server', 'next/headers', '@heyclaude/web-runtime/server', 'createSupabaseServerClient', 'getAuthenticatedUser', 'cookies', 'headers'];
-        const clientOnlyHooks = ['useState', 'useEffect', 'useCallback', 'useMemo', 'useRef', 'useContext', 'useReducer', 'useLayoutEffect', 'useTransition', 'useDeferredValue'];
+        const serverOnlyImports = [
+          'next/server',
+          'next/headers',
+          '@heyclaude/web-runtime/server',
+          'createSupabaseServerClient',
+          'getAuthenticatedUser',
+          'cookies',
+          'headers',
+        ];
+        const clientOnlyHooks = [
+          'useState',
+          'useEffect',
+          'useCallback',
+          'useMemo',
+          'useRef',
+          'useContext',
+          'useReducer',
+          'useLayoutEffect',
+          'useTransition',
+          'useDeferredValue',
+        ];
         let usesClientHooks = false;
 
         // Server-only import patterns (for path-based checking)
@@ -191,15 +232,17 @@ export default {
                   return;
                 }
               }
-              
+
               // Check for server-only patterns by path
               for (const pattern of serverOnlyPatterns) {
                 if (importPath.includes(pattern)) {
                   // Additional check: allow specific client-safe data imports
-                  if (pattern === 'packages/web-runtime/src/data/' && 
-                      (importPath.includes('config/category') || 
-                       importPath.includes('changelog.shared') || 
-                       importPath.includes('forms/submission-form-fields'))) {
+                  if (
+                    pattern === 'packages/web-runtime/src/data/' &&
+                    (importPath.includes('config/category') ||
+                      importPath.includes('changelog.shared') ||
+                      importPath.includes('forms/submission-form-fields'))
+                  ) {
                     continue;
                   }
                   context.report({
@@ -217,9 +260,13 @@ export default {
               // Dynamic import() detected - check the import path
               if (node.arguments && node.arguments.length > 0) {
                 const importArg = node.arguments[0];
-                if (importArg && importArg.type === 'Literal' && typeof importArg.value === 'string') {
+                if (
+                  importArg &&
+                  importArg.type === 'Literal' &&
+                  typeof importArg.value === 'string'
+                ) {
                   const importPath = importArg.value;
-                  
+
                   // Skip client-safe imports
                   if (
                     importPath === '@heyclaude/web-runtime/data' ||
@@ -231,7 +278,7 @@ export default {
                   ) {
                     return;
                   }
-                  
+
                   // Check for server-only imports by name
                   for (const serverImport of serverOnlyImports) {
                     if (importPath.indexOf(serverImport) !== -1) {
@@ -242,15 +289,17 @@ export default {
                       return;
                     }
                   }
-                  
+
                   // Check for server-only patterns by path
                   for (const pattern of serverOnlyPatterns) {
                     if (importPath.indexOf(pattern) !== -1) {
                       // Additional check: allow specific client-safe data imports
-                      if (pattern === 'packages/web-runtime/src/data/' && 
-                          (importPath.indexOf('config/category') !== -1 || 
-                           importPath.indexOf('changelog.shared') !== -1 || 
-                           importPath.indexOf('forms/submission-form-fields') !== -1)) {
+                      if (
+                        pattern === 'packages/web-runtime/src/data/' &&
+                        (importPath.indexOf('config/category') !== -1 ||
+                          importPath.indexOf('changelog.shared') !== -1 ||
+                          importPath.indexOf('forms/submission-form-fields') !== -1)
+                      ) {
                         continue;
                       }
                       context.report({
@@ -263,7 +312,7 @@ export default {
                 }
               }
             }
-            
+
             // Check for client hooks usage
             if (!isClientComponent && node.callee && node.callee.type === 'Identifier') {
               if (clientOnlyHooks.includes(node.callee.name)) {
@@ -295,8 +344,10 @@ export default {
         messages: {
           useErrorHandler:
             'API route error handling should use createErrorResponse() or handleApiError() from @heyclaude/web-runtime/utils/error-handler',
-          missingErrorHandler: 'API route catch block must use createErrorResponse or handleApiError for error handling',
-          missingNormalizeError: 'Catch block should use normalizeError() before createErrorResponse',
+          missingErrorHandler:
+            'API route catch block must use createErrorResponse or handleApiError for error handling',
+          missingNormalizeError:
+            'Catch block should use normalizeError() before createErrorResponse',
         },
       },
       create(context) {
@@ -304,7 +355,9 @@ export default {
         const sourceCode = context.getSourceCode();
 
         // Only apply to API route files
-        const isApiRoute = filename.includes('/api/') && (filename.endsWith('/route.ts') || filename.endsWith('/route.tsx'));
+        const isApiRoute =
+          filename.includes('/api/') &&
+          (filename.endsWith('/route.ts') || filename.endsWith('/route.tsx'));
         if (!isApiRoute) {
           return {};
         }
@@ -317,7 +370,13 @@ export default {
           ImportDeclaration(node) {
             if (node.source && node.source.type === 'Literal') {
               const sourceValue = node.source.value;
-              if (typeof sourceValue === 'string' && (sourceValue === '@heyclaude/web-runtime/utils/error-handler' || sourceValue.includes('error-handler') || sourceValue.includes('createErrorResponse') || sourceValue.includes('handleApiError'))) {
+              if (
+                typeof sourceValue === 'string' &&
+                (sourceValue === '@heyclaude/web-runtime/utils/error-handler' ||
+                  sourceValue.includes('error-handler') ||
+                  sourceValue.includes('createErrorResponse') ||
+                  sourceValue.includes('handleApiError'))
+              ) {
                 hasErrorHandlerImport = true;
               }
             }
@@ -377,13 +436,10 @@ export default {
         const sourceCode = context.getSourceCode();
         const ast = sourceCode.ast;
 
-        // Skip edge functions - they use different logging (logError, logInfo, logWarn)
-        const isEdgeFunction = filename.includes('apps/edge/functions');
-
         // Skip test files
         const isTestFile = filename.includes('.test.') || filename.includes('.spec.');
 
-        if (isEdgeFunction || isTestFile) {
+        if (isTestFile) {
           return {};
         }
 
@@ -402,7 +458,8 @@ export default {
         const isClientComponent = hasUseClientDirective(ast);
 
         // Skip client components - they may use different error handling patterns
-        const skipClientFiles = filename.includes('error.tsx') ||
+        const skipClientFiles =
+          filename.includes('error.tsx') ||
           filename.includes('wizard') ||
           filename.includes('draft-manager') ||
           filename.includes('marketing/contact');
@@ -427,7 +484,7 @@ export default {
             let isInUtilityFunction = false;
             let functionName = '';
             let isSimpleReturn = false;
-            
+
             while (parent) {
               if (parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression') {
                 functionName = parent.id?.name || 'anonymous';
@@ -456,20 +513,40 @@ export default {
             // Check if catch body has simple return statements (utility pattern)
             for (const stmt of node.body.body || []) {
               if (stmt.type === 'ReturnStatement' && stmt.argument) {
-                if (stmt.argument.type === 'Literal' && 
-                    (stmt.argument.value === false || stmt.argument.value === null || 
-                     stmt.argument.value === '' || stmt.argument.value === '#')) {
+                if (
+                  stmt.argument.type === 'Literal' &&
+                  (stmt.argument.value === false ||
+                    stmt.argument.value === null ||
+                    stmt.argument.value === '' ||
+                    stmt.argument.value === '#')
+                ) {
                   isSimpleReturn = true;
                 }
-                if (stmt.argument.type === 'ArrayExpression' && stmt.argument.elements.length === 0) {
+                if (
+                  stmt.argument.type === 'ArrayExpression' &&
+                  stmt.argument.elements.length === 0
+                ) {
                   isSimpleReturn = true;
                 }
               }
             }
 
             // Check if function name suggests it's a utility (is*, parse*, build*, get*, normalize*, etc.)
-            const utilityPrefixes = ['is', 'parse', 'build', 'get', 'normalize', 'validate', 'sanitize', 'extract', 'format', 'canonicalize'];
-            const isUtilityPattern = utilityPrefixes.some(prefix => functionName.toLowerCase().startsWith(prefix));
+            const utilityPrefixes = [
+              'is',
+              'parse',
+              'build',
+              'get',
+              'normalize',
+              'validate',
+              'sanitize',
+              'extract',
+              'format',
+              'canonicalize',
+            ];
+            const isUtilityPattern = utilityPrefixes.some((prefix) =>
+              functionName.toLowerCase().startsWith(prefix)
+            );
 
             if ((isSimpleReturn && isInUtilityFunction) || (isSimpleReturn && isUtilityPattern)) {
               return; // Skip - utility function with simple fallback
@@ -485,15 +562,21 @@ export default {
             // Check if catch is in JSX context
             let checkParent = node.parent;
             while (checkParent) {
-              if (checkParent.type === 'JSXExpressionContainer' || 
-                  checkParent.type === 'JSXElement' || 
-                  checkParent.type === 'JSXFragment') {
+              if (
+                checkParent.type === 'JSXExpressionContainer' ||
+                checkParent.type === 'JSXElement' ||
+                checkParent.type === 'JSXFragment'
+              ) {
                 isInJSX = true;
                 break;
               }
               if (checkParent.type === 'ReturnStatement') {
                 // Check if return contains JSX
-                if (checkParent.argument && (checkParent.argument.type === 'JSXElement' || checkParent.argument.type === 'JSXFragment')) {
+                if (
+                  checkParent.argument &&
+                  (checkParent.argument.type === 'JSXElement' ||
+                    checkParent.argument.type === 'JSXFragment')
+                ) {
                   isInJSX = true;
                   break;
                 }
@@ -504,14 +587,29 @@ export default {
             // Traverse catch body to find error handling patterns
             function traverseCatchBody(n) {
               if (!n) return;
-              
+
               // Check for logger.error/warn calls
               if (n.type === 'CallExpression' && n.callee && n.callee.type === 'MemberExpression') {
                 const obj = n.callee.object;
                 const prop = n.callee.property;
                 if (obj && obj.type === 'Identifier' && prop && prop.type === 'Identifier') {
-                  const loggerNames = ['logger', 'reqLogger', 'userLogger', 'actionLogger', 'metadataLogger', 'viewerLogger', 'processLogger', 'callbackLogger', 'requestLogger', 'utilityLogger', 'sectionLogger'];
-                  if (loggerNames.includes(obj.name) && (prop.name === 'error' || prop.name === 'warn')) {
+                  const loggerNames = [
+                    'logger',
+                    'reqLogger',
+                    'userLogger',
+                    'actionLogger',
+                    'metadataLogger',
+                    'viewerLogger',
+                    'processLogger',
+                    'callbackLogger',
+                    'requestLogger',
+                    'utilityLogger',
+                    'sectionLogger',
+                  ];
+                  if (
+                    loggerNames.includes(obj.name) &&
+                    (prop.name === 'error' || prop.name === 'warn')
+                  ) {
                     hasLoggerError = true;
                   }
                 }
@@ -523,17 +621,20 @@ export default {
                   if (n.callee.name === 'normalizeError') {
                     hasNormalizeError = true;
                   }
-                  if (n.callee.name === 'createErrorResponse' || n.callee.name === 'handleApiError') {
+                  if (
+                    n.callee.name === 'createErrorResponse' ||
+                    n.callee.name === 'handleApiError'
+                  ) {
                     usesErrorHandler = true;
                   }
                 }
               }
-              
+
               // Check for throw statements
               if (n.type === 'ThrowStatement') {
                 isRethrow = true;
               }
-              
+
               // Recursively traverse
               for (const key in n) {
                 if (key !== 'parent' && typeof n[key] === 'object' && n[key] !== null) {
@@ -547,75 +648,116 @@ export default {
                 }
               }
             }
-            
+
             traverseCatchBody(node.body);
 
             const shouldSkip = hasLoggerError || usesErrorHandler || isRethrow || isInJSX;
             if (!shouldSkip) {
-            const catchParam = node.param;
-            const errorVarName = catchParam && catchParam.type === 'Identifier' ? catchParam.name : 'error';
-            
-            // Find logger name from context - check full scope chain
-            let loggerName = 'logger';
-            let hasLoggerImport = false;
-            let loggerImportPath = null;
-            let hasReqLoggerInScope = false;
-            let operationName = '';
-            let routeName = '';
-            
-            // Check for logger imports
-            for (const stmt of ast.body || []) {
-              if (stmt.type === 'ImportDeclaration' && stmt.source && stmt.source.type === 'Literal') {
-                const sourceValue = stmt.source.value;
-                if (typeof sourceValue === 'string' && (sourceValue.includes('logging/server') || sourceValue.includes('logging/client'))) {
-                  for (const spec of stmt.specifiers || []) {
-                    if (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.name === 'logger') {
-                      hasLoggerImport = true;
-                      loggerImportPath = sourceValue;
-                      if (spec.local && spec.local.name) {
-                        loggerName = spec.local.name;
+              const catchParam = node.param;
+              const errorVarName =
+                catchParam && catchParam.type === 'Identifier' ? catchParam.name : 'error';
+
+              // Find logger name from context - check full scope chain
+              let loggerName = 'logger';
+              let hasLoggerImport = false;
+              let loggerImportPath = null;
+              let hasReqLoggerInScope = false;
+              let operationName = '';
+              let routeName = '';
+
+              // Check for logger imports
+              for (const stmt of ast.body || []) {
+                if (
+                  stmt.type === 'ImportDeclaration' &&
+                  stmt.source &&
+                  stmt.source.type === 'Literal'
+                ) {
+                  const sourceValue = stmt.source.value;
+                  if (
+                    typeof sourceValue === 'string' &&
+                    (sourceValue.includes('logging/server') ||
+                      sourceValue.includes('logging/client'))
+                  ) {
+                    for (const spec of stmt.specifiers || []) {
+                      if (
+                        spec.type === 'ImportSpecifier' &&
+                        spec.imported &&
+                        spec.imported.name === 'logger'
+                      ) {
+                        hasLoggerImport = true;
+                        loggerImportPath = sourceValue;
+                        if (spec.local && spec.local.name) {
+                          loggerName = spec.local.name;
+                        }
                       }
                     }
                   }
                 }
               }
-            }
-            
-            // Check for reqLogger/sectionLogger/routeLogger usage in full scope chain
-            // Traverse up the AST to find the containing function and check its scope
-            let current = node.parent;
-            while (current) {
-              if (current.type === 'FunctionDeclaration' || current.type === 'FunctionExpression' || current.type === 'ArrowFunctionExpression') {
-                // Extract function name for operation context
-                if (current.type === 'FunctionDeclaration' && current.id) {
-                  operationName = current.id.name || '';
-                }
-                
-                // Check function body for reqLogger/sectionLogger/routeLogger
-                if (current.body && current.body.type === 'BlockStatement') {
-                  // Check all statements in function body (not just before catch)
-                  for (const stmt of current.body.body || []) {
-                    if (stmt.type === 'VariableDeclaration') {
-                      for (const decl of stmt.declarations || []) {
-                        if (decl.id && decl.id.type === 'Identifier') {
-                          const varName = decl.id.name;
-                          if (varName === 'reqLogger' || varName === 'sectionLogger' || varName === 'routeLogger') {
-                            loggerName = varName;
-                            hasReqLoggerInScope = true;
-                            // Try to extract operation and route from logger.child() call
-                            if (decl.init && decl.init.type === 'CallExpression') {
-                              if (decl.init.callee && decl.init.callee.type === 'MemberExpression') {
-                                if (decl.init.callee.property && decl.init.callee.property.type === 'Identifier' && decl.init.callee.property.name === 'child') {
-                                  if (decl.init.arguments && decl.init.arguments.length > 0) {
-                                    const childArg = decl.init.arguments[0];
-                                    if (childArg && childArg.type === 'ObjectExpression') {
-                                      for (const prop of childArg.properties || []) {
-                                        if (prop.type === 'Property' && prop.key && prop.key.type === 'Identifier') {
-                                          if (prop.key.name === 'operation' && prop.value && prop.value.type === 'Literal') {
-                                            operationName = prop.value.value || '';
-                                          }
-                                          if (prop.key.name === 'route' && prop.value && prop.value.type === 'Literal') {
-                                            routeName = prop.value.value || '';
+
+              // Check for reqLogger/sectionLogger/routeLogger usage in full scope chain
+              // Traverse up the AST to find the containing function and check its scope
+              let current = node.parent;
+              while (current) {
+                if (
+                  current.type === 'FunctionDeclaration' ||
+                  current.type === 'FunctionExpression' ||
+                  current.type === 'ArrowFunctionExpression'
+                ) {
+                  // Extract function name for operation context
+                  if (current.type === 'FunctionDeclaration' && current.id) {
+                    operationName = current.id.name || '';
+                  }
+
+                  // Check function body for reqLogger/sectionLogger/routeLogger
+                  if (current.body && current.body.type === 'BlockStatement') {
+                    // Check all statements in function body (not just before catch)
+                    for (const stmt of current.body.body || []) {
+                      if (stmt.type === 'VariableDeclaration') {
+                        for (const decl of stmt.declarations || []) {
+                          if (decl.id && decl.id.type === 'Identifier') {
+                            const varName = decl.id.name;
+                            if (
+                              varName === 'reqLogger' ||
+                              varName === 'sectionLogger' ||
+                              varName === 'routeLogger'
+                            ) {
+                              loggerName = varName;
+                              hasReqLoggerInScope = true;
+                              // Try to extract operation and route from logger.child() call
+                              if (decl.init && decl.init.type === 'CallExpression') {
+                                if (
+                                  decl.init.callee &&
+                                  decl.init.callee.type === 'MemberExpression'
+                                ) {
+                                  if (
+                                    decl.init.callee.property &&
+                                    decl.init.callee.property.type === 'Identifier' &&
+                                    decl.init.callee.property.name === 'child'
+                                  ) {
+                                    if (decl.init.arguments && decl.init.arguments.length > 0) {
+                                      const childArg = decl.init.arguments[0];
+                                      if (childArg && childArg.type === 'ObjectExpression') {
+                                        for (const prop of childArg.properties || []) {
+                                          if (
+                                            prop.type === 'Property' &&
+                                            prop.key &&
+                                            prop.key.type === 'Identifier'
+                                          ) {
+                                            if (
+                                              prop.key.name === 'operation' &&
+                                              prop.value &&
+                                              prop.value.type === 'Literal'
+                                            ) {
+                                              operationName = prop.value.value || '';
+                                            }
+                                            if (
+                                              prop.key.name === 'route' &&
+                                              prop.value &&
+                                              prop.value.type === 'Literal'
+                                            ) {
+                                              routeName = prop.value.value || '';
+                                            }
                                           }
                                         }
                                       }
@@ -623,34 +765,33 @@ export default {
                                   }
                                 }
                               }
+                              break;
                             }
-                            break;
                           }
                         }
                       }
                     }
                   }
                 }
-              }
-              
-              // Also check if we're in an API route handler (GET, POST, etc.)
-              if (current.type === 'FunctionDeclaration' && current.id) {
-                const funcName = current.id.name || '';
-                if (['GET', 'POST', 'PUT', 'DELETE', 'PATCH'].includes(funcName)) {
-                  operationName = funcName;
-                  // Try to infer route from filename
-                  if (filename.includes('/api/')) {
-                    const apiMatch = filename.match(/\/api\/([^/]+)/);
-                    if (apiMatch) {
-                      routeName = `/api/${apiMatch[1]}`;
+
+                // Also check if we're in an API route handler (GET, POST, etc.)
+                if (current.type === 'FunctionDeclaration' && current.id) {
+                  const funcName = current.id.name || '';
+                  if (['GET', 'POST', 'PUT', 'DELETE', 'PATCH'].includes(funcName)) {
+                    operationName = funcName;
+                    // Try to infer route from filename
+                    if (filename.includes('/api/')) {
+                      const apiMatch = filename.match(/\/api\/([^/]+)/);
+                      if (apiMatch) {
+                        routeName = `/api/${apiMatch[1]}`;
+                      }
                     }
                   }
                 }
+
+                current = current.parent;
               }
-              
-              current = current.parent;
-            }
-              
+
               context.report({
                 node: node.body,
                 messageId: 'missingErrorLogging',
@@ -693,7 +834,6 @@ export default {
           'apps/web/src/lib/auth/use-authenticated-user.ts',
           'packages/web-runtime/src/auth/get-authenticated-user.ts',
           'packages/web-runtime/src/hooks/use-authenticated-user.ts',
-          'packages/edge-runtime/src/utils/auth.ts', // Edge functions can use it
         ]);
 
         // Normalize filename to match allowlist format
@@ -704,9 +844,6 @@ export default {
           }
           if (path.includes('packages/web-runtime/src')) {
             return path.split('packages/web-runtime/src/')[1] || path;
-          }
-          if (path.includes('packages/edge-runtime/src')) {
-            return path.split('packages/edge-runtime/src/')[1] || path;
           }
           return path;
         };
@@ -968,17 +1105,25 @@ export default {
                 }
               }
             }
-            
+
             // Check for logClientErrorBoundary calls
-            if (node.callee && node.callee.type === 'Identifier' && node.callee.name === 'logClientErrorBoundary') {
+            if (
+              node.callee &&
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'logClientErrorBoundary'
+            ) {
               hasLogClientErrorBoundary = true;
             }
-            
+
             // Check for normalizeError calls
-            if (node.callee && node.callee.type === 'Identifier' && node.callee.name === 'normalizeError') {
+            if (
+              node.callee &&
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'normalizeError'
+            ) {
               hasNormalizeError = true;
             }
-            
+
             // Check for console.error calls
             if (node.callee && node.callee.type === 'MemberExpression') {
               const obj = node.callee.object;
@@ -989,15 +1134,23 @@ export default {
                 }
               }
             }
-            
+
             // Check for useEffect calls
-            if (node.callee && node.callee.type === 'Identifier' && node.callee.name === 'useEffect') {
+            if (
+              node.callee &&
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'useEffect'
+            ) {
               hasUseEffect = true;
             }
           },
           MethodDefinition(node) {
             // Check for componentDidCatch method
-            if (node.key && node.key.type === 'Identifier' && node.key.name === 'componentDidCatch') {
+            if (
+              node.key &&
+              node.key.type === 'Identifier' &&
+              node.key.name === 'componentDidCatch'
+            ) {
               hasComponentDidCatch = true;
             }
           },
@@ -1011,10 +1164,14 @@ export default {
             // Check if this useEffect contains error parameter or error logging
             let hasErrorParam = false;
             let hasErrorLogging = false;
-            
+
             if (node.arguments && node.arguments.length > 0) {
               const callback = node.arguments[0];
-              if (callback && (callback.type === 'ArrowFunctionExpression' || callback.type === 'FunctionExpression')) {
+              if (
+                callback &&
+                (callback.type === 'ArrowFunctionExpression' ||
+                  callback.type === 'FunctionExpression')
+              ) {
                 // Check for error parameter
                 for (const param of callback.params || []) {
                   if (param.type === 'Identifier' && param.name === 'error') {
@@ -1022,13 +1179,17 @@ export default {
                     break;
                   }
                 }
-                
+
                 // Traverse callback body to find error logging
                 function traverseForErrorLogging(n) {
                   if (!n) return;
-                  
+
                   if (n.type === 'CallExpression') {
-                    if (n.callee && n.callee.type === 'Identifier' && n.callee.name === 'logClientErrorBoundary') {
+                    if (
+                      n.callee &&
+                      n.callee.type === 'Identifier' &&
+                      n.callee.name === 'logClientErrorBoundary'
+                    ) {
                       hasErrorLogging = true;
                       return;
                     }
@@ -1036,14 +1197,17 @@ export default {
                       const obj = n.callee.object;
                       const prop = n.callee.property;
                       if (obj && obj.type === 'Identifier' && prop && prop.type === 'Identifier') {
-                        if (obj.name === 'logger' && (prop.name === 'error' || prop.name === 'warn')) {
+                        if (
+                          obj.name === 'logger' &&
+                          (prop.name === 'error' || prop.name === 'warn')
+                        ) {
                           hasErrorLogging = true;
                           return;
                         }
                       }
                     }
                   }
-                  
+
                   for (const key in n) {
                     if (key !== 'parent' && typeof n[key] === 'object' && n[key] !== null) {
                       if (Array.isArray(n[key])) {
@@ -1058,7 +1222,7 @@ export default {
                     }
                   }
                 }
-                
+
                 traverseForErrorLogging(callback.body);
               }
             }
@@ -1088,13 +1252,17 @@ export default {
           'MethodDefinition[key.name="componentDidCatch"]'(node) {
             // Traverse method body to find error logging
             let hasErrorLogging = false;
-            
+
             if (node.value && node.value.body) {
               function traverseMethodBody(n) {
                 if (!n) return;
-                
+
                 if (n.type === 'CallExpression') {
-                  if (n.callee && n.callee.type === 'Identifier' && n.callee.name === 'logClientErrorBoundary') {
+                  if (
+                    n.callee &&
+                    n.callee.type === 'Identifier' &&
+                    n.callee.name === 'logClientErrorBoundary'
+                  ) {
                     hasErrorLogging = true;
                     return;
                   }
@@ -1102,14 +1270,17 @@ export default {
                     const obj = n.callee.object;
                     const prop = n.callee.property;
                     if (obj && obj.type === 'Identifier' && prop && prop.type === 'Identifier') {
-                      if (obj.name === 'logger' && (prop.name === 'error' || prop.name === 'warn')) {
+                      if (
+                        obj.name === 'logger' &&
+                        (prop.name === 'error' || prop.name === 'warn')
+                      ) {
                         hasErrorLogging = true;
                         return;
                       }
                     }
                   }
                 }
-                
+
                 for (const key in n) {
                   if (key !== 'parent' && typeof n[key] === 'object' && n[key] !== null) {
                     if (Array.isArray(n[key])) {
@@ -1124,7 +1295,7 @@ export default {
                   }
                 }
               }
-              
+
               traverseMethodBody(node.value.body);
             }
 
@@ -1210,23 +1381,32 @@ export default {
 
         // Check if file contains createErrorBoundaryFallback using AST
         let hasCreateErrorBoundaryFallback = false;
-        
+
         function checkForCreateErrorBoundaryFallback(node) {
           if (!node) return;
-          
-          if (node.type === 'CallExpression' && node.callee && node.callee.type === 'Identifier' && 
-              node.callee.name === 'createErrorBoundaryFallback') {
+
+          if (
+            node.type === 'CallExpression' &&
+            node.callee &&
+            node.callee.type === 'Identifier' &&
+            node.callee.name === 'createErrorBoundaryFallback'
+          ) {
             hasCreateErrorBoundaryFallback = true;
             return;
           }
-          
-          if (node.type === 'VariableDeclarator' && node.init && node.init.type === 'CallExpression' &&
-              node.init.callee && node.init.callee.type === 'Identifier' && 
-              node.init.callee.name === 'createErrorBoundaryFallback') {
+
+          if (
+            node.type === 'VariableDeclarator' &&
+            node.init &&
+            node.init.type === 'CallExpression' &&
+            node.init.callee &&
+            node.init.callee.type === 'Identifier' &&
+            node.init.callee.name === 'createErrorBoundaryFallback'
+          ) {
             hasCreateErrorBoundaryFallback = true;
             return;
           }
-          
+
           for (const key in node) {
             if (key !== 'parent' && typeof node[key] === 'object' && node[key] !== null) {
               if (Array.isArray(node[key])) {
@@ -1241,9 +1421,9 @@ export default {
             }
           }
         }
-        
+
         checkForCreateErrorBoundaryFallback(ast);
-        
+
         if (!hasCreateErrorBoundaryFallback) {
           return {};
         }
@@ -1296,7 +1476,7 @@ export default {
             // Traverse function body to find console.error and logger.error
             function traverseFunctionBody(n) {
               if (!n) return;
-              
+
               if (n.type === 'CallExpression') {
                 if (n.callee && n.callee.type === 'MemberExpression') {
                   const obj = n.callee.object;
@@ -1311,7 +1491,7 @@ export default {
                   }
                 }
               }
-              
+
               for (const key in n) {
                 if (key !== 'parent' && typeof n[key] === 'object' && n[key] !== null) {
                   if (Array.isArray(n[key])) {
@@ -1324,7 +1504,7 @@ export default {
                 }
               }
             }
-            
+
             if (node.body) {
               traverseFunctionBody(node.body);
             }
@@ -1383,7 +1563,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Enforce that enum values come from Constants.public.Enums.* instead of hardcoded strings',
+          description:
+            'Enforce that enum values come from Constants.public.Enums.* instead of hardcoded strings',
           category: 'Best Practices',
           recommended: true,
         },
@@ -1422,7 +1603,10 @@ export default {
             }
 
             const importPath = node.source.value;
-            if (importPath === '@heyclaude/database-types' || importPath.includes('@heyclaude/database-types')) {
+            if (
+              importPath === '@heyclaude/database-types' ||
+              importPath.includes('@heyclaude/database-types')
+            ) {
               if (node.specifiers) {
                 for (const specifier of node.specifiers) {
                   if (specifier.type === 'ImportSpecifier') {
@@ -1475,7 +1659,10 @@ export default {
               const types = node.typeAnnotation.types;
               // Check if all types are string literals
               const allStringLiterals = types.every(
-                (t) => t.type === 'TSLiteralType' && t.literal?.type === 'Literal' && typeof t.literal.value === 'string'
+                (t) =>
+                  t.type === 'TSLiteralType' &&
+                  t.literal?.type === 'Literal' &&
+                  typeof t.literal.value === 'string'
               );
 
               if (allStringLiterals && types.length >= 2) {
@@ -1564,15 +1751,32 @@ export default {
 
         return {
           ImportDeclaration(node) {
-            if (node.source && node.source.type === 'Literal' && typeof node.source.value === 'string') {
+            if (
+              node.source &&
+              node.source.type === 'Literal' &&
+              typeof node.source.value === 'string'
+            ) {
               const importPath = node.source.value;
-              if (importPath === '@heyclaude/database-types' || importPath.includes('@heyclaude/database-types')) {
+              if (
+                importPath === '@heyclaude/database-types' ||
+                importPath.includes('@heyclaude/database-types')
+              ) {
                 for (const spec of node.specifiers || []) {
-                  if (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.type === 'Identifier' && spec.imported.name === 'Constants') {
+                  if (
+                    spec.type === 'ImportSpecifier' &&
+                    spec.imported &&
+                    spec.imported.type === 'Identifier' &&
+                    spec.imported.name === 'Constants'
+                  ) {
                     hasConstantsImport = true;
                     break;
                   }
-                  if (spec.type === 'ImportNamespaceSpecifier' && spec.local && spec.local.type === 'Identifier' && spec.local.name === 'Constants') {
+                  if (
+                    spec.type === 'ImportNamespaceSpecifier' &&
+                    spec.local &&
+                    spec.local.type === 'Identifier' &&
+                    spec.local.name === 'Constants'
+                  ) {
                     hasConstantsImport = true;
                     break;
                   }
@@ -1596,7 +1800,7 @@ export default {
                 let usesConstants = false;
                 function checkForConstantsUsage(n) {
                   if (!n) return;
-                  
+
                   if (n.type === 'MemberExpression') {
                     let current = n;
                     let path = [];
@@ -1618,7 +1822,7 @@ export default {
                       }
                     }
                   }
-                  
+
                   for (const key in n) {
                     if (key !== 'parent' && typeof n[key] === 'object' && n[key] !== null) {
                       if (Array.isArray(n[key])) {
@@ -1633,10 +1837,10 @@ export default {
                     }
                   }
                 }
-                
+
                 // Check parent and surrounding context
                 checkForConstantsUsage(parent);
-                
+
                 if (!usesConstants && !hasConstantsImport) {
                   context.report({
                     node,
@@ -1653,7 +1857,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Enforce section-based logging on server pages (similar to homepage pattern)',
+          description:
+            'Enforce section-based logging on server pages (similar to homepage pattern)',
           category: 'Best Practices',
           recommended: true,
         },
@@ -1703,20 +1908,38 @@ export default {
             if (n.type === 'CallExpression') {
               if (n.callee && n.callee.type === 'MemberExpression') {
                 const prop = n.callee.property;
-                if (prop && prop.type === 'Identifier' && (prop.name === 'rpc' || prop.name === 'from')) {
+                if (
+                  prop &&
+                  prop.type === 'Identifier' &&
+                  (prop.name === 'rpc' || prop.name === 'from')
+                ) {
                   found = true;
                   return;
                 }
               }
               if (n.callee && n.callee.type === 'Identifier') {
-                const names = ['fetch', 'getContent', 'getData', 'fetchData', 'loadData', 'query', 'select', 'getUser', 'getCategory'];
+                const names = [
+                  'fetch',
+                  'getContent',
+                  'getData',
+                  'fetchData',
+                  'loadData',
+                  'query',
+                  'select',
+                  'getUser',
+                  'getCategory',
+                ];
                 if (names.includes(n.callee.name)) {
                   found = true;
                   return;
                 }
               }
             }
-            if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') {
+            if (
+              n.type === 'FunctionDeclaration' ||
+              n.type === 'FunctionExpression' ||
+              n.type === 'ArrowFunctionExpression'
+            ) {
               if (n.async) {
                 found = true;
                 return;
@@ -1750,17 +1973,28 @@ export default {
               const obj = node.callee.object;
               const prop = node.callee.property;
               if (obj && obj.type === 'Identifier' && prop && prop.type === 'Identifier') {
-                const loggerNames = ['logger', 'reqLogger', 'sectionLogger', 'routeLogger', 'userLogger'];
+                const loggerNames = [
+                  'logger',
+                  'reqLogger',
+                  'sectionLogger',
+                  'routeLogger',
+                  'userLogger',
+                ];
                 const logMethods = ['info', 'error', 'warn', 'debug', 'trace'];
                 if (loggerNames.includes(obj.name) && logMethods.includes(prop.name)) {
                   hasLoggerCalls = true;
-                  
+
                   // Check if first argument (object) has section property
                   if (node.arguments && node.arguments.length > 0) {
                     const firstArg = node.arguments[0];
                     if (firstArg && firstArg.type === 'ObjectExpression') {
                       for (const prop of firstArg.properties || []) {
-                        if (prop.type === 'Property' && prop.key && prop.key.type === 'Identifier' && prop.key.name === 'section') {
+                        if (
+                          prop.type === 'Property' &&
+                          prop.key &&
+                          prop.key.type === 'Identifier' &&
+                          prop.key.name === 'section'
+                        ) {
                           hasSectionLogging = true;
                           return;
                         }
@@ -1777,7 +2011,13 @@ export default {
               const obj = node.callee.object;
               const prop = node.callee.property;
               if (obj && obj.type === 'Identifier' && prop && prop.type === 'Identifier') {
-                const loggerNames = ['logger', 'reqLogger', 'sectionLogger', 'routeLogger', 'userLogger'];
+                const loggerNames = [
+                  'logger',
+                  'reqLogger',
+                  'sectionLogger',
+                  'routeLogger',
+                  'userLogger',
+                ];
                 const logMethods = ['info', 'error', 'warn', 'debug', 'trace'];
                 if (loggerNames.includes(obj.name) && logMethods.includes(prop.name)) {
                   // Check if first argument (object) has section property
@@ -1786,13 +2026,17 @@ export default {
                     if (firstArg && firstArg.type === 'ObjectExpression') {
                       // Check if section property exists
                       const hasSection = firstArg.properties.some(
-                        (prop) => prop.type === 'Property' && prop.key && prop.key.type === 'Identifier' && prop.key.name === 'section'
+                        (prop) =>
+                          prop.type === 'Property' &&
+                          prop.key &&
+                          prop.key.type === 'Identifier' &&
+                          prop.key.name === 'section'
                       );
-                      
+
                       if (!hasSection && hasAsyncOperations) {
                         // Infer section name from context
                         let inferredSection = 'data-fetch'; // Default
-                        
+
                         // Check surrounding code for hints
                         const parent = node.parent;
                         if (parent) {
@@ -1800,31 +2044,45 @@ export default {
                           const comments = sourceCode.getCommentsBefore(node) || [];
                           for (const comment of comments) {
                             const commentText = comment.value?.toLowerCase() || '';
-                            if (commentText.includes('authentication') || commentText.includes('auth')) {
+                            if (
+                              commentText.includes('authentication') ||
+                              commentText.includes('auth')
+                            ) {
                               inferredSection = 'authentication';
-                            } else if (commentText.includes('data') || commentText.includes('fetch') || commentText.includes('load')) {
+                            } else if (
+                              commentText.includes('data') ||
+                              commentText.includes('fetch') ||
+                              commentText.includes('load')
+                            ) {
                               inferredSection = 'data-fetch';
-                            } else if (commentText.includes('render') || commentText.includes('page')) {
+                            } else if (
+                              commentText.includes('render') ||
+                              commentText.includes('page')
+                            ) {
                               inferredSection = 'page-render';
                             } else if (commentText.includes('validation')) {
                               inferredSection = 'validation';
                             }
                           }
                         }
-                        
+
                         context.report({
                           node: firstArg,
                           messageId: 'missingSectionLogging',
                           // No fix() - autofix disabled (fixable: null)
                         });
                       }
-                    } else if (firstArg && firstArg.type === 'Literal' && typeof firstArg.value === 'string') {
+                    } else if (
+                      firstArg &&
+                      firstArg.type === 'Literal' &&
+                      typeof firstArg.value === 'string'
+                    ) {
                       // Log call with string message but no context object
                       // Object-first API: logger.info({ section: '...' }, 'message')
                       // Need to wrap message and add context object as first argument
                       const messageText = sourceCode.getText(firstArg);
                       const inferredSection = 'data-fetch'; // Default
-                      
+
                       context.report({
                         node,
                         messageId: 'missingSectionLogging',
@@ -1893,7 +2151,11 @@ export default {
               found = true;
               return;
             }
-            if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') {
+            if (
+              n.type === 'FunctionDeclaration' ||
+              n.type === 'FunctionExpression' ||
+              n.type === 'ArrowFunctionExpression'
+            ) {
               if (n.async) {
                 found = true;
                 return;
@@ -1956,10 +2218,18 @@ export default {
         return {
           ImportDeclaration(node) {
             // Check for useLoggedAsync import
-            if (node.source && node.source.type === 'Literal' && typeof node.source.value === 'string') {
+            if (
+              node.source &&
+              node.source.type === 'Literal' &&
+              typeof node.source.value === 'string'
+            ) {
               if (node.source.value.includes('@heyclaude/web-runtime/hooks')) {
                 for (const spec of node.specifiers || []) {
-                  if (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.name === 'useLoggedAsync') {
+                  if (
+                    spec.type === 'ImportSpecifier' &&
+                    spec.imported &&
+                    spec.imported.name === 'useLoggedAsync'
+                  ) {
                     hasUseLoggedAsyncImport = true;
                   }
                 }
@@ -2007,7 +2277,11 @@ export default {
           },
           CallExpression(node) {
             // Check for useLoggedAsync() hook calls
-            if (node.callee && node.callee.type === 'Identifier' && node.callee.name === 'useLoggedAsync') {
+            if (
+              node.callee &&
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'useLoggedAsync'
+            ) {
               hasUseLoggedAsync = true;
             }
           },
@@ -2074,7 +2348,12 @@ export default {
             // Check for safe-action middleware usage
             if (node.callee && node.callee.type === 'Identifier') {
               const funcName = node.callee.name;
-              if (funcName === 'authedAction' || funcName === 'optionalAuthAction' || funcName === 'rateLimitedAction' || funcName === 'actionClient') {
+              if (
+                funcName === 'authedAction' ||
+                funcName === 'optionalAuthAction' ||
+                funcName === 'rateLimitedAction' ||
+                funcName === 'actionClient'
+              ) {
                 hasSafeAction = true;
               }
             }
@@ -2082,7 +2361,12 @@ export default {
           ExportDefaultDeclaration(node) {
             // Check if default export is async function
             const decl = node.declaration;
-            if (decl && (decl.type === 'FunctionDeclaration' || decl.type === 'FunctionExpression' || decl.type === 'ArrowFunctionExpression')) {
+            if (
+              decl &&
+              (decl.type === 'FunctionDeclaration' ||
+                decl.type === 'FunctionExpression' ||
+                decl.type === 'ArrowFunctionExpression')
+            ) {
               if (decl.async) {
                 hasExportedAsyncFunction = true;
               }
@@ -2096,10 +2380,18 @@ export default {
               }
               if (node.declaration.type === 'VariableDeclaration') {
                 for (const declarator of node.declaration.declarations || []) {
-                  if (declarator.init && declarator.init.type === 'ArrowFunctionExpression' && declarator.init.async) {
+                  if (
+                    declarator.init &&
+                    declarator.init.type === 'ArrowFunctionExpression' &&
+                    declarator.init.async
+                  ) {
                     hasExportedAsyncFunction = true;
                   }
-                  if (declarator.init && declarator.init.type === 'FunctionExpression' && declarator.init.async) {
+                  if (
+                    declarator.init &&
+                    declarator.init.type === 'FunctionExpression' &&
+                    declarator.init.async
+                  ) {
                     hasExportedAsyncFunction = true;
                   }
                 }
@@ -2110,18 +2402,35 @@ export default {
               if (spec.type === 'ExportSpecifier') {
                 // Find the declaration for this export
                 for (const stmt of ast.body || []) {
-                  if (stmt.type === 'FunctionDeclaration' && stmt.id && stmt.id.name === spec.exported.name && stmt.async) {
+                  if (
+                    stmt.type === 'FunctionDeclaration' &&
+                    stmt.id &&
+                    stmt.id.name === spec.exported.name &&
+                    stmt.async
+                  ) {
                     hasExportedAsyncFunction = true;
                     break;
                   }
                   if (stmt.type === 'VariableDeclaration') {
                     for (const declarator of stmt.declarations || []) {
-                      if (declarator.id && declarator.id.type === 'Identifier' && declarator.id.name === spec.exported.name) {
-                        if (declarator.init && declarator.init.type === 'ArrowFunctionExpression' && declarator.init.async) {
+                      if (
+                        declarator.id &&
+                        declarator.id.type === 'Identifier' &&
+                        declarator.id.name === spec.exported.name
+                      ) {
+                        if (
+                          declarator.init &&
+                          declarator.init.type === 'ArrowFunctionExpression' &&
+                          declarator.init.async
+                        ) {
                           hasExportedAsyncFunction = true;
                           break;
                         }
-                        if (declarator.init && declarator.init.type === 'FunctionExpression' && declarator.init.async) {
+                        if (
+                          declarator.init &&
+                          declarator.init.type === 'FunctionExpression' &&
+                          declarator.init.async
+                        ) {
                           hasExportedAsyncFunction = true;
                           break;
                         }
@@ -2147,7 +2456,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Prevent direct Supabase client usage in server actions (should use data layer)',
+          description:
+            'Prevent direct Supabase client usage in server actions (should use data layer)',
           category: 'Best Practices',
           recommended: true,
         },
@@ -2189,21 +2499,27 @@ export default {
             if (node.callee && node.callee.type === 'MemberExpression') {
               const obj = node.callee.object;
               const prop = node.callee.property;
-              
+
               if (obj && obj.type === 'Identifier' && prop && prop.type === 'Identifier') {
                 // Check for supabase.from() or supabase.rpc()
-                if ((obj.name === 'supabase' || obj.name.toLowerCase().includes('supabase')) && 
-                    (prop.name === 'from' || prop.name === 'rpc')) {
+                if (
+                  (obj.name === 'supabase' || obj.name.toLowerCase().includes('supabase')) &&
+                  (prop.name === 'from' || prop.name === 'rpc')
+                ) {
                   hasDirectAccess = true;
                 }
-                
+
                 // Check for chained .from() or .rpc() calls
                 if (prop.name === 'from' || prop.name === 'rpc') {
                   // Check if parent is a member expression (e.g., something.from())
                   let current = obj;
                   while (current && current.type === 'MemberExpression') {
-                    if (current.object && current.object.type === 'Identifier' && 
-                        (current.object.name === 'supabase' || current.object.name.toLowerCase().includes('supabase'))) {
+                    if (
+                      current.object &&
+                      current.object.type === 'Identifier' &&
+                      (current.object.name === 'supabase' ||
+                        current.object.name.toLowerCase().includes('supabase'))
+                    ) {
                       hasDirectAccess = true;
                       break;
                     }
@@ -2212,7 +2528,7 @@ export default {
                 }
               }
             }
-            
+
             // Check for data layer service usage
             if (node.callee && node.callee.type === 'Identifier') {
               const serviceNames = [
@@ -2234,9 +2550,14 @@ export default {
                 hasDataLayer = true;
               }
             }
-            
+
             // Check for service instantiation: new ContentService(), etc.
-            if (node.callee && node.callee.type === 'NewExpression' && node.callee.callee && node.callee.callee.type === 'Identifier') {
+            if (
+              node.callee &&
+              node.callee.type === 'NewExpression' &&
+              node.callee.callee &&
+              node.callee.callee.type === 'Identifier'
+            ) {
               const serviceNames = [
                 'ContentService',
                 'AccountService',
@@ -2259,7 +2580,12 @@ export default {
           },
           MemberExpression(node) {
             // Check for service method calls: service.getContent(), etc.
-            if (node.object && node.object.type === 'Identifier' && node.property && node.property.type === 'Identifier') {
+            if (
+              node.object &&
+              node.object.type === 'Identifier' &&
+              node.property &&
+              node.property.type === 'Identifier'
+            ) {
               const serviceNames = [
                 'contentService',
                 'accountService',
@@ -2295,7 +2621,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Prevent direct Supabase RPC calls in API routes (should use data layer services)',
+          description:
+            'Prevent direct Supabase RPC calls in API routes (should use data layer services)',
           category: 'Best Practices',
           recommended: true,
         },
@@ -2331,27 +2658,34 @@ export default {
             if (node.callee && node.callee.type === 'MemberExpression') {
               const obj = node.callee.object;
               const prop = node.callee.property;
-              
+
               if (obj && prop && prop.type === 'Identifier' && prop.name === 'rpc') {
                 // Check if parent is a member expression with supabase
                 let current = obj;
                 while (current && current.type === 'MemberExpression') {
-                  if (current.object && current.object.type === 'Identifier' && 
-                      (current.object.name === 'supabase' || current.object.name.toLowerCase().includes('supabase'))) {
+                  if (
+                    current.object &&
+                    current.object.type === 'Identifier' &&
+                    (current.object.name === 'supabase' ||
+                      current.object.name.toLowerCase().includes('supabase'))
+                  ) {
                     hasDirectRpc = true;
                     break;
                   }
                   current = current.object;
                 }
-                
+
                 // Also check direct supabase.rpc() pattern
-                if (obj && obj.type === 'Identifier' && 
-                    (obj.name === 'supabase' || obj.name.toLowerCase().includes('supabase'))) {
+                if (
+                  obj &&
+                  obj.type === 'Identifier' &&
+                  (obj.name === 'supabase' || obj.name.toLowerCase().includes('supabase'))
+                ) {
                   hasDirectRpc = true;
                 }
               }
             }
-            
+
             // Check for data layer service usage
             if (node.callee && node.callee.type === 'Identifier') {
               const serviceNames = [
@@ -2373,9 +2707,14 @@ export default {
                 hasDataLayer = true;
               }
             }
-            
+
             // Check for service instantiation: new ContentService(), etc.
-            if (node.callee && node.callee.type === 'NewExpression' && node.callee.callee && node.callee.callee.type === 'Identifier') {
+            if (
+              node.callee &&
+              node.callee.type === 'NewExpression' &&
+              node.callee.callee &&
+              node.callee.callee.type === 'Identifier'
+            ) {
               const serviceNames = [
                 'ContentService',
                 'AccountService',
@@ -2398,7 +2737,12 @@ export default {
           },
           MemberExpression(node) {
             // Check for service method calls: service.getContent(), etc.
-            if (node.object && node.object.type === 'Identifier' && node.property && node.property.type === 'Identifier') {
+            if (
+              node.object &&
+              node.object.type === 'Identifier' &&
+              node.property &&
+              node.property.type === 'Identifier'
+            ) {
               const serviceNames = [
                 'contentService',
                 'accountService',
@@ -2424,226 +2768,6 @@ export default {
               context.report({
                 node: ast,
                 messageId: 'useDataLayer',
-              });
-            }
-          },
-        };
-      },
-    },
-    'require-edge-logging-setup': {
-      meta: {
-        type: 'problem',
-        docs: {
-          description: 'Comprehensive edge function logging validation: proper imports, initRequestLogging(), traceRequestComplete(), and logContext creation',
-          category: 'Best Practices',
-          recommended: true,
-        },
-        fixable: null,
-        schema: [],
-        messages: {
-          useEdgeLogging:
-            'Edge functions must use logError/logInfo/logWarn from @heyclaude/shared-runtime OR logger from @heyclaude/edge-runtime. Do not use logger from @heyclaude/web-runtime/core.',
-          missingInitRequestLogging:
-            'Edge function handler is missing initRequestLogging() call. Add: initRequestLogging(logContext) at handler start. This will automatically set logger bindings.',
-          missingTraceRequestComplete:
-            'Edge function handler is missing traceRequestComplete() call before success response. Add: traceRequestComplete(logContext) before returning.',
-          missingLogContextCreation:
-            'Edge function handler is missing logContext creation. Add: const logContext = create{Service}Context(...) at handler start.',
-        },
-      },
-      create(context) {
-        const filename = context.getFilename();
-        const sourceCode = context.getSourceCode();
-        const ast = sourceCode.ast;
-
-        // Only apply to edge function files
-        const isEdgeFunction = filename.includes('apps/edge/functions');
-
-        if (!isEdgeFunction) {
-          return {};
-        }
-
-        // Track all edge logging requirements
-        let hasWebRuntimeCoreLogger = false;
-        let hasSharedRuntimeHelpers = false;
-        let hasEdgeRuntimeLogger = false;
-        let hasHandlerExport = false;
-        let hasInitRequestLogging = false;
-        let hasTraceRequestComplete = false;
-        let hasLogContextCreation = false;
-        let hasSuccessResponse = false;
-
-        const handlerNames = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
-        const contextCreationFunctions = [
-          'createEmailHandlerContext',
-          'createDataApiContext',
-          'createSearchContext',
-          'createTransformApiContext',
-          'createUtilityContext',
-          'createNotificationRouterContext',
-          'createChangelogHandlerContext',
-          'createWebAppContext',
-        ];
-
-        /**
-         * Traverse AST to find patterns
-         */
-        function traverse(node) {
-          if (!node) return;
-
-          // Check for handler exports
-          if (node.type === 'ExportNamedDeclaration') {
-            if (node.declaration) {
-              if (node.declaration.type === 'FunctionDeclaration' &&
-                  node.declaration.id &&
-                  node.declaration.id.type === 'Identifier' &&
-                  handlerNames.includes(node.declaration.id.name)) {
-                hasHandlerExport = true;
-              }
-              if (node.declaration.type === 'VariableDeclaration') {
-                for (const declarator of node.declaration.declarations || []) {
-                  if (declarator.id && declarator.id.type === 'Identifier' &&
-                      handlerNames.includes(declarator.id.name)) {
-                    hasHandlerExport = true;
-                  }
-                }
-              }
-            }
-            if (node.specifiers) {
-              for (const spec of node.specifiers) {
-                if (spec.exported && spec.exported.type === 'Identifier' &&
-                    handlerNames.includes(spec.exported.name)) {
-                  hasHandlerExport = true;
-                }
-              }
-            }
-          }
-
-          // Check for initRequestLogging() calls
-          if (node.type === 'CallExpression' &&
-              node.callee.type === 'Identifier' &&
-              node.callee.name === 'initRequestLogging') {
-            hasInitRequestLogging = true;
-          }
-
-          // Check for traceRequestComplete() calls
-          if (node.type === 'CallExpression' &&
-              node.callee.type === 'Identifier' &&
-              node.callee.name === 'traceRequestComplete') {
-            hasTraceRequestComplete = true;
-          }
-
-          // Check for log context creation functions
-          if (node.type === 'CallExpression' &&
-              node.callee.type === 'Identifier' &&
-              contextCreationFunctions.includes(node.callee.name)) {
-            hasLogContextCreation = true;
-          }
-
-          // Check for return new Response() patterns
-          if (node.type === 'ReturnStatement' && node.argument) {
-            if (node.argument.type === 'NewExpression' &&
-                node.argument.callee.type === 'Identifier' &&
-                node.argument.callee.name === 'Response') {
-              hasSuccessResponse = true;
-            }
-            if (node.argument.type === 'CallExpression' &&
-                node.argument.callee.type === 'MemberExpression' &&
-                node.argument.callee.object.type === 'Identifier' &&
-                node.argument.callee.object.name === 'Response') {
-              hasSuccessResponse = true;
-            }
-          }
-
-          // Recursively traverse
-          for (const key in node) {
-            if (key !== 'parent' && typeof node[key] === 'object' && node[key] !== null) {
-              if (Array.isArray(node[key])) {
-                for (const item of node[key]) {
-                  traverse(item);
-                }
-              } else {
-                traverse(node[key]);
-              }
-            }
-          }
-        }
-
-        // Traverse entire AST
-        traverse(ast);
-
-        return {
-          ImportDeclaration(node) {
-            if (node.source && node.source.type === 'Literal' && typeof node.source.value === 'string') {
-              const importPath = node.source.value;
-              
-              // Check for web-runtime/core logger import (should not be used)
-              if (importPath === '@heyclaude/web-runtime/core' || importPath.indexOf('@heyclaude/web-runtime/core') !== -1) {
-                for (const spec of node.specifiers || []) {
-                  if (spec.type === 'ImportDefaultSpecifier' || 
-                      (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.type === 'Identifier' && spec.imported.name === 'logger')) {
-                    hasWebRuntimeCoreLogger = true;
-                    break;
-                  }
-                }
-              }
-              
-              // Check for shared-runtime helpers
-              if (importPath === '@heyclaude/shared-runtime' || importPath.indexOf('@heyclaude/shared-runtime') !== -1) {
-                for (const spec of node.specifiers || []) {
-                  if (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.type === 'Identifier') {
-                    const name = spec.imported.name;
-                    if (name === 'logError' || name === 'logInfo' || name === 'logWarn') {
-                      hasSharedRuntimeHelpers = true;
-                      break;
-                    }
-                  }
-                }
-              }
-              
-              // Check for edge-runtime logger
-              if (importPath === '@heyclaude/edge-runtime' || importPath.indexOf('@heyclaude/edge-runtime') !== -1) {
-                for (const spec of node.specifiers || []) {
-                  if (spec.type === 'ImportDefaultSpecifier' || 
-                      (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.type === 'Identifier' && spec.imported.name === 'logger')) {
-                    hasEdgeRuntimeLogger = true;
-                    break;
-                  }
-                }
-              }
-            }
-          },
-          'Program:exit'() {
-            if (!hasHandlerExport) {
-              return; // Not a handler file
-            }
-
-            // Check logging imports
-            if (hasWebRuntimeCoreLogger && !hasSharedRuntimeHelpers && !hasEdgeRuntimeLogger) {
-              context.report({
-                node: ast,
-                messageId: 'useEdgeLogging',
-              });
-            }
-
-            // Check logContext creation
-            if (!hasLogContextCreation) {
-              context.report({
-                node: ast,
-                messageId: 'missingLogContextCreation',
-              });
-            } else if (!hasInitRequestLogging) {
-              context.report({
-                node: ast,
-                messageId: 'missingInitRequestLogging',
-              });
-            }
-
-            // Check for success responses
-            if (hasSuccessResponse && !hasTraceRequestComplete) {
-              context.report({
-                node: ast,
-                messageId: 'missingTraceRequestComplete',
               });
             }
           },
@@ -2685,22 +2809,22 @@ export default {
           },
           'FunctionDeclaration:exit'(node) {
             asyncFunctionStack.pop();
-            isInAsyncFunction = asyncFunctionStack.length > 0 && asyncFunctionStack[asyncFunctionStack.length - 1];
+            isInAsyncFunction =
+              asyncFunctionStack.length > 0 && asyncFunctionStack[asyncFunctionStack.length - 1];
           },
           'FunctionExpression:exit'(node) {
             asyncFunctionStack.pop();
-            isInAsyncFunction = asyncFunctionStack.length > 0 && asyncFunctionStack[asyncFunctionStack.length - 1];
+            isInAsyncFunction =
+              asyncFunctionStack.length > 0 && asyncFunctionStack[asyncFunctionStack.length - 1];
           },
           'ArrowFunctionExpression:exit'(node) {
             asyncFunctionStack.pop();
-            isInAsyncFunction = asyncFunctionStack.length > 0 && asyncFunctionStack[asyncFunctionStack.length - 1];
+            isInAsyncFunction =
+              asyncFunctionStack.length > 0 && asyncFunctionStack[asyncFunctionStack.length - 1];
           },
           CallExpression(node) {
             // Check if this is a logError call
-            if (
-              node.callee.type === 'Identifier' &&
-              node.callee.name === 'logError'
-            ) {
+            if (node.callee.type === 'Identifier' && node.callee.name === 'logError') {
               // Check if we're in an async function
               if (isInAsyncFunction) {
                 // Check if logError is awaited
@@ -2776,7 +2900,7 @@ export default {
             // Check if this variable is created from a context creation function
             if (node.init) {
               const initText = sourceCode.getText(node.init);
-              const isLogContextCreation = logContextCreationPatterns.some(pattern => 
+              const isLogContextCreation = logContextCreationPatterns.some((pattern) =>
                 pattern.test(initText)
               );
 
@@ -2859,7 +2983,8 @@ export default {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Prefer using custom serializers (user, request, response, dbQuery, args) instead of manual formatting',
+          description:
+            'Prefer using custom serializers (user, request, response, dbQuery, args) instead of manual formatting',
           category: 'Best Practices',
           recommended: true,
         },
@@ -2899,10 +3024,10 @@ export default {
                 contextArg.properties.forEach((prop) => {
                   if (prop.type === 'Property' && prop.key.type === 'Identifier') {
                     const keyName = prop.key.name.toLowerCase();
-                    
+
                     // Check if this matches a serializer pattern
                     for (const [serializerName, patterns] of Object.entries(serializers)) {
-                      if (patterns.some(pattern => keyName.includes(pattern))) {
+                      if (patterns.some((pattern) => keyName.includes(pattern))) {
                         // Check if value is manually formatted (object with specific keys)
                         if (prop.value.type === 'ObjectExpression') {
                           const valueProps = prop.value.properties;
@@ -2947,7 +3072,8 @@ export default {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Edge functions should prefer helper functions (logError, logInfo, logWarn, logTrace) from @heyclaude/shared-runtime, but logger from @heyclaude/edge-runtime is also acceptable.',
+          description:
+            'Edge functions should prefer helper functions (logError, logInfo, logWarn, logTrace) from @heyclaude/shared-runtime, but logger from @heyclaude/edge-runtime is also acceptable.',
           category: 'Best Practices',
           recommended: true,
         },
@@ -2992,12 +3118,16 @@ export default {
               // 2. Logger is NOT from edge-runtime (if it's from edge-runtime, that's acceptable)
               if (hasHelperImports && !hasEdgeRuntimeLogger) {
                 const method = node.callee.property.name;
-                const helperName = 
-                  method === 'error' ? 'logError' :
-                  method === 'info' ? 'logInfo' :
-                  method === 'warn' ? 'logWarn' :
-                  method === 'trace' ? 'logTrace' :
-                  null;
+                const helperName =
+                  method === 'error'
+                    ? 'logError'
+                    : method === 'info'
+                      ? 'logInfo'
+                      : method === 'warn'
+                        ? 'logWarn'
+                        : method === 'trace'
+                          ? 'logTrace'
+                          : null;
 
                 if (helperName) {
                   context.report({
@@ -3016,7 +3146,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Detect async functions and service methods that should have error logging but are missing it',
+          description:
+            'Detect async functions and service methods that should have error logging but are missing it',
           category: 'Best Practices',
           recommended: true,
         },
@@ -3049,7 +3180,7 @@ export default {
         function hasAwaitExpressions(node) {
           if (!node) return false;
           if (node.type === 'AwaitExpression') return true;
-          
+
           for (const key in node) {
             if (key !== 'parent' && typeof node[key] === 'object' && node[key] !== null) {
               if (Array.isArray(node[key])) {
@@ -3069,7 +3200,7 @@ export default {
          */
         function hasErrorLoggingInNode(node) {
           if (!node) return false;
-          
+
           if (node.type === 'CallExpression') {
             // Check for logger.error, logger.warn
             if (node.callee.type === 'MemberExpression') {
@@ -3080,8 +3211,20 @@ export default {
                   return true;
                 }
                 // Check for child logger patterns (reqLogger.error, etc.)
-                const childLoggerNames = ['reqLogger', 'userLogger', 'actionLogger', 'metadataLogger', 'viewerLogger', 'processLogger', 'callbackLogger', 'requestLogger'];
-                if (childLoggerNames.includes(obj.name) && (prop.name === 'error' || prop.name === 'warn')) {
+                const childLoggerNames = [
+                  'reqLogger',
+                  'userLogger',
+                  'actionLogger',
+                  'metadataLogger',
+                  'viewerLogger',
+                  'processLogger',
+                  'callbackLogger',
+                  'requestLogger',
+                ];
+                if (
+                  childLoggerNames.includes(obj.name) &&
+                  (prop.name === 'error' || prop.name === 'warn')
+                ) {
                   return true;
                 }
               }
@@ -3094,7 +3237,7 @@ export default {
               }
             }
           }
-          
+
           // Recursively check children
           for (const key in node) {
             if (key !== 'parent' && typeof node[key] === 'object' && node[key] !== null) {
@@ -3107,7 +3250,7 @@ export default {
               }
             }
           }
-          
+
           return false;
         }
 
@@ -3117,7 +3260,7 @@ export default {
         function hasTryCatch(node) {
           if (!node) return false;
           if (node.type === 'TryStatement') return true;
-          
+
           for (const key in node) {
             if (key !== 'parent' && typeof node[key] === 'object' && node[key] !== null) {
               if (Array.isArray(node[key])) {
@@ -3137,24 +3280,29 @@ export default {
          */
         function hasDatabaseOperations(node) {
           if (!node) return false;
-          
+
           // Check for .rpc() calls
-          if (node.type === 'CallExpression' &&
-              node.callee.type === 'MemberExpression' &&
-              node.callee.property.type === 'Identifier' &&
-              (node.callee.property.name === 'rpc' || node.callee.property.name === 'from')) {
+          if (
+            node.type === 'CallExpression' &&
+            node.callee.type === 'MemberExpression' &&
+            node.callee.property.type === 'Identifier' &&
+            (node.callee.property.name === 'rpc' || node.callee.property.name === 'from')
+          ) {
             return true;
           }
-          
+
           // Check for supabase. or db. member expressions
           if (node.type === 'MemberExpression') {
             const obj = node.object;
-            if (obj && obj.type === 'Identifier' &&
-                (obj.name === 'supabase' || obj.name === 'db')) {
+            if (
+              obj &&
+              obj.type === 'Identifier' &&
+              (obj.name === 'supabase' || obj.name === 'db')
+            ) {
               return true;
             }
           }
-          
+
           // Recursively check children
           for (const key in node) {
             if (key !== 'parent' && typeof node[key] === 'object' && node[key] !== null) {
@@ -3167,7 +3315,7 @@ export default {
               }
             }
           }
-          
+
           return false;
         }
 
@@ -3176,14 +3324,20 @@ export default {
          */
         function estimateFunctionComplexity(node) {
           if (!node || !node.body) return 0;
-          
+
           let count = 0;
           function countStatements(n) {
             if (!n) return;
-            if (n.type === 'ExpressionStatement' || n.type === 'VariableDeclaration' ||
-                n.type === 'IfStatement' || n.type === 'ReturnStatement' ||
-                n.type === 'TryStatement' || n.type === 'ForStatement' ||
-                n.type === 'WhileStatement' || n.type === 'SwitchStatement') {
+            if (
+              n.type === 'ExpressionStatement' ||
+              n.type === 'VariableDeclaration' ||
+              n.type === 'IfStatement' ||
+              n.type === 'ReturnStatement' ||
+              n.type === 'TryStatement' ||
+              n.type === 'ForStatement' ||
+              n.type === 'WhileStatement' ||
+              n.type === 'SwitchStatement'
+            ) {
               count++;
             }
             for (const key in n) {
@@ -3198,7 +3352,7 @@ export default {
               }
             }
           }
-          
+
           const body = node.body.type === 'BlockStatement' ? node.body : { body: [node.body] };
           countStatements(body);
           return count;
@@ -3234,7 +3388,12 @@ export default {
                 messageId: 'missingErrorLogging',
                 data: { name: functionName },
               });
-            } else if (isServiceFile && hasDbOps && !hasErrorLogging && functionName !== 'anonymous') {
+            } else if (
+              isServiceFile &&
+              hasDbOps &&
+              !hasErrorLogging &&
+              functionName !== 'anonymous'
+            ) {
               // Service method with DB ops but no error logging
               context.report({
                 node,
@@ -3272,12 +3431,13 @@ export default {
         let isClientComponent = hasUseClientDirective(ast);
 
         // Also skip specific file patterns
-        if (!isClientComponent && (
-          filename.includes('error.tsx') ||
-          filename.includes('wizard') ||
-          filename.includes('draft-manager') ||
-          filename.includes('marketing/contact')
-        )) {
+        if (
+          !isClientComponent &&
+          (filename.includes('error.tsx') ||
+            filename.includes('wizard') ||
+            filename.includes('draft-manager') ||
+            filename.includes('marketing/contact'))
+        ) {
           isClientComponent = true;
         }
 
@@ -3285,8 +3445,12 @@ export default {
         if (!isClientComponent) {
           function hasLocalStorage(node) {
             if (!node) return false;
-            if (node.type === 'MemberExpression' && 
-                node.object && node.object.type === 'Identifier' && node.object.name === 'localStorage') {
+            if (
+              node.type === 'MemberExpression' &&
+              node.object &&
+              node.object.type === 'Identifier' &&
+              node.object.name === 'localStorage'
+            ) {
               return true;
             }
             for (const key in node) {
@@ -3317,7 +3481,16 @@ export default {
         let hasChildLoggerUsage = false;
         let hasOperationInChildLogger = false;
         let hasRouteInChildLogger = false;
-        const childLoggerNames = ['reqLogger', 'userLogger', 'actionLogger', 'metadataLogger', 'viewerLogger', 'processLogger', 'callbackLogger', 'requestLogger'];
+        const childLoggerNames = [
+          'reqLogger',
+          'userLogger',
+          'actionLogger',
+          'metadataLogger',
+          'viewerLogger',
+          'processLogger',
+          'callbackLogger',
+          'requestLogger',
+        ];
 
         /**
          * Traverse AST to find child logger patterns
@@ -3326,14 +3499,16 @@ export default {
           if (!node) return;
 
           // Check for logger.child() calls
-          if (node.type === 'CallExpression' &&
-              node.callee.type === 'MemberExpression' &&
-              node.callee.object.type === 'Identifier' &&
-              node.callee.object.name === 'logger' &&
-              node.callee.property.type === 'Identifier' &&
-              node.callee.property.name === 'child') {
+          if (
+            node.type === 'CallExpression' &&
+            node.callee.type === 'MemberExpression' &&
+            node.callee.object.type === 'Identifier' &&
+            node.callee.object.name === 'logger' &&
+            node.callee.property.type === 'Identifier' &&
+            node.callee.property.name === 'child'
+          ) {
             hasChildLogger = true;
-            
+
             // Check if child() includes operation and route
             if (node.arguments && node.arguments.length > 0) {
               const contextArg = node.arguments[0];
@@ -3353,12 +3528,14 @@ export default {
           }
 
           // Check for child logger variable usage (reqLogger.error, etc.)
-          if (node.type === 'CallExpression' &&
-              node.callee.type === 'MemberExpression' &&
-              node.callee.object.type === 'Identifier' &&
-              childLoggerNames.includes(node.callee.object.name) &&
-              node.callee.property.type === 'Identifier' &&
-              ['info', 'error', 'warn', 'debug'].includes(node.callee.property.name)) {
+          if (
+            node.type === 'CallExpression' &&
+            node.callee.type === 'MemberExpression' &&
+            node.callee.object.type === 'Identifier' &&
+            childLoggerNames.includes(node.callee.object.name) &&
+            node.callee.property.type === 'Identifier' &&
+            ['info', 'error', 'warn', 'debug'].includes(node.callee.property.name)
+          ) {
             hasChildLoggerUsage = true;
           }
 
@@ -3399,8 +3576,9 @@ export default {
               const contextArg = args[args.length - 1];
 
               // Check if this logger call is using a child logger variable
-              const isChildLoggerCall = node.callee.object.type === 'Identifier' && 
-                /Logger$/.test(node.callee.object.name) && 
+              const isChildLoggerCall =
+                node.callee.object.type === 'Identifier' &&
+                /Logger$/.test(node.callee.object.name) &&
                 node.callee.object.name !== 'logger';
 
               // If using child logger, context can be minimal - skip all context field checks
@@ -3421,8 +3599,12 @@ export default {
                   })
                   .filter((name) => name !== null);
 
-                const missingRequired = requiredFields.filter((field) => !contextKeys.includes(field));
-                const missingRecommended = recommendedFields.filter((field) => !contextKeys.includes(field));
+                const missingRequired = requiredFields.filter(
+                  (field) => !contextKeys.includes(field)
+                );
+                const missingRecommended = recommendedFields.filter(
+                  (field) => !contextKeys.includes(field)
+                );
 
                 if (missingRequired.length > 0) {
                   context.report({
@@ -3477,7 +3659,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Detect outdated logging patterns that need to be updated to new Pino standards',
+          description:
+            'Detect outdated logging patterns that need to be updated to new Pino standards',
           category: 'Best Practices',
           recommended: true,
         },
@@ -3489,7 +3672,7 @@ export default {
           manualErrorFormatting:
             'Manual error formatting detected. Use Pino\'s stdSerializers.err by passing error as "err" key instead of manual formatting.',
           manualRedaction:
-            'Manual data redaction detected. Use Pino\'s built-in redaction (configured in logger config) instead of manual sanitization.',
+            "Manual data redaction detected. Use Pino's built-in redaction (configured in logger config) instead of manual sanitization.",
           directPinoUsage:
             'Direct pino() usage detected. Use createPinoConfig() from @heyclaude/shared-runtime/logger/config instead.',
           oldImportPath:
@@ -3513,12 +3696,13 @@ export default {
         const ast = sourceCode.ast;
         // Check for 'use client' directive using pure AST (no getText())
         const isClientComponent = hasUseClientDirective(ast);
-        
+
         const isServerCode =
           filename.includes('/app/') ||
           filename.includes('/api/') ||
           filename.includes('server.ts') ||
-          (!isClientComponent && (filename.includes('apps/web/src') || filename.includes('packages/web-runtime/src')));
+          (!isClientComponent &&
+            (filename.includes('apps/web/src') || filename.includes('packages/web-runtime/src')));
         const correctBarrelPath = isClientComponent
           ? '@heyclaude/web-runtime/logging/client'
           : '@heyclaude/web-runtime/logging/server';
@@ -3531,7 +3715,7 @@ export default {
             }
 
             const importPath = node.source.value;
-            
+
             // Old direct import paths that should use barrel exports
             const oldImportPaths = [
               /packages\/web-runtime\/src\/utils\/request-context\.ts/,
@@ -3549,7 +3733,7 @@ export default {
             ];
 
             const isOldPath = oldImportPaths.some((pattern) => pattern.test(importPath));
-            
+
             if (isOldPath) {
               context.report({
                 node: node.source,
@@ -3608,35 +3792,38 @@ export default {
           CallExpression(node) {
             if (
               node.callee.type === 'Identifier' &&
-              (node.callee.name === 'createWebAppContextWithId' || node.callee.name === 'createWebAppContext')
+              (node.callee.name === 'createWebAppContextWithId' ||
+                node.callee.name === 'createWebAppContext')
             ) {
               // Skip client components - they shouldn't use logger.child() for request context
               if (isClientComponent) {
                 return;
               }
-              
+
               // Check if it's in a server component/page context
               if (isServerCode) {
                 // Check if this is a simple assignment: const logContext = createWebAppContextWithId(...)
                 const parent = node.parent;
-                const isSimpleAssignment = 
-                  parent.type === 'VariableDeclarator' &&
-                  parent.id.type === 'Identifier';
+                const isSimpleAssignment =
+                  parent.type === 'VariableDeclarator' && parent.id.type === 'Identifier';
 
                 if (isSimpleAssignment && node.arguments.length >= 3) {
                   // Extract arguments: requestId, route, operation, options?
                   const requestIdArg = sourceCode.getText(node.arguments[0]);
                   const routeArg = sourceCode.getText(node.arguments[1]);
                   const operationArg = sourceCode.getText(node.arguments[2]);
-                  const optionsArg = node.arguments[3] ? sourceCode.getText(node.arguments[3]) : null;
+                  const optionsArg = node.arguments[3]
+                    ? sourceCode.getText(node.arguments[3])
+                    : null;
 
                   // Extract module from options if present
                   let moduleValue = null;
                   if (optionsArg && node.arguments[3].type === 'ObjectExpression') {
                     const moduleProp = node.arguments[3].properties.find(
-                      (prop) => prop.type === 'Property' && 
-                      prop.key.type === 'Identifier' && 
-                      prop.key.name === 'module'
+                      (prop) =>
+                        prop.type === 'Property' &&
+                        prop.key.type === 'Identifier' &&
+                        prop.key.name === 'module'
                     );
                     if (moduleProp) {
                       moduleValue = sourceCode.getText(moduleProp.value);
@@ -3651,10 +3838,7 @@ export default {
                       const varName = parent.id.name;
 
                       // Build child logger call
-                      const childLoggerProps = [
-                        `operation: ${operationArg}`,
-                        `route: ${routeArg}`,
-                      ];
+                      const childLoggerProps = [`operation: ${operationArg}`, `route: ${routeArg}`];
                       if (moduleValue) {
                         childLoggerProps.push(`module: ${moduleValue}`);
                       }
@@ -3662,21 +3846,25 @@ export default {
 
                       // Find the function that contains this call
                       let containingFunction = parent.parent;
-                      while (containingFunction && 
+                      while (
+                        containingFunction &&
                         containingFunction.type !== 'FunctionDeclaration' &&
                         containingFunction.type !== 'FunctionExpression' &&
-                        containingFunction.type !== 'ArrowFunctionExpression') {
+                        containingFunction.type !== 'ArrowFunctionExpression'
+                      ) {
                         containingFunction = containingFunction.parent;
                       }
 
                       if (containingFunction && containingFunction.body) {
                         // Find the first statement in the function body
                         const body = containingFunction.body;
-                        
+
                         if (body.type === 'BlockStatement') {
                           // Block statement: insert before first statement or at start of block
                           if (body.body.length > 0) {
-                            fixes.push(fixer.insertTextBefore(body.body[0], `${childLoggerCall}\n  `));
+                            fixes.push(
+                              fixer.insertTextBefore(body.body[0], `${childLoggerCall}\n  `)
+                            );
                           } else {
                             // Empty block: insert after opening brace
                             fixes.push(fixer.insertTextAfter(body, `\n  ${childLoggerCall}\n`));
@@ -3786,7 +3974,13 @@ export default {
           // Detect old console.* patterns that should be logger.*
           'CallExpression[callee.object.name="console"]'(node) {
             const method = node.callee.property?.name;
-            if (method === 'log' || method === 'error' || method === 'warn' || method === 'info' || method === 'debug') {
+            if (
+              method === 'log' ||
+              method === 'error' ||
+              method === 'warn' ||
+              method === 'info' ||
+              method === 'debug'
+            ) {
               // This is already handled by no-console-in-production-enhanced
               // But we can add a specific message for outdated patterns
               const surroundingText = sourceCode.getText(node.parent || node);
@@ -3813,7 +4007,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Detect API routes missing proper logging setup (logContext, error logging, request tracing)',
+          description:
+            'Detect API routes missing proper logging setup (logContext, error logging, request tracing)',
           category: 'Best Practices',
           recommended: true,
         },
@@ -3848,90 +4043,123 @@ export default {
         let hasErrorLogging = false;
         let hasErrorHandling = false;
         let hasNormalizeError = false;
-        
-        const childLoggerNames = ['reqLogger', 'userLogger', 'actionLogger', 'metadataLogger', 'viewerLogger', 'processLogger', 'callbackLogger', 'requestLogger'];
-        
+
+        const childLoggerNames = [
+          'reqLogger',
+          'userLogger',
+          'actionLogger',
+          'metadataLogger',
+          'viewerLogger',
+          'processLogger',
+          'callbackLogger',
+          'requestLogger',
+        ];
+
         /**
          * Traverse AST to find logging patterns
          */
         function traverseForLogging(node) {
           if (!node) return;
-          
+
           // Check for logger.child() calls
-          if (node.type === 'CallExpression' &&
-              node.callee.type === 'MemberExpression' &&
-              node.callee.object.type === 'Identifier' &&
-              node.callee.object.name === 'logger' &&
-              node.callee.property.type === 'Identifier' &&
-              node.callee.property.name === 'child') {
+          if (
+            node.type === 'CallExpression' &&
+            node.callee.type === 'MemberExpression' &&
+            node.callee.object.type === 'Identifier' &&
+            node.callee.object.name === 'logger' &&
+            node.callee.property.type === 'Identifier' &&
+            node.callee.property.name === 'child'
+          ) {
             hasChildLogger = true;
           }
-          
+
           // Check for VariableDeclarator with child logger
-          if (node.type === 'VariableDeclarator' &&
-              node.id && node.id.type === 'Identifier' &&
-              node.id.name.endsWith('Logger') &&
-              node.init && node.init.type === 'CallExpression' &&
-              node.init.callee.type === 'MemberExpression' &&
-              node.init.callee.object.type === 'Identifier' &&
-              node.init.callee.object.name === 'logger' &&
-              node.init.callee.property.type === 'Identifier' &&
-              node.init.callee.property.name === 'child') {
+          if (
+            node.type === 'VariableDeclarator' &&
+            node.id &&
+            node.id.type === 'Identifier' &&
+            node.id.name.endsWith('Logger') &&
+            node.init &&
+            node.init.type === 'CallExpression' &&
+            node.init.callee.type === 'MemberExpression' &&
+            node.init.callee.object.type === 'Identifier' &&
+            node.init.callee.object.name === 'logger' &&
+            node.init.callee.property.type === 'Identifier' &&
+            node.init.callee.property.name === 'child'
+          ) {
             hasChildLogger = true;
           }
-          
+
           // Check for logger.info, logger.debug, logInfo, logTrace
           if (node.type === 'CallExpression') {
-            if (node.callee.type === 'MemberExpression' &&
-                node.callee.object.type === 'Identifier' &&
-                node.callee.property.type === 'Identifier') {
-              if (node.callee.object.name === 'logger' &&
-                  (node.callee.property.name === 'info' || node.callee.property.name === 'debug')) {
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.object.type === 'Identifier' &&
+              node.callee.property.type === 'Identifier'
+            ) {
+              if (
+                node.callee.object.name === 'logger' &&
+                (node.callee.property.name === 'info' || node.callee.property.name === 'debug')
+              ) {
                 hasRequestLogging = true;
               }
-              if (childLoggerNames.includes(node.callee.object.name) &&
-                  (node.callee.property.name === 'info' || node.callee.property.name === 'debug')) {
+              if (
+                childLoggerNames.includes(node.callee.object.name) &&
+                (node.callee.property.name === 'info' || node.callee.property.name === 'debug')
+              ) {
                 hasRequestLogging = true;
               }
             }
-            if (node.callee.type === 'Identifier' &&
-                (node.callee.name === 'logInfo' || node.callee.name === 'logTrace')) {
+            if (
+              node.callee.type === 'Identifier' &&
+              (node.callee.name === 'logInfo' || node.callee.name === 'logTrace')
+            ) {
               hasRequestLogging = true;
             }
           }
-          
+
           // Check for logger.error, logger.warn, logError, logWarn
           if (node.type === 'CallExpression') {
-            if (node.callee.type === 'MemberExpression' &&
-                node.callee.object.type === 'Identifier' &&
-                node.callee.property.type === 'Identifier') {
-              if (node.callee.object.name === 'logger' &&
-                  (node.callee.property.name === 'error' || node.callee.property.name === 'warn')) {
+            if (
+              node.callee.type === 'MemberExpression' &&
+              node.callee.object.type === 'Identifier' &&
+              node.callee.property.type === 'Identifier'
+            ) {
+              if (
+                node.callee.object.name === 'logger' &&
+                (node.callee.property.name === 'error' || node.callee.property.name === 'warn')
+              ) {
                 hasErrorLogging = true;
               }
-              if (childLoggerNames.includes(node.callee.object.name) &&
-                  (node.callee.property.name === 'error' || node.callee.property.name === 'warn')) {
+              if (
+                childLoggerNames.includes(node.callee.object.name) &&
+                (node.callee.property.name === 'error' || node.callee.property.name === 'warn')
+              ) {
                 hasErrorLogging = true;
               }
             }
-            if (node.callee.type === 'Identifier' &&
-                (node.callee.name === 'logError' || node.callee.name === 'logWarn')) {
+            if (
+              node.callee.type === 'Identifier' &&
+              (node.callee.name === 'logError' || node.callee.name === 'logWarn')
+            ) {
               hasErrorLogging = true;
             }
           }
-          
+
           // Check for try-catch
           if (node.type === 'TryStatement') {
             hasErrorHandling = true;
           }
-          
+
           // Check for normalizeError calls
-          if (node.type === 'CallExpression' &&
-              node.callee.type === 'Identifier' &&
-              node.callee.name === 'normalizeError') {
+          if (
+            node.type === 'CallExpression' &&
+            node.callee.type === 'Identifier' &&
+            node.callee.name === 'normalizeError'
+          ) {
             hasNormalizeError = true;
           }
-          
+
           // Recursively traverse
           for (const key in node) {
             if (key !== 'parent' && typeof node[key] === 'object' && node[key] !== null) {
@@ -3945,13 +4173,13 @@ export default {
             }
           }
         }
-        
+
         // Traverse entire AST
         traverseForLogging(ast);
 
         return {
           'Program:exit'() {
-                if (!hasChildLogger) {
+            if (!hasChildLogger) {
               context.report({
                 node: context.sourceCode.ast,
                 messageId: 'missingBindings',
@@ -3977,7 +4205,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Enforce barrel export usage for logging utilities instead of direct imports',
+          description:
+            'Enforce barrel export usage for logging utilities instead of direct imports',
           category: 'Best Practices',
           recommended: true,
         },
@@ -3998,12 +4227,13 @@ export default {
         const ast = sourceCode.ast;
         // Check for 'use client' directive using pure AST (no getText())
         const isClientComponent = hasUseClientDirective(ast);
-        
+
         const isServerCode =
           filename.includes('/app/') ||
           filename.includes('/api/') ||
           filename.includes('server.ts') ||
-          (!isClientComponent && (filename.includes('apps/web/src') || filename.includes('packages/web-runtime/src')));
+          (!isClientComponent &&
+            (filename.includes('apps/web/src') || filename.includes('packages/web-runtime/src')));
 
         // Determine correct barrel export path
         const correctBarrelPath = isClientComponent
@@ -4014,11 +4244,14 @@ export default {
         let hasBarrelImport = false;
         function checkForBarrelImport(node) {
           if (!node) return;
-          if (node.type === 'ImportDeclaration' &&
-              node.source && node.source.type === 'Literal' &&
-              typeof node.source.value === 'string' &&
-              (node.source.value.startsWith('@heyclaude/web-runtime/logging/') ||
-               node.source.value.indexOf('@heyclaude/web-runtime/logging/') !== -1)) {
+          if (
+            node.type === 'ImportDeclaration' &&
+            node.source &&
+            node.source.type === 'Literal' &&
+            typeof node.source.value === 'string' &&
+            (node.source.value.startsWith('@heyclaude/web-runtime/logging/') ||
+              node.source.value.indexOf('@heyclaude/web-runtime/logging/') !== -1)
+          ) {
             hasBarrelImport = true;
           }
           for (const key in node) {
@@ -4070,11 +4303,13 @@ export default {
                 let hasClientLoggerUsage = false;
                 function checkForClientLoggerUsage(node) {
                   if (!node) return;
-                  if (node.type === 'CallExpression' &&
-                      node.callee.type === 'Identifier' &&
-                      (node.callee.name === 'useClientLogger' ||
-                       node.callee.name === 'logClientError' ||
-                       node.callee.name === 'logClientWarn')) {
+                  if (
+                    node.type === 'CallExpression' &&
+                    node.callee.type === 'Identifier' &&
+                    (node.callee.name === 'useClientLogger' ||
+                      node.callee.name === 'logClientError' ||
+                      node.callee.name === 'logClientWarn')
+                  ) {
                     hasClientLoggerUsage = true;
                     return;
                   }
@@ -4091,7 +4326,7 @@ export default {
                   }
                 }
                 checkForClientLoggerUsage(sourceCode.ast);
-                
+
                 if (hasClientLoggerUsage) {
                   context.report({
                     node: node.source,
@@ -4105,7 +4340,10 @@ export default {
             }
 
             // Check if importing logging utilities from @heyclaude/web-runtime/core
-            if (importPath === '@heyclaude/web-runtime/core' || importPath.startsWith('@heyclaude/web-runtime/core')) {
+            if (
+              importPath === '@heyclaude/web-runtime/core' ||
+              importPath.startsWith('@heyclaude/web-runtime/core')
+            ) {
               const loggingImports = [
                 'logger',
                 'normalizeError',
@@ -4168,7 +4406,10 @@ export default {
                       const ast = sourceCode.ast;
                       let lastImport = node;
                       for (const statement of ast.body) {
-                        if (statement.type === 'ImportDeclaration' && statement.range[0] > node.range[0]) {
+                        if (
+                          statement.type === 'ImportDeclaration' &&
+                          statement.range[0] > node.range[0]
+                        ) {
                           lastImport = statement;
                         }
                       }
@@ -4194,15 +4435,17 @@ export default {
                         })
                         .filter(Boolean)
                         .join(', ');
-                      
+
                       // Replace specifiers using range to preserve formatting
                       if (node.specifiers.length > 0) {
                         const firstSpec = node.specifiers[0];
                         const lastSpec = node.specifiers[node.specifiers.length - 1];
-                        fixes.push(fixer.replaceTextRange(
-                          [firstSpec.range[0], lastSpec.range[1]],
-                          specifiersText
-                        ));
+                        fixes.push(
+                          fixer.replaceTextRange(
+                            [firstSpec.range[0], lastSpec.range[1]],
+                            specifiersText
+                          )
+                        );
                       }
                     } else {
                       // No non-logging imports left, remove the import entirely
@@ -4284,7 +4527,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Prevent logging raw userId/user.id without hashing for PII privacy compliance',
+          description:
+            'Prevent logging raw userId/user.id without hashing for PII privacy compliance',
           category: 'Security',
           recommended: true,
         },
@@ -4305,12 +4549,13 @@ export default {
         const ast = sourceCode.ast;
         // Check for 'use client' directive using pure AST (no getText())
         const isClientComponent = hasUseClientDirective(ast);
-        
+
         const isServerCode =
           filename.includes('/app/') ||
           filename.includes('/api/') ||
           filename.includes('server.ts') ||
-          (!isClientComponent && (filename.includes('apps/web/src') || filename.includes('packages/web-runtime/src')));
+          (!isClientComponent &&
+            (filename.includes('apps/web/src') || filename.includes('packages/web-runtime/src')));
 
         // Determine correct import path
         const hashUserIdImportPath = isClientComponent
@@ -4321,18 +4566,26 @@ export default {
         let hasHashUserIdImport = false;
         function checkForHashUserIdImport(node) {
           if (!node) return;
-          if (node.type === 'ImportDeclaration' &&
-              node.source && node.source.type === 'Literal' &&
-              typeof node.source.value === 'string') {
+          if (
+            node.type === 'ImportDeclaration' &&
+            node.source &&
+            node.source.type === 'Literal' &&
+            typeof node.source.value === 'string'
+          ) {
             const importPath = node.source.value;
-            if ((importPath.includes('@heyclaude/web-runtime/logging/') ||
-                 importPath.includes('@heyclaude/shared-runtime') ||
-                 importPath.includes('@heyclaude/web-runtime/core')) &&
-                node.specifiers) {
+            if (
+              (importPath.includes('@heyclaude/web-runtime/logging/') ||
+                importPath.includes('@heyclaude/shared-runtime') ||
+                importPath.includes('@heyclaude/web-runtime/core')) &&
+              node.specifiers
+            ) {
               for (const spec of node.specifiers) {
-                if (spec.type === 'ImportSpecifier' &&
-                    spec.imported && spec.imported.type === 'Identifier' &&
-                    spec.imported.name === 'hashUserId') {
+                if (
+                  spec.type === 'ImportSpecifier' &&
+                  spec.imported &&
+                  spec.imported.type === 'Identifier' &&
+                  spec.imported.name === 'hashUserId'
+                ) {
                   hasHashUserIdImport = true;
                   return;
                 }
@@ -4357,8 +4610,17 @@ export default {
           CallExpression(node) {
             // Check logger calls
             // All logger methods including custom levels (audit, security)
-            const LOGGER_METHODS = ['info', 'error', 'warn', 'debug', 'trace', 'fatal', 'audit', 'security'];
-            
+            const LOGGER_METHODS = [
+              'info',
+              'error',
+              'warn',
+              'debug',
+              'trace',
+              'fatal',
+              'audit',
+              'security',
+            ];
+
             if (
               node.callee.type === 'MemberExpression' &&
               node.callee.object.type === 'Identifier' &&
@@ -4370,27 +4632,21 @@ export default {
                 if (arg.type === 'ObjectExpression') {
                   const properties = arg.properties;
                   for (const prop of properties) {
-                    if (
-                      prop.type === 'Property' &&
-                      prop.key.type === 'Identifier'
-                    ) {
+                    if (prop.type === 'Property' && prop.key.type === 'Identifier') {
                       const keyName = prop.key.name;
-                      
+
                       // Check for raw userId fields
-                      if (
-                        keyName === 'userId' ||
-                        keyName === 'user_id'
-                      ) {
+                      if (keyName === 'userId' || keyName === 'user_id') {
                         // Check if value is user.id or similar raw access
                         const valueText = sourceCode.getText(prop.value);
-                        const isRawUserId = 
+                        const isRawUserId =
                           valueText.includes('user.id') ||
                           valueText.includes('user?.id') ||
                           (prop.value.type === 'MemberExpression' &&
-                           prop.value.object.type === 'Identifier' &&
-                           prop.value.object.name === 'user' &&
-                           prop.value.property.type === 'Identifier' &&
-                           prop.value.property.name === 'id');
+                            prop.value.object.type === 'Identifier' &&
+                            prop.value.object.name === 'user' &&
+                            prop.value.property.type === 'Identifier' &&
+                            prop.value.property.name === 'id');
 
                         if (isRawUserId) {
                           // Note: Autofix disabled - too risky (complex userId transformation could break TypeScript)
@@ -4417,10 +4673,10 @@ export default {
                 valueText.includes('user.id') ||
                 valueText.includes('user?.id') ||
                 (node.value.type === 'MemberExpression' &&
-                 node.value.object.type === 'Identifier' &&
-                 node.value.object.name === 'user' &&
-                 node.value.property.type === 'Identifier' &&
-                 node.value.property.name === 'id');
+                  node.value.object.type === 'Identifier' &&
+                  node.value.object.name === 'user' &&
+                  node.value.property.type === 'Identifier' &&
+                  node.value.property.name === 'id');
 
               if (isRawUserId) {
                 // Check if this is in a logger.child() call - allow it since redaction handles it
@@ -4439,9 +4695,9 @@ export default {
                     if (
                       loggerObject.type === 'Identifier' &&
                       (loggerObject.name === 'logger' ||
-                       loggerObject.name === 'reqLogger' ||
-                       loggerObject.name === 'userLogger' ||
-                       loggerObject.name === 'actionLogger')
+                        loggerObject.name === 'reqLogger' ||
+                        loggerObject.name === 'userLogger' ||
+                        loggerObject.name === 'actionLogger')
                     ) {
                       isInChildLogger = true;
                       break;
@@ -4458,7 +4714,16 @@ export default {
                 }
 
                 // Check if this is in a logger call context (all methods including audit, security)
-                const LOGGER_METHODS = ['info', 'error', 'warn', 'debug', 'trace', 'fatal', 'audit', 'security'];
+                const LOGGER_METHODS = [
+                  'info',
+                  'error',
+                  'warn',
+                  'debug',
+                  'trace',
+                  'fatal',
+                  'audit',
+                  'security',
+                ];
                 let isInLoggerCall = false;
                 parent = node.parent;
                 while (parent) {
@@ -4467,9 +4732,9 @@ export default {
                     parent.callee.type === 'MemberExpression' &&
                     parent.callee.object.type === 'Identifier' &&
                     (parent.callee.object.name === 'logger' ||
-                     parent.callee.object.name === 'reqLogger' ||
-                     parent.callee.object.name === 'userLogger' ||
-                     parent.callee.object.name === 'actionLogger') &&
+                      parent.callee.object.name === 'reqLogger' ||
+                      parent.callee.object.name === 'userLogger' ||
+                      parent.callee.object.name === 'actionLogger') &&
                     parent.callee.property.type === 'Identifier' &&
                     LOGGER_METHODS.includes(parent.callee.property.name)
                   ) {
@@ -4499,7 +4764,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Prefer logger.child() for request-scoped context. This rule detects any remaining setBindings() usage and suggests migration to logger.child().',
+          description:
+            'Prefer logger.child() for request-scoped context. This rule detects any remaining setBindings() usage and suggests migration to logger.child().',
           category: 'Best Practices',
           recommended: true,
         },
@@ -4535,14 +4801,15 @@ export default {
                 fix(fixer) {
                   // Get the bindings object text
                   const bindingsArg = node.arguments[0];
-                  
+
                   // Filter out requestId (we don't use it anymore) and build new child logger call
                   const filteredProps = bindingsArg.properties.filter(
-                    prop => prop.type === 'Property' && 
-                    prop.key.type === 'Identifier' && 
-                    prop.key.name !== 'requestId'
+                    (prop) =>
+                      prop.type === 'Property' &&
+                      prop.key.type === 'Identifier' &&
+                      prop.key.name !== 'requestId'
                   );
-                  
+
                   if (filteredProps.length === 0) {
                     // No valid properties left after filtering - suggest basic child logger
                     return context.report({
@@ -4550,14 +4817,14 @@ export default {
                       messageId: 'useChildLogger',
                     });
                   }
-                  
+
                   // Build replacement with filtered properties
                   const filteredBindingsText = sourceCode.getText({
                     ...bindingsArg,
-                    properties: filteredProps
+                    properties: filteredProps,
                   });
                   const replacement = `const reqLogger = logger.child(${filteredBindingsText})`;
-                  
+
                   return fixer.replaceText(node, replacement);
                 },
               });
@@ -4570,7 +4837,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Ensure all log context parameters use Record<string, unknown> type for consistency',
+          description:
+            'Ensure all log context parameters use Record<string, unknown> type for consistency',
           category: 'Best Practices',
           recommended: true,
         },
@@ -4591,33 +4859,33 @@ export default {
               if (
                 param.type === 'Identifier' &&
                 (param.name === 'logContext' ||
-                 param.name === 'context' ||
-                 param.name === 'logCtx' ||
-                 param.name === 'ctx' ||
-                 param.name.includes('LogContext') ||
-                 param.name.includes('Context'))
+                  param.name === 'context' ||
+                  param.name === 'logCtx' ||
+                  param.name === 'ctx' ||
+                  param.name.includes('LogContext') ||
+                  param.name.includes('Context'))
               ) {
                 // Check if parameter has type annotation
                 if (param.typeAnnotation && param.typeAnnotation.typeAnnotation) {
                   const typeAnnotation = param.typeAnnotation.typeAnnotation;
-                  
+
                   // Check if type is not Record<string, unknown>
                   if (
                     typeAnnotation.type === 'TSTypeReference' &&
                     typeAnnotation.typeName.type === 'Identifier'
                   ) {
                     const typeName = typeAnnotation.typeName.name;
-                    
+
                     // Check for deprecated or incorrect types
                     if (
                       typeName === 'BaseLogContext' ||
                       typeName === 'any' ||
                       typeName === 'object' ||
-                      (typeName === 'Record' && 
-                       typeAnnotation.typeParameters &&
-                       typeAnnotation.typeParameters.params &&
-                       typeAnnotation.typeParameters.params[1] &&
-                       typeAnnotation.typeParameters.params[1].type === 'TSAnyKeyword')
+                      (typeName === 'Record' &&
+                        typeAnnotation.typeParameters &&
+                        typeAnnotation.typeParameters.params &&
+                        typeAnnotation.typeParameters.params[1] &&
+                        typeAnnotation.typeParameters.params[1].type === 'TSAnyKeyword')
                     ) {
                       context.report({
                         node: param,
@@ -4631,17 +4899,18 @@ export default {
                         },
                       });
                     }
-                  } else if (typeAnnotation.type === 'TSAnyKeyword' || 
-                            typeAnnotation.type === 'TSObjectKeyword') {
+                  } else if (
+                    typeAnnotation.type === 'TSAnyKeyword' ||
+                    typeAnnotation.type === 'TSObjectKeyword'
+                  ) {
                     context.report({
                       node: param,
                       messageId: 'useRecordStringUnknown',
-                      data: { actualType: typeAnnotation.type === 'TSAnyKeyword' ? 'any' : 'object' },
+                      data: {
+                        actualType: typeAnnotation.type === 'TSAnyKeyword' ? 'any' : 'object',
+                      },
                       fix(fixer) {
-                        return fixer.replaceText(
-                          param.typeAnnotation,
-                          ': Record<string, unknown>'
-                        );
+                        return fixer.replaceText(param.typeAnnotation, ': Record<string, unknown>');
                       },
                     });
                   }
@@ -4666,22 +4935,22 @@ export default {
                 if (
                   param.type === 'Identifier' &&
                   (param.name === 'logContext' ||
-                   param.name === 'context' ||
-                   param.name === 'logCtx' ||
-                   param.name === 'ctx' ||
-                   param.name.includes('LogContext') ||
-                   param.name.includes('Context'))
+                    param.name === 'context' ||
+                    param.name === 'logCtx' ||
+                    param.name === 'ctx' ||
+                    param.name.includes('LogContext') ||
+                    param.name.includes('Context'))
                 ) {
                   // Similar logic as FunctionDeclaration
                   if (param.typeAnnotation && param.typeAnnotation.typeAnnotation) {
                     const typeAnnotation = param.typeAnnotation.typeAnnotation;
-                    
+
                     if (
                       typeAnnotation.type === 'TSTypeReference' &&
                       typeAnnotation.typeName.type === 'Identifier'
                     ) {
                       const typeName = typeAnnotation.typeName.name;
-                      
+
                       if (
                         typeName === 'BaseLogContext' ||
                         typeName === 'any' ||
@@ -4712,7 +4981,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Enforce bracket notation with type guards when accessing properties from Record<string, unknown> log contexts',
+          description:
+            'Enforce bracket notation with type guards when accessing properties from Record<string, unknown> log contexts',
           category: 'Best Practices',
           recommended: true,
         },
@@ -4720,7 +4990,7 @@ export default {
         schema: [],
         messages: {
           useBracketNotation:
-            'Property access on Record<string, unknown> must use bracket notation with type guard. Use: typeof logContext[\'property\'] === \'string\' ? logContext[\'property\'] : undefined',
+            "Property access on Record<string, unknown> must use bracket notation with type guard. Use: typeof logContext['property'] === 'string' ? logContext['property'] : undefined",
         },
       },
       create(context) {
@@ -4732,18 +5002,18 @@ export default {
             if (
               node.property.type === 'Identifier' &&
               (node.property.name === 'request_id' ||
-               node.property.name === 'action' ||
-               node.property.name === 'function' ||
-               node.property.name === 'started_at')
+                node.property.name === 'action' ||
+                node.property.name === 'function' ||
+                node.property.name === 'started_at')
             ) {
               // Check if object is a variable with logContext/context in name
               if (
                 node.object.type === 'Identifier' &&
                 (node.object.name.includes('logContext') ||
-                 node.object.name.includes('Context') ||
-                 node.object.name === 'context' ||
-                 node.object.name === 'logCtx' ||
-                 node.object.name === 'ctx')
+                  node.object.name.includes('Context') ||
+                  node.object.name === 'context' ||
+                  node.object.name === 'logCtx' ||
+                  node.object.name === 'ctx')
               ) {
                 // Check if parent is not already using bracket notation or type guard
                 let parent = node.parent;
@@ -4784,7 +5054,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Prevent usage of deprecated BaseLogContext type in favor of Record<string, unknown>',
+          description:
+            'Prevent usage of deprecated BaseLogContext type in favor of Record<string, unknown>',
           category: 'Best Practices',
           recommended: true,
         },
@@ -4801,10 +5072,7 @@ export default {
         return {
           TSTypeReference(node) {
             // Check for BaseLogContext type usage
-            if (
-              node.typeName.type === 'Identifier' &&
-              node.typeName.name === 'BaseLogContext'
-            ) {
+            if (node.typeName.type === 'Identifier' && node.typeName.name === 'BaseLogContext') {
               context.report({
                 node,
                 messageId: 'useRecordStringUnknown',
@@ -4816,10 +5084,7 @@ export default {
           },
           ImportSpecifier(node) {
             // Check for BaseLogContext import
-            if (
-              node.imported.type === 'Identifier' &&
-              node.imported.name === 'BaseLogContext'
-            ) {
+            if (node.imported.type === 'Identifier' && node.imported.name === 'BaseLogContext') {
               context.report({
                 node,
                 messageId: 'useRecordStringUnknown',
@@ -4851,7 +5116,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Prevent direct pino() or pinoLogger usage. Use helpers (logError/logWarn) or logger wrapper instead',
+          description:
+            'Prevent direct pino() or pinoLogger usage. Use helpers (logError/logWarn) or logger wrapper instead',
           category: 'Best Practices',
           recommended: true,
         },
@@ -4869,22 +5135,24 @@ export default {
         // Skip if file is the logger config or logger implementation itself
         // These files are allowed to use pino directly
         if (
-          filename.includes('logger/config') || 
+          filename.includes('logger/config') ||
           filename.includes('logger/index') ||
           filename.includes('logging.ts') ||
           filename.includes('logger.ts')
         ) {
           return {};
         }
-        
+
         // Check if file uses createPinoConfig (AST-based)
         const ast = sourceCode.ast;
         let hasCreatePinoConfig = false;
         function checkForCreatePinoConfig(node) {
           if (!node) return;
-          if (node.type === 'CallExpression' &&
-              node.callee.type === 'Identifier' &&
-              node.callee.name === 'createPinoConfig') {
+          if (
+            node.type === 'CallExpression' &&
+            node.callee.type === 'Identifier' &&
+            node.callee.name === 'createPinoConfig'
+          ) {
             hasCreatePinoConfig = true;
             return;
           }
@@ -4907,12 +5175,12 @@ export default {
             // Check for const pinoLogger = pino(...) or const logger = pino(...)
             if (
               node.id.type === 'Identifier' &&
-              (node.id.name === 'pinoLogger' || 
-               (node.id.name === 'logger' && 
-                node.init &&
-                node.init.type === 'CallExpression' &&
-                node.init.callee.type === 'Identifier' &&
-                node.init.callee.name === 'pino'))
+              (node.id.name === 'pinoLogger' ||
+                (node.id.name === 'logger' &&
+                  node.init &&
+                  node.init.type === 'CallExpression' &&
+                  node.init.callee.type === 'Identifier' &&
+                  node.init.callee.name === 'pino'))
             ) {
               // Check if this is in a logger config file (allowed)
               // Files that use createPinoConfig are logger implementations
@@ -4944,7 +5212,9 @@ export default {
               node.callee.object.type === 'Identifier' &&
               node.callee.object.name === 'pinoLogger' &&
               node.callee.property.type === 'Identifier' &&
-              ['error', 'warn', 'info', 'debug', 'trace', 'fatal'].includes(node.callee.property.name) &&
+              ['error', 'warn', 'info', 'debug', 'trace', 'fatal'].includes(
+                node.callee.property.name
+              ) &&
               !hasCreatePinoConfig
             ) {
               context.report({
@@ -4960,7 +5230,8 @@ export default {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Ensure standardized context creation functions are used instead of manual object creation in edge functions',
+          description:
+            'Ensure standardized context creation functions are used instead of manual object creation in edge functions',
           category: 'Best Practices',
           recommended: true,
         },
@@ -4987,14 +5258,11 @@ export default {
             if (
               node.id.type === 'Identifier' &&
               (node.id.name.includes('logContext') ||
-               node.id.name.includes('Context') ||
-               node.id.name === 'context')
+                node.id.name.includes('Context') ||
+                node.id.name === 'context')
             ) {
               // Check if init is an object expression with function, action, request_id, started_at
-              if (
-                node.init &&
-                node.init.type === 'ObjectExpression'
-              ) {
+              if (node.init && node.init.type === 'ObjectExpression') {
                 const properties = node.init.properties;
                 const hasFunction = properties.some(
                   (prop) =>
@@ -5045,48 +5313,52 @@ export default {
         fixable: null,
         schema: [],
         messages: {
-          useImportMapPath: 'Files in packages accessible via import map (shared-runtime, edge-runtime, data-layer) must use import map paths instead of relative imports. Use "@heyclaude/package-name/path/to/file.ts" instead of "./path/to/file.ts" or "../path/to/file.ts".',
+          useImportMapPath:
+            'Files in packages accessible via import map (shared-runtime, edge-runtime, data-layer) must use import map paths instead of relative imports. Use "@heyclaude/package-name/path/to/file.ts" instead of "./path/to/file.ts" or "../path/to/file.ts".',
         },
       },
       create(context) {
         const filename = context.getFilename();
-        
+
         // Only apply to packages that are accessible via import map
-        const isImportMapPackage = 
+        const isImportMapPackage =
           filename.includes('packages/shared-runtime/src/') ||
           filename.includes('packages/edge-runtime/src/') ||
           filename.includes('packages/data-layer/src/');
-        
+
         if (!isImportMapPackage) {
           return {};
         }
-        
+
         // Skip test files - they're typically not imported via import map
         if (filename.includes('.test.') || filename.includes('.spec.')) {
           return {};
         }
-        
+
         return {
           ImportDeclaration(node) {
             const source = node.source.value;
-            
+
             // Check for relative imports (./ or ../)
-            if (typeof source === 'string' && (source.startsWith('./') || source.startsWith('../'))) {
+            if (
+              typeof source === 'string' &&
+              (source.startsWith('./') || source.startsWith('../'))
+            ) {
               // Allow relative imports to npm packages (e.g., './node_modules/...')
               if (source.includes('node_modules/')) {
                 return;
               }
-              
+
               // Allow relative imports to npm: packages
               if (source.startsWith('npm:')) {
                 return;
               }
-              
+
               // Allow relative imports to https:// packages
               if (source.startsWith('https://')) {
                 return;
               }
-              
+
               // Report relative import
               context.report({
                 node: node.source,
@@ -5101,7 +5373,6 @@ export default {
     // ============================================================================
     // NEXT.JS & REACT SERVER COMPONENTS RULES
     // ============================================================================
-
 
     'no-mixed-server-client-patterns': {
       meta: {
@@ -5125,16 +5396,25 @@ export default {
       create(context) {
         const sourceCode = context.getSourceCode();
         const ast = sourceCode.ast;
-        
+
         // Check for 'use client' and 'use server' directives using AST
         let hasUseServer = false;
         let hasUseClient = false;
-        
+
         // Check for directives using pure AST (no getText())
         hasUseServer = hasUseServerDirective(ast);
         hasUseClient = hasUseClientDirective(ast);
 
-        const clientOnlyHooks = ['useState', 'useEffect', 'useLayoutEffect', 'useReducer', 'useRef', 'useCallback', 'useMemo', 'useContext'];
+        const clientOnlyHooks = [
+          'useState',
+          'useEffect',
+          'useLayoutEffect',
+          'useReducer',
+          'useRef',
+          'useCallback',
+          'useMemo',
+          'useContext',
+        ];
 
         return {
           Program(node) {
@@ -5170,7 +5450,6 @@ export default {
         };
       },
     },
-
 
     'no-client-component-data-fetching': {
       meta: {
@@ -5269,11 +5548,11 @@ export default {
         const ast = sourceCode.ast;
         let hasUseClient = false;
         let hasUseServer = false;
-        
+
         // Check for directives using pure AST (no getText())
         hasUseServer = hasUseServerDirective(ast);
         hasUseClient = hasUseClientDirective(ast);
-        
+
         const isServerComponent = filename.includes('/app/') && !hasUseClient && !hasUseServer;
         const isApiRoute = filename.includes('/api/');
         const isAction = filename.includes('/actions/') || hasUseServer;
@@ -5308,16 +5587,18 @@ export default {
               // Find the parent statement node (AssignmentExpression, VariableDeclarator, etc.)
               // Comments are often before the statement, not the CallExpression
               let statementNode = node.parent;
-              while (statementNode && 
-                     statementNode.type !== 'VariableDeclarator' && 
-                     statementNode.type !== 'AssignmentExpression' &&
-                     statementNode.type !== 'ExpressionStatement' &&
-                     statementNode.type !== 'ReturnStatement') {
+              while (
+                statementNode &&
+                statementNode.type !== 'VariableDeclarator' &&
+                statementNode.type !== 'AssignmentExpression' &&
+                statementNode.type !== 'ExpressionStatement' &&
+                statementNode.type !== 'ReturnStatement'
+              ) {
                 statementNode = statementNode.parent;
               }
 
               // Check comments before the parent statement (most common case)
-              const statementComments = statementNode 
+              const statementComments = statementNode
                 ? sourceCode.getCommentsBefore(statementNode) || []
                 : [];
 
@@ -5328,7 +5609,7 @@ export default {
               // This handles cases where comments are separated by import statements
               const nodeLine = node.loc.start.line;
               const allComments = sourceCode.ast.comments || [];
-              
+
               // Find comments within 10 lines before the call
               const nearbyComments = allComments.filter((comment) => {
                 if (!comment.loc) return false;
@@ -5337,7 +5618,11 @@ export default {
               });
 
               // Check all relevant comments for explanation
-              const allRelevantComments = [...statementComments, ...directComments, ...nearbyComments];
+              const allRelevantComments = [
+                ...statementComments,
+                ...directComments,
+                ...nearbyComments,
+              ];
               const hasExplanation = allRelevantComments.some((comment) => {
                 if (!comment || !comment.value) return false;
                 // Check comment.value (AST property) - split and check exact matches (pure AST property access)
@@ -5345,8 +5630,14 @@ export default {
                 const lowerValue = value.toLowerCase();
                 // Split by whitespace/punctuation and check for exact keyword matches (no string includes)
                 const words = lowerValue.split(/\s+|[,.;:!?(){}[\]"'`]/);
-                return words.includes('admin') || words.includes('bypass') || words.includes('rls') ||
-                       words.some(w => w.startsWith('admin') || w.startsWith('bypass') || w.startsWith('rls'));
+                return (
+                  words.includes('admin') ||
+                  words.includes('bypass') ||
+                  words.includes('rls') ||
+                  words.some(
+                    (w) => w.startsWith('admin') || w.startsWith('bypass') || w.startsWith('rls')
+                  )
+                );
               });
 
               if (!hasExplanation) {
@@ -5365,7 +5656,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require proper error handling and logging for RPC calls (error destructuring, error logging)',
+          description:
+            'Require proper error handling and logging for RPC calls (error destructuring, error logging)',
           category: 'Best Practices',
           recommended: true,
         },
@@ -5383,9 +5675,10 @@ export default {
         const sourceCode = context.getSourceCode();
 
         // Apply to data-layer services and any file with RPC calls
-        const isServiceFile = filename.includes('packages/data-layer/src/services') ||
-                              filename.includes('packages/web-runtime/src/data') ||
-                              filename.includes('apps/edge/functions');
+        const isServiceFile =
+          filename.includes('packages/data-layer/src/services') ||
+          filename.includes('packages/web-runtime/src/data') ||
+          filename.includes('apps/edge/functions');
 
         // Track RPC calls and their error handling
         const rpcCalls = [];
@@ -5395,7 +5688,7 @@ export default {
          */
         function hasErrorLoggingInNode(node) {
           if (!node) return false;
-          
+
           // Check for logger.error, logger.warn, logError, logRpcError calls
           if (node.type === 'CallExpression') {
             if (node.callee.type === 'MemberExpression') {
@@ -5406,7 +5699,10 @@ export default {
                   return true;
                 }
                 // Check for child logger patterns (reqLogger.error, etc.)
-                if (obj.name.endsWith('Logger') && (prop.name === 'error' || prop.name === 'warn')) {
+                if (
+                  obj.name.endsWith('Logger') &&
+                  (prop.name === 'error' || prop.name === 'warn')
+                ) {
                   return true;
                 }
               }
@@ -5417,7 +5713,7 @@ export default {
               }
             }
           }
-          
+
           // Recursively check children
           for (const key in node) {
             if (key !== 'parent' && typeof node[key] === 'object' && node[key] !== null) {
@@ -5430,7 +5726,7 @@ export default {
               }
             }
           }
-          
+
           return false;
         }
 
@@ -5445,7 +5741,11 @@ export default {
               // Extract RPC name
               const rpcNameArg = node.arguments[0];
               let rpcName = 'unknown';
-              if (rpcNameArg && rpcNameArg.type === 'Literal' && typeof rpcNameArg.value === 'string') {
+              if (
+                rpcNameArg &&
+                rpcNameArg.type === 'Literal' &&
+                typeof rpcNameArg.value === 'string'
+              ) {
                 rpcName = rpcNameArg.value;
               }
 
@@ -5457,16 +5757,14 @@ export default {
                 if (grandParent?.type === 'VariableDeclarator') {
                   const id = grandParent.id;
                   if (id.type === 'ObjectPattern') {
-                    hasErrorProperty = id.properties.some(
-                      (prop) => prop.key?.name === 'error'
-                    );
+                    hasErrorProperty = id.properties.some((prop) => prop.key?.name === 'error');
                   }
                 }
               }
 
               // Check if this RPC call has error logging in surrounding code (AST-based)
               let hasErrorLogging = false;
-              
+
               // Check parent nodes for error logging
               let current = node.parent;
               while (current) {
@@ -5521,7 +5819,7 @@ export default {
                 // Final check: look for try-catch containing this RPC call
                 let parent = node.parent;
                 let foundTryCatch = false;
-                
+
                 while (parent) {
                   if (parent.type === 'TryStatement') {
                     foundTryCatch = true;
@@ -5550,8 +5848,6 @@ export default {
       },
     },
 
-
-
     // ============================================================================
     // CACHE & PERFORMANCE RULES
     // ============================================================================
@@ -5579,7 +5875,7 @@ export default {
         const ast = sourceCode.ast;
         // Check for 'use server' directive using pure AST (no getText())
         const hasUseServer = hasUseServerDirective(ast);
-        
+
         // Only check server actions
         if (!filename.includes('/actions/') && !hasUseServer) {
           return {};
@@ -5599,7 +5895,7 @@ export default {
               if (['insert', 'update', 'delete', 'upsert'].includes(methodName)) {
                 hasMutation = true;
               }
-              
+
               // Check for revalidation calls
               if (methodName === 'revalidatePath' || methodName === 'revalidateTag') {
                 hasRevalidation = true;
@@ -5618,9 +5914,14 @@ export default {
                 // Note: Checking substring patterns in string literals requires string operations
                 // We use startsWith for prefix patterns (more precise than includes)
                 const rpcNameValue = rpcName.value;
-                if (rpcNameValue.startsWith('create_') || rpcNameValue.startsWith('update_') ||
-                    rpcNameValue.startsWith('delete_') || rpcNameValue.startsWith('manage_') ||
-                    rpcNameValue.startsWith('insert_') || rpcNameValue.startsWith('upsert_')) {
+                if (
+                  rpcNameValue.startsWith('create_') ||
+                  rpcNameValue.startsWith('update_') ||
+                  rpcNameValue.startsWith('delete_') ||
+                  rpcNameValue.startsWith('manage_') ||
+                  rpcNameValue.startsWith('insert_') ||
+                  rpcNameValue.startsWith('upsert_')
+                ) {
                   hasMutation = true;
                 }
               }
@@ -5667,9 +5968,11 @@ export default {
         let hasCaching = false;
         function checkForCaching(node) {
           if (!node) return;
-          if (node.type === 'CallExpression' &&
-              node.callee.type === 'Identifier' &&
-              (node.callee.name === 'unstable_cache' || node.callee.name === 'fetchCached')) {
+          if (
+            node.type === 'CallExpression' &&
+            node.callee.type === 'Identifier' &&
+            (node.callee.name === 'unstable_cache' || node.callee.name === 'fetchCached')
+          ) {
             hasCaching = true;
             return;
           }
@@ -5686,7 +5989,7 @@ export default {
           }
         }
         checkForCaching(ast);
-        
+
         // Skip if file already uses caching
         if (hasCaching) {
           return {};
@@ -5732,7 +6035,7 @@ export default {
 
             // Count await statements in function body
             const awaitStatements = [];
-            
+
             function findAwaits(node) {
               if (node.type === 'AwaitExpression') {
                 awaitStatements.push(node);
@@ -5822,7 +6125,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require validated environment variables instead of direct process.env access',
+          description:
+            'Require validated environment variables instead of direct process.env access',
           category: 'Best Practices',
           recommended: true,
         },
@@ -5893,7 +6197,11 @@ export default {
         const filename = context.getFilename();
 
         // Skip test files and config files
-        if (filename.includes('.test.') || filename.includes('.config.') || filename.includes('readme-builder')) {
+        if (
+          filename.includes('.test.') ||
+          filename.includes('.config.') ||
+          filename.includes('readme-builder')
+        ) {
           return {};
         }
 
@@ -5981,10 +6289,7 @@ export default {
         return {
           CallExpression(node) {
             // Look for actionClient.action() without inputSchema
-            if (
-              node.callee.type === 'MemberExpression' &&
-              node.callee.property.name === 'action'
-            ) {
+            if (node.callee.type === 'MemberExpression' && node.callee.property.name === 'action') {
               // Check if there's .inputSchema() in the chain
               let current = node.callee.object;
               let hasInputSchema = false;
@@ -6042,9 +6347,7 @@ export default {
         return {
           ImportDeclaration(node) {
             if (node.source.value === '@heyclaude/database-types') {
-              const hasConstants = node.specifiers.some(
-                (spec) => spec.local.name === 'Constants'
-              );
+              const hasConstants = node.specifiers.some((spec) => spec.local.name === 'Constants');
               if (hasConstants) {
                 hasConstantsImport = true;
               }
@@ -6162,7 +6465,15 @@ export default {
         },
       },
       create(context) {
-        const sensitiveKeys = ['password', 'token', 'secret', 'apiKey', 'api_key', 'accessToken', 'refreshToken'];
+        const sensitiveKeys = [
+          'password',
+          'token',
+          'secret',
+          'apiKey',
+          'api_key',
+          'accessToken',
+          'refreshToken',
+        ];
 
         return {
           CallExpression(node) {
@@ -6248,7 +6559,7 @@ export default {
         schema: [],
         messages: {
           assertionNeedsComment:
-            'Type assertion should have comment explaining why it\'s necessary. Consider fixing the type instead.',
+            "Type assertion should have comment explaining why it's necessary. Consider fixing the type instead.",
         },
       },
       create(context) {
@@ -6354,9 +6665,7 @@ export default {
               // Check parameters for any type
               if (func.params) {
                 for (const param of func.params) {
-                  if (
-                    param.typeAnnotation?.typeAnnotation?.type === 'TSAnyKeyword'
-                  ) {
+                  if (param.typeAnnotation?.typeAnnotation?.type === 'TSAnyKeyword') {
                     context.report({
                       node: param,
                       messageId: 'anyInPublicApi',
@@ -6408,7 +6717,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Restrict admin client usage to admin-only files or require explanatory comments',
+          description:
+            'Restrict admin client usage to admin-only files or require explanatory comments',
           category: 'Security',
           recommended: true,
         },
@@ -6437,16 +6747,18 @@ export default {
               // Find the parent statement node (AssignmentExpression, VariableDeclarator, etc.)
               // Comments are often before the statement, not the CallExpression
               let statementNode = node.parent;
-              while (statementNode && 
-                     statementNode.type !== 'VariableDeclarator' && 
-                     statementNode.type !== 'AssignmentExpression' &&
-                     statementNode.type !== 'ExpressionStatement' &&
-                     statementNode.type !== 'ReturnStatement') {
+              while (
+                statementNode &&
+                statementNode.type !== 'VariableDeclarator' &&
+                statementNode.type !== 'AssignmentExpression' &&
+                statementNode.type !== 'ExpressionStatement' &&
+                statementNode.type !== 'ReturnStatement'
+              ) {
                 statementNode = statementNode.parent;
               }
 
               // Check comments before the parent statement (most common case)
-              const statementComments = statementNode 
+              const statementComments = statementNode
                 ? sourceCode.getCommentsBefore(statementNode) || []
                 : [];
 
@@ -6457,7 +6769,7 @@ export default {
               // This handles cases where comments are separated by import statements
               const nodeLine = node.loc.start.line;
               const allComments = sourceCode.ast.comments || [];
-              
+
               // Find comments within 10 lines before the call
               const nearbyComments = allComments.filter((comment) => {
                 if (!comment.loc) return false;
@@ -6466,7 +6778,11 @@ export default {
               });
 
               // Check all relevant comments for explanation
-              const allRelevantComments = [...statementComments, ...directComments, ...nearbyComments];
+              const allRelevantComments = [
+                ...statementComments,
+                ...directComments,
+                ...nearbyComments,
+              ];
               const hasExplanation = allRelevantComments.some((comment) => {
                 if (!comment || !comment.value) return false;
                 // Check comment.value (AST property) - split and check exact matches (pure AST property access)
@@ -6474,8 +6790,14 @@ export default {
                 const lowerValue = value.toLowerCase();
                 // Split by whitespace/punctuation and check for exact keyword matches (no string includes)
                 const words = lowerValue.split(/\s+|[,.;:!?(){}[\]"'`]/);
-                return words.includes('admin') || words.includes('bypass') || words.includes('rls') ||
-                       words.some(w => w.startsWith('admin') || w.startsWith('bypass') || w.startsWith('rls'));
+                return (
+                  words.includes('admin') ||
+                  words.includes('bypass') ||
+                  words.includes('rls') ||
+                  words.some(
+                    (w) => w.startsWith('admin') || w.startsWith('bypass') || w.startsWith('rls')
+                  )
+                );
               });
 
               // Only report if there's no explanation comment
@@ -6523,8 +6845,7 @@ export default {
           VariableDeclarator(node) {
             // Check if using authedAction or rateLimitedAction
             if (
-              node.init &&
-              node.init.callee?.object?.name === 'authedAction' ||
+              (node.init && node.init.callee?.object?.name === 'authedAction') ||
               node.init?.callee?.object?.name === 'rateLimitedAction'
             ) {
               usesAuthedAction = true;
@@ -6532,24 +6853,21 @@ export default {
           },
           CallExpression(node) {
             // Check for getAuthenticatedUser calls
-            if (
-              node.callee.type === 'Identifier' &&
-              node.callee.name === 'getAuthenticatedUser'
-            ) {
+            if (node.callee.type === 'Identifier' && node.callee.name === 'getAuthenticatedUser') {
               hasAuthCheck = true;
             }
 
             // Check for mutations without auth
-            if (
-              node.callee.type === 'MemberExpression' &&
-              node.callee.property.name === 'rpc'
-            ) {
+            if (node.callee.type === 'MemberExpression' && node.callee.property.name === 'rpc') {
               const rpcName = node.arguments[0];
               if (rpcName?.type === 'Literal' && typeof rpcName.value === 'string') {
                 // Check RPC name for sensitive patterns using startsWith (more precise)
                 const rpcNameValue = rpcName.value;
-                if (rpcNameValue.startsWith('delete_') || rpcNameValue.startsWith('manage_') ||
-                    rpcNameValue.startsWith('admin_')) {
+                if (
+                  rpcNameValue.startsWith('delete_') ||
+                  rpcNameValue.startsWith('manage_') ||
+                  rpcNameValue.startsWith('admin_')
+                ) {
                   if (!usesAuthedAction && !hasAuthCheck) {
                     context.report({
                       node,
@@ -6656,15 +6974,17 @@ export default {
         const ast = sourceCode.ast;
         let hasNamedExports = false;
         const handlerNames = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
-        
+
         function checkForNamedExports(node) {
           if (!node) return;
           if (node.type === 'ExportNamedDeclaration' && node.declaration) {
-            if (node.declaration.type === 'FunctionDeclaration' &&
-                node.declaration.async &&
-                node.declaration.id &&
-                node.declaration.id.type === 'Identifier' &&
-                handlerNames.includes(node.declaration.id.name)) {
+            if (
+              node.declaration.type === 'FunctionDeclaration' &&
+              node.declaration.async &&
+              node.declaration.id &&
+              node.declaration.id.type === 'Identifier' &&
+              handlerNames.includes(node.declaration.id.name)
+            ) {
               hasNamedExports = true;
               return;
             }
@@ -6692,10 +7012,7 @@ export default {
         return {
           MemberExpression(node) {
             // Look for request.method checks
-            if (
-              node.object.name === 'request' &&
-              node.property.name === 'method'
-            ) {
+            if (node.object.name === 'request' && node.property.name === 'method') {
               hasMethodCheck = true;
             }
           },
@@ -6798,19 +7115,23 @@ export default {
         let hasCorsHeaders = false;
         function checkForCorsHeaders(node) {
           if (!node) return;
-          if (node.type === 'Property' &&
-              node.key && node.key.type === 'Identifier' &&
-              node.key.name === 'Access-Control-Allow-Origin') {
+          if (
+            node.type === 'Property' &&
+            node.key &&
+            node.key.type === 'Identifier' &&
+            node.key.name === 'Access-Control-Allow-Origin'
+          ) {
             hasCorsHeaders = true;
             return;
           }
-          if (node.type === 'Literal' &&
-              typeof node.value === 'string') {
+          if (node.type === 'Literal' && typeof node.value === 'string') {
             // Check for CORS header using exact equality or startsWith (more precise than includes)
             const value = node.value;
-            if (value === 'Access-Control-Allow-Origin' || 
-                value.startsWith('Access-Control-Allow-Origin') ||
-                value.indexOf('Access-Control-Allow-Origin') !== -1) {
+            if (
+              value === 'Access-Control-Allow-Origin' ||
+              value.startsWith('Access-Control-Allow-Origin') ||
+              value.indexOf('Access-Control-Allow-Origin') !== -1
+            ) {
               hasCorsHeaders = true;
               return;
             }
@@ -6874,7 +7195,7 @@ export default {
               if (
                 name === 'readFile' ||
                 name === 'writeFile' ||
-                name === 'setTimeout' && node.arguments[1]?.value > 30000
+                (name === 'setTimeout' && node.arguments[1]?.value > 30000)
               ) {
                 context.report({
                   node,
@@ -6942,18 +7263,20 @@ export default {
         const ast = sourceCode.ast;
         let hasErrorTests = false;
         const errorKeywords = ['error', 'fail', 'throw', 'invalid', 'edge case'];
-        
+
         function checkForErrorTests(node) {
           if (!node) return;
-          if (node.type === 'CallExpression' &&
-              node.callee.type === 'Identifier' &&
-              (node.callee.name === 'it' || node.callee.name === 'test')) {
+          if (
+            node.type === 'CallExpression' &&
+            node.callee.type === 'Identifier' &&
+            (node.callee.name === 'it' || node.callee.name === 'test')
+          ) {
             // Check first argument (test description)
             if (node.arguments && node.arguments.length > 0) {
               const descArg = node.arguments[0];
               if (descArg.type === 'Literal' && typeof descArg.value === 'string') {
                 const desc = descArg.value.toLowerCase();
-                if (errorKeywords.some(keyword => desc.includes(keyword))) {
+                if (errorKeywords.some((keyword) => desc.includes(keyword))) {
                   hasErrorTests = true;
                   return;
                 }
@@ -7013,10 +7336,7 @@ export default {
         return {
           CallExpression(node) {
             // Check for test.only(), describe.only(), it.only()
-            if (
-              node.callee.type === 'MemberExpression' &&
-              node.callee.property.name === 'only'
-            ) {
+            if (node.callee.type === 'MemberExpression' && node.callee.property.name === 'only') {
               const object = node.callee.object;
               if (
                 object.type === 'Identifier' &&
@@ -7065,9 +7385,9 @@ export default {
         }
 
         const heavyPackages = {
-          'moment': 'date-fns or dayjs',
-          'lodash': 'lodash-es with tree-shaking or native methods',
-          'axios': 'native fetch API',
+          moment: 'date-fns or dayjs',
+          lodash: 'lodash-es with tree-shaking or native methods',
+          axios: 'native fetch API',
         };
 
         return {
@@ -7128,9 +7448,7 @@ export default {
         return {
           JSXOpeningElement(node) {
             if (node.name.name === 'Script') {
-              const hasStrategy = node.attributes.some(
-                (attr) => attr.name?.name === 'strategy'
-              );
+              const hasStrategy = node.attributes.some((attr) => attr.name?.name === 'strategy');
 
               if (!hasStrategy) {
                 context.report({
@@ -7235,9 +7553,7 @@ export default {
         return {
           JSXOpeningElement(node) {
             if (node.name.name === 'img' || node.name.name === 'Image') {
-              const altAttr = node.attributes.find(
-                (attr) => attr.name?.name === 'alt'
-              );
+              const altAttr = node.attributes.find((attr) => attr.name?.name === 'alt');
 
               if (altAttr && altAttr.value?.type === 'JSXExpressionContainer') {
                 const expr = altAttr.value.expression;
@@ -7292,8 +7608,7 @@ export default {
         fixable: null,
         schema: [],
         messages: {
-          circularDependency:
-            'Circular dependency detected. Refactor to remove circular import.',
+          circularDependency: 'Circular dependency detected. Refactor to remove circular import.',
         },
       },
       create(context) {
@@ -7342,7 +7657,10 @@ export default {
               });
             }
 
-            if (sourcePackage === 'shared-runtime' && importPath.includes('@heyclaude/web-runtime')) {
+            if (
+              sourcePackage === 'shared-runtime' &&
+              importPath.includes('@heyclaude/web-runtime')
+            ) {
               context.report({
                 node,
                 messageId: 'boundaryViolation',
@@ -7351,12 +7669,13 @@ export default {
             }
 
             // Edge functions should not import Node.js-only modules
-            if (sourcePackage === 'edge-functions' && (
-              importPath.startsWith('node:') ||
-              importPath === 'fs' ||
-              importPath === 'path' ||
-              importPath === 'os'
-            )) {
+            if (
+              sourcePackage === 'edge-functions' &&
+              (importPath.startsWith('node:') ||
+                importPath === 'fs' ||
+                importPath === 'path' ||
+                importPath === 'os')
+            ) {
               context.report({
                 node,
                 messageId: 'boundaryViolation',
@@ -7376,7 +7695,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require complete metadata in generateMetadata functions (recognizes database-driven patterns)',
+          description:
+            'Require complete metadata in generateMetadata functions (recognizes database-driven patterns)',
           category: 'SEO',
           recommended: true,
         },
@@ -7409,7 +7729,7 @@ export default {
 
               // Whitelist: If using database-driven metadata helpers, skip validation
               // These helpers (generatePageMetadata, getSEOMetadata, getCachedHomeMetadata, etc.) ensure complete metadata
-              const usesMetadataHelper = 
+              const usesMetadataHelper =
                 /generatePageMetadata\s*\(/.test(funcText) ||
                 /getSEOMetadata\s*\(/.test(funcText) ||
                 /getSEOMetadataWithSchemas\s*\(/.test(funcText) ||
@@ -7522,10 +7842,7 @@ export default {
             }
 
             // Check for useLocalStorage hook with sensitive keys
-            if (
-              node.callee.type === 'Identifier' &&
-              node.callee.name === 'useLocalStorage'
-            ) {
+            if (node.callee.type === 'Identifier' && node.callee.name === 'useLocalStorage') {
               const keyArg = node.arguments[0];
               if (keyArg && keyArg.type === 'Literal' && typeof keyArg.value === 'string') {
                 if (isSensitiveKey(keyArg.value)) {
@@ -7546,7 +7863,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require child logger in async page/layout functions (requestId was removed from codebase)',
+          description:
+            'Require child logger in async page/layout functions (requestId was removed from codebase)',
           category: 'Best Practices',
           recommended: true,
         },
@@ -7562,7 +7880,10 @@ export default {
         const sourceCode = context.getSourceCode();
 
         // Only check page.tsx and layout.tsx in app directory
-        if (!filename.includes('/app/') || (!filename.endsWith('page.tsx') && !filename.endsWith('layout.tsx'))) {
+        if (
+          !filename.includes('/app/') ||
+          (!filename.endsWith('page.tsx') && !filename.endsWith('layout.tsx'))
+        ) {
           return {};
         }
 
@@ -7592,7 +7913,11 @@ export default {
               if (importPath.includes('logging/server') || importPath.includes('logger')) {
                 // Check if logger is imported
                 for (const spec of node.specifiers || []) {
-                  if (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.type === 'Identifier') {
+                  if (
+                    spec.type === 'ImportSpecifier' &&
+                    spec.imported &&
+                    spec.imported.type === 'Identifier'
+                  ) {
                     if (spec.imported.name === 'logger') {
                       hasLoggerImport = true;
                     }
@@ -7610,7 +7935,11 @@ export default {
               hasAsyncExport = true;
               asyncFunctionNode = node.declaration;
               // Find first statement in function body
-              if (asyncFunctionNode.body && asyncFunctionNode.body.body && asyncFunctionNode.body.body.length > 0) {
+              if (
+                asyncFunctionNode.body &&
+                asyncFunctionNode.body.body &&
+                asyncFunctionNode.body.body.length > 0
+              ) {
                 firstStatementNode = asyncFunctionNode.body.body[0];
               }
             }
@@ -7631,8 +7960,11 @@ export default {
             if (hasAsyncExport && !hasChildLogger) {
               // Determine operation name from function name or file path
               const operationName = asyncFunctionNode?.id?.name || 'Page';
-              const route = filename.includes('/app/') 
-                ? filename.split('/app/')[1]?.replace(/\/page\.tsx$/, '').replace(/\/layout\.tsx$/, '') || '/'
+              const route = filename.includes('/app/')
+                ? filename
+                    .split('/app/')[1]
+                    ?.replace(/\/page\.tsx$/, '')
+                    .replace(/\/layout\.tsx$/, '') || '/'
                 : '/';
               const modulePath = filename.includes('apps/web/src/')
                 ? filename.split('apps/web/src/')[1] || filename
@@ -7672,14 +8004,14 @@ export default {
         return {};
       },
     },
-    
+
     /**
      * WARN-PII-FIELD-LOGGING
-     * 
+     *
      * Warns when PII fields (IP, phone, email, geolocation) are detected in log contexts.
      * This is informational - redaction handles these fields automatically, but developers
      * should be aware they're logging PII.
-     * 
+     *
      * Related: prevent-raw-userid-logging (for user ID hashing)
      * Related: SENSITIVE_PATTERNS in shared-runtime/logger/config.ts (automatic redaction)
      */
@@ -7687,7 +8019,8 @@ export default {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Warn when PII fields (IP, phone, email, geolocation) are logged. Redaction handles these automatically, but developers should be aware.',
+          description:
+            'Warn when PII fields (IP, phone, email, geolocation) are logged. Redaction handles these automatically, but developers should be aware.',
           category: 'Security',
           recommended: true,
         },
@@ -7708,26 +8041,62 @@ export default {
       },
       create(context) {
         // PII field patterns to detect
-        const IP_FIELDS = ['ip', 'ipAddress', 'ip_address', 'clientIp', 'client_ip', 'remoteAddress', 'remote_address', 'xForwardedFor', 'x_forwarded_for'];
-        const PHONE_FIELDS = ['phone', 'phoneNumber', 'phone_number', 'mobile', 'mobileNumber', 'mobile_number', 'telephone', 'tel', 'cell', 'cellPhone', 'cell_phone'];
+        const IP_FIELDS = [
+          'ip',
+          'ipAddress',
+          'ip_address',
+          'clientIp',
+          'client_ip',
+          'remoteAddress',
+          'remote_address',
+          'xForwardedFor',
+          'x_forwarded_for',
+        ];
+        const PHONE_FIELDS = [
+          'phone',
+          'phoneNumber',
+          'phone_number',
+          'mobile',
+          'mobileNumber',
+          'mobile_number',
+          'telephone',
+          'tel',
+          'cell',
+          'cellPhone',
+          'cell_phone',
+        ];
         const EMAIL_FIELDS = ['email', 'userEmail', 'user_email', 'emailAddress', 'email_address'];
-        const GEO_FIELDS = ['latitude', 'longitude', 'lat', 'lng', 'geo', 'geolocation', 'coordinates', 'location'];
-        
+        const GEO_FIELDS = [
+          'latitude',
+          'longitude',
+          'lat',
+          'lng',
+          'geo',
+          'geolocation',
+          'coordinates',
+          'location',
+        ];
+
         // Combine all PII fields for quick lookup
-        const ALL_PII_FIELDS = new Set([...IP_FIELDS, ...PHONE_FIELDS, ...EMAIL_FIELDS, ...GEO_FIELDS]);
-        
+        const ALL_PII_FIELDS = new Set([
+          ...IP_FIELDS,
+          ...PHONE_FIELDS,
+          ...EMAIL_FIELDS,
+          ...GEO_FIELDS,
+        ]);
+
         /**
          * Get the message ID for a PII field
          */
         function getMessageId(fieldName) {
           const lowerField = fieldName.toLowerCase();
-          if (IP_FIELDS.some(f => f.toLowerCase() === lowerField)) return 'ipFieldLogged';
-          if (PHONE_FIELDS.some(f => f.toLowerCase() === lowerField)) return 'phoneFieldLogged';
-          if (EMAIL_FIELDS.some(f => f.toLowerCase() === lowerField)) return 'emailFieldLogged';
-          if (GEO_FIELDS.some(f => f.toLowerCase() === lowerField)) return 'geoFieldLogged';
+          if (IP_FIELDS.some((f) => f.toLowerCase() === lowerField)) return 'ipFieldLogged';
+          if (PHONE_FIELDS.some((f) => f.toLowerCase() === lowerField)) return 'phoneFieldLogged';
+          if (EMAIL_FIELDS.some((f) => f.toLowerCase() === lowerField)) return 'emailFieldLogged';
+          if (GEO_FIELDS.some((f) => f.toLowerCase() === lowerField)) return 'geoFieldLogged';
           return 'genericPiiFieldLogged';
         }
-        
+
         /**
          * Check if we're inside a logger call context
          */
@@ -7738,11 +8107,21 @@ export default {
               parent.type === 'CallExpression' &&
               parent.callee.type === 'MemberExpression' &&
               parent.callee.object.type === 'Identifier' &&
-              (parent.callee.object.name === 'logger' || 
-               parent.callee.object.name.endsWith('Logger') ||
-               parent.callee.object.name === 'pinoLogger') &&
+              (parent.callee.object.name === 'logger' ||
+                parent.callee.object.name.endsWith('Logger') ||
+                parent.callee.object.name === 'pinoLogger') &&
               parent.callee.property.type === 'Identifier' &&
-              ['info', 'error', 'warn', 'debug', 'trace', 'fatal', 'audit', 'security', 'child'].includes(parent.callee.property.name)
+              [
+                'info',
+                'error',
+                'warn',
+                'debug',
+                'trace',
+                'fatal',
+                'audit',
+                'security',
+                'child',
+              ].includes(parent.callee.property.name)
             ) {
               return true;
             }
@@ -7750,7 +8129,9 @@ export default {
             if (
               parent.type === 'CallExpression' &&
               parent.callee.type === 'Identifier' &&
-              ['logError', 'logInfo', 'logWarn', 'logDebug', 'logTrace'].includes(parent.callee.name)
+              ['logError', 'logInfo', 'logWarn', 'logDebug', 'logTrace'].includes(
+                parent.callee.name
+              )
             ) {
               return true;
             }
@@ -7758,24 +8139,24 @@ export default {
           }
           return false;
         }
-        
+
         return {
           Property(node) {
             // Only check properties with identifier keys
             if (node.key.type !== 'Identifier') return;
-            
+
             const fieldName = node.key.name;
-            
+
             // Check if this is a PII field (case-insensitive match)
             const isPiiField = Array.from(ALL_PII_FIELDS).some(
-              piiField => piiField.toLowerCase() === fieldName.toLowerCase()
+              (piiField) => piiField.toLowerCase() === fieldName.toLowerCase()
             );
-            
+
             if (!isPiiField) return;
-            
+
             // Only warn if we're in a logger context
             if (!isInLoggerContext(node)) return;
-            
+
             // Report the warning
             context.report({
               node: node.key,
@@ -7786,23 +8167,24 @@ export default {
         };
       },
     },
-    
+
     /**
      * REQUIRE-AUDIT-LEVEL-FOR-MUTATIONS
-     * 
+     *
      * Suggests adding audit/security structured tags for database mutations and sensitive operations.
      * This helps with compliance logging and audit trails.
-     * 
+     *
      * NOTE: No autofix - use structured tags like { audit: true } or { securityEvent: true }
      * instead of custom log levels (which require TypeScript type augmentation).
-     * 
+     *
      * Level: warn (suggestion, not error)
      */
     'require-audit-level-for-mutations': {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Suggest adding audit/security tags for database mutations and sensitive operations to maintain audit trails.',
+          description:
+            'Suggest adding audit/security tags for database mutations and sensitive operations to maintain audit trails.',
           category: 'Best Practices',
           recommended: true,
         },
@@ -7818,7 +8200,7 @@ export default {
       },
       create(context) {
         const sourceCode = context.getSourceCode();
-        
+
         // Patterns that indicate mutations
         const MUTATION_PATTERNS = [
           /\.insert\s*\(/,
@@ -7828,7 +8210,7 @@ export default {
           /\.rpc\s*\(\s*['"](?:create|update|delete|insert|upsert|remove|add|modify|set|save)/i,
           /isMutation\s*:\s*true/,
         ];
-        
+
         // Patterns that indicate security operations
         const SECURITY_PATTERNS = [
           /auth\.signIn/,
@@ -7842,67 +8224,82 @@ export default {
           /forbidden/i,
           /permission.*denied/i,
         ];
-        
+
         /**
          * Check if the current function contains mutation patterns
          */
         function containsMutationPattern(node) {
           // Get the containing function
           let funcNode = node;
-          while (funcNode && !['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'].includes(funcNode.type)) {
+          while (
+            funcNode &&
+            !['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'].includes(
+              funcNode.type
+            )
+          ) {
             funcNode = funcNode.parent;
           }
-          
+
           if (!funcNode) return false;
-          
+
           const funcText = sourceCode.getText(funcNode);
-          return MUTATION_PATTERNS.some(pattern => pattern.test(funcText));
+          return MUTATION_PATTERNS.some((pattern) => pattern.test(funcText));
         }
-        
+
         /**
          * Check if the current function contains security patterns
          */
         function containsSecurityPattern(node) {
           let funcNode = node;
-          while (funcNode && !['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'].includes(funcNode.type)) {
+          while (
+            funcNode &&
+            !['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'].includes(
+              funcNode.type
+            )
+          ) {
             funcNode = funcNode.parent;
           }
-          
+
           if (!funcNode) return false;
-          
+
           const funcText = sourceCode.getText(funcNode);
-          return SECURITY_PATTERNS.some(pattern => pattern.test(funcText));
+          return SECURITY_PATTERNS.some((pattern) => pattern.test(funcText));
         }
-        
+
         /**
          * Check if the log call already includes audit/security tags
          */
         function hasAuditOrSecurityTag(node) {
           // Check if second argument (log context) exists
           if (node.arguments.length < 2) return false;
-          
+
           const contextArg = node.arguments[1];
-          
+
           // Handle ObjectExpression: { audit: true } or { securityEvent: true }
           if (contextArg.type === 'ObjectExpression') {
-            return contextArg.properties.some(prop => {
+            return contextArg.properties.some((prop) => {
               if (prop.type !== 'Property') return false;
-              const keyName = prop.key.type === 'Identifier' ? prop.key.name : 
-                             prop.key.type === 'Literal' ? prop.key.value : null;
+              const keyName =
+                prop.key.type === 'Identifier'
+                  ? prop.key.name
+                  : prop.key.type === 'Literal'
+                    ? prop.key.value
+                    : null;
               return keyName === 'audit' || keyName === 'securityEvent';
             });
           }
-          
+
           return false;
         }
-        
+
         return {
           CallExpression(node) {
             // Check for logger.info() calls
             if (
               node.callee.type === 'MemberExpression' &&
               node.callee.object.type === 'Identifier' &&
-              (node.callee.object.name === 'logger' || node.callee.object.name.endsWith('Logger')) &&
+              (node.callee.object.name === 'logger' ||
+                node.callee.object.name.endsWith('Logger')) &&
               node.callee.property.type === 'Identifier' &&
               node.callee.property.name === 'info'
             ) {
@@ -7910,7 +8307,7 @@ export default {
               if (hasAuditOrSecurityTag(node)) {
                 return;
               }
-              
+
               // Check if this is in a mutation context
               if (containsMutationPattern(node)) {
                 context.report({
@@ -7932,12 +8329,12 @@ export default {
         };
       },
     },
-    
+
     /**
      * suggest-warn-for-recoverable-errors
-     * 
+     *
      * Suggests using logger.warn() instead of logger.error() for recoverable failures.
-     * 
+     *
      * Patterns detected:
      * - Animation/config loading failures (has fallbacks)
      * - DOMPurify loading failures (has fallbacks)
@@ -7946,14 +8343,15 @@ export default {
      * - Confetti/cosmetic failures (non-critical)
      * - localStorage failures (optional feature)
      * - Rendering fallback errors (has UI fallbacks)
-     * 
+     *
      * Level: warn (suggestion, not error)
      */
     'suggest-warn-for-recoverable-errors': {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Suggest using logger.warn() instead of logger.error() for recoverable failures that have fallbacks or can be retried.',
+          description:
+            'Suggest using logger.warn() instead of logger.error() for recoverable failures that have fallbacks or can be retried.',
           category: 'Best Practices',
           recommended: true,
         },
@@ -7980,7 +8378,7 @@ export default {
       },
       create(context) {
         const sourceCode = context.getSourceCode();
-        
+
         // Patterns that indicate recoverable errors (should be warn, not error)
         const RECOVERABLE_PATTERNS = {
           animationConfig: [
@@ -7994,12 +8392,7 @@ export default {
             /sanitize.*html/i,
             /Failed to sanitize HTML/i,
           ],
-          clipboard: [
-            /clipboard/i,
-            /copy.*fail/i,
-            /failed to copy/i,
-            /copy failed/i,
-          ],
+          clipboard: [/clipboard/i, /copy.*fail/i, /failed to copy/i, /copy failed/i],
           share: [
             /share.*fail/i,
             /screenshot.*fail/i,
@@ -8009,15 +8402,8 @@ export default {
             /Download failed/i,
             /Screenshot.*fail/i,
           ],
-          confetti: [
-            /confetti/i,
-            /celebrate/i,
-          ],
-          localStorage: [
-            /localStorage/i,
-            /local storage/i,
-            /storage event/i,
-          ],
+          confetti: [/confetti/i, /celebrate/i],
+          localStorage: [/localStorage/i, /local storage/i, /storage event/i],
           renderingFallback: [
             /rendering failed/i,
             /render.*fail/i,
@@ -8025,54 +8411,62 @@ export default {
             /Rendering failed/i,
           ],
         };
-        
+
         /**
          * Get the message string from a logger call
          */
         function getLogMessage(node) {
           if (!node.arguments || node.arguments.length === 0) return '';
-          
+
           const firstArg = node.arguments[0];
           if (firstArg.type === 'Literal' && typeof firstArg.value === 'string') {
             return firstArg.value;
           }
           if (firstArg.type === 'TemplateLiteral') {
             // Get the static parts of the template literal
-            return firstArg.quasis.map(q => q.value.raw).join('');
+            return firstArg.quasis.map((q) => q.value.raw).join('');
           }
           return '';
         }
-        
+
         /**
          * Determine which category of recoverable error this is
          */
         function getRecoverableCategory(message) {
           const lowerMessage = message.toLowerCase();
-          
+
           for (const [category, patterns] of Object.entries(RECOVERABLE_PATTERNS)) {
-            if (patterns.some(pattern => pattern.test(lowerMessage))) {
+            if (patterns.some((pattern) => pattern.test(lowerMessage))) {
               return category;
             }
           }
           return null;
         }
-        
+
         /**
          * Get the appropriate message ID for a category
          */
         function getMessageId(category) {
           switch (category) {
-            case 'animationConfig': return 'animationConfigShouldWarn';
-            case 'domPurify': return 'domPurifyShouldWarn';
-            case 'clipboard': return 'clipboardShouldWarn';
-            case 'share': return 'shareShouldWarn';
-            case 'confetti': return 'confettiShouldWarn';
-            case 'localStorage': return 'localStorageShouldWarn';
-            case 'renderingFallback': return 'renderingFallbackShouldWarn';
-            default: return 'genericRecoverableShouldWarn';
+            case 'animationConfig':
+              return 'animationConfigShouldWarn';
+            case 'domPurify':
+              return 'domPurifyShouldWarn';
+            case 'clipboard':
+              return 'clipboardShouldWarn';
+            case 'share':
+              return 'shareShouldWarn';
+            case 'confetti':
+              return 'confettiShouldWarn';
+            case 'localStorage':
+              return 'localStorageShouldWarn';
+            case 'renderingFallback':
+              return 'renderingFallbackShouldWarn';
+            default:
+              return 'genericRecoverableShouldWarn';
           }
         }
-        
+
         return {
           CallExpression(node) {
             // Check if this is a logger.error() call
@@ -8082,10 +8476,9 @@ export default {
               node.callee.property.name === 'error'
             ) {
               // Check if the object is a logger (logger, reqLogger, childLogger, etc.)
-              const objectName = node.callee.object.type === 'Identifier' 
-                ? node.callee.object.name 
-                : '';
-              
+              const objectName =
+                node.callee.object.type === 'Identifier' ? node.callee.object.name : '';
+
               if (
                 objectName === 'logger' ||
                 objectName.endsWith('Logger') ||
@@ -8093,7 +8486,7 @@ export default {
               ) {
                 const message = getLogMessage(node);
                 const category = getRecoverableCategory(message);
-                
+
                 if (category) {
                   context.report({
                     node: node.callee.property,
@@ -8110,17 +8503,22 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require route and operation in logger.child() context for server components and API routes. Prefer logger.child() for request-scoped context instead of passing context in every log call.',
+          description:
+            'Require route and operation in logger.child() context for server components and API routes. Prefer logger.child() for request-scoped context instead of passing context in every log call.',
           category: 'Best Practices',
           recommended: true,
         },
         fixable: null,
         schema: [],
         messages: {
-          missingLoggerChild: 'Server components and API routes with async operations must create request-scoped logger using logger.child()',
-          missingRoute: 'logger.child() must include route in context object. Use: const reqLogger = logger.child({ operation: "MyPage", route: "/my-page" })',
-          missingOperation: 'logger.child() must include operation in context object. Use: const reqLogger = logger.child({ operation: "MyPage", route: "/my-page" })',
-          useChildLogger: 'Use logger.child({ {field}, ... }) at request start instead of passing {field} in every log call. Child logger context is automatically included in all logs.',
+          missingLoggerChild:
+            'Server components and API routes with async operations must create request-scoped logger using logger.child()',
+          missingRoute:
+            'logger.child() must include route in context object. Use: const reqLogger = logger.child({ operation: "MyPage", route: "/my-page" })',
+          missingOperation:
+            'logger.child() must include operation in context object. Use: const reqLogger = logger.child({ operation: "MyPage", route: "/my-page" })',
+          useChildLogger:
+            'Use logger.child({ {field}, ... }) at request start instead of passing {field} in every log call. Child logger context is automatically included in all logs.',
         },
       },
       create(context) {
@@ -8129,8 +8527,12 @@ export default {
         const ast = sourceCode.ast;
 
         // Only validate server components and API routes
-        const isServerComponent = filename.includes('/app/') && (filename.endsWith('/page.tsx') || filename.endsWith('/page.ts'));
-        const isApiRoute = filename.includes('/api/') && (filename.endsWith('/route.ts') || filename.endsWith('/route.tsx'));
+        const isServerComponent =
+          filename.includes('/app/') &&
+          (filename.endsWith('/page.tsx') || filename.endsWith('/page.ts'));
+        const isApiRoute =
+          filename.includes('/api/') &&
+          (filename.endsWith('/route.ts') || filename.endsWith('/route.tsx'));
 
         if (!isServerComponent && !isApiRoute) {
           return {};
@@ -8151,10 +8553,21 @@ export default {
         let hasRoute = false;
         let hasOperation = false;
         let loggerChildNode = null;
-        
+
         // Track context fields that should be in child logger (from require-logger-bindings-for-context)
         const contextFields = ['operation', 'route', 'module', 'function', 'userId', 'method'];
-        const childLoggerNames = ['reqLogger', 'userLogger', 'actionLogger', 'metadataLogger', 'viewerLogger', 'processLogger', 'callbackLogger', 'requestLogger', 'utilityLogger', 'sectionLogger'];
+        const childLoggerNames = [
+          'reqLogger',
+          'userLogger',
+          'actionLogger',
+          'metadataLogger',
+          'viewerLogger',
+          'processLogger',
+          'callbackLogger',
+          'requestLogger',
+          'utilityLogger',
+          'sectionLogger',
+        ];
         let hasChildLoggerVariable = false;
 
         // Helper to check if node contains async operations
@@ -8172,20 +8585,38 @@ export default {
             if (n.type === 'CallExpression') {
               if (n.callee && n.callee.type === 'MemberExpression') {
                 const prop = n.callee.property;
-                if (prop && prop.type === 'Identifier' && (prop.name === 'rpc' || prop.name === 'from')) {
+                if (
+                  prop &&
+                  prop.type === 'Identifier' &&
+                  (prop.name === 'rpc' || prop.name === 'from')
+                ) {
                   found = true;
                   return;
                 }
               }
               if (n.callee && n.callee.type === 'Identifier') {
-                const names = ['fetch', 'getContent', 'getData', 'fetchData', 'loadData', 'query', 'select', 'getUser', 'getCategory'];
+                const names = [
+                  'fetch',
+                  'getContent',
+                  'getData',
+                  'fetchData',
+                  'loadData',
+                  'query',
+                  'select',
+                  'getUser',
+                  'getCategory',
+                ];
                 if (names.includes(n.callee.name)) {
                   found = true;
                   return;
                 }
               }
             }
-            if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') {
+            if (
+              n.type === 'FunctionDeclaration' ||
+              n.type === 'FunctionExpression' ||
+              n.type === 'ArrowFunctionExpression'
+            ) {
               if (n.async) {
                 found = true;
                 return;
@@ -8210,11 +8641,11 @@ export default {
         }
 
         // Helper to check for 'use cache' directive
-          function checkUseCache(node) {
-            if (!node) return false;
-            // Check comments using pure AST (no getText())
-            const comments = sourceCode.getCommentsBefore(node) || [];
-            return hasUseCacheDirective(comments);
+        function checkUseCache(node) {
+          if (!node) return false;
+          // Check comments using pure AST (no getText())
+          const comments = sourceCode.getCommentsBefore(node) || [];
+          return hasUseCacheDirective(comments);
           // Check for directive in program body
           if (node.type === 'Program' && node.body && node.body.length > 0) {
             const first = node.body[0];
@@ -8224,9 +8655,16 @@ export default {
                 // Use AST properties directly (no string includes)
                 const value = expr.value;
                 const raw = expr.raw;
-                if (value === 'use cache' || value === "'use cache'" || value === '"use cache"' ||
-                    raw === "'use cache'" || raw === '"use cache"' ||
-                    value === 'use cache: private' || raw === "'use cache: private'" || raw === '"use cache: private"') {
+                if (
+                  value === 'use cache' ||
+                  value === "'use cache'" ||
+                  value === '"use cache"' ||
+                  raw === "'use cache'" ||
+                  raw === '"use cache"' ||
+                  value === 'use cache: private' ||
+                  raw === "'use cache: private'" ||
+                  raw === '"use cache: private"'
+                ) {
                   return true;
                 }
               }
@@ -8242,7 +8680,12 @@ export default {
             for (const stmt of node.body || []) {
               if (stmt.type === 'ExportDefaultDeclaration') {
                 const decl = stmt.declaration;
-                if (decl && (decl.type === 'FunctionDeclaration' || decl.type === 'FunctionExpression' || decl.type === 'ArrowFunctionExpression')) {
+                if (
+                  decl &&
+                  (decl.type === 'FunctionDeclaration' ||
+                    decl.type === 'FunctionExpression' ||
+                    decl.type === 'ArrowFunctionExpression')
+                ) {
                   return decl;
                 }
                 if (decl && decl.type === 'Identifier') {
@@ -8263,12 +8706,12 @@ export default {
           Program(node) {
             hasUseCache = checkUseCache(node);
             defaultExportFunction = findDefaultExport(node);
-            
+
             if (hasUseCache && defaultExportFunction) {
               // Check if component body has async operations
               hasAsyncInComponentBody = hasAsyncOps(defaultExportFunction);
             }
-            
+
             // Check entire file for async operations
             hasAsyncOperations = hasAsyncOps(node);
           },
@@ -8278,10 +8721,10 @@ export default {
               node.callee.type === 'MemberExpression' &&
               node.callee.property.type === 'Identifier' &&
               node.callee.property.name === 'child' &&
-              (node.callee.object.type === 'Identifier' && 
-               (node.callee.object.name === 'logger' || 
-                node.callee.object.name === 'reqLogger' || 
-                node.callee.object.name === 'routeLogger'))
+              node.callee.object.type === 'Identifier' &&
+              (node.callee.object.name === 'logger' ||
+                node.callee.object.name === 'reqLogger' ||
+                node.callee.object.name === 'routeLogger')
             ) {
               hasLoggerChild = true;
               loggerChildNode = node;
@@ -8301,7 +8744,7 @@ export default {
                 }
               }
             }
-            
+
             // Check logger calls (only base logger, not child loggers) - from require-logger-bindings-for-context
             if (
               node.callee.type === 'MemberExpression' &&
@@ -8316,7 +8759,12 @@ export default {
               const contextArg = args && args.length > 0 ? args[0] : null;
 
               // Skip if child logger is used (either via logger.child() or child logger variables)
-              if (contextArg && contextArg.type === 'ObjectExpression' && !hasLoggerChild && !hasChildLoggerVariable) {
+              if (
+                contextArg &&
+                contextArg.type === 'ObjectExpression' &&
+                !hasLoggerChild &&
+                !hasChildLoggerVariable
+              ) {
                 // Check if context contains fields that should be in child logger
                 for (const prop of contextArg.properties || []) {
                   if (prop.type === 'Property' && prop.key.type === 'Identifier') {
@@ -8335,7 +8783,11 @@ export default {
           },
           VariableDeclarator(node) {
             // Check for child logger variable declarations - from require-logger-bindings-for-context
-            if (node.id && node.id.type === 'Identifier' && childLoggerNames.includes(node.id.name)) {
+            if (
+              node.id &&
+              node.id.type === 'Identifier' &&
+              childLoggerNames.includes(node.id.name)
+            ) {
               hasChildLoggerVariable = true;
             }
           },
@@ -8374,7 +8826,8 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require try/catch blocks and error logging in server components with async operations',
+          description:
+            'Require try/catch blocks and error logging in server components with async operations',
           category: 'Best Practices',
           recommended: true,
         },
@@ -8382,7 +8835,8 @@ export default {
         schema: [],
         messages: {
           missingTryCatch: 'Server components with async operations must have try/catch blocks',
-          missingErrorLogging: 'Catch blocks must log errors using logger.error() or reqLogger.error()',
+          missingErrorLogging:
+            'Catch blocks must log errors using logger.error() or reqLogger.error()',
           missingNormalizeError: 'Catch blocks should use normalizeError() before logging',
         },
       },
@@ -8392,7 +8846,9 @@ export default {
         const ast = sourceCode.ast;
 
         // Only validate server components
-        const isServerComponent = filename.includes('/app/') && (filename.endsWith('/page.tsx') || filename.endsWith('/page.ts'));
+        const isServerComponent =
+          filename.includes('/app/') &&
+          (filename.endsWith('/page.tsx') || filename.endsWith('/page.ts'));
 
         if (!isServerComponent) {
           return {};
@@ -8427,20 +8883,38 @@ export default {
             if (n.type === 'CallExpression') {
               if (n.callee && n.callee.type === 'MemberExpression') {
                 const prop = n.callee.property;
-                if (prop && prop.type === 'Identifier' && (prop.name === 'rpc' || prop.name === 'from')) {
+                if (
+                  prop &&
+                  prop.type === 'Identifier' &&
+                  (prop.name === 'rpc' || prop.name === 'from')
+                ) {
                   found = true;
                   return;
                 }
               }
               if (n.callee && n.callee.type === 'Identifier') {
-                const names = ['fetch', 'getContent', 'getData', 'fetchData', 'loadData', 'query', 'select', 'getUser', 'getCategory'];
+                const names = [
+                  'fetch',
+                  'getContent',
+                  'getData',
+                  'fetchData',
+                  'loadData',
+                  'query',
+                  'select',
+                  'getUser',
+                  'getCategory',
+                ];
                 if (names.includes(n.callee.name)) {
                   found = true;
                   return;
                 }
               }
             }
-            if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') {
+            if (
+              n.type === 'FunctionDeclaration' ||
+              n.type === 'FunctionExpression' ||
+              n.type === 'ArrowFunctionExpression'
+            ) {
               if (n.async) {
                 found = true;
                 return;
@@ -8481,9 +8955,16 @@ export default {
                 const value = expr.value;
                 const raw = expr.raw;
                 // Check AST properties directly (no string includes)
-                if (value === 'use cache' || value === "'use cache'" || value === '"use cache"' ||
-                    raw === "'use cache'" || raw === '"use cache"' ||
-                    value === 'use cache: private' || raw === "'use cache: private'" || raw === '"use cache: private"') {
+                if (
+                  value === 'use cache' ||
+                  value === "'use cache'" ||
+                  value === '"use cache"' ||
+                  raw === "'use cache'" ||
+                  raw === '"use cache"' ||
+                  value === 'use cache: private' ||
+                  raw === "'use cache: private'" ||
+                  raw === '"use cache: private"'
+                ) {
                   return true;
                 }
               }
@@ -8499,7 +8980,12 @@ export default {
             for (const stmt of node.body || []) {
               if (stmt.type === 'ExportDefaultDeclaration') {
                 const decl = stmt.declaration;
-                if (decl && (decl.type === 'FunctionDeclaration' || decl.type === 'FunctionExpression' || decl.type === 'ArrowFunctionExpression')) {
+                if (
+                  decl &&
+                  (decl.type === 'FunctionDeclaration' ||
+                    decl.type === 'FunctionExpression' ||
+                    decl.type === 'ArrowFunctionExpression')
+                ) {
                   return decl;
                 }
                 if (decl && decl.type === 'Identifier') {
@@ -8519,11 +9005,11 @@ export default {
           Program(node) {
             hasUseCache = checkUseCache(node);
             defaultExportFunction = findDefaultExport(node);
-            
+
             if (hasUseCache && defaultExportFunction) {
               hasAsyncInComponentBody = hasAsyncOps(defaultExportFunction);
             }
-            
+
             hasAsyncOperations = hasAsyncOps(node);
           },
           TryStatement(node) {
@@ -8539,10 +9025,10 @@ export default {
               node.callee.property.type === 'Identifier' &&
               (node.callee.property.name === 'error' || node.callee.property.name === 'warn') &&
               node.callee.object.type === 'Identifier' &&
-              (node.callee.object.name === 'logger' || 
-               node.callee.object.name === 'reqLogger' || 
-               node.callee.object.name === 'routeLogger' ||
-               node.callee.object.name === 'userLogger')
+              (node.callee.object.name === 'logger' ||
+                node.callee.object.name === 'reqLogger' ||
+                node.callee.object.name === 'routeLogger' ||
+                node.callee.object.name === 'userLogger')
             ) {
               // Check if this call is within a catch block
               let parent = node.parent;
@@ -8554,8 +9040,12 @@ export default {
                     const firstArg = node.arguments[0];
                     if (firstArg && firstArg.type === 'ObjectExpression') {
                       for (const prop of firstArg.properties || []) {
-                        if (prop.type === 'Property' && prop.key && prop.key.type === 'Identifier' && 
-                            (prop.key.name === 'err' || prop.key.name === 'error')) {
+                        if (
+                          prop.type === 'Property' &&
+                          prop.key &&
+                          prop.key.type === 'Identifier' &&
+                          (prop.key.name === 'err' || prop.key.name === 'error')
+                        ) {
                           // Check if error value is normalized
                           if (prop.value && prop.value.type === 'Identifier') {
                             // Check if this identifier is result of normalizeError
@@ -8563,12 +9053,17 @@ export default {
                             let varParent = node.parent;
                             while (varParent) {
                               if (varParent.type === 'VariableDeclarator' && varParent.init) {
-                                if (varParent.init.type === 'CallExpression' && 
-                                    varParent.init.callee && 
-                                    varParent.init.callee.type === 'Identifier' && 
-                                    varParent.init.callee.name === 'normalizeError') {
-                                  if (varParent.id && varParent.id.type === 'Identifier' && 
-                                      varParent.id.name === prop.value.name) {
+                                if (
+                                  varParent.init.type === 'CallExpression' &&
+                                  varParent.init.callee &&
+                                  varParent.init.callee.type === 'Identifier' &&
+                                  varParent.init.callee.name === 'normalizeError'
+                                ) {
+                                  if (
+                                    varParent.id &&
+                                    varParent.id.type === 'Identifier' &&
+                                    varParent.id.name === prop.value.name
+                                  ) {
                                     isNormalized = true;
                                     break;
                                   }
@@ -8591,10 +9086,7 @@ export default {
             }
 
             // Check for normalizeError usage in catch blocks
-            if (
-              node.callee.type === 'Identifier' &&
-              node.callee.name === 'normalizeError'
-            ) {
+            if (node.callee.type === 'Identifier' && node.callee.name === 'normalizeError') {
               let parent = node.parent;
               while (parent) {
                 if (parent.type === 'CatchClause') {
@@ -8640,14 +9132,16 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require useLoggedAsync or equivalent error handling in client components with async operations',
+          description:
+            'Require useLoggedAsync or equivalent error handling in client components with async operations',
           category: 'Best Practices',
           recommended: true,
         },
         fixable: null,
         schema: [],
         messages: {
-          missingUseLoggedAsync: 'Client components with async operations must use useLoggedAsync or equivalent error handling (.catch with logUnhandledPromise, or try/catch with error logging)',
+          missingUseLoggedAsync:
+            'Client components with async operations must use useLoggedAsync or equivalent error handling (.catch with logUnhandledPromise, or try/catch with error logging)',
         },
       },
       create(context) {
@@ -8682,18 +9176,32 @@ export default {
                 found = true;
                 return;
               }
-              if (n.callee && n.callee.type === 'MemberExpression' && n.callee.property && n.callee.property.type === 'Identifier') {
+              if (
+                n.callee &&
+                n.callee.type === 'MemberExpression' &&
+                n.callee.property &&
+                n.callee.property.type === 'Identifier'
+              ) {
                 if (n.callee.property.name === 'then' || n.callee.property.name === 'catch') {
                   found = true;
                   return;
                 }
               }
             }
-            if (n.type === 'NewExpression' && n.callee && n.callee.type === 'Identifier' && n.callee.name === 'Promise') {
+            if (
+              n.type === 'NewExpression' &&
+              n.callee &&
+              n.callee.type === 'Identifier' &&
+              n.callee.name === 'Promise'
+            ) {
               found = true;
               return;
             }
-            if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') {
+            if (
+              n.type === 'FunctionDeclaration' ||
+              n.type === 'FunctionExpression' ||
+              n.type === 'ArrowFunctionExpression'
+            ) {
               if (n.async) {
                 found = true;
                 return;
@@ -8723,10 +9231,7 @@ export default {
           },
           CallExpression(node) {
             // Check for useLoggedAsync usage
-            if (
-              node.callee.type === 'Identifier' &&
-              node.callee.name === 'useLoggedAsync'
-            ) {
+            if (node.callee.type === 'Identifier' && node.callee.name === 'useLoggedAsync') {
               hasUseLoggedAsync = true;
             }
 
@@ -8738,10 +9243,19 @@ export default {
             ) {
               // Check if catch block contains logUnhandledPromise using AST
               const catchArg = node.arguments[0];
-              if (catchArg && (catchArg.type === 'ArrowFunctionExpression' || catchArg.type === 'FunctionExpression')) {
+              if (
+                catchArg &&
+                (catchArg.type === 'ArrowFunctionExpression' ||
+                  catchArg.type === 'FunctionExpression')
+              ) {
                 function findLogUnhandledPromise(n) {
                   if (!n) return false;
-                  if (n.type === 'CallExpression' && n.callee && n.callee.type === 'Identifier' && n.callee.name === 'logUnhandledPromise') {
+                  if (
+                    n.type === 'CallExpression' &&
+                    n.callee &&
+                    n.callee.type === 'Identifier' &&
+                    n.callee.name === 'logUnhandledPromise'
+                  ) {
                     return true;
                   }
                   for (const key in n) {
@@ -8798,16 +9312,20 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require Cache Components directive for server components with data fetching',
+          description:
+            'Require Cache Components directive for server components with data fetching',
           category: 'Best Practices',
           recommended: true,
         },
         fixable: null, // DISABLED: Autofix too risky - directive placement is critical and can break pages
         schema: [],
         messages: {
-          missingCacheDirective: "Server components with async data fetching must use 'use cache' or 'use cache: private' directive",
-          missingCacheLife: "Components with cache directive should use cacheLife() to specify cache profile",
-          missingConnection: 'Components with non-deterministic operations (Date.now(), Math.random()) must call await connection() before using them',
+          missingCacheDirective:
+            "Server components with async data fetching must use 'use cache' or 'use cache: private' directive",
+          missingCacheLife:
+            'Components with cache directive should use cacheLife() to specify cache profile',
+          missingConnection:
+            'Components with non-deterministic operations (Date.now(), Math.random()) must call await connection() before using them',
         },
       },
       create(context) {
@@ -8816,7 +9334,9 @@ export default {
         const ast = sourceCode.ast;
 
         // Only validate server components (pages)
-        const isServerComponent = filename.includes('/app/') && (filename.endsWith('/page.tsx') || filename.endsWith('/page.ts'));
+        const isServerComponent =
+          filename.includes('/app/') &&
+          (filename.endsWith('/page.tsx') || filename.endsWith('/page.ts'));
         if (!isServerComponent) {
           return {};
         }
@@ -8828,8 +9348,14 @@ export default {
         }
 
         // Skip excluded pages
-        const excludedPages = ['error.tsx', 'loading.tsx', 'not-found.tsx', 'layout.tsx', 'template.tsx'];
-        if (excludedPages.some(excluded => filename.includes(excluded))) {
+        const excludedPages = [
+          'error.tsx',
+          'loading.tsx',
+          'not-found.tsx',
+          'layout.tsx',
+          'template.tsx',
+        ];
+        if (excludedPages.some((excluded) => filename.includes(excluded))) {
           return {};
         }
 
@@ -8846,7 +9372,12 @@ export default {
           for (const stmt of node.body || []) {
             if (stmt.type === 'ExportDefaultDeclaration') {
               const decl = stmt.declaration;
-              if (decl && (decl.type === 'FunctionDeclaration' || decl.type === 'FunctionExpression' || decl.type === 'ArrowFunctionExpression')) {
+              if (
+                decl &&
+                (decl.type === 'FunctionDeclaration' ||
+                  decl.type === 'FunctionExpression' ||
+                  decl.type === 'ArrowFunctionExpression')
+              ) {
                 return decl;
               }
               if (decl && decl.type === 'Identifier') {
@@ -8865,7 +9396,19 @@ export default {
         function hasAsyncDataFetchingOps(node) {
           if (!node) return false;
           let found = false;
-          const dataFetchingPatterns = ['rpc', 'from', 'fetch', 'getContent', 'getData', 'fetchData', 'loadData', 'query', 'select', 'getUser', 'getCategory'];
+          const dataFetchingPatterns = [
+            'rpc',
+            'from',
+            'fetch',
+            'getContent',
+            'getData',
+            'fetchData',
+            'loadData',
+            'query',
+            'select',
+            'getUser',
+            'getCategory',
+          ];
           function traverse(n) {
             if (!n || found) return;
             if (n.type === 'AwaitExpression') {
@@ -8873,18 +9416,31 @@ export default {
               return;
             }
             if (n.type === 'CallExpression') {
-              if (n.callee && n.callee.type === 'MemberExpression' && n.callee.property && n.callee.property.type === 'Identifier') {
+              if (
+                n.callee &&
+                n.callee.type === 'MemberExpression' &&
+                n.callee.property &&
+                n.callee.property.type === 'Identifier'
+              ) {
                 if (n.callee.property.name === 'rpc' || n.callee.property.name === 'from') {
                   found = true;
                   return;
                 }
               }
-              if (n.callee && n.callee.type === 'Identifier' && dataFetchingPatterns.includes(n.callee.name)) {
+              if (
+                n.callee &&
+                n.callee.type === 'Identifier' &&
+                dataFetchingPatterns.includes(n.callee.name)
+              ) {
                 found = true;
                 return;
               }
             }
-            if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') {
+            if (
+              n.type === 'FunctionDeclaration' ||
+              n.type === 'FunctionExpression' ||
+              n.type === 'ArrowFunctionExpression'
+            ) {
               if (n.async) {
                 found = true;
                 return;
@@ -8919,16 +9475,24 @@ export default {
                 const obj = n.callee.object;
                 const prop = n.callee.property;
                 if (obj && obj.type === 'Identifier' && prop && prop.type === 'Identifier') {
-                  if ((obj.name === 'Date' && prop.name === 'now') ||
-                      (obj.name === 'Math' && prop.name === 'random') ||
-                      (obj.name === 'crypto' && prop.name === 'randomUUID') ||
-                      (obj.name === 'performance' && prop.name === 'now')) {
+                  if (
+                    (obj.name === 'Date' && prop.name === 'now') ||
+                    (obj.name === 'Math' && prop.name === 'random') ||
+                    (obj.name === 'crypto' && prop.name === 'randomUUID') ||
+                    (obj.name === 'performance' && prop.name === 'now')
+                  ) {
                     found = true;
                     return;
                   }
                 }
               }
-              if (n.callee && n.callee.type === 'NewExpression' && n.callee.callee && n.callee.callee.type === 'Identifier' && n.callee.callee.name === 'Date') {
+              if (
+                n.callee &&
+                n.callee.type === 'NewExpression' &&
+                n.callee.callee &&
+                n.callee.callee.type === 'Identifier' &&
+                n.callee.callee.name === 'Date'
+              ) {
                 found = true;
                 return;
               }
@@ -8968,9 +9532,16 @@ export default {
                 const value = expr.value;
                 const raw = expr.raw;
                 // Check AST properties directly (no string includes)
-                if (value === 'use cache' || value === "'use cache'" || value === '"use cache"' ||
-                    raw === "'use cache'" || raw === '"use cache"' ||
-                    value === 'use cache: private' || raw === "'use cache: private'" || raw === '"use cache: private"') {
+                if (
+                  value === 'use cache' ||
+                  value === "'use cache'" ||
+                  value === '"use cache"' ||
+                  raw === "'use cache'" ||
+                  raw === '"use cache"' ||
+                  value === 'use cache: private' ||
+                  raw === "'use cache: private'" ||
+                  raw === '"use cache: private"'
+                ) {
                   return true;
                 }
               }
@@ -8990,11 +9561,19 @@ export default {
           },
           CallExpression(node) {
             // Check for cacheLife() calls
-            if (node.callee && node.callee.type === 'Identifier' && node.callee.name === 'cacheLife') {
+            if (
+              node.callee &&
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'cacheLife'
+            ) {
               hasCacheLife = true;
             }
             // Check for connection() calls
-            if (node.callee && node.callee.type === 'Identifier' && node.callee.name === 'connection') {
+            if (
+              node.callee &&
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'connection'
+            ) {
               hasConnection = true;
             }
           },
@@ -9030,19 +9609,25 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require proper awaiting of params, searchParams, headers(), and cookies() in Next.js 15+',
+          description:
+            'Require proper awaiting of params, searchParams, headers(), and cookies() in Next.js 15+',
           category: 'Best Practices',
           recommended: true,
         },
         fixable: null,
         schema: [],
         messages: {
-          paramsNotAwaited: 'params must be awaited before property access. Use: const { id } = await params',
-          searchParamsNotAwaited: 'searchParams must be awaited before property access. Use: const query = await searchParams',
-          headersNotAwaited: 'headers() returns a Promise and must be awaited. Use: const headers = await headers()',
-          cookiesNotAwaited: 'cookies() returns a Promise and must be awaited. Use: const cookies = await cookies()',
+          paramsNotAwaited:
+            'params must be awaited before property access. Use: const { id } = await params',
+          searchParamsNotAwaited:
+            'searchParams must be awaited before property access. Use: const query = await searchParams',
+          headersNotAwaited:
+            'headers() returns a Promise and must be awaited. Use: const headers = await headers()',
+          cookiesNotAwaited:
+            'cookies() returns a Promise and must be awaited. Use: const cookies = await cookies()',
           paramsTypeNotPromise: 'params parameter type should be Promise<T> in Next.js 15+',
-          searchParamsTypeNotPromise: 'searchParams parameter type should be Promise<T> in Next.js 15+',
+          searchParamsTypeNotPromise:
+            'searchParams parameter type should be Promise<T> in Next.js 15+',
         },
       },
       create(context) {
@@ -9089,27 +9674,48 @@ export default {
         function findNextJsParams(node) {
           if (!node || node.type !== 'Program') return;
           for (const stmt of node.body || []) {
-            if (stmt.type === 'ExportDefaultDeclaration' || stmt.type === 'FunctionDeclaration' || stmt.type === 'ExportNamedDeclaration') {
+            if (
+              stmt.type === 'ExportDefaultDeclaration' ||
+              stmt.type === 'FunctionDeclaration' ||
+              stmt.type === 'ExportNamedDeclaration'
+            ) {
               let func = null;
               if (stmt.type === 'ExportDefaultDeclaration') {
                 func = stmt.declaration;
               } else if (stmt.type === 'FunctionDeclaration') {
                 func = stmt;
-              } else if (stmt.type === 'ExportNamedDeclaration' && stmt.declaration && stmt.declaration.type === 'FunctionDeclaration') {
+              } else if (
+                stmt.type === 'ExportNamedDeclaration' &&
+                stmt.declaration &&
+                stmt.declaration.type === 'FunctionDeclaration'
+              ) {
                 func = stmt.declaration;
               }
-              
-              if (func && (func.type === 'FunctionDeclaration' || func.type === 'FunctionExpression' || func.type === 'ArrowFunctionExpression')) {
+
+              if (
+                func &&
+                (func.type === 'FunctionDeclaration' ||
+                  func.type === 'FunctionExpression' ||
+                  func.type === 'ArrowFunctionExpression')
+              ) {
                 const funcName = func.id ? func.id.name : null;
-                const isRouteHandler = isRouteFile && funcName && ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'].includes(funcName);
-                const isPageComponent = isPageFile && (!funcName || funcName === 'default' || funcName.startsWith('generate'));
-                
+                const isRouteHandler =
+                  isRouteFile &&
+                  funcName &&
+                  ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'].includes(funcName);
+                const isPageComponent =
+                  isPageFile &&
+                  (!funcName || funcName === 'default' || funcName.startsWith('generate'));
+
                 if (isRouteHandler || isPageComponent) {
                   for (const param of func.params || []) {
                     if (param.type === 'Identifier') {
                       const paramName = param.name;
-                      const paramType = param.typeAnnotation && param.typeAnnotation.typeAnnotation ? sourceCode.getText(param.typeAnnotation.typeAnnotation) : '';
-                      
+                      const paramType =
+                        param.typeAnnotation && param.typeAnnotation.typeAnnotation
+                          ? sourceCode.getText(param.typeAnnotation.typeAnnotation)
+                          : '';
+
                       if (paramName === 'params') {
                         nextJsParams.add('params');
                         if (paramType && !paramType.includes('Promise')) {
@@ -9144,7 +9750,12 @@ export default {
               if (decl.init && decl.init.type === 'AwaitExpression') {
                 const awaitedExpr = decl.init.expression;
                 const awaitedText = sourceCode.getText(awaitedExpr);
-                if (awaitedText === 'params' || awaitedText === 'searchParams' || awaitedText.endsWith('.params') || awaitedText.endsWith('.searchParams')) {
+                if (
+                  awaitedText === 'params' ||
+                  awaitedText === 'searchParams' ||
+                  awaitedText.endsWith('.params') ||
+                  awaitedText.endsWith('.searchParams')
+                ) {
                   if (decl.id.type === 'Identifier') {
                     awaitedVariables.add(decl.id.name);
                   } else if (decl.id.type === 'ObjectPattern') {
@@ -9171,11 +9782,14 @@ export default {
             if (node.parent && node.parent.type === 'ObjectPattern') {
               return; // Skip destructuring patterns
             }
-            
-            const expression = node.parent && node.parent.type === 'MemberExpression' ? node.parent.expression : null;
+
+            const expression =
+              node.parent && node.parent.type === 'MemberExpression'
+                ? node.parent.expression
+                : null;
             if (expression && expression.type === 'Identifier') {
               const exprName = expression.name;
-              
+
               if (exprName === 'params' && nextJsParams.has('params')) {
                 if (!awaitedVariables.has('params')) {
                   let isAwaited = false;
@@ -9195,7 +9809,7 @@ export default {
                   }
                 }
               }
-              
+
               if (exprName === 'searchParams' && nextJsSearchParams.has('searchParams')) {
                 if (!awaitedVariables.has('searchParams')) {
                   let isAwaited = false;
@@ -9221,7 +9835,7 @@ export default {
             // Check for headers() and cookies() calls
             if (node.callee && node.callee.type === 'Identifier') {
               const funcName = node.callee.name;
-              
+
               if (funcName === 'headers' && hasHeadersImport) {
                 let isAwaited = false;
                 let parent = node.parent;
@@ -9239,7 +9853,7 @@ export default {
                   });
                 }
               }
-              
+
               if (funcName === 'cookies' && hasCookiesImport) {
                 let isAwaited = false;
                 let parent = node.parent;
@@ -9266,15 +9880,18 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require await connection() before non-deterministic operations in server components',
+          description:
+            'Require await connection() before non-deterministic operations in server components',
           category: 'Best Practices',
           recommended: true,
         },
         fixable: null,
         schema: [],
         messages: {
-          missingConnectionImport: "Missing import: import { connection } from 'next/server' (required for non-deterministic operations)",
-          missingConnectionCall: 'Missing await connection() (required before non-deterministic operations like Date.now())',
+          missingConnectionImport:
+            "Missing import: import { connection } from 'next/server' (required for non-deterministic operations)",
+          missingConnectionCall:
+            'Missing await connection() (required before non-deterministic operations like Date.now())',
         },
       },
       create(context) {
@@ -9283,7 +9900,9 @@ export default {
         const ast = sourceCode.ast;
 
         // Only validate server components
-        const isServerComponent = filename.includes('/app/') && (filename.endsWith('/page.tsx') || filename.endsWith('/page.ts'));
+        const isServerComponent =
+          filename.includes('/app/') &&
+          (filename.endsWith('/page.tsx') || filename.endsWith('/page.ts'));
         if (!isServerComponent) {
           return {};
         }
@@ -9295,8 +9914,14 @@ export default {
         }
 
         // Skip excluded pages
-        const excludedPages = ['error.tsx', 'loading.tsx', 'not-found.tsx', 'layout.tsx', 'template.tsx'];
-        if (excludedPages.some(excluded => filename.includes(excluded))) {
+        const excludedPages = [
+          'error.tsx',
+          'loading.tsx',
+          'not-found.tsx',
+          'layout.tsx',
+          'template.tsx',
+        ];
+        if (excludedPages.some((excluded) => filename.includes(excluded))) {
           return {};
         }
 
@@ -9311,7 +9936,12 @@ export default {
           for (const stmt of node.body || []) {
             if (stmt.type === 'ExportDefaultDeclaration') {
               const decl = stmt.declaration;
-              if (decl && (decl.type === 'FunctionDeclaration' || decl.type === 'FunctionExpression' || decl.type === 'ArrowFunctionExpression')) {
+              if (
+                decl &&
+                (decl.type === 'FunctionDeclaration' ||
+                  decl.type === 'FunctionExpression' ||
+                  decl.type === 'ArrowFunctionExpression')
+              ) {
                 return decl;
               }
               if (decl && decl.type === 'Identifier') {
@@ -9332,17 +9962,21 @@ export default {
           let found = false;
           function traverse(n, inCachedFunction = false) {
             if (!n || found) return;
-            
+
             // Check if we're entering a cached function
             let currentInCachedFunction = inCachedFunction;
-            if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') {
+            if (
+              n.type === 'FunctionDeclaration' ||
+              n.type === 'FunctionExpression' ||
+              n.type === 'ArrowFunctionExpression'
+            ) {
               // Check for 'use cache' directive before this function (pure AST)
               const comments = sourceCode.getCommentsBefore(n) || [];
               if (hasUseCacheDirective(comments)) {
                 currentInCachedFunction = true;
               }
             }
-            
+
             // Check for non-deterministic operations (only if not in cached function)
             if (!currentInCachedFunction) {
               if (n.type === 'CallExpression') {
@@ -9350,22 +9984,30 @@ export default {
                   const obj = n.callee.object;
                   const prop = n.callee.property;
                   if (obj && obj.type === 'Identifier' && prop && prop.type === 'Identifier') {
-                    if ((obj.name === 'Date' && prop.name === 'now') ||
-                        (obj.name === 'Math' && prop.name === 'random') ||
-                        (obj.name === 'crypto' && prop.name === 'randomUUID') ||
-                        (obj.name === 'performance' && prop.name === 'now')) {
+                    if (
+                      (obj.name === 'Date' && prop.name === 'now') ||
+                      (obj.name === 'Math' && prop.name === 'random') ||
+                      (obj.name === 'crypto' && prop.name === 'randomUUID') ||
+                      (obj.name === 'performance' && prop.name === 'now')
+                    ) {
                       found = true;
                       return;
                     }
                   }
                 }
-                if (n.callee && n.callee.type === 'NewExpression' && n.callee.callee && n.callee.callee.type === 'Identifier' && n.callee.callee.name === 'Date') {
+                if (
+                  n.callee &&
+                  n.callee.type === 'NewExpression' &&
+                  n.callee.callee &&
+                  n.callee.callee.type === 'Identifier' &&
+                  n.callee.callee.name === 'Date'
+                ) {
                   found = true;
                   return;
                 }
               }
             }
-            
+
             for (const key in n) {
               if (key !== 'parent' && typeof n[key] === 'object' && n[key] !== null) {
                 if (Array.isArray(n[key])) {
@@ -9392,7 +10034,11 @@ export default {
                 const source = stmt.source;
                 if (source && source.type === 'Literal' && source.value === 'next/server') {
                   for (const spec of stmt.specifiers || []) {
-                    if (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.name === 'connection') {
+                    if (
+                      spec.type === 'ImportSpecifier' &&
+                      spec.imported &&
+                      spec.imported.name === 'connection'
+                    ) {
                       hasConnectionImport = true;
                       break;
                     }
@@ -9400,7 +10046,7 @@ export default {
                 }
               }
             }
-            
+
             defaultExportFunction = findDefaultExport(node);
             if (defaultExportFunction) {
               hasNonDeterministicOps = hasNonDeterministicOperations(defaultExportFunction);
@@ -9408,7 +10054,11 @@ export default {
           },
           CallExpression(node) {
             // Check for connection() calls
-            if (node.callee && node.callee.type === 'Identifier' && node.callee.name === 'connection') {
+            if (
+              node.callee &&
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'connection'
+            ) {
               hasConnectionCall = true;
             }
           },
@@ -9445,7 +10095,8 @@ export default {
         fixable: null,
         schema: [],
         messages: {
-          missingSanitization: 'dangerouslySetInnerHTML used without sanitization (XSS risk). Must sanitize HTML with DOMPurify or similar before use.',
+          missingSanitization:
+            'dangerouslySetInnerHTML used without sanitization (XSS risk). Must sanitize HTML with DOMPurify or similar before use.',
         },
       },
       create(context) {
@@ -9458,12 +10109,23 @@ export default {
         // Check for sanitization patterns
         function checkForSanitization(node) {
           if (!node) return false;
-          const sanitizationPatterns = ['DOMPurify', 'sanitize', 'sanitized', 'escapeHtml', 'escape'];
+          const sanitizationPatterns = [
+            'DOMPurify',
+            'sanitize',
+            'sanitized',
+            'escapeHtml',
+            'escape',
+          ];
           let found = false;
           function traverse(n) {
             if (!n || found) return;
             if (n.type === 'CallExpression' && n.callee) {
-              if (n.callee.type === 'MemberExpression' && n.callee.object && n.callee.object.type === 'Identifier' && n.callee.object.name === 'DOMPurify') {
+              if (
+                n.callee.type === 'MemberExpression' &&
+                n.callee.object &&
+                n.callee.object.type === 'Identifier' &&
+                n.callee.object.name === 'DOMPurify'
+              ) {
                 found = true;
                 return;
               }
@@ -9492,9 +10154,13 @@ export default {
 
         return {
           JSXAttribute(node) {
-            if (node.name && node.name.type === 'JSXIdentifier' && node.name.name === 'dangerouslySetInnerHTML') {
+            if (
+              node.name &&
+              node.name.type === 'JSXIdentifier' &&
+              node.name.name === 'dangerouslySetInnerHTML'
+            ) {
               dangerouslySetInnerHtmlNodes.push(node);
-              
+
               // Check if file has sanitization
               if (checkForSanitization(ast)) {
                 hasSanitization = true;
@@ -9518,19 +10184,26 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require Promise types for params in generateMetadata, generateStaticParams, and image generation functions in Next.js 16',
+          description:
+            'Require Promise types for params in generateMetadata, generateStaticParams, and image generation functions in Next.js 16',
           category: 'Best Practices',
           recommended: true,
         },
         fixable: null,
         schema: [],
         messages: {
-          generateMetadataParamsNotPromise: 'generateMetadata params parameter type should be Promise<T> in Next.js 16',
-          generateMetadataSearchParamsNotPromise: 'generateMetadata searchParams parameter type should be Promise<T> in Next.js 16',
-          generateStaticParamsNotPromise: 'generateStaticParams params parameter type should be Promise<T> in Next.js 16 (when receiving parent params)',
-          imageFunctionParamsNotPromise: 'Image generation function params parameter type should be Promise<T> in Next.js 16',
-          imageFunctionIdNotPromise: 'Image generation function id parameter type should be Promise<string | number> in Next.js 16',
-          clientComponentParamsNotUse: 'Client component accessing params/searchParams without React.use() hook. In Next.js 16, params/searchParams are Promises and must be unwrapped with use()',
+          generateMetadataParamsNotPromise:
+            'generateMetadata params parameter type should be Promise<T> in Next.js 16',
+          generateMetadataSearchParamsNotPromise:
+            'generateMetadata searchParams parameter type should be Promise<T> in Next.js 16',
+          generateStaticParamsNotPromise:
+            'generateStaticParams params parameter type should be Promise<T> in Next.js 16 (when receiving parent params)',
+          imageFunctionParamsNotPromise:
+            'Image generation function params parameter type should be Promise<T> in Next.js 16',
+          imageFunctionIdNotPromise:
+            'Image generation function id parameter type should be Promise<string | number> in Next.js 16',
+          clientComponentParamsNotUse:
+            'Client component accessing params/searchParams without React.use() hook. In Next.js 16, params/searchParams are Promises and must be unwrapped with use()',
         },
       },
       create(context) {
@@ -9543,34 +10216,47 @@ export default {
 
         // Check for image generation files
         const imageFileNames = ['opengraph-image', 'twitter-image', 'icon', 'apple-icon'];
-        const isImageFile = imageFileNames.some(name => filename.includes(name));
+        const isImageFile = imageFileNames.some((name) => filename.includes(name));
 
         return {
           FunctionDeclaration(node) {
             const funcName = node.id ? node.id.name : null;
-            
+
             // Check generateMetadata
             if (funcName === 'generateMetadata') {
               for (const param of node.params || []) {
                 if (param.type === 'Identifier') {
                   const paramName = param.name;
-                  const paramType = param.typeAnnotation && param.typeAnnotation.typeAnnotation ? sourceCode.getText(param.typeAnnotation.typeAnnotation) : '';
-                  
-                  if ((paramName === 'params' || paramName === 'searchParams') && paramType && !paramType.includes('Promise')) {
+                  const paramType =
+                    param.typeAnnotation && param.typeAnnotation.typeAnnotation
+                      ? sourceCode.getText(param.typeAnnotation.typeAnnotation)
+                      : '';
+
+                  if (
+                    (paramName === 'params' || paramName === 'searchParams') &&
+                    paramType &&
+                    !paramType.includes('Promise')
+                  ) {
                     context.report({
                       node: param,
-                      messageId: paramName === 'params' ? 'generateMetadataParamsNotPromise' : 'generateMetadataSearchParamsNotPromise',
+                      messageId:
+                        paramName === 'params'
+                          ? 'generateMetadataParamsNotPromise'
+                          : 'generateMetadataSearchParamsNotPromise',
                     });
                   }
                 }
               }
             }
-            
+
             // Check generateStaticParams
             if (funcName === 'generateStaticParams') {
               for (const param of node.params || []) {
                 if (param.type === 'Identifier' && param.name === 'params') {
-                  const paramType = param.typeAnnotation && param.typeAnnotation.typeAnnotation ? sourceCode.getText(param.typeAnnotation.typeAnnotation) : '';
+                  const paramType =
+                    param.typeAnnotation && param.typeAnnotation.typeAnnotation
+                      ? sourceCode.getText(param.typeAnnotation.typeAnnotation)
+                      : '';
                   if (paramType && !paramType.includes('Promise')) {
                     context.report({
                       node: param,
@@ -9587,8 +10273,11 @@ export default {
               for (const param of node.params || []) {
                 if (param.type === 'Identifier') {
                   const paramName = param.name;
-                  const paramType = param.typeAnnotation && param.typeAnnotation.typeAnnotation ? sourceCode.getText(param.typeAnnotation.typeAnnotation) : '';
-                  
+                  const paramType =
+                    param.typeAnnotation && param.typeAnnotation.typeAnnotation
+                      ? sourceCode.getText(param.typeAnnotation.typeAnnotation)
+                      : '';
+
                   if (paramName === 'params' && paramType && !paramType.includes('Promise')) {
                     context.report({
                       node: param,
@@ -9610,18 +10299,27 @@ export default {
             if (isClientComponent) {
               if (node.object && node.object.type === 'Identifier') {
                 const objName = node.object.name;
-                if ((objName === 'params' || objName === 'searchParams') && node.property && node.property.type === 'Identifier') {
+                if (
+                  (objName === 'params' || objName === 'searchParams') &&
+                  node.property &&
+                  node.property.type === 'Identifier'
+                ) {
                   // Check if params/searchParams is wrapped with use()
                   let hasUse = false;
                   let parent = node.parent;
                   while (parent) {
-                    if (parent.type === 'CallExpression' && parent.callee && parent.callee.type === 'Identifier' && parent.callee.name === 'use') {
+                    if (
+                      parent.type === 'CallExpression' &&
+                      parent.callee &&
+                      parent.callee.type === 'Identifier' &&
+                      parent.callee.name === 'use'
+                    ) {
                       hasUse = true;
                       break;
                     }
                     parent = parent.parent;
                   }
-                  
+
                   if (!hasUse) {
                     context.report({
                       node,
@@ -9639,15 +10337,18 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Prevent direct database queries in components and app pages - should use services/data-layer',
+          description:
+            'Prevent direct database queries in components and app pages - should use services/data-layer',
           category: 'Best Practices',
           recommended: true,
         },
         fixable: null,
         schema: [],
         messages: {
-          directDatabaseQuery: 'Direct database queries in components bypass caching and logging. Extract to data layer function in packages/web-runtime/src/data/.',
-          directQueryInComponent: 'Direct database query in component (should use services/data-layer). Found: {{queryType}}',
+          directDatabaseQuery:
+            'Direct database queries in components bypass caching and logging. Extract to data layer function in packages/web-runtime/src/data/.',
+          directQueryInComponent:
+            'Direct database query in component (should use services/data-layer). Found: {{queryType}}',
         },
       },
       create(context) {
@@ -9665,8 +10366,10 @@ export default {
 
         // Check both components and app directories
         const isComponent = filename.includes('/components/');
-        const isAppPage = filename.includes('/app/') && (filename.endsWith('/page.tsx') || filename.endsWith('/page.ts'));
-        
+        const isAppPage =
+          filename.includes('/app/') &&
+          (filename.endsWith('/page.tsx') || filename.endsWith('/page.ts'));
+
         if (!isComponent && !isAppPage) {
           return {};
         }
@@ -9674,13 +10377,22 @@ export default {
         return {
           CallExpression(node) {
             // Check for supabase.from() or supabase.rpc() calls
-            if (node.callee && node.callee.type === 'MemberExpression' && node.callee.property && node.callee.property.type === 'Identifier') {
+            if (
+              node.callee &&
+              node.callee.type === 'MemberExpression' &&
+              node.callee.property &&
+              node.callee.property.type === 'Identifier'
+            ) {
               const propName = node.callee.property.name;
-              
+
               if (propName === 'from' || propName === 'rpc') {
                 // Check if it's a supabase call
                 const obj = node.callee.object;
-                if (obj && obj.type === 'Identifier' && (obj.name === 'supabase' || obj.name.toLowerCase().includes('supabase'))) {
+                if (
+                  obj &&
+                  obj.type === 'Identifier' &&
+                  (obj.name === 'supabase' || obj.name.toLowerCase().includes('supabase'))
+                ) {
                   if (isComponent) {
                     context.report({
                       node,
@@ -9711,8 +10423,10 @@ export default {
         fixable: null,
         schema: [],
         messages: {
-          missingAuthInRoute: 'API route accesses user data or performs mutations but missing authentication check (should use getAuthenticatedUser() or authedAction, or webhook secret/token validation)',
-          missingAuthInAction: 'Server action accesses user data or performs mutations but missing authentication (should use authedAction wrapper)',
+          missingAuthInRoute:
+            'API route accesses user data or performs mutations but missing authentication check (should use getAuthenticatedUser() or authedAction, or webhook secret/token validation)',
+          missingAuthInAction:
+            'Server action accesses user data or performs mutations but missing authentication (should use authedAction wrapper)',
         },
       },
       create(context) {
@@ -9720,20 +10434,34 @@ export default {
         const sourceCode = context.getSourceCode();
 
         // Only validate API routes and server actions
-        const isApiRoute = filename.includes('/api/') && (filename.endsWith('/route.ts') || filename.endsWith('/route.tsx'));
+        const isApiRoute =
+          filename.includes('/api/') &&
+          (filename.endsWith('/route.ts') || filename.endsWith('/route.tsx'));
         const isServerAction = filename.includes('/actions/') && filename.endsWith('.ts');
-        
+
         if (!isApiRoute && !isServerAction) {
           return {};
         }
 
         // Public routes/actions that don't require auth
-        const publicApiRoutes = ['/api/content', '/api/company', '/api/og', '/api/feeds', '/api/sitemap', '/api/stats/social-proof', '/api/templates', '/api/search', '/api/trending', '/api/status', '/api/flux'];
+        const publicApiRoutes = [
+          '/api/content',
+          '/api/company',
+          '/api/og',
+          '/api/feeds',
+          '/api/sitemap',
+          '/api/stats/social-proof',
+          '/api/templates',
+          '/api/search',
+          '/api/trending',
+          '/api/status',
+          '/api/flux',
+        ];
         const publicActions = ['searchContent', 'getContent', 'getContentBySlug', 'getTemplates'];
-        
+
         let isPublic = false;
         if (isApiRoute) {
-          isPublic = publicApiRoutes.some(route => filename.includes(route.replace('/api', '')));
+          isPublic = publicApiRoutes.some((route) => filename.includes(route.replace('/api', '')));
         }
 
         let hasAuthCheck = false;
@@ -9744,17 +10472,37 @@ export default {
         // Check for user data access patterns
         function checkUserDataAccess(node) {
           if (!node) return false;
-          const userDataPatterns = ['auth.users', 'getUserProfile', 'getUserData', 'getAuthenticatedUser', 'ctx.userId', 'ctx.userEmail', '.eq(\'user_id\')', '.eq(\'userId\')'];
+          const userDataPatterns = [
+            'auth.users',
+            'getUserProfile',
+            'getUserData',
+            'getAuthenticatedUser',
+            'ctx.userId',
+            'ctx.userEmail',
+            ".eq('user_id')",
+            ".eq('userId')",
+          ];
           const nodeText = sourceCode.getText(node);
-          return userDataPatterns.some(pattern => nodeText.includes(pattern));
+          return userDataPatterns.some((pattern) => nodeText.includes(pattern));
         }
 
         // Check for mutation patterns
         function checkMutations(node) {
           if (!node) return false;
-          const mutationPatterns = ['.insert(', '.update(', '.upsert(', '.delete(', 'createCompany', 'createJob', 'updateCompany', 'updateJob', 'deleteCompany', 'deleteJob'];
+          const mutationPatterns = [
+            '.insert(',
+            '.update(',
+            '.upsert(',
+            '.delete(',
+            'createCompany',
+            'createJob',
+            'updateCompany',
+            'updateJob',
+            'deleteCompany',
+            'deleteJob',
+          ];
           const nodeText = sourceCode.getText(node);
-          return mutationPatterns.some(pattern => nodeText.includes(pattern));
+          return mutationPatterns.some((pattern) => nodeText.includes(pattern));
         }
 
         return {
@@ -9766,17 +10514,21 @@ export default {
                 hasAuthCheck = true;
               }
             }
-            
+
             // Check for authedAction usage
-            if (node.callee && node.callee.type === 'Identifier' && node.callee.name === 'authedAction') {
+            if (
+              node.callee &&
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'authedAction'
+            ) {
               usesAuthedAction = true;
             }
-            
+
             // Check for user data access
             if (checkUserDataAccess(node)) {
               accessesUserData = true;
             }
-            
+
             // Check for mutations
             if (checkMutations(node)) {
               performsMutations = true;
@@ -9784,7 +10536,14 @@ export default {
           },
           MemberExpression(node) {
             // Check for auth.getUser() or auth.getSession()
-            if (node.object && node.object.type === 'Identifier' && node.object.name === 'auth' && node.property && node.property.type === 'Identifier' && (node.property.name === 'getUser' || node.property.name === 'getSession')) {
+            if (
+              node.object &&
+              node.object.type === 'Identifier' &&
+              node.object.name === 'auth' &&
+              node.property &&
+              node.property.type === 'Identifier' &&
+              (node.property.name === 'getUser' || node.property.name === 'getSession')
+            ) {
               hasAuthCheck = true;
             }
           },
@@ -9794,7 +10553,7 @@ export default {
             }
 
             const shouldBeProtected = accessesUserData || performsMutations;
-            
+
             if (shouldBeProtected) {
               if (isApiRoute && !hasAuthCheck) {
                 context.report({
@@ -9802,7 +10561,7 @@ export default {
                   messageId: 'missingAuthInRoute',
                 });
               }
-              
+
               if (isServerAction && !usesAuthedAction) {
                 context.report({
                   node: sourceCode.ast,
@@ -9825,8 +10584,10 @@ export default {
         fixable: null,
         schema: [],
         messages: {
-          missingActionClient: 'Server action missing actionClient wrapper (should use actionClient for automatic error logging)',
-          missingMetadata: 'Server action missing metadata with actionName (required for logging and debugging)',
+          missingActionClient:
+            'Server action missing actionClient wrapper (should use actionClient for automatic error logging)',
+          missingMetadata:
+            'Server action missing metadata with actionName (required for logging and debugging)',
           missingInputSchema: 'Server action missing inputSchema (should validate inputs with Zod)',
         },
       },
@@ -9840,7 +10601,11 @@ export default {
         }
 
         // Skip hook files and utility files
-        if (filename.includes('/hooks/') || filename.includes('safe-action.ts') || filename.includes('run-rpc-instance.ts')) {
+        if (
+          filename.includes('/hooks/') ||
+          filename.includes('safe-action.ts') ||
+          filename.includes('run-rpc-instance.ts')
+        ) {
           return {};
         }
 
@@ -9854,19 +10619,38 @@ export default {
             // Check for actionClient or its wrappers
             if (node.callee && node.callee.type === 'Identifier') {
               const funcName = node.callee.name;
-              if (['actionClient', 'authedAction', 'rateLimitedAction', 'optionalAuthAction'].includes(funcName)) {
+              if (
+                [
+                  'actionClient',
+                  'authedAction',
+                  'rateLimitedAction',
+                  'optionalAuthAction',
+                ].includes(funcName)
+              ) {
                 hasActionClient = true;
                 isServerAction = true;
               }
             }
-            
+
             // Check for metadata() call
-            if (node.callee && node.callee.type === 'MemberExpression' && node.callee.property && node.callee.property.type === 'Identifier' && node.callee.property.name === 'metadata') {
+            if (
+              node.callee &&
+              node.callee.type === 'MemberExpression' &&
+              node.callee.property &&
+              node.callee.property.type === 'Identifier' &&
+              node.callee.property.name === 'metadata'
+            ) {
               hasMetadata = true;
             }
-            
+
             // Check for inputSchema() call
-            if (node.callee && node.callee.type === 'MemberExpression' && node.callee.property && node.callee.property.type === 'Identifier' && node.callee.property.name === 'inputSchema') {
+            if (
+              node.callee &&
+              node.callee.type === 'MemberExpression' &&
+              node.callee.property &&
+              node.callee.property.type === 'Identifier' &&
+              node.callee.property.name === 'inputSchema'
+            ) {
               hasInputSchema = true;
             }
           },
@@ -9875,7 +10659,7 @@ export default {
             // Check for 'use server' directive using pure AST (no getText())
             const ast = sourceCode.ast;
             isServerAction = hasUseServerDirective(ast);
-            
+
             if (isServerAction) {
               if (!hasActionClient) {
                 context.report({
@@ -9909,7 +10693,8 @@ export default {
         fixable: null,
         schema: [],
         messages: {
-          promisePropertyAccess: 'Accessing {{property}} on Promise<NextResponse> from {{functionName}} - must await first',
+          promisePropertyAccess:
+            'Accessing {{property}} on Promise<NextResponse> from {{functionName}} - must await first',
         },
       },
       create(context) {
@@ -9917,7 +10702,9 @@ export default {
         const sourceCode = context.getSourceCode();
 
         // Only validate API routes
-        const isApiRoute = filename.includes('/api/') && (filename.endsWith('/route.ts') || filename.endsWith('/route.tsx'));
+        const isApiRoute =
+          filename.includes('/api/') &&
+          (filename.endsWith('/route.ts') || filename.endsWith('/route.tsx'));
         if (!isApiRoute) {
           return {};
         }
@@ -9925,9 +10712,18 @@ export default {
         return {
           MemberExpression(node) {
             // Check for .status or .headers access
-            if (node.property && node.property.type === 'Identifier' && (node.property.name === 'status' || node.property.name === 'headers')) {
+            if (
+              node.property &&
+              node.property.type === 'Identifier' &&
+              (node.property.name === 'status' || node.property.name === 'headers')
+            ) {
               const expression = node.object;
-              if (expression && expression.type === 'CallExpression' && expression.callee && expression.callee.type === 'Identifier') {
+              if (
+                expression &&
+                expression.type === 'CallExpression' &&
+                expression.callee &&
+                expression.callee.type === 'Identifier'
+              ) {
                 const funcName = expression.callee.name;
                 if (funcName === 'createErrorResponse' || funcName === 'handleApiError') {
                   // Check if it's awaited
@@ -9940,7 +10736,7 @@ export default {
                     }
                     parent = parent.parent;
                   }
-                  
+
                   if (!isAwaited) {
                     context.report({
                       node,
@@ -9969,7 +10765,8 @@ export default {
         fixable: null,
         schema: [],
         messages: {
-          missingSchemaExport: 'MCP tool "{{toolName}}" references schema "{{schemaName}}" that is not exported from lib/types.ts',
+          missingSchemaExport:
+            'MCP tool "{{toolName}}" references schema "{{schemaName}}" that is not exported from lib/types.ts',
           missingInputSchema: 'MCP tool "{{toolName}}" is missing inputSchema property',
         },
       },
@@ -10002,7 +10799,12 @@ export default {
             const optionsArg = node.arguments[1];
             if (optionsArg.type === 'ObjectExpression') {
               for (const prop of optionsArg.properties || []) {
-                if (prop.type === 'Property' && prop.key && prop.key.type === 'Identifier' && prop.key.name === 'inputSchema') {
+                if (
+                  prop.type === 'Property' &&
+                  prop.key &&
+                  prop.key.type === 'Identifier' &&
+                  prop.key.name === 'inputSchema'
+                ) {
                   if (prop.value && prop.value.type === 'Identifier') {
                     return prop.value.name;
                   }
@@ -10023,7 +10825,11 @@ export default {
                 if (source && source.type === 'Literal' && source.value === './lib/types.ts') {
                   // Collect imported schema names
                   for (const spec of stmt.specifiers || []) {
-                    if (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.type === 'Identifier') {
+                    if (
+                      spec.type === 'ImportSpecifier' &&
+                      spec.imported &&
+                      spec.imported.type === 'Identifier'
+                    ) {
                       const name = spec.imported.name;
                       if (name.endsWith('InputSchema')) {
                         exportedSchemas.add(name);
@@ -10039,11 +10845,17 @@ export default {
             if (node.callee && node.callee.type === 'MemberExpression') {
               const obj = node.callee.object;
               const prop = node.callee.property;
-              if (obj && obj.type === 'Identifier' && obj.name === 'mcpServer' && 
-                  prop && prop.type === 'Identifier' && prop.name === 'tool') {
+              if (
+                obj &&
+                obj.type === 'Identifier' &&
+                obj.name === 'mcpServer' &&
+                prop &&
+                prop.type === 'Identifier' &&
+                prop.name === 'tool'
+              ) {
                 const toolName = extractToolName(node);
                 const schemaRef = extractSchemaRef(node);
-                
+
                 if (toolName) {
                   if (!schemaRef) {
                     context.report({
@@ -10076,7 +10888,8 @@ export default {
         fixable: null,
         schema: [],
         messages: {
-          missingHandler: 'MCP tool "{{toolName}}" references handler "{{handlerName}}" that is not found in routes/',
+          missingHandler:
+            'MCP tool "{{toolName}}" references handler "{{handlerName}}" that is not found in routes/',
           missingHandlerRef: 'MCP tool "{{toolName}}" is missing handler property',
         },
       },
@@ -10108,7 +10921,12 @@ export default {
             const optionsArg = node.arguments[1];
             if (optionsArg.type === 'ObjectExpression') {
               for (const prop of optionsArg.properties || []) {
-                if (prop.type === 'Property' && prop.key && prop.key.type === 'Identifier' && prop.key.name === 'handler') {
+                if (
+                  prop.type === 'Property' &&
+                  prop.key &&
+                  prop.key.type === 'Identifier' &&
+                  prop.key.name === 'handler'
+                ) {
                   // Handler is typically a function, look for handleXXX pattern
                   if (prop.value) {
                     // Check if it's a call expression (wrapWithTimeout) or arrow function
@@ -10122,7 +10940,11 @@ export default {
                     // Look for handleXXX identifier in the expression
                     function findHandlerName(n) {
                       if (!n) return null;
-                      if (n.type === 'Identifier' && n.name.startsWith('handle') && n.name.length > 6) {
+                      if (
+                        n.type === 'Identifier' &&
+                        n.name.startsWith('handle') &&
+                        n.name.length > 6
+                      ) {
                         return n.name;
                       }
                       for (const key in n) {
@@ -10156,7 +10978,11 @@ export default {
               const sourceValue = node.source.value;
               if (typeof sourceValue === 'string' && sourceValue.startsWith('./routes/')) {
                 for (const spec of node.specifiers || []) {
-                  if (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.type === 'Identifier') {
+                  if (
+                    spec.type === 'ImportSpecifier' &&
+                    spec.imported &&
+                    spec.imported.type === 'Identifier'
+                  ) {
                     const name = spec.imported.name;
                     if (name.startsWith('handle')) {
                       importedHandlers.add(name);
@@ -10171,11 +10997,17 @@ export default {
             if (node.callee && node.callee.type === 'MemberExpression') {
               const obj = node.callee.object;
               const prop = node.callee.property;
-              if (obj && obj.type === 'Identifier' && obj.name === 'mcpServer' && 
-                  prop && prop.type === 'Identifier' && prop.name === 'tool') {
+              if (
+                obj &&
+                obj.type === 'Identifier' &&
+                obj.name === 'mcpServer' &&
+                prop &&
+                prop.type === 'Identifier' &&
+                prop.name === 'tool'
+              ) {
                 const toolName = extractToolName(node);
                 const handlerRef = extractHandlerRef(node);
-                
+
                 if (toolName) {
                   if (!handlerRef) {
                     context.report({
@@ -10208,7 +11040,8 @@ export default {
         fixable: null, // DISABLED: Autofix too risky - complex console.* to logger.* API transformation could break TypeScript or create incorrect object-first patterns
         schema: [],
         messages: {
-          useStructuredLogging: 'console.{{method}} is not allowed. Use logger.{{method}} from @heyclaude/web-runtime/logging/server (server) or @heyclaude/web-runtime/logging/client (client) instead.',
+          useStructuredLogging:
+            'console.{{method}} is not allowed. Use logger.{{method}} from @heyclaude/web-runtime/logging/server (server) or @heyclaude/web-runtime/logging/client (client) instead.',
         },
       },
       create(context) {
@@ -10241,7 +11074,20 @@ export default {
         let hasLoggerImport = false;
         let lastImportNode = null;
 
-        const consoleMethods = ['log', 'error', 'warn', 'info', 'debug', 'trace', 'table', 'dir', 'time', 'timeEnd', 'group', 'groupEnd'];
+        const consoleMethods = [
+          'log',
+          'error',
+          'warn',
+          'info',
+          'debug',
+          'trace',
+          'table',
+          'dir',
+          'time',
+          'timeEnd',
+          'group',
+          'groupEnd',
+        ];
 
         // Allow console.error in logError flush callback (it's a last resort)
         function isInFlushCallback(node) {
@@ -10267,10 +11113,12 @@ export default {
             lastImportNode = node;
             if (node.source && node.source.type === 'Literal') {
               const sourceValue = node.source.value;
-              if (typeof sourceValue === 'string' && 
-                  (sourceValue.includes('@heyclaude/web-runtime/logging/') || 
-                   sourceValue.includes('@heyclaude/shared-runtime') ||
-                   sourceValue.includes('@heyclaude/web-runtime/core'))) {
+              if (
+                typeof sourceValue === 'string' &&
+                (sourceValue.includes('@heyclaude/web-runtime/logging/') ||
+                  sourceValue.includes('@heyclaude/shared-runtime') ||
+                  sourceValue.includes('@heyclaude/web-runtime/core'))
+              ) {
                 // Check if logger is imported
                 for (const spec of node.specifiers || []) {
                   if (spec.type === 'ImportSpecifier' || spec.type === 'ImportDefaultSpecifier') {
@@ -10289,7 +11137,7 @@ export default {
             if (node.callee && node.callee.type === 'MemberExpression') {
               const obj = node.callee.object;
               const prop = node.callee.property;
-              
+
               if (obj && obj.type === 'Identifier' && obj.name === 'console') {
                 if (prop && prop.type === 'Identifier' && consoleMethods.includes(prop.name)) {
                   // Allow console.error in flush callback (last resort error handling)
@@ -10299,16 +11147,16 @@ export default {
 
                   // Map console methods to logger methods
                   const methodMap = {
-                    'log': 'info',
-                    'error': 'error',
-                    'warn': 'warn',
-                    'info': 'info',
-                    'debug': 'debug',
-                    'trace': 'trace',
+                    log: 'info',
+                    error: 'error',
+                    warn: 'warn',
+                    info: 'info',
+                    debug: 'debug',
+                    trace: 'trace',
                   };
-                  
+
                   const loggerMethod = methodMap[prop.name] || 'info';
-                  
+
                   context.report({
                     node: prop,
                     messageId: 'useStructuredLogging',
@@ -10327,14 +11175,16 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require Zod schema validation for API route request bodies and query parameters',
+          description:
+            'Require Zod schema validation for API route request bodies and query parameters',
           category: 'Security',
           recommended: true,
         },
         fixable: null,
         schema: [],
         messages: {
-          missingZodSchema: 'API route must validate request body/query parameters with Zod schema. Use z.object() and safeParse() or parse()',
+          missingZodSchema:
+            'API route must validate request body/query parameters with Zod schema. Use z.object() and safeParse() or parse()',
           missingZodImport: 'API route uses Zod but missing import from "zod"',
         },
       },
@@ -10343,7 +11193,9 @@ export default {
         const sourceCode = context.getSourceCode();
 
         // Only validate API routes
-        const isApiRoute = filename.includes('/api/') && (filename.endsWith('/route.ts') || filename.endsWith('/route.tsx'));
+        const isApiRoute =
+          filename.includes('/api/') &&
+          (filename.endsWith('/route.ts') || filename.endsWith('/route.tsx'));
         if (!isApiRoute) {
           return {};
         }
@@ -10357,25 +11209,42 @@ export default {
         // Check for request body access patterns
         function checkRequestBodyAccess(node) {
           if (!node) return false;
-          const bodyAccessPatterns = ['request.json()', 'request.body', 'await request.json()', '.json()'];
+          const bodyAccessPatterns = [
+            'request.json()',
+            'request.body',
+            'await request.json()',
+            '.json()',
+          ];
           const nodeText = sourceCode.getText(node);
-          return bodyAccessPatterns.some(pattern => nodeText.includes(pattern));
+          return bodyAccessPatterns.some((pattern) => nodeText.includes(pattern));
         }
 
         // Check for query parameter access patterns
         function checkQueryParamsAccess(node) {
           if (!node) return false;
-          const queryPatterns = ['searchParams', 'url.searchParams', 'request.nextUrl.searchParams', 'new URL(request.url)'];
+          const queryPatterns = [
+            'searchParams',
+            'url.searchParams',
+            'request.nextUrl.searchParams',
+            'new URL(request.url)',
+          ];
           const nodeText = sourceCode.getText(node);
-          return queryPatterns.some(pattern => nodeText.includes(pattern));
+          return queryPatterns.some((pattern) => nodeText.includes(pattern));
         }
 
         // Check for Zod schema usage
         function checkZodSchema(node) {
           if (!node) return false;
-          const zodPatterns = ['z.object', 'safeParse', '.parse(', 'z.string', 'z.number', 'z.array'];
+          const zodPatterns = [
+            'z.object',
+            'safeParse',
+            '.parse(',
+            'z.string',
+            'z.number',
+            'z.array',
+          ];
           const nodeText = sourceCode.getText(node);
-          return zodPatterns.some(pattern => nodeText.includes(pattern));
+          return zodPatterns.some((pattern) => nodeText.includes(pattern));
         }
 
         return {
@@ -10387,7 +11256,10 @@ export default {
           'ExportNamedDeclaration > FunctionDeclaration'(node) {
             // Check for route handler functions (GET, POST, etc.)
             const funcName = node.id ? node.id.name : null;
-            if (funcName && ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'].includes(funcName)) {
+            if (
+              funcName &&
+              ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'].includes(funcName)
+            ) {
               routeHandlers.push(node);
             }
           },
@@ -10409,7 +11281,11 @@ export default {
           },
           MemberExpression(node) {
             // Check for searchParams access
-            if (node.property && node.property.type === 'Identifier' && node.property.name === 'searchParams') {
+            if (
+              node.property &&
+              node.property.type === 'Identifier' &&
+              node.property.name === 'searchParams'
+            ) {
               hasQueryParamsAccess = true;
             }
           },
@@ -10436,16 +11312,20 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require normalizeError() usage before logging errors with Pino object-first API (logger.error({ err: normalized }, "message"))',
+          description:
+            'Require normalizeError() usage before logging errors with Pino object-first API (logger.error({ err: normalized }, "message"))',
           category: 'Best Practices',
           recommended: true,
         },
         fixable: null, // DISABLED: Autofix too risky - complex normalizeError insertion could break TypeScript or create incorrect error handling
         schema: [],
         messages: {
-          missingNormalizeError: 'Error must be normalized with normalizeError() before logging. Use: const normalized = normalizeError(error, "fallback message"); logger.error({ err: normalized }, "message")',
-          wrongErrorKey: 'Errors should use "err" key (Pino standard). Use: logger.error({ err: normalized }, "message")',
-          wrongApiPattern: 'Use Pino object-first API: logger.error({ err: normalized, ...context }, "message"). Not message-first.',
+          missingNormalizeError:
+            'Error must be normalized with normalizeError() before logging. Use: const normalized = normalizeError(error, "fallback message"); logger.error({ err: normalized }, "message")',
+          wrongErrorKey:
+            'Errors should use "err" key (Pino standard). Use: logger.error({ err: normalized }, "message")',
+          wrongApiPattern:
+            'Use Pino object-first API: logger.error({ err: normalized, ...context }, "message"). Not message-first.',
         },
       },
       create(context) {
@@ -10459,7 +11339,11 @@ export default {
         }
 
         // Skip logger implementation files - they ARE the helpers
-        if (filename.includes('logging.ts') || filename.includes('logger.ts') || filename.includes('error-handling.ts')) {
+        if (
+          filename.includes('logging.ts') ||
+          filename.includes('logger.ts') ||
+          filename.includes('error-handling.ts')
+        ) {
           return {};
         }
 
@@ -10470,8 +11354,16 @@ export default {
 
         // Track normalized variables
         function trackNormalizedVariables(node) {
-          if (node.type === 'VariableDeclarator' && node.init && node.init.type === 'CallExpression') {
-            if (node.init.callee && node.init.callee.type === 'Identifier' && node.init.callee.name === 'normalizeError') {
+          if (
+            node.type === 'VariableDeclarator' &&
+            node.init &&
+            node.init.type === 'CallExpression'
+          ) {
+            if (
+              node.init.callee &&
+              node.init.callee.type === 'Identifier' &&
+              node.init.callee.name === 'normalizeError'
+            ) {
               if (node.id && node.id.type === 'Identifier') {
                 normalizedVariables.add(node.id.name);
               }
@@ -10502,11 +11394,23 @@ export default {
         return {
           ImportDeclaration(node) {
             // Check for normalizeError import
-            if (node.source && node.source.type === 'Literal' && typeof node.source.value === 'string') {
+            if (
+              node.source &&
+              node.source.type === 'Literal' &&
+              typeof node.source.value === 'string'
+            ) {
               const sourceValue = node.source.value;
-              if (sourceValue.includes('logging/server') || sourceValue.includes('logging/client') || sourceValue.includes('errors')) {
+              if (
+                sourceValue.includes('logging/server') ||
+                sourceValue.includes('logging/client') ||
+                sourceValue.includes('errors')
+              ) {
                 for (const spec of node.specifiers || []) {
-                  if (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.name === 'normalizeError') {
+                  if (
+                    spec.type === 'ImportSpecifier' &&
+                    spec.imported &&
+                    spec.imported.name === 'normalizeError'
+                  ) {
                     hasNormalizeErrorImport = true;
                     normalizeErrorImportPath = sourceValue;
                   }
@@ -10524,20 +11428,30 @@ export default {
               const obj = node.callee.object;
               const prop = node.callee.property;
               if (obj && obj.type === 'Identifier' && prop && prop.type === 'Identifier') {
-                const loggerNames = ['logger', 'reqLogger', 'sectionLogger', 'routeLogger', 'userLogger'];
+                const loggerNames = [
+                  'logger',
+                  'reqLogger',
+                  'sectionLogger',
+                  'routeLogger',
+                  'userLogger',
+                ];
                 if (loggerNames.includes(obj.name) && prop.name === 'error') {
                   // Check for Pino object-first API: logger.error({ err: normalized }, "message")
                   if (node.arguments && node.arguments.length > 0) {
                     const firstArg = node.arguments[0];
-                    
+
                     // First arg should be object (object-first API)
                     if (firstArg && firstArg.type === 'ObjectExpression') {
                       // Check for 'err' key (Pino standard)
                       let hasErrKey = false;
                       let errValue = null;
-                      
+
                       for (const prop of firstArg.properties || []) {
-                        if (prop.type === 'Property' && prop.key && prop.key.type === 'Identifier') {
+                        if (
+                          prop.type === 'Property' &&
+                          prop.key &&
+                          prop.key.type === 'Identifier'
+                        ) {
                           if (prop.key.name === 'err' || prop.key.name === 'error') {
                             hasErrKey = true;
                             errValue = prop.value;
@@ -10545,12 +11459,12 @@ export default {
                           }
                         }
                       }
-                      
+
                       if (hasErrKey && errValue && errValue.type === 'Identifier') {
                         // Check if error is normalized
                         if (!isErrorNormalized(errValue.name)) {
                           // Check if errorArg is directly from catch parameter
-                          const catchBlock = errorUsages.find(catchNode => {
+                          const catchBlock = errorUsages.find((catchNode) => {
                             if (catchNode.param && catchNode.param.type === 'Identifier') {
                               return catchNode.param.name === errValue.name;
                             }
@@ -10558,14 +11472,17 @@ export default {
                           });
                           if (catchBlock) {
                             const catchParam = catchBlock.param;
-                            const errorVarName = catchParam && catchParam.type === 'Identifier' ? catchParam.name : 'error';
-                            
+                            const errorVarName =
+                              catchParam && catchParam.type === 'Identifier'
+                                ? catchParam.name
+                                : 'error';
+
                             context.report({
                               node: errValue,
                               messageId: 'missingNormalizeError',
                               fix(fixer) {
                                 const fixes = [];
-                                
+
                                 // Add import if missing
                                 if (!hasNormalizeErrorImport) {
                                   const importPath = getNormalizeErrorImportPath();
@@ -10577,42 +11494,66 @@ export default {
                                       break;
                                     }
                                   }
-                                  
+
                                   if (lastImport) {
-                                    fixes.push(fixer.insertTextAfter(lastImport, `\nimport { normalizeError } from '${importPath}';`));
+                                    fixes.push(
+                                      fixer.insertTextAfter(
+                                        lastImport,
+                                        `\nimport { normalizeError } from '${importPath}';`
+                                      )
+                                    );
                                   } else {
                                     const firstStmt = ast.body[0];
                                     if (firstStmt) {
-                                      fixes.push(fixer.insertTextBefore(firstStmt, `import { normalizeError } from '${importPath}';\n`));
+                                      fixes.push(
+                                        fixer.insertTextBefore(
+                                          firstStmt,
+                                          `import { normalizeError } from '${importPath}';\n`
+                                        )
+                                      );
                                     }
                                   }
                                 }
-                                
+
                                 // Find catch block body
                                 if (catchBlock.body && catchBlock.body.type === 'BlockStatement') {
                                   // Check if normalized variable already exists
-                                  const hasNormalizedVar = catchBlock.body.body.some(stmt => 
-                                    stmt.type === 'VariableDeclaration' &&
-                                    stmt.declarations.some(decl =>
-                                      decl.id && decl.id.type === 'Identifier' && decl.id.name === 'normalized'
-                                    )
+                                  const hasNormalizedVar = catchBlock.body.body.some(
+                                    (stmt) =>
+                                      stmt.type === 'VariableDeclaration' &&
+                                      stmt.declarations.some(
+                                        (decl) =>
+                                          decl.id &&
+                                          decl.id.type === 'Identifier' &&
+                                          decl.id.name === 'normalized'
+                                      )
                                   );
-                                  
+
                                   if (!hasNormalizedVar) {
                                     // Add normalizeError call at start of catch block
                                     const normalizeCode = `\n    const normalized = normalizeError(${errorVarName}, 'Operation failed');\n`;
                                     if (catchBlock.body.body.length > 0) {
-                                      fixes.push(fixer.insertTextBefore(catchBlock.body.body[0], normalizeCode));
+                                      fixes.push(
+                                        fixer.insertTextBefore(
+                                          catchBlock.body.body[0],
+                                          normalizeCode
+                                        )
+                                      );
                                     } else {
                                       const bodyStart = catchBlock.body.range[0] + 1;
-                                      fixes.push(fixer.insertTextAfterRange([bodyStart, bodyStart], normalizeCode));
+                                      fixes.push(
+                                        fixer.insertTextAfterRange(
+                                          [bodyStart, bodyStart],
+                                          normalizeCode
+                                        )
+                                      );
                                     }
                                   }
-                                  
+
                                   // Replace error usage with normalized
                                   fixes.push(fixer.replaceText(errValue, 'normalized'));
                                 }
-                                
+
                                 return fixes;
                               },
                             });
@@ -10636,14 +11577,18 @@ export default {
                 }
               }
             }
-            
+
             // Check for createErrorResponse() calls
-            if (node.callee && node.callee.type === 'Identifier' && node.callee.name === 'createErrorResponse') {
+            if (
+              node.callee &&
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'createErrorResponse'
+            ) {
               if (node.arguments && node.arguments.length > 0) {
                 const errorArg = node.arguments[0];
                 if (errorArg && errorArg.type === 'Identifier') {
                   if (!isErrorNormalized(errorArg.name)) {
-                    const catchBlock = errorUsages.find(catchNode => {
+                    const catchBlock = errorUsages.find((catchNode) => {
                       if (catchNode.param && catchNode.param.type === 'Identifier') {
                         return catchNode.param.name === errorArg.name;
                       }
@@ -10651,14 +11596,15 @@ export default {
                     });
                     if (catchBlock) {
                       const catchParam = catchBlock.param;
-                      const errorVarName = catchParam && catchParam.type === 'Identifier' ? catchParam.name : 'error';
-                      
+                      const errorVarName =
+                        catchParam && catchParam.type === 'Identifier' ? catchParam.name : 'error';
+
                       context.report({
                         node: errorArg,
                         messageId: 'missingNormalizeError',
                         fix(fixer) {
                           const fixes = [];
-                          
+
                           // Add import if missing
                           if (!hasNormalizeErrorImport) {
                             const importPath = getNormalizeErrorImportPath();
@@ -10670,42 +11616,60 @@ export default {
                                 break;
                               }
                             }
-                            
+
                             if (lastImport) {
-                              fixes.push(fixer.insertTextAfter(lastImport, `\nimport { normalizeError } from '${importPath}';`));
+                              fixes.push(
+                                fixer.insertTextAfter(
+                                  lastImport,
+                                  `\nimport { normalizeError } from '${importPath}';`
+                                )
+                              );
                             } else {
                               const firstStmt = ast.body[0];
                               if (firstStmt) {
-                                fixes.push(fixer.insertTextBefore(firstStmt, `import { normalizeError } from '${importPath}';\n`));
+                                fixes.push(
+                                  fixer.insertTextBefore(
+                                    firstStmt,
+                                    `import { normalizeError } from '${importPath}';\n`
+                                  )
+                                );
                               }
                             }
                           }
-                          
+
                           // Find catch block body
                           if (catchBlock.body && catchBlock.body.type === 'BlockStatement') {
                             // Check if normalized variable already exists
-                            const hasNormalizedVar = catchBlock.body.body.some(stmt => 
-                              stmt.type === 'VariableDeclaration' &&
-                              stmt.declarations.some(decl =>
-                                decl.id && decl.id.type === 'Identifier' && decl.id.name === 'normalized'
-                              )
+                            const hasNormalizedVar = catchBlock.body.body.some(
+                              (stmt) =>
+                                stmt.type === 'VariableDeclaration' &&
+                                stmt.declarations.some(
+                                  (decl) =>
+                                    decl.id &&
+                                    decl.id.type === 'Identifier' &&
+                                    decl.id.name === 'normalized'
+                                )
                             );
-                            
+
                             if (!hasNormalizedVar) {
                               // Add normalizeError call at start of catch block
                               const normalizeCode = `\n    const normalized = normalizeError(${errorVarName}, 'Operation failed');\n`;
                               if (catchBlock.body.body.length > 0) {
-                                fixes.push(fixer.insertTextBefore(catchBlock.body.body[0], normalizeCode));
+                                fixes.push(
+                                  fixer.insertTextBefore(catchBlock.body.body[0], normalizeCode)
+                                );
                               } else {
                                 const bodyStart = catchBlock.body.range[0] + 1;
-                                fixes.push(fixer.insertTextAfterRange([bodyStart, bodyStart], normalizeCode));
+                                fixes.push(
+                                  fixer.insertTextAfterRange([bodyStart, bodyStart], normalizeCode)
+                                );
                               }
                             }
-                            
+
                             // Replace error usage with normalized
                             fixes.push(fixer.replaceText(errorArg, 'normalized'));
                           }
-                          
+
                           return fixes;
                         },
                       });
@@ -10722,15 +11686,18 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require environment variables to be validated (requireEnvVar or env schema)',
+          description:
+            'Require environment variables to be validated (requireEnvVar or env schema)',
           category: 'Security',
           recommended: true,
         },
         fixable: null,
         schema: [],
         messages: {
-          missingEnvValidation: 'Environment variable access must be validated. Use requireEnvVar() or env schema from @heyclaude/shared-runtime/schemas/env',
-          directProcessEnv: 'Direct process.env access is not allowed. Use requireEnvVar() or env schema instead',
+          missingEnvValidation:
+            'Environment variable access must be validated. Use requireEnvVar() or env schema from @heyclaude/shared-runtime/schemas/env',
+          directProcessEnv:
+            'Direct process.env access is not allowed. Use requireEnvVar() or env schema instead',
         },
       },
       create(context) {
@@ -10738,7 +11705,11 @@ export default {
         const sourceCode = context.getSourceCode();
 
         // Skip test files and config files
-        if (filename.includes('.test.') || filename.includes('.spec.') || filename.includes('.config.')) {
+        if (
+          filename.includes('.test.') ||
+          filename.includes('.spec.') ||
+          filename.includes('.config.')
+        ) {
           return {};
         }
 
@@ -10755,7 +11726,10 @@ export default {
                   hasRequireEnvVar = true;
                   hasEnvValidation = true;
                 }
-                if (sourceValue.includes('schemas/env') || sourceValue.includes('@heyclaude/shared-runtime/schemas/env')) {
+                if (
+                  sourceValue.includes('schemas/env') ||
+                  sourceValue.includes('@heyclaude/shared-runtime/schemas/env')
+                ) {
                   hasEnvSchema = true;
                   hasEnvValidation = true;
                 }
@@ -10764,8 +11738,16 @@ export default {
           },
           MemberExpression(node) {
             // Check for process.env access
-            if (node.object && node.object.type === 'Identifier' && node.object.name === 'process') {
-              if (node.property && node.property.type === 'Identifier' && node.property.name === 'env') {
+            if (
+              node.object &&
+              node.object.type === 'Identifier' &&
+              node.object.name === 'process'
+            ) {
+              if (
+                node.property &&
+                node.property.type === 'Identifier' &&
+                node.property.name === 'env'
+              ) {
                 // Check if parent is MemberExpression accessing a property
                 const parent = node.parent;
                 if (parent && parent.type === 'MemberExpression' && parent.property) {
@@ -10787,7 +11769,11 @@ export default {
           },
           CallExpression(node) {
             // Check for requireEnvVar() usage
-            if (node.callee && node.callee.type === 'Identifier' && node.callee.name === 'requireEnvVar') {
+            if (
+              node.callee &&
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'requireEnvVar'
+            ) {
               hasEnvValidation = true;
             }
             // Check for env.SOMETHING usage (from env schema)
@@ -10805,14 +11791,16 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Enforce Pino object-first API: logger.error({ err, ...context }, "message") instead of message-first',
+          description:
+            'Enforce Pino object-first API: logger.error({ err, ...context }, "message") instead of message-first',
           category: 'Best Practices',
           recommended: true,
         },
         fixable: null,
         schema: [],
         messages: {
-          useObjectFirst: 'Use Pino object-first API: logger.{{method}}({ err, ...context }, "message"). Not message-first: logger.{{method}}("message", error, context)',
+          useObjectFirst:
+            'Use Pino object-first API: logger.{{method}}({ err, ...context }, "message"). Not message-first: logger.{{method}}("message", error, context)',
         },
       },
       create(context) {
@@ -10838,7 +11826,7 @@ export default {
                   // Check arguments - first should be object (object-first API)
                   if (node.arguments && node.arguments.length > 0) {
                     const firstArg = node.arguments[0];
-                    
+
                     // If first arg is string, it's message-first (wrong)
                     if (firstArg && firstArg.type === 'StringLiteral') {
                       context.report({
@@ -10866,7 +11854,8 @@ export default {
         fixable: null,
         schema: [],
         messages: {
-          useChildLogger: 'Use logger.child({ operation, route }) for request-scoped context. Do NOT use createLogger() - that creates a new logger instance (only for cache-safe logging).',
+          useChildLogger:
+            'Use logger.child({ operation, route }) for request-scoped context. Do NOT use createLogger() - that creates a new logger instance (only for cache-safe logging).',
         },
       },
       create(context) {
@@ -10874,8 +11863,12 @@ export default {
         const sourceCode = context.getSourceCode();
 
         // Only validate server components and API routes
-        const isServerComponent = filename.includes('/app/') && (filename.endsWith('/page.tsx') || filename.endsWith('/page.ts'));
-        const isApiRoute = filename.includes('/api/') && (filename.endsWith('/route.ts') || filename.endsWith('/route.tsx'));
+        const isServerComponent =
+          filename.includes('/app/') &&
+          (filename.endsWith('/page.tsx') || filename.endsWith('/page.ts'));
+        const isApiRoute =
+          filename.includes('/api/') &&
+          (filename.endsWith('/route.ts') || filename.endsWith('/route.tsx'));
 
         if (!isServerComponent && !isApiRoute) {
           return {};
@@ -10884,14 +11877,18 @@ export default {
         return {
           CallExpression(node) {
             // Check for createLogger() calls with context (not cache-safe)
-            if (node.callee && node.callee.type === 'Identifier' && node.callee.name === 'createLogger') {
+            if (
+              node.callee &&
+              node.callee.type === 'Identifier' &&
+              node.callee.name === 'createLogger'
+            ) {
               if (node.arguments && node.arguments.length > 0) {
                 const optionsArg = node.arguments[0];
                 if (optionsArg && optionsArg.type === 'ObjectExpression') {
                   // Check if options include operation, route, or other context (not cache-safe)
                   let hasContextOptions = false;
                   let hasTimestampFalse = false;
-                  
+
                   for (const prop of optionsArg.properties || []) {
                     if (prop.type === 'Property' && prop.key && prop.key.type === 'Identifier') {
                       const keyName = prop.key.name;
@@ -10900,12 +11897,17 @@ export default {
                         hasContextOptions = true;
                       }
                       // timestamp: false is valid (cache-safe logging)
-                      if (keyName === 'timestamp' && prop.value && prop.value.type === 'Literal' && prop.value.value === false) {
+                      if (
+                        keyName === 'timestamp' &&
+                        prop.value &&
+                        prop.value.type === 'Literal' &&
+                        prop.value.value === false
+                      ) {
                         hasTimestampFalse = true;
                       }
                     }
                   }
-                  
+
                   // If createLogger has context options (not just timestamp: false), it's wrong
                   if (hasContextOptions && !hasTimestampFalse) {
                     context.report({
@@ -10924,32 +11926,35 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require async keyword for IIFE that uses await. Validates next.config.mjs and other config files. ESLint parser automatically validates syntax.',
+          description:
+            'Require async keyword for IIFE that uses await. Validates next.config.mjs and other config files. ESLint parser automatically validates syntax.',
           category: 'Best Practices',
           recommended: true,
         },
         fixable: null,
         schema: [],
         messages: {
-          missingAsync: 'IIFE uses await but is not marked as async. Add async keyword: (async () => { ... })',
+          missingAsync:
+            'IIFE uses await but is not marked as async. Add async keyword: (async () => { ... })',
         },
       },
       create(context) {
         const filename = context.getFilename();
-        
+
         // Only check config files (next.config.mjs, etc.)
-        const isConfigFile = filename.includes('config') || 
-                            filename.endsWith('.config.mjs') || 
-                            filename.endsWith('.config.js') ||
-                            filename.includes('next.config');
-        
+        const isConfigFile =
+          filename.includes('config') ||
+          filename.endsWith('.config.mjs') ||
+          filename.endsWith('.config.js') ||
+          filename.includes('next.config');
+
         if (!isConfigFile) {
           return {};
         }
 
         // Track IIFE state
         let iifeStack = [];
-        
+
         /**
          * Check if node is an IIFE (Immediately Invoked Function Expression)
          * Pattern: (() => { ... })() or (async () => { ... })()
@@ -10957,22 +11962,24 @@ export default {
         function isIIFE(node) {
           if (node.type !== 'CallExpression') return false;
           if (!node.callee) return false;
-          
+
           // Check if callee is a parenthesized arrow function
           if (node.callee.type === 'ArrowFunctionExpression') {
             return true;
           }
-          
+
           // Check if callee is wrapped in parentheses: (() => {})
-          if (node.callee.type === 'ParenthesizedExpression' && 
-              node.callee.expression && 
-              node.callee.expression.type === 'ArrowFunctionExpression') {
+          if (
+            node.callee.type === 'ParenthesizedExpression' &&
+            node.callee.expression &&
+            node.callee.expression.type === 'ArrowFunctionExpression'
+          ) {
             return true;
           }
-          
+
           return false;
         }
-        
+
         /**
          * Check if arrow function is async
          */
@@ -10980,12 +11987,16 @@ export default {
           if (node.type === 'ArrowFunctionExpression') {
             return node.async === true;
           }
-          if (node.type === 'ParenthesizedExpression' && node.expression && node.expression.type === 'ArrowFunctionExpression') {
+          if (
+            node.type === 'ParenthesizedExpression' &&
+            node.expression &&
+            node.expression.type === 'ArrowFunctionExpression'
+          ) {
             return node.expression.async === true;
           }
           return false;
         }
-        
+
         /**
          * Get the arrow function from an IIFE node
          */
@@ -10993,9 +12004,11 @@ export default {
           if (node.callee.type === 'ArrowFunctionExpression') {
             return node.callee;
           }
-          if (node.callee.type === 'ParenthesizedExpression' && 
-              node.callee.expression && 
-              node.callee.expression.type === 'ArrowFunctionExpression') {
+          if (
+            node.callee.type === 'ParenthesizedExpression' &&
+            node.callee.expression &&
+            node.callee.expression.type === 'ArrowFunctionExpression'
+          ) {
             return node.callee.expression;
           }
           return null;
@@ -11040,7 +12053,8 @@ export default {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Auto-fix: Add missing JSDoc @returns tag to functions with explicit return types',
+          description:
+            'Auto-fix: Add missing JSDoc @returns tag to functions with explicit return types',
           category: 'Best Practices',
           recommended: false,
         },
@@ -11086,7 +12100,7 @@ export default {
           // Only autofix if function has explicit return type annotation (100% safe)
           if (node.returnType && node.returnType.typeAnnotation) {
             const typeAnnotation = node.returnType.typeAnnotation;
-            
+
             // Handle simple types
             if (typeAnnotation.type === 'TSVoidKeyword') {
               return 'void';
@@ -11115,19 +12129,25 @@ export default {
             if (typeAnnotation.type === 'TSNeverKeyword') {
               return 'never';
             }
-            
+
             // For Promise types, extract the inner type
-            if (typeAnnotation.type === 'TSTypeReference' && 
-                typeAnnotation.typeName && 
-                typeAnnotation.typeName.name === 'Promise') {
-              if (typeAnnotation.typeParameters && typeAnnotation.typeParameters.params && typeAnnotation.typeParameters.params.length > 0) {
+            if (
+              typeAnnotation.type === 'TSTypeReference' &&
+              typeAnnotation.typeName &&
+              typeAnnotation.typeName.name === 'Promise'
+            ) {
+              if (
+                typeAnnotation.typeParameters &&
+                typeAnnotation.typeParameters.params &&
+                typeAnnotation.typeParameters.params.length > 0
+              ) {
                 const innerType = typeAnnotation.typeParameters.params[0];
                 const innerTypeText = sourceCode.getText(innerType);
                 return `Promise<${innerTypeText}>`;
               }
               return 'Promise<unknown>';
             }
-            
+
             // For other complex types, get the text directly (100% safe - it's already in the code)
             return sourceCode.getText(typeAnnotation);
           }
@@ -11143,7 +12163,7 @@ export default {
 
             // Find JSDoc comment
             const jsdocComment = findJSDocComment(node);
-            
+
             // If no JSDoc comment exists, skip (let jsdoc/require-returns handle it)
             if (!jsdocComment) return;
 
@@ -11161,18 +12181,20 @@ export default {
               fix(fixer) {
                 // Get the full comment text including the /** and */
                 const fullCommentText = sourceCode.getText(jsdocComment);
-                
+
                 // Extract the content between /** and */
                 const commentContent = jsdocComment.value || '';
-                const commentLines = commentContent.split('\n').filter(line => line.trim() !== '');
-                
+                const commentLines = commentContent
+                  .split('\n')
+                  .filter((line) => line.trim() !== '');
+
                 // Add @returns tag at the end (before closing */)
                 const returnsTag = ` * @returns {${returnTypeText}} Return value description`;
                 commentLines.push(returnsTag);
-                
+
                 // Reconstruct the comment content with proper line breaks
                 const newContent = '\n' + commentLines.join('\n') + '\n ';
-                
+
                 // Replace the entire comment, preserving /** and */
                 return fixer.replaceText(jsdocComment, `/**${newContent}*/`);
               },
@@ -11190,14 +12212,16 @@ export default {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Auto-fix: Add missing JSDoc @param tags to functions with explicit parameter types',
+          description:
+            'Auto-fix: Add missing JSDoc @param tags to functions with explicit parameter types',
           category: 'Best Practices',
           recommended: false,
         },
         fixable: 'code', // ENABLED: Safe when parameter types are explicitly annotated in function signature
         schema: [],
         messages: {
-          missingParam: 'Function parameter is missing JSDoc @param tag. Add @param tag manually with correct type.',
+          missingParam:
+            'Function parameter is missing JSDoc @param tag. Add @param tag manually with correct type.',
         },
       },
       create(context) {
@@ -11246,7 +12270,7 @@ export default {
         function getParamTypeText(param) {
           if (param.typeAnnotation && param.typeAnnotation.typeAnnotation) {
             const typeAnnotation = param.typeAnnotation.typeAnnotation;
-            
+
             // Handle simple types
             if (typeAnnotation.type === 'TSNumberKeyword') return 'number';
             if (typeAnnotation.type === 'TSStringKeyword') return 'string';
@@ -11257,7 +12281,7 @@ export default {
             if (typeAnnotation.type === 'TSUnknownKeyword') return 'unknown';
             if (typeAnnotation.type === 'TSNeverKeyword') return 'never';
             if (typeAnnotation.type === 'TSVoidKeyword') return 'void';
-            
+
             // For complex types, get the text directly (100% safe - it's already in the code)
             return sourceCode.getText(typeAnnotation);
           }
@@ -11274,7 +12298,7 @@ export default {
             // Check each parameter
             for (const param of node.params) {
               if (param.type !== 'Identifier') continue; // Skip destructured params for now
-              
+
               const paramName = param.name;
               const paramTypeText = getParamTypeText(param);
               if (!paramTypeText) continue; // Skip if no explicit type (too risky)
@@ -11291,39 +12315,47 @@ export default {
                   const currentText = sourceCode.getText(jsdocComment);
                   const commentValue = jsdocComment.value || '';
                   const lines = commentValue.split('\n');
-                  
+
                   // Check if @param tag exists without type - if so, add type to it
                   const escapedName = paramName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                   let foundParamLine = false;
-                  
+
                   for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
                     // Match @param without type: @param name or @param  name
-                    const paramMatch = line.match(new RegExp(`(\\s*\\*\\s*@param\\s+)(?!\\{)(${escapedName}\\b)`));
+                    const paramMatch = line.match(
+                      new RegExp(`(\\s*\\*\\s*@param\\s+)(?!\\{)(${escapedName}\\b)`)
+                    );
                     if (paramMatch) {
                       // @param exists but no type - add type
-                      lines[i] = line.replace(paramMatch[0], `${paramMatch[1]}{${paramTypeText}} ${paramName}`);
+                      lines[i] = line.replace(
+                        paramMatch[0],
+                        `${paramMatch[1]}{${paramTypeText}} ${paramName}`
+                      );
                       foundParamLine = true;
                       break;
                     }
                   }
-                  
+
                   if (foundParamLine) {
                     // Reconstruct comment with updated line
                     const newContent = lines.join('\n');
                     return fixer.replaceText(jsdocComment, `/**${newContent}*/`);
                   }
-                  
+
                   // No @param tag exists - add it before closing */
                   const beforeClosing = currentText.lastIndexOf('*/');
                   if (beforeClosing === -1) return null;
-                  
+
                   // Calculate the actual position in the source
                   const commentStart = jsdocComment.range[0];
                   const insertPosition = commentStart + beforeClosing;
-                  
+
                   // Insert @param tag before the closing */
-                  return fixer.insertTextBeforeRange([insertPosition, insertPosition], ` * @param {${paramTypeText}} ${paramName} Parameter description\n`);
+                  return fixer.insertTextBeforeRange(
+                    [insertPosition, insertPosition],
+                    ` * @param {${paramTypeText}} ${paramName} Parameter description\n`
+                  );
                 },
               });
             }
@@ -11360,7 +12392,11 @@ export default {
               return;
             }
             // Don't traverse into nested function declarations/expressions
-            if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') {
+            if (
+              n.type === 'FunctionDeclaration' ||
+              n.type === 'FunctionExpression' ||
+              n.type === 'ArrowFunctionExpression'
+            ) {
               if (n !== node) {
                 // Skip nested functions
                 return;
@@ -11418,7 +12454,11 @@ export default {
               // Check if variable has type annotation
               if (node.parent.id && node.parent.id.typeAnnotation) {
                 const typeAnnotation = node.parent.id.typeAnnotation.typeAnnotation;
-                if (typeAnnotation.type === 'TSTypeReference' && typeAnnotation.typeName && typeAnnotation.typeName.name === 'Promise') {
+                if (
+                  typeAnnotation.type === 'TSTypeReference' &&
+                  typeAnnotation.typeName &&
+                  typeAnnotation.typeName.name === 'Promise'
+                ) {
                   return; // Keep async if explicitly typed as Promise
                 }
               }
@@ -11504,7 +12544,8 @@ export default {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Auto-fix: Standardize import path quotes (single quotes) - 100% safe text replacement',
+          description:
+            'Auto-fix: Standardize import path quotes (single quotes) - 100% safe text replacement',
           category: 'Style',
           recommended: false,
         },
@@ -11520,7 +12561,7 @@ export default {
         return {
           ImportDeclaration(node) {
             if (!node.source || node.source.type !== 'Literal') return;
-            
+
             const sourceValue = node.source.value;
             if (typeof sourceValue !== 'string') return;
 
@@ -11550,7 +12591,8 @@ export default {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Auto-fix: Remove trailing semicolons in type-only import statements (Prettier handles this, but ensures consistency)',
+          description:
+            'Auto-fix: Remove trailing semicolons in type-only import statements (Prettier handles this, but ensures consistency)',
           category: 'Style',
           recommended: false,
         },
@@ -11566,9 +12608,13 @@ export default {
         return {
           ImportDeclaration(node) {
             // Only check type-only imports
-            const isTypeOnly = node.importKind === 'type' || 
-              (node.specifiers.length > 0 && node.specifiers.every(spec => spec.type === 'ImportSpecifier' && spec.importKind === 'type'));
-            
+            const isTypeOnly =
+              node.importKind === 'type' ||
+              (node.specifiers.length > 0 &&
+                node.specifiers.every(
+                  (spec) => spec.type === 'ImportSpecifier' && spec.importKind === 'type'
+                ));
+
             if (!isTypeOnly) return;
 
             const lastToken = sourceCode.getLastToken(node);
@@ -11590,7 +12636,8 @@ export default {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Auto-fix: Sort import specifiers alphabetically within import statements - 100% safe',
+          description:
+            'Auto-fix: Sort import specifiers alphabetically within import statements - 100% safe',
           category: 'Style',
           recommended: false,
         },
@@ -11608,7 +12655,7 @@ export default {
             if (!node.specifiers || node.specifiers.length < 2) return;
 
             // Get all specifiers
-            const specifiers = node.specifiers.map(spec => {
+            const specifiers = node.specifiers.map((spec) => {
               const text = sourceCode.getText(spec);
               let name = '';
               if (spec.type === 'ImportSpecifier') {
@@ -11631,7 +12678,7 @@ export default {
                 messageId: 'sortSpecifiers',
                 fix(fixer) {
                   // Sort specifiers
-                  const sortedTexts = sorted.map(s => s.text).join(', ');
+                  const sortedTexts = sorted.map((s) => s.text).join(', ');
                   const firstSpec = node.specifiers[0];
                   const lastSpec = node.specifiers[node.specifiers.length - 1];
                   return fixer.replaceTextRange(
@@ -11650,7 +12697,8 @@ export default {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Auto-fix: Convert type assertions to use `as` syntax consistently - 100% safe',
+          description:
+            'Auto-fix: Convert type assertions to use `as` syntax consistently - 100% safe',
           category: 'Style',
           recommended: false,
         },
@@ -11686,7 +12734,8 @@ export default {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Auto-fix: Remove unnecessary type assertions when TypeScript can infer the type - 100% safe',
+          description:
+            'Auto-fix: Remove unnecessary type assertions when TypeScript can infer the type - 100% safe',
           category: 'Style',
           recommended: false,
         },
@@ -11707,7 +12756,7 @@ export default {
             // So we'll keep this rule simple and safe
             const expressionText = sourceCode.getText(node.expression);
             const typeText = sourceCode.getText(node.typeAnnotation);
-            
+
             // Only remove if it's a simple case like: (value as any) or (value as unknown)
             // These are common unnecessary assertions
             if (typeText === 'any' || typeText === 'unknown') {
@@ -11734,14 +12783,16 @@ export default {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Auto-fix: Replace JSON.parse(JSON.stringify()) with structuredClone() - 100% safe',
+          description:
+            'Auto-fix: Replace JSON.parse(JSON.stringify()) with structuredClone() - 100% safe',
           category: 'Best Practices',
           recommended: false,
         },
         fixable: 'code',
         schema: [],
         messages: {
-          preferStructuredClone: 'Prefer `structuredClone(…)` over `JSON.parse(JSON.stringify(…))` to create a deep clone.',
+          preferStructuredClone:
+            'Prefer `structuredClone(…)` over `JSON.parse(JSON.stringify(…))` to create a deep clone.',
         },
       },
       create(context) {
@@ -11812,14 +12863,18 @@ export default {
           },
         ],
         messages: {
-          preferDesignSystem: 'Use design system utility "{{utility}}" instead of inline Tailwind class "{{className}}". Import from @heyclaude/web-runtime/design-system',
-          inlineTailwindDetected: 'Inline Tailwind class "{{className}}" detected. Consider using design system utility instead.',
+          preferDesignSystem:
+            'Use design system utility "{{utility}}" instead of inline Tailwind class "{{className}}". Import from @heyclaude/web-runtime/design-system',
+          inlineTailwindDetected:
+            'Inline Tailwind class "{{className}}" detected. Consider using design system utility instead.',
         },
       },
       create(context) {
         const sourceCode = context.getSourceCode();
         const options = context.options[0] || {};
-        const allowedPatterns = (options.allowedPatterns || []).map((pattern) => new RegExp(pattern));
+        const allowedPatterns = (options.allowedPatterns || []).map(
+          (pattern) => new RegExp(pattern)
+        );
 
         // Common Tailwind patterns that should use design system
         const tailwindPatterns = [
@@ -11830,10 +12885,22 @@ export default {
           { pattern: /\bspace-x-(\d+)\b/, utility: 'spaceX.*', category: 'spacing' },
           // Layout
           { pattern: /\bflex\s+flex-col\s+gap-(\d+)\b/, utility: 'stack.*', category: 'layout' },
-          { pattern: /\bflex\s+items-center\s+gap-(\d+)\b/, utility: 'cluster.*', category: 'layout' },
-          { pattern: /\bflex\s+items-center\s+justify-between\b/, utility: 'between.center', category: 'layout' },
+          {
+            pattern: /\bflex\s+items-center\s+gap-(\d+)\b/,
+            utility: 'cluster.*',
+            category: 'layout',
+          },
+          {
+            pattern: /\bflex\s+items-center\s+justify-between\b/,
+            utility: 'between.center',
+            category: 'layout',
+          },
           // Typography
-          { pattern: /\btext-muted-foreground\b/, utility: 'muted.default', category: 'typography' },
+          {
+            pattern: /\btext-muted-foreground\b/,
+            utility: 'muted.default',
+            category: 'typography',
+          },
           { pattern: /\btext-(\w+)\b/, utility: 'size.*', category: 'typography' },
           // Icons
           { pattern: /\bh-(\d+)\s+w-(\d+)\b/, utility: 'iconSize.*', category: 'icons' },
@@ -11841,7 +12908,11 @@ export default {
           { pattern: /\brounded-(\w+)\b/, utility: 'radius.*', category: 'borders' },
           // Interactive
           { pattern: /\bhover:bg-accent\/\d+\b/, utility: 'hoverBg.*', category: 'interactive' },
-          { pattern: /\btransition-colors\b/, utility: 'transition.colors', category: 'interactive' },
+          {
+            pattern: /\btransition-colors\b/,
+            utility: 'transition.colors',
+            category: 'interactive',
+          },
         ];
 
         function checkClassName(node, classNameValue) {
@@ -11849,14 +12920,17 @@ export default {
 
           // Check if it's already using design system (contains design system import)
           const fileText = sourceCode.getText();
-          const hasDesignSystemImport = /from\s+['"]@heyclaude\/web-runtime\/design-system['"]/.test(fileText);
+          const hasDesignSystemImport =
+            /from\s+['"]@heyclaude\/web-runtime\/design-system['"]/.test(fileText);
 
           // Check each Tailwind pattern
           for (const { pattern, utility, category } of tailwindPatterns) {
             const match = classNameValue.match(pattern);
             if (match) {
               // Check if pattern is allowed
-              const isAllowed = allowedPatterns.some((allowedPattern) => allowedPattern.test(classNameValue));
+              const isAllowed = allowedPatterns.some((allowedPattern) =>
+                allowedPattern.test(classNameValue)
+              );
               if (isAllowed) continue;
 
               // Check if design system is imported
@@ -11915,7 +12989,8 @@ export default {
         fixable: null,
         schema: [],
         messages: {
-          suggestUtility: 'Consider using design system utility "{{utility}}" for pattern "{{pattern}}"',
+          suggestUtility:
+            'Consider using design system utility "{{utility}}" for pattern "{{pattern}}"',
         },
       },
       create(context) {

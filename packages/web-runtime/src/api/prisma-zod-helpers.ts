@@ -19,9 +19,7 @@ import { z } from 'zod';
  * // Returns: CompaniesCreateInputSchema
  * ```
  */
-export function getPrismaCreateSchema<T extends string>(
-  modelName: T
-): z.ZodTypeAny {
+export function getPrismaCreateSchema<T extends string>(modelName: T): z.ZodTypeAny {
   // Dynamic import to avoid loading all schemas at once
   // In practice, you'll import directly:
   // import { CompaniesCreateInputSchema } from 'prisma/generated/zod';
@@ -39,9 +37,7 @@ export function getPrismaCreateSchema<T extends string>(
  * const schema = CompaniesUpdateInputSchema;
  * ```
  */
-export function getPrismaUpdateSchema<T extends string>(
-  modelName: T
-): z.ZodTypeAny {
+export function getPrismaUpdateSchema<T extends string>(modelName: T): z.ZodTypeAny {
   throw new Error(
     `Use direct import: import { ${modelName}UpdateInputSchema } from 'prisma/generated/zod';`
   );
@@ -56,9 +52,7 @@ export function getPrismaUpdateSchema<T extends string>(
  * const schema = CompaniesWhereUniqueInputSchema;
  * ```
  */
-export function getPrismaWhereUniqueSchema<T extends string>(
-  modelName: T
-): z.ZodTypeAny {
+export function getPrismaWhereUniqueSchema<T extends string>(modelName: T): z.ZodTypeAny {
   throw new Error(
     `Use direct import: import { ${modelName}WhereUniqueInputSchema } from 'prisma/generated/zod';`
   );
@@ -76,10 +70,7 @@ export function getPrismaWhereUniqueSchema<T extends string>(
  * const validated = validatePrismaInput(CompaniesCreateInputSchema, body);
  * ```
  */
-export function validatePrismaInput<T extends z.ZodTypeAny>(
-  schema: T,
-  input: unknown
-): z.infer<T> {
+export function validatePrismaInput<T extends z.ZodTypeAny>(schema: T, input: unknown): z.infer<T> {
   return schema.parse(input);
 }
 

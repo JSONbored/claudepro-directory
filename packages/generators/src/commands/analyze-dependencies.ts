@@ -61,9 +61,7 @@ function buildDependencyGraph(project: Project, sourceFiles: string[]): Map<stri
 /**
  * Detect circular dependencies using DFS
  */
-function detectCircularDependencies(
-  graph: Map<string, Set<string>>
-): string[][] {
+function detectCircularDependencies(graph: Map<string, Set<string>>): string[][] {
   const cycles: string[][] = [];
   const visited = new Set<string>();
   const recStack = new Set<string>();
@@ -104,7 +102,10 @@ function detectCircularDependencies(
 /**
  * Detect unused imports
  */
-function detectUnusedImports(project: Project, sourceFiles: string[]): Array<{ file: string; import: string }> {
+function detectUnusedImports(
+  project: Project,
+  sourceFiles: string[]
+): Array<{ file: string; import: string }> {
   const unused: Array<{ file: string; import: string }> = [];
 
   for (const filePath of sourceFiles) {

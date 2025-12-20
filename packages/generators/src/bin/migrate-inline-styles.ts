@@ -6,7 +6,7 @@ const dryRun = args.includes('--dry-run') || args.includes('-d');
 
 // Parse --phase=N argument
 let phase: number | undefined;
-const phaseArg = args.find(arg => arg.startsWith('--phase='));
+const phaseArg = args.find((arg) => arg.startsWith('--phase='));
 if (phaseArg) {
   const phaseValue = phaseArg.split('=')[1];
   const phaseNum = parseInt(phaseValue, 10);

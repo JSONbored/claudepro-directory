@@ -65,10 +65,7 @@ export function useEventListener<K extends keyof WindowEventMap>(
   element?: undefined,
   options?: boolean | AddEventListenerOptions
 ): void;
-export function useEventListener<
-  K extends keyof DocumentEventMap,
-  T extends Document = Document
->(
+export function useEventListener<K extends keyof DocumentEventMap, T extends Document = Document>(
   eventName: K,
   handler: (event: DocumentEventMap[K]) => void,
   element: RefObject<T> | T | null,
@@ -76,7 +73,7 @@ export function useEventListener<
 ): void;
 export function useEventListener<
   K extends keyof HTMLElementEventMap,
-  T extends HTMLElement = HTMLElement
+  T extends HTMLElement = HTMLElement,
 >(
   eventName: K,
   handler: (event: HTMLElementEventMap[K]) => void,
@@ -85,7 +82,7 @@ export function useEventListener<
 ): void;
 export function useEventListener<
   K extends string,
-  T extends HTMLElement | MediaQueryList = HTMLElement
+  T extends HTMLElement | MediaQueryList = HTMLElement,
 >(
   eventName: K,
   handler: (event: Event) => void,
@@ -94,7 +91,7 @@ export function useEventListener<
 ): void;
 export function useEventListener<
   K extends keyof WindowEventMap | keyof DocumentEventMap | keyof HTMLElementEventMap | string,
-  T extends Window | Document | HTMLElement | MediaQueryList = Window
+  T extends Window | Document | HTMLElement | MediaQueryList = Window,
 >(
   eventName: K,
   handler: (event: any) => void,

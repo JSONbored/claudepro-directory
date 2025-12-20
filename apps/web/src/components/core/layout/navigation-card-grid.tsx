@@ -2,9 +2,9 @@
 
 /**
  * Navigation Card Grid Component
- * 
+ *
  * Responsive grid container for 3D navigation cards.
- * 
+ *
  * Layout:
  * - Desktop (xl:): 4 columns × 2 rows = 8 cards
  * - Tablet (md-xl): 2 columns × 4 rows = 8 cards
@@ -22,10 +22,7 @@ interface NavigationCardGridProps {
   className?: string;
 }
 
-export function NavigationCardGrid({
-  cards,
-  className,
-}: NavigationCardGridProps) {
+export function NavigationCardGrid({ cards, className }: NavigationCardGridProps) {
   const shouldReduceMotion = useReducedMotion();
   return (
     <div

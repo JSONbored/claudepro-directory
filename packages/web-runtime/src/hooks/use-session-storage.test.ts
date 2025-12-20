@@ -18,9 +18,7 @@ describe('useSessionStorage', () => {
   });
 
   it('should initialize with default value when no stored value', () => {
-    const { result } = renderHook(() =>
-      useSessionStorage('test-key', 'default')
-    );
+    const { result } = renderHook(() => useSessionStorage('test-key', 'default'));
 
     expect(result.current[0]).toBe('default');
   });
@@ -28,17 +26,13 @@ describe('useSessionStorage', () => {
   it('should load value from sessionStorage', () => {
     window.sessionStorage.setItem('test-key', JSON.stringify('stored-value'));
 
-    const { result } = renderHook(() =>
-      useSessionStorage('test-key', 'default')
-    );
+    const { result } = renderHook(() => useSessionStorage('test-key', 'default'));
 
     expect(result.current[0]).toBe('stored-value');
   });
 
   it('should update sessionStorage when value changes', () => {
-    const { result } = renderHook(() =>
-      useSessionStorage('test-key', 'initial')
-    );
+    const { result } = renderHook(() => useSessionStorage('test-key', 'initial'));
 
     act(() => {
       result.current[1]('updated');
@@ -51,9 +45,7 @@ describe('useSessionStorage', () => {
   it('should remove value from sessionStorage', () => {
     window.sessionStorage.setItem('test-key', JSON.stringify('value'));
 
-    const { result } = renderHook(() =>
-      useSessionStorage('test-key', 'default')
-    );
+    const { result } = renderHook(() => useSessionStorage('test-key', 'default'));
 
     act(() => {
       result.current[2]();
@@ -64,9 +56,7 @@ describe('useSessionStorage', () => {
   });
 
   it('should handle functional updates', () => {
-    const { result } = renderHook(() =>
-      useSessionStorage('test-key', 0)
-    );
+    const { result } = renderHook(() => useSessionStorage('test-key', 0));
 
     act(() => {
       result.current[1]((prev) => (prev as number) + 1);
@@ -97,9 +87,7 @@ describe('useSessionStorage', () => {
       throw new Error('QuotaExceededError');
     });
 
-    const { result } = renderHook(() =>
-      useSessionStorage('test-key', 'default')
-    );
+    const { result } = renderHook(() => useSessionStorage('test-key', 'default'));
 
     act(() => {
       result.current[1]('new-value');
@@ -115,9 +103,7 @@ describe('useSessionStorage', () => {
     const originalWindow = global.window;
     delete (global as any).window;
 
-    const { result } = renderHook(() =>
-      useSessionStorage('test-key', 'default')
-    );
+    const { result } = renderHook(() => useSessionStorage('test-key', 'default'));
 
     expect(result.current[0]).toBe('default');
 

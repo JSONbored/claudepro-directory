@@ -9,10 +9,12 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 import type { UnifiedSearchProps } from '@heyclaude/web-runtime/types/component.types';
 
 interface HeroSearchContextValue {
-  searchProps?: Omit<UnifiedSearchProps, 'placeholder'> & {
-    placeholder?: string;
-    onFocusChange?: (isFocused: boolean) => void;
-  } | undefined;
+  searchProps?:
+    | (Omit<UnifiedSearchProps, 'placeholder'> & {
+        placeholder?: string;
+        onFocusChange?: (isFocused: boolean) => void;
+      })
+    | undefined;
   setSearchProps: (props: HeroSearchContextValue['searchProps']) => void;
 }
 

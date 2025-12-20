@@ -130,7 +130,7 @@ export function BorderBeam({
           background: 'transparent',
         }}
       >
-        <div className="h-full w-full rounded-[inherit] bg-background" />
+        <div className="bg-background h-full w-full rounded-[inherit]" />
       </div>
     </div>
   );

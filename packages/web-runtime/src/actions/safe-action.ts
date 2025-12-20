@@ -7,7 +7,9 @@ import { logActionFailure, normalizeError } from '../errors.ts';
 
 const actionMetadataSchema = z.object({
   actionName: z.string().min(1),
-  category: z.enum(['analytics', 'form', 'content', 'user', 'admin', 'reputation', 'mfa']).optional(),
+  category: z
+    .enum(['analytics', 'form', 'content', 'user', 'admin', 'reputation', 'mfa'])
+    .optional(),
 });
 
 export type ActionMetadata = z.infer<typeof actionMetadataSchema>;
@@ -18,7 +20,10 @@ export const actionClient = createSafeActionClient({
   },
   handleServerError(error) {
     const normalized = normalizeError(error);
-    logger.error({ err: normalized, errorType: normalized.constructor?.name || 'Unknown', }, 'Server action error');
+    logger.error(
+      { err: normalized, errorType: normalized.constructor?.name || 'Unknown' },
+      'Server action error'
+    );
     if (isProduction) {
       return DEFAULT_SERVER_ERROR_MESSAGE;
     }
@@ -53,7 +58,10 @@ export const rateLimitedAction = loggedAction.use(async ({ next, metadata }) => 
   const parsedMetadata = actionMetadataSchema.safeParse(metadata);
   if (!parsedMetadata.success) {
     const normalized = normalizeError(parsedMetadata.error, 'Invalid action metadata');
-    logger.error({ err: normalized, metadataProvided: toLogContextValue(metadata), }, 'Invalid action metadata');
+    logger.error(
+      { err: normalized, metadataProvided: toLogContextValue(metadata) },
+      'Invalid action metadata'
+    );
     throw new Error('Invalid action configuration');
   }
 
@@ -80,12 +88,17 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
       'unknown';
     const referer = headersList.get('referer') || 'unknown';
 
-    logger.warn({ securityEvent: true, // Structured tag for security event filtering
-      clientIP,
-      path: referer,
-      actionName: metadata?.actionName || 'unknown',
-      reason: authResult.error?.message || 'No valid session',
-      errorCode: authResult.error?.name || 'AUTH_REQUIRED', }, 'Auth failure - Unauthorized action attempt');
+    logger.warn(
+      {
+        securityEvent: true, // Structured tag for security event filtering
+        clientIP,
+        path: referer,
+        actionName: metadata?.actionName || 'unknown',
+        reason: authResult.error?.message || 'No valid session',
+        errorCode: authResult.error?.name || 'AUTH_REQUIRED',
+      },
+      'Auth failure - Unauthorized action attempt'
+    );
 
     throw new Error('Unauthorized. Please sign in to continue.');
   }

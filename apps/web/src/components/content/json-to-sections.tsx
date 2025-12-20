@@ -4,7 +4,9 @@
 
 'use client';
 
-import type { contentModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type contentModel = Prisma.contentGetPayload<{}>;
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { getSafeExternalUrl } from '@heyclaude/web-runtime/utils/url-safety';
 import { isValidInternalPath } from '@heyclaude/web-runtime/utils/url-validation';
@@ -15,13 +17,19 @@ import { Checklist } from '@/src/components/content/checklist';
 import dynamic from 'next/dynamic';
 // Dynamic import for UnifiedContentBlock (595 lines) - lazy load for code splitting
 const UnifiedContentBlock = dynamic(
-  () => import('@/src/components/content/markdown-content-block').then((mod) => ({ default: mod.UnifiedContentBlock })),
+  () =>
+    import('@/src/components/content/markdown-content-block').then((mod) => ({
+      default: mod.UnifiedContentBlock,
+    })),
   { ssr: true }
 );
 
 // Lazy load large code block component (889 lines) - only loads when code blocks are rendered
 const ProductionCodeBlock = dynamic(
-  () => import('@/src/components/content/interactive-code-block').then((mod) => ({ default: mod.ProductionCodeBlock })),
+  () =>
+    import('@/src/components/content/interactive-code-block').then((mod) => ({
+      default: mod.ProductionCodeBlock,
+    })),
   { ssr: true }
 );
 import { ComparisonTable } from '@/src/components/core/domain/comparison-table';
@@ -241,7 +249,7 @@ function TrustedHTML({ html, className, id }: { className?: string; html: string
   // Initialize with empty string during SSR to prevent XSS - will be sanitized on client
   const [safeHtml, setSafeHtml] = useState<string>('');
   const isClient = useIsClient();
-  
+
   useEffect(() => {
     // Only sanitize on client - html should be pre-sanitized but we sanitize again for safety
     if (isClient && html && typeof html === 'string') {
@@ -398,7 +406,7 @@ function render_section(section: Section, index: number): React.ReactNode {
       return (
         <div key={key} id={section.id} className={section.className}>
           {section.title ? <h3 className="mb-4 text-lg font-semibold">{section.title}</h3> : null}
-          <div className="overflow-hidden card-base">
+          <div className="card-base overflow-hidden">
             {section.tabs.map((tab: CodeTab, idx: number) => (
               <details key={`${tab.label}-${idx}`} className="border-b last:border-0">
                 <summary className="hover:bg-muted/50 cursor-pointer px-4 py-2 font-medium">
@@ -546,7 +554,7 @@ function render_section(section: Section, index: number): React.ReactNode {
           {section.description ? (
             <p className="text-muted-foreground mb-4">{section.description}</p>
           ) : null}
-          <div className="overflow-hidden card-base">
+          <div className="card-base overflow-hidden">
             {section.items.map((item: TabItem, idx: number) => (
               <details key={`${item.value}-${idx}`} className="border-b last:border-0">
                 <summary className="hover:bg-muted/50 cursor-pointer px-4 py-2 font-medium">
@@ -610,7 +618,7 @@ function render_section(section: Section, index: number): React.ReactNode {
                 </h4>
                 <p className="text-muted-foreground mb-4">{step.description}</p>
                 {step.timeEstimate ? (
-                  <p className="text-muted-foreground text-sm mb-2">⏱️ {step.timeEstimate}</p>
+                  <p className="text-muted-foreground mb-2 text-sm">⏱️ {step.timeEstimate}</p>
                 ) : null}
                 {step.code ? (
                   <ProductionCodeBlock
@@ -620,7 +628,7 @@ function render_section(section: Section, index: number): React.ReactNode {
                   />
                 ) : null}
                 {step.notes ? (
-                  <p className="text-muted-foreground text-sm mt-2 italic">{step.notes}</p>
+                  <p className="text-muted-foreground mt-2 text-sm italic">{step.notes}</p>
                 ) : null}
               </div>
             ))}
@@ -699,7 +707,7 @@ function render_section(section: Section, index: number): React.ReactNode {
                       title="Invalid or unsafe URL - cannot display link"
                     >
                       <h4 className="mb-1 font-semibold">{r.title}</h4>
-                      <p className="text-muted-foreground text-sm mb-2">{r.description}</p>
+                      <p className="text-muted-foreground mb-2 text-sm">{r.description}</p>
                       <span className="text-destructive text-xs uppercase">
                         {r.type} • Invalid URL
                       </span>
@@ -718,7 +726,7 @@ function render_section(section: Section, index: number): React.ReactNode {
                     className="hover:bg-muted/50 card-base p-4 transition-colors"
                   >
                     <h4 className="mb-1 font-semibold">{r.title}</h4>
-                    <p className="text-muted-foreground text-sm mb-2">{r.description}</p>
+                    <p className="text-muted-foreground mb-2 text-sm">{r.description}</p>
                     <span className="text-primary text-xs uppercase">{r.type}</span>
                   </a>
                 );
@@ -741,10 +749,7 @@ function render_section(section: Section, index: number): React.ReactNode {
  * Detects legacy shapes (objects with `html` property but no `type` discriminator)
  * and converts them to `text` sections. Logs warnings for unrecognized shapes.
  */
-function normalizeLegacySection(
-  item: unknown,
-  index: number
-): Section | null {
+function normalizeLegacySection(item: unknown, index: number): Section | null {
   if (!item || typeof item !== 'object') {
     return null;
   }
@@ -823,11 +828,7 @@ export function JSONSectionRenderer({ sections }: JSONSectionRendererProps) {
     <div className="space-y-8">
       {normalizedSections.map((section, index) => {
         const key = section.id || `section-${index}`;
-        return (
-          <React.Fragment key={key}>
-            {render_section(section, index)}
-          </React.Fragment>
-        );
+        return <React.Fragment key={key}>{render_section(section, index)}</React.Fragment>;
       })}
     </div>
   );

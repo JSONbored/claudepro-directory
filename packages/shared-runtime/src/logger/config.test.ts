@@ -1,6 +1,6 @@
 /**
  * Logger Configuration Tests
- * 
+ *
  * Tests for Pino logger configuration features:
  * - Redaction patterns (IP, phone, geo, financial, user ID hashing)
  * - streamWrite hook (JWT, API key sanitization)
@@ -17,19 +17,19 @@ describe('Logger Configuration', () => {
   describe('SENSITIVE_PATTERNS', () => {
     it('should include standard sensitive field patterns', () => {
       const patterns = SENSITIVE_PATTERNS;
-      
+
       // Auth/credentials
       expect(patterns).toContain('password');
       expect(patterns).toContain('token');
       expect(patterns).toContain('secret');
       expect(patterns).toContain('apiKey');
       expect(patterns).toContain('api_key');
-      
+
       // User identification (userId is hashed, not just redacted)
       expect(patterns).toContain('userId');
       expect(patterns).toContain('user_id');
       // Note: email is NOT in SENSITIVE_PATTERNS - it uses a different approach
-      
+
       // Financial
       expect(patterns).toContain('creditCard');
       expect(patterns).toContain('credit_card');
@@ -40,7 +40,7 @@ describe('Logger Configuration', () => {
 
     it('should include IP address patterns', () => {
       const patterns = SENSITIVE_PATTERNS;
-      
+
       expect(patterns).toContain('ip');
       expect(patterns).toContain('ipAddress');
       expect(patterns).toContain('ip_address');
@@ -52,7 +52,7 @@ describe('Logger Configuration', () => {
 
     it('should include phone number patterns', () => {
       const patterns = SENSITIVE_PATTERNS;
-      
+
       expect(patterns).toContain('phone');
       expect(patterns).toContain('phoneNumber');
       expect(patterns).toContain('phone_number');
@@ -63,7 +63,7 @@ describe('Logger Configuration', () => {
 
     it('should include geolocation patterns', () => {
       const patterns = SENSITIVE_PATTERNS;
-      
+
       expect(patterns).toContain('latitude');
       expect(patterns).toContain('longitude');
       expect(patterns).toContain('lat');
@@ -74,19 +74,19 @@ describe('Logger Configuration', () => {
 
     it('should include nested path patterns for user ID', () => {
       const patterns = SENSITIVE_PATTERNS;
-      
+
       // Nested patterns for user ID structures
-      expect(patterns.some(p => p.includes('user.id'))).toBe(true);
-      expect(patterns.some(p => p.includes('user.userId'))).toBe(true);
-      expect(patterns.some(p => p.includes('req.ip'))).toBe(true);
-      expect(patterns.some(p => p.includes('request.ip'))).toBe(true);
+      expect(patterns.some((p) => p.includes('user.id'))).toBe(true);
+      expect(patterns.some((p) => p.includes('user.userId'))).toBe(true);
+      expect(patterns.some((p) => p.includes('req.ip'))).toBe(true);
+      expect(patterns.some((p) => p.includes('request.ip'))).toBe(true);
     });
   });
 
   describe('createPinoConfig', () => {
     it('should create valid Pino config with defaults', () => {
       const config = createPinoConfig();
-      
+
       expect(config).toBeDefined();
       expect(config.level).toBeDefined();
       expect(config.base).toBeDefined();
@@ -97,7 +97,7 @@ describe('Logger Configuration', () => {
 
     it('should apply custom service name to base context', () => {
       const config = createPinoConfig({ service: 'test-service' });
-      
+
       expect(config.base).toBeDefined();
       expect(config.base?.service).toBe('test-service');
     });
@@ -106,7 +106,7 @@ describe('Logger Configuration', () => {
       const config = createPinoConfig({
         base: { customField: 'test-value' },
       });
-      
+
       expect(config.base).toBeDefined();
       expect(config.base?.customField).toBe('test-value');
       expect(config.base?.env).toBeDefined(); // Default env should still exist
@@ -114,7 +114,7 @@ describe('Logger Configuration', () => {
 
     it('should use custom log level when provided', () => {
       const config = createPinoConfig({ level: 'debug' });
-      
+
       expect(config.level).toBe('debug');
     });
   });
@@ -122,9 +122,9 @@ describe('Logger Configuration', () => {
   describe('Redaction Configuration', () => {
     it('should configure redaction with sensitive patterns', () => {
       const config = createPinoConfig();
-      
+
       expect(config.redact).toBeDefined();
-      
+
       if (typeof config.redact === 'object' && !Array.isArray(config.redact)) {
         expect(config.redact.paths).toBeDefined();
         expect(Array.isArray(config.redact.paths)).toBe(true);
@@ -138,7 +138,7 @@ describe('Logger Configuration', () => {
           paths: ['customSecret', 'data.privateKey'],
         },
       });
-      
+
       if (typeof config.redact === 'object' && !Array.isArray(config.redact)) {
         expect(config.redact.paths).toContain('customSecret');
         expect(config.redact.paths).toContain('data.privateKey');
@@ -165,9 +165,9 @@ describe('Logger Configuration', () => {
 
     it('should enable pino-pretty transport in development by default', () => {
       process.env['NODE_ENV'] = 'development';
-      
+
       const config = createPinoConfig();
-      
+
       // In development with default 'auto' setting, transport should be pino-pretty
       expect(config.transport).toBeDefined();
       if (config.transport && 'target' in config.transport) {
@@ -177,27 +177,27 @@ describe('Logger Configuration', () => {
 
     it('should not enable pino-pretty in production', () => {
       process.env['NODE_ENV'] = 'production';
-      
+
       const config = createPinoConfig();
-      
+
       // In production, no transport should be set by default
       expect(config.transport).toBeUndefined();
     });
 
     it('should disable pino-pretty when prettyPrint is false', () => {
       process.env['NODE_ENV'] = 'development';
-      
+
       const config = createPinoConfig({ prettyPrint: false });
-      
+
       // Explicitly disabled, no transport
       expect(config.transport).toBeUndefined();
     });
 
     it('should enable pino-pretty in production when prettyPrint is true', () => {
       process.env['NODE_ENV'] = 'production';
-      
+
       const config = createPinoConfig({ prettyPrint: true });
-      
+
       // Explicitly enabled, should have pino-pretty transport
       expect(config.transport).toBeDefined();
       if (config.transport && 'target' in config.transport) {
@@ -207,14 +207,14 @@ describe('Logger Configuration', () => {
 
     it('should use custom transport over pino-pretty', () => {
       process.env['NODE_ENV'] = 'development';
-      
+
       const customTransport = {
         target: 'custom-transport',
         options: { foo: 'bar' },
       };
-      
+
       const config = createPinoConfig({ transport: customTransport });
-      
+
       // Custom transport takes precedence
       expect(config.transport).toEqual(customTransport);
     });
@@ -223,7 +223,7 @@ describe('Logger Configuration', () => {
   describe('Serializers', () => {
     it('should include standard Pino serializers', () => {
       const config = createPinoConfig();
-      
+
       expect(config.serializers).toBeDefined();
       expect(config.serializers?.err).toBeDefined();
       expect(config.serializers?.req).toBeDefined();
@@ -232,7 +232,7 @@ describe('Logger Configuration', () => {
 
     it('should include custom serializers', () => {
       const config = createPinoConfig();
-      
+
       expect(config.serializers?.user).toBeDefined();
       expect(config.serializers?.request).toBeDefined();
       expect(config.serializers?.response).toBeDefined();
@@ -242,13 +242,13 @@ describe('Logger Configuration', () => {
 
     it('should allow custom serializers to override defaults', () => {
       const customUserSerializer = (user: unknown) => ({ custom: true });
-      
+
       const config = createPinoConfig({
         serializers: {
           user: customUserSerializer,
         },
       });
-      
+
       expect(config.serializers?.user).toBe(customUserSerializer);
     });
   });
@@ -256,14 +256,14 @@ describe('Logger Configuration', () => {
   describe('Hooks Configuration', () => {
     it('should include logMethod hook', () => {
       const config = createPinoConfig();
-      
+
       expect(config.hooks).toBeDefined();
       expect(config.hooks?.logMethod).toBeDefined();
     });
 
     it('should include streamWrite hook for defense-in-depth sanitization', () => {
       const config = createPinoConfig();
-      
+
       expect(config.hooks).toBeDefined();
       expect(config.hooks?.streamWrite).toBeDefined();
     });
@@ -273,13 +273,14 @@ describe('Logger Configuration', () => {
     it('should sanitize JWT Bearer tokens in log output', () => {
       const config = createPinoConfig();
       const streamWrite = config.hooks?.streamWrite;
-      
+
       expect(streamWrite).toBeDefined();
-      
+
       if (streamWrite) {
-        const inputWithJWT = 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+        const inputWithJWT =
+          'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
         const output = streamWrite(inputWithJWT);
-        
+
         expect(output).not.toContain('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9');
         expect(output).toContain('[JWT_REDACTED]');
       }
@@ -288,13 +289,13 @@ describe('Logger Configuration', () => {
     it('should sanitize API keys with sk_live_ prefix (defense-in-depth)', () => {
       const config = createPinoConfig();
       const streamWrite = config.hooks?.streamWrite;
-      
+
       if (streamWrite) {
         // Defense-in-depth: sanitize common API key patterns (sk_live_, pk_live_, etc.)
         // Even though we use Polar, this protects against third-party libraries
         const inputWithAPIKey = 'api_key: sk_live_faketestkey1234567890abcd';
         const output = streamWrite(inputWithAPIKey);
-        
+
         expect(output).not.toContain('faketestkey1234567890abcd');
         expect(output).toContain('sk_live_[REDACTED]');
       }
@@ -303,12 +304,12 @@ describe('Logger Configuration', () => {
     it('should sanitize AWS access keys', () => {
       const config = createPinoConfig();
       const streamWrite = config.hooks?.streamWrite;
-      
+
       if (streamWrite) {
         // AWS access key pattern (starts with AKIA)
         const inputWithAWSKey = 'aws_key: AKIAIOSFODNN7EXAMPLE';
         const output = streamWrite(inputWithAWSKey);
-        
+
         // AWS keys should be sanitized
         expect(output).not.toContain('AKIAIOSFODNN7EXAMPLE');
         expect(output).toContain('[AWS_KEY_REDACTED]');
@@ -319,7 +320,7 @@ describe('Logger Configuration', () => {
   describe('onChild Hook', () => {
     it('should include onChild hook for child logger validation', () => {
       const config = createPinoConfig();
-      
+
       expect(config.onChild).toBeDefined();
       expect(typeof config.onChild).toBe('function');
     });
@@ -328,7 +329,7 @@ describe('Logger Configuration', () => {
   describe('Mixin Function', () => {
     it('should include mixin function for dynamic context injection', () => {
       const config = createPinoConfig();
-      
+
       expect(config.mixin).toBeDefined();
       expect(typeof config.mixin).toBe('function');
     });
@@ -340,13 +341,13 @@ describe('Logger Configuration', () => {
         service: 'test-logger',
         prettyPrint: false, // Disable for testing
       });
-      
+
       // Create logger without transport for testing
       const logger = pino({
         ...config,
         transport: undefined, // Disable transport for unit test
       });
-      
+
       expect(logger).toBeDefined();
       expect(typeof logger.info).toBe('function');
       expect(typeof logger.error).toBe('function');
@@ -359,19 +360,19 @@ describe('Logger Configuration', () => {
         service: 'test-logger',
         prettyPrint: false,
       });
-      
+
       const logger = pino({
         ...config,
         transport: undefined,
       });
-      
+
       const childLogger = logger.child({
         requestId: 'test-request-123',
         operation: 'test-operation',
       });
-      
+
       expect(childLogger).toBeDefined();
-      
+
       const bindings = childLogger.bindings();
       expect(bindings.requestId).toBe('test-request-123');
       expect(bindings.operation).toBe('test-operation');
@@ -384,7 +385,7 @@ describe('Integration: Redaction in Action', () => {
     const config = createPinoConfig({
       prettyPrint: false,
     });
-    
+
     // Create a string destination to capture output
     const chunks: string[] = [];
     const destination = {
@@ -393,7 +394,7 @@ describe('Integration: Redaction in Action', () => {
         return true;
       },
     };
-    
+
     const logger = pino(
       {
         ...config,
@@ -401,14 +402,17 @@ describe('Integration: Redaction in Action', () => {
       },
       destination as unknown as pino.DestinationStream
     );
-    
+
     // Log an object with sensitive fields
-    logger.info({
-      user: 'test',
-      password: 'my-secret-password',
-      email: 'user@example.com',
-    }, 'User login attempt');
-    
+    logger.info(
+      {
+        user: 'test',
+        password: 'my-secret-password',
+        email: 'user@example.com',
+      },
+      'User login attempt'
+    );
+
     // Check that the output has redacted values
     const output = chunks.join('');
     expect(output).toContain('[REDACTED]');
@@ -467,7 +471,7 @@ describe('Security & Safety Limits', () => {
         messageKey: 'message',
         prettyPrint: false,
       });
-      
+
       // Create a string destination to capture output
       const chunks: string[] = [];
       const destination = {
@@ -476,7 +480,7 @@ describe('Security & Safety Limits', () => {
           return true;
         },
       };
-      
+
       const logger = pino(
         {
           ...config,
@@ -484,9 +488,9 @@ describe('Security & Safety Limits', () => {
         },
         destination as unknown as pino.DestinationStream
       );
-      
+
       logger.info('Test message');
-      
+
       const output = chunks.join('');
       const parsed = JSON.parse(output);
       expect(parsed.message).toBe('Test message');
@@ -498,7 +502,7 @@ describe('Security & Safety Limits', () => {
 describe('Logger Helper Utilities', () => {
   // Import the helpers for testing
   // Note: These are tested indirectly through the Pino logger API
-  
+
   describe('isLevelEnabled via Pino', () => {
     it('should correctly report enabled levels', () => {
       const config = createPinoConfig({ level: 'warn', prettyPrint: false });
@@ -506,11 +510,11 @@ describe('Logger Helper Utilities', () => {
         ...config,
         transport: undefined,
       });
-      
+
       // With level set to 'warn' (40), debug (20) and info (30) should be disabled
       expect(logger.isLevelEnabled('debug')).toBe(false);
       expect(logger.isLevelEnabled('info')).toBe(false);
-      
+
       // warn (40), error (50), fatal (60) should be enabled
       expect(logger.isLevelEnabled('warn')).toBe(true);
       expect(logger.isLevelEnabled('error')).toBe(true);
@@ -523,7 +527,7 @@ describe('Logger Helper Utilities', () => {
         ...config,
         transport: undefined,
       });
-      
+
       expect(logger.isLevelEnabled('trace')).toBe(true);
       expect(logger.isLevelEnabled('debug')).toBe(true);
       expect(logger.isLevelEnabled('info')).toBe(true);
@@ -538,7 +542,7 @@ describe('Logger Helper Utilities', () => {
         ...config,
         transport: undefined,
       });
-      
+
       expect(logger.isLevelEnabled('trace')).toBe(false);
       expect(logger.isLevelEnabled('debug')).toBe(false);
       expect(logger.isLevelEnabled('info')).toBe(false);
@@ -555,7 +559,7 @@ describe('Logger Helper Utilities', () => {
         ...config,
         transport: undefined,
       });
-      
+
       expect(logger.level).toBe('warn');
     });
 
@@ -565,7 +569,7 @@ describe('Logger Helper Utilities', () => {
         ...config,
         transport: undefined,
       });
-      
+
       expect(logger.levelVal).toBe(40);
     });
 
@@ -575,13 +579,13 @@ describe('Logger Helper Utilities', () => {
         ...config,
         transport: undefined,
       });
-      
+
       expect(logger.level).toBe('info');
       expect(logger.isLevelEnabled('debug')).toBe(false);
-      
+
       // Change level dynamically
       logger.level = 'debug';
-      
+
       expect(logger.level).toBe('debug');
       expect(logger.isLevelEnabled('debug')).toBe(true);
     });

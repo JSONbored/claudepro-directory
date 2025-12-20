@@ -56,9 +56,7 @@ describe('useDebounceValue', () => {
   it('should use custom equality function', () => {
     const equalityFn = (a: { id: number }, b: { id: number }) => a.id === b.id;
 
-    const { result } = renderHook(() =>
-      useDebounceValue({ id: 1 }, 500, { equalityFn })
-    );
+    const { result } = renderHook(() => useDebounceValue({ id: 1 }, 500, { equalityFn }));
 
     act(() => {
       result.current[1]({ id: 1 }); // Same id
@@ -72,9 +70,7 @@ describe('useDebounceValue', () => {
   });
 
   it('should handle leading edge execution', () => {
-    const { result } = renderHook(() =>
-      useDebounceValue('initial', 500, { leading: true })
-    );
+    const { result } = renderHook(() => useDebounceValue('initial', 500, { leading: true }));
 
     act(() => {
       result.current[1]('updated');
@@ -85,9 +81,7 @@ describe('useDebounceValue', () => {
   });
 
   it('should handle maxWait option', () => {
-    const { result } = renderHook(() =>
-      useDebounceValue('initial', 1000, { maxWait: 2000 })
-    );
+    const { result } = renderHook(() => useDebounceValue('initial', 1000, { maxWait: 2000 }));
 
     act(() => {
       result.current[1]('updated');

@@ -57,7 +57,7 @@ export const LazyAllContentSection = dynamic(
 
 /**
  * SearchSection - REMOVED
- * 
+ *
  * Search results are now handled by the unified SearchResults component
  * from @heyclaude/web-runtime/search, which is integrated via SearchProvider.
  */

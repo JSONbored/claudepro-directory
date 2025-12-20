@@ -2,7 +2,7 @@
 
 /**
  * Company Profile Skeleton
- * 
+ *
  * Perfectly matches the structure of /companies/[slug] page:
  * - Header section: Logo, name, badges, description, metadata links
  * - Main content: Active jobs list (JobCard grid)
@@ -26,16 +26,16 @@ function CompanyHeaderSkeleton() {
       <div className="flex items-start gap-6">
         {/* Logo */}
         <Skeleton size="xl" width="xl" rounded="lg" className={cn('h-24 w-24 shrink-0')} />
-        
+
         {/* Content */}
-        <div className="flex flex-col gap-6 flex-1">
+        <div className="flex flex-1 flex-col gap-6">
           <div className="flex items-center gap-2">
             <Skeleton size="xl" width="lg" className="h-9" />
             <Skeleton size="sm" width="xs" rounded="full" />
           </div>
           <Skeleton size="md" width="3xl" className="h-5" />
           <Skeleton size="md" width="2xl" className="h-5" />
-          
+
           {/* Metadata links */}
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-0.5">
@@ -68,12 +68,12 @@ function JobCardSkeleton() {
           {/* Header with logo and title */}
           <div className="flex items-start gap-3">
             <Skeleton size="md" width="md" rounded="md" className={cn('h-8 w-8 shrink-0')} />
-            <div className="flex flex-col gap-2 flex-1">
+            <div className="flex flex-1 flex-col gap-2">
               <Skeleton size="md" width="3/4" />
               <Skeleton size="sm" width="2xl" />
             </div>
           </div>
-          
+
           {/* Metadata row */}
           <div className="flex flex-wrap items-center gap-2">
             <Skeleton size="xs" width="xs" rounded="full" />
@@ -81,21 +81,21 @@ function JobCardSkeleton() {
             <Skeleton size="xs" width="xs" rounded="full" />
             <Skeleton size="xs" width="xs" />
           </div>
-          
+
           {/* Description */}
           <div className="space-y-2">
             <Skeleton size="sm" width="3xl" />
             <Skeleton size="sm" width="3xl" />
             <Skeleton size="sm" width="2/3" />
           </div>
-          
+
           {/* Tags */}
           <div className="flex flex-wrap gap-1">
             <Skeleton size="xs" width="xs" rounded="full" />
             <Skeleton size="xs" width="xs" rounded="full" />
             <Skeleton size="xs" width="xs" rounded="full" />
           </div>
-          
+
           {/* Actions */}
           <div className="flex gap-1">
             <Skeleton size="md" width="lg" rounded="md" className="h-10" />
@@ -137,13 +137,9 @@ function CompanyStatsSkeleton() {
  */
 export function CompanyProfileSkeleton() {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={SPRING.smooth}
-    >
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={SPRING.smooth}>
       {/* Header Section */}
       <section className={`border-border relative border-b`}>
         <motion.div
@@ -169,7 +165,7 @@ export function CompanyProfileSkeleton() {
             <div className="flex items-center justify-between">
               <Skeleton size="lg" width="lg" className="h-8" />
             </div>
-            
+
             {/* Jobs Grid */}
             <div className="space-y-6">
               {KEYS_6.map((key, i) => {

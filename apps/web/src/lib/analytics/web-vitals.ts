@@ -1,9 +1,9 @@
 /**
  * Web Vitals Reporting
- * 
+ *
  * Reports Core Web Vitals metrics to console and can be extended to send to analytics.
  * This provides real-time performance monitoring in production.
- * 
+ *
  * @see https://web.dev/vitals/
  */
 
@@ -11,7 +11,7 @@ import { onCLS, onFCP, onLCP, onTTFB, onINP, type Metric } from 'web-vitals';
 
 /**
  * Report Web Vitals to console and analytics
- * 
+ *
  * In production, you can extend this to send metrics to your analytics service.
  */
 function reportMetric(metric: Metric) {
@@ -39,9 +39,9 @@ function reportMetric(metric: Metric) {
 
 /**
  * Initialize Web Vitals reporting
- * 
+ *
  * Call this function in your app layout or _app.tsx to start tracking Core Web Vitals.
- * 
+ *
  * @example
  * ```tsx
  * // In app/layout.tsx

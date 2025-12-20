@@ -193,10 +193,7 @@ describe('useTernaryDarkMode', () => {
 
     // Verify useLocalStorage was called (via mock)
     const { useLocalStorage } = require('./use-local-storage');
-    expect(useLocalStorage).toHaveBeenCalledWith(
-      'custom-key',
-      expect.any(Object)
-    );
+    expect(useLocalStorage).toHaveBeenCalledWith('custom-key', expect.any(Object));
   });
 
   it('should use custom defaultValue', () => {

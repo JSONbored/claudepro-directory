@@ -41,7 +41,7 @@
  * ```
  */
 
-import type { content_category, sponsorship_tier } from '@heyclaude/data-layer/prisma';
+import type { content_category, sponsorship_tier } from '@prisma/client';
 import { SPRING, DURATION } from '../../../design-system/index.ts';
 import { Star, TrendingUp, Zap } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
@@ -56,14 +56,12 @@ import Link from 'next/link';
  * Get category route URL
  * Maps category to route path, with special handling for CLAUDE.md → /rules
  */
-function getCategoryRoute(
-  category: content_category
-): string {
+function getCategoryRoute(category: content_category): string {
   // Special case: rules category (CLAUDE.md) maps to /rules
   if (category === 'rules') {
     return '/rules';
   }
-  
+
   // All other categories map directly: /{category}
   return `/${category}`;
 }
@@ -73,9 +71,7 @@ function getCategoryRoute(
  * Maps category to display name, with special handling for rules → "CLAUDE.md"
  * This matches the display names used in config-card.tsx for consistency
  */
-function getCategoryDisplayName(
-  category: content_category
-): string {
+function getCategoryDisplayName(category: content_category): string {
   switch (category) {
     case 'mcp':
       return 'MCP';
@@ -135,8 +131,10 @@ const categoryBadgeStyles = {
   agents: 'bg-transparent text-category-agents border-category-agents-border font-semibold',
   commands: 'bg-transparent text-category-commands border-category-commands-border font-semibold',
   hooks: 'bg-transparent text-category-hooks border-category-hooks-border font-semibold',
-  statuslines: 'bg-transparent text-category-statuslines border-category-statuslines-border font-semibold',
-  collections: 'bg-transparent text-category-collections border-category-collections-border font-semibold',
+  statuslines:
+    'bg-transparent text-category-statuslines border-category-statuslines-border font-semibold',
+  collections:
+    'bg-transparent text-category-collections border-category-collections-border font-semibold',
   guides: 'bg-transparent text-category-guides border-category-guides-border font-semibold',
   skills: 'bg-transparent text-category-skills border-category-skills-border font-semibold',
 } as const satisfies Partial<Record<content_category, string>>;
@@ -176,7 +174,11 @@ export interface TooltipComponents {
   Provider: React.ComponentType<{ delayDuration?: number; children: React.ReactNode }>;
   Root: React.ComponentType<{ children: React.ReactNode }>;
   Trigger: React.ComponentType<{ asChild?: boolean; children: React.ReactNode }>;
-  Content: React.ComponentType<{ side?: 'top' | 'right' | 'bottom' | 'left'; className?: string; children: React.ReactNode }>;
+  Content: React.ComponentType<{
+    side?: 'top' | 'right' | 'bottom' | 'left';
+    className?: string;
+    children: React.ReactNode;
+  }>;
 }
 
 /**
@@ -304,11 +306,7 @@ const BadgeWrapper = ({
  * PulseWrapper - Subtle pulse animation for attention badges (new, trending)
  * Respects prefers-reduced-motion via useReducedMotion hook
  */
-const PulseWrapper = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+const PulseWrapper = ({ children }: { children: React.ReactNode }) => {
   const shouldReduceMotion = useReducedMotion();
   return (
     <motion.div
@@ -320,7 +318,7 @@ const PulseWrapper = ({
           : {
               duration: DURATION.extraLong,
               repeat: Infinity,
-              ease: "easeInOut",
+              ease: 'easeInOut',
             }
       }
     >
@@ -336,12 +334,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
   // Base badge variant (informational - no hover)
   if (props.variant === 'base') {
     return (
-      <div
-        className={cn(
-          baseBadgeVariants({ variant: props.style }),
-          props.className
-        )}
-      >
+      <div className={cn(baseBadgeVariants({ variant: props.style }), props.className)}>
         {props.children}
       </div>
     );
@@ -351,14 +344,14 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
   if (props.variant === 'category') {
     // Auto-generate href from category unless explicitly disabled (href === null)
     const href = props.href === null ? undefined : (props.href ?? getCategoryRoute(props.category));
-    
+
     // Use provided children if given, otherwise use category display name
     const displayName = props.children ?? getCategoryDisplayName(props.category);
-    
+
     const badgeContent = (
       <div
         className={cn(
-          `border font-medium text-xs rounded-full px-2 py-0.5 transition-colors`,
+          `rounded-full border px-2 py-0.5 text-xs font-medium transition-colors`,
           categoryBadgeStyles[props.category as keyof typeof categoryBadgeStyles] ??
             'badge-category-rules',
           href && 'cursor-pointer hover:opacity-80',
@@ -397,7 +390,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     return (
       <div
         className={cn(
-          `border font-medium text-xs rounded-full px-2 py-0.5`,
+          `rounded-full border px-2 py-0.5 text-xs font-medium`,
           sourceBadgeStyles[props.source],
           props.className
         )}
@@ -412,7 +405,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     const badgeContent = (
       <div
         className={cn(
-          `border font-medium text-xs rounded-full px-2 py-0.5`,
+          `rounded-full border px-2 py-0.5 text-xs font-medium`,
           statusBadgeStyles[props.status],
           props.className
         )}
@@ -463,7 +456,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     return (
       <div
         className={cn(
-          'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs',
+          'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold',
           sponsoredBadgeStyles[props.tier],
           props.className
         )}
@@ -483,8 +476,8 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         <button
           type="button"
           className={cn(
-            'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-all duration-200 ease-out',
-            'cursor-pointer bg-accent text-accent-foreground shadow-lg shadow-primary/25',
+            'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-all duration-200 ease-out',
+            'bg-accent text-accent-foreground shadow-primary/25 cursor-pointer shadow-lg',
             props.className
           )}
           onClick={handleClick}
@@ -512,8 +505,8 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         <button
           type="button"
           className={cn(
-            'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-all duration-200',
-            'cursor-pointer border-muted-foreground/20 text-muted-foreground hover:border-accent/30 hover:bg-accent/10 hover:text-accent',
+            'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-all duration-200',
+            'border-muted-foreground/20 text-muted-foreground hover:border-accent/30 hover:bg-accent/10 hover:text-accent cursor-pointer',
             props.className
           )}
           onClick={handleClick}
@@ -548,29 +541,21 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <output className={cn('relative flex h-2 w-2', props.className)} aria-label={label}>
         <span className="sr-only">{label}</span>
         <span
-          className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75 motion-reduce:animate-none"
+          className="bg-accent absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 motion-reduce:animate-none"
           aria-hidden="true"
         />
-        <span
-          className="relative inline-flex h-2 w-2 rounded-full bg-accent"
-          aria-hidden="true"
-        />
+        <span className="bg-accent relative inline-flex h-2 w-2 rounded-full" aria-hidden="true" />
       </output>
     );
 
     // If Tooltip components are provided, wrap with tooltip
-    if (
-      props.TooltipProvider &&
-      props.Tooltip &&
-      props.TooltipTrigger &&
-      props.TooltipContent
-    ) {
+    if (props.TooltipProvider && props.Tooltip && props.TooltipTrigger && props.TooltipContent) {
       const { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } = props;
       return (
         <TooltipProvider delayDuration={delayDuration}>
           <Tooltip>
             <TooltipTrigger asChild={true}>{IndicatorDot}</TooltipTrigger>
-            <TooltipContent side={side} className="font-medium text-xs">
+            <TooltipContent side={side} className="text-xs font-medium">
               <p>{label}</p>
             </TooltipContent>
           </Tooltip>
@@ -597,7 +582,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         className={cn(
           'inline-flex items-center justify-center',
           'px-2.5 py-0.5',
-          'font-semibold text-[10px] uppercase tracking-wide',
+          'text-[10px] font-semibold tracking-wide uppercase',
           'rounded-full border',
           variantStyles[badgeVariant],
           props.className
@@ -639,8 +624,8 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     return (
       <span
         className={cn(
-          '-top-1 -right-1 absolute',
-          'font-semibold text-[10px] tabular-nums leading-none',
+          'absolute -top-1 -right-1',
+          'text-[10px] leading-none font-semibold tabular-nums',
           'pointer-events-none',
           colorClasses[type],
           props.className

@@ -56,7 +56,9 @@ test.describe('GET /api/content/changelog', () => {
 
     if (response.status() === 200) {
       expect(response.headers()['x-generated-by']).toBeDefined();
-      expect(response.headers()['x-generated-by']).toContain('prisma.rpc.generate_changelog_llms_txt');
+      expect(response.headers()['x-generated-by']).toContain(
+        'prisma.rpc.generate_changelog_llms_txt'
+      );
     }
   });
 
@@ -154,10 +156,10 @@ test.describe('GET /api/content/changelog', () => {
 
     if (response.status() === 200) {
       const text = await response.text();
-      
+
       // Should not contain escaped newlines (\\n)
       expect(text).not.toContain('\\n');
-      
+
       // Should contain actual newlines or be properly formatted
       expect(text.length).toBeGreaterThan(0);
     }

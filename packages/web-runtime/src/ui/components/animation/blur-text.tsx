@@ -25,13 +25,13 @@ const buildKeyframes = (
   from: Record<string, string | number>,
   steps: Array<Record<string, string | number>>
 ): Record<string, Array<string | number>> => {
-  const keys = new Set<string>([...Object.keys(from), ...steps.flatMap(s => Object.keys(s))]);
+  const keys = new Set<string>([...Object.keys(from), ...steps.flatMap((s) => Object.keys(s))]);
 
   const keyframes: Record<string, Array<string | number>> = {};
-  keys.forEach(k => {
+  keys.forEach((k) => {
     const fromValue = from[k];
     if (fromValue === undefined) return;
-    const stepValues = steps.map(s => s[k]).filter((v): v is string | number => v !== undefined);
+    const stepValues = steps.map((s) => s[k]).filter((v): v is string | number => v !== undefined);
     keyframes[k] = [fromValue, ...stepValues];
   });
   return keyframes;
@@ -49,22 +49,24 @@ export const BlurText: React.FC<BlurTextProps> = ({
   animationTo,
   easing = (t: number) => t,
   onAnimationComplete,
-  stepDuration = 0.35
+  stepDuration = 0.35,
 }) => {
   const elements = animateBy === 'words' ? text.split(' ') : text.split('');
-  
+
   // Use useIntersectionObserver hook for uniform implementation
   const { ref, isIntersecting } = useIntersectionObserver({
     threshold,
     rootMargin,
     freezeOnceVisible: true, // Once visible, keep it visible (matches original behavior)
   });
-  
+
   const inView = isIntersecting;
 
   const defaultFrom = useMemo(
     () =>
-      direction === 'top' ? { filter: 'blur(10px)', opacity: 0, y: -50 } : { filter: 'blur(10px)', opacity: 0, y: 50 },
+      direction === 'top'
+        ? { filter: 'blur(10px)', opacity: 0, y: -50 }
+        : { filter: 'blur(10px)', opacity: 0, y: 50 },
     [direction]
   );
 
@@ -73,9 +75,9 @@ export const BlurText: React.FC<BlurTextProps> = ({
       {
         filter: 'blur(5px)',
         opacity: 0.5,
-        y: direction === 'top' ? 5 : -5
+        y: direction === 'top' ? 5 : -5,
       },
-      { filter: 'blur(0px)', opacity: 1, y: 0 }
+      { filter: 'blur(0px)', opacity: 1, y: 0 },
     ],
     [direction]
   );
@@ -85,7 +87,9 @@ export const BlurText: React.FC<BlurTextProps> = ({
 
   const stepCount = toSnapshots.length + 1;
   const totalDuration = stepDuration * (stepCount - 1);
-  const times = Array.from({ length: stepCount }, (_, i) => (stepCount === 1 ? 0 : i / (stepCount - 1)));
+  const times = Array.from({ length: stepCount }, (_, i) =>
+    stepCount === 1 ? 0 : i / (stepCount - 1)
+  );
 
   return (
     <p ref={ref} className={`blur-text ${className} flex flex-wrap items-center`}>
@@ -96,7 +100,7 @@ export const BlurText: React.FC<BlurTextProps> = ({
           duration: totalDuration,
           times,
           delay: (index * delay) / 1000,
-          ease: easing
+          ease: easing,
         };
 
         const isLastElement = index === elements.length - 1;
@@ -106,15 +110,15 @@ export const BlurText: React.FC<BlurTextProps> = ({
           transition: spanTransition,
           style: {
             display: 'inline-block',
-            willChange: 'transform, filter, opacity'
+            willChange: 'transform, filter, opacity',
           },
           ...(isLastElement && onAnimationComplete
             ? {
                 onAnimationComplete: () => {
                   onAnimationComplete();
-                }
+                },
               }
-            : {})
+            : {}),
         };
 
         return (

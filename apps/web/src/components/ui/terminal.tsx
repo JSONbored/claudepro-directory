@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
 /**
  * Terminal Component
- * 
+ *
  * A macOS-style terminal window component with animated text output.
  * Perfect for command-line demos, installation guides, and interactive tutorials.
- * 
+ *
  * @example
  * ```tsx
  * <Terminal>
@@ -16,13 +16,13 @@
  *   </TypingAnimation>
  * </Terminal>
  * ```
- * 
+ *
  * **When to use:**
  * - Installation guides: Show command-line installation steps
  * - CLI tool demos: Demonstrate command-line interfaces
  * - Interactive tutorials: Step-by-step terminal commands
  * - Documentation: Terminal output examples
- * 
+ *
  * **Key features:**
  * - macOS-style window chrome (red/yellow/green dots)
  * - Animated text output
@@ -44,17 +44,12 @@ interface AnimatedSpanProps extends MotionProps {
   className?: string;
 }
 
-export const AnimatedSpan = ({
-  children,
-  delay = 0,
-  className,
-  ...props
-}: AnimatedSpanProps) => (
+export const AnimatedSpan = ({ children, delay = 0, className, ...props }: AnimatedSpanProps) => (
   <motion.div
     initial={{ opacity: 0, y: -5 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.3, delay: delay / 1000 }}
-    className={cn("grid text-sm font-normal tracking-tight", className)}
+    className={cn('grid text-sm font-normal tracking-tight', className)}
     {...(props as any)}
   >
     {children}
@@ -74,18 +69,18 @@ export const TypingAnimation = ({
   className,
   duration = 60,
   delay = 0,
-  as: Component = "span",
+  as: Component = 'span',
   ...props
 }: TypingAnimationProps) => {
-  if (typeof children !== "string") {
-    throw new Error("TypingAnimation: children must be a string. Received:");
+  if (typeof children !== 'string') {
+    throw new Error('TypingAnimation: children must be a string. Received:');
   }
 
   const MotionComponent = motion.create(Component, {
     forwardMotionProps: true,
   });
 
-  const [displayedText, setDisplayedText] = useState<string>("");
+  const [displayedText, setDisplayedText] = useState<string>('');
   const { value: started, setTrue: setStartedTrue } = useBoolean();
   const elementRef = useRef<HTMLElement | null>(null);
 
@@ -105,18 +100,21 @@ export const TypingAnimation = ({
     setDisplayedText('');
   }, [started, children]);
 
-  useInterval(() => {
-    if (!started) return;
-    if (typingIndex < children.length) {
-      setDisplayedText(children.substring(0, typingIndex + 1));
-      setTypingIndex((prev) => prev + 1);
-    }
-  }, started && typingIndex < children.length ? duration : null);
+  useInterval(
+    () => {
+      if (!started) return;
+      if (typingIndex < children.length) {
+        setDisplayedText(children.substring(0, typingIndex + 1));
+        setTypingIndex((prev) => prev + 1);
+      }
+    },
+    started && typingIndex < children.length ? duration : null
+  );
 
   return (
     <MotionComponent
       ref={elementRef}
-      className={cn("text-sm font-normal tracking-tight", className)}
+      className={cn('text-sm font-normal tracking-tight', className)}
       {...(props as any)}
     >
       {displayedText}
@@ -139,11 +137,11 @@ export const Terminal = ({ children, className, wrapInPreCode = true }: Terminal
   return (
     <div
       className={cn(
-        "z-0 h-full max-h-[400px] w-full max-w-lg rounded-xl border border-border bg-background",
-        className,
+        'border-border bg-background z-0 h-full max-h-[400px] w-full max-w-lg rounded-xl border',
+        className
       )}
     >
-      <div className={cn("flex flex-col gap-2 border-b border-border p-4")}>
+      <div className={cn('border-border flex flex-col gap-2 border-b p-4')}>
         <div className="flex flex-row gap-2">
           <div className="h-2 w-2 rounded-full bg-red-500"></div>
           <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
@@ -152,7 +150,7 @@ export const Terminal = ({ children, className, wrapInPreCode = true }: Terminal
       </div>
       {wrapInPreCode ? (
         <pre className="p-4">
-          <code className={cn("grid gap-1 overflow-auto")}>{children}</code>
+          <code className={cn('grid gap-1 overflow-auto')}>{children}</code>
         </pre>
       ) : (
         <div className="p-4">{children}</div>

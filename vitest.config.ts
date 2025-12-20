@@ -128,7 +128,12 @@ export default defineConfig({
     testTimeout: 5000,
 
     // Reporter configuration
-    reporters: ['verbose'],
+    reporters: [
+      'verbose',
+      // Vitest UI for visual test runner (only in non-CI environments)
+      // Temporarily disabled to debug startup error
+      // ...(process.env.CI ? [] : [['@vitest/ui', { port: 51204 }]]),
+    ],
 
     // Watch mode configuration
     watch: false, // Disable by default (use test:watch script)

@@ -117,10 +117,13 @@ export function useDarkMode(options: UseDarkModeOptions = {}) {
   const isDarkMode = storedPreference !== null ? storedPreference === 'true' : osPreference;
 
   // Update stored preference when isDarkMode changes (user action)
-  const setIsDarkMode = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
-    const newValue = typeof value === 'function' ? value(isDarkMode) : value;
-    setStoredPreference(String(newValue));
-  }, [isDarkMode, setStoredPreference]);
+  const setIsDarkMode = useCallback(
+    (value: boolean | ((prev: boolean) => boolean)) => {
+      const newValue = typeof value === 'function' ? value(isDarkMode) : value;
+      setStoredPreference(String(newValue));
+    },
+    [isDarkMode, setStoredPreference]
+  );
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -179,9 +182,12 @@ export function useDarkMode(options: UseDarkModeOptions = {}) {
     setIsDarkMode(false);
   }, [setIsDarkMode]);
 
-  const set = useCallback((value: boolean) => {
-    setIsDarkMode(value);
-  }, [setIsDarkMode]);
+  const set = useCallback(
+    (value: boolean) => {
+      setIsDarkMode(value);
+    },
+    [setIsDarkMode]
+  );
 
   return {
     isDarkMode,

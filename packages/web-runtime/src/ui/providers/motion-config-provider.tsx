@@ -1,11 +1,11 @@
 /**
  * MotionConfig Provider
- * 
+ *
  * Sets global configuration options for all child motion components.
  * Provides consistent animation defaults, reduced motion policy, and CSP support.
- * 
+ *
  * @module web-runtime/ui/providers/motion-config-provider
- * 
+ *
  * @example
  * ```tsx
  * // In root layout
@@ -39,7 +39,7 @@ export interface MotionConfigProviderProps {
    * - "user": Respect the user's device setting (recommended)
    * - "always": Enforce reduced motion (useful for debugging)
    * - "never": Don't respect reduced motion (not recommended)
-   * 
+   *
    * @default "user"
    */
   reducedMotion?: 'user' | 'always' | 'never';
@@ -53,13 +53,13 @@ export interface MotionConfigProviderProps {
 
 /**
  * Provider component that sets global configuration for all child motion components.
- * 
+ *
  * This ensures consistent animation behavior across the app and provides a centralized
  * way to configure animation defaults, reduced motion policy, and CSP compliance.
- * 
+ *
  * @param props - Provider props
  * @returns MotionConfig wrapper component
- * 
+ *
  * @see https://motion.dev/docs/react/motion-config
  */
 export function MotionConfigProvider({

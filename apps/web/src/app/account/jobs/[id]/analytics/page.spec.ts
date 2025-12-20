@@ -3,7 +3,7 @@ import { setupErrorTracking } from '../../../../../../config/tests/utils/error-t
 
 /**
  * Comprehensive Account Jobs Analytics Page E2E Tests
- * 
+ *
  * Tests ALL functionality on the account jobs analytics page ([id]/analytics) with strict error checking:
  * - Authentication flow (redirect to login if not authenticated)
  * - Analytics metrics display (views, clicks, etc.)
@@ -23,7 +23,7 @@ test.describe('Account Jobs Analytics Page', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (navigation handled per test with different IDs)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -39,7 +39,7 @@ test.describe('Account Jobs Analytics Page', () => {
   test('should handle unauthenticated access (redirect or sign-in prompt)', async ({ page }) => {
     // Use a test job ID (adjust based on actual jobs)
     const testJobId = '00000000-0000-0000-0000-000000000000';
-    
+
     await page.goto(`/account/jobs/${testJobId}/analytics`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -49,7 +49,7 @@ test.describe('Account Jobs Analytics Page', () => {
     const signInButton = page.getByRole('button', { name: /sign in|go to login/i });
     const currentUrl = page.url();
     const isRedirected = currentUrl.includes('/login') || currentUrl.includes('/auth');
-    
+
     // Should have sign-in prompt OR be redirected
     const hasSignInPrompt = await signInPrompt.isVisible().catch(() => false);
     const hasSignInButton = await signInButton.isVisible().catch(() => false);
@@ -60,7 +60,7 @@ test.describe('Account Jobs Analytics Page', () => {
     // Note: This test assumes user is authenticated
     // In a real scenario, you'd set up authentication state first
     const testJobId = '00000000-0000-0000-0000-000000000000';
-    
+
     await page.goto(`/account/jobs/${testJobId}/analytics`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -76,7 +76,7 @@ test.describe('Account Jobs Analytics Page', () => {
 
   test('should display analytics metrics', async ({ page }) => {
     const testJobId = '00000000-0000-0000-0000-000000000000';
-    
+
     await page.goto(`/account/jobs/${testJobId}/analytics`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -84,7 +84,7 @@ test.describe('Account Jobs Analytics Page', () => {
     // Check for analytics metrics (views, clicks, etc.)
     const metrics = page.getByText(/views|clicks|impressions|analytics/i);
     const hasMetrics = await metrics.isVisible().catch(() => false);
-    
+
     // Metrics may or may not be visible depending on data
     // But page should render
     const main = page.getByRole('main');
@@ -93,7 +93,7 @@ test.describe('Account Jobs Analytics Page', () => {
 
   test('should return 404 for invalid job ID', async ({ page }) => {
     const invalidJobId = '00000000-0000-0000-0000-000000000001';
-    
+
     await page.goto(`/account/jobs/${invalidJobId}/analytics`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -101,14 +101,14 @@ test.describe('Account Jobs Analytics Page', () => {
     // Should show 404 page
     const notFound = page.getByText(/not found|404|page not found/i);
     const hasNotFound = await notFound.isVisible().catch(() => false);
-    
+
     // May show 404 message or redirect
     expect(hasNotFound || page.url().includes('404')).toBe(true);
   });
 
   test('should be accessible', async ({ page }) => {
     const testJobId = '00000000-0000-0000-0000-000000000000';
-    
+
     await page.goto(`/account/jobs/${testJobId}/analytics`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -125,7 +125,7 @@ test.describe('Account Jobs Analytics Page', () => {
 
   test('should be responsive on mobile viewport', async ({ page }) => {
     const testJobId = '00000000-0000-0000-0000-000000000000';
-    
+
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto(`/account/jobs/${testJobId}/analytics`);
     await page.waitForLoadState('networkidle');
@@ -138,18 +138,18 @@ test.describe('Account Jobs Analytics Page', () => {
 
   test('should handle loading states', async ({ page }) => {
     const testJobId = '00000000-0000-0000-0000-000000000000';
-    
+
     await page.goto(`/account/jobs/${testJobId}/analytics`);
-    
+
     // Check for loading indicators (may flash quickly)
     const loadingIndicator = page.locator('[aria-busy="true"], [data-loading="true"]');
     const hasLoading = await loadingIndicator.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });

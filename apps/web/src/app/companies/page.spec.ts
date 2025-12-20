@@ -3,7 +3,7 @@ import { setupTestWithErrorTracking } from '../../../../config/tests/utils/error
 
 /**
  * Comprehensive Companies Page E2E Tests
- * 
+ *
  * Tests ALL functionality on the companies listing page with strict error checking:
  * - Page rendering without errors
  * - Companies list display
@@ -26,7 +26,7 @@ test.describe('Companies Page', () => {
     // Set up error tracking and navigate to companies page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/companies');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -49,31 +49,30 @@ test.describe('Companies Page', () => {
     await expect(errorOverlay).not.toBeVisible();
 
     // Check no hydration errors
-    const hydrationErrors = consoleErrors.filter(err => 
-      err.includes('Hydration') || 
-      err.includes('hydration')
+    const hydrationErrors = consoleErrors.filter(
+      (err) => err.includes('Hydration') || err.includes('hydration')
     );
     expect(hydrationErrors.length).toBe(0);
   });
 
   test('should display companies page heading', async ({ page }) => {
     // Check for companies page heading
-    const heading = page.getByRole('heading', { 
+    const heading = page.getByRole('heading', {
       level: 1,
-      name: /companies|directory/i 
+      name: /companies|directory/i,
     });
-    
+
     await expect(heading.first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should display companies list', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for company cards
     const companyCards = page.locator('article, [role="article"], [data-testid*="company-card"]');
     const cardCount = await companyCards.count();
-    
+
     // May have 0 or more companies depending on data
     expect(cardCount).toBeGreaterThanOrEqual(0);
   });
@@ -81,17 +80,17 @@ test.describe('Companies Page', () => {
   test('should display company cards with logos and names', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for company cards
     const companyCards = page.locator('article, [role="article"]');
     const cardCount = await companyCards.count();
-    
+
     if (cardCount > 0) {
       // Check first card has company name
       const firstCard = companyCards.first();
       const companyName = firstCard.getByRole('heading');
       const hasName = await companyName.isVisible().catch(() => false);
-      
+
       // Company name should be visible if cards exist
       if (hasName) {
         await expect(companyName.first()).toBeVisible();
@@ -121,17 +120,17 @@ test.describe('Companies Page', () => {
   test('should navigate to company detail page from card', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for company cards
     const companyCards = page.locator('article, [role="article"]');
     const cardCount = await companyCards.count();
-    
+
     if (cardCount > 0) {
       // Click first card
       const firstCard = companyCards.first();
       const cardLink = firstCard.getByRole('link').first();
       const hasLink = await cardLink.isVisible().catch(() => false);
-      
+
       if (hasLink) {
         const href = await cardLink.getAttribute('href');
         expect(href).toBeTruthy();
@@ -143,13 +142,16 @@ test.describe('Companies Page', () => {
   test('should handle empty state when no companies exist', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for empty state message (if no companies)
     const emptyState = page.getByText(/no companies|empty/i);
     const hasEmptyState = await emptyState.isVisible().catch(() => false);
-    
+
     // Empty state may or may not be visible, but page should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -162,7 +164,7 @@ test.describe('Companies Page', () => {
     await page.keyboard.press('Tab');
     const focused = page.locator(':focus');
     await expect(focused).toBeVisible();
-    
+
     // Check for proper heading hierarchy
     const heading = page.getByRole('heading', { level: 1 });
     await expect(heading.first()).toBeVisible();
@@ -180,23 +182,23 @@ test.describe('Companies Page', () => {
   test('should handle loading states', async ({ page }) => {
     // Navigate to page
     await page.goto('/companies');
-    
+
     // Check for loading indicators (may flash quickly)
     const loadingIndicator = page.locator('[aria-busy="true"], [data-loading="true"]');
     const hasLoading = await loadingIndicator.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });
 
   test('should handle error states gracefully', async ({ page }) => {
     // Intercept API calls to simulate error
-    await page.route('/api/**', route => {
+    await page.route('/api/**', (route) => {
       route.fulfill({
         status: 500,
         body: JSON.stringify({ error: 'Internal server error' }),
@@ -211,9 +213,12 @@ test.describe('Companies Page', () => {
     // Page should still render (error boundary or error message)
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
-    
+
     // Should show error message or handle gracefully
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     // Error overlay may or may not be visible, but page should not crash
     expect(typeof hasError).toBe('boolean');
   });
@@ -229,8 +234,11 @@ test.describe('Companies Page', () => {
     // Page should render or show error boundary, but not crash
     const main = page.getByRole('main');
     const hasMain = await main.isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error boundary, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -247,7 +255,10 @@ test.describe('Companies Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -263,7 +274,10 @@ test.describe('Companies Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -295,7 +309,10 @@ test.describe('Companies Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -311,7 +328,10 @@ test.describe('Companies Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -327,7 +347,10 @@ test.describe('Companies Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -343,7 +366,10 @@ test.describe('Companies Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -351,16 +377,16 @@ test.describe('Companies Page', () => {
     // This tests that Loading component is shown during Suspense
     // The component uses Suspense with Loading fallback
     await page.goto('/companies');
-    
+
     // Check for loading state (may flash quickly)
     const loading = page.locator('[data-loading], [aria-busy="true"]');
     const hasLoading = await loading.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });

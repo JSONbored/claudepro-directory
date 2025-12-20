@@ -12,15 +12,9 @@ import type {
 import type { UpdateUserProfileReturns } from '@heyclaude/database-types/postgres-types';
 import { toggleFollowReturnsSchema } from '@heyclaude/database-types/postgres-types/functions/toggle_follow';
 import { batchAddBookmarksReturnsSchema } from '@heyclaude/database-types/postgres-types/functions/batch_add_bookmarks';
-import type {
-  follow_action,
-  submission_status,
-} from '@heyclaude/data-layer/prisma';
+import type { follow_action, submission_status, content_category } from '@prisma/client';
 import { z } from 'zod';
-import {
-  content_categorySchema,
-  follow_actionSchema,
-} from '../prisma-zod-schemas.ts';
+import { content_categorySchema, follow_actionSchema } from '../prisma-zod-schemas.ts';
 
 // Export input types for bookmark actions (can't export from 'use server' files)
 export type { AddBookmarkInput, RemoveBookmarkInput } from './bookmarks.ts';
@@ -75,11 +69,17 @@ async function invalidateUserCaches({
     await Promise.allSettled(
       userIds
         .filter((id): id is string => Boolean(id))
-        .map((id) => revalidateTag(`user-${id}`, 'default'))
+        .map((id) => {
+          try {
+            return revalidateTag(`user-${id}`, 'default');
+          } catch (error) {
+            // Handle synchronous errors gracefully
+            return Promise.reject(error);
+          }
+        })
     );
   }
 }
-
 
 const updateProfileSchema = z.object({
   display_name: z.string().optional(),
@@ -101,7 +101,7 @@ export const updateProfile = authedAction
   .action(async ({ parsedInput, ctx }): Promise<UpdateUserProfileReturns> => {
     const { runRpc } = await import('./run-rpc-instance.ts');
     const { revalidatePath, revalidateTag } = await import('next/cache');
-    
+
     const args = {
       p_user_id: ctx.userId,
       ...(parsedInput.display_name && { p_display_name: parsedInput.display_name }),
@@ -109,27 +109,27 @@ export const updateProfile = authedAction
       ...(parsedInput.bio !== undefined && { p_bio: parsedInput.bio }),
       ...(parsedInput.work !== undefined && { p_work: parsedInput.work }),
       ...(parsedInput.website !== undefined && { p_website: parsedInput.website }),
-      ...(parsedInput.social_x_link !== undefined && { p_social_x_link: parsedInput.social_x_link }),
+      ...(parsedInput.social_x_link !== undefined && {
+        p_social_x_link: parsedInput.social_x_link,
+      }),
       ...(parsedInput.interests && { p_interests: parsedInput.interests }),
-      ...(parsedInput.profile_public !== undefined && { p_profile_public: parsedInput.profile_public }),
+      ...(parsedInput.profile_public !== undefined && {
+        p_profile_public: parsedInput.profile_public,
+      }),
       ...(parsedInput.follow_email !== undefined && { p_follow_email: parsedInput.follow_email }),
     };
-    
-    const rawResult = await runRpc<UpdateUserProfileResultV2>(
-      'update_user_profile',
-      args,
-      {
-        action: 'updateProfile.rpc',
-        userId: ctx.userId,
-      }
-    );
-    
+
+    const rawResult = await runRpc<UpdateUserProfileResultV2>('update_user_profile', args, {
+      action: 'updateProfile.rpc',
+      userId: ctx.userId,
+    });
+
     // Transform result - extract profile with null check
     if (!rawResult || !rawResult.profile) {
       throw new Error('update_user_profile returned null profile');
     }
     const result: UpdateUserProfileReturns = rawResult;
-    
+
     // Cache invalidation
     revalidatePath('/account');
     revalidatePath('/account/settings');
@@ -138,7 +138,7 @@ export const updateProfile = authedAction
     }
     revalidateTag('users', 'default');
     revalidateTag(`user-${ctx.userId}`, 'default');
-    
+
     return result;
   });
 
@@ -148,9 +148,9 @@ export const refreshProfileFromOAuth = authedAction
   .action(async ({ ctx }): Promise<{ success: boolean; message: string; slug: string | null }> => {
     const { runRpc } = await import('./run-rpc-instance.ts');
     const { revalidatePath, revalidateTag } = await import('next/cache');
-    
+
     const args = { user_id: ctx.userId };
-    
+
     const rawResult = await runRpc<RefreshProfileFromOauthReturns>(
       'refresh_profile_from_oauth',
       args,
@@ -159,7 +159,7 @@ export const refreshProfileFromOAuth = authedAction
         userId: ctx.userId,
       }
     );
-    
+
     // Transform result
     const slug = rawResult.user_profile?.slug ?? null;
     const result: { success: boolean; message: string; slug: string | null } = {
@@ -167,7 +167,7 @@ export const refreshProfileFromOAuth = authedAction
       message: 'Profile refreshed from OAuth provider',
       slug,
     };
-    
+
     // Cache invalidation
     revalidatePath('/account');
     revalidatePath('/account/settings');
@@ -176,7 +176,7 @@ export const refreshProfileFromOAuth = authedAction
     }
     revalidateTag('users', 'default');
     revalidateTag(`user-${ctx.userId}`, 'default');
-    
+
     return result;
   });
 
@@ -194,7 +194,6 @@ export async function refreshProfileFromOAuthServer(userId: string) {
 // Removed addBookmark, removeBookmark - migrated
 
 export const isBookmarkedAction = authedAction
-  .metadata({ actionName: 'isBookmarked', category: 'user' })
   .inputSchema(
     z.object({
       content_type: content_categorySchema,
@@ -204,6 +203,7 @@ export const isBookmarkedAction = authedAction
         .regex(/^[a-zA-Z0-9\-_/]+$/),
     })
   )
+  .metadata({ actionName: 'isBookmarked', category: 'user' })
   .action(async ({ parsedInput, ctx }) => {
     const { isBookmarked } = await import('../data/account.ts');
     return isBookmarked({
@@ -232,7 +232,7 @@ export const addBookmarkBatch = authedAction
   .action(async ({ parsedInput, ctx }): Promise<z.infer<typeof batchAddBookmarksReturnsSchema>> => {
     const { runRpc } = await import('./run-rpc-instance.ts');
     const { revalidatePath, revalidateTag } = await import('next/cache');
-    
+
     const args = {
       p_user_id: ctx.userId,
       p_items: parsedInput.items.map((item) => ({
@@ -240,7 +240,7 @@ export const addBookmarkBatch = authedAction
         content_slug: item.content_slug,
       })),
     };
-    
+
     const result = await runRpc<z.infer<typeof batchAddBookmarksReturnsSchema>>(
       'batch_add_bookmarks',
       args,
@@ -249,14 +249,14 @@ export const addBookmarkBatch = authedAction
         userId: ctx.userId,
       }
     );
-    
+
     // Cache invalidation
     revalidatePath('/account');
     revalidatePath('/account/library');
     revalidateTag('user-bookmarks', 'default');
     revalidateTag('users', 'default');
     revalidateTag(`user-${ctx.userId}`, 'default');
-    
+
     return result;
   });
 
@@ -273,22 +273,18 @@ export const toggleFollow = authedAction
   .action(async ({ parsedInput, ctx }): Promise<z.infer<typeof toggleFollowReturnsSchema>> => {
     const { runRpc } = await import('./run-rpc-instance.ts');
     const { revalidatePath, revalidateTag } = await import('next/cache');
-    
+
     const args = {
       p_follower_id: ctx.userId,
       p_following_id: parsedInput.user_id,
       p_action: parsedInput.action satisfies follow_action,
     };
-    
-    const result = await runRpc<z.infer<typeof toggleFollowReturnsSchema>>(
-      'toggle_follow',
-      args,
-      {
-        action: 'toggleFollow.rpc',
-        userId: ctx.userId,
-      }
-    );
-    
+
+    const result = await runRpc<z.infer<typeof toggleFollowReturnsSchema>>('toggle_follow', args, {
+      action: 'toggleFollow.rpc',
+      userId: ctx.userId,
+    });
+
     // Cache invalidation
     revalidatePath('/account');
     if (parsedInput.slug) {
@@ -297,17 +293,17 @@ export const toggleFollow = authedAction
     revalidateTag('users', 'default');
     revalidateTag(`user-${ctx.userId}`, 'default');
     revalidateTag(`user-${parsedInput.user_id}`, 'default');
-    
+
     return result;
   });
 
 export const isFollowingAction = authedAction
-  .metadata({ actionName: 'isFollowing', category: 'user' })
   .inputSchema(
     z.object({
       user_id: z.string().regex(UUID_REGEX, { message: 'Invalid UUID format' }),
     })
   )
+  .metadata({ actionName: 'isFollowing', category: 'user' })
   .action(async ({ parsedInput, ctx }) => {
     const { isFollowing } = await import('../data/account.ts');
     return isFollowing({
@@ -321,7 +317,6 @@ export const isFollowingAction = authedAction
  * Eliminates N+1 queries (20 queries → 1, 95% reduction)
  */
 export const getBookmarkStatusBatch = authedAction
-  .metadata({ actionName: 'getBookmarkStatusBatch', category: 'user' })
   .inputSchema(
     z.object({
       items: z.array(
@@ -332,6 +327,7 @@ export const getBookmarkStatusBatch = authedAction
       ),
     })
   )
+  .metadata({ actionName: 'getBookmarkStatusBatch', category: 'user' })
   .action(async ({ parsedInput, ctx }) => {
     const { isBookmarkedBatch } = await import('../data/account.ts');
     const data = await isBookmarkedBatch({
@@ -340,9 +336,13 @@ export const getBookmarkStatusBatch = authedAction
     });
 
     // Ensure data is an array before mapping
+    // IsBookmarkedBatchReturns is Array<{ content_type: content_category | null; content_slug: string; is_bookmarked: boolean }>
     const results = Array.isArray(data) ? data : [];
-    return new Map(
-      results.map((row) => [`${row.content_type}:${row.content_slug}`, row.is_bookmarked])
+    return new Map<string, boolean>(
+      results.map((row: { content_type: content_category | null; content_slug: string; is_bookmarked: boolean }) => [
+        `${row.content_type ?? 'unknown'}:${row.content_slug}`,
+        row.is_bookmarked,
+      ])
     );
   });
 
@@ -351,12 +351,12 @@ export const getBookmarkStatusBatch = authedAction
  * Eliminates N+1 queries (20 queries → 1, 95% reduction)
  */
 export const getFollowStatusBatch = authedAction
-  .metadata({ actionName: 'getFollowStatusBatch', category: 'user' })
   .inputSchema(
     z.object({
       user_ids: z.array(z.string().regex(UUID_REGEX, { message: 'Invalid UUID format' })),
     })
   )
+  .metadata({ actionName: 'getFollowStatusBatch', category: 'user' })
   .action(async ({ parsedInput, ctx }) => {
     const { isFollowingBatch } = await import('../data/account.ts');
     const data = await isFollowingBatch({
@@ -367,12 +367,14 @@ export const getFollowStatusBatch = authedAction
     // Ensure data is an array
     // IsFollowingBatchReturns is Record<string, unknown>[], so use bracket notation
     const results = Array.isArray(data) ? data : [];
-    return new Map(results.map((row) => [row['followed_user_id'] as string, row['is_following'] as boolean]));
+    return new Map(
+      results.map((row) => [row['followed_user_id'] as string, row['is_following'] as boolean])
+    );
   });
 
 export const getActivitySummary = authedAction
-  .metadata({ actionName: 'getActivitySummary', category: 'user' })
   .inputSchema(z.void())
+  .metadata({ actionName: 'getActivitySummary', category: 'user' })
   .action(async ({ ctx }) => {
     // OPTIMIZATION: Use getUserCompleteData directly - single database call
     const { getUserCompleteData } = await import('../data/account.ts');
@@ -381,8 +383,8 @@ export const getActivitySummary = authedAction
   });
 
 export const getActivityTimeline = authedAction
-  .metadata({ actionName: 'getActivityTimeline', category: 'user' })
   .inputSchema(activityFilterSchema)
+  .metadata({ actionName: 'getActivityTimeline', category: 'user' })
   .action(async ({ parsedInput: { type, limit = 20, offset = 0 }, ctx }) => {
     // OPTIMIZATION: Use getUserCompleteData directly - single database call
     const { getUserCompleteData } = await import('../data/account.ts');
@@ -395,8 +397,8 @@ export const getActivityTimeline = authedAction
   });
 
 export const getUserIdentities = authedAction
-  .metadata({ actionName: 'getUserIdentities', category: 'user' })
   .inputSchema(z.void())
+  .metadata({ actionName: 'getUserIdentities', category: 'user' })
   .action(async ({ ctx }) => {
     // Use data function with 'use cache: private' for Cache Components support
     const { getUserIdentitiesData } = await import('../data/account.ts');

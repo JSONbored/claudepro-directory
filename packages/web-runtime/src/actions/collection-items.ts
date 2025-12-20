@@ -1,6 +1,6 @@
 /**
  * Collection Items Actions - Consolidated
- * 
+ *
  * All collection item operations (add, remove, reorder) in one file.
  * Uses next-safe-action directly with factory helpers for business logic.
  */
@@ -43,23 +43,23 @@ export const addItemToCollection = authedAction
   .action(async ({ parsedInput, ctx }): Promise<z.infer<typeof manageCollectionReturnsSchema>> => {
     const { runRpc } = await import('./run-rpc-instance.ts');
     const { revalidatePath, revalidateTag } = await import('next/cache');
-    
+
     const args = {
-      'p_action': 'add_item',
-      'p_user_id': ctx.userId,
-      'p_create_data': null,
-      'p_update_data': null,
-      'p_delete_id': null,
-      'p_add_item_data': {
-        'collection_id': parsedInput.collection_id,
-        'content_type': parsedInput.content_type,
-        'content_slug': parsedInput.content_slug,
-        'notes': parsedInput.notes,
-        'order': parsedInput.order,
+      p_action: 'add_item',
+      p_user_id: ctx.userId,
+      p_create_data: null,
+      p_update_data: null,
+      p_delete_id: null,
+      p_add_item_data: {
+        collection_id: parsedInput.collection_id,
+        content_type: parsedInput.content_type,
+        content_slug: parsedInput.content_slug,
+        notes: parsedInput.notes,
+        order: parsedInput.order,
       },
-      'p_remove_item_id': null,
+      p_remove_item_id: null,
     };
-    
+
     const result = await runRpc<z.infer<typeof manageCollectionReturnsSchema>>(
       'manage_collection',
       args,
@@ -68,7 +68,7 @@ export const addItemToCollection = authedAction
         userId: ctx.userId,
       }
     );
-    
+
     // Cache invalidation
     revalidatePath('/account/library');
     if (result?.collection?.slug) {
@@ -76,7 +76,7 @@ export const addItemToCollection = authedAction
     }
     revalidateTag('collections', 'default');
     revalidateTag('users', 'default');
-    
+
     return result;
   });
 
@@ -88,17 +88,17 @@ export const removeItemFromCollection = authedAction
   .action(async ({ parsedInput, ctx }): Promise<z.infer<typeof manageCollectionReturnsSchema>> => {
     const { runRpc } = await import('./run-rpc-instance.ts');
     const { revalidatePath, revalidateTag } = await import('next/cache');
-    
+
     const args = {
-      'p_action': 'remove_item',
-      'p_user_id': ctx.userId,
-      'p_create_data': null,
-      'p_update_data': null,
-      'p_delete_id': null,
-      'p_add_item_data': null,
-      'p_remove_item_id': parsedInput.remove_item_id,
+      p_action: 'remove_item',
+      p_user_id: ctx.userId,
+      p_create_data: null,
+      p_update_data: null,
+      p_delete_id: null,
+      p_add_item_data: null,
+      p_remove_item_id: parsedInput.remove_item_id,
     };
-    
+
     const result = await runRpc<z.infer<typeof manageCollectionReturnsSchema>>(
       'manage_collection',
       args,
@@ -107,7 +107,7 @@ export const removeItemFromCollection = authedAction
         userId: ctx.userId,
       }
     );
-    
+
     // Cache invalidation
     revalidatePath('/account/library');
     if (result?.collection?.slug) {
@@ -115,7 +115,7 @@ export const removeItemFromCollection = authedAction
     }
     revalidateTag('collections', 'default');
     revalidateTag('users', 'default');
-    
+
     return result;
   });
 
@@ -124,29 +124,31 @@ export const reorderCollectionItems = authedAction
   .inputSchema(reorderCollectionItemsSchema)
   .outputSchema(reorderCollectionItemsReturnsSchema)
   .metadata({ actionName: 'reorderCollectionItems', category: 'user' })
-  .action(async ({ parsedInput, ctx }): Promise<z.infer<typeof reorderCollectionItemsReturnsSchema>> => {
-    const { runRpc } = await import('./run-rpc-instance.ts');
-    const { revalidatePath, revalidateTag } = await import('next/cache');
-    
-    const args = {
-      'p_collection_id': parsedInput.collection_id,
-      'p_user_id': ctx.userId,
-      'p_items': parsedInput.items,
-    };
-    
-    const result = await runRpc<z.infer<typeof reorderCollectionItemsReturnsSchema>>(
-      'reorder_collection_items',
-      args,
-      {
-        action: 'reorderCollectionItems.rpc',
-        userId: ctx.userId,
-      }
-    );
-    
-    // Cache invalidation
-    revalidatePath('/account/library');
-    revalidateTag('collections', 'default');
-    revalidateTag('users', 'default');
-    
-    return result;
-  });
+  .action(
+    async ({ parsedInput, ctx }): Promise<z.infer<typeof reorderCollectionItemsReturnsSchema>> => {
+      const { runRpc } = await import('./run-rpc-instance.ts');
+      const { revalidatePath, revalidateTag } = await import('next/cache');
+
+      const args = {
+        p_collection_id: parsedInput.collection_id,
+        p_user_id: ctx.userId,
+        p_items: parsedInput.items,
+      };
+
+      const result = await runRpc<z.infer<typeof reorderCollectionItemsReturnsSchema>>(
+        'reorder_collection_items',
+        args,
+        {
+          action: 'reorderCollectionItems.rpc',
+          userId: ctx.userId,
+        }
+      );
+
+      // Cache invalidation
+      revalidatePath('/account/library');
+      revalidateTag('collections', 'default');
+      revalidateTag('users', 'default');
+
+      return result;
+    }
+  );

@@ -2,11 +2,11 @@
 
 /**
  * Code Block Component
- * 
+ *
  * A premium code block component with syntax highlighting, file switching, copy functionality,
  * and beautiful line numbers. Perfect for displaying code examples in documentation, detail pages,
  * and content sections.
- * 
+ *
  * @example
  * ```tsx
  * <CodeBlock
@@ -48,15 +48,15 @@
  *   </CodeBlockBody>
  * </CodeBlock>
  * ```
- * 
+ *
  * @see {@link https://ui.shadcn.com/docs/components/code-block} for full documentation
- * 
+ *
  * **When to use:**
  * - Content detail pages: Replace `ProductionCodeBlock` with this for better UX
  * - Code examples in documentation: Multi-file code examples with tabs
  * - Interactive code demos: When users need to switch between file versions
  * - Code snippets with copy functionality: Built-in copy button
- * 
+ *
  * **Key features:**
  * - Syntax highlighting via Shiki (supports 100+ languages)
  * - Line numbers with proper spacing
@@ -141,20 +141,17 @@ import {
 } from '@icons-pack/react-simple-icons';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import { CheckIcon, CopyIcon } from 'lucide-react';
-import type {
-  ComponentProps,
-  HTMLAttributes,
-  ReactElement,
-  ReactNode,
-} from 'react';
+import type { ComponentProps, HTMLAttributes, ReactElement, ReactNode } from 'react';
+import { cloneElement, createContext, useContext, useEffect, useState } from 'react';
 import {
-  cloneElement,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
-import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, cn } from '@heyclaude/web-runtime/ui';
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  cn,
+} from '@heyclaude/web-runtime/ui';
 import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { useTimeout } from '@heyclaude/web-runtime/hooks/use-timeout';
 import { getThemeConfig } from '@heyclaude/shared-runtime';
@@ -312,7 +309,6 @@ const codeBlockClassName = cn(
   '[&_.line]:relative'
 );
 
-
 type CodeBlockData = {
   language: string;
   filename: string;
@@ -364,38 +360,22 @@ export const CodeBlock = ({
 
 export type CodeBlockHeaderProps = HTMLAttributes<HTMLDivElement>;
 
-export const CodeBlockHeader = ({
-  className,
-  ...props
-}: CodeBlockHeaderProps) => (
+export const CodeBlockHeader = ({ className, ...props }: CodeBlockHeaderProps) => (
   <div
-    className={cn(
-      'flex flex-row items-center border-b bg-secondary p-1',
-      className
-    )}
+    className={cn('bg-secondary flex flex-row items-center border-b p-1', className)}
     {...(props as any)}
   />
 );
 
-export type CodeBlockFilesProps = Omit<
-  HTMLAttributes<HTMLDivElement>,
-  'children'
-> & {
+export type CodeBlockFilesProps = Omit<HTMLAttributes<HTMLDivElement>, 'children'> & {
   children: (item: CodeBlockData) => ReactNode;
 };
 
-export const CodeBlockFiles = ({
-  className,
-  children,
-  ...props
-}: CodeBlockFilesProps) => {
+export const CodeBlockFiles = ({ className, children, ...props }: CodeBlockFilesProps) => {
   const { data } = useContext(CodeBlockContext);
 
   return (
-    <div
-      className={cn('flex grow flex-row items-center gap-2', className)}
-      {...(props as any)}
-    >
+    <div className={cn('flex grow flex-row items-center gap-2', className)} {...(props as any)}>
       {data.map(children)}
     </div>
   );
@@ -428,7 +408,9 @@ export const CodeBlockFilename = ({
 
   return (
     <div
-      className={cn('flex items-center gap-1 bg-secondary px-4 py-0.5 text-muted-foreground text-xs')}
+      className={cn(
+        'bg-secondary text-muted-foreground flex items-center gap-1 px-4 py-0.5 text-xs'
+      )}
       {...(props as any)}
     >
       {Icon && <Icon className="h-4 w-4 shrink-0" />}
@@ -447,12 +429,9 @@ export const CodeBlockSelect = (props: CodeBlockSelectProps) => {
 
 export type CodeBlockSelectTriggerProps = ComponentProps<typeof SelectTrigger>;
 
-export const CodeBlockSelectTrigger = ({
-  className,
-  ...props
-}: CodeBlockSelectTriggerProps) => (
+export const CodeBlockSelectTrigger = ({ className, ...props }: CodeBlockSelectTriggerProps) => (
   <SelectTrigger
-    className={cn('w-fit border-none shadow-none text-muted-foreground text-xs', className)}
+    className={cn('text-muted-foreground w-fit border-none text-xs shadow-none', className)}
     {...(props as any)}
   />
 );
@@ -463,17 +442,11 @@ export const CodeBlockSelectValue = (props: CodeBlockSelectValueProps) => (
   <SelectValue {...(props as any)} />
 );
 
-export type CodeBlockSelectContentProps = Omit<
-  ComponentProps<typeof SelectContent>,
-  'children'
-> & {
+export type CodeBlockSelectContentProps = Omit<ComponentProps<typeof SelectContent>, 'children'> & {
   children: (item: CodeBlockData) => ReactNode;
 };
 
-export const CodeBlockSelectContent = ({
-  children,
-  ...props
-}: CodeBlockSelectContentProps) => {
+export const CodeBlockSelectContent = ({ children, ...props }: CodeBlockSelectContentProps) => {
   const { data } = useContext(CodeBlockContext);
 
   return <SelectContent {...(props as any)}>{data.map(children)}</SelectContent>;
@@ -481,10 +454,7 @@ export const CodeBlockSelectContent = ({
 
 export type CodeBlockSelectItemProps = ComponentProps<typeof SelectItem>;
 
-export const CodeBlockSelectItem = ({
-  className,
-  ...props
-}: CodeBlockSelectItemProps) => (
+export const CodeBlockSelectItem = ({ className, ...props }: CodeBlockSelectItemProps) => (
   <SelectItem className={cn('text-sm', className)} {...(props as any)} />
 );
 
@@ -508,18 +478,17 @@ export const CodeBlockCopyButton = ({
   const code = data.find((item) => item.language === value)?.code;
 
   // Reset copy state after timeout when isCopied is true
-  useTimeout(() => {
-    if (isCopied) {
-      setIsCopiedFalse();
-    }
-  }, isCopied ? timeout : null);
+  useTimeout(
+    () => {
+      if (isCopied) {
+        setIsCopiedFalse();
+      }
+    },
+    isCopied ? timeout : null
+  );
 
   const copyToClipboard = () => {
-    if (
-      typeof window === 'undefined' ||
-      !navigator.clipboard.writeText ||
-      !code
-    ) {
+    if (typeof window === 'undefined' || !navigator.clipboard.writeText || !code) {
       return;
     }
 
@@ -570,10 +539,7 @@ const CodeBlockFallback = ({ children, ...props }: CodeBlockFallbackProps) => (
   </div>
 );
 
-export type CodeBlockBodyProps = Omit<
-  HTMLAttributes<HTMLDivElement>,
-  'children'
-> & {
+export type CodeBlockBodyProps = Omit<HTMLAttributes<HTMLDivElement>, 'children'> & {
   children: (item: CodeBlockData) => ReactNode;
 };
 
@@ -649,7 +615,7 @@ export const CodeBlockContent = ({
     const loadHighlightedCode = async () => {
       try {
         const { codeToHtml } = await import('shiki');
-        
+
         const html = await codeToHtml(children, {
           lang: language,
           themes: {
@@ -674,11 +640,5 @@ export const CodeBlockContent = ({
     return <CodeBlockFallback {...(props as any)}>{children}</CodeBlockFallback>;
   }
 
-  return (
-    <div
-      dangerouslySetInnerHTML={{ __html: highlightedCode }}
-      {...(props as any)}
-    />
-  );
+  return <div dangerouslySetInnerHTML={{ __html: highlightedCode }} {...(props as any)} />;
 };
-

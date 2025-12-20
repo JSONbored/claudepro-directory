@@ -58,7 +58,11 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ className }: UserMenuProps) {
-  const { value: signingOut, setTrue: setSigningOutTrue, setFalse: setSigningOutFalse } = useBoolean();
+  const {
+    value: signingOut,
+    setTrue: setSigningOutTrue,
+    setFalse: setSigningOutFalse,
+  } = useBoolean();
   const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
   const { user, status, supabaseClient } = useAuthenticatedUser({
@@ -123,7 +127,7 @@ export function UserMenu({ className }: UserMenuProps) {
             asChild
             variant="default"
             size="sm"
-            className="font-semibold shadow-sm bg-color-newsletter-bg text-color-newsletter-text"
+            className="bg-color-newsletter-bg text-color-newsletter-text font-semibold shadow-sm"
           >
             <Link href="/login" aria-label="Get started - Sign in with GitHub">
               <span>Get Started</span>
@@ -163,9 +167,9 @@ export function UserMenu({ className }: UserMenuProps) {
             >
               <Avatar className="h-8 w-8">
                 {avatarUrl ? (
-                  <AvatarImage 
-                    src={optimizeAvatarUrl(avatarUrl, 32) ?? avatarUrl} 
-                    alt={displayName || 'User avatar'} 
+                  <AvatarImage
+                    src={optimizeAvatarUrl(avatarUrl, 32) ?? avatarUrl}
+                    alt={displayName || 'User avatar'}
                   />
                 ) : null}
                 <AvatarFallback className="bg-accent/20 text-accent text-sm font-semibold">
@@ -178,21 +182,21 @@ export function UserMenu({ className }: UserMenuProps) {
 
         <NavigationHoverCardContent align="end" className="w-72 p-4" sideOffset={8}>
           {/* User Header with Avatar */}
-          <div className={cn('flex items-center gap-2', 'mb-4', 'pb-4', 'border-b border-border')}>
+          <div className={cn('flex items-center gap-2', 'mb-4', 'pb-4', 'border-border border-b')}>
             <Avatar className="h-12 w-12">
               {avatarUrl ? (
-                <AvatarImage 
-                  src={optimizeAvatarUrl(avatarUrl, 48) ?? avatarUrl} 
-                  alt={displayName || 'User avatar'} 
+                <AvatarImage
+                  src={optimizeAvatarUrl(avatarUrl, 48) ?? avatarUrl}
+                  alt={displayName || 'User avatar'}
                 />
               ) : null}
               <AvatarFallback className="bg-accent/20 text-accent text-base font-semibold">
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">{displayName}</p>
-              <p className="text-muted-foreground text-xs truncate">{user.email}</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold">{displayName}</p>
+              <p className="text-muted-foreground truncate text-xs">{user.email}</p>
             </div>
           </div>
 
@@ -204,9 +208,9 @@ export function UserMenu({ className }: UserMenuProps) {
           >
             <Link
               href="/account"
-              className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
+              className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
             >
-              <User className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+              <User className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
               <span className="flex-1 text-sm font-medium">Dashboard</span>
             </Link>
           </motion.div>
@@ -214,7 +218,15 @@ export function UserMenu({ className }: UserMenuProps) {
           {/* My Content Section */}
           <div className="mb-2">
             <div className={cn('px-3', 'py-1.5', 'mb-1')}>
-              <p className={cn('text-[10px]', 'font-semibold', 'text-muted-foreground', 'opacity-70 uppercase', 'tracking-wide')}>
+              <p
+                className={cn(
+                  'text-[10px]',
+                  'font-semibold',
+                  'text-muted-foreground',
+                  'uppercase opacity-70',
+                  'tracking-wide'
+                )}
+              >
                 My Content
               </p>
             </div>
@@ -225,9 +237,9 @@ export function UserMenu({ className }: UserMenuProps) {
               >
                 <Link
                   href="/account/library"
-                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
                 >
-                  <BookOpen className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                  <BookOpen className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
                   <span className="flex-1 text-sm">Library</span>
                 </Link>
               </motion.div>
@@ -237,9 +249,9 @@ export function UserMenu({ className }: UserMenuProps) {
               >
                 <Link
                   href="/account/bookmarks"
-                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
                 >
-                  <Bookmark className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                  <Bookmark className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
                   <span className="flex-1 text-sm">Bookmarks</span>
                 </Link>
               </motion.div>
@@ -249,9 +261,9 @@ export function UserMenu({ className }: UserMenuProps) {
               >
                 <Link
                   href="/account/submissions"
-                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
                 >
-                  <Rocket className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                  <Rocket className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
                   <span className="flex-1 text-sm">Submissions</span>
                 </Link>
               </motion.div>
@@ -261,9 +273,9 @@ export function UserMenu({ className }: UserMenuProps) {
               >
                 <Link
                   href="/account/activity"
-                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
                 >
-                  <Activity className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                  <Activity className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
                   <span className="flex-1 text-sm">Activity</span>
                 </Link>
               </motion.div>
@@ -273,7 +285,15 @@ export function UserMenu({ className }: UserMenuProps) {
           {/* Manage Section */}
           <div className="mb-2">
             <div className={cn('px-3', 'py-1.5', 'mb-1')}>
-              <p className={cn('text-[10px]', 'font-semibold', 'text-muted-foreground', 'opacity-70 uppercase', 'tracking-wide')}>
+              <p
+                className={cn(
+                  'text-[10px]',
+                  'font-semibold',
+                  'text-muted-foreground',
+                  'uppercase opacity-70',
+                  'tracking-wide'
+                )}
+              >
                 Manage
               </p>
             </div>
@@ -284,9 +304,9 @@ export function UserMenu({ className }: UserMenuProps) {
               >
                 <Link
                   href="/account/companies"
-                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
                 >
-                  <Building className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                  <Building className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
                   <span className="flex-1 text-sm">Companies</span>
                 </Link>
               </motion.div>
@@ -296,16 +316,16 @@ export function UserMenu({ className }: UserMenuProps) {
               >
                 <Link
                   href="/account/jobs"
-                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
                 >
-                  <Briefcase className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                  <Briefcase className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
                   <span className="flex-1 text-sm">Jobs</span>
                 </Link>
               </motion.div>
             </div>
           </div>
 
-          <div className="mt-2 pt-2 border-t border-border">
+          <div className="border-border mt-2 border-t pt-2">
             <motion.div
               whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
               transition={MICROINTERACTIONS.colorTransition.default}
@@ -313,9 +333,9 @@ export function UserMenu({ className }: UserMenuProps) {
             >
               <Link
                 href="/account/settings"
-                className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
+                className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
               >
-                <Settings className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                <Settings className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
                 <span className="flex-1 text-sm">Settings</span>
               </Link>
             </motion.div>
@@ -329,9 +349,9 @@ export function UserMenu({ className }: UserMenuProps) {
                     whileHover: { backgroundColor: 'rgba(239, 68, 68, 0.1)' },
                   })}
               transition={MICROINTERACTIONS.colorTransition.default}
-              className="flex items-center gap-2 px-3 py-2 rounded-md group/item w-full text-left text-destructive"
+              className="group/item text-destructive flex w-full items-center gap-2 rounded-md px-3 py-2 text-left"
             >
-              <LogOut className="h-4 w-4 group-hover/item:text-destructive transition-colors" />
+              <LogOut className="group-hover/item:text-destructive h-4 w-4 transition-colors" />
               <span className="flex-1 text-sm">{signingOut ? 'Signing out...' : 'Sign out'}</span>
             </motion.button>
           </div>

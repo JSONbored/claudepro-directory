@@ -16,7 +16,7 @@ describe('usePulse', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    
+
     const pulseClient = await import('../pulse-client.ts');
     mockTrackInteraction = vi.mocked(pulseClient.trackInteraction);
     mockTrackUsage = vi.mocked(pulseClient.trackUsage);
@@ -188,7 +188,13 @@ describe('usePulse', () => {
   it('should track all download action types via trackUsage', async () => {
     const { result } = renderHook(() => usePulse());
 
-    const actionTypes = ['download_zip', 'download_markdown', 'download_code', 'llmstxt', 'download_mcpb'] as const;
+    const actionTypes = [
+      'download_zip',
+      'download_markdown',
+      'download_code',
+      'llmstxt',
+      'download_mcpb',
+    ] as const;
 
     for (const actionType of actionTypes) {
       await result.current.download({

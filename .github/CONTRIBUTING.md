@@ -7,6 +7,7 @@ Thank you for your interest in contributing to ClaudePro Directory! This guide w
 **Option 1: Web Submission Form** (Recommended - Easiest)
 
 Visit [claudepro.directory/submit](https://claudepro.directory/submit) to submit through our database-driven form:
+
 - ✅ Dynamic field validation based on content type
 - ✅ Auto-complete from curated database templates
 - ✅ Real-time duplicate detection
@@ -21,16 +22,16 @@ Visit [claudepro.directory/submit](https://claudepro.directory/submit) to submit
 
 ## 🎯 Content Types We Accept
 
-| Type            | Description                           | Browse Live Examples                                  |
-| --------------- | ------------------------------------- | ----------------------------------------------------- |
-| **Agents**      | Specialized AI personas               | [claudepro.directory/agents](https://claudepro.directory/agents)           |
-| **MCP Servers** | Model Context Protocol integrations   | [claudepro.directory/mcp](https://claudepro.directory/mcp)                 |
-| **Commands**    | Quick automation slash commands       | [claudepro.directory/commands](https://claudepro.directory/commands)       |
-| **Rules**       | System prompts & behavior guidelines  | [claudepro.directory/rules](https://claudepro.directory/rules)             |
-| **Hooks**       | Event-driven automation scripts       | [claudepro.directory/hooks](https://claudepro.directory/hooks)             |
-| **Statuslines** | Custom CLI status displays            | [claudepro.directory/statuslines](https://claudepro.directory/statuslines) |
-| **Collections** | Curated bundles of related configs    | [claudepro.directory/collections](https://claudepro.directory/collections) |
-| **Skills**      | Task-focused capability guides        | [claudepro.directory/skills](https://claudepro.directory/skills)           |
+| Type            | Description                          | Browse Live Examples                                                       |
+| --------------- | ------------------------------------ | -------------------------------------------------------------------------- |
+| **Agents**      | Specialized AI personas              | [claudepro.directory/agents](https://claudepro.directory/agents)           |
+| **MCP Servers** | Model Context Protocol integrations  | [claudepro.directory/mcp](https://claudepro.directory/mcp)                 |
+| **Commands**    | Quick automation slash commands      | [claudepro.directory/commands](https://claudepro.directory/commands)       |
+| **Rules**       | System prompts & behavior guidelines | [claudepro.directory/rules](https://claudepro.directory/rules)             |
+| **Hooks**       | Event-driven automation scripts      | [claudepro.directory/hooks](https://claudepro.directory/hooks)             |
+| **Statuslines** | Custom CLI status displays           | [claudepro.directory/statuslines](https://claudepro.directory/statuslines) |
+| **Collections** | Curated bundles of related configs   | [claudepro.directory/collections](https://claudepro.directory/collections) |
+| **Skills**      | Task-focused capability guides       | [claudepro.directory/skills](https://claudepro.directory/skills)           |
 
 **Submit any content type at:** [claudepro.directory/submit](https://claudepro.directory/submit)
 
@@ -73,16 +74,19 @@ Visit [claudepro.directory/submit](https://claudepro.directory/submit) to submit
 If you're contributing **code changes** (not content submissions):
 
 1. **Install dependencies:**
+
    ```bash
    pnpm install
    ```
 
 2. **Run dev server:**
+
    ```bash
    pnpm dev
    ```
 
 3. **Build:**
+
    ```bash
    pnpm build
    ```
@@ -101,23 +105,27 @@ Add [Type]: [Your Content Title]
 ```
 
 Examples:
+
 - `Add Agent: TypeScript Code Reviewer`
 - `Add MCP: PostgreSQL Server`
 - `Add Rule: React Best Practices`
 
 Or for code changes:
+
 - `fix: resolve build error in submit form`
 - `feat: add new validation rule`
 
 ### Checklist Before Submitting
 
 **For Content Submissions:**
+
 - [ ] Tested your configuration and it works
 - [ ] Removed all API keys, secrets, and personal information
 - [ ] Content is original or properly attributed
 - [ ] No spam or promotional content
 
 **For Code Changes:**
+
 - [ ] Build passes (`pnpm build`)
 - [ ] Linting passes (`pnpm lint`)
 - [ ] Type checking passes (`pnpm type-check`)

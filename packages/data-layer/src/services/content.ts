@@ -9,11 +9,12 @@
  * Uses Prisma queries directly where possible, custom SQL for complex operations.
  */
 
-import type { content_category, Json } from '@heyclaude/data-layer/prisma';
+import type { Prisma, PrismaClient, content_category } from '@prisma/client';
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
 import { withSmartCache } from '../utils/request-cache.ts';
-import type { contentModel } from '@heyclaude/database-types/prisma/models';
+type Json = Prisma.JsonValue;
+type contentModel = Prisma.contentGetPayload<{}>;
 
 // Local types for migrated RPCs (RPCs removed, using Prisma directly)
 // These types match the transformed Prisma query results
@@ -91,7 +92,7 @@ type CategoryConfigFeatures = {
   metadata_show_github_link: boolean | null;
 };
 
-type CategoryConfigWithFeatures = {
+export type CategoryConfigWithFeatures = {
   category: content_category;
   title: string | null;
   plural_title: string | null;
@@ -235,6 +236,10 @@ export interface SimilarContentOptions {
  * - Same public API as Supabase-based service
  */
 export class ContentService extends BasePrismaService {
+  constructor(prismaClient?: PrismaClient) {
+    super(prismaClient);
+  }
+
   async getSitewideReadme(): Promise<GenerateReadmeDataReturns> {
     // Type narrowing: GenerateReadmeDataArgs is empty object (no args required)
     return this.callRpc<GenerateReadmeDataReturns>(
@@ -247,22 +252,23 @@ export class ContentService extends BasePrismaService {
   async getSitewideContentList(
     args?: GetSitewideContentListArgs
   ): Promise<GetSitewideContentListReturns> {
+    // get_sitewide_content_list returns RETURNS TABLE (SETOF), so it's an array return
     // Type narrowing: GetSitewideContentListArgs is optional, use empty object as fallback
     return this.callRpc<GetSitewideContentListReturns>(
       'get_sitewide_content_list',
       args ?? ({} satisfies GetSitewideContentListArgs),
-      { methodName: 'getSitewideContentList' }
+      { methodName: 'getSitewideContentList', returnType: 'array' } // RETURNS TABLE functions return arrays
     );
   }
 
   async getCategoryContentList(
     args: GetCategoryContentListArgs
   ): Promise<GetCategoryContentListReturns> {
-    return this.callRpc<GetCategoryContentListReturns>(
-      'get_category_content_list',
-      args,
-      { methodName: 'getCategoryContentList' }
-    );
+    // get_category_content_list returns RETURNS TABLE (SETOF), so it's an array return
+    return this.callRpc<GetCategoryContentListReturns>('get_category_content_list', args, {
+      methodName: 'getCategoryContentList',
+      returnType: 'array', // RETURNS TABLE functions return arrays
+    });
   }
 
   async getSitewideLlmsTxt(): Promise<GenerateSitewideLlmsTxtReturns> {
@@ -286,11 +292,9 @@ export class ContentService extends BasePrismaService {
   async getCategoryLlmsTxt(
     args: GenerateCategoryLlmsTxtArgs
   ): Promise<GenerateCategoryLlmsTxtReturns> {
-    return this.callRpc<GenerateCategoryLlmsTxtReturns>(
-      'generate_category_llms_txt',
-      args,
-      { methodName: 'getCategoryLlmsTxt' }
-    );
+    return this.callRpc<GenerateCategoryLlmsTxtReturns>('generate_category_llms_txt', args, {
+      methodName: 'getCategoryLlmsTxt',
+    });
   }
 
   async getChangelogEntryLlmsTxt(
@@ -303,14 +307,10 @@ export class ContentService extends BasePrismaService {
     );
   }
 
-  async getToolLlmsTxt(
-    args: GenerateToolLlmsTxtArgs
-  ): Promise<GenerateToolLlmsTxtReturns> {
-    return this.callRpc<GenerateToolLlmsTxtReturns>(
-      'generate_tool_llms_txt',
-      args,
-      { methodName: 'getToolLlmsTxt' }
-    );
+  async getToolLlmsTxt(args: GenerateToolLlmsTxtArgs): Promise<GenerateToolLlmsTxtReturns> {
+    return this.callRpc<GenerateToolLlmsTxtReturns>('generate_tool_llms_txt', args, {
+      methodName: 'getToolLlmsTxt',
+    });
   }
 
   /**
@@ -366,7 +366,9 @@ export class ContentService extends BasePrismaService {
         const transformed = configs.map((config: (typeof configs)[number]) => {
           // Extract sections JSON (default structure if missing)
           const sections =
-            typeof config.sections === 'object' && config.sections !== null && !Array.isArray(config.sections)
+            typeof config.sections === 'object' &&
+            config.sections !== null &&
+            !Array.isArray(config.sections)
               ? (config.sections as Record<string, unknown>)
               : {
                   examples: false,
@@ -386,15 +388,24 @@ export class ContentService extends BasePrismaService {
             build_enable_cache: true, // RPC hardcodes this
             api_generate_static: true, // RPC hardcodes this
             api_include_trending: true, // RPC hardcodes this
-            section_features: typeof sections['features'] === 'boolean' ? sections['features'] : null,
-            section_installation: typeof sections['installation'] === 'boolean' ? sections['installation'] : null,
-            section_use_cases: typeof sections['use_cases'] === 'boolean' ? sections['use_cases'] : null,
-            section_configuration: typeof sections['configuration'] === 'boolean' ? sections['configuration'] : null,
-            section_security: typeof sections['security'] === 'boolean' ? sections['security'] : null,
-            section_troubleshooting: typeof sections['troubleshooting'] === 'boolean' ? sections['troubleshooting'] : null,
-            section_examples: typeof sections['examples'] === 'boolean' ? sections['examples'] : null,
-            section_requirements: typeof sections['requirements'] === 'boolean' ? sections['requirements'] : null,
-            section_description: typeof sections['description'] === 'boolean' ? sections['description'] : null,
+            section_features:
+              typeof sections['features'] === 'boolean' ? sections['features'] : null,
+            section_installation:
+              typeof sections['installation'] === 'boolean' ? sections['installation'] : null,
+            section_use_cases:
+              typeof sections['use_cases'] === 'boolean' ? sections['use_cases'] : null,
+            section_configuration:
+              typeof sections['configuration'] === 'boolean' ? sections['configuration'] : null,
+            section_security:
+              typeof sections['security'] === 'boolean' ? sections['security'] : null,
+            section_troubleshooting:
+              typeof sections['troubleshooting'] === 'boolean' ? sections['troubleshooting'] : null,
+            section_examples:
+              typeof sections['examples'] === 'boolean' ? sections['examples'] : null,
+            section_requirements:
+              typeof sections['requirements'] === 'boolean' ? sections['requirements'] : null,
+            section_description:
+              typeof sections['description'] === 'boolean' ? sections['description'] : null,
             metadata_show_github_link: true, // RPC hardcodes this
           };
 
@@ -419,11 +430,13 @@ export class ContentService extends BasePrismaService {
             validation_config: config.validation_config,
             generation_config: config.generation_config,
             schema_name: config.schema_name,
-            api_schema: (typeof config.api_schema === 'object' && config.api_schema !== null && !Array.isArray(config.api_schema)
+            api_schema: (typeof config.api_schema === 'object' &&
+            config.api_schema !== null &&
+            !Array.isArray(config.api_schema)
               ? (config.api_schema as Record<string, unknown>)
               : Array.isArray(config.api_schema)
-              ? (config.api_schema as string[])
-              : null) as Record<string, unknown> | string[] | null,
+                ? (config.api_schema as string[])
+                : null) as Record<string, unknown> | string[] | null,
             metadata_fields: config.metadata_fields ?? null,
             badges: config.badges ?? null,
             features: features as CategoryConfigFeatures | null,
@@ -437,203 +450,180 @@ export class ContentService extends BasePrismaService {
     );
   }
 
-  async getApiContentFull(
-    args: GetApiContentFullArgs
-  ): Promise<GetApiContentFullReturns> {
-    return this.callRpc<GetApiContentFullReturns>(
-      'get_api_content_full',
-      args,
-      { methodName: 'getApiContentFull' }
-    );
+  async getApiContentFull(args: GetApiContentFullArgs): Promise<GetApiContentFullReturns> {
+    return this.callRpc<GetApiContentFullReturns>('get_api_content_full', args, {
+      methodName: 'getApiContentFull',
+    });
   }
 
   async generateMarkdownExport(
     args: GenerateMarkdownExportArgs
   ): Promise<GenerateMarkdownExportReturns> {
-    return this.callRpc<GenerateMarkdownExportReturns>(
-      'generate_markdown_export',
-      args,
-      { methodName: 'generateMarkdownExport' }
-    );
+    return this.callRpc<GenerateMarkdownExportReturns>('generate_markdown_export', args, {
+      methodName: 'generateMarkdownExport',
+    });
   }
 
-  async getItemLlmsTxt(
-    args: GenerateItemLlmsTxtArgs
-  ): Promise<GenerateItemLlmsTxtReturns> {
-    return this.callRpc<GenerateItemLlmsTxtReturns>(
-      'generate_item_llms_txt',
-      args,
-      { methodName: 'getItemLlmsTxt' }
-    );
+  async getItemLlmsTxt(args: GenerateItemLlmsTxtArgs): Promise<GenerateItemLlmsTxtReturns> {
+    return this.callRpc<GenerateItemLlmsTxtReturns>('generate_item_llms_txt', args, {
+      methodName: 'getItemLlmsTxt',
+    });
   }
 
-  async getSkillStoragePath(
-    args: GetSkillStoragePathArgs
-  ): Promise<GetSkillStoragePathReturns> {
-    return this.callRpc<GetSkillStoragePathReturns>(
-      'get_skill_storage_path',
-      args,
-      { methodName: 'getSkillStoragePath' }
-    );
+  async getSkillStoragePath(args: GetSkillStoragePathArgs): Promise<GetSkillStoragePathReturns> {
+    return this.callRpc<GetSkillStoragePathReturns>('get_skill_storage_path', args, {
+      methodName: 'getSkillStoragePath',
+    });
   }
 
-  async getMcpbStoragePath(
-    args: GetMcpbStoragePathArgs
-  ): Promise<GetMcpbStoragePathReturns> {
-    return this.callRpc<GetMcpbStoragePathReturns>(
-      'get_mcpb_storage_path',
-      args,
-      { methodName: 'getMcpbStoragePath' }
-    );
+  async getMcpbStoragePath(args: GetMcpbStoragePathArgs): Promise<GetMcpbStoragePathReturns> {
+    return this.callRpc<GetMcpbStoragePathReturns>('get_mcpb_storage_path', args, {
+      methodName: 'getMcpbStoragePath',
+    });
   }
 
   async getContentDetailComplete(
     args: GetContentDetailCompleteArgs
   ): Promise<GetContentDetailCompleteReturns> {
-    return this.callRpc<GetContentDetailCompleteReturns>(
-      'get_content_detail_complete',
-      args,
-      { methodName: 'getContentDetailComplete' }
-    );
+    return this.callRpc<GetContentDetailCompleteReturns>('get_content_detail_complete', args, {
+      methodName: 'getContentDetailComplete',
+    });
   }
 
   /**
    * Get enriched content list
-   * 
+   *
    * Converts RPC to Prisma query with LEFT JOIN for sponsored content.
    * Returns enriched content items with sponsorship information.
-   * 
+   *
    * Uses Prisma $queryRawUnsafe for complex queries with dynamic WHERE clauses.
    * This is safe because we're using parameterized queries.
+   */
+  /**
+   * Get enriched content list with sponsorship information
+   *
+   * OPTIMIZATION: Migrated from raw SQL LEFT JOIN to Prisma findMany + JavaScript join.
+   * This provides better type safety, maintainability, and leverages Prisma's query builder.
+   * Fetches content and sponsored_content separately, then joins in JavaScript.
+   *
+   * @param args - Arguments with optional category, slugs, limit, offset
+   * @returns Array of content items with sponsorship information
    */
   async getEnrichedContentList(args: {
     p_category?: content_category | null;
     p_slugs?: string[] | null;
     p_limit?: number;
     p_offset?: number;
-  }): Promise<contentModel[]> {
+  }): Promise<
+    (contentModel & {
+      trending_score: number;
+      sponsored_content_id: string | null;
+      sponsorship_tier: string | null;
+      is_sponsored: boolean;
+    })[]
+  > {
     const { p_category, p_slugs, p_limit = 100, p_offset = 0 } = args;
-
-    // Build WHERE conditions dynamically
-    const whereParts: string[] = [];
-    const queryParams: unknown[] = [];
-    let paramIndex = 1;
-
-    if (p_category !== null && p_category !== undefined) {
-      whereParts.push(`c.category = $${paramIndex}::content_category`);
-      queryParams.push(p_category);
-      paramIndex++;
-    }
-
-    if (p_slugs && p_slugs.length > 0) {
-      whereParts.push(`c.slug = ANY($${paramIndex}::text[])`);
-      queryParams.push(p_slugs);
-      paramIndex++;
-    }
-
-    const whereClause = whereParts.length > 0 ? `WHERE ${whereParts.join(' AND ')}` : '';
-
-    // Add limit and offset parameters
-    queryParams.push(p_limit, p_offset);
-    const limitParam = `$${paramIndex}::integer`;
-    const offsetParam = `$${paramIndex + 1}::integer`;
 
     // OPTIMIZATION: Use withSmartCache for request-scoped caching
     return withSmartCache(
       'get_enriched_content_list',
       'getEnrichedContentList',
       async () => {
-        // Execute query with LEFT JOIN to sponsored_content
-        const query = `
-          SELECT
-            c.id,
-            c.slug,
-            c.title,
-            c.display_title,
-            c.seo_title,
-            c.description,
-            c.author,
-            c.author_profile_url,
-            c.category,
-            c.tags,
-            c.category::text as source_table,
-            c.created_at,
-            c.updated_at,
-            c.date_added,
-            c.features,
-            c.use_cases,
-            c.source,
-            c.documentation_url,
-            c.metadata,
-            COALESCE(c.view_count, 0)::integer as view_count,
-            COALESCE(c.copy_count, 0)::integer as copy_count,
-            COALESCE(c.bookmark_count, 0)::integer as bookmark_count,
-            COALESCE(c.popularity_score, 0)::numeric as popularity_score,
-            0::integer as trending_score,
-            sc.id as sponsored_content_id,
-            sc.tier::text as sponsorship_tier,
-            COALESCE(sc.active, false)::boolean as is_sponsored
-          FROM content c
-          LEFT JOIN sponsored_content sc 
-            ON sc.content_id = c.id 
-            AND sc.content_type = c.category
-            AND sc.active = true 
-            AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
-          ${whereClause}
-          ORDER BY c.slug
-          LIMIT ${limitParam}
-          OFFSET ${offsetParam}
-        `;
+        // Step 1: Fetch content items with Prisma
+        // Select all fields to match contentModel type
+        const contentItems = await prisma.content.findMany({
+          where: {
+            ...(p_category !== null && p_category !== undefined && { category: p_category }),
+            ...(p_slugs && p_slugs.length > 0 && { slug: { in: p_slugs } }),
+          },
+          orderBy: { slug: 'asc' },
+          take: p_limit,
+          skip: p_offset,
+        });
 
-        // Type narrowing: $queryRawUnsafe returns unknown[], validate structure
-        const rawResult = await prisma.$queryRawUnsafe(query, ...queryParams);
-        const result = Array.isArray(rawResult) 
-          ? (rawResult satisfies contentModel[])
-          : [];
-        return result;
+        if (contentItems.length === 0) {
+          return [];
+        }
+
+        // Step 2: Fetch active sponsored content for these content items
+        const now = new Date();
+        const contentIds = contentItems.map((item) => item.id);
+        const contentCategories = [...new Set(contentItems.map((item) => item.category))];
+
+        const sponsoredItems = await prisma.sponsored_content.findMany({
+          where: {
+            content_id: { in: contentIds },
+            content_type: { in: contentCategories },
+            active: true,
+            start_date: { lte: now },
+            end_date: { gte: now },
+          },
+          select: {
+            id: true,
+            content_id: true,
+            content_type: true,
+            tier: true,
+            active: true,
+          },
+        });
+
+        // Step 3: Create a map for efficient lookup: content_id + content_type -> sponsored_content
+        const sponsoredMap = new Map<string, (typeof sponsoredItems)[number]>();
+        for (const sponsored of sponsoredItems) {
+          const key = `${sponsored.content_id}:${sponsored.content_type}`;
+          sponsoredMap.set(key, sponsored);
+        }
+
+        // Step 4: Join content with sponsored_content in JavaScript
+        // Return contentModel with extended fields (is_sponsored, sponsored_content_id, etc.)
+        const enrichedContent: (contentModel & {
+          trending_score: number;
+          sponsored_content_id: string | null;
+          sponsorship_tier: string | null;
+          is_sponsored: boolean;
+        })[] = contentItems.map((item) => {
+          const sponsoredKey = `${item.id}:${item.category}`;
+          const sponsored = sponsoredMap.get(sponsoredKey);
+
+          // Return the full contentModel with extended sponsorship fields
+          return {
+            ...item,
+            // Extended fields not in base contentModel
+            trending_score: 0, // Default value (not in content table)
+            sponsored_content_id: sponsored?.id ?? null,
+            sponsorship_tier: sponsored?.tier ?? null,
+            is_sponsored: sponsored?.active ?? false,
+          };
+        });
+
+        return enrichedContent;
       },
       args
     );
   }
 
-  async getContentPaginated(
-    args: GetContentPaginatedArgs
-  ): Promise<GetContentPaginatedReturns> {
-    return this.callRpc<GetContentPaginatedReturns>(
-      'get_content_paginated',
-      args,
-      { methodName: 'getContentPaginated' }
-    );
+  async getContentPaginated(args: GetContentPaginatedArgs): Promise<GetContentPaginatedReturns> {
+    return this.callRpc<GetContentPaginatedReturns>('get_content_paginated', args, {
+      methodName: 'getContentPaginated',
+    });
   }
 
-  async getHomepageComplete(
-    args: GetHomepageCompleteArgs
-  ): Promise<GetHomepageCompleteReturns> {
-    return this.callRpc<GetHomepageCompleteReturns>(
-      'get_homepage_complete',
-      args,
-      { methodName: 'getHomepageComplete' }
-    );
+  async getHomepageComplete(args: GetHomepageCompleteArgs): Promise<GetHomepageCompleteReturns> {
+    return this.callRpc<GetHomepageCompleteReturns>('get_homepage_complete', args, {
+      methodName: 'getHomepageComplete',
+    });
   }
 
-  async getReviewsWithStats(
-    args: GetReviewsWithStatsArgs
-  ): Promise<GetReviewsWithStatsReturns> {
-    return this.callRpc<GetReviewsWithStatsReturns>(
-      'get_reviews_with_stats',
-      args,
-      { methodName: 'getReviewsWithStats' }
-    );
+  async getReviewsWithStats(args: GetReviewsWithStatsArgs): Promise<GetReviewsWithStatsReturns> {
+    return this.callRpc<GetReviewsWithStatsReturns>('get_reviews_with_stats', args, {
+      methodName: 'getReviewsWithStats',
+    });
   }
 
-  async getRelatedContent(
-    args: GetRelatedContentArgs
-  ): Promise<GetRelatedContentReturns> {
-    return this.callRpc<GetRelatedContentReturns>(
-      'get_related_content',
-      args,
-      { methodName: 'getRelatedContent' }
-    );
+  async getRelatedContent(args: GetRelatedContentArgs): Promise<GetRelatedContentReturns> {
+    return this.callRpc<GetRelatedContentReturns>('get_related_content', args, {
+      methodName: 'getRelatedContent',
+    });
   }
 
   // getSimilarContent removed - embedding generation system has been deleted
@@ -642,23 +632,21 @@ export class ContentService extends BasePrismaService {
 
   /**
    * Get content templates by category
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing simple transformations that we can do in TypeScript with better type safety.
-   * 
+   *
    * @param args - Arguments with category filter
    * @returns Content templates result matching the RPC return type for backward compatibility
    */
-  async getContentTemplates(
-    args: Record<string, never> = {}
-  ): Promise<ContentTemplatesResult> {
+  async getContentTemplates(args: Record<string, never> = {}): Promise<ContentTemplatesResult> {
     // OPTIMIZATION: Use Prisma directly with request-scoped caching
     return withSmartCache(
       'getContentTemplates',
       'getContentTemplates',
       async () => {
         const { p_category } = args;
-        
+
         // Use Prisma to fetch templates directly
         // OPTIMIZATION: Select only needed fields to reduce data transfer
         const templates = await prisma.content_templates.findMany({
@@ -674,35 +662,35 @@ export class ContentService extends BasePrismaService {
             template_data: true,
             // Note: display_order not needed in result, but used for ordering
           },
-          orderBy: [
-            { display_order: 'asc' },
-            { name: 'asc' },
-          ],
+          orderBy: [{ display_order: 'asc' }, { name: 'asc' }],
         });
 
         // Transform to match RPC return type structure (ContentTemplatesResult)
         // The RPC extracts some fields from template_data JSON, we do the same here
-        const transformedTemplates: ContentTemplatesItem[] = templates.map((template: (typeof templates)[number]) => {
-          const templateData = template.template_data;
-          const templateDataObj = 
-            typeof templateData === 'object' && templateData !== null && !Array.isArray(templateData)
-              ? (templateData as Record<string, unknown>)
-              : {};
+        const transformedTemplates: ContentTemplatesItem[] = templates.map(
+          (template: (typeof templates)[number]) => {
+            const templateData = template.template_data;
+            const templateDataObj =
+              typeof templateData === 'object' &&
+              templateData !== null &&
+              !Array.isArray(templateData)
+                ? (templateData as Record<string, unknown>)
+                : {};
 
-          return {
-            id: template.id,
-            type: template.category, // RPC returns category as "type"
-            name: template.name,
-            description: template.description,
-            category: typeof templateDataObj['category'] === 'string' 
-              ? templateDataObj['category'] 
-              : null,
-            tags: typeof templateDataObj['tags'] === 'string'
-              ? templateDataObj['tags']
-              : null,
-            template_data: templateData as Record<string, unknown> | null,
-          };
-        });
+            return {
+              id: template.id,
+              type: template.category, // RPC returns category as "type"
+              name: template.name,
+              description: template.description,
+              category:
+                typeof templateDataObj['category'] === 'string'
+                  ? templateDataObj['category']
+                  : null,
+              tags: typeof templateDataObj['tags'] === 'string' ? templateDataObj['tags'] : null,
+              template_data: templateData as Record<string, unknown> | null,
+            };
+          }
+        );
 
         // Return in RPC format for backward compatibility
         return {
@@ -715,13 +703,15 @@ export class ContentService extends BasePrismaService {
 
   /**
    * Get content paginated slim
-   * 
+   *
    * Converts RPC to Prisma query using materialized view mv_content_list_slim.
    * Returns paginated content with pagination metadata.
-   * 
+   *
    * Note: This uses a materialized view, so we use $queryRawUnsafe for the complex query.
    */
-  async getContentPaginatedSlim(args: GetContentPaginatedSlimArgs): Promise<ContentPaginatedSlimResult> {
+  async getContentPaginatedSlim(
+    args: GetContentPaginatedSlimArgs
+  ): Promise<ContentPaginatedSlimResult> {
     // OPTIMIZATION: Use withSmartCache for request-scoped caching
     return withSmartCache(
       'get_content_paginated_slim',
@@ -749,103 +739,47 @@ export class ContentService extends BasePrismaService {
           throw new Error('Invalid order_direction: must be asc or desc');
         }
 
-        // Build ORDER BY clause
-        const orderClause =
+        // Build Prisma where clause
+        const where: Prisma.v_content_list_slimWhereInput = p_category
+          ? { category: p_category }
+          : {};
+
+        // Build Prisma orderBy clause
+        // Note: Prisma doesn't support COALESCE in orderBy, so we use the raw values
+        // The materialized view already has default values (0 for numeric fields)
+        // Always use array format for consistency with TypeScript types
+        const orderDirection = p_order_direction as 'asc' | 'desc';
+        const orderBy: Prisma.v_content_list_slimOrderByWithRelationInput[] =
           p_order_by === 'created_at'
-            ? `c.created_at ${p_order_direction.toUpperCase()}`
+            ? [{ created_at: orderDirection }]
             : p_order_by === 'popularity_score'
-              ? `COALESCE(c.popularity_score, 0) ${p_order_direction.toUpperCase()}, c.created_at DESC`
-              : `COALESCE(c.view_count, 0) ${p_order_direction.toUpperCase()}, c.created_at DESC`;
+              ? [
+                  { popularity_score: orderDirection },
+                  { created_at: 'desc' }, // Secondary sort
+                ]
+              : [
+                  { view_count: orderDirection },
+                  { created_at: 'desc' }, // Secondary sort
+                ];
 
-        // OPTIMIZATION: Use window function COUNT(*) OVER() to get total count in same query
-        // This eliminates a separate database round trip, improving performance
-        const whereClause = p_category ? `WHERE c.category = $1::text` : '';
-        const queryParams: unknown[] = [];
-        let paramIndex = 1;
+        // Execute queries in parallel for better performance
+        const [items, totalCount] = await Promise.all([
+          // Get paginated items using Prisma view
+          prisma.v_content_list_slim.findMany({
+            where,
+            orderBy,
+            take: p_limit,
+            skip: p_offset,
+          }),
+          // Get total count (Prisma doesn't support window functions, so separate query)
+          prisma.v_content_list_slim.count({ where }),
+        ]);
 
-        if (p_category) {
-          queryParams.push(p_category);
-          paramIndex++;
-        }
-
-        queryParams.push(p_limit, p_offset);
-        const limitParam = `$${paramIndex}::integer`;
-        const offsetParam = `$${paramIndex + 1}::integer`;
-
-        // Combined query with window function for count - eliminates separate count query
-        const itemsQuery = `
-          SELECT
-            c.id,
-            c.slug,
-            c.title,
-            c.display_title,
-            c.description,
-            c.author,
-            c.author_profile_url,
-            c.category,
-            c.tags,
-            c.source,
-            c.source_table,
-            c.created_at,
-            c.updated_at,
-            c.date_added,
-            c.view_count,
-            c.copy_count,
-            c.bookmark_count,
-            c.popularity_score,
-            c.trending_score,
-            c.sponsored_content_id,
-            c.sponsorship_tier,
-            c.is_sponsored,
-            COUNT(*) OVER()::bigint as total_count
-          FROM mv_content_list_slim c
-          ${whereClause}
-          ORDER BY ${orderClause}
-          LIMIT ${limitParam}
-          OFFSET ${offsetParam}
-        `;
-
-        // OPTIMIZATION: Explicit type annotation for better type safety
-        const itemsRaw = await prisma.$queryRawUnsafe<Array<contentModel & { total_count: bigint }>>(
-          itemsQuery,
-          ...queryParams
-        );
-
-        // Type narrowing: Extract items and total count from query result
-        if (!Array.isArray(itemsRaw) || itemsRaw.length === 0) {
-          return {
-            items: [],
-            pagination: {
-              total_count: 0,
-              limit: p_limit,
-              offset: p_offset,
-              has_more: false,
-              current_page: 1,
-              total_pages: 0,
-            },
-          };
-        }
-
-        // Extract total_count from first row (window function returns same value for all rows)
-        const firstRow = itemsRaw[0];
-        let totalCount = 0;
-        if (
-          typeof firstRow === 'object' &&
-          firstRow !== null &&
-          'total_count' in firstRow &&
-          typeof (firstRow as { total_count: unknown }).total_count === 'bigint'
-        ) {
-          totalCount = Number((firstRow as { total_count: bigint }).total_count);
-        }
-
-        // Remove total_count from items (it's not part of ContentPaginatedSlimItem)
-        const items = itemsRaw.map((row) => {
-          if (typeof row === 'object' && row !== null && 'total_count' in row) {
-            const { total_count, ...item } = row as { total_count: bigint } & ContentPaginatedSlimItem;
-            return item;
-          }
-          return row;
-        }) as ContentPaginatedSlimItem[];
+        // Transform items to match ContentPaginatedSlimItem type
+        // The view has additional fields (trending_score, sponsored_content_id, etc.)
+        // that aren't in contentModel, but we only need the core content fields
+        // TypeScript requires explicit conversion since view structure differs slightly
+        const transformedItems = items as unknown as ContentPaginatedSlimItem[];
 
         // Calculate pagination
         const currentPage = Math.floor(p_offset / p_limit) + 1;
@@ -853,7 +787,7 @@ export class ContentService extends BasePrismaService {
         const hasMore = p_offset + p_limit < totalCount;
 
         return {
-          items,
+          items: transformedItems,
           pagination: {
             total_count: totalCount,
             limit: p_limit,
@@ -870,18 +804,16 @@ export class ContentService extends BasePrismaService {
 
   /**
    * Get content detail core
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a SELECT with conditional LEFT JOIN for collection items.
    * Since collection_items doesn't have a direct relation to content (polymorphic via content_type+slug),
    * we fetch collection items separately and then fetch related content.
-   * 
+   *
    * @param args - Arguments with p_category and p_slug
    * @returns Content detail with collection items (if category is 'collections') matching RPC return structure
    */
-  async getContentDetailCore(
-    args: GetContentDetailCoreArgs
-  ): Promise<GetContentDetailCoreReturns> {
+  async getContentDetailCore(args: GetContentDetailCoreArgs): Promise<GetContentDetailCoreReturns> {
     return withSmartCache(
       'getContentDetailCore',
       'getContentDetailCore',
@@ -991,20 +923,21 @@ export class ContentService extends BasePrismaService {
             }));
 
             // OPTIMIZATION: Fetch all related content in parallel (already optimized)
-            const relatedContentPromises = contentLookups.map((lookup: (typeof contentLookups)[number]) =>
-              prisma.content.findUnique({
-                where: {
-                  slug_category: {
-                    slug: lookup.slug,
-                    category: lookup.category,
+            const relatedContentPromises = contentLookups.map(
+              (lookup: (typeof contentLookups)[number]) =>
+                prisma.content.findUnique({
+                  where: {
+                    slug_category: {
+                      slug: lookup.slug,
+                      category: lookup.category,
+                    },
                   },
-                },
-                select: {
-                  title: true,
-                  description: true,
-                  author: true,
-                },
-              })
+                  select: {
+                    title: true,
+                    description: true,
+                    author: true,
+                  },
+                })
             );
 
             const relatedContent = await Promise.all(relatedContentPromises);
@@ -1035,24 +968,16 @@ export class ContentService extends BasePrismaService {
     );
   }
 
-  async getContentAnalytics(
-    args: GetContentAnalyticsArgs
-  ): Promise<GetContentAnalyticsReturns> {
-    return this.callRpc<GetContentAnalyticsReturns>(
-      'get_content_analytics',
-      args,
-      { methodName: 'getContentAnalytics' }
-    );
+  async getContentAnalytics(args: GetContentAnalyticsArgs): Promise<GetContentAnalyticsReturns> {
+    return this.callRpc<GetContentAnalyticsReturns>('get_content_analytics', args, {
+      methodName: 'getContentAnalytics',
+    });
   }
 
-  async getHomepageOptimized(
-    args: GetHomepageOptimizedArgs
-  ): Promise<GetHomepageOptimizedReturns> {
-    return this.callRpc<GetHomepageOptimizedReturns>(
-      'get_homepage_optimized',
-      args,
-      { methodName: 'getHomepageOptimized' }
-    );
+  async getHomepageOptimized(args: GetHomepageOptimizedArgs): Promise<GetHomepageOptimizedReturns> {
+    return this.callRpc<GetHomepageOptimizedReturns>('get_homepage_optimized', args, {
+      methodName: 'getHomepageOptimized',
+    });
   }
 
   async generateChangelogRssFeed(
@@ -1095,9 +1020,7 @@ export class ContentService extends BasePrismaService {
     );
   }
 
-  async getWeeklyDigest(
-    args?: GetWeeklyDigestArgs
-  ): Promise<GetWeeklyDigestReturns> {
+  async getWeeklyDigest(args?: GetWeeklyDigestArgs): Promise<GetWeeklyDigestReturns> {
     return this.callRpc<GetWeeklyDigestReturns>(
       'get_weekly_digest',
       args ?? ({} satisfies GetWeeklyDigestArgs),

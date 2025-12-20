@@ -1,31 +1,31 @@
 /**
  * Web Runtime Logger
- * 
+ *
  * Main logger instance for web-runtime package.
  * Uses centralized Pino configuration with browser-specific optimizations.
- * 
+ *
  * **⚠️ IMPORTANT: Universal Module (Client & Server Compatible)**
  * - ✅ **SAFE** to import in client components (`'use client'`)
  * - ✅ **SAFE** to import in server components (server-only)
  * - This logger instance works in both contexts, but usage patterns differ:
  *   - **Client-side**: Use {@link ../logging/client | Client Logging Barrel} utilities
  *   - **Server-side**: Use {@link ../logging/server | Server Logging Barrel} utilities
- * 
+ *
  * **Browser Configuration:**
  * - Console logging: Disabled in production (users don't see logs)
  * - Transmit: Enabled in production to forward error/warn logs to server
  * - Performance: Fire-and-forget, batched, only error/warn levels
- * 
+ *
  * **Usage:**
  * - **Client components**: Import from {@link ../logging/client | Client Logging Barrel} (don't import logger directly)
  * - **Server components**: Import from {@link ../logging/server | Server Logging Barrel} (logger exported there)
- * 
+ *
  * **Related Modules:**
  * - {@link ../logging/client | Client Logging Barrel} - Use for client-side logging
  * - {@link ../logging/server | Server Logging Barrel} - Use for server-side logging
  * - {@link @heyclaude/shared-runtime/logger/config | Pino Configuration} - Centralized config
  * - {@link ../app/api/logs/client/route | Client Logs API} - Server endpoint for log forwarding
- * 
+ *
  * @module web-runtime/logger
  * @see {@link ../logging/client | Client Logging Barrel} - Recommended for client-side files
  * @see {@link ../logging/server | Server Logging Barrel} - Recommended for server-side files
@@ -55,24 +55,24 @@ function createVercelCompatibleDestination(): pino.DestinationStream | undefined
   if (typeof window !== 'undefined') {
     return undefined;
   }
-  
+
   return {
     write(chunk: string) {
       // Quick regex to find levelValue in the JSON (added by our formatter)
       // Level values: trace=10, debug=20, info=30, warn=40, error=50, fatal=60
       const levelMatch = /"levelValue"\s*:\s*(\d+)/.exec(chunk);
-      const levelValue = levelMatch?.[1] !== undefined 
-        ? Number.parseInt(levelMatch[1], 10) 
-        : 30;
-      
+      const levelValue = levelMatch?.[1] !== undefined ? Number.parseInt(levelMatch[1], 10) : 30;
+
       // Remove trailing newline for cleaner console output
       const logLine = chunk.trimEnd();
-      
+
       // Use console methods for proper Vercel log level detection
       /* eslint-disable no-console, architectural-rules/no-console-in-production-enhanced -- Required for Vercel log level detection */
-      if (levelValue >= 50) { // error=50, fatal=60
+      if (levelValue >= 50) {
+        // error=50, fatal=60
         console.error(logLine);
-      } else if (levelValue >= 40) { // warn=40
+      } else if (levelValue >= 40) {
+        // warn=40
         console.warn(logLine);
       } else {
         console.log(logLine);
@@ -105,7 +105,8 @@ function createLoggerInstance(): pino.Logger {
     return existing;
   }
 
-  const isDevelopment = typeof process !== 'undefined' && process.env?.['NODE_ENV'] !== 'production';
+  const isDevelopment =
+    typeof process !== 'undefined' && process.env?.['NODE_ENV'] !== 'production';
   const isServer = typeof window === 'undefined';
 
   const pinoConfig = createPinoConfig({
@@ -118,8 +119,10 @@ function createLoggerInstance(): pino.Logger {
           return undefined;
         }
 
-        const isProduction = typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'production';
-        const consoleEnabled = typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] === 'true';
+        const isProduction =
+          typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'production';
+        const consoleEnabled =
+          typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] === 'true';
 
         // Enable transmit in production (always) or development (if console enabled)
         // This ensures we capture client-side errors even when console is disabled
@@ -157,7 +160,8 @@ function createLoggerInstance(): pino.Logger {
       return {
         // Console logging: Only enabled if NEXT_PUBLIC_LOGGER_CONSOLE=true
         // In production, this is false (users don't see logs in browser console)
-        disabled: typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] !== 'true',
+        disabled:
+          typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] !== 'true',
         // Serialize all objects for proper formatting
         serialize: true,
         // Enable transmit for error/warn logs (sends to /api/logs/client)
@@ -179,7 +183,7 @@ function createLoggerInstance(): pino.Logger {
       // Turbopack can't analyze string concatenation in this context
       const moduleNameParts = ['pino', '-', 'pretty'];
       const moduleName = moduleNameParts.join('');
-      
+
       // Use eval to create a truly dynamic require that Next.js can't analyze
       // This is safe because we're only requiring a known dev dependency
       // eslint-disable-next-line @typescript-eslint/no-implied-eval, @typescript-eslint/no-require-imports, no-eval -- Dynamic require to avoid Next.js/Turbopack static analysis
@@ -205,10 +209,18 @@ function createLoggerInstance(): pino.Logger {
 
       // Increase max listeners on the stream to prevent MaxListenersExceededWarning
       // This is safe because we're using a singleton pattern - only one logger instance exists
-      if (typeof process !== 'undefined' && process.stdout && typeof process.stdout.setMaxListeners === 'function') {
+      if (
+        typeof process !== 'undefined' &&
+        process.stdout &&
+        typeof process.stdout.setMaxListeners === 'function'
+      ) {
         process.stdout.setMaxListeners(20);
       }
-      if (typeof process !== 'undefined' && process.stderr && typeof process.stderr.setMaxListeners === 'function') {
+      if (
+        typeof process !== 'undefined' &&
+        process.stderr &&
+        typeof process.stderr.setMaxListeners === 'function'
+      ) {
         process.stderr.setMaxListeners(20);
       }
 
@@ -229,7 +241,9 @@ function createLoggerInstance(): pino.Logger {
       const configWithoutTransport = { ...pinoConfig };
       delete configWithoutTransport.transport;
       const vercelDest = createVercelCompatibleDestination();
-      const instance = vercelDest ? pino(configWithoutTransport, vercelDest) : pino(configWithoutTransport);
+      const instance = vercelDest
+        ? pino(configWithoutTransport, vercelDest)
+        : pino(configWithoutTransport);
       setGlobalLogger(instance);
       return instance;
     }
@@ -241,16 +255,26 @@ function createLoggerInstance(): pino.Logger {
 
     if (isServer) {
       // Increase max listeners on stdout/stderr to prevent MaxListenersExceededWarning
-      if (typeof process !== 'undefined' && process.stdout && typeof process.stdout.setMaxListeners === 'function') {
+      if (
+        typeof process !== 'undefined' &&
+        process.stdout &&
+        typeof process.stdout.setMaxListeners === 'function'
+      ) {
         process.stdout.setMaxListeners(20);
       }
-      if (typeof process !== 'undefined' && process.stderr && typeof process.stderr.setMaxListeners === 'function') {
+      if (
+        typeof process !== 'undefined' &&
+        process.stderr &&
+        typeof process.stderr.setMaxListeners === 'function'
+      ) {
         process.stderr.setMaxListeners(20);
       }
 
       // Server production: Use Vercel-compatible destination
       const vercelDest = createVercelCompatibleDestination();
-      const instance = vercelDest ? pino(configWithoutTransport, vercelDest) : pino(configWithoutTransport);
+      const instance = vercelDest
+        ? pino(configWithoutTransport, vercelDest)
+        : pino(configWithoutTransport);
       setGlobalLogger(instance);
       return instance;
     } else {

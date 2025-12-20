@@ -1,6 +1,9 @@
 import { performance } from 'node:perf_hooks';
 
-import { transformSkillToMarkdown, type SkillRow } from '@heyclaude/web-runtime/transformers/skill-to-md';
+import {
+  transformSkillToMarkdown,
+  type SkillRow,
+} from '@heyclaude/web-runtime/transformers/skill-to-md';
 import archiver from 'archiver';
 
 import { prisma } from '@heyclaude/data-layer';
@@ -37,7 +40,7 @@ export async function runGenerateSkillPackages(): Promise<void> {
   logger.info(`✅ Found ${skills.length} skills in database\n`, { skillCount: skills.length });
 
   logger.info('🔍 Computing content hashes and filtering changed skills...');
-  const skillsToRebuild: Array<{ hash: string; skill: SkillRow; skillMd: string; }> = [];
+  const skillsToRebuild: Array<{ hash: string; skill: SkillRow; skillMd: string }> = [];
 
   for (const skill of skills) {
     const skillMd = transformSkillToMarkdown(skill);
@@ -63,7 +66,7 @@ export async function runGenerateSkillPackages(): Promise<void> {
   });
   logger.info('═'.repeat(80));
 
-  const allResults: Array<{ message: string; slug: string; status: 'error' | 'success'; }> = [];
+  const allResults: Array<{ message: string; slug: string; status: 'error' | 'success' }> = [];
 
   for (let i = 0; i < skillsToRebuild.length; i += CONCURRENCY) {
     const batch = skillsToRebuild.slice(i, i + CONCURRENCY);
@@ -211,9 +214,9 @@ async function uploadToStorage(
 }
 
 async function processBatch(
-  skills: Array<{ hash: string; skill: SkillRow; skillMd: string; }>,
+  skills: Array<{ hash: string; skill: SkillRow; skillMd: string }>,
   supabase: ReturnType<typeof createServiceRoleClient>
-): Promise<Array<{ message: string; slug: string; status: 'error' | 'success'; }>> {
+): Promise<Array<{ message: string; slug: string; status: 'error' | 'success' }>> {
   const results = await Promise.allSettled(
     skills.map(async ({ skill, skillMd, hash }) => {
       const buildStartTime = performance.now();

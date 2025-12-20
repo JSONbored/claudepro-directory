@@ -1,9 +1,9 @@
 #!/usr/bin/env tsx
 /**
  * CSS Variable Consolidation Command
- * 
+ *
  * Analyzes and consolidates duplicate CSS variables, mapping old names to new tweakcn theme names.
- * 
+ *
  * Usage:
  *   pnpm exec heyclaude-consolidate-variables --dry-run  # Analyze only
  *   pnpm exec heyclaude-consolidate-variables              # Apply changes (when ready)
@@ -51,9 +51,11 @@ function findCSSFiles(dir: string, fileList: string[] = []): string[] {
 /**
  * Generate consolidation report for all CSS files
  */
-export async function runConsolidateVariables(dryRun: boolean = false): Promise<ConsolidationReport> {
+export async function runConsolidateVariables(
+  dryRun: boolean = false
+): Promise<ConsolidationReport> {
   const cssFiles = findCSSFiles(join(PROJECT_ROOT, 'apps/web/src'));
-  
+
   logger.info(`Found ${cssFiles.length} CSS files`);
 
   if (dryRun) {
@@ -65,7 +67,7 @@ export async function runConsolidateVariables(dryRun: boolean = false): Promise<
   // Analyze globals.css (main file with both old and new variables)
   const globalsPath = join(PROJECT_ROOT, 'apps/web/src/app/globals.css');
   const globalsContent = readFileSync(globalsPath, 'utf-8');
-  
+
   const { variables, duplicates } = analyzeVariableConsolidation(globalsContent, globalsPath);
   const mappings = findVariableMappings(variables);
   const removable = findRemovableVariables(variables, mappings);
@@ -79,13 +81,22 @@ export async function runConsolidateVariables(dryRun: boolean = false): Promise<
     // Old variables are typically: --color-*, --dark-*, --light-*
     if (name.startsWith('--color-') || name.startsWith('--dark-') || name.startsWith('--light-')) {
       oldVariables.set(name, data);
-    } else if (name.startsWith('--background') || name.startsWith('--foreground') || 
-               name.startsWith('--primary') || name.startsWith('--secondary') ||
-               name.startsWith('--muted') || name.startsWith('--accent') ||
-               name.startsWith('--destructive') || name.startsWith('--border') ||
-               name.startsWith('--input') || name.startsWith('--ring') ||
-               name.startsWith('--card') || name.startsWith('--popover') ||
-               name.startsWith('--sidebar') || name.startsWith('--chart-')) {
+    } else if (
+      name.startsWith('--background') ||
+      name.startsWith('--foreground') ||
+      name.startsWith('--primary') ||
+      name.startsWith('--secondary') ||
+      name.startsWith('--muted') ||
+      name.startsWith('--accent') ||
+      name.startsWith('--destructive') ||
+      name.startsWith('--border') ||
+      name.startsWith('--input') ||
+      name.startsWith('--ring') ||
+      name.startsWith('--card') ||
+      name.startsWith('--popover') ||
+      name.startsWith('--sidebar') ||
+      name.startsWith('--chart-')
+    ) {
       newVariables.set(name, data);
     }
   }
@@ -96,12 +107,12 @@ export async function runConsolidateVariables(dryRun: boolean = false): Promise<
   const duplicateOpportunities = [];
   for (const [value, vars] of duplicates.entries()) {
     if (vars.length > 1) {
-      const recommended = vars.reduce((prev, curr) => 
+      const recommended = vars.reduce((prev, curr) =>
         curr.name.length < prev.name.length ? curr : prev
       );
-      
+
       duplicateOpportunities.push({
-        variables: vars.map(v => v.name),
+        variables: vars.map((v) => v.name),
         value: value.substring(0, 80) + (value.length > 80 ? '...' : ''),
         recommendedName: recommended.name,
         files: [relative(PROJECT_ROOT, globalsPath)],
@@ -176,7 +187,10 @@ export async function runConsolidateVariables(dryRun: boolean = false): Promise<
   console.log(md);
 
   // Write report to file
-  const reportPath = join(PROJECT_ROOT, '.cursor/tailwind-cleanup/variable-consolidation-report.md');
+  const reportPath = join(
+    PROJECT_ROOT,
+    '.cursor/tailwind-cleanup/variable-consolidation-report.md'
+  );
   const { mkdirSync } = await import('node:fs');
   const { dirname } = await import('node:path');
   mkdirSync(dirname(reportPath), { recursive: true });

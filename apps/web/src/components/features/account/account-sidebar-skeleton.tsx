@@ -11,7 +11,7 @@ export function AccountSidebarSkeleton() {
       {/* User profile header skeleton */}
       <div className="mb-6 flex items-center gap-2 border-b pb-4">
         <Skeleton className="h-12 w-12 rounded-full" />
-        <div className="flex flex-col gap-2 flex-1">
+        <div className="flex flex-1 flex-col gap-2">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-3 w-32" />
         </div>

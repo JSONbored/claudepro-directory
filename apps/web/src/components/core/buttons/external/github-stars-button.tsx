@@ -69,12 +69,12 @@ export function GitHubStarsButton({
           // Silently handle 403 - it's expected (rate limiting, private repo, etc.)
           return null;
         }
-        
+
         // Check if response is ok before parsing JSON
         if (!res.ok) {
           throw new Error(`GitHub API returned ${res.status}: ${res.statusText}`);
         }
-        
+
         return res.json();
       })
       .then((data) => {
@@ -82,7 +82,7 @@ export function GitHubStarsButton({
         if (!data) {
           return;
         }
-        
+
         const count =
           data && typeof data.stargazers_count === 'number' ? data.stargazers_count : null;
         setStars(count);
@@ -94,7 +94,7 @@ export function GitHubStarsButton({
           setStars(null);
           return;
         }
-        
+
         // Log other errors
         const normalized = normalizeError(error, 'Failed to fetch GitHub star count');
         logClientWarn(
@@ -130,9 +130,12 @@ export function GitHubStarsButton({
   };
 
   // Format star count: show "1.2k" for numbers > 999, otherwise full number with commas
-  const formattedStars = typeof stars === 'number' 
-    ? (stars > 999 ? `${(stars / 1000).toFixed(1)}k` : stars.toLocaleString())
-    : null;
+  const formattedStars =
+    typeof stars === 'number'
+      ? stars > 999
+        ? `${(stars / 1000).toFixed(1)}k`
+        : stars.toLocaleString()
+      : null;
 
   return (
     <Button
@@ -142,18 +145,18 @@ export function GitHubStarsButton({
       disabled={disabled}
       className={cn(
         // Match "More" dropdown design: icon-only with absolute badge overlay
-        size === 'icon' ? 'h-8 w-8 relative' : 'gap-2',
+        size === 'icon' ? 'relative h-8 w-8' : 'gap-2',
         className
       )}
       aria-label={`Star us on GitHub${stars !== null ? ` - ${stars} stars` : ''}`}
     >
       <Github className={size === 'icon' ? 'h-4 w-4' : 'h-4 w-4'} aria-hidden="true" />
       {formattedStars !== null && (
-        <span 
+        <span
           className={cn(
             // Match "More" dropdown: absolute badge overlay in top-right corner
-            size === 'icon' 
-              ? 'absolute -top-1 -right-1 text-[10px] font-medium text-accent'
+            size === 'icon'
+              ? 'text-accent absolute -top-1 -right-1 text-[10px] font-medium'
               : 'font-medium tabular-nums'
           )}
         >

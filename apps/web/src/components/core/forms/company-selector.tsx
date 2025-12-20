@@ -4,9 +4,14 @@
  * CompanySelector - Search or create companies (database-first via RPC)
  */
 
-import type { companiesModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type companiesModel = Prisma.companiesGetPayload<{}>;
 import { createCompany } from '@heyclaude/web-runtime/actions/companies-crud';
-import { getCompanyByIdAction, searchCompaniesAction } from '@heyclaude/web-runtime/actions/companies';
+import {
+  getCompanyByIdAction,
+  searchCompaniesAction,
+} from '@heyclaude/web-runtime/actions/companies';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
   Button,
@@ -22,10 +27,7 @@ import { useCallback, useEffect, useId, useRef, useState, useTransition } from '
 import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { useDebounceValue } from '@heyclaude/web-runtime/hooks/use-debounce-value';
 
-type Company = Pick<
-  companiesModel,
-  'description' | 'id' | 'logo' | 'name' | 'slug' | 'website'
->;
+type Company = Pick<companiesModel, 'description' | 'id' | 'logo' | 'name' | 'slug' | 'website'>;
 
 interface CompanySelectorProps {
   defaultCompanyName?: string | undefined; // For legacy text field migration
@@ -59,7 +61,11 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
   const [searchQuery, setSearchQuery] = useState('');
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const { value: isSearching, setTrue: setIsSearchingTrue, setFalse: setIsSearchingFalse } = useBoolean();
+  const {
+    value: isSearching,
+    setTrue: setIsSearchingTrue,
+    setFalse: setIsSearchingFalse,
+  } = useBoolean();
   const [debounceMs, setDebounceMs] = useState(DEFAULT_DEBOUNCE_MS);
   const { value: showCreateForm, setValue: setShowCreateForm } = useBoolean();
 
@@ -120,64 +126,71 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
   const latestQueryRef = useRef<string>('');
 
   // Debounced search
-  const searchCompanies = useCallback(async (query: string) => {
-    const trimmed = query.trim();
-    if (trimmed.length < 2) {
-      setCompanies([]);
-      setIsSearchingFalse();
-      return;
-    }
-
-    // Update latest query before making request
-    latestQueryRef.current = trimmed;
-
-    setIsSearchingTrue();
-    try {
-      const result = await searchCompaniesAction({ query: trimmed, limit: 10 });
-      
-      // Only apply results if this request's query still matches the latest query
-      if (latestQueryRef.current !== trimmed) {
-        return; // Stale request - ignore results
+  const searchCompanies = useCallback(
+    async (query: string) => {
+      const trimmed = query.trim();
+      if (trimmed.length < 2) {
+        setCompanies([]);
+        setIsSearchingFalse();
+        return;
       }
-      
-      // Type narrowing: result.data has companies array
-      const payload = result?.data && typeof result.data === 'object' && !Array.isArray(result.data) && 'companies' in result.data
-        ? (result.data as { companies?: Company[]; debounceMs?: number })
-        : undefined;
-      const companies = payload?.companies ?? [];
-      setCompanies(
-        companies.map(
-          (company): Company => ({
-            id: company.id,
-            name: company.name,
-            slug: company.slug ?? '',
-            description: company.description ?? null,
-            website: null,
-            logo: null,
-          })
-        )
-      );
 
-      if (typeof payload?.debounceMs === 'number' && payload.debounceMs > 0) {
-        setDebounceMs(payload.debounceMs);
-      }
-    } catch (error) {
-      logClientError(
-        '[Form] Unified search failed',
-        normalizeError(error, 'Unified search failed'),
-        'CompanySelector.searchCompanies',
-        {
-          component: 'CompanySelector',
-          action: 'search-companies',
-          category: 'form',
-          query: trimmed,
+      // Update latest query before making request
+      latestQueryRef.current = trimmed;
+
+      setIsSearchingTrue();
+      try {
+        const result = await searchCompaniesAction({ query: trimmed, limit: 10 });
+
+        // Only apply results if this request's query still matches the latest query
+        if (latestQueryRef.current !== trimmed) {
+          return; // Stale request - ignore results
         }
-      );
-      setCompanies([]);
-    } finally {
-      setIsSearchingFalse();
-    }
-  }, [setIsSearchingTrue, setIsSearchingFalse]);
+
+        // Type narrowing: result.data has companies array
+        const payload =
+          result?.data &&
+          typeof result.data === 'object' &&
+          !Array.isArray(result.data) &&
+          'companies' in result.data
+            ? (result.data as { companies?: Company[]; debounceMs?: number })
+            : undefined;
+        const companies = payload?.companies ?? [];
+        setCompanies(
+          companies.map(
+            (company): Company => ({
+              id: company.id,
+              name: company.name,
+              slug: company.slug ?? '',
+              description: company.description ?? null,
+              website: null,
+              logo: null,
+            })
+          )
+        );
+
+        if (typeof payload?.debounceMs === 'number' && payload.debounceMs > 0) {
+          setDebounceMs(payload.debounceMs);
+        }
+      } catch (error) {
+        logClientError(
+          '[Form] Unified search failed',
+          normalizeError(error, 'Unified search failed'),
+          'CompanySelector.searchCompanies',
+          {
+            component: 'CompanySelector',
+            action: 'search-companies',
+            category: 'form',
+            query: trimmed,
+          }
+        );
+        setCompanies([]);
+      } finally {
+        setIsSearchingFalse();
+      }
+    },
+    [setIsSearchingTrue, setIsSearchingFalse]
+  );
 
   // Debounced search query
   const [debouncedSearchQuery] = useDebounceValue(searchQuery, debounceMs);
@@ -336,7 +349,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                 className="h-9"
               />
               {isSearching ? (
-                <p className="text-muted-foreground text-sm px-2 py-4">Searching...</p>
+                <p className="text-muted-foreground px-2 py-4 text-sm">Searching...</p>
               ) : companies.length > 0 ? (
                 <div className="max-h-[200px] space-y-1 overflow-y-auto">
                   {companies.map((company) => (
@@ -352,7 +365,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                   ))}
                 </div>
               ) : searchQuery.length >= 2 ? (
-                <p className="text-muted-foreground text-sm px-2 py-4">No companies found</p>
+                <p className="text-muted-foreground px-2 py-4 text-sm">No companies found</p>
               ) : null}
               <Button
                 type="button"

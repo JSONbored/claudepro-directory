@@ -63,12 +63,11 @@ export const processEmailSequence = inngest.createFunction(
 
         // Map RPC result to our expected type, filtering out nulls
         if (!Array.isArray(data)) return [];
-        
+
         return (data as DueSequenceEmailItem[])
-          .filter((item): item is DueSequenceEmailItem & { id: string; email: string; step: number } => 
-            item.id !== null && 
-            item.email !== null && 
-            item.step !== null
+          .filter(
+            (item): item is DueSequenceEmailItem & { id: string; email: string; step: number } =>
+              item.id !== null && item.email !== null && item.step !== null
           )
           .map((item) => ({
             id: item.id!,
@@ -77,8 +76,7 @@ export const processEmailSequence = inngest.createFunction(
           }));
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to fetch due sequence emails');
-        logger.warn({ ...logContext,
-          err: normalized, }, 'Failed to fetch due sequence emails');
+        logger.warn({ ...logContext, err: normalized }, 'Failed to fetch due sequence emails');
         return [];
       }
     });
@@ -89,8 +87,7 @@ export const processEmailSequence = inngest.createFunction(
       return { sent: 0, failed: 0 };
     }
 
-    logger.info({ ...logContext,
-      dueCount: dueEmails.length, }, 'Processing sequence emails');
+    logger.info({ ...logContext, dueCount: dueEmails.length }, 'Processing sequence emails');
 
     // Step 2: Process emails in sequence
     let sentCount = 0;
@@ -100,42 +97,49 @@ export const processEmailSequence = inngest.createFunction(
     const batchSize = 5;
     for (let i = 0; i < dueEmails.length; i += batchSize) {
       const batch = dueEmails.slice(i, i + batchSize);
-      
-      const batchResults = await step.run(`send-batch-${i}`, async (): Promise<{
-        sent: number;
-        failed: number;
-      }> => {
-        let batchSent = 0;
-        let batchFailed = 0;
 
-        for (const emailItem of batch) {
-          try {
-            await processSequenceEmail(emailItem, logContext);
-            batchSent++;
-          } catch (error) {
-            const normalized = normalizeError(error, 'Failed to send sequence email');
-            logger.warn({ ...logContext,
-              email: emailItem.email, // Auto-hashed by pino redaction
-              sequenceId: emailItem.id,
-              step: emailItem.step,
-              errorMessage: normalized.message, }, 'Failed to send sequence email');
-            batchFailed++;
+      const batchResults = await step.run(
+        `send-batch-${i}`,
+        async (): Promise<{
+          sent: number;
+          failed: number;
+        }> => {
+          let batchSent = 0;
+          let batchFailed = 0;
+
+          for (const emailItem of batch) {
+            try {
+              await processSequenceEmail(emailItem, logContext);
+              batchSent++;
+            } catch (error) {
+              const normalized = normalizeError(error, 'Failed to send sequence email');
+              logger.warn(
+                {
+                  ...logContext,
+                  email: emailItem.email, // Auto-hashed by pino redaction
+                  sequenceId: emailItem.id,
+                  step: emailItem.step,
+                  errorMessage: normalized.message,
+                },
+                'Failed to send sequence email'
+              );
+              batchFailed++;
+            }
           }
-        }
 
-        return { sent: batchSent, failed: batchFailed };
-      });
+          return { sent: batchSent, failed: batchFailed };
+        }
+      );
 
       sentCount += batchResults.sent;
       failedCount += batchResults.failed;
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      sent: sentCount,
-      failed: failedCount,
-      total: dueEmails.length, }, 'Email sequence processing completed');
+    logger.info(
+      { ...logContext, durationMs, sent: sentCount, failed: failedCount, total: dueEmails.length },
+      'Email sequence processing completed'
+    );
 
     const result = {
       sent: sentCount,
@@ -172,10 +176,10 @@ async function processSequenceEmail(
 
   if (!claimResult) {
     // Already claimed or not found - skip silently (expected for duplicates)
-    logger.info({ ...logContext,
-      sequenceId: sequenceEmailId,
-      step,
-      reason: 'already_processed', }, 'Sequence email already claimed or not found, skipping');
+    logger.info(
+      { ...logContext, sequenceId: sequenceEmailId, step, reason: 'already_processed' },
+      'Sequence email already claimed or not found, skipping'
+    );
     return; // Don't throw - this is expected for duplicates
   }
 
@@ -219,10 +223,15 @@ async function processSequenceEmail(
   // Update last_sent_at to track successful delivery
   await service.updateEmailSequenceLastSent(sequenceEmailId);
 
-  logger.info({ ...logContext,
-    email, // Auto-hashed by pino redaction
-    sequenceId: sequenceEmailId,
-    step, }, 'Sequence email sent');
+  logger.info(
+    {
+      ...logContext,
+      email, // Auto-hashed by pino redaction
+      sequenceId: sequenceEmailId,
+      step,
+    },
+    'Sequence email sent'
+  );
 }
 
 /**

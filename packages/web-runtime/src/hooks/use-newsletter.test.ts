@@ -48,9 +48,7 @@ describe('useNewsletter', () => {
   });
 
   it('should initialize with empty email and no error', () => {
-    const { result } = renderHook(() =>
-      useNewsletter({ source: 'footer' as any })
-    );
+    const { result } = renderHook(() => useNewsletter({ source: 'footer' as any }));
 
     expect(result.current.email).toBe('');
     expect(result.current.error).toBe(null);
@@ -58,9 +56,7 @@ describe('useNewsletter', () => {
   });
 
   it('should update email when setEmail is called', () => {
-    const { result } = renderHook(() =>
-      useNewsletter({ source: 'footer' as any })
-    );
+    const { result } = renderHook(() => useNewsletter({ source: 'footer' as any }));
 
     act(() => {
       result.current.setEmail('test@example.com');
@@ -70,9 +66,7 @@ describe('useNewsletter', () => {
   });
 
   it('should reset form state', () => {
-    const { result } = renderHook(() =>
-      useNewsletter({ source: 'footer' as any })
-    );
+    const { result } = renderHook(() => useNewsletter({ source: 'footer' as any }));
 
     act(() => {
       result.current.setEmail('test@example.com');
@@ -107,9 +101,7 @@ describe('useNewsletter', () => {
       data: { success: true },
     });
 
-    const { result } = renderHook(() =>
-      useNewsletter({ source: 'footer' as any })
-    );
+    const { result } = renderHook(() => useNewsletter({ source: 'footer' as any }));
 
     act(() => {
       result.current.setEmail('  Test@Example.COM  ');
@@ -185,21 +177,16 @@ describe('useNewsletter', () => {
 
     expect(result.current.error).toBe('Email already subscribed');
     expect(onError).toHaveBeenCalledWith('Email already subscribed');
-    expect(vi.mocked(toasts.raw.error)).toHaveBeenCalledWith(
-      'Subscription Error',
-      {
-        description: 'Email already subscribed',
-      }
-    );
+    expect(vi.mocked(toasts.raw.error)).toHaveBeenCalledWith('Subscription Error', {
+      description: 'Email already subscribed',
+    });
   });
 
   it('should handle exceptions during subscription', async () => {
     mockSubscribeNewsletterAction.mockRejectedValue(new Error('Network error'));
 
     const { logClientError } = await import('../utils/client-logger.ts');
-    const { result } = renderHook(() =>
-      useNewsletter({ source: 'footer' as any })
-    );
+    const { result } = renderHook(() => useNewsletter({ source: 'footer' as any }));
 
     act(() => {
       result.current.setEmail('test@example.com');
@@ -224,9 +211,7 @@ describe('useNewsletter', () => {
       newsletter: mockNewsletter,
     } as any);
 
-    const { result } = renderHook(() =>
-      useNewsletter({ source: 'footer' as any })
-    );
+    const { result } = renderHook(() => useNewsletter({ source: 'footer' as any }));
 
     act(() => {
       result.current.setEmail('test@example.com');
@@ -259,9 +244,7 @@ describe('useNewsletter', () => {
       newsletter: mockNewsletter,
     } as any);
 
-    const { result } = renderHook(() =>
-      useNewsletter({ source: 'footer' as any })
-    );
+    const { result } = renderHook(() => useNewsletter({ source: 'footer' as any }));
 
     act(() => {
       result.current.setEmail('test@example.com');
@@ -314,9 +297,7 @@ describe('useNewsletter', () => {
       copy_slug: 'test-agent',
     };
 
-    const { result } = renderHook(() =>
-      useNewsletter({ source: 'footer' as any, metadata })
-    );
+    const { result } = renderHook(() => useNewsletter({ source: 'footer' as any, metadata }));
 
     act(() => {
       result.current.setEmail('test@example.com');

@@ -9,7 +9,7 @@
  * @module apps/web/src/app/[category]/category-page-search-client
  */
 
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@prisma/client';
 import { usePulse } from '@heyclaude/web-runtime/hooks/use-pulse';
 import { SearchBar } from '@heyclaude/web-runtime/search/components/search-bar';
 import { SearchFilters } from '@heyclaude/web-runtime/search/components/search-filters';

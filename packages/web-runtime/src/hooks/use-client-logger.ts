@@ -1,32 +1,32 @@
 /**
  * React Hook for Client-Side Logging
- * 
+ *
  * Provides a React hook for consistent client-side logging with automatic
  * component-level context and session ID management.
- * 
+ *
  * **⚠️ IMPORTANT: Client-Only Hook**
  * - ✅ **SAFE** to use in client components (`'use client'`)
  * - ❌ **DO NOT** use in server components (uses React hooks and browser APIs)
  * - For server-side logging, use {@link ../logging/server | Server Logging Barrel} instead
- * 
+ *
  * **Features:**
  * - Automatic component-level bindings (set once per component mount)
  * - Session ID management (via {@link ../utils/client-session | client-session})
  * - Standardized context creation (via {@link ../utils/client-logger | client-logger})
  * - Performance-optimized (bindings set once, not per log call)
- * 
+ *
  * **Consistency:**
  * - Uses existing {@link ../logger | logger} instance (same as server-side)
  * - Uses {@link ../utils/client-logger.createClientLogContext | createClientLogContext} internally
  * - Uses {@link ../utils/client-session.getOrCreateSessionId | getOrCreateSessionId} for session IDs
  * - Message-first API matches server-side patterns
- * 
+ *
  * **Related Modules:**
  * - {@link ../logging/client | Client Logging Barrel} - Recommended import path for client components
  * - {@link ../utils/client-logger | Client Logger Utilities} - Lower-level utilities used by this hook
  * - {@link ../utils/client-session | Client Session Management} - Session ID generation
  * - {@link ../logger | Logger Instance} - Main logger instance
- * 
+ *
  * @module web-runtime/hooks/use-client-logger
  * @see {@link ../logging/client | Client Logging Barrel} - Recommended import path
  * @see {@link ../utils/client-logger | Client Logger Utilities} - Lower-level utilities
@@ -61,11 +61,21 @@ export interface ClientLogger {
   /**
    * Log an error
    */
-  error: (message: string, error: unknown, action?: string, additionalContext?: Record<string, unknown>) => void;
+  error: (
+    message: string,
+    error: unknown,
+    action?: string,
+    additionalContext?: Record<string, unknown>
+  ) => void;
   /**
    * Log a warning
    */
-  warn: (message: string, error?: unknown, action?: string, additionalContext?: Record<string, unknown>) => void;
+  warn: (
+    message: string,
+    error?: unknown,
+    action?: string,
+    additionalContext?: Record<string, unknown>
+  ) => void;
   /**
    * Log an info message
    */
@@ -82,29 +92,29 @@ export interface ClientLogger {
 
 /**
  * React hook for client-side logging with automatic component context
- * 
+ *
  * Sets up component-level logger bindings and provides standardized logging methods.
- * 
+ *
  * **Performance:**
  * - Bindings set once per component mount (not per log call)
  * - Session ID retrieved once per component (cached via useMemo)
  * - No re-renders triggered by logging
- * 
+ *
  * **Automatic Features:**
  * - Component-level bindings (via {@link ../logger.setBindings | logger.setBindings()})
  * - Session ID injection (via {@link ../utils/client-session.getOrCreateSessionId | getOrCreateSessionId()})
  * - Standardized context creation (via {@link ../utils/client-logger.createClientLogContext | createClientLogContext()})
- * 
+ *
  * **Consistency:**
  * - Uses same {@link ../logger | logger} instance as server-side
  * - Uses same {@link ../utils/client-logger | client-logger} utilities internally
  * - Message-first API matches server-side patterns
- * 
+ *
  * @param options - Component and module information
  * @param options.context - Additional context to include in all logs (should be memoized to avoid unnecessary re-renders)
  * @remarks If passing a context object, ensure it is memoized (e.g., via useMemo) to avoid unnecessary re-renders and stale closures.
  * @returns Logger object with standardized methods (error, warn, info, debug, getContext)
- * 
+ *
  * @example
  * ```tsx
  * function MyComponent() {
@@ -112,7 +122,7 @@ export interface ClientLogger {
  *     component: 'MyComponent',
  *     module: 'components/my-component',
  *   });
- * 
+ *
  *   const handleClick = async () => {
  *     try {
  *       await someAsyncOperation();
@@ -121,11 +131,11 @@ export interface ClientLogger {
  *       log.error('Operation failed', error, 'handleClick');
  *     }
  *   };
- * 
+ *
  *   return <button onClick={handleClick}>Click me</button>;
  * }
  * ```
- * 
+ *
  * @see {@link ../utils/client-logger | Client Logger Utilities} - Lower-level utilities used internally
  * @see {@link ../utils/client-session | Client Session Management} - Session ID generation
  * @see {@link ../logger.setBindings | logger.setBindings} - How bindings are set
@@ -155,7 +165,12 @@ export function useClientLogger(options: UseClientLoggerOptions): ClientLogger {
     };
 
     return {
-      error: (message: string, error: unknown, action?: string, extraContext?: Record<string, unknown>) => {
+      error: (
+        message: string,
+        error: unknown,
+        action?: string,
+        extraContext?: Record<string, unknown>
+      ) => {
         const operation = createOperation(action);
         const clientContext = createClientLogContext(operation, {
           ...(component !== undefined && { component }),
@@ -172,7 +187,12 @@ export function useClientLogger(options: UseClientLoggerOptions): ClientLogger {
         componentLogger.error({ err: normalized, ...logContext }, message);
       },
 
-      warn: (message: string, error?: unknown, action?: string, extraContext?: Record<string, unknown>) => {
+      warn: (
+        message: string,
+        error?: unknown,
+        action?: string,
+        extraContext?: Record<string, unknown>
+      ) => {
         const operation = createOperation(action);
         const clientContext = createClientLogContext(operation, {
           ...(component !== undefined && { component }),

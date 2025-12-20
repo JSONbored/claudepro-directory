@@ -3,7 +3,7 @@ import { setupTestWithErrorTracking } from '../../../../config/tests/utils/error
 
 /**
  * Comprehensive Changelog Page E2E Tests
- * 
+ *
  * Tests ALL functionality on the changelog page with strict error checking:
  * - Page rendering without errors
  * - Changelog entries display
@@ -26,7 +26,7 @@ test.describe('Changelog Page', () => {
     // Set up error tracking and navigate to changelog page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/changelog');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -49,31 +49,30 @@ test.describe('Changelog Page', () => {
     await expect(errorOverlay).not.toBeVisible();
 
     // Check no hydration errors
-    const hydrationErrors = consoleErrors.filter(err => 
-      err.includes('Hydration') || 
-      err.includes('hydration')
+    const hydrationErrors = consoleErrors.filter(
+      (err) => err.includes('Hydration') || err.includes('hydration')
     );
     expect(hydrationErrors.length).toBe(0);
   });
 
   test('should display changelog heading', async ({ page }) => {
     // Check for changelog heading
-    const heading = page.getByRole('heading', { 
+    const heading = page.getByRole('heading', {
       level: 1,
-      name: /changelog/i 
+      name: /changelog/i,
     });
-    
+
     await expect(heading.first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should display changelog entries', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for changelog entries (timeline items, entries, etc.)
     const entries = page.locator('article, [role="article"], [data-testid*="changelog"]');
     const entryCount = await entries.count();
-    
+
     // May have 0 or more entries depending on data
     expect(entryCount).toBeGreaterThanOrEqual(0);
   });
@@ -81,13 +80,16 @@ test.describe('Changelog Page', () => {
   test('should display category filter', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for category filter (buttons, tabs, or select)
-    const categoryFilter = page.getByRole('button', { name: /all|added|changed|fixed/i }).or(
-      page.getByRole('combobox', { name: /category|filter/i })
-    );
-    const hasFilter = await categoryFilter.first().isVisible().catch(() => false);
-    
+    const categoryFilter = page
+      .getByRole('button', { name: /all|added|changed|fixed/i })
+      .or(page.getByRole('combobox', { name: /category|filter/i }));
+    const hasFilter = await categoryFilter
+      .first()
+      .isVisible()
+      .catch(() => false);
+
     // Filter may or may not be visible depending on implementation
     // But page should render
     const main = page.getByRole('main');
@@ -97,18 +99,21 @@ test.describe('Changelog Page', () => {
   test('should handle empty state for changelog', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for empty state message (if no entries)
     const entries = page.locator('article, [role="article"]');
     const entryCount = await entries.count();
-    
+
     if (entryCount === 0) {
       // Should show empty state message
       const emptyState = page.getByText(/no changelog entries|no updates/i);
       const hasEmptyState = await emptyState.isVisible().catch(() => false);
-      
+
       // Empty state may or may not be visible, but page should not error
-      const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+      const hasError = await page
+        .locator('[data-nextjs-error]')
+        .isVisible()
+        .catch(() => false);
       expect(hasError).toBe(false);
     }
   });
@@ -122,7 +127,7 @@ test.describe('Changelog Page', () => {
     await page.keyboard.press('Tab');
     const focused = page.locator(':focus');
     await expect(focused).toBeVisible();
-    
+
     // Check for proper heading hierarchy
     const heading = page.getByRole('heading', { level: 1 });
     await expect(heading.first()).toBeVisible();
@@ -140,16 +145,16 @@ test.describe('Changelog Page', () => {
   test('should handle loading states', async ({ page }) => {
     // Navigate to page
     await page.goto('/changelog');
-    
+
     // Check for loading indicators (may flash quickly)
     const loadingIndicator = page.locator('[aria-busy="true"], [data-loading="true"]');
     const hasLoading = await loadingIndicator.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });
@@ -169,9 +174,12 @@ test.describe('Changelog Page', () => {
     // Check for error message if error occurred
     const errorMessage = page.getByText(/unable to load changelog entries/i);
     const hasError = await errorMessage.isVisible().catch(() => false);
-    
+
     // Error may or may not be visible, but page should not crash
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasErrorOverlay).toBe(false);
   });
 
@@ -204,7 +212,10 @@ test.describe('Changelog Page', () => {
     await expect(main).toBeVisible();
 
     // May show empty state or no entries, but should not error
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -222,7 +233,7 @@ test.describe('Changelog Page', () => {
     // Entries should display without errors
     const entries = page.locator('article, [role="article"]');
     const entryCount = await entries.count();
-    
+
     // Should handle any number of entries (including 0)
     expect(entryCount).toBeGreaterThanOrEqual(0);
   });
@@ -239,7 +250,10 @@ test.describe('Changelog Page', () => {
     await expect(main).toBeVisible();
 
     // Should not crash on date parsing
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -252,10 +266,16 @@ test.describe('Changelog Page', () => {
     // Check for feed links in page head
     const rssLink = page.locator('link[type="application/rss+xml"]');
     const atomLink = page.locator('link[type="application/atom+xml"]');
-    
-    const hasRssLink = await rssLink.count().then(count => count > 0).catch(() => false);
-    const hasAtomLink = await atomLink.count().then(count => count > 0).catch(() => false);
-    
+
+    const hasRssLink = await rssLink
+      .count()
+      .then((count) => count > 0)
+      .catch(() => false);
+    const hasAtomLink = await atomLink
+      .count()
+      .then((count) => count > 0)
+      .catch(() => false);
+
     // Feed links may or may not be in DOM (depends on Next.js metadata rendering)
     // But page should render
     const main = page.getByRole('main');
@@ -274,7 +294,10 @@ test.describe('Changelog Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -290,7 +313,10 @@ test.describe('Changelog Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -306,7 +332,10 @@ test.describe('Changelog Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -322,7 +351,10 @@ test.describe('Changelog Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -338,7 +370,10 @@ test.describe('Changelog Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -346,16 +381,16 @@ test.describe('Changelog Page', () => {
     // This tests that ChangelogContentSkeleton is shown during Suspense
     // The component uses Suspense with ChangelogContentSkeleton fallback
     await page.goto('/changelog');
-    
+
     // Check for loading state (may flash quickly)
     const loading = page.locator('[data-loading], [aria-busy="true"]');
     const hasLoading = await loading.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });
@@ -372,7 +407,10 @@ test.describe('Changelog Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 });

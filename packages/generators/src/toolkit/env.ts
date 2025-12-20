@@ -2,14 +2,11 @@
  * Shared environment variable loading utility.
  * For local development: Use Infisical (run commands with `infisical run --env=dev -- <command>`).
  * In CI/Build (Vercel/GitHub): Environment variables are provided by platform.
- * 
+ *
  * This utility does NOT load .env files - all secrets must come from Infisical or platform env vars.
  */
 
-import { normalizeError } from '@heyclaude/shared-runtime';
-
 import { logger } from './logger.ts';
-
 
 export async function ensureEnvVars(
   requiredVars: string[],
@@ -19,9 +16,8 @@ export async function ensureEnvVars(
   const missingOptionalVars = optionalVars.filter((v) => !process.env[v]);
 
   if (missingVars.length === 0) {
-    const source = process.env['VERCEL'] || process.env['CI']
-      ? 'Platform (Vercel/CI)'
-      : 'Infisical';
+    const source =
+      process.env['VERCEL'] || process.env['CI'] ? 'Platform (Vercel/CI)' : 'Infisical';
     if (missingOptionalVars.length > 0) {
       logger.info(
         `✅ Required environment variables loaded from ${source} (${missingOptionalVars.length} optional vars missing)`,
@@ -59,13 +55,10 @@ export async function ensureEnvVars(
   }
 
   // Local development: Must use Infisical (no .env file fallback)
-  logger.error(
-    `❌ Missing required environment variables: ${missingVars.join(', ')}`,
-    {
-      command: 'env',
-      missingVarsCount: missingVars.length,
-    }
-  );
+  logger.error(`❌ Missing required environment variables: ${missingVars.join(', ')}`, {
+    command: 'env',
+    missingVarsCount: missingVars.length,
+  });
   throw new Error(
     `Missing required environment variables: ${missingVars.join(', ')}. ` +
       `For local development, use Infisical: infisical run --env=dev -- <command>. ` +

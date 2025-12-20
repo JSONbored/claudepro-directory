@@ -2,25 +2,15 @@
 
 /**
  * Community Stats Card Component
- * 
+ *
  * Client component for community stats with animated counters
  */
 
 import { motion } from 'motion/react';
 import { MICROINTERACTIONS, SPRING } from '@heyclaude/web-runtime/design-system';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  NumberTicker
-} from '@heyclaude/web-runtime/ui';
+import { Card, CardContent, CardHeader, CardTitle, NumberTicker } from '@heyclaude/web-runtime/ui';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
-import {
-  Layers,
-  MessageCircle,
-  Users,
-} from '@heyclaude/web-runtime/icons';
+import { Layers, MessageCircle, Users } from '@heyclaude/web-runtime/icons';
 import { useInView } from 'motion/react';
 import { useRef } from 'react';
 
@@ -30,9 +20,9 @@ import { useRef } from 'react';
 export type StatCardIconId = 'layers' | 'message-circle' | 'users';
 
 const ICON_MAP: Record<StatCardIconId, typeof Layers> = {
-  'layers': Layers,
+  layers: Layers,
   'message-circle': MessageCircle,
-  'users': Users,
+  users: Users,
 };
 
 export interface CommunityStatsCardProps {
@@ -60,12 +50,7 @@ export interface CommunityStatsCardProps {
 /**
  * Community stats card with animated counter
  */
-export function CommunityStatsCard({
-  iconId,
-  title,
-  value,
-  description,
-}: CommunityStatsCardProps) {
+export function CommunityStatsCard({ iconId, title, value, description }: CommunityStatsCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
   const shouldReduceMotion = useReducedMotion();
@@ -91,17 +76,13 @@ export function CommunityStatsCard({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Icon className="h-5 w-5 text-primary" />
+            <Icon className="text-primary h-5 w-5" />
             {title}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-3xl font-bold">
-            <NumberTicker
-              value={value}
-              delay={isInView ? 200 : 0}
-              decimalPlaces={0}
-            />
+            <NumberTicker value={value} delay={isInView ? 200 : 0} decimalPlaces={0} />
           </div>
           <p className="text-muted-foreground">{description}</p>
         </CardContent>

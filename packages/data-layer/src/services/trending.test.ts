@@ -1,14 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import type { MockPrismaClient } from '../test-utils/prisma-mock.ts';
 import { TrendingService } from './trending.ts';
+import { prisma } from '../prisma/client.ts';
+import type { PrismaClient } from '@prisma/client';
 
-// Mock the prisma singleton with Prismock (async to avoid Node.js TS processing issue)
-vi.mock('../prisma/client.ts', async () => {
-  const { setupPrismockMockAsync } = await import('../test-utils/prisma-mock.ts');
-  return {
-    prisma: await setupPrismockMockAsync(),
-  };
-});
+// Prismock is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from '../prisma/client.ts' will automatically use PrismockClient
 
 // Mock the RPC error logging utility
 vi.mock('../utils/rpc-error-logging.ts', () => ({
@@ -22,16 +18,42 @@ vi.mock('../utils/request-cache.ts', () => ({
 
 describe('TrendingService', () => {
   let service: TrendingService;
-  let prismock: MockPrismaClient;
+  let prismock: PrismaClient;
+  let queryRawUnsafeSpy: ReturnType<typeof vi.fn>;
+
+  /**
+   * Helper to safely mock Prismock model methods
+   */
+  function mockPrismockMethod<T>(
+    model: any,
+    method: string,
+    returnValue: T
+  ): ReturnType<typeof vi.fn> {
+    if (!model) {
+      throw new Error(`Prismock model does not exist - check if model name matches schema.prisma`);
+    }
+    const mockFn = vi.fn().mockResolvedValue(returnValue as any);
+    model[method] = mockFn;
+    return mockFn;
+  }
 
   beforeEach(async () => {
-    // Get the mocked prisma instance (Prismock)
-    const { prisma } = await import('../prisma/client.ts');
-    prismock = prisma as MockPrismaClient;
-    
+    // Get the prisma instance (automatically PrismockClient via __mocks__/@prisma/client.ts)
+    prismock = prisma;
+
     // Reset Prismock data before each test
-    prismock.reset();
-    
+    if ('reset' in prismock && typeof prismock.reset === 'function') {
+      prismock.reset();
+    }
+
+    // Prismock doesn't support $queryRawUnsafe, so we add it as a mock function
+    queryRawUnsafeSpy = vi.fn().mockResolvedValue([]);
+    (prismock as any).$queryRawUnsafe = queryRawUnsafeSpy;
+
+    // Ensure Prismock models are initialized
+    void prismock.v_trending_searches;
+    void prismock.content;
+
     service = new TrendingService();
   });
 
@@ -56,7 +78,7 @@ describe('TrendingService', () => {
         },
       ];
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      queryRawUnsafeSpy.mockResolvedValue(mockData as any);
 
       const result = await service.getTrendingContent({
         p_category: null,
@@ -72,7 +94,7 @@ describe('TrendingService', () => {
     });
 
     it('returns empty array when no trending content', async () => {
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([] as any);
+      queryRawUnsafeSpy.mockResolvedValue([] as any);
 
       const result = await service.getTrendingContent({
         p_category: null,
@@ -85,7 +107,7 @@ describe('TrendingService', () => {
     it('handles category filtering', async () => {
       const mockData = [{ id: 'content-1', category: 'agents' as const }];
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      queryRawUnsafeSpy.mockResolvedValue(mockData as any);
 
       // Test with category filter
       await service.getTrendingContent({ p_category: 'agents', p_limit: 5 });
@@ -107,7 +129,7 @@ describe('TrendingService', () => {
     it('throws error on database failure', async () => {
       const mockError = new Error('Database error');
 
-      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
+      queryRawUnsafeSpy.mockRejectedValue(mockError);
 
       await expect(
         service.getTrendingContent({
@@ -124,7 +146,7 @@ describe('TrendingService', () => {
         { id: '3', category: 'agents' as const, slug: 'item-3' },
       ];
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      queryRawUnsafeSpy.mockResolvedValue(mockData as any);
 
       const result = await service.getTrendingContent({
         p_category: null,
@@ -139,38 +161,49 @@ describe('TrendingService', () => {
 
   describe('getTrendingMetrics', () => {
     it('should return trending metrics with content', async () => {
+      // getTrendingMetrics uses callRpc which formats SQL as: SELECT * FROM get_trending_metrics_with_content(p_category_ids => $1)
       const mockData = {
         metrics: { total_views: 1000, total_clicks: 500 },
         content: [],
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      // callRpc unwraps single-element arrays for composite types, so mock returns [mockData]
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await service.getTrendingMetrics({
         p_category_ids: ['agents', 'mcp'],
       });
 
+      // callRpc formats the SQL as: SELECT * FROM get_trending_metrics_with_content(p_category_ids => $1)
+      // Arguments are: SQL string, then the array value for p_category_ids
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_trending_metrics_with_content')
+        expect.stringContaining('get_trending_metrics_with_content'),
+        ['agents', 'mcp']
       );
+      // callRpc unwraps single-element arrays for composite types, so result is mockData directly
       expect(result).toEqual(mockData);
     });
   });
 
   describe('getPopularContent', () => {
     it('should return popular content', async () => {
+      // getPopularContent uses callRpc which formats SQL as: SELECT * FROM get_popular_content(p_category => $1, p_limit => $2)
       const mockData = [
         { id: '1', slug: 'popular-1', view_count: 1000 },
         { id: '2', slug: 'popular-2', view_count: 900 },
       ];
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      // callRpc does NOT unwrap arrays for functions that return arrays (get_popular_content returns SETOF)
+      queryRawUnsafeSpy.mockResolvedValue(mockData as any);
 
       const result = await service.getPopularContent({
         p_category: 'agents',
         p_limit: 10,
       });
 
+      // callRpc formats the SQL as: SELECT * FROM get_popular_content(p_category => $1, p_limit => $2)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_popular_content')
+        expect.stringContaining('get_popular_content'),
+        'agents',
+        10
       );
       expect(result).toEqual(mockData);
     });
@@ -178,46 +211,67 @@ describe('TrendingService', () => {
 
   describe('getRecentContent', () => {
     it('should return recent content with default params', async () => {
+      // After migration: Mock data must match select fields (9 fields)
       const mockData = [
         {
-          id: '1',
-          slug: 'recent-1',
           category: 'agents',
+          author: 'test-author',
+          created_at: new Date(),
           date_added: new Date(),
+          description: 'Test description',
+          slug: 'recent-1',
+          tags: [],
+          title: 'Test Title',
+          display_title: 'Test Display Title',
         },
       ];
 
-      vi.mocked(prismock.content.findMany).mockResolvedValue(mockData as any);
+      mockPrismockMethod(prismock.content, 'findMany', mockData);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
 
       const result = await service.getRecentContent({});
 
+      // After migration: Uses Prisma with select (9 fields) and single orderBy
       expect(prismock.content.findMany).toHaveBeenCalledWith({
         where: {
           date_added: { gte: expect.any(Date) },
         },
-        orderBy: [
-          { date_added: 'desc' },
-          { created_at: 'desc' },
-        ],
+        select: {
+          category: true,
+          author: true,
+          created_at: true,
+          date_added: true,
+          description: true,
+          slug: true,
+          tags: true,
+          title: true,
+          display_title: true,
+        },
+        orderBy: { date_added: 'desc' },
         take: 20, // default limit
       });
       expect(result).toEqual(mockData);
     });
 
     it('should filter by category', async () => {
+      // After migration: Mock data must match select fields (9 fields)
       const mockData = [
         {
-          id: '1',
-          slug: 'recent-1',
           category: 'agents',
+          author: 'test-author',
+          created_at: new Date(),
           date_added: new Date(),
+          description: 'Test description',
+          slug: 'recent-1',
+          tags: [],
+          title: 'Test Title',
+          display_title: 'Test Display Title',
         },
       ];
 
-      vi.mocked(prismock.content.findMany).mockResolvedValue(mockData as any);
+      mockPrismockMethod(prismock.content, 'findMany', mockData);
 
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
@@ -228,15 +282,24 @@ describe('TrendingService', () => {
         p_days: 30,
       });
 
+      // After migration: Uses Prisma with select (9 fields) and single orderBy
       expect(prismock.content.findMany).toHaveBeenCalledWith({
         where: {
           category: 'agents',
           date_added: { gte: expect.any(Date) },
         },
-        orderBy: [
-          { date_added: 'desc' },
-          { created_at: 'desc' },
-        ],
+        select: {
+          category: true,
+          author: true,
+          created_at: true,
+          date_added: true,
+          description: true,
+          slug: true,
+          tags: true,
+          title: true,
+          display_title: true,
+        },
+        orderBy: { date_added: 'desc' },
         take: 10,
       });
       expect(result).toEqual(mockData);
@@ -246,15 +309,15 @@ describe('TrendingService', () => {
       const { withSmartCache } = await import('../utils/request-cache.ts');
       vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
 
-      vi.mocked(prismock.content.findMany).mockResolvedValue([]);
+      mockPrismockMethod(prismock.content, 'findMany', []);
 
       // Test lower bound
+      // Clear is not needed with mockPrismockMethod - each test gets fresh mocks
       await service.getRecentContent({ p_limit: 0 });
-      expect(prismock.content.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ take: 1 })
-      );
+      expect(prismock.content.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 1 }));
 
       // Test upper bound
+      // Clear is not needed with mockPrismockMethod - each test gets fresh mocks
       await service.getRecentContent({ p_limit: 200 });
       expect(prismock.content.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ take: 100 })
@@ -264,26 +327,32 @@ describe('TrendingService', () => {
 
   describe('getTrendingMetricsFormatted', () => {
     it('should return formatted trending metrics', async () => {
+      // getTrendingMetricsFormatted uses callRpc which formats SQL as: SELECT * FROM get_trending_metrics_formatted(p_category_ids => $1)
       const mockData = {
         total_views: '1,000',
         total_clicks: '500',
         click_through_rate: '50%',
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      // callRpc unwraps single-element arrays for composite types, so mock returns [mockData]
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await service.getTrendingMetricsFormatted({
         p_category_ids: ['agents'],
       });
 
+      // callRpc formats the SQL as: SELECT * FROM get_trending_metrics_formatted(p_category_ids => $1)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_trending_metrics_formatted')
+        expect.stringContaining('get_trending_metrics_formatted'),
+        ['agents']
       );
+      // callRpc unwraps single-element arrays for composite types, so result is mockData directly
       expect(result).toEqual(mockData);
     });
   });
 
   describe('getPopularContentFormatted', () => {
     it('should return formatted popular content', async () => {
+      // getPopularContentFormatted uses callRpc which formats SQL as: SELECT * FROM get_popular_content_formatted(p_category => $1, p_limit => $2)
       const mockData = [
         {
           id: '1',
@@ -292,15 +361,19 @@ describe('TrendingService', () => {
           formatted_views: '1,000 views',
         },
       ];
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      // callRpc does NOT unwrap arrays for functions that return arrays (SETOF)
+      queryRawUnsafeSpy.mockResolvedValue(mockData as any);
 
       const result = await service.getPopularContentFormatted({
         p_category: 'agents',
         p_limit: 10,
       });
 
+      // callRpc formats the SQL as: SELECT * FROM get_popular_content_formatted(p_category => $1, p_limit => $2)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_popular_content_formatted')
+        expect.stringContaining('get_popular_content_formatted'),
+        'agents',
+        10
       );
       expect(result).toEqual(mockData);
     });
@@ -308,6 +381,7 @@ describe('TrendingService', () => {
 
   describe('getRecentContentFormatted', () => {
     it('should return formatted recent content', async () => {
+      // getRecentContentFormatted uses callRpc which formats SQL as: SELECT * FROM get_recent_content_formatted(p_category => $1, p_limit => $2)
       const mockData = [
         {
           id: '1',
@@ -316,15 +390,19 @@ describe('TrendingService', () => {
           formatted_date: '2 days ago',
         },
       ];
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      // callRpc does NOT unwrap arrays for functions that return arrays (SETOF)
+      queryRawUnsafeSpy.mockResolvedValue(mockData as any);
 
       const result = await service.getRecentContentFormatted({
         p_category: 'agents',
         p_limit: 10,
       });
 
+      // callRpc formats the SQL as: SELECT * FROM get_recent_content_formatted(p_category => $1, p_limit => $2)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_recent_content_formatted')
+        expect.stringContaining('get_recent_content_formatted'),
+        'agents',
+        10
       );
       expect(result).toEqual(mockData);
     });
@@ -332,6 +410,7 @@ describe('TrendingService', () => {
 
   describe('getSidebarTrendingFormatted', () => {
     it('should return formatted sidebar trending content', async () => {
+      // getSidebarTrendingFormatted uses callRpc which formats SQL as: SELECT * FROM get_sidebar_trending_formatted(p_limit => $1)
       const mockData = [
         {
           id: '1',
@@ -340,14 +419,17 @@ describe('TrendingService', () => {
           formatted_score: 'High',
         },
       ];
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      // callRpc does NOT unwrap arrays for functions that return arrays (SETOF)
+      queryRawUnsafeSpy.mockResolvedValue(mockData as any);
 
       const result = await service.getSidebarTrendingFormatted({
         p_limit: 5,
       });
 
+      // callRpc formats the SQL as: SELECT * FROM get_sidebar_trending_formatted(p_limit => $1)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_sidebar_trending_formatted')
+        expect.stringContaining('get_sidebar_trending_formatted'),
+        5
       );
       expect(result).toEqual(mockData);
     });
@@ -355,6 +437,7 @@ describe('TrendingService', () => {
 
   describe('getSidebarRecentFormatted', () => {
     it('should return formatted sidebar recent content', async () => {
+      // getSidebarRecentFormatted uses callRpc which formats SQL as: SELECT * FROM get_sidebar_recent_formatted(p_limit => $1)
       const mockData = [
         {
           id: '1',
@@ -363,50 +446,28 @@ describe('TrendingService', () => {
           formatted_date: 'Just now',
         },
       ];
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      // callRpc does NOT unwrap arrays for functions that return arrays (SETOF)
+      queryRawUnsafeSpy.mockResolvedValue(mockData as any);
 
       const result = await service.getSidebarRecentFormatted({
         p_limit: 5,
       });
 
+      // callRpc formats the SQL as: SELECT * FROM get_sidebar_recent_formatted(p_limit => $1)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_sidebar_recent_formatted')
+        expect.stringContaining('get_sidebar_recent_formatted'),
+        5
       );
       expect(result).toEqual(mockData);
     });
   });
 
-  describe('calculateContentTimeMetrics', () => {
-    it('should calculate content time metrics', async () => {
-      const mockData = {
-        total_items: 100,
-        average_age_days: 30,
-      };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
-
-      const result = await service.calculateContentTimeMetrics();
-
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('calculate_content_time_metrics')
-      );
-      expect(result).toEqual(mockData);
-    });
-
-    it('should not use cache for mutations', async () => {
-      const mockData = { total_items: 100 };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
-
-      await service.calculateContentTimeMetrics();
-
-      // Verify callRpc was called with useCache: false
-      // This is handled internally by BasePrismaService
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalled();
-    });
-  });
+  // calculateContentTimeMetrics was removed from the service (RPC function was removed in migration)
+  // Tests removed to match service implementation
 
   describe('refreshTrendingMetricsView', () => {
     it('should refresh trending metrics view', async () => {
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(undefined as any);
+      queryRawUnsafeSpy.mockResolvedValue(undefined as any);
 
       await service.refreshTrendingMetricsView();
 
@@ -416,7 +477,7 @@ describe('TrendingService', () => {
     });
 
     it('should not use cache for mutations', async () => {
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(undefined as any);
+      queryRawUnsafeSpy.mockResolvedValue(undefined as any);
 
       await service.refreshTrendingMetricsView();
 

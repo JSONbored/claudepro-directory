@@ -253,8 +253,10 @@ describe('usePinboard', () => {
       result.current.pinItem({
         category: 'agents',
         slug: 'test-agent',
-        title: '  Very Long Title That Exceeds 140 Characters And Should Be Truncated To Ensure We Dont Store Too Much Data In LocalStorage  ',
-        description: 'Very long description that exceeds 240 characters and should be truncated to ensure we do not store too much data in localStorage which could cause quota exceeded errors',
+        title:
+          '  Very Long Title That Exceeds 140 Characters And Should Be Truncated To Ensure We Dont Store Too Much Data In LocalStorage  ',
+        description:
+          'Very long description that exceeds 240 characters and should be truncated to ensure we do not store too much data in localStorage which could cause quota exceeded errors',
         typeName: 'Very Long Type Name That Exceeds 80 Characters And Should Be Truncated',
         tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6', 'tag7'],
       });

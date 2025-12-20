@@ -1,14 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import type { MockPrismaClient } from '../test-utils/prisma-mock.ts';
 import { SearchService } from './search.ts';
+import { prisma } from '../prisma/client.ts';
+import type { PrismaClient } from '@prisma/client';
 
-// Mock the prisma singleton with Prismock (async to avoid Node.js TS processing issue)
-vi.mock('../prisma/client.ts', async () => {
-  const { setupPrismockMockAsync } = await import('../test-utils/prisma-mock.ts');
-  return {
-    prisma: await setupPrismockMockAsync(),
-  };
-});
+// Prismock is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from '../prisma/client.ts' will automatically use PrismockClient
 
 // Mock the RPC error logging utility
 vi.mock('../utils/rpc-error-logging.ts', () => ({
@@ -22,16 +18,41 @@ vi.mock('../utils/request-cache.ts', () => ({
 
 describe('SearchService', () => {
   let service: SearchService;
-  let prismock: PrismockClient;
+  let prismock: PrismaClient;
+  let queryRawUnsafeSpy: ReturnType<typeof vi.fn>;
+
+  /**
+   * Helper to safely mock Prismock model methods
+   */
+  function mockPrismockMethod<T>(
+    model: any,
+    method: string,
+    returnValue: T
+  ): ReturnType<typeof vi.fn> {
+    if (!model) {
+      throw new Error(`Prismock model does not exist - check if model name matches schema.prisma`);
+    }
+    const mockFn = vi.fn().mockResolvedValue(returnValue as any);
+    model[method] = mockFn;
+    return mockFn;
+  }
 
   beforeEach(async () => {
-    // Get the mocked prisma instance (Prismock)
-    const { prisma } = await import('../prisma/client.ts');
-    prismock = prisma as PrismockClient;
-    
+    // Get the prisma instance (automatically PrismockClient via __mocks__/@prisma/client.ts)
+    prismock = prisma;
+
     // Reset Prismock data before each test
-    prismock.reset();
-    
+    if ('reset' in prismock && typeof prismock.reset === 'function') {
+      prismock.reset();
+    }
+
+    // Prismock doesn't support $queryRawUnsafe, so we add it as a mock function
+    queryRawUnsafeSpy = vi.fn().mockResolvedValue([]);
+    (prismock as any).$queryRawUnsafe = queryRawUnsafeSpy;
+
+    // Ensure Prismock models are initialized
+    void prismock.v_content_list_slim;
+
     service = new SearchService();
   });
 
@@ -56,18 +77,37 @@ describe('SearchService', () => {
         },
       ];
 
-      // Search service returns { data: rows, total_count: number }
-      // Mock to return array with total_count property
-      const mockResult = { data: mockData, total_count: 2 };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockResult] as any);
+      // searchContent uses callRpc which calls $queryRawUnsafe with function call format
+      // callRpc does NOT unwrap functions with 'search' in name (line 129: !functionName.includes('search'))
+      // But search_content_optimized returns a composite type (object), so $queryRawUnsafe returns [{ results, total_count }]
+      // callRpc sees 'search' in name, so it returns the array: [{ results, total_count }]
+      // searchContent then does: result?.results ?? [] where result is [{ results, total_count }]
+      // But result is an array, not an object, so result.results is undefined
+      // This is a bug in callRpc logic - it should unwrap composite types even for 'search' functions
+      // For now, fix the test to match actual behavior: callRpc returns array, searchContent accesses result[0]?.results
+      const mockResult = {
+        results: mockData,
+        total_count: BigInt(2),
+      };
+      // callRpc returns array for 'search' functions, so we need to check if searchContent handles this
+      // Actually, looking at searchContent: result?.results - if result is array, this is undefined
+      // So the issue is that callRpc should unwrap, but doesn't for 'search' functions
+      // Let me check if the result[0] check is needed or if we should fix callRpc
+      queryRawUnsafeSpy.mockResolvedValue([mockResult] as any);
 
       const result = await service.searchContent({
-        search_query: 'typescript',
-        result_limit: 10,
+        p_query: 'typescript',
+        p_limit: 10,
       });
 
+      // The actual behavior: callRpc returns [{ results, total_count }] (not unwrapped)
+      // searchContent does: result?.results where result is [{ results, total_count }]
+      // This fails because result is array, not object
+      // We need to either fix callRpc to unwrap composite types, or fix searchContent to handle arrays
+      // For now, the test will fail - this indicates a real bug
       expect(result.data).toEqual(mockData);
       expect(result.total_count).toBe(2);
+      // callRpc formats the SQL as: SELECT * FROM search_content_optimized(p_query => $1, p_limit => $2)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('search_content_optimized'),
         'typescript',
@@ -76,12 +116,17 @@ describe('SearchService', () => {
     });
 
     it('returns empty array when no results found', async () => {
-      const mockResult = { data: [], total_count: 0 };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockResult] as any);
+      // callRpc returns null for empty arrays (single-return functions)
+      // But searchContent handles null by returning empty array
+      const mockResult = {
+        results: [],
+        total_count: BigInt(0),
+      };
+      queryRawUnsafeSpy.mockResolvedValue([mockResult] as any);
 
       const result = await service.searchContent({
-        search_query: 'nonexistent-query-xyz',
-        result_limit: 10,
+        p_query: 'nonexistent-query-xyz',
+        p_limit: 10,
       });
 
       expect(result.data).toEqual([]);
@@ -91,23 +136,26 @@ describe('SearchService', () => {
     it('throws error on database failure', async () => {
       const mockError = new Error('Search index unavailable');
 
-      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
+      queryRawUnsafeSpy.mockRejectedValue(mockError);
 
       await expect(
         service.searchContent({
-          search_query: 'test',
-          result_limit: 10,
+          p_query: 'test',
+          p_limit: 10,
         })
       ).rejects.toThrow('Search index unavailable');
     });
 
     it('handles special characters in query', async () => {
-      const mockResult = { data: [], total_count: 0 };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockResult] as any);
+      const mockResult = {
+        results: [],
+        total_count: BigInt(0),
+      };
+      queryRawUnsafeSpy.mockResolvedValue([mockResult] as any);
 
       const result = await service.searchContent({
-        search_query: 'test & query | with (special) characters',
-        result_limit: 10,
+        p_query: 'test & query | with (special) characters',
+        p_limit: 10,
       });
 
       expect(result.data).toEqual([]);
@@ -119,32 +167,33 @@ describe('SearchService', () => {
   describe('searchUnified', () => {
     it('should return unified search results', async () => {
       const mockResult = {
-        results: [
-          { id: '1', title: 'Result 1', category: 'agents' },
-        ],
+        results: [{ id: '1', title: 'Result 1', category: 'agents' }],
         total_count: 1n,
       };
 
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockResult] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockResult] as any);
 
       const result = await service.searchUnified({
-        search_query: 'test',
-        result_limit: 10,
+        p_query: 'test',
+        p_limit: 10,
       });
 
+      // callRpc formats the SQL as: SELECT * FROM search_unified(p_query => $1, p_limit => $2)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('search_unified')
+        expect.stringContaining('search_unified'),
+        'test',
+        10
       );
       expect(result.data).toEqual(mockResult.results);
       expect(result.total_count).toBe(1);
     });
 
     it('should handle null result', async () => {
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([null] as any);
+      queryRawUnsafeSpy.mockResolvedValue([null] as any);
 
       const result = await service.searchUnified({
-        search_query: 'test',
-        result_limit: 10,
+        p_query: 'test',
+        p_limit: 10,
       });
 
       expect(result.data).toEqual([]);
@@ -154,18 +203,23 @@ describe('SearchService', () => {
 
   describe('filterJobs', () => {
     it('should return filtered jobs', async () => {
-      const mockData = [
-        { id: 'job-1', title: 'Developer', category: 'engineering' },
-      ];
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      // filterJobs uses callRpc which returns FilterJobsReturns (object with jobs array and total_count)
+      const mockData = {
+        jobs: [{ id: 'job-1', title: 'Developer', category: 'engineering' }],
+        total_count: BigInt(1),
+      };
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await service.filterJobs({
         p_category: 'engineering',
         p_limit: 10,
       });
 
+      // callRpc formats the SQL as: SELECT * FROM filter_jobs(p_category => $1, p_limit => $2)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('filter_jobs')
+        expect.stringContaining('filter_jobs'),
+        'engineering',
+        10
       );
       expect(result).toEqual(mockData);
     });
@@ -173,15 +227,18 @@ describe('SearchService', () => {
 
   describe('getSearchFacets', () => {
     it('should return search facets', async () => {
+      // getSearchFacets uses callRpc which unwraps single-element arrays
       const mockData = {
         categories: ['agents', 'mcp'],
         tags: ['react', 'typescript'],
         authors: ['author1', 'author2'],
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await service.getSearchFacets();
 
+      // callRpc formats the SQL as: SELECT * FROM get_search_facets()
+      // callRpc unwraps single-element arrays, so result should be the unwrapped object
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('get_search_facets')
       );
@@ -191,14 +248,17 @@ describe('SearchService', () => {
 
   describe('getSearchFacetsFormatted', () => {
     it('should return formatted search facets', async () => {
+      // getSearchFacetsFormatted uses callRpc which unwraps single-element arrays
       const mockData = {
         categories: [{ name: 'Agents', count: 10 }],
         tags: [{ name: 'React', count: 5 }],
       };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await service.getSearchFacetsFormatted();
 
+      // callRpc formats the SQL as: SELECT * FROM get_search_facets_formatted()
+      // callRpc unwraps single-element arrays, so result should be the unwrapped object
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('get_search_facets_formatted')
       );
@@ -212,15 +272,18 @@ describe('SearchService', () => {
         { query: 'typescript', count: 10 },
         { query: 'react', count: 8 },
       ];
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      queryRawUnsafeSpy.mockResolvedValue(mockData as any);
 
-      const result = await service.getSearchSuggestionsFromHistory({
+      const result = await service.getSearchSuggestions({
         p_query: 'type',
         p_limit: 5,
       });
 
+      // callRpc formats the SQL as: SELECT * FROM get_search_suggestions_from_history(p_query => $1, p_limit => $2)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_search_suggestions_from_history')
+        expect.stringContaining('get_search_suggestions_from_history'),
+        'type',
+        5
       );
       expect(result).toEqual(mockData);
     });
@@ -232,15 +295,18 @@ describe('SearchService', () => {
         { suggestion: 'typescript', relevance: 0.9 },
         { suggestion: 'react', relevance: 0.8 },
       ];
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      queryRawUnsafeSpy.mockResolvedValue(mockData as any);
 
       const result = await service.getSearchSuggestionsFormatted({
         p_query: 'type',
         p_limit: 5,
       });
 
+      // callRpc formats the SQL as: SELECT * FROM get_search_suggestions_formatted(p_query => $1, p_limit => $2)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_search_suggestions_formatted')
+        expect.stringContaining('get_search_suggestions_formatted'),
+        'type',
+        5
       );
       expect(result).toEqual(mockData);
     });
@@ -248,8 +314,10 @@ describe('SearchService', () => {
 
   describe('batchInsertSearchQueries', () => {
     it('should batch insert search queries', async () => {
+      // batchInsertSearchQueries uses callRpc which formats SQL as: SELECT * FROM batch_insert_search_queries(p_queries => $1)
       const mockData = { inserted_count: 3 };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      // callRpc unwraps single-element arrays for composite types (objects)
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       const result = await service.batchInsertSearchQueries({
         p_queries: [
@@ -258,15 +326,18 @@ describe('SearchService', () => {
         ],
       });
 
+      // callRpc formats the SQL as: SELECT * FROM batch_insert_search_queries(p_queries => $1)
       expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('batch_insert_search_queries')
+        expect.stringContaining('batch_insert_search_queries'),
+        expect.any(Array) // p_queries is an array
       );
+      // callRpc unwraps single-element arrays for composite types, so result is mockData directly
       expect(result).toEqual(mockData);
     });
 
     it('should not use cache for mutations', async () => {
       const mockData = { inserted_count: 0 };
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+      queryRawUnsafeSpy.mockResolvedValue([mockData] as any);
 
       await service.batchInsertSearchQueries({
         p_queries: [],
@@ -279,20 +350,37 @@ describe('SearchService', () => {
 
   describe('getTrendingSearches', () => {
     it('should return trending searches', async () => {
+      // After migration: getTrendingSearches uses Prisma view queries (type-safe)
       const mockData = [
-        { query: 'typescript', count: 100 },
-        { query: 'react', count: 80 },
+        {
+          search_query: 'typescript',
+          search_count: BigInt(100),
+          last_searched: new Date('2024-01-01'),
+          unique_users: BigInt(50),
+        },
+        {
+          search_query: 'react',
+          search_count: BigInt(80),
+          last_searched: new Date('2024-01-01'),
+          unique_users: BigInt(40),
+        },
       ];
-      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+      mockPrismockMethod(prismock.v_trending_searches, 'findMany', mockData);
 
       const result = await service.getTrendingSearches({
-        p_limit: 10,
+        limit_count: 10,
       });
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('get_trending_searches')
-      );
-      expect(result).toEqual(mockData);
+      // getTrendingSearches uses Prisma view query (type-safe)
+      expect(prismock.v_trending_searches.findMany).toHaveBeenCalledWith({
+        orderBy: { search_count: 'desc' },
+        take: 10,
+      });
+      // Result is transformed: count (bigint) -> count (number), label computed
+      expect(result).toEqual([
+        { query: 'typescript', count: 100, label: '🔥 typescript (100 searches)' },
+        { query: 'react', count: 80, label: '🔥 react (80 searches)' },
+      ]);
     });
   });
 });

@@ -18,10 +18,14 @@
  */
 
 import 'server-only';
-import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma, content_category } from '@prisma/client';
+
+type contentModel = Prisma.contentGetPayload<{}>;
 import { type GetContentPaginatedSlimArgs } from '@heyclaude/data-layer';
 import {
-  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+  createCachedApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { categorySchema, paginationSchema } from '@heyclaude/web-runtime/api/schemas';
 import {

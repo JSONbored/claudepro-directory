@@ -24,7 +24,16 @@
 
 import type { DisplayableContent, FilterState } from '@heyclaude/web-runtime/types/component.types';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, useRef, startTransition } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+  startTransition,
+} from 'react';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { useBoolean } from '../../hooks/use-boolean.ts';
 import { useDebounceCallback } from '../../hooks/use-debounce-callback.ts';
@@ -104,7 +113,7 @@ export function SearchProvider({
   const urlTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSearchRef = useRef<{ query: string; filters: FilterState } | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  
+
   // Track update source to prevent circular updates
   const isUpdatingFromUserRef = useRef(false);
   const lastUrlQueryRef = useRef<string>('');
@@ -126,7 +135,7 @@ export function SearchProvider({
   useEffect(() => {
     const urlQuery = searchParams.get('q') ?? '';
     const urlFilters = syncSearchStateFromURL(searchParams);
-    
+
     // Skip if we just updated from user input (prevents circular updates)
     if (isUpdatingFromUserRef.current) {
       return;
@@ -134,11 +143,11 @@ export function SearchProvider({
 
     // Serialize filters for comparison
     const urlFiltersKey = JSON.stringify(urlFilters);
-    
+
     // Only update if URL actually changed
     const urlQueryChanged = urlQuery !== lastUrlQueryRef.current;
     const urlFiltersChanged = urlFiltersKey !== lastUrlFiltersRef.current;
-    
+
     if (!urlQueryChanged && !urlFiltersChanged) {
       return; // No change, skip update
     }
@@ -150,10 +159,11 @@ export function SearchProvider({
     // CRITICAL: Only update query state if input is not focused
     // This prevents overwriting user input during typing
     // CRITICAL FIX: Check if document exists (SSR-safe)
-    const isInputFocused = typeof document !== 'undefined' && 
-                          document.activeElement?.tagName === 'INPUT' && 
-                          (document.activeElement as HTMLInputElement).type === 'search';
-    
+    const isInputFocused =
+      typeof document !== 'undefined' &&
+      document.activeElement?.tagName === 'INPUT' &&
+      (document.activeElement as HTMLInputElement).type === 'search';
+
     if (!isInputFocused) {
       // Safe to update - user is not typing
       setQueryState((currentQuery) => {
@@ -189,12 +199,12 @@ export function SearchProvider({
         }
         return newQuery;
       });
-      
+
       setError(null);
 
       // Mark as user update to prevent sync effect from running
       isUpdatingFromUserRef.current = true;
-      
+
       // Reset flag after a brief delay
       setTimeout(() => {
         isUpdatingFromUserRef.current = false;
@@ -222,7 +232,7 @@ export function SearchProvider({
               newSearchParams.delete('q');
             }
             const newUrl = `?${newSearchParams.toString()}`;
-            
+
             // Only call router.replace if URL actually changed
             if (newUrl !== lastRouterUrlRef.current) {
               lastRouterUrlRef.current = newUrl;
@@ -239,21 +249,20 @@ export function SearchProvider({
   const setFilters = useCallback(
     (newFilters: FilterState | ((prev: FilterState) => FilterState)) => {
       setFiltersState((prev) => {
-        const updated =
-          typeof newFilters === 'function' ? newFilters(prev) : newFilters;
-        
+        const updated = typeof newFilters === 'function' ? newFilters(prev) : newFilters;
+
         // Skip if filters haven't actually changed (prevent unnecessary updates)
         const prevKey = JSON.stringify(prev);
         const updatedKey = JSON.stringify(updated);
         if (prevKey === updatedKey) {
           return prev; // Return same reference to prevent re-render
         }
-        
+
         setError(null);
 
         // Mark as user update to prevent sync effect from running
         isUpdatingFromUserRef.current = true;
-        
+
         // Reset flag after a brief delay
         setTimeout(() => {
           isUpdatingFromUserRef.current = false;
@@ -267,11 +276,7 @@ export function SearchProvider({
         // Debounce URL sync
         urlTimeoutRef.current = setTimeout(() => {
           startTransition(() => {
-            const newSearchParams = syncSearchStateToURL(
-              query,
-              updated,
-              searchParams
-            );
+            const newSearchParams = syncSearchStateToURL(query, updated, searchParams);
             const newUrl = `?${newSearchParams.toString()}`;
             // Only call router.replace if URL actually changed
             if (newUrl !== lastRouterUrlRef.current) {
@@ -347,7 +352,7 @@ export function SearchProvider({
     const searchKey = JSON.stringify({ query, filters });
     const lastSearchKey = lastSearchRef.current ? JSON.stringify(lastSearchRef.current) : null;
     const isDuplicate = lastSearchKey === searchKey;
-    
+
     // CRITICAL FIX: Only skip if it's a true duplicate AND we have results
     // This allows re-searching if results were cleared or if search failed
     if (isDuplicate && results.length > 0 && !error) {
@@ -376,10 +381,17 @@ export function SearchProvider({
     try {
       // CRITICAL FIX: Pass abort signal to onSearch if it accepts it
       // This allows proper request cancellation
-      const searchResults = onSearch.length >= 3 
-        ? await (onSearch as (query: string, filters: FilterState, signal?: AbortSignal) => Promise<DisplayableContent[]>)(query, filters, controller.signal)
-        : await onSearch(query, filters);
-      
+      const searchResults =
+        onSearch.length >= 3
+          ? await (
+              onSearch as (
+                query: string,
+                filters: FilterState,
+                signal?: AbortSignal
+              ) => Promise<DisplayableContent[]>
+            )(query, filters, controller.signal)
+          : await onSearch(query, filters);
+
       // Check if request was aborted
       if (controller.signal.aborted) {
         return;
@@ -400,12 +412,12 @@ export function SearchProvider({
       }
     } catch (err) {
       const normalized = normalizeError(err, 'Search failed');
-      
+
       // Ignore abort errors
       if (err instanceof Error && err.name === 'AbortError') {
         return;
       }
-      
+
       // Only set error if still the current search
       const currentSearchKey = JSON.stringify({ query, filters });
       if (currentSearchKey === searchKey) {
@@ -420,14 +432,11 @@ export function SearchProvider({
   }, [query, filters, onSearch, setIsLoadingState, results, error]);
 
   // Debounced search execution
-  const debouncedPerformSearch = useDebounceCallback(
-    () => {
-      startTransition(() => {
-        performSearch();
-      });
-    },
-    debounceMs
-  );
+  const debouncedPerformSearch = useDebounceCallback(() => {
+    startTransition(() => {
+      performSearch();
+    });
+  }, debounceMs);
 
   // Call debounced search when query or filters change
   // CRITICAL FIX: Ensure search executes even if URL sync is happening

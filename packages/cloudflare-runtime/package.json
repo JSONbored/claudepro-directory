@@ -1,0 +1,64 @@
+{
+  "name": "@heyclaude/cloudflare-runtime",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./config/env": {
+      "development": "./src/config/env.ts",
+      "types": "./dist/config/env.d.ts",
+      "default": "./src/config/env.ts"
+    },
+    "./prisma/client": {
+      "development": "./src/prisma/client.ts",
+      "types": "./dist/prisma/client.d.ts",
+      "default": "./src/prisma/client.ts"
+    },
+    "./auth/supabase": {
+      "development": "./src/auth/supabase.ts",
+      "types": "./dist/auth/supabase.d.ts",
+      "default": "./src/auth/supabase.ts"
+    },
+    "./logging/pino": {
+      "development": "./src/logging/pino.ts",
+      "types": "./dist/logging/pino.d.ts",
+      "default": "./src/logging/pino.ts"
+    },
+    "./utils/errors": {
+      "development": "./src/utils/errors.ts",
+      "types": "./dist/utils/errors.d.ts",
+      "default": "./src/utils/errors.ts"
+    },
+    "./infisical/client": {
+      "development": "./src/infisical/client.ts",
+      "types": "./dist/infisical/client.d.ts",
+      "default": "./src/infisical/client.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "lint": "eslint . --config ../../config/tools/eslint.config.mjs",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@heyclaude/database-types": "workspace:*",
+    "@heyclaude/shared-runtime": "workspace:*",
+    "@infisical/sdk": "^4.0.0",
+    "@prisma/adapter-pg": "^7.2.0",
+    "@supabase/supabase-js": "^2.89.0",
+    "pg": "^8.16.3",
+    "pino": "^10.1.0",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251220.0",
+    "@types/pg": "^8.16.0",
+    "typescript": "5.9.3"
+  }
+}

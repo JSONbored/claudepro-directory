@@ -201,7 +201,7 @@ export function FormField(props: FormFieldProps) {
       {/* Label */}
       <Label htmlFor={fieldId}>
         {label}
-        {required && <span className="ml-1 text-destructive">*</span>}
+        {required && <span className="text-destructive ml-1">*</span>}
       </Label>
 
       {/* Field variant */}

@@ -25,7 +25,7 @@ test.describe('Category Page', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (navigation handled per test with different categories)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -56,7 +56,7 @@ test.describe('Category Page', () => {
     // This tests that invalid categories trigger notFound()
     // The component checks isValidCategory() and calls notFound() if invalid
     const response = await page.goto('/invalid-category-123');
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -99,7 +99,10 @@ test.describe('Category Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -115,7 +118,10 @@ test.describe('Category Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -131,7 +137,10 @@ test.describe('Category Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -147,7 +156,10 @@ test.describe('Category Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -163,7 +175,10 @@ test.describe('Category Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -187,7 +202,7 @@ test.describe('Category Page', () => {
     // This tests that generateMetadata handles invalid categories
     // The function checks isValidCategory and calls generatePageMetadata with category
     const response = await page.goto('/invalid-category-123');
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -195,7 +210,7 @@ test.describe('Category Page', () => {
   test('should handle all valid categories', async ({ page }) => {
     // Test all valid categories render correctly
     const validCategories = ['agents', 'mcp', 'commands', 'rules', 'hooks', 'statuslines'];
-    
+
     for (const category of validCategories) {
       await page.goto(`/${category}`);
       await page.waitForLoadState('networkidle');
@@ -204,7 +219,10 @@ test.describe('Category Page', () => {
       const main = page.getByRole('main').or(page.locator('body'));
       await expect(main.first()).toBeVisible();
 
-      const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+      const hasError = await page
+        .locator('[data-nextjs-error]')
+        .isVisible()
+        .catch(() => false);
       expect(hasError).toBe(false);
     }
   });

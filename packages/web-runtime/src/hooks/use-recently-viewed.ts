@@ -34,10 +34,7 @@
  * ```
  */
 
-import {
-  getRecentlyViewedConfig,
-  getTimeoutConfig,
-} from '../config/static-configs.ts';
+import { getRecentlyViewedConfig, getTimeoutConfig } from '../config/static-configs.ts';
 import { normalizeError } from '../errors.ts';
 // Import directly from source files to avoid indirect imports through entries/core.ts
 import { logger } from '../logger.ts';
@@ -63,7 +60,7 @@ export type RecentlyViewedCategory =
 /**
  * Maps singular RecentlyViewedCategory to plural route slug.
  * Used for generating correct URLs from recently viewed items.
- * 
+ *
  * @example
  * getCategoryRoute('agent') // returns 'agents'
  * getCategoryRoute('mcp') // returns 'mcp' (unchanged)
@@ -196,7 +193,7 @@ function loadFromStorage(): RecentlyViewedItem[] {
     return validItems.slice(0, MAX_ITEMS);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load recently viewed');
-    logger.error({ err: normalized, hook: 'useRecentlyViewed', }, 'Failed to load recently viewed');
+    logger.error({ err: normalized, hook: 'useRecentlyViewed' }, 'Failed to load recently viewed');
     return [];
   }
 }
@@ -219,11 +216,17 @@ function saveToStorage(items: RecentlyViewedItem[]): void {
       try {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(reducedItems));
       } catch {
-        logger.error({ err: undefined, hook: 'useRecentlyViewed', }, 'Failed to save even after reduction');
+        logger.error(
+          { err: undefined, hook: 'useRecentlyViewed' },
+          'Failed to save even after reduction'
+        );
       }
     } else {
       const normalized = normalizeError(error, 'Failed to save recently viewed');
-      logger.error({ err: normalized, hook: 'useRecentlyViewed', }, 'Failed to save recently viewed');
+      logger.error(
+        { err: normalized, hook: 'useRecentlyViewed' },
+        'Failed to save recently viewed'
+      );
     }
   }
 }
@@ -252,7 +255,7 @@ export function useRecentlyViewed(): UseRecentlyViewedReturn {
     // Load configs from static defaults (only when not loaded)
     const recentlyViewed = getRecentlyViewedConfig();
     const timeout = getTimeoutConfig();
-    
+
     const recentlyViewedConfig = recentlyViewed as {
       'recently_viewed.max_items': number;
       'recently_viewed.ttl_days': number;
@@ -263,7 +266,7 @@ export function useRecentlyViewed(): UseRecentlyViewedReturn {
     TTL_DAYS = recentlyViewedConfig['recently_viewed.ttl_days'];
     MAX_DESCRIPTION_LENGTH = recentlyViewedConfig['recently_viewed.max_description_length'];
     MAX_TAGS = recentlyViewedConfig['recently_viewed.max_tags'];
-    
+
     const timeoutConfig = timeout as { 'timeout.ui.form_debounce_ms': number };
     DEBOUNCE_MS = timeoutConfig['timeout.ui.form_debounce_ms'];
 

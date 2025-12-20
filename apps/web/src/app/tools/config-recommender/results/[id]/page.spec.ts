@@ -24,7 +24,7 @@ test.describe('Config Recommender Results Page', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (navigation handled per test with different IDs/query params)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -41,7 +41,7 @@ test.describe('Config Recommender Results Page', () => {
     // This tests that missing answers parameter triggers notFound()
     // The component checks if (!resolvedSearchParameters.answers) and calls notFound()
     const response = await page.goto('/tools/config-recommender/results/test-id');
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -53,7 +53,7 @@ test.describe('Config Recommender Results Page', () => {
     const response = await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(invalidAnswers)}`
     );
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -65,7 +65,7 @@ test.describe('Config Recommender Results Page', () => {
     const response = await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(invalidJson)}`
     );
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -77,7 +77,7 @@ test.describe('Config Recommender Results Page', () => {
     const response = await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(invalidAnswers)}`
     );
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -95,7 +95,7 @@ test.describe('Config Recommender Results Page', () => {
     const response = await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(invalidAnswers)}`
     );
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -111,11 +111,11 @@ test.describe('Config Recommender Results Page', () => {
         toolPreferences: [],
       })
     ).toString('base64url');
-    
+
     const response = await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`
     );
-    
+
     // Should either render or return 404
     expect([200, 404]).toContain(response?.status() ?? 0);
   });
@@ -130,7 +130,7 @@ test.describe('Config Recommender Results Page', () => {
         toolPreferences: [],
       })
     ).toString('base64url');
-    
+
     await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`
     );
@@ -139,9 +139,15 @@ test.describe('Config Recommender Results Page', () => {
 
     // Page should render or show error boundary, but not crash
     const main = page.getByRole('main').or(page.locator('body'));
-    const hasMain = await main.first().isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasMain = await main
+      .first()
+      .isVisible()
+      .catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error boundary, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -156,7 +162,7 @@ test.describe('Config Recommender Results Page', () => {
         toolPreferences: [],
       })
     ).toString('base64url');
-    
+
     await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`
     );
@@ -168,7 +174,10 @@ test.describe('Config Recommender Results Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -182,7 +191,7 @@ test.describe('Config Recommender Results Page', () => {
         toolPreferences: [],
       })
     ).toString('base64url');
-    
+
     await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`
     );
@@ -194,7 +203,10 @@ test.describe('Config Recommender Results Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -208,7 +220,7 @@ test.describe('Config Recommender Results Page', () => {
         toolPreferences: [],
       })
     ).toString('base64url');
-    
+
     await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`
     );
@@ -220,7 +232,10 @@ test.describe('Config Recommender Results Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -238,7 +253,7 @@ test.describe('Config Recommender Results Page', () => {
     const response = await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(invalidAnswers)}`
     );
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -257,7 +272,7 @@ test.describe('Config Recommender Results Page', () => {
     const response = await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(invalidAnswers)}`
     );
-    
+
     // Should return 404
     expect(response?.status()).toBe(404);
   });
@@ -272,7 +287,7 @@ test.describe('Config Recommender Results Page', () => {
         toolPreferences: [],
       })
     ).toString('base64url');
-    
+
     await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`
     );
@@ -294,7 +309,7 @@ test.describe('Config Recommender Results Page', () => {
         toolPreferences: [],
       })
     ).toString('base64url');
-    
+
     await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`
     );
@@ -316,7 +331,7 @@ test.describe('Config Recommender Results Page', () => {
         toolPreferences: [],
       })
     ).toString('base64url');
-    
+
     await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`
     );
@@ -342,20 +357,20 @@ test.describe('Config Recommender Results Page', () => {
         toolPreferences: [],
       })
     ).toString('base64url');
-    
+
     await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`
     );
-    
+
     // Check for loading state (may flash quickly)
     const loading = page.locator('[data-loading], [aria-busy="true"]');
     const hasLoading = await loading.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main').or(page.locator('body'));
     await expect(main.first()).toBeVisible();
   });
@@ -370,7 +385,7 @@ test.describe('Config Recommender Results Page', () => {
         toolPreferences: [],
       })
     ).toString('base64url');
-    
+
     await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`
     );
@@ -379,9 +394,15 @@ test.describe('Config Recommender Results Page', () => {
 
     // Page should render or show error boundary, but not crash
     const main = page.getByRole('main').or(page.locator('body'));
-    const hasMain = await main.first().isVisible().catch(() => false);
-    const hasErrorOverlay = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
-    
+    const hasMain = await main
+      .first()
+      .isVisible()
+      .catch(() => false);
+    const hasErrorOverlay = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
+
     // Should either render main or show error boundary, but not have unhandled error overlay
     expect(hasErrorOverlay).toBe(false);
   });
@@ -396,7 +417,7 @@ test.describe('Config Recommender Results Page', () => {
         toolPreferences: [],
       })
     ).toString('base64url');
-    
+
     await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`
     );
@@ -408,7 +429,10 @@ test.describe('Config Recommender Results Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -423,7 +447,7 @@ test.describe('Config Recommender Results Page', () => {
         // p_integrations and p_focus_areas are optional
       })
     ).toString('base64url');
-    
+
     await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`
     );
@@ -435,7 +459,10 @@ test.describe('Config Recommender Results Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -449,7 +476,7 @@ test.describe('Config Recommender Results Page', () => {
         toolPreferences: [], // Empty array
       })
     ).toString('base64url');
-    
+
     await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`
     );
@@ -461,7 +488,10 @@ test.describe('Config Recommender Results Page', () => {
     await expect(main.first()).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -473,7 +503,7 @@ test.describe('Config Recommender Results Page', () => {
         toolPreferences: [],
       })
     ).toString('base64url');
-    
+
     await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`
     );
@@ -496,7 +526,7 @@ test.describe('Config Recommender Results Page', () => {
         toolPreferences: [],
       })
     ).toString('base64url');
-    
+
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto(
       `/tools/config-recommender/results/test-id?answers=${encodeURIComponent(validAnswers)}`

@@ -1,9 +1,9 @@
 /**
  * Custom Playwright Fixtures
- * 
+ *
  * Provides reusable fixtures for common test scenarios.
  * These fixtures extend the base Playwright test context.
- * 
+ *
  * @module config/tests/fixtures/playwright-fixtures
  */
 
@@ -21,22 +21,22 @@ export const test = base.extend<{
 }>({
   /**
    * Page with error tracking automatically set up
-   * 
+   *
    * Automatically tracks console errors, warnings, and network failures.
    * Throws in afterEach if any errors are detected.
    */
   pageWithErrors: async ({ page }, use) => {
     const cleanup = setupErrorTracking(page);
     (page as any).__errorTrackingCleanup = cleanup;
-    
+
     await use(page);
-    
+
     // Cleanup is called automatically in afterEach via the stored function
   },
 
   /**
    * Authenticated page (with user logged in)
-   * 
+   *
    * Note: This is a placeholder fixture. Actual authentication setup
    * would depend on your auth implementation. You may need to:
    * - Set cookies/tokens
@@ -47,23 +47,23 @@ export const test = base.extend<{
     // Set up error tracking
     const cleanup = setupErrorTracking(page);
     (page as any).__errorTrackingCleanup = cleanup;
-    
+
     // TODO: Add authentication setup here
     // Example: await page.context().addCookies([...]);
     // Or: await page.goto('/auth/test-login');
-    
+
     await use(page);
   },
 
   /**
    * Page with theme set
-   * 
+   *
    * Returns a function that sets the theme and returns the page.
    */
   pageWithTheme: async ({ page }, use) => {
     const cleanup = setupErrorTracking(page);
     (page as any).__errorTrackingCleanup = cleanup;
-    
+
     await use(async (theme: 'light' | 'dark') => {
       await setTheme(page, theme);
       return page;
@@ -73,7 +73,7 @@ export const test = base.extend<{
 
 /**
  * Helper fixture for common test setup
- * 
+ *
  * Combines error tracking and navigation in one fixture.
  */
 export const testWithNavigation = base.extend<{
@@ -82,7 +82,7 @@ export const testWithNavigation = base.extend<{
   navigateTo: async ({ page }, use) => {
     const { cleanup, navigate } = setupTestWithErrorTracking(page);
     (page as any).__errorTrackingCleanup = cleanup;
-    
+
     await use(navigate);
   },
 });

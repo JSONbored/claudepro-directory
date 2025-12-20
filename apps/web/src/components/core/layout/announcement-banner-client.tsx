@@ -1,6 +1,6 @@
 'use client';
 
-import type { announcement_icon } from '@heyclaude/data-layer/prisma';
+import type { announcement_icon } from '@prisma/client';
 import { useAnnouncementDismissal } from '@heyclaude/web-runtime/hooks/use-announcement-dismissal';
 import {
   AlertTriangle,
@@ -11,12 +11,7 @@ import {
   Sparkles,
   X,
 } from '@heyclaude/web-runtime/icons';
-import {
-  Announcement,
-  AnnouncementTag,
-  AnnouncementTitle,
-  cn,
-} from '@heyclaude/web-runtime/ui';
+import { Announcement, AnnouncementTag, AnnouncementTitle, cn } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { type ComponentType, useEffect } from 'react';
 import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
@@ -35,7 +30,9 @@ const ICON_MAP: Record<AnnouncementIcon, ComponentType<{ className?: string }>> 
   Sparkles,
 };
 
-import type { announcementsModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type announcementsModel = Prisma.announcementsGetPayload<{}>;
 
 interface AnnouncementBannerClientProps {
   announcement: announcementsModel;
@@ -117,11 +114,9 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
     >
       {/* Rounded pill container */}
       <div className="container mx-auto">
-        <div
-          className="border-accent/20 bg-accent/10 rounded-full border shadow-sm backdrop-blur-sm transition-all duration-300 ease-out hover:border-accent/30 hover:shadow-md motion-reduce:transition-none"
-        >
+        <div className="border-accent/20 bg-accent/10 hover:border-accent/30 rounded-full border shadow-sm backdrop-blur-sm transition-all duration-300 ease-out hover:shadow-md motion-reduce:transition-none">
           <div className="px-4 py-2 md:px-6 md:py-2.5">
-              <div className="flex flex-col items-center md:flex-row md:items-center">
+            <div className="flex flex-col items-center md:flex-row md:items-center">
               {/* Announcement Content */}
               <Announcement
                 variant={announcement.variant}
@@ -137,7 +132,12 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                   {announcement.href ? (
                     <Link
                       href={announcement.href}
-                      className={cn('hover:underline', 'flex items-center gap-2', 'gap-1.5', 'transition-all duration-200 ease-out')}
+                      className={cn(
+                        'hover:underline',
+                        'flex items-center gap-2',
+                        'gap-1.5',
+                        'transition-all duration-200 ease-out'
+                      )}
                     >
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent ? (
@@ -167,12 +167,9 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                   type="button"
                   onClick={dismiss}
                   aria-label="Dismiss announcement"
-                  className="flex min-h-[36px] min-w-[36px] shrink-0 items-center justify-center rounded-full transition-all duration-200 ease-out hover:bg-accent/20 focus-visible:ring-accent focus-visible:ring-2 focus-visible:ring-offset-2 sm:min-h-[40px] sm:min-w-[40px]"
+                  className="hover:bg-accent/20 focus-visible:ring-accent flex min-h-[36px] min-w-[36px] shrink-0 items-center justify-center rounded-full transition-all duration-200 ease-out focus-visible:ring-2 focus-visible:ring-offset-2 sm:min-h-[40px] sm:min-w-[40px]"
                 >
-                  <X
-                    className="h-3 w-3 text-foreground sm:h-4 sm:w-4"
-                    aria-hidden="true"
-                  />
+                  <X className="text-foreground h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
                 </button>
               ) : null}
             </div>

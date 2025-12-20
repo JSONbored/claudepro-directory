@@ -48,9 +48,7 @@ export function runLintUnusedTypes() {
       output = execError.message ?? String(error);
     } else {
       output =
-        typeof execError.stdout === 'string'
-          ? execError.stdout
-          : execError.stdout.toString('utf8');
+        typeof execError.stdout === 'string' ? execError.stdout : execError.stdout.toString('utf8');
     }
   }
 

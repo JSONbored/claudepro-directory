@@ -1,17 +1,17 @@
 #!/usr/bin/env tsx
 /**
  * Inline Styles Migration Command
- * 
+ *
  * Migrates inline Tailwind classes to semantic design system utilities.
  * Uses ts-morph for AST-based transformations to handle template literals,
  * string literals, and imports correctly.
- * 
+ *
  * Usage:
  *   pnpm exec heyclaude-migrate-inline-styles --dry-run              # Analyze only (all phases)
  *   pnpm exec heyclaude-migrate-inline-styles                         # Apply all phases
  *   pnpm exec heyclaude-migrate-inline-styles --phase=1                # Phase 1: Spacing only
  *   pnpm exec heyclaude-migrate-inline-styles --phase=1 --dry-run     # Dry run Phase 1
- * 
+ *
  * Phases:
  *   1: Spacing (margins, padding, gaps, space-x/y) - Safest
  *   2: Layout & Flex/Grid (stack, cluster, flex, grid, display)
@@ -23,7 +23,15 @@
 import { readFileSync, writeFileSync, readdirSync, statSync, copyFileSync } from 'node:fs';
 import { join, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Project, Node, SourceFile, JsxAttribute, StringLiteral, TemplateExpression, TemplateSpan } from 'ts-morph';
+import {
+  Project,
+  Node,
+  SourceFile,
+  JsxAttribute,
+  StringLiteral,
+  TemplateExpression,
+  TemplateSpan,
+} from 'ts-morph';
 
 import { logger } from '../toolkit/logger.ts';
 
@@ -62,8 +70,8 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
         '8': 'relaxed',
         '12': 'loose',
         '16': 'hero',
-        'px': 'px', // Direct mapping for mb-px
-        'py': 'py', // Direct mapping for mb-py
+        px: 'px', // Direct mapping for mb-px
+        py: 'py', // Direct mapping for mb-py
       };
       const key = mapping[value] || 'default';
       // Handle numeric keys and special values (mb-5, mb-7, mb-px, mb-py) that need bracket notation
@@ -86,8 +94,8 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
         '5': '5', // Direct mapping for mt-5
         '6': 'comfortable',
         '8': 'relaxed',
-        'px': 'px', // Direct mapping for mt-px
-        'py': 'py', // Direct mapping for mt-py
+        px: 'px', // Direct mapping for mt-px
+        py: 'py', // Direct mapping for mt-py
       };
       const key = mapping[value] || 'default';
       // Handle numeric keys and special values (mt-5, mt-px, mt-py) that need bracket notation
@@ -738,7 +746,8 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
   // Background colors: bg-primary, bg-secondary, etc. → Keep as-is but ensure template literal
   // Note: These are semantic colors, might want semantic utilities later
   {
-    pattern: /\bbg-(primary|secondary|muted|accent|destructive|foreground|background|card|popover)\b(?!\/)/g, // Negative lookahead to avoid matching bg-accent/10
+    pattern:
+      /\bbg-(primary|secondary|muted|accent|destructive|foreground|background|card|popover)\b(?!\/)/g, // Negative lookahead to avoid matching bg-accent/10
     replacement: (match, color) => {
       // Keep as-is but ensure template literal
       return `bg-${color}`;
@@ -749,7 +758,8 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
   },
   // Text colors: text-primary, text-secondary, etc. → Keep as-is but ensure template literal
   {
-    pattern: /\btext-(primary|secondary|muted-foreground|accent|destructive|foreground|background|card-foreground|popover-foreground)\b(?!\/)/g, // Negative lookahead to avoid matching text-accent/10
+    pattern:
+      /\btext-(primary|secondary|muted-foreground|accent|destructive|foreground|background|card-foreground|popover-foreground)\b(?!\/)/g, // Negative lookahead to avoid matching text-accent/10
     replacement: (match, color) => {
       // text-muted-foreground is already handled by muted pattern, skip it
       if (color === 'muted-foreground') {
@@ -764,7 +774,8 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
   },
   // Border colors: border-primary, border-secondary, etc. → Keep as-is but ensure template literal
   {
-    pattern: /\bborder-(primary|secondary|muted|accent|destructive|foreground|background|border)\b(?!\/)/g, // Negative lookahead to avoid matching border-accent/10
+    pattern:
+      /\bborder-(primary|secondary|muted|accent|destructive|foreground|background|border)\b(?!\/)/g, // Negative lookahead to avoid matching border-accent/10
     replacement: (match, color) => {
       // Keep as-is but ensure template literal
       return `border-${color}`;
@@ -820,7 +831,7 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
         '4': 'default',
         '6': 'comfortable',
         '8': 'relaxed',
-        'auto': 'auto',
+        auto: 'auto',
       };
       const key = mapping[value] || 'default';
       return `\${marginX.${key}}`;
@@ -859,7 +870,7 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
         '4': 'default',
         '6': 'comfortable',
         '8': 'relaxed',
-        'auto': 'auto',
+        auto: 'auto',
       };
       const key = mapping[value] || 'default';
       return `\${marginLeft.${key}}`;
@@ -879,7 +890,7 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
         '4': 'default',
         '6': 'comfortable',
         '8': 'relaxed',
-        'auto': 'auto',
+        auto: 'auto',
       };
       const key = mapping[value] || 'default';
       return `\${marginRight.${key}}`;
@@ -901,7 +912,8 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
   },
   // Border variants: border-t-*, border-b-*, border-l-*, border-r-*, border-x-*, border-y-* → Keep as-is but ensure template literal
   {
-    pattern: /\bborder-(t|b|l|r|x|y)-(\d+|primary|secondary|muted|accent|destructive|foreground|background|border)\b/g,
+    pattern:
+      /\bborder-(t|b|l|r|x|y)-(\d+|primary|secondary|muted|accent|destructive|foreground|background|border)\b/g,
     replacement: (match, side, value) => {
       // Keep as-is but ensure template literal
       return `border-${side}-${value}`;
@@ -914,13 +926,15 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
   // Note: Must run AFTER stack/cluster patterns to avoid conflicts
   // This pattern handles standalone display values, not compound flex patterns
   {
-    pattern: /\b(block|inline|inline-block|grid|table|contents|list-item|hidden|visible|invisible)\b(?!-)/g, // Exclude 'flex' - handled by stack/cluster patterns
+    pattern:
+      /\b(block|inline|inline-block|grid|table|contents|list-item|hidden|visible|invisible)\b(?!-)/g, // Exclude 'flex' - handled by stack/cluster patterns
     replacement: (match, display) => {
       // Keep as-is but ensure template literal
       return display;
     },
     importName: null, // No semantic utility yet
-    description: 'Display (modernized formatting, excluding flex which is handled by stack/cluster)',
+    description:
+      'Display (modernized formatting, excluding flex which is handled by stack/cluster)',
     phase: 2, // Phase 2: Layout
   },
   // Standalone flex (not part of flex flex-col or flex items-center patterns)
@@ -1000,32 +1014,33 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
   // This pattern must run AFTER the square icon pattern to avoid conflicts
   // Also handles h-X w-fraction patterns (e.g., h-4 w-3/4)
   {
-    pattern: /\b(h-(\d+)\s+w-(\d+|\d+\/\d+|full|auto|3\/4|1\/2|1\/3|2\/3)|w-(\d+|\d+\/\d+|full|auto|3\/4|1\/2|1\/3|2\/3)\s+h-(\d+))\b/g,
+    pattern:
+      /\b(h-(\d+)\s+w-(\d+|\d+\/\d+|full|auto|3\/4|1\/2|1\/3|2\/3)|w-(\d+|\d+\/\d+|full|auto|3\/4|1\/2|1\/3|2\/3)\s+h-(\d+))\b/g,
     replacement: (match, fullMatch, h1, w1, w2, h2) => {
       // Extract height and width (order-independent)
       const height = h1 || h2;
       const width = w1 || w2;
-      
+
       // Skip if square numeric values (handled by previous pattern)
       if (height === width && /^\d+$/.test(width)) {
         return match; // Return unchanged, let square pattern handle it
       }
-      
+
       // Handle fractional widths (w-3/4, w-1/2, w-2/3, etc.) - create semantic key
       if (width.includes('/')) {
         const key = `${height}x${width.replace('/', '-')}`; // e.g., "4x3-4" for h-4 w-3/4, "3x2-3" for h-3 w-2/3
         return `\${iconSizeRect['${key}']}`;
       }
-      
+
       // Handle special width values (full, auto)
       if (width === 'full' || width === 'auto') {
         const key = `${height}x${width}`;
         return `\${iconSizeRect['${key}']}`;
       }
-      
+
       // Create key from numeric dimensions (always use height x width format)
       const key = `${height}x${width}`;
-      
+
       // Check if we have a predefined mapping
       const rectMapping: Record<string, string> = {
         '4x5': '4x5',
@@ -1051,13 +1066,13 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
         '32x48': '32x48',
         '64x72': '64x72',
       };
-      
+
       // Use predefined mapping if available, otherwise create dynamic mapping
       const mappedKey = rectMapping[key];
       if (mappedKey) {
         return `\${iconSizeRect['${mappedKey}']}`;
       }
-      
+
       // For unmapped sizes, create direct mapping
       return `\${iconSizeRect['${key}']}`;
     },
@@ -1142,11 +1157,7 @@ function migrateClassName(
 /**
  * Migrate a single file
  */
-function migrateFile(
-  filePath: string,
-  dryRun: boolean,
-  phase?: number
-): MigrationResult {
+function migrateFile(filePath: string, dryRun: boolean, phase?: number): MigrationResult {
   const result: MigrationResult = {
     file: relative(PROJECT_ROOT, filePath),
     transformations: [],
@@ -1163,207 +1174,233 @@ function migrateFile(
     let hasChanges = false;
 
     // Filter mappings by phase if specified
-    const mappingsToUse = phase 
-      ? CLASSNAME_MAPPINGS.filter(m => m.phase === phase)
+    const mappingsToUse = phase
+      ? CLASSNAME_MAPPINGS.filter((m) => m.phase === phase)
       : CLASSNAME_MAPPINGS;
 
     // Process JSX className attributes
     sourceFile.forEachDescendant((node) => {
       if (!Node.isJsxAttribute(node)) return;
-      
+
       // Get attribute name - ts-morph API
       const nameNode = node.getNameNode();
       if (!nameNode || !Node.isIdentifier(nameNode) || nameNode.getText() !== 'className') {
         return;
       }
-      
+
       const initializer = node.getInitializer();
       if (!initializer) {
         // className without value (className={undefined} or className)
         return;
       }
 
-        // Handle string literal: className="mb-4"
-        if (Node.isStringLiteral(initializer)) {
-          const originalValue = initializer.getLiteralValue();
-          const { updated, neededImports, patternCount } = migrateClassName(originalValue, mappingsToUse);
+      // Handle string literal: className="mb-4"
+      if (Node.isStringLiteral(initializer)) {
+        const originalValue = initializer.getLiteralValue();
+        const { updated, neededImports, patternCount } = migrateClassName(
+          originalValue,
+          mappingsToUse
+        );
 
-          // Always transform string literals to template literals for consistency
-          if (updated !== originalValue || neededImports.size > 0 || patternCount > 0) {
+        // Always transform string literals to template literals for consistency
+        if (updated !== originalValue || neededImports.size > 0 || patternCount > 0) {
+          hasChanges = true;
+          neededImports.forEach((imp) => allNeededImports.add(imp));
+
+          // Create ONE transformation record per className attribute
+          // The patternCount field indicates how many patterns were transformed in this attribute
+          result.transformations.push({
+            file: result.file,
+            line: initializer.getStartLineNumber(),
+            original: `className="${originalValue}"`,
+            transformed: `className={\`${updated}\`}`,
+            type: patternCount > 0 ? 'string-literal' : 'string-literal-modernize',
+            patternCount: patternCount, // Actual count of patterns transformed
+          });
+
+          if (!dryRun) {
+            // Convert string literal to template literal
+            // Need to wrap in JSX expression
+            try {
+              const parent = initializer.getParent();
+              if (Node.isJsxAttribute(parent)) {
+                const newInitializer = `{\`${updated}\`}`;
+                // Verify the replacement will actually change something
+                const currentInitializer = parent.getInitializer()?.getText() || '';
+                if (newInitializer !== currentInitializer) {
+                  parent.setInitializer(newInitializer);
+                } else {
+                  result.errors.push(
+                    `String literal replacement produced identical text at line ${initializer.getStartLineNumber()}`
+                  );
+                }
+              }
+            } catch (error) {
+              result.errors.push(
+                `Failed to replace string literal at line ${initializer.getStartLineNumber()}: ${error instanceof Error ? error.message : String(error)}`
+              );
+            }
+          }
+        }
+      }
+      // Handle JSX expression with string: className={"mb-4"}
+      else if (Node.isJsxExpression(initializer)) {
+        const expression = initializer.getExpression();
+        if (Node.isStringLiteral(expression)) {
+          const originalValue = expression.getLiteralValue();
+          const { updated, neededImports, patternCount } = migrateClassName(
+            originalValue,
+            mappingsToUse
+          );
+
+          if (updated !== originalValue || patternCount > 0) {
             hasChanges = true;
-            neededImports.forEach(imp => allNeededImports.add(imp));
+            neededImports.forEach((imp) => allNeededImports.add(imp));
 
             // Create ONE transformation record per className attribute
             // The patternCount field indicates how many patterns were transformed in this attribute
             result.transformations.push({
               file: result.file,
-              line: initializer.getStartLineNumber(),
-              original: `className="${originalValue}"`,
+              line: expression.getStartLineNumber(),
+              original: `className={"${originalValue}"}`,
               transformed: `className={\`${updated}\`}`,
-              type: patternCount > 0 ? 'string-literal' : 'string-literal-modernize',
+              type: 'jsx-expression-string',
               patternCount: patternCount, // Actual count of patterns transformed
             });
 
             if (!dryRun) {
-              // Convert string literal to template literal
-              // Need to wrap in JSX expression
+              // Replace string literal with template literal
               try {
-                const parent = initializer.getParent();
-                if (Node.isJsxAttribute(parent)) {
-                  const newInitializer = `{\`${updated}\`}`;
-                  // Verify the replacement will actually change something
-                  const currentInitializer = parent.getInitializer()?.getText() || '';
-                  if (newInitializer !== currentInitializer) {
-                    parent.setInitializer(newInitializer);
-                  } else {
-                    result.errors.push(`String literal replacement produced identical text at line ${initializer.getStartLineNumber()}`);
-                  }
+                const newText = `\`${updated}\``;
+                const originalText = expression.getText();
+                // Verify the replacement will actually change something
+                if (newText !== originalText) {
+                  expression.replaceWithText(newText);
+                } else {
+                  result.errors.push(
+                    `JSX expression string replacement produced identical text at line ${expression.getStartLineNumber()}`
+                  );
                 }
               } catch (error) {
-                result.errors.push(`Failed to replace string literal at line ${initializer.getStartLineNumber()}: ${error instanceof Error ? error.message : String(error)}`);
+                result.errors.push(
+                  `Failed to replace JSX expression string at line ${expression.getStartLineNumber()}: ${error instanceof Error ? error.message : String(error)}`
+                );
               }
             }
           }
         }
-        // Handle JSX expression with string: className={"mb-4"}
-        else if (Node.isJsxExpression(initializer)) {
-          const expression = initializer.getExpression();
-          if (Node.isStringLiteral(expression)) {
-            const originalValue = expression.getLiteralValue();
-            const { updated, neededImports, patternCount } = migrateClassName(originalValue, mappingsToUse);
+        // Handle template literal: className={`mb-4 ${other}`}
+        else if (Node.isTemplateExpression(expression)) {
+          // Get all template spans
+          const spans = expression.getTemplateSpans();
+          let templateChanged = false;
+          const updatedParts: string[] = [];
+          let totalPatternCount = 0;
 
-            if (updated !== originalValue || patternCount > 0) {
-              hasChanges = true;
-              neededImports.forEach(imp => allNeededImports.add(imp));
-
-              // Create ONE transformation record per className attribute
-              // The patternCount field indicates how many patterns were transformed in this attribute
-              result.transformations.push({
-                file: result.file,
-                line: expression.getStartLineNumber(),
-                original: `className={"${originalValue}"}`,
-                transformed: `className={\`${updated}\`}`,
-                type: 'jsx-expression-string',
-                patternCount: patternCount, // Actual count of patterns transformed
-              });
-
-              if (!dryRun) {
-                // Replace string literal with template literal
-                try {
-                  const newText = `\`${updated}\``;
-                  const originalText = expression.getText();
-                  // Verify the replacement will actually change something
-                  if (newText !== originalText) {
-                    expression.replaceWithText(newText);
-                  } else {
-                    result.errors.push(`JSX expression string replacement produced identical text at line ${expression.getStartLineNumber()}`);
-                  }
-                } catch (error) {
-                  result.errors.push(`Failed to replace JSX expression string at line ${expression.getStartLineNumber()}: ${error instanceof Error ? error.message : String(error)}`);
-                }
-              }
-            }
+          // Process head (first literal part before first ${})
+          // getText() on TemplateHead returns the raw text content (no quotes, no backticks)
+          const head = expression.getHead().getText();
+          const {
+            updated: updatedHead,
+            neededImports: headImports,
+            patternCount: headPatternCount,
+          } = migrateClassName(head, mappingsToUse);
+          totalPatternCount += headPatternCount;
+          if (updatedHead !== head) {
+            templateChanged = true;
+            headImports.forEach((imp) => allNeededImports.add(imp));
           }
-          // Handle template literal: className={`mb-4 ${other}`}
-          else if (Node.isTemplateExpression(expression)) {
-            // Get all template spans
-            const spans = expression.getTemplateSpans();
-            let templateChanged = false;
-            const updatedParts: string[] = [];
-            let totalPatternCount = 0;
+          updatedParts.push(updatedHead);
 
-            // Process head (first literal part before first ${})
-            // getText() on TemplateHead returns the raw text content (no quotes, no backticks)
-            const head = expression.getHead().getText();
-            const { updated: updatedHead, neededImports: headImports, patternCount: headPatternCount } = migrateClassName(head, mappingsToUse);
-            totalPatternCount += headPatternCount;
-            if (updatedHead !== head) {
+          // Process each span (${expression} literal)
+          const allLiteralImports = new Set<string>();
+          for (const span of spans) {
+            // Add the expression with ${} wrapper
+            // getText() on the expression node returns just the expression content (e.g., "other")
+            // We need to wrap it with ${} to reconstruct the template literal correctly
+            // Use string concatenation to avoid issues with special characters in exprText
+            const exprText = span.getExpression().getText();
+            updatedParts.push('${' + exprText + '}');
+
+            // Process the literal part after the expression
+            // getText() on TemplateTail returns the raw text content (no quotes, no backticks)
+            const literal = span.getLiteral().getText();
+            const {
+              updated: updatedLiteral,
+              neededImports: literalImports,
+              patternCount: literalPatternCount,
+            } = migrateClassName(literal, mappingsToUse);
+            totalPatternCount += literalPatternCount;
+            if (updatedLiteral !== literal) {
               templateChanged = true;
-              headImports.forEach(imp => allNeededImports.add(imp));
+              literalImports.forEach((imp) => {
+                allNeededImports.add(imp);
+                allLiteralImports.add(imp);
+              });
             }
-            updatedParts.push(updatedHead);
+            updatedParts.push(updatedLiteral);
+          }
 
-            // Process each span (${expression} literal)
-            const allLiteralImports = new Set<string>();
-            for (const span of spans) {
-              // Add the expression with ${} wrapper
-              // getText() on the expression node returns just the expression content (e.g., "other")
-              // We need to wrap it with ${} to reconstruct the template literal correctly
-              // Use string concatenation to avoid issues with special characters in exprText
-              const exprText = span.getExpression().getText();
-              updatedParts.push('${' + exprText + '}');
-              
-              // Process the literal part after the expression
-              // getText() on TemplateTail returns the raw text content (no quotes, no backticks)
-              const literal = span.getLiteral().getText();
-              const { updated: updatedLiteral, neededImports: literalImports, patternCount: literalPatternCount } = migrateClassName(literal, mappingsToUse);
-              totalPatternCount += literalPatternCount;
-              if (updatedLiteral !== literal) {
-                templateChanged = true;
-                literalImports.forEach(imp => {
-                  allNeededImports.add(imp);
-                  allLiteralImports.add(imp);
-                });
-              }
-              updatedParts.push(updatedLiteral);
+          // Always transform template literals if they contain any patterns we're migrating
+          // This ensures all patterns in template literals are transformed and counted
+          if (templateChanged || totalPatternCount > 0) {
+            hasChanges = true;
+            headImports.forEach((imp) => allNeededImports.add(imp));
+            allLiteralImports.forEach((imp) => allNeededImports.add(imp));
+
+            const originalText = expression.getText();
+            // Reconstruct the template literal properly
+            // updatedParts contains: [head, ${expr1}, literal1, ${expr2}, literal2, ...]
+            // We need to join them to create a valid template literal
+            // getText() on TemplateExpression returns the template literal WITH backticks
+            // So newText should also include backticks
+            const newText = '`' + updatedParts.join('') + '`';
+
+            // Debug: Log reconstruction details if there are patterns to transform
+            if (totalPatternCount > 0 && !dryRun) {
+              // Verify reconstruction is correct by comparing structure
+              // This helps catch reconstruction bugs early
             }
 
-            // Always transform template literals if they contain any patterns we're migrating
-            // This ensures all patterns in template literals are transformed and counted
-            if (templateChanged || totalPatternCount > 0) {
-              hasChanges = true;
-              headImports.forEach(imp => allNeededImports.add(imp));
-              allLiteralImports.forEach(imp => allNeededImports.add(imp));
-              
-              const originalText = expression.getText();
-              // Reconstruct the template literal properly
-              // updatedParts contains: [head, ${expr1}, literal1, ${expr2}, literal2, ...]
-              // We need to join them to create a valid template literal
+            // Create ONE transformation record per className attribute
+            // The patternCount field indicates how many patterns were transformed in this attribute
+            // This ensures dry-run and live-run counts match accurately
+            result.transformations.push({
+              file: result.file,
+              line: expression.getStartLineNumber(),
+              original: `className={${originalText}}`,
+              transformed: `className={${newText}}`,
+              type: 'template-literal',
+              patternCount: totalPatternCount, // Actual count of patterns transformed
+            });
+
+            if (!dryRun) {
+              // Replace the template expression using replaceWithText (same as migrate-ui-classes.ts)
               // getText() on TemplateExpression returns the template literal WITH backticks
               // So newText should also include backticks
-              const newText = '`' + updatedParts.join('') + '`';
-              
-              // Debug: Log reconstruction details if there are patterns to transform
-              if (totalPatternCount > 0 && !dryRun) {
-                // Verify reconstruction is correct by comparing structure
-                // This helps catch reconstruction bugs early
-              }
-
-              // Create ONE transformation record per className attribute
-              // The patternCount field indicates how many patterns were transformed in this attribute
-              // This ensures dry-run and live-run counts match accurately
-              result.transformations.push({
-                file: result.file,
-                line: expression.getStartLineNumber(),
-                original: `className={${originalText}}`,
-                transformed: `className={${newText}}`,
-                type: 'template-literal',
-                patternCount: totalPatternCount, // Actual count of patterns transformed
-              });
-
-              if (!dryRun) {
-                // Replace the template expression using replaceWithText (same as migrate-ui-classes.ts)
-                // getText() on TemplateExpression returns the template literal WITH backticks
-                // So newText should also include backticks
-                try {
-                  // Verify the replacement will actually change something
-                  if (newText !== originalText) {
-                    // Use replaceWithText directly on TemplateExpression (same approach as migrate-ui-classes.ts)
-                    expression.replaceWithText(newText);
-                  } else {
-                    // If newText equals originalText, something went wrong with reconstruction
-                    result.errors.push(`Template literal reconstruction produced identical text at line ${expression.getStartLineNumber()}: original="${originalText}", new="${newText}"`);
-                  }
-                } catch (error) {
-                  // Log detailed error information for debugging
-                  const errorMsg = error instanceof Error ? error.message : String(error);
-                  result.errors.push(`Failed to replace template expression at line ${expression.getStartLineNumber()}: ${errorMsg}. Original: "${originalText}", New: "${newText}"`);
-                  // Don't throw - continue processing other transformations
+              try {
+                // Verify the replacement will actually change something
+                if (newText !== originalText) {
+                  // Use replaceWithText directly on TemplateExpression (same approach as migrate-ui-classes.ts)
+                  expression.replaceWithText(newText);
+                } else {
+                  // If newText equals originalText, something went wrong with reconstruction
+                  result.errors.push(
+                    `Template literal reconstruction produced identical text at line ${expression.getStartLineNumber()}: original="${originalText}", new="${newText}"`
+                  );
                 }
+              } catch (error) {
+                // Log detailed error information for debugging
+                const errorMsg = error instanceof Error ? error.message : String(error);
+                result.errors.push(
+                  `Failed to replace template expression at line ${expression.getStartLineNumber()}: ${errorMsg}. Original: "${originalText}", New: "${newText}"`
+                );
+                // Don't throw - continue processing other transformations
               }
             }
           }
         }
+      }
     });
 
     // Add imports if needed
@@ -1376,9 +1413,7 @@ function migrateFile(
         const moduleSpecifier = importDecl.getModuleSpecifierValue();
         if (moduleSpecifier === '@heyclaude/web-runtime/design-system') {
           hasDesignSystemImport = true;
-          const existingNames = new Set(
-            importDecl.getNamedImports().map(imp => imp.getName())
-          );
+          const existingNames = new Set(importDecl.getNamedImports().map((imp) => imp.getName()));
 
           for (const importName of allNeededImports) {
             if (!existingNames.has(importName)) {
@@ -1406,7 +1441,6 @@ function migrateFile(
       const updatedContent = sourceFile.getFullText();
       writeFileSync(filePath, updatedContent, 'utf-8');
     }
-
   } catch (error) {
     result.errors.push(error instanceof Error ? error.message : String(error));
   }
@@ -1419,15 +1453,15 @@ function migrateFile(
  */
 export async function migrateInlineStyles(dryRun: boolean = false, phase?: number): Promise<void> {
   logger.info('=== Inline Styles Migration ===');
-  
+
   if (phase) {
     logger.info(`PHASE ${phase} MODE - Only migrating patterns from phase ${phase}`);
-    const phaseMappings = CLASSNAME_MAPPINGS.filter(m => m.phase === phase);
+    const phaseMappings = CLASSNAME_MAPPINGS.filter((m) => m.phase === phase);
     logger.info(`Phase ${phase} includes ${phaseMappings.length} pattern(s)`);
   } else {
     logger.info('ALL PHASES MODE - Migrating all patterns');
   }
-  
+
   if (dryRun) {
     logger.info('DRY RUN MODE - Analysis only, no files will be modified');
   } else {
@@ -1446,16 +1480,21 @@ export async function migrateInlineStyles(dryRun: boolean = false, phase?: numbe
   for (const filePath of tsxFiles) {
     const result = migrateFile(filePath, dryRun, phase);
     results.push(result);
-    
+
     if (result.transformations.length > 0) {
       // Count transformations: one per className attribute (consistent with dry-run)
       // Each transformation record represents one className attribute that was transformed
       totalTransformations += result.transformations.length;
       filesModified++;
-      
+
       // Calculate total patterns for informational logging
-      const filePatternCount = result.transformations.reduce((sum, t) => sum + (t.patternCount || 0), 0);
-      logger.info(`${result.file}: ${result.transformations.length} transformation(s) (${filePatternCount} pattern(s))`);
+      const filePatternCount = result.transformations.reduce(
+        (sum, t) => sum + (t.patternCount || 0),
+        0
+      );
+      logger.info(
+        `${result.file}: ${result.transformations.length} transformation(s) (${filePatternCount} pattern(s))`
+      );
       if (result.importsAdded.length > 0) {
         logger.info(`  Added imports: ${result.importsAdded.join(', ')}`);
       }
@@ -1489,10 +1528,10 @@ export async function migrateInlineStyles(dryRun: boolean = false, phase?: numbe
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run') || args.includes('-d');
-  
+
   // Parse --phase=N argument
   let phase: number | undefined;
-  const phaseArg = args.find(arg => arg.startsWith('--phase='));
+  const phaseArg = args.find((arg) => arg.startsWith('--phase='));
   if (phaseArg) {
     const phaseValue = phaseArg.split('=')[1];
     const phaseNum = parseInt(phaseValue, 10);
@@ -1502,7 +1541,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     }
     phase = phaseNum;
   }
-  
+
   migrateInlineStyles(dryRun, phase).catch((error) => {
     logger.error('Migration failed', error);
     process.exit(1);

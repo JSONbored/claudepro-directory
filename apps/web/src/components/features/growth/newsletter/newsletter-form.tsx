@@ -1,15 +1,12 @@
 'use client';
 
-import type { newsletter_source } from '@heyclaude/data-layer/prisma';
+import type { newsletter_source } from '@prisma/client';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/config/marketing-client';
 import { useConfetti } from '@heyclaude/web-runtime/hooks/use-confetti';
 import { useNewsletter } from '@heyclaude/web-runtime/hooks/use-newsletter';
 import { ArrowRight, Loader2 } from '@heyclaude/web-runtime/icons';
-import {
-  cn,
-  Input,
-} from '@heyclaude/web-runtime/ui';
+import { cn, Input } from '@heyclaude/web-runtime/ui';
 import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
@@ -69,7 +66,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
               'h-12 w-full pr-14 text-base',
               'border-border bg-background',
               'transition-all duration-200 ease-out',
-              'focus:border-color-newsletter-border focus:ring-2 focus:ring-color-newsletter-ring focus:outline-none',
+              'focus:border-color-newsletter-border focus:ring-color-newsletter-ring focus:ring-2 focus:outline-none',
               error && 'border-destructive focus:border-destructive focus:ring-destructive/20',
               isSubmitting && 'cursor-not-allowed opacity-60',
               showSubmitButton && 'pr-14'
@@ -87,7 +84,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
                 type="button"
                 disabled
                 className={cn(
-                  'absolute right-2 top-1/2 -translate-y-1/2',
+                  'absolute top-1/2 right-2 -translate-y-1/2',
                   'flex h-10 w-10 items-center justify-center rounded-lg',
                   'bg-color-newsletter-bg text-background',
                   'cursor-not-allowed'
@@ -105,12 +102,12 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
                 key="submit"
                 type="submit"
                 className={cn(
-                  'absolute right-2 top-1/2 -translate-y-1/2',
+                  'absolute top-1/2 right-2 -translate-y-1/2',
                   'flex h-10 w-10 items-center justify-center rounded-lg',
                   'bg-color-newsletter-bg text-background',
                   'shadow-sm transition-all duration-200',
                   'hover:bg-color-newsletter-bg-hover hover:shadow-md',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-color-newsletter-bg focus-visible:ring-offset-2',
+                  'focus-visible:ring-color-newsletter-bg focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
                   'active:scale-95'
                 )}
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }}

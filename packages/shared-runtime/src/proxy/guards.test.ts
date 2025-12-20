@@ -52,7 +52,7 @@ describe('detectSuspiciousHeaders', () => {
     const request = new Request('https://example.com', {
       headers: {
         'user-agent': 'Mozilla/5.0',
-        'accept': 'text/html',
+        accept: 'text/html',
       },
     });
     const result = detectSuspiciousHeaders(request);
@@ -86,7 +86,8 @@ describe('sanitizePathForLogging', () => {
   });
 
   it('should handle multiple UUIDs', () => {
-    const path = '/api/users/550e8400-e29b-41d4-a716-446655440000/posts/660e8400-e29b-41d4-a716-446655440001';
+    const path =
+      '/api/users/550e8400-e29b-41d4-a716-446655440000/posts/660e8400-e29b-41d4-a716-446655440001';
     const result = sanitizePathForLogging(path);
     expect(result).toContain('[UUID]');
   });

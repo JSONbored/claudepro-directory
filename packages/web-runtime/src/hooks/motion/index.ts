@@ -1,9 +1,9 @@
 /**
  * Motion Hooks
- * 
+ *
  * Centralized exports for all Motion.dev hooks and utilities.
  * These hooks provide accessibility, performance, and UX improvements for animations.
- * 
+ *
  * @module web-runtime/hooks/motion
  */
 

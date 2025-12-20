@@ -64,9 +64,7 @@ describe('useOnClickOutside', () => {
     const handler = vi.fn();
     const ref = { current: document.createElement('div') };
 
-    renderHook(() =>
-      useOnClickOutside(ref, handler, { eventType: 'mouseup' })
-    );
+    renderHook(() => useOnClickOutside(ref, handler, { eventType: 'mouseup' }));
 
     document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
 

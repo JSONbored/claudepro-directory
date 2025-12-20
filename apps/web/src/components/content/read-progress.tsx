@@ -156,7 +156,7 @@ export function ReadProgress({
   // This effect must be called unconditionally (before any early returns)
   useEffect(() => {
     if (!isMounted) return;
-    
+
     const updateProgress = () => {
       setCurrentProgress(Math.round(scrollYProgress.get() * 100));
     };

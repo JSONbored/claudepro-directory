@@ -46,11 +46,8 @@ interface DiscordPayload {
  */
 export async function handleDiscordDirect(request: NextRequest): Promise<NextResponse> {
   const notificationType = request.headers.get('X-Discord-Notification-Type');
-  
-  const logContext = createWebAppContextWithId(
-    '/api/flux/discord/direct',
-    'handleDiscordDirect'
-  );
+
+  const logContext = createWebAppContextWithId('/api/flux/discord/direct', 'handleDiscordDirect');
 
   // Validate notification type header
   if (!notificationType) {
@@ -70,7 +67,7 @@ export async function handleDiscordDirect(request: NextRequest): Promise<NextRes
   }
 
   try {
-    const body = await request.json() as DiscordPayload;
+    const body = (await request.json()) as DiscordPayload;
 
     // Trigger Inngest function to handle Discord notification asynchronously
     // This eliminates blocking external API call from Vercel function (reduces CPU/bandwidth usage)

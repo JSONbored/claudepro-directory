@@ -109,9 +109,13 @@ export function JobToggleButton({
         // Error already logged by useLoggedAsync
         const normalized = normalizeError(error, 'Failed to toggle job status');
         const errorMessage = normalized.message;
-        
+
         // Check if error is auth-related and show modal if so
-        if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+        if (
+          errorMessage.includes('signed in') ||
+          errorMessage.includes('auth') ||
+          errorMessage.includes('unauthorized')
+        ) {
           openAuthModal({
             valueProposition: 'Sign in to manage jobs',
             redirectTo: pathname ?? undefined,

@@ -1,12 +1,15 @@
 /**
  * Content Transformation Utilities
- * 
+ *
  * Shared utilities for transforming database results to displayable content items.
  * Eliminates duplicate transformation logic across multiple components and pages.
  */
 
-import { type content_category } from '@heyclaude/data-layer/prisma';
-import { type GetPopularContentReturns, type GetTrendingMetricsWithContentReturns } from '@heyclaude/database-types/postgres-types';
+import { type content_category } from '@prisma/client';
+import {
+  type GetPopularContentReturns,
+  type GetTrendingMetricsWithContentReturns,
+} from '@heyclaude/database-types/postgres-types';
 import { type GetRecentContentReturns } from '@heyclaude/data-layer';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import {
@@ -16,7 +19,7 @@ import {
 
 /**
  * Normalizes a raw content record into a HomepageContentItem suitable for display.
- * 
+ *
  * Optional properties are normalized with sensible defaults:
  * - `title` defaults to `slug`
  * - `description` defaults to empty string
@@ -26,7 +29,7 @@ import {
  * - `created_at`/`date_added` default to current ISO timestamp when both are missing
  * - `viewCount`/`copyCount` default to `0`
  * - `featured` flag is set when `featuredScore` is provided
- * 
+ *
  * @param input - Raw content fields with optional properties
  * @returns The normalized HomepageContentItem with canonical field names and defaults applied
  */
@@ -67,7 +70,7 @@ export function toHomepageContentItem(input: {
 
 /**
  * Maps trending metrics data to displayable content items.
- * 
+ *
  * @param rows - Array of trending metrics with content data
  * @param category - Optional category filter (null for all categories)
  * @returns Array of displayable content items
@@ -80,7 +83,9 @@ export function mapTrendingMetrics(
   if (rows.length === 0) return [];
   return rows.map((row: GetTrendingMetricsWithContentReturns[number], index: number) => {
     const resolvedCategory = category ?? row.category;
-    const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : defaultCategory;
+    const validCategory = isValidCategory(resolvedCategory)
+      ? (resolvedCategory as content_category)
+      : defaultCategory;
     return toHomepageContentItem({
       author: row.author ?? 'Community',
       category: validCategory,
@@ -99,7 +104,7 @@ export function mapTrendingMetrics(
 
 /**
  * Maps popular content data to displayable content items.
- * 
+ *
  * @param rows - Array of popular content data
  * @param category - Optional category filter (null for all categories)
  * @returns Array of displayable content items
@@ -112,7 +117,9 @@ export function mapPopularContent(
   if (rows.length === 0) return [];
   return rows.map((row: GetPopularContentReturns[number], index: number) => {
     const resolvedCategory = category ?? row.category;
-    const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : defaultCategory;
+    const validCategory = isValidCategory(resolvedCategory)
+      ? (resolvedCategory as content_category)
+      : defaultCategory;
     return toHomepageContentItem({
       author: row.author ?? 'Community',
       category: validCategory,
@@ -130,7 +137,7 @@ export function mapPopularContent(
 
 /**
  * Maps recent content data to displayable content items.
- * 
+ *
  * @param rows - Array of recent content data
  * @param category - Optional category filter (null for all categories)
  * @returns Array of displayable content items
@@ -143,14 +150,24 @@ export function mapRecentContent(
   if (rows.length === 0) return [];
   return rows.map((row: GetRecentContentReturns[number], index: number) => {
     const resolvedCategory = category ?? row.category;
-    const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : defaultCategory;
+    const validCategory = isValidCategory(resolvedCategory)
+      ? (resolvedCategory as content_category)
+      : defaultCategory;
     return toHomepageContentItem({
       author: row.author ?? 'Community',
       category: validCategory,
       // Use static fallback timestamp instead of new Date() (build-time safe)
       // contentModel has created_at as Date, convert to ISO string
-      created_at: row.created_at instanceof Date ? row.created_at.toISOString() : (row.created_at ?? '1970-01-01T00:00:00.000Z'),
-      date_added: row.date_added instanceof Date ? row.date_added.toISOString() : (row.date_added ?? row.created_at instanceof Date ? row.created_at.toISOString() : (row.created_at ?? '1970-01-01T00:00:00.000Z')),
+      created_at:
+        row.created_at instanceof Date
+          ? row.created_at.toISOString()
+          : (row.created_at ?? '1970-01-01T00:00:00.000Z'),
+      date_added:
+        row.date_added instanceof Date
+          ? row.date_added.toISOString()
+          : (row.date_added ?? row.created_at instanceof Date)
+            ? row.created_at.toISOString()
+            : (row.created_at ?? '1970-01-01T00:00:00.000Z'),
       description: row.description ?? '',
       featuredRank: index + 1,
       slug: row.slug ?? '',

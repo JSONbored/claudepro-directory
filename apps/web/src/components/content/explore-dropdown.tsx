@@ -2,7 +2,7 @@
 
 /**
  * Explore Dropdown Component
- * 
+ *
  * Hover dropdown that provides access to content variants:
  * - LLMs.txt (AI-optimized plain text)
  * - Markdown export
@@ -208,7 +208,7 @@ export function ExploreDropdown({
           aria-label="Explore content variants"
         >
           <span>Explore here</span>
-          <ExternalLink className="h-3 w-3 ml-0.5" />
+          <ExternalLink className="ml-0.5 h-3 w-3" />
         </Button>
       </NavigationHoverCardTrigger>
       <NavigationHoverCardContent align="end" className="w-56 p-2" sideOffset={8}>
@@ -219,9 +219,15 @@ export function ExploreDropdown({
               return (
                 <div
                   key={item.label}
-                  className={cn('flex items-center', 'gap-1', 'px-1', 'py-1.5', 'text-sm rounded-md opacity-50 cursor-not-allowed')}
+                  className={cn(
+                    'flex items-center',
+                    'gap-1',
+                    'px-1',
+                    'py-1.5',
+                    'cursor-not-allowed rounded-md text-sm opacity-50'
+                  )}
                 >
-                  <Icon className="h-4 w-4 text-muted-foreground" />
+                  <Icon className="text-muted-foreground h-4 w-4" />
                   <div className="flex-1">
                     <div className="font-medium">{item.label}</div>
                     {item.description && (
@@ -236,9 +242,15 @@ export function ExploreDropdown({
               <Link
                 key={item.label}
                 href={item.href}
-                className={cn('flex items-center', 'gap-1', 'px-1', 'py-1.5', 'text-sm rounded-md hover:bg-accent/5 transition-colors group/item')}
+                className={cn(
+                  'flex items-center',
+                  'gap-1',
+                  'px-1',
+                  'py-1.5',
+                  'hover:bg-accent/5 group/item rounded-md text-sm transition-colors'
+                )}
               >
-                <Icon className="h-4 w-4 text-muted-foreground group-hover/item:text-foreground transition-colors" />
+                <Icon className="text-muted-foreground group-hover/item:text-foreground h-4 w-4 transition-colors" />
                 <div className="flex-1">
                   <div className="font-medium">{item.label}</div>
                   {item.description && (

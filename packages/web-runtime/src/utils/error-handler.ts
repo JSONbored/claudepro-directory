@@ -1,16 +1,16 @@
 /**
  * Error Handling - Simplified approach using Vercel primitives + BetterStack
  * Replaces 371 LOC custom error handler with 95 LOC utility
- * 
+ *
  * **⚠️ IMPORTANT: Server-Only Module**
  * - ❌ **DO NOT** import this in client components (`'use client'`)
  * - ✅ **ONLY** import in server components, API routes, or server actions
  * - Uses Next.js `NextResponse` which is server-only
- * 
+ *
  * **Client/Server Boundaries:**
  * - This module is designed for API route error handling
  * - For client-side error handling, use {@link ../logging/client | Client Logging Barrel} instead
- * 
+ *
  * @module web-runtime/utils/error-handler
  * @see {@link ../logging/server | Server Logging Barrel} - Server-side logging utilities
  * @see {@link ../logging/client | Client Logging Barrel} - Client-side logging utilities
@@ -30,14 +30,14 @@ import { ApiErrorCode, determineErrorCode } from './api-error-codes.ts';
 
 /**
  * Create standardized error response with proper logging
- * 
+ *
  * **⚠️ Server-Only Function**
  * - ❌ **DO NOT** call from client components
  * - ✅ **ONLY** call from API routes or server actions
  * - Uses Next.js `NextResponse` which is server-only
- * 
+ *
  * Vercel automatically adds: x-vercel-id, timestamp, function name, region, duration
- * 
+ *
  * @see {@link ../logging/server | Server Logging Barrel} - Server-side logging utilities
  */
 export async function createErrorResponse(
@@ -61,7 +61,7 @@ export async function createErrorResponse(
       ...context.logContext,
     }
   );
-  
+
   // Log error with full context - Pino logger outputs to stdout (Vercel captures these logs)
   const normalized = normalizeError(error, 'API error occurred');
   logger.error({ err: normalized, ...logContext }, 'API error occurred');
@@ -69,12 +69,12 @@ export async function createErrorResponse(
   // Determine status code and error code
   let statusCode = 500;
   let errorCode = ApiErrorCode.INTERNAL_ERROR;
-  
+
   // Handle Zod validation errors
   if (error instanceof z.ZodError) {
     statusCode = 400;
     errorCode = ApiErrorCode.VALIDATION_ERROR;
-    
+
     return NextResponse.json(
       {
         success: false,
@@ -91,13 +91,19 @@ export async function createErrorResponse(
 
   // Determine error code from error and status
   errorCode = determineErrorCode(error, statusCode);
-  
+
   // Adjust status code based on error code
   if (errorCode === ApiErrorCode.NOT_FOUND) {
     statusCode = 404;
-  } else if (errorCode === ApiErrorCode.UNAUTHORIZED || errorCode === ApiErrorCode.AUTHENTICATION_REQUIRED) {
+  } else if (
+    errorCode === ApiErrorCode.UNAUTHORIZED ||
+    errorCode === ApiErrorCode.AUTHENTICATION_REQUIRED
+  ) {
     statusCode = 401;
-  } else if (errorCode === ApiErrorCode.VALIDATION_ERROR || errorCode === ApiErrorCode.INVALID_PARAMETER) {
+  } else if (
+    errorCode === ApiErrorCode.VALIDATION_ERROR ||
+    errorCode === ApiErrorCode.INVALID_PARAMETER
+  ) {
     statusCode = 400;
   } else if (errorCode === ApiErrorCode.RATE_LIMIT_EXCEEDED) {
     statusCode = 429;
@@ -130,12 +136,12 @@ export async function createErrorResponse(
 
 /**
  * Convenience function for API route error handling
- * 
+ *
  * **⚠️ Server-Only Function**
  * - ❌ **DO NOT** call from client components
  * - ✅ **ONLY** call from API routes or server actions
  * - Drop-in replacement for old handleApiError
- * 
+ *
  * @see {@link createErrorResponse} - Lower-level function that does the work
  * @see {@link ../logging/server | Server Logging Barrel} - Server-side logging utilities
  */

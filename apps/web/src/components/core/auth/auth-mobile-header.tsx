@@ -23,7 +23,7 @@ export function AuthMobileHeader() {
   const shouldReduceMotion = useReducedMotion();
   return (
     <motion.div
-      className="p-6 bg-color-accent-primary"
+      className="bg-color-accent-primary p-6"
       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -20 }}
       animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={{ duration: DURATION.moderate }}

@@ -2,7 +2,9 @@ import { trackMissingData } from '@heyclaude/web-runtime/utils/homepage-error-tr
 import { trackValidationFailure } from '@heyclaude/web-runtime/utils/homepage-error-tracking';
 import { normalizeError, serializeForClient } from '@heyclaude/shared-runtime';
 import type { GetHomepageOptimizedReturns } from '@heyclaude/database-types/postgres-types';
-import type { jobsModel } from '@heyclaude/database-types/prisma/models';
+import type { Prisma } from '@prisma/client';
+
+type jobsModel = Prisma.jobsGetPayload<{}>;
 
 // Use Prisma model type instead of excluded composite type
 type Jobs = jobsModel;
@@ -11,7 +13,7 @@ import { HomePageClient } from '@/src/components/features/home/home-sections';
 
 /**
  * Process homepage result data into structured format for client components
- * 
+ *
  * OPTIMIZATION: This function now processes data passed as props instead of fetching
  * This eliminates duplicate function calls and reduces function usage by 66%
  */
@@ -66,14 +68,13 @@ async function processHomepageData(
   const featuredJobsRaw = homepageResult.featured_jobs;
   // Type guard: Validate featuredJobsRaw is Jobs array
   function isJobsArray(value: unknown): value is Jobs[] {
-    return Array.isArray(value) && value.every((item): item is Jobs => 
-      item !== null && typeof item === 'object' && 'id' in item
+    return (
+      Array.isArray(value) &&
+      value.every((item): item is Jobs => item !== null && typeof item === 'object' && 'id' in item)
     );
   }
-  
-  const featuredJobs: readonly Jobs[] = isJobsArray(featuredJobsRaw) 
-    ? featuredJobsRaw
-    : [];
+
+  const featuredJobs: readonly Jobs[] = isJobsArray(featuredJobsRaw) ? featuredJobsRaw : [];
 
   // CRITICAL: content is Json type (JSONB from database) - Supabase should auto-parse it
   // But we need to ensure it's actually an object, not a string
@@ -83,7 +84,10 @@ async function processHomepageData(
   if (typeof content === 'string') {
     try {
       content = JSON.parse(content);
-      reqLogger.warn({ note: 'Content was string, parsed to object' }, 'processHomepageData: Content was a string, parsed it');
+      reqLogger.warn(
+        { note: 'Content was string, parsed to object' },
+        'processHomepageData: Content was a string, parsed it'
+      );
     } catch (parseError) {
       const normalized = normalizeError(parseError, 'Failed to parse content string');
       reqLogger.error({ err: normalized }, 'processHomepageData: Failed to parse content string');
@@ -103,18 +107,21 @@ async function processHomepageData(
       const categoryDataRaw = content['categoryData'];
       const statsRaw = content['stats'];
       const weekStart = typeof content['weekStart'] === 'string' ? content['weekStart'] : '';
-      
+
       // Type narrowing: Ensure categoryData is Record<string, unknown>
-      const categoryData: Record<string, unknown> = 
+      const categoryData: Record<string, unknown> =
         categoryDataRaw && typeof categoryDataRaw === 'object' && !Array.isArray(categoryDataRaw)
           ? (categoryDataRaw as Record<string, unknown>)
           : {};
-      
+
       // Type narrowing: Ensure stats is Record<string, { featured: number; total: number }>
-      const stats: Record<string, { featured: number; total: number }> = 
-        statsRaw && typeof statsRaw === 'object' && !Array.isArray(statsRaw) &&
+      const stats: Record<string, { featured: number; total: number }> =
+        statsRaw &&
+        typeof statsRaw === 'object' &&
+        !Array.isArray(statsRaw) &&
         Object.values(statsRaw).every(
-          (value) => typeof value === 'object' && value !== null && 'total' in value && 'featured' in value
+          (value) =>
+            typeof value === 'object' && value !== null && 'total' in value && 'featured' in value
         )
           ? (statsRaw as Record<string, { featured: number; total: number }>)
           : {};
@@ -170,12 +177,9 @@ async function processHomepageData(
 
       // Type narrowing: Ensure categoryData values are arrays
       const categoryDataTyped: Record<string, unknown[]> = Object.fromEntries(
-        Object.entries(categoryData).map(([key, value]) => [
-          key,
-          Array.isArray(value) ? value : [],
-        ])
+        Object.entries(categoryData).map(([key, value]) => [key, Array.isArray(value) ? value : []])
       );
-      
+
       return {
         categoryData: categoryDataTyped,
         stats,
@@ -222,11 +226,11 @@ async function processHomepageData(
  * Homepage Content Server Component
  *
  * Renders the main homepage content section with all featured content
- * 
+ *
  * OPTIMIZATION: Now receives homepage data as props instead of fetching
  * This eliminates duplicate function calls (reduces function usage by 66%)
  * Data is fetched once at the page level and passed down as props
- * 
+ *
  * @param homepageResult - Homepage data from getHomepageData() (fetched at page level)
  * @param categoryIds - Category IDs for homepage
  * @param bookmarkStatusMap - Map of bookmark statuses (key: "content_type:content_slug", value: boolean)
@@ -251,7 +255,10 @@ export async function HomepageContentServer({
 
   // CRITICAL: Process homepage data from props instead of fetching
   // This eliminates duplicate function calls
-  const { homepageContentData, featuredJobs } = await processHomepageData(homepageResult, categoryIds);
+  const { homepageContentData, featuredJobs } = await processHomepageData(
+    homepageResult,
+    categoryIds
+  );
 
   // CRITICAL: Ensure data is properly serialized for Next.js Client Component
   // Next.js requires all props to be serializable (JSON-compatible)
@@ -268,7 +275,10 @@ export async function HomepageContentServer({
       : {};
 
   // Validate that serialized data maintains expected structure
-  if (Object.keys(serializedCategoryData).length === 0 && Object.keys(homepageContentData.categoryData).length > 0) {
+  if (
+    Object.keys(serializedCategoryData).length === 0 &&
+    Object.keys(homepageContentData.categoryData).length > 0
+  ) {
     reqLogger.warn(
       {
         serializedType: typeof serializedCategoryDataRaw,

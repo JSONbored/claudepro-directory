@@ -61,17 +61,36 @@ export interface UseFormTrackingReturn {
   /** Track when form is started */
   trackStart: (submissionType: SubmissionContentType) => Promise<void>;
   /** Track when a step is completed */
-  trackStepCompleted: (step: number, stepName: string, metadata?: FormTrackingMetadata) => Promise<void>;
+  trackStepCompleted: (
+    step: number,
+    stepName: string,
+    metadata?: FormTrackingMetadata
+  ) => Promise<void>;
   /** Track when a field receives focus */
   trackFieldFocused: (fieldName: string, metadata?: FormTrackingMetadata) => Promise<void>;
   /** Track when a template is selected */
-  trackTemplateSelected: (templateId: string, templateName: string, submissionType: SubmissionContentType) => Promise<void>;
+  trackTemplateSelected: (
+    templateId: string,
+    templateName: string,
+    submissionType: SubmissionContentType
+  ) => Promise<void>;
   /** Track when form is abandoned */
-  trackAbandoned: (step: number, stepName: string, metadata?: FormTrackingMetadata) => Promise<void>;
+  trackAbandoned: (
+    step: number,
+    stepName: string,
+    metadata?: FormTrackingMetadata
+  ) => Promise<void>;
   /** Track when form is submitted */
-  trackSubmitted: (submissionType: SubmissionContentType, metadata?: FormTrackingMetadata) => Promise<void>;
+  trackSubmitted: (
+    submissionType: SubmissionContentType,
+    metadata?: FormTrackingMetadata
+  ) => Promise<void>;
   /** Track validation errors */
-  trackValidationError: (fieldName: string, errorMessage: string, metadata?: FormTrackingMetadata) => Promise<void>;
+  trackValidationError: (
+    fieldName: string,
+    errorMessage: string,
+    metadata?: FormTrackingMetadata
+  ) => Promise<void>;
   /** Track when draft is saved */
   trackDraftSaved: (metadata?: FormTrackingMetadata) => Promise<void>;
   /** Track when draft is loaded */

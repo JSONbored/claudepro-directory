@@ -1,6 +1,6 @@
 /**
  * Pulse Action Types - Separated to avoid Next.js serialization issues
- * 
+ *
  * Types are extracted from pulse.ts to allow type-only imports from client components
  * without triggering Next.js to analyze and serialize the entire pulse.ts module.
  */
@@ -11,7 +11,7 @@ import type {
   focus_area_type,
   integration_type,
   use_case_type,
-} from '@heyclaude/data-layer/prisma';
+} from '@prisma/client';
 
 export type RecommendationItem = NonNullable<
   NonNullable<GetRecommendationsReturns>['results']

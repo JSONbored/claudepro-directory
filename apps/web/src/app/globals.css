@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "../styles/tabs.css";
+@import 'tailwindcss';
+@import '../styles/tabs.css';
 /* ---break---
 */
 @custom-variant dark (&:is(.dark *));
@@ -21,8 +21,8 @@
      ======================================== */
 
   /* Font Families - Auto-generates font-* utilities */
-  --font-sans: var(--font-inter, "Inter"), system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: var(--font-geist-mono, "GeistMono"), "SF Mono", Consolas, "Monaco", monospace;
+  --font-sans: var(--font-inter, 'Inter'), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: var(--font-geist-mono, 'GeistMono'), 'SF Mono', Consolas, 'Monaco', monospace;
 
   /* Border Radius - Auto-generates rounded-* utilities */
   --radius: 0.375rem;
@@ -37,7 +37,7 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-border-beam: border-beam linear infinite;
-  
+
   /* Custom Animations - Auto-generates animate-* utilities */
   /* Note: Duration and easing variables are defined in :root, accessible here */
   --animate-fade-in: fadeIn var(--duration-quick) var(--ease-out) both;
@@ -98,7 +98,9 @@
   --color-linkedin-bg: oklch(50% 0.12 250 / 0.2); /* LinkedIn blue with opacity */
 
   /* Form Button Text Color */
-  --color-form-button-text: oklch(10% 0.005 60); /* #1A1A1D - Dark text for buttons with light backgrounds */
+  --color-form-button-text: oklch(
+    10% 0.005 60
+  ); /* #1A1A1D - Dark text for buttons with light backgrounds */
 
   /* OG Image Colors (ImageResponse requires inline styles, but defined here for consistency) */
   --color-og-bg-dark: oklch(10% 0.006 60); /* #1a1410 - Dark background for OG images */
@@ -295,7 +297,9 @@
     72% 0.01 60
   ); /* Increased from 69% to 72% for improved WCAG AA contrast (4.5:1 minimum) */
   --color-text-disabled: oklch(57% 0.012 60);
-  --color-text-inverse: oklch(100% 0 0); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
+  --color-text-inverse: oklch(
+    100% 0 0
+  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: var(--claude-orange-hover);
   --color-accent-active: var(--claude-orange-active);
   --color-accent-light: var(--claude-orange-light);
@@ -333,10 +337,14 @@
      ======================================== */
 
   /* Text Colors - New */
-  --color-text-primary: oklch(94% 0.005 60); /* TOKENS: colors.text.primary (slightly different from --foreground) */
+  --color-text-primary: oklch(
+    94% 0.005 60
+  ); /* TOKENS: colors.text.primary (slightly different from --foreground) */
 
   /* Accent Colors - New */
-  --color-accent-primary: var(--claude-orange); /* TOKENS: colors.accent.primary (maps to existing) */
+  --color-accent-primary: var(
+    --claude-orange
+  ); /* TOKENS: colors.accent.primary (maps to existing) */
   --color-accent-glow: oklch(74% 0.2 35 / 0.15); /* TOKENS: colors.accent.glow */
 
   /* Border Colors - New */
@@ -361,7 +369,9 @@
   --color-category-rules-submission: oklch(58% 0.19 250); /* TOKENS: colors.category.rules */
   --color-category-commands-submission: oklch(77% 0.2 38); /* TOKENS: colors.category.commands */
   --color-category-hooks-submission: oklch(65% 0.24 350); /* TOKENS: colors.category.hooks */
-  --color-category-statuslines-submission: oklch(60% 0.2 290); /* TOKENS: colors.category.statuslines */
+  --color-category-statuslines-submission: oklch(
+    60% 0.2 290
+  ); /* TOKENS: colors.category.statuslines */
   --color-category-skills-submission: oklch(65% 0.2 310); /* TOKENS: colors.category.skills */
 
   /* Shadow Glow Effects - New */
@@ -384,44 +394,83 @@
   --color-featured-text-light: oklch(58% 0.16 65); /* COLORS.semantic.featured.light.text */
   --color-featured-text-dark: oklch(82% 0.17 37); /* COLORS.semantic.featured.dark.text */
   --color-featured-border: oklch(58% 0.16 65 / 0.3); /* COLORS.semantic.featured.*.border */
-  --color-featured-gradient-from: oklch(58% 0.16 65 / 0.1); /* COLORS.semantic.featured.*.gradientFrom */
-  --color-featured-gradient-to: oklch(66% 0.155 65 / 0.1); /* COLORS.semantic.featured.*.gradientTo */
+  --color-featured-gradient-from: oklch(
+    58% 0.16 65 / 0.1
+  ); /* COLORS.semantic.featured.*.gradientFrom */
+  --color-featured-gradient-to: oklch(
+    66% 0.155 65 / 0.1
+  ); /* COLORS.semantic.featured.*.gradientTo */
 
   /* Sponsored Colors - New */
   --color-sponsored-text-light: oklch(64% 0.22 290); /* COLORS.semantic.sponsored.light.text */
   --color-sponsored-text-dark: oklch(78% 0.168 290); /* COLORS.semantic.sponsored.dark.text */
   --color-sponsored-border: oklch(64% 0.22 290 / 0.3); /* COLORS.semantic.sponsored.*.border */
-  --color-sponsored-gradient-from: oklch(64% 0.22 290 / 0.1); /* COLORS.semantic.sponsored.*.gradientFrom */
-  --color-sponsored-gradient-to: oklch(68% 0.26 350 / 0.1); /* COLORS.semantic.sponsored.*.gradientTo */
+  --color-sponsored-gradient-from: oklch(
+    64% 0.22 290 / 0.1
+  ); /* COLORS.semantic.sponsored.*.gradientFrom */
+  --color-sponsored-gradient-to: oklch(
+    68% 0.26 350 / 0.1
+  ); /* COLORS.semantic.sponsored.*.gradientTo */
 
   /* Social Proof Colors - New */
   --color-social-view-text-light: oklch(54% 0.17 250); /* COLORS.semantic.social.view.light.text */
   --color-social-view-text-dark: oklch(78% 0.168 250); /* COLORS.semantic.social.view.dark.text */
   --color-social-copy-text-light: oklch(62% 0.19 145); /* COLORS.semantic.social.copy.light.text */
   --color-social-copy-text-dark: oklch(72% 0.19 145); /* COLORS.semantic.social.copy.dark.text */
-  --color-social-bookmark-text-light: oklch(66% 0.155 65); /* COLORS.semantic.social.bookmark.light.text */
-  --color-social-bookmark-text-dark: oklch(82% 0.17 37); /* COLORS.semantic.social.bookmark.dark.text */
+  --color-social-bookmark-text-light: oklch(
+    66% 0.155 65
+  ); /* COLORS.semantic.social.bookmark.light.text */
+  --color-social-bookmark-text-dark: oklch(
+    82% 0.17 37
+  ); /* COLORS.semantic.social.bookmark.dark.text */
 
   /* Swipe Gesture Colors - New */
   --color-swipe-copy-text-light: oklch(52% 0.18 145); /* COLORS.semantic.swipe.copy.light.text */
   --color-swipe-copy-text-dark: oklch(72% 0.19 145); /* COLORS.semantic.swipe.copy.dark.text */
   --color-swipe-copy-border: oklch(52% 0.18 145 / 0.3); /* COLORS.semantic.swipe.copy.*.border */
   --color-swipe-copy-bg: oklch(52% 0.18 145 / 0.2); /* COLORS.semantic.swipe.copy.*.background */
-  --color-swipe-bookmark-text-light: oklch(54% 0.17 250); /* COLORS.semantic.swipe.bookmark.light.text */
-  --color-swipe-bookmark-text-dark: oklch(78% 0.168 250); /* COLORS.semantic.swipe.bookmark.dark.text */
-  --color-swipe-bookmark-border: oklch(54% 0.17 250 / 0.3); /* COLORS.semantic.swipe.bookmark.*.border */
-  --color-swipe-bookmark-bg: oklch(54% 0.17 250 / 0.2); /* COLORS.semantic.swipe.bookmark.*.background */
+  --color-swipe-bookmark-text-light: oklch(
+    54% 0.17 250
+  ); /* COLORS.semantic.swipe.bookmark.light.text */
+  --color-swipe-bookmark-text-dark: oklch(
+    78% 0.168 250
+  ); /* COLORS.semantic.swipe.bookmark.dark.text */
+  --color-swipe-bookmark-border: oklch(
+    54% 0.17 250 / 0.3
+  ); /* COLORS.semantic.swipe.bookmark.*.border */
+  --color-swipe-bookmark-bg: oklch(
+    54% 0.17 250 / 0.2
+  ); /* COLORS.semantic.swipe.bookmark.*.background */
 
   /* Search Bar Colors - New (RGB for Motion.dev, OKLCH for CSS) */
-  --color-search-focus-border-oklch: oklch(74% 0.2 35 / 0.7); /* COLORS.semantic.search.focus.borderColor.oklch */
-  --color-search-focus-border-rgb: rgba(249, 115, 22, 0.7); /* COLORS.semantic.search.focus.borderColor.rgb */
-  --color-search-focus-shadow-oklch: oklch(74% 0.2 35 / 0.2); /* COLORS.semantic.search.focus.shadowColor.oklch */
-  --color-search-focus-shadow-rgb: rgba(249, 115, 22, 0.2); /* COLORS.semantic.search.focus.shadowColor.rgb */
+  --color-search-focus-border-oklch: oklch(
+    74% 0.2 35 / 0.7
+  ); /* COLORS.semantic.search.focus.borderColor.oklch */
+  --color-search-focus-border-rgb: rgba(
+    249,
+    115,
+    22,
+    0.7
+  ); /* COLORS.semantic.search.focus.borderColor.rgb */
+  --color-search-focus-shadow-oklch: oklch(
+    74% 0.2 35 / 0.2
+  ); /* COLORS.semantic.search.focus.shadowColor.oklch */
+  --color-search-focus-shadow-rgb: rgba(
+    249,
+    115,
+    22,
+    0.2
+  ); /* COLORS.semantic.search.focus.shadowColor.rgb */
   --color-search-glow-from: rgba(249, 115, 22, 0.5); /* COLORS.semantic.search.focus.glow.from */
   --color-search-glow-via: rgba(249, 115, 22, 0.35); /* COLORS.semantic.search.focus.glow.via */
   --color-search-glow-to: rgba(249, 115, 22, 0.15); /* COLORS.semantic.search.focus.glow.to */
   --color-search-particle-base: rgba(249, 115, 22, 0.4); /* COLORS.semantic.search.particle.base */
-  --color-search-particle-shadow: rgba(249, 115, 22, 0.5); /* COLORS.semantic.search.particle.shadow */
+  --color-search-particle-shadow: rgba(
+    249,
+    115,
+    22,
+    0.5
+  ); /* COLORS.semantic.search.particle.shadow */
 
   /* ========================================
      BADGE_COLORS - Convert Tailwind to OKLCH
@@ -433,57 +482,59 @@
   --color-badge-category-agents-bg: oklch(68% 0.22 145 / 0.1); /* purple-500/10 */
   --color-badge-category-agents-text: oklch(78% 0.18 145); /* purple-400 → OKLCH equivalent */
   --color-badge-category-agents-border: oklch(68% 0.22 145 / 0.2); /* purple-500/20 */
-  
+
   --color-badge-category-mcp: oklch(62% 0.22 305); /* cyan-500 → OKLCH equivalent */
   --color-badge-category-mcp-bg: oklch(62% 0.22 305 / 0.1);
   --color-badge-category-mcp-text: oklch(72% 0.18 305); /* cyan-400 */
   --color-badge-category-mcp-border: oklch(62% 0.22 305 / 0.2);
-  
+
   --color-badge-category-commands: oklch(75% 0.22 38); /* blue-500 → OKLCH equivalent */
   --color-badge-category-commands-bg: oklch(75% 0.22 38 / 0.1);
   --color-badge-category-commands-text: oklch(78% 0.18 38); /* blue-400 */
   --color-badge-category-commands-border: oklch(75% 0.22 38 / 0.2);
-  
+
   --color-badge-category-rules: oklch(75% 0.18 65); /* amber-500 → OKLCH equivalent */
   --color-badge-category-rules-bg: oklch(75% 0.18 65 / 0.1);
   --color-badge-category-rules-text: oklch(82% 0.17 65); /* amber-400 */
   --color-badge-category-rules-border: oklch(75% 0.18 65 / 0.2);
-  
+
   --color-badge-category-hooks: oklch(68% 0.22 145); /* green-500 → OKLCH equivalent */
   --color-badge-category-hooks-bg: oklch(68% 0.22 145 / 0.1);
   --color-badge-category-hooks-text: oklch(72% 0.19 145); /* green-400 */
   --color-badge-category-hooks-border: oklch(68% 0.22 145 / 0.2);
-  
+
   --color-badge-category-statuslines: oklch(60% 0.18 290); /* teal-500 → OKLCH equivalent */
   --color-badge-category-statuslines-bg: oklch(60% 0.18 290 / 0.1);
   --color-badge-category-statuslines-text: oklch(70% 0.17 290); /* teal-400 */
   --color-badge-category-statuslines-border: oklch(60% 0.18 290 / 0.2);
-  
+
   --color-badge-category-collections: oklch(62% 0.22 270); /* indigo-500 → OKLCH equivalent */
   --color-badge-category-collections-bg: oklch(62% 0.22 270 / 0.1);
   --color-badge-category-collections-text: oklch(72% 0.19 270); /* indigo-400 */
   --color-badge-category-collections-border: oklch(62% 0.22 270 / 0.2);
-  
+
   --color-badge-category-skills: oklch(68% 0.22 310); /* pink-500 → OKLCH equivalent */
   --color-badge-category-skills-bg: oklch(68% 0.22 310 / 0.1);
   --color-badge-category-skills-text: oklch(78% 0.19 310); /* pink-400 */
   --color-badge-category-skills-border: oklch(68% 0.22 310 / 0.2);
-  
+
   --color-badge-category-guides: oklch(68% 0.22 280); /* violet-500 → OKLCH equivalent */
   --color-badge-category-guides-bg: oklch(68% 0.22 280 / 0.1);
   --color-badge-category-guides-text: oklch(78% 0.19 280); /* violet-400 */
   --color-badge-category-guides-border: oklch(68% 0.22 280 / 0.2);
-  
-  --color-badge-category-jobs: oklch(74% 0.2 35); /* orange-500 → OKLCH equivalent (matches claude-orange) */
+
+  --color-badge-category-jobs: oklch(
+    74% 0.2 35
+  ); /* orange-500 → OKLCH equivalent (matches claude-orange) */
   --color-badge-category-jobs-bg: oklch(74% 0.2 35 / 0.1);
   --color-badge-category-jobs-text: oklch(78% 0.19 35); /* orange-400 */
   --color-badge-category-jobs-border: oklch(74% 0.2 35 / 0.2);
-  
+
   --color-badge-category-changelog: oklch(60% 0.005 60); /* slate-500 → OKLCH equivalent */
   --color-badge-category-changelog-bg: oklch(60% 0.005 60 / 0.1);
   --color-badge-category-changelog-text: oklch(72% 0.005 60); /* slate-400 */
   --color-badge-category-changelog-border: oklch(60% 0.005 60 / 0.2);
-  
+
   --color-badge-category-default: oklch(60% 0.005 60); /* gray-500 → OKLCH equivalent */
   --color-badge-category-default-bg: oklch(60% 0.005 60 / 0.1);
   --color-badge-category-default-text: oklch(72% 0.005 60); /* gray-400 */
@@ -494,27 +545,27 @@
   --color-badge-jobtype-fulltime-bg: oklch(68% 0.22 145 / 0.1);
   --color-badge-jobtype-fulltime-text: oklch(72% 0.19 145); /* green-400 */
   --color-badge-jobtype-fulltime-border: oklch(68% 0.22 145 / 0.2);
-  
+
   --color-badge-jobtype-parttime: oklch(75% 0.22 38); /* blue-500 */
   --color-badge-jobtype-parttime-bg: oklch(75% 0.22 38 / 0.1);
   --color-badge-jobtype-parttime-text: oklch(78% 0.18 38); /* blue-400 */
   --color-badge-jobtype-parttime-border: oklch(75% 0.22 38 / 0.2);
-  
+
   --color-badge-jobtype-contract: oklch(74% 0.2 35); /* orange-500 */
   --color-badge-jobtype-contract-bg: oklch(74% 0.2 35 / 0.1);
   --color-badge-jobtype-contract-text: oklch(78% 0.19 35); /* orange-400 */
   --color-badge-jobtype-contract-border: oklch(74% 0.2 35 / 0.2);
-  
+
   --color-badge-jobtype-freelance: oklch(68% 0.22 145); /* purple-500 */
   --color-badge-jobtype-freelance-bg: oklch(68% 0.22 145 / 0.1);
   --color-badge-jobtype-freelance-text: oklch(78% 0.18 145); /* purple-400 */
   --color-badge-jobtype-freelance-border: oklch(68% 0.22 145 / 0.2);
-  
+
   --color-badge-jobtype-internship: oklch(62% 0.22 305); /* cyan-500 */
   --color-badge-jobtype-internship-bg: oklch(62% 0.22 305 / 0.1);
   --color-badge-jobtype-internship-text: oklch(72% 0.18 305); /* cyan-400 */
   --color-badge-jobtype-internship-border: oklch(62% 0.22 305 / 0.2);
-  
+
   --color-badge-jobtype-remote: oklch(68% 0.22 145); /* emerald-500 */
   --color-badge-jobtype-remote-bg: oklch(68% 0.22 145 / 0.1);
   --color-badge-jobtype-remote-text: oklch(72% 0.19 145); /* emerald-400 */
@@ -525,12 +576,12 @@
   --color-badge-difficulty-beginner-bg: oklch(68% 0.22 145 / 0.1);
   --color-badge-difficulty-beginner-text: oklch(72% 0.19 145); /* green-400 */
   --color-badge-difficulty-beginner-border: oklch(68% 0.22 145 / 0.2);
-  
+
   --color-badge-difficulty-intermediate: oklch(75% 0.18 65); /* yellow-500 */
   --color-badge-difficulty-intermediate-bg: oklch(75% 0.18 65 / 0.1);
   --color-badge-difficulty-intermediate-text: oklch(82% 0.17 65); /* yellow-400 */
   --color-badge-difficulty-intermediate-border: oklch(75% 0.18 65 / 0.2);
-  
+
   --color-badge-difficulty-advanced: oklch(70% 0.195 25); /* red-500 */
   --color-badge-difficulty-advanced-bg: oklch(70% 0.195 25 / 0.1);
   --color-badge-difficulty-advanced-text: oklch(75% 0.19 25); /* red-400 */
@@ -541,17 +592,17 @@
   --color-badge-status-success-bg: var(--color-success-bg);
   --color-badge-status-success-text: var(--color-success);
   --color-badge-status-success-border: var(--color-success-border);
-  
+
   --color-badge-status-warning: var(--color-warning);
   --color-badge-status-warning-bg: var(--color-warning-bg);
   --color-badge-status-warning-text: var(--color-warning);
   --color-badge-status-warning-border: var(--color-warning-border);
-  
+
   --color-badge-status-error: var(--color-error);
   --color-badge-status-error-bg: var(--color-error-bg);
   --color-badge-status-error-text: var(--color-error);
   --color-badge-status-error-border: var(--color-error-border);
-  
+
   --color-badge-status-info: var(--color-info);
   --color-badge-status-info-bg: var(--color-info-bg);
   --color-badge-status-info-text: var(--color-info);
@@ -562,17 +613,17 @@
   --color-badge-collectiontype-starter-kit-bg: oklch(75% 0.22 38 / 0.1);
   --color-badge-collectiontype-starter-kit-text: oklch(78% 0.18 38); /* blue-400 */
   --color-badge-collectiontype-starter-kit-border: oklch(75% 0.22 38 / 0.2);
-  
+
   --color-badge-collectiontype-workflow: oklch(68% 0.22 145); /* purple-500 */
   --color-badge-collectiontype-workflow-bg: oklch(68% 0.22 145 / 0.1);
   --color-badge-collectiontype-workflow-text: oklch(78% 0.18 145); /* purple-400 */
   --color-badge-collectiontype-workflow-border: oklch(68% 0.22 145 / 0.2);
-  
+
   --color-badge-collectiontype-advanced-system: oklch(70% 0.195 25); /* red-500 */
   --color-badge-collectiontype-advanced-system-bg: oklch(70% 0.195 25 / 0.1);
   --color-badge-collectiontype-advanced-system-text: oklch(75% 0.19 25); /* red-400 */
   --color-badge-collectiontype-advanced-system-border: oklch(70% 0.195 25 / 0.2);
-  
+
   --color-badge-collectiontype-use-case: oklch(68% 0.22 145); /* green-500 */
   --color-badge-collectiontype-use-case-bg: oklch(68% 0.22 145 / 0.1);
   --color-badge-collectiontype-use-case-text: oklch(72% 0.19 145); /* green-400 */
@@ -584,31 +635,31 @@
   --color-badge-changelog-added-text-light: oklch(52% 0.18 145); /* green-700 */
   --color-badge-changelog-added-text-dark: oklch(72% 0.19 145); /* green-400 */
   --color-badge-changelog-added-border: oklch(68% 0.22 145 / 0.2);
-  
+
   --color-badge-changelog-changed: oklch(75% 0.22 38); /* blue-500 */
   --color-badge-changelog-changed-bg: oklch(75% 0.22 38 / 0.1);
   --color-badge-changelog-changed-text-light: oklch(58% 0.19 250); /* blue-700 */
   --color-badge-changelog-changed-text-dark: oklch(78% 0.18 38); /* blue-400 */
   --color-badge-changelog-changed-border: oklch(75% 0.22 38 / 0.2);
-  
+
   --color-badge-changelog-deprecated: oklch(75% 0.18 65); /* yellow-500 */
   --color-badge-changelog-deprecated-bg: oklch(75% 0.18 65 / 0.1);
   --color-badge-changelog-deprecated-text-light: oklch(58% 0.16 65); /* yellow-700 */
   --color-badge-changelog-deprecated-text-dark: oklch(82% 0.17 65); /* yellow-400 */
   --color-badge-changelog-deprecated-border: oklch(75% 0.18 65 / 0.2);
-  
+
   --color-badge-changelog-removed: oklch(70% 0.195 25); /* red-500 */
   --color-badge-changelog-removed-bg: oklch(70% 0.195 25 / 0.1);
   --color-badge-changelog-removed-text-light: oklch(53% 0.19 25); /* red-700 */
   --color-badge-changelog-removed-text-dark: oklch(75% 0.19 25); /* red-400 */
   --color-badge-changelog-removed-border: oklch(70% 0.195 25 / 0.2);
-  
+
   --color-badge-changelog-fixed: oklch(68% 0.22 145); /* purple-500 */
   --color-badge-changelog-fixed-bg: oklch(68% 0.22 145 / 0.1);
   --color-badge-changelog-fixed-text-light: oklch(64% 0.22 290); /* purple-700 */
   --color-badge-changelog-fixed-text-dark: oklch(78% 0.18 145); /* purple-400 */
   --color-badge-changelog-fixed-border: oklch(68% 0.22 145 / 0.2);
-  
+
   --color-badge-changelog-security: oklch(74% 0.2 35); /* orange-500 */
   --color-badge-changelog-security-bg: oklch(74% 0.2 35 / 0.1);
   --color-badge-changelog-security-text-light: oklch(58% 0.19 38); /* orange-700 */
@@ -620,22 +671,22 @@
   --color-badge-submissionstatus-pending-bg: oklch(75% 0.18 65 / 0.1);
   --color-badge-submissionstatus-pending-text: oklch(82% 0.17 65); /* yellow-400 */
   --color-badge-submissionstatus-pending-border: oklch(75% 0.18 65 / 0.2);
-  
+
   --color-badge-submissionstatus-approved: oklch(75% 0.22 38); /* blue-500 */
   --color-badge-submissionstatus-approved-bg: oklch(75% 0.22 38 / 0.1);
   --color-badge-submissionstatus-approved-text: oklch(78% 0.18 38); /* blue-400 */
   --color-badge-submissionstatus-approved-border: oklch(75% 0.22 38 / 0.2);
-  
+
   --color-badge-submissionstatus-merged: oklch(68% 0.22 145); /* green-500 */
   --color-badge-submissionstatus-merged-bg: oklch(68% 0.22 145 / 0.1);
   --color-badge-submissionstatus-merged-text: oklch(72% 0.19 145); /* green-400 */
   --color-badge-submissionstatus-merged-border: oklch(68% 0.22 145 / 0.2);
-  
+
   --color-badge-submissionstatus-rejected: oklch(70% 0.195 25); /* red-500 */
   --color-badge-submissionstatus-rejected-bg: oklch(70% 0.195 25 / 0.1);
   --color-badge-submissionstatus-rejected-text: oklch(75% 0.19 25); /* red-400 */
   --color-badge-submissionstatus-rejected-border: oklch(70% 0.195 25 / 0.2);
-  
+
   --color-badge-submissionstatus-spam: oklch(60% 0.005 60); /* gray-500 */
   --color-badge-submissionstatus-spam-bg: oklch(60% 0.005 60 / 0.1);
   --color-badge-submissionstatus-spam-text: oklch(72% 0.005 60); /* gray-400 */
@@ -646,11 +697,11 @@
   --color-badge-membertype-owner-bg: oklch(68% 0.22 145 / 0.1);
   --color-badge-membertype-owner-text: oklch(78% 0.18 145); /* purple-400 */
   --color-badge-membertype-owner-border: oklch(68% 0.22 145 / 0.3);
-  
+
   --color-badge-membertype-contributor-bg: oklch(74% 0.2 35 / 0.1); /* accent/10 */
   --color-badge-membertype-contributor-text: var(--claude-orange); /* accent */
   --color-badge-membertype-contributor-border: oklch(74% 0.2 35 / 0.3); /* accent/30 */
-  
+
   --color-badge-membertype-member-text: var(--muted-foreground); /* muted-foreground */
   --color-badge-membertype-member-border: oklch(78% 0.008 60 / 0.2); /* muted-foreground/20 */
 
@@ -659,32 +710,32 @@
   --color-badge-jobstatus-draft-bg: oklch(75% 0.18 65 / 0.1);
   --color-badge-jobstatus-draft-text: oklch(82% 0.17 65); /* yellow-400 */
   --color-badge-jobstatus-draft-border: oklch(75% 0.18 65 / 0.2);
-  
+
   --color-badge-jobstatus-pending-payment: oklch(74% 0.2 35); /* orange-500 */
   --color-badge-jobstatus-pending-payment-bg: oklch(74% 0.2 35 / 0.1);
   --color-badge-jobstatus-pending-payment-text: oklch(78% 0.19 35); /* orange-400 */
   --color-badge-jobstatus-pending-payment-border: oklch(74% 0.2 35 / 0.2);
-  
+
   --color-badge-jobstatus-pending-review: oklch(75% 0.22 38); /* blue-500 */
   --color-badge-jobstatus-pending-review-bg: oklch(75% 0.22 38 / 0.1);
   --color-badge-jobstatus-pending-review-text: oklch(78% 0.18 38); /* blue-400 */
   --color-badge-jobstatus-pending-review-border: oklch(75% 0.22 38 / 0.2);
-  
+
   --color-badge-jobstatus-active: oklch(68% 0.22 145); /* green-500 */
   --color-badge-jobstatus-active-bg: oklch(68% 0.22 145 / 0.1);
   --color-badge-jobstatus-active-text: oklch(72% 0.19 145); /* green-400 */
   --color-badge-jobstatus-active-border: oklch(68% 0.22 145 / 0.2);
-  
+
   --color-badge-jobstatus-expired: oklch(70% 0.195 25); /* red-500 */
   --color-badge-jobstatus-expired-bg: oklch(70% 0.195 25 / 0.1);
   --color-badge-jobstatus-expired-text: oklch(75% 0.19 25); /* red-400 */
   --color-badge-jobstatus-expired-border: oklch(70% 0.195 25 / 0.2);
-  
+
   --color-badge-jobstatus-rejected: oklch(70% 0.195 25); /* red-500 */
   --color-badge-jobstatus-rejected-bg: oklch(70% 0.195 25 / 0.1);
   --color-badge-jobstatus-rejected-text: oklch(75% 0.19 25); /* red-400 */
   --color-badge-jobstatus-rejected-border: oklch(70% 0.195 25 / 0.2);
-  
+
   --color-badge-jobstatus-deleted: oklch(60% 0.005 60); /* gray-500 */
   --color-badge-jobstatus-deleted-bg: oklch(60% 0.005 60 / 0.1);
   --color-badge-jobstatus-deleted-text: oklch(72% 0.005 60); /* gray-400 */
@@ -692,7 +743,7 @@
 
   /* Primary color - maps to Claude orange brand color */
   --primary-foreground: var(--color-text-inverse);
-  
+
   /* Tailwind CSS variable mappings for shadcn/ui compatibility */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -727,27 +778,27 @@
    */
 
   /* Animation Durations - Semantic design tokens from DURATION presets */
-  --duration-micro: 100ms;        /* 0.1s - Very quick animations */
-  --duration-fast: 150ms;        /* 0.15s - Quick feedback */
-  --duration-quick: 200ms;       /* 0.2s - Rapid animations */
+  --duration-micro: 100ms; /* 0.1s - Very quick animations */
+  --duration-fast: 150ms; /* 0.15s - Quick feedback */
+  --duration-quick: 200ms; /* 0.2s - Rapid animations */
   --duration-comfortable: 250ms; /* 0.25s - Balanced quick animations */
-  --duration-default: 300ms;     /* 0.3s - Standard animations */
-  --duration-balanced: 350ms;     /* 0.35s - Between default and slow */
-  --duration-slow: 400ms;        /* 0.4s - Deliberate animations */
-  --duration-moderate: 500ms;    /* 0.5s - Balanced animations */
-  --duration-extended: 600ms;    /* 0.6s - Longer animations */
-  --duration-relaxed: 700ms;     /* 0.7s - Between extended and long */
-  --duration-long: 800ms;        /* 0.8s - Extended animations */
-  --duration-very-long: 1000ms;  /* 1.0s - Very long animations */
+  --duration-default: 300ms; /* 0.3s - Standard animations */
+  --duration-balanced: 350ms; /* 0.35s - Between default and slow */
+  --duration-slow: 400ms; /* 0.4s - Deliberate animations */
+  --duration-moderate: 500ms; /* 0.5s - Balanced animations */
+  --duration-extended: 600ms; /* 0.6s - Longer animations */
+  --duration-relaxed: 700ms; /* 0.7s - Between extended and long */
+  --duration-long: 800ms; /* 0.8s - Extended animations */
+  --duration-very-long: 1000ms; /* 1.0s - Very long animations */
   --duration-extended-long: 1200ms; /* 1.2s - Extended long animations */
   --duration-very-extended: 1500ms; /* 1.5s - Very extended animations */
-  --duration-maximum: 2000ms;    /* 2.0s - Maximum animations */
+  --duration-maximum: 2000ms; /* 2.0s - Maximum animations */
   --duration-extra-long: 2500ms; /* 2.5s - Extra long animations */
-  --duration-extreme: 3000ms;    /* 3.0s - Extreme animations */
-  --duration-hero: 5000ms;       /* 5.0s - Hero-level animations */
-  --duration-subtle: 8000ms;     /* 8.0s - Subtle, long animations */
-  --duration-beam: 15000ms;      /* 15.0s - Border beam animations */
-  --duration-morphing: 20000ms;  /* 20.0s - Morphing blob animations */
+  --duration-extreme: 3000ms; /* 3.0s - Extreme animations */
+  --duration-hero: 5000ms; /* 5.0s - Hero-level animations */
+  --duration-subtle: 8000ms; /* 8.0s - Subtle, long animations */
+  --duration-beam: 15000ms; /* 15.0s - Border beam animations */
+  --duration-morphing: 20000ms; /* 20.0s - Morphing blob animations */
 
   /* Legacy duration variables (kept for backward compatibility) */
   --duration-75: 75ms;
@@ -842,7 +893,9 @@
     44% 0.01 65
   ); /* Decreased from 67% to 44% for improved WCAG AA contrast (4.5:1 minimum) on light backgrounds */
   --color-text-disabled: oklch(68% 0.008 60);
-  --color-text-inverse: oklch(100% 0 0); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
+  --color-text-inverse: oklch(
+    100% 0 0
+  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: oklch(54% 0.17 40);
   --color-accent-active: oklch(50% 0.175 39);
   --color-accent-subtle: oklch(95% 0.035 42);
@@ -894,7 +947,9 @@
     72% 0.01 60
   ); /* Increased from 69% to 72% for improved WCAG AA contrast (4.5:1 minimum) */
   --color-text-disabled: oklch(57% 0.012 60);
-  --color-text-inverse: oklch(100% 0 0); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
+  --color-text-inverse: oklch(
+    100% 0 0
+  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: var(--claude-orange-hover);
   --color-accent-active: var(--claude-orange-active);
   --color-accent-subtle: oklch(45% 0.08 35);
@@ -957,9 +1012,9 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings:
-      "rlig" 1,
-      "calt" 1;
-    font-family: var(--font-inter, "Inter"), system-ui, sans-serif;
+      'rlig' 1,
+      'calt' 1;
+    font-family: var(--font-inter, 'Inter'), system-ui, sans-serif;
     background-color: var(--background);
     color: var(--foreground);
     -webkit-font-smoothing: antialiased;
@@ -1007,7 +1062,7 @@
   }
 
   .link-accent-underline::after {
-    content: "";
+    content: '';
     position: absolute;
     bottom: 0;
     left: 0;
@@ -1434,7 +1489,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   transition: var(--transition-normal);
-  
+
   &:hover {
     background: var(--color-bg-tertiary);
     box-shadow: var(--shadow-sm);
@@ -1527,7 +1582,7 @@
 
 @utility hover-accent-subtle {
   transition: background-color var(--duration-quick) var(--ease-in-out);
-  
+
   &:hover {
     background-color: var(--accent) / 0.05;
   }
@@ -1764,10 +1819,16 @@
 /* Enhanced system font fallback for improved layout stability */
 .font-sans {
   font-family:
-    var(--font-inter, "Inter"), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "Helvetica Neue", Arial, sans-serif;
-  font-feature-settings: "cv11", "ss01";
-  font-variation-settings: "opsz" 32;
+    var(--font-inter, 'Inter'),
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+  font-feature-settings: 'cv11', 'ss01';
+  font-variation-settings: 'opsz' 32;
 }
 
 /* Optimize font rendering performance */
@@ -1822,8 +1883,10 @@ body {
   border-radius: 0.5rem;
   overflow: hidden;
   font-family: var(--font-sans);
-    border: 1px solid var(--border);
-  box-shadow: 0 10px 38px -10px rgba(22, 23, 24, 0.35), 0 10px 20px -15px rgba(22, 23, 24, 0.2);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 10px 38px -10px rgba(22, 23, 24, 0.35),
+    0 10px 20px -15px rgba(22, 23, 24, 0.2);
   outline: none;
 }
 
@@ -1922,17 +1985,39 @@ body {
 }
 
 /* Staggered entrance - each item animates with slight delay for beautiful cascade */
-[cmdk-item]:nth-child(1) { animation-delay: 0.03s; }
-[cmdk-item]:nth-child(2) { animation-delay: 0.06s; }
-[cmdk-item]:nth-child(3) { animation-delay: 0.09s; }
-[cmdk-item]:nth-child(4) { animation-delay: 0.12s; }
-[cmdk-item]:nth-child(5) { animation-delay: 0.15s; }
-[cmdk-item]:nth-child(6) { animation-delay: 0.18s; }
-[cmdk-item]:nth-child(7) { animation-delay: 0.21s; }
-[cmdk-item]:nth-child(8) { animation-delay: 0.24s; }
-[cmdk-item]:nth-child(9) { animation-delay: 0.27s; }
-[cmdk-item]:nth-child(10) { animation-delay: 0.30s; }
-[cmdk-item]:nth-child(n+11) { animation-delay: 0.33s; }
+[cmdk-item]:nth-child(1) {
+  animation-delay: 0.03s;
+}
+[cmdk-item]:nth-child(2) {
+  animation-delay: 0.06s;
+}
+[cmdk-item]:nth-child(3) {
+  animation-delay: 0.09s;
+}
+[cmdk-item]:nth-child(4) {
+  animation-delay: 0.12s;
+}
+[cmdk-item]:nth-child(5) {
+  animation-delay: 0.15s;
+}
+[cmdk-item]:nth-child(6) {
+  animation-delay: 0.18s;
+}
+[cmdk-item]:nth-child(7) {
+  animation-delay: 0.21s;
+}
+[cmdk-item]:nth-child(8) {
+  animation-delay: 0.24s;
+}
+[cmdk-item]:nth-child(9) {
+  animation-delay: 0.27s;
+}
+[cmdk-item]:nth-child(10) {
+  animation-delay: 0.3s;
+}
+[cmdk-item]:nth-child(n + 11) {
+  animation-delay: 0.33s;
+}
 
 @keyframes cmdk-item-enter {
   from {
@@ -1987,7 +2072,9 @@ body {
 @media (prefers-reduced-motion: reduce) {
   [cmdk-item] {
     animation: none;
-    transition: background-color 150ms ease, color 150ms ease;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
   }
 
   [cmdk-item]:hover:not([data-disabled='true']):not([data-selected='true']),
@@ -2007,7 +2094,7 @@ body {
 [cmdk-separator] {
   height: 1px;
   width: 100%;
-    background: var(--border);
+  background: var(--border);
   margin: 0.25rem 0;
 }
 
@@ -2029,8 +2116,8 @@ body {
 }
 
 /* CRITICAL FIX: Ensure DialogContent is centered and above overlay - override Radix UI positioning */
-[role="dialog"][data-radix-dialog-content],
-[role="dialog"] {
+[role='dialog'][data-radix-dialog-content],
+[role='dialog'] {
   /* Force centering with !important to override Radix inline styles */
   position: fixed !important;
   top: 50% !important;
@@ -2046,7 +2133,7 @@ body {
 /* CRITICAL: Command palette specific width constraints - responsive at all breakpoints */
 /* Only set width constraints for command palette (dialogs with cmdk-root) */
 /* Other dialogs will use their component-defined widths */
-[role="dialog"][data-radix-dialog-content] [cmdk-root] {
+[role='dialog'][data-radix-dialog-content] [cmdk-root] {
   /* CRITICAL: Command root should never exceed parent width */
   max-width: 100% !important;
   width: 100% !important;

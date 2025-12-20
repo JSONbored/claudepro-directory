@@ -2,7 +2,7 @@
 
 /**
  * User Profile Skeleton
- * 
+ *
  * Perfectly matches the structure of /u/[slug] page:
  * - Hero/Profile Header: Avatar, name, bio, ProfileSocialStats, website link, FollowButton
  * - ProfileStatsCard
@@ -23,7 +23,7 @@ const KEYS_6 = Array.from({ length: 6 }, (_, i) => `skeleton-${i + 1}`);
  */
 export function UserProfileSkeleton() {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <motion.div
       className={`bg-background min-h-screen`}
@@ -43,12 +43,12 @@ export function UserProfileSkeleton() {
             <div className="flex items-start gap-3">
               {/* Avatar */}
               <Skeleton size="xl" width="xl" rounded="full" className="h-24 w-24 shrink-0" />
-              
+
               {/* Content */}
               <div className="mt-4 space-y-3">
                 <Skeleton size="xl" width="lg" className="h-9" />
                 <Skeleton size="md" width="2xl" className="h-5" />
-                
+
                 {/* Social Stats */}
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-0.5">
@@ -61,7 +61,7 @@ export function UserProfileSkeleton() {
                     <Skeleton size="xs" width="xs" />
                   </div>
                 </div>
-                
+
                 {/* Website link */}
                 <div className="flex items-center gap-3">
                   <span>•</span>
@@ -72,7 +72,7 @@ export function UserProfileSkeleton() {
                 </div>
               </div>
             </div>
-            
+
             {/* Follow Button */}
             <Skeleton size="md" width="lg" rounded="md" className="h-10" />
           </div>

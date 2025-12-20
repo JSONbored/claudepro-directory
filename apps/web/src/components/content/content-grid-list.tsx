@@ -1,16 +1,11 @@
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink, HelpCircle } from '@heyclaude/web-runtime/icons';
 import {
   type ContentListServerProps,
   type DisplayableContent,
 } from '@heyclaude/web-runtime/types/component.types';
-import {
-  ICON_NAME_MAP,
-  UnifiedBadge,
-  Skeleton,
-  Button,
-} from '@heyclaude/web-runtime/ui';
+import { ICON_NAME_MAP, UnifiedBadge, Skeleton, Button } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
 
@@ -51,23 +46,26 @@ function ContentHeroSection<T extends DisplayableContent>({
         ];
 
   return (
-    <section className="relative overflow-hidden border-b border-border/50 bg-card/30" aria-labelledby={pageTitleId}>
+    <section
+      className="border-border/50 bg-card/30 relative overflow-hidden border-b"
+      aria-labelledby={pageTitleId}
+    >
       <div className="container mx-auto px-4 py-4">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-6 flex justify-center">
             <div className="bg-accent/10 rounded-full p-3" aria-hidden="true">
               {(() => {
                 const IconComponent = ICON_NAME_MAP[icon] || HelpCircle;
-                return <IconComponent className="h-8 w-8 text-primary" />;
+                return <IconComponent className="text-primary h-8 w-8" />;
               })()}
             </div>
           </div>
 
-          <h1 id={pageTitleId} className="text-4xl lg:text-6xl font-bold mb-6 text-foreground">
+          <h1 id={pageTitleId} className="text-foreground mb-6 text-4xl font-bold lg:text-6xl">
             {title}
           </h1>
 
-          <p className="text-lg text-muted-foreground mb-8 leading-relaxed">{description}</p>
+          <p className="text-muted-foreground mb-8 text-lg leading-relaxed">{description}</p>
 
           <ul className="mb-8 flex list-none flex-wrap justify-center gap-1">
             {displayBadges.map((badge, idx) => (
@@ -77,12 +75,7 @@ function ContentHeroSection<T extends DisplayableContent>({
                     ? (() => {
                         if (typeof badge.icon === 'string') {
                           const BadgeIconComponent = ICON_NAME_MAP[badge.icon] || HelpCircle;
-                          return (
-                            <BadgeIconComponent
-                              className="h-3 w-3 mr-2"
-                              aria-hidden="true"
-                            />
-                          );
+                          return <BadgeIconComponent className="mr-2 h-3 w-3" aria-hidden="true" />;
                         }
                         return null;
                       })()
@@ -195,7 +188,6 @@ export function ContentListServer<T extends DisplayableContent>({
           </Suspense>
         </div>
       </section>
-
     </div>
   );
 }

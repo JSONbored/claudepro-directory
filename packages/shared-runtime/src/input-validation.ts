@@ -2,7 +2,7 @@ const MAX_QUERY_STRING_LENGTH = 2048;
 const MAX_PATH_SEGMENT_LENGTH = 255;
 const MAX_ROUTE_LENGTH = 2048;
 
-export function validateQueryString(url: URL): { error?: string; valid: boolean; } {
+export function validateQueryString(url: URL): { error?: string; valid: boolean } {
   const queryString = url.search;
   if (queryString.length > MAX_QUERY_STRING_LENGTH) {
     return {
@@ -21,7 +21,7 @@ export function validateQueryString(url: URL): { error?: string; valid: boolean;
   return { valid: true };
 }
 
-export function validatePathSegments(segments: string[]): { error?: string; valid: boolean; } {
+export function validatePathSegments(segments: string[]): { error?: string; valid: boolean } {
   for (const segment of segments) {
     if (segment.length > MAX_PATH_SEGMENT_LENGTH) {
       return {
@@ -67,7 +67,7 @@ export function sanitizeRoute(route: string): string {
 export function validateCategory(
   category: null | string,
   validCategories: readonly string[]
-): { category?: string; error?: string; valid: boolean; } {
+): { category?: string; error?: string; valid: boolean } {
   if (!category) {
     return { valid: true };
   }
@@ -88,7 +88,7 @@ export function validateLimit(
   min = 1,
   max = 100,
   defaultValue = 10
-): { error?: string; limit?: number; valid: boolean; } {
+): { error?: string; limit?: number; valid: boolean } {
   if (!limit) {
     return { valid: true, limit: defaultValue };
   }
@@ -121,7 +121,7 @@ export const MAX_BODY_SIZE = {
 export function validateBodySize(
   contentLength: null | string,
   maxSize: number = MAX_BODY_SIZE.default
-): { error?: string; valid: boolean; } {
+): { error?: string; valid: boolean } {
   if (!contentLength) {
     return { valid: true };
   }
@@ -144,7 +144,7 @@ export function validateBodySize(
   return { valid: true };
 }
 
-export function validateSlug(slug: string): { error?: string; valid: boolean; } {
+export function validateSlug(slug: string): { error?: string; valid: boolean } {
   if (!/^[a-z0-9-]+$/.test(slug)) {
     return {
       valid: false,

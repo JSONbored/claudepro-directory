@@ -157,7 +157,7 @@ function FooterComponent() {
               </div>
 
               {/* Description */}
-              <p className="text-muted-foreground text-sm max-w-sm leading-relaxed">
+              <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
                 {APP_CONFIG.description}
               </p>
 
@@ -199,7 +199,7 @@ function FooterComponent() {
               </div>
 
               {/* Description */}
-              <p className="text-muted-foreground text-sm max-w-sm leading-relaxed">
+              <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
                 {APP_CONFIG.description}
               </p>
 
@@ -252,7 +252,7 @@ function FooterComponent() {
                     <li key={`browse-${link.label}`}>
                       <Link
                         href={link.href}
-                        className="text-muted-foreground text-sm hover:text-foreground transition-colors"
+                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -271,7 +271,11 @@ function FooterComponent() {
                       <li key={`resources-${link.label}`}>
                         <Link
                           href={link.href}
-                          className={cn('text-muted-foreground text-sm hover:text-foreground inline-flex items-center', 'gap-1.5', 'transition-colors')}
+                          className={cn(
+                            'text-muted-foreground hover:text-foreground inline-flex items-center text-sm',
+                            'gap-1.5',
+                            'transition-colors'
+                          )}
                           {...(isExternal && {
                             target: '_blank',
                             rel: 'noopener noreferrer',
@@ -294,7 +298,7 @@ function FooterComponent() {
                     <li key={`support-${link.label}`}>
                       <Link
                         href={link.href}
-                        className="text-muted-foreground text-sm hover:text-foreground transition-colors"
+                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -311,7 +315,7 @@ function FooterComponent() {
                     <li key={`legal-${link.label}`}>
                       <Link
                         href={link.href}
-                        className="text-muted-foreground text-sm hover:text-foreground transition-colors"
+                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -330,7 +334,7 @@ function FooterComponent() {
                     <li key={`browse-${link.label}`}>
                       <Link
                         href={link.href}
-                        className="text-muted-foreground text-sm hover:text-foreground transition-colors"
+                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -349,7 +353,11 @@ function FooterComponent() {
                       <li key={`resources-${link.label}`}>
                         <Link
                           href={link.href}
-                          className={cn('text-muted-foreground text-sm hover:text-foreground inline-flex items-center', 'gap-1.5', 'transition-colors')}
+                          className={cn(
+                            'text-muted-foreground hover:text-foreground inline-flex items-center text-sm',
+                            'gap-1.5',
+                            'transition-colors'
+                          )}
                           {...(isExternal && {
                             target: '_blank',
                             rel: 'noopener noreferrer',
@@ -372,7 +380,7 @@ function FooterComponent() {
                     <li key={`support-${link.label}`}>
                       <Link
                         href={link.href}
-                        className="text-muted-foreground text-sm hover:text-foreground transition-colors"
+                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -389,7 +397,7 @@ function FooterComponent() {
                     <li key={`legal-${link.label}`}>
                       <Link
                         href={link.href}
-                        className="text-muted-foreground text-sm hover:text-foreground transition-colors"
+                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -412,7 +420,7 @@ function FooterComponent() {
           >
             <div className="flex flex-col items-center justify-between gap-3 md:flex-row">
               {/* Left - Copyright with heart and version */}
-              <div className={cn('text-muted-foreground text-sm flex items-center', 'gap-1.5')}>
+              <div className={cn('text-muted-foreground flex items-center text-sm', 'gap-1.5')}>
                 <span>© {currentYear}</span>
                 <span className="text-border">•</span>
                 <span>Made with</span>
@@ -448,7 +456,7 @@ function FooterComponent() {
                 */}
                 <Link
                   href="/changelog"
-                  className="font-mono text-xs hover:text-foreground transition-colors"
+                  className="hover:text-foreground font-mono text-xs transition-colors"
                   title={`Version ${APP_VERSION} - View changelog and release history`}
                 >
                   v{APP_VERSION}
@@ -463,7 +471,7 @@ function FooterComponent() {
                     width="250"
                     height="30"
                     title="System Status"
-                    className={cn("rounded-md [color-scheme:normal] border-0 overflow-hidden")}
+                    className={cn('overflow-hidden rounded-md border-0 [color-scheme:normal]')}
                     loading="lazy"
                   />
                 ) : null}
@@ -474,7 +482,7 @@ function FooterComponent() {
           <div className="border-border/30 mt-4 border-t pt-8">
             <div className="flex flex-col items-center justify-between gap-3 md:flex-row">
               {/* Left - Copyright with heart and version */}
-              <div className={cn('text-muted-foreground text-sm flex items-center', 'gap-1.5')}>
+              <div className={cn('text-muted-foreground flex items-center text-sm', 'gap-1.5')}>
                 <span>© {currentYear}</span>
                 <span className="text-border">•</span>
                 <span>Made with</span>
@@ -510,7 +518,7 @@ function FooterComponent() {
                 */}
                 <Link
                   href="/changelog"
-                  className="font-mono text-xs hover:text-foreground transition-colors"
+                  className="hover:text-foreground font-mono text-xs transition-colors"
                   title={`Version ${APP_VERSION} - View changelog and release history`}
                 >
                   v{APP_VERSION}

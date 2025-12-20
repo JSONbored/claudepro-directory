@@ -12,8 +12,8 @@
  * Performance: Only the interactive buttons are client-side, rest is server-rendered
  */
 
-import { ContentCategory } from '@heyclaude/data-layer/prisma';
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import { content_category as ContentCategory } from '@prisma/client';
+import type { content_category } from '@prisma/client';
 import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
@@ -53,7 +53,12 @@ import { useRef, useCallback, memo } from 'react';
 
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { ExploreDropdown } from '@/src/components/content/explore-dropdown';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@heyclaude/web-runtime/ui';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@heyclaude/web-runtime/ui';
 import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 
@@ -72,9 +77,7 @@ function sanitizePathSegment(segment: string): null | string {
  * Infer whether an item's copyable content should be treated as `code` or `link`.
  */
 function determineCopyType(
-  item:
-    | ContentItem
-    | (ContentItem & GetContentDetailCompleteReturns['content'])
+  item: ContentItem | (ContentItem & GetContentDetailCompleteReturns['content'])
 ): CopyType {
   if ('content' in item && item.content) return 'code';
   if ('configuration' in item && item['configuration']) return 'code';
@@ -85,15 +88,9 @@ function determineCopyType(
  * Extracts a non-empty string suitable for copying from a content item or its configuration.
  */
 function getContentForCopy(
-  item:
-    | ContentItem
-    | (ContentItem & GetContentDetailCompleteReturns['content'])
+  item: ContentItem | (ContentItem & GetContentDetailCompleteReturns['content'])
 ): null | string {
-  if (
-    'content' in item &&
-    typeof item.content === 'string' &&
-    item.content.trim().length > 0
-  ) {
+  if ('content' in item && typeof item.content === 'string' && item.content.trim().length > 0) {
     return item.content;
   }
 
@@ -129,9 +126,7 @@ export interface DetailHeaderActionsProps {
   category: content_category;
   displayTitle: string;
   hasContent: boolean;
-  item:
-    | ContentItem
-    | NonNullable<GetContentDetailCompleteReturns['content']>;
+  item: ContentItem | NonNullable<GetContentDetailCompleteReturns['content']>;
   onCopyContent?: (() => Promise<void>) | undefined;
   primaryAction: SerializableAction;
   secondaryActions?: SerializableAction[];
@@ -140,7 +135,7 @@ export interface DetailHeaderActionsProps {
 
 /**
  * Render the interactive header and sticky actions sidebar for a content detail view.
- * 
+ *
  * PERFORMANCE: Memoized to prevent unnecessary re-renders when parent components update.
  * This component receives many props and renders a complex UI, so memoization prevents
  * expensive re-renders when parent state changes (e.g., search, filters, etc.).
@@ -166,7 +161,7 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
   const itemSlug = typeof item['slug'] === 'string' ? item['slug'] : '';
   const itemDescription = typeof item['description'] === 'string' ? item['description'] : '';
 
-  const itemForCopy = ('id' in item && typeof item['id'] === 'string') ? (item as ContentItem) : null;
+  const itemForCopy = 'id' in item && typeof item['id'] === 'string' ? (item as ContentItem) : null;
 
   const { copy } = useCopyWithEmailCapture({
     emailContext: {
@@ -203,19 +198,19 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
   const { openDrawer: openPinboardDrawer } = usePinboardDrawer();
   const pinned = isPinned(category, itemSlug);
 
-  const shareUrl = isClient
-    ? `${window.location.origin}/${category}/${itemSlug}`
-    : '';
+  const shareUrl = isClient ? `${window.location.origin}/${category}/${itemSlug}` : '';
 
   const handleTogglePin = useCallback(() => {
     const wasPinned = pinned;
-    const tags = ('tags' in item && Array.isArray(item.tags))
-      ? item.tags.filter((tag: unknown): tag is string => typeof tag === 'string')
-      : undefined;
+    const tags =
+      'tags' in item && Array.isArray(item.tags)
+        ? item.tags.filter((tag: unknown): tag is string => typeof tag === 'string')
+        : undefined;
     const itemTitle = typeof item['title'] === 'string' ? item['title'] : null;
-    const itemThumbnailUrl = 'thumbnail_url' in item && typeof item['thumbnail_url'] === 'string'
-      ? item['thumbnail_url']
-      : null;
+    const itemThumbnailUrl =
+      'thumbnail_url' in item && typeof item['thumbnail_url'] === 'string'
+        ? item['thumbnail_url']
+        : null;
 
     togglePin({
       category,
@@ -240,7 +235,17 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
         },
       });
     }
-  }, [pinned, item, category, itemSlug, displayTitle, typeName, itemDescription, togglePin, openPinboardDrawer]);
+  }, [
+    pinned,
+    item,
+    category,
+    itemSlug,
+    displayTitle,
+    typeName,
+    itemDescription,
+    togglePin,
+    openPinboardDrawer,
+  ]);
 
   const handleCopyContent = useCallback(async () => {
     if (onCopyContent) {
@@ -248,7 +253,8 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
       return;
     }
 
-    const itemForCopy = ('id' in item && typeof item['id'] === 'string') ? (item as ContentItem) : null;
+    const itemForCopy =
+      'id' in item && typeof item['id'] === 'string' ? (item as ContentItem) : null;
     const contentToCopy = itemForCopy ? getContentForCopy(itemForCopy) : null;
 
     if (!contentToCopy) {
@@ -284,86 +290,95 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
 
   const hasDownloadAvailable = hasMcpbDownload || hasStorageDownload;
 
-  const handleDownload = useCallback((
-    downloadType: 'mcpb' | 'zip',
-    contentItem: ContentItem,
-    category: content_category,
-    pulse: ReturnType<typeof usePulse>
-  ) => {
-    const safeSlug = sanitizePathSegment(contentItem.slug);
-    if (!safeSlug) {
-      toasts.raw.error('Invalid content slug', {
-        description: 'The download link is not available.',
+  const handleDownload = useCallback(
+    (
+      downloadType: 'mcpb' | 'zip',
+      contentItem: ContentItem,
+      category: content_category,
+      pulse: ReturnType<typeof usePulse>
+    ) => {
+      const safeSlug = sanitizePathSegment(contentItem.slug);
+      if (!safeSlug) {
+        toasts.raw.error('Invalid content slug', {
+          description: 'The download link is not available.',
+        });
+        return;
+      }
+
+      const downloadUrl =
+        downloadType === 'mcpb'
+          ? `/api/content/mcp/${safeSlug}?format=storage`
+          : `/api/content/skills/${safeSlug}?format=storage`;
+
+      globalThis.location.href = downloadUrl;
+      pulse
+        .download({
+          category,
+          slug: contentItem.slug,
+          action_type: downloadType === 'mcpb' ? 'download_mcpb' : 'download_zip',
+        })
+        .catch((error) => {
+          logUnhandledPromise(
+            downloadType === 'mcpb'
+              ? 'trackInteraction:download_mcpb'
+              : 'trackInteraction:download',
+            error,
+            {
+              slug: contentItem.slug,
+              category,
+            }
+          );
+        });
+
+      const contentItemTitle =
+        typeof contentItem['title'] === 'string' ? contentItem['title'] : null;
+      const contentItemSlug = typeof contentItem['slug'] === 'string' ? contentItem['slug'] : '';
+      toasts.raw.success('Download started!', {
+        description: `Downloading ${contentItemTitle || contentItemSlug} package...`,
       });
-      return;
-    }
+    },
+    []
+  );
 
-    const downloadUrl =
-      downloadType === 'mcpb'
-        ? `/api/content/mcp/${safeSlug}?format=storage`
-        : `/api/content/skills/${safeSlug}?format=storage`;
-
-    globalThis.location.href = downloadUrl;
-    pulse
-      .download({
-        category,
-        slug: contentItem.slug,
-        action_type: downloadType === 'mcpb' ? 'download_mcpb' : 'download_zip',
-      })
-      .catch((error) => {
-        logUnhandledPromise(
-          downloadType === 'mcpb' ? 'trackInteraction:download_mcpb' : 'trackInteraction:download',
-          error,
-          {
-            slug: contentItem.slug,
-            category,
+  const handleActionClick = useCallback(
+    (action: SerializableAction) => {
+      if (action.type === 'download') {
+        if (hasMcpbDownload) {
+          const itemForDownload =
+            'id' in item && typeof item['id'] === 'string' ? (item as ContentItem) : null;
+          if (itemForDownload) {
+            handleDownload('mcpb', itemForDownload, category, pulse);
           }
-        );
-      });
-
-    const contentItemTitle = typeof contentItem['title'] === 'string' ? contentItem['title'] : null;
-    const contentItemSlug = typeof contentItem['slug'] === 'string' ? contentItem['slug'] : '';
-    toasts.raw.success('Download started!', {
-      description: `Downloading ${contentItemTitle || contentItemSlug} package...`,
-    });
-  }, []);
-
-  const handleActionClick = useCallback((action: SerializableAction) => {
-    if (action.type === 'download') {
-      if (hasMcpbDownload) {
-        const itemForDownload = ('id' in item && typeof item['id'] === 'string') ? (item as ContentItem) : null;
-        if (itemForDownload) {
-          handleDownload('mcpb', itemForDownload, category, pulse);
+          return;
         }
+
+        if (hasStorageDownload) {
+          const itemForDownload =
+            'id' in item && typeof item['id'] === 'string' ? (item as ContentItem) : null;
+          if (itemForDownload) {
+            handleDownload('zip', itemForDownload, category, pulse);
+          }
+          return;
+        }
+
+        toasts.raw.error('Download unavailable', {
+          description: 'This package is not yet available for download.',
+        });
         return;
       }
 
-      if (hasStorageDownload) {
-        const itemForDownload = ('id' in item && typeof item['id'] === 'string') ? (item as ContentItem) : null;
-        if (itemForDownload) {
-          handleDownload('zip', itemForDownload, category, pulse);
-        }
-        return;
-      }
-
-      toasts.raw.error('Download unavailable', {
-        description: 'This package is not yet available for download.',
+      toasts.raw.success(`${action.label}`, {
+        description: `Copy the ${typeName.toLowerCase()} content and follow the installation instructions.`,
       });
-      return;
-    }
-
-    toasts.raw.success(`${action.label}`, {
-      description: `Copy the ${typeName.toLowerCase()} content and follow the installation instructions.`,
-    });
-  }, [hasMcpbDownload, hasStorageDownload, item, category, pulse, handleDownload, typeName]);
+    },
+    [hasMcpbDownload, hasStorageDownload, item, category, pulse, handleDownload, typeName]
+  );
 
   // Share handlers
   const handleShareTwitter = useCallback(() => {
     void (async () => {
       const shareUrlWithUtm = `${shareUrl}?utm_source=share&utm_medium=share&utm_campaign=${category}`;
-      const tweetText = encodeURIComponent(
-        `Check out ${displayTitle} on ClaudePro Directory!`
-      );
+      const tweetText = encodeURIComponent(`Check out ${displayTitle} on ClaudePro Directory!`);
       const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(shareUrlWithUtm)}`;
       if (isClient) {
         window.open(twitterUrl, '_blank', 'noopener,noreferrer,width=550,height=420');
@@ -422,10 +437,14 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
             onClick: handleCopyForAI,
           },
         });
-        logUnhandledPromise('Failed to copy for AI', new Error(`HTTP ${response.status}: ${response.statusText}`), {
-          category,
-          slug: itemSlug,
-        });
+        logUnhandledPromise(
+          'Failed to copy for AI',
+          new Error(`HTTP ${response.status}: ${response.statusText}`),
+          {
+            category,
+            slug: itemSlug,
+          }
+        );
         return;
       }
       const content = await response.text();
@@ -468,10 +487,14 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
             onClick: handleCopyMarkdown,
           },
         });
-        logUnhandledPromise('Failed to copy markdown', new Error(`HTTP ${response.status}: ${response.statusText}`), {
-          category,
-          slug: itemSlug,
-        });
+        logUnhandledPromise(
+          'Failed to copy markdown',
+          new Error(`HTTP ${response.status}: ${response.statusText}`),
+          {
+            category,
+            slug: itemSlug,
+          }
+        );
         return;
       }
       const content = await response.text();
@@ -512,10 +535,14 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
             onClick: handleDownloadMarkdown,
           },
         });
-        logUnhandledPromise('Failed to download markdown', new Error(`HTTP ${response.status}: ${response.statusText}`), {
-          category,
-          slug: itemSlug,
-        });
+        logUnhandledPromise(
+          'Failed to download markdown',
+          new Error(`HTTP ${response.status}: ${response.statusText}`),
+          {
+            category,
+            slug: itemSlug,
+          }
+        );
         return;
       }
       const content = await response.text();
@@ -550,7 +577,8 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
   }, [category, itemSlug, pulse]);
 
   const handleDownloadClick = useCallback(() => {
-    const itemForDownload = ('id' in item && typeof item['id'] === 'string') ? (item as ContentItem) : null;
+    const itemForDownload =
+      'id' in item && typeof item['id'] === 'string' ? (item as ContentItem) : null;
     if (!itemForDownload) return;
 
     if (hasMcpbDownload) {
@@ -607,7 +635,9 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
               style="outline"
               className={cn('text-sm', 'font-medium', 'text-foreground')}
             >
-              {isValidCategory(category) ? getCategoryConfig(category)?.typeName ?? category : category}
+              {isValidCategory(category)
+                ? (getCategoryConfig(category)?.typeName ?? category)
+                : category}
             </UnifiedBadge>
           </div>
 
@@ -662,8 +692,8 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
                     {primaryAction.type === 'copy_command' || primaryAction.type === 'copy_script'
                       ? 'Copy content to clipboard'
                       : primaryAction.type === 'download'
-                      ? 'Download configuration file'
-                      : 'Primary action for this item'}
+                        ? 'Download configuration file'
+                        : 'Primary action for this item'}
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -680,11 +710,7 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
                     whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.button.hover}
                     transition={MICROINTERACTIONS.button.transition}
                   >
-                    <Button
-                      onClick={handleDownloadClick}
-                      variant="outline"
-                      className="w-full"
-                    >
+                    <Button onClick={handleDownloadClick} variant="outline" className="w-full">
                       <Download className={cn('h-4 w-4', 'mr-2')} />
                       {category === ContentCategory.mcp ? 'Download .mcpb' : 'Download'}
                     </Button>
@@ -748,12 +774,7 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
                     whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.button.hover}
                     transition={MICROINTERACTIONS.button.transition}
                   >
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleCopyLink}
-                      className="flex-1"
-                    >
+                    <Button variant="outline" size="sm" onClick={handleCopyLink} className="flex-1">
                       <Copy className={cn('h-4 w-4', 'mr-2')} />
                       Share
                     </Button>
@@ -839,11 +860,7 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
           </div>
 
           {/* Explore Dropdown */}
-          <ExploreDropdown
-            category={category}
-            slug={itemSlug}
-            pageType="detail"
-          />
+          <ExploreDropdown category={category} slug={itemSlug} pageType="detail" />
 
           {/* View Pinboard Link */}
           <Button
@@ -898,9 +915,7 @@ export const DetailHeaderActions = memo(DetailHeaderActionsComponent, (prevProps
   }
 
   // Compare secondaryActions array length and content
-  if (
-    (prevProps.secondaryActions?.length ?? 0) !== (nextProps.secondaryActions?.length ?? 0)
-  ) {
+  if ((prevProps.secondaryActions?.length ?? 0) !== (nextProps.secondaryActions?.length ?? 0)) {
     return false;
   }
 

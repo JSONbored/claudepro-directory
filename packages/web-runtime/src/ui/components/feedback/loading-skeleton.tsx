@@ -133,7 +133,7 @@ function LoadingSkeleton() {
   return (
     <div className={'flex min-h-screen items-center justify-center'}>
       <div className="flex flex-col items-center gap-6">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
         <p className="text-muted-foreground">Loading...</p>
       </div>
     </div>
@@ -151,7 +151,7 @@ function PageHeaderSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDi
 
 function ConfigCardSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('rounded-lg border bg-card p-6', className)} {...props}>
+    <div className={cn('bg-card rounded-lg border p-6', className)} {...props}>
       <Skeleton size="md" width="3/4" className="mb-3" />
       <Skeleton size="sm" width="3xl" className="mb-2" />
       <Skeleton size="sm" width="5/6" className="mb-4" />
@@ -173,13 +173,12 @@ function ConfigGridSkeleton({
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <div className={cn('container mx-auto px-4 py-8', className)} {...props}>
       <PageHeaderSkeleton />
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {[...Array(count)].map((_, i) => {
-
           return (
             <motion.div
               key={`config-skeleton-${i + 1}`}
@@ -188,7 +187,7 @@ function ConfigGridSkeleton({
               transition={
                 stagger && !prefersReducedMotion
                   ? {
-                ...SPRING.loading,
+                      ...SPRING.loading,
                       mass: 0.5,
                       delay: i * STAGGER.micro, // Stagger by 50ms per card
                     }
@@ -214,11 +213,10 @@ function ContentListSkeleton({
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <div className={cn('space-y-4', className)} {...props}>
       {[...Array(count)].map((_, i) => {
-
         return (
           <motion.div
             key={`content-skeleton-${i + 1}`}
@@ -228,26 +226,26 @@ function ContentListSkeleton({
             transition={
               stagger && !prefersReducedMotion
                 ? {
-                ...SPRING.default,
+                    ...SPRING.default,
                     mass: 0.5,
                     delay: i * STAGGER.micro, // Faster stagger for lists (using micro for 40ms)
                   }
                 : {}
             }
           >
-          <div className={'mb-3 flex items-start justify-between'}>
-            <div className="flex-1">
-              <Skeleton size="md" width="2/3" className="mb-2" />
-              <Skeleton size="sm" width="3xl" />
+            <div className={'mb-3 flex items-start justify-between'}>
+              <div className="flex-1">
+                <Skeleton size="md" width="2/3" className="mb-2" />
+                <Skeleton size="sm" width="3xl" />
+              </div>
+              <Skeleton size="sm" width="xs" rounded="full" />
             </div>
-            <Skeleton size="sm" width="xs" rounded="full" />
-          </div>
-          <div className="flex gap-2">
-            <Skeleton size="xs" width="xs" rounded="full" />
-            <Skeleton size="xs" width="xs" rounded="full" />
-            <Skeleton size="xs" width="xs" rounded="full" />
-          </div>
-        </motion.div>
+            <div className="flex gap-2">
+              <Skeleton size="xs" width="xs" rounded="full" />
+              <Skeleton size="xs" width="xs" rounded="full" />
+              <Skeleton size="xs" width="xs" rounded="full" />
+            </div>
+          </motion.div>
         );
       })}
     </div>
@@ -271,10 +269,10 @@ function FilterBarSkeleton({
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <div
-      className={cn('space-y-6 rounded-lg border border-border/50 bg-card/30 p-6', className)}
+      className={cn('border-border/50 bg-card/30 space-y-6 rounded-lg border p-6', className)}
       {...props}
     >
       <div className="flex items-center justify-between">
@@ -283,7 +281,6 @@ function FilterBarSkeleton({
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => {
-
           return (
             <motion.div
               key={`filter-skeleton-${i + 1}`}
@@ -293,22 +290,21 @@ function FilterBarSkeleton({
               transition={
                 stagger && !prefersReducedMotion
                   ? {
-                ...SPRING.loading,
+                      ...SPRING.loading,
                       mass: 0.5,
                       delay: i * STAGGER.micro, // 50ms stagger per filter
                     }
                   : {}
               }
             >
-            <Skeleton size="sm" width="sm" />
-            <Skeleton size="lg" width="3xl" />
-          </motion.div>
+              <Skeleton size="sm" width="sm" />
+              <Skeleton size="lg" width="3xl" />
+            </motion.div>
           );
         })}
       </div>
       <div className="flex flex-wrap gap-2">
         {[...Array(8)].map((_, i) => {
-
           return (
             <motion.div
               key={`tag-skeleton-${i + 1}`}
@@ -317,15 +313,15 @@ function FilterBarSkeleton({
               transition={
                 stagger && !prefersReducedMotion
                   ? {
-                ...SPRING.loading,
+                      ...SPRING.loading,
                       mass: 0.5,
                       delay: STAGGER.default + i * STAGGER.micro, // Start after filters, 20ms stagger per tag (using micro for 20ms)
                     }
                   : {}
               }
             >
-            <Skeleton size="sm" width="xs" rounded="full" />
-          </motion.div>
+              <Skeleton size="sm" width="xs" rounded="full" />
+            </motion.div>
           );
         })}
       </div>
@@ -345,7 +341,7 @@ function TableSkeleton({
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <div className={cn('rounded-lg border', className)} {...props}>
       <div className="border-b p-4">
@@ -356,7 +352,6 @@ function TableSkeleton({
         </div>
       </div>
       {[...Array(rows)].map((_, rowIndex) => {
-
         return (
           <motion.div
             key={`row-${rowIndex + 1}`}
@@ -366,19 +361,19 @@ function TableSkeleton({
             transition={
               stagger && !prefersReducedMotion
                 ? {
-                ...SPRING.default,
+                    ...SPRING.default,
                     mass: 0.5,
                     delay: rowIndex * STAGGER.micro, // 30ms stagger per row (using micro for 30ms)
                   }
                 : {}
             }
           >
-          <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
-            {[...Array(columns)].map((_, colIndex) => (
-              <Skeleton key={`cell-${rowIndex + 1}-${colIndex + 1}`} size="sm" width="md" />
-            ))}
-          </div>
-        </motion.div>
+            <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+              {[...Array(columns)].map((_, colIndex) => (
+                <Skeleton key={`cell-${rowIndex + 1}-${colIndex + 1}`} size="sm" width="md" />
+              ))}
+            </div>
+          </motion.div>
         );
       })}
     </div>
@@ -416,7 +411,7 @@ function FeaturedSectionSkeleton({
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <div className={cn('space-y-8', className)} {...props}>
       {/* Section Header */}
@@ -427,7 +422,6 @@ function FeaturedSectionSkeleton({
       {/* Card Grid with Stagger */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {[...Array(count)].map((_, i) => {
-
           return (
             <motion.div
               key={`featured-skeleton-${i + 1}`}
@@ -436,15 +430,15 @@ function FeaturedSectionSkeleton({
               transition={
                 stagger && !prefersReducedMotion
                   ? {
-                ...SPRING.loading,
+                      ...SPRING.loading,
                       mass: 0.5,
                       delay: i * STAGGER.micro,
                     }
                   : {}
               }
             >
-            <ConfigCardSkeleton />
-          </motion.div>
+              <ConfigCardSkeleton />
+            </motion.div>
           );
         })}
       </div>
@@ -460,14 +454,13 @@ function HomepageStatsSkeleton({
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <div
       className={cn('flex-wrap justify-center gap-4 text-xs lg:gap-6 lg:text-sm', className)}
       {...props}
     >
       {[...Array(7)].map((_, i) => {
-
         return (
           <motion.div
             key={`stat-skeleton-${i + 1}`}
@@ -477,16 +470,16 @@ function HomepageStatsSkeleton({
             transition={
               stagger && !prefersReducedMotion
                 ? {
-                ...SPRING.default,
+                    ...SPRING.default,
                     mass: 0.5,
                     delay: i * STAGGER.micro, // 40ms stagger per stat (using micro for 40ms)
                   }
                 : {}
             }
           >
-          <Skeleton size="sm" width="xs" rounded="full" />
-          <Skeleton size="sm" width="sm" />
-        </motion.div>
+            <Skeleton size="sm" width="xs" rounded="full" />
+            <Skeleton size="sm" width="sm" />
+          </motion.div>
         );
       })}
     </div>

@@ -5,7 +5,9 @@
  *
  * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
-import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma, content_category } from '@prisma/client';
+
+type contentModel = Prisma.contentGetPayload<{}>;
 import { getDeploymentEnv } from '@heyclaude/shared-runtime/platform';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
@@ -413,7 +415,7 @@ async function DetailPageContent({
   }
 
   // Type narrowing: category is now a valid category enum
-  const validCategory = category;
+  const validCategory = category as content_category;
   const config = getCategoryConfig(validCategory);
   if (!config) {
     // logger.error() normalizes errors internally, so pass raw error

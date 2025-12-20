@@ -37,14 +37,7 @@
     "tailwind-merge", // Used via web-runtime/ui (cn utility)
     "zustand", // Used for state management
     // Workspace dependencies - used but not in individual package.json (monorepo pattern)
-    "@heyclaude/*", // All workspace packages (shared-runtime, web-runtime, data-layer, database-types, edge-runtime, generators)
-    // Edge function dependencies - used via Deno imports
-    "zod", // Used in edge functions
-    "hono", // Used in edge functions
-    "mcp-lite", // Used in edge functions
-    "@imagemagick/magick-wasm", // Used in edge functions for image processing
-    "npm", // Used in edge-runtime email common-styles (npm: protocol)
-    "zod-to-json-schema", // Used in edge functions (heyclaude-mcp/index.ts)
+    "@heyclaude/*", // All workspace packages (shared-runtime, web-runtime, data-layer, database-types, generators)
     // Verified false positives (2025-12-11 validation)
     "@types/sanitize-html", // sanitize-html is used, types needed
     "pino-pretty", // Used in logger configs for dev pretty-printing (3 locations)
@@ -100,7 +93,6 @@
   "ignoreIssues": {
     // Intentional duplicate exports (both named and default) - valid pattern
     "apps/web/src/components/content/read-progress.tsx": ["exports"],
-    "packages/edge-runtime/src/utils/email/theme.ts": ["exports"],
     "packages/web-runtime/src/email/base-template.tsx": ["exports"],
     "packages/web-runtime/src/email/templates/newsletter-welcome.tsx": ["exports"],
     "packages/web-runtime/src/email/theme.ts": ["exports"],
@@ -132,23 +124,12 @@
   ],
   "workspaces": {
     ".": {
-      "entry": [
-        "scripts/**/*.ts",
-        "config/**/*.ts"
-      ],
+      "entry": ["scripts/**/*.ts", "config/**/*.ts"],
       "project": ["config/**/*.ts", "scripts/**/*.ts"]
     },
     "apps/web": {
-      "entry": [
-        "src/**/*.{ts,tsx}",
-        "src/proxy.ts",
-        "next.config.mjs"
-      ],
+      "entry": ["src/**/*.{ts,tsx}", "src/proxy.ts", "next.config.mjs"],
       "project": ["src/**/*.{ts,tsx}"]
-    },
-    "apps/edge": {
-      "entry": ["supabase/functions/**/*.{ts,tsx}"],
-      "project": ["supabase/functions/**/*.{ts,tsx}"]
     },
     "packages/*": {
       "entry": ["src/**/*.{ts,tsx}"],
@@ -159,10 +140,7 @@
   // (config/ and scripts/ directories at root level)
   // Workspaces handle entry/project patterns per workspace, but don't cover root-level files
   // This is intentional - not redundant
-  "entry": [
-    "config/**/*.ts",
-    "scripts/**/*.ts"
-  ],
+  "entry": ["config/**/*.ts", "scripts/**/*.ts"],
   "project": [
     "config/**/*.ts",
     "scripts/**/*.ts",
@@ -180,8 +158,6 @@
   },
   "vitest": {
     "config": ["vitest.config.ts"],
-    "entry": [
-      "**/*.{test,spec}.{ts,tsx}"
-    ]
+    "entry": ["**/*.{test,spec}.{ts,tsx}"]
   }
 }

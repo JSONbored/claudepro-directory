@@ -49,7 +49,7 @@ const PACKAGE_BUILDS: readonly PackageBuildConfig[] = [
  * Comprehensive schema query covering all database objects
  */
 function buildSchemaQuery(schema: string): string {
-  const safeSchema = schema.replaceAll('\'', "''");
+  const safeSchema = schema.replaceAll("'", "''");
   return `
     -- Table columns
     SELECT 'table_column' as object_type, table_name, column_name, data_type, is_nullable, column_default, NULL as definition
@@ -288,24 +288,19 @@ function generateSchemaDump(params: {
   } catch (error) {
     spinner.fail('Schema dump failed');
     const schemaError = normalizeError(error, 'Schema dump failed');
-    logger.error(
-      `   ${schemaError.message}`,
-      schemaError,
-      {
-        script: 'sync-database-schema',
-        step: 'Schema Dump',
-      }
-    );
+    logger.error(`   ${schemaError.message}`, schemaError, {
+      script: 'sync-database-schema',
+      step: 'Schema Dump',
+    });
     return {
       step: 'Schema Dump',
       success: false,
       skipped: false,
       duration_ms: Math.round(performance.now() - startTime),
-      reason: normalizeError(error, "Operation failed").message,
+      reason: normalizeError(error, 'Operation failed').message,
     };
   }
 }
-
 
 function runPackageBuilds(params: {
   dryRun: boolean;
@@ -360,20 +355,16 @@ function runPackageBuilds(params: {
   } catch (error) {
     spinner.fail('Package builds failed');
     const buildError = normalizeError(error, 'Package builds failed');
-    logger.error(
-      `   ${buildError.message}`,
-      buildError,
-      {
-        script: 'sync-database-schema',
-        step: 'Package Builds',
-      }
-    );
+    logger.error(`   ${buildError.message}`, buildError, {
+      script: 'sync-database-schema',
+      step: 'Package Builds',
+    });
     return {
       step: 'Package Builds',
       success: false,
       skipped: false,
       duration_ms: Math.round(performance.now() - startTime),
-      reason: normalizeError(error, "Operation failed").message,
+      reason: normalizeError(error, 'Operation failed').message,
     };
   }
 }
@@ -405,7 +396,7 @@ function runTypeVerification(dryRun: boolean): StepResult {
       success: false,
       skipped: false,
       duration_ms: Math.round(performance.now() - startTime),
-      reason: normalizeError(error, "Operation failed").message,
+      reason: normalizeError(error, 'Operation failed').message,
     };
   }
 }
@@ -551,7 +542,7 @@ export async function runSyncDb() {
 
     const summaryRows = results.map((result) => ({
       step: result.step,
-      status: result.skipped ? 'SKIPPED' : (result.success ? 'SUCCESS' : 'FAILED'),
+      status: result.skipped ? 'SKIPPED' : result.success ? 'SUCCESS' : 'FAILED',
       duration: result.duration_ms > 0 ? `${result.duration_ms}ms` : '—',
       notes: result.reason ?? '',
     }));

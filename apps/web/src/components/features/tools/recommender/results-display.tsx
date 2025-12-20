@@ -5,14 +5,14 @@
  * Uses RPC function returns + minimal UI enrichment only.
  */
 
+import { content_category as ContentCategory } from '@prisma/client';
 import type {
   content_category,
   experience_level,
   focus_area_type,
   integration_type,
   use_case_type,
-} from '@heyclaude/data-layer/prisma';
-import { ContentCategory } from '@heyclaude/data-layer/prisma';
+} from '@prisma/client';
 import type { GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
 import { addBookmarkBatch } from '@heyclaude/web-runtime/actions/user';
 import { getContentItemUrl, sanitizeSlug } from '@heyclaude/web-runtime/content';
@@ -90,7 +90,11 @@ interface ResultsDisplayProps {
 }
 
 export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProps) {
-  const { value: showShareModal, setTrue: setShowShareModalTrue, setFalse: setShowShareModalFalse } = useBoolean();
+  const {
+    value: showShareModal,
+    setTrue: setShowShareModalTrue,
+    setFalse: setShowShareModalFalse,
+  } = useBoolean();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [minScore, setMinScore] = useState(60);
   const [maxResults, setMaxResults] = useState(10);
@@ -98,10 +102,14 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
   const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
   const { user, status } = useAuthenticatedUser({ context: 'ResultsDisplay' });
-  
+
   // Use useSafeAction hook - this properly infers types from next-safe-action
   const { executeAsync: executeSaveBatch, isPending } = useSafeAction(addBookmarkBatch, {
-    onSuccess: ({ data }: { data?: { success: boolean | null; saved_count: number; total_requested: number } }) => {
+    onSuccess: ({
+      data,
+    }: {
+      data?: { success: boolean | null; saved_count: number; total_requested: number };
+    }) => {
       if (data?.success) {
         toasts.raw.success(
           `Saved ${data.saved_count} of ${data.total_requested} recommendations to your library`,
@@ -121,7 +129,11 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
     },
     onError: ({ error }: { error: { serverError?: string; validationErrors?: unknown } }) => {
       const errorMessage = error.serverError || 'Failed to save recommendations';
-      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+      if (
+        errorMessage.includes('signed in') ||
+        errorMessage.includes('auth') ||
+        errorMessage.includes('unauthorized')
+      ) {
         openAuthModal({
           valueProposition: 'Sign in to save recommendations',
           redirectTo: pathname ?? undefined,
@@ -182,8 +194,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
   return (
     <div className="space-y-8">
       <div className="space-y-4 text-center">
-        <div className="flex items-center gap-2 justify-center">
-          <Sparkles className="h-6 w-6 text-primary" />
+        <div className="flex items-center justify-center gap-2">
+          <Sparkles className="text-primary h-6 w-6" />
           <h1 className="text-3xl font-bold md:text-4xl">Your Personalized Recommendations</h1>
         </div>
 
@@ -195,18 +207,18 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
         <div className="flex-wrap items-center justify-center gap-2">
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
-            <TrendingUp className="h-3 w-3 mr-1" />
+            <TrendingUp className="mr-1 h-3 w-3" />
             {(summary?.avg_match_score ?? 0).toFixed(0)}% Avg Match
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
-            <BarChart className="h-3 w-3 mr-1" />
+            <BarChart className="mr-1 h-3 w-3" />
             {(summary?.diversity_score ?? 0).toFixed(0)}% Diversity
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="outline" className="text-sm">
             Top Category:{' '}
             {summary?.top_category && isValidCategory(summary.top_category)
-              ? getCategoryConfig(summary.top_category)?.typeName ?? summary.top_category
-              : summary?.top_category ?? 'General'}
+              ? (getCategoryConfig(summary.top_category)?.typeName ?? summary.top_category)
+              : (summary?.top_category ?? 'General')}
           </UnifiedBadge>
         </div>
 
@@ -221,12 +233,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             <Bookmark className="h-4 w-4" />
             {isPending ? 'Saving...' : 'Save All to Library'}
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={setShowShareModalTrue}
-            className="gap-1.5"
-          >
+          <Button variant="outline" size="sm" onClick={setShowShareModalTrue} className="gap-1.5">
             <Share2 className="h-4 w-4" />
             Share Results
           </Button>
@@ -319,19 +326,19 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
             <div>
               <span className="text-sm-medium">Use Case</span>
-              <p className="text-muted-foreground text-sm mt-1 capitalize">
+              <p className="text-muted-foreground mt-1 text-sm capitalize">
                 {String(answers.useCase).replace('-', ' ')}
               </p>
             </div>
             <div>
               <span className="text-sm-medium">Experience Level</span>
-              <p className="text-muted-foreground text-sm mt-1 capitalize">
+              <p className="text-muted-foreground mt-1 text-sm capitalize">
                 {String(answers.experienceLevel)}
               </p>
             </div>
             <div>
               <span className="text-sm-medium">Tool Preferences</span>
-              <p className="text-muted-foreground text-sm mt-1">
+              <p className="text-muted-foreground mt-1 text-sm">
                 {Array.isArray(answers.toolPreferences) ? answers.toolPreferences.join(', ') : ''}
               </p>
             </div>
@@ -340,7 +347,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             answers.p_integrations.length > 0 ? (
               <div>
                 <span className="text-sm-medium">Integrations</span>
-                <p className="text-muted-foreground text-sm mt-1">
+                <p className="text-muted-foreground mt-1 text-sm">
                   {answers.p_integrations.join(', ')}
                 </p>
               </div>
@@ -350,7 +357,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             answers.p_focus_areas.length > 0 ? (
               <div>
                 <span className="text-sm-medium">Focus Areas</span>
-                <p className="text-muted-foreground text-sm mt-1">
+                <p className="text-muted-foreground mt-1 text-sm">
                   {answers.p_focus_areas.join(', ')}
                 </p>
               </div>
@@ -358,7 +365,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             {answers.teamSize ? (
               <div>
                 <span className="text-sm-medium">Team Size</span>
-                <p className="text-muted-foreground text-sm mt-1 capitalize">
+                <p className="text-muted-foreground mt-1 text-sm capitalize">
                   {String(answers.teamSize)}
                 </p>
               </div>
@@ -378,8 +385,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               category === 'all'
                 ? 'All Results'
                 : category && isValidCategory(category)
-                  ? getCategoryConfig(category)?.typeName ?? category
-                  : category ?? 'all';
+                  ? (getCategoryConfig(category)?.typeName ?? category)
+                  : (category ?? 'all');
             return (
               <TabsTrigger key={category ?? 'all'} value={category ?? 'all'}>
                 {displayName} ({count})
@@ -430,9 +437,12 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     ? result.author
                     : undefined;
                 const getMatchScoreColor = (score: number) => {
-                  if (score >= 90) return 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20';
-                  if (score >= 75) return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
-                  if (score >= 60) return 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20';
+                  if (score >= 90)
+                    return 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20';
+                  if (score >= 75)
+                    return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
+                  if (score >= 60)
+                    return 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20';
                   return 'text-muted-foreground';
                 };
                 const getMatchGradient = (score: number) => {
@@ -453,7 +463,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                               style="secondary"
                               className={`${getMatchScoreColor(matchScore)} px-3 py-1 text-base font-bold`}
                             >
-                              <Sparkles className="h-3 w-3 mr-1" />
+                              <Sparkles className="mr-1 h-3 w-3" />
                               {matchScore}%
                             </UnifiedBadge>
                           </TooltipTrigger>
@@ -471,12 +481,12 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                           style="outline"
                           className="bg-background/80 backdrop-blur-sm"
                         >
-                          <Award className="h-3 w-3 mr-1" />#{rank}
+                          <Award className="mr-1 h-3 w-3" />#{rank}
                         </UnifiedBadge>
                       </div>
                     )}
 
-                    <div className="absolute bottom-4 right-4 z-10">
+                    <div className="absolute right-4 bottom-4 z-10">
                       <BookmarkButton
                         contentType={result.category}
                         contentSlug={result.slug}
@@ -511,12 +521,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         )}
                         renderContent={() => (
                           <>
-                            <div
-                              className="flex items-start gap-2 bg-accent/50 mb-3 rounded-lg p-3"
-                            >
-                              <Info
-                                className="text-primary h-4 w-4 flex-shrink-0 mt-0.5"
-                              />
+                            <div className="bg-accent/50 mb-3 flex items-start gap-2 rounded-lg p-3">
+                              <Info className="text-primary mt-0.5 h-4 w-4 flex-shrink-0" />
                               <div>
                                 <p className="text-sm-medium">Why recommended:</p>
                                 <p className="text-muted-foreground text-sm">{primaryReason}</p>
@@ -546,11 +552,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                             className="group -mx-4 mt-2 -mb-4 w-full"
                             asChild
                           >
-                            <span className="flex items-center gap-2 justify-center">
+                            <span className="flex items-center justify-center gap-2">
                               View Details
-                              <ArrowRight
-                                className="h-4 w-4 transition-transform group-hover:translate-x-1"
-                              />
+                              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                             </span>
                           </Button>
                         }
@@ -575,7 +579,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
+            <Sparkles className="text-primary h-5 w-5" />
             What's Next?
           </CardTitle>
         </CardHeader>

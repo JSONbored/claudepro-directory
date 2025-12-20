@@ -62,13 +62,14 @@ export function useSavedSearchPresets({
   const canUseStorage = useMemo(() => !disableStorage && isStorageAvailable(), [disableStorage]);
 
   // Use useLocalStorage hook for modern storage management
-  const { value: storedPresets, setValue: setStoredPresets, error: storageError } = useLocalStorage<SavedSearchPreset[]>(
-    storageKey,
-    {
-      defaultValue: [],
-      syncAcrossTabs: false,
-    }
-  );
+  const {
+    value: storedPresets,
+    setValue: setStoredPresets,
+    error: storageError,
+  } = useLocalStorage<SavedSearchPreset[]>(storageKey, {
+    defaultValue: [],
+    syncAcrossTabs: false,
+  });
 
   const [presets, setPresets] = useState<SavedSearchPreset[]>([]);
   const { value: isLoaded, setTrue: setIsLoadedTrue } = useBoolean();
@@ -122,13 +123,14 @@ export function useSavedSearchPresets({
     if (!canUseStorage || isLoaded) return;
 
     // Validate and sanitize stored presets
-    const stored = storedPresets && Array.isArray(storedPresets) 
-      ? enforcePresetLimit(
-          storedPresets
-            .map((preset) => sanitizePresetFromStorage(preset))
-            .filter((preset): preset is SavedSearchPreset => preset !== null)
-        )
-      : [];
+    const stored =
+      storedPresets && Array.isArray(storedPresets)
+        ? enforcePresetLimit(
+            storedPresets
+              .map((preset) => sanitizePresetFromStorage(preset))
+              .filter((preset): preset is SavedSearchPreset => preset !== null)
+          )
+        : [];
 
     if (stored.length > 0) {
       setPresets(stored);

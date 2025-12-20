@@ -1,4 +1,6 @@
-import type { changelogModel } from '@heyclaude/data-layer/prisma';
+import type { Prisma } from '@prisma/client';
+
+type changelogModel = Prisma.changelogGetPayload<{}>;
 import { ArrowRight, Calendar } from '@heyclaude/web-runtime/icons';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import {
@@ -9,7 +11,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@heyclaude/web-runtime/ui';
-import type { changelog_category } from '@heyclaude/data-layer/prisma';
+import type { changelog_category } from '@prisma/client';
 
 interface ChangelogStickyEntryProps {
   entry: changelogModel;
@@ -18,16 +20,23 @@ interface ChangelogStickyEntryProps {
 
 // Direct Tailwind utilities mapping - no wrapper needed
 const changelogBadgeMap: Record<changelog_category, string> = {
-  Added: 'bg-color-badge-changelog-added-bg text-color-badge-changelog-added-text-light dark:text-color-badge-changelog-added-text-dark border-color-badge-changelog-added-border',
-  Changed: 'bg-color-badge-changelog-changed-bg text-color-badge-changelog-changed-text-light dark:text-color-badge-changelog-changed-text-dark border-color-badge-changelog-changed-border',
-  Deprecated: 'bg-color-badge-changelog-deprecated-bg text-color-badge-changelog-deprecated-text-light dark:text-color-badge-changelog-deprecated-text-dark border-color-badge-changelog-deprecated-border',
-  Removed: 'bg-color-badge-changelog-removed-bg text-color-badge-changelog-removed-text-light dark:text-color-badge-changelog-removed-text-dark border-color-badge-changelog-removed-border',
-  Fixed: 'bg-color-badge-changelog-fixed-bg text-color-badge-changelog-fixed-text-light dark:text-color-badge-changelog-fixed-text-dark border-color-badge-changelog-fixed-border',
-  Security: 'bg-color-badge-changelog-security-bg text-color-badge-changelog-security-text-light dark:text-color-badge-changelog-security-text-dark border-color-badge-changelog-security-border',
+  Added:
+    'bg-color-badge-changelog-added-bg text-color-badge-changelog-added-text-light dark:text-color-badge-changelog-added-text-dark border-color-badge-changelog-added-border',
+  Changed:
+    'bg-color-badge-changelog-changed-bg text-color-badge-changelog-changed-text-light dark:text-color-badge-changelog-changed-text-dark border-color-badge-changelog-changed-border',
+  Deprecated:
+    'bg-color-badge-changelog-deprecated-bg text-color-badge-changelog-deprecated-text-light dark:text-color-badge-changelog-deprecated-text-dark border-color-badge-changelog-deprecated-border',
+  Removed:
+    'bg-color-badge-changelog-removed-bg text-color-badge-changelog-removed-text-light dark:text-color-badge-changelog-removed-text-dark border-color-badge-changelog-removed-border',
+  Fixed:
+    'bg-color-badge-changelog-fixed-bg text-color-badge-changelog-fixed-text-light dark:text-color-badge-changelog-fixed-text-dark border-color-badge-changelog-fixed-border',
+  Security:
+    'bg-color-badge-changelog-security-bg text-color-badge-changelog-security-text-light dark:text-color-badge-changelog-security-text-dark border-color-badge-changelog-security-border',
 };
 
 export function ChangelogStickyEntry({ entry, targetPath }: ChangelogStickyEntryProps) {
-  const releaseDateString = entry.release_date instanceof Date ? entry.release_date.toISOString() : entry.release_date;
+  const releaseDateString =
+    entry.release_date instanceof Date ? entry.release_date.toISOString() : entry.release_date;
   const displayDate = getRelativeTime(releaseDateString);
   const nonEmptyCategories = getNonEmptyCategories(entry.changes);
 
@@ -35,7 +44,7 @@ export function ChangelogStickyEntry({ entry, targetPath }: ChangelogStickyEntry
     <div className="group border-muted relative grid gap-6 border-l-2 pl-8 md:grid-cols-[240px_1fr] md:border-l-0 md:pl-4">
       {/* Mobile Date/Title (visible only on small screens) */}
       <div className="md:hidden">
-        <div className="text-muted-foreground text-sm mb-2 flex items-center gap-1">
+        <div className="text-muted-foreground mb-2 flex items-center gap-1 text-sm">
           <Calendar className="h-4 w-4" />
           <time dateTime={releaseDateString}>{formatChangelogDateShort(releaseDateString)}</time>
         </div>
@@ -72,7 +81,7 @@ export function ChangelogStickyEntry({ entry, targetPath }: ChangelogStickyEntry
                   key={category}
                   variant="base"
                   style="outline"
-                      className={`${changelogBadgeMap[category]} text-xs`}
+                  className={`${changelogBadgeMap[category as changelog_category] ?? ''} text-xs`}
                 >
                   {category}
                 </UnifiedBadge>
@@ -108,7 +117,7 @@ export function ChangelogStickyEntry({ entry, targetPath }: ChangelogStickyEntry
                       key={category}
                       variant="base"
                       style="outline"
-                      className={`${changelogBadgeMap[category]} font-medium`}
+                      className={`${changelogBadgeMap[category as changelog_category] ?? ''} font-medium`}
                     >
                       {category}
                     </UnifiedBadge>
@@ -122,7 +131,7 @@ export function ChangelogStickyEntry({ entry, targetPath }: ChangelogStickyEntry
               ) : null}
 
               {/* Read More Link */}
-              <div className="text-primary group-hover/card:text-accent flex items-center gap-1 text-sm-medium transition-colors">
+              <div className="text-primary group-hover/card:text-accent text-sm-medium flex items-center gap-1 transition-colors">
                 <span>Read full changelog</span>
                 <ArrowRight className="h-4 w-4" />
               </div>

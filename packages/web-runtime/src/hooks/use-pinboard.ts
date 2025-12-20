@@ -13,7 +13,7 @@
  * - Debounced persistence to reduce localStorage writes
  */
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 // Import directly from source files to avoid indirect imports through entries/core.ts
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
@@ -74,13 +74,16 @@ function loadPinsFromStorage(): PinboardItem[] {
     if (!stored) return [];
     const parsed = JSON.parse(stored) as PinboardItem[];
     if (!Array.isArray(parsed)) {
-      logger.warn({ hook: 'usePinboard' }, 'usePinboard: invalid data structure, resetting pinboard');
+      logger.warn(
+        { hook: 'usePinboard' },
+        'usePinboard: invalid data structure, resetting pinboard'
+      );
       return [];
     }
     return parsed.slice(0, MAX_PINS);
   } catch (error) {
     const normalized = normalizeError(error, 'usePinboard: failed to load pins');
-    logger.error({ err: normalized, hook: 'usePinboard', }, 'usePinboard: failed to load pins');
+    logger.error({ err: normalized, hook: 'usePinboard' }, 'usePinboard: failed to load pins');
     return [];
   }
 }
@@ -91,7 +94,7 @@ function savePinsToStorage(pins: PinboardItem[]): void {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(pins.slice(0, MAX_PINS)));
   } catch (error) {
     const normalized = normalizeError(error, 'usePinboard: failed to persist pins');
-    logger.error({ err: normalized, hook: 'usePinboard', }, 'usePinboard: failed to persist pins');
+    logger.error({ err: normalized, hook: 'usePinboard' }, 'usePinboard: failed to persist pins');
   }
 }
 
@@ -115,8 +118,7 @@ export function usePinboard(): UsePinboardReturn {
       if (!payload.slug) return;
       pulse.bookmark({ category: payload.category, slug: payload.slug, action }).catch((error) => {
         const normalized = normalizeError(error, 'usePinboard: bookmark pulse failed');
-        logger.warn({ err: normalized,
-          hook: 'usePinboard', }, 'usePinboard: bookmark pulse failed');
+        logger.warn({ err: normalized, hook: 'usePinboard' }, 'usePinboard: bookmark pulse failed');
       });
     },
     [pulse]

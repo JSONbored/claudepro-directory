@@ -1,8 +1,8 @@
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 
 /**
  * Category display name mappings
- * 
+ *
  * Maps content category enum values to user-friendly display names and descriptions.
  * Used for page titles, meta descriptions, and UI labels.
  */
@@ -12,11 +12,13 @@ const CATEGORY_DISPLAY_NAMES: Record<
 > = {
   agents: {
     pluralTitle: 'AI Agents',
-    description: "Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities.",
+    description:
+      "Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities.",
   },
   mcp: {
     pluralTitle: 'MCP Servers',
-    description: 'Model Context Protocol servers that extend Claude with external data and capabilities.',
+    description:
+      'Model Context Protocol servers that extend Claude with external data and capabilities.',
   },
   rules: {
     pluralTitle: 'Rules',
@@ -58,27 +60,30 @@ const CATEGORY_DISPLAY_NAMES: Record<
 
 /**
  * Get display name and description for a content category.
- * 
+ *
  * Returns user-friendly plural title and description for a given content category.
  * Falls back to the category enum value if no mapping exists.
- * 
+ *
  * @param category - Content category enum value
  * @returns Object with `pluralTitle` (e.g., "AI Agents") and `description` (e.g., "Browse specialized AI agents...")
- * 
+ *
  * @example
  * ```ts
  * getCategoryDisplayName('agents')
  * // Returns: { pluralTitle: 'AI Agents', description: 'Browse specialized AI agents...' }
- * 
+ *
  * getCategoryDisplayName('unknown-category')
  * // Returns: { pluralTitle: 'unknown-category', description: 'Content category' }
  * ```
  */
-export function getCategoryDisplayName(
-  category: content_category
-): { pluralTitle: string; description: string } {
-  return CATEGORY_DISPLAY_NAMES[category] ?? {
-    pluralTitle: category,
-    description: 'Content category',
-  };
+export function getCategoryDisplayName(category: content_category): {
+  pluralTitle: string;
+  description: string;
+} {
+  return (
+    CATEGORY_DISPLAY_NAMES[category] ?? {
+      pluralTitle: category,
+      description: 'Content category',
+    }
+  );
 }

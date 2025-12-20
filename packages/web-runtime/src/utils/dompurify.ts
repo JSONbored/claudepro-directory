@@ -61,10 +61,7 @@ export async function sanitizeHtml(
  * @param config - DOMPurify configuration options
  * @returns Sanitized HTML string, or original HTML if DOMPurify not loaded
  */
-export function sanitizeHtmlSync(
-  html: string,
-  config?: import('dompurify').Config
-): string {
+export function sanitizeHtmlSync(html: string, config?: import('dompurify').Config): string {
   if (!dompurifyInstance) {
     // Fallback to original HTML if DOMPurify not loaded yet
     // This should rarely happen if using async sanitizeHtml

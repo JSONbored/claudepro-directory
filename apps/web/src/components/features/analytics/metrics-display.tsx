@@ -55,12 +55,12 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
       {title || description ? (
         <div className="mb-8 text-center">
           {title ? (
-            <h3 className="mb-4 text-xl font-semibold text-foreground" itemProp="name">
+            <h3 className="text-foreground mb-4 text-xl font-semibold" itemProp="name">
               {title}
             </h3>
           ) : null}
           {description ? (
-            <p className="mx-auto max-w-3xl text-lg text-muted-foreground" itemProp="description">
+            <p className="text-muted-foreground mx-auto max-w-3xl text-lg" itemProp="description">
               {description}
             </p>
           ) : null}
@@ -93,12 +93,12 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
               )}
             >
               {/* Metric Label */}
-              <p className="text-muted-foreground text-sm font-medium uppercase tracking-wide">
+              <p className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
                 {metricLabel}
               </p>
 
               {/* Metric Value */}
-              <p className="mt-2 bg-linear-to-r from-foreground to-muted-foreground bg-clip-text text-3xl font-bold text-transparent">
+              <p className="from-foreground to-muted-foreground mt-2 bg-linear-to-r bg-clip-text text-3xl font-bold text-transparent">
                 {metricValue}
               </p>
 

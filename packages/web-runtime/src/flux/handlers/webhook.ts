@@ -8,7 +8,7 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import { normalizeError, verifySvixSignature } from '@heyclaude/shared-runtime';
 
 type ContentCategory = content_category;
@@ -29,7 +29,7 @@ const WEBHOOK_CORS_HEADERS = {
 const MAX_WEBHOOK_BODY_SIZE = 262144;
 
 // Valid webhook sources from database enum
-import type { webhook_source, webhook_event_type } from '@heyclaude/data-layer/prisma';
+import type { webhook_source, webhook_event_type } from '@prisma/client';
 
 type WebhookSource = webhook_source;
 type WebhookEventType = webhook_event_type;
@@ -64,7 +64,10 @@ const POLAR_SUPPORTED_EVENTS = [
 type PolarEventType = (typeof POLAR_SUPPORTED_EVENTS)[number];
 
 // Helper to extract metadata from Polar payload
-function getPolarMetadataValue<T = unknown>(payload: Record<string, unknown>, key: string): T | undefined {
+function getPolarMetadataValue<T = unknown>(
+  payload: Record<string, unknown>,
+  key: string
+): T | undefined {
   // Polar wraps data in a 'data' object, and metadata is nested within
   const data = payload['data'];
   if (data && typeof data === 'object') {
@@ -80,16 +83,19 @@ function getPolarMetadataValue<T = unknown>(payload: Record<string, unknown>, ke
 
 /**
  * Verify Vercel webhook signature using HMAC
- * 
+ *
  * Vercel sends webhook signatures in the x-vercel-signature header.
  * The signature is an HMAC-SHA256 of the raw request body.
- * 
+ *
  * @see https://vercel.com/docs/observability/webhooks-overview/webhooks-api#securing-webhooks
  */
 function verifyVercelSignature(body: string, headers: Headers): boolean {
   const secret = process.env['VERCEL_WEBHOOK_SECRET'];
   if (!secret) {
-    logger.warn({ hasHeader: !!headers.get('x-vercel-signature'), }, 'VERCEL_WEBHOOK_SECRET not configured, skipping signature verification');
+    logger.warn(
+      { hasHeader: !!headers.get('x-vercel-signature') },
+      'VERCEL_WEBHOOK_SECRET not configured, skipping signature verification'
+    );
     return true; // Allow but log warning - set secret to enforce verification
   }
 
@@ -104,7 +110,7 @@ function verifyVercelSignature(body: string, headers: Headers): boolean {
     const expectedSignature = createHmac('sha256', secret)
       .update(body, 'utf8') // Ensure UTF-8 encoding
       .digest('hex');
-    
+
     // Vercel signature might be in different formats:
     // 1. Plain hex string
     // 2. Prefixed with "sha256="
@@ -112,31 +118,46 @@ function verifyVercelSignature(body: string, headers: Headers): boolean {
     const normalizedSignature = signature.startsWith('sha256=')
       ? signature.slice(7) // Remove "sha256=" prefix
       : signature;
-    
+
     // Constant-time comparison to prevent timing attacks
     const sigBuffer = Buffer.from(normalizedSignature, 'hex');
     const expectedBuffer = Buffer.from(expectedSignature, 'hex');
-    
+
     if (sigBuffer.length !== expectedBuffer.length) {
-      logger.warn({ receivedLength: sigBuffer.length,
-        expectedLength: expectedBuffer.length,
-        hasPrefix: signature.startsWith('sha256='), }, 'Vercel webhook signature length mismatch');
+      logger.warn(
+        {
+          receivedLength: sigBuffer.length,
+          expectedLength: expectedBuffer.length,
+          hasPrefix: signature.startsWith('sha256='),
+        },
+        'Vercel webhook signature length mismatch'
+      );
       return false;
     }
-    
+
     const isValid = timingSafeEqual(sigBuffer, expectedBuffer);
-    
+
     if (!isValid) {
-      logger.warn({ hasSecret: !!secret,
-        signatureLength: normalizedSignature.length,
-        expectedLength: expectedSignature.length,
-        hasPrefix: signature.startsWith('sha256='), }, 'Vercel webhook signature verification failed');
+      logger.warn(
+        {
+          hasSecret: !!secret,
+          signatureLength: normalizedSignature.length,
+          expectedLength: expectedSignature.length,
+          hasPrefix: signature.startsWith('sha256='),
+        },
+        'Vercel webhook signature verification failed'
+      );
     }
-    
+
     return isValid;
   } catch (error) {
-    logger.warn({ err: normalizeError(error, 'Signature verification exception'),
-      signatureLength: signature.length, }, 'Vercel webhook signature verification error');
+    logger.warn(
+      {
+        err: normalizeError(error, 'Signature verification exception'),
+        signatureLength: signature.length,
+      },
+      'Vercel webhook signature verification error'
+    );
     return false;
   }
 }
@@ -144,10 +165,14 @@ function verifyVercelSignature(body: string, headers: Headers): boolean {
 /**
  * Verify Polar/Resend webhook signature using shared-runtime crypto utilities
  */
-async function verifySvixWebhookSignature(source: 'polar' | 'resend', body: string, headers: Headers): Promise<boolean> {
+async function verifySvixWebhookSignature(
+  source: 'polar' | 'resend',
+  body: string,
+  headers: Headers
+): Promise<boolean> {
   const secretEnvVar = source === 'polar' ? 'POLAR_WEBHOOK_SECRET' : 'RESEND_WEBHOOK_SECRET';
   const secret = process.env[secretEnvVar];
-  
+
   if (!secret) {
     logger.warn({ source }, `${secretEnvVar} not configured, skipping signature verification`);
     return true; // Allow but log warning - set secret to enforce verification
@@ -182,7 +207,10 @@ async function verifySvixWebhookSignature(source: 'polar' | 'resend', body: stri
 /**
  * Detect webhook source from headers and verify signature
  */
-async function detectAndVerifyWebhookSource(headers: Headers, body: string): Promise<WebhookSource | null> {
+async function detectAndVerifyWebhookSource(
+  headers: Headers,
+  body: string
+): Promise<WebhookSource | null> {
   // Check explicit header first
   const explicitSource = headers.get('X-Webhook-Source');
   if (explicitSource) {
@@ -220,12 +248,12 @@ async function detectAndVerifyWebhookSource(headers: Headers, body: string): Pro
   }
 
   // Check for Supabase webhook (auth/storage events)
-  const supabaseSignature = headers.get('x-supabase-signature') || 
-                           headers.get('x-webhook-signature') ||
-                           headers.get('x-signature');
-  const supabaseTimestamp = headers.get('x-webhook-timestamp') || 
-                            headers.get('x-timestamp');
-  
+  const supabaseSignature =
+    headers.get('x-supabase-signature') ||
+    headers.get('x-webhook-signature') ||
+    headers.get('x-signature');
+  const supabaseTimestamp = headers.get('x-webhook-timestamp') || headers.get('x-timestamp');
+
   if (supabaseSignature) {
     // Verify Supabase webhook signature
     const webhookSecret = process.env['INTERNAL_API_SECRET'];
@@ -273,7 +301,7 @@ function mapEventType(source: WebhookSource, eventType: string | undefined): Web
     // DELETE events don't need package generation
     return 'webhook_received' as WebhookEventType;
   }
-  
+
   // TODO: Add more event type mappings as needed
   // Currently defaults to 'webhook_received' for unmapped types
   // This is more semantically accurate than 'content_announcement_create'
@@ -283,16 +311,13 @@ function mapEventType(source: WebhookSource, eventType: string | undefined): Web
 /**
  * Ingest and deduplicate webhook event
  */
-async function ingestWebhookEvent(
-  body: string,
-  headers: Headers
-): Promise<WebhookIngestResult> {
+async function ingestWebhookEvent(body: string, headers: Headers): Promise<WebhookIngestResult> {
   const source = await detectAndVerifyWebhookSource(headers, body);
-  
+
   if (!source) {
     throw new Error('Unknown or unverified webhook source');
   }
-  
+
   let payload: Record<string, unknown>;
 
   try {
@@ -320,14 +345,16 @@ async function ingestWebhookEvent(
       break;
     case 'supabase_db':
       // Supabase webhooks use record.id as unique identifier
-      svixId = (payload['record'] as Record<string, unknown>)?.['id'] as string | null ||
-               headers.get('x-request-id') || 
-               null;
+      svixId =
+        ((payload['record'] as Record<string, unknown>)?.['id'] as string | null) ||
+        headers.get('x-request-id') ||
+        null;
       // Type-safe event type extraction
       const dbEventType = payload['type'] as string | undefined;
-      eventTypeRaw = dbEventType && ['INSERT', 'UPDATE', 'DELETE'].includes(dbEventType) 
-        ? dbEventType 
-        : undefined;
+      eventTypeRaw =
+        dbEventType && ['INSERT', 'UPDATE', 'DELETE'].includes(dbEventType)
+          ? dbEventType
+          : undefined;
       break;
     default:
       svixId = headers.get('x-request-id') || null;
@@ -337,11 +364,11 @@ async function ingestWebhookEvent(
   // Check for duplicate using svix_id
   let duplicate = false;
   let webhookId: string | null = null;
-  
+
   if (svixId) {
     const { getService } = await import('../../data/service-factory');
     const miscService = await getService('misc');
-    
+
     // Use MiscService for proper data layer architecture
     const existing = await miscService.getWebhookEventBySvixId({
       p_svix_id: svixId,
@@ -356,7 +383,7 @@ async function ingestWebhookEvent(
       // Record the event with proper column names
       const webhookEventType = mapEventType(source, eventTypeRaw);
       const now = new Date().toISOString();
-      
+
       // Use MiscService for proper data layer architecture
       try {
         webhookId = await miscService.insertWebhookEvent({
@@ -386,14 +413,14 @@ async function ingestWebhookEvent(
 
 /**
  * Process Polar webhook events via Inngest
- * 
+ *
  * Forwards all Polar events to Inngest for durable, idempotent processing.
  * This provides:
  * - Automatic retries on failure
  * - Idempotency via webhookId
  * - Better observability in Inngest dashboard
  * - Decoupled from webhook response time
- * 
+ *
  * The Inngest function handles:
  * - order.paid → Activates job listing after payment
  * - order.refunded → Handles refund processing
@@ -406,23 +433,23 @@ async function processPolarWebhook(
 ): Promise<{ forwarded: boolean; eventName?: string; error?: string }> {
   const { eventType, payload, webhookId, svixId } = result;
 
-  logger.info({ ...logContext,
-    eventType,
-    webhookId, }, 'Forwarding Polar webhook to Inngest');
+  logger.info({ ...logContext, eventType, webhookId }, 'Forwarding Polar webhook to Inngest');
 
   // Validate webhookId (required for idempotency)
   if (!webhookId) {
-    logger.warn({ ...logContext,
-      eventType,
-      svixId, }, 'Polar webhook missing webhookId, cannot forward to Inngest');
+    logger.warn(
+      { ...logContext, eventType, svixId },
+      'Polar webhook missing webhookId, cannot forward to Inngest'
+    );
     return { forwarded: false, error: 'Missing webhookId' };
   }
 
   // Check if this is a supported event type
   if (!POLAR_SUPPORTED_EVENTS.includes(eventType as PolarEventType)) {
-    logger.info({ ...logContext,
-      eventType,
-      supportedEvents: POLAR_SUPPORTED_EVENTS.join(', '), }, 'Polar event type not in supported list');
+    logger.info(
+      { ...logContext, eventType, supportedEvents: POLAR_SUPPORTED_EVENTS.join(', ') },
+      'Polar event type not in supported list'
+    );
     // Still return success - event is recorded but not forwarded
     return { forwarded: false };
   }
@@ -447,18 +474,18 @@ async function processPolarWebhook(
       },
     });
 
-    logger.info({ ...logContext,
-      eventType,
-      webhookId,
-      jobId: jobId ?? null,
-      userId: userId ?? null, }, 'Polar webhook forwarded to Inngest');
+    logger.info(
+      { ...logContext, eventType, webhookId, jobId: jobId ?? null, userId: userId ?? null },
+      'Polar webhook forwarded to Inngest'
+    );
 
     return { forwarded: true, eventName: 'polar/webhook' };
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to forward Polar webhook to Inngest');
-    logger.error({ err: normalized, ...logContext,
-      eventType,
-      webhookId, }, 'Polar webhook forwarding failed');
+    logger.error(
+      { err: normalized, ...logContext, eventType, webhookId },
+      'Polar webhook forwarding failed'
+    );
 
     // Return error but don't fail the webhook
     // The event is recorded in webhook_events table for manual retry
@@ -479,11 +506,11 @@ const RESEND_EVENT_TYPES = [
   'email.clicked',
 ] as const;
 
-type ResendEventType = typeof RESEND_EVENT_TYPES[number];
+type ResendEventType = (typeof RESEND_EVENT_TYPES)[number];
 
 /**
  * Process Resend webhook events
- * 
+ *
  * Forwards all Resend events to Inngest for durable processing.
  * This enables:
  * - Automatic list hygiene (bounce/complaint handling)
@@ -496,56 +523,57 @@ async function processResendWebhook(
 ): Promise<{ forwarded: boolean; eventName?: string }> {
   const { eventType, payload } = result;
 
-  logger.info({ ...logContext,
-    eventType, }, 'Processing Resend webhook');
+  logger.info({ ...logContext, eventType }, 'Processing Resend webhook');
 
   // Validate event type
   if (!RESEND_EVENT_TYPES.includes(eventType as ResendEventType)) {
-    logger.info({ ...logContext,
-      eventType,
-      supportedTypes: RESEND_EVENT_TYPES.join(', '), }, 'Unhandled Resend event type');
+    logger.info(
+      { ...logContext, eventType, supportedTypes: RESEND_EVENT_TYPES.join(', ') },
+      'Unhandled Resend event type'
+    );
     return { forwarded: false };
   }
 
   // Extract email data from payload
   const emailData = payload['data'] as Record<string, unknown> | undefined;
-  
+
   // Validate required fields before forwarding to Inngest
   const emailId = emailData?.['email_id'];
   const from = emailData?.['from'];
   const to = emailData?.['to'] as string[] | undefined;
   const subject = emailData?.['subject'];
-  
+
   if (!emailId || typeof emailId !== 'string') {
-    logger.warn({ ...logContext,
-      eventType,
-      hasEmailId: !!emailId, }, 'Resend webhook missing required email_id field');
+    logger.warn(
+      { ...logContext, eventType, hasEmailId: !!emailId },
+      'Resend webhook missing required email_id field'
+    );
     return { forwarded: false };
   }
-  
+
   if (!from || typeof from !== 'string') {
-    logger.warn({ ...logContext,
-      eventType,
-      emailId,
-      hasFrom: !!from, }, 'Resend webhook missing required from field');
+    logger.warn(
+      { ...logContext, eventType, emailId, hasFrom: !!from },
+      'Resend webhook missing required from field'
+    );
     return { forwarded: false };
   }
-  
+
   if (!to || !Array.isArray(to) || to.length === 0) {
-    logger.warn({ ...logContext,
-      eventType,
-      emailId,
-      hasTo: !!to, }, 'Resend webhook missing required to field');
+    logger.warn(
+      { ...logContext, eventType, emailId, hasTo: !!to },
+      'Resend webhook missing required to field'
+    );
     return { forwarded: false };
   }
-  
+
   // Forward to Inngest for durable processing
   try {
     // Dynamic import to avoid circular dependencies
     const { inngest } = await import('../../inngest/client');
-    
+
     const eventName = `resend/${eventType}` as `resend/${ResendEventType}`;
-    
+
     // Build the event data from the validated payload
     const clickData = emailData?.['click'];
     const eventData: {
@@ -562,27 +590,26 @@ async function processResendWebhook(
       to: to,
       subject: String(subject ?? ''),
     };
-    
+
     if (clickData && typeof clickData === 'object') {
       eventData.click = clickData as { link: string };
     }
-    
+
     await inngest.send({
       name: eventName,
       data: eventData,
     });
 
-    logger.info({ ...logContext,
-      eventType,
-      eventName,
-      emailId: eventData.email_id, }, 'Resend event forwarded to Inngest');
+    logger.info(
+      { ...logContext, eventType, eventName, emailId: eventData.email_id },
+      'Resend event forwarded to Inngest'
+    );
 
     return { forwarded: true, eventName };
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to forward Resend event to Inngest');
-    logger.error({ err: normalized, ...logContext,
-      eventType, }, 'Resend event forwarding failed');
-    
+    logger.error({ err: normalized, ...logContext, eventType }, 'Resend event forwarding failed');
+
     // Don't fail the webhook - log and continue
     // The event is already recorded in webhook_events table
     return { forwarded: false };
@@ -591,7 +618,7 @@ async function processResendWebhook(
 
 /**
  * Process Supabase webhook events
- * 
+ *
  * Forwards content change events to Inngest for durable processing.
  * This enables:
  * - Automatic package generation (skills, MCPB) when content is added/updated
@@ -604,15 +631,14 @@ async function processSupabaseWebhook(
 ): Promise<{ forwarded: boolean; eventName?: string; error?: string }> {
   const { eventType, payload, webhookId, svixId } = result;
 
-  logger.info({ ...logContext,
-    eventType,
-    webhookId, }, 'Processing Supabase webhook');
+  logger.info({ ...logContext, eventType, webhookId }, 'Processing Supabase webhook');
 
   // Validate webhookId (required for idempotency)
   if (!webhookId) {
-    logger.warn({ ...logContext,
-      eventType,
-      svixId, }, 'Supabase webhook missing webhookId, cannot forward to Inngest');
+    logger.warn(
+      { ...logContext, eventType, svixId },
+      'Supabase webhook missing webhookId, cannot forward to Inngest'
+    );
     return { forwarded: false, error: 'Missing webhookId' };
   }
 
@@ -623,20 +649,19 @@ async function processSupabaseWebhook(
   const schema = payload['schema'] as string | undefined;
 
   if (!record || !table || !schema) {
-    logger.warn({ ...logContext,
-      eventType,
-      hasRecord: !!record,
-      hasTable: !!table,
-      hasSchema: !!schema, }, 'Supabase webhook missing required fields');
+    logger.warn(
+      { ...logContext, eventType, hasRecord: !!record, hasTable: !!table, hasSchema: !!schema },
+      'Supabase webhook missing required fields'
+    );
     return { forwarded: false, error: 'Invalid webhook payload structure' };
   }
 
   // Only process content table changes
   if (table !== 'content' || schema !== 'public') {
-    logger.info({ ...logContext,
-      eventType,
-      table,
-      schema, }, 'Supabase webhook for non-content table, skipping');
+    logger.info(
+      { ...logContext, eventType, table, schema },
+      'Supabase webhook for non-content table, skipping'
+    );
     return { forwarded: false };
   }
 
@@ -646,10 +671,10 @@ async function processSupabaseWebhook(
   const slug = record['slug'] as string | undefined;
 
   if (!contentId || !category) {
-    logger.warn({ ...logContext,
-      eventType,
-      hasContentId: !!contentId,
-      hasCategory: !!category, }, 'Supabase webhook missing content metadata');
+    logger.warn(
+      { ...logContext, eventType, hasContentId: !!contentId, hasCategory: !!category },
+      'Supabase webhook missing content metadata'
+    );
     return { forwarded: false, error: 'Missing content metadata' };
   }
 
@@ -666,9 +691,7 @@ async function processSupabaseWebhook(
     // Type-safe event type casting
     const dbEventType = eventType as 'INSERT' | 'UPDATE' | 'DELETE';
     if (!['INSERT', 'UPDATE', 'DELETE'].includes(dbEventType)) {
-      logger.warn({ ...logContext,
-        eventType,
-        webhookId, }, 'Invalid Supabase event type');
+      logger.warn({ ...logContext, eventType, webhookId }, 'Invalid Supabase event type');
       return { forwarded: false, error: `Invalid event type: ${eventType}` };
     }
 
@@ -689,22 +712,19 @@ async function processSupabaseWebhook(
       },
     });
 
-    logger.info({ ...logContext,
-      eventType,
-      webhookId,
-      category,
-      contentId,
-      slug: slug ?? null, }, 'Supabase webhook forwarded to Inngest');
+    logger.info(
+      { ...logContext, eventType, webhookId, category, contentId, slug: slug ?? null },
+      'Supabase webhook forwarded to Inngest'
+    );
 
     return { forwarded: true, eventName: 'supabase/content-changed' };
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to forward Supabase webhook to Inngest');
-    logger.error({ err: normalized, ...logContext,
-      eventType,
-      webhookId,
-      category,
-      contentId, }, 'Supabase webhook forwarding failed');
-    
+    logger.error(
+      { err: normalized, ...logContext, eventType, webhookId, category, contentId },
+      'Supabase webhook forwarding failed'
+    );
+
     // Don't fail the webhook - log and continue
     // The event is already recorded in webhook_events table
     return { forwarded: false, error: normalized.message };
@@ -747,16 +767,21 @@ export async function handleExternalWebhook(request: NextRequest): Promise<NextR
     let processingResult: { forwarded?: boolean; eventName?: string; error?: string } = {};
 
     if (result.duplicate) {
-      logger.info({ ...logContext,
-        source: result.source,
-        svixId: result.svixId,
-        duplicate: true, }, 'Webhook already processed');
+      logger.info(
+        { ...logContext, source: result.source, svixId: result.svixId, duplicate: true },
+        'Webhook already processed'
+      );
     } else {
-      logger.info({ ...logContext,
-        source: result.source,
-        eventType: result.eventType,
-        svixId: result.svixId,
-        webhookId: result.webhookId, }, 'Webhook ingested');
+      logger.info(
+        {
+          ...logContext,
+          source: result.source,
+          eventType: result.eventType,
+          svixId: result.svixId,
+          webhookId: result.webhookId,
+        },
+        'Webhook ingested'
+      );
 
       // Process based on source - Polar, Resend, and Supabase forward to Inngest
       if (result.source === 'polar') {
@@ -769,17 +794,22 @@ export async function handleExternalWebhook(request: NextRequest): Promise<NextR
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      source: result.source,
-      duplicate: result.duplicate,
-      forwarded: processingResult.forwarded,
-      eventName: processingResult.eventName, }, 'Webhook processing completed');
+    logger.info(
+      {
+        ...logContext,
+        durationMs,
+        source: result.source,
+        duplicate: result.duplicate,
+        forwarded: processingResult.forwarded,
+        eventName: processingResult.eventName,
+      },
+      'Webhook processing completed'
+    );
 
     return NextResponse.json(
-      { 
-        message: 'OK', 
-        source: result.source, 
+      {
+        message: 'OK',
+        source: result.source,
         duplicate: result.duplicate,
         webhookId: result.webhookId,
         forwarded: processingResult.forwarded,

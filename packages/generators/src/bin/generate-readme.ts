@@ -13,12 +13,8 @@ runGenerateReadme()
     process.exit(0);
   })
   .catch((error) => {
-    logger.error(
-      '💥 README generation failed',
-      normalizeError(error, 'README generation failed'),
-      {
-        script: 'generate-readme',
-      }
-    );
+    logger.error('💥 README generation failed', normalizeError(error, 'README generation failed'), {
+      script: 'generate-readme',
+    });
     process.exit(1);
   });

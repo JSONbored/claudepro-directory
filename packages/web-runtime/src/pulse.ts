@@ -1,7 +1,8 @@
 'use server';
 
-import type { JsonValue } from '@heyclaude/data-layer/prisma';
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import { Prisma } from '@prisma/client';
+import type { content_category } from '@prisma/client';
+type JsonValue = Prisma.JsonValue;
 import { logger } from './logger.ts';
 import { normalizeError } from './errors.ts';
 import { pgmqSend } from './supabase/pgmq-client.ts';

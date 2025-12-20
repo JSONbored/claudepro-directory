@@ -17,7 +17,9 @@
 
 import 'server-only';
 import {
-  createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext,
+  createOptionsHandler as createApiOptionsHandler,
+  createCachedApiRoute,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { changelogEntryFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import {
@@ -75,7 +77,8 @@ export const GET = createCachedApiRoute({
             description: 'Source of the response data',
           },
         },
-        example: '# Changelog Entry\n\n## [1.2.0] - 2025-12-07\n\n### Added\n- New feature X\n- New feature Y\n\n### Fixed\n- Bug fix A\n- Bug fix B',
+        example:
+          '# Changelog Entry\n\n## [1.2.0] - 2025-12-07\n\n### Added\n- New feature X\n- New feature Y\n\n### Fixed\n- Bug fix A\n- Bug fix B',
       },
       400: {
         description: 'Invalid format parameter',

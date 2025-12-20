@@ -1,13 +1,7 @@
 // Json type for JSON-LD serialization
 // Using a generic JSON value type compatible with Prisma's JsonValue
 // Note: shared-runtime is a pure utility package and shouldn't depend on data-layer
-type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: JsonValue }
-  | JsonValue[];
+type JsonValue = string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[];
 
 function validateJsonLdSafe(data: unknown): unknown {
   const jsonString = JSON.stringify(data);

@@ -29,24 +29,21 @@ class PrismaRpcService extends BasePrismaService {
   ): Promise<ResultType> {
     try {
       // Detect mutations - these don't use caching
-      const isMutation = rpcName.includes('insert') || 
-                        rpcName.includes('update') || 
-                        rpcName.includes('delete') || 
-                        rpcName.includes('create') ||
-                        rpcName.includes('remove') ||
-                        rpcName.includes('ensure') ||
-                        rpcName.includes('toggle') ||
-                        rpcName.includes('add') ||
-                        rpcName.includes('remove');
-      
-      return await this.callRpc<ResultType>(
-        rpcName,
-        args,
-        { 
-          methodName: context.action,
-          useCache: !isMutation
-        }
-      );
+      const isMutation =
+        rpcName.includes('insert') ||
+        rpcName.includes('update') ||
+        rpcName.includes('delete') ||
+        rpcName.includes('create') ||
+        rpcName.includes('remove') ||
+        rpcName.includes('ensure') ||
+        rpcName.includes('toggle') ||
+        rpcName.includes('add') ||
+        rpcName.includes('remove');
+
+      return await this.callRpc<ResultType>(rpcName, args, {
+        methodName: context.action,
+        useCache: !isMutation,
+      });
     } catch (error) {
       // Format error with context for logging
       const dbQueryContext: Record<string, unknown> = {
@@ -56,9 +53,11 @@ class PrismaRpcService extends BasePrismaService {
       throw logActionFailure(context.action, error, {
         dbQuery: toLogContextValue(dbQueryContext),
         ...(context.userId && { userId: context.userId }),
-        ...(context.meta ? Object.fromEntries(
-          Object.entries(context.meta).map(([k, v]) => [k, toLogContextValue(v)])
-        ) : {}),
+        ...(context.meta
+          ? Object.fromEntries(
+              Object.entries(context.meta).map(([k, v]) => [k, toLogContextValue(v)])
+            )
+          : {}),
       });
     }
   }
@@ -79,10 +78,6 @@ export function createRunRpc<TExtraRpc extends string = never>() {
     args: Record<string, unknown>,
     context: RunRpcContext
   ): Promise<ResultType> {
-    return rpcService.callRpcForAction<ResultType>(
-      rpcName as string,
-      args,
-      context
-    );
+    return rpcService.callRpcForAction<ResultType>(rpcName as string, args, context);
   };
 }

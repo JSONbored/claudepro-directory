@@ -30,7 +30,11 @@ import {
   getStringProperty,
 } from '@heyclaude/shared-runtime';
 import {
-  createOptionsHandler as createApiOptionsHandler, createApiRoute, createFormatHandlerRoute, type FormatHandlerConfig, type RouteHandlerContext,
+  createOptionsHandler as createApiOptionsHandler,
+  createApiRoute,
+  createFormatHandlerRoute,
+  type FormatHandlerConfig,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { sitemapFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import {
@@ -212,7 +216,8 @@ export const GET = createFormatHandlerRoute<SitemapFormat, { format: SitemapForm
             description: 'Robots meta tag directive',
           },
         },
-        example: '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://claudepro.directory/</loc><lastmod>2025-01-11</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url></urlset>',
+        example:
+          '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://claudepro.directory/</loc><lastmod>2025-01-11</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url></urlset>',
       },
       400: {
         description: 'Invalid format parameter',

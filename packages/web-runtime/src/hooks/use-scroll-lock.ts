@@ -78,9 +78,7 @@ export interface UseScrollLockOptions {
  * });
  * ```
  */
-export function useScrollLock(
-  options: UseScrollLockOptions = {}
-): {
+export function useScrollLock(options: UseScrollLockOptions = {}): {
   isLocked: boolean;
   lock: () => void;
   unlock: () => void;
@@ -93,11 +91,7 @@ export function useScrollLock(
     return document.body;
   };
 
-  const {
-    autoLock = true,
-    lockTarget = getDefaultLockTarget(),
-    widthReflow = true,
-  } = options;
+  const { autoLock = true, lockTarget = getDefaultLockTarget(), widthReflow = true } = options;
 
   const [isLocked, setIsLocked] = useState(false);
   const originalStyleRef = useRef<{
@@ -157,10 +151,7 @@ export function useScrollLock(
     // Calculate scrollbar width and apply padding
     if (widthReflow) {
       const scrollbarWidth = getScrollbarWidth();
-      const currentPaddingRight = parseInt(
-        window.getComputedStyle(element).paddingRight,
-        10
-      ) || 0;
+      const currentPaddingRight = parseInt(window.getComputedStyle(element).paddingRight, 10) || 0;
 
       element.style.paddingRight = `${currentPaddingRight + scrollbarWidth}px`;
     }

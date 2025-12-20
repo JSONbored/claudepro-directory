@@ -1,7 +1,7 @@
 /**
  * Unified Structured Data - Renders Schema.org JSON-LD from generate_metadata_complete RPC
  * Schemas are serialized with XSS protection client-side
- * 
+ *
  * **Build-Time Optimization:**
  * - This component is used in pages with 'use cache' directive
  * - During build: RPC call executes (deterministic - uses stored database data)
@@ -66,7 +66,7 @@ export async function StructuredData({ route }: StructuredDataProps) {
         // This ensures the schema is safe to pass through Next.js prerendering
         // Use aggressive serialization to remove all functions, React components, and non-serializable values
         const serializedSchema = serializeForClient(schema);
-        
+
         // Additional pass: Remove any remaining functions or React components that might have been missed
         // This handles edge cases where functions are nested deeply or in unexpected structures
         const deepCleaned = JSON.parse(
@@ -86,10 +86,10 @@ export async function StructuredData({ route }: StructuredDataProps) {
             return value;
           })
         );
-        
+
         // Sanitize schema to remove javascript: protocol before JSON-LD serialization
         const sanitizedSchema = sanitizeUrlsInObject(deepCleaned);
-        
+
         // Serialize JSON-LD with XSS protection
         // Prisma JsonValue and shared-runtime JsonValue are structurally compatible
         // Both are: string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[]

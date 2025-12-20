@@ -42,7 +42,7 @@ export function ErrorTable(props: ErrorTableProps) {
       <CardContent className="p-4">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b bg-muted/30">
+            <thead className="bg-muted/30 border-b">
               <tr>
                 <th className="p-4 text-left font-medium">Error Code</th>
                 <th className="p-4 text-left font-medium">Severity</th>
@@ -70,7 +70,7 @@ export function ErrorTable(props: ErrorTableProps) {
                     </UnifiedBadge>
                   </td>
                   <td className="p-4 text-sm">{error.message}</td>
-                  <td className="p-4 text-muted-foreground text-sm">{error.solution}</td>
+                  <td className="text-muted-foreground p-4 text-sm">{error.solution}</td>
                 </tr>
               ))}
             </tbody>

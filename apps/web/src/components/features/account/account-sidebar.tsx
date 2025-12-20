@@ -73,17 +73,26 @@ export async function AccountSidebar({
           // Update local variables
           profile = refreshedProfile;
         } else {
-          reqLogger.warn({}, 'AccountSidebar: getUserCompleteData returned null user_data after ensureUserRecord');
+          reqLogger.warn(
+            {},
+            'AccountSidebar: getUserCompleteData returned null user_data after ensureUserRecord'
+          );
         }
       } else {
-        reqLogger.warn({}, 'AccountSidebar: getUserCompleteData returned null user_settings after ensureUserRecord');
+        reqLogger.warn(
+          {},
+          'AccountSidebar: getUserCompleteData returned null user_settings after ensureUserRecord'
+        );
       }
     } catch (error) {
       const normalized = normalizeError(
         error,
         'Failed to ensure user record or reload data in account sidebar'
       );
-      reqLogger.error({ err: normalized }, 'AccountSidebar: ensureUserRecord or getUserCompleteData threw');
+      reqLogger.error(
+        { err: normalized },
+        'AccountSidebar: ensureUserRecord or getUserCompleteData threw'
+      );
     }
   }
 
@@ -120,7 +129,7 @@ export async function AccountSidebar({
             priority
           />
         ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent">
+          <div className="bg-accent flex h-12 w-12 items-center justify-center rounded-full">
             <UserIcon className="h-6 w-6" />
           </div>
         )}
@@ -128,7 +137,7 @@ export async function AccountSidebar({
           <p className="font-medium">{profile?.name ?? userNameMetadata}</p>
           <p className="text-muted-foreground text-xs">{user.email ?? ''}</p>
           {profile?.slug ? (
-            <Link href={`/u/${profile.slug}`} className="text-xs text-accent hover:underline">
+            <Link href={`/u/${profile.slug}`} className="text-accent text-xs hover:underline">
               View Profile
             </Link>
           ) : null}

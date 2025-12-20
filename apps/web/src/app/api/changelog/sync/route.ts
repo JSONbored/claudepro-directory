@@ -66,7 +66,9 @@ import { ChangelogService } from '@heyclaude/data-layer';
 import { type SyncChangelogEntryArgs } from '@heyclaude/database-types/postgres-types';
 import { requireEnvVar } from '@heyclaude/shared-runtime';
 import {
-  createApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+  createApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import {
   changelogSyncResponseSchema,
@@ -296,7 +298,8 @@ export const POST = createApiRoute({
     operationId: 'syncChangelog',
     security: [{ bearerAuth: [] }],
     requestBody: {
-      description: 'Changelog entry data including version, date, content, and optional metadata (tldr, whatChanged, sections, rawContent)',
+      description:
+        'Changelog entry data including version, date, content, and optional metadata (tldr, whatChanged, sections, rawContent)',
       required: true,
     },
     responses: {

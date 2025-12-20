@@ -34,7 +34,11 @@ export function JobDeleteButton({
   const { user, status } = useAuthenticatedUser({ context: 'JobDeleteButton' });
   const { openAuthModal } = useAuthModal();
   const [isPending, startTransition] = useTransition();
-  const { value: isDeleting, setTrue: setIsDeletingTrue, setFalse: setIsDeletingFalse } = useBoolean();
+  const {
+    value: isDeleting,
+    setTrue: setIsDeletingTrue,
+    setFalse: setIsDeletingFalse,
+  } = useBoolean();
   const runLoggedAsync = useLoggedAsync({
     scope: 'JobDeleteButton',
     defaultMessage: 'Job deletion failed',
@@ -87,9 +91,13 @@ export function JobDeleteButton({
         // Error already logged by useLoggedAsync
         const normalized = normalizeError(error, 'Failed to delete job');
         const errorMessage = normalized.message;
-        
+
         // Check if error is auth-related and show modal if so
-        if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+        if (
+          errorMessage.includes('signed in') ||
+          errorMessage.includes('auth') ||
+          errorMessage.includes('unauthorized')
+        ) {
           openAuthModal({
             valueProposition: 'Sign in to manage jobs',
             redirectTo: pathname ?? undefined,
@@ -108,7 +116,17 @@ export function JobDeleteButton({
         setIsDeletingFalse();
       }
     });
-  }, [user, status, openAuthModal, pathname, jobId, router, runLoggedAsync, setIsDeletingTrue, setIsDeletingFalse]);
+  }, [
+    user,
+    status,
+    openAuthModal,
+    pathname,
+    jobId,
+    router,
+    runLoggedAsync,
+    setIsDeletingTrue,
+    setIsDeletingFalse,
+  ]);
 
   return (
     <Button

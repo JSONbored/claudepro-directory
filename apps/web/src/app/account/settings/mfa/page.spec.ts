@@ -20,7 +20,7 @@ test.describe('/account/settings/mfa', () => {
     // Set up error tracking and navigate to MFA settings page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/account/settings/mfa');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -95,7 +95,7 @@ test.describe('/account/settings/mfa', () => {
   test('should handle loading states', async ({ page }) => {
     // Test that page handles loading gracefully
     await page.goto('/account/settings/mfa');
-    
+
     // Should not show error overlay
     const errorOverlay = page.locator('[data-nextjs-error]');
     await expect(errorOverlay).not.toBeVisible();

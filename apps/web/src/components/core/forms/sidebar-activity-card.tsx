@@ -6,7 +6,7 @@
 
 'use client';
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import { CheckCircle, Clock, Lightbulb } from '@heyclaude/web-runtime/icons';
 import {
   cn,
@@ -40,19 +40,20 @@ interface SidebarActivityCardProps {
 /**
  * Fade-in animation for tab content
  */
-const createTabContentVariants = (shouldReduceMotion: boolean) => ({
-  hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 },
-  visible: shouldReduceMotion
-    ? {
-        opacity: 1,
-        transition: { duration: DURATION.default, ease: 'easeOut' as const },
-      }
-    : {
-        opacity: 1,
-        y: 0,
-        transition: { duration: DURATION.default, ease: 'easeOut' as const },
-      },
-} as const);
+const createTabContentVariants = (shouldReduceMotion: boolean) =>
+  ({
+    hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 },
+    visible: shouldReduceMotion
+      ? {
+          opacity: 1,
+          transition: { duration: DURATION.default, ease: 'easeOut' as const },
+        }
+      : {
+          opacity: 1,
+          y: 0,
+          transition: { duration: DURATION.default, ease: 'easeOut' as const },
+        },
+  }) as const;
 
 /**
  * Sidebar card displaying recent merged submissions and tips in two tabs.
@@ -103,7 +104,7 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
               className="space-y-3"
             >
               {recentMerged.length === 0 ? (
-                <p className={cn('py-4 text-center text-muted-foreground text-sm')}>
+                <p className={cn('text-muted-foreground py-4 text-center text-sm')}>
                   No recent submissions yet
                 </p>
               ) : (
@@ -112,16 +113,14 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
                     key={submission.id}
                     className={cn(
                       'flex items-start gap-2',
-                      'border-b border-border/50 pb-3 last:border-0 last:pb-0'
+                      'border-border/50 border-b pb-3 last:border-0 last:pb-0'
                     )}
                   >
                     <CheckCircle
-                      className={cn('mt-0.5 shrink-0 h-4 w-4 text-green-500 dark:text-green-400')}
+                      className={cn('mt-0.5 h-4 w-4 shrink-0 text-green-500 dark:text-green-400')}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className={cn('truncate text-sm-medium')}>
-                        {submission.content_name}
-                      </p>
+                      <p className={cn('text-sm-medium truncate')}>{submission.content_name}</p>
                       <div className={cn('mt-1 flex flex-wrap items-center gap-2')}>
                         <UnifiedBadge variant="base" style="outline" className="text-xs">
                           {typeLabels[submission.content_type]}
@@ -135,7 +134,7 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
                           </span>
                         ) : null}
                       </div>
-                      <p className={cn('mt-1 text-muted-foreground text-xs')}>
+                      <p className={cn('text-muted-foreground mt-1 text-xs')}>
                         {submission.merged_at_formatted || submission.merged_at}
                       </p>
                     </div>
@@ -147,7 +146,11 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
 
           {/* Tips Tab */}
           <TabsContent value="tips" className="mt-4">
-            <motion.div initial="hidden" animate="visible" variants={createTabContentVariants(shouldReduceMotion)}>
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={createTabContentVariants(shouldReduceMotion)}
+            >
               <ul className="list-none space-y-2">
                 {tips.map((tip) => (
                   <li key={tip} className="flex items-start gap-2">

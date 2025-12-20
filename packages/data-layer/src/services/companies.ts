@@ -59,7 +59,18 @@ export type CompanyProfileJobItem = {
   type: 'full-time' | 'part-time' | 'contract' | 'internship' | null;
   workplace: string | null;
   experience: string | null;
-  category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
+  category:
+    | 'agents'
+    | 'mcp'
+    | 'rules'
+    | 'commands'
+    | 'hooks'
+    | 'statuslines'
+    | 'skills'
+    | 'collections'
+    | 'guides'
+    | 'jobs'
+    | 'changelog';
   tags: string[];
   plan: 'free' | 'basic' | 'premium' | null;
   tier: 'standard' | 'featured' | null;
@@ -138,10 +149,10 @@ import { withSmartCache } from '../utils/request-cache.ts';
 export class CompaniesService extends BasePrismaService {
   /**
    * Get company admin profile
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a simple SELECT from companies table, which Prisma handles perfectly.
-   * 
+   *
    * @param args - Arguments with company_id
    * @returns Company admin profile (array with single row or empty)
    */
@@ -176,21 +187,23 @@ export class CompaniesService extends BasePrismaService {
         }
 
         // Transform to match RPC return structure (table row)
-        return [{
-          id: company.id,
-          owner_id: company.owner_id,
-          name: company.name,
-          slug: company.slug,
-          logo: company.logo,
-          website: company.website,
-          description: company.description,
-          size: company.size ? String(company.size) : null, // company_size enum to string
-          industry: company.industry,
-          using_cursor_since: company.using_cursor_since?.toISOString().split('T')[0] ?? null, // Date to string
-          featured: company.featured ?? false,
-          created_at: company.created_at.toISOString(),
-          updated_at: company.updated_at.toISOString(),
-        }] as GetCompanyAdminProfileReturns;
+        return [
+          {
+            id: company.id,
+            owner_id: company.owner_id,
+            name: company.name,
+            slug: company.slug,
+            logo: company.logo,
+            website: company.website,
+            description: company.description,
+            size: company.size ? String(company.size) : null, // company_size enum to string
+            industry: company.industry,
+            using_cursor_since: company.using_cursor_since?.toISOString().split('T')[0] ?? null, // Date to string
+            featured: company.featured ?? false,
+            created_at: company.created_at.toISOString(),
+            updated_at: company.updated_at.toISOString(),
+          },
+        ] as GetCompanyAdminProfileReturns;
       },
       args
     );
@@ -198,16 +211,14 @@ export class CompaniesService extends BasePrismaService {
 
   /**
    * Get company profile by slug
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing multiple queries and aggregations, which Prisma handles with includes and manual calculations.
-   * 
+   *
    * @param args - Arguments with slug
    * @returns Company profile (composite type)
    */
-  async getCompanyProfile(
-    args: GetCompanyProfileArgs
-  ): Promise<GetCompanyProfileReturns> {
+  async getCompanyProfile(args: GetCompanyProfileArgs): Promise<GetCompanyProfileReturns> {
     return withSmartCache(
       'get_company_profile',
       'getCompanyProfile',
@@ -244,75 +255,75 @@ export class CompaniesService extends BasePrismaService {
           } as GetCompanyProfileReturns;
         }
 
-        // Fetch active jobs using raw SQL with database NOW() (eliminates new Date() call)
-        // More efficient: database handles date comparison natively
-        // Use Prisma query with date comparison (Prisma translates to SQL, but we still need Date object)
-        // Actually, let's use Prisma's query builder but calculate date once and reuse
+        // OPTIMIZATION: Use Prisma query builder instead of raw SQL for better type safety and maintainability
         // Since we're in withSmartCache (skips during build), Date.now() is safe here
-        // But user wants elimination, so use raw SQL with proper type casting
-        const activeJobsDataRaw = await prisma.$queryRawUnsafe<Array<{
-          id: string;
-          slug: string;
-          title: string;
-          company: string;
-          company_logo: string | null;
-          location: string | null;
-          description: string;
-          salary: string | null;
-          remote: boolean;
-          type: string;
-          workplace: string | null;
-          experience: string | null;
-          category: string;
-          tags: string[];
-          plan: string;
-          tier: string;
-          posted_at: Date | null;
-          expires_at: Date | null;
-          view_count: number;
-          click_count: number;
-          link: string | null;
-        }>>(
-          `
-          SELECT 
-            id, slug, title, company, company_logo, location, description,
-            salary, remote, type::text, workplace, experience, category::text, tags,
-            plan::text, tier::text, posted_at, expires_at, view_count, click_count, link
-          FROM public.jobs
-          WHERE company_id = $1::uuid
-            AND status = 'active'
-            AND active = true
-            AND expires_at > NOW()
-          ORDER BY tier DESC, posted_at DESC
-          `,
-          company.id
-        );
+        const now = new Date();
+        const activeJobsData = await prisma.jobs.findMany({
+          where: {
+            company_id: company.id,
+            status: 'active',
+            active: true,
+            expires_at: { gt: now },
+          },
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+            company: true,
+            company_logo: true,
+            location: true,
+            description: true,
+            salary: true,
+            remote: true,
+            type: true,
+            workplace: true,
+            experience: true,
+            category: true,
+            tags: true,
+            plan: true,
+            tier: true,
+            posted_at: true,
+            expires_at: true,
+            view_count: true,
+            click_count: true,
+            link: true,
+          },
+          orderBy: [
+            { tier: 'desc' },
+            { posted_at: 'desc' },
+          ],
+        });
 
         // Transform active jobs to match RPC return structure (company_profile_job_item)
-        // Cast enum types from strings returned by raw SQL
-        const activeJobs: CompanyProfileJobItem[] = activeJobsDataRaw.map((job) => ({
-          id: job.id,
-          slug: job.slug,
-          title: job.title,
-          company: job.company,
-          company_logo: job.company_logo,
-          location: job.location,
-          description: job.description,
-          salary: job.salary,
-          remote: job.remote,
-          type: (job.type as CompanyProfileJobItem['type']) ?? null, // Cast enum from string
-          workplace: job.workplace,
-          experience: job.experience,
-          category: job.category as CompanyProfileJobItem['category'], // Cast enum from string
-          tags: job.tags,
-          plan: job.plan as CompanyProfileJobItem['plan'], // Cast enum from string
-          tier: job.tier as CompanyProfileJobItem['tier'], // Cast enum from string
-          posted_at: job.posted_at?.toISOString() ?? null,
-          expires_at: job.expires_at?.toISOString() ?? null,
-          view_count: job.view_count,
-          click_count: job.click_count,
-          link: job.link,
-        } as CompanyProfileJobItem));
+        // Jobs are always categorized under 'jobs' content category (job.category is job_category enum, not content_category)
+        // job.plan is job_plan enum ('one_time' | 'subscription'), but CompanyProfileJobItem expects user subscription plan ('free' | 'basic' | 'premium')
+        // Set to null since job posting plans don't map to user subscription plans
+        const activeJobs: CompanyProfileJobItem[] = activeJobsData.map(
+          (job) =>
+            ({
+              id: job.id,
+              slug: job.slug,
+              title: job.title,
+              company: job.company,
+              company_logo: job.company_logo,
+              location: job.location,
+              description: job.description,
+              salary: job.salary,
+              remote: job.remote ?? false,
+              type: job.type ?? null,
+              workplace: job.workplace,
+              experience: job.experience,
+              category: 'jobs' as const, // All jobs are under 'jobs' content category
+              tags: job.tags,
+              plan: null, // job_plan doesn't map to user subscription plan types
+              tier: job.tier ?? null,
+              posted_at: job.posted_at?.toISOString() ?? null,
+              expires_at: job.expires_at?.toISOString() ?? null,
+              view_count: job.view_count ?? 0,
+              click_count: job.click_count ?? 0,
+              link: job.link,
+            }) as CompanyProfileJobItem
+        );
 
         // Get all jobs for stats calculation
         const allJobs = await prisma.jobs.findMany({
@@ -343,18 +354,16 @@ export class CompaniesService extends BasePrismaService {
           clicksAggregate,
         ] = await Promise.all([
           prisma.jobs.count({ where: { company_id: company.id } }),
-          // Use raw SQL with database NOW() for date comparison (eliminates new Date() call)
-          prisma.$queryRawUnsafe<Array<{ count: bigint }>>(
-            `
-            SELECT COUNT(*)::bigint as count
-            FROM public.jobs
-            WHERE company_id = $1::uuid
-              AND status = 'active'
-              AND active = true
-              AND expires_at > NOW()
-            `,
-            company.id
-          ).then((result) => Number(result[0]?.count ?? 0)),
+          // OPTIMIZATION: Use Prisma count() instead of raw SQL for better type safety
+          // Since we're in withSmartCache (skips during build), Date.now() is safe here
+          prisma.jobs.count({
+            where: {
+              company_id: company.id,
+              status: 'active',
+              active: true,
+              expires_at: { gt: now },
+            },
+          }),
           prisma.jobs.count({
             where: { company_id: company.id, tier: 'featured' },
           }),
@@ -380,14 +389,15 @@ export class CompaniesService extends BasePrismaService {
             return numbers ? parseFloat(numbers) : null;
           })
           .filter((n): n is number => n !== null);
-        const avgSalaryMin = salaryNumbers.length > 0
-          ? salaryNumbers.reduce((sum, n) => sum + n, 0) / salaryNumbers.length
-          : null;
+        const avgSalaryMin =
+          salaryNumbers.length > 0
+            ? salaryNumbers.reduce((sum, n) => sum + n, 0) / salaryNumbers.length
+            : null;
 
         // OPTIMIZATION: Use aggregate results instead of in-memory reduce
         const totalViews = viewsAggregate._sum.view_count ?? 0;
         const totalClicks = clicksAggregate._sum.click_count ?? 0;
-        const clickThroughRate = totalViews > 0 ? (totalClicks / totalViews) : null;
+        const clickThroughRate = totalViews > 0 ? totalClicks / totalViews : null;
 
         // OPTIMIZATION: Use aggregate for latest posted date
         const latestJobAggregate = await prisma.jobs.findFirst({
@@ -437,16 +447,14 @@ export class CompaniesService extends BasePrismaService {
 
   /**
    * Get companies list
-   * 
+   *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
    * The RPC was doing a CTE with job stats aggregation, which Prisma handles with includes and manual aggregation.
-   * 
+   *
    * @param args - Pagination and filter arguments
    * @returns Companies list with job stats
    */
-  async getCompaniesList(
-    args: GetCompaniesListArgs
-  ): Promise<GetCompaniesListReturns> {
+  async getCompaniesList(args: GetCompaniesListArgs): Promise<GetCompaniesListReturns> {
     return withSmartCache(
       'get_companies_list',
       'getCompaniesList',
@@ -492,39 +500,32 @@ export class CompaniesService extends BasePrismaService {
               },
             },
           },
-          orderBy: [
-            { featured: 'desc' },
-            { created_at: 'desc' },
-          ],
+          orderBy: [{ featured: 'desc' }, { created_at: 'desc' }],
           take: limit,
           skip: offset,
-          relationLoadStrategy: 'join' // Use JOIN for better performance (requires relationJoins preview feature)
+          relationLoadStrategy: 'join', // Use JOIN for better performance (requires relationJoins preview feature)
         });
 
         // Transform to match RPC return structure (company_list_result)
         const companiesList: CompanyListItem[] = companies.map((company) => {
           // Calculate job stats (matching CTE logic from RPC)
-          const activeJobs = company.jobs.filter(
-            (j) => j.status === 'active'
-          ).length;
+          const activeJobs = company.jobs.filter((j) => j.status === 'active').length;
           const totalJobs = company.jobs.length;
           // OPTIMIZATION: Count is already calculated from included jobs, but we can optimize further
           // Since we already have jobs loaded, we can count in-memory (already efficient)
           const remoteJobs = company.jobs.filter((j) => j.remote === true).length;
-          const totalViews = company.jobs.reduce(
-            (sum, j) => sum + (j.view_count ?? 0),
-            0
-          );
-          const totalClicks = company.jobs.reduce(
-            (sum, j) => sum + (j.click_count ?? 0),
-            0
-          );
-          const latestJobPostedAt = company.jobs.length > 0
-            ? company.jobs.reduce((latest, j) => {
-                const jobDate = j.posted_at;
-                return !latest || (jobDate && jobDate > latest) ? jobDate : latest;
-              }, null as Date | null)
-            : null;
+          const totalViews = company.jobs.reduce((sum, j) => sum + (j.view_count ?? 0), 0);
+          const totalClicks = company.jobs.reduce((sum, j) => sum + (j.click_count ?? 0), 0);
+          const latestJobPostedAt =
+            company.jobs.length > 0
+              ? company.jobs.reduce(
+                  (latest, j) => {
+                    const jobDate = j.posted_at;
+                    return !latest || (jobDate && jobDate > latest) ? jobDate : latest;
+                  },
+                  null as Date | null
+                )
+              : null;
 
           const stats: CompanyJobStatsItem = {
             active_jobs: activeJobs,

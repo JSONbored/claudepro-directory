@@ -23,7 +23,9 @@
 
 import 'server-only';
 import {
-  createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext,
+  createOptionsHandler as createApiOptionsHandler,
+  createCachedApiRoute,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import {
   categoryConfigsResponseSchema,

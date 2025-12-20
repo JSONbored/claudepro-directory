@@ -72,7 +72,7 @@ export function SearchIconAnimation({
       <AnimatePresence>
         {isFocused && (
           <motion.div
-            className="absolute inset-0 rounded-full bg-accent/20 blur-md"
+            className="bg-accent/20 absolute inset-0 rounded-full blur-md"
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1.2 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
@@ -91,7 +91,7 @@ export function SearchIconAnimation({
             {[...Array(3)].map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute inset-0 rounded-full bg-accent/30"
+                className="bg-accent/30 absolute inset-0 rounded-full"
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0, x: 0, y: 0 }}
                 animate={
                   shouldReduceMotion

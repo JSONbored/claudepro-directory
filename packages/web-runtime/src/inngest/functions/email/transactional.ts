@@ -14,11 +14,14 @@ import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { sendCriticalFailureHeartbeat } from '../../utils/monitoring';
 
 // Email type configurations
-const TRANSACTIONAL_EMAIL_CONFIGS: Record<string, {
-  from: string;
-  buildSubject: (data: Record<string, unknown>) => string;
-  buildHtml: (data: Record<string, unknown>, email: string) => string;
-}> = {
+const TRANSACTIONAL_EMAIL_CONFIGS: Record<
+  string,
+  {
+    from: string;
+    buildSubject: (data: Record<string, unknown>) => string;
+    buildHtml: (data: Record<string, unknown>, email: string) => string;
+  }
+> = {
   'job-posted': {
     from: JOBS_FROM,
     buildSubject: (data) => `Your job posting "${data['jobTitle']}" is now live!`,
@@ -67,12 +70,16 @@ export const sendTransactionalEmail = inngest.createFunction(
         context.error = error instanceof Error ? error.message : String(error);
       }
       sendCriticalFailureHeartbeat('BETTERSTACK_HEARTBEAT_CRITICAL_FAILURE', context);
-      
+
       // Log for observability
       logger.error(
-        { 
+        {
           functionName: 'sendTransactionalEmail',
-          errorMessage: error ? (error instanceof Error ? error.message : String(error)) : 'unknown',
+          errorMessage: error
+            ? error instanceof Error
+              ? error.message
+              : String(error)
+            : 'unknown',
         },
         'Transactional email function failed after all retries'
       );
@@ -81,7 +88,10 @@ export const sendTransactionalEmail = inngest.createFunction(
   { event: 'email/transactional' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const logContext = createWebAppContextWithId('/inngest/email/transactional', 'sendTransactionalEmail');
+    const logContext = createWebAppContextWithId(
+      '/inngest/email/transactional',
+      'sendTransactionalEmail'
+    );
 
     const { type, email, emailData } = event.data;
 
@@ -93,55 +103,64 @@ export const sendTransactionalEmail = inngest.createFunction(
     // Validate email type
     const config = TRANSACTIONAL_EMAIL_CONFIGS[type];
     if (!config) {
-      logger.warn({ ...logContext,
-        type,
-        availableTypes: Object.keys(TRANSACTIONAL_EMAIL_CONFIGS).join(', '), }, 'Unknown transactional email type');
+      logger.warn(
+        {
+          ...logContext,
+          type,
+          availableTypes: Object.keys(TRANSACTIONAL_EMAIL_CONFIGS).join(', '),
+        },
+        'Unknown transactional email type'
+      );
       throw new Error(`Unknown transactional email type: ${type}`);
     }
 
     // Step 1: Send the email
-    const emailResult = await step.run('send-email', async (): Promise<{
-      sent: boolean;
-      emailId: string | null;
-    }> => {
-      try {
-        const subject = config.buildSubject(emailData);
-        const html = config.buildHtml(emailData, email);
+    const emailResult = await step.run(
+      'send-email',
+      async (): Promise<{
+        sent: boolean;
+        emailId: string | null;
+      }> => {
+        try {
+          const subject = config.buildSubject(emailData);
+          const html = config.buildHtml(emailData, email);
 
-        const { data: sendData, error: sendError } = await sendEmail(
-          {
-            from: config.from,
-            to: email,
-            subject,
-            html,
-            tags: [{ name: 'type', value: type }],
-          },
-          `Resend transactional email (${type}) send timed out`
-        );
+          const { data: sendData, error: sendError } = await sendEmail(
+            {
+              from: config.from,
+              to: email,
+              subject,
+              html,
+              tags: [{ name: 'type', value: type }],
+            },
+            `Resend transactional email (${type}) send timed out`
+          );
 
-        if (sendError) {
-          logger.warn({ ...logContext,
-            type,
-            errorMessage: sendError.message, }, 'Transactional email failed');
+          if (sendError) {
+            logger.warn(
+              { ...logContext, type, errorMessage: sendError.message },
+              'Transactional email failed'
+            );
+            return { sent: false, emailId: null };
+          }
+
+          return { sent: true, emailId: sendData?.id ?? null };
+        } catch (error) {
+          const normalized = normalizeError(error, 'Transactional email failed');
+          logger.warn(
+            { ...logContext, type, errorMessage: normalized.message },
+            'Transactional email failed'
+          );
           return { sent: false, emailId: null };
         }
-
-        return { sent: true, emailId: sendData?.id ?? null };
-      } catch (error) {
-        const normalized = normalizeError(error, 'Transactional email failed');
-        logger.warn({ ...logContext,
-          type,
-          errorMessage: normalized.message, }, 'Transactional email failed');
-        return { sent: false, emailId: null };
       }
-    });
+    );
 
     const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      type,
-      sent: emailResult.sent,
-      emailId: emailResult.emailId, }, 'Transactional email completed');
+    logger.info(
+      { ...logContext, durationMs, type, sent: emailResult.sent, emailId: emailResult.emailId },
+      'Transactional email completed'
+    );
 
     return {
       success: emailResult.sent,

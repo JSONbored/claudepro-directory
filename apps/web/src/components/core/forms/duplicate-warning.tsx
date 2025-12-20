@@ -1,6 +1,6 @@
 'use client';
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@prisma/client';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
 import { Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
@@ -86,7 +86,11 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
       <motion.div
         className="text-muted-foreground text-sm"
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [1, 0.5, 1] }}
-        transition={shouldReduceMotion ? {} : { duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+        transition={
+          shouldReduceMotion
+            ? {}
+            : { duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }
+        }
       >
         Checking for duplicates...
       </motion.div>

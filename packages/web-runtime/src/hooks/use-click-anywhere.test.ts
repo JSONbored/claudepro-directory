@@ -20,10 +20,9 @@ describe('useClickAnywhere', () => {
     const handler1 = vi.fn();
     const handler2 = vi.fn();
 
-    const { rerender } = renderHook(
-      ({ handler }) => useClickAnywhere(handler),
-      { initialProps: { handler: handler1 } }
-    );
+    const { rerender } = renderHook(({ handler }) => useClickAnywhere(handler), {
+      initialProps: { handler: handler1 },
+    });
 
     document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     expect(handler1).toHaveBeenCalledTimes(1);

@@ -87,7 +87,9 @@ export function useDetailQuickActions({
       ? null
       : mcpServers !== undefined
         ? mcpServers
-        : metadata['mcpServers'] && typeof metadata['mcpServers'] === 'object' && !Array.isArray(metadata['mcpServers'])
+        : metadata['mcpServers'] &&
+            typeof metadata['mcpServers'] === 'object' &&
+            !Array.isArray(metadata['mcpServers'])
           ? (metadata['mcpServers'] as Record<string, unknown>)
           : null;
 
@@ -96,7 +98,9 @@ export function useDetailQuickActions({
       ? null
       : configurationObject !== undefined
         ? configurationObject
-        : metadata['configuration'] && typeof metadata['configuration'] === 'object' && !Array.isArray(metadata['configuration'])
+        : metadata['configuration'] &&
+            typeof metadata['configuration'] === 'object' &&
+            !Array.isArray(metadata['configuration'])
           ? (metadata['configuration'] as Record<string, unknown>)
           : null;
 
@@ -186,7 +190,9 @@ export function useDetailQuickActions({
                 label: 'Retry',
                 onClick: async () => {
                   try {
-                    await copyToClipboard(JSON.stringify({ mcpServers: resolvedMcpServers }, null, 2));
+                    await copyToClipboard(
+                      JSON.stringify({ mcpServers: resolvedMcpServers }, null, 2)
+                    );
                     toasts.raw.success('Claude config copied', {
                       description: 'Paste into Claude Desktop → Settings → MCP Servers.',
                     });

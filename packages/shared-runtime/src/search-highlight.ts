@@ -167,7 +167,7 @@ export function highlightSearchTerms(
 
 /**
  * Escape HTML characters to prevent XSS/HTML injection
- * 
+ *
  * @param text - Text to escape (handles null/undefined)
  * @returns Escaped text safe for HTML insertion
  */

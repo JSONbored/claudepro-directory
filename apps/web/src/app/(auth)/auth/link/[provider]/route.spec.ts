@@ -19,7 +19,7 @@ test.describe('OAuth Link Route (/auth/link/[provider])', () => {
   test.beforeEach(async ({ page }) => {
     // Set up error tracking (API routes don't need navigation)
     const cleanup = setupErrorTracking(page);
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -77,9 +77,9 @@ test.describe('OAuth Link Route (/auth/link/[provider])', () => {
     expect(response.status()).toBe(307);
     const location = response.headers()['location'];
     // Should redirect to either login (if not auth) or callback (if auth)
-    expect(
-      location.includes('/login') || location.includes('/auth/link/github/callback')
-    ).toBe(true);
+    expect(location.includes('/login') || location.includes('/auth/link/github/callback')).toBe(
+      true
+    );
   });
 
   test('should handle valid providers (github, google, etc)', async ({ page }) => {

@@ -3,7 +3,7 @@ import { setupTestWithErrorTracking } from '../../../../config/tests/utils/error
 
 /**
  * Comprehensive Submit Page E2E Tests
- * 
+ *
  * Tests ALL functionality on the submit page with strict error checking:
  * - Page rendering without errors
  * - Submission form display
@@ -27,7 +27,7 @@ test.describe('Submit Page', () => {
     // Set up error tracking and navigate to submit page
     const { cleanup, navigate } = setupTestWithErrorTracking(page, '/submit');
     await navigate();
-    
+
     // Store cleanup function for afterEach
     (page as any).__errorTrackingCleanup = cleanup;
   });
@@ -50,31 +50,30 @@ test.describe('Submit Page', () => {
     await expect(errorOverlay).not.toBeVisible();
 
     // Check no hydration errors
-    const hydrationErrors = consoleErrors.filter(err => 
-      err.includes('Hydration') || 
-      err.includes('hydration')
+    const hydrationErrors = consoleErrors.filter(
+      (err) => err.includes('Hydration') || err.includes('hydration')
     );
     expect(hydrationErrors.length).toBe(0);
   });
 
   test('should display submit page heading', async ({ page }) => {
     // Check for submit page heading
-    const heading = page.getByRole('heading', { 
+    const heading = page.getByRole('heading', {
       level: 1,
-      name: /submit|share your configuration/i 
+      name: /submit|share your configuration/i,
     });
-    
+
     await expect(heading.first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should display submission form', async ({ page }) => {
     // Wait for form to load
     await page.waitForTimeout(2000);
-    
+
     // Check for form elements
     const form = page.locator('form').first();
     const hasForm = await form.isVisible().catch(() => false);
-    
+
     // Form may or may not be visible depending on implementation
     // But page should render
     const main = page.getByRole('main');
@@ -84,11 +83,11 @@ test.describe('Submit Page', () => {
   test('should display submission dashboard stats', async ({ page }) => {
     // Wait for content to load
     await page.waitForTimeout(2000);
-    
+
     // Check for dashboard stats
     const statsSection = page.getByText(/submissions|pending|approved/i);
     const hasStats = await statsSection.isVisible().catch(() => false);
-    
+
     // Stats may or may not be visible depending on data
     // But page should render
     const main = page.getByRole('main');
@@ -141,7 +140,7 @@ test.describe('Submit Page', () => {
     await page.keyboard.press('Tab');
     const focused = page.locator(':focus');
     await expect(focused).toBeVisible();
-    
+
     // Check for proper heading hierarchy
     const heading = page.getByRole('heading', { level: 1 });
     await expect(heading.first()).toBeVisible();
@@ -159,23 +158,23 @@ test.describe('Submit Page', () => {
   test('should handle loading states', async ({ page }) => {
     // Navigate to page
     await page.goto('/submit');
-    
+
     // Check for loading indicators (may flash quickly)
     const loadingIndicator = page.locator('[aria-busy="true"], [data-loading="true"]');
     const hasLoading = await loadingIndicator.isVisible().catch(() => false);
-    
+
     // Loading state may or may not be visible depending on load time
     // But page should eventually load
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    
+
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
   });
 
   test('should handle error states gracefully', async ({ page }) => {
     // Intercept API calls to simulate error
-    await page.route('/api/**', route => {
+    await page.route('/api/**', (route) => {
       route.fulfill({
         status: 500,
         body: JSON.stringify({ error: 'Internal server error' }),
@@ -190,14 +189,19 @@ test.describe('Submit Page', () => {
     // Page should still render (error boundary or error message)
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
-    
+
     // Should show error message or handle gracefully
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     // Error overlay may or may not be visible, but page should not crash
     expect(typeof hasError).toBe('boolean');
   });
 
-  test('should handle getSubmissionDashboard error gracefully in SubmitPageHeroWithStats', async ({ page }) => {
+  test('should handle getSubmissionDashboard error gracefully in SubmitPageHeroWithStats', async ({
+    page,
+  }) => {
     // This tests the error path when getSubmissionDashboard throws in SubmitPageHeroWithStats
     // The component catches error and continues with null dashboardData
     await page.goto('/submit');
@@ -209,7 +213,10 @@ test.describe('Submit Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -225,7 +232,10 @@ test.describe('Submit Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -241,7 +251,10 @@ test.describe('Submit Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -257,7 +270,10 @@ test.describe('Submit Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -273,7 +289,10 @@ test.describe('Submit Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -289,7 +308,10 @@ test.describe('Submit Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -305,11 +327,16 @@ test.describe('Submit Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
-  test('should handle mapSubmissionTypeToContentCategory with null/invalid values', async ({ page }) => {
+  test('should handle mapSubmissionTypeToContentCategory with null/invalid values', async ({
+    page,
+  }) => {
     // This tests edge cases in mapSubmissionTypeToContentCategory
     // The function handles null and invalid submission_type values
     await page.goto('/submit');
@@ -321,7 +348,10 @@ test.describe('Submit Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -337,11 +367,16 @@ test.describe('Submit Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
-  test('should handle getSubmissionDashboard error gracefully in SubmitPageSidebar', async ({ page }) => {
+  test('should handle getSubmissionDashboard error gracefully in SubmitPageSidebar', async ({
+    page,
+  }) => {
     // This tests the error path when getSubmissionDashboard throws in SubmitPageSidebar
     // The component catches error and continues with null dashboardData
     await page.goto('/submit');
@@ -353,7 +388,10 @@ test.describe('Submit Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -369,7 +407,10 @@ test.describe('Submit Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -401,7 +442,10 @@ test.describe('Submit Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 
@@ -417,7 +461,10 @@ test.describe('Submit Page', () => {
     await expect(main).toBeVisible();
 
     // Should not have critical errors
-    const hasError = await page.locator('[data-nextjs-error]').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('[data-nextjs-error]')
+      .isVisible()
+      .catch(() => false);
     expect(hasError).toBe(false);
   });
 });
