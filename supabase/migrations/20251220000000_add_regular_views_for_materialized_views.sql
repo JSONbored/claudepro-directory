@@ -23,11 +23,13 @@
 -- - packages/data-layer/src/services/search.ts: Update getTrendingSearches to use Prisma queries
 
 -- View for content list slim (reads from materialized view)
-CREATE VIEW IF NOT EXISTS public.v_content_list_slim AS
+-- Note: PostgreSQL doesn't support IF NOT EXISTS for CREATE VIEW, so we use CREATE OR REPLACE
+CREATE OR REPLACE VIEW public.v_content_list_slim AS
 SELECT * FROM public.mv_content_list_slim;
 
 -- View for trending searches (reads from materialized view)
-CREATE VIEW IF NOT EXISTS public.v_trending_searches AS
+-- Note: PostgreSQL doesn't support IF NOT EXISTS for CREATE VIEW, so we use CREATE OR REPLACE
+CREATE OR REPLACE VIEW public.v_trending_searches AS
 SELECT * FROM public.trending_searches;
 
 -- Grant permissions for views (same as materialized views)
