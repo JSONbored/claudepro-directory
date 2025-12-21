@@ -196,6 +196,12 @@ export const FEATURE_FLAGS = {
   'monitoring.betterstack.inngest.cron_success': true, // Success heartbeats for cron functions
   'monitoring.betterstack.api.endpoints': true, // API endpoint monitoring
   'monitoring.betterstack.vercel.cron': true, // Existing Vercel cron monitoring (keep existing)
+  // Infisical SDK Integration Feature Flag
+  // Note: Infisical is automatically enabled for dev environment only
+  // For staging/prod, it's automatically disabled (secrets come from Vercel env vars)
+  // This flag can override the environment-based behavior if needed
+  // Can also be overridden with INFISICAL_ENABLED environment variable
+  'infisical.enabled': true, // Enable Infisical SDK (dev only by default)
 } as const;
 
 /** Security settings */
@@ -458,33 +464,31 @@ export const SEARCH_CONFIG = {
 // =============================================================================
 
 /** Homepage configuration */
-// Import directly from database-types to avoid pulling in prisma client (server-only)
-// Note: Prisma exports enums as snake_case in Prisma namespace
-import { content_category as ContentCategory } from '@prisma/client';
-
+// Use string literals directly to avoid importing Prisma client (which would bundle into client)
+// These values match the content_category enum from the database
 export const HOMEPAGE_CONFIG = {
   featured_categories: [
-    ContentCategory.agents,
-    ContentCategory.mcp,
-    ContentCategory.commands,
-    ContentCategory.rules,
-    ContentCategory.skills,
-    ContentCategory.collections,
-    ContentCategory.hooks,
-    ContentCategory.statuslines,
-  ],
+    'agents',
+    'mcp',
+    'commands',
+    'rules',
+    'skills',
+    'collections',
+    'hooks',
+    'statuslines',
+  ] as const,
   tab_categories: [
     'all',
-    ContentCategory.agents,
-    ContentCategory.mcp,
-    ContentCategory.commands,
-    ContentCategory.rules,
-    ContentCategory.hooks,
-    ContentCategory.statuslines,
-    ContentCategory.collections,
-    ContentCategory.guides,
+    'agents',
+    'mcp',
+    'commands',
+    'rules',
+    'hooks',
+    'statuslines',
+    'collections',
+    'guides',
     'community',
-  ],
+  ] as const,
 } as const;
 
 // =============================================================================

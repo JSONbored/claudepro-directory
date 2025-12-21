@@ -7,7 +7,8 @@
 
 import { Prisma } from '@prisma/client';
 type notificationsCreateInput = Prisma.notificationsCreateInput;
-import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { revalidateTag } from 'next/cache';
 
 import { inngest } from '../../client';
@@ -41,7 +42,7 @@ interface ChangelogReleaseJob {
 }
 
 function buildDiscordEmbed(job: ChangelogReleaseJob): Record<string, unknown> {
-  const siteUrl = getEnvVar('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
+  const siteUrl = env.NEXT_PUBLIC_SITE_URL || 'https://claudepro.directory';
   const typeEmoji: Record<string, string> = {
     feat: '✨',
     fix: '🐛',
@@ -148,7 +149,7 @@ export const processChangelogNotifyQueue = inngest.createFunction(
 
           try {
             // 1. Send Discord webhook
-            const discordWebhookUrl = getEnvVar('DISCORD_CHANGELOG_WEBHOOK_URL');
+            const discordWebhookUrl = env.DISCORD_CHANGELOG_WEBHOOK_URL;
             if (discordWebhookUrl) {
               try {
                 const embed = buildDiscordEmbed(job);
@@ -251,12 +252,14 @@ export const processChangelogNotifyQueue = inngest.createFunction(
 
     const durationMs = Date.now() - startTime;
     logger.info(
-      { ...logContext, durationMs, processed: messages.length, notified: notifiedCount },
+      { ...logContext, durationMs, processed: processedMsgIds.length, notified: notifiedCount },
       'Changelog notify queue processing completed'
     );
 
+    // Return count of successfully processed messages, not just messages read
+    // This ensures processed count matches actual processing, not just queue reads
     const result = {
-      processed: messages.length,
+      processed: processedMsgIds.length, // Count of successfully processed messages
       notified: notifiedCount,
     };
 

@@ -134,9 +134,9 @@ export type GetCompaniesListReturns = {
   companies: CompanyListItem[] | null;
   total: number;
 };
-import { BasePrismaService } from './base-prisma-service.ts';
-import { prisma } from '../prisma/client.ts';
-import { withSmartCache } from '../utils/request-cache.ts';
+import { BasePrismaService } from './base-prisma-service';
+import { prisma } from '../prisma/client';
+import { withSmartCache } from '../utils/request-cache';
 
 /**
  * Companies Service using Prisma Client

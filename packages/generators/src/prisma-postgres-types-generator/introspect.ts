@@ -66,7 +66,7 @@ export async function introspectDatabase(
   if (!validation.valid) {
     throw new Error(
       `Invalid connection string: ${validation.error}. ` +
-        `Please check your DIRECT_URL or DATABASE_URL environment variable. ` +
+        `Please check your DIRECT_URL or POSTGRES_PRISMA_URL environment variable. ` +
         `Expected format: postgresql://user:password@host:port/database`
     );
   }

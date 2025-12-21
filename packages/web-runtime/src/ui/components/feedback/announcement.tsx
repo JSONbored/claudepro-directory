@@ -1,6 +1,6 @@
 'use client';
 
-import type { announcement_variant } from '@prisma/client';
+import type { announcement_variant } from '../../../types/client-safe-enums.ts';
 import { baseBadgeVariants } from '../badges/unified-badge.tsx';
 // Removed deprecated design system utilities - using direct Tailwind classes
 import { cn } from '../../utils.ts';

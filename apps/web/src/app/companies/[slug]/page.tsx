@@ -4,14 +4,14 @@
  * Leverages get_company_profile() RPC + company_job_stats materialized view
  */
 
-import {
-  type experience_level,
-  type job_category,
-  type job_plan,
-  type job_tier,
-  type job_type,
-  type workplace_type,
-} from '@prisma/client';
+import type {
+  experience_level,
+  job_category,
+  job_plan,
+  job_tier,
+  job_type,
+  workplace_type,
+} from '@heyclaude/web-runtime/types/client-safe-enums';
 import { type CompanyProfileJobItem } from '@heyclaude/data-layer';
 import { type JobCardJobType } from '@heyclaude/web-runtime/types/component.types';
 import { getCompanyProfile } from '@heyclaude/web-runtime/data/companies';
@@ -421,7 +421,7 @@ function CompanyJobsList({
           description: job.description,
           salary: job.salary,
           remote: job.remote,
-          type: job.type as job_type | null,
+          type: (job.type as string) as job_type | null,
           workplace: (job.workplace as workplace_type) ?? 'remote',
           experience: (job.experience as experience_level) ?? 'beginner',
           category: (job.category as job_category) ?? null,

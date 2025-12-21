@@ -7,7 +7,7 @@ import type {
   focus_area_type,
   interaction_type,
   content_category,
-} from '@prisma/client';
+} from './types/client-safe-enums';
 import { logger } from './logger.ts';
 
 // Lazy import server actions to avoid client/server boundary issues during HMR

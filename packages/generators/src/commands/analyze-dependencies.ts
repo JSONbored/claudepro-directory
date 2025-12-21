@@ -21,7 +21,7 @@ import { normalizeError } from '../toolkit/errors.ts';
 const __filename = fileURLToPath(import.meta.url);
 const SCRIPT_DIR = join(__filename, '..');
 const PROJECT_ROOT = join(SCRIPT_DIR, '../../../../');
-const MCP_ROOT = join(PROJECT_ROOT, 'apps/edge/supabase/functions/heyclaude-mcp');
+const MCP_ROOT = join(PROJECT_ROOT, 'apps/workers/heyclaude-mcp');
 
 interface DependencyAnalysis {
   circularDependencies: string[][];
@@ -156,7 +156,6 @@ export function analyzeDependencies(): DependencyAnalysis {
     // Try to find tsconfig.json - check multiple possible locations
     let tsConfigPath: string | undefined;
     const possiblePaths = [
-      join(PROJECT_ROOT, 'apps/edge/tsconfig.json'),
       join(PROJECT_ROOT, 'tsconfig.json'),
       join(MCP_ROOT, 'tsconfig.json'),
     ];

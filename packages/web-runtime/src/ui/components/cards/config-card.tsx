@@ -43,8 +43,9 @@
 import {
   experience_level as ExperienceLevel,
   content_category as ContentCategory,
-} from '@prisma/client';
-import type { experience_level, content_category } from '@prisma/client';
+  type experience_level,
+  type content_category,
+} from '../../../types/client-safe-enums.ts';
 import { ensureStringArray, getMetadata } from '../../../utils/content-helpers.ts';
 import { getCategoryDisplayName } from '../../../utils/category-display-names.ts';
 // Import client-safe utilities directly from content.ts

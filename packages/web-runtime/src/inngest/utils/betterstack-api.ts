@@ -7,8 +7,8 @@
  * @module web-runtime/inngest/utils/betterstack-api
  */
 
-import { getEnvVar } from '@heyclaude/shared-runtime';
 import { logger, normalizeError } from '../../logging/server';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 const BETTERSTACK_API_BASE = 'https://uptime.betterstack.com/api/v2';
 
@@ -42,7 +42,7 @@ interface HeartbeatMonitorResponse {
 export async function createHeartbeatMonitor(
   config: HeartbeatMonitorConfig
 ): Promise<HeartbeatMonitorResponse | null> {
-  const apiToken = getEnvVar('BETTERSTACK_API_TOKEN');
+  const apiToken = env.BETTERSTACK_API_TOKEN;
   if (!apiToken) {
     logger.warn(
       { envVarName: 'BETTERSTACK_API_TOKEN' },
@@ -139,7 +139,7 @@ export async function listHeartbeatMonitors(): Promise<Array<{
   name: string;
   url: string;
 }> | null> {
-  const apiToken = getEnvVar('BETTERSTACK_API_TOKEN');
+  const apiToken = env.BETTERSTACK_API_TOKEN;
   if (!apiToken) {
     logger.warn(
       { envVarName: 'BETTERSTACK_API_TOKEN' },
@@ -192,7 +192,7 @@ export async function listHeartbeatMonitors(): Promise<Array<{
  * @returns true if deleted successfully, false otherwise
  */
 export async function deleteHeartbeatMonitor(monitorId: string): Promise<boolean> {
-  const apiToken = getEnvVar('BETTERSTACK_API_TOKEN');
+  const apiToken = env.BETTERSTACK_API_TOKEN;
   if (!apiToken) {
     logger.warn(
       { envVarName: 'BETTERSTACK_API_TOKEN' },

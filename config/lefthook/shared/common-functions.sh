@@ -31,6 +31,29 @@ command_exists() {
   command -v "$1" >/dev/null 2>&1
 }
 
+# Check if pnpm script exists
+pnpm_script_exists() {
+  local script_name="$1"
+  # Check if script exists in package.json
+  if grep -q "\"$script_name\":" package.json 2>/dev/null; then
+    return 0
+  fi
+  return 1
+}
+
+# Run pnpm script with existence check (resilient)
+run_pnpm_script_if_exists() {
+  local script_name="$1"
+  shift || true
+  
+  if ! pnpm_script_exists "$script_name"; then
+    log_warning "Script '$script_name' not found in package.json - skipping"
+    return 0
+  fi
+  
+  pnpm run "$script_name" "$@"
+}
+
 # Get changed packages (for monorepo)
 detect_changed_packages() {
   local changed_files

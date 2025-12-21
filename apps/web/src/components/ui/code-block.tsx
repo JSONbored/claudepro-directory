@@ -139,7 +139,7 @@ import {
   SiVuedotjs,
   SiWebassembly,
 } from '@icons-pack/react-simple-icons';
-import { useControllableState } from '@radix-ui/react-use-controllable-state';
+import { useControllableState } from '@heyclaude/web-runtime/utils/radix-re-exports';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import type { ComponentProps, HTMLAttributes, ReactElement, ReactNode } from 'react';
 import { cloneElement, createContext, useContext, useEffect, useState } from 'react';

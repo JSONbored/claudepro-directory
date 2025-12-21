@@ -1,7 +1,7 @@
 'use client';
 
 import { cn, Checkbox } from '@heyclaude/web-runtime/ui';
-import { type CheckedState } from '@radix-ui/react-checkbox';
+import { type CheckedState } from '@heyclaude/web-runtime/utils/radix-re-exports';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { useId } from 'react';

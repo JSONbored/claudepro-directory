@@ -43,6 +43,12 @@ export type TrackInteractionParams = Omit<
 // Import for internal use, re-export for backward compatibility
 import type { RecommendationItem, RecommendationsPayload } from './pulse-types.ts';
 export type { ConfigRecommendationsResponse, RecommendationsPayload } from './pulse-types.ts';
+import type {
+  use_case_type,
+  experience_level,
+  integration_type,
+  focus_area_type,
+} from '../types/client-safe-enums.ts';
 
 // ============================================
 // ZOD SCHEMAS
@@ -305,11 +311,11 @@ export const generateConfigRecommendationsAction = rateLimitedAction
         recommendations: {
           ...payload,
           answers: {
-            useCase: parsedInput.useCase,
-            experienceLevel: parsedInput.experienceLevel,
+            useCase: parsedInput.useCase as use_case_type,
+            experienceLevel: parsedInput.experienceLevel as experience_level,
             toolPreferences: parsedInput.toolPreferences,
-            integrations: parsedInput.integrations ?? [],
-            focusAreas: parsedInput.focusAreas ?? [],
+            integrations: (parsedInput.integrations ?? []) as integration_type[],
+            focusAreas: (parsedInput.focusAreas ?? []) as focus_area_type[],
           },
           id: responseId,
           generatedAt: new Date().toISOString(),
@@ -341,11 +347,11 @@ export const generateConfigRecommendationsAction = rateLimitedAction
             diversity_score: 0,
           },
           answers: {
-            useCase: parsedInput.useCase,
-            experienceLevel: parsedInput.experienceLevel,
+            useCase: parsedInput.useCase as use_case_type,
+            experienceLevel: parsedInput.experienceLevel as experience_level,
             toolPreferences: parsedInput.toolPreferences,
-            integrations: parsedInput.integrations ?? [],
-            focusAreas: parsedInput.focusAreas ?? [],
+            integrations: (parsedInput.integrations ?? []) as integration_type[],
+            focusAreas: (parsedInput.focusAreas ?? []) as focus_area_type[],
           },
           id: `error_${Date.now()}`,
           generatedAt: new Date().toISOString(),

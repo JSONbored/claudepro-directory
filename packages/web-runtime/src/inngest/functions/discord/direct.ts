@@ -12,7 +12,7 @@
 import { inngest } from '../../client';
 import { RETRY_CONFIGS } from '../../config';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { getEnvVar } from '@heyclaude/shared-runtime';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 const MAX_BODY_SIZE = 200_000; // 200KB limit
 
@@ -28,13 +28,13 @@ interface DiscordPayload {
 function getWebhookUrl(notificationType: string): string | undefined {
   switch (notificationType) {
     case 'changelog':
-      return getEnvVar('DISCORD_CHANGELOG_WEBHOOK_URL');
+      return env.DISCORD_CHANGELOG_WEBHOOK_URL;
     case 'submission':
-      return getEnvVar('DISCORD_SUBMISSIONS_WEBHOOK_URL');
+      return env.DISCORD_SUBMISSIONS_WEBHOOK_URL;
     case 'job':
-      return getEnvVar('DISCORD_JOBS_WEBHOOK_URL');
+      return env.DISCORD_JOBS_WEBHOOK_URL;
     case 'error':
-      return getEnvVar('DISCORD_ERRORS_WEBHOOK_URL');
+      return env.DISCORD_ERROR_WEBHOOK_URL;
     default:
       return undefined;
   }

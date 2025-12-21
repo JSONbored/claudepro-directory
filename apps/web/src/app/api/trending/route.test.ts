@@ -40,23 +40,30 @@ const mockGetRecentContentFormatted = vi.hoisted(() => vi.fn());
 const mockGetSidebarTrendingFormatted = vi.hoisted(() => vi.fn());
 const mockGetSidebarRecentFormatted = vi.hoisted(() => vi.fn());
 
-vi.mock('@heyclaude/data-layer', () => ({
-  TrendingService: class {
-    getTrendingMetricsFormatted = mockGetTrendingMetricsFormatted;
-    getPopularContentFormatted = mockGetPopularContentFormatted;
-    getRecentContentFormatted = mockGetRecentContentFormatted;
-    getSidebarTrendingFormatted = mockGetSidebarTrendingFormatted;
-    getSidebarRecentFormatted = mockGetSidebarRecentFormatted;
-  },
-  AccountService: class {},
-  ChangelogService: class {},
-  CompaniesService: class {},
-  ContentService: class {},
-  JobsService: class {},
-  MiscService: class {},
-  NewsletterService: class {},
-  SearchService: class {},
-}));
+vi.mock('@heyclaude/data-layer', async () => {
+  // Import actual modules to get prisma export (PrismockClient in tests)
+  // Required because pgmqSend imports prisma from @heyclaude/data-layer
+  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
+  return {
+    ...actual,
+    TrendingService: class {
+      getTrendingMetricsFormatted = mockGetTrendingMetricsFormatted;
+      getPopularContentFormatted = mockGetPopularContentFormatted;
+      getRecentContentFormatted = mockGetRecentContentFormatted;
+      getSidebarTrendingFormatted = mockGetSidebarTrendingFormatted;
+      getSidebarRecentFormatted = mockGetSidebarRecentFormatted;
+    },
+    AccountService: class {},
+    ChangelogService: class {},
+    CompaniesService: class {},
+    ContentService: class {},
+    JobsService: class {},
+    MiscService: class {},
+    NewsletterService: class {},
+    SearchService: class {},
+    // prisma is already exported from actual (will be PrismockClient in tests)
+  };
+});
 
 // Mock service-factory (getService)
 vi.mock('../../../../packages/web-runtime/src/data/service-factory', () => ({

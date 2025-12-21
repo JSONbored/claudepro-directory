@@ -25,7 +25,8 @@ generator json-types {
   provider  = "prisma-json-types-generator"
   namespace = "PrismaJson"
   allowAny  = false
-  output    = "../packages/database-types/src/prisma/json-types"
+  // Note: This generator modifies Prisma client files directly in node_modules/.prisma/client
+  // It does NOT generate separate files, so no 'output' option is needed or supported
 }
 
 generator postgres-types {

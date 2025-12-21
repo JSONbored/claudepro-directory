@@ -18,6 +18,9 @@ import { resolve } from 'path';
  * - Each package runs in isolation with its own configuration
  */
 export default defineConfig({
+  // Vite cache directory (replaces deprecated cache.dir)
+  cacheDir: '.vitest-cache',
+  
   test: {
     // Enable global test functions (describe, it, expect, vi)
     globals: true,
@@ -25,12 +28,6 @@ export default defineConfig({
     // Use threads pool for better performance (faster than default 'forks' pool)
     pool: 'threads',
     maxWorkers: '50%', // Use 50% of available CPU cores
-
-    // Enable test result caching for faster re-runs
-    // Cache is invalidated when source files or dependencies change
-    cache: {
-      dir: '.vitest-cache',
-    },
 
     // Optional: Enable profiling for performance debugging (set VITEST_PROFILE=1)
     execArgv: process.env.VITEST_PROFILE
@@ -69,7 +66,6 @@ export default defineConfig({
       '**/coverage/**',
       '**/.turbo/**',
       '**/*.generated.{ts,tsx}', // Exclude auto-generated files
-      'apps/edge/functions/**', // Edge functions use Deno, test separately
       '**/*.spec.{ts,tsx}', // Exclude Playwright E2E tests (.spec.ts files)
     ],
 
@@ -85,7 +81,6 @@ export default defineConfig({
         '**/*.config.{ts,js,mjs}', // Exclude config files
         '**/vitest.setup.ts',
         '**/vitest.config.ts',
-        'apps/edge/functions/**', // Edge functions tested separately
         // Exclude test files themselves
         '**/*.test.{ts,tsx}',
         '**/*.spec.{ts,tsx}',

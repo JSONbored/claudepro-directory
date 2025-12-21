@@ -11,7 +11,7 @@ import type {
   focus_area_type,
   integration_type,
   use_case_type,
-} from '@prisma/client';
+} from '../types/client-safe-enums';
 
 export type RecommendationItem = NonNullable<
   NonNullable<GetRecommendationsReturns>['results']

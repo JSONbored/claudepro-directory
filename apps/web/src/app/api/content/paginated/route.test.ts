@@ -21,19 +21,26 @@ vi.mock('next/cache', () => ({
 // Mock data-layer services
 const mockGetContentPaginatedSlim = vi.fn();
 
-vi.mock('@heyclaude/data-layer', () => ({
-  AccountService: class {},
-  ChangelogService: class {},
-  CompaniesService: class {},
-  ContentService: class {
-    getContentPaginatedSlim = mockGetContentPaginatedSlim;
-  },
-  JobsService: class {},
-  MiscService: class {},
-  NewsletterService: class {},
-  SearchService: class {},
-  TrendingService: class {},
-}));
+vi.mock('@heyclaude/data-layer', async () => {
+  // Import actual modules to get prisma export (PrismockClient in tests)
+  // Required because pgmqSend imports prisma from @heyclaude/data-layer
+  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
+  return {
+    ...actual,
+    AccountService: class {},
+    ChangelogService: class {},
+    CompaniesService: class {},
+    ContentService: class {
+      getContentPaginatedSlim = mockGetContentPaginatedSlim;
+    },
+    JobsService: class {},
+    MiscService: class {},
+    NewsletterService: class {},
+    SearchService: class {},
+    TrendingService: class {},
+    // prisma is already exported from actual (will be PrismockClient in tests)
+  };
+});
 
 // Mock logging/server
 vi.mock('../../../../../packages/web-runtime/src/logging/server', () => ({

@@ -1,6 +1,5 @@
 import 'server-only';
-import { content_category as ContentCategory } from '@prisma/client';
-import type { content_category } from '@prisma/client';
+import { content_category as ContentCategory, type content_category } from '../../types/client-safe-enums.ts';
 
 import { isBuildTime } from '../../build-time.ts';
 import { getHomepageConfigBundle } from '../../config/static-configs.ts';

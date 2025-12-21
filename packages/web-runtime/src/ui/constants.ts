@@ -13,7 +13,7 @@ import type {
   content_category,
   job_status,
   submission_status,
-} from '@prisma/client';
+} from '../types/client-safe-enums';
 
 // ==========================================
 // SECTION 1: ICON MAPPING
@@ -34,8 +34,8 @@ export const ICON_NAME_MAP: Record<string, LucideIcon> = {
 // SECTION 2: TYPE EXPORTS
 // ==========================================
 
-// Types - using Prisma enums directly (source of truth)
-import type { experience_level } from '@prisma/client';
+// Types - using client-safe enums (source of truth)
+import type { experience_level } from '../types/client-safe-enums';
 export type JobType =
   | 'full-time'
   | 'part-time'
@@ -50,7 +50,7 @@ export type ChangelogCategory = changelog_category;
 
 // Re-export ChangelogCategory enum from Prisma for ordered iteration
 // The enum order in Prisma schema matches the desired UI display order
-import { changelog_category as ChangelogCategoryEnum } from '@prisma/client';
+import { changelog_category as ChangelogCategoryEnum } from '../types/client-safe-enums.ts';
 
 export const ChangelogCategory = ChangelogCategoryEnum;
 

@@ -26,9 +26,8 @@ import type {
 import type { Prisma, PrismaClient, content_category } from '@prisma/client';
 
 type contentModel = Prisma.contentGetPayload<{}>;
-import { prisma } from '../prisma/client.ts';
-import { BasePrismaService } from './base-prisma-service.ts';
-import { withSmartCache } from '../utils/request-cache.ts';
+import { BasePrismaService } from './base-prisma-service';
+import { withSmartCache } from '../utils/request-cache';
 
 // Local types for converted RPCs (RPC removed, using Prisma directly)
 // Exported for use in web-runtime
@@ -102,7 +101,7 @@ export class TrendingService extends BasePrismaService {
         // OPTIMIZATION: Use select to fetch only needed fields (9 fields)
         // This reduces data transfer significantly (from 30+ fields to 9 fields per content item)
         // Fields match mapRecentContent and edge function requirements
-        const results = await prisma.content.findMany({
+        const results = await this.prisma.content.findMany({
           where: {
             ...(p_category && { category: p_category as content_category }),
             ...(dateThreshold && { date_added: { gte: dateThreshold } }),

@@ -8,7 +8,8 @@
 import type { Prisma } from '@prisma/client';
 
 type content_submissionsModel = Prisma.content_submissionsGetPayload<{}>;
-import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
@@ -32,7 +33,7 @@ function buildSubmissionEmbed(
   submission: ContentSubmission,
   isNew: boolean
 ): Record<string, unknown> {
-  const siteUrl = getEnvVar('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
+  const siteUrl = env.NEXT_PUBLIC_SITE_URL || 'https://claudepro.directory';
 
   const fields: Array<{ name: string; value: string; inline?: boolean }> = [];
 
@@ -70,7 +71,7 @@ function buildSubmissionEmbed(
 }
 
 function buildMergedEmbed(submission: ContentSubmission): Record<string, unknown> {
-  const siteUrl = getEnvVar('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
+  const siteUrl = env.NEXT_PUBLIC_SITE_URL || 'https://claudepro.directory';
 
   // Determine content URL based on category
   const categoryToPath: Record<string, string> = {
@@ -131,8 +132,8 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
 
     logger.info(logContext, 'Discord submissions queue processing started');
 
-    const adminWebhookUrl = getEnvVar('DISCORD_SUBMISSIONS_WEBHOOK_URL');
-    const announcementWebhookUrl = getEnvVar('DISCORD_ANNOUNCEMENTS_WEBHOOK_URL');
+    const adminWebhookUrl = env.DISCORD_SUBMISSIONS_WEBHOOK_URL;
+    const announcementWebhookUrl = env.DISCORD_ANNOUNCEMENTS_WEBHOOK_URL;
 
     if (!adminWebhookUrl && !announcementWebhookUrl) {
       logger.warn(logContext, 'Discord submission webhook URLs not configured');

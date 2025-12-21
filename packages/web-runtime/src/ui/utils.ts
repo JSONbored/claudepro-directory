@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import type { content_category } from '@prisma/client';
+import type { content_category } from '../types/client-safe-enums.ts';
 
 export const ACRONYMS = [
   'API',

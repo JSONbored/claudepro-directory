@@ -9,11 +9,56 @@
  * can be converted to Prisma queries directly.
  */
 
-// Import prisma from data-layer/prisma export
-import { prisma as defaultPrisma } from '../prisma/client.ts';
-import { logRpcError } from '../utils/rpc-error-logging.ts';
-import { withSmartCache } from '../utils/request-cache.ts';
-import type { Prisma, PrismaClient } from '@prisma/client';
+// Import Prisma client and types (ES module import)
+// This import is safe because isCloudflareWorkers() check prevents usage in Cloudflare Workers
+import { prisma as importedPrisma } from '../prisma/client';
+import type { PrismaClient } from '@prisma/client';
+
+// Lazy access to Prisma client (cached after first access)
+// This avoids re-importing but allows the module to load without instantiating
+let defaultPrisma: PrismaClient | undefined;
+
+/**
+ * Check if we're running in Cloudflare Workers
+ * Cloudflare Workers don't have process.env or have a different globalThis structure
+ */
+function isCloudflareWorkers(): boolean {
+  // Cloudflare Workers have navigator but no process.env (or process.env is limited)
+  // Also check for Cloudflare-specific globals
+  return (
+    typeof globalThis.navigator !== 'undefined' &&
+    (typeof process === 'undefined' || typeof process.env === 'undefined' || !process.env['NODE_ENV'])
+  );
+}
+
+/**
+ * Get the default Prisma client (lazy initialization)
+ * Only creates the client when actually needed (not in Cloudflare Workers)
+ * In Cloudflare Workers, this will throw an error - services must receive an injected Prisma client
+ */
+function getDefaultPrisma(): PrismaClient {
+  // In Cloudflare Workers, default Prisma client is not available
+  // Services must receive an injected Prisma client
+  const isCloudflare = isCloudflareWorkers();
+  if (isCloudflare) {
+    throw new Error(
+      'Default Prisma client is not available in Cloudflare Workers. Services must receive an injected Prisma client via constructor.'
+    );
+  }
+
+  if (!defaultPrisma) {
+    // Use top-level ES module import instead of require()
+    // The package uses "type": "module", so require() doesn't work properly during Next.js build
+    // Top-level import works correctly with ES modules and is safe because isCloudflareWorkers() check prevents usage in Cloudflare Workers
+    defaultPrisma = importedPrisma;
+  }
+  // Type assertion: defaultPrisma is guaranteed to be set after the check above
+  return defaultPrisma as PrismaClient;
+}
+
+import { logRpcError } from '../utils/rpc-error-logging';
+import { withSmartCache } from '../utils/request-cache';
+import type { Prisma } from '@prisma/client';
 // Extract TransactionClient type from prisma.$transaction method
 // This avoids namespace import issues while still getting the correct type
 type TransactionClient = Parameters<Parameters<PrismaClient['$transaction']>[0]>[0];
@@ -52,7 +97,7 @@ type TransactionClient = Parameters<Parameters<PrismaClient['$transaction']>[0]>
 export abstract class BasePrismaService {
   /**
    * Prisma client instance
-   * Uses injected client if provided, otherwise falls back to singleton
+   * Uses injected client if provided, otherwise falls back to singleton (lazy)
    */
   protected readonly prisma: PrismaClient;
 
@@ -60,10 +105,10 @@ export abstract class BasePrismaService {
    * Constructor
    *
    * @param prismaClient - Optional Prisma client instance (for Cloudflare Workers)
-   *                       If not provided, uses the singleton Prisma client
+   *                       If not provided, uses the singleton Prisma client (lazy)
    */
   constructor(prismaClient?: PrismaClient) {
-    this.prisma = prismaClient ?? defaultPrisma;
+    this.prisma = prismaClient ?? getDefaultPrisma();
   }
   /**
    * Call PostgreSQL RPC function

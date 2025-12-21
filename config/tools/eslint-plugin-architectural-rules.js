@@ -3089,12 +3089,9 @@ export default {
         const sourceCode = context.getSourceCode();
         const ast = sourceCode.ast;
 
-        // Only apply to edge function files
-        const isEdgeFunction = filename.includes('apps/edge/functions');
-
-        if (!isEdgeFunction) {
+        // Edge functions (Supabase Edge Functions) have been migrated to Cloudflare Workers
+        // This rule is no longer needed - return empty config
           return {};
-        }
 
         // Check if helper functions are imported (using AST)
         let hasHelperImports = false;
@@ -3164,11 +3161,10 @@ export default {
         const filename = context.getFilename();
         const sourceCode = context.getSourceCode();
 
-        // Only apply to service files and edge functions
+        // Only apply to service files
         const isServiceFile =
           filename.includes('packages/data-layer/src/services') ||
-          filename.includes('packages/web-runtime/src/data') ||
-          filename.includes('apps/edge/functions');
+          filename.includes('packages/web-runtime/src/data');
 
         if (!isServiceFile) {
           return {};
@@ -4482,7 +4478,6 @@ export default {
 
         // Only apply to server-side code
         const isServerCode =
-          filename.includes('apps/edge/functions') ||
           filename.includes('/app/') ||
           filename.includes('/api/') ||
           filename.includes('server.ts');
@@ -5246,13 +5241,9 @@ export default {
         const filename = context.getFilename();
         const sourceCode = context.getSourceCode();
 
-        // Only apply to edge functions
-        const isEdgeFunction = filename.includes('apps/edge/functions');
-        if (!isEdgeFunction) {
+        // Edge functions (Supabase Edge Functions) have been migrated to Cloudflare Workers
+        // This rule is no longer needed - return empty config
           return {};
-        }
-
-        return {
           VariableDeclarator(node) {
             // Check for manual logContext creation
             if (
@@ -5677,8 +5668,7 @@ export default {
         // Apply to data-layer services and any file with RPC calls
         const isServiceFile =
           filename.includes('packages/data-layer/src/services') ||
-          filename.includes('packages/web-runtime/src/data') ||
-          filename.includes('apps/edge/functions');
+          filename.includes('packages/web-runtime/src/data');
 
         // Track RPC calls and their error handling
         const rpcCalls = [];
@@ -7181,10 +7171,9 @@ export default {
       create(context) {
         const filename = context.getFilename();
 
-        // Only check edge function files
-        if (!filename.includes('/functions/') && !filename.includes('/edge/')) {
+        // Edge functions (Supabase Edge Functions) have been migrated to Cloudflare Workers
+        // This rule is no longer needed - return empty config
           return {};
-        }
 
         return {
           CallExpression(node) {
@@ -7642,7 +7631,6 @@ export default {
         if (filename.includes('/packages/edge-runtime/')) sourcePackage = 'edge-runtime';
         if (filename.includes('/packages/web-runtime/')) sourcePackage = 'web-runtime';
         if (filename.includes('/apps/web/')) sourcePackage = 'web-app';
-        if (filename.includes('/apps/edge/')) sourcePackage = 'edge-functions';
 
         return {
           ImportDeclaration(node) {
@@ -7668,20 +7656,8 @@ export default {
               });
             }
 
-            // Edge functions should not import Node.js-only modules
-            if (
-              sourcePackage === 'edge-functions' &&
-              (importPath.startsWith('node:') ||
-                importPath === 'fs' ||
-                importPath === 'path' ||
-                importPath === 'os')
-            ) {
-              context.report({
-                node,
-                messageId: 'boundaryViolation',
-                data: { sourcePackage: 'edge-functions', targetPackage: 'node-modules' },
-              });
-            }
+            // Edge functions (Supabase Edge Functions) have been migrated to Cloudflare Workers
+            // Edge function boundary checks are no longer needed
           },
         };
       },

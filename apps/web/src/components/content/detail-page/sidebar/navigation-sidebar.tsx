@@ -4,7 +4,7 @@
  * DetailSidebar - Sidebar orchestrator for detail pages
  */
 
-import { content_category as ContentCategory } from '@prisma/client';
+import { content_category as ContentCategory } from '@heyclaude/web-runtime/types/client-safe-enums';
 import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
 import { ensureStringArray, getMetadata } from '@heyclaude/web-runtime/utils/content-helpers';
 import { getContentItemUrl, sanitizeSlug } from '@heyclaude/web-runtime/content';

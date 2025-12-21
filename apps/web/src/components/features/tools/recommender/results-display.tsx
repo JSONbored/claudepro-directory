@@ -5,14 +5,14 @@
  * Uses RPC function returns + minimal UI enrichment only.
  */
 
-import { content_category as ContentCategory } from '@prisma/client';
-import type {
+import {
   content_category,
-  experience_level,
-  focus_area_type,
-  integration_type,
-  use_case_type,
-} from '@prisma/client';
+  type content_category as ContentCategoryType,
+  type experience_level,
+  type focus_area_type,
+  type integration_type,
+  type use_case_type,
+} from '@heyclaude/web-runtime/types/client-safe-enums';
 import type { GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
 import { addBookmarkBatch } from '@heyclaude/web-runtime/actions/user';
 import { getContentItemUrl, sanitizeSlug } from '@heyclaude/web-runtime/content';
@@ -411,7 +411,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               )
               .map((result) => {
                 // Only allow categories from the explicit allowlist - use Prisma enum
-                const allowedCategories = Object.values(ContentCategory);
+                const allowedCategories = Object.values(content_category) as ContentCategoryType[];
                 // Validate slug pattern: alphanumeric start, then alphanumeric/hyphens/underscores, 3-32 chars
                 const slugPattern = /^[a-zA-Z0-9][a-zA-Z0-9-_]{2,32}$/;
                 if (

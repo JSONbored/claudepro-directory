@@ -7,26 +7,55 @@ import { type PostgrestError } from '@supabase/supabase-js';
 
 // Import enum value objects from @prisma/client (default Prisma location)
 // Enum value objects are exported directly from @prisma/client, not via Prisma namespace
-import { content_category as ContentCategory, guide_subcategory as GuideSubcategory } from '@prisma/client';
+// Note: Import may fail in some environments (e.g., Cloudflare Workers), so we handle it gracefully
+let ContentCategory: Record<string, string> | undefined;
+let GuideSubcategory: Record<string, string> | undefined;
+
+try {
+  // Try to import enums - may fail in some environments
+  const prismaClient = require('@prisma/client');
+  ContentCategory = prismaClient.content_category;
+  GuideSubcategory = prismaClient.guide_subcategory;
+} catch {
+  // Fallback: Use hardcoded enum values if import fails
+  // These match the actual enum values from the database
+  ContentCategory = {
+    agents: 'agents',
+    mcp: 'mcp',
+    rules: 'rules',
+    configurations: 'configurations',
+  };
+  GuideSubcategory = {
+    getting_started: 'getting_started',
+    advanced: 'advanced',
+    troubleshooting: 'troubleshooting',
+  };
+}
 
 /**
  * Constraint name → user-friendly error message mapping
  * Generated from database CHECK constraints
  *
- * Note: Enum values are hardcoded to avoid module resolution issues in CLI tools.
+ * Note: Enum values are accessed lazily to avoid module resolution issues in CLI tools and Cloudflare Workers.
  * These match the enums in @prisma/client (default Prisma location)
  */
-const CONSTRAINT_MESSAGES: Record<string, string> = {
+const CONSTRAINT_MESSAGES: Record<string, string | (() => string)> = {
   // Bookmarks
   bookmarks_notes_length: 'Bookmark notes must be 500 characters or less',
   bookmarks_content_slug_pattern: 'Invalid content reference format',
 
   // Content
   content_slug_pattern: 'Slug must be 3-100 lowercase characters (letters, numbers, hyphens only)',
-  content_category_check: `Invalid category. Must be one of: ${Object.values(ContentCategory).join(', ')}`,
+  content_category_check: () => {
+    const values = ContentCategory ? Object.values(ContentCategory).join(', ') : 'agents, mcp, rules, configurations';
+    return `Invalid category. Must be one of: ${values}`;
+  },
   content_avg_rating_check: 'Rating must be between 0 and 5',
   content_download_url_check: 'Download URL must start with /downloads/ or https://',
-  content_guide_subcategory_check: `Guide subcategory must be one of: ${Object.values(GuideSubcategory).join(', ')}`,
+  content_guide_subcategory_check: () => {
+    const values = GuideSubcategory ? Object.values(GuideSubcategory).join(', ') : 'getting_started, advanced, troubleshooting';
+    return `Guide subcategory must be one of: ${values}`;
+  },
 
   // Profiles
   profiles_display_name_check: 'Display name must be 1-100 characters',
@@ -114,9 +143,11 @@ export function parseDatabaseError(error: PostgrestError): Error {
 
   if (constraintMatch?.[1]) {
     const constraintName = constraintMatch[1];
-    const friendlyMessage = CONSTRAINT_MESSAGES[constraintName];
+    const friendlyMessageOrFn = CONSTRAINT_MESSAGES[constraintName];
 
-    if (friendlyMessage) {
+    if (friendlyMessageOrFn) {
+      // Handle both string messages and lazy functions
+      const friendlyMessage = typeof friendlyMessageOrFn === 'function' ? friendlyMessageOrFn() : friendlyMessageOrFn;
       return new Error(friendlyMessage);
     }
   }

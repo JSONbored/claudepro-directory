@@ -7,14 +7,12 @@
 
 'use client';
 
-import type { Prisma } from '@prisma/client';
-
-type changelogModel = Prisma.changelogGetPayload<{}>;
+import type { ChangelogEntry } from '@heyclaude/web-runtime/types/changelog';
 import { formatChangelogDateShort } from '@heyclaude/web-runtime/utils/changelog';
 import Link from 'next/link';
 
 interface TimelineMarkerProps {
-  entry: changelogModel;
+  entry: ChangelogEntry;
   isActive: boolean;
   onClick?: (() => void) | undefined;
   targetPath: string;

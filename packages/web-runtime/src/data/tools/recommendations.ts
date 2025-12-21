@@ -5,7 +5,7 @@ import {
   type focus_area_type,
   type integration_type,
   type use_case_type,
-} from '@prisma/client';
+} from '../../types/client-safe-enums';
 import { type GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
 
 import { createDataFunction } from '../cached-data-factory.ts';
@@ -41,12 +41,12 @@ export const getConfigRecommendations = createDataFunction<
   operation: 'getConfigRecommendations',
   serviceKey: 'misc', // Consolidated: QuizService methods moved to MiscService
   transformArgs: (input) => ({
-    p_experience_level: input.experienceLevel,
-    p_focus_areas: input.focusAreas ?? [],
-    p_integrations: input.integrations ?? [],
+    p_experience_level: input.experienceLevel as string,
+    p_focus_areas: (input.focusAreas ?? []) as string[],
+    p_integrations: (input.integrations ?? []) as string[],
     p_limit: input.limit ?? 20,
     p_tool_preferences: input.toolPreferences,
-    p_use_case: input.useCase,
+    p_use_case: input.useCase as string,
     ...(input.viewerId ? { p_viewer_id: input.viewerId } : {}),
   }),
 });

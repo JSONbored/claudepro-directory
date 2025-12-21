@@ -25,10 +25,10 @@ import 'server-only';
 import { MiscService } from '@heyclaude/data-layer';
 import {
   APP_CONFIG,
-  getEnvVar,
   getNumberProperty,
   getStringProperty,
 } from '@heyclaude/shared-runtime';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import {
   createOptionsHandler as createApiOptionsHandler,
   createApiRoute,
@@ -61,8 +61,8 @@ export const sitemapQuerySchema = z.object({
   format: sitemapFormatSchema,
 });
 
-const INDEXNOW_API_KEY = getEnvVar('INDEXNOW_API_KEY');
-const INDEXNOW_TRIGGER_KEY = getEnvVar('INDEXNOW_TRIGGER_KEY');
+const INDEXNOW_API_KEY = env.INDEXNOW_API_KEY;
+const INDEXNOW_TRIGGER_KEY = env.INDEXNOW_TRIGGER_KEY;
 const SITE_URL = APP_CONFIG.url;
 
 function timingSafeEqual(a?: null | string, b?: null | string): boolean {

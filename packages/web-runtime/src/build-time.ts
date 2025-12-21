@@ -20,8 +20,7 @@ export function isBuildTime(): boolean {
   }
 
   // Method 1: Check NEXT_PHASE (most reliable - set by Next.js during build)
-  // Read directly from process.env to avoid schema caching issues
-  const nextPhase = typeof process.env !== 'undefined' ? process.env['NEXT_PHASE'] : undefined;
+  const nextPhase = env.NEXT_PHASE;
   if (nextPhase === 'phase-production-build' || nextPhase === 'phase-production-server') {
     return true;
   }
@@ -49,7 +48,7 @@ export function isBuildTime(): boolean {
   // Method 4: Check if NODE_ENV is production but we're not on a known platform (local build)
   // Next.js sets NODE_ENV=production during build, even locally
   // If we're not on a known platform and NODE_ENV is production, this is likely a local build
-  const nodeEnv = typeof process.env !== 'undefined' ? process.env['NODE_ENV'] : undefined;
+  const nodeEnv = env.NODE_ENV;
   const platform = detectPlatform();
 
   if (nodeEnv === 'production' && platform === 'unknown') {

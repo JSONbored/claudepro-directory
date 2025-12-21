@@ -9,7 +9,7 @@
 import { createServerClient } from '@supabase/ssr';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { getEnvVar } from '@heyclaude/shared-runtime';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { normalizeErrorEdge as normalizeError } from '../errors-edge.ts';
 
 // Use console directly instead of logger to avoid pulling in pino
@@ -28,8 +28,8 @@ import { normalizeErrorEdge as normalizeError } from '../errors-edge.ts';
  * @returns NextResponse with refreshed auth cookies, or null if no update needed
  */
 export async function updateSupabaseSession(request: NextRequest): Promise<NextResponse | null> {
-  const supabaseUrl = getEnvVar('NEXT_PUBLIC_SUPABASE_URL');
-  const supabaseAnonKey = getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
     // Silently fail in middleware - don't block requests

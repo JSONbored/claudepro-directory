@@ -39,7 +39,7 @@ const GRID_COLUMN_CLASSES: Record<GridColumn, string> = {
   full: 'col-span-full',
   half: 'sm:col-span-1',
   third: 'sm:col-span-1',
-  'two-thirds': 'sm:col-span-2',
+  two_thirds: 'sm:col-span-2',
 };
 
 // ============================================================================
@@ -280,7 +280,7 @@ export function ContentTypeFieldRenderer({ config, formId }: ContentTypeFieldRen
     const isGridField =
       field.gridColumn === 'half' ||
       field.gridColumn === 'third' ||
-      field.gridColumn === 'two-thirds';
+      field.gridColumn === 'two_thirds';
 
     if (isGridField) {
       currentGroup.push(field);

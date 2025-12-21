@@ -11,7 +11,7 @@
  */
 
 import { APP_CONFIG } from '../../config/unified-config';
-import { getEnvVar } from '@heyclaude/shared-runtime';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 /**
  * Email template types
@@ -117,9 +117,9 @@ export function getEmailConfig(template: EmailTemplate) {
  */
 export function getResendEnv() {
   return {
-    apiKey: getEnvVar('RESEND_API_KEY'),
-    audienceId: getEnvVar('RESEND_AUDIENCE_ID'),
-    webhookSecret: getEnvVar('RESEND_WEBHOOK_SECRET'),
+    apiKey: env.RESEND_API_KEY,
+    audienceId: env.RESEND_AUDIENCE_ID,
+    webhookSecret: env.RESEND_WEBHOOK_SECRET,
   };
 }
 

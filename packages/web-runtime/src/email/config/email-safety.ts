@@ -13,6 +13,7 @@
  */
 
 import { getDeploymentEnv } from '@heyclaude/shared-runtime/platform';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { logger as pinoLogger } from '../../logging/server';
 
 /**
@@ -53,7 +54,7 @@ export interface EmailSafetyConfig {
  * Load email safety configuration from environment
  */
 export function getEmailSafetyConfig(): EmailSafetyConfig {
-  const nodeEnv = process.env['NODE_ENV'];
+  const nodeEnv = env.NODE_ENV;
   const deploymentEnv = getDeploymentEnv();
 
   // Determine if production (platform-agnostic)
@@ -61,16 +62,16 @@ export function getEmailSafetyConfig(): EmailSafetyConfig {
 
   // Check for dev email override
   const allowDevEmails =
-    process.env['ALLOW_DEV_EMAILS'] === 'true' || process.env['ALLOW_DEV_EMAILS'] === '1';
+    env.ALLOW_DEV_EMAILS === 'true' || env.ALLOW_DEV_EMAILS === '1';
 
   // Parse whitelisted emails (comma-separated)
-  const whitelistedEmails = (process.env['DEV_EMAIL_WHITELIST'] || '')
+  const whitelistedEmails = (env.DEV_EMAIL_WHITELIST || '')
     .split(',')
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
 
   // Parse whitelisted domains (comma-separated)
-  const whitelistedDomains = (process.env['DEV_EMAIL_DOMAIN_WHITELIST'] || '')
+  const whitelistedDomains = (env.DEV_EMAIL_DOMAIN_WHITELIST || '')
     .split(',')
     .map((d) => d.trim().toLowerCase())
     .filter(Boolean);
@@ -173,7 +174,7 @@ export function logBlockedEmail(emailData: BlockedEmailLog, reason: string): voi
       subject: emailData.subject,
       tags: emailData.tags?.map((t) => `${t.name}=${t.value}`).join(', '),
       htmlPreview: emailData.html ? emailData.html.slice(0, 200) + '...' : undefined,
-      environment: process.env['NODE_ENV'] || 'development',
+      environment: env.NODE_ENV || 'development',
       tip: 'To send real emails in dev, set ALLOW_DEV_EMAILS=true or add email to DEV_EMAIL_WHITELIST',
     },
     '📧 Email BLOCKED (dev mode)'

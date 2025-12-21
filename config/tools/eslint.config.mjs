@@ -67,6 +67,7 @@ import importPlugin from 'eslint-plugin-import-x';
 import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
 import nextPlugin from '@next/eslint-plugin-next';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
+import inngestPlugin from '@inngest/eslint-plugin';
 import tseslint from 'typescript-eslint';
 // @ts-expect-error - Dynamic import for custom plugin
 import architecturalRules from './eslint-plugin-architectural-rules.js';
@@ -162,6 +163,7 @@ export default tseslint.config(
       playwright: eslintPluginPlaywright,
       'no-only-tests': eslintPluginNoOnlyTests,
       markdown: eslintPluginMarkdown,
+      '@inngest': inngestPlugin,
       // Note: unicorn plugin is already included via eslintPluginUnicorn.configs.recommended
     },
     settings: {
@@ -1627,35 +1629,6 @@ export default tseslint.config(
     },
   },
   {
-    files: ['../../apps/edge/functions/**/*.ts'],
-    rules: {
-      'architectural-rules/require-edge-logging-setup': 'error', // Consolidated: includes require-edge-logging, require-edge-init-request-logging, require-edge-trace-request-complete, detect-missing-edge-logging-setup
-      'architectural-rules/require-await-log-error': 'error',
-      'architectural-rules/enforce-log-context-naming': 'error',
-      'architectural-rules/prefer-logger-helpers-in-edge': 'error',
-      'architectural-rules/require-normalize-error': 'error', // Consolidated rule
-      'architectural-rules/require-logging-context': 'error', // Use logger.child() instead of setBindings (consolidated: includes require-logger-bindings-for-context)
-      'architectural-rules/require-module-in-bindings': 'error',
-      /**
-       * @type {import('eslint').Linter.RuleEntry}
-       * @description Enforces barrel export usage for logging utilities.
-       * @autofix Safe - Simple import path replacement, TypeScript-compatible.
-       * @example `'packages/web-runtime/src/utils/logger.ts'` → `'@heyclaude/web-runtime/logging/server'`
-       */
-      'architectural-rules/prefer-barrel-exports-for-logging': 'error',
-      'architectural-rules/no-console-calls': 'error', // Consolidated rule with auto-fix
-      'architectural-rules/detect-missing-error-logging-in-functions': 'error',
-      'architectural-rules/detect-incomplete-log-context': 'error',
-      /**
-       * @type {import('eslint').Linter.RuleEntry}
-       * @description Detects and fixes outdated logging import paths.
-       * @autofix Safe - Simple import path replacement, TypeScript-compatible.
-       * @example `'packages/web-runtime/src/utils/request-context.ts'` → `'@heyclaude/web-runtime/logging/server'`
-       */
-      'architectural-rules/detect-outdated-logging-patterns': 'error',
-    },
-  },
-  {
     // Error boundary files must use standardized logging
     files: [
       '**/error.tsx',
@@ -1741,6 +1714,29 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/await-thenable': 'off',
+    },
+  },
+  // ============================================
+  // Inngest Functions Configuration
+  // ============================================
+  {
+    files: [
+      '../../packages/web-runtime/src/inngest/functions/**/*.ts',
+      '**/packages/web-runtime/src/inngest/functions/**/*.ts',
+    ],
+    ignores: [
+      '**/*.test.ts',
+      '**/*.spec.ts',
+    ],
+    plugins: {
+      '@inngest': inngestPlugin,
+    },
+    rules: {
+      // Inngest ESLint Plugin - Recommended rules for Inngest functions
+      // See: https://www.inngest.com/docs/guides/testing#eslint-plugin
+      '@inngest/await-inngest-send': 'warn', // Recommended: Warn if inngest.send() is not awaited
+      '@inngest/no-nested-steps': 'error', // Recommended: Error if step.run() is nested inside another step.run()
+      '@inngest/no-variable-mutation-in-step': 'error', // Recommended: Error if variables are mutated inside step.run()
     },
   },
   // ============================================

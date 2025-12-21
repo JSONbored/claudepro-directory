@@ -132,7 +132,7 @@ vi.mock('server-only', () => ({}));
 // All imports of PrismaClient from @prisma/client will automatically use
 // PrismockClient instead, providing in-memory database for all tests.
 //
-// Note: DATABASE_URL is provided via Infisical in test command, but Prismock
+// Note: POSTGRES_PRISMA_URL is provided via Infisical in test command, but Prismock
 // doesn't require it (uses in-memory storage).
 
 // ============================================================================
@@ -145,8 +145,8 @@ process.env.NEXT_PUBLIC_SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://test.supabase.co';
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key';
-// Provide DATABASE_URL for tests (Prismock doesn't need it, but some code checks for it)
-process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
+// Provide POSTGRES_PRISMA_URL for tests (Prismock doesn't need it, but some code checks for it)
+process.env.POSTGRES_PRISMA_URL = process.env.POSTGRES_PRISMA_URL || 'postgresql://test:test@localhost:5432/test';
 
 // ============================================================================
 // React Profiler Integration (vitest-react-profiler)

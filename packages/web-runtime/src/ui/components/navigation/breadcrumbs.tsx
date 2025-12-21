@@ -39,7 +39,7 @@
  * using the database's build_breadcrumb_json_ld RPC function
  */
 
-import type { content_category } from '@prisma/client';
+import type { content_category } from '../../../types/client-safe-enums.ts';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import Link from 'next/link';

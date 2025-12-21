@@ -10,7 +10,8 @@ import { revalidateTag } from 'next/cache';
 
 import { content_category as ContentCategory } from '@prisma/client';
 import type { content_category } from '@prisma/client';
-import { getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 import { pgmqRead, pgmqDelete } from '../../supabase/pgmq-client';
 import { logger, createWebAppContextWithId } from '../../logging/server';
@@ -115,7 +116,7 @@ export async function handleRevalidation(_request: NextRequest): Promise<NextRes
       );
     }
 
-    const expectedSecret = getEnvVar('REVALIDATE_SECRET');
+    const expectedSecret = env.REVALIDATE_SECRET;
     const results: Array<{
       msg_id: string;
       status: 'success' | 'skipped' | 'failed';

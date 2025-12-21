@@ -17,7 +17,7 @@ import { logger } from '../toolkit/logger.ts';
 const ROOT = fileURLToPath(new URL('../../../../', import.meta.url));
 
 // Output files
-const SCHEMA_FILE = path.join(ROOT, 'apps/edge/schema.sql');
+const SCHEMA_FILE = path.join(ROOT, 'supabase/schema.sql');
 
 const DEFAULT_SCHEMA = 'public';
 

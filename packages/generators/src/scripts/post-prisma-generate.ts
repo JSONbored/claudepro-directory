@@ -20,8 +20,6 @@ import { fixPrismaClientCommonJSWrapper } from '../utils/prisma-post-generation.
 
 const PRISMA_INDEX_PATH = join(process.cwd(), 'packages/database-types/src/prisma/index.ts');
 
-const PJTG_PATH = join(process.cwd(), 'packages/database-types/src/prisma/pjtg.ts');
-
 const OPENAPI_PATH = join(process.cwd(), 'packages/database-types/src/openapi/openapi.yaml');
 
 const DOCS_PATH = join(process.cwd(), 'packages/database-types/docs/index.html');
@@ -33,12 +31,15 @@ const INDEX_CONTENT = `/**
  * - Enums (enum types and value objects)
  * - Models (table types)
  * - Client (PrismaClient and Prisma namespace)
- * - Internal types (Prisma namespace types)
  * 
  * Prisma generates to default location: node_modules/.prisma/client
+ * prisma-json-types-generator modifies the Prisma client files directly in that location.
  * This index file re-exports from @prisma/client for convenience.
  * 
  * NOTE: This file is recreated automatically after \`prisma generate\` runs.
+ * 
+ * The PrismaJson namespace (from prisma-json-types-generator) is available globally
+ * via declaration merging. See packages/database-types/src/prisma-json-types.ts
  */
 
 // Re-export PrismaClient and Prisma namespace from default Prisma location
@@ -49,40 +50,7 @@ export { PrismaClient, Prisma } from '@prisma/client';
 // Re-export all enum types from @prisma/client
 // Enum value objects are available via Prisma namespace (e.g., Prisma.content_category)
 export type * from '@prisma/client';
-
-// Re-export internal Prisma namespace types (JsonValue, etc.)
-export type * from './internal/prismaNamespace.ts';
-
-// Re-export pjtg (prisma-json-types-generator namespace anchor)
-export * from './pjtg.ts';
 `;
-
-async function fixPjtgImport() {
-  try {
-    const content = await readFile(PJTG_PATH, 'utf-8');
-    // Fix the import to use .ts extension
-    const fixed = content.replace(
-      "import * as Prisma from './internal/prismaNamespace';",
-      "import * as Prisma from './internal/prismaNamespace.ts';"
-    );
-
-    if (content !== fixed) {
-      await writeFile(PJTG_PATH, fixed, 'utf-8');
-      logger.info('Fixed pjtg.ts import extension', {
-        script: 'post-prisma-generate',
-        file: 'pjtg.ts',
-        fix: 'import-extension',
-      });
-    }
-  } catch (error) {
-    // pjtg.ts might not exist in some configurations, that's okay
-    logger.warn('Could not fix pjtg.ts (file may not exist)', {
-      script: 'post-prisma-generate',
-      file: 'pjtg.ts',
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-}
 
 /**
  * Fix Prisma namespace type references in Zod schema files
@@ -805,6 +773,151 @@ async function fixViewSchemaCursorImports() {
   }
 }
 
+/**
+ * Remove invalid schema exports from index.ts
+ *
+ * After removing invalid view schema files, we need to also remove their exports
+ * from the index.ts file. This function reads the index.ts file, removes exports
+ * for files that don't exist, and writes it back.
+ */
+async function removeInvalidSchemaExports() {
+  try {
+    logger.info('Starting removeInvalidSchemaExports', {
+      script: 'post-prisma-generate',
+      operation: 'remove-invalid-schema-exports',
+    });
+    
+    const schemasDir = join(process.cwd(), 'packages/database-types/src/prisma/zod/schemas');
+    const indexPath = join(schemasDir, 'index.ts');
+    
+    // Check if index.ts exists
+    try {
+      await access(indexPath);
+      logger.info('Found Zod schemas index.ts', {
+        script: 'post-prisma-generate',
+        operation: 'remove-invalid-schema-exports',
+        path: indexPath,
+      });
+    } catch (error) {
+      // Index file doesn't exist, nothing to clean up
+      logger.info('Zod schemas index.ts not found, skipping export cleanup', {
+        script: 'post-prisma-generate',
+        operation: 'remove-invalid-schema-exports',
+      });
+      return;
+    }
+
+    const content = await readFile(indexPath, 'utf-8');
+    const lines = content.split('\n');
+    const viewNames = ['v_content_list_slim', 'v_trending_searches'];
+    
+    // Invalid schema patterns for views
+    const invalidSchemaPatterns = [
+      'createManyAndReturn',
+      'findUniqueOrThrow',
+      'updateManyAndReturn',
+    ];
+
+    let removedExports = 0;
+    const filteredLines: string[] = [];
+
+    for (const line of lines) {
+      // Check if this line is an export statement
+      if (!line.trim().startsWith('export')) {
+        filteredLines.push(line);
+        continue;
+      }
+
+      // Extract the file path from the export statement
+      // Pattern: export * from './filename.schema'
+      const exportMatch = line.match(/export\s+\*\s+from\s+['"]([^'"]+)['"]/);
+      const matchedGroup = exportMatch?.[1];
+      if (!matchedGroup) {
+        filteredLines.push(line);
+        continue;
+      }
+
+      // matchedGroup is guaranteed to be a string here due to the check above
+      // Explicit type annotation to help TypeScript's type narrowing
+      const exportPath: string = matchedGroup;
+      // Remove leading './' if present
+      const relativePath: string = exportPath.startsWith('./') ? exportPath.slice(2) : exportPath;
+      
+      // Check if this is an invalid view schema export
+      // The export path might be './findUniqueOrThrowv_content_list_slim.schema' (no .ts extension)
+      // or './findUniqueOrThrowv_content_list_slim.schema.ts' (with .ts extension)
+      let isInvalidViewSchema = false;
+      for (const viewName of viewNames) {
+        for (const pattern of invalidSchemaPatterns) {
+          // Check both with and without .ts extension
+          const expectedPath1 = `${pattern}${viewName}.schema`;
+          const expectedPath2 = `${pattern}${viewName}.schema.ts`;
+          if (relativePath === expectedPath1 || relativePath === expectedPath2) {
+            isInvalidViewSchema = true;
+            break;
+          }
+        }
+        if (isInvalidViewSchema) break;
+      }
+
+      if (isInvalidViewSchema) {
+        // Check if the file actually exists
+        // relativePath is guaranteed to be a string here because we checked matchedPath above
+        const fileName: string = relativePath.endsWith('.ts') 
+          ? relativePath 
+          : `${relativePath}.ts`;
+        const filePath = join(schemasDir, fileName);
+        
+        try {
+          await access(filePath);
+          // File exists, keep the export (shouldn't happen, but be safe)
+          filteredLines.push(line);
+          logger.warn('Invalid view schema file exists (unexpected)', {
+            script: 'post-prisma-generate',
+            operation: 'remove-invalid-schema-exports',
+            file: fileName,
+          });
+        } catch (error) {
+          // File doesn't exist, remove the export
+          removedExports++;
+          logger.info('Removed invalid schema export from index.ts', {
+            script: 'post-prisma-generate',
+            operation: 'remove-invalid-schema-exports',
+            export: line.trim(),
+            file: fileName,
+          });
+          // Don't add this line to filteredLines
+        }
+      } else {
+        // Not an invalid view schema, keep the line
+        filteredLines.push(line);
+      }
+    }
+
+    if (removedExports > 0) {
+      const updatedContent = filteredLines.join('\n');
+      await writeFile(indexPath, updatedContent, 'utf-8');
+      logger.info('Removed invalid schema exports from index.ts', {
+        script: 'post-prisma-generate',
+        operation: 'remove-invalid-schema-exports',
+        removed: removedExports,
+      });
+    } else {
+      logger.info('No invalid schema exports found in index.ts', {
+        script: 'post-prisma-generate',
+        operation: 'remove-invalid-schema-exports',
+      });
+    }
+  } catch (error) {
+    const normalized = normalizeError(error, 'Could not remove invalid schema exports from index.ts');
+    logger.error('Could not remove invalid schema exports from index.ts', normalized, {
+      script: 'post-prisma-generate',
+      operation: 'remove-invalid-schema-exports',
+    });
+    // Don't throw - this is a cleanup operation, not critical
+  }
+}
+
 async function verifyGeneratorOutputs() {
   const checks = [
     { path: PRISMA_INDEX_PATH, name: 'Prisma index' },
@@ -879,7 +992,6 @@ async function main() {
 
     // Run post-processing operations in parallel where possible
     await Promise.all([
-      fixPjtgImport(),
       fixPrismaNamespaceTypeCasing(),
       fixPrismaClientCommonJSWrapper(process.cwd()),
       createMissingViewSchemas(),
@@ -888,6 +1000,9 @@ async function main() {
 
     // Fix view schemas that reference removed WhereUniqueInput (must run after removeInvalidViewSchemas)
     await fixViewSchemaCursorImports();
+
+    // Remove invalid schema exports from index.ts (must run after removeInvalidViewSchemas)
+    await removeInvalidSchemaExports();
 
     // Verify outputs (includes validation)
     await verifyGeneratorOutputs();

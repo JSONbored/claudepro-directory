@@ -1,20 +1,18 @@
-import type { Prisma } from '@prisma/client';
-
-type changelogModel = Prisma.changelogGetPayload<{}>;
+import type { ChangelogEntry } from '@heyclaude/web-runtime/types/changelog';
 import { ArrowRight, Calendar } from '@heyclaude/web-runtime/icons';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import {
   formatChangelogDateShort,
-  getNonEmptyCategories,
   getRelativeTime,
 } from '@heyclaude/web-runtime/utils/changelog';
+import { getNonEmptyCategories } from '@heyclaude/web-runtime/types/changelog';
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@heyclaude/web-runtime/ui';
-import type { changelog_category } from '@prisma/client';
+import type { changelog_category } from '@heyclaude/web-runtime/types/client-safe-enums';
 
 interface ChangelogStickyEntryProps {
-  entry: changelogModel;
+  entry: ChangelogEntry;
   targetPath: string;
 }
 

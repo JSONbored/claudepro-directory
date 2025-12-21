@@ -10,7 +10,8 @@
  * - job-expired: Notification when job has expired
  */
 
-import { escapeHtml, getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
+import { escapeHtml, normalizeError } from '@heyclaude/shared-runtime';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 import { inngest } from '../../client';
 import { sendEmail } from '../../../integrations/resend';
@@ -19,7 +20,7 @@ import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { sendCriticalFailureHeartbeat } from '../../utils/monitoring';
 
 // Base URL for links - configurable via environment
-const BASE_URL = getEnvVar('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
+const BASE_URL = env.NEXT_PUBLIC_SITE_URL || 'https://claudepro.directory';
 
 /**
  * Safely convert payload value to escaped string

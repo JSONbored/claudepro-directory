@@ -63,7 +63,7 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
 
   // Database configuration (via Hyperdrive)
-  // DATABASE_URL is provided by Hyperdrive binding, not env var
+  // POSTGRES_PRISMA_URL is provided by Hyperdrive binding, not env var
   // We'll use the Hyperdrive connection string instead
 
   // Optional: Newsletter (from vars)

@@ -29,25 +29,32 @@ vi.mock('next/cache', () => ({
 // Mock data-layer services (service-factory imports from @heyclaude/data-layer)
 // This matches the pattern used in service-factory.test.ts
 // Update service class and method as needed
+// IMPORTANT: Use vi.importActual to include prisma export (required by pgmq-client)
 const mockServiceMethod = vi.fn();
 
-vi.mock('@heyclaude/data-layer', () => ({
-  AccountService: class {},
-  ChangelogService: class {},
-  CompaniesService: class {
-    // Add methods as needed: yourMethodName = mockServiceMethod;
-  },
-  ContentService: class {},
-  JobsService: class {},
-  MiscService: class {
-    // Add methods as needed: yourMethodName = mockServiceMethod;
-  },
-  NewsletterService: class {},
-  SearchService: class {
-    // Add methods as needed: yourMethodName = mockServiceMethod;
-  },
-  TrendingService: class {},
-}));
+vi.mock('@heyclaude/data-layer', async () => {
+  // Import actual modules to get prisma export (PrismockClient in tests)
+  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
+  return {
+    ...actual,
+    AccountService: class {},
+    ChangelogService: class {},
+    CompaniesService: class {
+      // Add methods as needed: yourMethodName = mockServiceMethod;
+    },
+    ContentService: class {},
+    JobsService: class {},
+    MiscService: class {
+      // Add methods as needed: yourMethodName = mockServiceMethod;
+    },
+    NewsletterService: class {},
+    SearchService: class {
+      // Add methods as needed: yourMethodName = mockServiceMethod;
+    },
+    TrendingService: class {},
+    // prisma is already exported from actual (will be PrismockClient in tests)
+  };
+});
 
 // Mock logger
 vi.mock('../../../../packages/web-runtime/src/logging/server', () => ({

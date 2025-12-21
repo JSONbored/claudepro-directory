@@ -41,7 +41,7 @@
  * ```
  */
 
-import type { content_category, sponsorship_tier } from '@prisma/client';
+import type { content_category, sponsorship_tier } from '../../../types/client-safe-enums.ts';
 import { SPRING, DURATION } from '../../../design-system/index.ts';
 import { Star, TrendingUp, Zap } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';

@@ -135,7 +135,16 @@ const handler = {
         // Type assertion: Hyperdrive is provided by Cloudflare Workers runtime
         // TypeScript type-checking happens at compile time, runtime is untyped
         const hyperdrive = hyperdriveRaw as unknown as Parameters<typeof createPrismaClient>[0];
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.ts:138',message:'Before createPrismaClient call',data:{hasHyperdrive:!!hyperdrive,hasConnectionString:!!hyperdrive?.connectionString,nodejsCompat:env['NODE_ENV']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+        // #endregion
+        
         const prisma = createPrismaClient(hyperdrive);
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.ts:143',message:'After createPrismaClient call',data:{hasPrisma:!!prisma},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+        // #endregion
 
         // Create MCP server instance
         const mcpServer = createMcpServer({

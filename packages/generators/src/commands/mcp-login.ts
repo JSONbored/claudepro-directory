@@ -16,6 +16,7 @@ import { URL } from 'node:url';
 
 import { createClient } from '@supabase/supabase-js';
 import escapeHtml from 'escape-html';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 import { logger } from '../toolkit/logger.ts';
 import { getTokenFilePath, loadToken, type TokenData } from '../toolkit/mcp-token.ts';
@@ -41,12 +42,10 @@ function loadEnvFile(): void {
 loadEnvFile();
 
 const SUPABASE_URL =
-  process.env['NEXT_PUBLIC_SUPABASE_URL'] ??
-  process.env['SUPABASE_URL'] ??
+  env.NEXT_PUBLIC_SUPABASE_URL ??
   'https://hgtjdifxfapoltfflowc.supabase.co';
 
-const SUPABASE_ANON_KEY =
-  process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? process.env['SUPABASE_ANON_KEY'] ?? '';
+const SUPABASE_ANON_KEY = env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
 if (!SUPABASE_ANON_KEY) {
   throw new Error(
@@ -256,7 +255,7 @@ async function loginWithOAuth(): Promise<void> {
 
   try {
     // Use web app's login page with special callback parameter
-    const webAppUrl = process.env['NEXT_PUBLIC_APP_URL'] ?? DEFAULT_APP_URL;
+    const webAppUrl = env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_APP_URL;
     const loginUrl = `${webAppUrl}/auth/signin?redirect=${encodeURIComponent(callbackUrl)}&mcp_login=true`;
 
     // Open browser

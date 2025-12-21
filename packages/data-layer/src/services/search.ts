@@ -40,9 +40,8 @@ export type GetTrendingSearchesReturns = Array<{
 }>;
 import type { Prisma, PrismaClient, experience_level, job_category, job_type } from '@prisma/client';
 type jobsModel = Prisma.jobsGetPayload<{}>;
-import { BasePrismaService } from './base-prisma-service.ts';
-import { prisma } from '../prisma/client.ts';
-import { withSmartCache } from '../utils/request-cache.ts';
+import { BasePrismaService } from './base-prisma-service';
+import { withSmartCache } from '../utils/request-cache';
 
 type SearchResultRow = jobsModel | SearchContentOptimizedRow | SearchUnifiedRow;
 type SearchType = 'content' | 'jobs' | 'unified';
@@ -160,7 +159,7 @@ export class SearchService extends BasePrismaService {
         const limit = args?.limit_count ?? 5;
 
         // Query using Prisma view (type-safe, no raw SQL)
-        const results = await prisma.v_trending_searches.findMany({
+        const results = await this.prisma.v_trending_searches.findMany({
           orderBy: {
             search_count: 'desc',
           },

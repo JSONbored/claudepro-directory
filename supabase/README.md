@@ -33,11 +33,6 @@ Migration files in `migrations/` are:
 - Applied automatically to preview branches when created
 - Committed to git for version control
 
-## Related Directories
-
-- `apps/edge/supabase/` - Edge Functions configuration (separate from migrations)
-- `apps/edge/supabase/functions/` - Edge Functions code
-
 ## Setup
 
 To generate migration files from production:

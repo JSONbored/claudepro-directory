@@ -29,19 +29,23 @@ vi.mock('next/server', async () => {
 // Mock data-layer services
 const mockGetSocialProofStats = vi.fn();
 
-vi.mock('@heyclaude/data-layer', () => ({
-  AccountService: class {},
-  ChangelogService: class {},
-  CompaniesService: class {},
-  ContentService: class {},
-  JobsService: class {},
-  MiscService: class {
-    getSocialProofStats = mockGetSocialProofStats;
-  },
-  NewsletterService: class {},
-  SearchService: class {},
-  TrendingService: class {},
-}));
+vi.mock('@heyclaude/data-layer', async () => {
+  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
+  return {
+    ...actual,
+    AccountService: class {},
+    ChangelogService: class {},
+    CompaniesService: class {},
+    ContentService: class {},
+    JobsService: class {},
+    MiscService: class {
+      getSocialProofStats = mockGetSocialProofStats;
+    },
+    NewsletterService: class {},
+    SearchService: class {},
+    TrendingService: class {},
+  };
+});
 
 // Mock service-factory (getService)
 vi.mock('../../../../../packages/web-runtime/src/data/service-factory', () => ({

@@ -12,7 +12,7 @@
  * Performance: Only the interactive buttons are client-side, rest is server-rendered
  */
 
-import { content_category as ContentCategory } from '@prisma/client';
+import { content_category as ContentCategory } from '@heyclaude/web-runtime/types/client-safe-enums';
 import type { content_category } from '@prisma/client';
 import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';

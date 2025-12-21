@@ -49,7 +49,7 @@ import { Button } from '../button.tsx';
 import { AnimatePresence, motion } from 'motion/react';
 import { MICROINTERACTIONS } from '../../../design-system/index.ts';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../tooltip.tsx';
-import type { content_category } from '@prisma/client';
+import type { content_category } from '../../../types/client-safe-enums.ts';
 
 /**
  * BookmarkButton Props

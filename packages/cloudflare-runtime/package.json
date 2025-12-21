@@ -3,7 +3,9 @@
   "version": "1.1.0",
   "private": true,
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "./src/prisma/node-globals-polyfill.ts"
+  ],
   "exports": {
     ".": {
       "development": "./src/index.ts",
@@ -51,6 +53,7 @@
     "@heyclaude/shared-runtime": "workspace:*",
     "@infisical/sdk": "^4.0.0",
     "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
     "@supabase/supabase-js": "^2.89.0",
     "pg": "^8.16.3",
     "pino": "^10.1.0",

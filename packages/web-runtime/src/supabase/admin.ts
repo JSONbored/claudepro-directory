@@ -4,7 +4,6 @@
  */
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import { getEnvVar } from '@heyclaude/shared-runtime';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 type SupabaseAdminClient = ReturnType<typeof createSupabaseClient>;
@@ -13,7 +12,7 @@ type SupabaseAdminClient = ReturnType<typeof createSupabaseClient>;
  * Check if we're in build phase
  */
 function isBuildPhase(): boolean {
-  const nextPhase = getEnvVar('NEXT_PHASE');
+  const nextPhase = env.NEXT_PHASE;
   return nextPhase === 'phase-production-build' || nextPhase === 'phase-production-server';
 }
 
@@ -27,10 +26,8 @@ function isBuildPhase(): boolean {
  */
 export function createSupabaseAdminClient(): SupabaseAdminClient {
   // Use validated env schema (handles empty strings -> undefined)
-  // Fallback to process.env for SUPABASE_SERVICE_ROLE_KEY (not in public schema)
   const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseServiceKey =
-    process.env['SUPABASE_SERVICE_ROLE_KEY'] || getEnvVar('SUPABASE_SERVICE_ROLE_KEY');
+  const supabaseServiceKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
   const buildPhase = isBuildPhase() ? ' (BUILD PHASE)' : '';
 

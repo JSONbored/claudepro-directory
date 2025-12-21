@@ -9,14 +9,29 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { existsSync } from 'node:fs';
 
+/**
+ * Get the OpenAPI spec path (lazy evaluation to avoid import.meta.url issues)
+ * In Cloudflare Workers, we can't read from filesystem, so this will return null
+ */
+function getOpenAPISpecPath(): string | null {
+  try {
+    // In Cloudflare Workers, import.meta.url may be undefined
+    // We'll handle this gracefully by returning null
+    if (typeof import.meta === 'undefined' || typeof import.meta.url === 'undefined') {
+      return null;
+    }
 const __filename = fileURLToPath(import.meta.url);
 // Calculate PROJECT_ROOT: from apps/workers/heyclaude-mcp/src/routes/ -> project root
 let PROJECT_ROOT = join(__filename, '../../../../../');
 if (!existsSync(join(PROJECT_ROOT, 'apps/workers/heyclaude-mcp'))) {
   PROJECT_ROOT = process.cwd();
 }
-
-const OPENAPI_SPEC_PATH = join(PROJECT_ROOT, 'openapi-mcp.json');
+    return join(PROJECT_ROOT, 'openapi-mcp.json');
+  } catch {
+    // If import.meta.url is unavailable, return null
+    return null;
+  }
+}
 
 /**
  * Handle OpenAPI spec request
@@ -25,7 +40,8 @@ const OPENAPI_SPEC_PATH = join(PROJECT_ROOT, 'openapi-mcp.json');
  */
 export async function handleOpenAPI(): Promise<Response> {
   try {
-    if (!existsSync(OPENAPI_SPEC_PATH)) {
+    const OPENAPI_SPEC_PATH = getOpenAPISpecPath();
+    if (!OPENAPI_SPEC_PATH || !existsSync(OPENAPI_SPEC_PATH)) {
       return new Response(
         JSON.stringify({
           error: 'OpenAPI spec not found',

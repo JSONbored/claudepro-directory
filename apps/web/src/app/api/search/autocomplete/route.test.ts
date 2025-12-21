@@ -21,19 +21,23 @@ vi.mock('next/cache', () => ({
 // Mock data-layer services
 const mockGetSearchSuggestionsFormatted = vi.fn();
 
-vi.mock('@heyclaude/data-layer', () => ({
-  AccountService: class {},
-  ChangelogService: class {},
-  CompaniesService: class {},
-  ContentService: class {},
-  JobsService: class {},
-  MiscService: class {},
-  NewsletterService: class {},
-  SearchService: class {
-    getSearchSuggestionsFormatted = mockGetSearchSuggestionsFormatted;
-  },
-  TrendingService: class {},
-}));
+vi.mock('@heyclaude/data-layer', async () => {
+  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
+  return {
+    ...actual,
+    AccountService: class {},
+    ChangelogService: class {},
+    CompaniesService: class {},
+    ContentService: class {},
+    JobsService: class {},
+    MiscService: class {},
+    NewsletterService: class {},
+    SearchService: class {
+      getSearchSuggestionsFormatted = mockGetSearchSuggestionsFormatted;
+    },
+    TrendingService: class {},
+  };
+});
 
 // Mock logging/server
 vi.mock('../../../../packages/web-runtime/src/logging/server', () => ({

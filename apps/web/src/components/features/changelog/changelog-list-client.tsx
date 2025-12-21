@@ -1,12 +1,7 @@
 'use client';
 
-import type { Prisma } from '@prisma/client';
-
-type changelogModel = Prisma.changelogGetPayload<{}>;
-
+import type { ChangelogEntry } from '@heyclaude/web-runtime/types/changelog';
 import { ChangelogTimelineView } from '@/src/components/features/changelog/changelog-timeline-view';
-
-type ChangelogEntry = changelogModel;
 
 export interface ChangelogListClientProps {
   categoryCounts: Record<string, number>;

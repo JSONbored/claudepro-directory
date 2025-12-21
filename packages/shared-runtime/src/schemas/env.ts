@@ -3,7 +3,6 @@
 import { z } from 'zod';
 
 import { getEnvObject } from '../env.ts';
-import { logger, normalizeError } from '../logger/index.ts';
 
 import { nonEmptyString, optionalUrlString } from './primitives.ts';
 
@@ -84,6 +83,18 @@ const serverEnvSchema = z
       .optional()
       .describe('Supabase service role key for admin operations (bypasses RLS)'),
 
+    // Prisma database connection strings
+    DIRECT_URL: nonEmptyString
+      .optional()
+      .describe(
+        'Direct PostgreSQL connection URL for Prisma migrations and introspection (Prisma 7.1.0+)'
+      ),
+    POSTGRES_PRISMA_URL: nonEmptyString
+      .optional()
+      .describe(
+        'PostgreSQL connection URL for Prisma client (connection pooling via Prisma Data Proxy)'
+      ),
+
     POLAR_ACCESS_TOKEN: nonEmptyString
       .optional()
       .describe('Polar.sh API access token for payment operations'),
@@ -94,6 +105,83 @@ const serverEnvSchema = z
       .enum(['sandbox', 'production'])
       .optional()
       .describe('Polar.sh environment (sandbox for testing, production for live)'),
+
+    // Discord webhooks (optional - for notifications)
+    DISCORD_CHANGELOG_WEBHOOK_URL: optionalUrlString.describe(
+      'Discord webhook URL for changelog notifications'
+    ),
+    DISCORD_JOBS_WEBHOOK_URL: optionalUrlString.describe(
+      'Discord webhook URL for job posting notifications'
+    ),
+    DISCORD_ERROR_WEBHOOK_URL: optionalUrlString.describe(
+      'Discord webhook URL for error notifications'
+    ),
+    DISCORD_SUBMISSIONS_WEBHOOK_URL: optionalUrlString.describe(
+      'Discord webhook URL for submission notifications'
+    ),
+    DISCORD_ANNOUNCEMENTS_WEBHOOK_URL: optionalUrlString.describe(
+      'Discord webhook URL for announcement notifications'
+    ),
+
+    // Email configuration (optional)
+    RESEND_FROM_EMAIL: nonEmptyString
+      .optional()
+      .describe('Default from email address for Resend (fallback if not specified in template)'),
+    ALLOW_DEV_EMAILS: z
+      .enum(['true', 'false', '1', '0'])
+      .optional()
+      .describe('Allow sending emails in development environment (for testing)'),
+    DEV_EMAIL_WHITELIST: nonEmptyString
+      .optional()
+      .describe('Comma-separated list of whitelisted email addresses for development'),
+    DEV_EMAIL_DOMAIN_WHITELIST: nonEmptyString
+      .optional()
+      .describe('Comma-separated list of whitelisted email domains for development'),
+
+    // GitHub integration (optional)
+    GITHUB_TOKEN: nonEmptyString.optional().describe('GitHub personal access token for API operations'),
+    GITHUB_REPOSITORY: nonEmptyString
+      .optional()
+      .describe('GitHub repository in format owner/repo (e.g., JSONbored/claudepro-directory)'),
+
+    // IndexNow (optional - for search engine indexing)
+    INDEXNOW_API_KEY: nonEmptyString.optional().describe('IndexNow API key for search engine indexing'),
+    INDEXNOW_TRIGGER_KEY: nonEmptyString
+      .optional()
+      .describe('IndexNow trigger key for search engine indexing'),
+
+    // Build/test flags (optional)
+    VITEST: z
+      .enum(['true', 'false', '1', '0'])
+      .optional()
+      .describe('Flag indicating if running in Vitest test environment'),
+    PRISMA_DEBUG: z
+      .enum(['true', 'false', '1', '0'])
+      .optional()
+      .describe('Enable Prisma debug logging (verbose query logging)'),
+    PRISMA_VALIDATE: z
+      .enum(['true', 'false', '1', '0'])
+      .optional()
+      .describe('Flag indicating Prisma validation mode (skip introspection during validation)'),
+
+    // Infisical SDK credentials (optional - only needed if infisical.enabled feature flag is true)
+    INFISICAL_CLIENT_ID: nonEmptyString
+      .optional()
+      .describe('Infisical Universal Auth client ID (for SDK integration)'),
+    INFISICAL_CLIENT_SECRET: nonEmptyString
+      .optional()
+      .describe('Infisical Universal Auth client secret (for SDK integration)'),
+    INFISICAL_PROJECT_ID: nonEmptyString
+      .optional()
+      .describe('Infisical project/workspace ID (defaults to value in .infisical.json)'),
+    INFISICAL_ENV: z
+      .enum(['dev', 'staging', 'prod'])
+      .optional()
+      .describe('Infisical environment override (defaults to dev for development, prod for production)'),
+    INFISICAL_ENABLED: z
+      .enum(['true', 'false', '1', '0'])
+      .optional()
+      .describe('Feature flag to enable/disable Infisical SDK (overrides unified-config FEATURE_FLAGS)'),
   })
   .describe(
     'Server-side environment variables containing sensitive data only accessible on the server'
@@ -128,6 +216,20 @@ const clientEnvSchema = z
     NEXT_PUBLIC_SUPABASE_ANON_KEY: nonEmptyString
       .optional()
       .describe('Supabase anonymous/public key (safe for client-side, RLS enforced)'),
+    NEXT_PUBLIC_BASE_URL: optionalUrlString.describe(
+      'Public base URL for the application (safe for client-side, used for OAuth callbacks)'
+    ),
+    NEXT_PUBLIC_LOGGER_CONSOLE: z
+      .enum(['true', 'false', '1', '0'])
+      .optional()
+      .describe('Enable console logging in client-side logger (for debugging)'),
+    NEXT_PUBLIC_LOGGER_VERBOSE: z
+      .enum(['true', 'false', '1', '0'])
+      .optional()
+      .describe('Enable verbose logging in client-side logger (for debugging)'),
+    NEXT_PUBLIC_APP_URL: optionalUrlString.describe(
+      'Public application URL for OAuth callbacks and redirects (safe for client-side)'
+    ),
   })
   .describe(
     'Client-side environment variables exposed to the browser (must not contain sensitive data)'
@@ -235,33 +337,41 @@ function validateEnv(): Env {
 
     const validationError = new Error(`Invalid environment variables: ${errorDetails}`);
     // Fire-and-forget: validation must remain synchronous
-    const normalized = normalizeError(validationError, 'Invalid environment variables detected');
-    void logger.error(
-      {
-        err: normalized,
-        module: 'shared-runtime',
-        operation: 'validateEnv',
-        errorDetails,
-        phase: 'validation',
-        isBuildPhase,
-        debugValues, // Include debug info to see what Netlify is actually passing
-      },
-      'Invalid environment variables detected'
-    );
+    // Use lazy import to avoid circular dependency (logger imports env schema)
+    void (async () => {
+      const { logger, normalizeError } = await import('../logger/index.ts');
+      const normalized = normalizeError(validationError, 'Invalid environment variables detected');
+      void logger.error(
+        {
+          err: normalized,
+          module: 'shared-runtime',
+          operation: 'validateEnv',
+          errorDetails,
+          phase: 'validation',
+          isBuildPhase,
+          debugValues, // Include debug info to see what Netlify is actually passing
+        },
+        'Invalid environment variables detected'
+      );
+    })();
 
     // During build phase, be lenient - env vars may not be available yet
     // Netlify may not pass all env vars during build, but they're available at runtime
     // They'll be validated again at runtime when they're actually needed
     if (isBuildPhase) {
-      logger.warn(
-        {
-          module: 'shared-runtime',
-          operation: 'validateEnv',
-          phase: 'build',
-          errorDetails,
-        },
-        'Skipping strict env validation during build phase - will validate at runtime'
-      );
+      // Use lazy import to avoid circular dependency (logger imports env schema)
+      void (async () => {
+        const { logger } = await import('../logger/index.ts');
+        void logger.warn(
+          {
+            module: 'shared-runtime',
+            operation: 'validateEnv',
+            phase: 'build',
+            errorDetails,
+          },
+          'Skipping strict env validation during build phase - will validate at runtime'
+        );
+      })();
       // Use a permissive parse that filters out invalid optional fields
       const buildTimeEnv: Record<string, unknown> = { ...rawEnv };
       // Remove invalid optional fields - they'll be validated at runtime
@@ -284,13 +394,17 @@ function validateEnv(): Env {
     }
 
     // In development, warn but continue with defaults
-    logger.warn(
-      {
-        module: 'shared-runtime',
-        operation: 'validateEnv',
-      },
-      'Using default values for missing environment variables'
-    );
+    // Use lazy import to avoid circular dependency (logger imports env schema)
+    void (async () => {
+      const { logger } = await import('../logger/index.ts');
+      void logger.warn(
+        {
+          module: 'shared-runtime',
+          operation: 'validateEnv',
+        },
+        'Using default values for missing environment variables'
+      );
+    })();
     cachedEnv = envSchema.parse({
       ...rawEnv,
       NODE_ENV: rawEnv['NODE_ENV'] ?? 'development',
@@ -315,19 +429,23 @@ function validateEnv(): Env {
       );
 
       // Fire-and-forget: log the error before throwing
-      const normalized = normalizeError(
-        missingEnvError,
-        'Missing required production environment variables for security features'
-      );
-      void logger.error(
-        {
-          err: normalized,
-          module: 'shared-runtime',
-          operation: 'validateEnv',
-          missingVars,
-        },
-        'Missing required production environment variables for security features'
-      );
+      // Use lazy import to avoid circular dependency (logger imports env schema)
+      void (async () => {
+        const { logger, normalizeError } = await import('../logger/index.ts');
+        const normalized = normalizeError(
+          missingEnvError,
+          'Missing required production environment variables for security features'
+        );
+        void logger.error(
+          {
+            err: normalized,
+            module: 'shared-runtime',
+            operation: 'validateEnv',
+            missingVars,
+          },
+          'Missing required production environment variables for security features'
+        );
+      })();
       throw new Error(
         `Missing required production environment variables: ${missingVars}. These are required for security and functionality in production.`
       );

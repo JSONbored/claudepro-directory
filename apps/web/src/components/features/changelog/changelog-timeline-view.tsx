@@ -10,9 +10,7 @@
 
 'use client';
 
-import type { Prisma } from '@prisma/client';
-
-type changelogModel = Prisma.changelogGetPayload<{}>;
+import type { ChangelogEntry } from '@heyclaude/web-runtime/types/changelog';
 import { useInfiniteScroll } from '@heyclaude/web-runtime/hooks/use-infinite-scroll';
 import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { getChangelogPath } from '@heyclaude/web-runtime/utils/changelog';
@@ -20,7 +18,7 @@ import Link from 'next/link';
 
 import { ChangelogContent } from './changelog-content';
 
-type ChangelogEntry = changelogModel;
+// ChangelogEntry type imported from web-runtime
 
 interface ChangelogTimelineViewProps {
   entries: ChangelogEntry[];

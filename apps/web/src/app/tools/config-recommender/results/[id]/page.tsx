@@ -8,14 +8,12 @@ import {
   focus_area_type as FocusAreaType,
   integration_type as IntegrationType,
   use_case_type as UseCaseType,
-} from '@prisma/client';
-import {
   type content_category,
   type experience_level,
   type focus_area_type,
   type integration_type,
   type use_case_type,
-} from '@prisma/client';
+} from '@heyclaude/web-runtime/types/client-safe-enums';
 import {
   type GetRecommendationsReturns,
   type RecommendationItem,
@@ -417,11 +415,11 @@ async function ResultsPageContent({
 
   // Section: Recommendations Fetch
   const enrichedResult = await getConfigRecommendations({
-    experienceLevel: answers.experienceLevel,
+    experienceLevel: answers.experienceLevel as unknown as experience_level,
     toolPreferences: answers.toolPreferences,
-    useCase: answers.useCase,
-    ...(answers.p_integrations && { integrations: answers.p_integrations }),
-    ...(answers.p_focus_areas && { focusAreas: answers.p_focus_areas }),
+    useCase: answers.useCase as unknown as use_case_type,
+    ...(answers.p_integrations && { integrations: answers.p_integrations as unknown as integration_type[] }),
+    ...(answers.p_focus_areas && { focusAreas: answers.p_focus_areas as unknown as focus_area_type[] }),
   });
   routeLogger.info(
     {

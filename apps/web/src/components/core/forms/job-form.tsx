@@ -11,15 +11,12 @@ import {
   workplace_type as WorkplaceType,
   experience_level as ExperienceLevel,
   job_plan as jobPlanEnum,
-} from '@prisma/client';
-
-import type {
-  job_plan,
-  job_type,
-  job_category,
-  workplace_type,
-  experience_level,
-} from '@prisma/client';
+  type job_plan,
+  type job_type,
+  type job_category,
+  type workplace_type,
+  type experience_level,
+} from '@heyclaude/web-runtime/types/client-safe-enums';
 import {
   normalizeError,
   getFormDataString,
@@ -340,7 +337,7 @@ export function JobForm({
         throw new Error('Invalid job type or category');
       }
 
-      const jobData: CreateJobInput = {
+      const jobData = {
         title: getFormDataStringRequired(formData, 'title'),
         company: companyName,
         company_id: companyId || undefined,
@@ -348,9 +345,9 @@ export function JobForm({
         description: getFormDataStringRequired(formData, 'description'),
         salary: salary || undefined,
         remote: getFormDataBoolean(formData, 'remote'),
-        type: jobType,
-        workplace: workplace || undefined,
-        experience: experience || undefined,
+        type: (jobType as unknown) as job_type | null | undefined,
+        workplace: ((workplace || undefined) as unknown) as workplace_type | null | undefined,
+        experience: ((experience || undefined) as unknown) as experience_level | null | undefined,
         category: category,
         tags,
         requirements,
@@ -366,7 +363,7 @@ export function JobForm({
         tier: isFeatured ? 'featured' : 'standard',
         contact_email: contactEmail || undefined,
         company_logo: companyLogo || undefined,
-      } satisfies CreateJobInput;
+      } as CreateJobInput;
 
       startTransition(async () => {
         try {

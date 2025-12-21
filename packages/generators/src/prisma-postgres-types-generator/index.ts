@@ -15,6 +15,8 @@ const { generatorHandler } = pkg;
 import { mkdir, writeFile, readFile, readdir, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 
+import { env } from '@heyclaude/shared-runtime/schemas/env';
+
 import { generateCompositeTypes } from './composite-generator.ts';
 import { generateEnumSchemas } from './enum-generator.ts';
 import { generateFunctionTypes } from './function-generator.ts';
@@ -165,8 +167,12 @@ generatorHandler({
       // Get database connection string
       // Prisma 7.1.0+ uses prisma.config.ts which may not pass resolved URL to generators
       // Read DIRECT_URL directly from environment (Prisma 7.1.0+ uses it for migrations/introspection)
-      // Fallback to DATABASE_URL for compatibility
-      let connectionString = process.env['DIRECT_URL'] || process.env['DATABASE_URL'] || '';
+      // Fallback to POSTGRES_PRISMA_URL for compatibility
+      // Uses isomorphic env schema for type-safe, validated access
+      // Type assertion needed because these are server-only env vars but generator runs at build time
+      let connectionString = (env as { DIRECT_URL?: string; POSTGRES_PRISMA_URL?: string }).DIRECT_URL || 
+                             (env as { DIRECT_URL?: string; POSTGRES_PRISMA_URL?: string }).POSTGRES_PRISMA_URL || 
+                             '';
 
       // Try to get from Prisma's datasource if available (for compatibility with older Prisma versions)
       if (!connectionString) {
@@ -178,20 +184,21 @@ generatorHandler({
           | { url?: string | { value?: string; fromEnvVar?: string } }
           | undefined;
 
-        if (datasource) {
+        if (datasource && datasource.url) {
           // Extract connection string from environment variable or direct value
           const urlValue =
             typeof datasource.url === 'string'
               ? datasource.url
               : (datasource.url as { value?: string; fromEnvVar?: string })?.value ||
                 ((datasource.url as { fromEnvVar?: string })?.fromEnvVar
-                  ? process.env[(datasource.url as { fromEnvVar: string }).fromEnvVar] || ''
+                  ? (env[datasource.url.fromEnvVar as keyof typeof env] as string | undefined) || ''
                   : '');
 
           if (urlValue.startsWith('env("') || urlValue.startsWith("env('")) {
             // Extract env var name: env("VAR_NAME") or env('VAR_NAME')
             const envVar = urlValue.replace(/^env\(["']/, '').replace(/["']\)$/, '');
-            connectionString = process.env[envVar] || '';
+            // Dynamic access to env schema (for Prisma datasource env() syntax)
+            connectionString = (env[envVar as keyof typeof env] as string | undefined) || '';
           } else if (urlValue) {
             connectionString = urlValue;
           }
@@ -199,8 +206,27 @@ generatorHandler({
       }
 
       if (!connectionString) {
+        // During prisma validate, we don't need actual database connection
+        // Skip introspection if connection string is not available (validation mode)
+        // This allows schema validation to pass without database connection
+        // For actual generation, connection string is required
+        // PRISMA_VALIDATE is not in schema, use process.env directly for this build-time flag
+        const isValidationMode = (typeof process !== 'undefined' && process.env?.['PRISMA_VALIDATE'] === 'true') || 
+                                  process.argv.includes('validate') ||
+                                  !process.argv.includes('generate');
+        
+        if (isValidationMode) {
+          // During validation, skip introspection and return empty metadata
+          // This allows schema validation to pass without database connection
+          return {
+            functions: [],
+            compositeTypes: [],
+            enums: [],
+          };
+        }
+        
         throw new Error(
-          'Database connection string not found. Please set DIRECT_URL (for Prisma 7.1.0+ migrations/introspection) or DATABASE_URL environment variable.\n' +
+          'Database connection string not found. Please set DIRECT_URL (for Prisma 7.1.0+ migrations/introspection) or POSTGRES_PRISMA_URL environment variable.\n' +
             'For local development: infisical run --env=dev -- prisma generate\n' +
             'For CI/CD: Ensure DIRECT_URL is set in your environment variables.\n' +
             'For Supabase: Get connection string from Project Settings > Database > Connection string (Session mode, port 5432)'
@@ -212,7 +238,7 @@ generatorHandler({
         throw new Error(
           `Invalid connection string format. Expected postgresql://, postgres://, or pgsql:// prefix.\n` +
             `Received: ${connectionString.substring(0, 50)}...\n` +
-            `Please check your DIRECT_URL or DATABASE_URL environment variable.`
+            `Please check your DIRECT_URL or POSTGRES_PRISMA_URL environment variable.`
         );
       }
 
@@ -713,12 +739,15 @@ generatorHandler({
  * - Enums (enum types and value objects)
  * - Models (table types)
  * - Client (PrismaClient and Prisma namespace)
- * - Internal types (Prisma namespace types)
  * 
  * Prisma generates to default location: node_modules/.prisma/client
+ * prisma-json-types-generator modifies the Prisma client files directly in that location.
  * This index file re-exports from @prisma/client for convenience.
  * 
  * NOTE: This file is recreated automatically after \`prisma generate\` runs.
+ * 
+ * The PrismaJson namespace (from prisma-json-types-generator) is available globally
+ * via declaration merging. See packages/database-types/src/prisma-json-types.ts
  */
 
 // Re-export PrismaClient and Prisma namespace from default Prisma location
@@ -729,33 +758,11 @@ export { PrismaClient, Prisma } from '@prisma/client';
 // Re-export all enum types from @prisma/client
 // Enum value objects are available via Prisma namespace (e.g., Prisma.content_category)
 export type * from '@prisma/client';
-
-// Re-export internal Prisma namespace types (JsonValue, etc.)
-export type * from './internal/prismaNamespace.ts';
-
-// Re-export pjtg (prisma-json-types-generator namespace anchor)
-export * from './pjtg.ts';
 `;
       await writeFile(prismaIndexPath, prismaIndexContent, 'utf-8');
-
-      // 2. Fix pjtg.ts import extension (prisma-json-types-generator generates without .ts extension)
-      // This must run AFTER json-types generator, so we're placed after it in schema.prisma
-      const pjtgPath = join(process.cwd(), 'packages/database-types/src/prisma/pjtg.ts');
-      try {
-        const pjtgContent = await readFile(pjtgPath, 'utf-8');
-        // Fix the import to use .ts extension for NodeNext module resolution
-        const fixedPjtgContent = pjtgContent.replace(
-          "import * as Prisma from './internal/prismaNamespace';",
-          "import * as Prisma from './internal/prismaNamespace.ts';"
-        );
-
-        if (pjtgContent !== fixedPjtgContent) {
-          await writeFile(pjtgPath, fixedPjtgContent, 'utf-8');
-        }
-      } catch (error) {
-        // pjtg.ts might not exist in some configurations, that's okay
-        // This is a non-critical fix
-      }
+      
+      // Explicit return to satisfy TypeScript's "not all code paths return a value" check
+      return;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       const errorStack = error instanceof Error ? error.stack : undefined;

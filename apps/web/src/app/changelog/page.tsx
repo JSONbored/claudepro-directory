@@ -22,9 +22,7 @@
  * - Responsive design
  */
 
-import type { Prisma } from '@prisma/client';
-
-type changelogModel = Prisma.changelogGetPayload<{}>;
+import type { ChangelogEntry } from '@heyclaude/web-runtime/types/changelog';
 import { getChangelogOverview } from '@heyclaude/web-runtime/data/changelog';
 import { APP_CONFIG, QUERY_LIMITS } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -160,7 +158,7 @@ async function ChangelogContentWithData({
   reqLogger: ReturnType<typeof logger.child>;
 }) {
   // Fetch data outside JSX construction - handle errors before rendering
-  let sortedEntries: changelogModel[] = [];
+  let sortedEntries: ChangelogEntry[] = [];
   let hasError = false;
 
   try {
@@ -207,7 +205,7 @@ async function ChangelogContentWithData({
         source: null,
         twitter_card: null,
         updated_at: new Date(entry.updated_at ?? ''),
-      } as changelogModel;
+      } as unknown as ChangelogEntry;
     });
 
     // Sort entries by date (newest first) - EXACTLY matches Magic UI template

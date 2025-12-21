@@ -98,7 +98,7 @@
         "packages/generators/src/prisma-postgres-types-generator/**/*"
       ],
       "cache": true,
-      "passThroughEnv": ["DIRECT_URL", "DATABASE_URL"]
+      "passThroughEnv": ["DIRECT_URL", "POSTGRES_PRISMA_URL"]
     },
     "type-check": {
       "dependsOn": ["@heyclaude/database-types#build"],

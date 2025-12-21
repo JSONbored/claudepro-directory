@@ -10,7 +10,7 @@ import type {
   BatchInsertUserInteractionsReturns,
 } from '@heyclaude/database-types/postgres-types';
 import type { content_category } from '@prisma/client';
-import { prisma } from '../prisma/client.ts';
+import { prisma } from '../prisma/client';
 
 // Local types for converted RPCs (RPCs removed, using Prisma directly)
 // These RPC functions were removed and converted to Prisma direct queries
@@ -367,8 +367,8 @@ export type IsFollowingBatchReturns = Array<{
   followed_user_id: string;
   is_following: boolean;
 }>;
-import { BasePrismaService } from './base-prisma-service.ts';
-import { withSmartCache } from '../utils/request-cache.ts';
+import { BasePrismaService } from './base-prisma-service';
+import { withSmartCache } from '../utils/request-cache';
 
 /**
  * Account Service using Prisma Client

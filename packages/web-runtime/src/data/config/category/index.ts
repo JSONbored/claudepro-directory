@@ -1,4 +1,4 @@
-import { type content_category } from '@prisma/client';
+import { type content_category } from '../../../types/client-safe-enums.ts';
 
 import {
   type CategoryStatsConfig,

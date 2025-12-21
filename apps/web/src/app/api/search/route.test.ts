@@ -45,20 +45,27 @@ vi.mock('next/server', async () => {
 const mockExecuteSearch = vi.hoisted(() => vi.fn());
 const mockHighlightResults = vi.hoisted(() => vi.fn());
 
-vi.mock('@heyclaude/data-layer', () => ({
-  SearchService: class {
-    executeSearch = mockExecuteSearch;
-    static highlightResults = mockHighlightResults;
-  },
-  AccountService: class {},
-  ChangelogService: class {},
-  CompaniesService: class {},
-  ContentService: class {},
-  JobsService: class {},
-  MiscService: class {},
-  NewsletterService: class {},
-  TrendingService: class {},
-}));
+vi.mock('@heyclaude/data-layer', async () => {
+  // Import actual modules to get prisma export (PrismockClient in tests)
+  // Required because pgmqSend imports prisma from @heyclaude/data-layer
+  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
+  return {
+    ...actual,
+    SearchService: class {
+      executeSearch = mockExecuteSearch;
+      static highlightResults = mockHighlightResults;
+    },
+    AccountService: class {},
+    ChangelogService: class {},
+    CompaniesService: class {},
+    ContentService: class {},
+    JobsService: class {},
+    MiscService: class {},
+    NewsletterService: class {},
+    TrendingService: class {},
+    // prisma is already exported from actual (will be PrismockClient in tests)
+  };
+});
 
 // Import route handlers (after mocks are set up)
 import { GET, OPTIONS } from './route';

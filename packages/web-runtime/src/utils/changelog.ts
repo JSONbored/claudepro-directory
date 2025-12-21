@@ -5,7 +5,7 @@
  * from `@heyclaude/web-runtime/data` for consistency and to prevent hydration mismatches.
  */
 
-import type { changelog_category } from '@prisma/client';
+import type { changelog_category } from '../types/client-safe-enums.ts';
 import { formatDate, formatRelativeDate } from '../data.ts';
 import { APP_CONFIG } from '../data/config/constants.ts';
 
@@ -153,18 +153,19 @@ export function getNonEmptyCategories(categories: unknown): changelog_category[]
   const cats = categories as Record<string, unknown>;
   if (!cats) return nonEmpty;
 
+  // Return database category names directly (Added, Changed, Fixed, etc.)
   if (Array.isArray(cats['Added']) && cats['Added'].length > 0)
-    nonEmpty.push('Added' as changelog_category);
+    nonEmpty.push('Added');
   if (Array.isArray(cats['Changed']) && cats['Changed'].length > 0)
-    nonEmpty.push('Changed' as changelog_category);
+    nonEmpty.push('Changed');
   if (Array.isArray(cats['Deprecated']) && cats['Deprecated'].length > 0)
-    nonEmpty.push('Deprecated' as changelog_category);
+    nonEmpty.push('Deprecated');
   if (Array.isArray(cats['Removed']) && cats['Removed'].length > 0)
-    nonEmpty.push('Removed' as changelog_category);
+    nonEmpty.push('Removed');
   if (Array.isArray(cats['Fixed']) && cats['Fixed'].length > 0)
-    nonEmpty.push('Fixed' as changelog_category);
+    nonEmpty.push('Fixed');
   if (Array.isArray(cats['Security']) && cats['Security'].length > 0)
-    nonEmpty.push('Security' as changelog_category);
+    nonEmpty.push('Security');
 
   return nonEmpty;
 }

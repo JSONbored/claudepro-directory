@@ -33,6 +33,7 @@
 import pino from 'pino';
 
 import { hashUserId, hashEmail } from '../privacy.ts';
+import { getEnvObject } from '../env.ts';
 
 /**
  * Sensitive data patterns for redaction
@@ -1228,10 +1229,13 @@ function defaultStreamWrite(s: string): string {
  * const logger = pino(config);
  */
 export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOptions {
+  // Use getEnvObject() directly to avoid circular dependency with env schema
+  // (env schema imports logger, logger config needs env vars)
+  const rawEnv = getEnvObject();
   const loggerConsoleEnabled =
-    typeof process !== 'undefined' && process.env['NEXT_PUBLIC_LOGGER_CONSOLE'] === 'true';
+    rawEnv['NEXT_PUBLIC_LOGGER_CONSOLE'] === 'true' || rawEnv['NEXT_PUBLIC_LOGGER_CONSOLE'] === '1';
   const loggerVerbose =
-    typeof process !== 'undefined' && process.env['NEXT_PUBLIC_LOGGER_VERBOSE'] === 'true';
+    rawEnv['NEXT_PUBLIC_LOGGER_VERBOSE'] === 'true' || rawEnv['NEXT_PUBLIC_LOGGER_VERBOSE'] === '1';
 
   // Handle redaction - support both array and object formats
   // Use custom censor function that hashes user IDs instead of just redacting them
@@ -1301,7 +1305,9 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
 
     // Log sampling: Sample high-volume debug/trace logs in production
     // Only sample if level is debug or trace and we're in production
-    const isProduction = typeof process !== 'undefined' && process.env['NODE_ENV'] === 'production';
+    // Use getEnvObject() directly to avoid circular dependency with env schema
+    const rawEnv = getEnvObject();
+    const isProduction = rawEnv['NODE_ENV'] === 'production';
     const isHighVolumeLevel = levelName === 'debug' || levelName === 'trace';
 
     if (isProduction && isHighVolumeLevel) {
@@ -1927,15 +1933,12 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
   const prettyPrintSetting = options?.prettyPrint ?? 'auto';
 
   // CRITICAL: Pino transports use Node.js worker threads which are NOT available in:
-  // - Deno (Supabase Edge Functions)
   // - Vercel Edge Runtime
   // - Cloudflare Workers
   // We must detect these environments and skip transport configuration entirely.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Runtime check for Deno global
-  const isDenoRuntime = typeof (globalThis as any).Deno !== 'undefined';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Runtime check for Vercel Edge Runtime global
   const isVercelEdge = typeof (globalThis as any).EdgeRuntime !== 'undefined';
-  const isEdgeEnvironment = isDenoRuntime || isVercelEdge;
+  const isEdgeEnvironment = isVercelEdge;
 
   const shouldPrettyPrint =
     !isEdgeEnvironment && // Never use transports in edge environments

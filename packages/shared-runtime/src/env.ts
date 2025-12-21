@@ -1,12 +1,6 @@
 type EnvRecord = Record<string, string | undefined>;
 
 interface GlobalEnv {
-  Deno?: {
-    env?: {
-      get?(key: string): string | undefined;
-      toObject?(): Record<string, string>;
-    };
-  };
   process?: {
     env?: EnvRecord;
   };
@@ -26,21 +20,34 @@ const envCache = new Map<string, string | undefined>();
  *
  * MAINTENANCE: When adding new NEXT_PUBLIC_* env vars, add them here too!
  * @see https://nextjs.org/docs/basic-features/environment-variables#exposing-environment-variables-to-the-browser
+ *
+ * Note: Using lazy initialization via getter function to avoid temporal dead zone issues
+ * during module initialization when called from validateEnv() in schemas/env.ts.
+ * Using IIFE to create cache object immediately at module scope to avoid TDZ.
  */
-const NEXT_PUBLIC_ENV_VARS: EnvRecord = {
-  // Supabase - required for client-side database access
-  NEXT_PUBLIC_SUPABASE_URL: process.env['NEXT_PUBLIC_SUPABASE_URL'],
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'],
-  // URLs
-  NEXT_PUBLIC_SITE_URL: process.env['NEXT_PUBLIC_SITE_URL'],
-  NEXT_PUBLIC_BASE_URL: process.env['NEXT_PUBLIC_BASE_URL'],
-  NEXT_PUBLIC_APP_URL: process.env['NEXT_PUBLIC_APP_URL'],
-  // Edge functions
-  NEXT_PUBLIC_FLUX_STATION_URL: process.env['NEXT_PUBLIC_FLUX_STATION_URL'],
-  // Logging (for client-side logger config)
-  NEXT_PUBLIC_LOGGER_CONSOLE: process.env['NEXT_PUBLIC_LOGGER_CONSOLE'],
-  NEXT_PUBLIC_LOGGER_VERBOSE: process.env['NEXT_PUBLIC_LOGGER_VERBOSE'],
-};
+const _nextPublicEnvVarsCache = (() => {
+  const cache: { value: EnvRecord | null } = { value: null };
+  return cache;
+})();
+
+function getNextPublicEnvVars(): EnvRecord {
+  if (_nextPublicEnvVarsCache.value === null) {
+    _nextPublicEnvVarsCache.value = {
+      // Supabase - required for client-side database access
+      NEXT_PUBLIC_SUPABASE_URL: process.env['NEXT_PUBLIC_SUPABASE_URL'],
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'],
+      // URLs
+      NEXT_PUBLIC_SITE_URL: process.env['NEXT_PUBLIC_SITE_URL'],
+      NEXT_PUBLIC_BASE_URL: process.env['NEXT_PUBLIC_BASE_URL'],
+      NEXT_PUBLIC_APP_URL: process.env['NEXT_PUBLIC_APP_URL'],
+      NEXT_PUBLIC_FLUX_STATION_URL: process.env['NEXT_PUBLIC_FLUX_STATION_URL'],
+      // Logging (for client-side logger config)
+      NEXT_PUBLIC_LOGGER_CONSOLE: process.env['NEXT_PUBLIC_LOGGER_CONSOLE'],
+      NEXT_PUBLIC_LOGGER_VERBOSE: process.env['NEXT_PUBLIC_LOGGER_VERBOSE'],
+    };
+  }
+  return _nextPublicEnvVarsCache.value;
+}
 
 function normalizeValue(value: null | string | undefined): string | undefined {
   if (value === undefined || value === null || value === '') {
@@ -57,17 +64,10 @@ function readEnv(name: string): string | undefined {
   let value: string | undefined;
 
   // For NEXT_PUBLIC_* variables, use the pre-inlined values first (works on client)
-  if (name.startsWith('NEXT_PUBLIC_') && name in NEXT_PUBLIC_ENV_VARS) {
-    value = normalizeValue(NEXT_PUBLIC_ENV_VARS[name]);
-  }
-
-  // Deno environment (edge functions)
-  const denoEnv = globalEnv.Deno?.env;
-  if (!value && denoEnv?.get) {
-    try {
-      value = normalizeValue(denoEnv.get(name));
-    } catch {
-      value = undefined;
+  if (name.startsWith('NEXT_PUBLIC_')) {
+    const nextPublicVars = getNextPublicEnvVars();
+    if (name in nextPublicVars) {
+      value = normalizeValue(nextPublicVars[name]);
     }
   }
 
@@ -127,16 +127,34 @@ export function getEnvObject(): EnvRecord {
 
   // During build, read directly from process.env to avoid using truncated inlined values
   // At runtime, use inlined values for client-side compatibility
-  const record: EnvRecord = isBuildPhase ? {} : { ...NEXT_PUBLIC_ENV_VARS };
-
-  // Deno environment (edge functions)
-  const denoEnv = globalEnv.Deno?.env;
-  if (denoEnv?.toObject) {
-    const denoRecord = denoEnv.toObject();
-    for (const [key, value] of Object.entries(denoRecord)) {
-      record[key] = normalizeValue(value);
+  // Use try-catch to handle cases where getNextPublicEnvVars() is called during module initialization
+  let record: EnvRecord = {};
+  if (!isBuildPhase) {
+    try {
+      record = { ...getNextPublicEnvVars() };
+    } catch {
+      // If cache isn't ready yet (TDZ), read directly from process.env for NEXT_PUBLIC_* vars
+      // This handles the circular dependency case during module initialization
+      if (typeof process !== 'undefined' && process.env) {
+        const nextPublicVars: EnvRecord = {};
+        const nextPublicKeys = [
+          'NEXT_PUBLIC_SUPABASE_URL',
+          'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+          'NEXT_PUBLIC_SITE_URL',
+          'NEXT_PUBLIC_BASE_URL',
+          'NEXT_PUBLIC_APP_URL',
+          'NEXT_PUBLIC_FLUX_STATION_URL',
+          'NEXT_PUBLIC_LOGGER_CONSOLE',
+          'NEXT_PUBLIC_LOGGER_VERBOSE',
+        ];
+        for (const key of nextPublicKeys) {
+          if (key in process.env) {
+            nextPublicVars[key] = normalizeValue(process.env[key]);
+          }
+        }
+        record = nextPublicVars;
+      }
     }
-    return record;
   }
 
   // Node.js environment (server-side) - merge with NEXT_PUBLIC_* vars

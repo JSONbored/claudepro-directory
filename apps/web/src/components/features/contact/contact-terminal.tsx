@@ -16,19 +16,16 @@
 import {
   contact_action_type as ContactActionType,
   contact_command_icon,
-} from '@prisma/client';
-import type {
-  contact_action_type,
-  contact_category,
-  confetti_variant,
-} from '@prisma/client';
+  type contact_action_type,
+  type contact_category,
+  type confetti_variant,
+} from '@heyclaude/web-runtime/types/client-safe-enums';
 import { getContactCommands } from '@heyclaude/web-runtime/actions/contact';
 import { submitContactForm } from '@heyclaude/web-runtime/actions/submit-contact-form';
 import {
   trackTerminalCommandAction,
   trackTerminalFormSubmissionAction,
 } from '@heyclaude/web-runtime/actions/pulse';
-import { contact_action_typeSchema } from '@heyclaude/web-runtime/prisma-zod-schemas';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/errors';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
@@ -308,10 +305,8 @@ export function ContactTerminal() {
         }
       }
 
-      // Use schema to validate and ensure proper type (contact_action_typeSchema outputs contact_action_type)
-      const actionType = contact_action_typeSchema.parse(
-        command.action_type ?? ContactActionType.internal
-      );
+      // Validate and ensure proper type
+      const actionType = (command.action_type ?? ContactActionType.internal) as contact_action_type;
       trackTerminalCommandAction({
         command_id: command.id ?? '',
         action_type: actionType,
@@ -338,10 +333,8 @@ export function ContactTerminal() {
           commandId: command.id ?? 'unknown',
         }
       );
-      // Use schema to validate and ensure proper type (contact_action_typeSchema outputs contact_action_type)
-      const actionType = contact_action_typeSchema.parse(
-        command.action_type ?? ContactActionType.internal
-      );
+      // Validate and ensure proper type
+      const actionType = (command.action_type ?? ContactActionType.internal) as contact_action_type;
       trackTerminalCommandAction({
         command_id: command.id ?? '',
         action_type: actionType,

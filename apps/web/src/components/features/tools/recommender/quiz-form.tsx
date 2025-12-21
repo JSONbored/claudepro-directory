@@ -36,13 +36,11 @@ import {
   focus_area_type as FocusAreaType,
   integration_type as IntegrationType,
   use_case_type as UseCaseType,
-} from '@prisma/client';
-import type {
-  experience_level,
-  focus_area_type,
-  integration_type,
-  use_case_type,
-} from '@prisma/client';
+  type experience_level,
+  type focus_area_type,
+  type integration_type,
+  type use_case_type,
+} from '@heyclaude/web-runtime/types/client-safe-enums';
 import type { GetQuizConfigurationReturns } from '@heyclaude/data-layer';
 
 // Use enum values directly from Prisma enum objects
@@ -266,8 +264,8 @@ export function QuizForm() {
           await runLoggedAsync(
             async () => {
               const result = await generateConfigRecommendations({
-                useCase: validatedAnswers.useCase,
-                experienceLevel: validatedAnswers.experienceLevel,
+                useCase: validatedAnswers.useCase as use_case_type,
+                experienceLevel: validatedAnswers.experienceLevel as experience_level,
                 toolPreferences: validatedAnswers.toolPreferences,
                 ...(validatedAnswers.p_integrations && {
                   integrations: validatedAnswers.p_integrations,

@@ -12,12 +12,12 @@
 import { inngest } from '../../client';
 import { sendEmail } from '../../../integrations/resend';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
-import { getEnvVar, escapeHtml } from '@heyclaude/shared-runtime';
+import { escapeHtml } from '@heyclaude/shared-runtime';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { getService } from '../../../data/service-factory';
 
-const BASE_URL = getEnvVar('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
-const FROM_EMAIL =
-  getEnvVar('RESEND_FROM_EMAIL') || 'Claude Pro Directory <hello@claudepro.directory>';
+const BASE_URL = env.NEXT_PUBLIC_SITE_URL || 'https://claudepro.directory';
+const FROM_EMAIL = env.RESEND_FROM_EMAIL || 'Claude Pro Directory <hello@claudepro.directory>';
 
 /**
  * Safely serialize a string value for use in CEL (Common Expression Language) filters.

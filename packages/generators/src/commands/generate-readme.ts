@@ -3,6 +3,7 @@ import { isAbsolute, join, resolve } from 'node:path';
 
 // Prisma types
 import type { GenerateReadmeDataReturns } from '@heyclaude/database-types/postgres-types/functions/generate_readme_data';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 import { ensureEnvVars } from '../toolkit/env.ts';
 import { normalizeError } from '../toolkit/errors.ts';
@@ -118,7 +119,7 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
   try {
     await ensureEnvVars([]);
 
-    if (!process.env['NEXT_PUBLIC_SUPABASE_URL']) {
+    if (!env.NEXT_PUBLIC_SUPABASE_URL) {
       logger.warn(
         'NEXT_PUBLIC_SUPABASE_URL not set, using fallback URL. Set this in Vercel Project Settings for production builds.',
         {
@@ -132,7 +133,7 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
 
     // Call Next.js API route (not edge functions)
     // Use same fallback as readme-builder.ts for consistency
-    const siteUrl = process.env['NEXT_PUBLIC_SITE_URL'] || 'https://claudepro.directory';
+    const siteUrl = env.NEXT_PUBLIC_SITE_URL || 'https://claudepro.directory';
     const apiUrl = `${siteUrl}/api/content/sitewide?format=readme`;
 
     logger.info(`   Endpoint: ${apiUrl}`, { script: 'generate-readme' });

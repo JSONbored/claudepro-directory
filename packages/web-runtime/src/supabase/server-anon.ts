@@ -6,7 +6,6 @@
 import 'server-only';
 
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { getEnvVar } from '@heyclaude/shared-runtime';
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
@@ -16,7 +15,7 @@ type SupabaseAnonClient = ReturnType<typeof createSupabaseClient>;
  * Check if we're in build phase
  */
 function isBuildPhase(): boolean {
-  const nextPhase = getEnvVar('NEXT_PHASE');
+  const nextPhase = env.NEXT_PHASE;
   return nextPhase === 'phase-production-build' || nextPhase === 'phase-production-server';
 }
 

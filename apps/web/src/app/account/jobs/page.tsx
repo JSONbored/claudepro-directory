@@ -1,6 +1,14 @@
-import type { Prisma, job_plan, job_tier } from '@prisma/client';
-
-type jobsModel = Prisma.jobsGetPayload<{}>;
+import type { job_plan, job_tier, job_status } from '@heyclaude/web-runtime/types/client-safe-enums';
+// Note: jobsModel type should come from data layer, not Prisma directly
+// For now, using a basic type definition
+type jobsModel = {
+  id: string;
+  title: string;
+  company_name: string;
+  plan: job_plan;
+  tier: job_tier;
+  [key: string]: unknown;
+};
 import { type GetUserCompleteDataReturns } from '@heyclaude/data-layer';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
@@ -383,8 +391,8 @@ async function PaymentSuccessAlert({
     if (paymentJobSummary?.is_subscription && paymentJobSummary.subscription_status) {
       return humanizeStatus(paymentJobSummary.subscription_status);
     }
-    if (paymentJob?.expires_at) {
-      return `Expires ${formatRelativeDate(paymentJob.expires_at)}`;
+    if (paymentJob?.['expires_at']) {
+      return `Expires ${formatRelativeDate(paymentJob['expires_at'] as string | Date)}`;
     }
     return null;
   })();
@@ -661,8 +669,8 @@ async function JobsListWithBilling({
             ]
               .filter(Boolean)
               .join(' • ')
-          : job.expires_at
-            ? `Active until ${formatRelativeDate(job.expires_at)}`
+          : job['expires_at']
+            ? `Active until ${formatRelativeDate(job['expires_at'] as string | Date)}`
             : null;
         const paymentCopy =
           summary?.last_payment_at && summary.last_payment_amount !== null
@@ -682,17 +690,17 @@ async function JobsListWithBilling({
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <UnifiedBadge
-                      className={getStatusColor(job.status ?? 'draft')}
+                      className={getStatusColor((job['status'] as job_status) ?? 'draft')}
                       style="outline"
                       variant="base"
                     >
-                      {job.status ?? 'draft'}
+                      {(job['status'] as job_status) ?? 'draft'}
                     </UnifiedBadge>
-                    {getPlanBadge(job.plan, job.tier)}
+                    {getPlanBadge(job.plan as job_plan, job.tier as job_tier)}
                   </div>
-                  <CardTitle className="mt-2">{job.title}</CardTitle>
+                  <CardTitle className="mt-2">{job.title as string}</CardTitle>
                   <CardDescription>
-                    {job.company} • {job.location ?? 'Remote'} • {job.type}
+                    {(job['company'] as string) ?? ''} • {(job['location'] as string) ?? 'Remote'} • {(job['type'] as string) ?? ''}
                   </CardDescription>
                 </div>
               </div>
@@ -702,10 +710,10 @@ async function JobsListWithBilling({
               <div className="text-muted-foreground mb-4 flex flex-wrap gap-3 text-sm">
                 <div className="flex items-center gap-1">
                   <Eye className="h-4 w-4" />
-                  {job.view_count ?? 0} views
+                  {(job['view_count'] as number) ?? 0} views
                 </div>
-                {job.posted_at ? <div>Posted {formatRelativeDate(job.posted_at)}</div> : null}
-                {job.expires_at ? <div>Expires {formatRelativeDate(job.expires_at)}</div> : null}
+                {job['posted_at'] ? <div>Posted {formatRelativeDate(job['posted_at'] as string | Date)}</div> : null}
+                {job['expires_at'] ? <div>Expires {formatRelativeDate(job['expires_at'] as string | Date)}</div> : null}
               </div>
               {showBillingCard ? (
                 <div className="border-muted bg-muted/20 card-base mb-4 border-dashed p-3 text-xs sm:text-sm">
@@ -738,9 +746,9 @@ async function JobsListWithBilling({
                   </Link>
                 </Button>
 
-                {job.slug ? (
+                {job['slug'] ? (
                   <Button asChild size="sm" variant="ghost">
-                    <Link href={`/jobs/${job.slug}`}>
+                    <Link href={`/jobs/${job['slug'] as string}`}>
                       <ExternalLink className="mr-0.5 h-3 w-3" />
                       View
                     </Link>
@@ -748,7 +756,7 @@ async function JobsListWithBilling({
                 ) : null}
 
                 {(() => {
-                  const status = job.status;
+                  const status = job['status'] as job_status;
                   return status === 'active' || status === 'draft' ? (
                     <JobToggleButton currentStatus={status} jobId={job.id} />
                   ) : null;

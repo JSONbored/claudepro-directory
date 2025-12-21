@@ -42,8 +42,7 @@
  * - Portal-based rendering
  */
 
-import { useControllableState } from '@radix-ui/react-use-controllable-state';
-import * as PortalPrimitive from '@radix-ui/react-portal';
+import { useControllableState, PortalPrimitive } from '@heyclaude/web-runtime/utils/radix-re-exports';
 import type {
   ButtonHTMLAttributes,
   Dispatch,

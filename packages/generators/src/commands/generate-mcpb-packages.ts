@@ -12,6 +12,8 @@ type JsonValue = Prisma.JsonValue;
 type Json = JsonValue;
 
 import { prisma } from '@heyclaude/data-layer';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
+
 import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.ts';
 import { ensureEnvVars } from '../toolkit/env.ts';
 import { logger } from '../toolkit/logger.ts';
@@ -50,7 +52,7 @@ const CONCURRENCY = 5;
 export async function runGenerateMcpbPackages(): Promise<void> {
   await ensureEnvVars(['SUPABASE_SERVICE_ROLE_KEY']);
 
-  if (!process.env['NEXT_PUBLIC_SUPABASE_URL']) {
+  if (!env.NEXT_PUBLIC_SUPABASE_URL) {
     logger.warn(
       'NEXT_PUBLIC_SUPABASE_URL not set, using fallback URL. Set this in Vercel Project Settings for production builds.',
       {

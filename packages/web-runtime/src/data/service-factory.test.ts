@@ -17,13 +17,27 @@ vi.mock('@heyclaude/data-layer', () => ({
   ContentService: class {
     getContentDetailCore = mockContentService.getContentDetailCore;
   },
-  ChangelogService: class {},
-  CompaniesService: class {},
-  JobsService: class {},
-  MiscService: class {},
-  NewsletterService: class {},
-  SearchService: class {},
-  TrendingService: class {},
+  ChangelogService: class {
+    // Add any methods as needed
+  },
+  CompaniesService: class {
+    // Add any methods as needed
+  },
+  JobsService: class {
+    // Add any methods as needed
+  },
+  MiscService: class {
+    // Add any methods as needed
+  },
+  NewsletterService: class {
+    // Add any methods as needed
+  },
+  SearchService: class {
+    // Add any methods as needed
+  },
+  TrendingService: class {
+    // Add any methods as needed
+  },
 }));
 
 describe('service-factory', () => {
@@ -77,10 +91,61 @@ describe('service-factory', () => {
       mockAccountService.getAccountDashboard.mockResolvedValue({ profile: {} });
 
       const service = await getService('account');
-      const result = await service.getAccountDashboard('user-id');
+      const result = await service.getAccountDashboard({ p_user_id: 'user-id' });
 
-      expect(mockAccountService.getAccountDashboard).toHaveBeenCalledWith('user-id');
+      expect(mockAccountService.getAccountDashboard).toHaveBeenCalledWith({ p_user_id: 'user-id' });
       expect(result).toEqual({ profile: {} });
+    });
+  });
+
+  describe('error handling', () => {
+    // Note: Testing module import failures with vi.doMock is complex in Vitest
+    // because mocks are hoisted and module cache behavior differs from Jest.
+    // These error scenarios are better tested in integration tests or E2E tests
+    // where actual module loading failures can occur.
+
+    it('should handle service method errors', async () => {
+      const error = new Error('Database connection failed');
+      mockAccountService.getAccountDashboard.mockRejectedValue(error);
+
+      const service = await getService('account');
+
+      await expect(service.getAccountDashboard({ p_user_id: 'user-id' })).rejects.toThrow(
+        'Database connection failed'
+      );
+    });
+
+    it('should handle all service keys', async () => {
+      // Test that all service keys can be instantiated
+      // This verifies the service registry is complete
+      // Note: We test a subset since all services are mocked
+      const testKeys: ServiceKey[] = ['account', 'content'];
+
+      for (const key of testKeys) {
+        const service = await getService(key);
+        expect(service).toBeDefined();
+        expect(service).toBeInstanceOf(Object);
+      }
+    });
+
+    it('should maintain singleton instances across multiple calls', async () => {
+      const service1 = await getService('account');
+      const service2 = await getService('account');
+      const service3 = await getService('account');
+
+      expect(service1).toBe(service2);
+      expect(service2).toBe(service3);
+    });
+
+    it('should handle service method errors', async () => {
+      const error = new Error('Database connection failed');
+      mockAccountService.getAccountDashboard.mockRejectedValue(error);
+
+      const service = await getService('account');
+
+      await expect(service.getAccountDashboard({ p_user_id: 'user-id' })).rejects.toThrow(
+        'Database connection failed'
+      );
     });
   });
 });

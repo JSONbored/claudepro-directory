@@ -246,6 +246,18 @@
       "types": "./src/utils/error-handler.ts",
       "default": "./src/utils/error-handler.ts"
     },
+    "./utils/radix-re-exports": {
+      "types": "./src/utils/radix-re-exports.ts",
+      "default": "./src/utils/radix-re-exports.ts"
+    },
+    "./types/client-safe-enums": {
+      "types": "./src/types/client-safe-enums.ts",
+      "default": "./src/types/client-safe-enums.ts"
+    },
+    "./types/changelog": {
+      "types": "./src/types/changelog.ts",
+      "default": "./src/types/changelog.ts"
+    },
     "./utils/request-context": {
       "types": "./src/utils/request-context.ts",
       "default": "./src/utils/request-context.ts"
@@ -641,6 +653,7 @@
     "@radix-ui/react-hover-card": "^1.1.15",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-portal": "^1.1.10",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.8",

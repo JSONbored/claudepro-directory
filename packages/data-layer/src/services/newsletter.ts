@@ -13,10 +13,10 @@ import type {
 import type { Prisma } from '@prisma/client';
 
 type newsletter_subscriptionsModel = Prisma.newsletter_subscriptionsGetPayload<{}>;
-import { prisma } from '../prisma/client.ts';
-import { BasePrismaService } from './base-prisma-service.ts';
-import { logRpcError } from '../utils/rpc-error-logging.ts';
-import { withSmartCache } from '../utils/request-cache.ts';
+import { prisma } from '../prisma/client';
+import { BasePrismaService } from './base-prisma-service';
+import { logRpcError } from '../utils/rpc-error-logging';
+import { withSmartCache } from '../utils/request-cache';
 
 // Type helpers: Extract model types from Prisma query results
 type NewsletterSubscription = Awaited<

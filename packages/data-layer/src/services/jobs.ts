@@ -173,9 +173,9 @@ type GetPaymentPlanCatalogReturns = Array<{
     | null;
 }>;
 
-import { prisma } from '../prisma/client.ts';
-import { BasePrismaService } from './base-prisma-service.ts';
-import { withSmartCache } from '../utils/request-cache.ts';
+import { prisma } from '../prisma/client';
+import { BasePrismaService } from './base-prisma-service';
+import { withSmartCache } from '../utils/request-cache';
 
 // Type helper: Extract model type from Prisma query result (non-nullable)
 type Job = NonNullable<Awaited<ReturnType<typeof prisma.jobs.findUnique>>>;

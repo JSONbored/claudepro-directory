@@ -5,7 +5,8 @@
  * Triggered by webhook_events table inserts with error != null.
  */
 
-import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete } from '../../../supabase/pgmq-client';
@@ -93,7 +94,7 @@ export const processDiscordErrorsQueue = inngest.createFunction(
 
     // Step 2: Get Discord webhook URL
     const webhookUrl = await step.run('get-webhook-url', async () => {
-      const url = getEnvVar('DISCORD_ERROR_WEBHOOK_URL');
+      const url = env.DISCORD_ERROR_WEBHOOK_URL;
       if (!url) {
         throw new Error('DISCORD_ERROR_WEBHOOK_URL not configured');
       }

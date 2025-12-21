@@ -10,9 +10,8 @@
  */
 
 import type { Prisma, PrismaClient, content_category } from '@prisma/client';
-import { prisma } from '../prisma/client.ts';
-import { BasePrismaService } from './base-prisma-service.ts';
-import { withSmartCache } from '../utils/request-cache.ts';
+import { BasePrismaService } from './base-prisma-service';
+import { withSmartCache } from '../utils/request-cache';
 type Json = Prisma.JsonValue;
 type contentModel = Prisma.contentGetPayload<{}>;
 
@@ -329,7 +328,7 @@ export class ContentService extends BasePrismaService {
       async (): Promise<GetCategoryConfigsWithFeaturesReturns> => {
         // OPTIMIZATION: Use select to fetch only needed fields, excluding timestamps
         // We use almost all fields, but exclude created_at/updated_at which aren't used
-        const configs = await prisma.category_configs.findMany({
+        const configs = await this.prisma.category_configs.findMany({
           select: {
             category: true,
             title: true,
@@ -531,7 +530,7 @@ export class ContentService extends BasePrismaService {
       async () => {
         // Step 1: Fetch content items with Prisma
         // Select all fields to match contentModel type
-        const contentItems = await prisma.content.findMany({
+        const contentItems = await this.prisma.content.findMany({
           where: {
             ...(p_category !== null && p_category !== undefined && { category: p_category }),
             ...(p_slugs && p_slugs.length > 0 && { slug: { in: p_slugs } }),
@@ -550,7 +549,7 @@ export class ContentService extends BasePrismaService {
         const contentIds = contentItems.map((item) => item.id);
         const contentCategories = [...new Set(contentItems.map((item) => item.category))];
 
-        const sponsoredItems = await prisma.sponsored_content.findMany({
+        const sponsoredItems = await this.prisma.sponsored_content.findMany({
           where: {
             content_id: { in: contentIds },
             content_type: { in: contentCategories },
@@ -649,7 +648,7 @@ export class ContentService extends BasePrismaService {
 
         // Use Prisma to fetch templates directly
         // OPTIMIZATION: Select only needed fields to reduce data transfer
-        const templates = await prisma.content_templates.findMany({
+        const templates = await this.prisma.content_templates.findMany({
           where: {
             ...(p_category !== undefined && p_category !== null ? { category: p_category } : {}),
             active: true,
@@ -765,14 +764,14 @@ export class ContentService extends BasePrismaService {
         // Execute queries in parallel for better performance
         const [items, totalCount] = await Promise.all([
           // Get paginated items using Prisma view
-          prisma.v_content_list_slim.findMany({
+          this.prisma.v_content_list_slim.findMany({
             where,
             orderBy,
             take: p_limit,
             skip: p_offset,
           }),
           // Get total count (Prisma doesn't support window functions, so separate query)
-          prisma.v_content_list_slim.count({ where }),
+          this.prisma.v_content_list_slim.count({ where }),
         ]);
 
         // Transform items to match ContentPaginatedSlimItem type
@@ -821,7 +820,7 @@ export class ContentService extends BasePrismaService {
         // Fetch content
         // OPTIMIZATION: Use select to fetch only needed fields, reducing data transfer
         // This query uses most fields, but excludes large JSONB fields that aren't used
-        const content = await prisma.content.findUnique({
+        const content = await this.prisma.content.findUnique({
           where: {
             slug_category: {
               slug: args.p_slug,
@@ -901,7 +900,7 @@ export class ContentService extends BasePrismaService {
         // This reduces sequential queries from 2+ to 1 parallel batch
         if (args.p_category === 'collections') {
           // Fetch collection items for this collection (content.id is the collection_id)
-          const items = await prisma.collection_items.findMany({
+          const items = await this.prisma.collection_items.findMany({
             where: { collection_id: content.id },
             orderBy: { order: 'asc' },
             select: {
@@ -925,7 +924,7 @@ export class ContentService extends BasePrismaService {
             // OPTIMIZATION: Fetch all related content in parallel (already optimized)
             const relatedContentPromises = contentLookups.map(
               (lookup: (typeof contentLookups)[number]) =>
-                prisma.content.findUnique({
+                this.prisma.content.findUnique({
                   where: {
                     slug_category: {
                       slug: lookup.slug,

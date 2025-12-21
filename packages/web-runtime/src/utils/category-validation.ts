@@ -1,9 +1,7 @@
-import { content_category as ContentCategory } from '@prisma/client';
-import type { content_category } from '@prisma/client';
+import { content_category as ContentCategory, type content_category } from '../types/client-safe-enums.ts';
 
-export const CONTENT_CATEGORY_VALUES = Object.values(
-  ContentCategory
-) as readonly content_category[];
+// Use client-safe enum values
+const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
 
 function isContentCategory(value: unknown): value is content_category {
   return typeof value === 'string' && CONTENT_CATEGORY_VALUES.includes(value as content_category);

@@ -4,7 +4,7 @@
 // Branch: feat_prisma-migration (project_ref: pyquxdlmqfkczsukahpi)
 //
 // Connection strings per Supabase official documentation:
-// - DATABASE_URL: Transaction mode (port 6543) via Shared Connection Pooler
+// - POSTGRES_PRISMA_URL: Transaction mode (port 6543) via Shared Connection Pooler
 // - DIRECT_URL: Session mode (port 5432) via Shared Pooler for migrations/introspection
 
 // Infisical injects secrets as environment variables automatically.
@@ -22,7 +22,7 @@ export default defineConfig({
     // For Prisma CLI (migrations/introspection), use DIRECT_URL (session mode, port 5432)
     // This avoids "prepared statement already exists" errors with PgBouncer
     url: env('DIRECT_URL'),
-    // Note: Prisma Client at runtime should use DATABASE_URL (transaction mode, port 6543)
+    // Note: Prisma Client at runtime should use POSTGRES_PRISMA_URL (transaction mode, port 6543)
     // This will be configured when initializing PrismaClient with adapter
   },
 });

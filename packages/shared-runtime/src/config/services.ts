@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { getEnvVar } from '../env.ts';
+import { env } from '../schemas/env';
 
 /**
  * Default site URL fallback
@@ -78,7 +78,7 @@ export const EXTERNAL_SERVICES = externalServicesSchema.parse({
 
   // Main Domain
   app: (() => {
-    const siteUrl = getEnvVar('NEXT_PUBLIC_SITE_URL') ?? DEFAULT_SITE_URL;
+    const siteUrl = env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_SITE_URL;
     const wwwUrl = (() => {
       if (siteUrl.startsWith('http://www.') || siteUrl.startsWith('https://www.')) {
         return siteUrl;

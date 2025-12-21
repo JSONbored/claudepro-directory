@@ -37,12 +37,16 @@ vi.mock('next/server', async () => {
 const mockGetCategoryContentList = vi.fn();
 const mockGetCategoryLlmsTxt = vi.fn();
 
-vi.mock('@heyclaude/data-layer', () => ({
-  ContentService: class {
-    getCategoryContentList = mockGetCategoryContentList;
-    getCategoryLlmsTxt = mockGetCategoryLlmsTxt;
-  },
-}));
+vi.mock('@heyclaude/data-layer', async () => {
+  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
+  return {
+    ...actual,
+    ContentService: class {
+      getCategoryContentList = mockGetCategoryContentList;
+      getCategoryLlmsTxt = mockGetCategoryLlmsTxt;
+    },
+  };
+});
 
 // Mock service-factory
 vi.mock('../../../../../../packages/web-runtime/src/data/service-factory', () => ({

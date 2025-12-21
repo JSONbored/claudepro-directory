@@ -51,14 +51,18 @@ const mockGetItemLlmsTxt = vi.fn();
 const mockGenerateMarkdownExport = vi.fn();
 const mockGetStoragePath = vi.fn();
 
-vi.mock('@heyclaude/data-layer', () => ({
-  ContentService: class {
-    getApiContentFull = mockGetApiContentFull;
-    getItemLlmsTxt = mockGetItemLlmsTxt;
-    generateMarkdownExport = mockGenerateMarkdownExport;
-    getStoragePath = mockGetStoragePath;
-  },
-}));
+vi.mock('@heyclaude/data-layer', async () => {
+  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
+  return {
+    ...actual,
+    ContentService: class {
+      getApiContentFull = mockGetApiContentFull;
+      getItemLlmsTxt = mockGetItemLlmsTxt;
+      generateMarkdownExport = mockGenerateMarkdownExport;
+      getStoragePath = mockGetStoragePath;
+    },
+  };
+});
 
 // Mock service-factory
 vi.mock('../../../../../../../packages/web-runtime/src/data/service-factory', () => ({

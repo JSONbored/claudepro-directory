@@ -8,6 +8,9 @@
  */
 
 import { detectPlatform } from './detection.ts';
+// Lazy import to avoid circular dependency during module initialization
+// platform/env.ts is imported by logger/config.ts, which can cause TDZ issues
+// if env is imported at top level when schemas/env.ts calls validateEnv()
 
 /**
  * Standardized deployment environment values
@@ -35,6 +38,7 @@ export type DeploymentEnv = 'production' | 'preview' | 'development' | 'build';
  * ```
  */
 export function getDeploymentEnv(): DeploymentEnv {
+  // This function cannot be async, so we read from process.env directly
   if (typeof process === 'undefined' || !process.env) {
     return 'development';
   }
@@ -42,7 +46,8 @@ export function getDeploymentEnv(): DeploymentEnv {
   const platform = detectPlatform();
 
   // Priority 1: Explicit DEPLOYMENT_ENV (platform-agnostic)
-  const explicitEnv = process.env['DEPLOYMENT_ENV'];
+  // DEPLOYMENT_ENV is not in schema (platform-specific), use getEnvVar for dynamic access
+  const explicitEnv = typeof process !== 'undefined' && process.env ? process.env['DEPLOYMENT_ENV'] : undefined;
   if (explicitEnv) {
     const normalized = explicitEnv.toLowerCase().trim();
     if (
@@ -59,8 +64,10 @@ export function getDeploymentEnv(): DeploymentEnv {
   switch (platform) {
     case 'aws':
       // AWS Amplify uses AMPLIFY_ENV
-      if (process.env['AMPLIFY_ENV']) {
-        const amplifyEnv = process.env['AMPLIFY_ENV'].toLowerCase();
+      // Platform-specific env vars not in schema - use process.env directly
+      const amplifyEnvVar = typeof process !== 'undefined' && process.env ? process.env['AMPLIFY_ENV'] : undefined;
+      if (amplifyEnvVar) {
+        const amplifyEnv = amplifyEnvVar.toLowerCase();
         if (amplifyEnv === 'production') return 'production';
         return 'preview';
       }
@@ -68,15 +75,19 @@ export function getDeploymentEnv(): DeploymentEnv {
 
     case 'cloudflare':
       // CF_PAGES_BRANCH: main (production) or branch name (preview)
-      if (process.env['CF_PAGES_BRANCH']) {
-        return process.env['CF_PAGES_BRANCH'] === 'main' ? 'production' : 'preview';
+      // Platform-specific env vars not in schema - use process.env directly
+      const cfPagesBranch = typeof process !== 'undefined' && process.env ? process.env['CF_PAGES_BRANCH'] : undefined;
+      if (cfPagesBranch) {
+        return cfPagesBranch === 'main' ? 'production' : 'preview';
       }
       break;
 
     case 'netlify':
       // NETLIFY_CONTEXT: production, deploy-preview, branch-deploy, dev
-      if (process.env['NETLIFY_CONTEXT']) {
-        const context = process.env['NETLIFY_CONTEXT'].toLowerCase();
+      // Platform-specific env vars not in schema - use process.env directly
+      const netlifyContext = typeof process !== 'undefined' && process.env ? process.env['NETLIFY_CONTEXT'] : undefined;
+      if (netlifyContext) {
+        const context = netlifyContext.toLowerCase();
         if (context === 'production') return 'production';
         if (context === 'deploy-preview' || context === 'branch-deploy') return 'preview';
         return 'development';
@@ -85,15 +96,19 @@ export function getDeploymentEnv(): DeploymentEnv {
 
     case 'railway':
       // Railway uses RAILWAY_ENVIRONMENT
-      if (process.env['RAILWAY_ENVIRONMENT']) {
-        return process.env['RAILWAY_ENVIRONMENT'] === 'production' ? 'production' : 'preview';
+      // Platform-specific env vars not in schema - use process.env directly
+      const railwayEnv = typeof process !== 'undefined' && process.env ? process.env['RAILWAY_ENVIRONMENT'] : undefined;
+      if (railwayEnv) {
+        return railwayEnv === 'production' ? 'production' : 'preview';
       }
       break;
 
     case 'render':
       // Render uses RENDER_ENV
-      if (process.env['RENDER_ENV']) {
-        const renderEnv = process.env['RENDER_ENV'].toLowerCase();
+      // Platform-specific env vars not in schema - use process.env directly
+      const renderEnvVar = typeof process !== 'undefined' && process.env ? process.env['RENDER_ENV'] : undefined;
+      if (renderEnvVar) {
+        const renderEnv = renderEnvVar.toLowerCase();
         if (renderEnv === 'production') return 'production';
         return 'preview';
       }
@@ -101,8 +116,11 @@ export function getDeploymentEnv(): DeploymentEnv {
 
     case 'vercel':
       // VERCEL_ENV: production, preview, development
-      if (process.env['VERCEL_ENV']) {
-        const vercelEnv = process.env['VERCEL_ENV'].toLowerCase();
+      // Read directly from process.env to avoid circular dependency with schemas/env.ts
+      const vercelEnvVar =
+        typeof process !== 'undefined' && process.env ? process.env['VERCEL_ENV'] : undefined;
+      if (vercelEnvVar) {
+        const vercelEnv = vercelEnvVar.toLowerCase();
         if (vercelEnv === 'production') return 'production';
         if (vercelEnv === 'preview') return 'preview';
         return 'development';
@@ -112,11 +130,17 @@ export function getDeploymentEnv(): DeploymentEnv {
 
   // Priority 3: NODE_ENV fallback
   // Note: NODE_ENV is 'production' during builds, so we need to detect build phase
-  if (process.env['NODE_ENV'] === 'production') {
+  // Read directly from process.env to avoid circular dependency with schemas/env.ts
+  const nodeEnv =
+    typeof process !== 'undefined' && process.env ? process.env['NODE_ENV'] : undefined;
+  const nextPhase =
+    typeof process !== 'undefined' && process.env ? process.env['NEXT_PHASE'] : undefined;
+
+  if (nodeEnv === 'production') {
     // Check if this is a build phase (not runtime)
     const isBuildPhase =
-      process.env['NEXT_PHASE'] === 'phase-production-build' ||
-      process.env['NEXT_PHASE'] === 'phase-production-server' ||
+      nextPhase === 'phase-production-build' ||
+      nextPhase === 'phase-production-server' ||
       (typeof process.argv !== 'undefined' &&
         process.argv.some(
           (arg) => arg.includes('next') && (arg.includes('build') || arg.includes('export'))
@@ -161,7 +185,9 @@ export function getDeploymentUrl(): string | undefined {
   }
 
   // Priority 1: Explicit DEPLOYMENT_URL
-  if (process.env['DEPLOYMENT_URL']) {
+  // DEPLOYMENT_URL is not in schema (platform-specific), use process.env directly
+  const deploymentUrl = typeof process !== 'undefined' && process.env ? process.env['DEPLOYMENT_URL'] : undefined;
+  if (deploymentUrl) {
     return process.env['DEPLOYMENT_URL'];
   }
 

@@ -5,4 +5,4 @@
  * Import Prisma types directly from @prisma/client to avoid re-export complications.
  */
 
-export { prisma } from './client.ts';
+export { prisma } from './client';

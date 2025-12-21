@@ -2,7 +2,6 @@ import type { job_plan, job_tier } from '@prisma/client';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { normalizeError } from '../../errors';
 import { logger } from '../../logging/server.ts';
-import { getEnvVar } from '@heyclaude/shared-runtime';
 import { getService } from '../../data/service-factory';
 
 /**
@@ -43,7 +42,7 @@ export async function onJobCreated(
 
       if (productPriceId) {
         const baseUrl =
-          getEnvVar('NEXT_PUBLIC_BASE_URL') ||
+          env.NEXT_PUBLIC_BASE_URL ||
           ((env as Record<string, unknown>)['NEXT_PUBLIC_BASE_URL'] as string | undefined);
 
         if (!baseUrl) {

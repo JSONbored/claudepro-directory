@@ -17,9 +17,9 @@ import type {
   SyncChangelogEntryArgs,
   SyncChangelogEntryReturns,
 } from '@heyclaude/database-types/postgres-types';
-import { prisma } from '../prisma/client.ts';
-import { BasePrismaService } from './base-prisma-service.ts';
-import { withSmartCache } from '../utils/request-cache.ts';
+import { prisma } from '../prisma/client';
+import { BasePrismaService } from './base-prisma-service';
+import { withSmartCache } from '../utils/request-cache';
 
 /**
  * Changelog Service using Prisma Client

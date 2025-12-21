@@ -21,7 +21,7 @@
  * @module components/infra/pulse
  */
 
-import type { content_category } from '@prisma/client';
+import type { content_category } from '@heyclaude/web-runtime/types/client-safe-enums';
 import { trackInteraction } from '@heyclaude/web-runtime/pulse-client';
 import { getOrCreateSessionId } from '@heyclaude/web-runtime/logging/client';
 import { getPollingConfig } from '@heyclaude/web-runtime/config/static-configs';

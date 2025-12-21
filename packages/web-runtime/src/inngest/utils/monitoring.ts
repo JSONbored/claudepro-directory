@@ -7,8 +7,8 @@
  * @module web-runtime/inngest/utils/monitoring
  */
 
-import { getEnvVar } from '@heyclaude/shared-runtime';
 import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
+import { getEnvVar } from '@heyclaude/shared-runtime';
 import { FEATURE_FLAGS } from '@heyclaude/web-runtime/config/unified-config';
 import { logger } from '../../logging/server';
 

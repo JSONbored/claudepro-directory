@@ -39,14 +39,21 @@ const mockGenerateContentAtomFeed = vi.fn();
 const mockGenerateChangelogRssFeed = vi.fn();
 const mockGenerateChangelogAtomFeed = vi.fn();
 
-vi.mock('@heyclaude/data-layer', () => ({
-  ContentService: class {
-    generateContentRssFeed = mockGenerateContentRssFeed;
-    generateContentAtomFeed = mockGenerateContentAtomFeed;
-    generateChangelogRssFeed = mockGenerateChangelogRssFeed;
-    generateChangelogAtomFeed = mockGenerateChangelogAtomFeed;
-  },
-}));
+vi.mock('@heyclaude/data-layer', async () => {
+  // Import actual modules to get prisma export (PrismockClient in tests)
+  // Required because pgmqSend imports prisma from @heyclaude/data-layer
+  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
+  return {
+    ...actual,
+    ContentService: class {
+      generateContentRssFeed = mockGenerateContentRssFeed;
+      generateContentAtomFeed = mockGenerateContentAtomFeed;
+      generateChangelogRssFeed = mockGenerateChangelogRssFeed;
+      generateChangelogAtomFeed = mockGenerateChangelogAtomFeed;
+    },
+    // prisma is already exported from actual (will be PrismockClient in tests)
+  };
+});
 
 // Mock service-factory
 vi.mock('../../../../../packages/web-runtime/src/data/service-factory', () => ({

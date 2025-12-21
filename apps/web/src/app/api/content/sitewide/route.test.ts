@@ -38,13 +38,17 @@ const mockGetSitewideContentList = vi.fn();
 const mockGetSitewideLlmsTxt = vi.fn();
 const mockGetSitewideReadme = vi.fn();
 
-vi.mock('@heyclaude/data-layer', () => ({
-  ContentService: class {
-    getSitewideContentList = mockGetSitewideContentList;
-    getSitewideLlmsTxt = mockGetSitewideLlmsTxt;
-    getSitewideReadme = mockGetSitewideReadme;
-  },
-}));
+vi.mock('@heyclaude/data-layer', async () => {
+  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
+  return {
+    ...actual,
+    ContentService: class {
+      getSitewideContentList = mockGetSitewideContentList;
+      getSitewideLlmsTxt = mockGetSitewideLlmsTxt;
+      getSitewideReadme = mockGetSitewideReadme;
+    },
+  };
+});
 
 // Mock service-factory
 vi.mock('../../../../../packages/web-runtime/src/data/service-factory', () => ({

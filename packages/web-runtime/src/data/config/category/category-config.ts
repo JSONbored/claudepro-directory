@@ -14,8 +14,8 @@
 import {
   config_format as ConfigFormat,
   primary_action_type as PrimaryActionType,
-} from '@prisma/client';
-import type { content_category } from '@prisma/client';
+  type content_category,
+} from '../../../types/client-safe-enums.ts';
 
 import {
   BookOpen,

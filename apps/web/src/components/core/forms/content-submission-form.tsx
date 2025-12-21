@@ -14,9 +14,9 @@
 import {
   submission_type as SubmissionType,
   submission_status as SubmissionStatus,
-} from '@prisma/client';
-import { submission_statusSchema } from '@heyclaude/web-runtime/prisma-zod-schemas';
-import type { submission_status, content_category } from '@prisma/client';
+  type submission_status,
+  type content_category,
+} from '@heyclaude/web-runtime/types/client-safe-enums';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions/submit-content-for-review';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
@@ -183,8 +183,8 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           );
         }
 
-        // Use Prisma enum object directly (no type assertion needed)
-        const validatedStatus = submission_statusSchema.parse(SubmissionStatus.pending);
+        // Use enum value directly (already validated as submission_status)
+        const validatedStatus = SubmissionStatus.pending as submission_status;
         setSubmissionResult({
           submission_id: typeof data.submission_id === 'string' ? data.submission_id : 'unknown',
           status: validatedStatus,

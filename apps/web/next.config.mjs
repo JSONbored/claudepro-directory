@@ -44,7 +44,7 @@ const nextConfig = {
   // Note: @supabase/storage-js and iceberg-js are nested dependencies of @supabase/supabase-js
   // We can't externalize nested dependencies directly, but webpack IgnorePlugin handles client bundles
   // Server code uses the real storage-js, client bundles ignore it (storage is server-only)
-  serverExternalPackages: ['@imagemagick/magick-wasm', 'pino', 'pino-pretty', 'thread-stream', 'sonic-boom'],
+  serverExternalPackages: ['pino', 'pino-pretty', 'thread-stream', 'sonic-boom'],
   /**
    * Cache Life Profiles
    *
@@ -142,8 +142,6 @@ const nextConfig = {
       '@utils': './lib/utils',
       '@content': './content',
       '@generated': './generated',
-      // Stub out edge function image manipulation code for web bundle
-      '@heyclaude/shared-runtime/src/image/manipulation': resolve(__dirname, './src/lib/stubs/image-manipulation-stub.ts'),
       // Fix Turbopack subpath export resolution for zod v4 (required by @hookform/resolvers@5.x)
       // Turbopack has issues resolving subpath exports in pnpm monorepos
       'zod/v4/core': 'zod/v4/core',
@@ -163,9 +161,6 @@ const nextConfig = {
       '__tests__/**/*',
       'tests/**/*',
       '*.test.*',
-      // Exclude edge function image manipulation code
-      '**/packages/shared-runtime/src/image/manipulation.ts',
-      '**/node_modules/@imagemagick/**/*',
       '*.spec.*',
       'vitest.config.ts',
       'playwright.config.ts',
@@ -363,16 +358,11 @@ const nextConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': resolve(__dirname, './'),
-      // Stub out edge function image manipulation code for web bundle
-      '@heyclaude/shared-runtime/src/image/manipulation': resolve(__dirname, './src/lib/stubs/image-manipulation-stub.ts'),
     };
 
-    // Ignore edge function dependencies and server-only storage for client bundles
+    // Ignore server-only dependencies for client bundles
     if (!isServer) {
       config.plugins.push(
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^@imagemagick\/magick-wasm$/,
-        }),
         // Ignore @supabase/storage-js and iceberg-js for client bundles
         // These are server-only - client components should use server actions for storage
         new webpack.IgnorePlugin({

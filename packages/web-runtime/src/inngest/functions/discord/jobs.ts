@@ -8,7 +8,8 @@
 import type { Prisma } from '@prisma/client';
 
 type jobsModel = Prisma.jobsGetPayload<{}>;
-import { normalizeError, getEnvVar, sanitizeForDiscord } from '@heyclaude/shared-runtime';
+import { normalizeError, sanitizeForDiscord } from '@heyclaude/shared-runtime';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
@@ -52,7 +53,7 @@ function isValidSlug(slug: string | null | undefined): slug is string {
 }
 
 function buildJobEmbed(job: JobRow, isNew: boolean): Record<string, unknown> | null {
-  const siteUrl = getEnvVar('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
+  const siteUrl = env.NEXT_PUBLIC_SITE_URL || 'https://claudepro.directory';
 
   // Validate slug before constructing URL
   if (!isValidSlug(job.slug)) {
@@ -118,7 +119,7 @@ export const processDiscordJobsQueue = inngest.createFunction(
 
     logger.info(logContext, 'Discord jobs queue processing started');
 
-    const discordWebhookUrl = getEnvVar('DISCORD_JOBS_WEBHOOK_URL');
+    const discordWebhookUrl = env.DISCORD_JOBS_WEBHOOK_URL;
 
     if (!discordWebhookUrl) {
       logger.warn(logContext, 'Discord jobs webhook URL not configured');

@@ -18,11 +18,8 @@
  * - No MDX dependencies
  */
 
-import { Prisma, changelog_category as ChangelogCategory } from '@prisma/client';
-import type { changelog_category } from '@prisma/client';
-
-type changelogModel = Prisma.changelogGetPayload<{}>;
-type contentModel = Prisma.contentGetPayload<{}>;
+import { changelog_category as ChangelogCategory, type changelog_category } from '@heyclaude/web-runtime/types/client-safe-enums';
+import type { ChangelogEntry } from '@heyclaude/web-runtime/types/changelog';
 import { parseChangelogChanges } from '@heyclaude/web-runtime/data/changelog.shared';
 import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import {
@@ -56,9 +53,9 @@ import {
 } from './changelog-content-utils';
 import { SanitizedHTML } from './sanitized-html';
 
-type ChangelogEntry = changelogModel;
-type ContentRow = contentModel;
-type GuideSection = ContentRow['metadata'];
+// ChangelogEntry type imported from web-runtime
+// GuideSection is metadata from content - define directly to avoid Prisma import
+type GuideSection = Record<string, unknown> | null;
 
 /**
  * Render sanitized HTML content while optionally forwarding `className` and `id`.

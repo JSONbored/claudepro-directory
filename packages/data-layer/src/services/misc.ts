@@ -102,10 +102,10 @@ type GetActiveNotificationsArgs = {
 // Prisma namespace already imported above
 
 type notificationsModel = Prisma.notificationsGetPayload<{}>;
-import { prisma } from '../prisma/client.ts';
-import { BasePrismaService } from './base-prisma-service.ts';
-import { logRpcError } from '../utils/rpc-error-logging.ts';
-import { withSmartCache } from '../utils/request-cache.ts';
+import { prisma } from '../prisma/client';
+import { BasePrismaService } from './base-prisma-service';
+import { logRpcError } from '../utils/rpc-error-logging';
+import { withSmartCache } from '../utils/request-cache';
 
 // Type helpers: Extract model types from Prisma query results
 type SponsoredContent = Awaited<ReturnType<typeof prisma.sponsored_content.findUnique>>;

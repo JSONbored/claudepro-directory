@@ -7,6 +7,8 @@
  * ⚠️ Client-Compatible: Safe to use in both server and client components
  */
 
+import { env } from '@heyclaude/shared-runtime/schemas/env';
+
 /**
  * Get the public URL for a placeholder image from Supabase Storage
  *
@@ -29,7 +31,7 @@ export function getPlaceholderImageUrl(
   // Use bracket notation for TypeScript index signature compliance
   const supabaseUrl =
     typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_SUPABASE_URL']
-      ? process.env['NEXT_PUBLIC_SUPABASE_URL']
+      ? env.NEXT_PUBLIC_SUPABASE_URL
       : typeof window !== 'undefined'
         ? (
             window as unknown as {

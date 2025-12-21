@@ -3,10 +3,12 @@
  * Uses updateJob server action (calls update_job RPC)
  */
 
-import { Prisma, job_type as JobType, job_category as JobCategory } from '@prisma/client';
-import type { job_type, job_category } from '@prisma/client';
-
-type jobsModel = Prisma.jobsGetPayload<{}>;
+import {
+  job_type as JobType,
+  job_category as JobCategory,
+  type job_type,
+  type job_category,
+} from '@heyclaude/web-runtime/types/client-safe-enums';
 import { type CreateJobInput, updateJob } from '@heyclaude/web-runtime/actions/jobs-crud';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserJobById } from '@heyclaude/web-runtime/data/account';
@@ -142,7 +144,7 @@ async function EditJobPageContent({
   userLogger.info({ section: 'data-fetch' }, 'EditJobPage: authentication successful');
 
   // Section: Job Data Fetch
-  let job: jobsModel | null = null;
+  let job: Awaited<ReturnType<typeof getUserJobById>> | null = null;
   try {
     job = await getUserJobById(user.id, id);
     userLogger.info({ hasJob: !!job, section: 'data-fetch' }, 'EditJobPage: job data loaded');

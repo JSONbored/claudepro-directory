@@ -21,7 +21,7 @@
  * - Accessibility support
  * - Responsive design
  */
-import { type content_category } from '@prisma/client';
+import type { content_category } from '@heyclaude/web-runtime/types/client-safe-enums';
 import { getChangelogEntryBySlug } from '@heyclaude/web-runtime/data/changelog';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';

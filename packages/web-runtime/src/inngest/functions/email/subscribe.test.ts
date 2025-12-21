@@ -133,9 +133,23 @@ describe('subscribeNewsletter', () => {
       ],
     });
 
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'subscribe.test.ts:136',message:'Error object analysis',data:{error,errorType:typeof error,isError:error instanceof Error,errorString:String(error),errorKeys:error?Object.keys(error):[]},timestamp:Date.now(),sessionId:'vitest-debug',runId:'hypothesis-B',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+
     expect(error).toBeDefined();
-    // Error might be an object, so check the message property or string representation
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    
+    // InngestTestEngine returns errors as objects with message property, not Error instances
+    // Handle both Error instances and error objects
+    let errorMessage: string;
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (error && typeof error === 'object' && 'message' in error) {
+      errorMessage = String(error.message);
+    } else {
+      errorMessage = String(error);
+    }
+
     expect(errorMessage).toContain('Invalid email format');
   });
 

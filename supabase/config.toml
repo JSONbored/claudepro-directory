@@ -1,7 +1,5 @@
 # Supabase Configuration
 # This file is used by Supabase GitHub Integration for branch management
-# 
-# For Edge Functions configuration, see: apps/edge/supabase/config.toml
 
 [api]
 enabled = true
@@ -9,5 +7,4 @@ enabled = true
 [db]
 port = 54322
 
-# Note: Edge Functions are configured separately in apps/edge/supabase/config.toml
 # This config is minimal and focused on database migrations for branching

@@ -66,12 +66,23 @@ global.fetch = mockFetch;
 import { processChangelogNotifyQueue } from './notify';
 
 describe('processChangelogNotifyQueue', () => {
-  const t = new InngestTestEngine({
-    function: processChangelogNotifyQueue,
-  });
+  // Create a fresh test engine for each test to avoid state caching issues
+  let t: InngestTestEngine;
 
   beforeEach(() => {
+    // Create fresh test engine instance for each test
+    // This prevents step result memoization between tests
+    t = new InngestTestEngine({
+      function: processChangelogNotifyQueue,
+    });
+
     vi.clearAllMocks();
+    // Reset mocks to ensure clean state
+    mockPgmqRead.mockReset();
+    mockPgmqDelete.mockReset();
+    mockGetService.mockReset();
+    mockRevalidateTag.mockReset();
+    mockFetch.mockReset();
     mockFetch.mockResolvedValue({
       ok: true,
       status: 200,
@@ -121,6 +132,8 @@ describe('processChangelogNotifyQueue', () => {
     };
 
     // Mock queue read - this will be called inside the step
+    // IMPORTANT: Reset mock before each test to ensure clean state
+    mockPgmqRead.mockReset();
     mockPgmqRead.mockResolvedValue([mockMessage] as never);
     mockPgmqDelete.mockResolvedValue(undefined);
 
@@ -128,6 +141,7 @@ describe('processChangelogNotifyQueue', () => {
     const mockService = {
       upsertNotification: vi.fn().mockResolvedValue(undefined),
     };
+    mockGetService.mockReset();
     mockGetService.mockResolvedValue(mockService as never);
 
     // Mock Discord webhook
@@ -138,6 +152,7 @@ describe('processChangelogNotifyQueue', () => {
 
     // Execute function - InngestTestEngine will run the actual function code
     // The mocks above will be used when the function executes
+    // For cron functions, execute() without arguments triggers the cron
     const { result } = await t.execute();
 
     expect(result).toEqual({
@@ -169,15 +184,19 @@ describe('processChangelogNotifyQueue', () => {
       message: mockJob,
     };
 
+    // Reset mocks to ensure clean state
+    mockPgmqRead.mockReset();
     mockPgmqRead.mockResolvedValue([mockMessage] as never);
     mockPgmqDelete.mockResolvedValue(undefined);
 
     const mockService = {
       upsertNotification: vi.fn().mockResolvedValue(undefined),
     };
+    mockGetService.mockReset();
     mockGetService.mockResolvedValue(mockService as never);
 
     // Mock Discord webhook failure
+    mockFetch.mockReset();
     mockFetch.mockResolvedValue({
       ok: false,
       status: 500,
@@ -221,6 +240,8 @@ describe('processChangelogNotifyQueue', () => {
       },
     };
 
+    // Reset mocks to ensure clean state
+    mockPgmqRead.mockReset();
     // Mock queue to return both valid and invalid messages
     // The function will filter out invalid ones
     mockPgmqRead.mockResolvedValue([validMessage, invalidMessage] as never);
@@ -230,9 +251,11 @@ describe('processChangelogNotifyQueue', () => {
     const mockService = {
       upsertNotification: vi.fn().mockResolvedValue(undefined),
     };
+    mockGetService.mockReset();
     mockGetService.mockResolvedValue(mockService as never);
 
     // Mock Discord webhook
+    mockFetch.mockReset();
     mockFetch.mockResolvedValue({
       ok: true,
       status: 200,

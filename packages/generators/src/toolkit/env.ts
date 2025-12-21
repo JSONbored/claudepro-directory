@@ -4,20 +4,35 @@
  * In CI/Build (Vercel/GitHub): Environment variables are provided by platform.
  *
  * This utility does NOT load .env files - all secrets must come from Infisical or platform env vars.
+ *
+ * Uses isomorphic `env` schema from @heyclaude/shared-runtime/schemas/env for type-safe, validated access.
+ * This ensures 100% isomorphic, type-safe environment variable access across all platforms.
  */
 
+import { env } from '@heyclaude/shared-runtime/schemas/env';
+
 import { logger } from './logger.ts';
+
+/**
+ * Helper to get env var value from env schema (type-safe, validated)
+ * Falls back to undefined if not in schema (for dynamic access)
+ */
+function getEnvValue(key: string): string | undefined {
+  // Type-safe access to env schema
+  // @ts-expect-error - Dynamic key access for validation utility
+  return env[key];
+}
 
 export async function ensureEnvVars(
   requiredVars: string[],
   optionalVars: string[] = []
 ): Promise<void> {
-  const missingVars = requiredVars.filter((v) => !process.env[v]);
-  const missingOptionalVars = optionalVars.filter((v) => !process.env[v]);
+  const missingVars = requiredVars.filter((v) => !getEnvValue(v));
+  const missingOptionalVars = optionalVars.filter((v) => !getEnvValue(v));
 
   if (missingVars.length === 0) {
     const source =
-      process.env['VERCEL'] || process.env['CI'] ? 'Platform (Vercel/CI)' : 'Infisical';
+      env.VERCEL || env.VERCEL_ENV ? 'Platform (Vercel/CI)' : 'Infisical';
     if (missingOptionalVars.length > 0) {
       logger.info(
         `✅ Required environment variables loaded from ${source} (${missingOptionalVars.length} optional vars missing)`,
@@ -32,16 +47,17 @@ export async function ensureEnvVars(
     return;
   }
 
+  // Check CI environment (need to use getEnvValue for dynamic keys not in schema)
   const isCI =
-    process.env['CI'] === 'true' ||
-    process.env['GITHUB_ACTIONS'] === 'true' ||
-    process.env['VERCEL'] === '1' ||
-    (process.env['VERCEL_ENV'] !== undefined && process.env['VERCEL_ENV'] !== '');
+    getEnvValue('CI') === 'true' ||
+    getEnvValue('GITHUB_ACTIONS') === 'true' ||
+    env.VERCEL === '1' ||
+    env.VERCEL_ENV !== undefined;
 
   if (isCI) {
-    const environment = process.env['VERCEL']
+    const environment = env.VERCEL
       ? 'vercel'
-      : process.env['GITHUB_ACTIONS']
+      : getEnvValue('GITHUB_ACTIONS')
         ? 'github'
         : 'ci';
     logger.warn(`⚠️  Missing environment variables in CI/Build: ${missingVars.join(', ')}`, {

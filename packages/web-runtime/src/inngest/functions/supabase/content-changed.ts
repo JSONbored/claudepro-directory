@@ -20,6 +20,7 @@ import type { Prisma } from '@prisma/client';
 
 type contentModel = Prisma.contentGetPayload<{}>;
 import { normalizeError } from '@heyclaude/shared-runtime';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 import { inngest } from '../../client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
@@ -44,8 +45,8 @@ async function triggerGitHubWorkflow(
   contentId?: string,
   slug?: string
 ): Promise<WorkflowTriggerResult> {
-  const githubToken = process.env['GITHUB_TOKEN'];
-  const githubRepo = process.env['GITHUB_REPOSITORY'] || 'JSONbored/claudepro-directory';
+  const githubToken = env.GITHUB_TOKEN;
+  const githubRepo = env.GITHUB_REPOSITORY || 'JSONbored/claudepro-directory';
 
   if (!githubToken) {
     throw new Error('GITHUB_TOKEN environment variable is not set');

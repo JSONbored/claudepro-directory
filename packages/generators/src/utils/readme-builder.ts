@@ -1,7 +1,8 @@
 import type { GenerateReadmeDataReturns } from '@heyclaude/database-types/postgres-types/functions/generate_readme_data';
 import type { ReadmeCategory } from '@heyclaude/database-types/postgres-types/composites/readme_category';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 
-const SITE_URL = process.env['NEXT_PUBLIC_SITE_URL'] ?? 'https://claudepro.directory';
+const SITE_URL = env.NEXT_PUBLIC_SITE_URL ?? 'https://claudepro.directory';
 
 const ICON_EMOJI_MAP: Record<string, string> = {
   Sparkles: '🤖',

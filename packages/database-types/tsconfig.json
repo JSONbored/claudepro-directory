@@ -16,9 +16,7 @@
   "include": [
     "src/**/*",
     "src/prisma-json-types.ts",
-    "src/prisma/index.ts",
-    "src/prisma/internal/prismaNamespace.ts",
-    "src/prisma/pjtg.ts"
+    "src/prisma/index.ts"
   ],
   "exclude": [
     "dist",
@@ -32,7 +30,6 @@
     "src/prisma/edge.ts",
     "src/prisma/index-browser.ts",
     "src/prisma/internal/**/*",
-    "!src/prisma/internal/prismaNamespace.ts",
     "src/prisma/zod/**/*",
     "src/prisma/json-types/**/*",
     "src/postgres-types/**/*"

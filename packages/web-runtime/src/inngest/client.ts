@@ -363,3 +363,35 @@ export const inngest =
 
 // Re-export for convenience
 export type { Events as InngestEvents };
+
+/**
+ * Helper types for working with Inngest events and functions
+ * @see https://www.inngest.com/docs/guides/typescript#helpers
+ */
+
+/**
+ * Get all available events from the Inngest client
+ * @example
+ * ```ts
+ * type AllEvents = GetEvents<typeof inngest>;
+ * ```
+ */
+export type { GetEvents } from 'inngest';
+
+/**
+ * Get the function input type for a given event trigger
+ * @example
+ * ```ts
+ * type Input = GetFunctionInput<typeof inngest, 'email/subscribe'>;
+ * ```
+ */
+export type { GetFunctionInput } from 'inngest';
+
+/**
+ * Get the step tools type for a given event trigger
+ * @example
+ * ```ts
+ * type StepTools = GetStepTools<typeof inngest, 'email/subscribe'>;
+ * ```
+ */
+export type { GetStepTools } from 'inngest';

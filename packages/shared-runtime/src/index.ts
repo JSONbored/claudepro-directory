@@ -37,6 +37,7 @@ export * from './security-headers.ts';
 export * from './input-validation.ts';
 export * from './search-highlight.ts';
 export * from './error-handling.ts';
+export * from './infisical/client.ts';
 // Export logger from logger/index.ts (unified logger with normalizeError)
 export {
   createLogger,
@@ -93,9 +94,3 @@ export * from './utils/serialize.ts';
 export * from './utils/form-data.ts';
 // Platform detection and environment utilities (platform-agnostic)
 export * from './platform/index.ts';
-
-// NOTE: Image manipulation is edge-function-only and should not be imported in web app
-// This export is commented out to prevent the Deno-only @imagemagick/magick-wasm package
-// from being included in the web app bundle. Edge functions can import directly from
-// packages/shared-runtime/src/image/manipulation.ts if needed.
-// export * from './image/manipulation.ts';

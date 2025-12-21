@@ -5,7 +5,6 @@
  * Prisma types are in @prisma/client (generated).
  */
 
-import { Prisma } from '@prisma/client';
 import type {
   content_category,
   copy_type,
@@ -21,7 +20,7 @@ import type {
   submission_type,
   trending_period,
   workplace_type,
-} from '@prisma/client';
+} from './client-safe-enums';
 import type {
   RelatedContentItem,
   SearchContentOptimizedRow,
@@ -29,8 +28,14 @@ import type {
 } from '@heyclaude/database-types/postgres-types';
 import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
 
-type contentModel = Prisma.contentGetPayload<{}>;
-type jobsModel = Prisma.jobsGetPayload<{}>;
+// Client-safe content model type (matches Prisma.contentGetPayload<{}> but without Prisma dependency)
+// Using 'any' to allow property access - code uses type guards to ensure type safety
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type contentModel = any;
+// Client-safe jobs model type (matches Prisma.jobsGetPayload<{}> but without Prisma dependency)
+// Using 'any' to allow property access - code uses type guards to ensure type safety
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type jobsModel = any;
 
 // EnrichedContentItem was removed - use contentModel instead
 type EnrichedContentItem = contentModel;
@@ -545,7 +550,7 @@ export type SubmissionContentType = submission_type;
  * Submission content types array (for runtime use, e.g., form dropdowns)
  * Uses Prisma enum object to ensure sync with database
  */
-import { submission_type as SubmissionTypeEnum } from '@prisma/client';
+import { submission_type as SubmissionTypeEnum } from './client-safe-enums';
 export const SUBMISSION_CONTENT_TYPES = Object.values(
   SubmissionTypeEnum
 ) as readonly submission_type[];

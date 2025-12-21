@@ -4,8 +4,7 @@
 
 'use client';
 
-import { changelog_category as ChangelogCategory } from '@prisma/client';
-import type { changelog_category } from '@prisma/client';
+import { changelog_category as ChangelogCategory, type changelog_category } from '@heyclaude/web-runtime/types/client-safe-enums';
 import { UnifiedBadge, TabsList, TabsTrigger, cn } from '@heyclaude/web-runtime/ui';
 
 // Use Prisma enum values

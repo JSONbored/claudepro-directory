@@ -253,7 +253,7 @@ Ensure the generator is properly configured in `schema.prisma` and the provider 
 
 The generator requires access to the database. Ensure:
 
-- `DATABASE_URL` or the datasource URL environment variable is set
+- `POSTGRES_PRISMA_URL` or the datasource URL environment variable is set
 - Database is accessible from the generation environment
 - Connection string is valid
 

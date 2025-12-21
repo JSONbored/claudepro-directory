@@ -1,5 +1,4 @@
-import { changelog_category as ChangelogCategory } from '@prisma/client';
-import type { changelog_category } from '@prisma/client';
+import { changelog_category as ChangelogCategory, type changelog_category } from '../types/client-safe-enums.ts';
 import { z } from 'zod';
 
 import { normalizeError } from '../errors.ts';
