@@ -1,0 +1,82 @@
+{
+  "name": "@heyclaude/mcp-server",
+  "version": "1.0.0",
+  "description": "HeyClaude MCP Server - Model Context Protocol server for Claude Pro Directory",
+  "type": "module",
+  "private": false,
+  "_versioning": {
+    "note": "Version management documentation is in README.md. This package follows SemVer. Starting version: 1.0.0. Version bumps via GitHub Actions workflows (.github/workflows/auto-release.yml and release.yml). NPM publishing is manual - see README.md for details."
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./server": {
+      "development": "./src/server/node-server.ts",
+      "types": "./dist/server/node-server.d.ts",
+      "default": "./src/server/node-server.ts"
+    },
+    "./cli": {
+      "development": "./src/cli.ts",
+      "types": "./dist/cli.d.ts",
+      "default": "./src/cli.ts"
+    },
+    "./adapters": {
+      "development": "./src/adapters/api-proxy.ts",
+      "types": "./dist/adapters/api-proxy.d.ts",
+      "default": "./src/adapters/api-proxy.ts"
+    },
+    "./adapters/cloudflare-worker": {
+      "development": "./src/adapters/cloudflare-worker.ts",
+      "types": "./dist/adapters/cloudflare-worker.d.ts",
+      "default": "./src/adapters/cloudflare-worker.ts"
+    }
+  },
+  "bin": {
+    "heyclaude-mcp": "./src/cli.ts"
+  },
+  "files": [
+    "src/**/*",
+    "bin/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --config ../../config/tools/eslint.config.mjs"
+  },
+  "dependencies": {
+    "@heyclaude/data-layer": "workspace:*",
+    "@heyclaude/database-types": "workspace:*",
+    "@heyclaude/shared-runtime": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.25.1",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "typescript": "5.9.3"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "ai",
+    "heyclaude",
+    "claudepro-directory"
+  ],
+  "author": "JSONbored",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JSONbored/claudepro-directory",
+    "directory": "packages/mcp-server"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

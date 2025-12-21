@@ -16,17 +16,20 @@ import { createPrismaClient } from '@heyclaude/cloudflare-runtime/prisma/client'
 import { createSupabaseServiceRoleClient, requireAuthUser } from '@heyclaude/cloudflare-runtime/auth/supabase';
 import { createLogger } from '@heyclaude/cloudflare-runtime/logging/pino';
 
-// Import MCP server setup
-import { createMcpServer } from './mcp/server.js';
+// Import MCP server setup from package
+import { createMcpServer } from '@heyclaude/mcp-server';
+import { convertMcpServerOptions } from '@heyclaude/mcp-server/adapters/cloudflare-worker';
 
-// Import route handlers
-import { handleHealth } from './routes/health.js';
-import { handleOAuthMetadata } from './routes/oauth-metadata.js';
-import { handleOAuthAuthorize } from './routes/oauth-authorize.js';
-import { handleOAuthToken } from './routes/oauth-token.js';
-import { handleOpenAPI } from './routes/openapi.js';
+// Import route handlers from package
+import { handleHealth, handleOAuthMetadata, handleOAuthAuthorize, handleOAuthToken, handleOpenAPI } from '@heyclaude/mcp-server';
 
-// Import OpenTelemetry instrumentation
+// Import Cloudflare-specific types
+import type { ExtendedEnv } from '@heyclaude/cloudflare-runtime/config/env';
+
+// Import middleware from package
+import { checkRateLimit, addRateLimitHeaders, createRateLimitErrorResponse } from '@heyclaude/mcp-server';
+
+// Import OpenTelemetry instrumentation (Cloudflare-specific, lives in Worker app)
 import { instrumentHandler } from './observability/axiom.js';
 
 /**
@@ -60,7 +63,9 @@ const handler = {
 
       // Health check endpoint (no auth required)
       if (url.pathname === '/') {
-        return handleHealth();
+        // Note: handleHealth now requires prisma for dependency checks
+        // For health check without auth, we pass undefined
+        return await handleHealth({ prisma: undefined });
       }
 
       // OpenAPI spec endpoint (no auth required)
@@ -109,10 +114,7 @@ const handler = {
           ? { limit: 200, period: 60 } // Dev: 200 req/min
           : { limit: 100, period: 60 }; // Prod: 100 req/min
 
-        // Import rate limit utilities
-        const { checkRateLimit, addRateLimitHeaders, createRateLimitErrorResponse } = await import(
-          './middleware/rate-limit.js'
-        );
+        // Rate limit utilities are already imported from package
 
         // Use user ID as identifier for rate limiting
         const rateLimitResult = await checkRateLimit(env, rateLimitName, authResult.user.id);
@@ -146,14 +148,16 @@ const handler = {
         fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.ts:143',message:'After createPrismaClient call',data:{hasPrisma:!!prisma},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
         // #endregion
 
-        // Create MCP server instance
-        const mcpServer = createMcpServer({
+        // Create MCP server instance using package
+        // Convert Cloudflare-specific types to runtime-agnostic types
+        const mcpServerOptions = convertMcpServerOptions({
           prisma,
           user: authResult.user,
           token: authResult.token,
-          env,
+          env: env as ExtendedEnv,
           logger,
         });
+        const mcpServer = createMcpServer(mcpServerOptions);
 
         // Create MCP handler using dynamic import (agents/mcp is a runtime module)
         const { createMcpHandler } = await import('agents/mcp');

@@ -37,7 +37,9 @@ export * from './security-headers.ts';
 export * from './input-validation.ts';
 export * from './search-highlight.ts';
 export * from './error-handling.ts';
-export * from './infisical/client.ts';
+// Infisical exports are NOT re-exported from index.ts to avoid Turbopack analyzing
+// server-only modules. Import directly from '@heyclaude/shared-runtime/infisical/client'
+// or '@heyclaude/shared-runtime/infisical/cache' in server-only contexts only.
 // Export logger from logger/index.ts (unified logger with normalizeError)
 export {
   createLogger,

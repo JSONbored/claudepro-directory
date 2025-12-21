@@ -220,6 +220,19 @@ function LayoutFallback({ children }: { children: React.ReactNode }) {
  * @returns {Promise<unknown>} Description of return value*/
 async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
   'use cache';
+  
+  // Initialize Infisical secrets early (non-blocking, cached)
+  // This ensures secrets are available for Prisma client and other services
+  // Initialization is idempotent (cached), so safe to call on every request
+  try {
+    const cacheModule = await import('@heyclaude/shared-runtime/infisical/cache');
+    // Trigger initialization (cached - only runs once)
+    // Fire-and-forget: If it fails, env vars will fallback to process.env
+    void cacheModule.initializeInfisicalSecrets();
+  } catch {
+    // Silently fail - fallback to process.env
+    // Infisical initialization errors shouldn't break the app
+  }
   const [layoutDataResult] = await Promise.allSettled([getLayoutData()]);
 
   // Extract layout data with fallbacks

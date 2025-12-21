@@ -12,7 +12,7 @@
  *
  * **Usage:**
  * ```ts
- * import { getInfisicalSecret, getInfisicalEnvironment } from '@heyclaude/shared-runtime/infisical';
+ * import { getInfisicalSecret, getInfisicalEnvironment } from '@heyclaude/shared-runtime/infisical/client';
  *
  * // Get environment (dev, staging, prod)
  * const env = getInfisicalEnvironment();
@@ -20,11 +20,22 @@
  * // Get a secret
  * const secret = await getInfisicalSecret('DATABASE_URL', env);
  * ```
+ *
+ * **Testing:**
+ * ```ts
+ * import { resetInfisicalState } from '@heyclaude/shared-runtime/infisical/client';
+ *
+ * beforeEach(() => {
+ *   resetInfisicalState(); // Clear cached state for fresh test runs
+ * });
+ * ```
+ *
+ * **Server-only:** This module uses server-only APIs and must not be imported in client components.
  */
 
+import 'server-only';
+
 import { InfisicalSDK, type Secret } from '@infisical/sdk';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { env } from '../schemas/env';
 
 /**
@@ -45,6 +56,20 @@ let authPromise: Promise<void> | null = null;
 let isEnabled: boolean | null = null;
 
 /**
+ * Reset Infisical module state (for testing only)
+ *
+ * Clears cached values to allow tests to change environment variables
+ * and get fresh results from isInfisicalEnabled() and getInfisicalClient().
+ *
+ * @internal This function is exported for testing purposes only
+ */
+export function resetInfisicalState(): void {
+  infisicalClient = null;
+  authPromise = null;
+  isEnabled = null;
+}
+
+/**
  * Check if Infisical is enabled via feature flag (environment-aware)
  *
  * Infisical is enabled ONLY for dev environment by default.
@@ -58,7 +83,7 @@ let isEnabled: boolean | null = null;
  *
  * @returns true if Infisical is enabled for current environment, false otherwise
  */
-function isInfisicalEnabled(): boolean {
+export function isInfisicalEnabled(): boolean {
   // Cache the check result (feature flags are static)
   if (isEnabled !== null) {
     return isEnabled;
@@ -84,30 +109,15 @@ function isInfisicalEnabled(): boolean {
   // Note: We skip unified-config check here to avoid circular dependencies
   // The feature flag is checked in web-runtime code that uses Infisical
 
-  // Priority 3: Fallback - check if credentials exist (env vars or local file)
+  // Priority 3: Fallback - check if credentials exist (env vars)
   // This allows Infisical to work in dev even if feature flag system isn't loaded
   // If credentials are present in dev, assume Infisical should be enabled
   const hasEnvCredentials =
     Boolean(env.INFISICAL_CLIENT_ID) &&
     Boolean(env.INFISICAL_CLIENT_SECRET);
 
-  // Also check for local file credentials
-  let hasLocalCredentials = false;
-  if (!hasEnvCredentials) {
-    try {
-      const projectRoot = process.cwd();
-      const localConfigPath = join(projectRoot, '.infisical.local.json');
-      const localConfig = JSON.parse(readFileSync(localConfigPath, 'utf-8'));
-      hasLocalCredentials =
-        Boolean(localConfig.INFISICAL_CLIENT_ID) &&
-        Boolean(localConfig.INFISICAL_CLIENT_SECRET);
-    } catch {
-      // .infisical.local.json doesn't exist or is invalid - ignore
-    }
-  }
-
   // Only enable if we're in dev and have credentials
-  isEnabled = currentEnv === 'dev' && (hasEnvCredentials || hasLocalCredentials);
+  isEnabled = currentEnv === 'dev' && hasEnvCredentials;
   return isEnabled;
 }
 
@@ -141,48 +151,20 @@ export async function getInfisicalClient(): Promise<InfisicalSDK | null> {
     }
   }
 
-  // Get credentials from environment variables first, then fall back to local config file
-  let clientId = env.INFISICAL_CLIENT_ID;
-  let clientSecret = env.INFISICAL_CLIENT_SECRET;
-
-  // If not in environment, try to load from .infisical.local.json (for local development)
-  if (!clientId || !clientSecret) {
-    try {
-      // Try to read from .infisical.local.json in project root
-      // This file is gitignored and contains local credentials
-      const projectRoot = process.cwd();
-      const localConfigPath = join(projectRoot, '.infisical.local.json');
-      const localConfig = JSON.parse(readFileSync(localConfigPath, 'utf-8'));
-
-      if (localConfig.INFISICAL_CLIENT_ID && localConfig.INFISICAL_CLIENT_SECRET) {
-        clientId = localConfig.INFISICAL_CLIENT_ID;
-        clientSecret = localConfig.INFISICAL_CLIENT_SECRET;
-      }
-    } catch {
-      // .infisical.local.json doesn't exist or is invalid - continue to error
-    }
-  }
+  // Get credentials from environment variables
+  const clientId = env.INFISICAL_CLIENT_ID;
+  const clientSecret = env.INFISICAL_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
     throw new Error(
       'Infisical credentials not found. Set INFISICAL_CLIENT_ID and INFISICAL_CLIENT_SECRET:\n' +
         '\n' +
-        '**Recommended (Local Development):**\n' +
-        '  1. Store credentials in Infisical (dev environment):\n' +
-        '     infisical secrets set INFISICAL_CLIENT_ID=your-client-id --env=dev\n' +
-        '     infisical secrets set INFISICAL_CLIENT_SECRET=your-client-secret --env=dev\n' +
-        '  2. Fetch them once using CLI:\n' +
-        '     infisical run --env=dev -- node -e "const fs=require(\'fs\');fs.writeFileSync(\'.infisical.local.json\',JSON.stringify({INFISICAL_CLIENT_ID:process.env.INFISICAL_CLIENT_ID,INFISICAL_CLIENT_SECRET:process.env.INFISICAL_CLIENT_SECRET},null,2));"\n' +
-        '  3. The SDK will automatically read from .infisical.local.json (gitignored)\n' +
-        '\n' +
-        '**Alternative:**\n' +
-        '  - Environment variables: INFISICAL_CLIENT_ID and INFISICAL_CLIENT_SECRET\n' +
-        '  - Manual local file: Create .infisical.local.json in project root\n' +
+        '**Local Development:**\n' +
+        '  - Set environment variables: INFISICAL_CLIENT_ID and INFISICAL_CLIENT_SECRET\n' +
+        '  - Or use Infisical CLI: infisical run --env=dev -- <command>\n' +
         '\n' +
         '**Production (Vercel):**\n' +
-        '  - Set INFISICAL_CLIENT_ID and INFISICAL_CLIENT_SECRET in Vercel environment variables\n' +
-        '\n' +
-        '**Note:** .infisical.local.json is gitignored and should not be committed'
+        '  - Set INFISICAL_CLIENT_ID and INFISICAL_CLIENT_SECRET in Vercel environment variables\n'
     );
   }
 
@@ -299,26 +281,26 @@ export async function getInfisicalSecret(
  * Determine environment from NODE_ENV or explicit config
  *
  * Node.js/Next.js can determine their environment from:
+ * - Explicit INFISICAL_ENV variable (highest priority - allows override)
  * - NODE_ENV variable (development → 'dev', production → 'prod')
- * - Explicit INFISICAL_ENV variable
  * - Default to 'dev' for safety
  *
  * @returns Environment slug ('dev', 'staging', or 'prod')
  */
 export function getInfisicalEnvironment(): 'dev' | 'staging' | 'prod' {
-  // Check NODE_ENV first
+  // Priority 1: Check for explicit INFISICAL_ENV variable (allows override)
+  const infisicalEnv = env.INFISICAL_ENV;
+  if (infisicalEnv === 'dev' || infisicalEnv === 'staging' || infisicalEnv === 'prod') {
+    return infisicalEnv;
+  }
+
+  // Priority 2: Check NODE_ENV (fallback if INFISICAL_ENV not set)
   const nodeEnv = env.NODE_ENV;
   if (nodeEnv === 'development') {
     return 'dev';
   }
   if (nodeEnv === 'production') {
     return 'prod';
-  }
-
-  // Check for explicit INFISICAL_ENV variable
-  const infisicalEnv = env.INFISICAL_ENV;
-  if (infisicalEnv === 'dev' || infisicalEnv === 'staging' || infisicalEnv === 'prod') {
-    return infisicalEnv;
   }
 
   // Default to 'dev' for safety (less risky than defaulting to 'prod')

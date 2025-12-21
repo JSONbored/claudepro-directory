@@ -84,9 +84,13 @@ export const resolveAxiomConfig = (async (env: ExtendedEnv) => {
   }
 
   // Configure Axiom OTLP exporter
-  // Axiom accepts OTLP over HTTP, so we use the standard OTLP HTTP exporter
+  // Axiom accepts OTLP over HTTP at /v1/traces endpoint
+  // URL format: https://AXIOM_DOMAIN/v1/traces (default: https://api.axiom.co/v1/traces)
+  // For edge deployments, use the edge domain instead of api.axiom.co
+  const axiomUrl = axiomConfig.url ?? 'https://api.axiom.co';
+  const axiomDomain = axiomUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
   const exporter = new OTLPTraceExporter({
-    url: `${axiomConfig.url}/api/v1/traces`,
+    url: `https://${axiomDomain}/v1/traces`,
     headers: {
       Authorization: `Bearer ${axiomConfig.apiToken}`,
       'X-Axiom-Dataset': axiomConfig.dataset,

@@ -260,6 +260,7 @@ pre-commit:
     linting:
       tags: [linting, code-quality, non-blocking]
       glob: "**/*.{ts,tsx}"
+      file_types: text  # Only lint text files (skip binaries automatically)
       exclude: 
         - "packages/edge-runtime/src/utils/email/**"
       skip:
@@ -300,6 +301,7 @@ pre-commit:
     formatting:
       tags: [formatting, code-quality, non-blocking]
       glob: "**/*.{ts,tsx,js,jsx,json,css,md}"
+      file_types: text  # Only format text files (skip binaries automatically)
       exclude:
         - "node_modules/**"
         - ".next/**"
@@ -325,6 +327,7 @@ pre-commit:
     quick-insights:
       tags: [insights, code-quality, non-blocking]
       glob: "**/*.{ts,tsx}"
+      file_types: text  # Only analyze text files (skip binaries automatically)
       exclude:
         - "node_modules/**"
         - ".next/**"

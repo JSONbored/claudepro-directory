@@ -16,7 +16,6 @@
     "heyclaude-webhooks-replay": "./src/bin/replay-webhook.ts",
     "heyclaude-changelog": "./src/bin/changelog.ts",
     "heyclaude-analyze-dependencies": "./src/bin/analyze-dependencies.ts",
-    "heyclaude-deploy-edge": "./src/bin/deploy-functions.ts",
     "heyclaude-mcp-login": "./src/bin/mcp-login.ts",
     "heyclaude-bump-version": "./src/bin/bump-version.ts",
     "heyclaude-analyze-commits": "./src/bin/analyze-commits.ts",

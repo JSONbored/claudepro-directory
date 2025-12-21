@@ -4,6 +4,12 @@ interface GlobalEnv {
   process?: {
     env?: EnvRecord;
   };
+  // Global Infisical cache interface (populated by server-only code)
+  __INFISICAL_CACHE__?: {
+    getSecret: (name: string) => string | undefined;
+    isInitialized: () => boolean;
+    getCachedSecretNames: () => string[];
+  };
 }
 
 const globalEnv = globalThis as GlobalEnv;
@@ -56,14 +62,58 @@ function normalizeValue(value: null | string | undefined): string | undefined {
   return value;
 }
 
+/**
+ * Check if Infisical cache is available (via global interface)
+ * 
+ * The Infisical cache is registered on globalThis by server-only code.
+ * This allows env.ts to check the cache without importing server-only modules,
+ * which prevents Turbopack from analyzing server-only imports in client components.
+ */
+function getInfisicalCache(): GlobalEnv['__INFISICAL_CACHE__'] {
+  return globalEnv.__INFISICAL_CACHE__;
+}
+
+/**
+ * Read environment variable with Infisical integration
+ *
+ * Priority order (when Infisical enabled):
+ * 1. envCache (cached value - fastest)
+ * 2. Infisical cache (if initialized and enabled) - checked synchronously if module loaded
+ * 3. NEXT_PUBLIC_* vars (for client-side vars - build-time inlining)
+ * 4. process.env (Node.js environment)
+ *
+ * Note: NEXT_PUBLIC_* vars skip Infisical to ensure build-time inlining works.
+ * Infisical cache is lazy-loaded - first access uses process.env, subsequent accesses use cache.
+ */
 function readEnv(name: string): string | undefined {
+  // Check cache first (fastest path - includes previously resolved Infisical values)
   if (envCache.has(name)) {
     return envCache.get(name);
   }
 
   let value: string | undefined;
 
-  // For NEXT_PUBLIC_* variables, use the pre-inlined values first (works on client)
+  // Priority 1: Check Infisical cache (if initialized and enabled)
+  // Skip for NEXT_PUBLIC_* vars to ensure build-time inlining works
+  // Uses global interface to avoid importing server-only modules
+  if (!name.startsWith('NEXT_PUBLIC_')) {
+    const infisicalCache = getInfisicalCache();
+    
+    // If cache is available and initialized, check it synchronously
+    if (infisicalCache && infisicalCache.isInitialized()) {
+      const infisicalValue = infisicalCache.getSecret(name);
+      // Only use Infisical value if it's a non-null string (null means secret not found)
+      if (infisicalValue !== undefined && infisicalValue !== null) {
+        value = normalizeValue(infisicalValue);
+        // Cache in envCache for faster subsequent access
+        envCache.set(name, value);
+        return value;
+      }
+    }
+  }
+
+  // Priority 2: For NEXT_PUBLIC_* variables, use the pre-inlined values first (works on client)
+  // These skip Infisical to ensure Next.js build-time inlining works correctly
   if (name.startsWith('NEXT_PUBLIC_')) {
     const nextPublicVars = getNextPublicEnvVars();
     if (name in nextPublicVars) {
@@ -71,12 +121,14 @@ function readEnv(name: string): string | undefined {
     }
   }
 
-  // Node.js environment (server-side)
+  // Priority 3: Node.js environment (server-side)
+  // This is the fallback if Infisical is disabled or secret not found
   const nodeEnv = globalEnv.process?.env;
   if (!value && nodeEnv) {
     value = normalizeValue(nodeEnv[name]);
   }
 
+  // Cache the resolved value (from Infisical or process.env)
   envCache.set(name, value);
   return value;
 }
@@ -116,6 +168,19 @@ export function getBooleanEnvVar(name: string, fallback?: boolean): boolean | un
   return fallback;
 }
 
+/**
+ * Get all environment variables as a record
+ *
+ * This function is used by validateEnv() for schema validation.
+ * It includes Infisical cache values (if initialized) with priority over process.env.
+ *
+ * Priority order:
+ * 1. Infisical cache (if initialized, for non-NEXT_PUBLIC_* vars)
+ * 2. NEXT_PUBLIC_* vars (from inlined values or process.env)
+ * 3. process.env (Node.js environment)
+ *
+ * Note: Infisical cache is async-initialized, so first call may use process.env only.
+ */
 export function getEnvObject(): EnvRecord {
   // Check if we're in build phase - during build, Next.js may have inlined truncated values
   // Read directly from process.env instead of using inlined NEXT_PUBLIC_ENV_VARS
@@ -160,17 +225,36 @@ export function getEnvObject(): EnvRecord {
   // Node.js environment (server-side) - merge with NEXT_PUBLIC_* vars
   // Normalize all values to convert empty strings to undefined
   const nodeEnv = globalEnv.process?.env;
+  let normalized: EnvRecord = {};
   if (nodeEnv) {
-    const normalized: EnvRecord = {};
     for (const [key, value] of Object.entries(nodeEnv)) {
       normalized[key] = normalizeValue(value);
     }
-    // During build, use process.env directly (avoids truncated inlined values)
-    // At runtime, merge with inlined values for client compatibility
-    return isBuildPhase ? normalized : { ...record, ...normalized };
   }
 
-  return record;
+  // Merge Infisical cache values (if initialized) - they take priority over process.env
+  // Skip for NEXT_PUBLIC_* vars (handled above) and build phase
+  if (!isBuildPhase) {
+    const infisicalCache = getInfisicalCache();
+    if (infisicalCache && infisicalCache.isInitialized()) {
+      // Get all cached secret names
+      const cachedNames = infisicalCache.getCachedSecretNames();
+      for (const secretName of cachedNames) {
+        // Skip NEXT_PUBLIC_* vars (handled separately for build-time inlining)
+        if (!secretName.startsWith('NEXT_PUBLIC_')) {
+          const infisicalValue = infisicalCache.getSecret(secretName);
+          if (infisicalValue !== undefined) {
+            // Infisical values take priority over process.env
+            normalized[secretName] = normalizeValue(infisicalValue);
+          }
+        }
+      }
+    }
+  }
+
+  // During build, use process.env directly (avoids truncated inlined values)
+  // At runtime, merge with inlined values for client compatibility
+  return isBuildPhase ? normalized : { ...record, ...normalized };
 }
 
 export function clearEnvCache(): void {

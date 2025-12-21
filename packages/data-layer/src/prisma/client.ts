@@ -23,6 +23,23 @@ import { Pool } from 'pg';
 import { logger } from '@heyclaude/shared-runtime';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 
+// Initialize Infisical secrets before Prisma client creation
+// This ensures database connection strings are available from Infisical if enabled
+// Fire-and-forget: If Infisical fails, env will fallback to process.env
+if (typeof process !== 'undefined' && process.env) {
+  // Trigger lazy initialization (non-blocking)
+  // First env access will use process.env, subsequent accesses will use Infisical cache
+  void import('@heyclaude/shared-runtime/infisical/cache').then((cacheModule) => {
+    return cacheModule.initializeInfisicalSecrets([
+      'POSTGRES_PRISMA_URL',
+      'DIRECT_URL',
+      'SUPABASE_SERVICE_ROLE_KEY',
+    ]);
+  }).catch(() => {
+    // Silently fail - fallback to process.env
+  });
+}
+
 type PrismaClientInstance = InstanceType<typeof PrismaClient>;
 
 const globalForPrisma = globalThis as unknown as {

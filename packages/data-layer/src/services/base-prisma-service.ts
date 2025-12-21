@@ -35,6 +35,8 @@ function isCloudflareWorkers(): boolean {
  * Get the default Prisma client (lazy initialization)
  * Only creates the client when actually needed (not in Cloudflare Workers)
  * In Cloudflare Workers, this will throw an error - services must receive an injected Prisma client
+ *
+ * Note: Triggers Infisical initialization on first access (fire-and-forget) to ensure database secrets are available.
  */
 function getDefaultPrisma(): PrismaClient {
   // In Cloudflare Workers, default Prisma client is not available
@@ -44,6 +46,24 @@ function getDefaultPrisma(): PrismaClient {
     throw new Error(
       'Default Prisma client is not available in Cloudflare Workers. Services must receive an injected Prisma client via constructor.'
     );
+  }
+
+  // Trigger Infisical initialization on first access (fire-and-forget)
+  // This ensures database secrets are loaded from Infisical if enabled
+  // Prisma client reads env vars at initialization, so triggering init here helps
+  // Even if not ready yet, readEnv() will fallback to process.env and trigger lazy init
+  if (typeof process !== 'undefined' && process.env && !defaultPrisma) {
+    void import('@heyclaude/shared-runtime/infisical/cache')
+      .then((cacheModule) => {
+        return cacheModule.initializeInfisicalSecrets([
+          'POSTGRES_PRISMA_URL',
+          'DIRECT_URL',
+          'SUPABASE_SERVICE_ROLE_KEY',
+        ]);
+      })
+      .catch(() => {
+        // Silently fail - fallback to process.env
+      });
   }
 
   if (!defaultPrisma) {

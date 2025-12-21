@@ -59,6 +59,16 @@
       "development": "./src/infisical/client.ts",
       "types": "./dist/infisical/client.d.ts",
       "default": "./src/infisical/client.ts"
+    },
+    "./infisical/cache": {
+      "development": "./src/infisical/cache.ts",
+      "types": "./dist/infisical/cache.d.ts",
+      "default": "./src/infisical/cache.ts"
+    },
+    "./infisical/client": {
+      "development": "./src/infisical/client.ts",
+      "types": "./dist/infisical/client.d.ts",
+      "default": "./src/infisical/client.ts"
     }
   },
   "main": "./src/index.ts",

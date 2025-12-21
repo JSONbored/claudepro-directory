@@ -51,7 +51,7 @@
   "dependencies": {
     "@heyclaude/database-types": "workspace:*",
     "@heyclaude/shared-runtime": "workspace:*",
-    "@infisical/sdk": "^4.0.0",
+    "@infisical/sdk": "^4.0.6",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@supabase/supabase-js": "^2.89.0",
@@ -60,7 +60,7 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251220.0",
+    "@cloudflare/workers-types": "^4.20251221.0",
     "@types/pg": "^8.16.0",
     "typescript": "5.9.3"
   }
