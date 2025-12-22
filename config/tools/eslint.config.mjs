@@ -106,6 +106,19 @@ export default tseslint.config(
   // Note: eslintConfigPrettier disables conflicting ESLint formatting rules
   // but import-x/order can still conflict during auto-fix
   eslintConfigPrettier,
+  // CSS files configuration - Tailwind v4 directives support
+  // Note: ESLint doesn't natively lint CSS files, but better-tailwindcss plugin
+  // uses globals.css as entryPoint for class validation in TS/TSX files.
+  // The "Unknown at rule" warnings are from the editor's CSS language server,
+  // not from ESLint. These Tailwind v4 directives (@theme, @custom-variant, @apply, @utility)
+  // are valid and processed by Tailwind's PostCSS plugin.
+  {
+    files: ['**/*.css'],
+    // CSS files are not linted by ESLint by default
+    // The better-tailwindcss plugin uses globals.css as entryPoint for class validation
+    // but doesn't lint the CSS file itself
+    // Editor warnings about @theme, @custom-variant, etc. are expected and can be ignored
+  },
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {

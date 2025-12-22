@@ -22,13 +22,20 @@
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
   Activity,
+  BarChart,
   Bookmark,
   BookOpen,
   Briefcase,
   Building,
+  DollarSign,
+  FileText,
+  HelpCircle,
   LogOut,
+  Plug,
   Rocket,
   Settings,
+  Shield,
+  SlidersHorizontal,
   User,
 } from '@heyclaude/web-runtime/icons';
 import {
@@ -180,7 +187,7 @@ export function UserMenu({ className }: UserMenuProps) {
           </motion.div>
         </NavigationHoverCardTrigger>
 
-        <NavigationHoverCardContent align="end" className="w-72 p-4" sideOffset={8}>
+        <NavigationHoverCardContent align="end" className="w-[calc(100vw-2rem)] max-w-72 p-4 sm:w-72" sideOffset={8}>
           {/* User Header with Avatar */}
           <div className={cn('flex items-center gap-2', 'mb-4', 'pb-4', 'border-border border-b')}>
             <Avatar className="h-12 w-12">
@@ -325,21 +332,122 @@ export function UserMenu({ className }: UserMenuProps) {
             </div>
           </div>
 
-          <div className="border-border mt-2 border-t pt-2">
-            <motion.div
-              whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
-              transition={MICROINTERACTIONS.colorTransition.default}
-              className="mb-2"
-            >
-              <Link
-                href="/account/settings"
-                className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
+          {/* Settings & Account Section */}
+          <div className="mb-2">
+            <div className={cn('px-3', 'py-1.5', 'mb-1')}>
+              <p
+                className={cn(
+                  'text-[10px]',
+                  'font-semibold',
+                  'text-muted-foreground',
+                  'uppercase opacity-70',
+                  'tracking-wide'
+                )}
               >
-                <Settings className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
-                <span className="flex-1 text-sm">Settings</span>
-              </Link>
-            </motion.div>
+                Settings & Account
+              </p>
+            </div>
+            <div className="space-y-3.5">
+              <motion.div
+                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                transition={MICROINTERACTIONS.colorTransition.default}
+              >
+                <Link
+                  href="/account/settings"
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
+                >
+                  <Settings className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
+                  <span className="flex-1 text-sm">Settings</span>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                transition={MICROINTERACTIONS.colorTransition.default}
+              >
+                <Link
+                  href="/account/settings/security"
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
+                >
+                  <Shield className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
+                  <span className="flex-1 text-sm">Security</span>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                transition={MICROINTERACTIONS.colorTransition.default}
+              >
+                <Link
+                  href="/account/settings/preferences"
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
+                >
+                  <SlidersHorizontal className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
+                  <span className="flex-1 text-sm">Preferences</span>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                transition={MICROINTERACTIONS.colorTransition.default}
+              >
+                <Link
+                  href="/account/data"
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
+                >
+                  <FileText className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
+                  <span className="flex-1 text-sm">Data & Privacy</span>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                transition={MICROINTERACTIONS.colorTransition.default}
+              >
+                <Link
+                  href="/account/billing"
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
+                >
+                  <DollarSign className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
+                  <span className="flex-1 text-sm">Billing</span>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                transition={MICROINTERACTIONS.colorTransition.default}
+              >
+                <Link
+                  href="/account/analytics"
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
+                >
+                  <BarChart className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
+                  <span className="flex-1 text-sm">Analytics</span>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                transition={MICROINTERACTIONS.colorTransition.default}
+              >
+                <Link
+                  href="/account/integrations"
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
+                >
+                  <Plug className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
+                  <span className="flex-1 text-sm">Integrations</span>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                transition={MICROINTERACTIONS.colorTransition.default}
+              >
+                <Link
+                  href="/account/support"
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'group/item rounded-md')}
+                >
+                  <HelpCircle className="text-muted-foreground group-hover/item:text-accent h-4 w-4 transition-colors" />
+                  <span className="flex-1 text-sm">Support</span>
+                </Link>
+              </motion.div>
+            </div>
+          </div>
 
+          <div className="border-border mt-2 border-t pt-2">
             <motion.button
               onClick={handleSignOut}
               disabled={signingOut}

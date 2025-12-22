@@ -8,22 +8,31 @@ import { ensureUserRecord } from '@heyclaude/web-runtime/actions/user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import {
   Activity,
+  BarChart,
   Bookmark,
   Briefcase,
+  CreditCard,
+  FileText,
   Home,
+  Key,
+  Lock,
   Mail,
   Plug,
   Send,
   Settings,
   Shield,
+  SlidersHorizontal,
   TrendingUp,
   User as UserIcon,
+  HelpCircle,
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { Button, Card } from '@heyclaude/web-runtime/ui';
+import { Card } from '@heyclaude/web-runtime/ui';
 import { type User } from '@supabase/supabase-js';
 import Image from 'next/image';
 import Link from 'next/link';
+
+import { AccountSidebarNav } from './account-sidebar-nav';
 
 interface AccountSidebarProps {
   user: User;
@@ -110,6 +119,13 @@ export async function AccountSidebar({
       : []),
     { name: 'Newsletter', href: '/account/newsletter', icon: Mail },
     { name: 'Settings', href: '/account/settings', icon: Settings },
+    { name: 'Security', href: '/account/settings/security', icon: Lock },
+    { name: 'Preferences', href: '/account/settings/preferences', icon: SlidersHorizontal },
+    { name: 'Data & Privacy', href: '/account/data', icon: FileText },
+    { name: 'Billing', href: '/account/billing', icon: CreditCard },
+    { name: 'Analytics', href: '/account/analytics', icon: BarChart },
+    { name: 'Integrations', href: '/account/integrations', icon: Key },
+    { name: 'Support', href: '/account/support', icon: HelpCircle },
     { name: 'Two-Factor Auth', href: '/account/settings/mfa', icon: Shield },
     { name: 'Connected Accounts', href: '/account/connected-accounts', icon: Plug },
   ];
@@ -118,44 +134,40 @@ export async function AccountSidebar({
   const imageSrc = userImageMetadata || profile?.image || null;
 
   return (
-    <Card className="h-fit p-4 md:col-span-1">
-      <div className="mb-6 flex items-center gap-2 border-b pb-4">
+    <Card className="h-fit p-4 md:p-6 md:col-span-1 shadow-sm">
+      <div className="mb-4 md:mb-6 flex items-center gap-2 md:gap-3 border-b border-border/50 pb-3 md:pb-4">
         {imageSrc ? (
-          <Image
-            src={imageSrc}
-            alt={`${profile?.name ?? userNameMetadata ?? 'User'}'s avatar`}
-            width={48}
-            height={48}
-            className="h-12 w-12 rounded-full object-cover"
-            unoptimized
-            priority
-          />
+          <div className="relative">
+            <Image
+              src={imageSrc}
+              alt={`${profile?.name ?? userNameMetadata ?? 'User'}'s avatar`}
+              width={48}
+              height={48}
+              className="h-12 w-12 rounded-full object-cover ring-2 ring-border/50 transition-all hover:ring-accent/50"
+              unoptimized
+              priority
+            />
+          </div>
         ) : (
-          <div className="bg-accent flex h-12 w-12 items-center justify-center rounded-full">
-            <UserIcon className="h-6 w-6" />
+          <div className="bg-accent/10 flex h-12 w-12 items-center justify-center rounded-full ring-2 ring-border/50">
+            <UserIcon className="h-6 w-6 text-accent" />
           </div>
         )}
-        <div className="flex-1">
-          <p className="font-medium">{profile?.name ?? userNameMetadata}</p>
-          <p className="text-muted-foreground text-xs">{user.email ?? ''}</p>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm truncate">{profile?.name ?? userNameMetadata}</p>
+          <p className="text-muted-foreground text-xs truncate">{user.email ?? ''}</p>
           {profile?.slug ? (
-            <Link href={`/u/${profile.slug}`} className="text-accent text-xs hover:underline">
-              View Profile
+            <Link
+              href={`/u/${profile.slug}`}
+              className="text-accent text-xs hover:underline transition-colors inline-block mt-0.5"
+            >
+              View Profile →
             </Link>
           ) : null}
         </div>
       </div>
 
-      <nav className="space-y-2">
-        {navigation.map((item) => (
-          <Link key={item.name} href={item.href}>
-            <Button variant="ghost" className="w-full justify-start text-sm">
-              <item.icon className="mr-1 h-4 w-4" />
-              {item.name}
-            </Button>
-          </Link>
-        ))}
-      </nav>
+      <AccountSidebarNav navigation={navigation} />
     </Card>
   );
 }

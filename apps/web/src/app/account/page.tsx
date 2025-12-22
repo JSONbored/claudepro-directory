@@ -89,11 +89,13 @@ export default async function AccountDashboard() {
       'AccountDashboard: unauthenticated access attempt detected'
     );
     return (
-      <div className="space-y-6">
-        <Card>
+      <div className="space-y-8">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
-            <CardDescription>Please sign in to view your dashboard.</CardDescription>
+            <CardDescription className="text-sm">
+              Please sign in to view your dashboard.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <SignInButton redirectTo="/account" valueProposition="Sign in to view your dashboard">
@@ -140,7 +142,7 @@ export default async function AccountDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Dashboard header and stats - streams in Suspense */}
       <Suspense fallback={<Loading />}>
         <DashboardHeaderAndStats bundleData={bundleData} userLogger={userLogger} />
@@ -226,13 +228,15 @@ function DashboardHeaderAndStats({
 
   return (
     <>
-      <div>
-        <h1 className="mb-2 text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, {profile?.name ?? 'User'}!</p>
+      <div className="mb-6">
+        <h1 className="mb-2 text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground text-base">
+          Welcome back, {profile?.name ?? 'User'}!
+        </p>
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <AnimatedStatsCard
           description="Saved items"
           icon={Bookmark}
@@ -262,10 +266,12 @@ function DashboardHeaderAndStats({
 
       {/* Quick actions */}
       <AnimatedCard>
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common tasks and features</CardDescription>
+            <CardTitle className="text-xl">Quick Actions</CardTitle>
+            <CardDescription className="text-sm">
+              Common tasks and features
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {resumeBookmarkHref ? (
@@ -454,10 +460,12 @@ function RecentlySavedSection({
   );
 
   return (
-    <Card>
+    <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle>Recently Saved</CardTitle>
-        <CardDescription>Your latest bookmarks at a glance</CardDescription>
+        <CardTitle className="text-xl">Recently Saved</CardTitle>
+        <CardDescription className="text-sm">
+          Your latest bookmarks at a glance
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {recentlySavedContent.length > 0 ? (
@@ -567,10 +575,12 @@ function RecommendationsSection({
   );
 
   return (
-    <Card>
+    <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle>Recommended next</CardTitle>
-        <CardDescription>Suggestions based on your saved tags</CardDescription>
+        <CardTitle className="text-xl">Recommended next</CardTitle>
+        <CardDescription className="text-sm">
+          Suggestions based on your saved tags
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {recommendations.length > 0 ? (
@@ -581,7 +591,7 @@ function RecommendationsSection({
               const similarHref = firstTag ? `/search?tags=${encodeURIComponent(firstTag)}` : null;
               return (
                 <li
-                  className="border-border/60 bg-muted/20 rounded-xl border p-3"
+                  className="border-border/60 hover:border-border hover:bg-muted/30 rounded-lg border bg-muted/20 p-4 transition-all duration-200"
                   key={`${item.category}-${item.slug}`}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -645,12 +655,15 @@ function QuickActionRow({
   title: string;
 }) {
   return (
-    <div className="border-border/50 flex items-center justify-between gap-3 rounded-xl border p-3">
-      <div>
-        <p className="font-medium">{title}</p>
-        <p className="text-muted-foreground text-sm">{description}</p>
+    <div className="border-border/50 hover:border-border hover:bg-accent/5 flex items-center justify-between gap-4 rounded-lg border p-4 transition-all duration-200">
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-sm">{title}</p>
+        <p className="text-muted-foreground text-xs mt-0.5">{description}</p>
       </div>
-      <NavLink className="text-sm font-semibold" href={href}>
+      <NavLink
+        className="text-sm font-semibold text-accent hover:text-accent/80 transition-colors whitespace-nowrap"
+        href={href}
+      >
         Open →
       </NavLink>
     </div>
@@ -670,12 +683,15 @@ function QuickActionRow({
  */
 function EmptyRecentlySavedState() {
   return (
-    <div className="border-border/70 rounded-2xl border border-dashed p-6 text-center">
-      <p className="font-medium">No saved configs yet</p>
-      <p className="text-muted-foreground text-sm">
+    <div className="border-border/70 rounded-lg border border-dashed p-8 text-center">
+      <p className="font-semibold text-sm mb-2">No saved configs yet</p>
+      <p className="text-muted-foreground text-xs mb-4">
         Browse the directory and bookmark your favorite configurations to see them here.
       </p>
-      <NavLink className="mt-4 inline-flex font-semibold" href={ROUTES.HOME}>
+      <NavLink
+        className="inline-flex font-semibold text-sm text-accent hover:text-accent/80 transition-colors"
+        href={ROUTES.HOME}
+      >
         Explore directory →
       </NavLink>
     </div>

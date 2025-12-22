@@ -196,11 +196,13 @@ async function SponsorshipsPageContent({
       'SponsorshipsPage: unauthenticated access attempt'
     );
     return (
-      <div className="space-y-6">
-        <Card>
+      <div className="space-y-8">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
-            <CardDescription>Please sign in to manage your sponsorship campaigns.</CardDescription>
+            <CardDescription className="text-sm">
+              Please sign in to manage your sponsorship campaigns.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <SignInButton
@@ -263,11 +265,11 @@ async function SponsorshipsPageContent({
   if (sponsorships.length === 0) {
     userLogger.info({ section: 'data-fetch' }, 'SponsorshipsPage: user has no sponsorships');
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="space-y-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="mb-2 text-3xl font-bold">Sponsorships</h1>
-            <p className="text-muted-foreground">No active campaigns yet</p>
+            <h1 className="mb-2 text-3xl font-bold tracking-tight">Sponsorships</h1>
+            <p className="text-muted-foreground text-base">No active campaigns yet</p>
           </div>
           <Button asChild variant="outline">
             <Link href={ROUTES.PARTNER}>
@@ -276,7 +278,7 @@ async function SponsorshipsPageContent({
             </Link>
           </Button>
         </div>
-        <Card>
+        <Card className="shadow-sm">
           <CardContent className="text-muted-foreground py-12 text-center">
             You haven&apos;t launched any sponsorship campaigns yet.
           </CardContent>
@@ -297,11 +299,11 @@ async function SponsorshipsPageContent({
   ).length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="mb-2 text-3xl font-bold">Sponsorships</h1>
-          <p className="text-muted-foreground">
+          <h1 className="mb-2 text-3xl font-bold tracking-tight">Sponsorships</h1>
+          <p className="text-muted-foreground text-base">
             {activeCount} active {activeCount === 1 ? 'campaign' : 'campaigns'}
           </p>
         </div>
@@ -334,7 +336,7 @@ async function SponsorshipsPageContent({
           const safeTier = sponsorship['tier'] as string | null as sponsorship_tier | null;
 
           return (
-            <Card key={sponsorship.id}>
+            <Card key={sponsorship.id} className="shadow-sm">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">

@@ -210,11 +210,11 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
 
   if (hasError) {
     return (
-      <div className="space-y-6">
-        <Card>
+      <div className="space-y-8">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="text-2xl">Companies unavailable</CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm">
               We couldn&apos;t load your companies. Please refresh the page or try again later.
             </CardDescription>
           </CardHeader>
@@ -239,11 +239,11 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="mb-2 text-3xl font-bold">My Companies</h1>
-          <p className="text-muted-foreground">
+          <h1 className="mb-2 text-3xl font-bold tracking-tight">My Companies</h1>
+          <p className="text-muted-foreground text-base">
             {companies.length} {companies.length === 1 ? 'company' : 'companies'}
           </p>
         </div>
@@ -256,11 +256,11 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
       </div>
 
       {companies.length === 0 ? (
-        <Card>
+        <Card className="shadow-sm">
           <CardContent className="flex flex-col items-center py-12">
             <Building2 className="text-muted-foreground mb-4 h-12 w-12" />
             <h3 className="mb-2 text-xl font-semibold">No companies yet</h3>
-            <p className="text-muted-foreground mb-4 max-w-md text-center">
+            <p className="text-muted-foreground mb-4 max-w-md text-center text-sm">
               Create a company profile to showcase your organization and post job listings
             </p>
             <Button asChild>
@@ -284,7 +284,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
               } => company.id !== null && company.name !== null && company.slug !== null
             )
             .map((company: UserCompaniesCompany, index: number) => (
-              <Card key={company.id}>
+              <Card key={company.id} className="shadow-sm">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex flex-1 items-start gap-3">

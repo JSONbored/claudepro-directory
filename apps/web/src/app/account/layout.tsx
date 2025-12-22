@@ -106,10 +106,13 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="bg-background min-h-screen">
-      <div className="border-b px-4 py-4">
+      <div className="border-b border-border/50 bg-card/50 backdrop-blur-sm px-4 py-4 shadow-sm">
         <div className="container mx-auto flex items-center justify-between">
           <div className="group flex items-center gap-2">
-            <Link className="group-hover:text-accent transition-colors" href="/">
+            <Link
+              className="text-muted-foreground hover:text-foreground group-hover:text-accent text-sm font-medium transition-colors"
+              href="/"
+            >
               ← Back to Directory
             </Link>
           </div>
@@ -120,7 +123,7 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
           {/* Sidebar wrapped in its own Suspense boundary to properly isolate async operations */}
           {/* This prevents "async info not on parent boundary" errors by ensuring each async component */}
           {/* has its own clearly defined Suspense boundary */}
@@ -172,10 +175,13 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
     <Suspense
       fallback={
         <div className="bg-background min-h-screen">
-          <div className="border-b px-4 py-4">
+          <div className="border-b border-border/50 bg-card/50 backdrop-blur-sm px-4 py-4 shadow-sm">
             <div className="container mx-auto flex items-center justify-between">
               <div className="group flex items-center gap-2">
-                <Link className="group-hover:text-accent transition-colors" href="/">
+                <Link
+                  className="text-muted-foreground hover:text-foreground group-hover:text-accent text-sm font-medium transition-colors"
+                  href="/"
+                >
                   ← Back to Directory
                 </Link>
               </div>
@@ -185,10 +191,10 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
             </div>
           </div>
           <div className="container mx-auto px-4 py-8">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
               <AccountSidebarSkeleton />
               <div className="md:col-span-3">
-                <div className="bg-muted h-96 animate-pulse rounded-lg" />
+                <div className="bg-muted h-96 animate-pulse rounded-lg shadow-sm" />
               </div>
             </div>
           </div>

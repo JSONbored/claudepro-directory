@@ -18,12 +18,12 @@ jest.mock('server-only', () => ({}));
 
 // Mock next/cache
 jest.mock('next/cache', () => ({
-  cacheTag: vi.fn(),
+  cacheTag: jest.fn(),
 }));
 
 describe('content-helpers', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('generateContentTags', () => {

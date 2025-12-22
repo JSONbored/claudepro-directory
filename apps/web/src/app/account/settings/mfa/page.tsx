@@ -76,21 +76,21 @@ export default async function MFASettingsPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Two-Factor Authentication</h1>
-        <p className="text-muted-foreground mt-2">
+    <div className="space-y-8">
+      <div className="mb-6">
+        <h1 className="mb-2 text-3xl font-bold tracking-tight">Two-Factor Authentication</h1>
+        <p className="text-muted-foreground text-base">
           Add an extra layer of security to your account with two-factor authentication.
         </p>
       </div>
 
-      <Card>
+      <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-1">
+          <CardTitle className="flex items-center gap-1 text-xl">
             <Shield className="h-4 w-4" />
             MFA Factors
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm">
             Manage your enrolled authenticator devices. You can have multiple factors for backup.
           </CardDescription>
         </CardHeader>

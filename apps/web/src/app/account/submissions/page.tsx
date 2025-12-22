@@ -310,11 +310,13 @@ async function SubmissionsPageContent({
       'SubmissionsPage: unauthenticated access attempt'
     );
     return (
-      <div className="space-y-6">
-        <Card>
+      <div className="space-y-8">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
-            <CardDescription>Please sign in to view and manage your submissions.</CardDescription>
+            <CardDescription className="text-sm">
+              Please sign in to view and manage your submissions.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <SignInButton
@@ -366,11 +368,11 @@ async function SubmissionsPageContent({
 
   if (hasError) {
     return (
-      <div className="space-y-6">
-        <Card>
+      <div className="space-y-8">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="text-2xl">Unable to load submissions</CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm">
               We couldn&apos;t load your submissions right now. Please refresh or try again later.
             </CardDescription>
           </CardHeader>
@@ -536,11 +538,11 @@ async function SubmissionsPageContent({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="mb-2 text-3xl font-bold">My Submissions</h1>
-          <p className="text-muted-foreground">
+          <h1 className="mb-2 text-3xl font-bold tracking-tight">My Submissions</h1>
+          <p className="text-muted-foreground text-base">
             {submissions.length} {submissions.length === 1 ? 'submission' : 'submissions'}
           </p>
         </div>

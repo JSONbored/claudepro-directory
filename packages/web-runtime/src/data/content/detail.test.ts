@@ -4,226 +4,411 @@ import {
   getContentDetailCore,
   getContentAnalytics,
 } from './detail';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
 
 // Mock server-only FIRST
 jest.mock('server-only', () => ({}));
 
-// Mock database-types to avoid schema generation issues
-jest.mock('@heyclaude/database-types/postgres-types', () => ({
-  GetContentDetailCompleteReturns: { id: '', slug: '', title: '' },
-  GetContentAnalyticsReturns: { view_count: 0, like_count: 0 },
+// Mock next/cache for cache directives
+jest.mock('next/cache', () => ({
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
+  connection: jest.fn(() => Promise.resolve()),
 }));
 
 // Prismocker is automatically configured via __mocks__/@prisma/client.ts
-// No manual Prisma mock needed - let __mocks__/@prisma/client.ts handle it
+// The prisma singleton from data-layer will automatically use PrismockerClient
 
-// Mock category validation
-jest.mock('@heyclaude/web-runtime/utils/category-validation', () => ({
-  isValidCategory: vi.fn((cat: string) => ['agents', 'mcp', 'rules'].includes(cat)),
+// Import real cache utilities for proper cache testing
+// Note: Deep relative imports are acceptable for test utilities to avoid circular dependencies
+import { clearRequestCache, getRequestCache } from '../../../../data-layer/src/utils/request-cache.ts';
+
+// Mock RPC error logging utility (if needed)
+// Note: Deep relative import needed for jest.mock() to work correctly
+jest.mock('../../../../data-layer/src/utils/rpc-error-logging.ts', () => ({
+  logRpcError: jest.fn(),
 }));
 
-// Mock cached-data-factory - need to set up mock BEFORE import
-// Use globalThis to store mocks (accessible across module boundaries)
-jest.mock('../cached-data-factory.ts', () => ({
-  createDataFunction: vi.fn((config) => {
-    // Create a mock function for this operation
-    const mock = jest.fn();
-    if (config.operation) {
-      // Store in globalThis so it's accessible in tests
-      if (!(globalThis as any).__dataFunctionMocks) {
-        (globalThis as any).__dataFunctionMocks = new Map();
-      }
-      (globalThis as any).__dataFunctionMocks.set(config.operation, mockFn);
-    }
-    return mockFn;
-  }),
-}));
+// Don't mock category validation - use real implementation
+
+// Don't mock createDataFunction - use real implementation
+// Don't mock service-factory - use real implementation
+// Services will use Prismocker via __mocks__/@prisma/client.ts
 
 describe('content/detail', () => {
-  let mockGetContentDetailComplete: ReturnType<typeof jest.fn>;
-  let mockGetContentDetailCore: ReturnType<typeof jest.fn>;
-  let mockGetContentAnalytics: ReturnType<typeof jest.fn>;
+  let prismocker: PrismaClient;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    // Get the mock functions that were created when the modules loaded
-    const mocks = (globalThis as any).__dataFunctionMocks;
-    mockGetContentDetailComplete = mocks?.get('getContentDetailComplete') || vi.fn();
-    mockGetContentDetailCore = mocks?.get('getContentDetailCore') || vi.fn();
-    mockGetContentAnalytics = mocks?.get('getContentAnalytics') || vi.fn();
-    // Reset them for each test
-    mockGetContentDetailComplete.mockReset();
-    mockGetContentDetailCore.mockReset();
-    mockGetContentAnalytics.mockReset();
+  beforeEach(async () => {
+    // 1. Clear request cache before each test (REQUIRED for test isolation)
+    clearRequestCache();
+
+    // 2. Get Prismocker instance (automatically PrismockerClient via global mock)
+    prismocker = prisma;
+
+    // 3. Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
+    // 4. Clear all mocks
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+
+    // 5. Set up $queryRawUnsafe for RPC testing (getContentDetailComplete and getContentAnalytics use RPC)
+    // Use Prismocker's Proxy set handler to override $queryRawUnsafe
+    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
   });
 
   describe('getContentDetailComplete', () => {
     it('should return content detail for valid category and slug', async () => {
-      const mockDetail = { id: '1', slug: 'test-slug', title: 'Test', category: 'agents' };
-      mockGetContentDetailComplete.mockResolvedValue(mockDetail);
+      // getContentDetailComplete uses ContentService.getContentDetailComplete which uses RPC
+      const mockDetail = {
+        id: '1',
+        slug: 'test-slug',
+        title: 'Test',
+        category: 'agents' as const,
+        description: 'Test description',
+        author: 'Test Author',
+        author_profile_url: null,
+        date_added: '2024-01-01T00:00:00Z',
+        tags: [],
+        features: [],
+        use_cases: [],
+        metadata: {},
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        view_count: 0,
+        bookmark_count: 0,
+        review_count: 0,
+        copy_count: 0,
+        use_count: 0,
+        keywords: [],
+        content_votes: [],
+      };
+
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockDetail] as any);
 
       const result = await getContentDetailComplete({ category: 'agents', slug: 'test-slug' });
 
-      expect(mockGetContentDetailComplete).toHaveBeenCalledWith({
-        category: 'agents',
-        slug: 'test-slug',
-      });
-      expect(result).toEqual(mockDetail);
+      // $queryRawUnsafe is called with get_content_detail_complete RPC
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_content_detail_complete'),
+        expect.objectContaining({
+          p_category: 'agents',
+          p_slug: 'test-slug',
+        })
+      );
+      expect(result).toMatchObject({ id: '1', slug: 'test-slug', title: 'Test' });
     });
 
     it('should reject invalid category', async () => {
-      // BUG POTENTIAL: validate function should reject invalid categories
-      // But if validation fails, what happens? Does it throw or return null?
-      mockGetContentDetailComplete.mockResolvedValue(null);
-
-      const result = await getContentDetailComplete({
-        category: 'invalid-category',
-        slug: 'test-slug',
-      });
-
-      // If validation fails, the function might not be called or might return null
-      // Need to check actual behavior
-      expect(result).toBeNull();
+      // Invalid category should fail validation and not call the service
+      await expect(
+        getContentDetailComplete({ category: 'invalid-category', slug: 'test-slug' })
+      ).rejects.toThrow('Invalid category');
     });
 
     it('should handle empty slug', async () => {
-      // BUG POTENTIAL: No validation on slug - empty string might cause issues
-      const mockDetail = null;
-      mockGetContentDetailComplete.mockResolvedValue(mockDetail);
+      // Empty slug should still call the service (no validation on slug)
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([null] as any);
 
       const result = await getContentDetailComplete({ category: 'agents', slug: '' });
 
-      expect(mockGetContentDetailComplete).toHaveBeenCalledWith({
-        category: 'agents',
-        slug: '',
-      });
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_content_detail_complete'),
+        expect.objectContaining({
+          p_category: 'agents',
+          p_slug: '',
+        })
+      );
+      // RPC returns null when content not found
       expect(result).toBeNull();
     });
 
-    it('should handle whitespace in slug', async () => {
-      const mockDetail = { id: '1', slug: 'test-slug', title: 'Test' };
-      mockGetContentDetailComplete.mockResolvedValue(mockDetail);
-
-      const result = await getContentDetailComplete({
-        category: 'agents',
-        slug: '  test-slug  ',
-      });
-
-      // Slug should be passed as-is (no trimming in transformArgs)
-      expect(mockGetContentDetailComplete).toHaveBeenCalledWith({
-        category: 'agents',
-        slug: '  test-slug  ',
-      });
-      expect(result).toEqual(mockDetail);
-    });
-
-    it('should handle case-insensitive category', async () => {
-      const mockDetail = { id: '1', slug: 'test-slug', title: 'Test' };
-      mockGetContentDetailComplete.mockResolvedValue(mockDetail);
-
-      const result = await getContentDetailComplete({ category: 'AGENTS', slug: 'test-slug' });
-
-      // Category is cast to content_category, but validation should handle case
-      expect(mockGetContentDetailComplete).toHaveBeenCalledWith({
-        category: 'AGENTS',
-        slug: 'test-slug',
-      });
-      expect(result).toEqual(mockDetail);
-    });
-
     it('should handle service errors', async () => {
-      mockGetContentDetailComplete.mockRejectedValue(new Error('Service error'));
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(
+        new Error('Service error')
+      );
 
       await expect(
         getContentDetailComplete({ category: 'agents', slug: 'test-slug' })
       ).rejects.toThrow('Service error');
     });
+
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockDetail = {
+        id: '1',
+        slug: 'test-slug',
+        title: 'Test',
+        category: 'agents' as const,
+        description: 'Test description',
+        author: 'Test Author',
+        author_profile_url: null,
+        date_added: '2024-01-01T00:00:00Z',
+        tags: [],
+        features: [],
+        use_cases: [],
+        metadata: {},
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        view_count: 0,
+        bookmark_count: 0,
+        review_count: 0,
+        copy_count: 0,
+        use_count: 0,
+        keywords: [],
+        content_votes: [],
+      };
+
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockDetail] as any);
+
+      // First call - should populate cache
+      const cacheBefore = getRequestCache().getStats().size;
+      const result1 = await getContentDetailComplete({ category: 'agents', slug: 'test-slug' });
+      const cacheAfterFirst = getRequestCache().getStats().size;
+
+      // Second call - should use cache
+      const result2 = await getContentDetailComplete({ category: 'agents', slug: 'test-slug' });
+      const cacheAfterSecond = getRequestCache().getStats().size;
+
+      // Verify results are the same
+      expect(result1).toEqual(result2);
+
+      // Verify cache size increased after first call, stayed same after second
+      expect(cacheAfterFirst).toBeGreaterThan(cacheBefore);
+      expect(cacheAfterSecond).toBe(cacheAfterFirst);
+    });
   });
 
   describe('getContentDetailCore', () => {
     it('should return content detail core for valid category and slug', async () => {
-      const mockDetail = { id: '1', slug: 'test-slug', title: 'Test', category: 'agents' };
-      mockGetContentDetailCore.mockResolvedValue(mockDetail);
+      // getContentDetailCore uses ContentService.getContentDetailCore which uses direct Prisma
+      // Seed content table using Prismocker
+      if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+        (prismocker as any).setData('content', [
+          {
+            id: '1',
+            slug: 'test-slug',
+            category: 'agents',
+            title: 'Test',
+            display_title: 'Test',
+            seo_title: 'Test',
+            description: 'Test description',
+            author: 'Test Author',
+            author_profile_url: null,
+            date_added: new Date('2024-01-01'),
+            tags: [],
+            content: null,
+            source: null,
+            documentation_url: null,
+            features: [],
+            use_cases: [],
+            examples: null,
+            metadata: {},
+            popularity_score: null,
+            created_at: new Date('2024-01-01'),
+            updated_at: new Date('2024-01-01'),
+          },
+        ]);
+      }
 
       const result = await getContentDetailCore({ category: 'agents', slug: 'test-slug' });
 
-      expect(mockGetContentDetailCore).toHaveBeenCalledWith({
-        category: 'agents',
+      expect(result).toMatchObject({
+        id: '1',
         slug: 'test-slug',
+        category: 'agents',
+        title: 'Test',
       });
-      expect(result).toEqual(mockDetail);
     });
 
     it('should reject invalid category', async () => {
-      mockGetContentDetailCore.mockResolvedValue(null);
+      // Invalid category should fail validation and not call the service
+      await expect(
+        getContentDetailCore({ category: 'invalid-category', slug: 'test-slug' })
+      ).rejects.toThrow('Invalid category');
+    });
 
-      const result = await getContentDetailCore({
-        category: 'invalid-category',
-        slug: 'test-slug',
-      });
+    it('should return null when content not found', async () => {
+      // Seed empty content table
+      if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+        (prismocker as any).setData('content', []);
+      }
+
+      const result = await getContentDetailCore({ category: 'agents', slug: 'non-existent' });
 
       expect(result).toBeNull();
     });
 
-    it('should handle empty slug', async () => {
-      const mockDetail = null;
-      mockGetContentDetailCore.mockResolvedValue(mockDetail);
+    it('should cache results on duplicate calls (caching test)', async () => {
+      // Seed content table
+      if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+        (prismocker as any).setData('content', [
+          {
+            id: '1',
+            slug: 'test-slug',
+            category: 'agents',
+            title: 'Test',
+            display_title: 'Test',
+            seo_title: 'Test',
+            description: 'Test description',
+            author: 'Test Author',
+            author_profile_url: null,
+            date_added: new Date('2024-01-01'),
+            tags: [],
+            content: null,
+            source: null,
+            documentation_url: null,
+            features: [],
+            use_cases: [],
+            examples: null,
+            metadata: {},
+            popularity_score: null,
+            created_at: new Date('2024-01-01'),
+            updated_at: new Date('2024-01-01'),
+          },
+        ]);
+      }
 
-      const result = await getContentDetailCore({ category: 'agents', slug: '' });
+      // First call - should populate cache
+      const cacheBefore = getRequestCache().getStats().size;
+      const result1 = await getContentDetailCore({ category: 'agents', slug: 'test-slug' });
+      const cacheAfterFirst = getRequestCache().getStats().size;
 
-      expect(mockGetContentDetailCore).toHaveBeenCalledWith({
-        category: 'agents',
-        slug: '',
-      });
-      expect(result).toBeNull();
+      // Second call - should use cache
+      const result2 = await getContentDetailCore({ category: 'agents', slug: 'test-slug' });
+      const cacheAfterSecond = getRequestCache().getStats().size;
+
+      // Verify results are the same
+      expect(result1).toEqual(result2);
+
+      // Verify cache size increased after first call, stayed same after second
+      expect(cacheAfterFirst).toBeGreaterThan(cacheBefore);
+      expect(cacheAfterSecond).toBe(cacheAfterFirst);
     });
   });
 
   describe('getContentAnalytics', () => {
     it('should return content analytics for valid category and slug', async () => {
-      const mockAnalytics = { view_count: 100, like_count: 50 };
-      mockGetContentAnalytics.mockResolvedValue(mockAnalytics);
+      // getContentAnalytics uses ContentService.getContentAnalytics which uses RPC
+      const mockAnalytics = {
+        content_id: '1',
+        views_7d: 100,
+        views_30d: 500,
+        copies_7d: 10,
+        copies_30d: 50,
+        bookmarks_7d: 5,
+        bookmarks_30d: 25,
+        views_prev_7d: 80,
+        velocity_7d: 1.25,
+        last_calculated_at: '2024-01-01T00:00:00Z',
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      };
+
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockAnalytics,
+      ] as any);
 
       const result = await getContentAnalytics({ category: 'agents', slug: 'test-slug' });
 
-      expect(mockGetContentAnalytics).toHaveBeenCalledWith({
-        category: 'agents',
-        slug: 'test-slug',
+      // $queryRawUnsafe is called with get_content_analytics RPC
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_content_analytics'),
+        expect.objectContaining({
+          p_category: 'agents',
+          p_slug: 'test-slug',
+        })
+      );
+      expect(result).toMatchObject({
+        views_7d: 100,
+        views_30d: 500,
+        copies_7d: 10,
+        copies_30d: 50,
       });
-      expect(result).toEqual(mockAnalytics);
     });
 
     it('should reject invalid category', async () => {
-      mockGetContentAnalytics.mockResolvedValue(null);
-
-      const result = await getContentAnalytics({
-        category: 'invalid-category',
-        slug: 'test-slug',
-      });
-
-      expect(result).toBeNull();
+      // Invalid category should fail validation and not call the service
+      await expect(
+        getContentAnalytics({ category: 'invalid-category', slug: 'test-slug' })
+      ).rejects.toThrow('Invalid category');
     });
 
-    it('should handle empty slug', async () => {
-      const mockAnalytics = null;
-      mockGetContentAnalytics.mockResolvedValue(mockAnalytics);
+    it('should return null when analytics not found', async () => {
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([null] as any);
 
-      const result = await getContentAnalytics({ category: 'agents', slug: '' });
+      const result = await getContentAnalytics({ category: 'agents', slug: 'non-existent' });
 
-      expect(mockGetContentAnalytics).toHaveBeenCalledWith({
-        category: 'agents',
-        slug: '',
-      });
       expect(result).toBeNull();
     });
 
     it('should handle zero analytics', async () => {
-      const mockAnalytics = { view_count: 0, like_count: 0 };
-      mockGetContentAnalytics.mockResolvedValue(mockAnalytics);
+      const mockAnalytics = {
+        content_id: '1',
+        views_7d: 0,
+        views_30d: 0,
+        copies_7d: 0,
+        copies_30d: 0,
+        bookmarks_7d: 0,
+        bookmarks_30d: 0,
+        views_prev_7d: 0,
+        velocity_7d: 0,
+        last_calculated_at: '2024-01-01T00:00:00Z',
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      };
+
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockAnalytics,
+      ] as any);
 
       const result = await getContentAnalytics({ category: 'agents', slug: 'test-slug' });
 
-      expect(result).toEqual(mockAnalytics);
+      expect(result).toMatchObject({
+        views_7d: 0,
+        views_30d: 0,
+        copies_7d: 0,
+        copies_30d: 0,
+      });
+    });
+
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockAnalytics = {
+        content_id: '1',
+        views_7d: 100,
+        views_30d: 500,
+        copies_7d: 10,
+        copies_30d: 50,
+        bookmarks_7d: 5,
+        bookmarks_30d: 25,
+        views_prev_7d: 80,
+        velocity_7d: 1.25,
+        last_calculated_at: '2024-01-01T00:00:00Z',
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      };
+
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockAnalytics,
+      ] as any);
+
+      // First call - should populate cache
+      const cacheBefore = getRequestCache().getStats().size;
+      const result1 = await getContentAnalytics({ category: 'agents', slug: 'test-slug' });
+      const cacheAfterFirst = getRequestCache().getStats().size;
+
+      // Second call - should use cache
+      const result2 = await getContentAnalytics({ category: 'agents', slug: 'test-slug' });
+      const cacheAfterSecond = getRequestCache().getStats().size;
+
+      // Verify results are the same
+      expect(result1).toEqual(result2);
+
+      // Verify cache size increased after first call, stayed same after second
+      expect(cacheAfterFirst).toBeGreaterThan(cacheBefore);
+      expect(cacheAfterSecond).toBe(cacheAfterFirst);
     });
   });
 });

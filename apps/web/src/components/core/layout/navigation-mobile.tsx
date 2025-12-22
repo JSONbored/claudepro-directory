@@ -31,6 +31,25 @@ import { useEffect } from 'react';
 import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import {
+  Activity,
+  BarChart,
+  BookOpen,
+  DollarSign,
+  FileText,
+  HelpCircle,
+  LogOut,
+  Plug,
+  Rocket,
+  Settings,
+  Shield,
+  SlidersHorizontal,
+  User,
+} from '@heyclaude/web-runtime/icons';
+import { useRouter } from 'next/navigation';
+import { useCallback } from 'react';
+import { toasts } from '@heyclaude/web-runtime/ui';
 
 interface NavLinkProps {
   children: React.ReactNode;
@@ -90,10 +109,38 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
   const { value: isMounted, setTrue: setIsMountedTrue } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
   const dragControls = useDragControls();
+  const { user, status, supabaseClient } = useAuthenticatedUser({
+    context: 'NavigationMobile',
+  });
+  const router = useRouter();
+  const {
+    value: signingOut,
+    setTrue: setSigningOutTrue,
+    setFalse: setSigningOutFalse,
+  } = useBoolean();
 
   useEffect(() => {
     setIsMountedTrue();
   }, [setIsMountedTrue]);
+
+  const handleSignOut = useCallback(async () => {
+    setSigningOutTrue();
+    try {
+      const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
+      if (error) {
+        toasts.raw.error(`Sign out failed: ${error.message}`);
+      } else {
+        toasts.success.signedOut();
+        router.push('/');
+        router.refresh();
+        onOpenChange(false);
+      }
+    } catch (error) {
+      toasts.raw.error('An unexpected error occurred');
+    } finally {
+      setSigningOutFalse();
+    }
+  }, [supabaseClient, router, setSigningOutTrue, setSigningOutFalse, onOpenChange]);
 
   // Don't render Sheet until mounted to prevent Radix UI ID hydration mismatch
   if (!isMounted) {
@@ -275,6 +322,195 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                     })}
                 </div>
               </nav>
+
+              {/* Account Navigation - Only show when authenticated */}
+              {user && status !== 'loading' && (
+                <nav
+                  className="border-border/30 mt-4 border-t pt-6"
+                  aria-label="Account navigation"
+                >
+                  <div className="mb-3 px-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground opacity-70">
+                      Account
+                    </p>
+                  </div>
+                  <div className="space-y-3">
+                    {/* Dashboard */}
+                    <motion.div
+                      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
+                      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
+                      transition={{
+                        delay:
+                          STAGGER.medium +
+                          (PRIMARY_NAVIGATION.length +
+                            SECONDARY_NAVIGATION.flatMap((g) => g.links).filter(
+                              (l) => l.label !== 'Pinboard'
+                            ).length) *
+                            STAGGER.micro,
+                      }}
+                    >
+                      <motion.div
+                        whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
+                        transition={MICROINTERACTIONS.button.transition}
+                      >
+                        <NavLink
+                          href="/account"
+                          isActive={isActive}
+                          onClick={() => onOpenChange(false)}
+                          className={cn(
+                            'border-border bg-card flex w-full items-center rounded-xl border',
+                            'px-5',
+                            'py-4',
+                            'text-base font-medium',
+                            'transition-all duration-200 ease-out',
+                            'hover:border-accent/50 hover:bg-accent/10'
+                          )}
+                        >
+                          <User className="mr-2 h-5 w-5 shrink-0" />
+                          <span>Dashboard</span>
+                        </NavLink>
+                      </motion.div>
+                    </motion.div>
+
+                    {/* My Content */}
+                    {[
+                      { href: '/account/activity', icon: Activity, label: 'Activity' },
+                      { href: '/account/library', icon: BookOpen, label: 'Library' },
+                      { href: '/account/submissions', icon: Rocket, label: 'Submissions' },
+                    ].map((link, index) => {
+                      const IconComponent = link.icon;
+                      const baseDelay =
+                        STAGGER.medium +
+                        (PRIMARY_NAVIGATION.length +
+                          SECONDARY_NAVIGATION.flatMap((g) => g.links).filter(
+                            (l) => l.label !== 'Pinboard'
+                          ).length +
+                          1) *
+                          STAGGER.micro;
+                      return (
+                        <motion.div
+                          key={`account-${link.label}-${index}`}
+                          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
+                          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
+                          transition={{ delay: baseDelay + index * STAGGER.micro }}
+                        >
+                          <motion.div
+                            whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
+                            transition={MICROINTERACTIONS.button.transition}
+                          >
+                            <NavLink
+                              href={link.href}
+                              isActive={isActive}
+                              onClick={() => onOpenChange(false)}
+                              className={cn(
+                                'border-border/40 bg-card/50 text-muted-foreground flex w-full items-center rounded-xl border',
+                                'px-5',
+                                'py-4',
+                                'text-sm font-medium',
+                                'transition-all duration-200 ease-out',
+                                'hover:border-accent/30 hover:bg-accent/5 hover:text-foreground'
+                              )}
+                            >
+                              <IconComponent className="mr-2 h-4 w-4 shrink-0" />
+                              <span>{link.label}</span>
+                            </NavLink>
+                          </motion.div>
+                        </motion.div>
+                      );
+                    })}
+
+                    {/* Settings & Account */}
+                    {[
+                      { href: '/account/settings', icon: Settings, label: 'Settings' },
+                      { href: '/account/settings/security', icon: Shield, label: 'Security' },
+                      {
+                        href: '/account/settings/preferences',
+                        icon: SlidersHorizontal,
+                        label: 'Preferences',
+                      },
+                      { href: '/account/data', icon: FileText, label: 'Data & Privacy' },
+                      { href: '/account/billing', icon: DollarSign, label: 'Billing' },
+                      { href: '/account/analytics', icon: BarChart, label: 'Analytics' },
+                      { href: '/account/integrations', icon: Plug, label: 'Integrations' },
+                      { href: '/account/support', icon: HelpCircle, label: 'Support' },
+                    ].map((link, index) => {
+                      const IconComponent = link.icon;
+                      const baseDelay =
+                        STAGGER.medium +
+                        (PRIMARY_NAVIGATION.length +
+                          SECONDARY_NAVIGATION.flatMap((g) => g.links).filter(
+                            (l) => l.label !== 'Pinboard'
+                          ).length +
+                          4) *
+                          STAGGER.micro;
+                      return (
+                        <motion.div
+                          key={`settings-${link.label}-${index}`}
+                          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
+                          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
+                          transition={{ delay: baseDelay + index * STAGGER.micro }}
+                        >
+                          <motion.div
+                            whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
+                            transition={MICROINTERACTIONS.button.transition}
+                          >
+                            <NavLink
+                              href={link.href}
+                              isActive={isActive}
+                              onClick={() => onOpenChange(false)}
+                              className={cn(
+                                'border-border/40 bg-card/50 text-muted-foreground flex w-full items-center rounded-xl border',
+                                'px-5',
+                                'py-4',
+                                'text-sm font-medium',
+                                'transition-all duration-200 ease-out',
+                                'hover:border-accent/30 hover:bg-accent/5 hover:text-foreground'
+                              )}
+                            >
+                              <IconComponent className="mr-2 h-4 w-4 shrink-0" />
+                              <span>{link.label}</span>
+                            </NavLink>
+                          </motion.div>
+                        </motion.div>
+                      );
+                    })}
+
+                    {/* Sign Out */}
+                    <motion.div
+                      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
+                      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
+                      transition={{
+                        delay:
+                          STAGGER.medium +
+                          (PRIMARY_NAVIGATION.length +
+                            SECONDARY_NAVIGATION.flatMap((g) => g.links).filter(
+                              (l) => l.label !== 'Pinboard'
+                            ).length +
+                            12) *
+                            STAGGER.micro,
+                      }}
+                    >
+                      <motion.button
+                        onClick={handleSignOut}
+                        disabled={signingOut}
+                        whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
+                        transition={MICROINTERACTIONS.button.transition}
+                        className={cn(
+                          'text-destructive border-border/40 bg-card/50 flex w-full items-center rounded-xl border',
+                          'px-5',
+                          'py-4',
+                          'text-sm font-medium',
+                          'transition-all duration-200 ease-out',
+                          'hover:border-destructive/30 hover:bg-destructive/5'
+                        )}
+                      >
+                        <LogOut className="mr-2 h-4 w-4 shrink-0" />
+                        <span>{signingOut ? 'Signing out...' : 'Sign out'}</span>
+                      </motion.button>
+                    </motion.div>
+                  </div>
+                </nav>
+              )}
             </nav>
           </div>
 

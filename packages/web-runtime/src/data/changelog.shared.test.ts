@@ -6,26 +6,29 @@ jest.mock('server-only', () => ({}));
 
 // Mock logger
 jest.mock('../errors.ts', () => ({
-  normalizeError: vi.fn((error, message) => {
+  normalizeError: jest.fn((error: unknown, message?: string) => {
     if (error instanceof Error) {
       return error;
     }
-    return new Error(message || String(error));
+    return new Error(message || (typeof error === 'string' ? error : 'Unknown error'));
   }),
 }));
 
 // Mock logger
 jest.mock('../logger.ts', () => ({
   logger: {
-    child: vi.fn(() => ({
-      error: vi.fn(),
+    child: jest.fn(() => ({
+      error: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
     })),
   },
 }));
 
 describe('changelog.shared', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('parseChangelogChanges', () => {
@@ -89,6 +92,7 @@ describe('changelog.shared', () => {
         InvalidCategory: ['Something'],
       };
       const result = parseChangelogChanges(changes);
+      // .strict() should reject extra keys, so this should return empty object
       expect(result).toEqual({});
     });
 
@@ -139,11 +143,9 @@ describe('changelog.shared', () => {
         Added: ['Valid'],
         InvalidCategory: ['Should be ignored'],
       };
-      // The refine check should catch invalid categories
+      // .strict() should reject extra keys
       const result = parseChangelogChanges(changes);
-      // BUG POTENTIAL: The refine only checks if keys are valid, but doesn't reject extra keys
-      // Zod's object schema allows extra keys by default unless .strict() is used
-      // This might be a bug - extra keys should be rejected or at least logged
+      // Should return empty object on error (strict() rejects extra keys)
       expect(result).toEqual({});
     });
 

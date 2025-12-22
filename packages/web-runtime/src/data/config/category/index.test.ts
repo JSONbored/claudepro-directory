@@ -1,4 +1,18 @@
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it, jest } from '@jest/globals';
+
+// Mock icons (React components) - category-config.ts imports icons from icons.tsx
+jest.mock('../../../icons.tsx', () => ({
+  BookOpen: jest.fn(() => 'BookOpen'),
+  Briefcase: jest.fn(() => 'Briefcase'),
+  Code: jest.fn(() => 'Code'),
+  FileText: jest.fn(() => 'FileText'),
+  Layers: jest.fn(() => 'Layers'),
+  Server: jest.fn(() => 'Server'),
+  Sparkles: jest.fn(() => 'Sparkles'),
+  Terminal: jest.fn(() => 'Terminal'),
+  Webhook: jest.fn(() => 'Webhook'),
+}));
+
 import {
   getCategoryConfigs,
   getCategoryConfig,

@@ -101,11 +101,13 @@ async function ConnectedAccountsPageContent() {
       'ConnectedAccountsPage: page render completed (unauthenticated)'
     );
     return (
-      <div className="space-y-6">
-        <Card>
+      <div className="space-y-8">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
-            <CardDescription>Please sign in to manage your connected accounts.</CardDescription>
+            <CardDescription className="text-sm">
+              Please sign in to manage your connected accounts.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <SignInButton
@@ -152,9 +154,9 @@ async function ConnectedAccountsPageContent() {
   }
 
   const pageHeader = (
-    <div>
-      <h1 className="mb-2 text-3xl font-bold">Connected Accounts</h1>
-      <p className="text-muted-foreground">Manage your OAuth provider connections</p>
+    <div className="mb-6">
+      <h1 className="mb-2 text-3xl font-bold tracking-tight">Connected Accounts</h1>
+      <p className="text-muted-foreground text-base">Manage your OAuth provider connections</p>
     </div>
   );
 
@@ -170,13 +172,13 @@ async function ConnectedAccountsPageContent() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {pageHeader}
 
-      <Card>
+      <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>OAuth Providers</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-xl">OAuth Providers</CardTitle>
+          <CardDescription className="text-sm">
             Link multiple accounts to sign in with any provider. Your data stays unified across all
             login methods.
           </CardDescription>

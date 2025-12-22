@@ -241,11 +241,13 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
       'MyJobsPage: unauthenticated access attempt detected'
     );
     return (
-      <div className="space-y-6">
-        <Card>
+      <div className="space-y-8">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
-            <CardDescription>Please sign in to manage your job listings.</CardDescription>
+            <CardDescription className="text-sm">
+              Please sign in to manage your job listings.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <SignInButton
@@ -269,7 +271,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
   userLogger.info({ section: 'data-fetch' }, 'MyJobsPage: authentication successful');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Payment success alert - rendered immediately if paymentStatus is present */}
       {paymentStatus === 'success' && paymentJobId ? (
         <Suspense fallback={null}>
@@ -475,10 +477,10 @@ async function JobsListWithHeader({
 
   if (fetchError) {
     return (
-      <Card>
+      <Card className="shadow-sm">
         <CardHeader>
           <CardTitle className="text-2xl">Job listings unavailable</CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm">
             We couldn&apos;t load your job dashboard. Please refresh or try again later.
           </CardDescription>
         </CardHeader>
@@ -536,10 +538,10 @@ async function JobsListWithHeader({
 
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="mb-2 text-3xl font-bold">My Job Listings</h1>
-          <p className="text-muted-foreground">
+          <h1 className="mb-2 text-3xl font-bold tracking-tight">My Job Listings</h1>
+          <p className="text-muted-foreground text-base">
             {jobs.length} {jobs.length === 1 ? 'listing' : 'listings'}
           </p>
         </div>

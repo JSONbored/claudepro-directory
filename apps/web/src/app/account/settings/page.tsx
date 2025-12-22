@@ -110,6 +110,7 @@ export default async function SettingsPage() {
 
   // Section: Settings Data Fetch
   let settingsData: GetUserCompleteDataReturns['user_settings'] | null = null;
+  let heroImageUrl: string | null = null;
   try {
     const completeData = await getUserCompleteData(user.id);
     settingsData = completeData?.user_settings ?? null;
@@ -119,6 +120,14 @@ export default async function SettingsPage() {
         'SettingsPage: getUserCompleteData returned null or missing user_settings'
       );
     }
+
+    // Fetch hero image separately (not included in getUserSettings)
+    const { prisma } = await import('@heyclaude/data-layer/prisma/client');
+    const userRecord = await prisma.public_users.findUnique({
+      where: { id: user.id },
+      select: { hero: true },
+    });
+    heroImageUrl = userRecord?.hero ?? null;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings');
     userLogger.error(
@@ -295,19 +304,23 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="mb-2 text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">Manage your account settings and preferences</p>
+    <div className="space-y-8">
+      <div className="mb-6">
+        <h1 className="mb-2 text-3xl font-bold tracking-tight">Settings</h1>
+        <p className="text-muted-foreground text-base">
+          Manage your account settings and preferences
+        </p>
       </div>
 
       {/* Profile Information */}
-      <Card>
+      <Card className="shadow-sm">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Profile Information</CardTitle>
-              <CardDescription>Update your public profile details</CardDescription>
+              <CardTitle className="text-xl">Profile Information</CardTitle>
+              <CardDescription className="text-sm">
+                Update your public profile details
+              </CardDescription>
             </div>
             {userData?.slug && typeof userData.slug === 'string' ? (
               <Button asChild size="sm" variant="outline">
@@ -329,25 +342,27 @@ export default async function SettingsPage() {
               website: profile.website,
               work: profile.work,
             }}
+            avatarUrl={userData?.image ?? null}
+            heroUrl={heroImageUrl}
           />
         </CardContent>
       </Card>
 
       {/* Account Details */}
-      <Card>
+      <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>Account Details</CardTitle>
-          <CardDescription>Your account information</CardDescription>
+          <CardTitle className="text-xl">Account Details</CardTitle>
+          <CardDescription className="text-sm">Your account information</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <p className="text-sm-medium">Email</p>
-              <p className="text-muted-foreground">{user.email}</p>
+              <p className="text-sm font-semibold mb-1">Email</p>
+              <p className="text-muted-foreground text-sm">{user.email}</p>
             </div>
             <div>
-              <p className="text-sm-medium">Member Since</p>
-              <p className="text-muted-foreground">
+              <p className="text-sm font-semibold mb-1">Member Since</p>
+              <p className="text-muted-foreground text-sm">
                 {profile.created_at ? formatDate(profile.created_at, 'long') : 'N/A'}
               </p>
             </div>
@@ -355,10 +370,10 @@ export default async function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>Profile Picture</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-xl">Profile Picture</CardTitle>
+          <CardDescription className="text-sm">
             Synced from {user.app_metadata.provider === 'github' ? 'GitHub' : 'Google'}
           </CardDescription>
         </CardHeader>

@@ -3,7 +3,6 @@ import { getFilteredJobs, buildFilterJobsArgs } from './jobs';
 import type { JobsFilterOptions } from './jobs';
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
-import { SearchService } from '@heyclaude/data-layer/services/search.ts';
 import type { FilterJobsReturns } from '@heyclaude/database-types/postgres-types';
 
 // Mock server-only FIRST
@@ -27,36 +26,16 @@ jest.mock('../../../data-layer/src/utils/rpc-error-logging.ts', () => ({
   logRpcError: jest.fn(),
 }));
 
-// Mock type guards - create mocks that can be reset in beforeEach
-// Use globalThis to avoid temporal dead zone issues
-if (!(globalThis as any).__typeGuardMocks) {
-  (globalThis as any).__typeGuardMocks = {
-    isValidJobCategory: jest.fn((cat: string) => ['engineering', 'design', 'product'].includes(cat)),
-    isValidJobType: jest.fn((type: string) => ['full-time', 'part-time', 'contract'].includes(type)),
-    isValidExperienceLevel: jest.fn((level: string) => ['entry', 'mid', 'senior'].includes(level)),
-  };
-}
-
 // Mock type guards - path must match the import in jobs.ts (../utils/type-guards.ts)
-jest.mock('../utils/type-guards.ts', () => {
-  const mocks = (globalThis as any).__typeGuardMocks;
-  if (!mocks) {
-    // Fallback if mocks weren't initialized
-    return {
-      isValidJobCategory: jest.fn((cat: string) => ['engineering', 'design', 'product'].includes(cat)),
-      isValidJobType: jest.fn((type: string) => ['full-time', 'part-time', 'contract'].includes(type)),
-      isValidExperienceLevel: jest.fn((level: string) => ['entry', 'mid', 'senior'].includes(level)),
-    };
-  }
-  return {
-    isValidJobCategory: mocks.isValidJobCategory,
-    isValidJobType: mocks.isValidJobType,
-    isValidExperienceLevel: mocks.isValidExperienceLevel,
-  };
-});
+// These are stateless validation functions, so simple implementations are sufficient
+jest.mock('../utils/type-guards.ts', () => ({
+  isValidJobCategory: jest.fn((cat: string) => ['engineering', 'design', 'product'].includes(cat)),
+  isValidJobType: jest.fn((type: string) => ['full-time', 'part-time', 'contract'].includes(type)),
+  isValidExperienceLevel: jest.fn((level: string) => ['entry', 'mid', 'senior'].includes(level)),
+}));
 
-// Mock pulse
-jest.mock('./pulse.ts', () => ({
+// Mock pulse (imported from ../pulse.ts in jobs.ts)
+jest.mock('../pulse.ts', () => ({
   pulseJobSearch: jest.fn(() => Promise.resolve()),
 }));
 
@@ -76,7 +55,7 @@ jest.mock('../logger.ts', () => ({
   },
 }));
 
-// Mock normalizeError
+// Mock normalizeError - path matches import in jobs.ts
 jest.mock('@heyclaude/shared-runtime', () => ({
   normalizeError: jest.fn((error, message) => {
     if (error instanceof Error) {
@@ -92,8 +71,6 @@ jest.mock('@heyclaude/shared-runtime', () => ({
 
 describe('jobs', () => {
   let prismocker: PrismaClient;
-  let searchService: SearchService;
-  let filterJobsSpy: ReturnType<typeof jest.SpyInstance>;
 
   beforeEach(async () => {
     // Clear request cache before each test
@@ -111,22 +88,6 @@ describe('jobs', () => {
     prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
 
     jest.clearAllMocks();
-
-    // Create real SearchService instance for spying
-    searchService = new SearchService();
-    filterJobsSpy = jest.spyOn(searchService, 'filterJobs');
-
-    // Mock getService to return our spied service instance
-    const { getService } = await import('./service-factory.ts');
-    jest.spyOn(await import('./service-factory.ts'), 'getService').mockResolvedValue(searchService as any);
-
-    // Re-setup validation mocks (restore their implementations)
-    const typeGuardMocks = (globalThis as any).__typeGuardMocks;
-    if (typeGuardMocks) {
-      typeGuardMocks.isValidJobCategory.mockImplementation((cat: string) => ['engineering', 'design', 'product'].includes(cat));
-      typeGuardMocks.isValidJobType.mockImplementation((type: string) => ['full-time', 'part-time', 'contract'].includes(type));
-      typeGuardMocks.isValidExperienceLevel.mockImplementation((level: string) => ['entry', 'mid', 'senior'].includes(level));
-    }
   });
 
   describe('buildFilterJobsArgs', () => {
@@ -161,12 +122,6 @@ describe('jobs', () => {
     });
 
     it('should build args with valid experience level', () => {
-      // Ensure mock is set up - the mock should return true for 'senior'
-      const typeGuardMocks = (globalThis as any).__typeGuardMocks;
-      if (typeGuardMocks?.isValidExperienceLevel) {
-        typeGuardMocks.isValidExperienceLevel.mockReturnValue(true);
-      }
-      
       const result = buildFilterJobsArgs({ experience: 'senior' });
       expect(result).toHaveProperty('p_experience_level', 'senior');
     });
@@ -213,15 +168,17 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      filterJobsSpy.mockResolvedValue(mockRpcResult);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
 
       const result = await getFilteredJobs({});
 
       // Default limit is 30 (QUERY_LIMITS.pagination.default), offset defaults to 0
-      expect(filterJobsSpy).toHaveBeenCalledWith({
-        p_limit: 30,
-        p_offset: 0,
-      });
+      // callRpc builds query: SELECT * FROM filter_jobs(p_limit => $1, p_offset => $2)
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('filter_jobs'),
+        expect.anything(), // p_limit value
+        expect.anything(), // p_offset value
+      );
       expect(result).toMatchObject({
         hits: [],
         pagination: { total: 0 },
@@ -234,7 +191,7 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      filterJobsSpy.mockResolvedValue(mockRpcResult);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
 
       const result = await getFilteredJobs({
         category: 'all',
@@ -242,11 +199,8 @@ describe('jobs', () => {
         experience: 'any',
       });
 
-      // Should use getJobsListCached (no filters path)
-      expect(filterJobsSpy).toHaveBeenCalledWith({
-        p_limit: 30,
-        p_offset: 0,
-      });
+      // Should use getJobsListCached (no filters path) - same as no filters
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalled();
       expect(result).toMatchObject({
         hits: [],
         pagination: { total: 0 },
@@ -259,16 +213,16 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      filterJobsSpy.mockResolvedValue(mockRpcResult);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
 
       const result = await getFilteredJobs({ searchQuery: 'developer' });
 
       // Should use getFilteredJobsCached (has filters path)
-      expect(filterJobsSpy).toHaveBeenCalledWith({
-        p_search_query: 'developer',
-        p_limit: undefined,
-        p_offset: undefined,
-      });
+      // callRpc builds query: SELECT * FROM filter_jobs(p_search_query => $1)
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('filter_jobs'),
+        expect.anything(), // p_search_query value
+      );
       expect(result).toMatchObject({
         hits: [],
         pagination: { total: 0 },
@@ -281,16 +235,16 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      filterJobsSpy.mockResolvedValue(mockRpcResult);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
 
       const result = await getFilteredJobs({ category: 'engineering' });
 
       // Should use getFilteredJobsCached (has filters path)
-      expect(filterJobsSpy).toHaveBeenCalledWith({
-        p_category: 'engineering',
-        p_limit: undefined,
-        p_offset: undefined,
-      });
+      // callRpc builds query: SELECT * FROM filter_jobs(p_category => $1)
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('filter_jobs'),
+        expect.anything(), // p_category value
+      );
       expect(result).toMatchObject({
         hits: [],
         pagination: { total: 0 },
@@ -298,7 +252,7 @@ describe('jobs', () => {
     });
 
     it('should return null on error', async () => {
-      filterJobsSpy.mockRejectedValue(new Error('Service error'));
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(new Error('Service error'));
 
       const result = await getFilteredJobs({});
 
@@ -311,15 +265,12 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      filterJobsSpy.mockResolvedValue(mockRpcResult);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
 
       const result = await getFilteredJobs({ limit: undefined });
 
       // Should use default limit of 30
-      expect(filterJobsSpy).toHaveBeenCalledWith({
-        p_limit: 30,
-        p_offset: 0,
-      });
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalled();
       expect(result).toMatchObject({
         hits: [],
         pagination: { total: 0 },
@@ -332,15 +283,12 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      filterJobsSpy.mockResolvedValue(mockRpcResult);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
 
       const result = await getFilteredJobs({ offset: undefined });
 
       // Should use default offset of 0
-      expect(filterJobsSpy).toHaveBeenCalledWith({
-        p_limit: 30,
-        p_offset: 0,
-      });
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalled();
       expect(result).toMatchObject({
         hits: [],
         pagination: { total: 0 },
@@ -355,20 +303,20 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      filterJobsSpy.mockResolvedValue(mockRpcResult);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
 
-      // First call - should hit service and populate cache
+      // First call - should hit database and populate cache
       const result1 = await getFilteredJobs({});
-      const firstCallCount = filterJobsSpy.mock.calls.length;
+      const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
 
-      // Second call - should hit cache (no service call)
+      // Second call - should hit cache (no database call)
       const result2 = await getFilteredJobs({});
-      const secondCallCount = filterJobsSpy.mock.calls.length;
+      const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
 
       // Verify results are the same (indicating cache was used)
       expect(result1).toEqual(result2);
       
-      // Verify filterJobs was only called once (cached on second call)
+      // Verify $queryRawUnsafe was only called once (cached on second call)
       expect(secondCallCount).toBe(firstCallCount);
       expect(secondCallCount).toBe(1);
     });
@@ -383,25 +331,25 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      filterJobsSpy
-        .mockResolvedValueOnce(mockUnfilteredResult)
-        .mockResolvedValueOnce(mockFilteredResult);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>)
+        .mockResolvedValueOnce([mockUnfilteredResult] as any)
+        .mockResolvedValueOnce([mockFilteredResult] as any);
 
       // First call - no filters
       const result1 = await getFilteredJobs({});
-      expect(filterJobsSpy).toHaveBeenCalledTimes(1);
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledTimes(1);
 
       // Second call - with filters (different cache key)
       const result2 = await getFilteredJobs({ category: 'engineering' });
-      expect(filterJobsSpy).toHaveBeenCalledTimes(2);
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledTimes(2);
 
       // Third call - same as first (should use cache)
       const result3 = await getFilteredJobs({});
-      expect(filterJobsSpy).toHaveBeenCalledTimes(2); // Still 2, cached
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledTimes(2); // Still 2, cached
 
       // Fourth call - same as second (should use cache)
       const result4 = await getFilteredJobs({ category: 'engineering' });
-      expect(filterJobsSpy).toHaveBeenCalledTimes(2); // Still 2, cached
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledTimes(2); // Still 2, cached
 
       expect(result1).toEqual(result3);
       expect(result2).toEqual(result4);

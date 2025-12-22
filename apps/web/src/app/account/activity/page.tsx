@@ -108,11 +108,11 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
       'ActivityPage: unauthenticated access attempt detected'
     );
     return (
-      <div className="space-y-6">
-        <Card>
+      <div className="space-y-8">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm">
               Please sign in to view your contribution history and activity metrics.
             </CardDescription>
           </CardHeader>
@@ -168,11 +168,11 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
   // Only show global fallback when both fail
   if (!hasSummary && !hasTimeline) {
     return (
-      <div className="space-y-6">
-        <Card>
+      <div className="space-y-8">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="text-2xl">Activity unavailable</CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm">
               We couldn&apos;t load your activity data. Please refresh or try again later.
             </CardDescription>
           </CardHeader>
@@ -206,19 +206,21 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="mb-2 text-3xl font-bold">Activity</h1>
-        <p className="text-muted-foreground">Your contribution history and community activity</p>
+      <div className="mb-6">
+        <h1 className="mb-2 text-3xl font-bold tracking-tight">Activity</h1>
+        <p className="text-muted-foreground text-base">
+          Your contribution history and community activity
+        </p>
       </div>
 
       {/* Stats Overview - only render if summary is available */}
       {summary == null ? null : (
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <Card>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Card className="shadow-sm">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Submissions</CardTitle>
+              <CardTitle className="text-sm font-semibold">Submissions</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
@@ -235,10 +237,10 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
 
       {/* Timeline - only render if timeline is available */}
       {hasTimeline ? (
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Activity Timeline</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl">Activity Timeline</CardTitle>
+            <CardDescription className="text-sm">
               Your recent contributions and interactions
               {summary == null ? '' : ` (${summary.total_activity} total)`}
             </CardDescription>
@@ -260,10 +262,12 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Activity Timeline</CardTitle>
-            <CardDescription>Unable to load activity timeline</CardDescription>
+            <CardTitle className="text-xl">Activity Timeline</CardTitle>
+            <CardDescription className="text-sm">
+              Unable to load activity timeline
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground text-sm">

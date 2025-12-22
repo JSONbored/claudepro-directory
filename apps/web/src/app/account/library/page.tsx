@@ -227,11 +227,11 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="mb-2 text-3xl font-bold">My Library</h1>
-          <p className="text-muted-foreground">
+          <h1 className="mb-2 text-3xl font-bold tracking-tight">My Library</h1>
+          <p className="text-muted-foreground text-base">
             {bookmarkCount} bookmarks • {collectionCount} collections
           </p>
         </div>
@@ -257,15 +257,15 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
 
         <TabsContent className="space-y-3" value="bookmarks">
           {bookmarks.length === 0 ? (
-            <Card>
+            <Card className="shadow-sm">
               <CardContent className="flex flex-col items-center py-12">
                 <BookmarkIcon className="text-muted-foreground mb-4 h-12 w-12" />
                 <h3 className="mb-2 text-xl font-semibold">No bookmarks yet</h3>
-                <p className="text-muted-foreground max-w-md text-center">
+                <p className="text-muted-foreground max-w-md text-center text-sm">
                   Start exploring the directory and bookmark your favorite agents, MCP servers,
                   rules, and more!
                 </p>
-                <NavLink className="mt-4" href="/">
+                <NavLink className="mt-4 text-accent hover:text-accent/80 font-semibold text-sm transition-colors" href="/">
                   Browse Directory →
                 </NavLink>
               </CardContent>
@@ -273,7 +273,7 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
           ) : (
             <div className="grid gap-4">
               {bookmarks.map((bookmark: UserLibraryBookmark) => (
-                <Card key={bookmark.id}>
+                <Card key={bookmark.id} className="shadow-sm hover:shadow-md transition-shadow duration-200">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">

@@ -25,18 +25,15 @@ import { useCommandPalette } from '@/src/components/features/navigation/command-
 /**
  * Determines if sub-menu bar should be shown based on pathname
  *
- * Shows sitewide except on auth and account pages.
- * Homepage is now included to show Pinboard, GitHub Stars, and Explore dropdown.
+ * Shows sitewide except on auth pages.
+ * Homepage and account pages are now included to show Pinboard, GitHub Stars, Explore dropdown, and breadcrumbs.
  */
 function shouldShowSubMenu(pathname: string): boolean {
-  // Hide on auth pages only (homepage now shown)
+  // Hide on auth pages only (homepage and account pages now shown)
   const hidePaths = ['/login', '/signup'];
   if (hidePaths.includes(pathname)) return false;
 
-  // Hide on account pages
-  if (pathname.startsWith('/account')) return false;
-
-  // Show on all other pages including homepage (sitewide)
+  // Show on all other pages including homepage and account pages (sitewide)
   return true;
 }
 

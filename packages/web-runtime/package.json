@@ -553,6 +553,10 @@
       "types": "./src/actions/user.ts",
       "default": "./src/actions/user.ts"
     },
+    "./actions/user-images": {
+      "types": "./src/actions/user-images.ts",
+      "default": "./src/actions/user-images.ts"
+    },
     "./icons": {
       "types": "./src/icons.tsx",
       "default": "./src/icons.tsx"

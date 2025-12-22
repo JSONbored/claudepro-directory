@@ -85,10 +85,10 @@ async function NewCompanyPageContent() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="mb-2 text-3xl font-bold">Create Company</h1>
-        <p className="text-muted-foreground">
+    <div className="space-y-8">
+      <div className="mb-6">
+        <h1 className="mb-2 text-3xl font-bold tracking-tight">Create Company</h1>
+        <p className="text-muted-foreground text-base">
           Add a new company profile to post jobs and showcase your organization
         </p>
       </div>

@@ -26,6 +26,10 @@ import { z } from 'zod';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { ListItemManager } from '@/src/components/core/forms/list-items-editor';
+import { ProfileAvatarUpload } from './profile-avatar-upload';
+import { ProfileHeroUpload } from './profile-hero-upload';
+import { ProfileCompletionProgress } from './profile-completion-progress';
+import { ProfileLivePreview } from './profile-live-preview';
 
 // Profile data consolidated into users table - use generated types
 type ProfileData = Pick<
@@ -69,6 +73,8 @@ type ProfileFormData = z.infer<typeof profileFormSchema>;
 
 interface ProfileEditFormProps {
   profile: ProfileData;
+  avatarUrl?: string | null;
+  heroUrl?: string | null;
 }
 
 /**
@@ -78,13 +84,15 @@ interface ProfileEditFormProps {
  * and resets the form to submitted values on successful update.
  *
  * @param props.profile - Initial profile values used to populate the form (bio, work, website, social_x_link, interests, profile_public, follow_email).
+ * @param props.avatarUrl - Current avatar image URL (optional).
+ * @param props.heroUrl - Current hero image URL (optional).
  * @returns The profile edit form element.
  *
  * @see profileFormSchema
  * @see updateProfile
  * @see toasts
  */
-export function ProfileEditForm({ profile }: ProfileEditFormProps) {
+export function ProfileEditForm({ profile, avatarUrl, heroUrl }: ProfileEditFormProps) {
   const [isPending, startTransition] = useTransition();
   const pathname = usePathname();
   const { user, status } = useAuthenticatedUser({ context: 'ProfileEditForm' });
@@ -225,8 +233,48 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
     [user, status, openAuthModal, pathname, runLoggedAsync, reset]
   );
 
+  // Calculate profile completion for progress bar
+  const profileFields = {
+    name: watch('name'),
+    username: watch('username'),
+    bio: watch('bio'),
+    work: watch('work'),
+    website: watch('website'),
+    social_x_link: watch('social_x_link'),
+    interests: watch('interests') || [],
+    avatarUrl,
+    heroUrl,
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Profile Completion Progress */}
+      <ProfileCompletionProgress profile={profileFields} />
+
+      {/* Profile Images Section */}
+      <div className="space-y-4 rounded-lg border border-border/50 bg-card/50 p-4">
+        <h3 className="text-sm font-semibold">Profile Images</h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <ProfileAvatarUpload currentAvatarUrl={avatarUrl} />
+          <ProfileHeroUpload currentHeroUrl={heroUrl} />
+        </div>
+      </div>
+
+      {/* Live Preview */}
+      <ProfileLivePreview
+        profile={{
+          name: watch('name'),
+          username: watch('username'),
+          bio: watch('bio'),
+          work: watch('work'),
+          website: watch('website'),
+          social_x_link: watch('social_x_link'),
+          interests: watch('interests') || [],
+          avatarUrl,
+          heroUrl,
+        }}
+      />
+
       <FormField
         variant="input"
         label="Name"
