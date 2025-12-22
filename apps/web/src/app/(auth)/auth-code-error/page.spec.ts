@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { setupTestWithErrorTracking } from '../../../../config/tests/utils/error-tracking';
+import { setupTestWithErrorTracking } from '@test-utils/error-tracking';
 
 /**
  * Comprehensive Auth Code Error Page E2E Tests

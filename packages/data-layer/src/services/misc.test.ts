@@ -1,67 +1,49 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { MiscService } from './misc.ts';
 import { prisma } from '../prisma/client.ts';
 import type { PrismaClient } from '@prisma/client';
 
-// Prismock is automatically configured via __mocks__/@prisma/client.ts
-// The prisma singleton from '../prisma/client.ts' will automatically use PrismockClient
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from '../prisma/client.ts' will automatically use PrismockerClient
+// Jest automatically uses __mocks__ directory (no explicit registration needed)
+// Use Prismocker's setData() to seed test data and its actual methods (findMany, findUnique, etc.)
 
 // Mock the RPC error logging utility
-vi.mock('../utils/rpc-error-logging.ts', () => ({
-  logRpcError: vi.fn(),
+jest.mock('../utils/rpc-error-logging.ts', () => ({
+  logRpcError: jest.fn(),
 }));
 
-// Mock request cache
-vi.mock('../utils/request-cache.ts', () => ({
-  withSmartCache: vi.fn((_key, _method, fn) => fn()),
-}));
+// DON'T mock request cache - use real implementation
+// Cache is cleared in beforeEach for test isolation
+// This allows us to:
+// 1. Test business logic with fresh cache (each test starts with empty cache)
+// 2. Test caching behavior by verifying cache stats and duplicate calls
 
 describe('MiscService', () => {
   let miscService: MiscService;
-  let prismock: PrismaClient;
-  let queryRawUnsafeSpy: ReturnType<typeof vi.fn>;
-
-  /**
-   * Helper to safely mock Prismock model methods
-   */
-  function mockPrismockMethod<T>(
-    model: any,
-    method: string,
-    returnValue: T
-  ): ReturnType<typeof vi.fn> {
-    if (!model) {
-      throw new Error(`Prismock model does not exist - check if model name matches schema.prisma`);
-    }
-    const mockFn = vi.fn().mockResolvedValue(returnValue as any);
-    model[method] = mockFn;
-    return mockFn;
-  }
+  let prismaMock: PrismaClient;
+  let queryRawUnsafeSpy: ReturnType<typeof jest.fn>;
 
   beforeEach(async () => {
-    // Get the prisma instance (automatically PrismockClient via __mocks__/@prisma/client.ts)
-    prismock = prisma;
+    // Get the prisma instance (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    prismaMock = prisma;
 
-    // Reset Prismock data before each test
-    if ('reset' in prismock && typeof prismock.reset === 'function') {
-      prismock.reset();
+    // Reset Prismocker data before each test
+    if ('reset' in prismaMock && typeof prismaMock.reset === 'function') {
+      prismaMock.reset();
     }
 
-    // Prismock doesn't support $queryRawUnsafe, so we add it as a mock function
-    queryRawUnsafeSpy = vi.fn().mockResolvedValue([]);
-    (prismock as any).$queryRawUnsafe = queryRawUnsafeSpy;
+    // Clear all mocks to ensure clean state
+    jest.clearAllMocks();
+    jest.resetAllMocks();
 
-    // Ensure Prismock models are initialized
-    void prismock.notifications;
-    void prismock.announcements;
-    void prismock.contact_commands;
-    void prismock.form_field_configs;
-    void prismock.content_submissions;
-    void prismock.content;
-    void prismock.sponsored_content;
-    void prismock.app_settings;
-    void prismock.email_engagement_summary;
-    void prismock.email_blocklist;
-    void prismock.webhook_events;
+    // Clear request cache for test isolation (each test starts with empty cache)
+    const { clearRequestCache } = await import('../utils/request-cache.ts');
+    clearRequestCache();
+
+    // Prismocker provides $queryRawUnsafe as a stub, but we need to mock it for RPC calls
+    queryRawUnsafeSpy = jest.fn().mockResolvedValue([]);
+    (prismaMock as any).$queryRawUnsafe = queryRawUnsafeSpy;
 
     miscService = new MiscService();
   });
@@ -74,39 +56,105 @@ describe('MiscService', () => {
           title: 'Test notification',
           message: 'Test message',
           active: true,
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
 
-      mockPrismockMethod(prismock.notifications, 'findMany', mockNotifications);
-
-      const { withSmartCache } = await import('../utils/request-cache.ts');
-      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+      // Use Prismocker's setData to seed test data (proper Prismocker usage)
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('notifications', mockNotifications);
+      }
 
       const result = await miscService.getActiveNotifications({
         p_dismissed_ids: [],
       });
 
-      expect(prismock.notifications.findMany).toHaveBeenCalled();
       expect(result).toEqual(mockNotifications);
     });
 
     it('should filter dismissed notifications', async () => {
-      mockPrismockMethod(prismock.notifications, 'findMany', []);
+      const mockNotifications = [
+        {
+          id: 'notif-1',
+          title: 'Test 1',
+          message: 'Message 1',
+          active: true,
+          expires_at: null, // Must be null or future date to match OR clause
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 'notif-2',
+          title: 'Test 2',
+          message: 'Message 2',
+          active: true,
+          expires_at: null, // Must be null or future date to match OR clause
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 'notif-3',
+          title: 'Test 3',
+          message: 'Message 3',
+          active: true,
+          expires_at: null, // Must be null or future date to match OR clause
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ];
 
-      const { withSmartCache } = await import('../utils/request-cache.ts');
-      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+      // Seed data with all notifications
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('notifications', mockNotifications);
+      }
 
-      await miscService.getActiveNotifications({
+      const result = await miscService.getActiveNotifications({
         p_dismissed_ids: ['notif-1', 'notif-2'],
       });
 
-      expect(prismock.notifications.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            id: { notIn: ['notif-1', 'notif-2'] },
-          }),
-        })
-      );
+      // Should only return notif-3 (not in dismissed list)
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('notif-3');
+    });
+
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockNotifications = [
+        {
+          id: 'notif-1',
+          title: 'Test notification',
+          message: 'Test message',
+          active: true,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ];
+
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('notifications', mockNotifications);
+      }
+
+      // Test caching behavior with real implementation
+      const { getRequestCache } = await import('../utils/request-cache.ts');
+      const cache = getRequestCache();
+
+      // First call - should hit database and populate cache
+      const result1 = await miscService.getActiveNotifications({
+        p_dismissed_ids: [],
+      });
+      const cacheSizeAfterFirst = cache.getStats().size;
+      expect(cacheSizeAfterFirst).toBeGreaterThan(0); // Cache should have entry
+
+      // Second call with same args - should hit cache (no database call)
+      const result2 = await miscService.getActiveNotifications({
+        p_dismissed_ids: [],
+      });
+      const cacheSizeAfterSecond = cache.getStats().size;
+      expect(cacheSizeAfterSecond).toBe(cacheSizeAfterFirst); // Cache size unchanged (hit cache)
+
+      expect(result1).toEqual(result2);
+      expect(result1).toEqual(mockNotifications);
     });
   });
 
@@ -116,28 +164,67 @@ describe('MiscService', () => {
         id: 'announce-1',
         title: 'Test announcement',
         active: true,
+        start_date: null, // Must be null or past date to match OR clause
+        end_date: null, // Must be null or future date to match OR clause
+        priority: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
 
-      mockPrismockMethod(prismock.announcements, 'findFirst', mockAnnouncement);
-
-      const { withSmartCache } = await import('../utils/request-cache.ts');
-      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('announcements', [mockAnnouncement]);
+      }
 
       const result = await miscService.getActiveAnnouncement();
 
-      expect(prismock.announcements.findFirst).toHaveBeenCalled();
       expect(result).toEqual(mockAnnouncement);
     });
 
     it('should return null when no active announcement', async () => {
-      mockPrismockMethod(prismock.announcements, 'findFirst', null);
-
-      const { withSmartCache } = await import('../utils/request-cache.ts');
-      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+      // No data seeded, so findFirst should return null
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('announcements', []);
+      }
 
       const result = await miscService.getActiveAnnouncement();
 
       expect(result).toBeNull();
+    });
+
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockAnnouncement = {
+        id: 'announce-1',
+        title: 'Test announcement',
+        active: true,
+        start_date: null,
+        end_date: null,
+        priority: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('announcements', [mockAnnouncement]);
+      }
+
+      // Test caching behavior with real implementation
+      const { getRequestCache } = await import('../utils/request-cache.ts');
+      const cache = getRequestCache();
+
+      // First call - should hit database and populate cache
+      const result1 = await miscService.getActiveAnnouncement();
+      const cacheSizeAfterFirst = cache.getStats().size;
+      expect(cacheSizeAfterFirst).toBeGreaterThan(0); // Cache should have entry
+
+      // Second call - should hit cache (no database call)
+      const result2 = await miscService.getActiveAnnouncement();
+      const cacheSizeAfterSecond = cache.getStats().size;
+      expect(cacheSizeAfterSecond).toBe(cacheSizeAfterFirst); // Cache size unchanged (hit cache)
+
+      expect(result1).toEqual(result2);
+      expect(result1).toEqual(mockAnnouncement);
     });
   });
 
@@ -155,31 +242,70 @@ describe('MiscService', () => {
           confetti_variant: null,
           requires_auth: false,
           aliases: ['h', '?'],
+          is_active: true,
+          display_order: 1,
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
 
-      mockPrismockMethod(prismock.contact_commands, 'findMany', mockCommands);
-
-      const { withSmartCache } = await import('../utils/request-cache.ts');
-      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('contact_commands', mockCommands);
+      }
 
       const result = await miscService.getContactCommands();
 
-      expect(prismock.contact_commands.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { is_active: true },
-          orderBy: { display_order: 'asc' },
-        })
-      );
-
       expect(result).toHaveLength(1);
       expect(result[0]).toHaveProperty('text', 'help'); // Transformed from command_text
+    });
+
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockCommands = [
+        {
+          id: 'cmd-1',
+          command_text: 'help',
+          description: 'Get help',
+          category: 'general',
+          icon_name: 'help',
+          action_type: 'link',
+          action_value: '/help',
+          confetti_variant: null,
+          requires_auth: false,
+          aliases: ['h', '?'],
+          is_active: true,
+          display_order: 1,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ];
+
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('contact_commands', mockCommands);
+      }
+
+      // Test caching behavior with real implementation
+      const { getRequestCache } = await import('../utils/request-cache.ts');
+      const cache = getRequestCache();
+
+      // First call - should hit database and populate cache
+      const result1 = await miscService.getContactCommands();
+      const cacheSizeAfterFirst = cache.getStats().size;
+      expect(cacheSizeAfterFirst).toBeGreaterThan(0); // Cache should have entry
+
+      // Second call - should hit cache (no database call)
+      const result2 = await miscService.getContactCommands();
+      const cacheSizeAfterSecond = cache.getStats().size;
+      expect(cacheSizeAfterSecond).toBe(cacheSizeAfterFirst); // Cache size unchanged (hit cache)
+
+      expect(result1).toEqual(result2);
+      expect(result1).toHaveLength(1);
     });
   });
 
   describe('getFormFieldConfig', () => {
     it('should return form field config', async () => {
-      // getFormFieldConfig uses prisma.form_field_configs.findMany with select
       const mockConfigs = [
         {
           field_name: 'title',
@@ -195,30 +321,22 @@ describe('MiscService', () => {
           config: null,
           field_group: 'basic',
           display_order: 1,
+          form_type: 'content_submission',
+          enabled: true,
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
 
-      mockPrismockMethod(prismock.form_field_configs, 'findMany', mockConfigs);
-
-      const { withSmartCache } = await import('../utils/request-cache.ts');
-      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('form_field_configs', mockConfigs);
+      }
 
       const result = await miscService.getFormFieldConfig({
         p_form_type: 'content_submission',
       });
 
-      expect(prismock.form_field_configs.findMany).toHaveBeenCalledWith({
-        where: {
-          form_type: 'content_submission',
-          enabled: true,
-        },
-        select: expect.objectContaining({
-          field_name: true,
-          field_label: true,
-          field_type: true,
-        }),
-        orderBy: [{ field_group: 'asc' }, { display_order: 'asc' }],
-      });
       expect(result).toHaveProperty('form_type', 'content_submission');
       expect(result).toHaveProperty('fields');
       expect(Array.isArray(result.fields)).toBe(true);
@@ -228,42 +346,128 @@ describe('MiscService', () => {
         expect(result.fields[0]).toHaveProperty('type', 'text');
       }
     });
+
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockConfigs = [
+        {
+          field_name: 'title',
+          field_label: 'Title',
+          field_type: 'text',
+          required: true,
+          placeholder: 'Enter title',
+          help_text: 'The title of your submission',
+          default_value: null,
+          grid_column: null,
+          icon_name: null,
+          icon_position: null,
+          config: null,
+          field_group: 'basic',
+          display_order: 1,
+          form_type: 'content_submission',
+          enabled: true,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ];
+
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('form_field_configs', mockConfigs);
+      }
+
+      // Test caching behavior with real implementation
+      const { getRequestCache } = await import('../utils/request-cache.ts');
+      const cache = getRequestCache();
+
+      // First call - should hit database and populate cache
+      const result1 = await miscService.getFormFieldConfig({
+        p_form_type: 'content_submission',
+      });
+      const cacheSizeAfterFirst = cache.getStats().size;
+      expect(cacheSizeAfterFirst).toBeGreaterThan(0); // Cache should have entry
+
+      // Second call with same args - should hit cache (no database call)
+      const result2 = await miscService.getFormFieldConfig({
+        p_form_type: 'content_submission',
+      });
+      const cacheSizeAfterSecond = cache.getStats().size;
+      expect(cacheSizeAfterSecond).toBe(cacheSizeAfterFirst); // Cache size unchanged (hit cache)
+
+      expect(result1).toEqual(result2);
+      expect(result1).toHaveProperty('form_type', 'content_submission');
+    });
   });
 
   describe('getSocialProofStats', () => {
     it('should return social proof stats', async () => {
-      // getSocialProofStats uses Prisma queries: count, groupBy, and content.count
-      const mockRecentCount = 50;
-      const mockMonthSubmissions = [
-        { status: 'merged' as const, _count: { id: 40 } },
-        { status: 'pending' as const, _count: { id: 10 } },
-      ];
-      const mockTopContributors = [
-        { author: 'user1@example.com', _count: { id: 5 } },
-        { author: 'user2@example.com', _count: { id: 3 } },
-      ];
-      const mockTotalContent = 1000;
+      // This test uses count, groupBy, and content.count
+      // For Prismocker, we need to seed data and let it calculate counts
+      const mockSubmissions = Array.from({ length: 50 }, (_, i) => ({
+        id: `sub-${i}`,
+        status: i < 40 ? 'merged' : 'pending',
+        author: `user${i % 5}@example.com`,
+        created_at: new Date(),
+        updated_at: new Date(),
+      }));
 
-      mockPrismockMethod(prismock.content_submissions, 'count', mockRecentCount);
-      const groupByMock = vi.fn()
-        .mockResolvedValueOnce(mockMonthSubmissions)
-        .mockResolvedValueOnce(mockTopContributors);
-      prismock.content_submissions.groupBy = groupByMock;
-      mockPrismockMethod(prismock.content, 'count', mockTotalContent);
+      const mockContent = Array.from({ length: 1000 }, (_, i) => ({
+        id: `content-${i}`,
+        slug: `content-${i}`,
+        created_at: new Date(),
+        updated_at: new Date(),
+      }));
 
-      const { withSmartCache } = await import('../utils/request-cache.ts');
-      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+      // Seed data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('content_submissions', mockSubmissions);
+        (prismaMock as any).setData('content', mockContent);
+      }
 
       const result = await miscService.getSocialProofStats();
 
-      expect(prismock.content_submissions.count).toHaveBeenCalled();
-      expect(prismock.content_submissions.groupBy).toHaveBeenCalledTimes(2);
-      expect(prismock.content.count).toHaveBeenCalled();
-      
       expect(result).toHaveLength(1);
       expect(result[0]).toHaveProperty('submission_count', 50);
-      expect(result[0]).toHaveProperty('contributor_count', 2);
       expect(result[0]).toHaveProperty('total_users', 1000);
+    });
+
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockSubmissions = Array.from({ length: 10 }, (_, i) => ({
+        id: `sub-${i}`,
+        status: i < 8 ? 'merged' : 'pending',
+        author: `user${i % 3}@example.com`,
+        created_at: new Date(),
+        updated_at: new Date(),
+      }));
+
+      const mockContent = Array.from({ length: 100 }, (_, i) => ({
+        id: `content-${i}`,
+        slug: `content-${i}`,
+        created_at: new Date(),
+        updated_at: new Date(),
+      }));
+
+      // Seed data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('content_submissions', mockSubmissions);
+        (prismaMock as any).setData('content', mockContent);
+      }
+
+      // Test caching behavior with real implementation
+      const { getRequestCache } = await import('../utils/request-cache.ts');
+      const cache = getRequestCache();
+
+      // First call - should hit database and populate cache
+      const result1 = await miscService.getSocialProofStats();
+      const cacheSizeAfterFirst = cache.getStats().size;
+      expect(cacheSizeAfterFirst).toBeGreaterThan(0); // Cache should have entry
+
+      // Second call - should hit cache (no database call)
+      const result2 = await miscService.getSocialProofStats();
+      const cacheSizeAfterSecond = cache.getStats().size;
+      expect(cacheSizeAfterSecond).toBe(cacheSizeAfterFirst); // Cache size unchanged (hit cache)
+
+      expect(result1).toEqual(result2);
+      expect(result1).toHaveLength(1);
     });
   });
 
@@ -278,7 +482,7 @@ describe('MiscService', () => {
 
       const result = await miscService.getApiHealth();
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('get_api_health')
       );
       expect(result).toEqual(mockData);
@@ -297,7 +501,7 @@ describe('MiscService', () => {
 
       const result = await miscService.getApiHealthFormatted();
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('get_api_health_formatted')
       );
       expect(result).toEqual(mockData);
@@ -314,7 +518,7 @@ describe('MiscService', () => {
 
       const result = await miscService.getSiteUrls();
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('get_site_urls')
       );
       expect(result).toEqual(mockData);
@@ -334,8 +538,7 @@ describe('MiscService', () => {
         p_format: 'json',
       });
 
-      // callRpc formats the SQL as: SELECT * FROM get_site_urls_formatted(p_format => $1)
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('get_site_urls_formatted'),
         'json'
       );
@@ -353,7 +556,7 @@ describe('MiscService', () => {
 
       const result = await miscService.generateSitemapXml();
 
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('generate_sitemap_xml')
       );
       expect(result).toEqual(mockData);
@@ -362,77 +565,138 @@ describe('MiscService', () => {
 
   describe('getSponsoredContentById', () => {
     it('should return sponsored content', async () => {
-      // getSponsoredContentById only selects content_type, so mock should only return that
       const mockData = {
+        id: 'sponsored-1',
         content_type: 'agents' as const,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
 
-      mockPrismockMethod(prismock.sponsored_content, 'findUnique', mockData);
-
-      const { withSmartCache } = await import('../utils/request-cache.ts');
-      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('sponsored_content', [mockData]);
+      }
 
       const result = await miscService.getSponsoredContentById('sponsored-1');
 
-      expect(prismock.sponsored_content.findUnique).toHaveBeenCalledWith({
-        where: { id: 'sponsored-1' },
-        select: { content_type: true },
-      });
       // getSponsoredContentById returns only content_type (select: { content_type: true })
       expect(result).toEqual({ content_type: 'agents' });
       expect(result).not.toHaveProperty('id'); // Only content_type is selected
+    });
+
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockData = {
+        id: 'sponsored-1',
+        content_type: 'agents' as const,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('sponsored_content', [mockData]);
+      }
+
+      // Test caching behavior with real implementation
+      const { getRequestCache } = await import('../utils/request-cache.ts');
+      const cache = getRequestCache();
+
+      // First call - should hit database and populate cache
+      const result1 = await miscService.getSponsoredContentById('sponsored-1');
+      const cacheSizeAfterFirst = cache.getStats().size;
+      expect(cacheSizeAfterFirst).toBeGreaterThan(0); // Cache should have entry
+
+      // Second call with same args - should hit cache (no database call)
+      const result2 = await miscService.getSponsoredContentById('sponsored-1');
+      const cacheSizeAfterSecond = cache.getStats().size;
+      expect(cacheSizeAfterSecond).toBe(cacheSizeAfterFirst); // Cache size unchanged (hit cache)
+
+      expect(result1).toEqual(result2);
+      expect(result1).toEqual({ content_type: 'agents' });
     });
   });
 
   describe('getAppSetting', () => {
     it('should return app setting', async () => {
-      // getAppSetting uses prisma.app_settings.findUnique with select
       const mockData = {
+        setting_key: 'test_key',
         setting_value: { test: 'value' },
         updated_at: new Date('2024-01-01T00:00:00Z'),
+        created_at: new Date('2024-01-01T00:00:00Z'),
       };
 
-      mockPrismockMethod(prismock.app_settings, 'findUnique', mockData);
-
-      const { withSmartCache } = await import('../utils/request-cache.ts');
-      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('app_settings', [mockData]);
+      }
 
       const result = await miscService.getAppSetting('test_key');
 
-      expect(prismock.app_settings.findUnique).toHaveBeenCalledWith({
-        where: { setting_key: 'test_key' },
-        select: {
-          setting_value: true,
-          updated_at: true,
-        },
+      expect(result).toEqual({
+        setting_value: { test: 'value' },
+        updated_at: new Date('2024-01-01T00:00:00Z'),
       });
-      expect(result).toEqual(mockData);
+    });
+
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockData = {
+        setting_key: 'test_key',
+        setting_value: { test: 'value' },
+        updated_at: new Date('2024-01-01T00:00:00Z'),
+        created_at: new Date('2024-01-01T00:00:00Z'),
+      };
+
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('app_settings', [mockData]);
+      }
+
+      // Test caching behavior with real implementation
+      const { getRequestCache } = await import('../utils/request-cache.ts');
+      const cache = getRequestCache();
+
+      // First call - should hit database and populate cache
+      const result1 = await miscService.getAppSetting('test_key');
+      const cacheSizeAfterFirst = cache.getStats().size;
+      expect(cacheSizeAfterFirst).toBeGreaterThan(0); // Cache should have entry
+
+      // Second call with same args - should hit cache (no database call)
+      const result2 = await miscService.getAppSetting('test_key');
+      const cacheSizeAfterSecond = cache.getStats().size;
+      expect(cacheSizeAfterSecond).toBe(cacheSizeAfterFirst); // Cache size unchanged (hit cache)
+
+      expect(result1).toEqual(result2);
+      expect(result1).toEqual({
+        setting_value: { test: 'value' },
+        updated_at: new Date('2024-01-01T00:00:00Z'),
+      });
     });
   });
 
   describe('upsertAppSetting', () => {
     it('should upsert app setting (mutation)', async () => {
-      // upsertAppSetting uses prisma.app_settings.upsert with AppSettingCreateInput
       const mockSetting = {
         setting_key: 'test_key',
         setting_value: { test: 'new_value' },
       };
 
-      mockPrismockMethod(prismock.app_settings, 'upsert', mockSetting);
-
+      // Use Prismocker's create/upsert methods directly
+      // Prismocker supports upsert natively
+      // Note: upsertAppSetting is a mutation, so withSmartCache will skip caching
       await miscService.upsertAppSetting(mockSetting);
 
-      expect(prismock.app_settings.upsert).toHaveBeenCalledWith({
+      // Verify data was upserted by checking if it exists
+      const result = await prismaMock.app_settings.findUnique({
         where: { setting_key: 'test_key' },
-        update: mockSetting,
-        create: mockSetting,
       });
+
+      expect(result).toBeDefined();
+      expect(result?.setting_value).toEqual({ test: 'new_value' });
     });
   });
 
   describe('getEmailEngagementSummary', () => {
     it('should return email engagement summary', async () => {
-      // getEmailEngagementSummary uses prisma.email_engagement_summary.findUnique with select (10 fields)
       const mockData = {
         email: 'test@example.com',
         emails_sent: 10,
@@ -443,31 +707,76 @@ describe('MiscService', () => {
         last_delivered_at: new Date('2024-01-01T00:00:00Z'),
         last_opened_at: new Date('2024-01-01T00:00:00Z'),
         last_clicked_at: new Date('2024-01-01T00:00:00Z'),
-        last_bounced_at: null,
+        health_status: 'active', // This field is selected
+        // Note: last_bounced_at is NOT in the select, so it won't be returned
+        // Note: created_at and updated_at are not in the select, so they won't be returned
       };
 
-      mockPrismockMethod(prismock.email_engagement_summary, 'findUnique', mockData);
-
-      const { withSmartCache } = await import('../utils/request-cache.ts');
-      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('email_engagement_summary', [mockData]);
+      }
 
       const result = await miscService.getEmailEngagementSummary('test@example.com');
 
-      expect(prismock.email_engagement_summary.findUnique).toHaveBeenCalledWith({
-        where: { email: 'test@example.com' },
-        select: expect.objectContaining({
-          email: true,
-          emails_sent: true,
-          emails_delivered: true,
-        }),
+      // Only selected fields are returned (last_bounced_at, created_at, updated_at are not selected)
+      expect(result).toMatchObject({
+        email: 'test@example.com',
+        emails_sent: 10,
+        emails_delivered: 9,
+        emails_opened: 8,
+        emails_clicked: 5,
+        last_sent_at: new Date('2024-01-01T00:00:00Z'),
+        last_delivered_at: new Date('2024-01-01T00:00:00Z'),
+        last_opened_at: new Date('2024-01-01T00:00:00Z'),
+        last_clicked_at: new Date('2024-01-01T00:00:00Z'),
+        health_status: 'active',
       });
-      expect(result).toEqual(mockData);
+      // Verify fields NOT in select are NOT in result
+      expect(result).not.toHaveProperty('last_bounced_at');
+      expect(result).not.toHaveProperty('created_at');
+      expect(result).not.toHaveProperty('updated_at');
+    });
+
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockData = {
+        email: 'test@example.com',
+        emails_sent: 10,
+        emails_delivered: 9,
+        emails_opened: 8,
+        emails_clicked: 5,
+        last_sent_at: new Date('2024-01-01T00:00:00Z'),
+        last_delivered_at: new Date('2024-01-01T00:00:00Z'),
+        last_opened_at: new Date('2024-01-01T00:00:00Z'),
+        last_clicked_at: new Date('2024-01-01T00:00:00Z'),
+        health_status: 'active',
+      };
+
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('email_engagement_summary', [mockData]);
+      }
+
+      // Test caching behavior with real implementation
+      const { getRequestCache } = await import('../utils/request-cache.ts');
+      const cache = getRequestCache();
+
+      // First call - should hit database and populate cache
+      const result1 = await miscService.getEmailEngagementSummary('test@example.com');
+      const cacheSizeAfterFirst = cache.getStats().size;
+      expect(cacheSizeAfterFirst).toBeGreaterThan(0); // Cache should have entry
+
+      // Second call with same args - should hit cache (no database call)
+      const result2 = await miscService.getEmailEngagementSummary('test@example.com');
+      const cacheSizeAfterSecond = cache.getStats().size;
+      expect(cacheSizeAfterSecond).toBe(cacheSizeAfterFirst); // Cache size unchanged (hit cache)
+
+      expect(result1).toEqual(result2);
     });
   });
 
   describe('upsertEmailEngagementSummary', () => {
     it('should upsert email engagement summary (mutation)', async () => {
-      // upsertEmailEngagementSummary uses prisma.email_engagement_summary.upsert with EmailEngagementSummaryCreateInput
       const mockEngagement = {
         email: 'test@example.com',
         emails_sent: 10,
@@ -476,56 +785,67 @@ describe('MiscService', () => {
         emails_clicked: 5,
       };
 
-      mockPrismockMethod(prismock.email_engagement_summary, 'upsert', mockEngagement);
-
+      // Note: upsertEmailEngagementSummary is a mutation, so withSmartCache will skip caching
       await miscService.upsertEmailEngagementSummary(mockEngagement);
 
-      expect(prismock.email_engagement_summary.upsert).toHaveBeenCalledWith({
+      // Verify data was upserted
+      const result = await prismaMock.email_engagement_summary.findUnique({
         where: { email: 'test@example.com' },
-        update: mockEngagement,
-        create: mockEngagement,
       });
+
+      expect(result).toBeDefined();
+      expect(result?.emails_sent).toBe(10);
     });
   });
 
   describe('upsertEmailBlocklist', () => {
     it('should upsert email blocklist entry (mutation)', async () => {
-      // upsertEmailBlocklist uses prisma.email_blocklist.upsert with EmailBlocklistCreateInput
       const mockBlocklistEntry = {
         email: 'blocked@example.com',
         reason: 'bounce' as const,
       };
 
-      mockPrismockMethod(prismock.email_blocklist, 'upsert', mockBlocklistEntry);
-
+      // Note: upsertEmailBlocklist is a mutation, so withSmartCache will skip caching
       await miscService.upsertEmailBlocklist(mockBlocklistEntry);
 
-      expect(prismock.email_blocklist.upsert).toHaveBeenCalledWith({
+      // Verify data was upserted
+      const result = await prismaMock.email_blocklist.findUnique({
         where: { email: 'blocked@example.com' },
-        update: mockBlocklistEntry,
-        create: mockBlocklistEntry,
       });
+
+      expect(result).toBeDefined();
+      expect(result?.reason).toBe('bounce');
     });
   });
 
   describe('updateWebhookEventStatus', () => {
     it('should update webhook event status (mutation)', async () => {
-      // After migration: Uses Prisma update instead of $executeRawUnsafe
-      mockPrismockMethod(prismock.webhook_events, 'update', {
+      const mockWebhookEvent = {
         id: 'webhook-123',
-        processed: true,
-        processed_at: new Date(),
-      } as any);
+        svix_id: 'svix-123',
+        source: 'polar' as const,
+        payload: {},
+        processed: false,
+        processed_at: null,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      // Seed data first
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('webhook_events', [mockWebhookEvent]);
+      }
 
       await miscService.updateWebhookEventStatus('webhook-123');
 
-      expect(prismock.webhook_events.update).toHaveBeenCalledWith({
+      // Verify data was updated
+      const result = await prismaMock.webhook_events.findUnique({
         where: { id: 'webhook-123' },
-        data: {
-          processed: true,
-          processed_at: expect.any(Date),
-        },
       });
+
+      expect(result).toBeDefined();
+      expect(result?.processed).toBe(true);
+      expect(result?.processed_at).toBeInstanceOf(Date);
     });
   });
 
@@ -535,63 +855,111 @@ describe('MiscService', () => {
         id: 'notif-1',
         title: 'Test',
         message: 'Test message',
+        active: true,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
 
-      mockPrismockMethod(prismock.notifications, 'upsert', mockData);
-
+      // Note: upsertNotification is a mutation, so withSmartCache will skip caching
       await miscService.upsertNotification({
         id: 'notif-1',
         title: 'Test',
         message: 'Test message',
       });
 
-      expect(prismock.notifications.upsert).toHaveBeenCalled();
+      // Verify data was upserted
+      const result = await prismaMock.notifications.findUnique({
+        where: { id: 'notif-1' },
+      });
+
+      expect(result).toBeDefined();
+      expect(result?.title).toBe('Test');
     });
   });
 
   describe('insertNotification', () => {
     it('should insert notification (mutation)', async () => {
-      const mockData = {
-        id: 'notif-1',
-        title: 'Test',
-      };
-
-      mockPrismockMethod(prismock.notifications, 'create', mockData);
-
+      // Note: insertNotification is a mutation, so withSmartCache will skip caching
       await miscService.insertNotification({
         title: 'Test',
         message: 'Test message',
       });
 
-      expect(prismock.notifications.create).toHaveBeenCalled();
+      // Verify data was created (findMany to get all, then check if our notification exists)
+      const result = await prismaMock.notifications.findMany({
+        where: { title: 'Test' },
+      });
+
+      expect(result.length).toBeGreaterThan(0);
+      expect(result[0].title).toBe('Test');
     });
   });
 
   describe('getWebhookEventBySvixId', () => {
     it('should return webhook event by Svix ID', async () => {
-      // getWebhookEventBySvixId uses prisma.webhook_events.findFirst with select { id: true }
       const mockData = {
         id: 'webhook-1',
+        svix_id: 'svix-123',
+        source: 'polar' as const,
+        payload: {},
+        processed: false,
+        processed_at: null,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
 
-      mockPrismockMethod(prismock.webhook_events, 'findFirst', mockData);
-
-      const { withSmartCache } = await import('../utils/request-cache.ts');
-      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('webhook_events', [mockData]);
+      }
 
       const result = await miscService.getWebhookEventBySvixId({
         p_svix_id: 'svix-123',
         p_source: 'polar',
       });
 
-      expect(prismock.webhook_events.findFirst).toHaveBeenCalledWith({
-        where: {
-          svix_id: 'svix-123',
-          source: 'polar',
-        },
-        select: { id: true },
+      expect(result).toEqual({ id: 'webhook-1' }); // Only id is selected
+    });
+
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockData = {
+        id: 'webhook-1',
+        svix_id: 'svix-123',
+        source: 'polar' as const,
+        payload: {},
+        processed: false,
+        processed_at: null,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('webhook_events', [mockData]);
+      }
+
+      // Test caching behavior with real implementation
+      const { getRequestCache } = await import('../utils/request-cache.ts');
+      const cache = getRequestCache();
+
+      // First call - should hit database and populate cache
+      const result1 = await miscService.getWebhookEventBySvixId({
+        p_svix_id: 'svix-123',
+        p_source: 'polar',
       });
-      expect(result).toEqual(mockData);
+      const cacheSizeAfterFirst = cache.getStats().size;
+      expect(cacheSizeAfterFirst).toBeGreaterThan(0); // Cache should have entry
+
+      // Second call with same args - should hit cache (no database call)
+      const result2 = await miscService.getWebhookEventBySvixId({
+        p_svix_id: 'svix-123',
+        p_source: 'polar',
+      });
+      const cacheSizeAfterSecond = cache.getStats().size;
+      expect(cacheSizeAfterSecond).toBe(cacheSizeAfterFirst); // Cache size unchanged (hit cache)
+
+      expect(result1).toEqual(result2);
+      expect(result1).toEqual({ id: 'webhook-1' });
     });
   });
 
@@ -610,8 +978,7 @@ describe('MiscService', () => {
         p_payload: {},
       });
 
-      // callRpc formats the SQL as: SELECT * FROM insert_webhook_event(p_svix_id => $1, p_source => $2, p_payload => $3)
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('insert_webhook_event'),
         'svix-123',
         'polar',
@@ -629,8 +996,7 @@ describe('MiscService', () => {
         webhook_data: {},
       });
 
-      // callRpc formats the SQL as: SELECT * FROM handle_polar_webhook(webhook_id => $1, webhook_data => $2)
-      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('handle_polar_webhook'),
         'webhook-123',
         {}

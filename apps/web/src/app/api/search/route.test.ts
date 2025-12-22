@@ -41,31 +41,29 @@ vi.mock('next/server', async () => {
   };
 });
 
+// Import prisma directly - don't use vi.importActual
+// Prisma is automatically PrismockerClient via __mocks__/@prisma/client.ts
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+
 // Mock data-layer services using hoisted mocks
 const mockExecuteSearch = vi.hoisted(() => vi.fn());
 const mockHighlightResults = vi.hoisted(() => vi.fn());
 
-vi.mock('@heyclaude/data-layer', async () => {
-  // Import actual modules to get prisma export (PrismockClient in tests)
-  // Required because pgmqSend imports prisma from @heyclaude/data-layer
-  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
-  return {
-    ...actual,
-    SearchService: class {
-      executeSearch = mockExecuteSearch;
-      static highlightResults = mockHighlightResults;
-    },
-    AccountService: class {},
-    ChangelogService: class {},
-    CompaniesService: class {},
-    ContentService: class {},
-    JobsService: class {},
-    MiscService: class {},
-    NewsletterService: class {},
-    TrendingService: class {},
-    // prisma is already exported from actual (will be PrismockClient in tests)
-  };
-});
+vi.mock('@heyclaude/data-layer', () => ({
+  SearchService: class {
+    executeSearch = mockExecuteSearch;
+    static highlightResults = mockHighlightResults;
+  },
+  AccountService: class {},
+  ChangelogService: class {},
+  CompaniesService: class {},
+  ContentService: class {},
+  JobsService: class {},
+  MiscService: class {},
+  NewsletterService: class {},
+  TrendingService: class {},
+}));
 
 // Import route handlers (after mocks are set up)
 import { GET, OPTIONS } from './route';
@@ -174,7 +172,17 @@ vi.mock('../../../../packages/web-runtime/src/utils/category-validation', () => 
 }));
 
 describe('GET /api/search', () => {
+  let prismocker: PrismaClient;
+
   beforeEach(() => {
+    // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    prismocker = prisma;
+    
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+    
     vi.clearAllMocks();
     // Default mock: successful search with content results
     const mockResults = [

@@ -1,0 +1,44 @@
+# Development files
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+tsconfig.json
+tsconfig.*.json
+
+# Build artifacts (if not needed)
+dist/
+build/
+
+# Development tools
+.vscode/
+.idea/
+*.log
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Documentation (keep README.md, exclude others)
+docs/
+*.md
+!README.md
+
+# CI/CD
+.github/
+.cursor/
+
+# Environment
+.env
+.env.*
+
+# Test files
+**/__tests__/
+**/__mocks__/
+**/*.test.*
+**/*.spec.*
+
+# Source maps (if not needed)
+*.map
+

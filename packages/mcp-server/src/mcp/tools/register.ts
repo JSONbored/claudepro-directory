@@ -27,6 +27,9 @@ import {
   SubmitContentInputSchema,
   CreateAccountInputSchema,
   SubscribeNewsletterInputSchema,
+  DownloadSkillPackageInputSchema,
+  DownloadMcpServerPackageInputSchema,
+  DownloadStorageFileInputSchema,
   ListCategoriesOutputSchema,
   SearchContentOutputSchema,
   GetContentDetailOutputSchema,
@@ -47,6 +50,9 @@ import {
   SubmitContentOutputSchema,
   CreateAccountOutputSchema,
   SubscribeNewsletterOutputSchema,
+  DownloadSkillPackageOutputSchema,
+  DownloadMcpServerPackageOutputSchema,
+  DownloadStorageFileOutputSchema,
 } from '../../lib/types.js';
 
 // Import tool handlers (migrating incrementally)
@@ -70,6 +76,9 @@ import { handleGetSocialProofStats } from './social-proof.js';
 import { handleSubmitContent } from './submit-content.js';
 import { handleCreateAccount } from './account.js';
 import { handleSubscribeNewsletter } from './newsletter.js';
+import { handleDownloadSkillPackage } from './download-skill-package.js';
+import { handleDownloadMcpServerPackage } from './download-mcp-server-package.js';
+import { handleDownloadStorageFile } from './download-storage-file.js';
 
 /**
  * Helper to wrap tool handlers with timeout protection, request deduplication, and metrics
@@ -511,6 +520,60 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       handleSubscribeNewsletter,
       'subscribeNewsletter',
       30000,
+      context
+    )
+  );
+
+  // 21. downloadSkillPackage - Download Skills ZIP file from Supabase Storage
+  mcpServer.registerTool(
+    'downloadSkillPackage',
+    {
+      title: 'Download Skill Package',
+      description:
+        'Downloads a Skills ZIP file from Supabase Storage. If rootUri is provided, writes to client filesystem using Roots. Otherwise, returns download URL for manual download.',
+      inputSchema: DownloadSkillPackageInputSchema,
+      outputSchema: DownloadSkillPackageOutputSchema,
+    },
+    wrapToolHandler(
+      handleDownloadSkillPackage,
+      'downloadSkillPackage',
+      60000,
+      context
+    )
+  );
+
+  // 22. downloadMcpServerPackage - Download MCP server .mcpb file from Supabase Storage
+  mcpServer.registerTool(
+    'downloadMcpServerPackage',
+    {
+      title: 'Download MCP Server Package',
+      description:
+        'Downloads an MCP server .mcpb file from Supabase Storage. If rootUri is provided, writes to client filesystem using Roots. Otherwise, returns download URL for manual download.',
+      inputSchema: DownloadMcpServerPackageInputSchema,
+      outputSchema: DownloadMcpServerPackageOutputSchema,
+    },
+    wrapToolHandler(
+      handleDownloadMcpServerPackage,
+      'downloadMcpServerPackage',
+      60000,
+      context
+    )
+  );
+
+  // 23. downloadStorageFile - Generic tool for downloading any storage file
+  mcpServer.registerTool(
+    'downloadStorageFile',
+    {
+      title: 'Download Storage File',
+      description:
+        'Generic tool for downloading any storage file from Supabase Storage. Supports Skills ZIPs, MCP server .mcpb files, and future storage file types. If rootUri is provided, writes to client filesystem using Roots. Otherwise, returns download URL for manual download.',
+      inputSchema: DownloadStorageFileInputSchema,
+      outputSchema: DownloadStorageFileOutputSchema,
+    },
+    wrapToolHandler(
+      handleDownloadStorageFile,
+      'downloadStorageFile',
+      60000,
       context
     )
   );

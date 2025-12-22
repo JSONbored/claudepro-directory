@@ -8,10 +8,9 @@
     "deploy": "wrangler deploy",
     "build": "tsc",
     "type-check": "tsc --noEmit",
-    "lint": "eslint . --config ../../config/tools/eslint.config.mjs"
+    "lint": "eslint . --config ../../../config/tools/eslint.config.mjs"
   },
   "dependencies": {
-    "@cloudflare/workers-oauth-provider": "^0.2.2",
     "@heyclaude/cloudflare-runtime": "workspace:*",
     "@heyclaude/data-layer": "workspace:*",
     "@heyclaude/database-types": "workspace:*",
@@ -20,11 +19,7 @@
     "@microlabs/otel-cf-workers": "1.0.0-rc.52",
     "@modelcontextprotocol/sdk": "^1.25.1",
     "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
-    "@opentelemetry/sdk-trace-base": "^2.2.0",
-    "@opentelemetry/semantic-conventions": "^1.38.0",
-    "hono": "^4.11.1",
-    "zod": "^4.2.1"
+    "@opentelemetry/exporter-trace-otlp-http": "^0.208.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251221.0",

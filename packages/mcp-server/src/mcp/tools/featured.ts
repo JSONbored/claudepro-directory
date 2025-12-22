@@ -118,7 +118,8 @@ export async function handleGetFeatured(
     // Format results
     const formatItem = (item: any) => ({
       slug: item.slug,
-      title: item.title || item.display_title,
+      // Prioritize display_title over title (display_title is user-friendly version)
+      title: item.display_title || item.title,
       category: item.category,
       description: (item.description || '').substring(0, 150),
       tags: item.tags || [],

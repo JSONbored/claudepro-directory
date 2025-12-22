@@ -1,13 +1,13 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { getContentDescriptionCopy, getPartnerHeroStats } from './site';
 import { getContentCount } from '../content/index';
 import { logger } from '../../logger';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock logger
-vi.mock('../../logger', () => ({
+jest.mock('../../logger', () => ({
   logger: {
     child: vi.fn(() => ({
       error: vi.fn(),
@@ -16,8 +16,8 @@ vi.mock('../../logger', () => ({
 }));
 
 // Mock content/index
-const mockGetContentCount = vi.fn();
-vi.mock('../content/index', () => ({
+const mock = jest.fn();
+jest.mock('../content/index', () => ({
   getContentCount: (...args: any[]) => mockGetContentCount(...args),
 }));
 

@@ -21,11 +21,10 @@ import type {
 type JsonValue = Prisma.JsonValue;
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { inngest } from '../../client';
+import { createInngestFunction } from '../../utils/function-factory';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { logger } from '../../../logging/server';
 import { getService } from '../../../data/service-factory';
-import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 const PULSE_BATCH_SIZE = 100;
 const MAX_RETRY_ATTEMPTS = 5;
@@ -63,19 +62,21 @@ function isValidPulseEvent(value: unknown): value is PulseEvent {
 
 /**
  * Process pulse queue in batches
+ * Uses singleton pattern to prevent duplicate runs
  */
-export const processPulseQueue = inngest.createFunction(
+export const processPulseQueue = createInngestFunction(
   {
     id: 'analytics-pulse-processor',
     name: 'Analytics Pulse Processor',
+    route: '/inngest/analytics/pulse',
     retries: 1,
+    // Singleton pattern: Only one pulse processor can run at a time
+    singleton: {
+      key: 'analytics-pulse',
+    },
   },
   { cron: '0 * * * *' }, // Every hour (optimized from 30 minutes)
-  async ({ step }) => {
-    const startTime = Date.now();
-    const logContext = createWebAppContextWithId('/inngest/analytics/pulse', 'processPulseQueue');
-
-    logger.info(logContext, 'Pulse queue processing started');
+  async ({ step, logContext }) => {
 
     // Step 1: Read messages from queue
     const messages = await step.run('read-queue', async (): Promise<PulseQueueMessage[]> => {
@@ -146,7 +147,7 @@ export const processPulseQueue = inngest.createFunction(
             const isValidUUID = (value: string | null | undefined): value is string =>
               typeof value === 'string' && UUID_REGEX.test(value);
 
-            const searchQueries = searchEvents.map((msg) => {
+            const searchQueries = searchEvents.map((msg: PulseQueueMessage) => {
               const event = msg.message;
               const metadata = event['metadata'] as Record<string, unknown> | null;
 
@@ -168,7 +169,7 @@ export const processPulseQueue = inngest.createFunction(
             });
 
             // Prepare search query inputs for batch RPC
-            const searchQueryInputs: SearchQueryInput[] = searchQueries.map((q) => ({
+            const searchQueryInputs: SearchQueryInput[] = searchQueries.map((q: ReturnType<typeof searchEvents[0] extends PulseQueueMessage ? typeof searchEvents[0] : never>['message']) => ({
               query: q.query,
               filters: q.filters,
               result_count: q.result_count,
@@ -330,7 +331,7 @@ export const processPulseQueue = inngest.createFunction(
     }
 
     // Step 6: Handle failed messages that exceeded retry attempts
-    const failedMessages = messages.filter((msg) => {
+    const failedMessages = messages.filter((msg: PulseQueueMessage) => {
       const msgIdStr = String(msg.msg_id);
       const isProcessed = processedMsgIds.some((id) => String(id) === msgIdStr);
       return !isProcessed && msg.read_ct >= MAX_RETRY_ATTEMPTS;
@@ -349,9 +350,9 @@ export const processPulseQueue = inngest.createFunction(
 
         // Execute batches in parallel
         await Promise.allSettled(
-          batches.map(async (batch) => {
+          batches.map(async (batch: PulseQueueMessage[]) => {
             await Promise.allSettled(
-              batch.map(async (msg) => {
+              batch.map(async (msg: PulseQueueMessage) => {
                 try {
                   await pgmqDelete('pulse', msg.msg_id);
                   logger.warn(
@@ -368,11 +369,10 @@ export const processPulseQueue = inngest.createFunction(
       });
     }
 
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
     logger.info(
       {
         ...logContext,
-        durationMs,
         processed: messages.length,
         inserted: totalInserted,
         failed: totalFailed,
@@ -380,20 +380,10 @@ export const processPulseQueue = inngest.createFunction(
       'Pulse queue processing completed'
     );
 
-    const result = {
+    return {
       processed: messages.length,
       inserted: totalInserted,
       failed: totalFailed,
     };
-
-    // BetterStack monitoring: Send success heartbeat (feature-flagged)
-    if (result.inserted > 0) {
-      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
-        functionName: 'processPulseQueue',
-        result: { inserted: result.inserted },
-      });
-    }
-
-    return result;
   }
 );

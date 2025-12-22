@@ -8,14 +8,17 @@
 
 import { contact_category as ContactCategoryEnum } from '@prisma/client';
 import type { contact_category } from '@prisma/client';
-import { normalizeError, escapeHtml } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { inngest } from '../../client';
-import { sendEmail } from '../../../integrations/resend';
+import { renderEmailTemplate } from '../../../email/base-template';
 import { HELLO_FROM, CONTACT_FROM } from '../../../email/config/email-config';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
-
-type ContactCategory = 'bug' | 'feature' | 'partnership' | 'general' | 'other';
+import {
+  ContactAdminNotificationEmail,
+  ContactUserConfirmationEmail,
+} from '../../../email/templates/contact';
+import { sendEmail } from '../../../integrations/resend';
+import { logger } from '../../../logging/server';
+import { createInngestFunction, type InngestHandlerContext } from '../../utils/function-factory';
 
 /**
  * Contact form submission function
@@ -24,19 +27,18 @@ type ContactCategory = 'bug' | 'feature' | 'partnership' | 'general' | 'other';
  * 1. Admin notification email
  * 2. User confirmation email
  */
-export const sendContactEmails = inngest.createFunction(
+export const sendContactEmails = createInngestFunction(
   {
     id: 'email-contact',
     name: 'Contact Form Emails',
+    route: '/inngest/email/contact',
     retries: 3,
     // Idempotency: Use submissionId to prevent duplicate contact emails
     // Each submission will only trigger emails once
     idempotency: 'event.data.submissionId',
   },
   { event: 'email/contact' },
-  async ({ event, step }) => {
-    const startTime = Date.now();
-    const logContext = createWebAppContextWithId('/inngest/email/contact', 'sendContactEmails');
+  async ({ event, step, logContext }: InngestHandlerContext) => {
 
     const { submissionId, name, email, category, message } = event.data;
 
@@ -78,14 +80,14 @@ export const sendContactEmails = inngest.createFunction(
             other: '📧',
           };
 
-          // Build simple HTML for admin notification
-          const adminHtml = buildAdminNotificationHtml({
+          // Build HTML for admin notification using React Email template
+          const adminHtml = await renderEmailTemplate(ContactAdminNotificationEmail, {
             submissionId,
             name,
             email,
             category: validatedCategory,
-            message,
             categoryEmoji: categoryEmoji[validatedCategory] || '📧',
+            message,
             submittedAt: new Date().toISOString(),
           });
 
@@ -128,10 +130,11 @@ export const sendContactEmails = inngest.createFunction(
         emailId: string | null;
       }> => {
         try {
-          // Build simple HTML for user confirmation
-          const userHtml = buildUserConfirmationHtml({
+          // Build HTML for user confirmation using React Email template
+          const userHtml = await renderEmailTemplate(ContactUserConfirmationEmail, {
             name,
             category: validatedCategory,
+            email,
           });
 
           const { data: emailData, error: emailError } = await sendEmail(
@@ -165,11 +168,10 @@ export const sendContactEmails = inngest.createFunction(
       }
     );
 
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
     logger.info(
       {
         ...logContext,
-        durationMs,
         submissionId,
         adminEmailSent: adminEmailResult.sent,
         userEmailSent: userEmailResult.sent,
@@ -188,92 +190,3 @@ export const sendContactEmails = inngest.createFunction(
   }
 );
 
-/**
- * Build admin notification HTML (simple inline HTML for now)
- * TODO: Migrate to React Email template
- */
-function buildAdminNotificationHtml(props: {
-  submissionId: string;
-  name: string;
-  email: string;
-  category: ContactCategory;
-  message: string;
-  categoryEmoji: string;
-  submittedAt: string;
-}): string {
-  const { submissionId, name, email, category, message, categoryEmoji, submittedAt } = props;
-  const submittedDate = new Date(submittedAt).toLocaleString('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
-
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
-  <div style="background-color: white; border-radius: 8px; padding: 32px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h1 style="font-size: 24px; margin: 0 0 8px;">${categoryEmoji} New Contact Submission</h1>
-    <p style="color: #666; margin: 0 0 24px;">Submitted via interactive terminal on ${submittedDate}</p>
-    
-    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
-    
-    <p style="margin: 8px 0;"><strong>Category:</strong> ${escapeHtml(category.charAt(0).toUpperCase() + category.slice(1))}</p>
-    <p style="margin: 8px 0;"><strong>From:</strong> ${escapeHtml(name)} (${escapeHtml(email)})</p>
-    <p style="margin: 8px 0;"><strong>Submission ID:</strong> ${escapeHtml(submissionId)}</p>
-    
-    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
-    
-    <p style="margin: 8px 0;"><strong>Message:</strong></p>
-    <div style="background-color: #f5f5f5; padding: 16px; border-radius: 8px; margin-top: 8px; border: 1px solid #e0e0e0; font-family: monospace; white-space: pre-wrap; word-break: break-word;">
-      ${escapeHtml(message)}
-    </div>
-    
-    <div style="margin-top: 24px;">
-      <a href="mailto:${encodeURIComponent(email)}" style="display: inline-block; background-color: #ff6b35; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">Reply to ${escapeHtml(name)}</a>
-    </div>
-  </div>
-</body>
-</html>
-  `.trim();
-}
-
-/**
- * Build user confirmation HTML (simple inline HTML for now)
- * TODO: Migrate to React Email template
- */
-function buildUserConfirmationHtml(props: { name: string; category: ContactCategory }): string {
-  const { name, category } = props;
-
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
-  <div style="background-color: white; border-radius: 8px; padding: 32px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h1 style="font-size: 24px; margin: 0 0 16px;">Thanks for reaching out, ${escapeHtml(name)}!</h1>
-    
-    <p style="color: #333; margin: 0 0 16px; line-height: 1.6;">
-      We've received your <strong>${escapeHtml(category)}</strong> message and will get back to you as soon as possible.
-    </p>
-    
-    <p style="color: #666; margin: 0 0 24px; line-height: 1.6;">
-      Our team typically responds within 24-48 hours during business days.
-    </p>
-    
-    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
-    
-    <p style="color: #666; font-size: 14px; margin: 0;">
-      — The Claude Pro Directory Team
-    </p>
-  </div>
-</body>
-</html>
-  `.trim();
-}

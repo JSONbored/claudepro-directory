@@ -1,4 +1,8 @@
 # Next.js 16 Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
 # Comprehensive Next.js 16 best practices and prevents common mistakes
 # Shareable across Next.js 16+ projects
 # Consolidated from: nextjs-16-async-patterns.yml, nextjs-16-patterns.yml
@@ -8,7 +12,7 @@
 id: nextjs-async-params-without-await
 language: typescript
 files:
-  - 'app/**/page.tsx'
+  - 'apps/web/src/app/**/page.tsx'
 rule:
   all:
     - kind: function_declaration
@@ -44,7 +48,7 @@ severity: error
 id: nextjs-async-searchparams-without-await
 language: typescript
 files:
-  - 'app/**/page.tsx'
+  - 'apps/web/src/app/**/page.tsx'
 rule:
   all:
     - kind: function_declaration
@@ -112,7 +116,7 @@ severity: error
 id: incorrect-metadata-signature
 language: typescript
 files:
-  - 'app/**/page.tsx'
+  - 'apps/web/src/app/**/page.tsx'
 rule:
   all:
     - kind: function_declaration
@@ -178,7 +182,7 @@ severity: error
 id: nextjs-missing-suspense
 language: typescript
 files:
-  - 'app/**/page.tsx'
+  - 'apps/web/src/app/**/page.tsx'
 rule:
   all:
     - kind: function_declaration
@@ -198,7 +202,7 @@ severity: warning
 id: nextjs-missing-error-boundary
 language: typescript
 files:
-  - 'app/**/page.tsx'
+  - 'apps/web/src/app/**/page.tsx'
 rule:
   all:
     - kind: function_declaration
@@ -214,7 +218,7 @@ severity: warning
 id: nextjs-missing-loading-file
 language: typescript
 files:
-  - 'app/**/page.tsx'
+  - 'apps/web/src/app/**/page.tsx'
 rule:
   all:
     - kind: function_declaration

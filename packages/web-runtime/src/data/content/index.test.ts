@@ -1,32 +1,28 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { getContentBatchBySlugs } from './index';
 import type { content_category } from '@prisma/client';
 
 // groupItemsByCategory is not exported, so we'll test it indirectly through getContentBatchBySlugs
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock database-types to avoid schema generation issues
-vi.mock('@heyclaude/database-types/postgres-types', () => ({
+jest.mock('@heyclaude/database-types/postgres-types', () => ({
   GetPopularContentReturns: [],
   GetTrendingContentReturns: [],
   GetTrendingMetricsWithContentReturns: [],
 }));
 
-// Mock Prisma
-vi.mock('@prisma/client', () => ({
-  Prisma: {
-    contentGetPayload: vi.fn(),
-  },
-}));
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// No manual Prisma mock needed - let __mocks__/@prisma/client.ts handle it
 
 // Mock service factory
 const mockContentService = {
   getEnrichedContentList: vi.fn(),
 };
 
-vi.mock('../service-factory.ts', () => ({
+jest.mock('../service-factory.ts', () => ({
   getService: vi.fn(async (serviceKey: string) => {
     if (serviceKey === 'content') {
       return mockContentService;
@@ -43,7 +39,7 @@ const mockChildLogger = {
   warn: vi.fn(),
 };
 
-vi.mock('../../logger.ts', () => ({
+jest.mock('../../logger.ts', () => ({
   logger: {
     child: vi.fn(() => mockChildLogger),
     error: vi.fn(),
@@ -52,7 +48,7 @@ vi.mock('../../logger.ts', () => ({
 }));
 
 // Mock constants
-vi.mock('../config/constants.ts', () => ({
+jest.mock('../config/constants.ts', () => ({
   QUERY_LIMITS: {
     content: {
       default: 30,
@@ -61,7 +57,7 @@ vi.mock('../config/constants.ts', () => ({
 }));
 
 // Mock normalizeError from shared-runtime
-vi.mock('@heyclaude/shared-runtime', () => ({
+jest.mock('@heyclaude/shared-runtime', () => ({
   normalizeError: vi.fn((error, message) => {
     if (error instanceof Error) {
       return error;

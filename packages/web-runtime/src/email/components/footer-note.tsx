@@ -2,7 +2,7 @@ import { Section, Text } from '@react-email/components';
 import { footerNoteSection, footerNoteStyle, strongStyle } from '../common-styles';
 import type { FooterLine } from '../config/footer-presets';
 
-interface EmailFooterNoteProps {
+export interface EmailFooterNoteProps {
   lines: FooterLine[];
 }
 

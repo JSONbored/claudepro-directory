@@ -1,4 +1,8 @@
 # Prisma Best Practices Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
 # Enforces proper Prisma ORM usage and prevents common anti-patterns
 # Shareable across projects using Prisma
 

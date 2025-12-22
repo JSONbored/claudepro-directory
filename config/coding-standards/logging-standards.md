@@ -385,10 +385,9 @@ The following ESLint rules enforce these standards:
 - `require-use-logged-async-in-client`: Ensures client async operations use useLoggedAsync
 - `require-normalize-error-before-logging`: Ensures errors are normalized before logging
 - `require-record-string-unknown-for-log-context`: Enforces proper log context types
-- `prevent-base-log-context-usage`: Prevents deprecated BaseLogContext usage
 - `prevent-direct-pino-logger-usage`: Prevents direct Pino logger usage outside implementations
 
-See [ESLint Architectural Rules](../tools/ESLINT_RULES.md) for complete documentation.
+See [ESLint Architectural Rules](../tools/eslint-plugin-architectural-rules.js) for complete documentation (see inline JSDoc comments).
 
 ---
 
@@ -428,6 +427,6 @@ When updating existing code:
 
 ## Reference
 
-- **ESLint Rules**: `config/tools/ESLINT_RULES.md`
+- **ESLint Rules**: `config/tools/eslint-plugin-architectural-rules.js` (see inline JSDoc comments)
 - **Logger Configuration**: `packages/shared-runtime/src/logger/config.ts`
 - **Error Handling Utilities**: `packages/shared-runtime/src/error-handling.ts`

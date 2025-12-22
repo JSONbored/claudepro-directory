@@ -33,25 +33,26 @@ vi.mock('next/server', async () => {
   };
 });
 
+// Import prisma directly - don't use vi.importActual
+// Prisma is automatically PrismockerClient via __mocks__/@prisma/client.ts
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+
 // Mock data-layer services
 const mockGetSitewideContentList = vi.fn();
 const mockGetSitewideLlmsTxt = vi.fn();
 const mockGetSitewideReadme = vi.fn();
 
-vi.mock('@heyclaude/data-layer', async () => {
-  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
-  return {
-    ...actual,
-    ContentService: class {
-      getSitewideContentList = mockGetSitewideContentList;
-      getSitewideLlmsTxt = mockGetSitewideLlmsTxt;
-      getSitewideReadme = mockGetSitewideReadme;
-    },
-  };
-});
+vi.mock('@heyclaude/data-layer', () => ({
+  ContentService: class {
+    getSitewideContentList = mockGetSitewideContentList;
+    getSitewideLlmsTxt = mockGetSitewideLlmsTxt;
+    getSitewideReadme = mockGetSitewideReadme;
+  },
+}));
 
 // Mock service-factory
-vi.mock('../../../../../packages/web-runtime/src/data/service-factory', () => ({
+vi.mock('@heyclaude/web-runtime/data/service-factory', () => ({
   getService: vi.fn(async (serviceKey: string) => {
     const { ContentService } = await import('@heyclaude/data-layer');
     if (serviceKey === 'content') {
@@ -155,7 +156,7 @@ vi.mock('../../../../../packages/web-runtime/src/api/route-factory', () => ({
       }
 
       // Mock service call
-      const { getService } = await import('../../../../../packages/web-runtime/src/data/service-factory');
+      const { getService } = await import('@heyclaude/web-runtime/data/service-factory');
       const service = await getService(formatHandler.serviceKey);
       const methodArgs = formatHandler.methodArgs(format as any, {}, {}, {});
       const result = await (service as any)[formatHandler.methodName](...methodArgs);
@@ -193,7 +194,17 @@ vi.mock('../../../../../packages/web-runtime/src/api/route-factory', () => ({
 }));
 
 describe('GET /api/content/sitewide', () => {
+  let prismocker: PrismaClient;
+
   beforeEach(() => {
+    // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    prismocker = prisma;
+    
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+    
     vi.clearAllMocks();
     mockGetSitewideLlmsTxt.mockResolvedValue('# Sitewide Content\n\n## Skills\n- Example');
     mockGetSitewideContentList.mockResolvedValue([

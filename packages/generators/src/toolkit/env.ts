@@ -18,9 +18,10 @@ import { logger } from './logger.ts';
  * Falls back to undefined if not in schema (for dynamic access)
  */
 function getEnvValue(key: string): string | undefined {
-  // Type-safe access to env schema
-  // @ts-expect-error - Dynamic key access for validation utility
-  return env[key];
+  // Type assertion needed for dynamic key access to env schema
+  // The env object is a Zod-inferred type, but we need to access keys dynamically
+  // that may not be in the type definition (e.g., CI, GITHUB_ACTIONS)
+  return (env as Record<string, string | undefined>)[key];
 }
 
 export async function ensureEnvVars(

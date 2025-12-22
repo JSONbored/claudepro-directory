@@ -9,10 +9,11 @@
  * Data: { notificationType: string, payload: DiscordPayload }
  */
 
-import { inngest } from '../../client';
 import { RETRY_CONFIGS } from '../../config';
-import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '../../../logging/server';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
+import { createInngestFunction, type InngestHandlerContext } from '../../utils/function-factory';
 
 const MAX_BODY_SIZE = 200_000; // 200KB limit
 
@@ -40,22 +41,24 @@ function getWebhookUrl(notificationType: string): string | undefined {
   }
 }
 
-export const sendDiscordDirect = inngest.createFunction(
+export const sendDiscordDirect = createInngestFunction(
   {
     id: 'discord/direct',
     name: 'Send Discord Direct Notification',
+    route: '/inngest/discord/direct',
     retries: RETRY_CONFIGS.externalApi,
     timeouts: {
       finish: '30s', // 30 seconds (TIMEOUTS.EXTERNAL_API = 30000ms)
     },
   },
   { event: 'discord/direct' },
-  async ({ event, step }) => {
+  async ({ event, step, logContext }: InngestHandlerContext) => {
     const { notificationType, payload } = event.data;
 
     if (!notificationType) {
       logger.warn(
         {
+          ...logContext,
           eventId: event.id,
         },
         'Discord Direct: Missing notification type'
@@ -63,11 +66,12 @@ export const sendDiscordDirect = inngest.createFunction(
       return { success: false, error: 'Missing notification type' };
     }
 
-    // Validate payload size
+    // Validate payload size (256KB Inngest free tier limit)
     const payloadSize = JSON.stringify(payload).length;
     if (payloadSize > MAX_BODY_SIZE) {
       logger.warn(
         {
+          ...logContext,
           eventId: event.id,
           payloadSize,
           maxSize: MAX_BODY_SIZE,
@@ -83,6 +87,7 @@ export const sendDiscordDirect = inngest.createFunction(
         if (!webhookUrl) {
           logger.warn(
             {
+              ...logContext,
               eventId: event.id,
               notificationType,
             },
@@ -111,6 +116,7 @@ export const sendDiscordDirect = inngest.createFunction(
           if (fetchError instanceof Error && fetchError.name === 'AbortError') {
             logger.warn(
               {
+                ...logContext,
                 eventId: event.id,
                 notificationType,
               },
@@ -129,6 +135,7 @@ export const sendDiscordDirect = inngest.createFunction(
           const errorText = await response.text();
           logger.warn(
             {
+              ...logContext,
               eventId: event.id,
               notificationType,
               status: response.status,
@@ -145,6 +152,7 @@ export const sendDiscordDirect = inngest.createFunction(
 
         logger.info(
           {
+            ...logContext,
             eventId: event.id,
             notificationType,
           },
@@ -159,6 +167,7 @@ export const sendDiscordDirect = inngest.createFunction(
         const normalized = normalizeError(error, 'Discord notification failed');
         logger.error(
           {
+            ...logContext,
             err: normalized,
             eventId: event.id,
             notificationType,

@@ -1,6 +1,6 @@
 import type React from 'react';
 
-interface HeyClaudeEmailLogoProps {
+export interface HeyClaudeEmailLogoProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
@@ -10,35 +10,37 @@ const FONT_SIZES: Record<'sm' | 'md' | 'lg', string> = {
   lg: '34px',
 };
 
+/**
+ * HeyClaude Email Logo Component
+ *
+ * EXACT match to the main HeyClaudeLogo component used in footer/navigation.
+ * Displays "heyclaude" as a single word with orange background highlight and white text.
+ *
+ * Matches HighlightText component styling:
+ * - Background: #F0704A (orange)
+ * - Text: #FFFFFF (white)
+ * - Padding: 2px 6px (0.125rem 0.375rem)
+ * - Border radius: 6px (0.375rem)
+ * - Font: bold (700), tracking-tight (letter-spacing: -0.02em)
+ */
 export function HeyClaudeEmailLogo({ size = 'md' }: HeyClaudeEmailLogoProps) {
   const fontSize = FONT_SIZES[size];
 
-  const baseStyle: React.CSSProperties = {
+  const logoStyle: React.CSSProperties = {
     fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
     fontWeight: 700,
     letterSpacing: '-0.02em',
-    color: '#E9EBE6',
     fontSize,
     textTransform: 'lowercase',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
+    display: 'inline-block',
     margin: 0,
-  };
-
-  const chipStyle: React.CSSProperties = {
-    backgroundColor: '#FF6F4A',
-    color: '#1A1B17',
-    borderRadius: '9999px',
-    padding: '2px 12px',
-    fontWeight: 800,
+    // EXACT match to HighlightText component styling
+    backgroundColor: '#F0704A', // Exact orange from HighlightText
+    color: '#FFFFFF', // White text
+    padding: '2px 6px', // 0.125rem 0.375rem
+    borderRadius: '6px', // 0.375rem
     lineHeight: 1.2,
   };
 
-  return (
-    <span style={baseStyle}>
-      <span>hey</span>
-      <span style={chipStyle}>claude</span>
-    </span>
-  );
+  return <span style={logoStyle}>heyclaude</span>;
 }

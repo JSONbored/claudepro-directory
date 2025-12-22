@@ -51,8 +51,35 @@ const VercelPulse = dynamic(
   }
 );
 
-// Removed Speed Insights - Vercel Analytics already includes performance metrics
-// This reduces bundle size and eliminates redundant analytics tracking
+// Conditionally load Speed Insights only if feature flag is enabled
+const SpeedInsights = dynamic(
+  () => {
+    const vercelEnabled = getFeatureFlag('analytics.vercel_enabled');
+    if (!vercelEnabled) {
+      return Promise.resolve(() => null);
+    }
+    return import('@vercel/speed-insights/next')
+      .then((mod) => mod.SpeedInsights)
+      .catch((error) => {
+        const normalized = normalizeError(error, 'Failed to load Speed Insights');
+        logClientWarn(
+          '[Analytics] Speed Insights import failed',
+          normalized,
+          'PulseCannon.loadSpeedInsights',
+          {
+            component: 'PulseCannon',
+            action: 'load-speed-insights',
+            category: 'analytics',
+            error: normalized.message,
+          }
+        );
+        return () => null;
+      });
+  },
+  {
+    ssr: false,
+  }
+);
 
 function loadUmamiPulse(): void {
   if (!isProduction || document.querySelector('script[data-website-id]')) {
@@ -147,7 +174,7 @@ export function PulseCannon() {
   return (
     <>
       {vercelEnabled && <VercelPulse />}
-      {/* Speed Insights removed - Vercel Analytics includes performance metrics */}
+      {vercelEnabled && <SpeedInsights />}
     </>
   );
 }

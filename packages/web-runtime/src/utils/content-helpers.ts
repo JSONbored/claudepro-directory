@@ -5,7 +5,7 @@
  */
 
 import type { Prisma } from '@prisma/client';
-import { prisma } from '@heyclaude/data-layer/prisma';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
 
 type contentModel = Prisma.contentGetPayload<{}>;
 // EnrichedContentItem was removed - use contentModel instead

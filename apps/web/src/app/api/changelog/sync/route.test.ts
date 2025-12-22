@@ -40,23 +40,22 @@ vi.mock('node:crypto', () => ({
   }),
 }));
 
+// Import prisma directly - don't use vi.importActual
+// Prisma is automatically PrismockerClient via __mocks__/@prisma/client.ts
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+
 // Mock data-layer services
 const mockSyncChangelogEntry = vi.fn();
 
-vi.mock('@heyclaude/data-layer', async () => {
-  // Import actual modules to get PrismockClient (via __mocks__/@prisma/client.ts)
-  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
-  return {
-    ...actual,
-    ChangelogService: class {
-      syncChangelogEntry = mockSyncChangelogEntry;
-    },
-    // prisma is already exported from actual (will be PrismockClient in tests)
-  };
-});
+vi.mock('@heyclaude/data-layer', () => ({
+  ChangelogService: class {
+    syncChangelogEntry = mockSyncChangelogEntry;
+  },
+}));
 
-// Don't mock pgmq-client - let it use the real function with PrismockClient
-// pgmqSend imports prisma from @heyclaude/data-layer, which will be PrismockClient in tests
+// Don't mock pgmq-client - let it use the real function with PrismockerClient
+// pgmqSend imports prisma from @heyclaude/data-layer, which will be PrismockerClient in tests
 
 // Mock shared-runtime
 vi.mock('@heyclaude/shared-runtime', () => ({
@@ -190,25 +189,24 @@ vi.mock('../../../../../packages/web-runtime/src/api/route-factory', () => ({
 }));
 
 describe('POST /api/changelog/sync', () => {
-  let prismock: any;
+  let prismocker: PrismaClient;
 
-  beforeEach(async () => {
+  beforeEach(() => {
+    // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    prismocker = prisma;
+    
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+    
     vi.clearAllMocks();
     process.env['CHANGELOG_SYNC_TOKEN'] = 'test-token';
     
-    // Get PrismockClient instance (automatically provided via __mocks__/@prisma/client.ts)
-    const { prisma } = await import('@heyclaude/data-layer');
-    prismock = prisma;
-    
-    // Reset Prismock data before each test
-    if ('reset' in prismock && typeof prismock.reset === 'function') {
-      prismock.reset();
-    }
-    
-    // Prismock doesn't support $queryRawUnsafe, so we mock it for pgmqSend
+    // Prismocker doesn't support $queryRawUnsafe, so we mock it for pgmqSend
     // pgmqSend uses prisma.$queryRawUnsafe internally
     const queryRawUnsafeSpy = vi.fn().mockResolvedValue([{ msg_id: BigInt(1) }]);
-    (prismock as any).$queryRawUnsafe = queryRawUnsafeSpy;
+    (prismocker as any).$queryRawUnsafe = queryRawUnsafeSpy;
   });
 
   it('should return 200 when changelog is synced successfully', async () => {
@@ -253,7 +251,7 @@ describe('POST /api/changelog/sync', () => {
     expect(mockSyncChangelogEntry).toHaveBeenCalled();
     // Verify isNewEntry is true (created_at === updated_at)
     // pgmqSend should have been called (uses prisma.$queryRawUnsafe which is mocked)
-    expect((prismock as any).$queryRawUnsafe).toHaveBeenCalled();
+    expect((prismocker as any).$queryRawUnsafe).toHaveBeenCalled();
   });
 
   it('should return 401 when token is missing', async () => {
@@ -330,7 +328,7 @@ describe('POST /api/changelog/sync', () => {
     expect(body).toHaveProperty('success', true);
     expect(body).toHaveProperty('message', 'Entry already exists');
     // Should not enqueue for existing entries (isNewEntry is false)
-    expect((prismock as any).$queryRawUnsafe).not.toHaveBeenCalled();
+    expect((prismocker as any).$queryRawUnsafe).not.toHaveBeenCalled();
   });
 
   it('should handle optional fields correctly', async () => {
@@ -394,7 +392,7 @@ describe('POST /api/changelog/sync', () => {
 
     mockSyncChangelogEntry.mockResolvedValue(mockChangelogData);
     // Make $queryRawUnsafe throw to simulate pgmqSend failure
-    (prismock as any).$queryRawUnsafe.mockRejectedValueOnce(new Error('Queue error'));
+    (prismocker as any).$queryRawUnsafe.mockRejectedValueOnce(new Error('Queue error'));
 
     const request = createMockRequest({
       method: 'POST',

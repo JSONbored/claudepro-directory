@@ -245,7 +245,61 @@ export function recordToolCall(
 }
 
 /**
- * Wrap a tool handler with metrics tracking
+ * Performance metrics to add to tool responses
+ */
+export interface PerformanceMetrics {
+  executionTime: number; // Duration in milliseconds
+  cached?: boolean; // Whether result was served from cache
+  cacheHit?: boolean; // Cache hit/miss status
+}
+
+/**
+ * Check if an object has a `_meta` property
+ */
+function hasMeta(obj: unknown): obj is { _meta: Record<string, unknown> } {
+  return typeof obj === 'object' && obj !== null && '_meta' in obj && typeof (obj as { _meta: unknown })._meta === 'object' && (obj as { _meta: unknown })._meta !== null;
+}
+
+/**
+ * Add performance metrics to tool response
+ *
+ * @param result - Tool response
+ * @param metrics - Performance metrics
+ * @returns Enhanced response with metrics in _meta
+ */
+function addPerformanceMetricsToResponse<TOutput>(result: TOutput, metrics: PerformanceMetrics): TOutput {
+  // If result has _meta, add metrics to it
+  if (hasMeta(result)) {
+    return {
+      ...result,
+      _meta: {
+        ...result._meta,
+        _performance: metrics,
+      },
+    } as TOutput;
+  }
+
+  // If result is an object, add _meta with metrics
+  if (typeof result === 'object' && result !== null && !Array.isArray(result)) {
+    return {
+      ...result,
+      _meta: {
+        _performance: metrics,
+      },
+    } as TOutput;
+  }
+
+  // If result is not an object, wrap it
+  return {
+    content: result,
+    _meta: {
+      _performance: metrics,
+    },
+  } as TOutput;
+}
+
+/**
+ * Wrap a tool handler with metrics tracking and performance metadata injection
  *
  * @param toolName - Name of the tool
  * @param handler - Tool handler function
@@ -260,14 +314,35 @@ export function withMetrics<TInput, TOutput, TContext = unknown>(
   return async (input: TInput, context: TContext): Promise<TOutput> => {
     const startTime = Date.now();
     let success = false;
+    let cached = false;
+    let cacheHit = false;
 
     try {
       const result = await handler(input, context);
       success = true;
-      return result;
-    } finally {
+
+      // Check if result indicates cache usage (if it has fromCache property)
+      if (typeof result === 'object' && result !== null && 'fromCache' in result) {
+        cached = (result as { fromCache?: boolean }).fromCache ?? false;
+        cacheHit = cached;
+      }
+
+      // Add performance metrics to response
+      const duration = Date.now() - startTime;
+      const enhancedResult = addPerformanceMetricsToResponse(result, {
+        executionTime: duration,
+        cached,
+        cacheHit,
+      });
+
+      // Record metrics (after enhancing response)
+      recordToolCall(toolName, success, duration, logger);
+
+      return enhancedResult;
+    } catch (error) {
       const duration = Date.now() - startTime;
       recordToolCall(toolName, success, duration, logger);
+      throw error;
     }
   };
 }

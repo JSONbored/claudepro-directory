@@ -14,7 +14,6 @@
  * - eslint-plugin-react-hooks: React hooks rules (ALL 17 recommended rules included)
  * - eslint-plugin-react: React-specific linting rules (ALL 22 recommended rules included)
  * - @next/eslint-plugin-next: Next.js rules (ALL 21 rules from core-web-vitals config)
- * - eslint-plugin-vitest: Vitest testing best practices
  * - eslint-plugin-n: Node.js-specific rules
  * - eslint-plugin-better-tailwindcss: Tailwind CSS linting
  * - eslint-plugin-perfectionist: Sorting and consistency
@@ -58,7 +57,6 @@ import eslintPluginSecurity from 'eslint-plugin-security';
 import eslintPluginSonarjs from 'eslint-plugin-sonarjs';
 import eslintPluginTurbo from 'eslint-plugin-turbo';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
-import eslintPluginVitest from 'eslint-plugin-vitest';
 import eslintPluginTestingLibrary from 'eslint-plugin-testing-library';
 import eslintPluginPlaywright from 'eslint-plugin-playwright';
 import eslintPluginNoOnlyTests from 'eslint-plugin-no-only-tests';
@@ -69,7 +67,6 @@ import nextPlugin from '@next/eslint-plugin-next';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import inngestPlugin from '@inngest/eslint-plugin';
 import tseslint from 'typescript-eslint';
-// @ts-expect-error - Dynamic import for custom plugin
 import architecturalRules from './eslint-plugin-architectural-rules.js';
 
 export default tseslint.config(
@@ -616,7 +613,6 @@ export default tseslint.config(
       // Modernization Rules
       'architectural-rules/require-record-string-unknown-for-log-context': 'error',
       'architectural-rules/enforce-bracket-notation-for-log-context-access': 'error',
-      'architectural-rules/prevent-base-log-context-usage': 'error',
       'architectural-rules/prevent-direct-pino-logger-usage': 'error',
       'architectural-rules/require-context-creation-functions': 'warn',
       // Missing Instrumentation Detection Rules
@@ -1158,7 +1154,7 @@ export default tseslint.config(
     },
   },
   // ============================================
-  // Vitest Test Files Configuration (NEW)
+  // Test Files Configuration
   // Performance: Disable expensive type-checked rules for test files
   // ============================================
   {
@@ -1173,82 +1169,7 @@ export default tseslint.config(
         tsconfigRootDir: import.meta.dirname,
       },
     },
-    plugins: {
-      vitest: eslintPluginVitest,
-    },
     rules: {
-      // Vitest best practices
-      'vitest/expect-expect': 'error',
-      'vitest/no-focused-tests': 'error',
-      'vitest/no-commented-out-tests': 'warn',
-      'vitest/valid-expect': 'error',
-      'vitest/no-conditional-expect': 'error',
-      'vitest/no-identical-title': 'error',
-      /**
-       * @type {import('eslint').Linter.RuleEntry}
-       * @description Prefers `toBe()` over `toEqual()` for primitive values.
-       * @autofix Safe - Only fixes when semantically equivalent (primitives).
-       * @example `expect(x).toEqual(5)` → `expect(x).toBe(5)` (when x is primitive)
-       */
-      'vitest/prefer-to-be': 'warn',
-      'vitest/require-top-level-describe': 'warn',
-      'vitest/no-disabled-tests': 'warn',
-      'vitest/no-duplicate-hooks': 'error',
-      'vitest/valid-title': 'error',
-      /**
-       * @type {import('eslint').Linter.RuleEntry}
-       * @description Prefers `toHaveLength()` over `.length` assertions.
-       * @autofix Safe - Equivalent assertion, more readable.
-       * @example `expect(arr.length).toBe(5)` → `expect(arr).toHaveLength(5)`
-       */
-      'vitest/prefer-to-have-length': 'warn',
-      'vitest/prefer-to-be-truthy': 'warn',
-      'vitest/prefer-to-be-falsy': 'warn',
-      'vitest/no-standalone-expect': 'error',
-      /**
-       * @type {import('eslint').Linter.RuleEntry}
-       * @description Prefers `vi.spyOn()` over direct property assignment for mocks.
-       * @autofix Safe - Better mock management, equivalent functionality.
-       * @example `obj.prop = vi.fn()` → `vi.spyOn(obj, 'prop')`
-       */
-      'vitest/prefer-spy-on': 'warn',
-      /**
-       * @type {import('eslint').Linter.RuleEntry}
-       * @description Prefers comparison matchers over manual comparisons.
-       * @autofix Safe - More semantic, equivalent functionality.
-       * @note IMPORTANT: Only works with `.toBe(true)`, NOT `.toBeTruthy()` or `.toBe(false)`
-       * @example `expect(x > 5).toBe(true)` → `expect(x).toBeGreaterThan(5)`
-       * @example `expect(x < 7).toBe(true)` → `expect(x).toBeLessThan(7)`
-       */
-      'vitest/prefer-comparison-matcher': 'warn', // Only autofixes .toBe(true), not .toBeTruthy()
-      /**
-       * @type {import('eslint').Linter.RuleEntry}
-       * @description Prefers `await expect(promise).resolves` over `expect(await promise)`.
-       * @autofix Safe - Better promise assertion pattern, equivalent functionality.
-       * @note Works with both `.toBe(true)` and `.toBeTruthy()`
-       * @example `expect(await promise).toBe(true)` → `await expect(promise).resolves.toBe(true)`
-       * @example `expect(await promise).toBeTruthy()` → `await expect(promise).resolves.toBeTruthy()`
-       */
-      'vitest/prefer-expect-resolves': 'warn',
-      // Additional Vitest autofix rules
-      /**
-       * @type {import('eslint').Linter.RuleEntry}
-       * @description Enforces consistent test/it usage in test files.
-       * @autofix Safe - Only changes function name, no semantic difference.
-       * @param {Object} options - Configuration options
-       * @param {'it'|'test'} options.fn - Preferred function name
-       * @example `it('test', ...)` → `test('test', ...)` (if fn: 'test')
-       */
-      'vitest/consistent-test-it': ['warn', { fn: 'test' }],
-      // NOTE: vitest/consistent-vitest-vi rule does not exist in eslint-plugin-vitest
-      // Removed - this rule is not available in the plugin
-      /**
-       * @type {import('eslint').Linter.RuleEntry}
-       * @description Removes `.only()` from focused tests.
-       * @autofix Safe - Only removes `.only()`, no other changes.
-       * @example `test.only('test', ...)` → `test('test', ...)`
-       */
-      'vitest/no-focused-tests': 'error',
       // Relax some rules for test files
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',

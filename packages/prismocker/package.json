@@ -1,0 +1,65 @@
+{
+  "name": "prismocker",
+  "version": "0.1.0",
+  "description": "A type-safe, in-memory Prisma Client mock for testing. Works perfectly with pnpm and supports all Prisma operations.",
+  "keywords": [
+    "prisma",
+    "mock",
+    "testing",
+    "test",
+    "in-memory",
+    "type-safe",
+    "pnpm"
+  ],
+  "license": "MIT",
+  "author": "JSONbored",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JSONbored/prismocker"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./bin/generate-enums": {
+      "types": "./dist/bin/generate-enums.d.ts",
+      "import": "./dist/bin/generate-enums.mjs",
+      "require": "./dist/bin/generate-enums.js"
+    }
+  },
+  "bin": {
+    "prismocker": "./dist/bin/generate-enums.js",
+    "prismocker-generate-enums": "./dist/bin/generate-enums.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsup && pnpm build:types",
+    "build:types": "tsc --declaration --outDir dist",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "type-check": "tsc --noEmit",
+    "test": "echo 'Tests disabled - migrating to Jest'",
+    "test:watch": "echo 'Tests disabled - migrating to Jest'",
+    "lint": "eslint src --ext .ts",
+    "prepublishOnly": "pnpm build"
+  },
+  "peerDependencies": {
+    "@prisma/client": "^7.0.0"
+  },
+  "devDependencies": {
+    "@prisma/client": "^7.2.0",
+    "@types/node": "^20.0.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

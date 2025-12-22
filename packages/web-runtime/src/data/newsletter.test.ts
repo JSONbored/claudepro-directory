@@ -1,17 +1,17 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, jest } from '@jest/globals';
 import { getNewsletterSubscriberCount } from './newsletter';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock cached-data-factory
-vi.mock('./cached-data-factory', () => ({
-  createDataFunction: vi.fn((config: any) => {
+jest.mock('./cached-data-factory', () => ({
+  createDataFunction: jest.fn((config: any) => {
     if (!(globalThis as any).__dataFunctionConfigs) {
       (globalThis as any).__dataFunctionConfigs = new Map();
     }
     (globalThis as any).__dataFunctionConfigs.set(config.operation, config);
-    return vi.fn().mockResolvedValue(0);
+    return jest.fn().mockResolvedValue(0);
   }),
 }));
 

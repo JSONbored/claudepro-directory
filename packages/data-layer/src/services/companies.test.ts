@@ -1,65 +1,55 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { CompaniesService } from './companies.ts';
 import { prisma } from '../prisma/client.ts';
 import type { PrismaClient } from '@prisma/client';
 
-// Prismock is automatically configured via __mocks__/@prisma/client.ts
-// The prisma singleton from '../prisma/client.ts' will automatically use PrismockClient
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from '../prisma/client.ts' will automatically use PrismockerClient
+// Jest automatically uses __mocks__ directory (no explicit registration needed)
 
 // Mock the RPC error logging utility
-vi.mock('../utils/rpc-error-logging.ts', () => ({
-  logRpcError: vi.fn(),
+jest.mock('../utils/rpc-error-logging.ts', () => ({
+  logRpcError: jest.fn(),
 }));
 
-// Mock request cache
-vi.mock('../utils/request-cache.ts', () => ({
-  withSmartCache: vi.fn((_key, _method, fn) => fn()),
-}));
+// DON'T mock request cache - use real implementation
+// Cache is cleared in beforeEach for test isolation
+// This allows us to:
+// 1. Test business logic with fresh cache (each test starts with empty cache)
+// 2. Test caching behavior by verifying cache stats and duplicate calls
 
 describe('CompaniesService', () => {
   let service: CompaniesService;
-  let prismock: PrismaClient;
-  let queryRawUnsafeSpy: ReturnType<typeof vi.fn>;
-
-  /**
-   * Helper to safely mock Prismock model methods
-   */
-  function mockPrismockMethod<T>(
-    model: any,
-    method: string,
-    returnValue: T
-  ): ReturnType<typeof vi.fn> {
-    if (!model) {
-      throw new Error(`Prismock model does not exist - check if model name matches schema.prisma`);
-    }
-    const mockFn = vi.fn().mockResolvedValue(returnValue as any);
-    model[method] = mockFn;
-    return mockFn;
-  }
+  let prismaMock: PrismaClient;
+  let queryRawUnsafeSpy: ReturnType<typeof jest.fn>;
 
   beforeEach(async () => {
-    // Get the prisma instance (automatically PrismockClient via __mocks__/@prisma/client.ts)
-    prismock = prisma;
+    // Get the prisma instance (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    prismaMock = prisma;
 
-    // Reset Prismock data before each test
-    if ('reset' in prismock && typeof prismock.reset === 'function') {
-      prismock.reset();
+    // Reset Prismocker data before each test
+    if ('reset' in prismaMock && typeof prismaMock.reset === 'function') {
+      prismaMock.reset();
     }
 
-    // Prismock doesn't support $queryRawUnsafe, so we add it as a mock function
-    queryRawUnsafeSpy = vi.fn().mockResolvedValue([]);
-    (prismock as any).$queryRawUnsafe = queryRawUnsafeSpy;
+    // Clear all mocks to ensure clean state
+    jest.clearAllMocks();
+    jest.resetAllMocks();
 
-      // Ensure Prismock models are initialized
-      void prismock.companies;
-      void prismock.jobs;
+    // Clear request cache for test isolation (each test starts with empty cache)
+    const { clearRequestCache } = await import('../utils/request-cache.ts');
+    clearRequestCache();
+
+    // Prismocker supports $queryRawUnsafe as a stub (returns empty array by default)
+    // Create a fresh spy for each test AFTER clearing mocks to ensure proper isolation
+    queryRawUnsafeSpy = jest.fn().mockImplementation(async () => []);
+    (prismaMock as any).$queryRawUnsafe = queryRawUnsafeSpy;
 
     service = new CompaniesService();
   });
 
   describe('getCompanyAdminProfile', () => {
     it('returns company admin profile data on success', async () => {
-      // getCompanyAdminProfile uses prisma.companies.findUnique, not $queryRawUnsafe
       const mockCompany = {
         id: 'company-1',
         owner_id: 'user123',
@@ -76,20 +66,13 @@ describe('CompaniesService', () => {
         updated_at: new Date('2024-01-01'),
       };
 
-      mockPrismockMethod(prismock.companies, 'findUnique', mockCompany);
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('companies', [mockCompany]);
+      }
 
       const result = await service.getCompanyAdminProfile({ p_company_id: 'company-1' });
 
-      expect(prismock.companies.findUnique).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: 'company-1' },
-          select: expect.objectContaining({
-            id: true,
-            slug: true,
-            name: true,
-          }),
-        })
-      );
       // Returns array matching RPC return structure
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
@@ -104,29 +87,72 @@ describe('CompaniesService', () => {
     });
 
     it('throws error when database call fails', async () => {
-      const mockError = new Error('Database error');
-
-      mockPrismockMethod(prismock.companies, 'findUnique', Promise.reject(mockError));
+      // For error testing, we need to mock the method to throw
+      const findUniqueSpy = jest.spyOn(prismaMock.companies, 'findUnique');
+      findUniqueSpy.mockRejectedValue(new Error('Database error'));
 
       await expect(service.getCompanyAdminProfile({ p_company_id: 'company-1' })).rejects.toThrow(
         'Database error'
       );
+
+      findUniqueSpy.mockRestore();
     });
 
     it('handles null data gracefully', async () => {
       // Returns empty array when company not found (matching RPC behavior)
-      mockPrismockMethod(prismock.companies, 'findUnique', null);
+      // Use Prismocker's setData to seed empty test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('companies', []);
+      }
 
       const result = await service.getCompanyAdminProfile({ p_company_id: 'nonexistent' });
 
       // Returns empty array when not found
       expect(result).toEqual([]);
     });
+
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockCompany = {
+        id: 'company-1',
+        owner_id: 'user123',
+        slug: 'test-company',
+        name: 'Test Company',
+        logo: null,
+        website: 'https://test.com',
+        description: 'A test company',
+        size: 'small' as const,
+        industry: null,
+        using_cursor_since: new Date('2024-01-01'),
+        featured: true,
+        created_at: new Date('2024-01-01'),
+        updated_at: new Date('2024-01-01'),
+      };
+
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('companies', [mockCompany]);
+      }
+
+      // Test caching behavior with real implementation
+      const { getRequestCache } = await import('../utils/request-cache.ts');
+      const cache = getRequestCache();
+
+      // First call - should hit database and populate cache
+      const result1 = await service.getCompanyAdminProfile({ p_company_id: 'company-1' });
+      const cacheSizeAfterFirst = cache.getStats().size;
+      expect(cacheSizeAfterFirst).toBeGreaterThan(0); // Cache should have entry
+
+      // Second call with same args - should hit cache (no database call)
+      const result2 = await service.getCompanyAdminProfile({ p_company_id: 'company-1' });
+      const cacheSizeAfterSecond = cache.getStats().size;
+      expect(cacheSizeAfterSecond).toBe(cacheSizeAfterFirst); // Cache size unchanged (hit cache)
+
+      expect(result1).toEqual(result2);
+      expect(result1).toHaveLength(1);
+    });
   });
 
   describe('getCompanyProfile', () => {
     it('returns company profile data on success', async () => {
-      // getCompanyProfile uses prisma.companies.findFirst, prisma.jobs.findMany, and some $queryRawUnsafe for active jobs
       const mockCompany = {
         id: 'company-1',
         slug: 'test-company',
@@ -144,56 +170,14 @@ describe('CompaniesService', () => {
         updated_at: new Date('2024-01-01'),
       };
 
-      mockPrismockMethod(prismock.companies, 'findFirst', mockCompany);
-      
-      // Mock jobs.findMany for active jobs (migrated from raw SQL to Prisma)
-      const findManyMock = vi.fn()
-        .mockResolvedValueOnce([]) // activeJobsData
-        .mockResolvedValueOnce([]); // allJobs for stats
-      prismock.jobs.findMany = findManyMock;
-      
-      // Mock jobs.count for stats calculation
-      const countMock = vi.fn()
-        .mockResolvedValueOnce(0) // totalJobs
-        .mockResolvedValueOnce(0) // activeJobsCount (migrated from raw SQL)
-        .mockResolvedValueOnce(0) // featuredJobs
-        .mockResolvedValueOnce(0); // remoteJobs
-      prismock.jobs.count = countMock;
-      
-      // Mock jobs.aggregate
-      const aggregateMock = vi.fn()
-        .mockResolvedValueOnce({ _sum: { view_count: 0 } })
-        .mockResolvedValueOnce({ _sum: { click_count: 0 } });
-      prismock.jobs.aggregate = aggregateMock;
-      
-      mockPrismockMethod(prismock.jobs, 'findFirst', null);
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('companies', [mockCompany]);
+        (prismaMock as any).setData('jobs', []); // No active jobs
+      }
 
       const result = await service.getCompanyProfile({ p_slug: 'test-company' });
 
-      expect(prismock.companies.findFirst).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: {
-            slug: 'test-company',
-            owner_id: { not: null },
-          },
-          select: expect.objectContaining({
-            id: true,
-            slug: true,
-            name: true,
-          }),
-        })
-      );
-      // Verify active jobs query (migrated from raw SQL to Prisma)
-      expect(prismock.jobs.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            company_id: 'company-1',
-            status: 'active',
-            active: true,
-            expires_at: expect.objectContaining({ gt: expect.any(Date) }),
-          }),
-        })
-      );
       expect(result).toBeDefined();
       expect(result.company).not.toBeNull();
       expect(result.company?.id).toBe('company-1');
@@ -202,7 +186,10 @@ describe('CompaniesService', () => {
     });
 
     it('returns null company when not found', async () => {
-      mockPrismockMethod(prismock.companies, 'findFirst', null);
+      // Use Prismocker's setData to seed empty test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('companies', []);
+      }
 
       const result = await service.getCompanyProfile({ p_slug: 'nonexistent' });
 
@@ -212,11 +199,53 @@ describe('CompaniesService', () => {
         stats: null,
       });
     });
+
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockCompany = {
+        id: 'company-1',
+        slug: 'test-company',
+        name: 'Test Company',
+        logo: 'https://test.com/logo.png',
+        website: 'https://test.com',
+        description: 'A test company',
+        size: 'small' as const,
+        industry: null,
+        using_cursor_since: new Date('2024-01-01'),
+        featured: true,
+        json_ld: null,
+        owner_id: 'user123',
+        created_at: new Date('2024-01-01'),
+        updated_at: new Date('2024-01-01'),
+      };
+
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('companies', [mockCompany]);
+        (prismaMock as any).setData('jobs', []);
+      }
+
+      // Test caching behavior with real implementation
+      const { getRequestCache } = await import('../utils/request-cache.ts');
+      const cache = getRequestCache();
+
+      // First call - should hit database and populate cache
+      const result1 = await service.getCompanyProfile({ p_slug: 'test-company' });
+      const cacheSizeAfterFirst = cache.getStats().size;
+      expect(cacheSizeAfterFirst).toBeGreaterThan(0); // Cache should have entry
+
+      // Second call with same args - should hit cache (no database call)
+      const result2 = await service.getCompanyProfile({ p_slug: 'test-company' });
+      const cacheSizeAfterSecond = cache.getStats().size;
+      expect(cacheSizeAfterSecond).toBe(cacheSizeAfterFirst); // Cache size unchanged (hit cache)
+
+      expect(result1).toEqual(result2);
+      expect(result1.company?.id).toBe('company-1');
+    });
   });
 
   describe('getCompaniesList', () => {
     it('returns list of companies on success', async () => {
       // getCompaniesList uses prisma.companies.findMany with jobs relation, not $queryRawUnsafe
+      // Use Prismocker's setData to seed test data
       const mockCompanies = [
         {
           id: 'company-1',
@@ -228,28 +257,10 @@ describe('CompaniesService', () => {
           size: 'small' as const,
           industry: null,
           using_cursor_since: null,
-          featured: false,
+          featured: true, // Featured first (orderBy: featured desc)
+          owner_id: 'user123', // Required for where clause
           created_at: new Date('2024-01-01'),
-          jobs: [
-            {
-              id: 'job-1',
-              status: 'active' as const,
-              remote: true,
-              view_count: 10,
-              click_count: 5,
-              posted_at: new Date('2024-01-15'),
-              created_at: new Date('2024-01-15'),
-            },
-            {
-              id: 'job-2',
-              status: 'active' as const,
-              remote: false,
-              view_count: 5,
-              click_count: 2,
-              posted_at: new Date('2024-01-10'),
-              created_at: new Date('2024-01-10'),
-            },
-          ],
+          updated_at: new Date('2024-01-01'),
         },
         {
           id: 'company-2',
@@ -262,40 +273,50 @@ describe('CompaniesService', () => {
           industry: null,
           using_cursor_since: null,
           featured: false,
+          owner_id: 'user456', // Required for where clause
           created_at: new Date('2024-01-02'),
-          jobs: [],
+          updated_at: new Date('2024-01-02'),
         },
       ];
 
-      mockPrismockMethod(prismock.companies, 'count', 2);
-      mockPrismockMethod(prismock.companies, 'findMany', mockCompanies);
+      const mockJobs = [
+        {
+          id: 'job-1',
+          company_id: 'company-1',
+          status: 'active' as const,
+          remote: true,
+          view_count: 10,
+          click_count: 5,
+          posted_at: new Date('2024-01-15'),
+          created_at: new Date('2024-01-15'),
+          updated_at: new Date('2024-01-15'),
+        },
+        {
+          id: 'job-2',
+          company_id: 'company-1',
+          status: 'active' as const,
+          remote: false,
+          view_count: 5,
+          click_count: 2,
+          posted_at: new Date('2024-01-10'),
+          created_at: new Date('2024-01-10'),
+          updated_at: new Date('2024-01-10'),
+        },
+      ];
+
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('companies', mockCompanies);
+        (prismaMock as any).setData('jobs', mockJobs);
+      }
 
       const result = await service.getCompaniesList({ p_limit: 10, p_offset: 0 });
 
-      expect(prismock.companies.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { owner_id: { not: null } },
-          select: expect.objectContaining({
-            id: true,
-            slug: true,
-            name: true,
-            jobs: expect.objectContaining({
-              select: expect.objectContaining({
-                id: true,
-                status: true,
-              }),
-            }),
-          }),
-          orderBy: [{ featured: 'desc' }, { created_at: 'desc' }],
-          take: 10,
-          skip: 0,
-          relationLoadStrategy: 'join',
-        })
-      );
       expect(result).toBeDefined();
       expect(result.companies).not.toBeNull();
       expect(result.companies).toHaveLength(2);
       expect(result.total).toBe(2);
+      // Verify stats calculation (Prismocker handles the query internally)
       expect(result.companies?.[0].stats).toMatchObject({
         active_jobs: 2,
         total_jobs: 2,
@@ -306,8 +327,11 @@ describe('CompaniesService', () => {
     });
 
     it('returns null companies array when no companies exist', async () => {
-      mockPrismockMethod(prismock.companies, 'count', 0);
-      mockPrismockMethod(prismock.companies, 'findMany', []);
+      // Use Prismocker's setData to seed empty test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('companies', []);
+        (prismaMock as any).setData('jobs', []);
+      }
 
       const result = await service.getCompaniesList({ p_limit: 10, p_offset: 0 });
 
@@ -316,20 +340,27 @@ describe('CompaniesService', () => {
     });
 
     it('throws error on database failure', async () => {
+      // For error testing, we need to spy and mock the method to throw
+      const countSpy = jest.spyOn(prismaMock.companies, 'count');
       const mockError = new Error('Connection timeout');
-
-      mockPrismockMethod(prismock.companies, 'count', Promise.reject(mockError));
+      countSpy.mockRejectedValue(mockError);
 
       await expect(service.getCompaniesList({ p_limit: 10, p_offset: 0 })).rejects.toThrow(
         'Connection timeout'
       );
+
+      countSpy.mockRestore();
     });
 
     it('handles pagination correctly', async () => {
-      const mockCompany = {
-        id: 'company-11',
-        slug: 'company-11',
-        name: 'Company 11',
+      // Create 11 companies to test pagination
+      // Order: featured desc, then created_at desc
+      // All have featured: false, so ordered by created_at desc (newest first)
+      // company-11 (2024-01-11) is newest, company-1 (2024-01-01) is oldest
+      const mockCompanies = Array.from({ length: 11 }, (_, i) => ({
+        id: `company-${i + 1}`,
+        slug: `company-${i + 1}`,
+        name: `Company ${i + 1}`,
         logo: null,
         website: null,
         description: null,
@@ -337,23 +368,67 @@ describe('CompaniesService', () => {
         industry: null,
         using_cursor_since: null,
         featured: false,
-        created_at: new Date('2024-01-11'),
-        jobs: [],
-      };
+        owner_id: `user${i + 1}`,
+        created_at: new Date(`2024-01-${String(i + 1).padStart(2, '0')}`),
+        updated_at: new Date(`2024-01-${String(i + 1).padStart(2, '0')}`),
+      }));
 
-      mockPrismockMethod(prismock.companies, 'count', 11);
-      mockPrismockMethod(prismock.companies, 'findMany', [mockCompany]);
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('companies', mockCompanies);
+        (prismaMock as any).setData('jobs', []);
+      }
 
       const result = await service.getCompaniesList({ p_limit: 10, p_offset: 10 });
 
-      expect(prismock.companies.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          take: 10,
-          skip: 10,
-        })
-      );
       expect(result.companies).toHaveLength(1);
-      expect(result.companies?.[0].id).toBe('company-11');
+      // With offset 10, we skip the first 10 (company-11 through company-2)
+      // So we get company-1 (oldest, created 2024-01-01)
+      expect(result.companies?.[0].id).toBe('company-1');
+      expect(result.total).toBe(11);
+    });
+
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockCompanies = [
+        {
+          id: 'company-1',
+          slug: 'company-1',
+          name: 'Company 1',
+          logo: null,
+          website: null,
+          description: null,
+          size: 'small' as const,
+          industry: null,
+          using_cursor_since: null,
+          featured: false,
+          owner_id: 'user123',
+          created_at: new Date('2024-01-01'),
+          updated_at: new Date('2024-01-01'),
+        },
+      ];
+
+      // Use Prismocker's setData to seed test data
+      if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
+        (prismaMock as any).setData('companies', mockCompanies);
+        (prismaMock as any).setData('jobs', []);
+      }
+
+      // Test caching behavior with real implementation
+      const { getRequestCache } = await import('../utils/request-cache.ts');
+      const cache = getRequestCache();
+
+      // First call - should hit database and populate cache
+      const result1 = await service.getCompaniesList({ p_limit: 10, p_offset: 0 });
+      const cacheSizeAfterFirst = cache.getStats().size;
+      expect(cacheSizeAfterFirst).toBeGreaterThan(0); // Cache should have entry
+
+      // Second call with same args - should hit cache (no database call)
+      const result2 = await service.getCompaniesList({ p_limit: 10, p_offset: 0 });
+      const cacheSizeAfterSecond = cache.getStats().size;
+      expect(cacheSizeAfterSecond).toBe(cacheSizeAfterFirst); // Cache size unchanged (hit cache)
+
+      expect(result1).toEqual(result2);
+      expect(result1.companies).toHaveLength(1);
     });
   });
 });

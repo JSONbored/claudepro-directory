@@ -1,8 +1,7 @@
 import { spawnSync } from 'node:child_process';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { performance } from 'node:perf_hooks';
 
 import type { Prisma } from '@prisma/client';
 
@@ -11,13 +10,13 @@ type JsonValue = Prisma.JsonValue;
 
 type Json = JsonValue;
 
-import { prisma } from '@heyclaude/data-layer';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
-import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.ts';
 import { ensureEnvVars } from '../toolkit/env.ts';
-import { logger } from '../toolkit/logger.ts';
-import { createServiceRoleClient, DEFAULT_SUPABASE_URL } from '../toolkit/supabase.ts';
+import { generatePackages, type PackageGeneratorConfig } from '../toolkit/package-generator.ts';
+import { DEFAULT_SUPABASE_URL } from '../toolkit/supabase.ts';
 
 type McpRow = contentModel & { category: 'mcp' };
 
@@ -47,12 +46,11 @@ interface UserConfigEntry {
   type: string;
 }
 
-const CONCURRENCY = 5;
-
 export async function runGenerateMcpbPackages(): Promise<void> {
   await ensureEnvVars(['SUPABASE_SERVICE_ROLE_KEY']);
 
   if (!env.NEXT_PUBLIC_SUPABASE_URL) {
+    const { logger } = await import('../toolkit/logger.ts');
     logger.warn(
       'NEXT_PUBLIC_SUPABASE_URL not set, using fallback URL. Set this in Vercel Project Settings for production builds.',
       {
@@ -62,130 +60,63 @@ export async function runGenerateMcpbPackages(): Promise<void> {
     );
   }
 
-  const supabase = createServiceRoleClient();
+  const config: PackageGeneratorConfig<McpRow, string> = {
+    commandName: 'generate-mcpb-packages',
+    itemName: 'MCP server',
+    itemNamePlural: 'MCP servers',
+    cacheKeyPrefix: 'mcpb:',
+    storageBucket: 'mcpb-packages',
+    fileExtension: '.mcpb',
+    concurrency: 5,
+    loadItems: loadAllMcpServersFromDatabase,
+    transformToPackageContent: (mcp) =>
+      JSON.stringify({
+        manifest: generateManifest(mcp),
+        metadata: mcp.metadata,
+        description: mcp.description,
+        title: mcp.title,
+      }),
+    buildPackage: async (mcp, _packageContent) => {
+      // Create temp directory and build .mcpb file
+      let tempDir: string | null = null;
+      try {
+        tempDir = await createTempBundleDirectory(mcp);
+        const outputPath = join(tempDir, `${mcp.slug}.mcpb`);
+        await packMcpbBundle(tempDir, outputPath);
+        const mcpbBuffer = await readFile(outputPath);
+        return mcpbBuffer;
+      } finally {
+        if (tempDir) {
+          await rm(tempDir, { recursive: true, force: true }).catch(() => {});
+        }
+      }
+    },
+    uploadAndUpdate: async (supabase, mcp, mcpbBuffer, contentHash) => {
+      return uploadToStorage(supabase, mcp, mcpbBuffer, contentHash);
+    },
+    verify: async (supabase) => {
+      const verificationResult = await verifyMcpbPackages(supabase);
+      const { logger } = await import('../toolkit/logger.ts');
 
-  logger.info('🚀 Generating .mcpb packages for MCP servers (database-first, optimized)...\n');
-  logger.info('═'.repeat(80));
-
-  const startTime = performance.now();
-
-  logger.info('\n📊 Loading MCP servers from database...');
-  const mcps = await loadAllMcpServersFromDatabase();
-  logger.info(`✅ Found ${mcps.length} MCP servers in database\n`, { mcpCount: mcps.length });
-
-  logger.info('🔍 Computing content hashes and filtering changed MCP servers...');
-  const mcpsToRebuild: Array<{ hash: string; mcp: McpRow; packageContent: string }> = [];
-
-  for (const mcp of mcps) {
-    const packageContent = JSON.stringify({
-      manifest: generateManifest(mcp),
-      metadata: mcp.metadata,
-      description: mcp.description,
-      title: mcp.title,
-    });
-    const hash = computeHash(packageContent);
-
-    if (needsRebuild(mcp, packageContent)) {
-      mcpsToRebuild.push({ mcp, packageContent, hash });
-    }
-  }
-
-  if (mcpsToRebuild.length === 0) {
-    logger.info('✨ All MCP servers up to date! No rebuild needed.\n');
-    logger.info('💡 Content hashes match - zero .mcpb files regenerated\n');
-    return;
-  }
-
-  logger.info(`🔄 Rebuilding ${mcpsToRebuild.length}/${mcps.length} MCP servers\n`, {
-    rebuilding: mcpsToRebuild.length,
-    total: mcps.length,
-  });
-  logger.info(`⚡ Processing ${CONCURRENCY} MCP servers concurrently...\n`, {
-    concurrency: CONCURRENCY,
-  });
-  logger.info('═'.repeat(80));
-
-  const allResults: Array<{ message: string; slug: string; status: 'error' | 'success' }> = [];
-
-  for (let i = 0; i < mcpsToRebuild.length; i += CONCURRENCY) {
-    const batch = mcpsToRebuild.slice(i, i + CONCURRENCY);
-    const batchResults = await processBatch(batch, supabase);
-
-    allResults.push(...batchResults);
-
-    for (const result of batchResults) {
-      if (result.status === 'success') {
-        logger.info(`✅ ${result.slug} (${result.message})`, {
-          slug: result.slug,
-          message: result.message,
-        });
+      if (verificationResult.missing_packages > 0 || verificationResult.storage_mismatches > 0) {
+        logger.warn(
+          `⚠️  Verification found ${verificationResult.missing_packages + verificationResult.storage_mismatches} issues`,
+          {
+            script: 'generate-mcpb-packages',
+            missing_packages: verificationResult.missing_packages,
+            storage_mismatches: verificationResult.storage_mismatches,
+          }
+        );
+        // Don't fail the build - just warn (packages may be in progress)
       } else {
-        logger.error(`❌ ${result.slug}: ${result.message}`, undefined, {
-          slug: result.slug,
-          message: result.message,
+        logger.info('✅ All MCP content has valid packages!\n', {
+          script: 'generate-mcpb-packages',
         });
       }
-    }
-  }
+    },
+  };
 
-  const endTime = performance.now();
-  const duration = ((endTime - startTime) / 1000).toFixed(2);
-  const successCount = allResults.filter((r) => r.status === 'success').length;
-  const failCount = allResults.filter((r) => r.status === 'error').length;
-
-  logger.info(`\n${'═'.repeat(80)}`);
-  logger.info('\n📊 BUILD SUMMARY:\n');
-  logger.info(`   Total MCP servers: ${mcps.length}`);
-  logger.info(`   ✅ Built: ${successCount}/${mcpsToRebuild.length}`);
-  logger.info(`   ⏭️  Skipped: ${mcps.length - mcpsToRebuild.length} (content unchanged)`);
-  logger.info(`   ❌ Failed: ${failCount}/${mcpsToRebuild.length}`);
-  logger.info(`   ⏱️  Duration: ${duration}s`);
-  logger.info(`   ⚡ Concurrency: ${CONCURRENCY} parallel uploads`);
-  logger.info('   🗄️  Storage: Supabase Storage (mcpb-packages bucket)', {
-    total: mcps.length,
-    built: successCount,
-    skipped: mcps.length - mcpsToRebuild.length,
-    failed: failCount,
-    duration: `${duration}s`,
-    concurrency: CONCURRENCY,
-  });
-
-  if (failCount > 0) {
-    const failedResults = allResults.filter((r) => r.status === 'error');
-    logger.error('\n❌ FAILED BUILDS:\n', undefined, {
-      failCount,
-      failedBuilds: failedResults.map((r) => ({
-        slug: r.slug,
-        message: r.message,
-      })),
-    });
-    for (const r of failedResults) {
-      logger.error(`   ${r.slug}: ${r.message}`, undefined, { slug: r.slug, message: r.message });
-    }
-    process.exit(1);
-  }
-
-  logger.info('\n✨ Build complete! Next run will skip unchanged MCP servers.\n');
-
-  // Post-generation verification: Verify all MCP content has valid packages
-  logger.info('\n🔍 Verifying MCPB packages...\n');
-  const verificationResult = await verifyMcpbPackages(supabase);
-
-  if (verificationResult.missing_packages > 0 || verificationResult.storage_mismatches > 0) {
-    logger.warn(
-      `⚠️  Verification found ${verificationResult.missing_packages + verificationResult.storage_mismatches} issues`,
-      {
-        script: 'generate-mcpb-packages',
-        missing_packages: verificationResult.missing_packages,
-        storage_mismatches: verificationResult.storage_mismatches,
-      }
-    );
-    // Don't fail the build - just warn (packages may be in progress)
-  } else {
-    logger.info('✅ All MCP content has valid packages!\n', {
-      script: 'generate-mcpb-packages',
-    });
-  }
+  await generatePackages(config);
 }
 
 interface VerificationResult {
@@ -209,9 +140,7 @@ interface VerificationResult {
 /**
  * Verifies that all MCP content entries have MCPB package URLs in the database and corresponding files in Supabase storage.
  */
-async function verifyMcpbPackages(
-  supabase: ReturnType<typeof createServiceRoleClient>
-): Promise<VerificationResult> {
+async function verifyMcpbPackages(supabase: SupabaseClient): Promise<VerificationResult> {
   const mcpContent = await prisma.content.findMany({
     where: {
       category: 'mcp',
@@ -250,6 +179,8 @@ async function verifyMcpbPackages(
   );
 
   const storageMismatches: VerificationResult['storage_mismatches_list'] = [];
+
+  const { logger } = await import('../toolkit/logger.ts');
 
   for (const mcp of withPackages) {
     const { data: fileData, error: fileError } = await supabase.storage
@@ -653,10 +584,6 @@ async function packMcpbBundle(tempDir: string, outputPath: string): Promise<void
   }
 }
 
-function needsRebuild(mcp: McpRow, packageContent: string): boolean {
-  const contentHash = computeHash(packageContent);
-  return hasHashChanged(`mcpb:${mcp.slug}`, contentHash);
-}
 
 /**
  * Uploads a generated .mcpb package to Supabase Storage.
@@ -665,18 +592,16 @@ function needsRebuild(mcp: McpRow, packageContent: string): boolean {
  *
  * @param supabase - Supabase service role client
  * @param mcp - The MCP content row
- * @param mcpbFilePath - Path to the generated .mcpb file
+ * @param mcpbBuffer - Buffer containing the .mcpb file content
  * @param contentHash - Pre-computed hash of the package content
  * @returns The public URL of the uploaded package
  */
 async function uploadToStorage(
-  supabase: ReturnType<typeof createServiceRoleClient>,
+  supabase: SupabaseClient,
   mcp: McpRow,
-  mcpbFilePath: string,
+  mcpbBuffer: Buffer,
   contentHash: string
 ): Promise<string> {
-  const { readFile } = await import('node:fs/promises');
-  const mcpbBuffer = await readFile(mcpbFilePath);
   const fileName = `packages/${mcp.slug}.mcpb`;
 
   const { error: uploadError } = await supabase.storage
@@ -710,66 +635,3 @@ async function uploadToStorage(
   return publicUrl;
 }
 
-async function processBatch(
-  mcps: Array<{ hash: string; mcp: McpRow; packageContent: string }>,
-  supabase: ReturnType<typeof createServiceRoleClient>
-): Promise<Array<{ message: string; slug: string; status: 'error' | 'success' }>> {
-  const results = await Promise.allSettled(
-    mcps.map(async ({ mcp, packageContent: _packageContent, hash }) => {
-      const buildStartTime = performance.now();
-      let tempDir: null | string = null;
-
-      try {
-        tempDir = await createTempBundleDirectory(mcp);
-        const outputPath = join(tempDir, `${mcp.slug}.mcpb`);
-        await packMcpbBundle(tempDir, outputPath);
-
-        const { readFile } = await import('node:fs/promises');
-        const mcpbBuffer = await readFile(outputPath);
-        const fileSizeKB = (mcpbBuffer.length / 1024).toFixed(2);
-
-        await uploadToStorage(supabase, mcp, outputPath, hash);
-
-        await rm(tempDir, { recursive: true, force: true });
-
-        const buildDuration = performance.now() - buildStartTime;
-
-        setHash(`mcpb:${mcp.slug}`, hash, {
-          reason: 'MCPB package rebuilt',
-          duration: buildDuration,
-          files: [`${mcp.slug}.mcpb`],
-        });
-
-        return {
-          slug: mcp.slug,
-          status: 'success' as const,
-          message: `${fileSizeKB}KB`,
-        };
-      } catch (error) {
-        if (tempDir) {
-          await rm(tempDir, { recursive: true, force: true }).catch(() => {});
-        }
-        throw error;
-      }
-    })
-  );
-
-  return results.map((result, index) => {
-    if (result.status === 'fulfilled') {
-      return result.value;
-    }
-    const mcp = mcps[index];
-    if (!mcp) {
-      return {
-        slug: 'unknown',
-        status: 'error' as const,
-        message: 'MCP server not found at index',
-      };
-    }
-    return {
-      slug: mcp.mcp.slug,
-      status: 'error' as const,
-      message: result.reason instanceof Error ? result.reason.message : String(result.reason),
-    };
-  });
-}

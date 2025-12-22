@@ -8,30 +8,29 @@
  * Optimized: Increased from 30 minutes (trending doesn't need to be that fresh).
  */
 
-import { inngest } from '../../client';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { logger } from '../../../logging/server';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { getService } from '../../../data/service-factory';
-import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
+import { createInngestFunction } from '../../utils/function-factory';
 
 /**
  * Calculate trending metrics and refresh materialized view
+ * Uses singleton pattern to prevent duplicate runs
  */
-export const calculateTrendingMetrics = inngest.createFunction(
+export const calculateTrendingMetrics = createInngestFunction(
   {
     id: 'trending-calculate-metrics',
     name: 'Calculate Trending Metrics',
+    route: '/inngest/trending/calculate-metrics',
     retries: 2,
+    // Singleton pattern: Only one metrics calculation can run at a time
+    singleton: {
+      key: 'trending-metrics',
+    },
+    cronSuccessHeartbeat: 'BETTERSTACK_HEARTBEAT_INNGEST_CRON',
   },
   { cron: '0 * * * *' }, // Every hour (optimized from 30 minutes)
-  async ({ step }) => {
-    const startTime = Date.now();
-    const logContext = createWebAppContextWithId(
-      '/inngest/trending/calculate-metrics',
-      'calculateTrendingMetrics'
-    );
-
-    logger.info(logContext, 'Trending metrics calculation started');
+  async ({ step, logContext }) => {
 
     const trendingService = await getService('trending');
 
@@ -75,31 +74,19 @@ export const calculateTrendingMetrics = inngest.createFunction(
       }
     });
 
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
     logger.info(
       {
         ...logContext,
-        durationMs,
         updatedMetrics: metricsResult.updated,
         createdMetrics: metricsResult.created,
       },
       'Trending metrics calculation completed'
     );
 
-    const result = {
+    return {
       updated: metricsResult.updated,
       created: metricsResult.created,
-      durationMs,
     };
-
-    // BetterStack monitoring: Send success heartbeat (feature-flagged)
-    if (result.updated > 0 || result.created > 0) {
-      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
-        functionName: 'calculateTrendingMetrics',
-        result: { updated: result.updated, created: result.created },
-      });
-    }
-
-    return result;
   }
 );

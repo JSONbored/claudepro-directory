@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import {
   generateContentTags,
   generateResourceTags,
@@ -14,10 +14,10 @@ import {
 } from './content-helpers';
 
 // Mock server-only (required for server-only modules in tests)
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
+jest.mock('next/cache', () => ({
   cacheTag: vi.fn(),
 }));
 

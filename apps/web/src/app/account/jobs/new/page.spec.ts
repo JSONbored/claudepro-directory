@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { setupTestWithErrorTracking } from '../../../../../../config/tests/utils/error-tracking';
+import { setupTestWithErrorTracking } from '@test-utils/error-tracking';
 
 /**
  * Comprehensive New Job Page E2E Tests

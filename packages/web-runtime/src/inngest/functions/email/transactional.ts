@@ -5,13 +5,23 @@
  * Supports various email types defined in TRANSACTIONAL_EMAIL_CONFIGS.
  */
 
-import { normalizeError, escapeHtml } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { inngest } from '../../client';
+import { renderEmailTemplate } from '../../../email/base-template';
+import { HELLO_FROM, JOBS_FROM } from '../../../email/config/email-config';
+import {
+  EmailChangeEmail,
+  JobPostedEmail,
+  PasswordResetEmail,
+} from '../../../email/templates/transactional';
+import {
+  MFAFactorAddedEmail,
+  MFAFactorRemovedEmail,
+} from '../../../email/templates/mfa';
 import { sendEmail } from '../../../integrations/resend';
-import { HELLO_FROM, JOBS_FROM, COMMUNITY_FROM } from '../../../email/config/email-config';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
-import { sendCriticalFailureHeartbeat } from '../../utils/monitoring';
+import { logger } from '../../../logging/server';
+import { createInngestFunction } from '../../utils/function-factory';
+import { RETRY_CONFIGS } from '../../config';
 
 // Email type configurations
 const TRANSACTIONAL_EMAIL_CONFIGS: Record<
@@ -19,28 +29,70 @@ const TRANSACTIONAL_EMAIL_CONFIGS: Record<
   {
     from: string;
     buildSubject: (data: Record<string, unknown>) => string;
-    buildHtml: (data: Record<string, unknown>, email: string) => string;
+    buildHtml: (data: Record<string, unknown>) => Promise<string>;
   }
 > = {
   'job-posted': {
     from: JOBS_FROM,
     buildSubject: (data) => `Your job posting "${data['jobTitle']}" is now live!`,
-    buildHtml: (data, email) => buildJobPostedHtml(data, email),
-  },
-  'collection-shared': {
-    from: COMMUNITY_FROM,
-    buildSubject: (data) => `${data['senderName']} shared a collection with you`,
-    buildHtml: (data, email) => buildCollectionSharedHtml(data, email),
+    buildHtml: async (data) => {
+      const props: {
+        jobTitle: string;
+        company?: string;
+        jobSlug: string;
+      } = {
+        jobTitle: String(data['jobTitle'] || 'Your Job'),
+        jobSlug: String(data['jobSlug'] || ''),
+      };
+      if (data['company']) {
+        props.company = String(data['company']);
+      }
+      return renderEmailTemplate(JobPostedEmail, props);
+    },
   },
   'password-reset': {
     from: HELLO_FROM,
     buildSubject: () => 'Reset Your Password - Claude Pro Directory',
-    buildHtml: (data, email) => buildPasswordResetHtml(data, email),
+    buildHtml: async (data) => {
+      return renderEmailTemplate(PasswordResetEmail, {
+        resetUrl: String(data['resetUrl'] || 'https://claudepro.directory/reset-password'),
+      });
+    },
   },
   'email-change': {
     from: HELLO_FROM,
     buildSubject: () => 'Confirm Email Change - Claude Pro Directory',
-    buildHtml: (data, email) => buildEmailChangeHtml(data, email),
+    buildHtml: async (data) => {
+      return renderEmailTemplate(EmailChangeEmail, {
+        confirmUrl: String(data['confirmUrl'] || 'https://claudepro.directory/confirm-email'),
+        newEmail: String(data['newEmail'] || ''),
+      });
+    },
+  },
+  'mfa-factor-added': {
+    from: HELLO_FROM,
+    buildSubject: () => 'New Two-Factor Authentication Method Added',
+    buildHtml: async (data) => {
+      return renderEmailTemplate(MFAFactorAddedEmail, {
+        factorType: (data['factorType'] as 'totp' | 'phone') || 'totp',
+        factorName: String(data['factorName'] || 'Authenticator App'),
+        addedAt: String(data['addedAt'] || new Date().toISOString()),
+        userEmail: String(data['userEmail'] || ''),
+      });
+    },
+  },
+  'mfa-factor-removed': {
+    from: HELLO_FROM,
+    buildSubject: () => 'Two-Factor Authentication Method Removed',
+    buildHtml: async (data) => {
+      return renderEmailTemplate(MFAFactorRemovedEmail, {
+        factorType: (data['factorType'] as 'totp' | 'phone') || 'totp',
+        factorName: String(data['factorName'] || 'Authenticator App'),
+        removedAt: String(data['removedAt'] || new Date().toISOString()),
+        userEmail: String(data['userEmail'] || ''),
+        remainingFactorsCount: Number(data['remainingFactorsCount'] || 0),
+      });
+    },
   },
 };
 
@@ -49,50 +101,19 @@ const TRANSACTIONAL_EMAIL_CONFIGS: Record<
  *
  * Sends transactional emails based on the type provided in the event.
  */
-export const sendTransactionalEmail = inngest.createFunction(
+export const sendTransactionalEmail = createInngestFunction(
   {
     id: 'email-transactional',
     name: 'Transactional Email',
-    retries: 3,
+    route: '/inngest/email/transactional',
+    retries: RETRY_CONFIGS.EMAIL,
     // Idempotency: Use type + email + timestamp to prevent duplicates
     // Note: CEL doesn't support || for null coalescing
     idempotency: 'event.data.type + "-" + event.data.email + "-" + string(event.ts)',
-    // BetterStack monitoring: Send heartbeat on failure (feature-flagged)
-    onFailure: async ({ event, error }) => {
-      const eventData = event?.data as { type?: string } | undefined;
-      const context: { functionName?: string; eventType?: string; error?: string } = {
-        functionName: 'sendTransactionalEmail',
-      };
-      if (eventData?.type) {
-        context.eventType = eventData.type;
-      }
-      if (error) {
-        context.error = error instanceof Error ? error.message : String(error);
-      }
-      sendCriticalFailureHeartbeat('BETTERSTACK_HEARTBEAT_CRITICAL_FAILURE', context);
-
-      // Log for observability
-      logger.error(
-        {
-          functionName: 'sendTransactionalEmail',
-          errorMessage: error
-            ? error instanceof Error
-              ? error.message
-              : String(error)
-            : 'unknown',
-        },
-        'Transactional email function failed after all retries'
-      );
-    },
+    onFailureHeartbeat: 'BETTERSTACK_HEARTBEAT_CRITICAL_FAILURE',
   },
   { event: 'email/transactional' },
-  async ({ event, step }) => {
-    const startTime = Date.now();
-    const logContext = createWebAppContextWithId(
-      '/inngest/email/transactional',
-      'sendTransactionalEmail'
-    );
-
+  async ({ event, step, logContext }) => {
     const { type, email, emailData } = event.data;
 
     logger.info(
@@ -123,7 +144,7 @@ export const sendTransactionalEmail = inngest.createFunction(
       }> => {
         try {
           const subject = config.buildSubject(emailData);
-          const html = config.buildHtml(emailData, email);
+          const html = await config.buildHtml(emailData);
 
           const { data: sendData, error: sendError } = await sendEmail(
             {
@@ -156,9 +177,9 @@ export const sendTransactionalEmail = inngest.createFunction(
       }
     );
 
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
     logger.info(
-      { ...logContext, durationMs, type, sent: emailResult.sent, emailId: emailResult.emailId },
+      { ...logContext, type, sent: emailResult.sent, emailId: emailResult.emailId },
       'Transactional email completed'
     );
 
@@ -170,169 +191,3 @@ export const sendTransactionalEmail = inngest.createFunction(
     };
   }
 );
-
-// HTML builders for each email type
-
-function buildJobPostedHtml(data: Record<string, unknown>, _email: string): string {
-  const jobTitle = escapeHtml(String(data['jobTitle'] || 'Your Job'));
-  const company = escapeHtml(String(data['company'] || ''));
-  const jobSlug = encodeURIComponent(String(data['jobSlug'] || ''));
-  const jobUrl = `https://claudepro.directory/jobs/${jobSlug}`;
-
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
-  <div style="background-color: white; border-radius: 8px; padding: 32px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h1 style="font-size: 24px; margin: 0 0 16px;">🎉 Your Job is Live!</h1>
-    
-    <p style="color: #333; line-height: 1.6;">
-      Great news! Your job posting <strong>"${jobTitle}"</strong>${company ? ` at ${company}` : ''} is now live on Claude Pro Directory.
-    </p>
-    
-    <div style="margin: 24px 0;">
-      <a href="${jobUrl}" style="display: inline-block; background-color: #ff6b35; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
-        View Your Listing
-      </a>
-    </div>
-    
-    <p style="color: #666; font-size: 14px; line-height: 1.6;">
-      Your listing will be visible to thousands of Claude developers and AI enthusiasts.
-    </p>
-    
-    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
-    
-    <p style="color: #666; font-size: 14px; margin: 0;">
-      — The Claude Pro Directory Team
-    </p>
-  </div>
-</body>
-</html>
-  `.trim();
-}
-
-function buildCollectionSharedHtml(data: Record<string, unknown>, _email: string): string {
-  const collectionName = escapeHtml(String(data['collectionName'] || 'A Collection'));
-  const senderName = escapeHtml(String(data['senderName'] || 'Someone'));
-  const collectionSlug = encodeURIComponent(String(data['collectionSlug'] || ''));
-  const senderSlug = encodeURIComponent(String(data['senderSlug'] || ''));
-  const itemCount = Number(data['itemCount'] || 0);
-  const collectionUrl = `https://claudepro.directory/u/${senderSlug}/collections/${collectionSlug}`;
-  const collectionDescription = escapeHtml(String(data['collectionDescription'] || ''));
-
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
-  <div style="background-color: white; border-radius: 8px; padding: 32px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h1 style="font-size: 24px; margin: 0 0 16px;">📚 ${senderName} shared a collection with you</h1>
-    
-    <p style="color: #333; line-height: 1.6;">
-      <strong>${collectionName}</strong> - ${itemCount} items
-    </p>
-    
-    ${collectionDescription ? `<p style="color: #666; line-height: 1.6;">${collectionDescription}</p>` : ''}
-    
-    <div style="margin: 24px 0;">
-      <a href="${collectionUrl}" style="display: inline-block; background-color: #ff6b35; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
-        View Collection
-      </a>
-    </div>
-    
-    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
-    
-    <p style="color: #666; font-size: 14px; margin: 0;">
-      — The Claude Pro Directory Team
-    </p>
-  </div>
-</body>
-</html>
-  `.trim();
-}
-
-function buildPasswordResetHtml(data: Record<string, unknown>, _email: string): string {
-  const resetUrl = String(data['resetUrl'] || 'https://claudepro.directory/reset-password');
-
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
-  <div style="background-color: white; border-radius: 8px; padding: 32px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h1 style="font-size: 24px; margin: 0 0 16px;">🔐 Reset Your Password</h1>
-    
-    <p style="color: #333; line-height: 1.6;">
-      We received a request to reset your password. Click the button below to create a new password.
-    </p>
-    
-    <div style="margin: 24px 0;">
-      <a href="${resetUrl}" style="display: inline-block; background-color: #ff6b35; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
-        Reset Password
-      </a>
-    </div>
-    
-    <p style="color: #666; font-size: 14px; line-height: 1.6;">
-      If you didn't request this, you can safely ignore this email. The link will expire in 24 hours.
-    </p>
-    
-    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
-    
-    <p style="color: #666; font-size: 14px; margin: 0;">
-      — The Claude Pro Directory Team
-    </p>
-  </div>
-</body>
-</html>
-  `.trim();
-}
-
-function buildEmailChangeHtml(data: Record<string, unknown>, _email: string): string {
-  const confirmUrl = String(data['confirmUrl'] || 'https://claudepro.directory/confirm-email');
-  const newEmail = escapeHtml(String(data['newEmail'] || ''));
-
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
-  <div style="background-color: white; border-radius: 8px; padding: 32px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h1 style="font-size: 24px; margin: 0 0 16px;">📧 Confirm Email Change</h1>
-    
-    <p style="color: #333; line-height: 1.6;">
-      We received a request to change your email address${newEmail ? ` to <strong>${newEmail}</strong>` : ''}.
-    </p>
-    
-    <div style="margin: 24px 0;">
-      <a href="${confirmUrl}" style="display: inline-block; background-color: #ff6b35; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
-        Confirm Email Change
-      </a>
-    </div>
-    
-    <p style="color: #666; font-size: 14px; line-height: 1.6;">
-      If you didn't request this change, please contact support immediately.
-    </p>
-    
-    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
-    
-    <p style="color: #666; font-size: 14px; margin: 0;">
-      — The Claude Pro Directory Team
-    </p>
-  </div>
-</body>
-</html>
-  `.trim();
-}

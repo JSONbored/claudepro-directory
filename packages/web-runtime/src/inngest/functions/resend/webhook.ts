@@ -22,10 +22,11 @@ import { Prisma } from '@prisma/client';
 type email_engagement_summaryCreateInput = Prisma.email_engagement_summaryCreateInput;
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { inngest, type ResendEmailEventData } from '../../client';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
+import type { ResendEmailEventData } from '../../client';
+import { logger } from '../../../logging/server';
 import { getService } from '../../../data/service-factory';
-import { CONCURRENCY_LIMITS, RETRY_CONFIGS } from '../../config';
+import { CONCURRENCY_LIMITS, RETRY_CONFIGS, THROTTLE_CONFIGS } from '../../config';
+import { createInngestFunction } from '../../utils/function-factory';
 
 type EmailEngagementInsert = email_engagement_summaryCreateInput;
 
@@ -99,10 +100,11 @@ async function incrementEngagementCounter(
  * - Concurrency limits to protect Resend API
  * - Step-based routing for different event types
  */
-export const handleResendWebhook = inngest.createFunction(
+export const handleResendWebhook = createInngestFunction(
   {
     id: 'resend-webhook-handler',
     name: 'Resend Webhook Handler',
+    route: '/inngest/resend/webhook',
     retries: RETRY_CONFIGS.WEBHOOK,
     // Idempotency: Use Resend's email_id to prevent duplicate processing
     idempotency: 'event.data.email_id',
@@ -110,15 +112,19 @@ export const handleResendWebhook = inngest.createFunction(
     concurrency: {
       limit: CONCURRENCY_LIMITS.RESEND_API,
     },
+    // Throttle: Limit to 100 events per minute to prevent abuse
+    // Resend can send many tracking events (sent, opened, clicked, etc.) per email
+    throttle: {
+      limit: THROTTLE_CONFIGS.EMAIL_ENGAGEMENT.limit,
+      period: THROTTLE_CONFIGS.EMAIL_ENGAGEMENT.period,
+      key: 'event.data.email_id', // Throttle per email_id to handle bursts per email
+    },
   },
   // Listen to all Resend events
   RESEND_EVENT_TYPES.map((event) => ({ event })),
-  async ({ event, step }) => {
-    const startTime = Date.now();
+  async ({ event, step, logContext }) => {
     const eventName = event.name as ResendEventType;
     const action = getEventAction(eventName);
-
-    const logContext = createWebAppContextWithId('/inngest/resend/webhook', 'handleResendWebhook');
 
     const emailData = event.data as ResendEmailEventData;
     const emails = emailData.to || [];
@@ -294,9 +300,9 @@ export const handleResendWebhook = inngest.createFunction(
         logger.info({ ...logContext, eventName, action }, 'Unhandled Resend event type');
     }
 
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
     logger.info(
-      { ...logContext, durationMs, action, emailId, processedCount: emails.length },
+      { ...logContext, action, emailId, processedCount: emails.length },
       'Resend webhook processed'
     );
 
@@ -305,7 +311,6 @@ export const handleResendWebhook = inngest.createFunction(
       action,
       emailId,
       processedCount: emails.length,
-      durationMs,
     };
   }
 );

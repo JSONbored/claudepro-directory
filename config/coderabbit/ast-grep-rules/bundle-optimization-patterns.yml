@@ -1,4 +1,8 @@
 # Bundle Optimization Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
 # Enforces bundle size optimization and code splitting patterns
 # Critical for fast page loads and optimal bundle sizes
 
@@ -64,7 +68,7 @@ severity: info
 id: missing-code-splitting-routes
 language: typescript
 files:
-  - 'app/**/page.tsx'
+  - 'apps/web/src/app/**/page.tsx'
 rule:
   all:
     - kind: import_statement

@@ -41,9 +41,6 @@ import type { Hyperdrive } from '@cloudflare/workers-types';
  * @returns Prisma Client instance configured with Hyperdrive
  */
 export function createPrismaClient(hyperdrive: Hyperdrive): PrismaClient {
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'prisma/client.ts:40',message:'createPrismaClient entry',data:{hasHyperdrive:!!hyperdrive,hasConnectionString:!!hyperdrive?.connectionString},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  // #endregion
   // Get connection string from Hyperdrive binding
   // Hyperdrive provides a connection string that includes connection pooling
   const connectionString = hyperdrive.connectionString;
@@ -63,24 +60,11 @@ export function createPrismaClient(hyperdrive: Hyperdrive): PrismaClient {
   // Create Prisma adapter with pg Pool
   const adapter = new PrismaPg(pool);
 
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'prisma/client.ts:61',message:'Before PrismaClient instantiation',data:{hasAdapter:!!adapter,adapterType:adapter?.constructor?.name,hasConnectionString:!!connectionString},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-  // #endregion
-
   // Initialize Prisma Client with adapter
-  try {
-    const client = new PrismaClient({
+  const client = new PrismaClient({
     adapter,
     log: process.env['NODE_ENV'] === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'prisma/client.ts:69',message:'PrismaClient created successfully',data:{hasClient:!!client},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
-    return client;
-  } catch (error) {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'prisma/client.ts:75',message:'PrismaClient creation failed',data:{errorMessage:error instanceof Error?error.message:String(error),errorStack:error instanceof Error?error.stack:undefined,errorName:error instanceof Error?error.name:undefined},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-    // #endregion
-    throw error;
-  }
+  
+  return client;
 }

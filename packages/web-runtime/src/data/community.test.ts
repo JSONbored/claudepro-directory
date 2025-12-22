@@ -1,14 +1,14 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { getCommunityDirectory, getPublicUserProfile, getPublicCollectionDetail } from './community';
 import { normalizeError } from '../errors';
 import { logger } from '../logger';
 import { pulseUserSearch } from '../pulse';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock logger
-vi.mock('../logger', () => ({
+jest.mock('../logger', () => ({
   logger: {
     child: vi.fn(() => ({
       info: vi.fn(),
@@ -19,12 +19,12 @@ vi.mock('../logger', () => ({
 }));
 
 // Mock pulse
-vi.mock('../pulse', () => ({
+jest.mock('../pulse', () => ({
   pulseUserSearch: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Mock cached-data-factory - use globalThis to avoid hoisting issues
-vi.mock('./cached-data-factory', () => {
+jest.mock('./cached-data-factory', () => {
   // Initialize mocks in globalThis
   if (!(globalThis as any).__communityMocks) {
     (globalThis as any).__communityMocks = {

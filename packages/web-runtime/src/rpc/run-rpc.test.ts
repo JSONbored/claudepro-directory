@@ -1,32 +1,13 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { createRunRpc } from './run-rpc.ts';
-import { prisma } from '../../../data-layer/src/prisma/client.ts';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
 
-// Prismock is automatically configured via __mocks__/@prisma/client.ts
-// The prisma singleton from data-layer will automatically use PrismockClient
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from data-layer will automatically use PrismockerClient
 
-// Mock request cache - BasePrismaService imports from '../utils/request-cache.ts'
-// We need to mock the internal import path
-vi.mock('../../../data-layer/src/utils/request-cache.ts', () => ({
-  withSmartCache: vi.fn(async (_rpcName, _methodName, rpcCall, _args) => {
-    return await rpcCall();
-  }),
-  withRequestCache: vi.fn(async (_rpcName, rpcCall, _args) => {
-    return await rpcCall();
-  }),
-}));
-
-// Also mock the package export for completeness
-vi.mock('@heyclaude/data-layer', async () => {
-  const actual = await vi.importActual('@heyclaude/data-layer');
-  return {
-    ...actual,
-    withSmartCache: vi.fn(async (_rpcName, _methodName, rpcCall, _args) => {
-      return await rpcCall();
-    }),
-  };
-});
+// Import real cache utilities for proper cache testing
+import { clearRequestCache, getRequestCache } from '../../../data-layer/src/utils/request-cache.ts';
 
 // Mock dependencies
 vi.mock('../errors.ts', () => ({
@@ -49,7 +30,10 @@ describe('createRunRpc', () => {
   let mockQueryRawUnsafe: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
-    // Get the prisma instance (automatically PrismockClient via __mocks__/@prisma/client.ts)
+    // Clear request cache before each test
+    clearRequestCache();
+
+    // Get the prisma instance (automatically PrismockerClient via __mocks__/@prisma/client.ts)
     mockPrisma = prisma;
 
     // Reset all mocks
@@ -58,10 +42,9 @@ describe('createRunRpc', () => {
       mockPrisma.reset();
     }
 
-    // Prismock doesn't support $queryRawUnsafe, so we add it as a mock function
-    // This matches the pattern used in other test files (e.g., base-prisma-service.test.ts)
-    mockQueryRawUnsafe = vi.fn().mockResolvedValue([]);
-    (mockPrisma as any).$queryRawUnsafe = mockQueryRawUnsafe;
+    // Use Prismocker's Proxy set handler to override $queryRawUnsafe
+    mockPrisma.$queryRawUnsafe = vi.fn().mockResolvedValue([]);
+    mockQueryRawUnsafe = mockPrisma.$queryRawUnsafe as ReturnType<typeof vi.fn>;
 
     // Create runRpc instance (no createClient needed - uses Prisma directly)
     runRpc = createRunRpc();
@@ -266,6 +249,39 @@ describe('createRunRpc', () => {
       expect(mockQueryRawUnsafe).toHaveBeenCalled();
       expect(result.id).toBe('test');
       expect(result.count).toBe(5);
+    });
+  });
+
+  describe('caching behavior', () => {
+    it('should cache results on duplicate calls (caching test)', async () => {
+      const mockData = { id: '123', name: 'Test' };
+      mockQueryRawUnsafe.mockResolvedValue([mockData] as any);
+
+      // First call - should hit database and populate cache
+      const result1 = await runRpc(
+        'test_rpc',
+        { arg: 'value' },
+        {
+          action: 'testAction',
+        }
+      );
+      const firstCallCount = mockQueryRawUnsafe.mock.calls.length;
+
+      // Second call - should hit cache (no database call)
+      const result2 = await runRpc(
+        'test_rpc',
+        { arg: 'value' },
+        {
+          action: 'testAction',
+        }
+      );
+      const secondCallCount = mockQueryRawUnsafe.mock.calls.length;
+
+      // Verify results are the same (indicating cache was used)
+      expect(result1).toEqual(result2);
+      
+      // Verify $queryRawUnsafe was only called once (cached on second call)
+      expect(secondCallCount).toBe(firstCallCount);
     });
   });
 });

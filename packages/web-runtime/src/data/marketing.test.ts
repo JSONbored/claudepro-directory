@@ -1,12 +1,12 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, jest } from '@jest/globals';
 import { getPartnerPricing } from './marketing';
 import { PRICING_CONFIG } from '../config/unified-config';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock unified-config
-vi.mock('../config/unified-config', () => ({
+jest.mock('../config/unified-config', () => ({
   PRICING_CONFIG: {
     'jobs.discounted': 50,
     'jobs.duration_days': 30,

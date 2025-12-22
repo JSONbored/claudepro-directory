@@ -11,10 +11,9 @@ type jobsModel = Prisma.jobsGetPayload<{}>;
 import { normalizeError, sanitizeForDiscord } from '@heyclaude/shared-runtime';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 
-import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
-import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
+import { logger } from '../../../logging/server';
+import { createInngestFunction } from '../../utils/function-factory';
 
 type JobRow = jobsModel;
 
@@ -102,22 +101,21 @@ function buildJobEmbed(job: JobRow, isNew: boolean): Record<string, unknown> | n
 
 /**
  * Process Discord job notifications from queue
+ * Uses singleton pattern to prevent duplicate runs
  */
-export const processDiscordJobsQueue = inngest.createFunction(
+export const processDiscordJobsQueue = createInngestFunction(
   {
     id: 'discord-jobs-processor',
     name: 'Discord Jobs Processor',
+    route: '/inngest/discord/jobs',
     retries: 2,
+    // Singleton pattern: Only one Discord jobs processor can run at a time
+    singleton: {
+      key: 'discord-jobs',
+    },
   },
   { cron: '*/30 * * * *' }, // Every 30 minutes
-  async ({ step }) => {
-    const startTime = Date.now();
-    const logContext = createWebAppContextWithId(
-      '/inngest/discord/jobs',
-      'processDiscordJobsQueue'
-    );
-
-    logger.info(logContext, 'Discord jobs queue processing started');
+  async ({ step, logContext }) => {
 
     const discordWebhookUrl = env.DISCORD_JOBS_WEBHOOK_URL;
 
@@ -266,25 +264,15 @@ export const processDiscordJobsQueue = inngest.createFunction(
       });
     }
 
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
     logger.info(
-      { ...logContext, durationMs, processed: messages.length, sent: sentCount },
+      { ...logContext, processed: messages.length, sent: sentCount },
       'Discord jobs queue processing completed'
     );
 
-    const result = {
+    return {
       processed: messages.length,
       sent: sentCount,
     };
-
-    // BetterStack monitoring: Send success heartbeat (feature-flagged)
-    if (result.sent > 0) {
-      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
-        functionName: 'processDiscordJobsQueue',
-        result: { sent: result.sent },
-      });
-    }
-
-    return result;
   }
 );

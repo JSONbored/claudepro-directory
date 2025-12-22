@@ -58,6 +58,7 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@heyclaude/cloudflare-runtime": "workspace:*",
     "@types/node": "^25.0.3",
     "typescript": "5.9.3"
   },
@@ -67,7 +68,10 @@
     "claude",
     "ai",
     "heyclaude",
-    "claudepro-directory"
+    "claudepro-directory",
+    "mcp-server",
+    "anthropic",
+    "claude-desktop"
   ],
   "author": "JSONbored",
   "license": "MIT",
@@ -75,6 +79,10 @@
     "type": "git",
     "url": "https://github.com/JSONbored/claudepro-directory",
     "directory": "packages/mcp-server"
+  },
+  "homepage": "https://github.com/JSONbored/claudepro-directory#readme",
+  "bugs": {
+    "url": "https://github.com/JSONbored/claudepro-directory/issues"
   },
   "publishConfig": {
     "access": "public"

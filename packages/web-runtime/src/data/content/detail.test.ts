@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import {
   getContentDetailComplete,
   getContentDetailCore,
@@ -6,32 +6,28 @@ import {
 } from './detail';
 
 // Mock server-only FIRST
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock database-types to avoid schema generation issues
-vi.mock('@heyclaude/database-types/postgres-types', () => ({
+jest.mock('@heyclaude/database-types/postgres-types', () => ({
   GetContentDetailCompleteReturns: { id: '', slug: '', title: '' },
   GetContentAnalyticsReturns: { view_count: 0, like_count: 0 },
 }));
 
-// Mock Prisma
-vi.mock('@prisma/client', () => ({
-  Prisma: {
-    contentGetPayload: vi.fn(),
-  },
-}));
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// No manual Prisma mock needed - let __mocks__/@prisma/client.ts handle it
 
 // Mock category validation
-vi.mock('@heyclaude/web-runtime/utils/category-validation', () => ({
+jest.mock('@heyclaude/web-runtime/utils/category-validation', () => ({
   isValidCategory: vi.fn((cat: string) => ['agents', 'mcp', 'rules'].includes(cat)),
 }));
 
 // Mock cached-data-factory - need to set up mock BEFORE import
 // Use globalThis to store mocks (accessible across module boundaries)
-vi.mock('../cached-data-factory.ts', () => ({
+jest.mock('../cached-data-factory.ts', () => ({
   createDataFunction: vi.fn((config) => {
     // Create a mock function for this operation
-    const mockFn = vi.fn();
+    const mock = jest.fn();
     if (config.operation) {
       // Store in globalThis so it's accessible in tests
       if (!(globalThis as any).__dataFunctionMocks) {
@@ -44,9 +40,9 @@ vi.mock('../cached-data-factory.ts', () => ({
 }));
 
 describe('content/detail', () => {
-  let mockGetContentDetailComplete: ReturnType<typeof vi.fn>;
-  let mockGetContentDetailCore: ReturnType<typeof vi.fn>;
-  let mockGetContentAnalytics: ReturnType<typeof vi.fn>;
+  let mockGetContentDetailComplete: ReturnType<typeof jest.fn>;
+  let mockGetContentDetailCore: ReturnType<typeof jest.fn>;
+  let mockGetContentAnalytics: ReturnType<typeof jest.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();

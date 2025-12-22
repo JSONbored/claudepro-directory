@@ -22,8 +22,7 @@ export type EmailTemplate =
   | 'magic-link'
   | 'password-reset'
   | 'email-change'
-  | 'job-posted'
-  | 'collection-shared';
+  | 'job-posted';
 
 /**
  * Email configuration schema
@@ -73,15 +72,6 @@ export const EMAIL_CONFIG = {
     tags: [
       { name: 'type', value: 'transactional' },
       { name: 'category', value: 'job' },
-    ],
-  },
-  'collection-shared': {
-    from: 'ClaudePro Directory <community@mail.claudepro.directory>',
-    subject: 'Someone shared a collection with you!',
-    template: 'collection-shared',
-    tags: [
-      { name: 'type', value: 'transactional' },
-      { name: 'category', value: 'collection' },
     ],
   },
 } as const satisfies Record<

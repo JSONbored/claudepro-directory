@@ -11,84 +11,51 @@
 import type { GetWeeklyDigestReturns } from '@heyclaude/database-types/postgres-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { inngest } from '../../client';
-import { getResendClient } from '../../../integrations/resend';
+import { renderEmailTemplate } from '../../../email/base-template';
 import { HELLO_FROM } from '../../../email/config/email-config';
+import { WeeklyDigestEmail } from '../../../email/templates/weekly-digest';
+import { getResendClient } from '../../../integrations/resend';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { getService } from '../../../data/service-factory';
-import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
+import { createInngestFunction } from '../../utils/function-factory';
 
 // Types for digest data
 type WeeklyDigestData = GetWeeklyDigestReturns;
+
+// Subscriber preferences type
+type SubscriberPreferences = {
+  email: string;
+  categories_visited: string[];
+  engagement_score: number;
+  primary_interest: string | null;
+};
+
+// Engagement segment type
+type EngagementSegment = 'high' | 'medium' | 'low';
 
 /**
  * Weekly digest email function
  *
  * Cron schedule: Every Monday at 9:00 AM UTC
  * - Fetches digest content for the previous week
- * - Checks rate limiting to prevent duplicate sends
+ * - Uses singleton pattern to prevent duplicate runs
  * - Sends batch emails to all active subscribers
  */
-export const sendWeeklyDigest = inngest.createFunction(
+export const sendWeeklyDigest = createInngestFunction(
   {
     id: 'email-weekly-digest',
     name: 'Weekly Digest Email',
+    route: '/inngest/email/digest',
     retries: 1, // Limited retries for cron jobs
+    // Singleton pattern: Only one digest can run at a time (prevents duplicate sends)
+    singleton: {
+      key: 'weekly-digest',
+    },
+    cronSuccessHeartbeat: 'BETTERSTACK_HEARTBEAT_INNGEST_CRON',
   },
   { cron: '0 9 * * 1' }, // Every Monday at 9:00 AM UTC
-  async ({ step }) => {
-    const startTime = Date.now();
-    const logContext = createWebAppContextWithId('/inngest/email/digest', 'sendWeeklyDigest');
-
-    logger.info(logContext, 'Weekly digest started');
-
-    // Step 1: Check rate limiting
-    const rateLimitCheck = await step.run(
-      'check-rate-limit',
-      async (): Promise<{
-        rateLimited: boolean;
-        hoursSinceLastRun?: number;
-        nextAllowedAt?: string;
-      }> => {
-        const service = await getService('misc');
-        const lastRunData = await service.getAppSetting('last_digest_email_timestamp');
-
-        if (lastRunData?.setting_value) {
-          const lastRunTimestamp = new Date(lastRunData.setting_value as string);
-          const hoursSinceLastRun = (Date.now() - lastRunTimestamp.getTime()) / (1000 * 60 * 60);
-
-          if (hoursSinceLastRun < 24) {
-            const nextAllowedAt = new Date(lastRunTimestamp.getTime() + 24 * 60 * 60 * 1000);
-            return {
-              rateLimited: true,
-              hoursSinceLastRun,
-              nextAllowedAt: nextAllowedAt.toISOString(),
-            };
-          }
-        }
-
-        return { rateLimited: false };
-      }
-    );
-
-    if (rateLimitCheck.rateLimited) {
-      logger.info(
-        {
-          ...logContext,
-          hoursSinceLastRun: rateLimitCheck.hoursSinceLastRun?.toFixed(1),
-          nextAllowedAt: rateLimitCheck.nextAllowedAt,
-        },
-        'Digest rate limited'
-      );
-      return {
-        skipped: true,
-        reason: 'rate_limited',
-        hoursSinceLastRun: Math.round((rateLimitCheck.hoursSinceLastRun ?? 0) * 10) / 10,
-        nextAllowedAt: rateLimitCheck.nextAllowedAt,
-      };
-    }
-
-    // Step 2: Fetch digest content
+  async ({ step, logContext }) => {
+    // Step 1: Fetch digest content
     const digestData = await step.run(
       'fetch-digest-content',
       async (): Promise<WeeklyDigestData | null> => {
@@ -122,19 +89,22 @@ export const sendWeeklyDigest = inngest.createFunction(
       return { skipped: true, reason: 'no_content' };
     }
 
-    // Step 3: Fetch subscribers
-    const subscribers = await step.run('fetch-subscribers', async (): Promise<string[]> => {
-      const newsletterService = await getService('newsletter');
+    // Step 2: Fetch subscribers with preferences
+    const subscribers = await step.run(
+      'fetch-subscribers',
+      async (): Promise<SubscriberPreferences[]> => {
+        const newsletterService = await getService('newsletter');
 
-      try {
-        const data = await newsletterService.getActiveSubscribers();
-        return data || [];
-      } catch (error) {
-        const normalized = normalizeError(error, 'Failed to fetch subscribers');
-        logger.warn({ ...logContext, err: normalized }, 'Failed to fetch subscribers');
-        return [];
+        try {
+          const data = await (newsletterService as any).getActiveSubscribersWithPreferences();
+          return data || [];
+        } catch (error) {
+          const normalized = normalizeError(error, 'Failed to fetch subscribers');
+          logger.warn({ ...logContext, err: normalized }, 'Failed to fetch subscribers');
+          return [];
+        }
       }
-    });
+    );
 
     if (subscribers.length === 0) {
       logger.info(logContext, 'Digest skipped - no subscribers');
@@ -143,10 +113,10 @@ export const sendWeeklyDigest = inngest.createFunction(
 
     logger.info(
       { ...logContext, subscriberCount: subscribers.length },
-      'Sending digest to subscribers'
+      'Sending personalized digest to subscribers'
     );
 
-    // Step 4: Send batch digest emails
+    // Step 3: Send personalized batch digest emails
     const sendResults = await step.run(
       'send-batch-emails',
       async (): Promise<{
@@ -154,37 +124,14 @@ export const sendWeeklyDigest = inngest.createFunction(
         failed: number;
         successRate: string;
       }> => {
-        return sendBatchDigest(subscribers, digestData, logContext);
+        return sendPersonalizedBatchDigest(subscribers, digestData, logContext);
       }
     );
 
-    // Step 5: Update last run timestamp
-    await step.run('update-timestamp', async () => {
-      const service = await getService('misc');
-      const currentTimestamp = new Date().toISOString();
-
-      try {
-        await service.upsertAppSetting({
-          setting_key: 'last_digest_email_timestamp',
-          setting_value: currentTimestamp,
-          setting_type: 'string',
-          environment: 'production',
-          enabled: true,
-          description: 'Timestamp of last successful weekly digest email send',
-          category: 'config',
-          version: 1,
-        });
-      } catch (error) {
-        const normalized = normalizeError(error, 'Failed to update digest timestamp');
-        logger.warn({ ...logContext, err: normalized }, 'Failed to update digest timestamp');
-      }
-    });
-
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
     logger.info(
       {
         ...logContext,
-        durationMs,
         sent: sendResults.success,
         failed: sendResults.failed,
         successRate: sendResults.successRate,
@@ -192,21 +139,11 @@ export const sendWeeklyDigest = inngest.createFunction(
       'Weekly digest completed'
     );
 
-    const result = {
+    return {
       sent: sendResults.success,
       failed: sendResults.failed,
       rate: sendResults.successRate,
     };
-
-    // BetterStack monitoring: Send success heartbeat (feature-flagged)
-    if (result.sent > 0) {
-      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
-        functionName: 'sendWeeklyDigest',
-        result: { sent: result.sent },
-      });
-    }
-
-    return result;
   }
 );
 
@@ -227,10 +164,78 @@ function getPreviousWeekStart(): string {
 }
 
 /**
- * Send batch digest emails using Resend batch API
+ * Get engagement segment from engagement score
  */
-async function sendBatchDigest(
-  subscribers: string[],
+function getEngagementSegment(engagementScore: number): EngagementSegment {
+  if (engagementScore >= 75) return 'high';
+  if (engagementScore >= 40) return 'medium';
+  return 'low';
+}
+
+/**
+ * Personalize digest content based on subscriber preferences
+ *
+ * Filters and ranks content by:
+ * 1. Primary interest (highest priority)
+ * 2. Categories visited (secondary priority)
+ * 3. All content (fallback)
+ */
+function personalizeDigestContent(
+  digestData: WeeklyDigestData,
+  preferences: SubscriberPreferences
+): WeeklyDigestData {
+  const { categories_visited, primary_interest } = preferences;
+
+  // Build priority categories list
+  const priorityCategories: Set<string> = new Set();
+  if (primary_interest) {
+    priorityCategories.add(primary_interest.toLowerCase());
+  }
+  categories_visited.forEach((cat) => priorityCategories.add(cat.toLowerCase()));
+
+  // If no preferences, return all content
+  if (priorityCategories.size === 0) {
+    return digestData;
+  }
+
+  // Score function: higher score = more relevant
+  const scoreContent = (category: string | null): number => {
+    if (!category) return 0;
+    const catLower = category.toLowerCase();
+    if (primary_interest && catLower === primary_interest.toLowerCase()) return 3;
+    if (priorityCategories.has(catLower)) return 2;
+    return 1;
+  };
+
+  // Sort new content by relevance
+  const personalizedNewContent = [...(digestData.new_content || [])].sort((a, b) => {
+    const scoreA = scoreContent(a.category);
+    const scoreB = scoreContent(b.category);
+    return scoreB - scoreA; // Higher score first
+  });
+
+  // Sort trending content by relevance
+  const personalizedTrendingContent = [...(digestData.trending_content || [])].sort((a, b) => {
+    const scoreA = scoreContent(a.category);
+    const scoreB = scoreContent(b.category);
+    return scoreB - scoreA; // Higher score first
+  });
+
+  return {
+    ...digestData,
+    new_content: personalizedNewContent,
+    trending_content: personalizedTrendingContent,
+  };
+}
+
+/**
+ * Send personalized batch digest emails using Resend batch API
+ *
+ * Segments subscribers by engagement level and personalizes content per subscriber
+ * based on their category preferences.
+ */
+async function sendPersonalizedBatchDigest(
+  subscribers: SubscriberPreferences[],
   digestData: WeeklyDigestData,
   logContext: ReturnType<typeof createWebAppContextWithId>
 ): Promise<{
@@ -243,8 +248,27 @@ async function sendBatchDigest(
 
   const resend = getResendClient();
 
-  // Build HTML for the digest
-  const html = buildDigestHtml(digestData);
+  // Group subscribers by engagement segment for better tracking
+  const segments: Record<EngagementSegment, SubscriberPreferences[]> = {
+    high: [],
+    medium: [],
+    low: [],
+  };
+
+  subscribers.forEach((sub) => {
+    const segment = getEngagementSegment(sub.engagement_score);
+    segments[segment].push(sub);
+  });
+
+  logger.info(
+    {
+      ...logContext,
+      highEngagement: segments.high.length,
+      mediumEngagement: segments.medium.length,
+      lowEngagement: segments.low.length,
+    },
+    'Subscribers segmented by engagement'
+  );
 
   // Use Resend batch API (up to 100 recipients per batch)
   const batchSize = 100;
@@ -252,15 +276,30 @@ async function sendBatchDigest(
     const batch = subscribers.slice(i, i + batchSize);
 
     try {
-      const result = await resend.batch.send(
-        batch.map((email) => ({
-          from: HELLO_FROM,
-          to: email,
-          subject: `This Week in Claude: ${digestData.week_of}`,
-          html,
-          tags: [{ name: 'type', value: 'weekly_digest' }],
-        }))
+      // Generate personalized HTML for each subscriber in batch
+      const batchEmails = await Promise.all(
+        batch.map(async (subscriber) => {
+          // Personalize content for this subscriber
+          const personalizedData = personalizeDigestContent(digestData, subscriber);
+          const html = await buildDigestHtml(personalizedData);
+
+          return {
+            from: HELLO_FROM,
+            to: subscriber.email,
+            subject: `This Week in Claude: ${digestData.week_of}`,
+            html,
+            tags: [
+              { name: 'type', value: 'weekly_digest' },
+              {
+                name: 'engagement',
+                value: getEngagementSegment(subscriber.engagement_score),
+              },
+            ],
+          };
+        })
       );
+
+      const result = await resend.batch.send(batchEmails);
 
       if (result.error) {
         failed += batch.length;
@@ -295,81 +334,12 @@ async function sendBatchDigest(
 }
 
 /**
- * Build digest HTML (simple inline HTML)
- * TODO: Migrate to React Email template
+ * Build digest HTML using React Email template
  */
-function buildDigestHtml(digestData: WeeklyDigestData): string {
-  const newContentHtml = (digestData.new_content || [])
-    .map(
-      (item) => `
-      <div style="padding: 16px; background: #f8f9fa; border-radius: 8px; margin-bottom: 12px;">
-        <a href="${item.url}" style="color: #ff6b35; font-weight: 600; font-size: 16px; text-decoration: none;">
-          ${item.title}
-        </a>
-        <p style="color: #666; margin: 8px 0 0; font-size: 14px;">${item.description || ''}</p>
-        <span style="font-size: 12px; color: #999;">${item.category}</span>
-      </div>
-    `
-    )
-    .join('');
-
-  const trendingContentHtml = (digestData.trending_content || [])
-    .map(
-      (item) => `
-      <div style="padding: 16px; background: #f8f9fa; border-radius: 8px; margin-bottom: 12px;">
-        <a href="${item.url}" style="color: #ff6b35; font-weight: 600; font-size: 16px; text-decoration: none;">
-          ${item.title}
-        </a>
-        <p style="color: #666; margin: 8px 0 0; font-size: 14px;">${item.description || ''}</p>
-        <div style="font-size: 12px; color: #999; margin-top: 4px;">
-          ${item.category} • ${(item.view_count || 0).toLocaleString()} views
-        </div>
-      </div>
-    `
-    )
-    .join('');
-
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
-  <div style="background-color: white; border-radius: 8px; padding: 32px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h1 style="font-size: 24px; margin: 0 0 8px;">This Week in Claude</h1>
-    <p style="color: #666; margin: 0 0 24px;">Week of ${digestData.week_of}</p>
-    
-    ${
-      newContentHtml
-        ? `
-    <h2 style="font-size: 18px; margin: 24px 0 16px; color: #333;">✨ New This Week</h2>
-    ${newContentHtml}
-    `
-        : ''
-    }
-    
-    ${
-      trendingContentHtml
-        ? `
-    <h2 style="font-size: 18px; margin: 24px 0 16px; color: #333;">🔥 Trending</h2>
-    ${trendingContentHtml}
-    `
-        : ''
-    }
-    
-    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
-    
-    <p style="color: #666; font-size: 14px; margin: 0;">
-      — The Claude Pro Directory Team
-    </p>
-    
-    <p style="color: #999; font-size: 12px; margin: 16px 0 0;">
-      <a href="https://claudepro.directory/unsubscribe" style="color: #999;">Unsubscribe</a>
-    </p>
-  </div>
-</body>
-</html>
-  `.trim();
+async function buildDigestHtml(digestData: WeeklyDigestData): Promise<string> {
+  return renderEmailTemplate(WeeklyDigestEmail, {
+    weekOf: digestData.week_of || 'Unknown Week',
+    newContent: digestData.new_content || [],
+    trendingContent: digestData.trending_content || [],
+  });
 }

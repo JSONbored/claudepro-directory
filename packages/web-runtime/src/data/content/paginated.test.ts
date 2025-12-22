@@ -1,23 +1,19 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 
 // Mock server-only FIRST (before any imports)
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock database-types to avoid schema generation issues
-vi.mock('@heyclaude/database-types/postgres-types', () => ({
+jest.mock('@heyclaude/database-types/postgres-types', () => ({
   GetContentDetailCompleteReturns: [],
   GetContentAnalyticsReturns: [],
 }));
 
-// Mock Prisma
-vi.mock('@prisma/client', () => ({
-  Prisma: {
-    contentGetPayload: vi.fn(),
-  },
-}));
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// No manual Prisma mock needed - let __mocks__/@prisma/client.ts handle it
 
 // Mock category validation
-vi.mock('@heyclaude/web-runtime/utils/category-validation', () => ({
+jest.mock('@heyclaude/web-runtime/utils/category-validation', () => ({
   isValidCategory: vi.fn((cat: string) => ['agents', 'mcp', 'rules'].includes(cat)),
 }));
 
@@ -26,10 +22,10 @@ vi.mock('@heyclaude/web-runtime/utils/category-validation', () => ({
 // Store the mock function in a way that's accessible after import
 // Use globalThis to avoid temporal dead zone issues
 if (!(globalThis as any).__dataFunctionMocks) {
-  (globalThis as any).__dataFunctionMocks = new Map<string, ReturnType<typeof vi.fn>>();
+  (globalThis as any).__dataFunctionMocks = new Map<string, ReturnType<typeof jest.fn>>();
 }
 
-vi.mock('../cached-data-factory.ts', () => {
+jest.mock('../cached-data-factory.ts', () => {
   // Ensure mockFunctions exists before the mock factory runs
   if (!(globalThis as any).__dataFunctionMocks) {
     (globalThis as any).__dataFunctionMocks = new Map();
@@ -38,7 +34,7 @@ vi.mock('../cached-data-factory.ts', () => {
   return {
     createDataFunction: vi.fn((config) => {
       // Create a mock function for this operation
-      const mockFn = vi.fn();
+      const mock = jest.fn();
       if (config.operation && mockFunctions) {
         mockFunctions.set(config.operation, mockFn);
       }
@@ -52,7 +48,7 @@ vi.mock('../cached-data-factory.ts', () => {
 import { getPaginatedContent } from './paginated';
 
 describe('content/paginated', () => {
-  let mockGetPaginatedContent: ReturnType<typeof vi.fn>;
+  let mockGetPaginatedContent: ReturnType<typeof jest.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();

@@ -4,10 +4,17 @@
  *
  * Features:
  * - Responsive design (mobile-first)
- * - Claude brand styling
+ * - Claude brand styling with OKLCH color scheme (converted to RGB)
  * - Email client compatibility (Gmail, Outlook, Apple Mail)
- * - Dark theme optimized
+ * - Dark mode support via color-scheme meta tags
+ * - Dark theme optimized (default) with accurate color conversions
  * - Accessibility features
+ *
+ * Dark Mode:
+ * - Uses color-scheme and supported-color-schemes meta tags
+ * - Defaults to dark theme for best readability
+ * - Colors automatically adapt based on email client support
+ * - All colors converted from OKLCH to RGB for email client compatibility
  */
 
 import {

@@ -47,3 +47,7 @@ export * from './middleware/rate-limit.js';
 export * from './lib/utils.js';
 export * from './lib/errors.js';
 
+// OAuth shared implementation (for use by runtime-specific adapters)
+export { handleOAuthTokenShared, handleOAuthAuthorizeShared, jsonError } from './routes/oauth/shared.js';
+export type { OAuthAdapter, OAuthEnvConfig } from './routes/oauth/shared.js';
+

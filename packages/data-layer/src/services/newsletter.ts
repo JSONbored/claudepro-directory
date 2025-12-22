@@ -101,6 +101,56 @@ export class NewsletterService extends BasePrismaService {
   }
 
   /**
+   * Get active subscribers with preferences for personalization
+   *
+   * Returns subscribers with their personalization data:
+   * - categories_visited: Categories the subscriber has shown interest in
+   * - engagement_score: Engagement level (0-100, default 50)
+   * - primary_interest: Primary interest category
+   *
+   * Used for personalized weekly digest emails.
+   *
+   * @returns Array of subscriber data with preferences
+   */
+  async getActiveSubscribersWithPreferences(): Promise<
+    Array<{
+      email: string;
+      categories_visited: string[];
+      engagement_score: number;
+      primary_interest: string | null;
+    }>
+  > {
+    return withSmartCache(
+      'getActiveSubscribersWithPreferences',
+      'getActiveSubscribersWithPreferences',
+      async () => {
+        const subscribers = await prisma.newsletter_subscriptions.findMany({
+          where: {
+            status: 'active',
+            confirmed: true,
+            unsubscribed_at: null,
+          },
+          select: {
+            email: true,
+            categories_visited: true,
+            engagement_score: true,
+            primary_interest: true,
+          },
+          orderBy: { subscribed_at: 'desc' },
+        });
+
+        return subscribers.map((s) => ({
+          email: s.email,
+          categories_visited: s.categories_visited || [],
+          engagement_score: s.engagement_score ?? 50,
+          primary_interest: s.primary_interest || null,
+        }));
+      },
+      {}
+    );
+  }
+
+  /**
    * Get subscription by ID
    *
    * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
@@ -119,6 +169,19 @@ export class NewsletterService extends BasePrismaService {
         });
       },
       { id }
+    );
+  }
+
+  async getSubscriptionByEmail(email: string): Promise<newsletter_subscriptionsModel | null> {
+    return withSmartCache(
+      'getSubscriptionByEmail',
+      'getSubscriptionByEmail',
+      async () => {
+        return prisma.newsletter_subscriptions.findUnique({
+          where: { email },
+        });
+      },
+      { email }
     );
   }
 
@@ -240,6 +303,30 @@ export class NewsletterService extends BasePrismaService {
         rpcName: 'newsletter_subscriptions.update',
         operation: 'NewsletterService.unsubscribeWithTimestamp',
         args: { email },
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Update resend_topics field in database
+   *
+   * Syncs the topic IDs from Resend back to the database.
+   */
+  async updateResendTopics(email: string, topicIds: string[]): Promise<void> {
+    try {
+      await prisma.newsletter_subscriptions.update({
+        where: { email },
+        data: {
+          resend_topics: topicIds,
+          updated_at: new Date(),
+        },
+      });
+    } catch (error) {
+      logRpcError(error, {
+        rpcName: 'newsletter_subscriptions.update',
+        operation: 'NewsletterService.updateResendTopics',
+        args: { email, topicIds },
       });
       throw error;
     }

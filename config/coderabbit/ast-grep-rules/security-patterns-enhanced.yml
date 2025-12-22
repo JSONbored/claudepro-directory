@@ -1,7 +1,13 @@
 # Enhanced Security Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
 # Comprehensive security best practices from top engineering companies
 # Critical for preventing security vulnerabilities
-# Consolidated from: security-patterns.yml, security-patterns-enhanced.yml
+# Consolidated: This file consolidates all security patterns from:
+#   - security-patterns.yml (merged)
+#   - security-patterns-enhanced.yml (original)
 
 ---
 # Rule: Detect hardcoded secrets/API keys

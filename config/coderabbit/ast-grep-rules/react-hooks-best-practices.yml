@@ -1,7 +1,13 @@
 # React Hooks Best Practices Pattern Rules
 # Comprehensive React Hooks Rules and best practices
 # Shareable across React projects
-# Consolidated from: react-hooks-patterns.yml, react-hooks-best-practices.yml
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: No codebase-specific references - ready to use as-is
+#
+# Consolidated: This file consolidates all React hooks patterns from:
+#   - react-hooks-patterns.yml (merged)
+#   - react-hooks-best-practices.yml (original)
 
 ---
 # Rule: Detect hooks called conditionally
@@ -58,6 +64,7 @@ id: missing-cleanup-custom-hook
 language: typescript
 files:
   - 'packages/web-runtime/src/hooks/**/*.ts'
+  - 'packages/web-runtime/src/hooks/**/*.tsx'
 rule:
   all:
     - kind: function_declaration
@@ -141,3 +148,4 @@ severity: info
 # Note: React.memo detection for list items requires JSX pattern matching
 # This is better handled by ESLint rule: react/jsx-no-bind
 # AST-GREP has limitations with complex JSX pattern matching
+

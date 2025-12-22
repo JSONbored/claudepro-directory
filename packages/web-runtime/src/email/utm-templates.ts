@@ -125,6 +125,137 @@ export const EMAIL_UTM_TEMPLATES = {
     medium: 'announcement',
     campaign: 'product_update',
   },
+  CHANGELOG_RELEASE: {
+    source: 'email' as const,
+    medium: 'newsletter',
+    campaign: 'changelog_release',
+  },
+  MCP_SERVER_LAUNCH: {
+    source: 'email' as const,
+    medium: 'announcement',
+    campaign: 'mcp_server_launch',
+  },
+
+  // Transactional emails
+  JOB_POSTED: {
+    source: 'email' as const,
+    medium: 'transactional',
+    campaign: 'job-posted',
+  },
+  PASSWORD_RESET: {
+    source: 'email' as const,
+    medium: 'transactional',
+    campaign: 'password-reset',
+  },
+  EMAIL_CHANGE: {
+    source: 'email' as const,
+    medium: 'transactional',
+    campaign: 'email-change',
+  },
+
+  // MFA emails
+  TRANSACTIONAL_MFA_FACTOR_ADDED: {
+    source: 'email' as const,
+    medium: 'transactional',
+    campaign: 'mfa',
+    content: 'factor_added',
+  },
+  TRANSACTIONAL_MFA_FACTOR_REMOVED: {
+    source: 'email' as const,
+    medium: 'transactional',
+    campaign: 'mfa',
+    content: 'factor_removed',
+  },
+
+  // Job lifecycle emails
+  JOB_SUBMITTED: {
+    source: 'email' as const,
+    medium: 'transactional',
+    campaign: 'job-submitted',
+  },
+  JOB_APPROVED: {
+    source: 'email' as const,
+    medium: 'transactional',
+    campaign: 'job-approved',
+  },
+  JOB_REJECTED: {
+    source: 'email' as const,
+    medium: 'transactional',
+    campaign: 'job-rejected',
+  },
+  JOB_PAYMENT_CONFIRMED: {
+    source: 'email' as const,
+    medium: 'transactional',
+    campaign: 'job-payment-confirmed',
+  },
+  JOB_EXPIRING: {
+    source: 'email' as const,
+    medium: 'transactional',
+    campaign: 'job-expiring',
+  },
+  JOB_EXPIRED: {
+    source: 'email' as const,
+    medium: 'transactional',
+    campaign: 'job-expired',
+  },
+
+  // Drip campaign emails
+  DRIP_POWER_USER_TIPS: {
+    source: 'email' as const,
+    medium: 'drip',
+    campaign: 'newsletter_onboarding',
+    content: 'power_user_tips',
+  },
+  DRIP_ENGAGEMENT_NUDGE: {
+    source: 'email' as const,
+    medium: 'drip',
+    campaign: 'newsletter_onboarding',
+    content: 'engagement_nudge',
+  },
+  DRIP_DIGEST_PREVIEW: {
+    source: 'email' as const,
+    medium: 'drip',
+    campaign: 'newsletter_onboarding',
+    content: 'digest_preview',
+  },
+  DRIP_JOB_CONFIRMATION: {
+    source: 'email' as const,
+    medium: 'drip',
+    campaign: 'job_posting',
+    content: 'confirmation',
+  },
+  DRIP_JOB_SHARE_REMINDER: {
+    source: 'email' as const,
+    medium: 'drip',
+    campaign: 'job_posting',
+    content: 'share_reminder',
+  },
+  DRIP_JOB_PERFORMANCE_REPORT: {
+    source: 'email' as const,
+    medium: 'drip',
+    campaign: 'job_posting',
+    content: 'performance_report',
+  },
+  DRIP_JOB_EXPIRATION_REMINDER: {
+    source: 'email' as const,
+    medium: 'drip',
+    campaign: 'job_posting',
+    content: 'expiration_reminder',
+  },
+
+  // Contact form emails
+  CONTACT_ADMIN: {
+    source: 'email' as const,
+    medium: 'contact',
+    campaign: 'form_submission',
+    content: 'admin_notification',
+  },
+  CONTACT_USER_CONFIRMATION: {
+    source: 'email' as const,
+    medium: 'contact',
+    campaign: 'form_submission',
+    content: 'user_confirmation',
+  },
 } as const satisfies Record<string, EmailUTMParams>;
 
 /**

@@ -11,11 +11,14 @@ import { normalizeError } from '@heyclaude/shared-runtime';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { revalidateTag } from 'next/cache';
 
-import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { logger } from '../../../logging/server';
 import { getService } from '../../../data/service-factory';
-import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
+import { createInngestFunction } from '../../utils/function-factory';
+import { renderEmailTemplate } from '../../../email/base-template';
+import { ChangelogReleaseEmail } from '../../../email/templates/changelog-release';
+import { HELLO_FROM } from '../../../email/config/email-config';
+import { getResendClient } from '../../../integrations/resend';
 
 const CHANGELOG_NOTIFY_QUEUE = 'changelog_notify';
 const BATCH_SIZE = 5;
@@ -75,22 +78,21 @@ function buildDiscordEmbed(job: ChangelogReleaseJob): Record<string, unknown> {
 
 /**
  * Process changelog notifications from queue
+ * Uses singleton pattern to prevent duplicate runs
  */
-export const processChangelogNotifyQueue = inngest.createFunction(
+export const processChangelogNotifyQueue = createInngestFunction(
   {
     id: 'changelog-notify',
     name: 'Changelog Notify',
+    route: '/inngest/changelog/notify',
     retries: 2,
+    // Singleton pattern: Only one changelog notify processor can run at a time
+    singleton: {
+      key: 'changelog-notify',
+    },
   },
   { cron: '*/30 * * * *' }, // Every 30 minutes
-  async ({ step }) => {
-    const startTime = Date.now();
-    const logContext = createWebAppContextWithId(
-      '/inngest/changelog/notify',
-      'processChangelogNotifyQueue'
-    );
-
-    logger.info(logContext, 'Changelog notify queue processing started');
+  async ({ step, logContext }) => {
 
     // Step 1: Read messages from queue
     const messages = await step.run(
@@ -142,10 +144,12 @@ export const processChangelogNotifyQueue = inngest.createFunction(
           success: boolean;
           discordSent: boolean;
           notificationInserted: boolean;
+          emailsSent: number;
         }> => {
           const job = msg.message;
           let discordSent = false;
           let notificationInserted = false;
+          let emailsSent = 0;
 
           try {
             // 1. Send Discord webhook
@@ -199,7 +203,100 @@ export const processChangelogNotifyQueue = inngest.createFunction(
             notificationInserted = true;
             logger.info({ ...logContext, entryId: job.entryId }, 'Notification inserted');
 
-            // 3. Invalidate cache tags
+            // 3. Send email to newsletter subscribers
+            // NOTE: Currently sends to all active subscribers. Once the changelog segment is created
+            // in Resend dashboard and RESEND_SEGMENT_IDS.changelog is updated, we can optionally
+            // add logic to filter contacts by segment membership (requires querying each contact's
+            // segments via Resend API, which may be inefficient for large lists).
+            try {
+              const newsletterService = await getService('newsletter');
+              const subscribers = await newsletterService.getActiveSubscribers();
+
+              if (subscribers && subscribers.length > 0) {
+                // Build email HTML using React Email template
+                const html = await renderEmailTemplate(ChangelogReleaseEmail, {
+                  title: job.title,
+                  tldr: job.tldr || 'We just shipped a fresh Claude Pro Directory release.',
+                  sections: job.sections || [],
+                  releaseDate: job.releaseDate,
+                  slug: job.slug,
+                });
+
+                const resend = getResendClient();
+                const subject = `New Release: ${job.title}`;
+
+                // Use Resend batch API (up to 100 recipients per batch)
+                const batchSize = 100;
+                for (let batchStart = 0; batchStart < subscribers.length; batchStart += batchSize) {
+                  const batch = subscribers.slice(batchStart, batchStart + batchSize);
+
+                  try {
+                    const result = await resend.batch.send(
+                      batch.map((email) => ({
+                        from: HELLO_FROM,
+                        to: email,
+                        subject,
+                        html,
+                        tags: [
+                          { name: 'type', value: 'announcement' },
+                          { name: 'category', value: 'changelog' },
+                        ],
+                      }))
+                    );
+
+                    if (result.data) {
+                      const batchSuccessCount = result.data['length'] || batch.length;
+                      emailsSent += batchSuccessCount;
+                      logger.info(
+                        {
+                          ...logContext,
+                          slug: job.slug,
+                          batchSize: batchSuccessCount,
+                          totalSent: emailsSent,
+                        },
+                        'Changelog email batch sent'
+                      );
+                    }
+                  } catch (batchError) {
+                    const normalized = normalizeError(batchError, 'Email batch send failed');
+                    logger.warn(
+                      {
+                        ...logContext,
+                        slug: job.slug,
+                        errorMessage: normalized.message,
+                        batchStart,
+                      },
+                      'Changelog email batch failed'
+                    );
+                  }
+                }
+
+                logger.info(
+                  {
+                    ...logContext,
+                    slug: job.slug,
+                    totalEmailsSent: emailsSent,
+                    totalSubscribers: subscribers.length,
+                  },
+                  'Changelog emails sent to subscribers'
+                );
+              } else {
+                logger.info({ ...logContext, slug: job.slug }, 'No subscribers to notify via email');
+              }
+            } catch (emailError) {
+              const normalized = normalizeError(emailError, 'Changelog email send failed');
+              logger.warn(
+                {
+                  ...logContext,
+                  slug: job.slug,
+                  errorMessage: normalized.message,
+                },
+                'Changelog email send failed (non-fatal)'
+              );
+              // Don't fail the entire notification if email fails
+            }
+
+            // 4. Invalidate cache tags
             // Using 'max' profile for stale-while-revalidate semantics (Next.js 16+)
             try {
               revalidateTag('changelog', 'max');
@@ -221,14 +318,14 @@ export const processChangelogNotifyQueue = inngest.createFunction(
               );
             }
 
-            return { success: true, discordSent, notificationInserted };
+            return { success: true, discordSent, notificationInserted, emailsSent };
           } catch (error) {
             const normalized = normalizeError(error, 'Changelog notification failed');
             logger.warn(
               { ...logContext, entryId: job.entryId, errorMessage: normalized.message },
               'Changelog notification failed'
             );
-            return { success: notificationInserted, discordSent, notificationInserted };
+            return { success: notificationInserted, discordSent, notificationInserted, emailsSent };
           }
         }
       );
@@ -250,27 +347,18 @@ export const processChangelogNotifyQueue = inngest.createFunction(
       });
     }
 
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
+    // Note: Email count is logged inside each step, not aggregated here
     logger.info(
-      { ...logContext, durationMs, processed: processedMsgIds.length, notified: notifiedCount },
+      { ...logContext, processed: processedMsgIds.length, notified: notifiedCount },
       'Changelog notify queue processing completed'
     );
 
     // Return count of successfully processed messages, not just messages read
     // This ensures processed count matches actual processing, not just queue reads
-    const result = {
+    return {
       processed: processedMsgIds.length, // Count of successfully processed messages
       notified: notifiedCount,
     };
-
-    // BetterStack monitoring: Send success heartbeat (feature-flagged)
-    if (result.notified > 0) {
-      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
-        functionName: 'processChangelogNotifyQueue',
-        result: { notified: result.notified },
-      });
-    }
-
-    return result;
   }
 );

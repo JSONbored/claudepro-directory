@@ -11,7 +11,8 @@
       "@/*": ["./*"],
       "@/src/*": ["./src/*"],
       "@heyclaude/shared-runtime": ["../../packages/shared-runtime/src/index.ts"],
-      "@heyclaude/shared-runtime/*": ["../../packages/shared-runtime/src/*"]
+      "@heyclaude/shared-runtime/*": ["../../packages/shared-runtime/src/*"],
+      "@test-utils/*": ["../../config/tests/utils/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

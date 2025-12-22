@@ -1,14 +1,14 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import {
   getHomepageFeaturedCategories,
   getHomepageTabCategories,
 } from './categories';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock build-time
-vi.mock('../../build-time.ts', () => ({
+jest.mock('../../build-time.ts', () => ({
   isBuildTime: vi.fn(() => false),
 }));
 
@@ -18,14 +18,14 @@ const mockHomepageConfig = {
   'homepage.tab_categories': ['agents', 'mcp', 'rules', 'skills'],
 };
 
-vi.mock('../../config/static-configs.ts', () => ({
+jest.mock('../../config/static-configs.ts', () => ({
   getHomepageConfigBundle: vi.fn(() => ({
     homepageConfig: mockHomepageConfig,
   })),
 }));
 
 // Mock logger
-vi.mock('../../logger.ts', () => ({
+jest.mock('../../logger.ts', () => ({
   logger: {
     child: vi.fn(() => ({
       debug: vi.fn(),
@@ -49,7 +49,7 @@ describe('categories config', () => {
 
     it('should return empty array at build time', async () => {
       const { isBuildTime } = await import('../../build-time.ts');
-      vi.mocked(isBuildTime).mockReturnValueOnce(true);
+      jest.mocked(isBuildTime).mockReturnValueOnce(true);
 
       const categories = getHomepageFeaturedCategories();
       expect(categories).toEqual([]);
@@ -57,7 +57,7 @@ describe('categories config', () => {
 
     it('should filter invalid category values', async () => {
       const { getHomepageConfigBundle } = await import('../../config/static-configs.ts');
-      vi.mocked(getHomepageConfigBundle).mockReturnValueOnce({
+      jest.mocked(getHomepageConfigBundle).mockReturnValueOnce({
         homepageConfig: {
           'homepage.featured_categories': ['agents', 'invalid-category', 'mcp'],
         },
@@ -72,7 +72,7 @@ describe('categories config', () => {
 
     it('should return empty array when config is not an array', async () => {
       const { getHomepageConfigBundle } = await import('../../config/static-configs.ts');
-      vi.mocked(getHomepageConfigBundle).mockReturnValueOnce({
+      jest.mocked(getHomepageConfigBundle).mockReturnValueOnce({
         homepageConfig: {
           'homepage.featured_categories': null,
         },
@@ -84,7 +84,7 @@ describe('categories config', () => {
 
     it('should handle undefined config key', async () => {
       const { getHomepageConfigBundle } = await import('../../config/static-configs.ts');
-      vi.mocked(getHomepageConfigBundle).mockReturnValueOnce({
+      jest.mocked(getHomepageConfigBundle).mockReturnValueOnce({
         homepageConfig: {
           // 'homepage.featured_categories' is missing
         },
@@ -96,7 +96,7 @@ describe('categories config', () => {
 
     it('should handle empty array', async () => {
       const { getHomepageConfigBundle } = await import('../../config/static-configs.ts');
-      vi.mocked(getHomepageConfigBundle).mockReturnValueOnce({
+      jest.mocked(getHomepageConfigBundle).mockReturnValueOnce({
         homepageConfig: {
           'homepage.featured_categories': [],
         },
@@ -108,7 +108,7 @@ describe('categories config', () => {
 
     it('should handle non-array values (string)', async () => {
       const { getHomepageConfigBundle } = await import('../../config/static-configs.ts');
-      vi.mocked(getHomepageConfigBundle).mockReturnValueOnce({
+      jest.mocked(getHomepageConfigBundle).mockReturnValueOnce({
         homepageConfig: {
           'homepage.featured_categories': 'not-an-array',
         },
@@ -120,7 +120,7 @@ describe('categories config', () => {
 
     it('should handle non-array values (object)', async () => {
       const { getHomepageConfigBundle } = await import('../../config/static-configs.ts');
-      vi.mocked(getHomepageConfigBundle).mockReturnValueOnce({
+      jest.mocked(getHomepageConfigBundle).mockReturnValueOnce({
         homepageConfig: {
           'homepage.featured_categories': { not: 'an array' },
         },
@@ -139,7 +139,7 @@ describe('categories config', () => {
 
     it('should return empty array at build time', async () => {
       const { isBuildTime } = await import('../../build-time.ts');
-      vi.mocked(isBuildTime).mockReturnValueOnce(true);
+      jest.mocked(isBuildTime).mockReturnValueOnce(true);
 
       const categories = getHomepageTabCategories();
       expect(categories).toEqual([]);
@@ -147,7 +147,7 @@ describe('categories config', () => {
 
     it('should convert non-string values to strings', async () => {
       const { getHomepageConfigBundle } = await import('../../config/static-configs.ts');
-      vi.mocked(getHomepageConfigBundle).mockReturnValueOnce({
+      jest.mocked(getHomepageConfigBundle).mockReturnValueOnce({
         homepageConfig: {
           'homepage.tab_categories': ['agents', 123, 'mcp'],
         },
@@ -159,7 +159,7 @@ describe('categories config', () => {
 
     it('should return empty array when config is not an array', async () => {
       const { getHomepageConfigBundle } = await import('../../config/static-configs.ts');
-      vi.mocked(getHomepageConfigBundle).mockReturnValueOnce({
+      jest.mocked(getHomepageConfigBundle).mockReturnValueOnce({
         homepageConfig: {
           'homepage.tab_categories': null,
         },
@@ -171,7 +171,7 @@ describe('categories config', () => {
 
     it('should handle undefined config key', async () => {
       const { getHomepageConfigBundle } = await import('../../config/static-configs.ts');
-      vi.mocked(getHomepageConfigBundle).mockReturnValueOnce({
+      jest.mocked(getHomepageConfigBundle).mockReturnValueOnce({
         homepageConfig: {
           // 'homepage.tab_categories' is missing
         },
@@ -185,7 +185,7 @@ describe('categories config', () => {
 
     it('should handle empty array', async () => {
       const { getHomepageConfigBundle } = await import('../../config/static-configs.ts');
-      vi.mocked(getHomepageConfigBundle).mockReturnValueOnce({
+      jest.mocked(getHomepageConfigBundle).mockReturnValueOnce({
         homepageConfig: {
           'homepage.tab_categories': [],
         },
@@ -197,7 +197,7 @@ describe('categories config', () => {
 
     it('should handle non-array values (string)', async () => {
       const { getHomepageConfigBundle } = await import('../../config/static-configs.ts');
-      vi.mocked(getHomepageConfigBundle).mockReturnValueOnce({
+      jest.mocked(getHomepageConfigBundle).mockReturnValueOnce({
         homepageConfig: {
           'homepage.tab_categories': 'not-an-array',
         },
@@ -209,7 +209,7 @@ describe('categories config', () => {
 
     it('should handle non-array values (object)', async () => {
       const { getHomepageConfigBundle } = await import('../../config/static-configs.ts');
-      vi.mocked(getHomepageConfigBundle).mockReturnValueOnce({
+      jest.mocked(getHomepageConfigBundle).mockReturnValueOnce({
         homepageConfig: {
           'homepage.tab_categories': { not: 'an array' },
         },
@@ -221,7 +221,7 @@ describe('categories config', () => {
 
     it('should handle null values in array', async () => {
       const { getHomepageConfigBundle } = await import('../../config/static-configs.ts');
-      vi.mocked(getHomepageConfigBundle).mockReturnValueOnce({
+      jest.mocked(getHomepageConfigBundle).mockReturnValueOnce({
         homepageConfig: {
           'homepage.tab_categories': ['agents', null, 'mcp', undefined],
         },

@@ -18,29 +18,30 @@ vi.mock('next/cache', () => ({
   connection: vi.fn(async () => {}),
 }));
 
+// Import prisma directly - don't use vi.importActual
+// Prisma is automatically PrismockerClient via __mocks__/@prisma/client.ts
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+
 // Mock data-layer services
 const mockGetChangelogEntryLlmsTxt = vi.fn();
 
-vi.mock('@heyclaude/data-layer', async () => {
-  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
-  return {
-    ...actual,
-    AccountService: class {},
-    ChangelogService: class {},
-    CompaniesService: class {},
-    ContentService: class {
-      getChangelogEntryLlmsTxt = mockGetChangelogEntryLlmsTxt;
-    },
-    JobsService: class {},
-    MiscService: class {},
-    NewsletterService: class {},
-    SearchService: class {},
-    TrendingService: class {},
-  };
-});
+vi.mock('@heyclaude/data-layer', () => ({
+  AccountService: class {},
+  ChangelogService: class {},
+  CompaniesService: class {},
+  ContentService: class {
+    getChangelogEntryLlmsTxt = mockGetChangelogEntryLlmsTxt;
+  },
+  JobsService: class {},
+  MiscService: class {},
+  NewsletterService: class {},
+  SearchService: class {},
+  TrendingService: class {},
+}));
 
 // Mock service-factory (getService)
-vi.mock('../../../../../../packages/web-runtime/src/data/service-factory', () => ({
+vi.mock('@heyclaude/web-runtime/data/service-factory', () => ({
   getService: vi.fn(async (serviceKey: string) => {
     const { ContentService } = await import('@heyclaude/data-layer');
     if (serviceKey === 'content') {
@@ -133,7 +134,17 @@ vi.mock('../../../../../../packages/web-runtime/src/auth/get-authenticated-user'
 }));
 
 describe('GET /api/content/changelog/[slug]', () => {
+  let prismocker: PrismaClient;
+
   beforeEach(() => {
+    // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    prismocker = prisma;
+    
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+    
     vi.clearAllMocks();
     mockGetChangelogEntryLlmsTxt.mockResolvedValue('# Changelog Entry\n\n## [1.0.0] - 2025-01-11\n- Added feature');
   });

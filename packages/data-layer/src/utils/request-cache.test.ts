@@ -8,7 +8,7 @@
  * - Cache isolation
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import {
   withRequestCache,
   withSmartCache,
@@ -27,7 +27,7 @@ describe('Request Cache', () => {
 
   describe('withRequestCache', () => {
     it('should cache result on first call', async () => {
-      const mockRpcCall = vi.fn().mockResolvedValue({ id: '1', name: 'Test' });
+      const mockRpcCall = jest.fn().mockResolvedValue({ id: '1', name: 'Test' });
 
       const result1 = await withRequestCache('get_item', mockRpcCall, { p_id: '123' });
 
@@ -36,7 +36,7 @@ describe('Request Cache', () => {
     });
 
     it('should return cached result on second call with same args', async () => {
-      const mockRpcCall = vi.fn().mockResolvedValue({ id: '1', name: 'Test' });
+      const mockRpcCall = jest.fn().mockResolvedValue({ id: '1', name: 'Test' });
 
       const result1 = await withRequestCache('get_item', mockRpcCall, { p_id: '123' });
       const result2 = await withRequestCache('get_item', mockRpcCall, { p_id: '123' });
@@ -47,7 +47,7 @@ describe('Request Cache', () => {
     });
 
     it('should call RPC again with different args', async () => {
-      const mockRpcCall = vi.fn()
+      const mockRpcCall = jest.fn()
         .mockResolvedValueOnce({ id: '1', name: 'Test 1' })
         .mockResolvedValueOnce({ id: '2', name: 'Test 2' });
 
@@ -60,7 +60,7 @@ describe('Request Cache', () => {
     });
 
     it('should handle undefined args', async () => {
-      const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+      const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
       const result1 = await withRequestCache('get_all_items', mockRpcCall, undefined);
       const result2 = await withRequestCache('get_all_items', mockRpcCall, undefined);
@@ -71,7 +71,7 @@ describe('Request Cache', () => {
     });
 
     it('should handle empty args object', async () => {
-      const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+      const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
       const result1 = await withRequestCache('get_all_items', mockRpcCall, {});
       const result2 = await withRequestCache('get_all_items', mockRpcCall, {});
@@ -82,7 +82,7 @@ describe('Request Cache', () => {
     });
 
     it('should handle cache key with sorted object keys', async () => {
-      const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+      const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
       // Same args, different key order
       await withRequestCache('get_item', mockRpcCall, { p_id: '123', p_category: 'agents' });
@@ -92,7 +92,7 @@ describe('Request Cache', () => {
     });
 
     it('should handle errors and not cache them', async () => {
-      const mockRpcCall = vi.fn()
+      const mockRpcCall = jest.fn()
         .mockRejectedValueOnce(new Error('First error'))
         .mockResolvedValueOnce({ id: '1' });
 
@@ -111,7 +111,7 @@ describe('Request Cache', () => {
   describe('withSmartCache', () => {
     describe('mutation detection', () => {
       it('should skip caching for insert operations', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+        const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
         await withSmartCache('insert_item', 'insertItem', mockRpcCall, { p_name: 'Test' });
         await withSmartCache('insert_item', 'insertItem', mockRpcCall, { p_name: 'Test' });
@@ -120,7 +120,7 @@ describe('Request Cache', () => {
       });
 
       it('should skip caching for update operations', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+        const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
         await withSmartCache('update_item', 'updateItem', mockRpcCall, { p_id: '123' });
         await withSmartCache('update_item', 'updateItem', mockRpcCall, { p_id: '123' });
@@ -129,7 +129,7 @@ describe('Request Cache', () => {
       });
 
       it('should skip caching for delete operations', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ success: true });
+        const mockRpcCall = jest.fn().mockResolvedValue({ success: true });
 
         await withSmartCache('delete_item', 'deleteItem', mockRpcCall, { p_id: '123' });
         await withSmartCache('delete_item', 'deleteItem', mockRpcCall, { p_id: '123' });
@@ -138,7 +138,7 @@ describe('Request Cache', () => {
       });
 
       it('should skip caching for upsert operations', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+        const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
         await withSmartCache('upsert_item', 'upsertItem', mockRpcCall, { p_id: '123' });
         await withSmartCache('upsert_item', 'upsertItem', mockRpcCall, { p_id: '123' });
@@ -147,7 +147,7 @@ describe('Request Cache', () => {
       });
 
       it('should skip caching for create operations', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+        const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
         await withSmartCache('create_item', 'createItem', mockRpcCall, { p_name: 'Test' });
         await withSmartCache('create_item', 'createItem', mockRpcCall, { p_name: 'Test' });
@@ -156,7 +156,7 @@ describe('Request Cache', () => {
       });
 
       it('should skip caching for remove operations', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ success: true });
+        const mockRpcCall = jest.fn().mockResolvedValue({ success: true });
 
         await withSmartCache('remove_item', 'removeItem', mockRpcCall, { p_id: '123' });
         await withSmartCache('remove_item', 'removeItem', mockRpcCall, { p_id: '123' });
@@ -165,7 +165,7 @@ describe('Request Cache', () => {
       });
 
       it('should skip caching for batch_insert operations', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ inserted_count: 5 });
+        const mockRpcCall = jest.fn().mockResolvedValue({ inserted_count: 5 });
 
         await withSmartCache('batch_insert_items', 'batchInsertItems', mockRpcCall, { items: [] });
         await withSmartCache('batch_insert_items', 'batchInsertItems', mockRpcCall, { items: [] });
@@ -174,7 +174,7 @@ describe('Request Cache', () => {
       });
 
       it('should skip caching for subscribe operations', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ success: true });
+        const mockRpcCall = jest.fn().mockResolvedValue({ success: true });
 
         await withSmartCache('subscribe_newsletter', 'subscribeNewsletter', mockRpcCall, {
           p_email: 'test@example.com',
@@ -187,7 +187,7 @@ describe('Request Cache', () => {
       });
 
       it('should skip caching for sync operations', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+        const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
         await withSmartCache('sync_changelog_entry', 'syncChangelogEntry', mockRpcCall, {
           p_slug: 'test',
@@ -200,7 +200,7 @@ describe('Request Cache', () => {
       });
 
       it('should skip caching for RPC names with _insert suffix', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+        const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
         await withSmartCache('batch_insert_user_interactions', 'batchInsert', mockRpcCall, {});
         await withSmartCache('batch_insert_user_interactions', 'batchInsert', mockRpcCall, {});
@@ -209,7 +209,7 @@ describe('Request Cache', () => {
       });
 
       it('should skip caching for RPC names with _update suffix', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+        const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
         await withSmartCache('update_webhook_event_status', 'updateStatus', mockRpcCall, {});
         await withSmartCache('update_webhook_event_status', 'updateStatus', mockRpcCall, {});
@@ -218,7 +218,7 @@ describe('Request Cache', () => {
       });
 
       it('should skip caching for RPC names with _delete suffix', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ success: true });
+        const mockRpcCall = jest.fn().mockResolvedValue({ success: true });
 
         await withSmartCache('delete_old_records', 'deleteOld', mockRpcCall, {});
         await withSmartCache('delete_old_records', 'deleteOld', mockRpcCall, {});
@@ -227,7 +227,7 @@ describe('Request Cache', () => {
       });
 
       it('should skip caching for RPC names with _upsert suffix', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+        const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
         await withSmartCache('upsert_notification', 'upsertNotification', mockRpcCall, {});
         await withSmartCache('upsert_notification', 'upsertNotification', mockRpcCall, {});
@@ -236,7 +236,7 @@ describe('Request Cache', () => {
       });
 
       it('should skip caching for RPC names with _sync suffix', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+        const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
         await withSmartCache('sync_changelog_entry', 'syncEntry', mockRpcCall, {});
         await withSmartCache('sync_changelog_entry', 'syncEntry', mockRpcCall, {});
@@ -247,7 +247,7 @@ describe('Request Cache', () => {
 
     describe('read-only operations', () => {
       it('should cache read-only operations', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ id: '1', name: 'Test' });
+        const mockRpcCall = jest.fn().mockResolvedValue({ id: '1', name: 'Test' });
 
         const result1 = await withSmartCache('get_item', 'getItem', mockRpcCall, { p_id: '123' });
         const result2 = await withSmartCache('get_item', 'getItem', mockRpcCall, { p_id: '123' });
@@ -258,7 +258,7 @@ describe('Request Cache', () => {
       });
 
       it('should cache list operations', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue([{ id: '1' }, { id: '2' }]);
+        const mockRpcCall = jest.fn().mockResolvedValue([{ id: '1' }, { id: '2' }]);
 
         const result1 = await withSmartCache('get_content_list', 'getContentList', mockRpcCall, {
           p_category: 'agents',
@@ -273,7 +273,7 @@ describe('Request Cache', () => {
       });
 
       it('should cache search operations', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ results: [], total_count: 0 });
+        const mockRpcCall = jest.fn().mockResolvedValue({ results: [], total_count: 0 });
 
         const result1 = await withSmartCache('search_content', 'searchContent', mockRpcCall, {
           p_query: 'test',
@@ -290,7 +290,7 @@ describe('Request Cache', () => {
 
     describe('method name detection', () => {
       it('should use methodName for mutation detection when provided', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+        const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
         // RPC name doesn't indicate mutation, but methodName does
         await withSmartCache('get_item', 'updateItem', mockRpcCall, { p_id: '123' });
@@ -300,7 +300,7 @@ describe('Request Cache', () => {
       });
 
       it('should fall back to rpcName for mutation detection', async () => {
-        const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+        const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
         // methodName not provided, use rpcName
         await withSmartCache('insert_item', undefined as any, mockRpcCall, { p_name: 'Test' });
@@ -313,7 +313,7 @@ describe('Request Cache', () => {
 
   describe('cache management', () => {
     it('should clear cache with clearRequestCache', async () => {
-      const mockRpcCall = vi.fn()
+      const mockRpcCall = jest.fn()
         .mockResolvedValueOnce({ id: '1' })
         .mockResolvedValueOnce({ id: '2' });
 
@@ -335,7 +335,7 @@ describe('Request Cache', () => {
 
     it('should track cache size correctly', async () => {
       const cache = getRequestCache();
-      const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+      const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
       expect(cache.getStats().size).toBe(0);
 
@@ -354,7 +354,7 @@ describe('Request Cache', () => {
   describe('cache key generation', () => {
     it('should generate consistent keys for same args', async () => {
       const cache = getRequestCache();
-      const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+      const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
       await withRequestCache('get_item', mockRpcCall, { p_id: '123', p_category: 'agents' });
       await withRequestCache('get_item', mockRpcCall, { p_category: 'agents', p_id: '123' });
@@ -363,7 +363,7 @@ describe('Request Cache', () => {
     });
 
     it('should generate different keys for different RPC names', async () => {
-      const mockRpcCall = vi.fn()
+      const mockRpcCall = jest.fn()
         .mockResolvedValueOnce({ id: '1' })
         .mockResolvedValueOnce({ id: '2' });
 
@@ -374,7 +374,7 @@ describe('Request Cache', () => {
     });
 
     it('should handle undefined args in cache key', async () => {
-      const mockRpcCall = vi.fn().mockResolvedValue({ id: '1' });
+      const mockRpcCall = jest.fn().mockResolvedValue({ id: '1' });
 
       await withRequestCache('get_all_items', mockRpcCall, undefined);
       await withRequestCache('get_all_items', mockRpcCall, undefined);

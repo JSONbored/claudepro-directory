@@ -1,11 +1,11 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { getPaymentPlanCatalog, getJobBillingSummaries, type PaymentPlanCatalogEntry, type JobBillingSummaryEntry } from './payments';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock cached-data-factory - use globalThis to avoid hoisting issues
-vi.mock('./cached-data-factory', () => {
+jest.mock('./cached-data-factory', () => {
   if (!(globalThis as any).__paymentsMocks) {
     (globalThis as any).__paymentsMocks = {
       getPaymentPlanCatalog: vi.fn(),

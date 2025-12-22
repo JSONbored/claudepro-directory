@@ -188,16 +188,73 @@ export async function handleSubmitContent(
       throw new Error(error.message);
     }
 
-    // Check if we have minimum required data (use sanitized values)
-    const hasMinimumData = Boolean(
-      input.submission_type && sanitizedName && sanitizedDescription && sanitizedAuthor
-    );
+    // Use elicitation to collect missing required fields
+    let submissionType = input.submission_type;
+    let name = sanitizedName;
+    let description = sanitizedDescription;
+    let author = sanitizedAuthor;
 
-    // Generate submission URL (use sanitized name if available)
+    // Elicit submission_type if missing
+    if (!submissionType && context.elicit) {
+      const elicited = await context.elicit({
+        type: 'string',
+        description: 'What type of content are you submitting?',
+        enum: ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills'] as const,
+      });
+      if (typeof elicited === 'string' && elicited) {
+        submissionType = elicited as typeof input.submission_type;
+      }
+    }
+
+    // Elicit name if missing
+    if (!name && context.elicit) {
+      const elicited = await context.elicit({
+        type: 'string',
+        description: 'What is the name of your content? (e.g., "My Awesome Agent")',
+      });
+      if (typeof elicited === 'string' && elicited) {
+        name = sanitizeString(elicited);
+      }
+    }
+
+    // Elicit description if missing
+    if (!description && context.elicit) {
+      const elicited = await context.elicit({
+        type: 'string',
+        description: 'Provide a description of your content. What does it do?',
+      });
+      if (typeof elicited === 'string' && elicited) {
+        description = sanitizeString(elicited);
+      }
+    }
+
+    // Elicit author if missing
+    if (!author && context.elicit) {
+      const elicited = await context.elicit({
+        type: 'string',
+        description: 'Who is the author of this content? (Your name or GitHub username)',
+      });
+      if (typeof elicited === 'string' && elicited) {
+        author = sanitizeString(elicited);
+      }
+    }
+
+    // Check if we have minimum required data (use sanitized values)
+    const hasMinimumData = Boolean(submissionType && name && description && author);
+
+    // Collect missing required fields for guidance
+    const missingFields: string[] = [];
+    if (!submissionType) missingFields.push('submission_type');
+    if (!name) missingFields.push('name');
+    if (!description) missingFields.push('description');
+    if (!author) missingFields.push('author');
+
+    // Generate submission URL (use collected/elicited values)
     const submissionUrl = generateSubmissionUrl(
       {
         ...input,
-        name: sanitizedName || input.name,
+        submission_type: submissionType || input.submission_type,
+        name: name || sanitizedName || input.name,
       },
       APP_URL
     );
@@ -222,19 +279,51 @@ export async function handleSubmitContent(
       );
       instructions.push('### Your Submission Data\n');
       instructions.push(
-        formatSubmissionData(input, {
-          ...(sanitizedName && { name: sanitizedName }),
-          ...(sanitizedDescription && { description: sanitizedDescription }),
-          ...(sanitizedAuthor && { author: sanitizedAuthor }),
-          ...(sanitizedAuthorProfileUrl && { authorProfileUrl: sanitizedAuthorProfileUrl }),
-          ...(sanitizedGithubUrl && { githubUrl: sanitizedGithubUrl }),
-        })
+        formatSubmissionData(
+          {
+            ...input,
+            submission_type: submissionType || input.submission_type,
+            name: name || sanitizedName || input.name,
+            description: description || sanitizedDescription || input.description,
+            author: author || sanitizedAuthor || input.author,
+          },
+          {
+            ...(name && { name }),
+            ...(description && { description }),
+            ...(author && { author }),
+            ...(sanitizedAuthorProfileUrl && { authorProfileUrl: sanitizedAuthorProfileUrl }),
+            ...(sanitizedGithubUrl && { githubUrl: sanitizedGithubUrl }),
+          }
+        )
       );
     } else {
       instructions.push('## Content Submission Guide\n');
       instructions.push(
         'To submit content to Claude Pro Directory, I need to collect some information.\n'
       );
+      
+      if (missingFields.length > 0) {
+        instructions.push('### Missing Required Information\n');
+        instructions.push(`I still need the following information to proceed:\n`);
+        for (const field of missingFields) {
+          switch (field) {
+            case 'submission_type':
+              instructions.push(`- **Submission Type** (required): Choose from: agents, mcp, rules, commands, hooks, statuslines, or skills`);
+              break;
+            case 'name':
+              instructions.push(`- **Name** (required): The title of your content`);
+              break;
+            case 'description':
+              instructions.push(`- **Description** (required): A brief description of your content`);
+              break;
+            case 'author':
+              instructions.push(`- **Author** (required): Your name or handle`);
+              break;
+          }
+        }
+        instructions.push(`\n**Please provide the missing information above, and I'll continue with your submission.**\n`);
+      }
+      
       instructions.push('### Required Information\n');
       instructions.push(
         '- **Submission Type**: agents, mcp, rules, commands, hooks, statuslines, or skills'
@@ -249,7 +338,6 @@ export async function handleSubmitContent(
       instructions.push('- **Author Profile URL**: Link to your profile');
       instructions.push('- **GitHub URL**: Link to GitHub repository (if applicable)\n');
       instructions.push('### Next Steps\n');
-      instructions.push("I'll ask you for this information step-by-step using MCP elicitation.\n");
       instructions.push("Once I have all the required data, I'll provide you with:");
       instructions.push('- A pre-filled submission URL');
       instructions.push('- Step-by-step instructions');
@@ -267,7 +355,7 @@ export async function handleSubmitContent(
       tool: 'submitContent',
       duration_ms: Date.now() - startTime,
       hasMinimumData,
-      submissionType: input.submission_type || null,
+      submissionType: submissionType || input.submission_type || null,
     });
 
     return {
@@ -280,10 +368,10 @@ export async function handleSubmitContent(
       _meta: {
         submissionUrl,
         hasMinimumData,
-        submissionType: input.submission_type || null,
+        submissionType: submissionType || input.submission_type || null,
         category: input.category || null,
-        name: sanitizedName || null,
-        author: sanitizedAuthor || null,
+        name: name || sanitizedName || null,
+        author: author || sanitizedAuthor || null,
         appUrl: APP_URL,
         webFormUrl: `${APP_URL}/submit`,
         nextSteps: hasMinimumData

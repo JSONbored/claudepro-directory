@@ -1,11 +1,11 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
 import { createDataFunction, type DataFunctionConfig } from './cached-data-factory';
 
 // Mock server-only (required for server-only modules in tests)
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock logger
-vi.mock('../logger.ts', () => ({
+jest.mock('../logger.ts', () => ({
   logger: {
     child: vi.fn(() => ({
       info: vi.fn(),
@@ -16,7 +16,7 @@ vi.mock('../logger.ts', () => ({
 }));
 
 // Mock normalizeError
-vi.mock('../errors.ts', () => ({
+jest.mock('../errors.ts', () => ({
   normalizeError: vi.fn((error, message) => {
     if (error instanceof Error) {
       return error;
@@ -34,7 +34,7 @@ const createMockService = () => ({
 
 const mockService = createMockService();
 
-vi.mock('./service-factory.ts', () => ({
+jest.mock('./service-factory.ts', () => ({
   getService: vi.fn(async (serviceKey: string) => {
     if (serviceKey === 'test') {
       return mockService;
@@ -292,7 +292,7 @@ describe('createDataFunction', () => {
       };
 
       const { getService } = await import('./service-factory.ts');
-      vi.mocked(getService).mockResolvedValueOnce(invalidService as any);
+      jest.mocked(getService).mockResolvedValueOnce(invalidService as any);
 
       const config: DataFunctionConfig<string, string> = {
         methodName: 'nonexistentMethod',
@@ -307,7 +307,7 @@ describe('createDataFunction', () => {
       expect(result).toBeNull();
       
       // Restore mock for subsequent tests
-      vi.mocked(getService).mockResolvedValue(mockService);
+      jest.mocked(getService).mockResolvedValue(mockService);
     });
   });
 
@@ -317,7 +317,7 @@ describe('createDataFunction', () => {
       mockService.testMethod.mockReset();
       mockService.testMethod.mockResolvedValue({ count: 5 });
 
-      const logContextFn = vi.fn((args, result?) => {
+      const mock = jest.fn((args, result?) => {
         return {
           inputLength: (args as string).length,
           resultCount: (result as { count: number })?.count ?? 0,
@@ -360,7 +360,7 @@ describe('createDataFunction', () => {
 
       // Update the mock to return service with both methods
       const { getService } = await import('./service-factory');
-      vi.mocked(getService).mockResolvedValue(mockServiceWithBothMethods as any);
+      jest.mocked(getService).mockResolvedValue(mockServiceWithBothMethods as any);
 
       const config1: DataFunctionConfig<string, string> = {
         methodName: 'testMethod',

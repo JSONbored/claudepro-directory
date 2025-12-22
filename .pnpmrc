@@ -5,6 +5,13 @@ lifecycle-scripts-allow-list[]=esbuild
 lifecycle-scripts-allow-list[]=msw
 lifecycle-scripts-allow-list[]=lefthook
 
+# Use hoisted node linker (pnpm v8.6.0+)
+# This makes pnpm behave like npm/yarn, hoisting all dependencies to node_modules/
+# This is REQUIRED for Prismock compatibility, as PrismockClient internally imports
+# @prisma/client from paths that don't exist in pnpm's default virtual store.
+# NOTE: This is different from shamefully-hoist - it changes the entire linking strategy.
+node-linker=hoisted
+
 # Hoist Next.js and React to root for type compatibility
 # This ensures all packages use the same Next.js installation
 # Fixes TypeScript type compatibility issues in monorepo

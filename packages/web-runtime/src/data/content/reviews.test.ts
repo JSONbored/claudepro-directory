@@ -1,12 +1,12 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, jest } from '@jest/globals';
 import { getReviewsWithStatsData, type ReviewsWithStatsParameters } from './reviews';
 import type { content_category } from '@prisma/client';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock cached-data-factory
-vi.mock('../cached-data-factory', () => ({
+jest.mock('../cached-data-factory', () => ({
   createDataFunction: vi.fn((config: any) => {
     if (!(globalThis as any).__dataFunctionConfigs) {
       (globalThis as any).__dataFunctionConfigs = new Map();

@@ -13,9 +13,9 @@ import {
 import type { notification_type, notification_priority } from '@prisma/client';
 type notificationsCreateInput = Prisma.notificationsCreateInput;
 
-import { inngest } from '../../client';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { logger } from '../../../logging/server';
 import { getService } from '../../../data/service-factory';
+import { createInngestFunction } from '../../utils/function-factory';
 
 type NotificationType = 'announcement' | 'feedback';
 type NotificationPriority = 'high' | 'medium' | 'low';
@@ -43,19 +43,15 @@ function isValidNotificationPriority(value: string): value is notification_prior
  * - action_href?: string
  * - id?: string (for idempotency)
  */
-export const createNotification = inngest.createFunction(
+export const createNotification = createInngestFunction(
   {
     id: 'notifications-create',
     name: 'Create Notification',
+    route: '/inngest/notifications/create',
     retries: 3,
   },
   { event: 'notification/create' },
-  async ({ event, step }) => {
-    const startTime = Date.now();
-    const logContext = createWebAppContextWithId(
-      '/inngest/notifications/create',
-      'createNotification'
-    );
+  async ({ event, step, logContext }) => {
 
     const { title, message, type, priority, action_label, action_href, id } = event.data;
 
@@ -140,9 +136,9 @@ export const createNotification = inngest.createFunction(
       );
     });
 
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
     logger.info(
-      { ...logContext, durationMs, notificationId: notification.id },
+      { ...logContext, notificationId: notification.id },
       'Create notification function completed'
     );
 
@@ -159,19 +155,15 @@ export const createNotification = inngest.createFunction(
  * Similar to createNotification but with different defaults
  * and potentially different distribution logic.
  */
-export const broadcastNotification = inngest.createFunction(
+export const broadcastNotification = createInngestFunction(
   {
     id: 'notifications-broadcast',
     name: 'Broadcast Notification',
+    route: '/inngest/notifications/broadcast',
     retries: 2,
   },
   { event: 'notification/broadcast' },
-  async ({ event, step }) => {
-    const startTime = Date.now();
-    const logContext = createWebAppContextWithId(
-      '/inngest/notifications/broadcast',
-      'broadcastNotification'
-    );
+  async ({ event, step, logContext }) => {
 
     const { title, message, type, priority, action_label, action_href } = event.data;
 
@@ -255,9 +247,9 @@ export const broadcastNotification = inngest.createFunction(
       );
     });
 
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
     logger.info(
-      { ...logContext, durationMs, notificationId: notification.id },
+      { ...logContext, notificationId: notification.id },
       'Broadcast notification completed'
     );
 

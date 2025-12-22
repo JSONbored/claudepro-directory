@@ -7,7 +7,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import { MCP_SERVER_VERSION } from '../lib/types.js';
-import type { McpServerOptions } from '../types/runtime.js';
+import type { McpServerOptions, ToolContext } from '../types/runtime.js';
 import { registerAllTools } from './tools/index.js';
 import { registerAllResources } from './resources/index.js';
 import { registerAllPrompts } from './prompts/index.js';
@@ -22,7 +22,7 @@ export type { McpServerOptions } from '../types/runtime.js';
  * @returns Configured MCP server instance
  */
 export function createMcpServer(options: McpServerOptions): McpServer {
-  const { prisma, user, token, env, logger } = options;
+  const { prisma, user, token, env, logger, kvCache } = options;
 
   // Create MCP server instance
   // Note: capabilities are declared via registerTool/registerResource/registerPrompt calls
@@ -34,14 +34,17 @@ export function createMcpServer(options: McpServerOptions): McpServer {
     // The SDK handles Zod schema conversion automatically
   });
 
+  // Create context with KV cache (ensure kvCache is null if undefined)
+  const context: ToolContext = { prisma, user, token, env, logger, kvCache: kvCache ?? null };
+
   // Register all tools
-  registerAllTools(mcpServer, { prisma, user, token, env, logger });
+  registerAllTools(mcpServer, context);
 
   // Register all resources
-  registerAllResources(mcpServer, { prisma, user, token, env, logger });
+  registerAllResources(mcpServer, context);
 
   // Register all prompts
-  registerAllPrompts(mcpServer, { prisma, user, token, env, logger });
+  registerAllPrompts(mcpServer, context);
 
   return mcpServer;
 }

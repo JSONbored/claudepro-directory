@@ -15,6 +15,8 @@
  */
 
 // Import PrismaClient from default Prisma location
+// In test environment, Jest automatically uses __mocks__/@prisma/client.ts
+// which provides PrismockerClient instead of the real PrismaClient
 import { PrismaClient } from '@prisma/client';
 
 // Import PostgreSQL adapter (Prisma 7.1.0+ requirement)
@@ -47,6 +49,19 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 /**
+ * Check if we're running in Cloudflare Workers
+ * Cloudflare Workers don't have process.env or have a different globalThis structure
+ */
+function isCloudflareWorkers(): boolean {
+  // Cloudflare Workers have navigator but no process.env (or process.env is limited)
+  // Also check for Cloudflare-specific globals
+  return (
+    typeof globalThis.navigator !== 'undefined' &&
+    (typeof process === 'undefined' || typeof process.env === 'undefined' || !process.env['NODE_ENV'])
+  );
+}
+
+/**
  * Prisma Client singleton instance
  *
  * Reuses the same instance across requests in development to prevent
@@ -54,23 +69,46 @@ const globalForPrisma = globalThis as unknown as {
  *
  * Prisma 7.1.0+ requires an adapter when using engine type "client".
  * We use @prisma/adapter-pg with pg Pool for PostgreSQL connection pooling.
+ *
+ * NOTE: In Cloudflare Workers, this will throw an error during module evaluation.
+ * This is expected - Cloudflare Workers should use createPrismaClient from @heyclaude/cloudflare-runtime.
  */
 export const prisma =
   globalForPrisma.prisma ??
   (() => {
+    // In Cloudflare Workers, don't create PrismaClient (will be injected via services)
+    // This check prevents PrismaClient creation during Cloudflare Workers bundling
+    if (isCloudflareWorkers()) {
+      // Return a dummy object that will throw if used
+      // This prevents the module from being evaluated during bundling
+      throw new Error(
+        'PrismaClient is not available in Cloudflare Workers. Use createPrismaClient from @heyclaude/cloudflare-runtime instead.'
+      );
+    }
     // Get POSTGRES_PRISMA_URL from environment (transaction mode, port 6543)
     // During build time or tests, POSTGRES_PRISMA_URL may not be available - handle gracefully
     // Type assertion needed because these are server-only env vars but Prisma client runs at build time
     const dbUrl = (env as { POSTGRES_PRISMA_URL?: string }).POSTGRES_PRISMA_URL;
-    const isTest = env.NODE_ENV === 'test' || (env as { VITEST?: string }).VITEST === 'true' || (env as { VITEST?: string }).VITEST === '1';
+    // Check both env schema and process.env for test detection (env schema might not have VITEST)
+    const isTest = 
+      env.NODE_ENV === 'test' || 
+      (env as { VITEST?: string }).VITEST === 'true' || 
+      (env as { VITEST?: string }).VITEST === '1' ||
+      (typeof process !== 'undefined' && process.env && (process.env['NODE_ENV'] === 'test' || process.env['VITEST'] === 'true' || process.env['VITEST'] === '1'));
     
-    // In test environment, Prismock is used (via __mocks__/@prisma/client.ts)
-    // Prismock doesn't require a connection string, so allow missing POSTGRES_PRISMA_URL
+    // #region agent log
+    if (typeof process !== 'undefined' && process.env) {
+      fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'client.ts:90',message:'Test environment detection',data:{isTest,nodeEnv:env.NODE_ENV,processNodeEnv:process.env['NODE_ENV'],vitest:process.env['VITEST']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    }
+    // #endregion
+    
+    // In test environment, Prismocker is used (via __mocks__/@prisma/client.ts)
+    // Prismocker doesn't require a connection string, so allow missing POSTGRES_PRISMA_URL
     // However, if POSTGRES_PRISMA_URL is provided (via Infisical), use it
     let connectionString: string;
     if (isTest && !dbUrl) {
       // Test environment without POSTGRES_PRISMA_URL - use dummy value
-      // Prismock will be used instead via __mocks__/@prisma/client.ts
+      // Prismocker will be used instead via __mocks__/@prisma/client.ts
       connectionString = 'postgresql://test:test@localhost:5432/test';
     } else if (!dbUrl) {
       // Only throw if we're in Vercel (production deployment) - not during local builds
@@ -104,22 +142,23 @@ export const prisma =
     // The connection string already contains all necessary SSL and connection parameters
     // Do NOT modify the connection string - use it as-is
 
-    // In test environment, skip creating Pool (Prismock doesn't need it)
-    // But we still need to create a PrismaClient instance for the mock to work
-    if (isTest && !dbUrl) {
-      // Return a dummy PrismaClient with dummy adapter for test environment
-      // Prismock will be used instead via __mocks__/@prisma/client.ts
-      // Create a minimal Pool just for the adapter (won't be used by Prismock)
-      const dummyPool = new Pool({
-        connectionString: 'postgresql://test:test@localhost:5432/test',
-        max: 1,
-      });
-      const dummyAdapter = new PrismaPg(dummyPool);
-      return new PrismaClient({
-        adapter: dummyAdapter,
-        log: [],
-      });
-    }
+        // In test environment, skip creating Pool and adapter (Prismocker doesn't need them)
+        // PrismockerClient (via __mocks__/@prisma/client.ts) accepts empty object {} but not adapter or log config
+        // NOTE: Even if POSTGRES_PRISMA_URL is set (via vitest.setup.ts), we should use Prismocker in test mode
+        if (isTest) {
+          // #region agent log
+          if (typeof process !== 'undefined' && process.env) {
+            fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'client.ts:145',message:'BEFORE new PrismaClient({})',data:{isTest,dbUrl:!!dbUrl,PrismaClientName:PrismaClient.name,PrismaClientType:typeof PrismaClient,PrismaClientIsFunction:typeof PrismaClient === 'function'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+          }
+          // #endregion
+          const client = new PrismaClient({} as any); // PrismockerClient via __mocks__/@prisma/client.ts accepts {}
+          // #region agent log
+          if (typeof process !== 'undefined' && process.env) {
+            fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'client.ts:150',message:'AFTER new PrismaClient({})',data:{clientType:client.constructor.name,clientPrototype:Object.getPrototypeOf(client).constructor.name,hasReset:typeof (client as any).reset === 'function',clientKeys:Object.keys(client).slice(0,10)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+          }
+          // #endregion
+          return client;
+        }
 
     // Create pg Pool for connection pooling with SSL configuration
     // Supabase ALWAYS requires SSL connections, even in development/build
@@ -209,10 +248,18 @@ export const prisma =
     const adapter = new PrismaPg(pool);
 
     // Initialize Prisma Client with adapter
-    const client = new PrismaClient({
+    // Production/development: use full config with adapter and log
+    const clientConfig: { adapter: typeof adapter; log: string[] } = {
       adapter,
       log: env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-    });
+    };
+    const client = new PrismaClient(clientConfig as any);
+    
+    // #region agent log
+    if (typeof process !== 'undefined' && process.env) {
+      fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'client.ts:260',message:'After PrismaClient instantiation',data:{isTest,clientType:client.constructor.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+    }
+    // #endregion
     return client;
   })();
 

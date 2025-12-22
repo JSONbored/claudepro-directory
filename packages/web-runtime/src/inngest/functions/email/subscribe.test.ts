@@ -66,8 +66,10 @@ describe('subscribeNewsletter', () => {
       primaryInterest: 'agents',
     });
     vi.mocked(resend.syncContactToResend).mockResolvedValue({
-      id: 'contact-id',
-      email: 'test@example.com',
+      resendContactId: 'contact-id',
+      syncStatus: 'synced' as const,
+      syncError: null,
+      topicIds: [],
     });
     vi.mocked(resend.sendEmail).mockResolvedValue({ id: 'email-id' });
     vi.mocked(resend.enrollInOnboardingSequence).mockResolvedValue(undefined);
@@ -132,10 +134,6 @@ describe('subscribeNewsletter', () => {
         },
       ],
     });
-
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'subscribe.test.ts:136',message:'Error object analysis',data:{error,errorType:typeof error,isError:error instanceof Error,errorString:String(error),errorKeys:error?Object.keys(error):[]},timestamp:Date.now(),sessionId:'vitest-debug',runId:'hypothesis-B',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
 
     expect(error).toBeDefined();
     

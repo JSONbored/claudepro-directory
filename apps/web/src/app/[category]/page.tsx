@@ -51,6 +51,7 @@ import React from 'react';
 import { CategoryPageSearchClient } from '@/src/app/[category]/category-page-search-client';
 import { ExploreDropdown } from '@/src/components/content/explore-dropdown';
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
+import { CategoryNewsletterCTA } from '@/src/components/features/growth/newsletter/category-newsletter-cta';
 
 /**
  * Dynamic Rendering Required
@@ -466,6 +467,9 @@ function CategoryPageContent({
           {/* Sidebar - Unified ContentSidebar with JobsPromo + RecentlyViewed */}
           <ContentSidebar />
         </div>
+
+        {/* Category-specific Newsletter CTA */}
+        <CategoryNewsletterCTA category={category} source="content_page" className="mt-12" />
       </section>
     </>
   );

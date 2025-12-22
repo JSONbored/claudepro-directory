@@ -43,6 +43,19 @@ const NewsletterFooterBar = dynamic(
   }
 );
 
+const ExitIntentNewsletterModal = dynamic(
+  () =>
+    import('@/src/components/features/growth/newsletter/exit-intent-newsletter-modal').then(
+      (mod) => ({
+        default: mod.ExitIntentNewsletterModal,
+      })
+    ),
+  {
+    loading: () => null,
+    ssr: false, // Exit intent only works on client
+  }
+);
+
 /**
  * Wrapper component to access CommandPalette context and render NavigationCommandMenu
  */
@@ -206,6 +219,8 @@ export function LayoutContent({ children, announcement }: LayoutContentProps) {
                 showAfterDelay={delayMs}
                 ctaVariant={ctaVariant}
               />
+              {/* Exit Intent Newsletter Modal - Only on non-auth pages */}
+              {!isAuthRoute && <ExitIntentNewsletterModal source="modal" />}
             </div>
           </CommandMenuWrapper>
         </PinboardDrawerProvider>

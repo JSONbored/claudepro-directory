@@ -22,7 +22,6 @@ import type { SubscribeNewsletterArgs } from '@heyclaude/database-types/postgres
 import { validateEmail, normalizeError } from '@heyclaude/shared-runtime';
 import { revalidateTag } from 'next/cache';
 
-import { inngest } from '../../client';
 import { renderEmailTemplate } from '../../../email/base-template';
 import { NewsletterWelcome } from '../../../email/templates/newsletter-welcome';
 import { HELLO_FROM } from '../../../email/config/email-config';
@@ -33,7 +32,8 @@ import {
   sendEmail,
   enrollInOnboardingSequence,
 } from '../../../integrations/resend';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { logger } from '../../../logging/server';
+import { createInngestFunction, type InngestHandlerContext } from '../../utils/function-factory';
 
 /**
  * Newsletter subscribe function
@@ -45,19 +45,18 @@ import { logger, createWebAppContextWithId } from '../../../logging/server';
  * - Sends a welcome email
  * - Enrolls the user in the onboarding sequence
  */
-export const subscribeNewsletter = inngest.createFunction(
+export const subscribeNewsletter = createInngestFunction(
   {
     id: 'email-subscribe',
     name: 'Newsletter Subscribe',
+    route: '/inngest/email/subscribe',
     retries: 3,
     // Idempotency: Use email to prevent duplicate subscriptions
     // Same email will only be processed once (source changes don't matter for deduplication)
     idempotency: 'event.data.email',
   },
   { event: 'email/subscribe' },
-  async ({ event, step }) => {
-    const startTime = Date.now();
-    const logContext = createWebAppContextWithId('/inngest/email/subscribe', 'subscribeNewsletter');
+  async ({ event, step, logContext }: InngestHandlerContext) => {
 
     const { email, source, referrer, copyType, copyCategory, copySlug } = event.data;
 
@@ -310,11 +309,10 @@ export const subscribeNewsletter = inngest.createFunction(
       });
     }
 
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
     logger.info(
       {
         ...logContext,
-        durationMs,
         subscriptionId: subscription.subscriptionId,
         resendContactId: String(syncResult['resendContactId'] ?? ''),
         syncStatus: String(syncResult['syncStatus'] ?? ''),

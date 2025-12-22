@@ -9,14 +9,24 @@
  * @see https://www.inngest.com/docs/features/inngest-functions/steps-workflows/wait-for-event
  */
 
-import { inngest } from '../../client';
-import { sendEmail } from '../../../integrations/resend';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { escapeHtml } from '@heyclaude/shared-runtime';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { getService } from '../../../data/service-factory';
 
-const BASE_URL = env.NEXT_PUBLIC_SITE_URL || 'https://claudepro.directory';
+import { renderEmailTemplate } from '../../../email/base-template';
+import {
+  DigestPreviewEmail,
+  EngagementNudgeEmail,
+  JobConfirmationDripEmail,
+  JobExpirationReminderEmail,
+  JobPerformanceReportEmail,
+  JobShareReminderEmail,
+  PowerUserTipsEmail,
+} from '../../../email/templates/drip-campaigns';
+import { sendEmail } from '../../../integrations/resend';
+import { logger } from '../../../logging/server';
+import { getService } from '../../../data/service-factory';
+import { createInngestFunction } from '../../utils/function-factory';
+
 const FROM_EMAIL = env.RESEND_FROM_EMAIL || 'Claude Pro Directory <hello@claudepro.directory>';
 
 /**
@@ -43,17 +53,17 @@ function toCelString(value: string | undefined | null): string {
  * 4. If not clicked → send engagement nudge
  * 5. After 7 days → send weekly digest preview
  */
-export const newsletterDripCampaign = inngest.createFunction(
+export const newsletterDripCampaign = createInngestFunction(
   {
     id: 'newsletter-drip-campaign',
     name: 'Newsletter Drip Campaign',
+    route: '/inngest/email/drip-campaigns/newsletter',
     retries: 3,
     // Idempotency: Use email to ensure only one drip campaign per subscriber
     idempotency: 'event.data.email',
   },
   { event: 'email/welcome' },
-  async ({ event, step }) => {
-    const logContext = createWebAppContextWithId('inngest', 'newsletterDripCampaign');
+  async ({ event, step, logContext }) => {
 
     const { email, triggerSource } = event.data;
 
@@ -83,11 +93,12 @@ export const newsletterDripCampaign = inngest.createFunction(
       await step.sleep('delay-tips-email', '1 day');
 
       await step.run('send-power-user-tips', async () => {
+        const html = await renderEmailTemplate(PowerUserTipsEmail, { email });
         const result = await sendEmail({
           to: email,
           from: FROM_EMAIL,
           subject: '🚀 Pro tips for getting the most out of Claude',
-          html: buildPowerUserTipsEmail(),
+          html,
         });
 
         if (result.error) {
@@ -104,11 +115,12 @@ export const newsletterDripCampaign = inngest.createFunction(
       logger.info({ ...logContext, email }, 'User not engaged, sending nudge email');
 
       await step.run('send-nudge-email', async () => {
+        const html = await renderEmailTemplate(EngagementNudgeEmail, { email });
         const result = await sendEmail({
           to: email,
           from: FROM_EMAIL,
           subject: 'Did you know? 5 ways to supercharge your Claude experience',
-          html: buildNudgeEmail(),
+          html,
         });
 
         if (result.error) {
@@ -137,11 +149,12 @@ export const newsletterDripCampaign = inngest.createFunction(
 
     if (stillSubscribed) {
       await step.run('send-digest-preview', async () => {
+        const html = await renderEmailTemplate(DigestPreviewEmail, { email });
         const result = await sendEmail({
           to: email,
           from: FROM_EMAIL,
           subject: '📬 Your first Claude Pro Directory digest is coming!',
-          html: buildDigestPreviewEmail(),
+          html,
         });
 
         return result.data?.id;
@@ -167,17 +180,17 @@ export const newsletterDripCampaign = inngest.createFunction(
  * 4. At 7 days → send performance report
  * 5. At 25 days → remind about expiration (if 30-day listing)
  */
-export const jobPostingDripCampaign = inngest.createFunction(
+export const jobPostingDripCampaign = createInngestFunction(
   {
     id: 'job-posting-drip-campaign',
     name: 'Job Posting Drip Campaign',
+    route: '/inngest/email/drip-campaigns/job-posting',
     retries: 3,
     // Idempotency: Use jobId to ensure only one drip campaign per job posting
     idempotency: 'event.data.jobId',
   },
   { event: 'job/published' },
-  async ({ event, step }) => {
-    const logContext = createWebAppContextWithId('inngest', 'jobPostingDripCampaign');
+  async ({ event, step, logContext }) => {
 
     const { jobId, employerEmail, employerName, jobTitle, jobSlug } = event.data;
     const safeJobTitle = escapeHtml(jobTitle);
@@ -187,11 +200,17 @@ export const jobPostingDripCampaign = inngest.createFunction(
 
     // Step 1: Send confirmation email
     await step.run('send-confirmation', async () => {
+      const html = await renderEmailTemplate(JobConfirmationDripEmail, {
+        jobTitle: safeJobTitle,
+        jobSlug,
+        name: safeName,
+        email: employerEmail,
+      });
       const result = await sendEmail({
         to: employerEmail,
         from: FROM_EMAIL,
         subject: `✅ Your job posting "${safeJobTitle}" is now live!`,
-        html: buildJobConfirmationEmail(safeJobTitle, jobSlug, safeName),
+        html,
       });
 
       if (result.error) {
@@ -215,11 +234,17 @@ export const jobPostingDripCampaign = inngest.createFunction(
     if (!viewedPosting) {
       // Remind them to share their posting
       await step.run('send-share-reminder', async () => {
+        const html = await renderEmailTemplate(JobShareReminderEmail, {
+          jobTitle: safeJobTitle,
+          jobSlug,
+          name: safeName,
+          email: employerEmail,
+        });
         const result = await sendEmail({
           to: employerEmail,
           from: FROM_EMAIL,
           subject: `📣 Boost visibility for "${safeJobTitle}" - share your posting`,
-          html: buildShareReminderEmail(safeJobTitle, jobSlug, safeName),
+          html,
         });
 
         return result.data?.id;
@@ -238,11 +263,19 @@ export const jobPostingDripCampaign = inngest.createFunction(
       await step.run('send-performance-report', async () => {
         const viewCount = Number(jobStats['view_count'] || 0);
         const clickCount = Number(jobStats['click_count'] || 0);
+        const html = await renderEmailTemplate(JobPerformanceReportEmail, {
+          jobTitle: safeJobTitle,
+          jobSlug,
+          name: safeName,
+          email: employerEmail,
+          viewCount,
+          clickCount,
+        });
         const result = await sendEmail({
           to: employerEmail,
           from: FROM_EMAIL,
           subject: `📊 Your job posting stats: ${viewCount} views`,
-          html: buildPerformanceReportEmail(safeJobTitle, jobSlug, safeName, viewCount, clickCount),
+          html,
         });
 
         return result.data?.id;
@@ -261,11 +294,16 @@ export const jobPostingDripCampaign = inngest.createFunction(
 
       if (stillActive) {
         await step.run('send-expiration-reminder', async () => {
+          const html = await renderEmailTemplate(JobExpirationReminderEmail, {
+            jobTitle: safeJobTitle,
+            name: safeName,
+            email: employerEmail,
+          });
           const result = await sendEmail({
             to: employerEmail,
             from: FROM_EMAIL,
             subject: `⏰ Your job posting expires in 5 days - renew now?`,
-            html: buildExpirationReminderEmail(safeJobTitle, jobSlug, safeName),
+            html,
           });
 
           return result.data?.id;
@@ -279,269 +317,3 @@ export const jobPostingDripCampaign = inngest.createFunction(
   }
 );
 
-// ============================================================================
-// Email Templates (HTML builders)
-// ============================================================================
-
-function buildPowerUserTipsEmail(): string {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1a1a1a;">
-  <h1 style="color: #ff6b35; font-size: 24px;">🚀 Pro Tips for Claude Power Users</h1>
-  
-  <p>Since you're actively exploring Claude Pro Directory, here are some tips to get even more value:</p>
-  
-  <div style="background: #f8f9fa; border-radius: 8px; padding: 16px; margin: 20px 0;">
-    <h3 style="margin-top: 0;">1. Bookmark Your Favorites</h3>
-    <p>Save prompts, rules, and MCP servers to your personal library for quick access.</p>
-  </div>
-  
-  <div style="background: #f8f9fa; border-radius: 8px; padding: 16px; margin: 20px 0;">
-    <h3 style="margin-top: 0;">2. Explore Categories</h3>
-    <p>We have specialized content for coding, writing, analysis, and more.</p>
-  </div>
-  
-  <div style="background: #f8f9fa; border-radius: 8px; padding: 16px; margin: 20px 0;">
-    <h3 style="margin-top: 0;">3. Submit Your Own Content</h3>
-    <p>Share your best prompts and get featured in the community.</p>
-  </div>
-  
-  <p style="margin-top: 30px;">
-    <a href="${BASE_URL}" style="background: #ff6b35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Explore More</a>
-  </p>
-  
-  <p style="color: #666; font-size: 14px; margin-top: 30px;">
-    Happy exploring!<br>
-    The Claude Pro Directory Team
-  </p>
-</body>
-</html>`;
-}
-
-function buildNudgeEmail(): string {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1a1a1a;">
-  <h1 style="color: #ff6b35; font-size: 24px;">Did you know? 5 ways to supercharge your Claude experience</h1>
-  
-  <p>We noticed you might not have had a chance to explore yet. Here's what you're missing:</p>
-  
-  <ol style="line-height: 1.8;">
-    <li><strong>Curated Prompts</strong> - Expert-crafted prompts for every use case</li>
-    <li><strong>MCP Servers</strong> - Extend Claude's capabilities with custom tools</li>
-    <li><strong>Cursor Rules</strong> - Optimize your AI-powered coding experience</li>
-    <li><strong>Skills Library</strong> - Downloadable skill packs for Claude Desktop</li>
-    <li><strong>Community Submissions</strong> - Fresh content added daily</li>
-  </ol>
-  
-  <p style="margin-top: 30px;">
-    <a href="${BASE_URL}" style="background: #ff6b35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Start Exploring</a>
-  </p>
-  
-  <p style="color: #666; font-size: 14px; margin-top: 30px;">
-    If you have any questions, just reply to this email!<br>
-    The Claude Pro Directory Team
-  </p>
-</body>
-</html>`;
-}
-
-function buildDigestPreviewEmail(): string {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1a1a1a;">
-  <h1 style="color: #ff6b35; font-size: 24px;">📬 Your Weekly Digest is Coming!</h1>
-  
-  <p>Starting next week, you'll receive our weekly digest featuring:</p>
-  
-  <ul style="line-height: 1.8;">
-    <li>🆕 Trending new prompts and tools</li>
-    <li>⭐ Community highlights</li>
-    <li>📰 Claude ecosystem news</li>
-    <li>💡 Tips and tutorials</li>
-  </ul>
-  
-  <p>The digest arrives every Tuesday morning - keep an eye on your inbox!</p>
-  
-  <p style="margin-top: 30px;">
-    <a href="${BASE_URL}" style="background: #ff6b35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Browse This Week's Content</a>
-  </p>
-  
-  <p style="color: #666; font-size: 14px; margin-top: 30px;">
-    The Claude Pro Directory Team
-  </p>
-</body>
-</html>`;
-}
-
-function buildJobConfirmationEmail(jobTitle: string, jobSlug: string, name: string): string {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1a1a1a;">
-  <h1 style="color: #22c55e; font-size: 24px;">✅ Your Job is Live!</h1>
-  
-  <p>Hi ${name},</p>
-  
-  <p>Great news! Your job posting <strong>"${jobTitle}"</strong> is now live on Claude Pro Directory.</p>
-  
-  <div style="background: #f0fdf4; border-radius: 8px; padding: 16px; margin: 20px 0; border-left: 4px solid #22c55e;">
-    <p style="margin: 0;"><strong>Next steps to maximize visibility:</strong></p>
-    <ul style="margin-top: 10px;">
-      <li>Share on LinkedIn, Twitter, and relevant communities</li>
-      <li>Add to your company's careers page</li>
-      <li>Consider upgrading to Featured for 3x more views</li>
-    </ul>
-  </div>
-  
-  <p style="margin-top: 30px;">
-    <a href="${BASE_URL}/jobs/${jobSlug}" style="background: #ff6b35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">View Your Posting</a>
-  </p>
-  
-  <p style="color: #666; font-size: 14px; margin-top: 30px;">
-    Questions? Just reply to this email.<br>
-    The Claude Pro Directory Team
-  </p>
-</body>
-</html>`;
-}
-
-function buildShareReminderEmail(jobTitle: string, jobSlug: string, name: string): string {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1a1a1a;">
-  <h1 style="color: #ff6b35; font-size: 24px;">📣 Boost Your Job Visibility</h1>
-  
-  <p>Hi ${name},</p>
-  
-  <p>Your job posting <strong>"${jobTitle}"</strong> is live, but sharing it can significantly increase applications!</p>
-  
-  <div style="background: #fef3c7; border-radius: 8px; padding: 16px; margin: 20px 0; border-left: 4px solid #f59e0b;">
-    <p style="margin: 0;"><strong>📊 Did you know?</strong></p>
-    <p style="margin: 10px 0 0 0;">Shared job postings receive 4x more applications on average.</p>
-  </div>
-  
-  <p><strong>Quick share options:</strong></p>
-  <ul>
-    <li><a href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${BASE_URL}/jobs/${jobSlug}`)}">Share on LinkedIn</a></li>
-    <li><a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(`${BASE_URL}/jobs/${jobSlug}`)}&text=${encodeURIComponent(`We're hiring! ${jobTitle}`)}">Share on Twitter/X</a></li>
-  </ul>
-  
-  <p style="margin-top: 30px;">
-    <a href="${BASE_URL}/jobs/${jobSlug}" style="background: #ff6b35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">View Your Posting</a>
-  </p>
-  
-  <p style="color: #666; font-size: 14px; margin-top: 30px;">
-    The Claude Pro Directory Team
-  </p>
-</body>
-</html>`;
-}
-
-function buildPerformanceReportEmail(
-  jobTitle: string,
-  jobSlug: string,
-  name: string,
-  views: number,
-  clicks: number
-): string {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1a1a1a;">
-  <h1 style="color: #ff6b35; font-size: 24px;">📊 Your Job Posting Performance</h1>
-  
-  <p>Hi ${name},</p>
-  
-  <p>Here's how <strong>"${jobTitle}"</strong> is performing after one week:</p>
-  
-  <div style="display: flex; gap: 20px; margin: 20px 0;">
-    <div style="background: #f0fdf4; border-radius: 8px; padding: 20px; text-align: center; flex: 1;">
-      <div style="font-size: 32px; font-weight: bold; color: #22c55e;">${views}</div>
-      <div style="color: #666;">Views</div>
-    </div>
-    <div style="background: #eff6ff; border-radius: 8px; padding: 20px; text-align: center; flex: 1;">
-      <div style="font-size: 32px; font-weight: bold; color: #3b82f6;">${clicks}</div>
-      <div style="color: #666;">Clicks</div>
-    </div>
-  </div>
-  
-  ${
-    views < 50
-      ? `
-  <div style="background: #fef3c7; border-radius: 8px; padding: 16px; margin: 20px 0;">
-    <p style="margin: 0;"><strong>💡 Tip:</strong> Consider upgrading to Featured to boost visibility by 3x!</p>
-  </div>
-  `
-      : ''
-  }
-  
-  <p style="margin-top: 30px;">
-    <a href="${BASE_URL}/jobs/${jobSlug}" style="background: #ff6b35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">View Full Analytics</a>
-  </p>
-  
-  <p style="color: #666; font-size: 14px; margin-top: 30px;">
-    The Claude Pro Directory Team
-  </p>
-</body>
-</html>`;
-}
-
-function buildExpirationReminderEmail(jobTitle: string, _jobSlug: string, name: string): string {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1a1a1a;">
-  <h1 style="color: #f59e0b; font-size: 24px;">⏰ Your Job Posting Expires in 5 Days</h1>
-  
-  <p>Hi ${name},</p>
-  
-  <p>Your job posting <strong>"${jobTitle}"</strong> will expire in 5 days.</p>
-  
-  <div style="background: #fef3c7; border-radius: 8px; padding: 16px; margin: 20px 0; border-left: 4px solid #f59e0b;">
-    <p style="margin: 0;"><strong>Still hiring?</strong></p>
-    <p style="margin: 10px 0 0 0;">Renew your listing to keep it visible to qualified candidates.</p>
-  </div>
-  
-  <p style="margin-top: 30px;">
-    <a href="${BASE_URL}/account/jobs" style="background: #ff6b35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Manage Your Postings</a>
-  </p>
-  
-  <p style="color: #666; font-size: 14px; margin-top: 30px;">
-    The Claude Pro Directory Team
-  </p>
-</body>
-</html>`;
-}

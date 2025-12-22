@@ -2,13 +2,13 @@
  * Centralized Test Data Factories
  *
  * Provides reusable test data factories for common entities.
- * Uses Prismock-compatible data structures for database testing.
+ * Uses Prismocker-compatible data structures for database testing.
  * Optionally uses @faker-js/faker for realistic test data generation.
  *
  * @module config/tests/fixtures/test-data
  */
 
-import type { PrismockClient } from 'prismock';
+import type { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
 /**
@@ -208,10 +208,10 @@ export function createTestBookmark(overrides?: Partial<TestBookmark>): TestBookm
 }
 
 /**
- * Helper to seed Prismock database with test data
+ * Helper to seed Prismocker database with test data
  */
 export async function seedTestData(
-  prismock: PrismockClient,
+  prismocker: PrismaClient,
   options?: {
     users?: TestUser[];
     content?: TestContent[];
@@ -222,31 +222,31 @@ export async function seedTestData(
 ) {
   if (options?.users) {
     for (const user of options.users) {
-      await prismock.public_users.create({ data: user as any });
+      await prismocker.public_users.create({ data: user as any });
     }
   }
 
   if (options?.content) {
     for (const content of options.content) {
-      await prismock.content.create({ data: content as any });
+      await prismocker.content.create({ data: content as any });
     }
   }
 
   if (options?.jobs) {
     for (const job of options.jobs) {
-      await prismock.jobs.create({ data: job as any });
+      await prismocker.jobs.create({ data: job as any });
     }
   }
 
   if (options?.companies) {
     for (const company of options.companies) {
-      await prismock.companies.create({ data: company as any });
+      await prismocker.companies.create({ data: company as any });
     }
   }
 
   if (options?.bookmarks) {
     for (const bookmark of options.bookmarks) {
-      await prismock.bookmarks.create({ data: bookmark as any });
+      await prismocker.bookmarks.create({ data: bookmark as any });
     }
   }
 }

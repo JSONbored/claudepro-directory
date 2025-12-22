@@ -26,29 +26,30 @@ vi.mock('next/server', async () => {
   };
 });
 
+// Import prisma directly - don't use vi.importActual
+// Prisma is automatically PrismockerClient via __mocks__/@prisma/client.ts
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+
 // Mock data-layer services
 const mockGetSocialProofStats = vi.fn();
 
-vi.mock('@heyclaude/data-layer', async () => {
-  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
-  return {
-    ...actual,
-    AccountService: class {},
-    ChangelogService: class {},
-    CompaniesService: class {},
-    ContentService: class {},
-    JobsService: class {},
-    MiscService: class {
-      getSocialProofStats = mockGetSocialProofStats;
-    },
-    NewsletterService: class {},
-    SearchService: class {},
-    TrendingService: class {},
-  };
-});
+vi.mock('@heyclaude/data-layer', () => ({
+  AccountService: class {},
+  ChangelogService: class {},
+  CompaniesService: class {},
+  ContentService: class {},
+  JobsService: class {},
+  MiscService: class {
+    getSocialProofStats = mockGetSocialProofStats;
+  },
+  NewsletterService: class {},
+  SearchService: class {},
+  TrendingService: class {},
+}));
 
 // Mock service-factory (getService)
-vi.mock('../../../../../packages/web-runtime/src/data/service-factory', () => ({
+vi.mock('@heyclaude/web-runtime/data/service-factory', () => ({
   getService: vi.fn(async (serviceKey: string) => {
     const { MiscService } = await import('@heyclaude/data-layer');
     if (serviceKey === 'misc') {
@@ -117,7 +118,17 @@ vi.mock('../../../../../packages/web-runtime/src/auth/get-authenticated-user', (
 }));
 
 describe('GET /api/stats/social-proof', () => {
+  let prismocker: PrismaClient;
+
   beforeEach(() => {
+    // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    prismocker = prisma;
+    
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+    
     vi.clearAllMocks();
     // Mock service returns array with single row (RPC pattern)
     // The route uses transformResult to extract the first row

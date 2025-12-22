@@ -5,7 +5,7 @@
  * PGMQ is a PostgreSQL extension for message queues.
  */
 
-import { prisma } from '@heyclaude/data-layer';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { logger } from '../logging/server';
 

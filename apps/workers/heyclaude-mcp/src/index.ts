@@ -20,8 +20,10 @@ import { createLogger } from '@heyclaude/cloudflare-runtime/logging/pino';
 import { createMcpServer } from '@heyclaude/mcp-server';
 import { convertMcpServerOptions } from '@heyclaude/mcp-server/adapters/cloudflare-worker';
 
-// Import route handlers from package
-import { handleHealth, handleOAuthMetadata, handleOAuthAuthorize, handleOAuthToken, handleOpenAPI } from '@heyclaude/mcp-server';
+// Import route handlers from package and Cloudflare Workers adapters
+import { handleHealth, handleOAuthMetadata, handleOpenAPI } from '@heyclaude/mcp-server';
+import { handleOAuthToken } from './routes/oauth-token.js';
+import { handleOAuthAuthorize } from './routes/oauth-authorize.js';
 
 // Import Cloudflare-specific types
 import type { ExtendedEnv } from '@heyclaude/cloudflare-runtime/config/env';
@@ -138,15 +140,10 @@ const handler = {
         // TypeScript type-checking happens at compile time, runtime is untyped
         const hyperdrive = hyperdriveRaw as unknown as Parameters<typeof createPrismaClient>[0];
         
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.ts:138',message:'Before createPrismaClient call',data:{hasHyperdrive:!!hyperdrive,hasConnectionString:!!hyperdrive?.connectionString,nodejsCompat:env['NODE_ENV']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-        // #endregion
-        
         const prisma = createPrismaClient(hyperdrive);
-        
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/a6ff234e-b9b0-4505-81c3-e5b21fd3c031',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.ts:143',message:'After createPrismaClient call',data:{hasPrisma:!!prisma},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
-        // #endregion
+
+        // Get KV cache binding from env (MCP_CACHE)
+        const kvCacheBinding = env['MCP_CACHE'] as { get(key: string, options?: { type?: 'text' | 'json' }): Promise<string | null>; put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>; delete(key: string): Promise<void> } | undefined;
 
         // Create MCP server instance using package
         // Convert Cloudflare-specific types to runtime-agnostic types
@@ -156,6 +153,7 @@ const handler = {
           token: authResult.token,
           env: env as ExtendedEnv,
           logger,
+          kvCache: kvCacheBinding ?? null,
         });
         const mcpServer = createMcpServer(mcpServerOptions);
 

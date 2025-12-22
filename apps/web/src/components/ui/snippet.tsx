@@ -101,10 +101,12 @@ export const SnippetCopyButton = ({
   };
 
   if (asChild) {
-    return cloneElement(children as ReactElement, {
-      // @ts-expect-error - we know this is a button
-      onClick: copyToClipboard,
-    });
+    return cloneElement(
+      children as ReactElement<{ onClick?: () => void }>,
+      {
+        onClick: copyToClipboard,
+      }
+    );
   }
 
   const icon = isCopied ? <CheckIcon size={14} /> : <CopyIcon size={14} />;

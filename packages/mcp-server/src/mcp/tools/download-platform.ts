@@ -49,8 +49,19 @@ export async function handleDownloadContentForPlatform(
   const category = input.category;
   const slug = sanitizeString(input.slug);
   const platform = input.platform || 'claude-code';
-  const targetDirectory = input.targetDirectory ? sanitizeString(input.targetDirectory) : undefined;
+  let targetDirectory = input.targetDirectory ? sanitizeString(input.targetDirectory) : undefined;
   const startTime = Date.now();
+
+  // Use elicitation to collect targetDirectory if missing
+  if (!targetDirectory && context.elicit) {
+    const elicited = await context.elicit({
+      type: 'string',
+      description: `Enter the target directory path where you want to save the ${platform} configuration file (e.g., /Users/username/.claude or /Users/username/project/.cursor)`,
+    });
+    if (typeof elicited === 'string' && elicited) {
+      targetDirectory = sanitizeString(elicited);
+    }
+  }
 
   // Validate slug format
   if (!isValidSlug(slug)) {

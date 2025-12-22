@@ -9,31 +9,33 @@
  * Data: { urlList: string[], host: string, key: string, keyLocation: string }
  */
 
-import { inngest } from '../../client';
 import { RETRY_CONFIGS } from '../../config';
-import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '../../../logging/server';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { fetchWithRetryAndTimeout } from '@heyclaude/web-runtime/server/fetch-helpers';
 import { TIMEOUT_PRESETS } from '@heyclaude/shared-runtime';
+import { createInngestFunction } from '../../utils/function-factory';
 
 const INDEXNOW_API_URL = 'https://api.indexnow.org/IndexNow';
 
-export const submitIndexNow = inngest.createFunction(
+export const submitIndexNow = createInngestFunction(
   {
-    id: 'indexnow/submit',
+    id: 'indexnow-submit',
     name: 'Submit URLs to IndexNow',
+    route: '/inngest/indexnow/submit',
     retries: RETRY_CONFIGS.externalApi,
     timeouts: {
       finish: '30s', // 30 seconds (TIMEOUTS.EXTERNAL_API = 30000ms)
     },
   },
   { event: 'indexnow/submit' },
-  async ({ event, step }) => {
+  async ({ event, step, logContext }) => {
     const { urlList, host, key, keyLocation } = event.data;
 
     if (!urlList || !Array.isArray(urlList) || urlList.length === 0) {
       logger.warn(
         {
-          eventId: event.id,
+          ...logContext,
           urlCount: urlList?.length ?? 0,
         },
         'IndexNow: Empty or invalid URL list'
@@ -44,7 +46,7 @@ export const submitIndexNow = inngest.createFunction(
     if (!host || !key || !keyLocation) {
       logger.warn(
         {
-          eventId: event.id,
+          ...logContext,
           hasHost: !!host,
           hasKey: !!key,
           hasKeyLocation: !!keyLocation,
@@ -83,7 +85,7 @@ export const submitIndexNow = inngest.createFunction(
           const text = await response.text();
           logger.warn(
             {
-              eventId: event.id,
+              ...logContext,
               status: response.status,
               body: text,
               submitted: urlList.length,
@@ -101,7 +103,7 @@ export const submitIndexNow = inngest.createFunction(
 
         logger.info(
           {
-            eventId: event.id,
+            ...logContext,
             submitted: urlList.length,
             host,
           },
@@ -117,7 +119,7 @@ export const submitIndexNow = inngest.createFunction(
         logger.error(
           {
             err: normalized,
-            eventId: event.id,
+            ...logContext,
             submitted: urlList.length,
           },
           'IndexNow: Submission error'

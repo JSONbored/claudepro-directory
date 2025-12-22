@@ -23,11 +23,10 @@ import { Prisma } from '@prisma/client';
 type Json = Prisma.JsonValue;
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { inngest } from '../../client';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { logger } from '../../../logging/server';
 import { getService } from '../../../data/service-factory';
 import { CONCURRENCY_LIMITS, RETRY_CONFIGS, ACCOUNT_CONCURRENCY_KEYS } from '../../config';
-import { sendCriticalFailureHeartbeat } from '../../utils/monitoring';
+import { createInngestFunction } from '../../utils/function-factory';
 
 /**
  * Polar event types that trigger database RPC functions
@@ -60,10 +59,11 @@ type InformationalEvent = (typeof POLAR_INFORMATIONAL_EVENTS)[number];
  * - Automatic retries on failure
  * - Comprehensive logging
  */
-export const handlePolarWebhook = inngest.createFunction(
+export const handlePolarWebhook = createInngestFunction(
   {
     id: 'polar-webhook-handler',
     name: 'Polar Webhook Handler',
+    route: '/inngest/polar/webhook',
     retries: RETRY_CONFIGS.WEBHOOK,
     // Idempotency: Use webhookId to prevent duplicate processing
     // This ensures the same webhook is processed exactly once
@@ -73,34 +73,18 @@ export const handlePolarWebhook = inngest.createFunction(
       limit: CONCURRENCY_LIMITS.POLAR_API,
       key: ACCOUNT_CONCURRENCY_KEYS.POLAR,
     },
-    // BetterStack monitoring: Send heartbeat on failure (feature-flagged)
-    onFailure: async ({ event, error }) => {
-      const eventData = event?.data as { eventType?: string } | undefined;
-      const context: { functionName?: string; eventType?: string; error?: string } = {
-        functionName: 'handlePolarWebhook',
-      };
-      if (eventData?.eventType) {
-        context.eventType = eventData.eventType;
-      }
-      if (error) {
-        context.error = error instanceof Error ? error.message : String(error);
-      }
-      sendCriticalFailureHeartbeat('BETTERSTACK_HEARTBEAT_CRITICAL_FAILURE', context);
-
-      // Log for observability
-      logger.error(
-        {
-          event: event ? JSON.stringify(event) : 'unknown',
-          error: error ? (error instanceof Error ? error.message : String(error)) : 'unknown',
-        },
-        'Polar webhook handler failed after all retries'
-      );
+    // Throttle: Limit to 50 events per minute to prevent abuse
+    // Payment webhooks are less frequent but can spike during high activity
+    throttle: {
+      limit: 50,
+      period: '1m',
+      key: 'event.data.userId', // Throttle per user to handle user-specific bursts
     },
+    // BetterStack monitoring: Send heartbeat on failure (feature-flagged)
+    onFailureHeartbeat: 'BETTERSTACK_HEARTBEAT_CRITICAL_FAILURE',
   },
   { event: 'polar/webhook' },
-  async ({ event, step }) => {
-    const startTime = Date.now();
-    const logContext = createWebAppContextWithId('/inngest/polar/webhook', 'handlePolarWebhook');
+  async ({ event, step, logContext }) => {
 
     const { eventType, webhookId, svixId, payload, jobId, userId } = event.data;
 
@@ -258,11 +242,10 @@ export const handlePolarWebhook = inngest.createFunction(
       });
     }
 
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
     logger.info(
       {
         ...logContext,
-        durationMs,
         eventType,
         webhookId,
         rpcName: classification.rpcName,
@@ -282,7 +265,6 @@ export const handlePolarWebhook = inngest.createFunction(
       webhookId,
       action: 'processed',
       rpcName: rpcResult.rpcName,
-      durationMs,
     };
   }
 );

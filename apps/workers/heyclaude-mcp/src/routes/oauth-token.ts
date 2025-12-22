@@ -1,50 +1,14 @@
 /**
- * OAuth 2.1 Token Endpoint
+ * OAuth 2.1 Token Endpoint - Cloudflare Workers Adapter
  *
- * Proxies OAuth token exchange requests to Supabase Auth OAuth 2.1 Server.
- * This endpoint handles the authorization code exchange for access tokens.
- *
- * **IMPORTANT:** This requires OAuth 2.1 Server to be enabled in your Supabase project.
- * Enable it in: Authentication > OAuth Server in the Supabase dashboard.
- *
- * The token endpoint:
- * 1. Receives authorization code from client
- * 2. Forwards to Supabase Auth OAuth 2.1 Server
- * 3. Returns access token with correct audience claim (from resource parameter)
+ * Cloudflare Workers-specific adapter for OAuth token exchange.
+ * Uses Cloudflare-specific env parsing (async with Infisical) and Pino logger.
  */
 
 import type { ExtendedEnv } from '@heyclaude/cloudflare-runtime/config/env';
 import { parseEnv } from '@heyclaude/cloudflare-runtime/config/env';
 import { createLogger } from '@heyclaude/cloudflare-runtime/logging/pino';
-import { normalizeError } from '@heyclaude/cloudflare-runtime/utils/errors';
-import { sanitizeString } from '../lib/utils.js';
-
-/**
- * Create an OAuth-style JSON error response
- *
- * @param error - OAuth error code to return (e.g., `invalid_request`, `server_error`)
- * @param description - Human-readable error description
- * @param status - HTTP status code to send (400 or 500); defaults to 400
- * @returns A Response with JSON body containing `error` and `error_description`
- */
-function jsonError(
-  error: string,
-  description: string,
-  status: 400 | 500 = 400
-): Response {
-  return new Response(
-    JSON.stringify({ error, error_description: description }),
-    {
-      status,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
-    }
-  );
-}
+import { handleOAuthTokenShared, type OAuthAdapter } from '@heyclaude/mcp-server';
 
 /**
  * Proxies OAuth token exchange requests to Supabase Auth OAuth 2.1 Server.
@@ -59,83 +23,53 @@ export async function handleOAuthToken(
   request: Request,
   env: ExtendedEnv
 ): Promise<Response> {
-  const logger = createLogger({ name: 'heyclaude-mcp' });
+  // Create adapter with Cloudflare-specific async env parsing and Pino logger
+  const adapter: OAuthAdapter = {
+    parseEnv: async (e: ExtendedEnv) => {
+      const config = await parseEnv(e as ExtendedEnv);
+      return {
+        supabase: {
+          url: config.supabase.url,
+        },
+      };
+    },
+    createLogger: () => {
+      const pinoLogger = createLogger({ name: 'heyclaude-mcp' });
+      // Convert Pino logger (meta-first) to RuntimeLogger (message-first)
+      return {
+        info: (message: string, meta?: Record<string, unknown>) => {
+          pinoLogger.info(meta || {}, message);
+        },
+        error: (message: string, error?: Error | unknown, meta?: Record<string, unknown>) => {
+          pinoLogger.error({ error, ...meta }, message);
+        },
+        warn: (message: string, meta?: Record<string, unknown>) => {
+          pinoLogger.warn(meta || {}, message);
+        },
+        debug: (message: string, meta?: Record<string, unknown>) => {
+          pinoLogger.debug(meta || {}, message);
+        },
+        child: (meta: Record<string, unknown>) => {
+          const childLogger = pinoLogger.child(meta);
+          return {
+            info: (msg: string, m?: Record<string, unknown>) => {
+              childLogger.info(m || {}, msg);
+            },
+            error: (msg: string, err?: Error | unknown, m?: Record<string, unknown>) => {
+              childLogger.error({ error: err, ...m }, msg);
+            },
+            warn: (msg: string, m?: Record<string, unknown>) => {
+              childLogger.warn(m || {}, msg);
+            },
+            debug: (msg: string, m?: Record<string, unknown>) => {
+              childLogger.debug(m || {}, msg);
+            },
+            child: () => adapter.createLogger().child({}),
+          };
+        },
+      };
+    },
+  };
 
-  try {
-    const config = await parseEnv(env);
-    const supabaseAuthUrl = `${config.supabase.url}/auth/v1`;
-
-    // Only allow POST requests
-    if (request.method !== 'POST') {
-      return jsonError('invalid_request', 'Only POST method is supported', 400);
-    }
-
-    // Parse request body (form-encoded)
-    const formData = await request.formData();
-    const grantType = formData.get('grant_type');
-    const code = formData.get('code');
-    const redirectUri = formData.get('redirect_uri');
-    const clientId = formData.get('client_id');
-    const codeVerifier = formData.get('code_verifier');
-
-    // Validate required parameters
-    if (!grantType || grantType !== 'authorization_code') {
-      return jsonError('unsupported_grant_type', 'Only authorization_code grant type is supported', 400);
-    }
-
-    if (!code || !redirectUri || !clientId || !codeVerifier) {
-      logger.warn(
-        { code: !!code, redirectUri: !!redirectUri, clientId: !!clientId, codeVerifier: !!codeVerifier },
-        'Missing required token exchange parameters'
-      );
-      return jsonError('invalid_request', 'Missing required parameters: code, redirect_uri, client_id, code_verifier', 400);
-    }
-
-    // Build Supabase Auth token endpoint URL
-    const tokenUrl = `${supabaseAuthUrl}/oauth/token`;
-
-    // Forward request to Supabase Auth OAuth 2.1 Server
-    const tokenRequest = new Request(tokenUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        code: sanitizeString(code as string),
-        redirect_uri: sanitizeString(redirectUri as string),
-        client_id: sanitizeString(clientId as string),
-        code_verifier: sanitizeString(codeVerifier as string),
-      }).toString(),
-    });
-
-    logger.info({ tokenUrl }, 'Forwarding token exchange to Supabase Auth');
-
-    const tokenResponse = await fetch(tokenRequest);
-
-    // Get response body
-    const responseBody = await tokenResponse.text();
-
-    // Forward response from Supabase Auth
-    return new Response(responseBody, {
-      status: tokenResponse.status,
-      statusText: tokenResponse.statusText,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        // Forward any additional headers from Supabase
-        ...Object.fromEntries(
-          Array.from(tokenResponse.headers.entries()).filter(([key]) =>
-            !['content-encoding', 'transfer-encoding'].includes(key.toLowerCase())
-          )
-        ),
-      },
-    });
-  } catch (error) {
-    const normalized = normalizeError(error, 'OAuth token exchange failed');
-    logger.error({ error: normalized }, 'OAuth token exchange error');
-    return jsonError('server_error', 'Internal server error', 500);
-  }
+  return handleOAuthTokenShared(request, env, adapter);
 }

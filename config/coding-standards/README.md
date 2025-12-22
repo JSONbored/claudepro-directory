@@ -5,7 +5,7 @@ This directory contains coding standards and guidelines for the codebase. These 
 ## Documents
 
 - **[Logging & Error Instrumentation Standards](./logging-standards.md)** - Structured logging patterns, error handling, and instrumentation requirements
-- **[ESLint Architectural Rules](../tools/ESLINT_RULES.md)** - Custom ESLint rules and enforcement patterns
+- **[ESLint Architectural Rules](../tools/eslint-plugin-architectural-rules.js)** - Custom ESLint rules (see inline JSDoc comments for documentation)
 
 ## Purpose
 

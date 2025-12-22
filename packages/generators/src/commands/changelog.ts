@@ -176,6 +176,12 @@ function parseArgs(): GenerateOptions {
   while (!current.done) {
     const arg = current.value;
 
+    // Handle help flags early to avoid unreachable code after process.exit
+    if (arg === '--help' || arg === '-h') {
+      showHelp();
+      process.exit(0);
+    }
+
     switch (arg) {
       case '--branch': {
         current = argsIterator.next();
@@ -245,13 +251,6 @@ function parseArgs(): GenerateOptions {
       case '--dry-run':
       case '--dry': {
         options.dryRun = true;
-        break;
-      }
-      case '--help':
-      case '-h': {
-        showHelp();
-        process.exit(0);
-        // @ts-expect-error - break is unreachable but required by Biome's noFallthroughSwitchClause rule
         break;
       }
       default: {

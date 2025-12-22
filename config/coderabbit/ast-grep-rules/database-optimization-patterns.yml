@@ -1,4 +1,8 @@
 # Database Optimization Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
 # Enforces database query optimization from .cursor/rules/performance-optimization-standards.mdc
 # Codebase uses Prisma ORM with request-scoped caching via withSmartCache()
 
@@ -7,7 +11,7 @@
 id: missing-request-scoped-cache-prisma
 language: typescript
 files:
-  - 'packages/data-layer/src/services/**/*.ts'
+  - 'src/services/**/*.ts'
 rule:
   all:
     - kind: method_definition
@@ -26,7 +30,7 @@ severity: error
 id: missing-smart-cache-prisma-raw
 language: typescript
 files:
-  - 'packages/data-layer/src/services/**/*.ts'
+  - 'src/services/**/*.ts'
 rule:
   all:
     - kind: await_expression
@@ -43,7 +47,7 @@ severity: error
 id: prisma-query-missing-error-handling
 language: typescript
 files:
-  - 'packages/data-layer/src/services/**/*.ts'
+  - 'src/services/**/*.ts'
 rule:
   all:
     - kind: await_expression
@@ -63,7 +67,7 @@ severity: warning
 id: prisma-query-missing-select-optimization
 language: typescript
 files:
-  - 'packages/data-layer/src/services/**/*.ts'
+  - 'src/services/**/*.ts'
 rule:
   all:
     - kind: await_expression
@@ -80,7 +84,7 @@ severity: warning
 id: prisma-findmany-missing-where
 language: typescript
 files:
-  - 'packages/data-layer/src/services/**/*.ts'
+  - 'src/services/**/*.ts'
 rule:
   all:
     - kind: await_expression
@@ -101,7 +105,7 @@ severity: warning
 id: prisma-findmany-missing-pagination
 language: typescript
 files:
-  - 'packages/data-layer/src/services/**/*.ts'
+  - 'src/services/**/*.ts'
 rule:
   all:
     - kind: await_expression
@@ -138,7 +142,7 @@ severity: error
 id: prisma-unsafe-type-assertion
 language: typescript
 files:
-  - 'packages/data-layer/src/services/**/*.ts'
+  - 'src/services/**/*.ts'
 rule:
   all:
     - kind: await_expression
@@ -154,7 +158,7 @@ severity: error
 id: prisma-missing-error-destructuring
 language: typescript
 files:
-  - 'packages/data-layer/src/services/**/*.ts'
+  - 'src/services/**/*.ts'
 rule:
   all:
     - kind: variable_declarator

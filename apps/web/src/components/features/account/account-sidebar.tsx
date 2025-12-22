@@ -11,6 +11,7 @@ import {
   Bookmark,
   Briefcase,
   Home,
+  Mail,
   Plug,
   Send,
   Settings,
@@ -107,6 +108,7 @@ export async function AccountSidebar({
     ...(hasSponsorships
       ? [{ name: 'Sponsorships', href: '/account/sponsorships', icon: TrendingUp }]
       : []),
+    { name: 'Newsletter', href: '/account/newsletter', icon: Mail },
     { name: 'Settings', href: '/account/settings', icon: Settings },
     { name: 'Two-Factor Auth', href: '/account/settings/mfa', icon: Shield },
     { name: 'Connected Accounts', href: '/account/connected-accounts', icon: Plug },

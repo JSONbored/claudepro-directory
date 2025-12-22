@@ -1,4 +1,8 @@
 # React Optimization Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
 # Enforces React performance optimization patterns
 # Prevents unnecessary re-renders and optimizes component performance
 
@@ -106,7 +110,7 @@ severity: error
 id: missing-suspense-async-component
 language: typescript
 files:
-  - 'app/**/*.tsx'
+  - 'apps/web/src/app/**/*.tsx'
 rule:
   all:
     - kind: function_declaration

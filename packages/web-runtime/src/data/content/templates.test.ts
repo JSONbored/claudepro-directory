@@ -1,13 +1,13 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, jest } from '@jest/globals';
 import { getContentTemplates } from './templates';
 import { serializeForClient } from '@heyclaude/shared-runtime';
 import type { content_category } from '@prisma/client';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock serializeForClient - use importActual to include createPinoConfig
-vi.mock('@heyclaude/shared-runtime', async (importOriginal) => {
+jest.mock('@heyclaude/shared-runtime', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@heyclaude/shared-runtime')>();
   return {
     ...actual,
@@ -16,7 +16,7 @@ vi.mock('@heyclaude/shared-runtime', async (importOriginal) => {
 });
 
 // Mock cached-data-factory
-vi.mock('../cached-data-factory', () => ({
+jest.mock('../cached-data-factory', () => ({
   createDataFunction: vi.fn((config: any) => {
     if (!(globalThis as any).__dataFunctionConfigs) {
       (globalThis as any).__dataFunctionConfigs = new Map();

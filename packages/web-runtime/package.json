@@ -98,10 +98,6 @@
       "types": "./src/hooks/use-boolean.ts",
       "default": "./src/hooks/use-boolean.ts"
     },
-    "./hooks/use-button-success": {
-      "types": "./src/hooks/use-button-success.ts",
-      "default": "./src/hooks/use-button-success.ts"
-    },
     "./hooks/use-component-card-config": {
       "types": "./src/hooks/use-component-card-config.tsx",
       "default": "./src/hooks/use-component-card-config.tsx"
@@ -202,6 +198,10 @@
     "./data/utils": {
       "types": "./src/data.ts",
       "default": "./src/data.ts"
+    },
+    "./data/service-factory": {
+      "types": "./src/data/service-factory.ts",
+      "default": "./src/data/service-factory.ts"
     },
     "./config/static-configs": {
       "types": "./src/config/static-configs.ts",
@@ -395,6 +395,11 @@
       "react-server": "./src/data/marketing/site.ts",
       "default": "./src/data/marketing/site.ts"
     },
+    "./data/newsletter": {
+      "types": "./src/data/newsletter.ts",
+      "react-server": "./src/data/newsletter.ts",
+      "default": "./src/data/newsletter.ts"
+    },
     "./data/payments": {
       "types": "./src/data/payments.ts",
       "react-server": "./src/data/payments.ts",
@@ -577,10 +582,6 @@
       "react-server": "./src/inngest/serve.ts",
       "default": "./src/inngest/serve.ts"
     },
-    "./inngest/config": {
-      "types": "./src/inngest/config.ts",
-      "default": "./src/inngest/config.ts"
-    },
     "./integrations/resend": {
       "types": "./src/integrations/resend.ts",
       "default": "./src/integrations/resend.ts"
@@ -592,10 +593,6 @@
     "./design-system": {
       "types": "./src/design-system/index.ts",
       "default": "./src/design-system/index.ts"
-    },
-    "./design-tokens": {
-      "types": "./src/design-tokens/index.ts",
-      "default": "./src/design-tokens/index.ts"
     },
     "./flux/router": {
       "types": "./src/flux/router.ts",
@@ -663,7 +660,6 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
-    "@radix-ui/react-visually-hidden": "^1.2.4",
     "@react-email/components": "^1.0.2",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.89.0",
@@ -674,7 +670,6 @@
     "cmdk": "^1.1.1",
     "devalue": "^5.6.1",
     "dompurify": "^3.3.1",
-    "gsap": "^3.14.2",
     "html2canvas-pro": "^1.6.1",
     "inngest": "^3.48.1",
     "lucide-react": "^0.562.0",
@@ -708,6 +703,7 @@
     "next": "16.1.0",
     "pino-pretty": "^13.1.3",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-email": "^5.1.0"
   }
 }

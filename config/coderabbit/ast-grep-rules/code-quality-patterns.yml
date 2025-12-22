@@ -1,4 +1,8 @@
 # Code Quality Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
 # Industry-standard code quality patterns
 # Improves maintainability and prevents technical debt
 
@@ -38,8 +42,8 @@ severity: error
 id: missing-jsdoc-public-api
 language: typescript
 files:
-  - 'packages/web-runtime/src/**/*.ts'
-  - 'packages/data-layer/src/**/*.ts'
+  - 'src/**/*.ts'
+  - 'src/**/*.ts'
 rule:
   all:
     - kind: function_declaration

@@ -224,6 +224,23 @@ export const RESEND_TOPIC_IDS = {
   platform_updates: 'f84d94d8-76aa-4abf-8ff6-3dfd916b56e6',
 } as const;
 
+/**
+ * Valid Resend topic IDs set for validation
+ */
+const VALID_TOPIC_IDS = new Set(Object.values(RESEND_TOPIC_IDS));
+
+/**
+ * Validate that all topic IDs are valid Resend topic IDs.
+ *
+ * @param topicIds - Array of topic IDs to validate
+ * @returns true if all topic IDs are valid, false otherwise
+ */
+export function validateTopicIds(topicIds: string[]): boolean {
+  return topicIds.every((id): id is typeof RESEND_TOPIC_IDS[keyof typeof RESEND_TOPIC_IDS] => 
+    VALID_TOPIC_IDS.has(id as any)
+  );
+}
+
 const NEWSLETTER_INTEREST_VALUES = Object.values(
   NewsletterInterest
 ) as readonly newsletter_interest[];
@@ -409,10 +426,19 @@ export function buildContactProperties(params: {
 /*                              Segmentation API                              */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Resend Segment IDs
+ * 
+ * @todo Create "changelog" segment in Resend dashboard and update RESEND_SEGMENT_IDS.changelog with the actual segment ID.
+ * See .cursor/resend-emails/CHANGELOG-SEGMENT-SETUP.md for detailed instructions.
+ */
 export const RESEND_SEGMENT_IDS = {
   high_engagement: '7757f565-bb4e-4a3e-bfd8-59f7636a6c14',
   medium_engagement: '6fadc736-c46a-452e-b3bd-8bfedb83f988',
   low_engagement: '2d86c140-fdff-4f22-b9bf-7efa0f7897e9',
+  // TODO: Create "changelog" segment in Resend dashboard and update this ID
+  // Segment name: "Changelog Subscribers" or "changelog"
+  changelog: 'REPLACE_WITH_ACTUAL_SEGMENT_ID',
 } as const;
 
 const SEGMENT_RETRY = {
@@ -679,6 +705,81 @@ export async function updateContactEngagement(
 }
 
 /**
+ * Add a contact to the changelog segment.
+ * 
+ * NOTE: The changelog segment must be created in the Resend dashboard first.
+ * Update RESEND_SEGMENT_IDS.changelog with the actual segment ID after creation.
+ * 
+ * @param resend - Resend client instance
+ * @param contactId - Resend contact ID
+ * @returns Promise that resolves when contact is added to segment
+ */
+export async function addContactToChangelogSegment(
+  resend: Resend,
+  contactId: string
+): Promise<void> {
+  if (!RESEND_SEGMENTS_SUPPORTED) {
+    return;
+  }
+
+  // Skip if segment ID is not set (placeholder value)
+  if (RESEND_SEGMENT_IDS.changelog === 'REPLACE_WITH_ACTUAL_SEGMENT_ID') {
+    logger.warn(
+      {
+        utility: 'resend',
+        operation: 'add-contact-to-changelog-segment',
+        contactId,
+        reason: 'Changelog segment ID not configured',
+      },
+      'Changelog segment ID not set - skipping segment assignment'
+    );
+    return;
+  }
+
+  const logContext: LogContext = {
+    utility: 'resend',
+    operation: 'add-contact-to-changelog-segment',
+    contactId,
+  };
+
+  try {
+    await runWithRetry(
+      async () => {
+        const addResponse = await scheduleSegmentApiCall(() =>
+          resend.contacts.segments.add({
+            contactId,
+            segmentId: RESEND_SEGMENT_IDS.changelog,
+          })
+        );
+        assertResendSuccess(addResponse, 'contacts.segments.add (changelog)');
+      },
+      {
+        attempts: 3,
+        baseDelayMs: 500,
+        onRetry(attempt, error, delay) {
+          logger.warn(
+            { ...logContext, attempt, delay, reason: error.message },
+            '[resend] changelog segment add throttled'
+          );
+        },
+      }
+    );
+
+    logger.info(logContext, 'Contact added to changelog segment');
+  } catch (err) {
+    const errorObj = normalizeError(err, 'Add to changelog segment failed');
+    if (err instanceof ResendApiError) {
+      logger.error(
+        { err: errorObj, ...logContext, status: err.status ?? 0, response_body: err.rawBody ?? '' },
+        'Add to changelog segment failed'
+      );
+    } else {
+      logger.error({ err: errorObj, ...logContext }, 'Add to changelog segment failed');
+    }
+  }
+}
+
+/**
  * Retrieve the list of segment IDs associated with a Resend contact.
  */
 async function listSegmentsWithRetry(resend: Resend, contactId: string): Promise<string[]> {
@@ -695,6 +796,80 @@ async function listSegmentsWithRetry(resend: Resend, contactId: string): Promise
 
   const segments = assertResendSuccess(response, 'contacts.segments.list');
   return segments.data.map((segment) => segment.id);
+}
+
+/**
+ * Retrieve the list of topic IDs that a Resend contact is subscribed to (opted in).
+ *
+ * @param resend - Resend client instance
+ * @param contactId - Resend contact ID
+ * @returns Promise that resolves to array of topic IDs the contact is opted into
+ */
+export async function getContactTopics(
+  resend: Resend,
+  contactId: string
+): Promise<string[]> {
+  const logContext: LogContext = {
+    utility: 'resend',
+    operation: 'get-contact-topics',
+    contactId,
+  };
+
+  try {
+    type ResendContactTopicsApi = {
+      list: (args: { id: string }) => Promise<{
+        data: Array<{ id: string; subscription: 'opt_in' | 'opt_out' }> | null;
+        error: { message?: string } | null;
+      }>;
+    };
+
+    const topicsApi = resend.contacts.topics as unknown as ResendContactTopicsApi;
+    const response = await runWithRetry(
+      () => topicsApi.list({ id: contactId }),
+      {
+        attempts: 3,
+        baseDelayMs: 500,
+        onRetry(attempt, error, delay) {
+          logger.warn(
+            { ...logContext, attempt, delay, reason: error.message },
+            '[resend] topic list throttled'
+          );
+        },
+      }
+    );
+
+    if (response.error || !response.data) {
+      throw new ResendApiError(
+        `contacts.topics.list failed: ${response.error?.message ?? 'Unknown error'}`,
+        null
+      );
+    }
+
+    // Filter to only return topics the contact is opted into
+    const optedInTopics = response.data
+      .filter((topic) => topic.subscription === 'opt_in')
+      .map((topic) => topic.id);
+
+    logger.info({ ...logContext, topic_count: optedInTopics.length }, 'Contact topics retrieved');
+    return optedInTopics;
+  } catch (error) {
+    const errorObj = normalizeError(error, 'Failed to get contact topics');
+    if (error instanceof ResendApiError) {
+      logger.error(
+        {
+          err: errorObj,
+          ...logContext,
+          status: error.status ?? 0,
+          response_body: error.rawBody ?? '',
+        },
+        'Failed to get contact topics'
+      );
+    } else {
+      logger.error({ err: errorObj, ...logContext }, 'Failed to get contact topics');
+    }
+    // Return empty array on error to avoid breaking the UI
+    return [];
+  }
 }
 
 /**

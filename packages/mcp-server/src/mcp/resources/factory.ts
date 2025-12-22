@@ -10,6 +10,25 @@ import { content_category as ContentCategory } from '@prisma/client';
 import { sanitizeString } from '../../lib/utils';
 import { McpErrorCode, createErrorResponse } from '../../lib/errors';
 import type { RuntimeLogger } from '../../types/runtime.js';
+import type { KvResourceCache } from '../../cache/kv-cache.js';
+import { generateCacheHeaders, isNotModified } from '../../cache/cache-headers.js';
+
+/**
+ * Generate ETag from content (simple hash-based)
+ *
+ * @param content - Content string
+ * @returns ETag string
+ */
+function generateETag(content: string): string {
+  // Simple hash-based ETag (for production, consider crypto.subtle)
+  let hash = 0;
+  for (let i = 0; i < content.length; i++) {
+    const char = content.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return `"${Math.abs(hash).toString(16)}"`;
+}
 
 /**
  * Validates if a string is a valid content category enum value
@@ -85,7 +104,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Fetch content from Next.js API route with error handling, timeout, and retry logic
+ * Fetch content from Next.js API route with error handling, timeout, retry logic, and KV caching
  *
  * @param url - API route URL to fetch
  * @param uri - MCP resource URI for logging
@@ -93,7 +112,9 @@ function sleep(ms: number): Promise<void> {
  * @param logger - Logger instance
  * @param timeoutMs - Request timeout in milliseconds (default: 30000)
  * @param retryConfig - Retry configuration (default: 3 retries with exponential backoff)
- * @returns Object with text content and MIME type
+ * @param kvCache - Optional KV cache instance for resource caching
+ * @param requestHeaders - Optional request headers for conditional requests (If-None-Match, If-Modified-Since)
+ * @returns Object with text content, MIME type, cache metadata, and cache headers
  * @throws Error if request fails, times out, or returns non-OK status
  */
 export async function fetchResourceFromApi(
@@ -102,8 +123,48 @@ export async function fetchResourceFromApi(
   context: Record<string, unknown>,
   logger: RuntimeLogger,
   timeoutMs: number = 30000,
-  retryConfig: RetryConfig = DEFAULT_RETRY_CONFIG
-): Promise<{ text: string; mimeType: string }> {
+  retryConfig: RetryConfig = DEFAULT_RETRY_CONFIG,
+  kvCache?: KvResourceCache | null,
+  requestHeaders?: Headers
+): Promise<{ text: string; mimeType: string; etag?: string; cachedAt?: string; cacheHeaders?: Record<string, string>; fromCache?: boolean }> {
+  // Check KV cache first (if available)
+  if (kvCache?.isAvailable()) {
+    try {
+      // Check cache metadata for conditional request
+      if (requestHeaders) {
+        const metadata = await kvCache.getMetadata(uri);
+        if (metadata && isNotModified(requestHeaders, metadata.etag, metadata.cachedAt)) {
+          // Resource not modified - return 304 response metadata
+          logger.info('Resource not modified (304)', { uri, etag: metadata.etag });
+          return {
+            text: '',
+            mimeType: 'text/plain',
+            etag: metadata.etag,
+            cachedAt: metadata.cachedAt,
+            cacheHeaders: generateCacheHeaders(metadata.etag, metadata.cachedAt),
+            fromCache: true,
+          };
+        }
+      }
+
+      // Try to get from cache
+      const cached = await kvCache.get(uri);
+      if (cached) {
+        logger.info('Resource served from KV cache', { uri, cachedAt: cached.cachedAt });
+        return {
+          text: cached.text,
+          mimeType: cached.mimeType,
+          etag: cached.etag,
+          cachedAt: cached.cachedAt,
+          cacheHeaders: generateCacheHeaders(cached.etag, cached.cachedAt),
+          fromCache: true,
+        };
+      }
+    } catch (error) {
+      // Cache error - log but continue with API fetch (graceful degradation)
+      logger.warn('KV cache error, falling back to API', { uri, error: error instanceof Error ? error.message : String(error) });
+    }
+  }
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= retryConfig.maxRetries; attempt++) {
@@ -177,9 +238,29 @@ export async function fetchResourceFromApi(
         // For text content, read as text
         const text = await response.text();
 
+        // Store in KV cache (if available)
+        if (kvCache?.isAvailable()) {
+          try {
+            await kvCache.set(uri, text, contentType);
+            logger.info('Resource cached in KV', { uri });
+          } catch (error) {
+            // Cache write error - log but don't fail (graceful degradation)
+            logger.warn('KV cache write error', { uri, error: error instanceof Error ? error.message : String(error) });
+          }
+        }
+
+        // Generate cache headers
+        const etag = generateETag(text);
+        const cachedAt = new Date().toISOString();
+        const cacheHeaders = generateCacheHeaders(etag, cachedAt);
+
         return {
           text,
           mimeType: contentType,
+          etag,
+          cachedAt,
+          cacheHeaders,
+          fromCache: false,
         };
       } catch (error) {
         clearTimeout(timeoutId);

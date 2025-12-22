@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import {
   getUserCompleteData,
   getUserBookmarksForCollections,
@@ -11,25 +11,25 @@ import {
 } from './account';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock Supabase client - must define inline to avoid hoisting issues
-vi.mock('../supabase/server.ts', () => ({
+jest.mock('../supabase/server.ts', () => ({
   createSupabaseServerClient: vi.fn(() => ({})),
 }));
 
 // Mock auth - must define inline to avoid hoisting issues
-vi.mock('../auth/get-authenticated-user.ts', () => ({
+jest.mock('../auth/get-authenticated-user.ts', () => ({
   getAuthenticatedUserFromClient: vi.fn(),
 }));
 
 // Mock service factory - must define inline to avoid hoisting issues
-vi.mock('./service-factory.ts', () => ({
+jest.mock('./service-factory.ts', () => ({
   getService: vi.fn(),
 }));
 
 // Mock logger
-vi.mock('../logger.ts', () => ({
+jest.mock('../logger.ts', () => ({
   logger: {
     child: vi.fn(() => ({
       info: vi.fn(),
@@ -40,7 +40,7 @@ vi.mock('../logger.ts', () => ({
 }));
 
 // Mock errors
-vi.mock('../errors.ts', () => ({
+jest.mock('../errors.ts', () => ({
   normalizeError: (error: unknown, fallback?: string) => {
     if (error instanceof Error) return error;
     return new Error(fallback || String(error));
@@ -48,12 +48,12 @@ vi.mock('../errors.ts', () => ({
 }));
 
 // Mock homepage data
-vi.mock('./content/homepage.ts', () => ({
+jest.mock('./content/homepage.ts', () => ({
   getHomepageData: vi.fn().mockResolvedValue({ categories: [] }),
 }));
 
 // Mock category config
-vi.mock('./config/category/index.ts', () => ({
+jest.mock('./config/category/index.ts', () => ({
   getHomepageCategoryIds: ['agents', 'mcp'],
 }));
 
@@ -71,9 +71,9 @@ describe('account data functions', () => {
     isFollowingBatch: vi.fn(),
   } as any; // Use 'as any' to allow dynamic method assignment in tests
 
-  let mockGetAuthenticatedUserFromClient: ReturnType<typeof vi.fn>;
-  let mockGetService: ReturnType<typeof vi.fn>;
-  let mockCreateSupabaseServerClient: ReturnType<typeof vi.fn>;
+  let mockGetAuthenticatedUserFromClient: ReturnType<typeof jest.fn>;
+  let mockGetService: ReturnType<typeof jest.fn>;
+  let mockCreateSupabaseServerClient: ReturnType<typeof jest.fn>;
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -83,9 +83,9 @@ describe('account data functions', () => {
     const { getAuthenticatedUserFromClient } = await import('../auth/get-authenticated-user.ts');
     const { getService } = await import('./service-factory.ts');
     
-    mockCreateSupabaseServerClient = vi.mocked(createSupabaseServerClient);
-    mockGetAuthenticatedUserFromClient = vi.mocked(getAuthenticatedUserFromClient);
-    mockGetService = vi.mocked(getService);
+    mockCreateSupabaseServerClient = jest.mocked(createSupabaseServerClient);
+    mockGetAuthenticatedUserFromClient = jest.mocked(getAuthenticatedUserFromClient);
+    mockGetService = jest.mocked(getService);
     
     mockCreateSupabaseServerClient.mockReturnValue({});
     mockGetAuthenticatedUserFromClient.mockResolvedValue({
@@ -373,7 +373,7 @@ describe('account data functions', () => {
       };
 
       mockAccountService.getUserCompleteData.mockResolvedValue(mockCompleteData);
-      vi.mocked(getHomepageData).mockResolvedValue({} as any);
+      jest.mocked(getHomepageData).mockResolvedValue({} as any);
 
       const result = await getAccountDashboardBundle('user-123');
 
@@ -391,7 +391,7 @@ describe('account data functions', () => {
       };
 
       mockAccountService.getUserCompleteData.mockResolvedValue(mockCompleteData);
-      vi.mocked(getHomepageData).mockResolvedValue({ categories: ['custom'] });
+      jest.mocked(getHomepageData).mockResolvedValue({ categories: ['custom'] });
 
       const result = await getAccountDashboardBundle('user-123', ['custom']);
 
@@ -407,7 +407,7 @@ describe('account data functions', () => {
       };
 
       mockAccountService.getUserCompleteData.mockResolvedValue(mockCompleteData);
-      vi.mocked(getHomepageData).mockResolvedValue({ categories: [] });
+      jest.mocked(getHomepageData).mockResolvedValue({ categories: [] });
 
       const result = await getAccountDashboardBundle('user-123');
 

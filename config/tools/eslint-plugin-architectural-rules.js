@@ -5045,68 +5045,6 @@ export default {
         };
       },
     },
-    'prevent-base-log-context-usage': {
-      meta: {
-        type: 'problem',
-        docs: {
-          description:
-            'Prevent usage of deprecated BaseLogContext type in favor of Record<string, unknown>',
-          category: 'Best Practices',
-          recommended: true,
-        },
-        fixable: null, // DISABLED: Autofix too risky - type changes could break TypeScript compilation
-        schema: [],
-        messages: {
-          useRecordStringUnknown:
-            'BaseLogContext is deprecated. Use Record<string, unknown> instead for consistency and maintainability.',
-        },
-      },
-      create(context) {
-        const sourceCode = context.getSourceCode();
-
-        return {
-          TSTypeReference(node) {
-            // Check for BaseLogContext type usage
-            if (node.typeName.type === 'Identifier' && node.typeName.name === 'BaseLogContext') {
-              context.report({
-                node,
-                messageId: 'useRecordStringUnknown',
-                fix(fixer) {
-                  return fixer.replaceText(node, 'Record<string, unknown>');
-                },
-              });
-            }
-          },
-          ImportSpecifier(node) {
-            // Check for BaseLogContext import
-            if (node.imported.type === 'Identifier' && node.imported.name === 'BaseLogContext') {
-              context.report({
-                node,
-                messageId: 'useRecordStringUnknown',
-                fix(fixer) {
-                  // Remove the import
-                  const importDeclaration = node.parent;
-                  if (importDeclaration.specifiers.length === 1) {
-                    // Only this import, remove entire import
-                    return fixer.remove(importDeclaration);
-                  } else {
-                    // Multiple imports, just remove this one
-                    const nextToken = sourceCode.getTokenAfter(node);
-                    const prevToken = sourceCode.getTokenBefore(node);
-                    if (nextToken && nextToken.value === ',') {
-                      return fixer.removeRange([node.range[0], nextToken.range[1]]);
-                    } else if (prevToken && prevToken.value === ',') {
-                      return fixer.removeRange([prevToken.range[0], node.range[1]]);
-                    }
-                    return fixer.remove(node);
-                  }
-                },
-              });
-            }
-          },
-        };
-      },
-    },
     'prevent-direct-pino-logger-usage': {
       meta: {
         type: 'problem',
@@ -5238,59 +5176,9 @@ export default {
         },
       },
       create(context) {
-        const filename = context.getFilename();
-        const sourceCode = context.getSourceCode();
-
         // Edge functions (Supabase Edge Functions) have been migrated to Cloudflare Workers
         // This rule is no longer needed - return empty config
-          return {};
-          VariableDeclarator(node) {
-            // Check for manual logContext creation
-            if (
-              node.id.type === 'Identifier' &&
-              (node.id.name.includes('logContext') ||
-                node.id.name.includes('Context') ||
-                node.id.name === 'context')
-            ) {
-              // Check if init is an object expression with function, action, request_id, started_at
-              if (node.init && node.init.type === 'ObjectExpression') {
-                const properties = node.init.properties;
-                const hasFunction = properties.some(
-                  (prop) =>
-                    prop.type === 'Property' &&
-                    prop.key.type === 'Identifier' &&
-                    prop.key.name === 'function'
-                );
-                const hasAction = properties.some(
-                  (prop) =>
-                    prop.type === 'Property' &&
-                    prop.key.type === 'Identifier' &&
-                    prop.key.name === 'action'
-                );
-                const hasRequestId = properties.some(
-                  (prop) =>
-                    prop.type === 'Property' &&
-                    prop.key.type === 'Identifier' &&
-                    (prop.key.name === 'request_id' || prop.key.name === 'requestId')
-                );
-                const hasStartedAt = properties.some(
-                  (prop) =>
-                    prop.type === 'Property' &&
-                    prop.key.type === 'Identifier' &&
-                    prop.key.name === 'started_at'
-                );
-
-                // If it has all the standard fields, suggest using creation function
-                if (hasFunction && hasAction && hasRequestId && hasStartedAt) {
-                  context.report({
-                    node,
-                    messageId: 'useCreationFunction',
-                  });
-                }
-              }
-            }
-          },
-        };
+        return {};
       },
     },
     'no-relative-imports-in-import-map-packages': {

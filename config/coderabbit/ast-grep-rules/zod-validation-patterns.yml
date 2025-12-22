@@ -1,4 +1,8 @@
 # Zod Validation Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
 # Enforces proper Zod schema usage and validation patterns
 # Shareable across projects using Zod for validation
 
@@ -7,7 +11,7 @@
 id: missing-zod-validation-api-route
 language: typescript
 files:
-  - 'app/api/**/*.ts'
+  - 'apps/web/src/app/api/**/*.ts'
 rule:
   all:
     - kind: function_declaration
@@ -58,8 +62,8 @@ severity: warning
 id: zod-schema-missing-openapi-meta
 language: typescript
 files:
-  - 'packages/web-runtime/src/api/**/*.ts'
-  - 'app/api/**/*.ts'
+  - 'src/api/**/*.ts'
+  - 'apps/web/src/app/api/**/*.ts'
 rule:
   all:
     - kind: variable_declarator
@@ -112,7 +116,7 @@ severity: warning
 id: zod-schema-missing-coerce
 language: typescript
 files:
-  - 'app/api/**/*.ts'
+  - 'apps/web/src/app/api/**/*.ts'
 rule:
   all:
     - kind: variable_declarator

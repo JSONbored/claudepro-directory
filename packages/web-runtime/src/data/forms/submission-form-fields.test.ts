@@ -1,12 +1,12 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { getSubmissionFormFields, fetchFieldsForContentType } from './submission-form-fields';
 import { SUBMISSION_CONTENT_TYPES } from '../../types/component.types';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock cached-data-factory - use globalThis to avoid hoisting issues
-vi.mock('../cached-data-factory', () => {
+jest.mock('../cached-data-factory', () => {
   if (!(globalThis as any).__submissionFormMocks) {
     (globalThis as any).__submissionFormMocks = {
       fetchFieldsForContentType: vi.fn(),
@@ -29,7 +29,7 @@ vi.mock('../cached-data-factory', () => {
 });
 
 // Mock types
-vi.mock('../../types/component.types', () => ({
+jest.mock('../../types/component.types', () => ({
   SUBMISSION_CONTENT_TYPES: ['agents', 'mcp', 'rules'],
 }));
 

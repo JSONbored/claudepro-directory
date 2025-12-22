@@ -1,18 +1,18 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { getLayoutData } from './layout';
 import { DEFAULT_LAYOUT_DATA } from './layout/constants';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock announcements
-const mockGetActiveAnnouncement = vi.fn();
-vi.mock('./announcements', () => ({
+const mock = jest.fn();
+jest.mock('./announcements', () => ({
   getActiveAnnouncement: () => mockGetActiveAnnouncement(),
 }));
 
 // Mock logger - use globalThis to avoid hoisting issues
-vi.mock('../logger', () => {
+jest.mock('../logger', () => {
   if (!(globalThis as any).__layoutLoggerMocks) {
     (globalThis as any).__layoutLoggerMocks = {
       info: vi.fn(),

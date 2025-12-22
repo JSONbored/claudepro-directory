@@ -26,35 +26,31 @@ vi.mock('next/cache', () => ({
   connection: vi.fn(() => Promise.resolve()),
 }));
 
-// Mock data-layer services (service-factory imports from @heyclaude/data-layer)
-// This matches the pattern used in service-factory.test.ts
-// Update service class and method as needed
-// IMPORTANT: Use vi.importActual to include prisma export (required by pgmq-client)
+// Mock data-layer services
+// IMPORTANT: Import prisma directly - don't use vi.importActual
+// Prisma is automatically PrismockerClient via __mocks__/@prisma/client.ts
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+
 const mockServiceMethod = vi.fn();
 
-vi.mock('@heyclaude/data-layer', async () => {
-  // Import actual modules to get prisma export (PrismockClient in tests)
-  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
-  return {
-    ...actual,
-    AccountService: class {},
-    ChangelogService: class {},
-    CompaniesService: class {
-      // Add methods as needed: yourMethodName = mockServiceMethod;
-    },
-    ContentService: class {},
-    JobsService: class {},
-    MiscService: class {
-      // Add methods as needed: yourMethodName = mockServiceMethod;
-    },
-    NewsletterService: class {},
-    SearchService: class {
-      // Add methods as needed: yourMethodName = mockServiceMethod;
-    },
-    TrendingService: class {},
-    // prisma is already exported from actual (will be PrismockClient in tests)
-  };
-});
+vi.mock('@heyclaude/data-layer', () => ({
+  AccountService: class {},
+  ChangelogService: class {},
+  CompaniesService: class {
+    // Add methods as needed: yourMethodName = mockServiceMethod;
+  },
+  ContentService: class {},
+  JobsService: class {},
+  MiscService: class {
+    // Add methods as needed: yourMethodName = mockServiceMethod;
+  },
+  NewsletterService: class {},
+  SearchService: class {
+    // Add methods as needed: yourMethodName = mockServiceMethod;
+  },
+  TrendingService: class {},
+}));
 
 // Mock logger
 vi.mock('../../../../packages/web-runtime/src/logging/server', () => ({
@@ -166,7 +162,17 @@ vi.mock('../../../../packages/web-runtime/src/auth/get-authenticated-user', () =
 }));
 
 describe('GET /api/your-route', () => {
+  let prismocker: PrismaClient;
+
   beforeEach(() => {
+    // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    prismocker = prisma;
+    
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+    
     vi.clearAllMocks();
   });
 

@@ -5,14 +5,11 @@
  * Converts Cloudflare-specific types (ExtendedEnv, Logger) to runtime-agnostic types.
  */
 
-// Cloudflare runtime types are only available in Cloudflare Workers context
-// These imports will fail type-checking in standalone package, but that's expected
-// The adapter is only used in apps/workers/heyclaude-mcp where these types exist
-// @ts-expect-error - Cloudflare runtime types not available in standalone package
+// Cloudflare runtime types for adapter (type-only imports)
+// Added as devDependency for type-checking in standalone package
 import type { ExtendedEnv } from '@heyclaude/cloudflare-runtime/config/env';
-// @ts-expect-error - Cloudflare runtime types not available in standalone package
 import type { Logger } from '@heyclaude/cloudflare-runtime/logging/pino';
-import type { RuntimeEnv, RuntimeLogger, ToolContext, McpServerOptions } from '../types/runtime.js';
+import type { RuntimeEnv, RuntimeLogger, ToolContext, McpServerOptions, KvNamespace } from '../types/runtime.js';
 import type { PrismaClient } from '@prisma/client';
 import type { User } from '@supabase/supabase-js';
 
@@ -56,6 +53,7 @@ export function convertMcpServerOptions(options: {
   token: string;
   env: ExtendedEnv;
   logger: Logger;
+  kvCache?: KvNamespace | null;
 }): McpServerOptions {
   return {
     prisma: options.prisma,
@@ -63,6 +61,7 @@ export function convertMcpServerOptions(options: {
     token: options.token,
     env: convertEnv(options.env),
     logger: convertLogger(options.logger),
+    kvCache: options.kvCache ?? null,
   };
 }
 

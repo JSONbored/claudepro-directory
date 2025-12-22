@@ -9,6 +9,7 @@
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolContext } from '../../types/runtime.js';
+import { createKvCache } from '../../cache/kv-cache.js';
 import { handleContentResource } from './content.js';
 import { handleCategoryResource } from './category.js';
 import { handleSitewideResource } from './sitewide.js';
@@ -25,7 +26,10 @@ import {
  * @param context - Tool handler context
  */
 export function registerAllResources(mcpServer: McpServer, context: ToolContext): void {
-  const { prisma, logger } = context;
+  const { prisma, logger, kvCache } = context;
+  
+  // Create KV cache instance if KV binding is available
+  const resourceCache = kvCache ? createKvCache(kvCache, { ttl: 3600 }) : null;
 
   // 1. Content resource: claudepro://content/{category}/{slug}/{format}
   mcpServer.registerResource(
@@ -52,7 +56,9 @@ export function registerAllResources(mcpServer: McpServer, context: ToolContext)
       mimeType: 'text/plain',
     },
     async (uri: URL, _context?: { category?: string; slug?: string; format?: string }) => {
-      const result = await handleContentResource(uri.href, logger);
+      // Note: MCP SDK doesn't provide request headers in resource handler
+      // Cache headers will be added at HTTP response level in worker handler
+      const result = await handleContentResource(uri.href, logger, resourceCache);
       return {
         contents: [
           {
@@ -86,7 +92,9 @@ export function registerAllResources(mcpServer: McpServer, context: ToolContext)
       mimeType: 'text/plain',
     },
     async (uri: URL, _context?: { category?: string; format?: string }) => {
-      const result = await handleCategoryResource(uri.href, logger);
+      // Note: MCP SDK doesn't provide request headers in resource handler
+      // Cache headers will be added at HTTP response level in worker handler
+      const result = await handleCategoryResource(uri.href, logger, resourceCache);
       return {
         contents: [
           {
@@ -117,7 +125,9 @@ export function registerAllResources(mcpServer: McpServer, context: ToolContext)
       mimeType: 'text/plain',
     },
     async (uri: URL, _context?: { format?: string }) => {
-      const result = await handleSitewideResource(uri.href, logger);
+      // Note: MCP SDK doesn't provide request headers in resource handler
+      // Cache headers will be added at HTTP response level in worker handler
+      const result = await handleSitewideResource(uri.href, logger, resourceCache);
       return {
         contents: [
           {

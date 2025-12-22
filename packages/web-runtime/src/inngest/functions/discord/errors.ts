@@ -8,10 +8,9 @@
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 
-import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete } from '../../../supabase/pgmq-client';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
-import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
+import { logger } from '../../../logging/server';
+import { createInngestFunction } from '../../utils/function-factory';
 
 const DISCORD_ERRORS_QUEUE = 'discord_errors';
 const BATCH_SIZE = 10;
@@ -56,19 +55,21 @@ function buildErrorEmbed(payload: ErrorWebhookPayload): Record<string, unknown> 
  * Process discord_errors queue
  * Runs every 30 minutes to send error notifications to Discord.
  * Optimized: Increased from 15 minutes (errors don't need immediate alerts).
+ * Uses singleton pattern to prevent duplicate runs.
  */
-export const processDiscordErrorsQueue = inngest.createFunction(
+export const processDiscordErrorsQueue = createInngestFunction(
   {
     id: 'discord-errors-queue',
     name: 'Process Discord Errors Queue',
+    route: '/inngest/discord-errors',
     retries: 3,
+    // Singleton pattern: Only one Discord errors processor can run at a time
+    singleton: {
+      key: 'discord-errors',
+    },
   },
   { cron: '*/30 * * * *' }, // Every 30 minutes (optimized from 15 minutes)
-  async ({ step }) => {
-    const logContext = createWebAppContextWithId(
-      '/inngest/discord-errors',
-      'processDiscordErrorsQueue'
-    );
+  async ({ step, logContext }) => {
 
     // Step 1: Read messages from queue
     const messages = await step.run('read-queue', async () => {
@@ -181,21 +182,11 @@ export const processDiscordErrorsQueue = inngest.createFunction(
       'Discord errors queue processing complete'
     );
 
-    const result = {
+    return {
       processed: messages.length,
       success: successCount,
       failed: failedCount,
       results,
     };
-
-    // BetterStack monitoring: Send success heartbeat (feature-flagged)
-    if (result.success > 0) {
-      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
-        functionName: 'processDiscordErrorsQueue',
-        result: { success: result.success },
-      });
-    }
-
-    return result;
   }
 );

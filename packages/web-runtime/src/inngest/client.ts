@@ -298,6 +298,7 @@ export interface SupabaseContentChangedEventData {
  * - id: Unique identifier for this app in Inngest dashboard
  * - schemas: Type-safe event schemas
  * - env: Environment identifier for branch environments (preview branches)
+ * - checkpointing: Enabled for performance optimization (eager step execution)
  *
  * Environment variables (auto-injected by Vercel Marketplace integration):
  * - INNGEST_EVENT_KEY: For sending events
@@ -308,7 +309,12 @@ export interface SupabaseContentChangedEventData {
  * - Preview: Uses branch-specific environment based on PR ID or commit SHA
  * - Development: Uses default environment (local dev with Inngest Dev Server)
  *
+ * Performance Optimization:
+ * - Checkpointing enabled: Steps execute eagerly, reducing latency by minimizing
+ *   internal orchestration delays. Particularly beneficial for real-time workflows.
+ *
  * @see https://www.inngest.com/docs/platform/environments#branch-environments
+ * @see https://www.inngest.com/docs/setup/checkpointing
  */
 
 // Determine the Inngest environment for branch environments
@@ -348,17 +354,21 @@ function getInngestEnv(): string | undefined {
 const inngestEnv = getInngestEnv();
 const schemas = new EventSchemas().fromRecord<Events>();
 
-// Create client with conditional env property
+// Create client with conditional env property and checkpointing enabled
+// Checkpointing improves performance by executing steps eagerly, reducing latency
+// Requires inngest@3.46.0+ (we have 3.48.1)
 export const inngest =
   inngestEnv !== undefined
     ? new Inngest({
         id: 'heyclaude',
         schemas,
         env: inngestEnv,
+        checkpointing: true,
       })
     : new Inngest({
         id: 'heyclaude',
         schemas,
+        checkpointing: true,
       });
 
 // Re-export for convenience

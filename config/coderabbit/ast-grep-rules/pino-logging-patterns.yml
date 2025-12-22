@@ -1,7 +1,15 @@
 # Pino Logging Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
 # Comprehensive Pino logger usage and best practices
 # Shareable across projects using Pino for structured logging
-# Consolidated from: logging-patterns.yml, logging-patterns-enhanced.yml, pino-logging-patterns.yml
+# Consolidated: This file consolidates all logging patterns from:
+#   - logging-patterns.yml (merged)
+#   - logging-patterns-enhanced.yml (merged, requestId rules excluded - requestId was removed from codebase)
+#   - pino-logging-patterns.yml (original)
+# NOTE: requestId was removed from codebase - do NOT check for it
 
 ---
 # Rule: Detect console.* usage (should use Pino logger)
@@ -66,7 +74,7 @@ severity: error
 id: missing-logger-child-context
 language: typescript
 files:
-  - 'app/**/*.tsx'
+  - 'apps/web/src/app/**/*.tsx'
 rule:
   all:
     - kind: function_declaration
@@ -77,26 +85,7 @@ rule:
     - not:
         has:
           regex: logger\.child|reqLogger
-message: "Server components/pages must use logger.child({ operation, route, module }) for request-scoped context. Create: const reqLogger = logger.child({ operation: 'PageName', route: '/path', module: 'apps/web/src/app/path' }) and use reqLogger for all logs."
-severity: error
-
----
-# Rule: Detect missing request-scoped logger in server components
-id: pino-missing-request-scoped-logger
-language: typescript
-files:
-  - 'app/**/*.tsx'
-rule:
-  all:
-    - kind: function_declaration
-    - has:
-        regex: 'export default async function \w+\([^)]*\)\s*\{'
-    - has:
-        regex: logger\.(info|warn|error|debug)
-    - not:
-        has:
-          regex: logger\.child|reqLogger
-message: "Server components should use request-scoped loggers via logger.child() to avoid race conditions and enable log correlation. Add: const reqLogger = logger.child({ operation, route, module }); and use reqLogger instead of logger."
+message: "Server components/pages must use logger.child({ operation, route, module }) for request-scoped context. Create: const reqLogger = logger.child({ operation: 'PageName', route: '/path', module: 'app/path' }) and use reqLogger for all logs."
 severity: error
 
 ---
@@ -117,7 +106,7 @@ rule:
     - not:
         has:
           regex: module:\s*['"]
-message: "logger.child() must include operation, route, and module fields. Use: logger.child({ operation: 'PageName', route: '/path', module: 'apps/web/src/app/path' })"
+message: "logger.child() must include operation, route, and module fields. Use: logger.child({ operation: 'PageName', route: '/path', module: 'app/path' })"
 severity: error
 
 ---
@@ -125,7 +114,7 @@ severity: error
 id: missing-section-logging
 language: typescript
 files:
-  - 'app/**/*.tsx'
+  - 'apps/web/src/app/**/*.tsx'
 rule:
   all:
     - kind: function_declaration

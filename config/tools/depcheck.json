@@ -7,7 +7,6 @@
     "typescript",
     "@playwright/test",
     "@testing-library/*",
-    "vitest",
     "tsx",
     "turbo",
     "prisma",

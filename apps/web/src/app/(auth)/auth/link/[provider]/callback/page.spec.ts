@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { setupErrorTracking } from '../../../../../../config/tests/utils/error-tracking';
+import { setupErrorTracking } from '@test-utils/error-tracking';
 
 /**
  * Comprehensive OAuth Link Callback Page E2E Tests

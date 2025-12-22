@@ -18,26 +18,27 @@ vi.mock('next/cache', () => ({
   connection: vi.fn(async () => {}),
 }));
 
+// Import prisma directly - don't use vi.importActual
+// Prisma is automatically PrismockerClient via __mocks__/@prisma/client.ts
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+
 // Mock data-layer services
 const mockGetContentTemplates = vi.fn();
 
-vi.mock('@heyclaude/data-layer', async () => {
-  const actual = await vi.importActual<typeof import('@heyclaude/data-layer')>('@heyclaude/data-layer');
-  return {
-    ...actual,
-    AccountService: class {},
-    ChangelogService: class {},
-    CompaniesService: class {},
-    ContentService: class {
-      getContentTemplates = mockGetContentTemplates;
-    },
-    JobsService: class {},
-    MiscService: class {},
-    NewsletterService: class {},
-    SearchService: class {},
-    TrendingService: class {},
-  };
-});
+vi.mock('@heyclaude/data-layer', () => ({
+  AccountService: class {},
+  ChangelogService: class {},
+  CompaniesService: class {},
+  ContentService: class {
+    getContentTemplates = mockGetContentTemplates;
+  },
+  JobsService: class {},
+  MiscService: class {},
+  NewsletterService: class {},
+  SearchService: class {},
+  TrendingService: class {},
+}));
 
 // Mock logging/server
 vi.mock('../../../../packages/web-runtime/src/logging/server', () => ({
@@ -106,7 +107,17 @@ vi.mock('../../../../packages/web-runtime/src/auth/get-authenticated-user', () =
 }));
 
 describe('GET /api/templates', () => {
+  let prismocker: PrismaClient;
+
   beforeEach(() => {
+    // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    prismocker = prisma;
+    
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+    
     vi.clearAllMocks();
     mockGetContentTemplates.mockResolvedValue({
       templates: [

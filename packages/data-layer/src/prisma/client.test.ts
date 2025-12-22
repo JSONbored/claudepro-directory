@@ -8,27 +8,33 @@
  * - Error handling
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+
+// Mock @prisma/client to use PrismockerClient from __mocks__/@prisma/client.ts
+// Jest automatically uses __mocks__ directory (no explicit registration needed)
+// The __mocks__/@prisma/client.ts file exports PrismockerClient as PrismaClient
+// NOTE: This matches the exact pattern used in mcp-server tests
+jest.mock('@prisma/client');
 
 // Mock Infisical cache module
 // Note: The actual code uses dynamic import(), so we need to mock the module path
-const mockInitializeInfisicalSecrets = vi.fn().mockResolvedValue(undefined);
+const mockInitializeInfisicalSecrets = jest.fn().mockResolvedValue(undefined);
 
-vi.mock('@heyclaude/shared-runtime/infisical/cache', () => ({
+jest.mock('@heyclaude/shared-runtime/infisical/cache', () => ({
   initializeInfisicalSecrets: mockInitializeInfisicalSecrets,
-  getInfisicalCachedSecret: vi.fn(),
-  isInfisicalCacheInitialized: vi.fn().mockReturnValue(false),
-  clearInfisicalCache: vi.fn(),
-  getCachedSecretNames: vi.fn().mockReturnValue([]),
+  getInfisicalCachedSecret: jest.fn(),
+  isInfisicalCacheInitialized: jest.fn().mockReturnValue(false),
+  clearInfisicalCache: jest.fn(),
+  getCachedSecretNames: jest.fn().mockReturnValue([]),
 }));
 
 // Mock logger
-vi.mock('@heyclaude/shared-runtime', () => ({
+jest.mock('@heyclaude/shared-runtime', () => ({
   logger: {
-    child: vi.fn(() => ({
-      info: vi.fn(),
-      error: vi.fn(),
-      warn: vi.fn(),
+    child: jest.fn(() => ({
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
     })),
   },
 }));
@@ -40,30 +46,47 @@ const mockEnv: Record<string, string | undefined> = {
   SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-key',
 };
 
-vi.mock('@heyclaude/shared-runtime/schemas/env', () => ({
+jest.mock('@heyclaude/shared-runtime/schemas/env', () => ({
   env: new Proxy(mockEnv, {
     get: (target, prop: string) => target[prop],
   }),
 }));
 
-// Mock Prisma Client
-vi.mock('@prisma/client', () => ({
-  PrismaClient: vi.fn(),
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// The PrismaClient import will be PrismockerClient in tests
+// This test is testing the initialization logic of client.ts, not Prisma itself
+// The __mocks__/@prisma/client.ts will ensure PrismockerClient is used
+// We need to mock Pool and PrismaPg to allow client.ts initialization to complete
+
+// Mock pg Pool - must be a constructor class
+class MockPool {
+  on = jest.fn();
+  totalCount = 0;
+  idleCount = 0;
+  waitingCount = 0;
+  constructor(_config?: any) {
+    // Constructor accepts config but doesn't use it
+  }
+}
+
+jest.mock('pg', () => ({
+  Pool: MockPool,
 }));
 
-// Mock pg Pool
-vi.mock('pg', () => ({
-  Pool: vi.fn(),
-}));
+// Mock Prisma adapter - must be a constructor class
+class MockPrismaPg {
+  constructor(_pool?: any) {
+    // Constructor accepts pool but doesn't use it
+  }
+}
 
-// Mock Prisma adapter
-vi.mock('@prisma/adapter-pg', () => ({
-  PrismaPg: vi.fn(),
+jest.mock('@prisma/adapter-pg', () => ({
+  PrismaPg: MockPrismaPg,
 }));
 
 describe('Prisma Client with Infisical Integration', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockInitializeInfisicalSecrets.mockResolvedValue(undefined);
     
     // Reset env mock
@@ -78,7 +101,7 @@ describe('Prisma Client with Infisical Integration', () => {
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('Infisical Initialization', () => {
@@ -93,6 +116,7 @@ describe('Prisma Client with Infisical Integration', () => {
       // Should have attempted to initialize Infisical secrets
       expect(mockInitializeInfisicalSecrets).toHaveBeenCalled();
       expect(prisma).toBeDefined();
+      // Prisma client is PrismockerClient via __mocks__/@prisma/client.ts
     });
 
     it('should request critical database secrets from Infisical', async () => {

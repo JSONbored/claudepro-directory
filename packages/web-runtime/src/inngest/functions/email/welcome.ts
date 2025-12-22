@@ -7,13 +7,12 @@
  */
 
 import { normalizeError } from '@heyclaude/shared-runtime';
-
-import { inngest } from '../../client';
 import { renderEmailTemplate } from '../../../email/base-template';
 import { NewsletterWelcome } from '../../../email/templates/newsletter-welcome';
 import { HELLO_FROM } from '../../../email/config/email-config';
 import { sendEmail, enrollInOnboardingSequence } from '../../../integrations/resend';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { logger } from '../../../logging/server';
+import { createInngestFunction, type InngestHandlerContext } from '../../utils/function-factory';
 
 /**
  * Welcome email function
@@ -22,19 +21,18 @@ import { logger, createWebAppContextWithId } from '../../../logging/server';
  * - newsletter_subscription: Sends newsletter welcome email
  * - auth_signup: Sends OAuth signup welcome email
  */
-export const sendWelcomeEmail = inngest.createFunction(
+export const sendWelcomeEmail = createInngestFunction(
   {
     id: 'email-welcome',
     name: 'Welcome Email',
+    route: '/inngest/email/welcome',
     retries: 3,
     // Idempotency: Use email + triggerSource to prevent duplicate welcome emails
     // Same email with same trigger source will only be processed once
     idempotency: 'event.data.email + "-" + event.data.triggerSource',
   },
   { event: 'email/welcome' },
-  async ({ event, step }) => {
-    const startTime = Date.now();
-    const logContext = createWebAppContextWithId('/inngest/email/welcome', 'sendWelcomeEmail');
+  async ({ event, step, logContext }: InngestHandlerContext) => {
 
     const { email, subscriptionId, triggerSource } = event.data;
 
@@ -111,11 +109,10 @@ export const sendWelcomeEmail = inngest.createFunction(
       });
     }
 
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
     logger.info(
       {
         ...logContext,
-        durationMs,
         sent: emailResult.sent,
         emailId: emailResult.emailId,
         triggerSource,

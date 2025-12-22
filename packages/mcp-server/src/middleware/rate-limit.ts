@@ -8,7 +8,8 @@
  * https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
  */
 
-// @ts-expect-error: Cloudflare-specific types only available in Cloudflare Workers
+// Cloudflare runtime types (type-only import)
+// Added as devDependency for type-checking in standalone package
 import type { ExtendedEnv } from '@heyclaude/cloudflare-runtime/config/env';
 
 /**

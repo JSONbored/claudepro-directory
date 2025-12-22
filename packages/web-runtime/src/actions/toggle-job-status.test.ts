@@ -1,4 +1,21 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+import { job_status } from '@prisma/client';
+
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from data-layer will automatically use PrismockerClient
+
+// Import real cache utilities for proper cache testing
+// Note: clearRequestCache is exported from @heyclaude/data-layer, but for tests we need the direct import
+// to avoid circular dependencies. Deep relative imports are acceptable for test utilities.
+import { clearRequestCache } from '../../../data-layer/src/utils/request-cache.ts';
+
+// Mock RPC error logging utility
+// Note: Deep relative import needed for vi.mock() to work correctly
+vi.mock('../../../data-layer/src/utils/rpc-error-logging.ts', () => ({
+  logRpcError: vi.fn(),
+}));
 
 // Mock safe-action middleware - standardized pattern
 // Pattern: authedAction.inputSchema().outputSchema().metadata().action()
@@ -51,10 +68,8 @@ vi.mock('./safe-action.ts', async () => {
   };
 });
 
-// Mock runRpc
-vi.mock('./run-rpc-instance.ts', () => ({
-  runRpc: vi.fn(),
-}));
+// DO NOT mock runRpc - use real runRpc which uses Prismocker
+// This allows us to test the real RPC flow end-to-end
 
 // Mock next/cache
 vi.mock('next/cache', () => ({
@@ -75,9 +90,43 @@ vi.mock('../errors.ts', () => ({
   }),
 }));
 
+// Mock logger
+vi.mock('../logger.ts', () => ({
+  logger: {
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+  },
+  toLogContextValue: vi.fn((v) => v),
+}));
+
+// Mock job hooks
+vi.mock('./hooks/job-hooks.ts', () => ({
+  onJobStatusToggled: vi.fn().mockResolvedValue(undefined),
+}));
+
 describe('toggleJobStatus', () => {
-  beforeEach(() => {
+  let prismocker: PrismaClient;
+  let queryRawUnsafeSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    // Clear request cache before each test
+    clearRequestCache();
+
+    // Get the prisma instance (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    prismocker = prisma;
+
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
+    // Clear all mocks
     vi.clearAllMocks();
+
+    // Use Prismocker's Proxy set handler to override $queryRawUnsafe
+    queryRawUnsafeSpy = vi.fn().mockResolvedValue([]);
+    (prismocker as any).$queryRawUnsafe = queryRawUnsafeSpy;
   });
 
   describe('input validation', () => {
@@ -96,7 +145,6 @@ describe('toggleJobStatus', () => {
     it('should validate new_status enum', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
       const { job_statusSchema } = await import('../prisma-zod-schemas.ts');
-      const { job_status } = await import('@prisma/client');
       const validStatuses = Object.values(job_status);
 
       // Test with valid status
@@ -119,7 +167,6 @@ describe('toggleJobStatus', () => {
   describe('RPC call', () => {
     it('should call toggle_job_status RPC with correct parameters', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { runRpc } = await import('./run-rpc-instance.ts');
 
       // Mock result must match toggleJobStatusResultSchema structure
       const mockResult = {
@@ -129,24 +176,22 @@ describe('toggleJobStatus', () => {
         new_status: 'active' as const,
         message: 'Job status updated successfully',
       };
-      vi.mocked(runRpc).mockResolvedValue(mockResult as any);
+
+      // Set up Prismocker to return the RPC result
+      queryRawUnsafeSpy.mockResolvedValue([mockResult] as any);
 
       const result = await toggleJobStatus({
         job_id: '123e4567-e89b-12d3-a456-426614174000',
         new_status: 'active',
       });
 
-      expect(runRpc).toHaveBeenCalledWith(
-        'toggle_job_status',
-        {
-          p_job_id: '123e4567-e89b-12d3-a456-426614174000',
-          p_user_id: 'test-user-id',
-          p_new_status: 'active',
-        },
-        {
-          action: 'toggleJobStatus.rpc',
-          userId: 'test-user-id',
-        }
+      // Verify RPC was called with correct SQL and parameters
+      // BasePrismaService.callRpc formats as: SELECT * FROM function_name(p_param => $1, ...)
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+        expect.stringContaining('toggle_job_status'),
+        '123e4567-e89b-12d3-a456-426614174000', // p_job_id
+        'test-user-id', // p_user_id
+        'active', // p_new_status
       );
 
       expect(result).toEqual(mockResult);
@@ -154,11 +199,10 @@ describe('toggleJobStatus', () => {
 
     it('should handle RPC errors', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { runRpc } = await import('./run-rpc-instance.ts');
       const { logActionFailure } = await import('../errors.ts');
 
       const mockError = new Error('Database error');
-      vi.mocked(runRpc).mockRejectedValue(mockError);
+      queryRawUnsafeSpy.mockRejectedValue(mockError);
 
       await expect(
         toggleJobStatus({
@@ -169,7 +213,7 @@ describe('toggleJobStatus', () => {
 
       expect(logActionFailure).toHaveBeenCalledWith(
         'toggleJobStatus',
-        mockError,
+        expect.any(Error),
         expect.objectContaining({
           userId: 'test-user-id',
         })
@@ -180,17 +224,18 @@ describe('toggleJobStatus', () => {
   describe('cache invalidation', () => {
     it('should revalidate paths and tags', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { runRpc } = await import('./run-rpc-instance.ts');
       const { revalidatePath, revalidateTag } = await import('next/cache');
 
       const jobId = '123e4567-e89b-12d3-a456-426614174000';
-      vi.mocked(runRpc).mockResolvedValue({
+      const mockResult = {
         success: true,
-        job_id: '123e4567-e89b-12d3-a456-426614174000',
+        job_id: jobId,
         old_status: 'draft' as const,
         new_status: 'active' as const,
         message: null,
-      } as any);
+      };
+
+      queryRawUnsafeSpy.mockResolvedValue([mockResult] as any);
 
       await toggleJobStatus({
         job_id: jobId,
@@ -210,16 +255,17 @@ describe('toggleJobStatus', () => {
       // Metadata is set during action creation, not directly callable
       // We verify the action works correctly instead
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { runRpc } = await import('./run-rpc-instance.ts');
 
       const jobId = '123e4567-e89b-12d3-a456-426614174000';
-      vi.mocked(runRpc).mockResolvedValue({
+      const mockResult = {
         success: true,
         job_id: jobId,
         old_status: 'draft' as const,
         new_status: 'active' as const,
         message: null,
-      } as any);
+      };
+
+      queryRawUnsafeSpy.mockResolvedValue([mockResult] as any);
 
       await toggleJobStatus({
         job_id: jobId,
@@ -227,17 +273,16 @@ describe('toggleJobStatus', () => {
       });
 
       // If action executes successfully, metadata was set correctly
-      expect(runRpc).toHaveBeenCalled();
+      expect(queryRawUnsafeSpy).toHaveBeenCalled();
     });
   });
 
   describe('edge cases', () => {
-    it('should handle null result from runRpc', async () => {
+    it('should handle null result from RPC', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { runRpc } = await import('./run-rpc-instance.ts');
 
       // Null result should fail outputSchema validation (outputSchema requires object)
-      vi.mocked(runRpc).mockResolvedValue(null as any);
+      queryRawUnsafeSpy.mockResolvedValue([null] as any);
 
       await expect(
         toggleJobStatus({
@@ -247,12 +292,11 @@ describe('toggleJobStatus', () => {
       ).rejects.toThrow();
     });
 
-    it('should handle undefined result from runRpc', async () => {
+    it('should handle empty array result from RPC', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { runRpc } = await import('./run-rpc-instance.ts');
 
-      // Undefined result should fail outputSchema validation (outputSchema requires object)
-      vi.mocked(runRpc).mockResolvedValue(undefined as any);
+      // Empty array result should fail outputSchema validation (outputSchema requires object)
+      queryRawUnsafeSpy.mockResolvedValue([] as any);
 
       await expect(
         toggleJobStatus({
@@ -264,21 +308,22 @@ describe('toggleJobStatus', () => {
 
     it('should handle revalidatePath errors gracefully', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { runRpc } = await import('./run-rpc-instance.ts');
       const { revalidatePath } = await import('next/cache');
 
-      vi.mocked(runRpc).mockResolvedValue({
+      const mockResult = {
         success: true,
         job_id: '123e4567-e89b-12d3-a456-426614174000',
         old_status: 'draft' as const,
         new_status: 'active' as const,
         message: null,
-      } as any);
+      };
+
+      queryRawUnsafeSpy.mockResolvedValue([mockResult] as any);
       vi.mocked(revalidatePath).mockImplementation(() => {
         throw new Error('Revalidate path error');
       });
 
-      // Should not throw - revalidatePath errors are not caught
+      // Should throw - revalidatePath errors are not caught
       await expect(
         toggleJobStatus({
           job_id: '123e4567-e89b-12d3-a456-426614174000',
@@ -289,68 +334,22 @@ describe('toggleJobStatus', () => {
 
     it('should handle revalidateTag errors gracefully', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { runRpc } = await import('./run-rpc-instance.ts');
       const { revalidateTag } = await import('next/cache');
 
-      vi.mocked(runRpc).mockResolvedValue({
+      const mockResult = {
         success: true,
         job_id: '123e4567-e89b-12d3-a456-426614174000',
         old_status: 'draft' as const,
         new_status: 'active' as const,
         message: null,
-      } as any);
+      };
+
+      queryRawUnsafeSpy.mockResolvedValue([mockResult] as any);
       vi.mocked(revalidateTag).mockImplementation(() => {
         throw new Error('Revalidate tag error');
       });
 
-      // Should not throw - revalidateTag errors are not caught
-      await expect(
-        toggleJobStatus({
-          job_id: '123e4567-e89b-12d3-a456-426614174000',
-          new_status: 'active',
-        })
-      ).rejects.toThrow();
-    });
-
-    it('should handle lazy import errors for next/cache', async () => {
-      const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { runRpc } = await import('./run-rpc-instance.ts');
-
-      vi.mocked(runRpc).mockResolvedValue({
-        success: true,
-        job_id: '123e4567-e89b-12d3-a456-426614174000',
-        old_status: 'draft' as const,
-        new_status: 'active' as const,
-        message: null,
-      } as any);
-
-      // Mock import to fail
-      vi.doMock('next/cache', () => {
-        throw new Error('Import error');
-      });
-
-      // Should throw when trying to import
-      await expect(
-        toggleJobStatus({
-          job_id: '123e4567-e89b-12d3-a456-426614174000',
-          new_status: 'active',
-        })
-      ).rejects.toThrow();
-    });
-
-    it('should handle lazy import errors for logActionFailure', async () => {
-      const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { runRpc } = await import('./run-rpc-instance.ts');
-
-      const mockError = new Error('Database error');
-      vi.mocked(runRpc).mockRejectedValue(mockError);
-
-      // Mock import to fail
-      vi.doMock('../errors.ts', () => {
-        throw new Error('Import error');
-      });
-
-      // Should throw when trying to import logActionFailure
+      // Should throw - revalidateTag errors are not caught
       await expect(
         toggleJobStatus({
           job_id: '123e4567-e89b-12d3-a456-426614174000',

@@ -1,4 +1,8 @@
 # Performance Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
 # Comprehensive performance optimization standards
 # Critical patterns for speed, optimization, and resource efficiency
 # Consolidated from: performance-patterns.yml, performance-patterns-enhanced.yml
@@ -130,7 +134,7 @@ severity: warning
 id: missing-suspense-async-data
 language: typescript
 files:
-  - 'app/**/*.tsx'
+  - 'apps/web/src/app/**/*.tsx'
 rule:
   all:
     - kind: function_declaration

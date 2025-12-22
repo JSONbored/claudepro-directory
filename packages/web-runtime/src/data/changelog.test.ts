@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { z } from 'zod';
 import { getChangelog, getChangelogOverview, getChangelogEntryBySlug, getPublishedChangelogSlugs } from './changelog';
 import { createDataFunction } from './cached-data-factory';
@@ -7,10 +7,10 @@ import type { changelog_category } from '@prisma/client';
 import type { GetChangelogOverviewReturns } from '@heyclaude/database-types/postgres-types';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock cached-data-factory - use inline factory to avoid hoisting issues
-vi.mock('./cached-data-factory', () => ({
+jest.mock('./cached-data-factory', () => ({
   createDataFunction: vi.fn((config: any) => {
     // Store config for testing
     if (!(globalThis as any).__dataFunctionConfigs) {
@@ -23,7 +23,7 @@ vi.mock('./cached-data-factory', () => ({
 }));
 
 // Mock constants
-vi.mock('./config/constants', () => ({
+jest.mock('./config/constants', () => ({
   QUERY_LIMITS: {
     changelog: {
       default: 50,

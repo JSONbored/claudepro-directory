@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { getService, services, type ServiceKey } from './service-factory';
 
 // Mock data-layer services - return constructors that create instances
@@ -10,7 +10,7 @@ const mockContentService = {
   getContentDetailCore: vi.fn(),
 };
 
-vi.mock('@heyclaude/data-layer', () => ({
+jest.mock('@heyclaude/data-layer', () => ({
   AccountService: class {
     getAccountDashboard = mockAccountService.getAccountDashboard;
   },

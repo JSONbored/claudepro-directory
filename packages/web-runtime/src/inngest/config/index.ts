@@ -179,33 +179,6 @@ export const RETRY_CONFIGS = {
 } as const;
 
 /**
- * Priority expressions (CEL)
- *
- * Higher values = higher priority (-600 to 600)
- */
-export const PRIORITY_EXPRESSIONS = {
-  /**
-   * Paid customers get priority
-   */
-  PAID_PRIORITY: 'event.data.requiresPayment == true ? 100 : 0',
-
-  /**
-   * High priority events
-   */
-  HIGH: '100',
-
-  /**
-   * Normal priority
-   */
-  NORMAL: '0',
-
-  /**
-   * Low priority (background tasks)
-   */
-  LOW: '-100',
-} as const;
-
-/**
  * Timeout configurations
  */
 export const TIMEOUTS = {

@@ -1,5 +1,21 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
 import { workplace_type, job_plan, job_tier } from '@prisma/client';
+
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from data-layer will automatically use PrismockerClient
+
+// Import real cache utilities for proper cache testing
+// Note: clearRequestCache is exported from @heyclaude/data-layer, but for tests we need the direct import
+// to avoid circular dependencies. Deep relative imports are acceptable for test utilities.
+import { clearRequestCache } from '../../../data-layer/src/utils/request-cache.ts';
+
+// Mock RPC error logging utility
+// Note: Deep relative import needed for vi.mock() to work correctly
+vi.mock('../../../data-layer/src/utils/rpc-error-logging.ts', () => ({
+  logRpcError: vi.fn(),
+}));
 
 // Mock safe-action middleware - standardized pattern
 // Pattern: authedAction.inputSchema().metadata().action()
@@ -43,10 +59,8 @@ vi.mock('./safe-action.ts', async () => {
   };
 });
 
-// Mock runRpc
-vi.mock('./run-rpc-instance.ts', () => ({
-  runRpc: vi.fn(),
-}));
+// DO NOT mock runRpc - use real runRpc which uses Prismocker
+// This allows us to test the real RPC flow end-to-end
 
 // Mock next/cache
 vi.mock('next/cache', () => ({
@@ -73,8 +87,25 @@ vi.mock('./hooks/job-hooks.ts', () => ({
 }));
 
 describe('jobs-crud', () => {
-  beforeEach(() => {
+  let prismocker: PrismaClient;
+
+  beforeEach(async () => {
+    // Clear request cache before each test
+    clearRequestCache();
+
+    // Get the prisma instance (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    prismocker = prisma;
+
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
+    // Clear all mocks
     vi.clearAllMocks();
+
+    // Use Prismocker's Proxy set handler to override $queryRawUnsafe
+    prismocker.$queryRawUnsafe = vi.fn().mockResolvedValue([]);
   });
 
   describe('createJob', () => {
@@ -91,10 +122,9 @@ describe('jobs-crud', () => {
 
       it('should accept all optional fields', async () => {
         const { createJob } = await import('./jobs-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
 
         // Mock result must match CreateJobWithPaymentReturns structure
-        vi.mocked(runRpc).mockResolvedValue({
+        (prismocker.$queryRawUnsafe as ReturnType<typeof vi.fn>).mockResolvedValue([{
           success: true,
           job_id: '123e4567-e89b-12d3-a456-426614174000',
           company_id: '223e4567-e89b-12d3-a456-426614174001',
@@ -102,12 +132,12 @@ describe('jobs-crud', () => {
           requires_payment: null,
           tier: 'standard' as const,
           plan: 'one-time' as const,
-        } as any);
+        }]);
 
         // Use valid enum values from Prisma
-        const validTier = Object.values(job_tier)[0];
-        const validPlan = Object.values(job_plan)[0];
-        const validWorkplace = Object.values(workplace_type)[0];
+        const validTier = Object.values(job_tier)[0] as string;
+        const validPlan = Object.values(job_plan)[0] as string;
+        const validWorkplace = Object.values(workplace_type)[0] as string | null | undefined;
         
         const result = await createJob({
           tier: validTier,
@@ -131,7 +161,7 @@ describe('jobs-crud', () => {
           company_logo: 'https://example.com/logo.png',
         });
 
-        expect(runRpc).toHaveBeenCalled();
+        expect(prismocker.$queryRawUnsafe).toHaveBeenCalled();
         expect(result).toBeDefined();
       });
     });
@@ -139,13 +169,12 @@ describe('jobs-crud', () => {
     describe('RPC call', () => {
       it('should call create_job_with_payment RPC with correct parameters', async () => {
         const { createJob } = await import('./jobs-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
 
         const mockResult = {
           job_id: '123e4567-e89b-12d3-a456-426614174000',
           company_id: 'company-123',
         };
-        vi.mocked(runRpc).mockResolvedValue(mockResult as any);
+        (prismocker.$queryRawUnsafe as ReturnType<typeof vi.fn>).mockResolvedValue([mockResult]);
 
         await createJob({
           tier: 'standard',
@@ -154,8 +183,8 @@ describe('jobs-crud', () => {
           company: 'Test Company',
         });
 
-        expect(runRpc).toHaveBeenCalledWith(
-          'create_job_with_payment',
+        expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+          expect.stringContaining('SELECT * FROM create_job_with_payment'),
           expect.objectContaining({
             p_user_id: 'test-user-id',
             p_tier: 'standard',
@@ -164,21 +193,16 @@ describe('jobs-crud', () => {
               title: 'Test Job',
               company: 'Test Company',
             }),
-          }),
-          expect.objectContaining({
-            action: 'createJob.rpc',
-            userId: 'test-user-id',
           })
         );
       });
 
       it('should handle RPC errors', async () => {
         const { createJob } = await import('./jobs-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
         const { logActionFailure } = await import('../errors.ts');
 
         const mockError = new Error('Database error');
-        vi.mocked(runRpc).mockRejectedValue(mockError);
+        (prismocker.$queryRawUnsafe as ReturnType<typeof vi.fn>).mockRejectedValue(mockError);
 
         await expect(
           createJob({
@@ -194,11 +218,10 @@ describe('jobs-crud', () => {
     describe('cache invalidation', () => {
       it('should revalidate paths and tags', async () => {
         const { createJob } = await import('./jobs-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
         const { revalidatePath, revalidateTag } = await import('next/cache');
 
         // Mock result must match CreateJobWithPaymentReturns structure
-        vi.mocked(runRpc).mockResolvedValue({
+        (prismocker.$queryRawUnsafe as ReturnType<typeof vi.fn>).mockResolvedValue([{
           success: true,
           job_id: '123e4567-e89b-12d3-a456-426614174000',
           company_id: '223e4567-e89b-12d3-a456-426614174001',
@@ -206,7 +229,7 @@ describe('jobs-crud', () => {
           requires_payment: null,
           tier: 'standard' as const,
           plan: 'one-time' as const,
-        } as any);
+        }]);
 
         await createJob({
           tier: 'standard',
@@ -226,15 +249,20 @@ describe('jobs-crud', () => {
     describe('hooks', () => {
       it('should call onJobCreated hook', async () => {
         const { createJob } = await import('./jobs-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
         const { onJobCreated } = await import('./hooks/job-hooks.ts');
 
         const mockResult = {
+          success: true,
           job_id: '123e4567-e89b-12d3-a456-426614174000',
           company_id: 'company-123',
+          payment_amount: null,
+          requires_payment: false,
+          tier: 'standard' as const,
+          plan: 'one-time' as const,
         };
-        vi.mocked(runRpc).mockResolvedValue(mockResult as any);
-        vi.mocked(onJobCreated).mockResolvedValue(undefined);
+        (prismocker.$queryRawUnsafe as ReturnType<typeof vi.fn>).mockResolvedValue([mockResult]);
+        // onJobCreated returns Promise<void>, so mock it to resolve
+        vi.mocked(onJobCreated).mockResolvedValue(undefined as any);
 
         await createJob({
           tier: 'standard',
@@ -261,51 +289,45 @@ describe('jobs-crud', () => {
 
       it('should accept updates object', async () => {
         const { updateJob } = await import('./jobs-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
 
         // Mock result must match UpdateJobResult structure
-        vi.mocked(runRpc).mockResolvedValue({
+        (prismocker.$queryRawUnsafe as ReturnType<typeof vi.fn>).mockResolvedValue([{
           success: true,
           job_id: '123e4567-e89b-12d3-a456-426614174000',
           message: null,
-        } as any);
+        }]);
 
         await updateJob({
           job_id: '123e4567-e89b-12d3-a456-426614174000',
           updates: { title: 'Updated Title' },
         });
 
-        expect(runRpc).toHaveBeenCalled();
+        expect(prismocker.$queryRawUnsafe).toHaveBeenCalled();
       });
     });
 
     describe('RPC call', () => {
       it('should call update_job RPC with correct parameters', async () => {
         const { updateJob } = await import('./jobs-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
 
         // Mock result must match UpdateJobResult structure
-        vi.mocked(runRpc).mockResolvedValue({
+        (prismocker.$queryRawUnsafe as ReturnType<typeof vi.fn>).mockResolvedValue([{
           success: true,
           job_id: '123e4567-e89b-12d3-a456-426614174000',
           message: null,
-        } as any);
+        }]);
 
         await updateJob({
           job_id: '123e4567-e89b-12d3-a456-426614174000',
           updates: { title: 'New Title' },
         });
 
-        expect(runRpc).toHaveBeenCalledWith(
-          'update_job',
-          {
+        expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+          expect.stringContaining('SELECT * FROM update_job'),
+          expect.objectContaining({
             p_job_id: '123e4567-e89b-12d3-a456-426614174000',
             p_user_id: 'test-user-id',
             p_updates: { title: 'New Title' },
-          },
-          expect.objectContaining({
-            action: 'updateJob.rpc',
-            userId: 'test-user-id',
           })
         );
       });
@@ -314,15 +336,14 @@ describe('jobs-crud', () => {
     describe('cache invalidation', () => {
       it('should revalidate paths and tags', async () => {
         const { updateJob } = await import('./jobs-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
         const { revalidatePath, revalidateTag } = await import('next/cache');
 
         // Mock result must match UpdateJobResult structure
-        vi.mocked(runRpc).mockResolvedValue({
+        (prismocker.$queryRawUnsafe as ReturnType<typeof vi.fn>).mockResolvedValue([{
           success: true,
           job_id: '123e4567-e89b-12d3-a456-426614174000',
           message: null,
-        } as any);
+        }]);
 
         await updateJob({
           job_id: '123e4567-e89b-12d3-a456-426614174000',
@@ -356,28 +377,23 @@ describe('jobs-crud', () => {
     describe('RPC call', () => {
       it('should call delete_job RPC with correct parameters', async () => {
         const { deleteJob } = await import('./jobs-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
 
-        // Mock result must match UpdateJobResult structure
-        vi.mocked(runRpc).mockResolvedValue({
+        // Mock result must match DeleteJobResult structure
+        (prismocker.$queryRawUnsafe as ReturnType<typeof vi.fn>).mockResolvedValue([{
           success: true,
           job_id: '123e4567-e89b-12d3-a456-426614174000',
           message: null,
-        } as any);
+        }]);
 
         await deleteJob({
           job_id: '123e4567-e89b-12d3-a456-426614174000',
         });
 
-        expect(runRpc).toHaveBeenCalledWith(
-          'delete_job',
-          {
+        expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+          expect.stringContaining('SELECT * FROM delete_job'),
+          expect.objectContaining({
             p_job_id: '123e4567-e89b-12d3-a456-426614174000',
             p_user_id: 'test-user-id',
-          },
-          expect.objectContaining({
-            action: 'deleteJob.rpc',
-            userId: 'test-user-id',
           })
         );
       });

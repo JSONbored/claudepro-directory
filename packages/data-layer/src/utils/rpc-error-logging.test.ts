@@ -1,12 +1,12 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 
 // Mock @heyclaude/shared-runtime
-vi.mock('@heyclaude/shared-runtime', () => ({
-  createPinoConfig: vi.fn((options?: { service?: string }) => ({
+jest.mock('@heyclaude/shared-runtime', () => ({
+  createPinoConfig: jest.fn((options?: { service?: string }) => ({
     level: 'info',
     ...(options?.service && { service: options.service }),
   })),
-  normalizeError: vi.fn((error: unknown) => {
+  normalizeError: jest.fn((error: unknown) => {
     if (error instanceof Error) return error;
     return new Error(String(error));
   }),
@@ -17,9 +17,9 @@ import { logRpcError, logger } from './rpc-error-logging.ts';
 
 describe('logRpcError', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     // Spy on the logger.error method
-    vi.spyOn(logger, 'error');
+    jest.spyOn(logger, 'error');
   });
 
   it('should log RPC errors with context', () => {

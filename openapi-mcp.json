@@ -274,163 +274,830 @@
       },
       "listCategoriesInput": {
         "type": "object",
-        "description": "Input schema for listCategories tool"
+        "properties": {},
+        "description": "List all content categories in the HeyClaude directory with counts and descriptions",
+        "example": {}
       },
       "searchContentInput": {
         "type": "object",
-        "description": "Input schema for searchContent tool"
+        "properties": {
+          "query": {
+            "description": "Search query string",
+            "example": "ai agents",
+            "type": "string"
+          },
+          "category": {
+            "description": "Filter by category",
+            "example": "agents",
+            "type": "string",
+            "enum": [
+              "agents",
+              "rules",
+              "commands",
+              "skills",
+              "collections",
+              "mcp",
+              "hooks",
+              "statuslines",
+              "guides",
+              "jobs",
+              "changelog"
+            ]
+          },
+          "tags": {
+            "description": "Filter by tags",
+            "example": [
+              "ai",
+              "automation"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "page": {
+            "description": "Page number for pagination",
+            "example": 1,
+            "minimum": 1,
+            "default": 1,
+            "type": "integer",
+            "maximum": 9007199254740991
+          },
+          "limit": {
+            "description": "Items per page (max 50)",
+            "example": 20,
+            "minimum": 1,
+            "maximum": 50,
+            "default": 20,
+            "type": "integer"
+          }
+        },
+        "description": "Search content with query, category, tags, and pagination. Returns formatted results with metadata.",
+        "example": {
+          "query": "example",
+          "category": "",
+          "tags": [],
+          "page": 0,
+          "limit": 0
+        }
       },
       "getContentDetailInput": {
         "type": "object",
-        "description": "Input schema for getContentDetail tool"
+        "properties": {
+          "slug": {
+            "description": "Content slug identifier",
+            "example": "ai-agent-framework",
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "description": "Content category",
+            "example": "agents",
+            "type": "string",
+            "enum": [
+              "agents",
+              "rules",
+              "commands",
+              "skills",
+              "collections",
+              "mcp",
+              "hooks",
+              "statuslines",
+              "guides",
+              "jobs",
+              "changelog"
+            ]
+          }
+        },
+        "required": [
+          "slug",
+          "category"
+        ],
+        "description": "Get complete metadata for a specific content item by slug and category. Includes full description, tags, author info, and stats.",
+        "example": {
+          "slug": "example",
+          "category": ""
+        }
       },
       "getTrendingInput": {
         "type": "object",
-        "description": "Input schema for getTrending tool"
+        "properties": {
+          "category": {
+            "description": "Filter by category (optional)",
+            "example": "agents",
+            "type": "string",
+            "enum": [
+              "agents",
+              "rules",
+              "commands",
+              "skills",
+              "collections",
+              "mcp",
+              "hooks",
+              "statuslines",
+              "guides",
+              "jobs",
+              "changelog"
+            ]
+          },
+          "limit": {
+            "description": "Number of items to return (max 50)",
+            "example": 20,
+            "minimum": 1,
+            "maximum": 50,
+            "default": 20,
+            "type": "integer"
+          }
+        },
+        "description": "Get trending content across categories or within a specific category. Sorted by popularity and engagement.",
+        "example": {
+          "category": "",
+          "limit": 0
+        }
       },
       "getFeaturedInput": {
         "type": "object",
-        "description": "Input schema for getFeatured tool"
+        "properties": {},
+        "description": "Get featured and highlighted content from the homepage. Includes hero items, latest additions, and popular content.",
+        "example": {}
       },
       "getPopularInput": {
         "type": "object",
-        "description": "Input schema for getPopular tool"
+        "properties": {
+          "category": {
+            "description": "Filter by category (optional)",
+            "example": "agents",
+            "type": "string",
+            "enum": [
+              "agents",
+              "rules",
+              "commands",
+              "skills",
+              "collections",
+              "mcp",
+              "hooks",
+              "statuslines",
+              "guides",
+              "jobs",
+              "changelog"
+            ]
+          },
+          "limit": {
+            "description": "Number of items (max 50)",
+            "example": 20,
+            "minimum": 1,
+            "maximum": 50,
+            "default": 20,
+            "type": "integer"
+          }
+        },
+        "description": "Get popular content across categories or within a specific category. Sorted by views and engagement metrics.",
+        "example": {
+          "category": "",
+          "limit": 0
+        }
       },
       "getRecentInput": {
         "type": "object",
-        "description": "Input schema for getRecent tool"
+        "properties": {
+          "category": {
+            "description": "Filter by category (optional)",
+            "example": "agents",
+            "type": "string",
+            "enum": [
+              "agents",
+              "rules",
+              "commands",
+              "skills",
+              "collections",
+              "mcp",
+              "hooks",
+              "statuslines",
+              "guides",
+              "jobs",
+              "changelog"
+            ]
+          },
+          "limit": {
+            "description": "Number of items (max 50)",
+            "example": 20,
+            "minimum": 1,
+            "maximum": 50,
+            "default": 20,
+            "type": "integer"
+          }
+        },
+        "description": "Get recently added content (optionally filtered by category). Shows items added within the last 30 days.",
+        "example": {
+          "category": "",
+          "limit": 0
+        }
       },
       "getTemplatesInput": {
         "type": "object",
-        "description": "Input schema for getTemplates tool"
+        "properties": {
+          "category": {
+            "description": "Get templates for specific category (optional)",
+            "example": "agents",
+            "type": "string",
+            "enum": [
+              "agents",
+              "rules",
+              "commands",
+              "skills",
+              "collections",
+              "mcp",
+              "hooks",
+              "statuslines",
+              "guides",
+              "jobs",
+              "changelog"
+            ]
+          }
+        },
+        "description": "Get content submission templates for creating new content. Includes field definitions, requirements, and examples.",
+        "example": {
+          "category": ""
+        }
       },
       "getCategoryConfigsInput": {
         "type": "object",
-        "description": "Input schema for getCategoryConfigs tool"
+        "properties": {
+          "category": {
+            "description": "Filter by specific category (optional)",
+            "example": "agents",
+            "type": "string",
+            "enum": [
+              "agents",
+              "rules",
+              "commands",
+              "skills",
+              "collections",
+              "mcp",
+              "hooks",
+              "statuslines",
+              "guides",
+              "jobs",
+              "changelog"
+            ]
+          }
+        },
+        "description": "Get category-specific configurations and features. Helps understand category-specific requirements and submission guidelines.",
+        "example": {
+          "category": ""
+        }
       },
       "getChangelogInput": {
         "type": "object",
-        "description": "Input schema for getChangelog tool"
+        "properties": {
+          "format": {
+            "description": "Output format (default: llms-txt)",
+            "example": "llms-txt",
+            "default": "llms-txt",
+            "type": "string",
+            "enum": [
+              "llms-txt",
+              "json"
+            ]
+          }
+        },
+        "description": "Get changelog of content updates in LLMs.txt format. Helps AI agents understand recent changes and stay current.",
+        "example": {
+          "format": ""
+        }
       },
       "getSearchFacetsInput": {
         "type": "object",
-        "description": "Input schema for getSearchFacets tool"
+        "properties": {},
+        "description": "Get available search facets (categories, tags, authors) for filtering content. Helps AI agents understand what filters are available.",
+        "example": {}
       },
       "getSearchSuggestionsInput": {
         "type": "object",
-        "description": "Input schema for getSearchSuggestions tool"
+        "properties": {
+          "query": {
+            "description": "Search query string (minimum 2 characters)",
+            "example": "ai",
+            "minLength": 2,
+            "type": "string"
+          },
+          "limit": {
+            "description": "Number of suggestions to return (1-20, default: 10)",
+            "example": 10,
+            "minimum": 1,
+            "maximum": 20,
+            "default": 10,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "description": "Get search suggestions based on query history. Helps discover popular searches and provides autocomplete functionality for AI agents.",
+        "example": {
+          "query": "example",
+          "limit": 0
+        }
       },
       "getMcpServersInput": {
         "type": "object",
-        "description": "Input schema for getMcpServers tool"
+        "properties": {
+          "limit": {
+            "description": "Number of servers to return (max 50)",
+            "example": 20,
+            "minimum": 1,
+            "maximum": 50,
+            "default": 20,
+            "type": "integer"
+          }
+        },
+        "description": "Get MCP servers from the HeyClaude directory with metadata, download URLs, and configuration details.",
+        "example": {
+          "limit": 0
+        }
       },
       "getRelatedContentInput": {
         "type": "object",
-        "description": "Input schema for getRelatedContent tool"
+        "properties": {
+          "slug": {
+            "description": "Reference content slug",
+            "example": "ai-agent-framework",
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "description": "Reference content category",
+            "example": "agents",
+            "type": "string",
+            "enum": [
+              "agents",
+              "rules",
+              "commands",
+              "skills",
+              "collections",
+              "mcp",
+              "hooks",
+              "statuslines",
+              "guides",
+              "jobs",
+              "changelog"
+            ]
+          },
+          "limit": {
+            "description": "Number of related items (max 20)",
+            "example": 10,
+            "minimum": 1,
+            "maximum": 20,
+            "default": 10,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "slug",
+          "category"
+        ],
+        "description": "Get related content for a given slug and category. Uses similarity matching based on tags and content.",
+        "example": {
+          "slug": "example",
+          "category": "",
+          "limit": 0
+        }
       },
       "getContentByTagInput": {
         "type": "object",
-        "description": "Input schema for getContentByTag tool"
+        "properties": {
+          "tags": {
+            "description": "Tags to filter by",
+            "example": [
+              "ai",
+              "automation"
+            ],
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "logic": {
+            "description": "Logical operator for multiple tags",
+            "example": "OR",
+            "default": "OR",
+            "type": "string",
+            "enum": [
+              "AND",
+              "OR"
+            ]
+          },
+          "category": {
+            "description": "Filter by category (optional)",
+            "example": "agents",
+            "type": "string",
+            "enum": [
+              "agents",
+              "rules",
+              "commands",
+              "skills",
+              "collections",
+              "mcp",
+              "hooks",
+              "statuslines",
+              "guides",
+              "jobs",
+              "changelog"
+            ]
+          },
+          "limit": {
+            "description": "Number of items (max 50)",
+            "example": 20,
+            "minimum": 1,
+            "maximum": 50,
+            "default": 20,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tags"
+        ],
+        "description": "Get content filtered by specific tags with AND/OR logic support. Can optionally filter by category.",
+        "example": {
+          "tags": [],
+          "logic": "",
+          "category": "",
+          "limit": 0
+        }
       },
       "downloadContentForPlatformInput": {
         "type": "object",
-        "description": "Input schema for downloadContentForPlatform tool"
+        "properties": {
+          "category": {
+            "description": "Content category",
+            "example": "agents",
+            "type": "string",
+            "enum": [
+              "agents",
+              "rules",
+              "commands",
+              "skills",
+              "collections",
+              "mcp",
+              "hooks",
+              "statuslines",
+              "guides",
+              "jobs",
+              "changelog"
+            ]
+          },
+          "slug": {
+            "description": "Content slug identifier",
+            "example": "ai-agent-framework",
+            "type": "string",
+            "minLength": 1
+          },
+          "platform": {
+            "description": "Target platform for formatting (default: claude-code)",
+            "example": "claude-code",
+            "default": "claude-code",
+            "type": "string",
+            "enum": [
+              "claude-code",
+              "cursor",
+              "chatgpt-codex",
+              "generic"
+            ]
+          },
+          "targetDirectory": {
+            "description": "Optional: Target directory path (e.g., \"/Users/username/project/.claude\")",
+            "example": "/Users/username/project/.claude",
+            "format": "path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "slug"
+        ],
+        "description": "Download content formatted for a specific platform (Claude Code, Cursor, ChatGPT Codex, or generic). Returns formatted content with installation instructions.",
+        "example": {
+          "category": "",
+          "slug": "example",
+          "platform": "",
+          "targetDirectory": "example"
+        }
       },
       "getSocialProofStatsInput": {
         "type": "object",
-        "description": "Input schema for getSocialProofStats tool"
+        "properties": {},
+        "description": "Get community statistics including top contributors, recent submissions, success rate, and total user count. Provides social proof data for engagement.",
+        "example": {}
       },
       "submitContentInput": {
         "type": "object",
-        "description": "Input schema for submitContent tool"
+        "properties": {
+          "submission_type": {
+            "description": "Type of content to submit (required for complete submission)",
+            "example": "agents",
+            "type": "string",
+            "enum": [
+              "agents",
+              "mcp",
+              "rules",
+              "commands",
+              "hooks",
+              "statuslines",
+              "skills"
+            ]
+          },
+          "category": {
+            "description": "Content category (usually matches submission_type)",
+            "example": "agents",
+            "type": "string",
+            "enum": [
+              "agents",
+              "rules",
+              "commands",
+              "skills",
+              "collections",
+              "mcp",
+              "hooks",
+              "statuslines",
+              "guides",
+              "jobs",
+              "changelog"
+            ]
+          },
+          "name": {
+            "description": "Title/name of the content (required)",
+            "example": "AI Agent Framework",
+            "type": "string"
+          },
+          "description": {
+            "description": "Brief description of the content (required)",
+            "example": "A comprehensive framework for building AI agents",
+            "type": "string"
+          },
+          "author": {
+            "description": "Author name or handle (required)",
+            "example": "johndoe",
+            "type": "string"
+          },
+          "content_data": {
+            "description": "Content data object (structure varies by type)",
+            "example": {
+              "version": "1.0.0",
+              "features": [
+                "feature1",
+                "feature2"
+              ]
+            }
+          },
+          "author_profile_url": {
+            "description": "Optional: Author profile URL",
+            "example": "https://github.com/johndoe",
+            "format": "uri",
+            "type": "string"
+          },
+          "github_url": {
+            "description": "Optional: GitHub repository URL",
+            "example": "https://github.com/johndoe/ai-agent-framework",
+            "format": "uri",
+            "type": "string"
+          },
+          "tags": {
+            "description": "Optional: Array of relevant tags",
+            "example": [
+              "ai",
+              "automation",
+              "agents"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "description": "Guide users through content submission using MCP elicitation. Collects submission data step-by-step and provides submission instructions with pre-filled URLs.",
+        "example": {
+          "submission_type": "",
+          "category": "",
+          "name": "example",
+          "description": "example",
+          "author": "example",
+          "content_data": null,
+          "author_profile_url": "example",
+          "github_url": "example",
+          "tags": []
+        }
       },
       "createAccountInput": {
         "type": "object",
-        "description": "Input schema for createAccount tool"
+        "properties": {
+          "provider": {
+            "description": "OAuth provider to use for account creation (default: \"github\")",
+            "example": "github",
+            "default": "github",
+            "type": "string",
+            "enum": [
+              "github",
+              "google",
+              "discord"
+            ]
+          },
+          "newsletterOptIn": {
+            "description": "Whether to automatically subscribe to newsletter (default: false)",
+            "example": false,
+            "default": false,
+            "type": "boolean"
+          },
+          "redirectTo": {
+            "description": "Optional: Path to redirect to after account creation (e.g., \"/account\")",
+            "example": "/account",
+            "format": "path",
+            "type": "string"
+          }
+        },
+        "description": "Provides OAuth URLs and instructions for creating an account. Supports newsletter opt-in during account creation.",
+        "example": {
+          "provider": "",
+          "newsletterOptIn": false,
+          "redirectTo": "example"
+        }
       },
       "subscribeNewsletterInput": {
         "type": "object",
-        "description": "Input schema for subscribeNewsletter tool"
-      },
-      "contentResource": {
-        "type": "object",
-        "description": "Export content in various formats (llms.txt, markdown, json, rss, atom). Supports all content categories.",
         "properties": {
-          "uri": {
+          "email": {
+            "description": "Email address to subscribe",
+            "example": "user@example.com",
+            "format": "email",
             "type": "string",
-            "format": "uri"
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
           },
-          "mimeType": {
+          "source": {
+            "description": "Newsletter subscription source (default: \"mcp\")",
+            "example": "mcp",
+            "default": "mcp",
             "type": "string"
           },
-          "text": {
+          "referrer": {
+            "description": "Optional: Referrer URL or source identifier",
+            "example": "https://claudepro.directory",
+            "format": "uri",
             "type": "string"
+          },
+          "metadata": {
+            "description": "Optional: Additional metadata for tracking",
+            "example": {
+              "campaign": "mcp-launch",
+              "source": "website"
+            },
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
           }
+        },
+        "required": [
+          "email"
+        ],
+        "description": "Subscribes a user to the newsletter via Inngest. Sends event to Inngest which handles email validation, Resend audience sync, database subscription, welcome email, and drip campaign enrollment.",
+        "example": {
+          "email": "example",
+          "source": "example",
+          "referrer": "example",
+          "metadata": null
         }
       },
-      "categoryResource": {
+      "downloadSkillPackageInput": {
         "type": "object",
-        "description": "Export all content in a category in various formats (llms.txt, markdown, json, rss, atom).",
         "properties": {
-          "uri": {
+          "slug": {
+            "description": "Slug identifier of the skill to download",
+            "example": "my-awesome-skill",
             "type": "string",
-            "format": "uri"
+            "minLength": 1
           },
-          "mimeType": {
-            "type": "string"
-          },
-          "text": {
+          "rootUri": {
+            "description": "Optional: Root URI for file download. If not provided, returns download URL.",
+            "example": "file:///Users/username/.claude/packages",
+            "format": "uri",
             "type": "string"
           }
+        },
+        "required": [
+          "slug"
+        ],
+        "description": "Downloads a Skills ZIP file from Supabase Storage. If rootUri is provided, writes to client filesystem using Roots. Otherwise, returns download URL for manual download.",
+        "example": {
+          "slug": "example",
+          "rootUri": "example"
         }
       },
-      "sitewideResource": {
+      "downloadMcpServerPackageInput": {
         "type": "object",
-        "description": "Export all content across all categories in various formats (llms.txt, markdown, json, rss, atom).",
         "properties": {
-          "uri": {
+          "slug": {
+            "description": "Slug identifier of the MCP server to download",
+            "example": "example-mcp-server",
             "type": "string",
-            "format": "uri"
+            "minLength": 1
           },
-          "mimeType": {
-            "type": "string"
-          },
-          "text": {
+          "rootUri": {
+            "description": "Optional: Root URI for file download. If not provided, returns download URL.",
+            "example": "file:///Users/username/.claude/mcp",
+            "format": "uri",
             "type": "string"
           }
+        },
+        "required": [
+          "slug"
+        ],
+        "description": "Downloads an MCP server .mcpb file from Supabase Storage. If rootUri is provided, writes to client filesystem using Roots. Otherwise, returns download URL for manual download.",
+        "example": {
+          "slug": "example",
+          "rootUri": "example"
+        }
+      },
+      "downloadStorageFileInput": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "description": "Content category",
+            "example": "skills",
+            "type": "string",
+            "enum": [
+              "agents",
+              "rules",
+              "commands",
+              "skills",
+              "collections",
+              "mcp",
+              "hooks",
+              "statuslines",
+              "guides",
+              "jobs",
+              "changelog"
+            ]
+          },
+          "slug": {
+            "description": "Slug identifier of the content to download",
+            "example": "my-content",
+            "type": "string",
+            "minLength": 1
+          },
+          "rootUri": {
+            "description": "Optional: Root URI for file download. If not provided, returns download URL.",
+            "example": "file:///Users/username/.claude/packages",
+            "format": "uri",
+            "type": "string"
+          },
+          "fileType": {
+            "description": "Optional: File type hint for better handling",
+            "example": "zip",
+            "type": "string",
+            "enum": [
+              "zip",
+              "mcpb",
+              "json",
+              "other"
+            ]
+          }
+        },
+        "required": [
+          "category",
+          "slug"
+        ],
+        "description": "Generic tool for downloading any storage file from Supabase Storage. Supports Skills ZIPs, MCP server .mcpb files, and future storage file types. If rootUri is provided, writes to client filesystem using Roots. Otherwise, returns download URL for manual download.",
+        "example": {
+          "category": "",
+          "slug": "example",
+          "rootUri": "example",
+          "fileType": ""
         }
       },
       "submit-content-guideArgs": {
         "type": "object",
-        "description": "Arguments for submit-content-guide prompt"
+        "description": "Step-by-step guide for submitting new content to the Claude Pro Directory. Provides instructions, requirements, and best practices for each content type."
       },
       "format-content-for-platformArgs": {
         "type": "object",
-        "description": "Arguments for format-content-for-platform prompt"
+        "description": "Instructions for formatting content for specific platforms (Claude Code, Cursor, etc.) with installation steps and configuration examples."
       },
       "search-optimization-tipsArgs": {
         "type": "object",
-        "description": "Arguments for search-optimization-tips prompt"
-      },
-      "content-discovery-guideArgs": {
-        "type": "object",
-        "description": "Arguments for content-discovery-guide prompt"
+        "description": "Tips and best practices for optimizing search queries to find content more effectively in the Claude Pro Directory."
       },
       "mcp-server-setup-guideArgs": {
         "type": "object",
-        "description": "Arguments for mcp-server-setup-guide prompt"
+        "description": "Complete guide on setting up, configuring, and using MCP servers from the directory, including installation and integration steps."
       },
       "content-submission-best-practicesArgs": {
         "type": "object",
-        "description": "Arguments for content-submission-best-practices prompt"
-      },
-      "tool-usage-guideArgs": {
-        "type": "object",
-        "description": "Arguments for tool-usage-guide prompt"
+        "description": "Best practices, guidelines, and tips for submitting high-quality content that gets accepted and helps the community."
       },
       "resource-access-guideArgs": {
         "type": "object",
-        "description": "Arguments for resource-access-guide prompt"
+        "description": "Guide on accessing and using MCP resources, including content exports, category exports, and sitewide exports in various formats."
       }
     },
     "securitySchemes": {

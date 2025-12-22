@@ -864,21 +864,16 @@ pre-push:
         if command -v ast-grep &> /dev/null || npx ast-grep --version &> /dev/null 2>&1; then
           echo "   🔍 Running ast-grep pattern checks..."
           
-          # Logging patterns
+          # Logging patterns (consolidated into pino-logging-patterns.yml)
           echo "   📝 Logging patterns..."
-          CONSOLE_USAGE=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/logging-patterns.yml 2>/dev/null | grep -c "no-console-usage\|missing-normalize-error" || echo "0")
+          CONSOLE_USAGE=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/pino-logging-patterns.yml 2>/dev/null | grep -c "console-usage\|missing-normalize-error\|missing-logger-child" || echo "0")
           if [ "$CONSOLE_USAGE" != "0" ]; then
-            echo "      ⚠️  Found logging pattern issues (console.* usage, missing normalizeError)"
+            echo "      ⚠️  Found logging pattern issues (console.* usage, missing normalizeError, missing logger.child)"
             echo "      💡 Use logger.* from @heyclaude/web-runtime/logging/*"
           fi
           
-          # Security patterns
-          echo "   🔒 Security patterns..."
-          SECURITY_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/security-patterns.yml 2>/dev/null | grep -c "missing-input-validation\|missing-auth" || echo "0")
-          if [ "$SECURITY_ISSUES" != "0" ]; then
-            echo "      ⚠️  Found potential security issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/security-patterns.yml"
-          fi
+          # Security patterns (consolidated into security-patterns-enhanced.yml)
+          # Removed: security-patterns.yml (merged into security-patterns-enhanced.yml)
           
           # Performance patterns
           echo "   ⚡ Performance patterns..."
@@ -928,13 +923,7 @@ pre-push:
             echo "      💡 Review: config/coderabbit/ast-grep-rules/type-safety-patterns.yml"
           fi
           
-          # Prisma migration patterns (CRITICAL - active migration)
-          echo "   🔄 Prisma migration patterns..."
-          PRISMA_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/prisma-migration-patterns.yml 2>/dev/null | grep -c "supabase-database-types\|generated-file-import\|missing-prisma-type" || echo "0")
-          if [ "$PRISMA_ISSUES" != "0" ]; then
-            echo "      ⚠️  Found Prisma migration issues (CRITICAL - active migration)"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/prisma-migration-patterns.yml"
-          fi
+          # Prisma migration patterns - REMOVED (migration complete)
           
           # Cache invalidation patterns
           echo "   🗄️  Cache invalidation patterns..."
@@ -952,21 +941,12 @@ pre-push:
             echo "      💡 Review: config/coderabbit/ast-grep-rules/skeleton-structure-patterns.yml"
           fi
           
-          # Enhanced logging patterns
-          echo "   📝 Enhanced logging patterns..."
-          LOGGING_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/logging-patterns-enhanced.yml 2>/dev/null | grep -c "missing-request-scoped-logger\|missing-request-id\|request-id-before-connection" || echo "0")
-          if [ "$LOGGING_ISSUES" != "0" ]; then
-            echo "      ⚠️  Found logging pattern issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/logging-patterns-enhanced.yml"
-          fi
+          # Enhanced logging patterns (consolidated into pino-logging-patterns.yml)
+          # Removed: logging-patterns-enhanced.yml (merged into pino-logging-patterns.yml)
+          # NOTE: requestId rules were excluded as requestId was removed from codebase
           
-          # React hooks patterns
-          echo "   ⚛️  React hooks patterns..."
-          HOOKS_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/react-hooks-patterns.yml 2>/dev/null | grep -c "conditional-hook-call\|missing-cleanup-custom-hook\|custom-hook-naming" || echo "0")
-          if [ "$HOOKS_ISSUES" != "0" ]; then
-            echo "      ⚠️  Found React hooks issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/react-hooks-patterns.yml"
-          fi
+          # React hooks patterns (consolidated into react-hooks-best-practices.yml)
+          # Removed: react-hooks-patterns.yml (merged into react-hooks-best-practices.yml)
           
           # Motion optimization patterns
           echo "   🎬 Motion optimization patterns..."
@@ -977,8 +957,9 @@ pre-push:
           fi
           
           # Industry-standard security patterns
-          echo "   🔒 Enhanced security patterns..."
-          SECURITY_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/security-patterns-enhanced.yml 2>/dev/null | grep -c "hardcoded-secrets\|sql-injection\|missing-csrf" || echo "0")
+          # Enhanced security patterns (consolidated)
+          echo "   🔒 Security patterns..."
+          SECURITY_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/security-patterns-enhanced.yml 2>/dev/null | grep -c "hardcoded-secrets\|sql-injection\|missing-csrf\|missing-input-validation\|missing-auth" || echo "0")
           if [ "$SECURITY_ISSUES" != "0" ]; then
             echo "      ⚠️  Found security issues (CRITICAL)"
             echo "      💡 Review: config/coderabbit/ast-grep-rules/security-patterns-enhanced.yml"
@@ -1044,6 +1025,30 @@ pre-push:
           if [ "$NEXTJS16_ISSUES" != "0" ]; then
             echo "      ⚠️  Found Next.js 16 pattern issues"
             echo "      💡 Review: config/coderabbit/ast-grep-rules/nextjs-16-patterns.yml"
+          fi
+          
+          # API routes patterns
+          echo "   🛣️  API routes patterns..."
+          API_ROUTE_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/api-routes-patterns.yml 2>/dev/null | grep -c "api-route-not-using-factory\|missing-route-property\|missing-operation-property\|missing-query-schema" || echo "0")
+          if [ "$API_ROUTE_ISSUES" != "0" ]; then
+            echo "      ⚠️  Found API route pattern issues"
+            echo "      💡 Review: config/coderabbit/ast-grep-rules/api-routes-patterns.yml"
+          fi
+          
+          # Page data flow patterns
+          echo "   🔄 Page data flow patterns..."
+          DATA_FLOW_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/page-data-flow-patterns.yml 2>/dev/null | grep -c "date-object-to-client\|non-serializable\|function-to-client" || echo "0")
+          if [ "$DATA_FLOW_ISSUES" != "0" ]; then
+            echo "      ⚠️  Found page data flow issues"
+            echo "      💡 Review: config/coderabbit/ast-grep-rules/page-data-flow-patterns.yml"
+          fi
+          
+          # Single dev team patterns
+          echo "   👤 Single dev team patterns..."
+          SINGLE_DEV_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/single-dev-team-patterns.yml 2>/dev/null | grep -c "missing-error-handling\|missing-validation\|unsafe-type" || echo "0")
+          if [ "$SINGLE_DEV_ISSUES" != "0" ]; then
+            echo "      ⚠️  Found single dev team pattern issues"
+            echo "      💡 Review: config/coderabbit/ast-grep-rules/single-dev-team-patterns.yml"
           fi
           
           echo ""

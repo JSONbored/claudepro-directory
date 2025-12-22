@@ -9,10 +9,13 @@
  * can be converted to Prisma queries directly.
  */
 
-// Import Prisma client and types (ES module import)
-// This import is safe because isCloudflareWorkers() check prevents usage in Cloudflare Workers
-import { prisma as importedPrisma } from '../prisma/client';
+// Import Prisma types only (no runtime import to avoid Cloudflare Workers bundling issues)
 import type { PrismaClient } from '@prisma/client';
+
+// Static ES6 import works with Vitest's __mocks__ system
+// This import will be automatically mocked by __mocks__/@prisma/client.ts in tests
+// The prisma singleton in client.ts is lazy-initialized, so this doesn't create the client immediately
+import { prisma as defaultPrismaSingleton } from '../prisma/client.js';
 
 // Lazy access to Prisma client (cached after first access)
 // This avoids re-importing but allows the module to load without instantiating
@@ -67,10 +70,10 @@ function getDefaultPrisma(): PrismaClient {
   }
 
   if (!defaultPrisma) {
-    // Use top-level ES module import instead of require()
-    // The package uses "type": "module", so require() doesn't work properly during Next.js build
-    // Top-level import works correctly with ES modules and is safe because isCloudflareWorkers() check prevents usage in Cloudflare Workers
-    defaultPrisma = importedPrisma;
+    // Use static ES6 import (already imported at top of file) which works with Vitest's __mocks__ system
+    // This ensures Prismock is used in tests via __mocks__/@prisma/client.ts
+    // The prisma singleton is lazy-initialized in client.ts, so this doesn't create the client immediately
+    defaultPrisma = defaultPrismaSingleton;
   }
   // Type assertion: defaultPrisma is guaranteed to be set after the check above
   return defaultPrisma as PrismaClient;

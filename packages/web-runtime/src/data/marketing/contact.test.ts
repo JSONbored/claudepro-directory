@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, jest } from '@jest/globals';
 import {
   getSocialLinks,
   getContactChannels,
@@ -9,17 +9,17 @@ import {
 import { getSocialLink } from '../config/constants';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock logger
-vi.mock('../../logger', () => ({
+jest.mock('../../logger', () => ({
   logger: {
     warn: vi.fn(),
   },
 }));
 
 // Mock constants
-vi.mock('../config/constants', () => ({
+jest.mock('../config/constants', () => ({
   getSocialLink: vi.fn((key: string) => {
     const links: Record<string, string> = {
       discord: 'https://discord.gg/test',

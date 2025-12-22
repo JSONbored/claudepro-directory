@@ -1,12 +1,12 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { getSEOMetadata, getSEOMetadataWithSchemas } from './client';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock env
-vi.mock('@heyclaude/shared-runtime/schemas/env', () => ({
+jest.mock('@heyclaude/shared-runtime/schemas/env', () => ({
   env: {
     NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
     NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-key',
@@ -14,13 +14,13 @@ vi.mock('@heyclaude/shared-runtime/schemas/env', () => ({
 }));
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
+jest.mock('next/cache', () => ({
   cacheLife: vi.fn(),
   cacheTag: vi.fn(),
 }));
 
 // Mock cached-data-factory - use globalThis to avoid hoisting issues
-vi.mock('../cached-data-factory', () => {
+jest.mock('../cached-data-factory', () => {
   if (!(globalThis as any).__seoMocks) {
     (globalThis as any).__seoMocks = {
       getSEOMetadataInternal: vi.fn(),
@@ -49,8 +49,8 @@ describe('seo client data functions', () => {
       (globalThis as any).__seoMocks.getSEOMetadataInternal.mockClear();
     }
     // Ensure env vars are set for tests (reset from any previous test that cleared them)
-    vi.mocked(env).NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
-    vi.mocked(env).NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-key';
+    jest.mocked(env).NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+    jest.mocked(env).NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-key';
   });
 
   describe('getSEOMetadata', () => {
@@ -98,8 +98,8 @@ describe('seo client data functions', () => {
     });
 
     it('should return null when environment variables missing', async () => {
-      vi.mocked(env).NEXT_PUBLIC_SUPABASE_URL = '';
-      vi.mocked(env).NEXT_PUBLIC_SUPABASE_ANON_KEY = '';
+      jest.mocked(env).NEXT_PUBLIC_SUPABASE_URL = '';
+      jest.mocked(env).NEXT_PUBLIC_SUPABASE_ANON_KEY = '';
 
       const result = await getSEOMetadata('/test-route');
 

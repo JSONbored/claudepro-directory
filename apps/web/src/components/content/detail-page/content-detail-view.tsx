@@ -58,6 +58,7 @@ const ReviewListSection = dynamic(
   { ssr: true }
 );
 import { NewsletterScrollTrigger } from '@/src/components/features/growth/newsletter/newsletter-scroll-trigger';
+import { PostContentNewsletterCTA } from '@/src/components/features/growth/newsletter/post-content-newsletter-cta';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 
 import { DetailHeader } from './detail-header';
@@ -1551,6 +1552,13 @@ export async function UnifiedDetailPage({
                 </Suspense>
               </div>
             ) : null}
+
+            {/* Post-Content Newsletter CTA - Static inline CTA after content */}
+            <PostContentNewsletterCTA
+              category={item.category}
+              source="content_page"
+              className="mt-8"
+            />
 
             {/* Email CTA - Scroll-triggered variant for better engagement */}
             <NewsletterScrollTrigger

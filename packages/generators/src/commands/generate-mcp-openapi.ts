@@ -30,20 +30,27 @@ import { z } from 'zod';
 // Import zod-openapi for type augmentation
 import 'zod-openapi';
 
+// Import shared Zod schema evaluation utilities
+import {
+  setProjectRoot,
+  evaluateSchemaFromFile,
+  generateExampleFromZodSchema,
+} from '../toolkit/zod-schema-evaluation.js';
+
 const __filename = fileURLToPath(import.meta.url);
 // Calculate PROJECT_ROOT: from packages/generators/src/commands/ -> project root
 // Or from packages/generators/src/bin/ -> project root
 let PROJECT_ROOT = join(__filename, '../../../../');
-// Verify by checking if apps/workers/heyclaude-mcp exists
-if (!existsSync(join(PROJECT_ROOT, 'apps/workers/heyclaude-mcp'))) {
+// Verify by checking if packages/mcp-server exists (standalone package)
+if (!existsSync(join(PROJECT_ROOT, 'packages/mcp-server'))) {
   // Try alternative path (if called from bin script)
   const altPath = join(__filename, '../../../../../');
-  if (existsSync(join(altPath, 'apps/workers/heyclaude-mcp'))) {
+  if (existsSync(join(altPath, 'packages/mcp-server'))) {
     PROJECT_ROOT = altPath;
   } else {
     // Final fallback - use process.cwd() and verify
     const cwdPath = process.cwd();
-    if (existsSync(join(cwdPath, 'apps/workers/heyclaude-mcp'))) {
+    if (existsSync(join(cwdPath, 'packages/mcp-server'))) {
       PROJECT_ROOT = cwdPath;
     } else {
       throw new Error(
@@ -51,13 +58,13 @@ if (!existsSync(join(PROJECT_ROOT, 'apps/workers/heyclaude-mcp'))) {
         `  - ${PROJECT_ROOT}\n` +
         `  - ${altPath}\n` +
         `  - ${cwdPath}\n` +
-        `Looking for: apps/workers/heyclaude-mcp`
+        `Looking for: packages/mcp-server`
       );
     }
   }
 }
 
-const MCP_SERVER_PATH = join(PROJECT_ROOT, 'apps/workers/heyclaude-mcp/src/mcp');
+const MCP_SERVER_PATH = join(PROJECT_ROOT, 'packages/mcp-server/src/mcp');
 
 interface ToolMetadata {
   name: string;
@@ -66,6 +73,8 @@ interface ToolMetadata {
   inputSchema?: z.ZodSchema;
   inputSchemaSource?: string;
   inputSchemaName?: string;
+  inputSchemaExample?: unknown;
+  outputSchemaName?: string;
   filePath: string;
 }
 
@@ -82,8 +91,10 @@ interface PromptMetadata {
   name: string;
   title: string;
   description: string;
-  argsSchema?: Record<string, z.ZodTypeAny>;
+  argsSchema?: z.ZodSchema;
   argsSchemaSource?: string;
+  argsSchemaName?: string;
+  argsSchemaExample?: unknown;
   filePath: string;
 }
 
@@ -164,9 +175,10 @@ function extractToolMetadata(sourceFile: SourceFile): ToolMetadata[] {
       }
     }
 
-    // Extract inputSchema source
+    // Extract inputSchema source and name
     let inputSchemaSource: string | undefined;
     let inputSchemaName: string | undefined;
+    let outputSchemaName: string | undefined;
     if (inputSchemaProp && Node.isPropertyAssignment(inputSchemaProp)) {
       const schemaInit = inputSchemaProp.getInitializer();
       if (schemaInit) {
@@ -177,12 +189,22 @@ function extractToolMetadata(sourceFile: SourceFile): ToolMetadata[] {
       }
     }
 
+    // Extract outputSchema name
+    const outputSchemaProp = metadataArg.getProperty('outputSchema');
+    if (outputSchemaProp && Node.isPropertyAssignment(outputSchemaProp)) {
+      const schemaInit = outputSchemaProp.getInitializer();
+      if (schemaInit && Node.isIdentifier(schemaInit)) {
+        outputSchemaName = schemaInit.getText();
+      }
+    }
+
     tools.push({
       name,
       title,
       description,
       ...(inputSchemaSource && { inputSchemaSource }),
       ...(inputSchemaName && { inputSchemaName }),
+      ...(outputSchemaName && { outputSchemaName }),
       filePath: sourceFile.getFilePath(),
     });
   });
@@ -360,12 +382,16 @@ function extractPromptMetadata(sourceFile: SourceFile): PromptMetadata[] {
       }
     }
 
-    // Extract argsSchema source
+    // Extract argsSchema source and name
     let argsSchemaSource: string | undefined;
+    let argsSchemaName: string | undefined;
     if (argsSchemaProp && Node.isPropertyAssignment(argsSchemaProp)) {
       const schemaInit = argsSchemaProp.getInitializer();
       if (schemaInit) {
         argsSchemaSource = schemaInit.getText();
+        if (Node.isIdentifier(schemaInit)) {
+          argsSchemaName = schemaInit.getText();
+        }
       }
     }
 
@@ -374,6 +400,7 @@ function extractPromptMetadata(sourceFile: SourceFile): PromptMetadata[] {
       title,
       description,
       ...(argsSchemaSource && { argsSchemaSource }),
+      ...(argsSchemaName && { argsSchemaName }),
       filePath: sourceFile.getFilePath(),
     });
   });
@@ -390,19 +417,24 @@ function extractPromptMetadata(sourceFile: SourceFile): PromptMetadata[] {
 function extractToolsViaRegex(sourceText: string): ToolMetadata[] {
   const tools: ToolMetadata[] = [];
   
-  // Match: mcpServer.registerTool('name', { title: '...', description: '...', inputSchema: ... }, ...)
-  const toolRegex = /mcpServer\.registerTool\s*\(\s*['"]([^'"]+)['"]\s*,\s*\{[^}]*title:\s*['"]([^'"]+)['"][^}]*description:\s*['"]?([^'"]+)['"]?/gs;
+  // Match: mcpServer.registerTool('name', { title: '...', description: '...', inputSchema: SchemaName }, ...)
+  // More comprehensive regex to capture inputSchema name
+  const toolRegex = /mcpServer\.registerTool\s*\(\s*['"]([^'"]+)['"]\s*,\s*\{[^}]*title:\s*['"]([^'"]+)['"][^}]*description:\s*['"]?([^'"]+)['"]?[^}]*inputSchema:\s*([A-Za-z][A-Za-z0-9_]*)/gs;
   
   let match;
   while ((match = toolRegex.exec(sourceText)) !== null) {
-    const [, name, title, description] = match;
+    const [, name, title, description, inputSchemaName] = match;
     if (name && title) {
-      tools.push({
+      const tool: ToolMetadata = {
         name: name.trim(),
         title: title.trim(),
         description: (description || '').trim(),
-        filePath: 'apps/workers/heyclaude-mcp/src/mcp/tools/register.ts',
-      });
+        filePath: 'packages/mcp-server/src/mcp/tools/register.ts',
+      };
+      if (inputSchemaName?.trim()) {
+        tool.inputSchemaName = inputSchemaName.trim();
+      }
+      tools.push(tool);
     }
   }
   
@@ -428,7 +460,7 @@ function extractResourcesViaRegex(sourceText: string): ResourceMetadata[] {
         title: title.trim(),
         description: (description || '').trim(),
         mimeType: (mimeType || 'text/plain').trim(),
-        filePath: 'apps/workers/heyclaude-mcp/src/mcp/resources/register.ts',
+        filePath: 'packages/mcp-server/src/mcp/resources/register.ts',
       });
     }
   }
@@ -442,19 +474,24 @@ function extractResourcesViaRegex(sourceText: string): ResourceMetadata[] {
 function extractPromptsViaRegex(sourceText: string): PromptMetadata[] {
   const prompts: PromptMetadata[] = [];
   
-  // Match: mcpServer.registerPrompt('name', { title: '...', description: '...', argsSchema: ... }, ...)
-  const promptRegex = /mcpServer\.registerPrompt\s*\(\s*['"]([^'"]+)['"]\s*,\s*\{[^}]*title:\s*['"]([^'"]+)['"][^}]*description:\s*['"]?([^'"]+)['"]?/gs;
+  // Match: mcpServer.registerPrompt('name', { title: '...', description: '...', argsSchema: SchemaName }, ...)
+  // More comprehensive regex to capture argsSchema name
+  const promptRegex = /mcpServer\.registerPrompt\s*\(\s*['"]([^'"]+)['"]\s*,\s*\{[^}]*title:\s*['"]([^'"]+)['"][^}]*description:\s*['"]?([^'"]+)['"]?[^}]*argsSchema:\s*([A-Za-z][A-Za-z0-9_]*)/gs;
   
   let match;
   while ((match = promptRegex.exec(sourceText)) !== null) {
-    const [, name, title, description] = match;
+    const [, name, title, description, argsSchemaName] = match;
     if (name && title) {
-      prompts.push({
+      const prompt: PromptMetadata = {
         name: name.trim(),
         title: title.trim(),
         description: (description || '').trim(),
-        filePath: 'apps/workers/heyclaude-mcp/src/mcp/prompts/register.ts',
-      });
+        filePath: 'packages/mcp-server/src/mcp/prompts/register.ts',
+      };
+      if (argsSchemaName?.trim()) {
+        prompt.argsSchemaName = argsSchemaName.trim();
+      }
+      prompts.push(prompt);
     }
   }
   
@@ -462,12 +499,81 @@ function extractPromptsViaRegex(sourceText: string): PromptMetadata[] {
 }
 
 /**
+ * Evaluate Zod schemas for tools and prompts
+ */
+async function evaluateSchemas(
+  tools: ToolMetadata[],
+  prompts: PromptMetadata[],
+  projectRoot: string
+): Promise<void> {
+  const typesFilePath = join(projectRoot, 'packages/mcp-server/src/lib/types.ts');
+  
+  if (!existsSync(typesFilePath)) {
+    console.warn(`⚠️  Types file not found: ${typesFilePath}`);
+    return;
+  }
+
+  console.log(`📦 Evaluating Zod schemas from: ${typesFilePath}`);
+
+  // Evaluate tool input schemas
+  for (const tool of tools) {
+    if (tool.inputSchemaName) {
+      try {
+        // Use absolute path to types file
+        const typesFilePath = join(projectRoot, 'packages/mcp-server/src/lib/types.ts');
+        const schema = await evaluateSchemaFromFile(
+          typesFilePath,
+          tool.inputSchemaName,
+          projectRoot
+        );
+        if (schema) {
+          tool.inputSchema = schema;
+          tool.inputSchemaExample = generateExampleFromZodSchema(schema);
+          console.log(`   ✅ Evaluated input schema for ${tool.name}: ${tool.inputSchemaName}`);
+        } else {
+          console.warn(`   ⚠️  Could not evaluate schema: ${tool.inputSchemaName}`);
+        }
+      } catch (error) {
+        console.warn(`   ⚠️  Error evaluating schema ${tool.inputSchemaName}: ${error}`);
+      }
+    }
+  }
+
+  // Evaluate prompt args schemas
+  for (const prompt of prompts) {
+    if (prompt.argsSchemaName) {
+      try {
+        // Use absolute path to types file
+        const typesFilePath = join(projectRoot, 'packages/mcp-server/src/lib/types.ts');
+        const schema = await evaluateSchemaFromFile(
+          typesFilePath,
+          prompt.argsSchemaName,
+          projectRoot
+        );
+        if (schema) {
+          prompt.argsSchema = schema;
+          prompt.argsSchemaExample = generateExampleFromZodSchema(schema);
+          console.log(`   ✅ Evaluated args schema for ${prompt.name}: ${prompt.argsSchemaName}`);
+        } else {
+          console.warn(`   ⚠️  Could not evaluate schema: ${prompt.argsSchemaName}`);
+        }
+      } catch (error) {
+        console.warn(`   ⚠️  Error evaluating schema ${prompt.argsSchemaName}: ${error}`);
+      }
+    }
+  }
+}
+
+/**
  * Generate OpenAPI spec for MCP server
  */
 async function generateMcpOpenAPI(): Promise<void> {
+  // Set project root for schema evaluation utilities
+  setProjectRoot(PROJECT_ROOT);
+
   // Create project with proper TypeScript configuration
-  // Try to use the MCP worker's tsconfig.json if it exists
-  const mcpTsConfigPath = join(PROJECT_ROOT, 'apps/workers/heyclaude-mcp/tsconfig.json');
+  // Try to use the MCP server package's tsconfig.json if it exists
+  const mcpTsConfigPath = join(PROJECT_ROOT, 'packages/mcp-server/tsconfig.json');
   const project = existsSync(mcpTsConfigPath)
     ? new Project({
         tsConfigFilePath: mcpTsConfigPath,
@@ -556,6 +662,9 @@ async function generateMcpOpenAPI(): Promise<void> {
     console.warn('   This is expected for now - AST parsing needs enhancement for full schema extraction.');
     console.warn('   The OpenAPI spec will be generated with placeholder schemas.');
   }
+
+  // Evaluate Zod schemas at runtime
+  await evaluateSchemas(tools, prompts, PROJECT_ROOT);
 
   // Create OpenAPI document
   const document = createDocument({
@@ -747,36 +856,185 @@ async function generateMcpOpenAPI(): Promise<void> {
   });
 
   // Add tool schemas to components.schemas
-  // For now, we'll add placeholders - full schema extraction requires runtime evaluation
   if (document.components?.schemas) {
     for (const tool of tools) {
-      document.components.schemas[`${tool.name}Input`] = {
-        type: 'object',
-        description: `Input schema for ${tool.name} tool`,
-        // Schema will be populated from Zod via zod-openapi
-      };
+      const schemaName = `${tool.name}Input`;
+      
+      if (tool.inputSchema) {
+        // Convert Zod schema to OpenAPI schema using zod-openapi
+        try {
+          // Use zod-openapi's .openapi() method if available
+          const zodSchema = tool.inputSchema as z.ZodSchema & { openapi?: (options?: any) => any };
+          
+          let openApiSchema: Record<string, unknown>;
+          
+          if (typeof zodSchema.openapi === 'function') {
+            // Use .openapi() method from zod-openapi
+            openApiSchema = zodSchema.openapi({
+              type: 'object',
+              description: tool.description || `Input schema for ${tool.name} tool`,
+            });
+          } else {
+            // Fallback: Use createDocument() with a mock path to convert schema
+            // This ensures zod-openapi properly converts the schema
+            const mockDocument = createDocument({
+              openapi: '3.1.0',
+              info: { title: 'Temp', version: '1.0.0' },
+              paths: {
+                '/temp': {
+                  post: {
+                    requestBody: {
+                      content: {
+                        'application/json': {
+                          schema: zodSchema,
+                        },
+                      },
+                    },
+                    responses: { '200': { description: 'OK' } },
+                  },
+                },
+              },
+            });
+            
+            // Extract schema from the converted document
+            const requestBodySchema = (mockDocument.paths?.['/temp']?.post?.requestBody as any)?.content?.['application/json']?.schema;
+            openApiSchema = requestBodySchema || { type: 'object' };
+          }
+          
+          // Ensure openApiSchema is an object before spreading
+          const baseSchema: Record<string, unknown> = typeof openApiSchema === 'object' && openApiSchema !== null && !Array.isArray(openApiSchema)
+            ? { ...(openApiSchema as Record<string, unknown>) }
+            : { type: 'object' };
+          
+          const finalSchema: Record<string, unknown> = {
+            ...baseSchema,
+            description: tool.description || `Input schema for ${tool.name} tool`,
+          };
+          if (tool.inputSchemaExample) {
+            finalSchema['example'] = tool.inputSchemaExample;
+          }
+          document.components.schemas[schemaName] = finalSchema as any;
+        } catch (error) {
+          console.warn(`   ⚠️  Error converting schema for ${tool.name}: ${error}`);
+          // Fallback to basic schema
+          const fallbackSchema: Record<string, unknown> = {
+            type: 'object',
+            description: tool.description || `Input schema for ${tool.name} tool`,
+          };
+          if (tool.inputSchemaExample) {
+            fallbackSchema['example'] = tool.inputSchemaExample;
+          }
+          document.components.schemas[schemaName] = fallbackSchema as any;
+        }
+      } else {
+        // Fallback: placeholder schema
+        document.components.schemas[schemaName] = {
+          type: 'object',
+          description: tool.description || `Input schema for ${tool.name} tool`,
+        };
+      }
     }
 
-    // Add resource schemas
+    // Add resource schemas with examples
     for (const resource of resources) {
+      const exampleUri = resource.uriTemplate
+        .replace('{category}', 'agents')
+        .replace('{slug}', 'example-slug')
+        .replace('{format}', 'markdown');
+      
       document.components.schemas[`${resource.name}Resource`] = {
         type: 'object',
         description: resource.description,
         properties: {
-          uri: { type: 'string', format: 'uri' },
-          mimeType: { type: 'string' },
-          text: { type: 'string' },
+          uri: { type: 'string', format: 'uri', example: exampleUri },
+          mimeType: { type: 'string', example: resource.mimeType },
+          text: { type: 'string', example: 'Resource content...' },
+        },
+        example: {
+          uri: exampleUri,
+          mimeType: resource.mimeType,
+          text: 'Resource content...',
         },
       };
     }
 
     // Add prompt schemas
     for (const prompt of prompts) {
-      document.components.schemas[`${prompt.name}Args`] = {
-        type: 'object',
-        description: `Arguments for ${prompt.name} prompt`,
-        // Schema will be populated from Zod via zod-openapi
-      };
+      const schemaName = `${prompt.name}Args`;
+      
+      if (prompt.argsSchema) {
+        // Convert Zod schema to OpenAPI schema using zod-openapi
+        try {
+          // Use zod-openapi's .openapi() method if available
+          const zodSchema = prompt.argsSchema as z.ZodSchema & { openapi?: (options?: any) => any };
+          
+          let openApiSchema: Record<string, unknown>;
+          
+          if (typeof zodSchema.openapi === 'function') {
+            // Use .openapi() method from zod-openapi
+            openApiSchema = zodSchema.openapi({
+              type: 'object',
+              description: prompt.description || `Arguments for ${prompt.name} prompt`,
+            });
+          } else {
+            // Fallback: Use createDocument() with a mock path to convert schema
+            // This ensures zod-openapi properly converts the schema
+            const mockDocument = createDocument({
+              openapi: '3.1.0',
+              info: { title: 'Temp', version: '1.0.0' },
+              paths: {
+                '/temp': {
+                  post: {
+                    requestBody: {
+                      content: {
+                        'application/json': {
+                          schema: zodSchema,
+                        },
+                      },
+                    },
+                    responses: { '200': { description: 'OK' } },
+                  },
+                },
+              },
+            });
+            
+            // Extract schema from the converted document
+            const requestBodySchema = (mockDocument.paths?.['/temp']?.post?.requestBody as any)?.content?.['application/json']?.schema;
+            openApiSchema = requestBodySchema || { type: 'object' };
+          }
+          
+          // Ensure openApiSchema is an object
+          const baseSchema: Record<string, unknown> = typeof openApiSchema === 'object' && openApiSchema !== null && !Array.isArray(openApiSchema)
+            ? { ...(openApiSchema as Record<string, unknown>) }
+            : { type: 'object' };
+          
+          const finalSchema: Record<string, unknown> = {
+            ...baseSchema,
+            description: prompt.description || `Arguments for ${prompt.name} prompt`,
+          };
+          if (prompt.argsSchemaExample) {
+            finalSchema['example'] = prompt.argsSchemaExample;
+          }
+          document.components.schemas[schemaName] = finalSchema as any;
+        } catch (error) {
+          console.warn(`   ⚠️  Error converting schema for ${prompt.name}: ${error}`);
+          // Fallback to basic schema
+          const fallbackSchema: Record<string, unknown> = {
+            type: 'object',
+            description: prompt.description || `Arguments for ${prompt.name} prompt`,
+          };
+          if (prompt.argsSchemaExample) {
+            fallbackSchema['example'] = prompt.argsSchemaExample;
+          }
+          document.components.schemas[schemaName] = fallbackSchema as any;
+        }
+      } else {
+        // Fallback: placeholder schema
+        document.components.schemas[schemaName] = {
+          type: 'object',
+          description: prompt.description || `Arguments for ${prompt.name} prompt`,
+        };
+      }
     }
   }
 

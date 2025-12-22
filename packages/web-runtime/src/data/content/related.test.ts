@@ -1,17 +1,17 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, jest } from '@jest/globals';
 import { getRelatedContent, type RelatedContentInput } from './related';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock category validation
-vi.mock('@heyclaude/web-runtime/utils/category-validation', () => ({
+jest.mock('@heyclaude/web-runtime/utils/category-validation', () => ({
   isValidCategory: vi.fn((cat: string) => ['agents', 'mcp', 'rules'].includes(cat)),
 }));
 
 // Mock cached-data-factory
-vi.mock('../cached-data-factory', () => ({
+jest.mock('../cached-data-factory', () => ({
   createDataFunction: vi.fn((config: any) => {
     if (!(globalThis as any).__dataFunctionConfigs) {
       (globalThis as any).__dataFunctionConfigs = new Map();

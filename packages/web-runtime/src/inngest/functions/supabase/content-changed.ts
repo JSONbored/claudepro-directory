@@ -22,9 +22,9 @@ type contentModel = Prisma.contentGetPayload<{}>;
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 
-import { inngest } from '../../client';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
-import { RETRY_CONFIGS } from '../../config/index';
+import { logger } from '../../../logging/server';
+import { RETRY_CONFIGS, DEBOUNCE_CONFIGS } from '../../config/index';
+import { createInngestFunction } from '../../utils/function-factory';
 
 // Type for content row from database
 type ContentRow = contentModel;
@@ -99,21 +99,24 @@ async function triggerGitHubWorkflow(
  * Processes content change events and triggers GitHub Actions workflows
  * for package generation when needed.
  */
-export const handleSupabaseContentChanged = inngest.createFunction(
+export const handleSupabaseContentChanged = createInngestFunction(
   {
     id: 'supabase-content-changed-handler',
     name: 'Supabase Content Changed Handler',
+    route: '/inngest/supabase/content-changed',
     retries: RETRY_CONFIGS.WEBHOOK,
     // Idempotency: Use webhookId to prevent duplicate processing
     idempotency: 'event.data.webhookId',
+    // Debounce: Wait for rapid content changes to settle before processing
+    // Prevents triggering multiple GitHub Actions workflows for rapid edits
+    debounce: {
+      period: DEBOUNCE_CONFIGS.CONTENT_UPDATE.period,
+      timeout: DEBOUNCE_CONFIGS.CONTENT_UPDATE.timeout,
+      key: 'event.data.contentId', // Debounce per content item
+    },
   },
   { event: 'supabase/content-changed' },
-  async ({ event, step }) => {
-    const startTime = Date.now();
-    const logContext = createWebAppContextWithId(
-      '/inngest/supabase/content-changed',
-      'handleSupabaseContentChanged'
-    );
+  async ({ event, step, logContext }) => {
 
     const { webhookId, eventType, category, contentId, slug, record } = event.data;
 
@@ -275,7 +278,7 @@ export const handleSupabaseContentChanged = inngest.createFunction(
       // Don't fail - README update is non-critical
     }
 
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
     logger.info(
       {
         ...logContext,
@@ -284,7 +287,6 @@ export const handleSupabaseContentChanged = inngest.createFunction(
         contentId,
         slug: slug ?? null,
         webhookId,
-        durationMs,
         action: 'workflow_triggered',
       },
       'Supabase content changed event processed'
@@ -298,7 +300,6 @@ export const handleSupabaseContentChanged = inngest.createFunction(
       slug: slug ?? null,
       webhookId,
       action: 'workflow_triggered',
-      durationMs,
     };
   }
 );

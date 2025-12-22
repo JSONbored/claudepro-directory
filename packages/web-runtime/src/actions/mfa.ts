@@ -18,6 +18,8 @@ import {
   requiresMFAChallenge,
 } from '../auth/mfa.ts';
 import { revalidatePath } from 'next/cache';
+import { normalizeError } from '../errors';
+import { logger } from '../logging/server';
 
 /**
  * Helper to revalidate MFA-related pages
@@ -83,8 +85,13 @@ export const verifyMFAChallengeAction = authedAction
     })
   )
   .metadata({ actionName: 'verifyMFAChallenge', category: 'mfa' })
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     const supabase = await createSupabaseServerClient();
+    
+    // Get factor details BEFORE verification (to include in email)
+    const { factors: allFactors } = await listMFAFactors(supabase);
+    const factor = allFactors.find((f) => f.id === parsedInput.factorId);
+    
     const { success, error } = await verifyMFAChallenge(
       supabase,
       parsedInput.factorId,
@@ -98,6 +105,36 @@ export const verifyMFAChallengeAction = authedAction
     await supabase.auth.refreshSession();
     await revalidateMFAPages();
 
+    // Send email notification via Inngest (factor was successfully added/verified)
+    if (ctx.userEmail && factor) {
+      try {
+        const { inngest } = await import('../inngest/client.ts');
+
+        await inngest.send({
+          name: 'email/transactional',
+          data: {
+            type: 'mfa-factor-added',
+            email: ctx.userEmail,
+            emailData: {
+              factorType: factor.factor_type,
+              factorName: factor.friendly_name,
+              addedAt: new Date().toISOString(),
+              userEmail: ctx.userEmail,
+            },
+          },
+        });
+
+        logger.info(
+          { factorId: parsedInput.factorId, factorType: factor.factor_type },
+          'MFA factor added email event sent to Inngest'
+        );
+      } catch (emailError) {
+        // Log but don't fail the action if email event fails
+        const normalized = normalizeError(emailError, 'Failed to send MFA factor added email event');
+        logger.warn({ err: normalized, factorId: parsedInput.factorId }, 'MFA factor added email event failed');
+      }
+    }
+
     return { success: true };
   });
 
@@ -107,10 +144,10 @@ export const verifyMFAChallengeAction = authedAction
 export const unenrollMFAAction = authedAction
   .inputSchema(z.object({ factorId: z.string().uuid('Invalid factor ID') }))
   .metadata({ actionName: 'unenrollMFA', category: 'mfa' })
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     const supabase = await createSupabaseServerClient();
 
-    // Check how many factors the user has
+    // Check how many factors the user has and get factor details BEFORE unenrollment
     const { factors, error: listError } = await listMFAFactors(supabase);
     if (listError) throw listError;
 
@@ -119,11 +156,47 @@ export const unenrollMFAAction = authedAction
       throw new Error('Cannot unenroll your last MFA factor. Please add another factor first.');
     }
 
+    // Get factor details BEFORE unenrollment (to include in email)
+    const factorToRemove = factors.find((f) => f.id === parsedInput.factorId);
+    const remainingFactorsCount = verifiedFactors.length - 1; // Count after removal
+
     const { success, error } = await unenrollMFAFactor(supabase, parsedInput.factorId);
     if (error) throw error;
     if (!success) throw new Error('MFA unenrollment failed');
 
     await revalidateMFAPages();
+
+    // Send email notification via Inngest (factor was successfully removed)
+    if (ctx.userEmail && factorToRemove) {
+      try {
+        const { inngest } = await import('../inngest/client.ts');
+
+        await inngest.send({
+          name: 'email/transactional',
+          data: {
+            type: 'mfa-factor-removed',
+            email: ctx.userEmail,
+            emailData: {
+              factorType: factorToRemove.factor_type,
+              factorName: factorToRemove.friendly_name,
+              removedAt: new Date().toISOString(),
+              userEmail: ctx.userEmail,
+              remainingFactorsCount,
+            },
+          },
+        });
+
+        logger.info(
+          { factorId: parsedInput.factorId, factorType: factorToRemove.factor_type },
+          'MFA factor removed email event sent to Inngest'
+        );
+      } catch (emailError) {
+        // Log but don't fail the action if email event fails
+        const normalized = normalizeError(emailError, 'Failed to send MFA factor removed email event');
+        logger.warn({ err: normalized, factorId: parsedInput.factorId }, 'MFA factor removed email event failed');
+      }
+    }
+
     return { success: true };
   });
 

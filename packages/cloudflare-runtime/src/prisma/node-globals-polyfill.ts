@@ -9,18 +9,23 @@
  * The package.json marks this file as having side effects to ensure it runs.
  */
 
+// Import type declarations for Node.js globals
+import './node-globals-polyfill.js';
+
 // Polyfill module global (used by Prisma's CommonJS wrapper)
+// Using type assertion because we're providing a minimal polyfill that matches
+// what Prisma expects, not the full Node.js Module type
 if (typeof globalThis.module === 'undefined') {
-  // @ts-expect-error - We're polyfilling Node.js globals
-  globalThis.module = {
+  (globalThis as unknown as { module: { exports: Record<string, unknown> } }).module = {
     exports: {},
   };
 }
 
 // Polyfill require global (used by Prisma's CommonJS wrapper)
+// Using type assertion because we're providing a minimal polyfill that throws,
+// not the full Node.js Require function
 if (typeof globalThis.require === 'undefined') {
-  // @ts-expect-error - We're polyfilling Node.js globals
-  globalThis.require = function require(id: string) {
+  (globalThis as unknown as { require: (id: string) => never }).require = function require(id: string) {
     // This is a minimal polyfill - actual require resolution is handled by wrangler
     throw new Error(`require('${id}') is not supported in Cloudflare Workers. Use ES modules instead.`);
   };

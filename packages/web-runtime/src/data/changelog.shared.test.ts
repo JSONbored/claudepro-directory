@@ -1,11 +1,11 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { parseChangelogChanges } from './changelog.shared';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock logger
-vi.mock('../errors.ts', () => ({
+jest.mock('../errors.ts', () => ({
   normalizeError: vi.fn((error, message) => {
     if (error instanceof Error) {
       return error;
@@ -15,7 +15,7 @@ vi.mock('../errors.ts', () => ({
 }));
 
 // Mock logger
-vi.mock('../logger.ts', () => ({
+jest.mock('../logger.ts', () => ({
   logger: {
     child: vi.fn(() => ({
       error: vi.fn(),

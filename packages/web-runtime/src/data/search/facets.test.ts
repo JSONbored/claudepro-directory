@@ -1,10 +1,10 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 
 // Mock server-only first
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock category validation
-vi.mock('@heyclaude/web-runtime/utils/category-validation', () => ({
+jest.mock('@heyclaude/web-runtime/utils/category-validation', () => ({
   isValidCategory: vi.fn((cat: string) => ['agents', 'mcp', 'rules'].includes(cat)),
 }));
 
@@ -14,7 +14,7 @@ const mockSearchService = {
   getTrendingSearches: vi.fn(),
 };
 
-vi.mock('../service-factory.ts', () => ({
+jest.mock('../service-factory.ts', () => ({
   getService: vi.fn(async (serviceKey: string) => {
     if (serviceKey === 'search') {
       return mockSearchService;
@@ -26,10 +26,10 @@ vi.mock('../service-factory.ts', () => ({
 // Mock cached-data-factory - use Map pattern like paginated.test.ts
 // Store mock functions in a Map that's accessible after import
 if (!(globalThis as any).__facetsMocks) {
-  (globalThis as any).__facetsMocks = new Map<string, ReturnType<typeof vi.fn>>();
+  (globalThis as any).__facetsMocks = new Map<string, ReturnType<typeof jest.fn>>();
 }
 
-vi.mock('../cached-data-factory.ts', () => {
+jest.mock('../cached-data-factory.ts', () => {
   // Ensure mockFunctions exists before the mock factory runs
   if (!(globalThis as any).__facetsMocks) {
     (globalThis as any).__facetsMocks = new Map();
@@ -38,7 +38,7 @@ vi.mock('../cached-data-factory.ts', () => {
   return {
     createDataFunction: vi.fn((config) => {
       // Create a mock function for this operation and store it
-      const mockFn = vi.fn();
+      const mock = jest.fn();
       if (config.operation && mockFunctions) {
         mockFunctions.set(config.operation, mockFn);
       }
@@ -53,8 +53,8 @@ import type { GetTrendingSearchesReturns } from '@heyclaude/data-layer';
 import type { GetSearchFacetsReturns } from '@heyclaude/database-types/postgres-types';
 
 describe('search/facets', () => {
-  let mockGetSearchFacets: ReturnType<typeof vi.fn>;
-  let mockGetPopularSearches: ReturnType<typeof vi.fn>;
+  let mockGetSearchFacets: ReturnType<typeof jest.fn>;
+  let mockGetPopularSearches: ReturnType<typeof jest.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();

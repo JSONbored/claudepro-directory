@@ -1,52 +1,14 @@
 /**
- * OAuth 2.1 Authorization Endpoint
+ * OAuth 2.1 Authorization Endpoint - Cloudflare Workers Adapter
  *
- * Proxies OAuth authorization requests to Supabase Auth OAuth 2.1 Server with the resource parameter
- * (RFC 8707) to ensure tokens include the MCP server URL in the audience claim.
- *
- * **IMPORTANT:** This requires OAuth 2.1 Server to be enabled in your Supabase project.
- * Enable it in: Authentication > OAuth Server in the Supabase dashboard.
- *
- * This endpoint enables full OAuth 2.1 flow for MCP clients:
- * 1. Client initiates OAuth with resource parameter
- * 2. Supabase Auth OAuth 2.1 Server validates and redirects to authorization UI
- * 3. User authenticates (using existing account) and approves/denies
- * 4. Token issued with correct audience claim (from resource parameter)
- * 5. Client uses token with MCP server
+ * Cloudflare Workers-specific adapter for OAuth authorization.
+ * Uses Cloudflare-specific env parsing (async with Infisical) and Pino logger.
  */
 
 import type { ExtendedEnv } from '@heyclaude/cloudflare-runtime/config/env';
-import { parseEnv, getEnvOrDefault } from '@heyclaude/cloudflare-runtime/config/env';
+import { parseEnv } from '@heyclaude/cloudflare-runtime/config/env';
 import { createLogger } from '@heyclaude/cloudflare-runtime/logging/pino';
-import { normalizeError } from '@heyclaude/cloudflare-runtime/utils/errors';
-import { sanitizeString } from '../lib/utils.js';
-
-/**
- * Create an OAuth-style JSON error response
- *
- * @param error - OAuth error code to return (e.g., `invalid_request`, `server_error`)
- * @param description - Human-readable error description
- * @param status - HTTP status code to send (400 or 500); defaults to 400
- * @returns A Response with JSON body containing `error` and `error_description`
- */
-function jsonError(
-  error: string,
-  description: string,
-  status: 400 | 500 = 400
-): Response {
-  return new Response(
-    JSON.stringify({ error, error_description: description }),
-    {
-      status,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
-    }
-  );
-}
+import { handleOAuthAuthorizeShared, type OAuthAdapter } from '@heyclaude/mcp-server';
 
 /**
  * Proxies incoming OAuth authorization requests to Supabase Auth OAuth 2.1 Server, injecting the RFC 8707 `resource` parameter for MCP audience and preserving required OAuth and PKCE parameters.
@@ -56,7 +18,7 @@ function jsonError(
  *
  * Performs required validation for `client_id`, `response_type` (must be `code`), `redirect_uri`, and PKCE (`code_challenge` / `code_challenge_method` must be `S256`) and returns appropriate JSON OAuth error responses on validation failure.
  *
- * @param request - Request object
+ * @param _request - Request object
  * @param env - Cloudflare Workers env
  * @param url - Parsed URL object
  * @returns A redirect Response to the Supabase Auth `/oauth/authorize` endpoint (OAuth 2.1 Server) when the request is valid, or a JSON error Response describing the validation or server error.
@@ -66,91 +28,53 @@ export async function handleOAuthAuthorize(
   env: ExtendedEnv,
   url: URL
 ): Promise<Response> {
-  const logger = createLogger({ name: 'heyclaude-mcp' });
+  // Create adapter with Cloudflare-specific async env parsing and Pino logger
+  const adapter: OAuthAdapter = {
+    parseEnv: async (e: ExtendedEnv) => {
+      const config = await parseEnv(e as ExtendedEnv);
+      return {
+        supabase: {
+          url: config.supabase.url,
+        },
+      };
+    },
+    createLogger: () => {
+      const pinoLogger = createLogger({ name: 'heyclaude-mcp' });
+      // Convert Pino logger (meta-first) to RuntimeLogger (message-first)
+      return {
+        info: (message: string, meta?: Record<string, unknown>) => {
+          pinoLogger.info(meta || {}, message);
+        },
+        error: (message: string, error?: Error | unknown, meta?: Record<string, unknown>) => {
+          pinoLogger.error({ error, ...meta }, message);
+        },
+        warn: (message: string, meta?: Record<string, unknown>) => {
+          pinoLogger.warn(meta || {}, message);
+        },
+        debug: (message: string, meta?: Record<string, unknown>) => {
+          pinoLogger.debug(meta || {}, message);
+        },
+        child: (meta: Record<string, unknown>) => {
+          const childLogger = pinoLogger.child(meta);
+          return {
+            info: (msg: string, m?: Record<string, unknown>) => {
+              childLogger.info(m || {}, msg);
+            },
+            error: (msg: string, err?: Error | unknown, m?: Record<string, unknown>) => {
+              childLogger.error({ error: err, ...m }, msg);
+            },
+            warn: (msg: string, m?: Record<string, unknown>) => {
+              childLogger.warn(m || {}, msg);
+            },
+            debug: (msg: string, m?: Record<string, unknown>) => {
+              childLogger.debug(m || {}, msg);
+            },
+            child: () => adapter.createLogger().child({}),
+          };
+        },
+      };
+    },
+  };
 
-  try {
-    const config = await parseEnv(env);
-    const supabaseAuthUrl = `${config.supabase.url}/auth/v1`;
-    const mcpServerUrl = getEnvOrDefault(env, 'MCP_SERVER_URL', 'https://mcp.claudepro.directory');
-    const mcpResourceUrl = `${mcpServerUrl}/mcp`;
-
-    // Get query parameters
-    const clientId = url.searchParams.get('client_id');
-    const responseType = url.searchParams.get('response_type');
-    const redirectUri = url.searchParams.get('redirect_uri');
-    const scope = url.searchParams.get('scope');
-    const state = url.searchParams.get('state');
-    const codeChallenge = url.searchParams.get('code_challenge');
-    const codeChallengeMethod = url.searchParams.get('code_challenge_method');
-
-    // Validate required parameters
-    if (!(clientId && responseType && redirectUri)) {
-      logger.warn({ clientId: !!clientId, responseType, redirectUri: !!redirectUri }, 'Missing required OAuth parameters');
-      return jsonError('invalid_request', 'Missing required OAuth parameters', 400);
-    }
-
-    // Basic URL validation for redirect_uri to prevent open redirect attacks
-    // Note: Supabase Auth also validates registered redirect URIs, but we add
-    // an extra layer of defense here
-    try {
-      const redirectUrl = new URL(redirectUri);
-      if (!['http:', 'https:'].includes(redirectUrl.protocol)) {
-        return jsonError('invalid_request', 'Invalid redirect_uri protocol', 400);
-      }
-    } catch {
-      return jsonError('invalid_request', 'Invalid redirect_uri format', 400);
-    }
-
-    // Validate response_type (OAuth 2.1 requires 'code')
-    if (responseType !== 'code') {
-      return jsonError(
-        'unsupported_response_type',
-        'Only "code" response type is supported',
-        400
-      );
-    }
-
-    // Validate PKCE (OAuth 2.1 requires PKCE)
-    if (!(codeChallenge && codeChallengeMethod)) {
-      return jsonError('invalid_request', 'PKCE (code_challenge) is required', 400);
-    }
-
-    if (codeChallengeMethod !== 'S256') {
-      return jsonError('invalid_request', 'Only S256 code challenge method is supported', 400);
-    }
-
-    // Build Supabase Auth OAuth 2.1 authorization URL
-    // Use /oauth/authorize endpoint (requires OAuth 2.1 Server to be enabled)
-    // Include resource parameter (RFC 8707) to ensure token has correct audience
-    const supabaseAuthUrlObj = new URL(`${supabaseAuthUrl}/oauth/authorize`);
-
-    // Preserve all OAuth parameters
-    supabaseAuthUrlObj.searchParams.set('client_id', sanitizeString(clientId));
-    supabaseAuthUrlObj.searchParams.set('response_type', responseType);
-    supabaseAuthUrlObj.searchParams.set('redirect_uri', redirectUri);
-
-    // Add resource parameter (RFC 8707) - CRITICAL for MCP spec compliance
-    // This tells Supabase Auth to include the MCP server URL in the token's audience claim
-    supabaseAuthUrlObj.searchParams.set('resource', mcpResourceUrl);
-
-    // Preserve optional parameters
-    if (scope) {
-      supabaseAuthUrlObj.searchParams.set('scope', sanitizeString(scope));
-    }
-    if (state) {
-      supabaseAuthUrlObj.searchParams.set('state', sanitizeString(state));
-    }
-    // PKCE parameters are validated as required above, so they're always present here
-    supabaseAuthUrlObj.searchParams.set('code_challenge', sanitizeString(codeChallenge));
-    supabaseAuthUrlObj.searchParams.set('code_challenge_method', codeChallengeMethod);
-
-    logger.info({ supabaseAuthUrl: supabaseAuthUrlObj.toString() }, 'Redirecting to Supabase Auth OAuth 2.1');
-
-    // Redirect to Supabase Auth with all parameters including resource
-    return Response.redirect(supabaseAuthUrlObj.toString(), 302);
-  } catch (error) {
-    const normalized = normalizeError(error, 'OAuth authorization proxy failed');
-    logger.error({ error: normalized }, 'OAuth authorization proxy error');
-    return jsonError('server_error', 'Internal server error', 500);
-  }
+  return handleOAuthAuthorizeShared(_request, env, url, adapter);
 }

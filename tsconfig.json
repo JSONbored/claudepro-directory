@@ -23,7 +23,6 @@
     "apps/web/src/**/*.tsx",
     "apps/web/src/types/**/*.d.ts",
     "apps/web/.next/types/**/*.ts",
-    "scripts/**/*.ts",
     "packages/web-runtime/src/**/*.ts",
     "packages/web-runtime/src/**/*.d.ts",
     "packages/shared-runtime/src/**/*.ts",
@@ -33,12 +32,11 @@
     "packages/database-types/src/prisma-json-types.ts",
     "packages/cloudflare-runtime/src/**/*.ts",
     "apps/workers/**/src/**/*.ts",
-    "types/**/*.d.ts"
+    "scripts/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     "tests",
-    "vitest.config.ts",
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",

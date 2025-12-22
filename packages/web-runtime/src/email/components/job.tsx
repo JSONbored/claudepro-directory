@@ -8,7 +8,7 @@ export interface JobDetailItem {
   icon?: string;
 }
 
-interface JobDetailsSectionProps {
+export interface JobDetailsSectionProps {
   title?: string;
   items: JobDetailItem[];
 }

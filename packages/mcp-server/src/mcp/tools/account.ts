@@ -73,8 +73,33 @@ export async function handleCreateAccount(
   };
 }> {
   const { env, logger } = context;
-  const { provider = 'github', newsletterOptIn = false, redirectTo } = input;
+  let provider = input.provider || 'github';
+  let newsletterOptIn = input.newsletterOptIn || false;
+  const { redirectTo } = input;
   const startTime = Date.now();
+
+  // Use elicitation to confirm provider selection if not provided
+  if (!input.provider && context.elicit) {
+    const elicited = await context.elicit({
+      type: 'string',
+      description: 'Which OAuth provider would you like to use to create your account?',
+      enum: ['github', 'google', 'discord'] as const,
+    });
+    if (typeof elicited === 'string' && elicited) {
+      provider = elicited as typeof input.provider;
+    }
+  }
+
+  // Use elicitation to confirm newsletter opt-in
+  if (context.elicit && input.newsletterOptIn === undefined) {
+    const elicited = await context.elicit({
+      type: 'boolean',
+      description: 'Would you like to subscribe to our newsletter for updates and new content?',
+    });
+    if (typeof elicited === 'boolean') {
+      newsletterOptIn = elicited;
+    }
+  }
 
   try {
     // Get URLs from environment (runtime-agnostic)

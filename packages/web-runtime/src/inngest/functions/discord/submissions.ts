@@ -11,10 +11,9 @@ type content_submissionsModel = Prisma.content_submissionsGetPayload<{}>;
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 
-import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
-import { logger, createWebAppContextWithId } from '../../../logging/server';
-import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
+import { logger } from '../../../logging/server';
+import { createInngestFunction } from '../../utils/function-factory';
 
 type ContentSubmission = content_submissionsModel;
 
@@ -115,22 +114,21 @@ function buildMergedEmbed(submission: ContentSubmission): Record<string, unknown
 
 /**
  * Process Discord submission notifications from queue
+ * Uses singleton pattern to prevent duplicate runs
  */
-export const processDiscordSubmissionsQueue = inngest.createFunction(
+export const processDiscordSubmissionsQueue = createInngestFunction(
   {
     id: 'discord-submissions-processor',
     name: 'Discord Submissions Processor',
+    route: '/inngest/discord/submissions',
     retries: 2,
+    // Singleton pattern: Only one Discord submissions processor can run at a time
+    singleton: {
+      key: 'discord-submissions',
+    },
   },
   { cron: '*/30 * * * *' }, // Every 30 minutes
-  async ({ step }) => {
-    const startTime = Date.now();
-    const logContext = createWebAppContextWithId(
-      '/inngest/discord/submissions',
-      'processDiscordSubmissionsQueue'
-    );
-
-    logger.info(logContext, 'Discord submissions queue processing started');
+  async ({ step, logContext }) => {
 
     const adminWebhookUrl = env.DISCORD_SUBMISSIONS_WEBHOOK_URL;
     const announcementWebhookUrl = env.DISCORD_ANNOUNCEMENTS_WEBHOOK_URL;
@@ -342,25 +340,15 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
       });
     }
 
-    const durationMs = Date.now() - startTime;
+    // Additional custom logging (duration logging is handled by factory)
     logger.info(
-      { ...logContext, durationMs, processed: messages.length, sent: sentCount },
+      { ...logContext, processed: messages.length, sent: sentCount },
       'Discord submissions queue processing completed'
     );
 
-    const result = {
+    return {
       processed: messages.length,
       sent: sentCount,
     };
-
-    // BetterStack monitoring: Send success heartbeat (feature-flagged)
-    if (result.sent > 0) {
-      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
-        functionName: 'processDiscordSubmissionsQueue',
-        result: { sent: result.sent },
-      });
-    }
-
-    return result;
   }
 );
