@@ -82,6 +82,11 @@ export const getContentBySlug = createDataFunction<
  * @param {Array<{ category: content_category; slug: string }>} items Parameter description
  * @param {Array<{ category: content_category; slug: string }>} items Parameter description
  * @param {Array<{ category: content_category; slug: string }>} items Parameter description
+ * @param {Array<{ category: content_category; slug: string }>} items Parameter description
+ * @param {Array<{ category: content_category; slug: string }>} items Parameter description
+ * @param {Array<{ category: content_category; slug: string }>} items Parameter description
+ * @param {Array<{ category: content_category; slug: string }>} items Parameter description
+ * @param {Array<{ category: content_category; slug: string }>} items Parameter description
  */
 function groupItemsByCategory(
   items: Array<{ category: content_category; slug: string }>

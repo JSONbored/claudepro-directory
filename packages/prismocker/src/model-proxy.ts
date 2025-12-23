@@ -162,7 +162,7 @@ export class ModelProxy {
       // Enhanced: Try removing common suffixes from singularTo
       // e.g., "collection_item" -> try "collection_id" (removes "_item")
       // Common suffixes to try removing: _item, _items, _collection, _collections, _user, _users, etc.
-      const commonSuffixes = ['_item', '_items', '_collection', '_collections', '_user', '_users', '_job', '_jobs', '_content', '_contents'];
+      const commonSuffixes = ['_item', '_items', '_collection', '_collections', '_user', '_users', '_job', '_jobs', '_content', '_contents', '_option', '_options', '_question', '_questions'];
       for (const suffix of commonSuffixes) {
         if (snakeCaseTo.endsWith(suffix)) {
           const withoutSuffix = snakeCaseTo.slice(0, -suffix.length);
@@ -176,12 +176,42 @@ export class ModelProxy {
       // e.g., "collection_item" -> "collection"
       const words = snakeCaseTo.split('_');
       if (words.length > 1) {
-        const commonWords = ['item', 'items', 'collection', 'collections', 'user', 'users', 'job', 'jobs', 'content', 'contents'];
+        const commonWords = ['item', 'items', 'collection', 'collections', 'user', 'users', 'job', 'jobs', 'content', 'contents', 'option', 'options', 'question', 'questions'];
         const lastWord = words[words.length - 1];
         if (commonWords.includes(lastWord)) {
           const withoutLastWord = words.slice(0, -1).join('_');
           if (withoutLastWord && withoutLastWord !== snakeCaseFrom) {
             candidates.push(`${withoutLastWord}_id`);
+          }
+        }
+      }
+      
+      // Special case: If fromModel and toModel share a common prefix, try extracting the shared part
+      // e.g., quiz_questions -> quiz_options: try "question_id" (shared "quiz_" prefix, extract "question" from "questions")
+      const fromWords = fromSnakeCase.split('_');
+      const toWords = snakeCaseTo.split('_');
+      if (fromWords.length > 1 && toWords.length > 1) {
+        // Find common prefix
+        let commonPrefixLength = 0;
+        for (let i = 0; i < Math.min(fromWords.length, toWords.length); i++) {
+          if (fromWords[i] === toWords[i]) {
+            commonPrefixLength = i + 1;
+          } else {
+            break;
+          }
+        }
+        // If they share a prefix, try extracting the key part from fromModel
+        // e.g., quiz_questions -> extract "questions" -> singularize to "question" -> try "question_id"
+        if (commonPrefixLength > 0 && fromWords.length > commonPrefixLength) {
+          const keyPart = fromWords[commonPrefixLength]; // "questions" from "quiz_questions"
+          if (keyPart && keyPart !== 'id') {
+            // Singularize the key part (e.g., "questions" -> "question")
+            const singularKeyPart = this.toSingular(keyPart);
+            if (singularKeyPart && singularKeyPart !== keyPart) {
+              candidates.push(`${singularKeyPart}_id`); // "question_id"
+            }
+            // Also try the original (non-singularized) version
+            candidates.push(`${keyPart}_id`); // "questions_id"
           }
         }
       }
@@ -209,80 +239,9 @@ export class ModelProxy {
       const sourceMatchField = actualForwardKey in record ? actualForwardKey : 'id';
       const sourceMatchValue = record[sourceMatchField];
       
-      // #region agent log
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            location: 'model-proxy.ts:loadRelation:one-to-many',
-            message: 'One-to-many relation matching',
-            data: {
-              modelName: this.modelName,
-              relationName,
-              actualForwardKey,
-              sourceMatchField,
-              sourceMatchValue,
-              recordId: record.id,
-              recordHasForwardKey: actualForwardKey in record,
-              relatedStoreLength: relatedStore.length,
-            },
-            timestamp: Date.now(),
-            sessionId: 'debug-session',
-            runId: 'pre-fix',
-            hypothesisId: 'A',
-          }),
-        }).catch(() => {});
-      }
-      // #endregion
-      
       const relatedRecords = relatedStore.filter((relatedRecord: any) => {
-        const matches = relatedRecord[actualForwardKey] === sourceMatchValue;
-        
-        // #region agent log
-        if (typeof fetch !== 'undefined') {
-          fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              location: 'model-proxy.ts:loadRelation:one-to-many:filter',
-              message: 'Filtering related record',
-              data: {
-                relatedRecordFk: relatedRecord[actualForwardKey],
-                sourceMatchValue,
-                matches,
-              },
-              timestamp: Date.now(),
-              sessionId: 'debug-session',
-              runId: 'pre-fix',
-              hypothesisId: 'A',
-            }),
-          }).catch(() => {});
-        }
-        // #endregion
-        
-        return matches;
+        return relatedRecord[actualForwardKey] === sourceMatchValue;
       });
-      
-      // #region agent log
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            location: 'model-proxy.ts:loadRelation:one-to-many:result',
-            message: 'One-to-many relation result',
-            data: {
-              relatedRecordsCount: relatedRecords.length,
-            },
-            timestamp: Date.now(),
-            sessionId: 'debug-session',
-            runId: 'pre-fix',
-            hypothesisId: 'A',
-          }),
-        }).catch(() => {});
-      }
-      // #endregion
       
       // Apply nested select to related records
       if (relationSelect.select) {

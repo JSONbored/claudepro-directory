@@ -10,7 +10,10 @@ import { getPaymentPlanCatalog } from '@heyclaude/web-runtime/data/payments';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import {
-  type job_category, job_category as JobCategory, type job_type, job_type as JobType,
+  type job_category,
+  job_category as JobCategory,
+  type job_type,
+  job_type as JobType,
 } from '@heyclaude/web-runtime/types/client-safe-enums';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';

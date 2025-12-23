@@ -300,6 +300,146 @@ const dataFunctionConfigs = new Map<
     validate?: (args: unknown) => boolean;
     validateError?: string;
   }} fnConfig Parameter description
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig Parameter description
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig Parameter description
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig Parameter description
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig Parameter description
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig Parameter description
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig Parameter description
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig Parameter description
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig Parameter description
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig Parameter description
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig Parameter description
 */
 async function executeDataFunction(
   fnConfig: {
