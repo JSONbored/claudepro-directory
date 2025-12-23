@@ -24,7 +24,7 @@ const path = require('path');
 
 // Use require() to load pre-compiled CommonJS dist file
 // This file is already compiled and doesn't need transformation
-const prismockerPath = path.resolve(__dirname, '../../packages/prismocker/dist/index.js');
+const prismockerPath = path.resolve(__dirname, '../../packages/prismocker/dist/index.cjs');
 const prismockerModule = require(prismockerPath);
 
 const createPrismocker = prismockerModule.createPrismocker || prismockerModule.default;

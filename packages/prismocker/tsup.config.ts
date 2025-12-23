@@ -15,9 +15,9 @@ export default defineConfig([
     external: ['@prisma/client'],
     // Use separate tsconfig with CommonJS module setting
     tsconfig: './tsconfig.cjs.json',
-    outExtension() {
-      // Use .js extension for CommonJS
-      return { js: '.js' };
+    outExtension({ format }) {
+      // Use .cjs extension for CommonJS to ensure Node.js treats it as CJS
+      return { js: format === 'cjs' ? '.cjs' : '.js' };
     },
     // Force esbuild to output CommonJS
     esbuildOptions(options) {
