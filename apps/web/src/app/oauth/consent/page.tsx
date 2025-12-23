@@ -201,12 +201,12 @@ export default async function OAuthConsentPage({
     const clientAuthDetails = {
       client: {
         client_id: authDetails.client.id,
-        name: authDetails.client.name,
         description: authDetails.client.description ?? null, // May be available for MCP clients
+        name: authDetails.client.name,
       },
       redirect_uri: authDetails.redirect_url ?? '',
-      scopes: authDetails.scope ? authDetails.scope.split(' ').filter(Boolean) : null, // Split space-separated scopes
       resource: authDetails.resource ?? null, // RFC 8707 resource parameter (MCP server URL)
+      scopes: authDetails.scope ? authDetails.scope.split(' ').filter(Boolean) : null, // Split space-separated scopes
     };
 
     return (

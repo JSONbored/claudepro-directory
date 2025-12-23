@@ -3,8 +3,6 @@
  * Single RPC call to get_user_profile() replaces 6+ separate queries
  */
 
-import { content_category as ContentCategory } from '@prisma/client';
-import type { content_category } from '@prisma/client';
 import { type GetUserProfileReturns } from '@heyclaude/database-types/postgres-types';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { sanitizeSlug } from '@heyclaude/web-runtime/content';
@@ -13,6 +11,8 @@ import { Globe } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { NavLink } from '@heyclaude/web-runtime/ui';
+import { type content_category } from '@prisma/client';
+import { content_category as ContentCategory } from '@prisma/client';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Image from 'next/image';

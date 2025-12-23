@@ -1,10 +1,10 @@
 import 'server-only';
 
-import type { Prisma } from '@prisma/client';
-
-type announcementsModel = Prisma.announcementsGetPayload<{}>;
+import { type Prisma } from '@prisma/client';
 
 import { createDataFunction } from './cached-data-factory.ts';
+
+type announcementsModel = Prisma.announcementsGetPayload<{}>;
 
 /**
  * Get active announcement

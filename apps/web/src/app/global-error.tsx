@@ -45,14 +45,14 @@ function ErrorCodeBlock({ content }: { content: string }) {
       <Button
         aria-label={copied ? 'Copied!' : 'Copy error message'}
         className="absolute top-2 right-2 h-6 w-6 p-4"
-        size="sm"
-        variant="ghost"
         onClick={() => {
           void copy(content);
         }}
+        size="sm"
+        variant="ghost"
       >
         {copied ? (
-          <Check aria-hidden="true" className="h-3 w-3 text-success" />
+          <Check aria-hidden="true" className="text-success h-3 w-3" />
         ) : (
           <Copy aria-hidden="true" className="h-3 w-3" />
         )}
@@ -152,7 +152,7 @@ export default function GlobalError({
                     ) : null}
                   </div>
                 ) : null}
-                <Button className="w-full" disabled={isResetting} size="lg" onClick={handleReset}>
+                <Button className="w-full" disabled={isResetting} onClick={handleReset} size="lg">
                   <RefreshCw className={`mr-2 h-4 w-4 ${isResetting ? 'animate-spin' : ''}`} />
                   {isResetting ? 'Resetting...' : 'Reset Application'}
                 </Button>

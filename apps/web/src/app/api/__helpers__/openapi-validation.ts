@@ -7,7 +7,8 @@
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { APIResponse } from '@playwright/test';
+
+import { type APIResponse } from '@playwright/test';
 
 const PROJECT_ROOT = process.cwd();
 const OPENAPI_JSON_PATH = join(PROJECT_ROOT, 'openapi.json');
@@ -15,7 +16,9 @@ const OPENAPI_JSON_PATH = join(PROJECT_ROOT, 'openapi.json');
 let openApiSpec: any = null;
 
 /**
+ *
  * Load OpenAPI specification from file
+ * @returns {any} Return value description
  */
 function loadOpenApiSpec(): any {
   if (openApiSpec) {
@@ -26,15 +29,19 @@ function loadOpenApiSpec(): any {
     const specContent = readFileSync(OPENAPI_JSON_PATH, 'utf-8');
     openApiSpec = JSON.parse(specContent);
     return openApiSpec;
-  } catch (error) {
+  } catch {
     throw new Error(
       `Failed to load OpenAPI spec from ${OPENAPI_JSON_PATH}. Run: pnpm generate:openapi`
     );
   }
 }
 
-/**
+/****
+ *
  * Get OpenAPI path definition for a route
+ * @param {string} path
+ * @param {string} method
+ * @returns {any} Return value description
  */
 function getPathDefinition(path: string, method: string): any {
   const spec = loadOpenApiSpec();
@@ -47,8 +54,13 @@ function getPathDefinition(path: string, method: string): any {
   return pathDef[methodLower] || null;
 }
 
-/**
+/*****
+ *
  * Get expected response schema for a status code
+ * @param {string} path
+ * @param {string} method
+ * @param {number} statusCode
+ * @returns {any} Return value description
  */
 function getResponseSchema(path: string, method: string, statusCode: number): any {
   const pathDef = getPathDefinition(path, method);
@@ -73,11 +85,12 @@ function getResponseSchema(path: string, method: string, statusCode: number): an
  * @param path - API path (e.g., '/api/v1/search')
  * @param method - HTTP method (e.g., 'GET')
  * @param options - Validation options
+ * @param options.strict
  */
 export async function validateOpenApiResponse(
   response: APIResponse,
   path: string,
-  method: string = 'GET',
+  method = 'GET',
   options: {
     strict?: boolean; // If true, fails on missing schema. If false, only validates if schema exists.
   } = {}
@@ -144,11 +157,14 @@ export async function validateOpenApiResponse(
  * Assert that an API response matches the OpenAPI specification
  *
  * Convenience wrapper for validateOpenApiResponse that throws on failure
+ * @param response
+ * @param path
+ * @param method
  */
 export async function expectOpenApiResponse(
   response: APIResponse,
   path: string,
-  method: string = 'GET'
+  method = 'GET'
 ): Promise<void> {
   await validateOpenApiResponse(response, path, method, { strict: true });
 }

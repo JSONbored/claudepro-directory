@@ -1,9 +1,12 @@
 import 'server-only';
-import { content_category as ContentCategory, type content_category } from '../../types/client-safe-enums.ts';
 
 import { isBuildTime } from '../../build-time.ts';
 import { getHomepageConfigBundle } from '../../config/static-configs.ts';
 import { logger } from '../../logger.ts';
+import {
+  type content_category,
+  content_category as ContentCategory,
+} from '../../types/client-safe-enums.ts';
 
 // Use Prisma-generated enum values directly - no manual arrays!
 const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];

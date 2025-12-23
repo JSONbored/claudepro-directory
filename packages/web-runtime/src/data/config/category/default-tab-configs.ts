@@ -1,6 +1,5 @@
-import { type content_category } from '../../../types/client-safe-enums.ts';
-
 import { type TabConfig } from '../../../types/category.ts';
+import { type content_category } from '../../../types/client-safe-enums.ts';
 
 /**
  * Standard tabs with Examples tab - for categories WITH examples data (mcp, skills)

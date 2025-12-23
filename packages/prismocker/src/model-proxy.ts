@@ -202,9 +202,87 @@ export class ModelProxy {
       const forwardCandidates = generateForeignKeyCandidates(this.modelName, relatedModelName);
       const actualForwardKey = findActualForeignKey(forwardCandidates) || forwardForeignKey;
       
+      // Determine which field on the source record to use for matching
+      // Priority: If foreign key field name exists on source record, use it (handles non-PK references)
+      // Otherwise, use primary key (standard case)
+      // This handles cases like quiz_options.question_id referencing quiz_questions.question_id (not id)
+      const sourceMatchField = actualForwardKey in record ? actualForwardKey : 'id';
+      const sourceMatchValue = record[sourceMatchField];
+      
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'model-proxy.ts:loadRelation:one-to-many',
+            message: 'One-to-many relation matching',
+            data: {
+              modelName: this.modelName,
+              relationName,
+              actualForwardKey,
+              sourceMatchField,
+              sourceMatchValue,
+              recordId: record.id,
+              recordHasForwardKey: actualForwardKey in record,
+              relatedStoreLength: relatedStore.length,
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'pre-fix',
+            hypothesisId: 'A',
+          }),
+        }).catch(() => {});
+      }
+      // #endregion
+      
       const relatedRecords = relatedStore.filter((relatedRecord: any) => {
-        return relatedRecord[actualForwardKey] === record.id;
+        const matches = relatedRecord[actualForwardKey] === sourceMatchValue;
+        
+        // #region agent log
+        if (typeof fetch !== 'undefined') {
+          fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              location: 'model-proxy.ts:loadRelation:one-to-many:filter',
+              message: 'Filtering related record',
+              data: {
+                relatedRecordFk: relatedRecord[actualForwardKey],
+                sourceMatchValue,
+                matches,
+              },
+              timestamp: Date.now(),
+              sessionId: 'debug-session',
+              runId: 'pre-fix',
+              hypothesisId: 'A',
+            }),
+          }).catch(() => {});
+        }
+        // #endregion
+        
+        return matches;
       });
+      
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'model-proxy.ts:loadRelation:one-to-many:result',
+            message: 'One-to-many relation result',
+            data: {
+              relatedRecordsCount: relatedRecords.length,
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'pre-fix',
+            hypothesisId: 'A',
+          }),
+        }).catch(() => {});
+      }
+      // #endregion
       
       // Apply nested select to related records
       if (relationSelect.select) {
@@ -237,8 +315,14 @@ export class ModelProxy {
       const forwardCandidates = generateForeignKeyCandidates(this.modelName, relatedModelName);
       const actualForwardKey = findActualForeignKey(forwardCandidates) || forwardForeignKey;
       
+      // Determine which field on the source record to use for matching
+      // Priority: If foreign key field name exists on source record, use it (handles non-PK references)
+      // Otherwise, use primary key (standard case)
+      const sourceMatchField = actualForwardKey in record ? actualForwardKey : 'id';
+      const sourceMatchValue = record[sourceMatchField];
+      
       const relatedRecord = relatedStore.find((relatedRecord: any) => {
-        return relatedRecord[actualForwardKey] === record.id;
+        return relatedRecord[actualForwardKey] === sourceMatchValue;
       });
       
       if (relatedRecord) {

@@ -5,8 +5,6 @@
 
 // GetUserLibraryReturns type is now derived from getUserCompleteData return type
 import { type GetUserLibraryReturns } from '@heyclaude/data-layer';
-type UserLibraryBookmark = NonNullable<GetUserLibraryReturns['bookmarks']>[number];
-type UserLibraryCollection = NonNullable<GetUserLibraryReturns['collections']>[number];
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -40,6 +38,8 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 
 import Loading from './loading';
+type UserLibraryBookmark = NonNullable<GetUserLibraryReturns['bookmarks']>[number];
+type UserLibraryCollection = NonNullable<GetUserLibraryReturns['collections']>[number];
 
 // Extract collections category value to avoid fragile enum index access
 const COLLECTIONS_TAB_VALUE = 'collections' as const;
@@ -265,7 +265,10 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                   Start exploring the directory and bookmark your favorite agents, MCP servers,
                   rules, and more!
                 </p>
-                <NavLink className="mt-4 text-accent hover:text-accent/80 font-semibold text-sm transition-colors" href="/">
+                <NavLink
+                  className="text-accent hover:text-accent/80 mt-4 text-sm font-semibold transition-colors"
+                  href="/"
+                >
                   Browse Directory →
                 </NavLink>
               </CardContent>
@@ -273,7 +276,10 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
           ) : (
             <div className="grid gap-4">
               {bookmarks.map((bookmark: UserLibraryBookmark) => (
-                <Card key={bookmark.id} className="shadow-sm hover:shadow-md transition-shadow duration-200">
+                <Card
+                  className="shadow-sm transition-shadow duration-200 hover:shadow-md"
+                  key={bookmark.id}
+                >
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">

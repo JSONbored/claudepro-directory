@@ -5,13 +5,13 @@
  * Allows users to manage their cookie preferences
  */
 
-import { ToggleField, Button, toasts } from '@heyclaude/web-runtime/ui';
-import { useState, useEffect } from 'react';
+import { Button, toasts, ToggleField } from '@heyclaude/web-runtime/ui';
+import { useEffect, useState } from 'react';
 
 export function CookiePreferences() {
   const [preferences, setPreferences] = useState({
-    essential: true, // Always required
     analytics: false,
+    essential: true, // Always required
     marketing: false,
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -32,10 +32,10 @@ export function CookiePreferences() {
     setIsSaving(true);
     // Save to localStorage
     localStorage.setItem('cookie_preferences', JSON.stringify(preferences));
-    
+
     // In production, you'd also set actual cookies based on preferences
     // and communicate with your analytics/marketing services
-    
+
     toasts.success('Cookie preferences saved');
     setIsSaving(false);
   };
@@ -47,34 +47,29 @@ export function CookiePreferences() {
       </p>
 
       <ToggleField
-        label="Essential Cookies"
-        description="Required for the site to function properly"
         checked={preferences.essential}
+        description="Required for the site to function properly"
         disabled
+        label="Essential Cookies"
       />
 
       <ToggleField
-        label="Analytics Cookies"
-        description="Help us understand how visitors interact with our site"
         checked={preferences.analytics}
-        onCheckedChange={(checked) =>
-          setPreferences({ ...preferences, analytics: checked })
-        }
+        description="Help us understand how visitors interact with our site"
+        label="Analytics Cookies"
+        onCheckedChange={(checked) => setPreferences({ ...preferences, analytics: checked })}
       />
 
       <ToggleField
-        label="Marketing Cookies"
-        description="Used to deliver personalized advertisements"
         checked={preferences.marketing}
-        onCheckedChange={(checked) =>
-          setPreferences({ ...preferences, marketing: checked })
-        }
+        description="Used to deliver personalized advertisements"
+        label="Marketing Cookies"
+        onCheckedChange={(checked) => setPreferences({ ...preferences, marketing: checked })}
       />
 
-      <Button onClick={handleSave} disabled={isSaving}>
+      <Button disabled={isSaving} onClick={handleSave}>
         {isSaving ? 'Saving...' : 'Save Cookie Preferences'}
       </Button>
     </div>
   );
 }
-

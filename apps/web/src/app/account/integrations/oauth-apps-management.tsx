@@ -5,21 +5,21 @@
  * Allows users to view and manage OAuth applications
  */
 
+import { ExternalLink, Plug, Trash2 } from '@heyclaude/web-runtime/icons';
 import { Button, toasts } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
-import { Plug, Trash2, ExternalLink } from '@heyclaude/web-runtime/icons';
 
 interface OAuthAppsManagementProps {
   userId: string;
 }
 
 interface OAuthApp {
-  id: string;
-  name: string;
   clientId: string;
-  redirectUri: string;
   createdAt: string;
+  id: string;
   lastUsed?: string;
+  name: string;
+  redirectUri: string;
 }
 
 export function OAuthAppsManagement({ userId }: OAuthAppsManagementProps) {
@@ -43,27 +43,27 @@ export function OAuthAppsManagement({ userId }: OAuthAppsManagementProps) {
         <div className="space-y-3">
           {apps.map((app) => (
             <div
+              className="border-border bg-card flex items-center justify-between rounded-lg border p-4"
               key={app.id}
-              className="flex items-center justify-between rounded-lg border border-border bg-card p-4"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <Plug className="h-4 w-4 text-muted-foreground" />
-                  <p className="font-medium text-sm">{app.name}</p>
+                  <Plug className="text-muted-foreground h-4 w-4" />
+                  <p className="text-sm font-medium">{app.name}</p>
                 </div>
-                <p className="text-muted-foreground mt-1 text-xs">
-                  Client ID: {app.clientId}
-                </p>
+                <p className="text-muted-foreground mt-1 text-xs">Client ID: {app.clientId}</p>
                 <p className="text-muted-foreground mt-1 text-xs">
                   Created: {new Date(app.createdAt).toLocaleDateString()}
-                  {app.lastUsed && ` • Last used: ${new Date(app.lastUsed).toLocaleDateString()}`}
+                  {app.lastUsed
+                    ? ` • Last used: ${new Date(app.lastUsed).toLocaleDateString()}`
+                    : null}
                 </p>
               </div>
               <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleRevokeAccess(app.id)}
                 className="text-destructive hover:text-destructive"
+                size="sm"
+                variant="ghost"
+                onClick={() => handleRevokeAccess(app.id)}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -72,11 +72,11 @@ export function OAuthAppsManagement({ userId }: OAuthAppsManagementProps) {
         </div>
       )}
 
-      <div className="bg-muted rounded-lg border border-border p-4">
-        <p className="font-medium text-sm mb-2">OAuth Documentation</p>
+      <div className="bg-muted border-border rounded-lg border p-4">
+        <p className="mb-2 text-sm font-medium">OAuth Documentation</p>
         <p className="text-muted-foreground text-xs">
           Learn about OAuth integration in our{' '}
-          <a href="/docs/oauth" className="text-accent hover:underline">
+          <a className="text-accent hover:underline" href="/docs/oauth">
             OAuth documentation
           </a>
           .
@@ -85,4 +85,3 @@ export function OAuthAppsManagement({ userId }: OAuthAppsManagementProps) {
     </div>
   );
 }
-

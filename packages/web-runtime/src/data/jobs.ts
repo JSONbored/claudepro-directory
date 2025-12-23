@@ -4,10 +4,8 @@ import {
   type FilterJobsArgs,
   type FilterJobsReturns,
 } from '@heyclaude/database-types/postgres-types';
-import type { Prisma } from '@prisma/client';
-
-type jobsModel = Prisma.jobsGetPayload<{}>;
 import { normalizeError } from '@heyclaude/shared-runtime';
+import { type Prisma } from '@prisma/client';
 
 import { logger } from '../logger.ts';
 import { pulseJobSearch } from '../pulse.ts';
@@ -17,9 +15,11 @@ import {
   isValidJobType,
 } from '../utils/type-guards.ts';
 
-import { QUERY_LIMITS } from './config/constants.ts';
 import { createDataFunction } from './cached-data-factory.ts';
+import { QUERY_LIMITS } from './config/constants.ts';
 import { getService } from './service-factory.ts';
+
+type jobsModel = Prisma.jobsGetPayload<{}>;
 
 export type JobsFilterResult = FilterJobsReturns;
 

@@ -10,13 +10,12 @@
 import 'server-only';
 
 import {
-  createApiRoute,
-  createOptionsHandler as createApiOptionsHandler,
-} from '@heyclaude/web-runtime/api/route-factory';
-import {
   errorResponseSchema,
   inngestResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createApiRoute, createOptionsHandler as createApiOptionsHandler,
+} from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import {
   GET as inngestGET,
@@ -56,13 +55,6 @@ export const GET = createApiRoute({
     responses: {
       200: {
         description: 'Function definitions returned successfully',
-        schema: inngestResponseSchema,
-        headers: {
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-        },
         example: {
           functions: [
             {
@@ -72,14 +64,21 @@ export const GET = createApiRoute({
             },
           ],
         },
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+        },
+        schema: inngestResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while processing Inngest request',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Inngest introspection endpoint',
@@ -111,26 +110,26 @@ export const POST = createApiRoute({
     responses: {
       200: {
         description: 'Function executed successfully',
-        schema: inngestResponseSchema,
-        headers: {
-          'X-RateLimit-Remaining': {
-            schema: { type: 'string' },
-            description: 'Remaining rate limit requests',
-          },
-        },
         example: {
-          success: true,
           functionId: 'changelog/notify',
           result: { notified: true },
+          success: true,
         },
+        headers: {
+          'X-RateLimit-Remaining': {
+            description: 'Remaining rate limit requests',
+            schema: { type: 'string' },
+          },
+        },
+        schema: inngestResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while executing Inngest function',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Inngest function invocation endpoint',
@@ -162,25 +161,25 @@ export const PUT = createApiRoute({
     responses: {
       200: {
         description: 'Sync completed successfully',
-        schema: inngestResponseSchema,
-        headers: {
-          'X-RateLimit-Remaining': {
-            schema: { type: 'string' },
-            description: 'Remaining rate limit requests',
-          },
-        },
         example: {
           success: true,
           synced: true,
         },
+        headers: {
+          'X-RateLimit-Remaining': {
+            description: 'Remaining rate limit requests',
+            schema: { type: 'string' },
+          },
+        },
+        schema: inngestResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while syncing Inngest functions',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Inngest sync endpoint',

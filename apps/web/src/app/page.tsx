@@ -1,6 +1,5 @@
 /** Homepage consuming homepageConfigs for runtime-tunable categories */
 
-import { type content_category, type user_tier } from '@prisma/client';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { isBookmarkedBatch } from '@heyclaude/web-runtime/data/account';
 import { getHomepageCategoryIds } from '@heyclaude/web-runtime/data/config/category';
@@ -8,6 +7,7 @@ import { getHomepageData } from '@heyclaude/web-runtime/data/content/homepage';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { trackRPCFailure } from '@heyclaude/web-runtime/utils/homepage-error-tracking';
+import { type content_category, type user_tier } from '@prisma/client';
 import { type Metadata } from 'next';
 // Suspense removed - not needed since data is fetched at page level
 // Suspense above the fold can cause blank states to be cached
@@ -136,9 +136,9 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
       const created_at: string =
         contributor.created_at instanceof Date
           ? contributor.created_at.toISOString()
-          : typeof contributor.created_at === 'string'
+          : (typeof contributor.created_at === 'string'
             ? contributor.created_at
-            : '';
+            : '');
 
       return {
         bio: contributor.bio,

@@ -9,8 +9,8 @@ import { type GetUserCompleteDataReturns } from '@heyclaude/data-layer';
 import { Card } from '@heyclaude/web-runtime/ui';
 
 interface ContentPerformanceProps {
-  userId: string;
   userData: GetUserCompleteDataReturns | null;
+  userId: string;
 }
 
 export function ContentPerformance({ userData }: ContentPerformanceProps) {
@@ -31,11 +31,11 @@ export function ContentPerformance({ userData }: ContentPerformanceProps) {
         <div className="text-muted-foreground text-sm">
           <p>Content performance tracking is coming soon.</p>
           <p className="mt-2">
-            You have {submissions.length} submission{submissions.length !== 1 ? 's' : ''}. Performance metrics will be displayed here.
+            You have {submissions.length} submission{submissions.length === 1 ? '' : 's'}.
+            Performance metrics will be displayed here.
           </p>
         </div>
       )}
     </div>
   );
 }
-

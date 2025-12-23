@@ -220,7 +220,7 @@ function LayoutFallback({ children }: { children: React.ReactNode }) {
  * @returns {Promise<unknown>} Description of return value*/
 async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
   'use cache';
-  
+
   // Initialize Infisical secrets early (non-blocking, cached)
   // This ensures secrets are available for Prisma client and other services
   // Initialization is idempotent (cached), so safe to call on every request
@@ -284,9 +284,9 @@ export default function RootLayout({
 
   return (
     <html
+      suppressHydrationWarning
       className={`${inter.variable} ${geist.variable} ${geistMono.variable} font-sans`}
       lang="en"
-      suppressHydrationWarning
     >
       <head>
         {/* Viewport for responsive design */}
@@ -319,11 +319,11 @@ export default function RootLayout({
         </Suspense>
         <ComponentConfigContextProvider value={componentCardConfig}>
           <ThemeProvider
+            enableSystem
             attribute="class"
             defaultTheme="dark"
             disableTransitionOnChange={true}
             enableColorScheme={false}
-            enableSystem
             storageKey="claudepro-theme"
           >
             <LazyMotionProvider>

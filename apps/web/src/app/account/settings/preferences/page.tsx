@@ -5,7 +5,7 @@
 
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { Globe, Clock, Mail, Eye, Palette } from '@heyclaude/web-runtime/icons';
+import { Clock, Eye, Globe, Mail, Palette } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
   Card,
@@ -21,7 +21,8 @@ import { redirect } from 'next/navigation';
 import { PreferencesForm } from './preferences-form';
 
 export const metadata: Metadata = {
-  description: 'Manage your account preferences including language, timezone, email frequency, and accessibility settings',
+  description:
+    'Manage your account preferences including language, timezone, email frequency, and accessibility settings',
   title: 'Preferences | Account Settings',
 };
 
@@ -75,7 +76,8 @@ export default async function PreferencesSettingsPage() {
       <div className="mb-6">
         <h1 className="mb-2 text-3xl font-bold tracking-tight">Preferences</h1>
         <p className="text-muted-foreground text-base">
-          Customize your account preferences including language, timezone, email frequency, and accessibility settings.
+          Customize your account preferences including language, timezone, email frequency, and
+          accessibility settings.
         </p>
       </div>
 
@@ -145,4 +147,3 @@ export default async function PreferencesSettingsPage() {
     </div>
   );
 }
-

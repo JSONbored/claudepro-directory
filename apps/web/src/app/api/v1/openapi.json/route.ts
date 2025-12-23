@@ -21,15 +21,18 @@
 import 'server-only';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { NextResponse } from 'next/server';
-import {
-  createApiRoute,
-  createOptionsHandler as createApiOptionsHandler,
-} from '@heyclaude/web-runtime/api/route-factory';
+
 import { errorResponseSchema } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createOptionsHandler as createApiOptionsHandler, createApiRoute,
+} from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
-import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
-import { buildCacheHeaders } from '@heyclaude/web-runtime/server/api-helpers';
+import {
+  buildCacheHeaders,
+  getOnlyCorsHeaders,
+  jsonResponse,
+} from '@heyclaude/web-runtime/server/api-helpers';
+import { NextResponse } from 'next/server';
 
 const PROJECT_ROOT = process.cwd();
 const OPENAPI_JSON_PATH = join(PROJECT_ROOT, 'openapi.json');
@@ -42,56 +45,6 @@ const OPENAPI_JSON_PATH = join(PROJECT_ROOT, 'openapi.json');
  */
 export const GET = createApiRoute({
   cors: 'anon',
-  method: 'GET',
-  openapi: {
-    description:
-      'Serves the generated OpenAPI specification JSON file. Used by API documentation tools like Scalar API Reference.',
-    operationId: 'getOpenApiSpec',
-    responses: {
-      200: {
-        description: 'OpenAPI specification retrieved successfully',
-        headers: {
-          'Content-Type': {
-            schema: { type: 'string' },
-            description: 'Content type (application/json)',
-          },
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-        },
-        example: {
-          openapi: '3.1.0',
-          info: {
-            title: 'ClaudePro Directory API',
-            version: '1.1.0',
-            description: 'API documentation for ClaudePro Directory',
-          },
-          paths: {},
-        },
-      },
-      404: {
-        description: 'OpenAPI specification not found. Run: pnpm generate:openapi',
-        schema: errorResponseSchema,
-        example: {
-          error: 'OpenAPI specification not found',
-          message: 'OpenAPI specification not found. Run: pnpm generate:openapi',
-        },
-      },
-      500: {
-        description: 'Failed to load OpenAPI specification',
-        schema: errorResponseSchema,
-        example: {
-          error: 'Failed to load OpenAPI specification',
-          message: 'An unexpected error occurred while loading the OpenAPI specification',
-        },
-      },
-    },
-    summary: 'Get OpenAPI specification',
-    tags: ['openapi', 'documentation'],
-  },
-  operation: 'OpenAPISpecAPI',
-  route: getVersionedRoute('openapi.json'),
   handler: async ({ logger }) => {
     try {
       // Read the generated OpenAPI spec file
@@ -122,7 +75,7 @@ export const GET = createApiRoute({
         );
         return NextResponse.json(
           { error: 'OpenAPI specification not found. Run: pnpm generate:openapi' },
-          { status: 404, headers: getOnlyCorsHeaders }
+          { headers: getOnlyCorsHeaders, status: 404 }
         );
       }
 
@@ -130,6 +83,56 @@ export const GET = createApiRoute({
       throw error;
     }
   },
+  method: 'GET',
+  openapi: {
+    description:
+      'Serves the generated OpenAPI specification JSON file. Used by API documentation tools like Scalar API Reference.',
+    operationId: 'getOpenApiSpec',
+    responses: {
+      200: {
+        description: 'OpenAPI specification retrieved successfully',
+        example: {
+          info: {
+            description: 'API documentation for ClaudePro Directory',
+            title: 'ClaudePro Directory API',
+            version: '1.1.0',
+          },
+          openapi: '3.1.0',
+          paths: {},
+        },
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+          'Content-Type': {
+            description: 'Content type (application/json)',
+            schema: { type: 'string' },
+          },
+        },
+      },
+      404: {
+        description: 'OpenAPI specification not found. Run: pnpm generate:openapi',
+        example: {
+          error: 'OpenAPI specification not found',
+          message: 'OpenAPI specification not found. Run: pnpm generate:openapi',
+        },
+        schema: errorResponseSchema,
+      },
+      500: {
+        description: 'Failed to load OpenAPI specification',
+        example: {
+          error: 'Failed to load OpenAPI specification',
+          message: 'An unexpected error occurred while loading the OpenAPI specification',
+        },
+        schema: errorResponseSchema,
+      },
+    },
+    summary: 'Get OpenAPI specification',
+    tags: ['openapi', 'documentation'],
+  },
+  operation: 'OpenAPISpecAPI',
+  route: getVersionedRoute('openapi.json'),
 });
 
 /**

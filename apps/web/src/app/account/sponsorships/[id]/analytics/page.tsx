@@ -1,7 +1,4 @@
-import { sponsorship_tier as SponsorshipTierEnum } from '@prisma/client';
 import { type GetSponsorshipAnalyticsReturns } from '@heyclaude/data-layer';
-
-import type { sponsorship_tier } from '@prisma/client';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getSponsorshipAnalytics } from '@heyclaude/web-runtime/data/account';
 import { formatDate } from '@heyclaude/web-runtime/data/utils';
@@ -15,6 +12,8 @@ import {
   CardTitle,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { type sponsorship_tier } from '@prisma/client';
+import { sponsorship_tier as SponsorshipTierEnum } from '@prisma/client';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { notFound } from 'next/navigation';
@@ -190,7 +189,7 @@ async function SponsorshipAnalyticsPageContent({
 
   // After null check, TypeScript narrows types - use generated types directly
   // Validate tier value at runtime using Prisma enum object
-  const rawTier = sponsorship.tier as string; // Widen to string for validation
+  const rawTier = sponsorship.tier; // Widen to string for validation
   const validTiers = Object.values(SponsorshipTierEnum) as readonly sponsorship_tier[];
 
   // Type guard to check if tier is a valid enum value

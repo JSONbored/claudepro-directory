@@ -110,7 +110,7 @@ export default async function SettingsPage() {
 
   // Section: Settings Data Fetch
   let settingsData: GetUserCompleteDataReturns['user_settings'] | null = null;
-  let heroImageUrl: string | null = null;
+  let heroImageUrl: null | string = null;
   try {
     const completeData = await getUserCompleteData(user.id);
     settingsData = completeData?.user_settings ?? null;
@@ -124,8 +124,8 @@ export default async function SettingsPage() {
     // Fetch hero image separately (not included in getUserSettings)
     const { prisma } = await import('@heyclaude/data-layer/prisma/client');
     const userRecord = await prisma.public_users.findUnique({
-      where: { id: user.id },
       select: { hero: true },
+      where: { id: user.id },
     });
     heroImageUrl = userRecord?.hero ?? null;
   } catch (error) {
@@ -331,6 +331,8 @@ export default async function SettingsPage() {
         </CardHeader>
         <CardContent>
           <ProfileEditForm
+            avatarUrl={userData?.image ?? null}
+            heroUrl={heroImageUrl}
             profile={{
               bio: profile.bio,
               display_name: profile.display_name,
@@ -342,8 +344,6 @@ export default async function SettingsPage() {
               website: profile.website,
               work: profile.work,
             }}
-            avatarUrl={userData?.image ?? null}
-            heroUrl={heroImageUrl}
           />
         </CardContent>
       </Card>
@@ -357,11 +357,11 @@ export default async function SettingsPage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <p className="text-sm font-semibold mb-1">Email</p>
+              <p className="mb-1 text-sm font-semibold">Email</p>
               <p className="text-muted-foreground text-sm">{user.email}</p>
             </div>
             <div>
-              <p className="text-sm font-semibold mb-1">Member Since</p>
+              <p className="mb-1 text-sm font-semibold">Member Since</p>
               <p className="text-muted-foreground text-sm">
                 {profile.created_at ? formatDate(profile.created_at, 'long') : 'N/A'}
               </p>

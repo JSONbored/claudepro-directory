@@ -7,27 +7,27 @@
 
 import { signOutSession } from '@heyclaude/web-runtime/actions/security';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
+import { Globe, Monitor, Smartphone, Tablet } from '@heyclaude/web-runtime/icons';
 import { Button, toasts } from '@heyclaude/web-runtime/ui';
-import { Monitor, Smartphone, Tablet, Globe } from '@heyclaude/web-runtime/icons';
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface Session {
+  createdAt?: null | string;
   id: string;
-  userAgent?: string | null;
-  ip?: string | null;
-  createdAt?: string | null;
-  updatedAt?: string | null;
+  ip?: null | string;
   isCurrent: boolean;
+  updatedAt?: null | string;
+  userAgent?: null | string;
 }
 
 interface ActiveSessionsListProps {
   userId: string;
 }
 
-function getDeviceIcon(userAgent?: string | null) {
+function getDeviceIcon(userAgent?: null | string) {
   if (!userAgent) return Globe;
-  
+
   const ua = userAgent.toLowerCase();
   if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) {
     return Smartphone;
@@ -38,13 +38,17 @@ function getDeviceIcon(userAgent?: string | null) {
   return Monitor;
 }
 
-function parseUserAgent(userAgent?: string | null): { browser: string; os: string; device: string } {
+function parseUserAgent(userAgent?: null | string): {
+  browser: string;
+  device: string;
+  os: string;
+} {
   if (!userAgent) {
-    return { browser: 'Unknown', os: 'Unknown', device: 'Unknown' };
+    return { browser: 'Unknown', device: 'Unknown', os: 'Unknown' };
   }
 
   const ua = userAgent.toLowerCase();
-  
+
   // Browser detection
   let browser = 'Unknown';
   if (ua.includes('chrome') && !ua.includes('edg')) browser = 'Chrome';
@@ -66,7 +70,7 @@ function parseUserAgent(userAgent?: string | null): { browser: string; os: strin
   if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) device = 'Mobile';
   else if (ua.includes('tablet') || ua.includes('ipad')) device = 'Tablet';
 
-  return { browser, os, device };
+  return { browser, device, os };
 }
 
 export function ActiveSessionsList({ userId }: ActiveSessionsListProps) {
@@ -74,9 +78,9 @@ export function ActiveSessionsList({ userId }: ActiveSessionsListProps) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const runLoggedAsync = useLoggedAsync({
-    scope: 'ActiveSessionsList',
     defaultMessage: 'Failed to sign out session',
     defaultRethrow: false,
+    scope: 'ActiveSessionsList',
   });
 
   useEffect(() => {
@@ -84,17 +88,17 @@ export function ActiveSessionsList({ userId }: ActiveSessionsListProps) {
     // In production, you'd fetch from an RPC or API endpoint
     // Supabase Auth doesn't provide a direct getSessions() method
     // You'd need to create an RPC function to query auth.sessions table
-    
+
     // For now, show current session only
     // TODO: Implement RPC function to fetch all sessions
     setIsLoading(false);
     setSessions([
       {
-        id: 'current-session',
-        userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : null,
-        isCurrent: true,
         createdAt: new Date().toISOString(),
+        id: 'current-session',
+        isCurrent: true,
         updatedAt: new Date().toISOString(),
+        userAgent: globalThis.window === undefined ? null : globalThis.navigator.userAgent,
       },
     ]);
   }, [userId]);
@@ -126,11 +130,7 @@ export function ActiveSessionsList({ userId }: ActiveSessionsListProps) {
   }
 
   if (sessions.length === 0) {
-    return (
-      <div className="text-muted-foreground text-sm">
-        No active sessions found.
-      </div>
-    );
+    return <div className="text-muted-foreground text-sm">No active sessions found.</div>;
   }
 
   return (
@@ -142,38 +142,38 @@ export function ActiveSessionsList({ userId }: ActiveSessionsListProps) {
 
         return (
           <div
+            className="border-border bg-card flex items-center justify-between rounded-lg border p-4"
             key={session.id}
-            className="flex items-center justify-between rounded-lg border border-border bg-card p-4"
           >
             <div className="flex items-center gap-3">
-              <DeviceIcon className="h-5 w-5 text-muted-foreground" />
+              <DeviceIcon className="text-muted-foreground h-5 w-5" />
               <div>
                 <div className="flex items-center gap-2">
-                  <p className="font-medium text-sm">
+                  <p className="text-sm font-medium">
                     {deviceInfo.browser} on {deviceInfo.os}
                   </p>
-                  {isCurrent && (
+                  {isCurrent ? (
                     <span className="bg-accent/10 text-accent rounded-full px-2 py-0.5 text-xs font-medium">
                       Current
                     </span>
-                  )}
+                  ) : null}
                 </div>
                 <p className="text-muted-foreground text-xs">
                   {deviceInfo.device}
-                  {session.ip && ` • ${session.ip}`}
+                  {session.ip ? ` • ${session.ip}` : null}
                 </p>
-                {session.updatedAt && (
+                {session.updatedAt ? (
                   <p className="text-muted-foreground text-xs">
                     Last active: {new Date(session.updatedAt).toLocaleString()}
                   </p>
-                )}
+                ) : null}
               </div>
             </div>
             {!isCurrent && (
               <Button
-                variant="outline"
-                size="sm"
                 onClick={() => handleSignOut(session.id, isCurrent)}
+                size="sm"
+                variant="outline"
               >
                 Sign Out
               </Button>
@@ -182,9 +182,9 @@ export function ActiveSessionsList({ userId }: ActiveSessionsListProps) {
         );
       })}
       <p className="text-muted-foreground text-xs">
-        Note: Signing out other sessions requires Supabase Admin API or RPC function. Currently, only the current session can be signed out directly.
+        Note: Signing out other sessions requires Supabase Admin API or RPC function. Currently,
+        only the current session can be signed out directly.
       </p>
     </div>
   );
 }
-

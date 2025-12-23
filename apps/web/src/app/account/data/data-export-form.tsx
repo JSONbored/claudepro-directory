@@ -5,10 +5,10 @@
  * Allows users to export their account data (GDPR compliant)
  */
 
+import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
 import { Button, toasts } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
-import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 
 interface DataExportFormProps {
   userId: string;
@@ -18,9 +18,9 @@ export function DataExportForm({ userId }: DataExportFormProps) {
   const [isExporting, setIsExporting] = useState(false);
 
   const runLoggedAsync = useLoggedAsync({
-    scope: 'DataExportForm',
     defaultMessage: 'Data export failed',
     defaultRethrow: false,
+    scope: 'DataExportForm',
   });
 
   const handleExport = async () => {
@@ -44,9 +44,9 @@ export function DataExportForm({ userId }: DataExportFormProps) {
         const link = document.createElement('a');
         link.href = url;
         link.download = `account-data-export-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(link);
+        document.body.append(link);
         link.click();
-        document.body.removeChild(link);
+        link.remove();
         URL.revokeObjectURL(url);
 
         toasts.success('Data exported successfully');
@@ -71,10 +71,9 @@ export function DataExportForm({ userId }: DataExportFormProps) {
         <li>Submissions</li>
         <li>Settings and preferences</li>
       </ul>
-      <Button onClick={handleExport} disabled={isExporting} variant="outline">
+      <Button disabled={isExporting} onClick={handleExport} variant="outline">
         {isExporting ? 'Exporting...' : 'Export Data (JSON)'}
       </Button>
     </div>
   );
 }
-

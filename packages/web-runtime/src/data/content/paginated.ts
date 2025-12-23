@@ -1,11 +1,11 @@
 import 'server-only';
 import { Prisma } from '@prisma/client';
-import type { content_category } from '@prisma/client';
-type contentModel = Prisma.contentGetPayload<{}>;
+import { type content_category } from '@prisma/client';
 
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 
 import { createDataFunction } from '../cached-data-factory.ts';
+type contentModel = Prisma.contentGetPayload<{}>;
 
 // Local types for migrated RPC (RPC removed, using Prisma directly)
 type ContentPaginatedSlimItem = contentModel;

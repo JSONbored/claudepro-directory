@@ -3,51 +3,51 @@
 /**
  * Preferences Form
  * Allows users to manage their account preferences
- * 
+ *
  * Note: Currently uses localStorage for preferences. In production, this should be extended
  * to use a user_preferences database table for persistence across devices.
  */
 
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
-import { Button, FormField, ToggleField, toasts } from '@heyclaude/web-runtime/ui';
-import { useState, useEffect } from 'react';
+import { Button, FormField, toasts, ToggleField } from '@heyclaude/web-runtime/ui';
+import { useEffect, useState } from 'react';
 
 interface PreferencesFormProps {
-  section: 'language' | 'email' | 'content' | 'accessibility';
+  section: 'accessibility' | 'content' | 'email' | 'language';
 }
 
 interface Preferences {
-  language: string;
-  timezone: string;
-  dateFormat: string;
-  emailFrequency: string;
-  emailNotifications: boolean;
+  accessibility: {
+    fontSize: string;
+    highContrast: boolean;
+    reducedMotion: boolean;
+  };
   contentFilters: {
     showNSFW: boolean;
     showSpoilers: boolean;
   };
-  accessibility: {
-    reducedMotion: boolean;
-    highContrast: boolean;
-    fontSize: string;
-  };
+  dateFormat: string;
+  emailFrequency: string;
+  emailNotifications: boolean;
+  language: string;
+  timezone: string;
 }
 
 const defaultPreferences: Preferences = {
-  language: 'en',
-  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-  dateFormat: 'MM/DD/YYYY',
-  emailFrequency: 'weekly',
-  emailNotifications: true,
+  accessibility: {
+    fontSize: 'medium',
+    highContrast: false,
+    reducedMotion: false,
+  },
   contentFilters: {
     showNSFW: false,
     showSpoilers: true,
   },
-  accessibility: {
-    reducedMotion: false,
-    highContrast: false,
-    fontSize: 'medium',
-  },
+  dateFormat: 'MM/DD/YYYY',
+  emailFrequency: 'weekly',
+  emailNotifications: true,
+  language: 'en',
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 };
 
 export function PreferencesForm({ section }: PreferencesFormProps) {
@@ -56,9 +56,9 @@ export function PreferencesForm({ section }: PreferencesFormProps) {
   const [isSaving, setIsSaving] = useState(false);
 
   const runLoggedAsync = useLoggedAsync({
-    scope: 'PreferencesForm',
     defaultMessage: 'Failed to save preferences',
     defaultRethrow: false,
+    scope: 'PreferencesForm',
   });
 
   useEffect(() => {
@@ -81,19 +81,17 @@ export function PreferencesForm({ section }: PreferencesFormProps) {
       // Save to localStorage
       // In production, this would save to a database table via server action
       localStorage.setItem('user_preferences', JSON.stringify(preferences));
-      
-      // Apply accessibility preferences immediately
-      if (preferences.accessibility.reducedMotion) {
-        document.documentElement.classList.add('reduce-motion');
-      } else {
-        document.documentElement.classList.remove('reduce-motion');
-      }
 
-      if (preferences.accessibility.highContrast) {
-        document.documentElement.classList.add('high-contrast');
-      } else {
-        document.documentElement.classList.remove('high-contrast');
-      }
+      // Apply accessibility preferences immediately
+      document.documentElement.classList.toggle(
+        'reduce-motion',
+        preferences.accessibility.reducedMotion
+      );
+
+      document.documentElement.classList.toggle(
+        'high-contrast',
+        preferences.accessibility.highContrast
+      );
 
       toasts.success('Preferences saved successfully');
     });
@@ -107,11 +105,11 @@ export function PreferencesForm({ section }: PreferencesFormProps) {
   if (section === 'language') {
     return (
       <div className="space-y-4">
-        <FormField label="Language" required>
+        <FormField required label="Language">
           <select
-            value={preferences.language}
+            className="border-input bg-background ring-offset-background focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             onChange={(e) => setPreferences({ ...preferences, language: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            value={preferences.language}
           >
             <option value="en">English</option>
             <option value="es">Spanish</option>
@@ -122,25 +120,25 @@ export function PreferencesForm({ section }: PreferencesFormProps) {
           </select>
         </FormField>
 
-        <FormField label="Timezone" required>
+        <FormField required label="Timezone">
           <select
-            value={preferences.timezone}
+            className="border-input bg-background ring-offset-background focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             onChange={(e) => setPreferences({ ...preferences, timezone: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            value={preferences.timezone}
           >
             {Intl.supportedValuesOf('timeZone').map((tz) => (
               <option key={tz} value={tz}>
-                {tz.replace(/_/g, ' ')}
+                {tz.replaceAll('_', ' ')}
               </option>
             ))}
           </select>
         </FormField>
 
-        <FormField label="Date Format" required>
+        <FormField required label="Date Format">
           <select
-            value={preferences.dateFormat}
+            className="border-input bg-background ring-offset-background focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             onChange={(e) => setPreferences({ ...preferences, dateFormat: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            value={preferences.dateFormat}
           >
             <option value="MM/DD/YYYY">MM/DD/YYYY</option>
             <option value="DD/MM/YYYY">DD/MM/YYYY</option>
@@ -149,7 +147,7 @@ export function PreferencesForm({ section }: PreferencesFormProps) {
           </select>
         </FormField>
 
-        <Button onClick={savePreferences} disabled={isSaving}>
+        <Button disabled={isSaving} onClick={savePreferences}>
           {isSaving ? 'Saving...' : 'Save Preferences'}
         </Button>
       </div>
@@ -159,11 +157,11 @@ export function PreferencesForm({ section }: PreferencesFormProps) {
   if (section === 'email') {
     return (
       <div className="space-y-4">
-        <FormField label="Email Frequency" required>
+        <FormField required label="Email Frequency">
           <select
-            value={preferences.emailFrequency}
+            className="border-input bg-background ring-offset-background focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             onChange={(e) => setPreferences({ ...preferences, emailFrequency: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            value={preferences.emailFrequency}
           >
             <option value="never">Never</option>
             <option value="daily">Daily</option>
@@ -173,15 +171,15 @@ export function PreferencesForm({ section }: PreferencesFormProps) {
         </FormField>
 
         <ToggleField
-          label="Email Notifications"
-          description="Receive email notifications for important account updates"
           checked={preferences.emailNotifications}
+          description="Receive email notifications for important account updates"
+          label="Email Notifications"
           onCheckedChange={(checked) =>
             setPreferences({ ...preferences, emailNotifications: checked })
           }
         />
 
-        <Button onClick={savePreferences} disabled={isSaving}>
+        <Button disabled={isSaving} onClick={savePreferences}>
           {isSaving ? 'Saving...' : 'Save Preferences'}
         </Button>
       </div>
@@ -192,9 +190,9 @@ export function PreferencesForm({ section }: PreferencesFormProps) {
     return (
       <div className="space-y-4">
         <ToggleField
-          label="Show NSFW Content"
-          description="Display content marked as not safe for work"
           checked={preferences.contentFilters.showNSFW}
+          description="Display content marked as not safe for work"
+          label="Show NSFW Content"
           onCheckedChange={(checked) =>
             setPreferences({
               ...preferences,
@@ -204,9 +202,9 @@ export function PreferencesForm({ section }: PreferencesFormProps) {
         />
 
         <ToggleField
-          label="Show Spoilers"
-          description="Display content that may contain spoilers"
           checked={preferences.contentFilters.showSpoilers}
+          description="Display content that may contain spoilers"
+          label="Show Spoilers"
           onCheckedChange={(checked) =>
             setPreferences({
               ...preferences,
@@ -215,7 +213,7 @@ export function PreferencesForm({ section }: PreferencesFormProps) {
           }
         />
 
-        <Button onClick={savePreferences} disabled={isSaving}>
+        <Button disabled={isSaving} onClick={savePreferences}>
           {isSaving ? 'Saving...' : 'Save Preferences'}
         </Button>
       </div>
@@ -226,51 +224,43 @@ export function PreferencesForm({ section }: PreferencesFormProps) {
     return (
       <div className="space-y-4">
         <ToggleField
-          label="Reduce Motion"
-          description="Reduce animations and motion effects for better accessibility"
           checked={preferences.accessibility.reducedMotion}
+          description="Reduce animations and motion effects for better accessibility"
+          label="Reduce Motion"
           onCheckedChange={(checked) => {
             setPreferences({
               ...preferences,
               accessibility: { ...preferences.accessibility, reducedMotion: checked },
             });
             // Apply immediately
-            if (checked) {
-              document.documentElement.classList.add('reduce-motion');
-            } else {
-              document.documentElement.classList.remove('reduce-motion');
-            }
+            document.documentElement.classList.toggle('reduce-motion', checked);
           }}
         />
 
         <ToggleField
-          label="High Contrast"
-          description="Increase contrast for better visibility"
           checked={preferences.accessibility.highContrast}
+          description="Increase contrast for better visibility"
+          label="High Contrast"
           onCheckedChange={(checked) => {
             setPreferences({
               ...preferences,
               accessibility: { ...preferences.accessibility, highContrast: checked },
             });
             // Apply immediately
-            if (checked) {
-              document.documentElement.classList.add('high-contrast');
-            } else {
-              document.documentElement.classList.remove('high-contrast');
-            }
+            document.documentElement.classList.toggle('high-contrast', checked);
           }}
         />
 
-        <FormField label="Font Size" required>
+        <FormField required label="Font Size">
           <select
-            value={preferences.accessibility.fontSize}
+            className="border-input bg-background ring-offset-background focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             onChange={(e) =>
               setPreferences({
                 ...preferences,
                 accessibility: { ...preferences.accessibility, fontSize: e.target.value },
               })
             }
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            value={preferences.accessibility.fontSize}
           >
             <option value="small">Small</option>
             <option value="medium">Medium</option>
@@ -279,7 +269,7 @@ export function PreferencesForm({ section }: PreferencesFormProps) {
           </select>
         </FormField>
 
-        <Button onClick={savePreferences} disabled={isSaving}>
+        <Button disabled={isSaving} onClick={savePreferences}>
           {isSaving ? 'Saving...' : 'Save Preferences'}
         </Button>
       </div>
@@ -288,4 +278,3 @@ export function PreferencesForm({ section }: PreferencesFormProps) {
 
   return null;
 }
-

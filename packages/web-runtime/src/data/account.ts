@@ -1,13 +1,5 @@
 import 'server-only';
 
-import { type IsBookmarkedBatchReturns, type IsFollowingBatchReturns } from '@heyclaude/data-layer';
-import {
-} from '@prisma/client';
-import { Prisma, user_tier as UserTier } from '@prisma/client';
-import type { content_category, user_tier } from '@prisma/client';
-
-type bookmarksModel = Prisma.bookmarksGetPayload<{}>;
-type jobsModel = Prisma.jobsGetPayload<{}>;
 import {
   type GetAccountDashboardReturns,
   type GetCollectionDetailWithItemsReturns,
@@ -17,8 +9,12 @@ import {
   type GetUserCompleteDataReturns,
   type GetUserIdentitiesReturns,
   type GetUserLibraryReturns,
+  type IsBookmarkedBatchReturns,
+  type IsFollowingBatchReturns,
   type UserCompaniesCompany,
 } from '@heyclaude/data-layer';
+import { Prisma, user_tier as UserTier } from '@prisma/client';
+import { type content_category, type user_tier } from '@prisma/client';
 import { z } from 'zod';
 
 import { getAuthenticatedUserFromClient } from '../auth/get-authenticated-user.ts';
@@ -28,6 +24,9 @@ import { createSupabaseServerClient } from '../supabase/server.ts';
 
 import { createDataFunction } from './cached-data-factory.ts';
 import { getService } from './service-factory.ts';
+
+type bookmarksModel = Prisma.bookmarksGetPayload<{}>;
+type jobsModel = Prisma.jobsGetPayload<{}>;
 
 const USER_TIER_VALUES = Object.values(UserTier) as readonly user_tier[];
 
@@ -85,9 +84,9 @@ export async function getUserBookmarksForCollections(userId: string): Promise<bo
         content_type: string;
         created_at: string;
         id: string;
+        notes?: null | string;
         updated_at?: string;
         user_id: string;
-        notes?: string | null;
       }) => ({
         content_slug: b.content_slug,
         content_type: b.content_type as bookmarksModel['content_type'], // RPC returns string, Prisma expects enum
@@ -189,8 +188,8 @@ export async function getUserCompleteData(
     const rpcParams: GetUserCompleteDataArgs = {
       p_activity_limit: options?.activityLimit ?? 20,
       p_activity_offset: options?.activityOffset ?? 0,
-      p_user_id: userId,
       p_activity_type: options?.activityType ?? null,
+      p_user_id: userId,
     };
 
     const result = await service.getUserCompleteData(rpcParams);

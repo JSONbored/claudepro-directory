@@ -70,7 +70,7 @@ const jobStatusBadgeMap: Record<JobStatus, string> = {
 function getStatusColor(status: JobStatus): string {
   const color = jobStatusBadgeMap[status];
   if (color) return color;
-  return jobStatusBadgeMap['draft'] as string;
+  return jobStatusBadgeMap['draft'];
 }
 
 /**
@@ -334,10 +334,10 @@ async function JobAnalyticsPageContent({
 
             {viewCount > 0 && clickCount === 0 && (
               <div className="card-base border-warning-border bg-warning-bg p-4">
-                <p className="text-sm text-warning">
+                <p className="text-warning text-sm">
                   Your listing is getting views but no clicks. Consider:
                 </p>
-                <ul className="mt-2 ml-4 list-disc text-sm text-warning">
+                <ul className="text-warning mt-2 ml-4 list-disc text-sm">
                   <li>Making the job title more descriptive</li>
                   <li>Highlighting competitive benefits</li>
                   <li>Adding salary information</li>
@@ -347,7 +347,7 @@ async function JobAnalyticsPageContent({
 
             {Number.parseFloat(ctr) > 5 && (
               <div className="card-base border-success-border bg-success-bg p-4">
-                <p className="text-sm text-success">
+                <p className="text-success text-sm">
                   Great performance! Your CTR of {ctr}% is above average. Keep it up!
                 </p>
               </div>

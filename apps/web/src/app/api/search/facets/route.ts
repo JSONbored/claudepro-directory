@@ -27,14 +27,12 @@ import 'server-only';
 
 // OPTIMIZATION: Removed unused imports - factory handles errors automatically
 import {
-  createOptionsHandler as createApiOptionsHandler,
-  createCachedApiRoute,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/api/route-factory';
-import {
   errorResponseSchema,
   searchFacetsResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 
@@ -57,41 +55,41 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'Search facets retrieved successfully',
-        schema: searchFacetsResponseSchema,
-        headers: {
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-          'X-Generated-By': {
-            schema: { type: 'string' },
-            description: 'Source of the response data',
-          },
-        },
         example: {
           facets: [
             {
+              authors: ['user1', 'user2'],
               category: 'skills',
               content_count: 150,
               tags: ['javascript', 'typescript', 'react'],
-              authors: ['user1', 'user2'],
             },
             {
+              authors: ['user3'],
               category: 'agents',
               content_count: 75,
               tags: ['ai', 'automation', 'llm'],
-              authors: ['user3'],
             },
           ],
         },
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+          'X-Generated-By': {
+            description: 'Source of the response data',
+            schema: { type: 'string' },
+          },
+        },
+        schema: searchFacetsResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while fetching search facets',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Get search facets',

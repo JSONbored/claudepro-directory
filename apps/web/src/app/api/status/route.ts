@@ -37,14 +37,12 @@ import 'server-only';
 
 // OPTIMIZATION: Removed unused imports - factory handles errors automatically
 import {
-  createCachedApiRoute,
-  createOptionsHandler as createApiOptionsHandler,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/api/route-factory';
-import {
   errorResponseSchema,
   statusResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 
@@ -68,46 +66,46 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'API is healthy or degraded',
-        schema: statusResponseSchema,
-        headers: {
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-          'X-Generated-By': {
-            schema: { type: 'string' },
-            description: 'Source of the response data',
-          },
-        },
         example: {
-          status: 'healthy',
           database: 'connected',
+          status: 'healthy',
           timestamp: '2025-01-11T12:00:00Z',
           version: '1.1.0',
         },
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+          'X-Generated-By': {
+            description: 'Source of the response data',
+            schema: { type: 'string' },
+          },
+        },
+        schema: statusResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while checking API status',
         },
+        schema: errorResponseSchema,
       },
       503: {
         description: 'API is unhealthy',
-        schema: statusResponseSchema,
-        headers: {
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-        },
         example: {
-          status: 'unhealthy',
           database: 'disconnected',
+          status: 'unhealthy',
           timestamp: '2025-01-11T12:00:00Z',
         },
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+        },
+        schema: statusResponseSchema,
       },
     },
     summary: 'Get API health status',
@@ -132,7 +130,7 @@ export const GET = createCachedApiRoute({
         status = statusValue;
       }
     }
-    const statusCode = status === 'healthy' ? 200 : status === 'degraded' ? 200 : 503;
+    const statusCode = status === 'healthy' ? 200 : (status === 'degraded' ? 200 : 503);
 
     logger.info(
       {

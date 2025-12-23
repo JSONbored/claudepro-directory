@@ -1,10 +1,10 @@
 import 'server-only';
 
-import type { Prisma } from '@prisma/client';
-
-type payment_plan_catalogModel = Prisma.payment_plan_catalogGetPayload<{}>;
+import { type Prisma } from '@prisma/client';
 
 import { createDataFunction } from './cached-data-factory.ts';
+
+type payment_plan_catalogModel = Prisma.payment_plan_catalogGetPayload<{}>;
 
 // Type for job billing summary (matches job_billing_summary view structure)
 // This type represents a single row from the view

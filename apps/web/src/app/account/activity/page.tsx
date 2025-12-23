@@ -1,8 +1,7 @@
-import type {
-  GetUserCompleteDataReturns,
-  GetUserActivityTimelineReturns,
+import {
+  type GetUserActivityTimelineReturns,
+  type GetUserCompleteDataReturns,
 } from '@heyclaude/data-layer';
-type UserActivityTimelineItem = GetUserActivityTimelineReturns['activities'][number];
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -26,6 +25,7 @@ import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
 
 import Loading from './loading';
+type UserActivityTimelineItem = GetUserActivityTimelineReturns['activities'][number];
 
 /**
  * Produce the Metadata for the account Activity route.
@@ -224,7 +224,7 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                <GitPullRequest className="h-5 w-5 text-info" />
+                <GitPullRequest className="text-info h-5 w-5" />
                 <span className="text-2xl font-bold">
                   {summary.merged_submissions}/{summary.total_submissions}
                 </span>
@@ -265,9 +265,7 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
         <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="text-xl">Activity Timeline</CardTitle>
-            <CardDescription className="text-sm">
-              Unable to load activity timeline
-            </CardDescription>
+            <CardDescription className="text-sm">Unable to load activity timeline</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground text-sm">

@@ -20,12 +20,12 @@ interface OAuthConsentClientProps {
   authDetails: {
     client: {
       client_id: string;
+      description?: null | string;
       name: string;
-      description?: string | null;
     };
     redirect_uri: string;
+    resource?: null | string; // RFC 8707 resource parameter (MCP server URL)
     scopes?: null | string[];
-    resource?: string | null; // RFC 8707 resource parameter (MCP server URL)
   };
   authorizationId: string;
 }
@@ -161,17 +161,20 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
   // Map scope names to user-friendly descriptions
   const scopeDescriptions: Record<string, string> = {
     email: 'Access your email address',
-    'mcp:resources': 'Access MCP resources on your behalf (content exports, category data, sitewide data)',
-    'mcp:tools': 'Access MCP tools on your behalf (search, browse, submit content, manage bookmarks)',
+    'mcp:resources':
+      'Access MCP resources on your behalf (content exports, category data, sitewide data)',
+    'mcp:tools':
+      'Access MCP tools on your behalf (search, browse, submit content, manage bookmarks)',
     openid: 'Access your basic profile information',
     phone: 'Access your phone number',
     profile: 'Access your profile information (name, picture)',
   };
 
   // Determine if this is an MCP client request
-  const isMcpClient = authDetails.resource?.includes('/mcp') || 
-                      authDetails.scopes?.some(scope => scope.startsWith('mcp:')) ||
-                      false;
+  const isMcpClient =
+    authDetails.resource?.includes('/mcp') ||
+    authDetails.scopes?.some((scope) => scope.startsWith('mcp:')) ||
+    false;
 
   // MCP-specific access description
   const mcpAccessDescription = isMcpClient
@@ -198,11 +201,11 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
               <span>{authDetails.client.name}</span>
             </h2>
             <div className="flex items-center gap-2">
-              {isMcpClient && (
+              {isMcpClient ? (
                 <UnifiedBadge className="text-xs" style="default" variant="base">
                   MCP Client
                 </UnifiedBadge>
-              )}
+              ) : null}
               <UnifiedBadge className="text-xs" style="secondary" variant="base">
                 OAuth Client
               </UnifiedBadge>
@@ -210,12 +213,12 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
           </div>
 
           {/* Client Description (if available) */}
-          {authDetails.client.description && (
+          {authDetails.client.description ? (
             <p className="text-muted-foreground text-sm">{authDetails.client.description}</p>
-          )}
+          ) : null}
 
           {/* MCP Access Description */}
-          {mcpAccessDescription && (
+          {mcpAccessDescription ? (
             <div className="bg-accent/10 border-accent/20 flex items-start gap-2 rounded-lg border p-3">
               <Shield aria-hidden="true" className="text-accent mt-0.5 h-4 w-4 flex-shrink-0" />
               <div className="flex flex-1 flex-col gap-1">
@@ -223,7 +226,7 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
                 <p className="text-muted-foreground text-xs">{mcpAccessDescription}</p>
               </div>
             </div>
-          )}
+          ) : null}
 
           <div className="text-muted-foreground flex flex-col gap-1 text-sm">
             <div className="flex items-center gap-1">
@@ -231,12 +234,12 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
               <span className="font-medium">Redirect URI:</span>
               <span className="font-mono text-xs break-all">{authDetails.redirect_uri}</span>
             </div>
-            {authDetails.resource && (
+            {authDetails.resource ? (
               <div className="flex items-center gap-1">
                 <span className="font-medium">Resource:</span>
                 <span className="font-mono text-xs break-all">{authDetails.resource}</span>
               </div>
-            )}
+            ) : null}
             <div className="flex items-center gap-1">
               <span className="font-medium">Client ID:</span>
               <span className="font-mono text-xs break-all">{authDetails.client.client_id}</span>

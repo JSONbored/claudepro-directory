@@ -5,7 +5,12 @@
  * Copy this template and customize for each route.
  */
 
-import { describe, it, vi, beforeEach } from 'vitest';
+// Mock data-layer services
+// IMPORTANT: Import prisma directly - don't use vi.importActual
+// Prisma is automatically PrismockerClient via __mocks__/@prisma/client.ts
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import { type PrismaClient } from '@prisma/client';
+import { beforeEach, describe, it, vi } from 'vitest';
 // TODO: Update import path to your actual route file
 // import { GET, OPTIONS } from './route';
 // TODO: Uncomment when you have a real route
@@ -25,12 +30,6 @@ vi.mock('next/cache', () => ({
   cacheTag: vi.fn(),
   connection: vi.fn(() => Promise.resolve()),
 }));
-
-// Mock data-layer services
-// IMPORTANT: Import prisma directly - don't use vi.importActual
-// Prisma is automatically PrismockerClient via __mocks__/@prisma/client.ts
-import { prisma } from '@heyclaude/data-layer/prisma/client';
-import type { PrismaClient } from '@prisma/client';
 
 const mockServiceMethod = vi.fn();
 
@@ -54,25 +53,25 @@ vi.mock('@heyclaude/data-layer', () => ({
 
 // Mock logger
 vi.mock('../../../../packages/web-runtime/src/logging/server', () => ({
+  createErrorResponse: vi.fn((error) =>
+    Response.json(
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+      {
+        headers: { 'Content-Type': 'application/json' },
+        status: 500,
+      }
+    )
+  ),
   logger: {
     child: vi.fn(() => ({
+      debug: vi.fn(),
+      error: vi.fn(),
       info: vi.fn(),
       warn: vi.fn(),
-      error: vi.fn(),
-      debug: vi.fn(),
     })),
   },
-  createErrorResponse: vi.fn((error) => {
-    return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : String(error),
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-  }),
   normalizeError: vi.fn((error) => {
     if (error instanceof Error) return error;
     return new Error(String(error));
@@ -81,63 +80,64 @@ vi.mock('../../../../packages/web-runtime/src/logging/server', () => ({
 
 // Mock server/api-helpers
 vi.mock('../../../../packages/web-runtime/src/server/api-helpers', () => ({
-  getOnlyCorsHeaders: {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  },
-  getWithAuthCorsHeaders: {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  },
-  postCorsHeaders: {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  },
-  badRequestResponse: vi.fn((message, errors) => {
-    return new Response(
-      JSON.stringify({
+  badRequestResponse: vi.fn((message, errors) =>
+    Response.json(
+      {
         error: message,
         ...(errors && { errors }),
-      }),
-      {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-  }),
-  handleOptionsRequest: vi.fn((corsHeaders) => {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        ...corsHeaders,
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       },
-    });
-  }),
-  unauthorizedResponse: vi.fn((message, _authInfo, corsHeaders) => {
-    return new Response(
-      JSON.stringify({
-        error: message,
-      }),
       {
-        status: 401,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,
       }
-    );
-  }),
-  jsonResponse: vi.fn((data, status, corsHeaders, additionalHeaders) => {
-    return new Response(JSON.stringify(data), {
-      status,
+    )
+  ),
+  getOnlyCorsHeaders: {
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Origin': '*',
+  },
+  getWithAuthCorsHeaders: {
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Origin': '*',
+  },
+  handleOptionsRequest: vi.fn(
+    (corsHeaders) =>
+      new Response(null, {
+        headers: {
+          ...corsHeaders,
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        },
+        status: 204,
+      })
+  ),
+  jsonResponse: vi.fn((data, status, corsHeaders, additionalHeaders) =>
+    Response.json(data, {
       headers: {
         'Content-Type': 'application/json',
         ...corsHeaders,
         ...additionalHeaders,
       },
-    });
-  }),
+      status,
+    })
+  ),
+  postCorsHeaders: {
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Origin': '*',
+  },
+  unauthorizedResponse: vi.fn((message, _authInfo, corsHeaders) =>
+    Response.json(
+      {
+        error: message,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
+        status: 401,
+      }
+    )
+  ),
 }));
 
 // Mock authentication (if route requires auth)
@@ -146,17 +146,17 @@ vi.mock('../../../../packages/web-runtime/src/auth/get-authenticated-user', () =
     if (options?.requireUser) {
       // For requireAuth routes, return authenticated user
       return {
-        user: {
-          id: 'test-user-id',
-          email: 'test@example.com',
-        },
         isAuthenticated: true,
+        user: {
+          email: 'test@example.com',
+          id: 'test-user-id',
+        },
       };
     }
     // For optionalAuth or no auth routes
     return {
-      user: null,
       isAuthenticated: false,
+      user: null,
     };
   }),
 }));
@@ -167,12 +167,12 @@ describe('GET /api/your-route', () => {
   beforeEach(() => {
     // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
     prismocker = prisma;
-    
+
     // Reset Prismocker data before each test
     if ('reset' in prismocker && typeof prismocker.reset === 'function') {
       prismocker.reset();
     }
-    
+
     vi.clearAllMocks();
   });
 

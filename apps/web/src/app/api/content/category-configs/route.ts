@@ -23,14 +23,12 @@
 
 import 'server-only';
 import {
-  createOptionsHandler as createApiOptionsHandler,
-  createCachedApiRoute,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/api/route-factory';
-import {
   categoryConfigsResponseSchema,
   errorResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 
@@ -54,25 +52,14 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'Category configurations retrieved successfully',
-        schema: categoryConfigsResponseSchema,
-        headers: {
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-          'X-Generated-By': {
-            schema: { type: 'string' },
-            description: 'Source of the response data',
-          },
-        },
         example: [
           {
             category: 'skills',
             display_name: 'Skills',
             features: ['search', 'filter', 'bookmark'],
             metadata: {
-              icon: 'code',
               color: 'blue',
+              icon: 'code',
             },
           },
           {
@@ -80,19 +67,30 @@ export const GET = createCachedApiRoute({
             display_name: 'Agents',
             features: ['search', 'filter', 'bookmark', 'export'],
             metadata: {
-              icon: 'robot',
               color: 'purple',
+              icon: 'robot',
             },
           },
         ],
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+          'X-Generated-By': {
+            description: 'Source of the response data',
+            schema: { type: 'string' },
+          },
+        },
+        schema: categoryConfigsResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while fetching category configurations',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Get category configurations',

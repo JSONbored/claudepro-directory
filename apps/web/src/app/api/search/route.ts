@@ -23,31 +23,19 @@
 import 'server-only';
 import { SearchService } from '@heyclaude/data-layer';
 import {
-  type content_category,
-  type experience_level,
-  type job_category,
-  type job_type,
-} from '@prisma/client';
-import type { Prisma } from '@prisma/client';
-
-type Json = Prisma.JsonValue;
-import {
   type SearchContentOptimizedArgs,
   type SearchContentOptimizedRow,
   type SearchUnifiedRow,
 } from '@heyclaude/database-types/postgres-types';
-
-type jobsModel = Prisma.jobsGetPayload<{}>;
 import { normalizeError } from '@heyclaude/shared-runtime';
-import {
-  createOptionsHandler as createApiOptionsHandler,
-  createApiRoute,
-} from '@heyclaude/web-runtime/api/route-factory';
-import { searchQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import {
   errorResponseSchema,
   searchResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createOptionsHandler as createApiOptionsHandler, createApiRoute,
+} from '@heyclaude/web-runtime/api/route-factory';
+import { searchQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { enqueuePulseEventServer } from '@heyclaude/web-runtime/pulse';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
@@ -55,7 +43,18 @@ import {
   isValidCategory,
   VALID_CATEGORIES,
 } from '@heyclaude/web-runtime/utils/category-validation';
+import {
+  type content_category,
+  type experience_level,
+  type job_category,
+  type job_type,
+  type Prisma,
+} from '@prisma/client';
 import { cacheLife } from 'next/cache';
+
+type Json = Prisma.JsonValue;
+
+type jobsModel = Prisma.jobsGetPayload<{}>;
 
 // OPTIMIZATION: Use SearchService methods instead of separate helper files
 
@@ -274,62 +273,62 @@ export const GET = createApiRoute({
     responses: {
       200: {
         description: 'Search results retrieved successfully',
-        schema: searchResponseSchema,
-        headers: {
-          'X-RateLimit-Remaining': {
-            schema: { type: 'string' },
-            description: 'Remaining rate limit requests',
-          },
-          'X-RateLimit-Reset': {
-            schema: { type: 'string' },
-            description: 'Rate limit reset timestamp',
-          },
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-        },
         example: {
-          query: 'ai agents',
-          results: [
-            {
-              id: 'content-1',
-              title: 'AI Agent Framework',
-              slug: 'ai-agent-framework',
-              category: 'agents',
-              description: 'A comprehensive framework for building AI agents',
-            },
-          ],
           filters: {
-            sort: 'relevance',
             categories: ['agents'],
+            sort: 'relevance',
             tags: ['ai', 'automation'],
           },
           pagination: {
-            total: 42,
+            hasMore: true,
             limit: 20,
             offset: 0,
-            hasMore: true,
+            total: 42,
           },
+          query: 'ai agents',
+          results: [
+            {
+              category: 'agents',
+              description: 'A comprehensive framework for building AI agents',
+              id: 'content-1',
+              slug: 'ai-agent-framework',
+              title: 'AI Agent Framework',
+            },
+          ],
           searchType: 'content',
         },
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+          'X-RateLimit-Remaining': {
+            description: 'Remaining rate limit requests',
+            schema: { type: 'string' },
+          },
+          'X-RateLimit-Reset': {
+            description: 'Rate limit reset timestamp',
+            schema: { type: 'string' },
+          },
+        },
+        schema: searchResponseSchema,
       },
       400: {
         description: 'Invalid query parameters',
-        schema: errorResponseSchema,
         example: {
           error: 'Invalid query parameters',
           message:
             'Invalid categories. Valid values: agents, mcp, rules, commands, hooks, statuslines, skills, collections, guides, jobs, changelog',
         },
+        schema: errorResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while processing the search request',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Unified search across content, jobs, companies, and users',

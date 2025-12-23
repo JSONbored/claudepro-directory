@@ -1,8 +1,9 @@
 import 'server-only';
 
-import type { Prisma } from '@prisma/client';
-import { getService } from './service-factory.ts';
+import { type Prisma } from '@prisma/client';
+
 import { createDataFunction } from './cached-data-factory.ts';
+import { getService } from './service-factory.ts';
 
 type newsletter_subscriptionsModel = Prisma.newsletter_subscriptionsGetPayload<{}>;
 
@@ -33,5 +34,5 @@ export async function getNewsletterSubscriptionByEmail(
   email: string
 ): Promise<newsletter_subscriptionsModel | null> {
   const newsletterService = await getService('newsletter');
-  return (newsletterService as any).getSubscriptionByEmail(email);
+  return newsletterService.getSubscriptionByEmail(email);
 }

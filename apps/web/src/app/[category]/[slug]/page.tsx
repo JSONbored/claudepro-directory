@@ -5,9 +5,6 @@
  *
  * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
-import type { Prisma, content_category } from '@prisma/client';
-
-type contentModel = Prisma.contentGetPayload<{}>;
 import { getDeploymentEnv } from '@heyclaude/shared-runtime/platform';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
@@ -22,6 +19,7 @@ import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { ensureStringArray } from '@heyclaude/web-runtime/utils/content-helpers';
+import { type content_category, type Prisma } from '@prisma/client';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { notFound } from 'next/navigation';
@@ -34,6 +32,8 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
 
 import Loading from './loading';
+
+type contentModel = Prisma.contentGetPayload<{}>;
 
 // OPTIMIZATION: Dynamic import for large component (1510 lines) - only loads when needed
 const UnifiedDetailPage = lazy(() =>

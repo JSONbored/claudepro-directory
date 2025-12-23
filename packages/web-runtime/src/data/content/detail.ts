@@ -1,10 +1,10 @@
 import 'server-only';
 
-import { type content_category } from '@prisma/client';
 import {
   type GetContentAnalyticsReturns,
   type GetContentDetailCompleteReturns,
 } from '@heyclaude/database-types/postgres-types';
+import { type content_category } from '@prisma/client';
 
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 

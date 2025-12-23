@@ -1,6 +1,6 @@
 import 'server-only';
-import { type content_category } from '@prisma/client';
 import { type GetReviewsWithStatsReturns } from '@heyclaude/database-types/postgres-types';
+import { type content_category } from '@prisma/client';
 
 import { createDataFunction } from '../cached-data-factory.ts';
 

@@ -5,23 +5,27 @@
  * including topic subscriptions (Resend Topics).
  */
 
+import { serializeForClient } from '@heyclaude/shared-runtime';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getNewsletterSubscriptionByEmail } from '@heyclaude/web-runtime/data/newsletter';
 import { cacheLife, cacheTag } from 'next/cache';
 import { Suspense } from 'react';
-import { serializeForClient } from '@heyclaude/shared-runtime';
 
-import { NewsletterManagementClient, type SerializedNewsletterSubscription } from '@/src/components/features/account/newsletter/newsletter-management-client';
+import {
+  NewsletterManagementClient,
+  type SerializedNewsletterSubscription,
+} from '@/src/components/features/account/newsletter/newsletter-management-client';
 import { NewsletterManagementSkeleton } from '@/src/components/features/account/newsletter/newsletter-management-skeleton';
 
-/**
+/***
  * Get newsletter subscription data for the authenticated user
  * Also fetches current topics from Resend to ensure accuracy
+ * @param {string} email
  */
 async function getSubscriptionData(email: string) {
   'use cache: private';
   // User-specific data: 1min stale, 5min revalidate, 30min expire
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 });
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 });
   cacheTag(`newsletter-subscription-${email}`);
 
   const subscription = await getNewsletterSubscriptionByEmail(email);
@@ -32,7 +36,10 @@ async function getSubscriptionData(email: string) {
       const resendModule = await import('@heyclaude/web-runtime/integrations/resend');
       const resend = resendModule.getResendClient();
       // getContactTopics is exported from resend module
-      const currentTopics = await (resendModule as any).getContactTopics(resend, subscription.resend_contact_id);
+      const currentTopics = await resendModule.getContactTopics(
+        resend,
+        subscription.resend_contact_id
+      );
 
       // Update subscription with current topics from Resend (source of truth)
       return {
@@ -45,7 +52,7 @@ async function getSubscriptionData(email: string) {
       const { logger, normalizeError } = await import('@heyclaude/web-runtime/logging/server');
       const normalized = normalizeError(error, 'Failed to fetch current topics from Resend');
       logger.warn(
-        { err: normalized, email, contactId: subscription.resend_contact_id },
+        { contactId: subscription.resend_contact_id, email, err: normalized },
         'Failed to fetch current topics from Resend, using database topics'
       );
     }
@@ -72,7 +79,9 @@ export default async function NewsletterManagementPage() {
     return (
       <div className="space-y-4">
         <h1 className="text-2xl font-bold">Newsletter Management</h1>
-        <p className="text-muted-foreground">Unable to load newsletter preferences. Please ensure your account has an email address.</p>
+        <p className="text-muted-foreground">
+          Unable to load newsletter preferences. Please ensure your account has an email address.
+        </p>
       </div>
     );
   }
@@ -97,13 +106,16 @@ export default async function NewsletterManagementPage() {
  * Newsletter Subscription Content
  *
  * Fetches and displays subscription data
+ * @param root0
+ * @param root0.email
  */
 async function NewsletterSubscriptionContent({ email }: { email: string }) {
   const subscription = await getSubscriptionData(email);
 
   // Serialize subscription data for client component (Next.js requires JSON-serializable props)
-  const serializedSubscription = subscription ? serializeForClient(subscription) as SerializedNewsletterSubscription : null;
+  const serializedSubscription = subscription
+    ? (serializeForClient(subscription) as SerializedNewsletterSubscription)
+    : null;
 
-  return <NewsletterManagementClient subscription={serializedSubscription} email={email} />;
+  return <NewsletterManagementClient email={email} subscription={serializedSubscription} />;
 }
-

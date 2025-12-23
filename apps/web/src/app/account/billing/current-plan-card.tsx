@@ -5,47 +5,35 @@
  * Displays the user's current plan/tier information
  */
 
+import { Crown, Star, Zap } from '@heyclaude/web-runtime/icons';
 import { Badge } from '@heyclaude/web-runtime/ui';
 import { type user_tier } from '@prisma/client';
-import { Zap, Crown, Star } from '@heyclaude/web-runtime/icons';
 
 interface CurrentPlanCardProps {
-  tier: user_tier | null | string;
+  tier: null | string | user_tier;
 }
 
-const tierConfig: Record<string, { name: string; icon: typeof Zap; color: string; features: string[] }> = {
+const tierConfig: Record<
+  string,
+  { color: string; features: string[]; icon: typeof Zap; name: string }
+> = {
+  enterprise: {
+    color: 'bg-warning text-warning-foreground',
+    features: ['Everything in Pro', 'Dedicated support', 'Custom integrations', 'SLA guarantee'],
+    icon: Crown,
+    name: 'Enterprise',
+  },
   free: {
-    name: 'Free',
-    icon: Star,
     color: 'bg-muted text-muted-foreground',
-    features: [
-      'Basic profile',
-      'Bookmark content',
-      'Submit content',
-      'View public profiles',
-    ],
+    features: ['Basic profile', 'Bookmark content', 'Submit content', 'View public profiles'],
+    icon: Star,
+    name: 'Free',
   },
   pro: {
-    name: 'Pro',
-    icon: Zap,
     color: 'bg-primary text-primary-foreground',
-    features: [
-      'Everything in Free',
-      'Advanced analytics',
-      'Priority support',
-      'Custom branding',
-    ],
-  },
-  enterprise: {
-    name: 'Enterprise',
-    icon: Crown,
-    color: 'bg-warning text-warning-foreground',
-    features: [
-      'Everything in Pro',
-      'Dedicated support',
-      'Custom integrations',
-      'SLA guarantee',
-    ],
+    features: ['Everything in Free', 'Advanced analytics', 'Priority support', 'Custom branding'],
+    icon: Zap,
+    name: 'Pro',
   },
 };
 
@@ -58,23 +46,28 @@ export function CurrentPlanCard({ tier }: CurrentPlanCardProps) {
     <div className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${config.color}`}>
+          <div
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${config.color}`}
+          >
             <Icon className="h-6 w-6" />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="font-semibold text-base sm:text-lg truncate">{config.name} Plan</h3>
+            <h3 className="truncate text-base font-semibold sm:text-lg">{config.name} Plan</h3>
             <p className="text-muted-foreground text-xs sm:text-sm">
               {tierKey === 'free' ? 'No subscription required' : 'Active subscription'}
             </p>
           </div>
         </div>
-        <Badge variant={tierKey === 'free' ? 'secondary' : 'default'} className="self-start sm:self-center">
+        <Badge
+          className="self-start sm:self-center"
+          variant={tierKey === 'free' ? 'secondary' : 'default'}
+        >
           {tierKey === 'free' ? 'Free' : 'Active'}
         </Badge>
       </div>
 
       <div>
-        <h4 className="font-medium text-sm mb-2">Plan Features:</h4>
+        <h4 className="mb-2 text-sm font-medium">Plan Features:</h4>
         <ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
           {config.features.map((feature, index) => (
             <li key={index}>{feature}</li>
@@ -83,8 +76,8 @@ export function CurrentPlanCard({ tier }: CurrentPlanCardProps) {
       </div>
 
       {tierKey !== 'enterprise' && (
-        <div className="pt-4 border-t border-border">
-          <p className="text-muted-foreground text-sm mb-2">
+        <div className="border-border border-t pt-4">
+          <p className="text-muted-foreground mb-2 text-sm">
             Want to upgrade? Contact us to learn more about our Pro and Enterprise plans.
           </p>
         </div>
@@ -92,4 +85,3 @@ export function CurrentPlanCard({ tier }: CurrentPlanCardProps) {
     </div>
   );
 }
-

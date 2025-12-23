@@ -1,11 +1,11 @@
 import 'server-only';
 
-import { type content_category } from '@prisma/client';
 import { type ContentTemplatesResult } from '@heyclaude/data-layer';
 // Import serializeForClient directly from serialize module to avoid Jest barrel export resolution issues
 // In production, this will resolve via the barrel export in index.ts
 // In Jest, the moduleNameMapper will resolve @heyclaude/shared-runtime/utils/serialize to the source file
 import { serializeForClient } from '@heyclaude/shared-runtime/utils/serialize';
+import { type content_category } from '@prisma/client';
 
 import { createDataFunction } from '../cached-data-factory.ts';
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;

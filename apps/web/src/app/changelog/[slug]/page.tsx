@@ -21,12 +21,12 @@
  * - Accessibility support
  * - Responsive design
  */
-import type { content_category } from '@heyclaude/web-runtime/types/client-safe-enums';
 import { getChangelogEntryBySlug } from '@heyclaude/web-runtime/data/changelog';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { type content_category } from '@heyclaude/web-runtime/types/client-safe-enums';
 import { Breadcrumbs, NavLink, Separator } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import { type Metadata } from 'next';
@@ -306,7 +306,7 @@ async function ChangelogEntryPageContent({
         <Separator className="my-8" />
 
         {/* Content */}
-        <ChangelogContent hideHeader entry={entry} />
+        <ChangelogContent entry={entry} hideHeader />
       </article>
     </>
   );

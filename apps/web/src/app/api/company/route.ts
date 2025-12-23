@@ -21,15 +21,13 @@
 
 import 'server-only';
 import {
-  createCachedApiRoute,
-  createOptionsHandler as createApiOptionsHandler,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/api/route-factory';
-import { slugSchema } from '@heyclaude/web-runtime/api/schemas';
-import {
   companyProfileResponseSchema,
   errorResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
+import { slugSchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 import { notFoundResponse } from '@heyclaude/web-runtime/server/not-found-response';
@@ -63,53 +61,53 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'Company profile retrieved successfully',
-        schema: companyProfileResponseSchema,
-        headers: {
-          'X-RateLimit-Remaining': {
-            schema: { type: 'string' },
-            description: 'Remaining rate limit requests',
-          },
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-          'X-Generated-By': {
-            schema: { type: 'string' },
-            description: 'Source of the response data',
-          },
-        },
         example: {
+          description: 'A leading technology company',
           id: '123e4567-e89b-12d3-a456-426614174000',
+          logo_url: 'https://acme.com/logo.png',
           name: 'Acme Corp',
           slug: 'acme-corp',
-          description: 'A leading technology company',
           website: 'https://acme.com',
-          logo_url: 'https://acme.com/logo.png',
         },
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+          'X-Generated-By': {
+            description: 'Source of the response data',
+            schema: { type: 'string' },
+          },
+          'X-RateLimit-Remaining': {
+            description: 'Remaining rate limit requests',
+            schema: { type: 'string' },
+          },
+        },
+        schema: companyProfileResponseSchema,
       },
       400: {
         description: 'Missing or invalid slug parameter',
-        schema: errorResponseSchema,
         example: {
           error: 'Missing or invalid slug parameter',
           message: 'Slug parameter is required and must be a valid slug format',
         },
+        schema: errorResponseSchema,
       },
       404: {
         description: 'Company not found',
-        schema: errorResponseSchema,
         example: {
           error: 'Company not found',
           message: 'No company found with slug "invalid-slug"',
         },
+        schema: errorResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while fetching company profile',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Get company profile by slug',

@@ -3,18 +3,15 @@
  * Uses updateJob server action (calls update_job RPC)
  */
 
-import {
-  job_type as JobType,
-  job_category as JobCategory,
-  type job_type,
-  type job_category,
-} from '@heyclaude/web-runtime/types/client-safe-enums';
 import { type CreateJobInput, updateJob } from '@heyclaude/web-runtime/actions/jobs-crud';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserJobById } from '@heyclaude/web-runtime/data/account';
 import { getPaymentPlanCatalog } from '@heyclaude/web-runtime/data/payments';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import {
+  type job_category, job_category as JobCategory, type job_type, job_type as JobType,
+} from '@heyclaude/web-runtime/types/client-safe-enums';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
@@ -261,8 +258,8 @@ async function EditJobPageContent({
         <p className="text-muted-foreground">Update your job posting details</p>
       </div>
       {hasInvalidData ? (
-        <div className="rounded-md bg-warning-bg p-4">
-          <p className="text-sm text-warning">
+        <div className="bg-warning-bg rounded-md p-4">
+          <p className="text-warning text-sm">
             Some fields contain invalid data and couldn&apos;t be loaded. Please review and update.
           </p>
         </div>

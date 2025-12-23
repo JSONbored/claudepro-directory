@@ -19,17 +19,14 @@
 
 import 'server-only';
 import {
-  createOptionsHandler as createApiOptionsHandler,
-  createFormatHandlerRoute,
-  type FormatHandlerConfig,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/api/route-factory';
-import { categoryContentFormatSchema } from '@heyclaude/web-runtime/api/schemas';
-import {
   changelogResponseSchema,
   errorResponseSchema,
   paginatedContentResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createOptionsHandler as createApiOptionsHandler, createFormatHandlerRoute, type FormatHandlerConfig, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
+import { categoryContentFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import {
   getOnlyCorsHeaders,
@@ -157,54 +154,54 @@ export const GET = createFormatHandlerRoute<CategoryFormat, { format: CategoryFo
     responses: {
       200: {
         description: 'Category content retrieved successfully',
-        schema: z.union([paginatedContentResponseSchema, changelogResponseSchema]),
-        headers: {
-          'Content-Type': {
-            schema: { type: 'string' },
-            description: 'Content type (text/plain for llms-category, application/json for json)',
-          },
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-          'X-Generated-By': {
-            schema: { type: 'string' },
-            description: 'Source of the response data',
-          },
-        },
         example: [
           {
-            id: 'content-1',
-            title: 'Example Content',
-            slug: 'example-content',
             category: 'agents',
             description: 'An example content item',
+            id: 'content-1',
+            slug: 'example-content',
+            title: 'Example Content',
           },
         ],
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+          'Content-Type': {
+            description: 'Content type (text/plain for llms-category, application/json for json)',
+            schema: { type: 'string' },
+          },
+          'X-Generated-By': {
+            description: 'Source of the response data',
+            schema: { type: 'string' },
+          },
+        },
+        schema: z.union([paginatedContentResponseSchema, changelogResponseSchema]),
       },
       400: {
         description: 'Invalid category or format parameter',
-        schema: errorResponseSchema,
         example: {
           error: 'Invalid category or format parameter',
           message: `Invalid category 'invalid'. Valid categories: ${VALID_CATEGORIES.join(', ')}`,
         },
+        schema: errorResponseSchema,
       },
       404: {
         description: 'Category content not found',
-        schema: errorResponseSchema,
         example: {
           error: 'Category content not found',
           message: 'No content found for the specified category',
         },
+        schema: errorResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while fetching category content',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Get category content',

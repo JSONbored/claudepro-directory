@@ -17,15 +17,13 @@
 
 import 'server-only';
 import {
-  createOptionsHandler as createApiOptionsHandler,
-  createCachedApiRoute,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/api/route-factory';
-import { changelogEntryFormatSchema } from '@heyclaude/web-runtime/api/schemas';
-import {
   changelogEntryResponseSchema,
   errorResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
+import { changelogEntryFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, textResponse } from '@heyclaude/web-runtime/server/api-helpers';
 import { notFoundResponse } from '@heyclaude/web-runtime/server/not-found-response';
@@ -62,47 +60,47 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'Changelog entry LLMs.txt content retrieved successfully',
-        schema: changelogEntryResponseSchema,
-        headers: {
-          'Content-Type': {
-            schema: { type: 'string' },
-            description: 'Content type (text/plain)',
-          },
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-          'X-Generated-By': {
-            schema: { type: 'string' },
-            description: 'Source of the response data',
-          },
-        },
         example:
           '# Changelog Entry\n\n## [1.2.0] - 2025-12-07\n\n### Added\n- New feature X\n- New feature Y\n\n### Fixed\n- Bug fix A\n- Bug fix B',
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+          'Content-Type': {
+            description: 'Content type (text/plain)',
+            schema: { type: 'string' },
+          },
+          'X-Generated-By': {
+            description: 'Source of the response data',
+            schema: { type: 'string' },
+          },
+        },
+        schema: changelogEntryResponseSchema,
       },
       400: {
         description: 'Invalid format parameter',
-        schema: errorResponseSchema,
         example: {
           error: 'Invalid format parameter',
           message: 'Invalid format. Valid format: llms-entry',
         },
+        schema: errorResponseSchema,
       },
       404: {
         description: 'Changelog entry not found',
-        schema: errorResponseSchema,
         example: {
           error: 'Changelog entry not found',
           message: 'No changelog entry found with slug "invalid-slug"',
         },
+        schema: errorResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while generating changelog entry',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Get changelog entry in LLMs.txt format',

@@ -18,22 +18,20 @@
  */
 
 import 'server-only';
-import type { Prisma, content_category } from '@prisma/client';
-
-type contentModel = Prisma.contentGetPayload<{}>;
 import { type GetContentPaginatedSlimArgs } from '@heyclaude/data-layer';
-import {
-  createCachedApiRoute,
-  createOptionsHandler as createApiOptionsHandler,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/api/route-factory';
-import { categorySchema, paginationSchema } from '@heyclaude/web-runtime/api/schemas';
 import {
   errorResponseSchema,
   paginatedContentResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
+import { categorySchema, paginationSchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { type content_category, type Prisma } from '@prisma/client';
+
+type contentModel = Prisma.contentGetPayload<{}>;
 
 /**
  * Query schema for paginated content API
@@ -80,49 +78,49 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'Paginated content retrieved successfully',
-        schema: paginatedContentResponseSchema,
-        headers: {
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-          'X-Generated-By': {
-            schema: { type: 'string' },
-            description: 'Source of the response data',
-          },
-        },
         example: [
           {
-            id: 'content-1',
-            title: 'Example Content',
-            slug: 'example-content',
             category: 'skills',
             description: 'An example content item',
+            id: 'content-1',
+            slug: 'example-content',
+            title: 'Example Content',
           },
           {
-            id: 'content-2',
-            title: 'Another Example',
-            slug: 'another-example',
             category: 'skills',
             description: 'Another example content item',
+            id: 'content-2',
+            slug: 'another-example',
+            title: 'Another Example',
           },
         ],
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+          'X-Generated-By': {
+            description: 'Source of the response data',
+            schema: { type: 'string' },
+          },
+        },
+        schema: paginatedContentResponseSchema,
       },
       400: {
         description: 'Invalid pagination or category parameters',
-        schema: errorResponseSchema,
         example: {
           error: 'Invalid pagination or category parameters',
           message: 'Limit must be between 1 and 100',
         },
+        schema: errorResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while fetching paginated content',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Get paginated content',

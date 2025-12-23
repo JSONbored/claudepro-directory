@@ -5,7 +5,7 @@
 
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { Shield, Lock, Smartphone, AlertTriangle } from '@heyclaude/web-runtime/icons';
+import { AlertTriangle, Lock, Shield, Smartphone } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
   Card,
@@ -18,12 +18,13 @@ import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { PasswordChangeForm } from './password-change-form';
 import { ActiveSessionsList } from './active-sessions-list';
+import { PasswordChangeForm } from './password-change-form';
 import { SecurityAlerts } from './security-alerts';
 
 export const metadata: Metadata = {
-  description: 'Manage your account security settings including password, active sessions, and security alerts',
+  description:
+    'Manage your account security settings including password, active sessions, and security alerts',
   title: 'Security Settings | Account Settings',
 };
 
@@ -105,7 +106,8 @@ export default async function SecuritySettingsPage() {
             Active Sessions
           </CardTitle>
           <CardDescription className="text-sm">
-            Manage devices and browsers where you're currently signed in. Sign out of any session you don't recognize.
+            Manage devices and browsers where you're currently signed in. Sign out of any session
+            you don't recognize.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -131,4 +133,3 @@ export default async function SecuritySettingsPage() {
     </div>
   );
 }
-

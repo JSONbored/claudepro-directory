@@ -3,14 +3,9 @@
  * Single RPC call to filter_jobs() - all filtering in PostgreSQL
  */
 
-import {
-  experience_level as ExperienceLevel,
-  job_type as JobType,
-} from '@prisma/client';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { getFilteredJobs } from '@heyclaude/web-runtime/data/jobs';
-import { type JobCardJobType } from '@heyclaude/web-runtime/types/component.types';
 import { type JobsFilterResult } from '@heyclaude/web-runtime/data/jobs';
 import {
   Briefcase,
@@ -24,6 +19,7 @@ import {
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
+import { type JobCardJobType } from '@heyclaude/web-runtime/types/component.types';
 import {
   Button,
   Card,
@@ -38,6 +34,7 @@ import {
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { experience_level as ExperienceLevel, job_type as JobType } from '@prisma/client';
 import { type Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -709,8 +706,8 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption): JobC
   if (!jobs || !Array.isArray(jobs)) return [];
 
   // Type guard to ensure jobs are properly typed
-  const typedJobs = jobs.filter((job): job is JobCardJobType => {
-    return (
+  const typedJobs = jobs.filter(
+    (job): job is JobCardJobType =>
       typeof job === 'object' &&
       job !== null &&
       'id' in job &&
@@ -719,8 +716,7 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption): JobC
       'company' in job &&
       'posted_at' in job &&
       typeof (job as { posted_at: unknown }).posted_at === 'string'
-    );
-  }) as JobCardJobType[];
+  );
 
   if (sort === 'oldest') {
     return typedJobs.toSorted((a, b) => {

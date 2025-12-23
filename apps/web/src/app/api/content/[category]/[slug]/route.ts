@@ -22,20 +22,16 @@
  */
 
 import 'server-only';
-import { type content_category } from '@prisma/client';
 import { APP_CONFIG } from '@heyclaude/shared-runtime';
-import {
-  createOptionsHandler as createApiOptionsHandler,
-  createFormatHandlerRoute,
-  type FormatHandlerConfig,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/api/route-factory';
-import { contentDetailQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import {
   changelogResponseSchema,
   contentDetailResponseSchema,
   errorResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createFormatHandlerRoute, createOptionsHandler as createApiOptionsHandler, type FormatHandlerConfig, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
+import { contentDetailQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import {
   getOnlyCorsHeaders,
@@ -45,12 +41,13 @@ import {
   textResponse,
 } from '@heyclaude/web-runtime/server/api-helpers';
 import { notFoundResponse } from '@heyclaude/web-runtime/server/not-found-response';
-import { z } from 'zod';
 import {
   isValidCategory,
   VALID_CATEGORIES,
 } from '@heyclaude/web-runtime/utils/category-validation';
+import { type content_category } from '@prisma/client';
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const SITE_URL = APP_CONFIG.url;
 
@@ -445,6 +442,29 @@ export const GET = createFormatHandlerRoute<ContentDetailFormat, ContentDetailQu
     responses: {
       200: {
         description: 'Content detail retrieved successfully',
+        example: {
+          category: 'agents',
+          content: 'Full content here...',
+          description: 'An AI agent that reviews code for quality and best practices',
+          id: 'content-1',
+          slug: 'code-reviewer',
+          title: 'Code Reviewer Agent',
+        },
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+          'Content-Type': {
+            description:
+              'Content type (application/json for json, text/markdown for markdown, text/plain for llms, application/json for storage)',
+            schema: { type: 'string' },
+          },
+          'X-Generated-By': {
+            description: 'Source of the response data',
+            schema: { type: 'string' },
+          },
+        },
         schema: z.union([
           contentDetailResponseSchema,
           changelogResponseSchema,
@@ -460,53 +480,30 @@ export const GET = createFormatHandlerRoute<ContentDetailFormat, ContentDetailQu
             })
             .describe('Storage metadata format'),
         ]),
-        headers: {
-          'Content-Type': {
-            schema: { type: 'string' },
-            description:
-              'Content type (application/json for json, text/markdown for markdown, text/plain for llms, application/json for storage)',
-          },
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-          'X-Generated-By': {
-            schema: { type: 'string' },
-            description: 'Source of the response data',
-          },
-        },
-        example: {
-          id: 'content-1',
-          title: 'Code Reviewer Agent',
-          slug: 'code-reviewer',
-          category: 'agents',
-          description: 'An AI agent that reviews code for quality and best practices',
-          content: 'Full content here...',
-        },
       },
       400: {
         description: 'Invalid category, format, or query parameters',
-        schema: errorResponseSchema,
         example: {
           error: 'Invalid category, format, or query parameters',
           message: `Invalid category 'invalid'. Valid categories: ${VALID_CATEGORIES.join(', ')}`,
         },
+        schema: errorResponseSchema,
       },
       404: {
         description: 'Content not found',
-        schema: errorResponseSchema,
         example: {
           error: 'Content not found',
           message: 'No content found with slug "invalid-slug" in category "agents"',
         },
+        schema: errorResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while fetching content detail',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Get content detail in multiple formats',

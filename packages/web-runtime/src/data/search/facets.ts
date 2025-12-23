@@ -1,8 +1,8 @@
 import 'server-only';
 
-import { type content_category } from '@prisma/client';
-import { type GetSearchFacetsReturns } from '@heyclaude/database-types/postgres-types';
 import { type GetTrendingSearchesReturns } from '@heyclaude/data-layer';
+import { type GetSearchFacetsReturns } from '@heyclaude/database-types/postgres-types';
+import { type content_category } from '@prisma/client';
 
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 
@@ -113,7 +113,9 @@ export const getSearchFacets = createDataFunction<void, SearchFacetAggregate>({
   throwOnError: true,
   transformResult: (result) => {
     // callRpc might unwrap single-element arrays, so ensure we have an array
-    const data = Array.isArray(result) ? (result as GetSearchFacetsReturns) : [result as GetSearchFacetsReturns[number]];
+    const data = Array.isArray(result)
+      ? (result as GetSearchFacetsReturns)
+      : [result as GetSearchFacetsReturns[number]];
     const facets = data.map((row) => normalizeFacetRow(row));
     const { authors, categories, tags } = extractAggregatedArrays(data);
     return {

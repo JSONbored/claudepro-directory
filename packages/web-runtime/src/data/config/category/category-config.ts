@@ -12,12 +12,6 @@
  */
 
 import {
-  config_format as ConfigFormat,
-  primary_action_type as PrimaryActionType,
-  type content_category,
-} from '../../../types/client-safe-enums.ts';
-
-import {
   BookOpen,
   Briefcase,
   Code,
@@ -30,6 +24,11 @@ import {
   Webhook,
 } from '../../../icons.tsx';
 import { type UnifiedCategoryConfig } from '../../../types/category.ts';
+import {
+  config_format as ConfigFormat,
+  type content_category,
+  primary_action_type as PrimaryActionType,
+} from '../../../types/client-safe-enums.ts';
 
 type ContentCategory = content_category;
 

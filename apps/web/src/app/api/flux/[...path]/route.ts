@@ -15,13 +15,12 @@
 import 'server-only';
 
 import {
-  createApiRoute,
-  createOptionsHandler as createApiOptionsHandler,
-} from '@heyclaude/web-runtime/api/route-factory';
-import {
   errorResponseSchema,
   fluxResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createApiRoute, createOptionsHandler as createApiOptionsHandler,
+} from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { routeFluxRequest } from '@heyclaude/web-runtime/flux/router';
 import { NextRequest } from 'next/server';
@@ -66,36 +65,36 @@ export const GET = createApiRoute({
     responses: {
       200: {
         description: 'Request routed successfully',
-        schema: fluxResponseSchema,
-        headers: {
-          'X-RateLimit-Remaining': {
-            schema: { type: 'string' },
-            description: 'Remaining rate limit requests',
-          },
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-        },
         example: {
           count: 1234,
         },
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+          'X-RateLimit-Remaining': {
+            description: 'Remaining rate limit requests',
+            schema: { type: 'string' },
+          },
+        },
+        schema: fluxResponseSchema,
       },
       404: {
         description: 'Route not found',
-        schema: errorResponseSchema,
         example: {
           error: 'Route not found',
           message: 'No Flux handler found for path: invalid/path',
         },
+        schema: errorResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while routing Flux request',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Flux catch-all GET handler',
@@ -127,33 +126,33 @@ export const POST = createApiRoute({
     responses: {
       200: {
         description: 'Request routed successfully',
-        schema: fluxResponseSchema,
+        example: {
+          message: 'Discord notification sent',
+          success: true,
+        },
         headers: {
           'X-RateLimit-Remaining': {
-            schema: { type: 'string' },
             description: 'Remaining rate limit requests',
+            schema: { type: 'string' },
           },
         },
-        example: {
-          success: true,
-          message: 'Discord notification sent',
-        },
+        schema: fluxResponseSchema,
       },
       404: {
         description: 'Route not found',
-        schema: errorResponseSchema,
         example: {
           error: 'Route not found',
           message: 'No Flux handler found for path: invalid/path',
         },
+        schema: errorResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while routing Flux request',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Flux catch-all POST handler',

@@ -1,13 +1,13 @@
 import 'server-only';
 
+import { type GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
+
 import {
   type experience_level,
   type focus_area_type,
   type integration_type,
   type use_case_type,
 } from '../../types/client-safe-enums';
-import { type GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
-
 import { createDataFunction } from '../cached-data-factory.ts';
 
 export interface RecommendationInput {
@@ -40,12 +40,6 @@ export const getConfigRecommendations = createDataFunction<
   onError: () => null,
   operation: 'getConfigRecommendations',
   serviceKey: 'misc', // Consolidated: QuizService methods moved to MiscService
-  validate: (input) => {
-    // Validate limit bounds (1-100) to prevent invalid database queries
-    const limit = input.limit ?? 20;
-    return limit >= 1 && limit <= 100;
-  },
-  validateError: 'Invalid limit: must be between 1 and 100',
   transformArgs: (input) => ({
     p_experience_level: input.experienceLevel as string,
     p_focus_areas: (input.focusAreas ?? []) as string[],
@@ -55,4 +49,10 @@ export const getConfigRecommendations = createDataFunction<
     p_use_case: input.useCase as string,
     ...(input.viewerId ? { p_viewer_id: input.viewerId } : {}),
   }),
+  validate: (input) => {
+    // Validate limit bounds (1-100) to prevent invalid database queries
+    const limit = input.limit ?? 20;
+    return limit >= 1 && limit <= 100;
+  },
+  validateError: 'Invalid limit: must be between 1 and 100',
 });

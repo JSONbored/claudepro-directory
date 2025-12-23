@@ -1,22 +1,22 @@
 import 'server-only';
 
-import { Prisma } from '@prisma/client';
-import type { content_category } from '@prisma/client';
-type contentModel = Prisma.contentGetPayload<{}>;
 import {
   type GetPopularContentReturns,
   type GetTrendingContentReturns,
   type GetTrendingMetricsWithContentReturns,
 } from '@heyclaude/database-types/postgres-types';
-
-// EnrichedContentItem was removed - use contentModel instead
-type EnrichedContentItem = contentModel;
 import { normalizeError } from '@heyclaude/shared-runtime';
+import { Prisma } from '@prisma/client';
+import { type content_category } from '@prisma/client';
 
 import { logger } from '../../logger.ts';
 import { createDataFunction } from '../cached-data-factory.ts';
 import { QUERY_LIMITS } from '../config/constants.ts';
 import { getService } from '../service-factory.ts';
+type contentModel = Prisma.contentGetPayload<{}>;
+
+// EnrichedContentItem was removed - use contentModel instead
+type EnrichedContentItem = contentModel;
 
 /**
  * Get content by category
@@ -73,6 +73,11 @@ export const getContentBySlug = createDataFunction<
  * Group items by category for efficient batch fetching
  * @param {Array<{ category: content_category; slug: string }>} items
  * @returns {Map<content_category, string[]>} Return value description
+ * @param {Array<{ category: content_category; slug: string }>} items Parameter description
+ * @param {Array<{ category: content_category; slug: string }>} items Parameter description
+ * @param {Array<{ category: content_category; slug: string }>} items Parameter description
+ * @param {Array<{ category: content_category; slug: string }>} items Parameter description
+ * @param {Array<{ category: content_category; slug: string }>} items Parameter description
  * @param {Array<{ category: content_category; slug: string }>} items Parameter description
  * @param {Array<{ category: content_category; slug: string }>} items Parameter description
  * @param {Array<{ category: content_category; slug: string }>} items Parameter description
@@ -151,7 +156,10 @@ export async function getContentBatchBySlugs(
         new Error('All category fetches failed'),
         'getContentBatchBySlugs failed'
       );
-      logger.error({ err: normalized, itemCount: items.length }, 'getContentBatchBySlugs: all fetches failed');
+      logger.error(
+        { err: normalized, itemCount: items.length },
+        'getContentBatchBySlugs: all fetches failed'
+      );
     }
 
     return resultMap;

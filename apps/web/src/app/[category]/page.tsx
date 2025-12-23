@@ -33,7 +33,6 @@
  * @see {@link file://../../lib/content-loaders.ts} - Content loading with caching
  */
 
-import { type content_category } from '@prisma/client';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { getContentByCategory } from '@heyclaude/web-runtime/data/content';
@@ -42,6 +41,7 @@ import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { Button, ICON_NAME_MAP, UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import { type content_category } from '@prisma/client';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
@@ -469,7 +469,7 @@ function CategoryPageContent({
         </div>
 
         {/* Category-specific Newsletter CTA */}
-        <CategoryNewsletterCTA category={category} source="content_page" className="mt-12" />
+        <CategoryNewsletterCTA category={category} className="mt-12" source="content_page" />
       </section>
     </>
   );

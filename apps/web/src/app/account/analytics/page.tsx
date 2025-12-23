@@ -6,7 +6,7 @@
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { BarChart3, TrendingUp, Eye, Heart } from '@heyclaude/web-runtime/icons';
+import { BarChart3, Eye, Heart, TrendingUp } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
   Card,
@@ -20,11 +20,12 @@ import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { AnalyticsOverview } from './analytics-overview';
-import { EngagementStats } from './engagement-stats';
 import { ContentPerformance } from './content-performance';
+import { EngagementStats } from './engagement-stats';
 
 export const metadata: Metadata = {
-  description: 'View your account analytics including profile views, engagement stats, and content performance',
+  description:
+    'View your account analytics including profile views, engagement stats, and content performance',
   title: 'Analytics | Account Dashboard',
 };
 
@@ -97,7 +98,7 @@ export default async function AnalyticsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AnalyticsOverview userId={user.id} userData={userData} />
+          <AnalyticsOverview userData={userData} userId={user.id} />
         </CardContent>
       </Card>
 
@@ -113,7 +114,7 @@ export default async function AnalyticsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <EngagementStats userId={user.id} userData={userData} />
+          <EngagementStats userData={userData} userId={user.id} />
         </CardContent>
       </Card>
 
@@ -129,10 +130,9 @@ export default async function AnalyticsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ContentPerformance userId={user.id} userData={userData} />
+          <ContentPerformance userData={userData} userId={user.id} />
         </CardContent>
       </Card>
     </div>
   );
 }
-

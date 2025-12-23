@@ -2,8 +2,6 @@
  * Job Detail Page - Database-first job listing display
  */
 
-import { content_category as ContentCategory } from '@prisma/client';
-import type { content_category } from '@prisma/client';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { getJobBySlug } from '@heyclaude/web-runtime/data/jobs';
@@ -31,6 +29,8 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 import { getSafeMailtoUrl, getSafeWebsiteUrl } from '@heyclaude/web-runtime/utils/url-safety';
+import { type content_category } from '@prisma/client';
+import { content_category as ContentCategory } from '@prisma/client';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
@@ -381,7 +381,7 @@ async function JobPageContent({
                     <ul className="space-y-2">
                       {benefits.map((benefit: string) => (
                         <li className="flex items-start gap-3" key={benefit}>
-                          <span className="mt-1 text-success">✓</span>
+                          <span className="text-success mt-1">✓</span>
                           <span>{benefit}</span>
                         </li>
                       ))}

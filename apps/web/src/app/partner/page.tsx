@@ -247,8 +247,8 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
             <Card className="relative overflow-hidden border-2">
               <CardHeader>
                 <div className="mb-4 flex items-start justify-between">
-                  <div className="rounded-lg bg-info-bg p-3">
-                    <Briefcase className="h-6 w-6 text-info" />
+                  <div className="bg-info-bg rounded-lg p-3">
+                    <Briefcase className="text-info h-6 w-6" />
                   </div>
                   <UnifiedBadge
                     className="border-info-border bg-info-bg"
@@ -283,23 +283,23 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                 {/* Features */}
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-success" />
+                    <Check className="text-success mt-0.5 h-4 w-4" />
                     <p className="text-sm">Featured in /jobs section</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-success" />
+                    <Check className="text-success mt-0.5 h-4 w-4" />
                     <p className="text-sm">Company logo & branding</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-success" />
+                    <Check className="text-success mt-0.5 h-4 w-4" />
                     <p className="text-sm">Apply button to your ATS</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-success" />
+                    <Check className="text-success mt-0.5 h-4 w-4" />
                     <p className="text-sm">{pricing.jobs.durationDays}-day visibility</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-success" />
+                    <Check className="text-success mt-0.5 h-4 w-4" />
                     <p className="text-sm">Analytics dashboard</p>
                   </div>
                 </div>
@@ -320,8 +320,8 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
             <Card className="relative overflow-hidden border-2">
               <CardHeader>
                 <div className="mb-4 flex items-start justify-between">
-                  <div className="rounded-lg bg-primary/10 p-3">
-                    <Megaphone className="h-6 w-6 text-primary" />
+                  <div className="bg-primary/10 rounded-lg p-3">
+                    <Megaphone className="text-primary h-6 w-6" />
                   </div>
                   <UnifiedBadge
                     className="border-primary/20 bg-primary/5"
@@ -354,23 +354,23 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                 {/* Features */}
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-success" />
+                    <Check className="text-success mt-0.5 h-4 w-4" />
                     <p className="text-sm">Top placement in category</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-success" />
+                    <Check className="text-success mt-0.5 h-4 w-4" />
                     <p className="text-sm">&quot;Sponsored&quot; badge</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-success" />
+                    <Check className="text-success mt-0.5 h-4 w-4" />
                     <p className="text-sm">Homepage feature rotation</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-success" />
+                    <Check className="text-success mt-0.5 h-4 w-4" />
                     <p className="text-sm">Analytics dashboard</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-success" />
+                    <Check className="text-success mt-0.5 h-4 w-4" />
                     <p className="text-sm">Custom call-to-action</p>
                   </div>
                 </div>

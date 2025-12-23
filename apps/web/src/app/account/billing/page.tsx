@@ -19,9 +19,9 @@ import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { BillingHistory } from './billing-history';
 import { CurrentPlanCard } from './current-plan-card';
 import { UsageStats } from './usage-stats';
-import { BillingHistory } from './billing-history';
 
 export const metadata: Metadata = {
   description: 'Manage your plan, view usage statistics, and billing history',
@@ -72,8 +72,8 @@ export default async function BillingPage() {
   reqLogger.info(
     {
       section: 'data-fetch',
-      userIdHash: user.id, // userId is automatically hashed by redaction
       tier,
+      userIdHash: user.id, // userId is automatically hashed by redaction
     },
     'BillingPage: rendered for authenticated user'
   );
@@ -115,7 +115,7 @@ export default async function BillingPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <UsageStats userId={user.id} userData={userData} />
+          <UsageStats userData={userData} userId={user.id} />
         </CardContent>
       </Card>
 
@@ -148,11 +148,11 @@ export default async function BillingPage() {
         </CardHeader>
         <CardContent>
           <div className="text-muted-foreground text-sm">
-            Payment method management is not yet available. Please contact support to update your payment information.
+            Payment method management is not yet available. Please contact support to update your
+            payment information.
           </div>
         </CardContent>
       </Card>
     </div>
   );
 }
-

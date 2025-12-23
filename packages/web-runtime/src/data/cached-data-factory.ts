@@ -53,7 +53,7 @@ const dataFunctionConfigs = new Map<
   }
 >();
 
-/**********
+/****************
 *
  * Shared implementation function (extracted to module level to avoid closure capture)
  * This function is called by data functions via Map lookup, not closure capture
@@ -172,14 +172,135 @@ const dataFunctionConfigs = new Map<
     validate?: (args: unknown) => boolean;
     validateError?: string;
   }} fnConfig.transformArgs
- * @param fnConfig.transformResult
- * @param fnConfig.normalizeResult
- * @param fnConfig.onError
- * @param fnConfig.throwOnError
- * @param fnConfig.logContext
- * @param args
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig.transformResult
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig.normalizeResult
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig.onError
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig.throwOnError
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig.logContext
+ * @param {unknown} args
  * @returns {Promise<unknown>} Return value description
- */
+  * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig Parameter description
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig Parameter description
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig Parameter description
+ * @param {{
+    logContext?: (args: unknown, result?: unknown) => LogContext;
+    methodName: string;
+    module: string;
+    normalizeResult?: (result: unknown) => null | unknown;
+    onError?: (error: unknown, args: unknown) => null | unknown;
+    operation: string;
+    serviceKey: ServiceKey;
+    throwOnError: boolean;
+    transformArgs?: (args: unknown) => unknown;
+    transformResult?: (result: unknown, args?: unknown) => unknown;
+    validate?: (args: unknown) => boolean;
+    validateError?: string;
+  }} fnConfig Parameter description
+*/
 async function executeDataFunction(
   fnConfig: {
     logContext?: (args: unknown, result?: unknown) => LogContext;
@@ -232,7 +353,7 @@ async function executeDataFunction(
     // specific method name at compile time, so we access methods dynamically with proper type narrowing.
     // The runtime check below (typeof serviceMethod !== 'function') ensures safety.
     // Use 'unknown' first to avoid unsafe type assertions, then narrow with runtime check
-    const serviceRecord = service as unknown;
+    const serviceRecord = service;
     const serviceMethods = serviceRecord as Record<
       string,
       (...args: unknown[]) => Promise<unknown>

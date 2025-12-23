@@ -5,7 +5,7 @@
 
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { Key, Webhook, Plug, Zap } from '@heyclaude/web-runtime/icons';
+import { Key, Plug, Webhook, Zap } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
   Card,
@@ -19,9 +19,9 @@ import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { ApiKeysManagement } from './api-keys-management';
-import { WebhooksManagement } from './webhooks-management';
 import { OAuthAppsManagement } from './oauth-apps-management';
 import { RateLimits } from './rate-limits';
+import { WebhooksManagement } from './webhooks-management';
 
 export const metadata: Metadata = {
   description: 'Manage your API keys, webhooks, OAuth apps, and integration settings',
@@ -148,4 +148,3 @@ export default async function IntegrationsPage() {
     </div>
   );
 }
-

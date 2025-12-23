@@ -4,6 +4,7 @@ import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { type content_category, type Prisma } from '@prisma/client';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
@@ -11,11 +12,10 @@ import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
 
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
-import type { Prisma, content_category } from '@prisma/client';
-
-type bookmarksModel = Prisma.bookmarksGetPayload<{}>;
 
 import Loading from './loading';
+
+type bookmarksModel = Prisma.bookmarksGetPayload<{}>;
 
 /**
  * Dynamic Rendering Required

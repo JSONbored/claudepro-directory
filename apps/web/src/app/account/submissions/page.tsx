@@ -1,17 +1,7 @@
 import {
-  submission_type as SubmissionType,
-  submission_status as SubmissionStatus,
-} from '@prisma/client';
-import type {
-  content_category,
-  submission_status,
-  submission_type,
-} from '@prisma/client';
-import {
   type GetUserCompleteDataReturns,
   type GetUserDashboardReturns,
 } from '@heyclaude/data-layer';
-type UserDashboardSubmission = GetUserDashboardReturns['submissions'][number];
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
@@ -30,6 +20,15 @@ import {
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
+import {
+  type content_category,
+  type submission_status,
+  type submission_type,
+} from '@prisma/client';
+import {
+  submission_status as SubmissionStatus,
+  submission_type as SubmissionType,
+} from '@prisma/client';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
@@ -39,6 +38,7 @@ import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
 
 import Loading from './loading';
+type UserDashboardSubmission = GetUserDashboardReturns['submissions'][number];
 
 /**
  * Produce metadata for the account submissions page while ensuring request-time evaluation.
@@ -539,7 +539,7 @@ async function SubmissionsPageContent({
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="mb-2 text-3xl font-bold tracking-tight">My Submissions</h1>
           <p className="text-muted-foreground text-base">
@@ -598,7 +598,7 @@ async function SubmissionsPageContent({
       <Card className="border-info-border bg-info-bg">
         <CardContent className="pt-6">
           <div className="flex gap-2">
-            <GitPullRequest className="mt-0.5 h-5 w-5 flex-shrink-0 text-info" />
+            <GitPullRequest className="text-info mt-0.5 h-5 w-5 flex-shrink-0" />
             <div className="flex-1">
               <p className="text-sm-medium text-info">How it works</p>
               <p className="text-muted-foreground mt-1 text-sm">

@@ -1,4 +1,3 @@
-import type { sponsorship_tier } from '@prisma/client';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -15,6 +14,7 @@ import {
   CardTitle,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { type sponsorship_tier } from '@prisma/client';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
@@ -58,6 +58,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * @returns `true` if the sponsorship's `active` flag is `true` and `now` is between `start_date` and `end_date` (inclusive), `false` otherwise.
  *
  * @see SponsorshipsPage
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
@@ -226,22 +231,22 @@ async function SponsorshipsPageContent({
   // Section: Sponsorships Data Fetch
   // sponsorships is unknown[] from GetUserCompleteDataReturns, need to type it properly
   // Based on sponsored_content Prisma model structure
-  type SponsorshipItem = {
-    id: string;
-    user_id: string;
-    content_type: string | null;
-    content_id: string | null;
-    tier: string | null;
-    active: boolean | null;
-    start_date: string;
-    end_date: string;
-    impression_count: number | null;
-    click_count: number | null;
-    impression_limit: number | null;
-    created_at: string;
-    updated_at: string;
+  interface SponsorshipItem {
     [key: string]: unknown;
-  };
+    active: boolean | null;
+    click_count: null | number;
+    content_id: null | string;
+    content_type: null | string;
+    created_at: string;
+    end_date: string;
+    id: string;
+    impression_count: null | number;
+    impression_limit: null | number;
+    start_date: string;
+    tier: null | string;
+    updated_at: string;
+    user_id: string;
+  }
   let sponsorships: SponsorshipItem[] = [];
   try {
     const completeData = await getUserCompleteData(user.id);
@@ -266,7 +271,7 @@ async function SponsorshipsPageContent({
     userLogger.info({ section: 'data-fetch' }, 'SponsorshipsPage: user has no sponsorships');
     return (
       <div className="space-y-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="mb-2 text-3xl font-bold tracking-tight">Sponsorships</h1>
             <p className="text-muted-foreground text-base">No active campaigns yet</p>
@@ -289,18 +294,18 @@ async function SponsorshipsPageContent({
 
   const orderedSponsorships = [...sponsorships].sort(
     (a: SponsorshipItem, b: SponsorshipItem) =>
-      new Date(b.created_at as string).getTime() - new Date(a.created_at as string).getTime()
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 
   // Compute active count once using consistent logic
   const now = new Date();
   const activeCount = orderedSponsorships.filter((s: SponsorshipItem) =>
-    isSponsorshipActive(s as { active: boolean | null; start_date: string; end_date: string }, now)
+    isSponsorshipActive(s as { active: boolean | null; end_date: string; start_date: string }, now)
   ).length;
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="mb-2 text-3xl font-bold tracking-tight">Sponsorships</h1>
           <p className="text-muted-foreground text-base">
@@ -318,25 +323,25 @@ async function SponsorshipsPageContent({
       <div className="grid gap-4">
         {orderedSponsorships.map((sponsorship: SponsorshipItem) => {
           const isActive = isSponsorshipActive(
-            sponsorship as { active: boolean | null; start_date: string; end_date: string },
+            sponsorship as { active: boolean | null; end_date: string; start_date: string },
             now
           );
 
           const impressionCount =
-            (sponsorship['impression_count'] as number | null | undefined) ?? 0;
-          const clickCount = (sponsorship['click_count'] as number | null | undefined) ?? 0;
+            (sponsorship['impression_count'] as null | number | undefined) ?? 0;
+          const clickCount = (sponsorship['click_count'] as null | number | undefined) ?? 0;
 
-          const impressionLimit = sponsorship['impression_limit'] as number | null | undefined;
+          const impressionLimit = sponsorship['impression_limit'] as null | number | undefined;
           const hasHitLimit = impressionLimit != null && impressionCount >= impressionLimit;
 
           const ctr =
             impressionCount > 0 ? ((clickCount / impressionCount) * 100).toFixed(2) : '0.00';
 
           // Use generated ENUM type directly - no validation needed
-          const safeTier = sponsorship['tier'] as string | null as sponsorship_tier | null;
+          const safeTier = sponsorship['tier'] as null | sponsorship_tier;
 
           return (
-            <Card key={sponsorship.id} className="shadow-sm">
+            <Card className="shadow-sm" key={sponsorship.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -368,8 +373,8 @@ async function SponsorshipsPageContent({
                       ) : null}
                     </div>
                     <CardTitle className="mt-2">
-                      {(sponsorship['content_type'] as string | null) ?? 'Unknown'} - ID:{' '}
-                      {(sponsorship['content_id'] as string | null) ?? 'N/A'}
+                      {sponsorship['content_type'] ?? 'Unknown'} - ID:{' '}
+                      {sponsorship['content_id'] ?? 'N/A'}
                     </CardTitle>
                     <CardDescription>
                       {formatDate(sponsorship.start_date)} - {formatDate(sponsorship.end_date)}

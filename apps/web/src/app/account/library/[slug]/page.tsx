@@ -1,3 +1,4 @@
+import { type Bookmarks, type CollectionItems } from '@heyclaude/database-types/postgres-types';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getCollectionDetail, getUserCompleteData } from '@heyclaude/web-runtime/data/account';
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -21,7 +22,6 @@ import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
 
 import { CollectionItemManager } from '@/src/components/core/domain/collection-items-editor';
-import type { Bookmarks, CollectionItems } from '@heyclaude/database-types/postgres-types';
 
 import Loading from './loading';
 
@@ -319,18 +319,18 @@ async function CollectionDetailContent({
             availableBookmarks={
               (bookmarks ?? []).map((b) => ({
                 ...b,
-                notes: b.notes ?? '',
                 // Ensure content_type is not null (composite type requires it)
                 content_type: b.content_type ?? 'agents',
+                notes: b.notes ?? '',
               })) as Bookmarks[]
             }
             collectionId={collection.id}
             items={
               (items ?? []).map((item) => ({
                 ...item,
-                notes: item.notes ?? '',
                 // Ensure content_type is not null (composite type requires it)
                 content_type: item.content_type ?? 'agents',
+                notes: item.notes ?? '',
               })) as CollectionItems[]
             }
           />

@@ -240,7 +240,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="mb-2 text-3xl font-bold tracking-tight">My Companies</h1>
           <p className="text-muted-foreground text-base">
@@ -284,7 +284,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
               } => company.id !== null && company.name !== null && company.slug !== null
             )
             .map((company: UserCompaniesCompany, index: number) => (
-              <Card key={company.id} className="shadow-sm">
+              <Card className="shadow-sm" key={company.id}>
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex flex-1 items-start gap-3">

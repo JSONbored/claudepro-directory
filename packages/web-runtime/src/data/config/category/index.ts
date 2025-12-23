@@ -1,10 +1,9 @@
-import { type content_category } from '../../../types/client-safe-enums.ts';
-
 import {
   type CategoryStatsConfig,
   type TabConfig,
   type UnifiedCategoryConfig,
 } from '../../../types/category.ts';
+import { type content_category } from '../../../types/client-safe-enums.ts';
 
 import { CATEGORY_CONFIGS } from './category-config.ts';
 import { getTabConfigForCategory } from './default-tab-configs.ts';
@@ -28,7 +27,7 @@ export const getCategoryConfig = (
     ...baseConfig,
     detailPage: {
       ...baseConfig.detailPage,
-      ...(tabs ? { tabs: tabs as ReadonlyArray<TabConfig> } : {}),
+      ...(tabs ? { tabs } : {}),
     },
   };
 };

@@ -17,14 +17,13 @@
 import 'server-only';
 import { OG_DEFAULTS, OG_DIMENSIONS } from '@heyclaude/shared-runtime';
 import {
-  createOptionsHandler as createApiOptionsHandler,
-  createApiRoute,
-} from '@heyclaude/web-runtime/api/route-factory';
-import { ogImageQuerySchema } from '@heyclaude/web-runtime/api/schemas';
-import {
   errorResponseSchema,
   ogImageResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createOptionsHandler as createApiOptionsHandler, createApiRoute,
+} from '@heyclaude/web-runtime/api/route-factory';
+import { ogImageQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { ImageResponse } from 'next/og';
 
@@ -221,34 +220,34 @@ export const GET = createApiRoute({
     responses: {
       200: {
         description: 'OG image generated successfully (image/png)',
-        schema: ogImageResponseSchema,
+        example: '[Binary PNG image data - 1200x630 pixels]',
         headers: {
-          'Content-Type': {
-            schema: { type: 'string' },
-            description: 'Content type (image/png)',
-          },
           'Cache-Control': {
-            schema: { type: 'string' },
             description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+          'Content-Type': {
+            description: 'Content type (image/png)',
+            schema: { type: 'string' },
           },
         },
-        example: '[Binary PNG image data - 1200x630 pixels]',
+        schema: ogImageResponseSchema,
       },
       400: {
         description: 'Invalid query parameters',
-        schema: errorResponseSchema,
         example: {
           error: 'Invalid query parameters',
           message: 'Title must be a string',
         },
+        schema: errorResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while generating OG image',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Generate Open Graph image',

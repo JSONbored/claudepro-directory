@@ -1,8 +1,11 @@
-import { changelog_category as ChangelogCategory, type changelog_category } from '../types/client-safe-enums.ts';
 import { z } from 'zod';
 
 import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
+import {
+  type changelog_category,
+  changelog_category as ChangelogCategory,
+} from '../types/client-safe-enums.ts';
 
 // Support both formats:
 // 1. Array of objects: [{ content: "..." }]

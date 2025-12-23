@@ -5,27 +5,28 @@
 
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { Download, Trash2, Shield, Cookie } from '@heyclaude/web-runtime/icons';
+import { Cookie, Download, Shield, Trash2 } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Button,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { DataExportForm } from './data-export-form';
 import { AccountDeletionForm } from './account-deletion-form';
-import { PrivacySettings } from './privacy-settings';
 import { CookiePreferences } from './cookie-preferences';
+import { DataExportForm } from './data-export-form';
+import { PrivacySettings } from './privacy-settings';
 
 export const metadata: Metadata = {
-  description: 'Manage your data, privacy settings, and account deletion. Export your data or delete your account.',
+  description:
+    'Manage your data, privacy settings, and account deletion. Export your data or delete your account.',
   title: 'Data & Privacy | Account Settings',
 };
 
@@ -79,7 +80,8 @@ export default async function DataPrivacyPage() {
       <div className="mb-6">
         <h1 className="mb-2 text-3xl font-bold tracking-tight">Data & Privacy</h1>
         <p className="text-muted-foreground text-base">
-          Manage your data, privacy settings, and account information. Export your data or delete your account.
+          Manage your data, privacy settings, and account information. Export your data or delete
+          your account.
         </p>
       </div>
 
@@ -132,9 +134,9 @@ export default async function DataPrivacyPage() {
       </Card>
 
       {/* Account Deletion */}
-      <Card className="shadow-sm border-destructive/50">
+      <Card className="border-destructive/50 shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl text-destructive">
+          <CardTitle className="text-destructive flex items-center gap-2 text-xl">
             <Trash2 className="h-5 w-5" />
             Delete Account
           </CardTitle>
@@ -143,10 +145,9 @@ export default async function DataPrivacyPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AccountDeletionForm userId={user.id} userEmail={user.email ?? ''} />
+          <AccountDeletionForm userEmail={user.email ?? ''} userId={user.id} />
         </CardContent>
       </Card>
     </div>
   );
 }
-

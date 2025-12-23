@@ -6,20 +6,20 @@
  */
 
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
+import { Copy, Eye, EyeOff, Key, Trash2 } from '@heyclaude/web-runtime/icons';
 import { Button, FormField, toasts } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
-import { Key, Copy, Trash2, Eye, EyeOff } from '@heyclaude/web-runtime/icons';
 
 interface ApiKeysManagementProps {
   userId: string;
 }
 
 interface ApiKey {
-  id: string;
-  name: string;
-  keyPrefix: string;
   createdAt: string;
+  id: string;
+  keyPrefix: string;
   lastUsed?: string;
+  name: string;
 }
 
 export function ApiKeysManagement({ userId }: ApiKeysManagementProps) {
@@ -29,9 +29,9 @@ export function ApiKeysManagement({ userId }: ApiKeysManagementProps) {
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
 
   const runLoggedAsync = useLoggedAsync({
-    scope: 'ApiKeysManagement',
     defaultMessage: 'API key operation failed',
     defaultRethrow: false,
+    scope: 'ApiKeysManagement',
   });
 
   const handleCreateKey = async () => {
@@ -65,24 +65,29 @@ export function ApiKeysManagement({ userId }: ApiKeysManagementProps) {
   return (
     <div className="space-y-4">
       {/* Create New Key */}
-      <div className="rounded-lg border border-border bg-card p-4">
-        <h3 className="font-semibold text-sm mb-3">Create New API Key</h3>
+      <div className="border-border bg-card rounded-lg border p-4">
+        <h3 className="mb-3 text-sm font-semibold">Create New API Key</h3>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <FormField label="Key Name" className="flex-1 min-w-0">
+          <FormField className="min-w-0 flex-1" label="Key Name">
             <input
-              type="text"
-              value={newKeyName}
+              className="border-input bg-background ring-offset-background focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               onChange={(e) => setNewKeyName(e.target.value)}
               placeholder="e.g., Production API Key"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              type="text"
+              value={newKeyName}
             />
           </FormField>
-          <Button onClick={handleCreateKey} disabled={isCreating} className="w-full sm:w-auto sm:mt-0">
+          <Button
+            className="w-full sm:mt-0 sm:w-auto"
+            disabled={isCreating}
+            onClick={handleCreateKey}
+          >
             {isCreating ? 'Creating...' : 'Create Key'}
           </Button>
         </div>
         <p className="text-muted-foreground mt-2 text-xs">
-          API keys provide programmatic access to your account. Keep them secure and never share them publicly.
+          API keys provide programmatic access to your account. Keep them secure and never share
+          them publicly.
         </p>
       </div>
 
@@ -98,37 +103,39 @@ export function ApiKeysManagement({ userId }: ApiKeysManagementProps) {
         <div className="space-y-3">
           {apiKeys.map((key) => (
             <div
+              className="border-border bg-card flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
               key={key.id}
-              className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
             >
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <Key className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  <p className="font-medium text-sm truncate">{key.name}</p>
+                  <Key className="text-muted-foreground h-4 w-4 shrink-0" />
+                  <p className="truncate text-sm font-medium">{key.name}</p>
                 </div>
                 <p className="text-muted-foreground mt-1 text-xs break-all">
                   {key.keyPrefix}••••••••••••••••
                 </p>
                 <p className="text-muted-foreground mt-1 text-xs">
                   Created: {new Date(key.createdAt).toLocaleDateString()}
-                  {key.lastUsed && ` • Last used: ${new Date(key.lastUsed).toLocaleDateString()}`}
+                  {key.lastUsed
+                    ? ` • Last used: ${new Date(key.lastUsed).toLocaleDateString()}`
+                    : null}
                 </p>
               </div>
               <div className="flex items-center gap-2 self-start sm:self-center">
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleCopyKey(key.id)}
                   aria-label="Copy API key"
+                  onClick={() => handleCopyKey(key.id)}
+                  size="sm"
+                  variant="ghost"
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRevokeKey(key.id)}
-                  className="text-destructive hover:text-destructive"
                   aria-label="Revoke API key"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => handleRevokeKey(key.id)}
+                  size="sm"
+                  variant="ghost"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -138,11 +145,11 @@ export function ApiKeysManagement({ userId }: ApiKeysManagementProps) {
         </div>
       )}
 
-      <div className="bg-muted rounded-lg border border-border p-4">
-        <p className="font-medium text-sm mb-2">API Documentation</p>
+      <div className="bg-muted border-border rounded-lg border p-4">
+        <p className="mb-2 text-sm font-medium">API Documentation</p>
         <p className="text-muted-foreground text-xs">
           Learn how to use API keys in our{' '}
-          <a href="/docs/api" className="text-accent hover:underline">
+          <a className="text-accent hover:underline" href="/docs/api">
             API documentation
           </a>
           .
@@ -151,4 +158,3 @@ export function ApiKeysManagement({ userId }: ApiKeysManagementProps) {
     </div>
   );
 }
-

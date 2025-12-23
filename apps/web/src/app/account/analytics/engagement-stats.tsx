@@ -9,8 +9,8 @@ import { type GetUserCompleteDataReturns } from '@heyclaude/data-layer';
 import { Card } from '@heyclaude/web-runtime/ui';
 
 interface EngagementStatsProps {
-  userId: string;
   userData: GetUserCompleteDataReturns | null;
+  userId: string;
 }
 
 export function EngagementStats({ userData }: EngagementStatsProps) {
@@ -20,26 +20,26 @@ export function EngagementStats({ userData }: EngagementStatsProps) {
   // In production, this would calculate from activity data
   const stats = [
     {
+      description: 'All-time activity count',
       label: 'Total Activity',
       value: activity?.total_activities ?? 0,
-      description: 'All-time activity count',
     },
     {
+      description: 'Activity in the last 30 days',
       label: 'This Month',
       value: activity?.recent_activities ?? 0,
-      description: 'Activity in the last 30 days',
     },
     {
+      description: 'Average weekly activity',
       label: 'Average per Week',
       value: activity?.total_activities ? Math.round(activity.total_activities / 52) : 0,
-      description: 'Average weekly activity',
     },
   ];
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
       {stats.map((stat) => (
-        <Card key={stat.label} className="p-4">
+        <Card className="p-4" key={stat.label}>
           <div className="space-y-2">
             <p className="text-muted-foreground text-sm">{stat.label}</p>
             <p className="text-3xl font-bold">{stat.value.toLocaleString()}</p>
@@ -50,4 +50,3 @@ export function EngagementStats({ userData }: EngagementStatsProps) {
     </div>
   );
 }
-

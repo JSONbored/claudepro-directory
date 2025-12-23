@@ -12,49 +12,52 @@ import { expect } from 'vitest';
  * Creates a mock NextRequest for testing API routes
  *
  * @param options - Request configuration
+ * @param options.method
+ * @param options.url
+ * @param options.query
+ * @param options.body
+ * @param options.headers
  * @returns Mocked NextRequest
  */
 export function createMockRequest(options: {
-  method?: string;
-  url?: string;
-  query?: Record<string, string>;
   body?: unknown;
   headers?: Record<string, string>;
+  method?: string;
+  query?: Record<string, string>;
+  url?: string;
 }): NextRequest {
   const {
-    method = 'GET',
-    url = 'http://localhost:3000/api/test',
-    query = {},
     body,
     headers = {},
+    method = 'GET',
+    query = {},
+    url = 'http://localhost:3000/api/test',
   } = options;
 
   // Build URL with query parameters
   const urlWithQuery = new URL(url);
-  Object.entries(query).forEach(([key, value]) => {
+  for (const [key, value] of Object.entries(query)) {
     urlWithQuery.searchParams.set(key, value);
-  });
+  }
 
   // Create mock NextRequest
   // Build request options conditionally to avoid type issues with RequestInit
   // With exactOptionalPropertyTypes, we can't include body: undefined
   const baseOptions = {
-    method,
     headers: {
       'content-type': 'application/json',
       ...headers,
     },
+    method,
   } as const;
-  
+
   // Only include body if it's defined
-  const request = body !== undefined
-    ? new NextRequest(urlWithQuery.toString(), {
+  return body === undefined
+    ? new NextRequest(urlWithQuery.toString(), baseOptions)
+    : new NextRequest(urlWithQuery.toString(), {
         ...baseOptions,
         body: typeof body === 'string' ? body : JSON.stringify(body),
-      })
-    : new NextRequest(urlWithQuery.toString(), baseOptions);
-
-  return request;
+      });
 }
 
 /**

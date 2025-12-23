@@ -1,14 +1,3 @@
-import type { job_plan, job_tier, job_status } from '@heyclaude/web-runtime/types/client-safe-enums';
-// Note: jobsModel type should come from data layer, not Prisma directly
-// For now, using a basic type definition
-type jobsModel = {
-  id: string;
-  title: string;
-  company_name: string;
-  plan: job_plan;
-  tier: job_tier;
-  [key: string]: unknown;
-};
 import { type GetUserCompleteDataReturns } from '@heyclaude/data-layer';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getUserCompleteData } from '@heyclaude/web-runtime/data/account';
@@ -27,6 +16,11 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import {
+  type job_plan,
+  type job_status,
+  type job_tier,
+} from '@heyclaude/web-runtime/types/client-safe-enums';
 import {
   Alert,
   AlertDescription,
@@ -51,6 +45,16 @@ import { JobToggleButton } from '@/src/components/core/buttons/jobs/job-toggle-b
 
 import Loading from './loading';
 import JobsListLoading from './loading-list';
+// Note: jobsModel type should come from data layer, not Prisma directly
+// For now, using a basic type definition
+interface jobsModel {
+  [key: string]: unknown;
+  company_name: string;
+  id: string;
+  plan: job_plan;
+  tier: job_tier;
+  title: string;
+}
 
 /**
  * Dynamic Rendering Required
@@ -171,7 +175,7 @@ const jobStatusBadgeMap: Record<JobStatus, string> = {
 function getStatusColor(status: JobStatus): string {
   const color = jobStatusBadgeMap[status];
   if (color) return color;
-  return jobStatusBadgeMap['draft'] as string;
+  return jobStatusBadgeMap['draft'];
 }
 
 /**
@@ -394,7 +398,7 @@ async function PaymentSuccessAlert({
       return humanizeStatus(paymentJobSummary.subscription_status);
     }
     if (paymentJob?.['expires_at']) {
-      return `Expires ${formatRelativeDate(paymentJob['expires_at'] as string | Date)}`;
+      return `Expires ${formatRelativeDate(paymentJob['expires_at'] as Date | string)}`;
     }
     return null;
   })();
@@ -538,7 +542,7 @@ async function JobsListWithHeader({
 
   return (
     <>
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="mb-2 text-3xl font-bold tracking-tight">My Job Listings</h1>
           <p className="text-muted-foreground text-base">
@@ -629,7 +633,10 @@ async function JobsListWithBilling({
     }
   }
 
-  const getPlanBadge = (plan: job_plan | null | undefined, tier?: job_tier | null): React.JSX.Element | null => {
+  const getPlanBadge = (
+    plan: job_plan | null | undefined,
+    tier?: job_tier | null
+  ): null | React.JSX.Element => {
     if (tier === 'featured') {
       return (
         <UnifiedBadge className="border-info-border bg-info-bg text-info" variant="base">
@@ -639,10 +646,7 @@ async function JobsListWithBilling({
     }
     if (plan === 'subscription') {
       return (
-        <UnifiedBadge
-          className="border-primary/20 bg-primary/10 text-primary"
-          variant="base"
-        >
+        <UnifiedBadge className="border-primary/20 bg-primary/10 text-primary" variant="base">
           Subscription
         </UnifiedBadge>
       );
@@ -672,7 +676,7 @@ async function JobsListWithBilling({
               .filter(Boolean)
               .join(' • ')
           : job['expires_at']
-            ? `Active until ${formatRelativeDate(job['expires_at'] as string | Date)}`
+            ? `Active until ${formatRelativeDate(job['expires_at'] as Date | string)}`
             : null;
         const paymentCopy =
           summary?.last_payment_at && summary.last_payment_amount !== null
@@ -698,11 +702,12 @@ async function JobsListWithBilling({
                     >
                       {(job['status'] as job_status) ?? 'draft'}
                     </UnifiedBadge>
-                    {getPlanBadge(job.plan as job_plan, job.tier as job_tier)}
+                    {getPlanBadge(job.plan, job.tier)}
                   </div>
-                  <CardTitle className="mt-2">{job.title as string}</CardTitle>
+                  <CardTitle className="mt-2">{job.title}</CardTitle>
                   <CardDescription>
-                    {(job['company'] as string) ?? ''} • {(job['location'] as string) ?? 'Remote'} • {(job['type'] as string) ?? ''}
+                    {(job['company'] as string) ?? ''} • {(job['location'] as string) ?? 'Remote'} •{' '}
+                    {(job['type'] as string) ?? ''}
                   </CardDescription>
                 </div>
               </div>
@@ -714,8 +719,12 @@ async function JobsListWithBilling({
                   <Eye className="h-4 w-4" />
                   {(job['view_count'] as number) ?? 0} views
                 </div>
-                {job['posted_at'] ? <div>Posted {formatRelativeDate(job['posted_at'] as string | Date)}</div> : null}
-                {job['expires_at'] ? <div>Expires {formatRelativeDate(job['expires_at'] as string | Date)}</div> : null}
+                {job['posted_at'] ? (
+                  <div>Posted {formatRelativeDate(job['posted_at'] as Date | string)}</div>
+                ) : null}
+                {job['expires_at'] ? (
+                  <div>Expires {formatRelativeDate(job['expires_at'] as Date | string)}</div>
+                ) : null}
               </div>
               {showBillingCard ? (
                 <div className="border-muted bg-muted/20 card-base mb-4 border-dashed p-3 text-xs sm:text-sm">

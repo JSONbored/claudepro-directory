@@ -4,25 +4,32 @@
  */
 
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
-import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { SOCIAL_LINKS } from '@heyclaude/web-runtime/data/config/constants';
-import { HelpCircle, Mail, MessageSquare, Bug, Lightbulb, ExternalLink } from '@heyclaude/web-runtime/icons';
+import { ROUTES, SOCIAL_LINKS } from '@heyclaude/web-runtime/data/config/constants';
+import {
+  Bug,
+  ExternalLink,
+  HelpCircle,
+  Lightbulb,
+  Mail,
+  MessageSquare,
+} from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Button,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
-  description: 'Get help, contact support, report bugs, request features, and access community resources',
+  description:
+    'Get help, contact support, report bugs, request features, and access community resources',
   title: 'Support | Account Settings',
 };
 
@@ -93,24 +100,24 @@ export default async function SupportPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           <Link
+            className="border-border bg-card hover:bg-accent/10 flex items-center justify-between rounded-lg border p-4 transition-colors"
             href="/docs"
-            className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:bg-accent/10 transition-colors"
           >
             <div>
-              <p className="font-medium text-sm">Documentation</p>
+              <p className="text-sm font-medium">Documentation</p>
               <p className="text-muted-foreground text-xs">Complete guides and API reference</p>
             </div>
-            <ExternalLink className="h-4 w-4 text-muted-foreground" />
+            <ExternalLink className="text-muted-foreground h-4 w-4" />
           </Link>
           <Link
+            className="border-border bg-card hover:bg-accent/10 flex items-center justify-between rounded-lg border p-4 transition-colors"
             href="/faq"
-            className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:bg-accent/10 transition-colors"
           >
             <div>
-              <p className="font-medium text-sm">FAQ</p>
+              <p className="text-sm font-medium">FAQ</p>
               <p className="text-muted-foreground text-xs">Frequently asked questions</p>
             </div>
-            <ExternalLink className="h-4 w-4 text-muted-foreground" />
+            <ExternalLink className="text-muted-foreground h-4 w-4" />
           </Link>
         </CardContent>
       </Card>
@@ -128,8 +135,8 @@ export default async function SupportPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <p className="font-medium text-sm mb-2">Email Support</p>
-            <p className="text-muted-foreground text-sm mb-3">
+            <p className="mb-2 text-sm font-medium">Email Support</p>
+            <p className="text-muted-foreground mb-3 text-sm">
               Send us an email and we'll get back to you as soon as possible.
             </p>
             <Button asChild variant="outline">
@@ -137,7 +144,7 @@ export default async function SupportPage() {
             </Button>
           </div>
           <div>
-            <p className="font-medium text-sm mb-2">Response Time</p>
+            <p className="mb-2 text-sm font-medium">Response Time</p>
             <p className="text-muted-foreground text-sm">
               We typically respond within 24-48 hours during business days.
             </p>
@@ -163,8 +170,8 @@ export default async function SupportPage() {
           <Button asChild variant="outline">
             <a
               href={`${SOCIAL_LINKS.github}/issues/new?template=feature_request.md`}
-              target="_blank"
               rel="noopener noreferrer"
+              target="_blank"
             >
               Submit Feature Request
               <ExternalLink className="ml-2 h-4 w-4" />
@@ -191,8 +198,8 @@ export default async function SupportPage() {
           <Button asChild variant="outline">
             <a
               href={`${SOCIAL_LINKS.github}/issues/new?template=bug_report.md`}
-              target="_blank"
               rel="noopener noreferrer"
+              target="_blank"
             >
               Report Bug
               <ExternalLink className="ml-2 h-4 w-4" />
@@ -215,28 +222,28 @@ export default async function SupportPage() {
         <CardContent className="space-y-3">
           <div className="grid gap-3 md:grid-cols-2">
             <Link
+              className="border-border bg-card hover:bg-accent/10 flex items-center justify-between rounded-lg border p-4 transition-colors"
               href={SOCIAL_LINKS.discord}
-              target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:bg-accent/10 transition-colors"
+              target="_blank"
             >
               <div>
-                <p className="font-medium text-sm">Discord</p>
+                <p className="text-sm font-medium">Discord</p>
                 <p className="text-muted-foreground text-xs">Join our Discord community</p>
               </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="text-muted-foreground h-4 w-4" />
             </Link>
             <Link
+              className="border-border bg-card hover:bg-accent/10 flex items-center justify-between rounded-lg border p-4 transition-colors"
               href={SOCIAL_LINKS.github}
-              target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:bg-accent/10 transition-colors"
+              target="_blank"
             >
               <div>
-                <p className="font-medium text-sm">GitHub</p>
+                <p className="text-sm font-medium">GitHub</p>
                 <p className="text-muted-foreground text-xs">Contribute on GitHub</p>
               </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="text-muted-foreground h-4 w-4" />
             </Link>
           </div>
         </CardContent>
@@ -244,4 +251,3 @@ export default async function SupportPage() {
     </div>
   );
 }
-

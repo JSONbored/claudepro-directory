@@ -4,16 +4,7 @@
  * Leverages get_company_profile() RPC + company_job_stats materialized view
  */
 
-import type {
-  experience_level,
-  job_category,
-  job_plan,
-  job_tier,
-  job_type,
-  workplace_type,
-} from '@heyclaude/web-runtime/types/client-safe-enums';
 import { type CompanyProfileJobItem } from '@heyclaude/data-layer';
-import { type JobCardJobType } from '@heyclaude/web-runtime/types/component.types';
 import { getCompanyProfile } from '@heyclaude/web-runtime/data/companies';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { formatDate } from '@heyclaude/web-runtime/data/utils';
@@ -27,6 +18,15 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import {
+  type experience_level,
+  type job_category,
+  type job_plan,
+  type job_tier,
+  type job_type,
+  type workplace_type,
+} from '@heyclaude/web-runtime/types/client-safe-enums';
+import { type JobCardJobType } from '@heyclaude/web-runtime/types/component.types';
 import {
   Card,
   CardContent,
@@ -412,27 +412,27 @@ function CompanyJobsList({
       )
       .map(
         (job): JobCardJobType => ({
-          id: job.id,
-          slug: job.slug,
-          title: job.title,
+          category: (job.category as job_category) ?? null,
+          click_count: job.click_count,
           company: job.company,
           company_logo: job.company_logo,
-          location: job.location,
           description: job.description,
-          salary: job.salary,
-          remote: job.remote,
-          type: (job.type as string) as job_type | null,
-          workplace: (job.workplace as workplace_type) ?? 'remote',
           experience: (job.experience as experience_level) ?? 'beginner',
-          category: (job.category as job_category) ?? null,
-          tags: job.tags,
-          plan: (job.plan as job_plan) ?? 'free',
-          tier: job.tier as job_tier | null,
-          posted_at: job.posted_at ?? '',
           expires_at: job.expires_at ?? '',
-          view_count: job.view_count,
-          click_count: job.click_count,
+          id: job.id,
           link: job.link,
+          location: job.location,
+          plan: (job.plan as job_plan) ?? 'free',
+          posted_at: job.posted_at ?? '',
+          remote: job.remote,
+          salary: job.salary,
+          slug: job.slug,
+          tags: job.tags,
+          tier: job.tier as job_tier | null,
+          title: job.title,
+          type: job.type as string as job_type | null,
+          view_count: job.view_count,
+          workplace: (job.workplace as workplace_type) ?? 'remote',
         })
       ) ?? [];
 
@@ -507,7 +507,7 @@ function CompanyStats({
 
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground text-sm">Active Openings</span>
-            <span className="font-semibold text-success">{stats?.active_jobs ?? 0}</span>
+            <span className="text-success font-semibold">{stats?.active_jobs ?? 0}</span>
           </div>
 
           {stats && (stats.remote_jobs ?? 0) > 0 ? (

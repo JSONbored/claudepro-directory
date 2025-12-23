@@ -6,21 +6,21 @@
  */
 
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
-import { Button, FormField, ToggleField, toasts } from '@heyclaude/web-runtime/ui';
+import { ExternalLink, Plus, Trash2, Webhook } from '@heyclaude/web-runtime/icons';
+import { Button, FormField, toasts, ToggleField } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
-import { Webhook, Plus, Trash2, ExternalLink } from '@heyclaude/web-runtime/icons';
 
 interface WebhooksManagementProps {
   userId: string;
 }
 
 interface WebhookConfig {
-  id: string;
-  url: string;
-  events: string[];
-  secret?: string;
   active: boolean;
   createdAt: string;
+  events: string[];
+  id: string;
+  secret?: string;
+  url: string;
 }
 
 export function WebhooksManagement({ userId }: WebhooksManagementProps) {
@@ -30,9 +30,9 @@ export function WebhooksManagement({ userId }: WebhooksManagementProps) {
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
 
   const runLoggedAsync = useLoggedAsync({
-    scope: 'WebhooksManagement',
     defaultMessage: 'Webhook operation failed',
     defaultRethrow: false,
+    scope: 'WebhooksManagement',
   });
 
   const availableEvents = [
@@ -75,27 +75,27 @@ export function WebhooksManagement({ userId }: WebhooksManagementProps) {
   return (
     <div className="space-y-4">
       {/* Create New Webhook */}
-      <div className="rounded-lg border border-border bg-card p-4">
-        <h3 className="font-semibold text-sm mb-3">Create New Webhook</h3>
+      <div className="border-border bg-card rounded-lg border p-4">
+        <h3 className="mb-3 text-sm font-semibold">Create New Webhook</h3>
         <div className="space-y-3">
-          <FormField label="Webhook URL" required>
+          <FormField required label="Webhook URL">
             <input
-              type="url"
-              value={newWebhookUrl}
+              className="border-input bg-background ring-offset-background focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               onChange={(e) => setNewWebhookUrl(e.target.value)}
               placeholder="https://example.com/webhook"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              type="url"
+              value={newWebhookUrl}
             />
           </FormField>
 
           <div>
-            <p className="font-medium text-sm mb-2">Event Types</p>
+            <p className="mb-2 text-sm font-medium">Event Types</p>
             <div className="grid gap-2 md:grid-cols-2">
               {availableEvents.map((event) => (
                 <ToggleField
+                  checked={selectedEvents.includes(event)}
                   key={event}
                   label={event}
-                  checked={selectedEvents.includes(event)}
                   onCheckedChange={(checked) => {
                     if (checked) {
                       setSelectedEvents([...selectedEvents, event]);
@@ -108,7 +108,7 @@ export function WebhooksManagement({ userId }: WebhooksManagementProps) {
             </div>
           </div>
 
-          <Button onClick={handleCreateWebhook} disabled={isCreating}>
+          <Button disabled={isCreating} onClick={handleCreateWebhook}>
             {isCreating ? 'Creating...' : 'Create Webhook'}
           </Button>
         </div>
@@ -125,15 +125,12 @@ export function WebhooksManagement({ userId }: WebhooksManagementProps) {
       ) : (
         <div className="space-y-3">
           {webhooks.map((webhook) => (
-            <div
-              key={webhook.id}
-              className="rounded-lg border border-border bg-card p-4"
-            >
+            <div className="border-border bg-card rounded-lg border p-4" key={webhook.id}>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <Webhook className="h-4 w-4 text-muted-foreground" />
-                    <p className="font-medium text-sm">{webhook.url}</p>
+                    <Webhook className="text-muted-foreground h-4 w-4" />
+                    <p className="text-sm font-medium">{webhook.url}</p>
                     {webhook.active ? (
                       <span className="bg-success-bg text-success rounded-full px-2 py-0.5 text-xs font-medium">
                         Active
@@ -152,10 +149,10 @@ export function WebhooksManagement({ userId }: WebhooksManagementProps) {
                   </p>
                 </div>
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDeleteWebhook(webhook.id)}
                   className="text-destructive hover:text-destructive"
+                  onClick={() => handleDeleteWebhook(webhook.id)}
+                  size="sm"
+                  variant="ghost"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -165,11 +162,11 @@ export function WebhooksManagement({ userId }: WebhooksManagementProps) {
         </div>
       )}
 
-      <div className="bg-muted rounded-lg border border-border p-4">
-        <p className="font-medium text-sm mb-2">Webhook Documentation</p>
+      <div className="bg-muted border-border rounded-lg border p-4">
+        <p className="mb-2 text-sm font-medium">Webhook Documentation</p>
         <p className="text-muted-foreground text-xs">
           Learn about webhook events and payloads in our{' '}
-          <a href="/docs/webhooks" className="text-accent hover:underline">
+          <a className="text-accent hover:underline" href="/docs/webhooks">
             webhook documentation
           </a>
           .
@@ -178,4 +175,3 @@ export function WebhooksManagement({ userId }: WebhooksManagementProps) {
     </div>
   );
 }
-

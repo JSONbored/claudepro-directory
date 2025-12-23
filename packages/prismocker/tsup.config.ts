@@ -15,9 +15,9 @@ export default defineConfig([
     external: ['@prisma/client'],
     // Use separate tsconfig with CommonJS module setting
     tsconfig: './tsconfig.cjs.json',
-    outExtension({ format }) {
+    outExtension() {
       // Use .js extension for CommonJS
-      return { js: format === 'cjs' ? '.js' : '.js' };
+      return { js: '.js' };
     },
     // Force esbuild to output CommonJS
     esbuildOptions(options) {
@@ -39,9 +39,9 @@ export default defineConfig([
     bundle: true, // Bundle all dependencies into single file
     external: ['@prisma/client'],
     tsconfig: './tsconfig.json',
-    outExtension({ format }) {
+    outExtension() {
       // Use .mjs extension for ESM
-      return { js: format === 'esm' ? '.mjs' : '.mjs' };
+      return { js: '.mjs' };
     },
   },
   {

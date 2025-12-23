@@ -21,17 +21,14 @@
  * ```
  */
 import 'server-only';
-import { type content_category } from '@prisma/client';
-import {
-  createCachedApiRoute,
-  createOptionsHandler as createApiOptionsHandler,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/api/route-factory';
-import { categorySchema } from '@heyclaude/web-runtime/api/schemas';
 import {
   errorResponseSchema,
   templatesResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
+import { categorySchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import {
   badRequestResponse,
@@ -39,6 +36,7 @@ import {
   jsonResponse,
 } from '@heyclaude/web-runtime/server/api-helpers';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/utils/category-validation';
+import { type content_category } from '@prisma/client';
 import { z } from 'zod';
 
 /**
@@ -80,51 +78,51 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'Templates retrieved successfully',
-        schema: templatesResponseSchema,
-        headers: {
-          'X-RateLimit-Remaining': {
-            schema: { type: 'string' },
-            description: 'Remaining rate limit requests',
-          },
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-          'X-Generated-By': {
-            schema: { type: 'string' },
-            description: 'Source of the response data',
-          },
-        },
         example: {
-          success: true,
           category: 'skills',
           count: 25,
+          success: true,
           templates: [
             {
+              category: 'skills',
+              description: 'An example template for demonstration',
               id: 'template-1',
               title: 'Example Template',
-              description: 'An example template for demonstration',
-              category: 'skills',
             },
           ],
         },
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+          'X-Generated-By': {
+            description: 'Source of the response data',
+            schema: { type: 'string' },
+          },
+          'X-RateLimit-Remaining': {
+            description: 'Remaining rate limit requests',
+            schema: { type: 'string' },
+          },
+        },
+        schema: templatesResponseSchema,
       },
       400: {
         description: 'Invalid or missing category parameter',
-        schema: errorResponseSchema,
         example: {
           error: 'Invalid category parameter',
           message:
             'Category parameter is required and cannot be "all". Valid categories: agents, mcp, rules, commands, hooks, statuslines, skills, collections, guides, jobs, changelog',
         },
+        schema: errorResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while fetching templates',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Get content templates by category',

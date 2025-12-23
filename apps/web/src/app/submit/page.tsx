@@ -3,11 +3,6 @@
  * All stats/recent/contributors from data layer with edge caching.
  */
 
-import {
-  content_category as ContentCategory,
-  submission_type as SubmissionType,
-} from '@prisma/client';
-import { type content_category, type submission_type } from '@prisma/client';
 import { getSubmissionDashboard } from '@heyclaude/web-runtime/data/account';
 import { getContentTemplates } from '@heyclaude/web-runtime/data/content/templates';
 import { getSubmissionFormFields } from '@heyclaude/web-runtime/data/forms/submission-form-fields';
@@ -16,6 +11,11 @@ import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { type SubmissionFormConfig } from '@heyclaude/web-runtime/types/component.types';
 import { Card, CardContent, CardHeader, CardTitle, cn } from '@heyclaude/web-runtime/ui';
+import { type content_category, type submission_type } from '@prisma/client';
+import {
+  content_category as ContentCategory,
+  submission_type as SubmissionType,
+} from '@prisma/client';
 import { type Metadata } from 'next';
 import { connection } from 'next/server';
 import { lazy, Suspense } from 'react';
@@ -491,19 +491,19 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
         <CardContent className="grid grid-cols-3 gap-2">
           {/* Total */}
           <div className={cn('rounded-lg p-3 text-center', 'bg-info-bg')}>
-            <div className="text-2xl font-bold text-info">{stats.total}</div>
+            <div className="text-info text-2xl font-bold">{stats.total}</div>
             <div className="text-muted-foreground text-xs">Total</div>
           </div>
 
           {/* Pending */}
           <div className={cn('rounded-lg p-3 text-center', 'bg-warning-bg')}>
-            <div className="text-2xl font-bold text-warning">{stats.pending}</div>
+            <div className="text-warning text-2xl font-bold">{stats.pending}</div>
             <div className="text-muted-foreground text-xs">Pending</div>
           </div>
 
           {/* This Week */}
           <div className={cn('rounded-lg p-3 text-center', 'bg-success-bg')}>
-            <div className="text-2xl font-bold text-success">{stats.merged_this_week}</div>
+            <div className="text-success text-2xl font-bold">{stats.merged_this_week}</div>
             <div className="text-muted-foreground text-xs">This Week</div>
           </div>
         </CardContent>

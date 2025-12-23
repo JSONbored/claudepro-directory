@@ -25,15 +25,13 @@ import 'server-only';
 import { type GetSearchSuggestionsFormattedArgs } from '@heyclaude/database-types/postgres-types';
 // OPTIMIZATION: Removed unused imports - factory handles errors automatically
 import {
-  createCachedApiRoute,
-  createOptionsHandler as createApiOptionsHandler,
-  type RouteHandlerContext,
-} from '@heyclaude/web-runtime/api/route-factory';
-import { searchAutocompleteQuerySchema } from '@heyclaude/web-runtime/api/schemas';
-import {
   errorResponseSchema,
   searchAutocompleteResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
+import {
+  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+} from '@heyclaude/web-runtime/api/route-factory';
+import { searchAutocompleteQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
 
@@ -57,48 +55,48 @@ export const GET = createCachedApiRoute({
     responses: {
       200: {
         description: 'Autocomplete suggestions retrieved successfully',
-        schema: searchAutocompleteResponseSchema,
-        headers: {
-          'X-RateLimit-Remaining': {
-            schema: { type: 'string' },
-            description: 'Remaining rate limit requests',
-          },
-          'Cache-Control': {
-            schema: { type: 'string' },
-            description: 'Cache control directive',
-          },
-        },
         example: {
           query: 'react',
           suggestions: [
             {
-              text: 'react hooks',
-              search_count: 150,
               is_popular: true,
+              search_count: 150,
+              text: 'react hooks',
             },
             {
-              text: 'react native',
-              search_count: 120,
               is_popular: false,
+              search_count: 120,
+              text: 'react native',
             },
           ],
         },
+        headers: {
+          'Cache-Control': {
+            description: 'Cache control directive',
+            schema: { type: 'string' },
+          },
+          'X-RateLimit-Remaining': {
+            description: 'Remaining rate limit requests',
+            schema: { type: 'string' },
+          },
+        },
+        schema: searchAutocompleteResponseSchema,
       },
       400: {
         description: 'Invalid query parameters (query must be at least 2 characters)',
-        schema: errorResponseSchema,
         example: {
           error: 'Invalid query parameters',
           message: 'Query must be at least 2 characters',
         },
+        schema: errorResponseSchema,
       },
       500: {
         description: 'Internal server error',
-        schema: errorResponseSchema,
         example: {
           error: 'Internal server error',
           message: 'An unexpected error occurred while fetching autocomplete suggestions',
         },
+        schema: errorResponseSchema,
       },
     },
     summary: 'Get search autocomplete suggestions',

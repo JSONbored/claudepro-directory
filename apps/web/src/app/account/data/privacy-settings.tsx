@@ -5,10 +5,10 @@
  * Allows users to manage their privacy preferences
  */
 
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
-import { ToggleField, Button, toasts } from '@heyclaude/web-runtime/ui';
-import { useState, useEffect } from 'react';
 import { updateProfile } from '@heyclaude/web-runtime/actions/user';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
+import { Button, toasts, ToggleField } from '@heyclaude/web-runtime/ui';
+import { useEffect, useState } from 'react';
 
 interface PrivacySettingsProps {
   userId: string;
@@ -20,9 +20,9 @@ export function PrivacySettings({ userId }: PrivacySettingsProps) {
   const [isSaving, setIsSaving] = useState(false);
 
   const runLoggedAsync = useLoggedAsync({
-    scope: 'PrivacySettings',
     defaultMessage: 'Failed to save privacy settings',
     defaultRethrow: false,
+    scope: 'PrivacySettings',
   });
 
   useEffect(() => {
@@ -35,8 +35,8 @@ export function PrivacySettings({ userId }: PrivacySettingsProps) {
     setIsSaving(true);
     await runLoggedAsync(async () => {
       const result = await updateProfile({
-        profile_public: profilePublic,
         follow_email: followEmail,
+        profile_public: profilePublic,
       });
 
       if (result?.serverError) {
@@ -54,23 +54,22 @@ export function PrivacySettings({ userId }: PrivacySettingsProps) {
   return (
     <div className="space-y-4">
       <ToggleField
-        label="Public Profile"
-        description="Allow others to view your public profile"
         checked={profilePublic}
+        description="Allow others to view your public profile"
+        label="Public Profile"
         onCheckedChange={setProfilePublic}
       />
 
       <ToggleField
-        label="Email on Follow"
-        description="Receive email notifications when someone follows you"
         checked={followEmail}
+        description="Receive email notifications when someone follows you"
+        label="Email on Follow"
         onCheckedChange={setFollowEmail}
       />
 
-      <Button onClick={handleSave} disabled={isSaving}>
+      <Button disabled={isSaving} onClick={handleSave}>
         {isSaving ? 'Saving...' : 'Save Privacy Settings'}
       </Button>
     </div>
   );
 }
-

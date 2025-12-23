@@ -1,6 +1,3 @@
-import type { Prisma, content_category } from '@prisma/client';
-
-type contentModel = Prisma.contentGetPayload<{}>;
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
 import { getAccountDashboardBundle } from '@heyclaude/web-runtime/data/account';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -20,6 +17,7 @@ import {
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { ensureStringArray } from '@heyclaude/web-runtime/utils/content-helpers';
+import { type content_category, type Prisma } from '@prisma/client';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
@@ -32,6 +30,8 @@ import { DashboardTabs } from '@/src/components/features/account/dashboard-tabs'
 import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
 
 import Loading from './loading';
+
+type contentModel = Prisma.contentGetPayload<{}>;
 
 /**
  * Generate metadata for the account page at request time.
@@ -230,9 +230,7 @@ function DashboardHeaderAndStats({
     <>
       <div className="mb-6">
         <h1 className="mb-2 text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground text-base">
-          Welcome back, {profile?.name ?? 'User'}!
-        </p>
+        <p className="text-muted-foreground text-base">Welcome back, {profile?.name ?? 'User'}!</p>
       </div>
 
       {/* Stats cards */}
@@ -269,9 +267,7 @@ function DashboardHeaderAndStats({
         <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="text-xl">Quick Actions</CardTitle>
-            <CardDescription className="text-sm">
-              Common tasks and features
-            </CardDescription>
+            <CardDescription className="text-sm">Common tasks and features</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {resumeBookmarkHref ? (
@@ -336,7 +332,7 @@ async function DashboardContent({
     recentBookmarks.map(async (bookmark) => {
       try {
         const category = bookmark.content_type as content_category;
-        const slug = bookmark.content_slug as string;
+        const slug = bookmark.content_slug;
         const detail = await getContentDetailCore({ category, slug });
         return detail?.content ?? null;
       } catch (error) {
@@ -463,9 +459,7 @@ function RecentlySavedSection({
     <Card className="shadow-sm">
       <CardHeader>
         <CardTitle className="text-xl">Recently Saved</CardTitle>
-        <CardDescription className="text-sm">
-          Your latest bookmarks at a glance
-        </CardDescription>
+        <CardDescription className="text-sm">Your latest bookmarks at a glance</CardDescription>
       </CardHeader>
       <CardContent>
         {recentlySavedContent.length > 0 ? (
@@ -578,9 +572,7 @@ function RecommendationsSection({
     <Card className="shadow-sm">
       <CardHeader>
         <CardTitle className="text-xl">Recommended next</CardTitle>
-        <CardDescription className="text-sm">
-          Suggestions based on your saved tags
-        </CardDescription>
+        <CardDescription className="text-sm">Suggestions based on your saved tags</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {recommendations.length > 0 ? (
@@ -591,7 +583,7 @@ function RecommendationsSection({
               const similarHref = firstTag ? `/search?tags=${encodeURIComponent(firstTag)}` : null;
               return (
                 <li
-                  className="border-border/60 hover:border-border hover:bg-muted/30 rounded-lg border bg-muted/20 p-4 transition-all duration-200"
+                  className="border-border/60 hover:border-border hover:bg-muted/30 bg-muted/20 rounded-lg border p-4 transition-all duration-200"
                   key={`${item.category}-${item.slug}`}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -656,12 +648,12 @@ function QuickActionRow({
 }) {
   return (
     <div className="border-border/50 hover:border-border hover:bg-accent/5 flex items-center justify-between gap-4 rounded-lg border p-4 transition-all duration-200">
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm">{title}</p>
-        <p className="text-muted-foreground text-xs mt-0.5">{description}</p>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold">{title}</p>
+        <p className="text-muted-foreground mt-0.5 text-xs">{description}</p>
       </div>
       <NavLink
-        className="text-sm font-semibold text-accent hover:text-accent/80 transition-colors whitespace-nowrap"
+        className="text-accent hover:text-accent/80 text-sm font-semibold whitespace-nowrap transition-colors"
         href={href}
       >
         Open →
@@ -684,12 +676,12 @@ function QuickActionRow({
 function EmptyRecentlySavedState() {
   return (
     <div className="border-border/70 rounded-lg border border-dashed p-8 text-center">
-      <p className="font-semibold text-sm mb-2">No saved configs yet</p>
-      <p className="text-muted-foreground text-xs mb-4">
+      <p className="mb-2 text-sm font-semibold">No saved configs yet</p>
+      <p className="text-muted-foreground mb-4 text-xs">
         Browse the directory and bookmark your favorite configurations to see them here.
       </p>
       <NavLink
-        className="inline-flex font-semibold text-sm text-accent hover:text-accent/80 transition-colors"
+        className="text-accent hover:text-accent/80 inline-flex text-sm font-semibold transition-colors"
         href={ROUTES.HOME}
       >
         Explore directory →

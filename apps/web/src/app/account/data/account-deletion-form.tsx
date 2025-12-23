@@ -5,32 +5,30 @@
  * Allows users to permanently delete their account
  */
 
+import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
 import { Button, FormField, toasts } from '@heyclaude/web-runtime/ui';
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
+import { useState } from 'react';
 
 interface AccountDeletionFormProps {
-  userId: string;
   userEmail: string;
+  userId: string;
 }
 
-export function AccountDeletionForm({ userId, userEmail }: AccountDeletionFormProps) {
+export function AccountDeletionForm({ userEmail, userId }: AccountDeletionFormProps) {
   const [confirmEmail, setConfirmEmail] = useState('');
   const [confirmText, setConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
   const runLoggedAsync = useLoggedAsync({
-    scope: 'AccountDeletionForm',
     defaultMessage: 'Account deletion failed',
     defaultRethrow: false,
+    scope: 'AccountDeletionForm',
   });
 
-  const canDelete =
-    confirmEmail === userEmail &&
-    confirmText.toLowerCase() === 'delete my account';
+  const canDelete = confirmEmail === userEmail && confirmText.toLowerCase() === 'delete my account';
 
   const handleDelete = async () => {
     if (!canDelete) {
@@ -65,13 +63,13 @@ export function AccountDeletionForm({ userId, userEmail }: AccountDeletionFormPr
   return (
     <div className="space-y-4">
       <div className="bg-destructive/10 border-destructive/50 rounded-lg border p-4">
-        <p className="text-destructive font-semibold text-sm mb-2">
+        <p className="text-destructive mb-2 text-sm font-semibold">
           Warning: This action cannot be undone
         </p>
         <p className="text-muted-foreground text-sm">
           Deleting your account will permanently remove all your data including:
         </p>
-        <ul className="text-muted-foreground list-inside list-disc mt-2 space-y-1 text-sm">
+        <ul className="text-muted-foreground mt-2 list-inside list-disc space-y-1 text-sm">
           <li>Your profile and all profile information</li>
           <li>All bookmarks and collections</li>
           <li>All job listings and submissions</li>
@@ -80,42 +78,33 @@ export function AccountDeletionForm({ userId, userEmail }: AccountDeletionFormPr
         </ul>
       </div>
 
-      <FormField
-        label="Confirm Email"
-        description="Enter your email address to confirm"
-        required
-      >
+      <FormField required description="Enter your email address to confirm" label="Confirm Email">
         <input
+          className="border-input bg-background ring-offset-background focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+          onChange={(e) => setConfirmEmail(e.target.value)}
+          placeholder={userEmail}
           type="email"
           value={confirmEmail}
-          onChange={(e) => setConfirmEmail(e.target.value)}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          placeholder={userEmail}
         />
       </FormField>
 
       <FormField
-        label="Type 'delete my account' to confirm"
         description="This confirms you understand this action is permanent"
+        label="Type 'delete my account' to confirm"
         required
       >
         <input
+          className="border-input bg-background ring-offset-background focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+          onChange={(e) => setConfirmText(e.target.value)}
+          placeholder="delete my account"
           type="text"
           value={confirmText}
-          onChange={(e) => setConfirmText(e.target.value)}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          placeholder="delete my account"
         />
       </FormField>
 
-      <Button
-        onClick={handleDelete}
-        disabled={!canDelete || isDeleting}
-        variant="destructive"
-      >
+      <Button disabled={!canDelete || isDeleting} variant="destructive" onClick={handleDelete}>
         {isDeleting ? 'Deleting Account...' : 'Permanently Delete Account'}
       </Button>
     </div>
   );
 }
-

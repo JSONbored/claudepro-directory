@@ -22,11 +22,11 @@
  * - Responsive design
  */
 
-import type { ChangelogEntry } from '@heyclaude/web-runtime/types/changelog';
 import { getChangelogOverview } from '@heyclaude/web-runtime/data/changelog';
 import { APP_CONFIG, QUERY_LIMITS } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { type ChangelogEntry } from '@heyclaude/web-runtime/types/changelog';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { Suspense } from 'react';
@@ -205,7 +205,7 @@ async function ChangelogContentWithData({
         source: null,
         twitter_card: null,
         updated_at: new Date(entry.updated_at ?? ''),
-      } as unknown as ChangelogEntry;
+      } as ChangelogEntry;
     });
 
     // Sort entries by date (newest first) - EXACTLY matches Magic UI template

@@ -4,17 +4,6 @@
  */
 
 import {
-  experience_level as ExperienceLevel,
-  focus_area_type as FocusAreaType,
-  integration_type as IntegrationType,
-  use_case_type as UseCaseType,
-  type content_category,
-  type experience_level,
-  type focus_area_type,
-  type integration_type,
-  type use_case_type,
-} from '@heyclaude/web-runtime/types/client-safe-enums';
-import {
   type GetRecommendationsReturns,
   type RecommendationItem,
 } from '@heyclaude/database-types/postgres-types';
@@ -22,6 +11,17 @@ import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { getConfigRecommendations } from '@heyclaude/web-runtime/data/tools/recommendations';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import {
+  type content_category,
+  type experience_level,
+  experience_level as ExperienceLevel,
+  type focus_area_type,
+  focus_area_type as FocusAreaType,
+  type integration_type,
+  integration_type as IntegrationType,
+  type use_case_type,
+  use_case_type as UseCaseType,
+} from '@heyclaude/web-runtime/types/client-safe-enums';
 import { type Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import { notFound } from 'next/navigation';
@@ -415,11 +415,15 @@ async function ResultsPageContent({
 
   // Section: Recommendations Fetch
   const enrichedResult = await getConfigRecommendations({
-    experienceLevel: answers.experienceLevel as unknown as experience_level,
+    experienceLevel: answers.experienceLevel,
     toolPreferences: answers.toolPreferences,
-    useCase: answers.useCase as unknown as use_case_type,
-    ...(answers.p_integrations && { integrations: answers.p_integrations as unknown as integration_type[] }),
-    ...(answers.p_focus_areas && { focusAreas: answers.p_focus_areas as unknown as focus_area_type[] }),
+    useCase: answers.useCase,
+    ...(answers.p_integrations && {
+      integrations: answers.p_integrations,
+    }),
+    ...(answers.p_focus_areas && {
+      focusAreas: answers.p_focus_areas,
+    }),
   });
   routeLogger.info(
     {

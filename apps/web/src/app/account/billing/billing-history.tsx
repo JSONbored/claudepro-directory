@@ -24,4 +24,3 @@ export function BillingHistory({ userId }: BillingHistoryProps) {
     </div>
   );
 }
-

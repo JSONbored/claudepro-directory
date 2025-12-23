@@ -106,7 +106,7 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="bg-background min-h-screen">
-      <div className="border-b border-border/50 bg-card/50 backdrop-blur-sm px-4 py-4 shadow-sm">
+      <div className="border-border/50 bg-card/50 border-b px-4 py-4 shadow-sm backdrop-blur-sm">
         <div className="container mx-auto flex items-center justify-between">
           <div className="group flex items-center gap-2">
             <Link
@@ -175,7 +175,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
     <Suspense
       fallback={
         <div className="bg-background min-h-screen">
-          <div className="border-b border-border/50 bg-card/50 backdrop-blur-sm px-4 py-4 shadow-sm">
+          <div className="border-border/50 bg-card/50 border-b px-4 py-4 shadow-sm backdrop-blur-sm">
             <div className="container mx-auto flex items-center justify-between">
               <div className="group flex items-center gap-2">
                 <Link
