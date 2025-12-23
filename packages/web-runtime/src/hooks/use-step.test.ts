@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+import { describe, it, expect } from '@jest/globals';
 import { renderHook, act } from '@testing-library/react';
 import { useStep } from './use-step';
 import type { UseStepActions } from './use-step';
 
 describe('useStep', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
 
   it('should initialize with step 1', () => {
     const { result } = renderHook(() => useStep(5));
@@ -303,5 +303,240 @@ describe('useStep', () => {
     });
 
     expect(result.current[0]).toBe(3);
+  });
+
+  it('should handle navigation to all steps', () => {
+    const { result } = renderHook(() => useStep(5));
+
+    // Navigate through all steps
+    for (let step = 1; step <= 5; step++) {
+      act(() => {
+        result.current[1].setStep(step);
+      });
+      expect(result.current[0]).toBe(step);
+    }
+  });
+
+  it('should handle reset from middle step', () => {
+    const { result } = renderHook(() => useStep(10));
+
+    act(() => {
+      result.current[1].setStep(5);
+    });
+
+    expect(result.current[0]).toBe(5);
+
+    act(() => {
+      result.current[1].reset();
+    });
+
+    expect(result.current[0]).toBe(1);
+    expect(result.current[1].canGoToNextStep).toBe(true);
+    expect(result.current[1].canGoToPrevStep).toBe(false);
+  });
+
+  it('should handle reset from max step', () => {
+    const { result } = renderHook(() => useStep(5));
+
+    act(() => {
+      result.current[1].setStep(5);
+    });
+
+    expect(result.current[0]).toBe(5);
+
+    act(() => {
+      result.current[1].reset();
+    });
+
+    expect(result.current[0]).toBe(1);
+  });
+
+  it('should handle reset from step 1 (no-op)', () => {
+    const { result } = renderHook(() => useStep(5));
+
+    expect(result.current[0]).toBe(1);
+
+    act(() => {
+      result.current[1].reset();
+    });
+
+    expect(result.current[0]).toBe(1);
+  });
+
+  it('should handle setStep with function that returns below 1', () => {
+    const { result } = renderHook(() => useStep(5));
+
+    act(() => {
+      result.current[1].setStep(2);
+    });
+
+    act(() => {
+      result.current[1].setStep((prev) => prev - 10); // Would be -8, but clamped to 1
+    });
+
+    expect(result.current[0]).toBe(1);
+  });
+
+  it('should handle setStep with function that returns above maxStep', () => {
+    const { result } = renderHook(() => useStep(5));
+
+    act(() => {
+      result.current[1].setStep(3);
+    });
+
+    act(() => {
+      result.current[1].setStep((prev) => prev + 10); // Would be 13, but clamped to 5
+    });
+
+    expect(result.current[0]).toBe(5);
+  });
+
+  it('should update flags correctly at all boundary positions', () => {
+    const { result } = renderHook(() => useStep(3));
+
+    // Step 1 (first)
+    let [, actions] = result.current;
+    expect(actions.canGoToNextStep).toBe(true);
+    expect(actions.canGoToPrevStep).toBe(false);
+
+    // Step 2 (middle)
+    act(() => {
+      result.current[1].setStep(2);
+    });
+    [, actions] = result.current;
+    expect(actions.canGoToNextStep).toBe(true);
+    expect(actions.canGoToPrevStep).toBe(true);
+
+    // Step 3 (last)
+    act(() => {
+      result.current[1].setStep(3);
+    });
+    [, actions] = result.current;
+    expect(actions.canGoToNextStep).toBe(false);
+    expect(actions.canGoToPrevStep).toBe(true);
+  });
+
+  it('should handle multiple resets', () => {
+    const { result } = renderHook(() => useStep(5));
+
+    act(() => {
+      result.current[1].setStep(3);
+      result.current[1].reset();
+      result.current[1].setStep(4);
+      result.current[1].reset();
+      result.current[1].setStep(5);
+      result.current[1].reset();
+    });
+
+    expect(result.current[0]).toBe(1);
+  });
+
+  it('should handle goToNextStep at max step (no-op)', () => {
+    const { result } = renderHook(() => useStep(3));
+
+    act(() => {
+      result.current[1].setStep(3);
+    });
+
+    expect(result.current[0]).toBe(3);
+
+    act(() => {
+      result.current[1].goToNextStep();
+      result.current[1].goToNextStep();
+      result.current[1].goToNextStep();
+    });
+
+    expect(result.current[0]).toBe(3);
+  });
+
+  it('should handle goToPrevStep at step 1 (no-op)', () => {
+    const { result } = renderHook(() => useStep(5));
+
+    expect(result.current[0]).toBe(1);
+
+    act(() => {
+      result.current[1].goToPrevStep();
+      result.current[1].goToPrevStep();
+      result.current[1].goToPrevStep();
+    });
+
+    expect(result.current[0]).toBe(1);
+  });
+
+  it('should handle large maxStep values', () => {
+    const { result } = renderHook(() => useStep(100));
+
+    expect(result.current[0]).toBe(1);
+    expect(result.current[1].canGoToNextStep).toBe(true);
+
+    act(() => {
+      result.current[1].setStep(50);
+    });
+
+    expect(result.current[0]).toBe(50);
+    expect(result.current[1].canGoToNextStep).toBe(true);
+    expect(result.current[1].canGoToPrevStep).toBe(true);
+
+    act(() => {
+      result.current[1].setStep(100);
+    });
+
+    expect(result.current[0]).toBe(100);
+    expect(result.current[1].canGoToNextStep).toBe(false);
+    expect(result.current[1].canGoToPrevStep).toBe(true);
+  });
+
+  it('should handle navigation through entire range', () => {
+    const { result } = renderHook(() => useStep(5));
+
+    // Forward navigation
+    for (let i = 1; i < 5; i++) {
+      act(() => {
+        result.current[1].goToNextStep();
+      });
+      expect(result.current[0]).toBe(i + 1);
+    }
+
+    // Backward navigation
+    for (let i = 5; i > 1; i--) {
+      act(() => {
+        result.current[1].goToPrevStep();
+      });
+      expect(result.current[0]).toBe(i - 1);
+    }
+  });
+
+  it('should handle setStep with exact boundary values', () => {
+    const { result } = renderHook(() => useStep(5));
+
+    act(() => {
+      result.current[1].setStep(1);
+    });
+    expect(result.current[0]).toBe(1);
+
+    act(() => {
+      result.current[1].setStep(5);
+    });
+    expect(result.current[0]).toBe(5);
+  });
+
+  it('should work with multiple hook instances independently', () => {
+    const { result: result1 } = renderHook(() => useStep(5));
+    const { result: result2 } = renderHook(() => useStep(10));
+
+    act(() => {
+      result1.current[1].setStep(3);
+      result2.current[1].setStep(7);
+    });
+
+    expect(result1.current[0]).toBe(3);
+    expect(result2.current[0]).toBe(7);
+
+    act(() => {
+      result1.current[1].reset();
+    });
+
+    expect(result1.current[0]).toBe(1);
+    expect(result2.current[0]).toBe(7); // Unchanged
   });
 });

@@ -507,7 +507,7 @@ function CompanyStats({
 
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground text-sm">Active Openings</span>
-            <span className="font-semibold text-[var(--color-success)]">{stats?.active_jobs ?? 0}</span>
+            <span className="font-semibold text-success">{stats?.active_jobs ?? 0}</span>
           </div>
 
           {stats && (stats.remote_jobs ?? 0) > 0 ? (

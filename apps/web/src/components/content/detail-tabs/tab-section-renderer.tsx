@@ -247,7 +247,7 @@ export function TabSectionRenderer({
           title="Troubleshooting"
           description="Common issues and solutions"
           items={troubleshooting}
-          dotColor="bg-[var(--color-error)]"
+          dotColor="bg-error"
         />
       );
     }

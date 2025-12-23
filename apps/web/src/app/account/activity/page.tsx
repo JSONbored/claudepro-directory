@@ -224,7 +224,7 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                <GitPullRequest className="h-5 w-5 text-[var(--color-info)]" />
+                <GitPullRequest className="h-5 w-5 text-info" />
                 <span className="text-2xl font-bold">
                   {summary.merged_submissions}/{summary.total_submissions}
                 </span>

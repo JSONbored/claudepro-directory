@@ -595,12 +595,12 @@ async function SubmissionsPageContent({
       )}
 
       {/* Info Card */}
-      <Card className="border-[var(--color-info-border)] bg-[var(--color-info-bg)]">
+      <Card className="border-info-border bg-info-bg">
         <CardContent className="pt-6">
           <div className="flex gap-2">
-            <GitPullRequest className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--color-info)]" />
+            <GitPullRequest className="mt-0.5 h-5 w-5 flex-shrink-0 text-info" />
             <div className="flex-1">
-              <p className="text-sm-medium text-[var(--color-info)]">How it works</p>
+              <p className="text-sm-medium text-info">How it works</p>
               <p className="text-muted-foreground mt-1 text-sm">
                 When you submit a configuration, we automatically create a Pull Request on GitHub.
                 Our team reviews it for quality, security, and accuracy. Once approved and merged,

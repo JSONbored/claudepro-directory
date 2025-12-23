@@ -531,7 +531,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
           transition={springSmooth}
         >
-          <Card className="mb-6 border-[var(--color-success-border)] bg-[var(--color-success-bg)]">
+          <Card className="mb-6 border-success-border bg-success-bg">
             <CardContent className="pt-6">
               <div className="flex flex-col items-center">
                 <motion.div
@@ -667,7 +667,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
                     transition={springBouncy}
                   >
-                    <CheckCircle className={cn('h-4 w-4', 'text-[var(--color-success)]')} />
+                    <CheckCircle className={cn('h-4 w-4', 'text-success')} />
                   </motion.div>
                 )}
               </div>

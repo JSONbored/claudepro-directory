@@ -247,11 +247,11 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
             <Card className="relative overflow-hidden border-2">
               <CardHeader>
                 <div className="mb-4 flex items-start justify-between">
-                  <div className="rounded-lg bg-[var(--color-info-bg)] p-3">
-                    <Briefcase className="h-6 w-6 text-[var(--color-info)]" />
+                  <div className="rounded-lg bg-info-bg p-3">
+                    <Briefcase className="h-6 w-6 text-info" />
                   </div>
                   <UnifiedBadge
-                    className="border-[var(--color-info-border)] bg-[var(--color-info-bg)]"
+                    className="border-info-border bg-info-bg"
                     style="outline"
                     variant="base"
                   >
@@ -283,23 +283,23 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                 {/* Features */}
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-[var(--color-success)]" />
+                    <Check className="mt-0.5 h-4 w-4 text-success" />
                     <p className="text-sm">Featured in /jobs section</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-[var(--color-success)]" />
+                    <Check className="mt-0.5 h-4 w-4 text-success" />
                     <p className="text-sm">Company logo & branding</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-[var(--color-success)]" />
+                    <Check className="mt-0.5 h-4 w-4 text-success" />
                     <p className="text-sm">Apply button to your ATS</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-[var(--color-success)]" />
+                    <Check className="mt-0.5 h-4 w-4 text-success" />
                     <p className="text-sm">{pricing.jobs.durationDays}-day visibility</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-[var(--color-success)]" />
+                    <Check className="mt-0.5 h-4 w-4 text-success" />
                     <p className="text-sm">Analytics dashboard</p>
                   </div>
                 </div>
@@ -354,23 +354,23 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                 {/* Features */}
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-[var(--color-success)]" />
+                    <Check className="mt-0.5 h-4 w-4 text-success" />
                     <p className="text-sm">Top placement in category</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-[var(--color-success)]" />
+                    <Check className="mt-0.5 h-4 w-4 text-success" />
                     <p className="text-sm">&quot;Sponsored&quot; badge</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-[var(--color-success)]" />
+                    <Check className="mt-0.5 h-4 w-4 text-success" />
                     <p className="text-sm">Homepage feature rotation</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-[var(--color-success)]" />
+                    <Check className="mt-0.5 h-4 w-4 text-success" />
                     <p className="text-sm">Analytics dashboard</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-[var(--color-success)]" />
+                    <Check className="mt-0.5 h-4 w-4 text-success" />
                     <p className="text-sm">Custom call-to-action</p>
                   </div>
                 </div>

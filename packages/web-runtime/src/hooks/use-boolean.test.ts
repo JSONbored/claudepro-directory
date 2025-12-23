@@ -1,4 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+import { describe, it, expect } from '@jest/globals';
 import { renderHook, act } from '@testing-library/react';
 import { useBoolean } from './use-boolean.ts';
 

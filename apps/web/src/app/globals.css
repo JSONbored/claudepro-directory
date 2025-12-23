@@ -1112,21 +1112,27 @@
   --color-category-agents: var(--color-category-agents);
   --color-category-agents-bg: var(--color-category-agents-bg);
   --color-category-agents-border: var(--color-category-agents-border);
+  --color-category-agents-hover: var(--color-category-agents-hover);
   --color-category-mcp: var(--color-category-mcp);
   --color-category-mcp-bg: var(--color-category-mcp-bg);
   --color-category-mcp-border: var(--color-category-mcp-border);
+  --color-category-mcp-hover: var(--color-category-mcp-hover);
   --color-category-commands: var(--color-category-commands);
   --color-category-commands-bg: var(--color-category-commands-bg);
   --color-category-commands-border: var(--color-category-commands-border);
+  --color-category-commands-hover: var(--color-category-commands-hover);
   --color-category-rules: var(--color-category-rules);
   --color-category-rules-bg: var(--color-category-rules-bg);
   --color-category-rules-border: var(--color-category-rules-border);
+  --color-category-rules-hover: var(--color-category-rules-hover);
   --color-category-hooks: var(--color-category-hooks);
   --color-category-hooks-bg: var(--color-category-hooks-bg);
   --color-category-hooks-border: var(--color-category-hooks-border);
+  --color-category-hooks-hover: var(--color-category-hooks-hover);
   --color-category-statuslines: var(--color-category-statuslines);
   --color-category-statuslines-bg: var(--color-category-statuslines-bg);
   --color-category-statuslines-border: var(--color-category-statuslines-border);
+  --color-category-statuslines-hover: var(--color-category-statuslines-hover);
   
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);

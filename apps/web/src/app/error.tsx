@@ -55,7 +55,7 @@ function ErrorCodeBlock({ content }: { content: string }) {
         }}
       >
         {copied ? (
-          <Check aria-hidden="true" className="h-3 w-3 text-[var(--color-success)]" />
+          <Check aria-hidden="true" className="h-3 w-3 text-success" />
         ) : (
           <Copy aria-hidden="true" className="h-3 w-3" />
         )}

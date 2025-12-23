@@ -384,8 +384,8 @@ export function ConsultingClient() {
                 title: 'Full-Stack Development',
                 description:
                   'End-to-end application development from database design to polished UI. React, Next.js, TypeScript, and modern web technologies.',
-                color: 'from-[var(--color-info-bg)] to-[var(--color-info-bg)]',
-                borderColor: 'border-[var(--color-info-border)]',
+                color: 'from-info-bg to-info-bg',
+                borderColor: 'border-info-border',
               },
               {
                 icon: Network,
@@ -408,24 +408,24 @@ export function ConsultingClient() {
                 title: 'Database Design',
                 description:
                   'PostgreSQL optimization, schema design, query performance tuning, and data architecture for scalable applications.',
-                color: 'from-[var(--color-success-bg)] to-[var(--color-success-bg)]',
-                borderColor: 'border-[var(--color-success-border)]',
+                color: 'from-success-bg to-success-bg',
+                borderColor: 'border-success-border',
               },
               {
                 icon: Sparkles,
                 title: 'AI/LLM Engineering',
                 description:
                   'Building AI-powered applications, prompt engineering, and integrating LLMs into production systems effectively.',
-                color: 'from-[var(--color-warning-bg)] to-[var(--color-warning-bg)]',
-                borderColor: 'border-[var(--color-warning-border)]',
+                color: '-from-warning-bg to-warning-bg',
+                borderColor: 'border-warning-border',
               },
               {
                 icon: TrendingUp,
                 title: 'Systems Architecture',
                 description:
                   'Designing scalable, maintainable systems that grow with your business. From monoliths to microservices and beyond.',
-                color: 'from-[var(--color-info-bg)] to-[var(--color-info-bg)]',
-                borderColor: 'border-[var(--color-info-border)]',
+                color: 'from-info-bg to-info-bg',
+                borderColor: 'border-info-border',
               },
             ].map((service) => {
               const Icon = service.icon;

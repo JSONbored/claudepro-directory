@@ -490,20 +490,20 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
         </CardHeader>
         <CardContent className="grid grid-cols-3 gap-2">
           {/* Total */}
-          <div className={cn('rounded-lg p-3 text-center', 'bg-[var(--color-info-bg)]')}>
-            <div className="text-2xl font-bold text-[var(--color-info)]">{stats.total}</div>
+          <div className={cn('rounded-lg p-3 text-center', 'bg-info-bg')}>
+            <div className="text-2xl font-bold text-info">{stats.total}</div>
             <div className="text-muted-foreground text-xs">Total</div>
           </div>
 
           {/* Pending */}
-          <div className={cn('rounded-lg p-3 text-center', 'bg-[var(--color-warning-bg)]')}>
-            <div className="text-2xl font-bold text-[var(--color-warning)]">{stats.pending}</div>
+          <div className={cn('rounded-lg p-3 text-center', 'bg-warning-bg')}>
+            <div className="text-2xl font-bold text-warning">{stats.pending}</div>
             <div className="text-muted-foreground text-xs">Pending</div>
           </div>
 
           {/* This Week */}
-          <div className={cn('rounded-lg p-3 text-center', 'bg-[var(--color-success-bg)]')}>
-            <div className="text-2xl font-bold text-[var(--color-success)]">{stats.merged_this_week}</div>
+          <div className={cn('rounded-lg p-3 text-center', 'bg-success-bg')}>
+            <div className="text-2xl font-bold text-success">{stats.merged_this_week}</div>
             <div className="text-muted-foreground text-xs">This Week</div>
           </div>
         </CardContent>

@@ -333,11 +333,11 @@ async function JobAnalyticsPageContent({
             )}
 
             {viewCount > 0 && clickCount === 0 && (
-              <div className="card-base border-[var(--color-warning-border)] bg-[var(--color-warning-bg)] p-4">
-                <p className="text-sm text-[var(--color-warning)]">
+              <div className="card-base border-warning-border bg-warning-bg p-4">
+                <p className="text-sm text-warning">
                   Your listing is getting views but no clicks. Consider:
                 </p>
-                <ul className="mt-2 ml-4 list-disc text-sm text-[var(--color-warning)]">
+                <ul className="mt-2 ml-4 list-disc text-sm text-warning">
                   <li>Making the job title more descriptive</li>
                   <li>Highlighting competitive benefits</li>
                   <li>Adding salary information</li>
@@ -346,8 +346,8 @@ async function JobAnalyticsPageContent({
             )}
 
             {Number.parseFloat(ctr) > 5 && (
-              <div className="card-base border-[var(--color-success-border)] bg-[var(--color-success-bg)] p-4">
-                <p className="text-sm text-[var(--color-success)]">
+              <div className="card-base border-success-border bg-success-bg p-4">
+                <p className="text-sm text-success">
                   Great performance! Your CTR of {ctr}% is above average. Keep it up!
                 </p>
               </div>

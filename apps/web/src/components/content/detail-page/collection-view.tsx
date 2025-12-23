@@ -200,7 +200,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-1 text-lg">
-              <AlertTriangle className="h-5 w-5 text-[var(--color-warning)]" aria-hidden="true" />
+              <AlertTriangle className="h-5 w-5 text-warning" aria-hidden="true" />
               Prerequisites
             </CardTitle>
           </CardHeader>

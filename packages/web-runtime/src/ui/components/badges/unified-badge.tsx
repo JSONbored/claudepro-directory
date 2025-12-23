@@ -140,9 +140,9 @@ const categoryBadgeStyles = {
 } as const satisfies Partial<Record<content_category, string>>;
 
 const sourceBadgeStyles = {
-  official: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)] border-[var(--color-warning-border)]',
-  partner: 'bg-[var(--color-info-bg)] text-[var(--color-info)] border-[var(--color-info-border)]',
-  community: 'bg-[var(--color-success-bg)] text-[var(--color-success)] border-[var(--color-success-border)]',
+  official: 'bg-warning-bg text-warning border-warning-border',
+  partner: 'bg-info-bg text-info border-info-border',
+  community: 'bg-success-bg text-success border-success-border',
   verified: 'bg-primary/10 text-primary border-primary/20',
   experimental: 'bg-primary/10 text-primary border-primary/20',
   other: 'bg-muted/50 text-muted-foreground border-border',
@@ -151,17 +151,17 @@ const sourceBadgeStyles = {
 const statusBadgeStyles = {
   active: 'bg-accent text-accent-foreground shadow-lg shadow-primary/25',
   trending: 'bg-primary/10 text-primary border-primary/20',
-  new: 'bg-[var(--color-success-bg)] text-[var(--color-success)] border-[var(--color-success-border)]',
-  updated: 'bg-[var(--color-info-bg)] text-[var(--color-info)] border-[var(--color-info-border)]',
-  deprecated: 'bg-[var(--color-error-bg)] text-[var(--color-error)] border-[var(--color-error-border)]',
+  new: 'bg-success-bg text-success border-success-border',
+  updated: 'bg-info-bg text-info border-info-border',
+  deprecated: 'bg-error-bg text-error border-error-border',
 } as const;
 
 /**
  * Sponsored badge styles (from sponsored-badge.tsx)
  */
 const sponsoredBadgeStyles = {
-  featured: 'border-[var(--color-warning-border)] bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
-  promoted: 'border-[var(--color-info-border)] bg-[var(--color-info-bg)] text-[var(--color-info)]',
+  featured: 'border-warning-border bg-warning-bg text-warning',
+  promoted: 'border-info-border bg-info-bg text-info',
   spotlight: 'border-primary/30 bg-primary/10 text-primary',
   sponsored: 'border-muted-foreground/30 bg-muted/50 text-muted-foreground',
 } as const;
@@ -573,7 +573,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     const children = props.children || 'NEW';
 
     const variantStyles = {
-      default: 'bg-[var(--color-success-bg)] text-[var(--color-success)] border-[var(--color-success-border)]',
+      default: 'bg-success-bg text-success border-success-border',
       outline: 'bg-accent/10 text-accent border-accent/20',
     };
 
@@ -582,7 +582,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         className={cn(
           'inline-flex items-center justify-center',
           'px-2.5 py-0.5',
-          'text-[10px] font-semibold tracking-wide uppercase',
+          'text-2xs font-semibold tracking-wide uppercase', // 10px = text-2xs
           'rounded-full border',
           variantStyles[badgeVariant],
           props.className

@@ -126,8 +126,9 @@ module.exports = {
   ],
   
   // Transform ignore patterns - don't transform pre-built dist files
+  // Exception: Transform next-safe-action (ESM module) for real middleware testing
   transformIgnorePatterns: [
-    '/node_modules/',
+    '/node_modules/(?!(next-safe-action)/)',
     // Don't transform prismocker dist files (they're already compiled)
     '/packages/prismocker/dist/',
   ],

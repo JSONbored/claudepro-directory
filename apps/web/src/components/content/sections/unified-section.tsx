@@ -574,7 +574,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           {...(props.icon && { icon: props.icon })}
           {...(props.className && { className: props.className })}
         >
-          <EnhancedList items={props.items} color={props.dotColor || 'bg-[var(--color-error)]'} />
+          <EnhancedList items={props.items} color={props.dotColor || 'bg-error'} />
         </Wrapper>
       );
     }

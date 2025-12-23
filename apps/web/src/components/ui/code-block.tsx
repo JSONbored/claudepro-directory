@@ -250,6 +250,7 @@ const lineNumberClassNames = cn(
 );
 
 const darkModeClassNames = cn(
+  // Shiki theme colors use CSS variables (required by Shiki library)
   'dark:[&_.shiki]:!text-[var(--shiki-dark)]',
   'dark:[&_.shiki]:!bg-[var(--shiki-dark-bg)]',
   'dark:[&_.shiki]:![font-style:var(--shiki-dark-font-style)]',
@@ -262,8 +263,8 @@ const darkModeClassNames = cn(
 );
 
 const lineHighlightClassNames = cn(
-  '[&_.line.highlighted]:bg-[var(--color-info-bg)]',
-  '[&_.line.highlighted]:after:bg-[var(--color-info)]',
+  '[&_.line.highlighted]:bg-info-bg',
+  '[&_.line.highlighted]:after:bg-info',
   '[&_.line.highlighted]:after:absolute',
   '[&_.line.highlighted]:after:left-0',
   '[&_.line.highlighted]:after:top-0',
@@ -277,10 +278,10 @@ const lineDiffClassNames = cn(
   '[&_.line.diff]:after:top-0',
   '[&_.line.diff]:after:bottom-0',
   '[&_.line.diff]:after:w-0.5',
-  '[&_.line.diff.add]:bg-[var(--color-success-bg)]',
-  '[&_.line.diff.add]:after:bg-[var(--color-success)]',
-  '[&_.line.diff.remove]:bg-[var(--color-error-bg)]',
-  '[&_.line.diff.remove]:after:bg-[var(--color-error)]'
+  '[&_.line.diff.add]:bg-success-bg',
+  '[&_.line.diff.add]:after:bg-success',
+  '[&_.line.diff.remove]:bg-error-bg',
+  '[&_.line.diff.remove]:after:bg-error'
 );
 
 const lineFocusedClassNames = cn(
@@ -289,7 +290,7 @@ const lineFocusedClassNames = cn(
 );
 
 const wordHighlightClassNames = cn(
-  '[&_.highlighted-word]:bg-[var(--color-info-bg)]'
+  '[&_.highlighted-word]:bg-info-bg'
 );
 
 const codeBlockClassName = cn(

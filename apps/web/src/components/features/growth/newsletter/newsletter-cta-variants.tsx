@@ -207,7 +207,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
           transition={{ delay: STAGGER.comfortable }}
         >
           <div className={cn('flex items-center gap-2')}>
-            <span className={cn('inline-flex', 'h-6 w-6', 'rounded-full bg-[var(--color-success)]')} />
+            <span className={cn('inline-flex', 'h-6 w-6', 'rounded-full bg-success')} />
             {isLoading ? (
               <span className={cn('text-muted-foreground', 'text-xs')}>
                 <span className="bg-muted/50 inline-block h-3 w-14 animate-pulse rounded" />

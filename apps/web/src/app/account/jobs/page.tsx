@@ -632,7 +632,7 @@ async function JobsListWithBilling({
   const getPlanBadge = (plan: job_plan | null | undefined, tier?: job_tier | null): React.JSX.Element | null => {
     if (tier === 'featured') {
       return (
-        <UnifiedBadge className="border-[var(--color-info-border)] bg-[var(--color-info-bg)] text-[var(--color-info)]" variant="base">
+        <UnifiedBadge className="border-info-border bg-info-bg text-info" variant="base">
           Featured
         </UnifiedBadge>
       );
