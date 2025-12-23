@@ -265,7 +265,7 @@ function CommunityIconsRow({
             <Github className="h-4 w-4" />
             {githubStars !== null && (
               <span
-                className={cn('absolute -top-1 -right-1', 'text-[10px]', 'text-accent font-medium')}
+                className={cn('absolute -top-1 -right-1', 'text-xs', 'text-accent font-medium')} // 10px
               >
                 {githubStars > 999
                   ? `${(githubStars / 1000).toFixed(1)}k`
@@ -346,8 +346,8 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                   >
                     {/* Animated gradient border */}
                     <AnimatedBorder
-                      colorFrom="rgba(249, 115, 22, 0.4)"
-                      colorTo="rgba(249, 115, 22, 0.2)"
+                      colorFrom="var(--color-primary-glow-from)"
+                      colorTo="var(--color-primary-glow-to)"
                       duration={4}
                       borderWidth={1.5}
                     />
@@ -613,7 +613,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                                     href={null}
                                                     className={cn(
                                                       'shrink-0',
-                                                      'text-[10px]',
+                                                      'text-xs', // 10px
                                                       'px-1.5',
                                                       'py-0'
                                                     )}
@@ -641,7 +641,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                                 <p
                                                   className={cn(
                                                     'text-muted-foreground',
-                                                    'text-[11px]',
+                                                    'text-sm', // 11px
                                                     'word-break-break-word line-clamp-1 leading-snug break-words',
                                                     'ml-8'
                                                   )}
@@ -828,7 +828,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                                       href={null}
                                                       className={cn(
                                                         'shrink-0',
-                                                        'text-[10px]',
+                                                        'text-xs', // 10px
                                                         'px-1.5',
                                                         'py-0'
                                                       )}
@@ -1011,7 +1011,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                                       href={null}
                                                       className={cn(
                                                         'shrink-0',
-                                                        'text-[10px]',
+                                                        'text-xs', // 10px
                                                         'px-1.5',
                                                         'py-0'
                                                       )}
@@ -1214,7 +1214,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                 <motion.div
                                   whileHover={{
                                     ...MICROINTERACTIONS.card.hover,
-                                    backgroundColor: 'rgba(249, 115, 22, 0.05)', // Preserve exact original background (accent/5)
+                                    backgroundColor: 'var(--color-primary-hover-bg)',
                                     y: 0, // Preserve original (no y movement for these links)
                                   }}
                                   whileTap={MICROINTERACTIONS.card.tap}

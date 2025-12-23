@@ -60,17 +60,17 @@ export function SecurityAlerts({ userId }: SecurityAlertsProps) {
 
         const bgColor =
           alert.type === 'success'
-            ? 'bg-green-500/10 border-green-500/20'
+            ? 'bg-[var(--color-success-bg)] border-[var(--color-success-border)]'
             : alert.type === 'warning'
-            ? 'bg-yellow-500/10 border-yellow-500/20'
-            : 'bg-blue-500/10 border-blue-500/20';
+            ? 'bg-[var(--color-warning-bg)] border-[var(--color-warning-border)]'
+            : 'bg-[var(--color-info-bg)] border-[var(--color-info-border)]';
 
         const textColor =
           alert.type === 'success'
-            ? 'text-green-600 dark:text-green-400'
+            ? 'text-[var(--color-success)]'
             : alert.type === 'warning'
-            ? 'text-yellow-600 dark:text-yellow-400'
-            : 'text-blue-600 dark:text-blue-400';
+            ? 'text-[var(--color-warning)]'
+            : 'text-[var(--color-info)]';
 
         return (
           <div

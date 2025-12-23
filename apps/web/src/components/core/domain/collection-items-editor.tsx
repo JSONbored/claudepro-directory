@@ -294,7 +294,7 @@ export function CollectionItemManager({
                       <UnifiedBadge
                         variant="base"
                         style="outline"
-                        className="text-[10px] capitalize"
+                        className="text-xs capitalize" // 10px
                       >
                         {bookmark.content_type}
                       </UnifiedBadge>
@@ -377,7 +377,7 @@ export function CollectionItemManager({
               {/* Content Info */}
               <div className={`flex-1`}>
                 <div className="flex items-center gap-2">
-                  <UnifiedBadge variant="base" style="outline" className="text-[10px] capitalize">
+                  <UnifiedBadge variant="base" style="outline" className="text-xs capitalize"> {/* 10px */}
                     {item.content_type}
                   </UnifiedBadge>
                   <span className="text-sm-medium">{item.content_slug}</span>

@@ -119,7 +119,7 @@ export function OAuthProviderButton({
       {/* Circular icon button */}
       <motion.div
         className={cn(
-          'flex h-16 w-16 items-center justify-center rounded-full border bg-white/5',
+          'flex h-16 w-16 items-center justify-center rounded-full border bg-foreground/5',
           'border-color-border-focus',
           loading && 'cursor-wait'
         )}
@@ -129,7 +129,7 @@ export function OAuthProviderButton({
               whileHover: {
                 ...MICROINTERACTIONS.iconButton.hover,
                 scale: 1.05, // Preserve exact original scale (design token is 1.1, but original was 1.05)
-                backgroundColor: 'rgba(255, 255, 255, 0.1)', // Preserve original hover background
+                backgroundColor: 'var(--foreground) / 0.1', // Use theme foreground with opacity
               },
             })}
         transition={MICROINTERACTIONS.iconButton.transition}

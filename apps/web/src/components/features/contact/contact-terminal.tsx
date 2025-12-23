@@ -554,7 +554,7 @@ export function ContactTerminal() {
                 className={cn(
                   'flex items-start gap-2',
                   line.type === 'error' && 'text-destructive',
-                  line.type === 'success' && 'text-green-500',
+                  line.type === 'success' && 'text-success',
                   line.type === 'command' && 'text-primary font-semibold'
                 )}
               >

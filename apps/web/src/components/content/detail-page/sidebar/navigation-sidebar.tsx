@@ -399,11 +399,11 @@ export const DetailSidebar = memo(function DetailSidebar({
                 <div>
                   <h4 className="mb-1 font-medium">Temperature</h4>
                   <div className="flex items-center gap-2">
-                    <Thermometer className="h-3 w-3 text-orange-500" />
+                    <Thermometer className="h-3 w-3 text-warning" />
                     <UnifiedBadge
                       variant="base"
                       style="outline"
-                      className="text-xs-medium border-orange-500/30 bg-orange-500/10 text-orange-600"
+                      className="text-xs-medium border-warning-border bg-warning-bg text-warning"
                     >
                       {String(temperature)}
                     </UnifiedBadge>

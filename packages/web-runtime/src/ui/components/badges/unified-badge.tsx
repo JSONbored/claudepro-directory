@@ -140,29 +140,29 @@ const categoryBadgeStyles = {
 } as const satisfies Partial<Record<content_category, string>>;
 
 const sourceBadgeStyles = {
-  official: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  partner: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  community: 'bg-green-500/10 text-green-400 border-green-500/20',
-  verified: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-  experimental: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  other: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+  official: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)] border-[var(--color-warning-border)]',
+  partner: 'bg-[var(--color-info-bg)] text-[var(--color-info)] border-[var(--color-info-border)]',
+  community: 'bg-[var(--color-success-bg)] text-[var(--color-success)] border-[var(--color-success-border)]',
+  verified: 'bg-primary/10 text-primary border-primary/20',
+  experimental: 'bg-primary/10 text-primary border-primary/20',
+  other: 'bg-muted/50 text-muted-foreground border-border',
 } as const;
 
 const statusBadgeStyles = {
   active: 'bg-accent text-accent-foreground shadow-lg shadow-primary/25',
   trending: 'bg-primary/10 text-primary border-primary/20',
-  new: 'bg-green-500/10 text-green-400 border-green-500/20',
-  updated: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  deprecated: 'bg-red-500/10 text-red-400 border-red-500/20',
+  new: 'bg-[var(--color-success-bg)] text-[var(--color-success)] border-[var(--color-success-border)]',
+  updated: 'bg-[var(--color-info-bg)] text-[var(--color-info)] border-[var(--color-info-border)]',
+  deprecated: 'bg-[var(--color-error-bg)] text-[var(--color-error)] border-[var(--color-error-border)]',
 } as const;
 
 /**
  * Sponsored badge styles (from sponsored-badge.tsx)
  */
 const sponsoredBadgeStyles = {
-  featured: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
-  promoted: 'border-blue-500/30 bg-blue-500/10 text-blue-400',
-  spotlight: 'border-purple-500/30 bg-purple-500/10 text-purple-400',
+  featured: 'border-[var(--color-warning-border)] bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
+  promoted: 'border-[var(--color-info-border)] bg-[var(--color-info-bg)] text-[var(--color-info)]',
+  spotlight: 'border-primary/30 bg-primary/10 text-primary',
   sponsored: 'border-muted-foreground/30 bg-muted/50 text-muted-foreground',
 } as const;
 
@@ -573,7 +573,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     const children = props.children || 'NEW';
 
     const variantStyles = {
-      default: 'bg-green-500/10 text-green-400 border-green-500/20',
+      default: 'bg-[var(--color-success-bg)] text-[var(--color-success)] border-[var(--color-success-border)]',
       outline: 'bg-accent/10 text-accent border-accent/20',
     };
 

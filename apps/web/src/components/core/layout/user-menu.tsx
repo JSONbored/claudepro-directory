@@ -20,6 +20,7 @@
  */
 
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import { useUserProfileImage } from '@heyclaude/web-runtime/hooks/use-user-profile-image';
 import {
   Activity,
   BarChart,
@@ -75,6 +76,7 @@ export function UserMenu({ className }: UserMenuProps) {
   const { user, status, supabaseClient } = useAuthenticatedUser({
     context: 'UserMenu',
   });
+  const profileImageUrl = useUserProfileImage(); // Database profile image (cached)
   const loading = status === 'loading';
   const supabase = supabaseClient;
 
@@ -149,7 +151,9 @@ export function UserMenu({ className }: UserMenuProps) {
   const userMetadata = user.user_metadata;
   const displayName =
     userMetadata?.['name'] || userMetadata?.['full_name'] || user.email?.split('@')[0];
-  const avatarUrl = userMetadata?.['avatar_url'] || userMetadata?.['picture'];
+  // Prefer database profile image over OAuth metadata image (fallback chain)
+  const metadataAvatarUrl = userMetadata?.['avatar_url'] || userMetadata?.['picture'];
+  const avatarUrl = profileImageUrl || metadataAvatarUrl || null;
   const initials =
     displayName
       ?.split(' ')
@@ -209,7 +213,7 @@ export function UserMenu({ className }: UserMenuProps) {
 
           {/* Dashboard Link */}
           <motion.div
-            whileHover={shouldReduceMotion ? {} : { backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+            whileHover={shouldReduceMotion ? {} : { backgroundColor: 'var(--color-primary-hover-bg)' }}
             transition={MICROINTERACTIONS.colorTransition.default}
             className="mb-2"
           >
@@ -227,7 +231,7 @@ export function UserMenu({ className }: UserMenuProps) {
             <div className={cn('px-3', 'py-1.5', 'mb-1')}>
               <p
                 className={cn(
-                  'text-[10px]',
+                  'text-xs', // 10px
                   'font-semibold',
                   'text-muted-foreground',
                   'uppercase opacity-70',
@@ -239,7 +243,7 @@ export function UserMenu({ className }: UserMenuProps) {
             </div>
             <div className="space-y-3.5">
               <motion.div
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                whileHover={{ backgroundColor: 'var(--color-primary-hover-bg)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
@@ -251,7 +255,7 @@ export function UserMenu({ className }: UserMenuProps) {
                 </Link>
               </motion.div>
               <motion.div
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                whileHover={{ backgroundColor: 'var(--color-primary-hover-bg)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
@@ -263,7 +267,7 @@ export function UserMenu({ className }: UserMenuProps) {
                 </Link>
               </motion.div>
               <motion.div
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                whileHover={{ backgroundColor: 'var(--color-primary-hover-bg)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
@@ -275,7 +279,7 @@ export function UserMenu({ className }: UserMenuProps) {
                 </Link>
               </motion.div>
               <motion.div
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                whileHover={{ backgroundColor: 'var(--color-primary-hover-bg)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
@@ -294,7 +298,7 @@ export function UserMenu({ className }: UserMenuProps) {
             <div className={cn('px-3', 'py-1.5', 'mb-1')}>
               <p
                 className={cn(
-                  'text-[10px]',
+                  'text-xs', // 10px
                   'font-semibold',
                   'text-muted-foreground',
                   'uppercase opacity-70',
@@ -306,7 +310,7 @@ export function UserMenu({ className }: UserMenuProps) {
             </div>
             <div className="space-y-3.5">
               <motion.div
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                whileHover={{ backgroundColor: 'var(--color-primary-hover-bg)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
@@ -318,7 +322,7 @@ export function UserMenu({ className }: UserMenuProps) {
                 </Link>
               </motion.div>
               <motion.div
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                whileHover={{ backgroundColor: 'var(--color-primary-hover-bg)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
@@ -337,7 +341,7 @@ export function UserMenu({ className }: UserMenuProps) {
             <div className={cn('px-3', 'py-1.5', 'mb-1')}>
               <p
                 className={cn(
-                  'text-[10px]',
+                  'text-xs', // 10px
                   'font-semibold',
                   'text-muted-foreground',
                   'uppercase opacity-70',
@@ -349,7 +353,7 @@ export function UserMenu({ className }: UserMenuProps) {
             </div>
             <div className="space-y-3.5">
               <motion.div
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                whileHover={{ backgroundColor: 'var(--color-primary-hover-bg)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
@@ -361,7 +365,7 @@ export function UserMenu({ className }: UserMenuProps) {
                 </Link>
               </motion.div>
               <motion.div
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                whileHover={{ backgroundColor: 'var(--color-primary-hover-bg)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
@@ -373,7 +377,7 @@ export function UserMenu({ className }: UserMenuProps) {
                 </Link>
               </motion.div>
               <motion.div
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                whileHover={{ backgroundColor: 'var(--color-primary-hover-bg)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
@@ -385,7 +389,7 @@ export function UserMenu({ className }: UserMenuProps) {
                 </Link>
               </motion.div>
               <motion.div
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                whileHover={{ backgroundColor: 'var(--color-primary-hover-bg)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
@@ -397,7 +401,7 @@ export function UserMenu({ className }: UserMenuProps) {
                 </Link>
               </motion.div>
               <motion.div
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                whileHover={{ backgroundColor: 'var(--color-primary-hover-bg)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
@@ -409,7 +413,7 @@ export function UserMenu({ className }: UserMenuProps) {
                 </Link>
               </motion.div>
               <motion.div
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                whileHover={{ backgroundColor: 'var(--color-primary-hover-bg)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
@@ -421,7 +425,7 @@ export function UserMenu({ className }: UserMenuProps) {
                 </Link>
               </motion.div>
               <motion.div
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                whileHover={{ backgroundColor: 'var(--color-primary-hover-bg)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
@@ -433,7 +437,7 @@ export function UserMenu({ className }: UserMenuProps) {
                 </Link>
               </motion.div>
               <motion.div
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                whileHover={{ backgroundColor: 'var(--color-primary-hover-bg)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
@@ -454,7 +458,7 @@ export function UserMenu({ className }: UserMenuProps) {
               {...(signingOut
                 ? {}
                 : {
-                    whileHover: { backgroundColor: 'rgba(239, 68, 68, 0.1)' },
+                    whileHover: { backgroundColor: 'var(--color-error-bg)' },
                   })}
               transition={MICROINTERACTIONS.colorTransition.default}
               className="group/item text-destructive flex w-full items-center gap-2 rounded-md px-3 py-2 text-left"

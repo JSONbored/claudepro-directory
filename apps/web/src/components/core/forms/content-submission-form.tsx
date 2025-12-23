@@ -531,7 +531,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
           transition={springSmooth}
         >
-          <Card className="mb-6 border-green-500/20 bg-green-500/5">
+          <Card className="mb-6 border-[var(--color-success-border)] bg-[var(--color-success-bg)]">
             <CardContent className="pt-6">
               <div className="flex flex-col items-center">
                 <motion.div
@@ -539,11 +539,11 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, rotate: 0 }}
                   transition={{ ...springBouncy, delay: STAGGER.default }}
                 >
-                  <CheckCircle className="mt-0.5 h-6 w-6 flex-shrink-0 text-green-500" />
+                  <CheckCircle className="mt-0.5 h-6 w-6 flex-shrink-0 text-success" />
                 </motion.div>
                 <div className="min-w-0 flex-1">
                   <motion.p
-                    className="text-lg font-semibold text-green-600 dark:text-green-400"
+                    className="text-lg font-semibold text-success"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: STAGGER.slow }}
@@ -667,7 +667,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
                     transition={springBouncy}
                   >
-                    <CheckCircle className={cn('h-4 w-4', 'text-green-500 dark:text-green-400')} />
+                    <CheckCircle className={cn('h-4 w-4', 'text-[var(--color-success)]')} />
                   </motion.div>
                 )}
               </div>
@@ -805,11 +805,11 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         </motion.div>
 
         {/* Info Box */}
-        <div className="card-base border-blue-500/20 bg-blue-500/10 p-3 sm:p-4">
+        <div className="card-base border-info-border bg-info-bg p-3 sm:p-4">
           <div className="flex gap-1 sm:gap-2">
-            <Github className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-400" />
+            <Github className="mt-0.5 h-5 w-5 flex-shrink-0 text-info" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm-medium text-blue-400">How it works</p>
+              <p className="text-sm-medium text-info">How it works</p>
               <p className="text-muted-foreground mt-1 text-sm">
                 We'll automatically create a Pull Request with your submission. Our team reviews for
                 quality and accuracy, then merges it to make your contribution live!

@@ -38,6 +38,7 @@ module.exports = {
     '^@heyclaude/shared-runtime/platform$': '<rootDir>/packages/shared-runtime/src/platform/index.ts',
     '^@heyclaude/shared-runtime/rate-limit$': '<rootDir>/packages/shared-runtime/src/rate-limit.ts',
     '^@heyclaude/shared-runtime/proxy/guards$': '<rootDir>/packages/shared-runtime/src/proxy/guards.ts',
+    '^@heyclaude/shared-runtime/utils/serialize$': '<rootDir>/packages/shared-runtime/src/utils/serialize.ts',
     // Map @heyclaude/database-types subpath exports (must come before general pattern)
     '^@heyclaude/database-types/postgres-types$': '<rootDir>/packages/database-types/src/postgres-types/index.ts',
     '^@heyclaude/database-types/postgres-types/(.*)$': '<rootDir>/packages/database-types/src/postgres-types/$1.ts',
@@ -50,6 +51,10 @@ module.exports = {
     '^@heyclaude/data-layer/prisma/client$': '<rootDir>/packages/data-layer/src/prisma/client.ts',
     '^@heyclaude/data-layer/prisma$': '<rootDir>/packages/data-layer/src/prisma/index.ts',
     '^@heyclaude/data-layer/services/trending$': '<rootDir>/packages/data-layer/src/services/trending.ts',
+    // Map @heyclaude/web-runtime/utils/* subpath exports (must come before general pattern)
+    '^@heyclaude/web-runtime/utils/(.*)$': '<rootDir>/packages/web-runtime/src/utils/$1',
+    // Map @heyclaude/web-runtime/prisma-zod-schemas (must come before general pattern)
+    '^@heyclaude/web-runtime/prisma-zod-schemas$': '<rootDir>/packages/web-runtime/src/prisma-zod-schemas.ts',
     // Map @heyclaude/* packages to their source files (must come after subpath exports)
     '^@heyclaude/(.*)$': '<rootDir>/packages/$1/src',
     // Map @/* to apps/web/*
@@ -167,5 +172,12 @@ module.exports = {
   //     },
   //   },
   // },
+  
+  // Removed forceExit: true - we now properly flush loggers in jest.setup.ts
+  // This ensures all async operations (Pino logger buffers) complete before Jest exits
+  // forceExit was masking the issue rather than fixing it
+  
+  // Increase test timeout for slow tests (default is 5000ms)
+  testTimeout: 10000,
 };
 

@@ -87,10 +87,10 @@ const CommandDialog = ({ children, open, onOpenChange, ...props }: DialogProps) 
           'bg-background/95 backdrop-blur-xl', // Glass morphism effect
           'shadow-2xl', // Premium shadow
           // CRITICAL: Ensure proper centering - Dialog component handles this, but add explicit classes
-          '!fixed !top-[50%] !right-auto !bottom-auto !left-[50%] !z-[100] !m-0 !-translate-x-1/2 !-translate-y-1/2'
+          '!fixed !top-[50%] !right-auto !bottom-auto !left-[50%] !z-100 !m-0 !-translate-x-1/2 !-translate-y-1/2'
         )}
         style={{
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)',
+          boxShadow: 'var(--shadow-2xl), 0 0 0 1px var(--border)',
           // CRITICAL: Inline styles as fallback for centering (Dialog component should handle this, but ensure it works)
           position: 'fixed',
           top: '50%',
@@ -113,7 +113,7 @@ const CommandDialog = ({ children, open, onOpenChange, ...props }: DialogProps) 
             // Group spacing: *:not([hidden]) + [cmdk-group] { margin-top: 8px }
             '[&_[cmdk-group]:not([hidden])_~[cmdk-group]]:mt-2',
             // Icon sizing: width: 18px; height: 18px
-            '[&_[cmdk-item]_svg]:h-[18px] [&_[cmdk-item]_svg]:w-[18px]'
+            '[&_[cmdk-item]_svg]:h-4.5 [&_[cmdk-item]_svg]:w-4.5' // 18px = h-4.5/w-4.5
           )}
         >
           {children}
@@ -283,7 +283,7 @@ const CommandItem = ({
       // Item spacing
       '[&+&]:mt-0.5',
       // Icon styling
-      '[&_svg]:text-muted-foreground [&_svg]:h-[18px] [&_svg]:w-[18px] [&_svg]:shrink-0',
+      '[&_svg]:text-muted-foreground [&_svg]:h-4.5 [&_svg]:w-4.5 [&_svg]:shrink-0', // 18px = h-4.5/w-4.5
       'data-[selected=true]:[&_svg]:text-foreground',
       className
     )}

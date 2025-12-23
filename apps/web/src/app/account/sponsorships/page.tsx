@@ -348,7 +348,7 @@ async function SponsorshipsPageContent({
                       />
                       {isActive ? (
                         <UnifiedBadge
-                          className="border-green-500/20 bg-green-500/10 text-green-600 dark:text-green-400"
+                          className="border-[var(--color-success-border)] bg-[var(--color-success-bg)] text-[var(--color-success)]"
                           variant="base"
                         >
                           Active
@@ -360,7 +360,7 @@ async function SponsorshipsPageContent({
                       )}
                       {hasHitLimit ? (
                         <UnifiedBadge
-                          className="border-yellow-500/20 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400"
+                          className="border-[var(--color-warning-border)] bg-[var(--color-warning-bg)] text-[var(--color-warning)]"
                           variant="base"
                         >
                           Limit Reached

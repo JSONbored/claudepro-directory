@@ -128,3 +128,84 @@ process.env.POSTGRES_PRISMA_URL = process.env.POSTGRES_PRISMA_URL || 'postgresql
 // Add any global test utilities here
 // Example: helper functions, custom matchers, etc.
 
+// ============================================================================
+// Global Test Cleanup
+// ============================================================================
+
+import { afterAll } from '@jest/globals';
+
+// Ensure all async operations complete before Jest exits
+// This prevents "worker process has failed to exit gracefully" errors
+afterAll(async () => {
+  // CRITICAL: Flush all Pino logger instances to ensure async logs are written
+  // Pino uses async logging by default, which means log messages are buffered
+  // and written asynchronously. We need to flush them before Jest exits.
+  
+  // Import logger instances (they may not be imported in all tests, so we import here)
+  // Use dynamic imports to avoid circular dependencies and ensure loggers are initialized
+  const flushLoggers = async () => {
+    try {
+      // Flush web-runtime logger (if it exists)
+      try {
+        const { logger: webRuntimeLogger } = await import('./packages/web-runtime/src/logger.ts');
+        if (webRuntimeLogger && typeof webRuntimeLogger.flush === 'function') {
+          await new Promise<void>((resolve, reject) => {
+            webRuntimeLogger.flush((err) => {
+              if (err) reject(err);
+              else resolve();
+            });
+          });
+        }
+      } catch {
+        // Logger may not be initialized in all test contexts, ignore
+      }
+
+      // Flush shared-runtime logger (if it exists)
+      try {
+        const sharedRuntimeLogger = await import('./packages/shared-runtime/src/logger/index.ts');
+        if (sharedRuntimeLogger.logger && typeof sharedRuntimeLogger.logger.flush === 'function') {
+          await new Promise<void>((resolve, reject) => {
+            sharedRuntimeLogger.logger.flush((err) => {
+              if (err) reject(err);
+              else resolve();
+            });
+          });
+        }
+      } catch {
+        // Logger may not be initialized in all test contexts, ignore
+      }
+
+      // Flush data-layer logger (if it exists)
+      try {
+        const { logger: dataLayerLogger } = await import('./packages/data-layer/src/utils/rpc-error-logging.ts');
+        if (dataLayerLogger && typeof dataLayerLogger.flush === 'function') {
+          await new Promise<void>((resolve, reject) => {
+            dataLayerLogger.flush((err) => {
+              if (err) reject(err);
+              else resolve();
+            });
+          });
+        }
+      } catch {
+        // Logger may not be initialized in all test contexts, ignore
+      }
+    } catch {
+      // Ignore errors during cleanup - tests may have already completed
+    }
+  };
+
+  // Flush all loggers
+  await flushLoggers();
+
+  // Additional cleanup: Clear request cache to ensure no lingering references
+  try {
+    const { clearRequestCache } = await import('./packages/data-layer/src/utils/request-cache.ts');
+    clearRequestCache();
+  } catch {
+    // Request cache may not be initialized in all test contexts, ignore
+  }
+
+  // Give a small buffer for any remaining async operations to complete
+  await new Promise((resolve) => setTimeout(resolve, 50));
+});
+

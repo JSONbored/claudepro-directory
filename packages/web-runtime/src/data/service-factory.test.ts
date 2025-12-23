@@ -3,11 +3,11 @@ import { getService, services, type ServiceKey } from './service-factory';
 
 // Mock data-layer services - return constructors that create instances
 const mockAccountService = {
-  getAccountDashboard: vi.fn(),
+  getAccountDashboard: jest.fn(),
 };
 
 const mockContentService = {
-  getContentDetailCore: vi.fn(),
+  getContentDetailCore: jest.fn(),
 };
 
 jest.mock('@heyclaude/data-layer', () => ({
@@ -42,7 +42,7 @@ jest.mock('@heyclaude/data-layer', () => ({
 
 describe('service-factory', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('getService', () => {
@@ -99,11 +99,6 @@ describe('service-factory', () => {
   });
 
   describe('error handling', () => {
-    // Note: Testing module import failures with vi.doMock is complex in Vitest
-    // because mocks are hoisted and module cache behavior differs from Jest.
-    // These error scenarios are better tested in integration tests or E2E tests
-    // where actual module loading failures can occur.
-
     it('should handle service method errors', async () => {
       const error = new Error('Database connection failed');
       mockAccountService.getAccountDashboard.mockRejectedValue(error);
@@ -135,17 +130,6 @@ describe('service-factory', () => {
 
       expect(service1).toBe(service2);
       expect(service2).toBe(service3);
-    });
-
-    it('should handle service method errors', async () => {
-      const error = new Error('Database connection failed');
-      mockAccountService.getAccountDashboard.mockRejectedValue(error);
-
-      const service = await getService('account');
-
-      await expect(service.getAccountDashboard({ p_user_id: 'user-id' })).rejects.toThrow(
-        'Database connection failed'
-      );
     });
   });
 });

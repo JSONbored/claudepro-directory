@@ -97,9 +97,9 @@ export function ConsultingClient() {
 
         {/* Particles Effect (simplified with CSS) */}
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-1/4 left-1/4 h-2 w-2 animate-ping rounded-full bg-orange-500 [animation-delay:0s] [animation-duration:3s]" />
-          <div className="absolute top-1/3 right-1/4 h-1.5 w-1.5 animate-ping rounded-full bg-purple-500 [animation-delay:1s] [animation-duration:4s]" />
-          <div className="absolute bottom-1/4 left-1/3 h-1 w-1 animate-ping rounded-full bg-orange-400 [animation-delay:2s] [animation-duration:5s]" />
+          <div className="absolute top-1/4 left-1/4 h-2 w-2 animate-ping rounded-full bg-primary [animation-delay:0s] [animation-duration:3s]" />
+          <div className="absolute top-1/3 right-1/4 h-1.5 w-1.5 animate-ping rounded-full bg-primary [animation-delay:1s] [animation-duration:4s]" />
+          <div className="absolute bottom-1/4 left-1/3 h-1 w-1 animate-ping rounded-full bg-primary/80 [animation-delay:2s] [animation-duration:5s]" />
         </div>
 
         <div className="relative z-10 container mx-auto px-4 py-4 sm:px-6 sm:py-4">
@@ -118,7 +118,7 @@ export function ConsultingClient() {
             >
               <UnifiedBadge
                 variant="base"
-                className="border-orange-500/30 bg-orange-500/10 text-orange-400"
+                className="border-primary/30 bg-primary/10 text-primary"
               >
                 <Sparkles className="mr-0.5 h-3 w-3" />
                 Available for New Projects
@@ -284,7 +284,7 @@ export function ConsultingClient() {
                     Cosmos blockchain validators (securing $100MM+ in network assets). Built{' '}
                     <Link
                       href="/"
-                      className={`text-orange-500 underline underline-offset-4 transition-colors hover:text-orange-400`}
+                      className={`text-primary underline underline-offset-4 transition-colors hover:text-primary/80`}
                     >
                       Claude Pro Directory
                     </Link>{' '}
@@ -293,7 +293,7 @@ export function ConsultingClient() {
                       href="https://github.com/jsonbored/claudepro-directory"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`inline-flex items-center gap-1 text-orange-500 underline underline-offset-4 transition-colors hover:text-orange-400`}
+                      className={`inline-flex items-center gap-1 text-primary underline underline-offset-4 transition-colors hover:text-primary/80`}
                     >
                       GitHub
                       <ExternalLink className="h-3 w-3" />
@@ -384,48 +384,48 @@ export function ConsultingClient() {
                 title: 'Full-Stack Development',
                 description:
                   'End-to-end application development from database design to polished UI. React, Next.js, TypeScript, and modern web technologies.',
-                color: 'from-blue-500/20 to-cyan-500/20',
-                borderColor: 'border-blue-500/30',
+                color: 'from-[var(--color-info-bg)] to-[var(--color-info-bg)]',
+                borderColor: 'border-[var(--color-info-border)]',
               },
               {
                 icon: Network,
                 title: 'Blockchain Infrastructure',
                 description:
                   'Validator operations, network security, and protocol development. Experience with Cosmos SDK and securing $100MM+ in assets.',
-                color: 'from-purple-500/20 to-pink-500/20',
-                borderColor: 'border-purple-500/30',
+                color: 'from-primary/10 to-primary/10',
+                borderColor: 'border-primary/30',
               },
               {
                 icon: Server,
                 title: 'DevOps & Infrastructure',
                 description:
                   'CI/CD pipelines, cloud architecture, system administration, and infrastructure automation. From bare metal to cloud-native.',
-                color: 'from-orange-500/20 to-red-500/20',
-                borderColor: 'border-orange-500/30',
+                color: 'from-primary/10 to-primary/10',
+                borderColor: 'border-primary/30',
               },
               {
                 icon: Database,
                 title: 'Database Design',
                 description:
                   'PostgreSQL optimization, schema design, query performance tuning, and data architecture for scalable applications.',
-                color: 'from-green-500/20 to-emerald-500/20',
-                borderColor: 'border-green-500/30',
+                color: 'from-[var(--color-success-bg)] to-[var(--color-success-bg)]',
+                borderColor: 'border-[var(--color-success-border)]',
               },
               {
                 icon: Sparkles,
                 title: 'AI/LLM Engineering',
                 description:
                   'Building AI-powered applications, prompt engineering, and integrating LLMs into production systems effectively.',
-                color: 'from-yellow-500/20 to-amber-500/20',
-                borderColor: 'border-yellow-500/30',
+                color: 'from-[var(--color-warning-bg)] to-[var(--color-warning-bg)]',
+                borderColor: 'border-[var(--color-warning-border)]',
               },
               {
                 icon: TrendingUp,
                 title: 'Systems Architecture',
                 description:
                   'Designing scalable, maintainable systems that grow with your business. From monoliths to microservices and beyond.',
-                color: 'from-indigo-500/20 to-violet-500/20',
-                borderColor: 'border-indigo-500/30',
+                color: 'from-[var(--color-info-bg)] to-[var(--color-info-bg)]',
+                borderColor: 'border-[var(--color-info-border)]',
               },
             ].map((service) => {
               const Icon = service.icon;
@@ -505,16 +505,16 @@ export function ConsultingClient() {
                 viewport={{ once: true }}
                 transition={SPRING.smooth}
               >
-                <Card className="h-full border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-purple-500/10 backdrop-blur-sm">
+                <Card className="h-full border-2 border-primary/30 bg-gradient-to-br from-primary/10 to-primary/10 backdrop-blur-sm">
                   <CardHeader>
                     <div className="mb-4 flex items-start justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="rounded-lg border border-orange-500/30 bg-orange-500/20 p-2">
-                          <Sparkles className="h-5 w-5 text-orange-400" />
+                        <div className="rounded-lg border border-primary/30 bg-primary/20 p-2">
+                          <Sparkles className="h-5 w-5 text-primary" />
                         </div>
                         <CardTitle className="text-lg">Claude Pro Directory</CardTitle>
                       </div>
-                      <UnifiedBadge variant="base" className="border-orange-500/30">
+                      <UnifiedBadge variant="base" className="border-primary/30">
                         Active
                       </UnifiedBadge>
                     </div>
@@ -552,16 +552,16 @@ export function ConsultingClient() {
                 viewport={{ once: true }}
                 transition={{ ...SPRING.smooth, delay: 0.1 }}
               >
-                <Card className="h-full border-2 border-purple-500/30 bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm">
+                <Card className="h-full border-2 border-primary/30 bg-gradient-to-br from-primary/10 to-primary/10 backdrop-blur-sm">
                   <CardHeader>
                     <div className="mb-4 flex items-start justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="rounded-lg border border-purple-500/30 bg-purple-500/20 p-2">
-                          <Network className="h-5 w-5 text-purple-400" />
+                        <div className="rounded-lg border border-primary/30 bg-primary/20 p-2">
+                          <Network className="h-5 w-5 text-primary" />
                         </div>
                         <CardTitle className="text-lg">Blockchain Validators</CardTitle>
                       </div>
-                      <UnifiedBadge variant="base" className="border-purple-500/30">
+                      <UnifiedBadge variant="base" className="border-primary/30">
                         3+ Years
                       </UnifiedBadge>
                     </div>
@@ -676,8 +676,8 @@ export function ConsultingClient() {
                   transition={SPRING.smooth}
                   className="border-border/50 bg-card/50 rounded-xl border py-6 text-center backdrop-blur-sm"
                 >
-                  <div className="mb-4 inline-flex rounded-lg border border-orange-500/30 bg-orange-500/10 p-3">
-                    <Icon className="h-6 w-6 text-orange-400" />
+                  <div className="mb-4 inline-flex rounded-lg border border-primary/30 bg-primary/10 p-3">
+                    <Icon className="h-6 w-6 text-primary" />
                   </div>
                   <div className="mb-2 text-3xl font-bold">
                     {stat.value.includes('%') ? (
@@ -805,7 +805,7 @@ export function ConsultingClient() {
                       ) : (
                         <div className="flex-center h-[600px]">
                           <div className="space-y-3 text-center">
-                            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-orange-500" />
+                            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-primary" />
                             <p className="text-muted-foreground">Loading calendar...</p>
                           </div>
                         </div>
@@ -827,7 +827,7 @@ export function ConsultingClient() {
                   Prefer email?{' '}
                   <a
                     href="mailto:ghost@zeronode.sh"
-                    className={`text-orange-500 underline underline-offset-4 transition-colors hover:text-orange-400`}
+                    className={`text-primary underline underline-offset-4 transition-colors hover:text-primary/80`}
                   >
                     ghost@zeronode.sh
                   </a>

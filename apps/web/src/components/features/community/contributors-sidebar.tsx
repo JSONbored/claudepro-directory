@@ -165,10 +165,10 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                       <Medal
                         className={`h-3 w-3 ${
                           index === 0
-                            ? 'text-amber-500'
+                            ? 'text-warning'
                             : index === 1
-                              ? 'text-slate-400'
-                              : 'text-amber-700'
+                              ? 'text-muted-foreground'
+                              : 'text-warning'
                         }`}
                       />
                     </div>

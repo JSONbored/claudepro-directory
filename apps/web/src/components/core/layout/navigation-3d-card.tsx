@@ -40,22 +40,23 @@ export interface Navigation3DCardProps {
 
 /**
  * Category color configuration for gradient blocks (shadcn 3d-pin style)
+ * Uses Tailwind utilities auto-generated from @theme block design tokens
  */
 const categoryGradients: Record<content_category, string> = {
-  agents: 'from-violet-500 via-purple-500 to-blue-500',
-  mcp: 'from-cyan-500 via-blue-500 to-indigo-500',
-  commands: 'from-blue-500 via-cyan-500 to-teal-500',
-  rules: 'from-amber-500 via-orange-500 to-yellow-500',
-  hooks: 'from-emerald-500 via-teal-500 to-cyan-500',
-  statuslines: 'from-teal-500 via-cyan-500 to-blue-500',
-  collections: 'from-indigo-500 via-purple-500 to-pink-500',
-  skills: 'from-pink-500 via-rose-500 to-red-500',
-  guides: 'from-violet-500 via-purple-500 to-fuchsia-500',
-  jobs: 'from-orange-500 via-red-500 to-pink-500',
-  changelog: 'from-slate-500 via-gray-500 to-zinc-500',
+  agents: 'bg-category-agents-bg',
+  mcp: 'bg-category-mcp-bg',
+  commands: 'bg-category-commands-bg',
+  rules: 'bg-category-rules-bg',
+  hooks: 'bg-category-hooks-bg',
+  statuslines: 'bg-category-statuslines-bg',
+  collections: 'bg-muted/50',
+  skills: 'bg-muted/50',
+  guides: 'bg-muted/50',
+  jobs: 'bg-primary/10',
+  changelog: 'bg-muted/50',
 };
 
-const defaultGradient = 'from-slate-500 via-gray-500 to-zinc-500';
+const defaultGradient = 'bg-muted/50';
 
 export function Navigation3DCard({
   href,
@@ -88,9 +89,9 @@ export function Navigation3DCard({
           transformOrigin: 'center bottom',
         }}
         className={cn(
-          'h-[70px] w-[120px] rounded-2xl',
-          'border border-white/[0.1] bg-black shadow-[0_8px_16px_rgb(0_0_0/0.4)]',
-          'overflow-hidden transition-all duration-700 group-hover/pin:border-white/[0.2]'
+          'h-16 w-28 rounded-2xl', // 70px ≈ 4rem (h-16), 120px ≈ 7rem (w-28)
+          'border border-foreground/10 bg-background shadow-lg',
+          'overflow-hidden transition-all duration-700 group-hover/pin:border-foreground/20'
         )}
       >
         <div
@@ -98,7 +99,7 @@ export function Navigation3DCard({
             'flex flex-col',
             'basis-full',
             'p-2',
-            'h-full w-full tracking-tight text-slate-100/50'
+            'h-full w-full tracking-tight text-foreground/50'
           )}
         >
           {/* Title */}
@@ -107,8 +108,8 @@ export function Navigation3DCard({
               'max-w-xs',
               'pb-0.5',
               '!m-0 font-bold',
-              'text-[10px]',
-              'leading-tight text-slate-100'
+              'text-xs', // 10px ≈ text-xs (0.75rem)
+              'leading-tight text-foreground'
             )}
           >
             {label}
@@ -121,14 +122,14 @@ export function Navigation3DCard({
                 variant="category"
                 category={category}
                 href={null}
-                className={cn('text-[8px]', 'px-1', 'py-4')}
+                className={cn('text-4xs', 'px-1', 'py-4')} // 8px = text-4xs
               />
             </div>
           )}
 
           {/* Gradient block at bottom (shadcn 3d-pin style) */}
           <div
-            className={cn('flex w-full flex-1 rounded-lg', 'mt-1', 'bg-gradient-to-br', gradient)}
+            className={cn('flex w-full flex-1 rounded-lg', 'mt-1', gradient)}
           />
         </div>
       </div>
@@ -146,7 +147,7 @@ export function Navigation3DCard({
             </Link>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="max-w-xs text-xs">
-            <div className={cn('font-semibold', 'mb-[18px]')}>{label}</div>
+            <div className={cn('font-semibold', 'mb-4')}>{label}</div> {/* 18px ≈ 1rem (mb-4) */}
             <div className="text-muted-foreground">{description}</div>
           </TooltipContent>
         </Tooltip>

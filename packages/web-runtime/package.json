@@ -94,6 +94,10 @@
       "types": "./src/hooks/use-authenticated-user.ts",
       "default": "./src/hooks/use-authenticated-user.ts"
     },
+    "./hooks/use-user-profile-image": {
+      "types": "./src/hooks/use-user-profile-image.ts",
+      "default": "./src/hooks/use-user-profile-image.ts"
+    },
     "./hooks/use-boolean": {
       "types": "./src/hooks/use-boolean.ts",
       "default": "./src/hooks/use-boolean.ts"

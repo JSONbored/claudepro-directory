@@ -1,14 +1,39 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from data-layer will automatically use PrismockerClient
+
+// Import real cache utilities for proper cache testing
+// Note: Deep relative imports are acceptable for test utilities to avoid circular dependencies
+import { clearRequestCache } from '../../../data-layer/src/utils/request-cache.ts';
+
+// Mock RPC error logging utility (if needed)
+// Note: Deep relative import needed for jest.mock() to work correctly
+jest.mock('../../../data-layer/src/utils/rpc-error-logging.ts', () => ({
+  logRpcError: jest.fn(),
+}));
+
+// Mock errors first (needed by safe-action mock)
+jest.mock('../errors.ts', () => ({
+  logActionFailure: jest.fn((actionName, error, context) => {
+    const err = error instanceof Error ? error : new Error(String(error));
+    err.name = actionName;
+    return err;
+  }),
+  normalizeError: jest.fn((error: unknown, message?: string) => {
+    if (error instanceof Error) return error;
+    return new Error(message || String(error));
+  }),
+}));
 
 // Mock safe-action middleware - standardized pattern
 // Pattern: authedAction.inputSchema().metadata().action()
-vi.mock('./safe-action.ts', async () => {
-  // Import mocked logActionFailure
-  const { logActionFailure } = await import('../errors.ts');
-  
+jest.mock('./safe-action.ts', () => {
   // Define all factory functions inside the mock factory to avoid hoisting issues
   const createActionHandler = (inputSchema: any) => {
-    return vi.fn((handler: any) => {
+    return jest.fn((handler: any) => {
       return async (input: unknown) => {
         try {
           const parsed = inputSchema ? inputSchema.parse(input) : input;
@@ -19,6 +44,7 @@ vi.mock('./safe-action.ts', async () => {
           return result;
         } catch (error) {
           // Simulate middleware error handling - logActionFailure is called by middleware
+          const { logActionFailure } = require('../errors.ts');
           logActionFailure('collectionsCrud', error, { userId: 'test-user-id' });
           throw error;
         }
@@ -31,57 +57,64 @@ vi.mock('./safe-action.ts', async () => {
   });
 
   const createInputSchemaResult = (inputSchema: any) => ({
-    metadata: vi.fn((metadata: any) => createMetadataResult(inputSchema)),
+    metadata: jest.fn((metadata: any) => createMetadataResult(inputSchema)),
     action: createActionHandler(inputSchema),
   });
 
   return {
     authedAction: {
-      inputSchema: vi.fn((schema: any) => createInputSchemaResult(schema)),
+      inputSchema: jest.fn((schema: any) => createInputSchemaResult(schema)),
     },
   };
 });
 
-// Mock runRpc
-vi.mock('./run-rpc-instance.ts', () => ({
-  runRpc: vi.fn(),
-}));
+// DO NOT mock runRpc - use real runRpc which uses Prismocker
+// This allows us to test the real RPC flow end-to-end
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
-  revalidatePath: vi.fn(),
-  revalidateTag: vi.fn(),
-}));
-
-// Mock errors
-vi.mock('../errors.ts', () => ({
-  logActionFailure: vi.fn((actionName, error, context) => {
-    const err = error instanceof Error ? error : new Error(String(error));
-    err.name = actionName;
-    return err;
-  }),
-  normalizeError: vi.fn((error: unknown, message?: string) => {
-    if (error instanceof Error) return error;
-    return new Error(message || String(error));
-  }),
+const mockRevalidatePath = jest.fn();
+const mockRevalidateTag = jest.fn();
+jest.mock('next/cache', () => ({
+  revalidatePath: (...args: any[]) => mockRevalidatePath(...args),
+  revalidateTag: (...args: any[]) => mockRevalidateTag(...args),
 }));
 
 describe('collections-crud', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+  let prismocker: PrismaClient;
+
+  beforeEach(async () => {
+    // Clear request cache before each test (required for test isolation)
+    clearRequestCache();
+
+    // Get the prisma instance (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    prismocker = prisma;
+
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
+    // Clear all mocks
+    jest.clearAllMocks();
+
+    // Use Prismocker's Proxy set handler to override $queryRawUnsafe
+    // This is what runRpc → BasePrismaService.callRpc → prisma.$queryRawUnsafe calls
+    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
   });
 
   describe('createCollection', () => {
     describe('RPC call', () => {
       it('should call manage_collection RPC with create action', async () => {
         const { createCollection } = await import('./collections-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
 
-        vi.mocked(runRpc).mockResolvedValue({
+        const collectionId = '123e4567-e89b-12d3-a456-426614174000';
+        // Mock result must match manageCollectionReturnsSchema structure
+        // collection must match userCollectionsSchema (all required fields)
+        const mockResult = {
           success: true,
           collection: {
-            id: '123e4567-e89b-12d3-a456-426614174000',
-            user_id: '223e4567-e89b-12d3-a456-426614174001',
+            id: collectionId,
+            user_id: '123e4567-e89b-12d3-a456-426614174000',
             name: 'Test Collection',
             slug: 'test-collection',
             description: null,
@@ -89,51 +122,54 @@ describe('collections-crud', () => {
             view_count: 0,
             bookmark_count: 0,
             item_count: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-01T00:00:00Z',
           },
-        } as any);
+          item: null,
+        };
 
-        await createCollection({
+        // Set up Prismocker to return the RPC result
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
+
+        const result = await createCollection({
           name: 'Test Collection',
           slug: 'test-collection',
           description: 'Test description',
           is_public: true,
         });
 
-        expect(runRpc).toHaveBeenCalledWith(
-          'manage_collection',
+        // Verify RPC was called with correct SQL and parameters
+        // BasePrismaService.callRpc formats as: SELECT * FROM function_name(p_param => $1, ...)
+        expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+          expect.stringContaining('manage_collection'),
+          'create', // p_action
+          'test-user-id', // p_user_id
           expect.objectContaining({
-            p_action: 'create',
-            p_user_id: 'test-user-id',
-            p_create_data: expect.objectContaining({
-              name: 'Test Collection',
-              slug: 'test-collection',
-              description: 'Test description',
-              is_public: true,
-            }),
-            p_update_data: null,
-            p_delete_id: null,
-          }),
-          expect.objectContaining({
-            action: 'createCollection.rpc',
-            userId: 'test-user-id',
-          })
+            name: 'Test Collection',
+            slug: 'test-collection',
+            description: 'Test description',
+            is_public: true,
+          }), // p_create_data
+          null, // p_update_data
+          null, // p_delete_id
+          null, // p_add_item_data
+          null // p_remove_item_id
         );
+
+        expect(result).toMatchObject(mockResult);
       });
     });
 
     describe('cache invalidation', () => {
       it('should revalidate paths and tags', async () => {
         const { createCollection } = await import('./collections-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
-        const { revalidatePath, revalidateTag } = await import('next/cache');
 
-        vi.mocked(runRpc).mockResolvedValue({
+        const collectionId = '123e4567-e89b-12d3-a456-426614174000';
+        const mockResult = {
           success: true,
           collection: {
-            id: '123e4567-e89b-12d3-a456-426614174000',
-            user_id: '223e4567-e89b-12d3-a456-426614174001',
+            id: collectionId,
+            user_id: '123e4567-e89b-12d3-a456-426614174000',
             name: 'Test Collection',
             slug: 'test-collection',
             description: null,
@@ -141,19 +177,22 @@ describe('collections-crud', () => {
             view_count: 0,
             bookmark_count: 0,
             item_count: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-01T00:00:00Z',
           },
-        } as any);
+          item: null,
+        };
+
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
 
         await createCollection({
           name: 'Test Collection',
         });
 
-        expect(revalidatePath).toHaveBeenCalledWith('/account');
-        expect(revalidatePath).toHaveBeenCalledWith('/account/library');
-        expect(revalidateTag).toHaveBeenCalledWith('collections', 'default');
-        expect(revalidateTag).toHaveBeenCalledWith('users', 'default');
+        expect(mockRevalidatePath).toHaveBeenCalledWith('/account');
+        expect(mockRevalidatePath).toHaveBeenCalledWith('/account/library');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('collections', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('users', 'default');
       });
     });
   });
@@ -162,61 +201,62 @@ describe('collections-crud', () => {
     describe('RPC call', () => {
       it('should call manage_collection RPC with update action', async () => {
         const { updateCollection } = await import('./collections-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
 
-        vi.mocked(runRpc).mockResolvedValue({
+        const collectionId = '123e4567-e89b-12d3-a456-426614174000';
+        const mockResult = {
           success: true,
           collection: {
-            id: '123e4567-e89b-12d3-a456-426614174000',
-            user_id: '223e4567-e89b-12d3-a456-426614174001',
-            name: 'Test Collection',
+            id: collectionId,
+            user_id: '123e4567-e89b-12d3-a456-426614174000',
+            name: 'Updated Collection',
             slug: 'test-collection',
             description: null,
             is_public: false,
             view_count: 0,
             bookmark_count: 0,
             item_count: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-01T00:00:00Z',
           },
-        } as any);
+          item: null,
+        };
 
-        await updateCollection({
-          id: '123e4567-e89b-12d3-a456-426614174000',
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
+
+        const result = await updateCollection({
+          id: collectionId,
           name: 'Updated Collection',
         });
 
-        expect(runRpc).toHaveBeenCalledWith(
-          'manage_collection',
+        // Verify RPC was called with correct SQL and parameters
+        expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+          expect.stringContaining('manage_collection'),
+          'update', // p_action
+          'test-user-id', // p_user_id
+          null, // p_create_data
           expect.objectContaining({
-            p_action: 'update',
-            p_user_id: 'test-user-id',
-            p_create_data: null,
-            p_update_data: expect.objectContaining({
-              id: '123e4567-e89b-12d3-a456-426614174000',
-              name: 'Updated Collection',
-            }),
-            p_delete_id: null,
-          }),
-          expect.objectContaining({
-            action: 'updateCollection.rpc',
-            userId: 'test-user-id',
-          })
+            id: collectionId,
+            name: 'Updated Collection',
+          }), // p_update_data
+          null, // p_delete_id
+          null, // p_add_item_data
+          null // p_remove_item_id
         );
+
+        expect(result).toMatchObject(mockResult);
       });
     });
 
     describe('cache invalidation', () => {
       it('should revalidate paths and tags', async () => {
         const { updateCollection } = await import('./collections-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
-        const { revalidatePath, revalidateTag } = await import('next/cache');
 
-        vi.mocked(runRpc).mockResolvedValue({
+        const collectionId = '123e4567-e89b-12d3-a456-426614174000';
+        const mockResult = {
           success: true,
           collection: {
-            id: '123e4567-e89b-12d3-a456-426614174000',
-            user_id: '223e4567-e89b-12d3-a456-426614174001',
+            id: collectionId,
+            user_id: '123e4567-e89b-12d3-a456-426614174000',
             name: 'Test Collection',
             slug: 'test-collection',
             description: null,
@@ -224,21 +264,24 @@ describe('collections-crud', () => {
             view_count: 0,
             bookmark_count: 0,
             item_count: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-01T00:00:00Z',
           },
-        } as any);
+          item: null,
+        };
+
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
 
         await updateCollection({
-          id: '123e4567-e89b-12d3-a456-426614174000',
+          id: collectionId,
           name: 'Updated Collection',
         });
 
-        expect(revalidatePath).toHaveBeenCalledWith('/account');
-        expect(revalidatePath).toHaveBeenCalledWith('/account/library');
-        expect(revalidatePath).toHaveBeenCalledWith('/account/library/test-collection');
-        expect(revalidateTag).toHaveBeenCalledWith('collections', 'default');
-        expect(revalidateTag).toHaveBeenCalledWith('users', 'default');
+        expect(mockRevalidatePath).toHaveBeenCalledWith('/account');
+        expect(mockRevalidatePath).toHaveBeenCalledWith('/account/library');
+        expect(mockRevalidatePath).toHaveBeenCalledWith('/account/library/test-collection');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('collections', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('users', 'default');
       });
     });
   });
@@ -247,13 +290,13 @@ describe('collections-crud', () => {
     describe('RPC call', () => {
       it('should call manage_collection RPC with delete action', async () => {
         const { deleteCollection } = await import('./collections-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
 
-        vi.mocked(runRpc).mockResolvedValue({
+        const collectionId = '123e4567-e89b-12d3-a456-426614174000';
+        const mockResult = {
           success: true,
           collection: {
-            id: '123e4567-e89b-12d3-a456-426614174000',
-            user_id: '223e4567-e89b-12d3-a456-426614174001',
+            id: collectionId,
+            user_id: '123e4567-e89b-12d3-a456-426614174000',
             name: 'Test Collection',
             slug: 'test-collection',
             description: null,
@@ -261,43 +304,44 @@ describe('collections-crud', () => {
             view_count: 0,
             bookmark_count: 0,
             item_count: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-01T00:00:00Z',
           },
-        } as any);
+          item: null,
+        };
 
-        await deleteCollection({
-          delete_id: '123e4567-e89b-12d3-a456-426614174000',
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
+
+        const result = await deleteCollection({
+          delete_id: collectionId,
         });
 
-        expect(runRpc).toHaveBeenCalledWith(
-          'manage_collection',
-          expect.objectContaining({
-            p_action: 'delete',
-            p_user_id: 'test-user-id',
-            p_create_data: null,
-            p_update_data: null,
-            p_delete_id: '123e4567-e89b-12d3-a456-426614174000',
-          }),
-          expect.objectContaining({
-            action: 'deleteCollection.rpc',
-            userId: 'test-user-id',
-          })
+        // Verify RPC was called with correct SQL and parameters
+        expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+          expect.stringContaining('manage_collection'),
+          'delete', // p_action
+          'test-user-id', // p_user_id
+          null, // p_create_data
+          null, // p_update_data
+          collectionId, // p_delete_id
+          null, // p_add_item_data
+          null // p_remove_item_id
         );
+
+        expect(result).toMatchObject(mockResult);
       });
     });
 
     describe('cache invalidation', () => {
       it('should revalidate paths and tags', async () => {
         const { deleteCollection } = await import('./collections-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
-        const { revalidatePath, revalidateTag } = await import('next/cache');
 
-        vi.mocked(runRpc).mockResolvedValue({
+        const collectionId = '123e4567-e89b-12d3-a456-426614174000';
+        const mockResult = {
           success: true,
           collection: {
-            id: '123e4567-e89b-12d3-a456-426614174000',
-            user_id: '223e4567-e89b-12d3-a456-426614174001',
+            id: collectionId,
+            user_id: '123e4567-e89b-12d3-a456-426614174000',
             name: 'Test Collection',
             slug: 'test-collection',
             description: null,
@@ -305,19 +349,22 @@ describe('collections-crud', () => {
             view_count: 0,
             bookmark_count: 0,
             item_count: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-01T00:00:00Z',
           },
-        } as any);
+          item: null,
+        };
+
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
 
         await deleteCollection({
-          delete_id: '123e4567-e89b-12d3-a456-426614174000',
+          delete_id: collectionId,
         });
 
-        expect(revalidatePath).toHaveBeenCalledWith('/account');
-        expect(revalidatePath).toHaveBeenCalledWith('/account/library');
-        expect(revalidateTag).toHaveBeenCalledWith('collections', 'default');
-        expect(revalidateTag).toHaveBeenCalledWith('users', 'default');
+        expect(mockRevalidatePath).toHaveBeenCalledWith('/account');
+        expect(mockRevalidatePath).toHaveBeenCalledWith('/account/library');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('collections', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('users', 'default');
       });
     });
   });

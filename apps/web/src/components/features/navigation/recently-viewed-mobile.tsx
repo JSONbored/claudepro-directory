@@ -128,7 +128,7 @@ export function RecentlyViewedMobileTray() {
                   {item.tags && item.tags.length > 0 ? (
                     <div className="text-muted-foreground mt-4 flex flex-wrap gap-1 text-xs">
                       {item.tags.slice(0, 3).map((tag) => (
-                        <span key={tag} className={cn('bg-muted rounded-full', 'px-1 py-[6px]')}>
+                        <span key={tag} className={cn('bg-muted rounded-full', 'px-1 py-1.5')}> // 6px = py-1.5
                           #{tag}
                         </span>
                       ))}

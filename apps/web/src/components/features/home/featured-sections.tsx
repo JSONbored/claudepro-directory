@@ -132,7 +132,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
                                 variant="base"
                                 style="secondary"
                                 className={cn(
-                                  'text-[10px]',
+                                  'text-xs', // 10px
                                   'tracking-wide',
                                   'pointer-events-auto uppercase'
                                 )}
@@ -154,7 +154,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
                                 variant="base"
                                 style="outline"
                                 className={cn(
-                                  'text-[10px]',
+                                  'text-xs', // 10px
                                   'tracking-wide',
                                   'pointer-events-auto uppercase'
                                 )}

@@ -96,8 +96,8 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
 
   /**
    * Z-Index Hierarchy:
-   * - z-[100]: Skip-to-content link (highest priority - accessibility)
-   * - z-[60]:  Announcement banner (above navigation, below skip link)
+   * - z-100: Skip-to-content link (highest priority - accessibility)
+   * - z-60:  Announcement banner (above navigation, below skip link)
    * - z-50:    Navigation, dialogs, sheets, dropdowns
    * - z-10:    Component-level overlays (badges, cards)
    *
@@ -123,12 +123,12 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                 className="flex-1 border-none bg-transparent shadow-none"
               >
                 {announcement.tag ? (
-                  <AnnouncementTag className="shrink-0 text-[9px] font-bold sm:text-xs">
+                  <AnnouncementTag className="shrink-0 text-3xs font-bold sm:text-xs"> {/* 9px = text-3xs */}
                     {announcement.tag}
                   </AnnouncementTag>
                 ) : null}
 
-                <AnnouncementTitle className="text-foreground text-[11px] font-semibold sm:text-sm">
+                <AnnouncementTitle className="text-foreground text-sm font-semibold sm:text-sm"> {/* 11px → text-sm */}
                   {announcement.href ? (
                     <Link
                       href={announcement.href}

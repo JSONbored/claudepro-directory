@@ -309,7 +309,7 @@ function ConfigsDropdown({ link }: ConfigsDropdownProps) {
                                             href={null}
                                             className={cn(
                                               'shrink-0',
-                                              'text-[10px]',
+                                              'text-xs', // 10px
                                               'px-1.5',
                                               'py-0'
                                             )}
@@ -338,7 +338,7 @@ function ConfigsDropdown({ link }: ConfigsDropdownProps) {
                                         <p
                                           className={cn(
                                             'text-muted-foreground',
-                                            'text-[11px]',
+                                            'text-sm', // 11px
                                             'word-break-break-word line-clamp-1 leading-snug break-words',
                                             'ml-8'
                                           )}
@@ -546,7 +546,7 @@ function DiscoverResourcesContributeDropdown({ link }: DiscoverResourcesContribu
                                               href={null}
                                               className={cn(
                                                 'shrink-0',
-                                                'text-[10px]',
+                                                'text-xs', // 10px
                                                 'px-1.5',
                                                 'py-0'
                                               )}
@@ -759,7 +759,7 @@ function FallbackDropdown({ link }: FallbackDropdownProps) {
                                                   href={null}
                                                   className={cn(
                                                     'shrink-0',
-                                                    'text-[10px]',
+                                                    'text-xs', // 10px
                                                     'px-1.5',
                                                     'py-0'
                                                   )}
@@ -1156,8 +1156,8 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
               >
                 {/* Subtle animated gradient border */}
                 <AnimatedBorder
-                  colorFrom="rgba(249, 115, 22, 0.4)"
-                  colorTo="rgba(249, 115, 22, 0.2)"
+                  colorFrom="var(--color-primary-glow-from)"
+                  colorTo="var(--color-primary-glow-to)"
                   duration={4}
                   borderWidth={1.5}
                 />
@@ -1405,7 +1405,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                               <motion.div
                                 whileHover={{
                                   ...MICROINTERACTIONS.card.hover,
-                                  backgroundColor: 'rgba(249, 115, 22, 0.05)', // Preserve exact original background (accent/5)
+                                  backgroundColor: 'var(--color-primary-hover-bg)',
                                   y: 0, // Preserve original (no y movement for these links)
                                 }}
                                 whileTap={MICROINTERACTIONS.card.tap}

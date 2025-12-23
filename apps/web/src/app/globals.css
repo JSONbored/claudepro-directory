@@ -15,14 +15,216 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ================================================
-   CLAUDE DESKTOP THEME SYSTEM - OKLCH Color Space
+   TWEAKCN THEME STRUCTURE - OKLCH Color Space
    ================================================
-
+   
+   Structure follows tweakcn pattern:
+   1. :root block - Light mode defaults (pure grayscale)
+   2. .dark class - Dark mode overrides (pure grayscale)
+   3. @theme inline block - Maps CSS variables to Tailwind utilities
+   
    Theme switching via .dark class on html element:
    - .dark class forces dark mode
    - .light class forces light mode
-   - No class = follows system preference
+   - No class = follows system preference (defaults to light)
 */
+
+/* ========================================
+   :ROOT - Light Mode Defaults (tweakcn pure grayscale)
+   ======================================== */
+:root {
+  /* Core Theme Colors - Pure Grayscale (tweakcn values) */
+  --background: oklch(1.0000 0 0);
+  --foreground: oklch(0.2478 0 0);
+  --card: oklch(0.9702 0 0);
+  --card-foreground: oklch(0.2478 0 0);
+  --popover: oklch(1.0000 0 0);
+  --popover-foreground: oklch(0.2478 0 0);
+  --primary: oklch(0.6916 0.1669 37.2264);
+  --primary-foreground: oklch(1.0000 0 0);
+  --secondary: oklch(0.9491 0 0);
+  --secondary-foreground: oklch(0.2478 0 0);
+  --muted: oklch(0.9702 0 0);
+  --muted-foreground: oklch(0.5624 0 0);
+  --accent: oklch(0.6916 0.1669 37.2264);
+  --accent-foreground: oklch(0.6916 0.1669 37.2264);
+  --destructive: oklch(0.6368 0.2078 25.3313);
+  --destructive-foreground: oklch(0.9851 0 0);
+  --border: oklch(0.9067 0 0);
+  --input: oklch(0.9067 0 0);
+  --ring: oklch(0.6916 0.1669 37.2264);
+  
+  /* Chart Colors */
+  --chart-1: oklch(0.6916 0.1669 37.2264);
+  --chart-2: oklch(0.6731 0.1624 144.2083);
+  --chart-3: oklch(0.6582 0.1690 248.8135);
+  --chart-4: oklch(0.8442 0.1722 84.9338);
+  --chart-5: oklch(0.5168 0.2151 321.2386);
+  
+  /* Sidebar Colors */
+  --sidebar: oklch(0.9702 0 0);
+  --sidebar-foreground: oklch(0.2478 0 0);
+  --sidebar-primary: oklch(0.6916 0.1669 37.2264);
+  --sidebar-primary-foreground: oklch(1.0000 0 0);
+  --sidebar-accent: oklch(0.6916 0.1669 37.2264);
+  --sidebar-accent-foreground: oklch(0.6916 0.1669 37.2264);
+  --sidebar-border: oklch(0.9067 0 0);
+  --sidebar-ring: oklch(0.6916 0.1669 37.2264);
+  
+  /* Typography */
+  --font-sans: sans-serif;
+  --font-serif: serif;
+  --font-mono: monospace;
+  
+  /* Border Radius */
+  --radius: 0.5rem;
+  
+  /* Shadows */
+  --shadow-x: 0rem;
+  --shadow-y: 0.25rem;
+  --shadow-blur: 0.5rem;
+  --shadow-spread: 0rem;
+  --shadow-opacity: 0.05;
+  --shadow-color: oklch(0% 0 0); /* Pure black for shadows */
+  --shadow-2xs: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.03);
+  --shadow-xs: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.03);
+  --shadow-sm: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.05), 0rem 1px 2px -1px oklch(0% 0 0 / 0.05);
+  --shadow: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.05), 0rem 1px 2px -1px oklch(0% 0 0 / 0.05);
+  --shadow-md: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.05), 0rem 2px 4px -1px oklch(0% 0 0 / 0.05);
+  --shadow-lg: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.05), 0rem 4px 6px -1px oklch(0% 0 0 / 0.05);
+  --shadow-xl: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.05), 0rem 8px 10px -1px oklch(0% 0 0 / 0.05);
+  --shadow-2xl: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.13);
+  
+  /* Letter Spacing */
+  --tracking-normal: 0rem;
+  
+  /* Spacing */
+  --spacing: 0.25rem;
+  
+  /* Custom variables - Light mode defaults (preserved from original theme) */
+  --claude-orange: oklch(74% 0.2 35);
+  --color-bg-tertiary: oklch(96% 0.007 80);
+  --color-bg-quaternary: oklch(94% 0.008 75);
+  --color-bg-selected: oklch(92% 0.025 42);
+  --color-bg-code: oklch(98% 0.004 85);
+  --color-bg-overlay: oklch(98% 0.003 90 / 0.9);
+  --color-text-tertiary: oklch(44% 0.01 65);
+  --color-text-disabled: oklch(68% 0.008 60);
+  --color-text-inverse: oklch(100% 0 0);
+  --color-accent-hover: oklch(54% 0.17 40);
+  --color-accent-active: oklch(50% 0.175 39);
+  --color-accent-subtle: oklch(95% 0.035 42);
+  --color-border-light: oklch(95% 0.004 80);
+  --color-border-medium: oklch(88% 0.008 70);
+  --color-border-strong: oklch(70% 0.2 35);
+  --color-success: oklch(52% 0.18 145);
+  --color-success-bg: oklch(96% 0.08 145 / 0.2);
+  --color-success-border: oklch(52% 0.18 145 / 0.3);
+  --color-warning: oklch(58% 0.16 65);
+  --color-warning-bg: oklch(97% 0.08 65 / 0.2);
+  --color-warning-border: oklch(58% 0.16 65 / 0.3);
+  --color-error: oklch(53% 0.19 25);
+  --color-error-bg: oklch(97% 0.08 25 / 0.2);
+  --color-error-border: oklch(53% 0.19 25 / 0.3);
+  --color-info: oklch(54% 0.17 250);
+  --color-info-bg: oklch(97% 0.08 250 / 0.2);
+  --color-info-border: oklch(54% 0.17 250 / 0.3);
+}
+
+/* ========================================
+   .DARK - Dark Mode Overrides (tweakcn pure grayscale)
+   ======================================== */
+.dark {
+  --background: oklch(0.2221 0 0);
+  --foreground: oklch(0.9067 0 0);
+  --card: oklch(0.2645 0 0);
+  --card-foreground: oklch(0.9067 0 0);
+  --popover: oklch(0.2645 0 0);
+  --popover-foreground: oklch(0.9067 0 0);
+  --primary: oklch(0.6916 0.1669 37.2264);
+  --primary-foreground: oklch(1.0000 0 0);
+  --secondary: oklch(0.3092 0 0);
+  --secondary-foreground: oklch(0.9067 0 0);
+  --muted: oklch(0.2891 0 0);
+  --muted-foreground: oklch(0.7058 0 0);
+  --accent: oklch(0.6916 0.1669 37.2264);
+  --accent-foreground: oklch(0.6916 0.1669 37.2264);
+  --destructive: oklch(0.6368 0.2078 25.3313);
+  --destructive-foreground: oklch(0.9851 0 0);
+  --border: oklch(0.3600 0 0);
+  --input: oklch(0.3211 0 0);
+  --ring: oklch(0.6916 0.1669 37.2264);
+  
+  /* Chart Colors (same as light mode) */
+  --chart-1: oklch(0.6916 0.1669 37.2264);
+  --chart-2: oklch(0.6731 0.1624 144.2083);
+  --chart-3: oklch(0.6582 0.1690 248.8135);
+  --chart-4: oklch(0.8442 0.1722 84.9338);
+  --chart-5: oklch(0.5168 0.2151 321.2386);
+  
+  /* Sidebar Colors */
+  --sidebar: oklch(0.2393 0 0);
+  --sidebar-foreground: oklch(0.9067 0 0);
+  --sidebar-primary: oklch(0.6916 0.1669 37.2264);
+  --sidebar-primary-foreground: oklch(1.0000 0 0);
+  --sidebar-accent: oklch(0.6916 0.1669 37.2264);
+  --sidebar-accent-foreground: oklch(0.6916 0.1669 37.2264);
+  --sidebar-border: oklch(0.3600 0 0);
+  --sidebar-ring: oklch(0.6916 0.1669 37.2264);
+  
+  /* Typography (same as light mode) */
+  --font-sans: sans-serif;
+  --font-serif: serif;
+  --font-mono: monospace;
+  
+  /* Border Radius (same as light mode) */
+  --radius: 0.5rem;
+  
+  /* Shadows (dark mode specific) */
+  --shadow-x: 0rem;
+  --shadow-y: 0.5rem;
+  --shadow-blur: 0.75rem;
+  --shadow-spread: -0.25rem;
+  --shadow-opacity: 0.2;
+  --shadow-color: oklch(0% 0 0); /* Pure black for shadows - OKLCH format for consistency */
+  --shadow-2xs: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.10);
+  --shadow-xs: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.10);
+  --shadow-sm: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.20), 0rem 1px 2px -1.25px oklch(0% 0 0 / 0.20);
+  --shadow: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.20), 0rem 1px 2px -1.25px oklch(0% 0 0 / 0.20);
+  --shadow-md: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.20), 0rem 2px 4px -1.25px oklch(0% 0 0 / 0.20);
+  --shadow-lg: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.20), 0rem 4px 6px -1.25px oklch(0% 0 0 / 0.20);
+  --shadow-xl: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.20), 0rem 8px 10px -1.25px oklch(0% 0 0 / 0.20);
+  --shadow-2xl: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.50);
+  
+  /* Custom variables - Dark mode overrides (preserved from original theme) */
+  --claude-orange: oklch(74% 0.2 35);
+  --color-bg-tertiary: oklch(32% 0.008 60);
+  --color-bg-quaternary: oklch(36% 0.009 60);
+  --color-bg-selected: oklch(40% 0.01 60);
+  --color-bg-code: oklch(12% 0.003 60);
+  --color-bg-overlay: oklch(18% 0.005 0 / 0.8);
+  --color-text-tertiary: oklch(72% 0.01 60);
+  --color-text-disabled: oklch(57% 0.012 60);
+  --color-text-inverse: oklch(100% 0 0);
+  --color-accent-hover: oklch(78% 0.19 35);
+  --color-accent-active: oklch(70% 0.21 35);
+  --color-accent-subtle: oklch(45% 0.08 35);
+  --color-border-light: oklch(28% 0.005 60 / 0.3);
+  --color-border-medium: oklch(34% 0.008 60 / 0.6);
+  --color-border-strong: oklch(74% 0.2 35);
+  --color-success: oklch(72% 0.19 145);
+  --color-success-bg: oklch(35% 0.08 145 / 0.15);
+  --color-success-border: oklch(64% 0.19 145 / 0.3);
+  --color-warning: oklch(75% 0.155 65);
+  --color-warning-bg: oklch(45% 0.08 65 / 0.15);
+  --color-warning-border: oklch(68% 0.155 65 / 0.3);
+  --color-error: oklch(70% 0.195 25);
+  --color-error-bg: oklch(40% 0.08 25 / 0.15);
+  --color-error-border: oklch(63% 0.195 25 / 0.3);
+  --color-info: oklch(78% 0.168 250);
+  --color-info-bg: oklch(40% 0.08 250 / 0.15);
+  --color-info-border: oklch(65% 0.168 250 / 0.3);
+}
 
 @theme {
   /* ========================================
@@ -45,21 +247,21 @@
   --breakpoint-2xl: 1400px;
 
   /* Animation Keyframes - Auto-generates animate-* utilities */
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-accordion-down: accordion-down var(--duration-quick) var(--ease-out);
+  --animate-accordion-up: accordion-up var(--duration-quick) var(--ease-out);
   --animate-border-beam: border-beam linear infinite;
 
   /* Custom Animations - Auto-generates animate-* utilities */
-  /* Note: Duration and easing variables are defined in :root, accessible here */
+  /* Note: Duration and easing variables are defined in @theme block below, accessible here */
   --animate-fade-in: fadeIn var(--duration-quick) var(--ease-out) both;
   --animate-slide-up: slideUp var(--duration-default) var(--ease-out) both;
   --animate-scale-in: scale-in var(--duration-quick) var(--ease-out) both;
   --animate-pulse: pulse-accent var(--duration-very-long) var(--ease-in-out) infinite;
   --animate-shimmer: shimmer var(--duration-maximum) linear infinite;
   --animate-gridMove: gridMove var(--duration-morphing) linear infinite;
-  --animate-textRoll: textRoll 600ms ease-in-out;
-  --animate-fade-in-up: fadeInUp 0.5s ease-out forwards;
-  --animate-fadeIn: fadeIn var(--duration-default) ease-out forwards;
+  --animate-textRoll: textRoll var(--duration-extended) var(--ease-in-out);
+  --animate-fade-in-up: fadeInUp var(--duration-moderate) var(--ease-out) forwards;
+  --animate-fadeIn: fadeIn var(--duration-default) var(--ease-out) forwards;
 
   /* Performance Optimizations - GPU Acceleration & Paint Isolation */
   /* will-change utilities for GPU acceleration */
@@ -74,6 +276,30 @@
   --contain-content: content;
   --contain-strict: strict;
   --contain-size: size;
+
+  /* ========================================
+     Z-INDEX SCALE - Auto-generates z-* utilities
+     ======================================== */
+  /* Z-Index Scale (semantic values for consistent layering):
+   * - z-0: Background elements (particles, decorative)
+   * - z-10: Component-level overlays (badges, cards, relative positioning)
+   * - z-20: Sticky elements (quick actions, progress bars)
+   * - z-30: Focus states (skip links, focus indicators)
+   * - z-40: Floating elements (mobile navigation, tooltips)
+   * - z-50: Navigation, dropdowns, popovers, command menu
+   * - z-60: Announcement banner, dialog overlays, sheets
+   * - z-61: Sheet content (above overlay)
+   * - z-100: Skip-to-content link (highest priority - accessibility), dialog content
+   */
+  --z-0: var(--z-0);
+  --z-10: var(--z-10);
+  --z-20: var(--z-20);
+  --z-30: var(--z-30);
+  --z-40: var(--z-40);
+  --z-50: var(--z-50);
+  --z-60: var(--z-60);
+  --z-61: var(--z-61);
+  --z-100: var(--z-100);
 
   /* ========================================
      COLOR DEFINITIONS - Both Themes
@@ -122,12 +348,12 @@
   --color-og-accent: oklch(74% 0.2 35); /* #f97316 - Claude orange for OG images */
   --color-og-accent-light: oklch(82% 0.17 37); /* #fb923c - Light orange for OG gradients */
 
-  /* Syntax Highlighting Colors - Polar-style muted palette */
-  --color-syntax-keyword: #7dd3fc; /* Light blue */
-  --color-syntax-function: #93c5fd; /* Soft blue */
-  --color-syntax-number: #fcd34d; /* Soft yellow */
-  --color-syntax-string: #86efac; /* Soft green */
-  --color-syntax-comment: #64748b; /* Slate gray */
+  /* Syntax Highlighting Colors - Polar-style muted palette (OKLCH format) */
+  --color-syntax-keyword: oklch(85% 0.12 230); /* Light blue - #7dd3fc */
+  --color-syntax-function: oklch(82% 0.14 240); /* Soft blue - #93c5fd */
+  --color-syntax-number: oklch(88% 0.15 90); /* Soft yellow - #fcd34d */
+  --color-syntax-string: oklch(85% 0.16 150); /* Soft green - #86efac */
+  --color-syntax-comment: oklch(55% 0.02 250); /* Slate gray - #64748b */
 
   /* ========================================
      CATEGORY COLOR SYSTEM - OKLCH
@@ -218,17 +444,22 @@
      ======================================== */
 
   /* Font Sizes - Auto-generates text-* utilities */
-  --font-size-2xs: 0.625rem; /* 10px */
-  --font-size-3xs: 0.6875rem; /* 11px */
-  --font-size-xs: 0.75rem; /* 12px */
-  --font-size-sm: 0.875rem; /* 14px */
-  --font-size-base: 1rem; /* 16px */
-  --font-size-lg: 1.125rem; /* 18px */
-  --font-size-xl: 1.25rem; /* 20px */
-  --font-size-2xl: 1.5rem; /* 24px */
-  --font-size-3xl: 1.875rem; /* 30px */
-  --font-size-4xl: 2.25rem; /* 36px */
-  --font-size-5xl: 3rem; /* 48px */
+  /* Extended scale for very small text (badges, labels, compact UI) */
+  --font-size-4xs: 0.5rem; /* 8px - Very small text (badges, labels) */
+  --font-size-3xs: 0.5625rem; /* 9px - Extra small text (compact badges) */
+  --font-size-2xs: 0.625rem; /* 10px - Small text (captions, badges) */
+  --font-size-xs: 0.6875rem; /* 11px - Small text (navigation labels) */
+  --font-size-sm: 0.75rem; /* 12px - Base small text */
+  --font-size-base: 0.8125rem; /* 13px - Medium small text (code blocks) */
+  /* Standard Tailwind scale */
+  --font-size-md: 0.875rem; /* 14px - Medium text */
+  --font-size-lg: 1rem; /* 16px - Large text */
+  --font-size-xl: 1.125rem; /* 18px - Extra large text */
+  --font-size-2xl: 1.25rem; /* 20px - 2x large text */
+  --font-size-3xl: 1.5rem; /* 24px - 3x large text */
+  --font-size-4xl: 1.875rem; /* 30px - 4x large text */
+  --font-size-5xl: 2.25rem; /* 36px - 5x large text */
+  --font-size-6xl: 3rem; /* 48px - 6x large text */
 
   /* Font Weights - Auto-generates font-* utilities */
   --font-weight-light: 300;
@@ -283,21 +514,36 @@
   /* ========================================
      Z-INDEX HIERARCHY - Auto-generates z-* utilities
      ======================================== */
-
-  --z-60: 60; /* Announcement banner (above navigation, below skip link) */
+  /* Z-Index Scale (semantic values for consistent layering):
+   * - z-0: Background elements (particles, decorative)
+   * - z-10: Component-level overlays (badges, cards, relative positioning)
+   * - z-20: Sticky elements (quick actions, progress bars)
+   * - z-30: Focus states (skip links, focus indicators)
+   * - z-40: Floating elements (mobile navigation, tooltips)
+   * - z-50: Navigation, dropdowns, popovers, command menu
+   * - z-60: Announcement banner, dialog overlays, sheets
+   * - z-61: Sheet content (above overlay)
+   * - z-100: Skip-to-content link (highest priority - accessibility), dialog content
+   */
+  --z-0: 0;
+  --z-10: 10;
+  --z-20: 20;
+  --z-30: 30;
+  --z-40: 40;
+  --z-50: 50;
+  --z-60: 60;
+  --z-61: 61;
+  --z-100: 100;
 
   /* ========================================
-     DEFAULT THEME (Dark)
+     DEFAULT THEME (Dark) - REMOVED
      ======================================== */
-
-  /* Active theme colors - defaults to dark */
-  --background: oklch(24% 0.008 60);
-  --card: oklch(28% 0.006 60);
-  --foreground: oklch(95% 0.005 60); /* Text color - high contrast on dark background */
-  --primary: var(--claude-orange); /* Primary brand color */
-  --secondary: var(--color-bg-tertiary); /* Secondary surface color */
-  --muted: var(--color-bg-tertiary); /* Muted surface color */
-  --destructive: var(--color-error); /* Destructive/error color */
+  /* REMOVED: Theme variable definitions from @theme block
+   * Core theme variables (--background, --foreground, --card, etc.) are now defined in
+   * :root (light mode defaults) and .dark (dark mode overrides) blocks above (tweakcn pattern).
+   * These variables are then mapped to Tailwind utilities via @theme inline block.
+   * Custom variables below (category colors, brand colors, etc.) are preserved here.
+   */
   --color-bg-tertiary: oklch(32% 0.008 60);
   --color-bg-quaternary: oklch(36% 0.009 60);
   --color-bg-selected: oklch(40% 0.01 60);
@@ -476,6 +722,12 @@
   --color-search-glow-via: rgba(249, 115, 22, 0.35); /* COLORS.semantic.search.focus.glow.via */
   --color-search-glow-to: rgba(249, 115, 22, 0.15); /* COLORS.semantic.search.focus.glow.to */
   --color-search-particle-base: rgba(249, 115, 22, 0.4); /* COLORS.semantic.search.particle.base */
+
+  /* Navigation Hover States - RGBA for Motion.dev compatibility */
+  --color-primary-hover-bg: rgba(249, 115, 22, 0.05); /* Primary hover background (5% opacity) */
+  --color-primary-hover-border: rgba(249, 115, 22, 0.5); /* Primary hover border (50% opacity) */
+  --color-primary-glow-from: rgba(249, 115, 22, 0.4); /* Primary glow gradient from */
+  --color-primary-glow-to: rgba(249, 115, 22, 0.2); /* Primary glow gradient to */
   --color-search-particle-shadow: rgba(
     249,
     115,
@@ -752,27 +1004,14 @@
   --color-badge-jobstatus-deleted-text: oklch(72% 0.005 60); /* gray-400 */
   --color-badge-jobstatus-deleted-border: oklch(60% 0.005 60 / 0.2);
 
+  /* REMOVED: Tailwind CSS variable mappings
+   * These mappings are now handled by @theme inline block (tweakcn pattern)
+   * The @theme inline block maps CSS variables (--background, --foreground, etc.) 
+   * from :root/.dark to Tailwind utilities (--color-background, --color-foreground, etc.)
+   */
+  
   /* Primary color - maps to Claude orange brand color */
   --primary-foreground: var(--color-text-inverse);
-
-  /* Tailwind CSS variable mappings for shadcn/ui compatibility */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--foreground);
-  --color-popover: var(--card);
-  --color-popover-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground); /* Maps to semantic --muted-foreground */
-  --color-border: var(--border);
-  --color-input: var(--card);
-  --color-ring: var(--primary);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--foreground);
 
   /* REMOVED: Typography and spacing variables
    * These have been migrated to the @theme block above (lines 203-260).
@@ -827,171 +1066,216 @@
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1); /* Spring easing for smooth, natural animations */
 }
 
 /* ========================================
-   SYSTEM PREFERENCE: LIGHT MODE
+   @THEME INLINE - Map CSS variables to Tailwind utilities (tweakcn pattern)
    ======================================== */
-@media (prefers-color-scheme: light) {
-  :root:not(.dark) {
-    --background: oklch(99% 0.003 90);
-    --card: oklch(97.5% 0.005 85);
-    --foreground: oklch(15% 0.005 60); /* Text color - dark on light background */
-    --primary: var(--claude-orange); /* Primary brand color (same in both themes) */
-    --secondary: var(--color-bg-tertiary); /* Secondary surface color */
-    --muted: var(--color-bg-tertiary); /* Muted surface color */
-    --destructive: var(--color-error); /* Destructive/error color */
-    --color-bg-tertiary: oklch(96% 0.007 80);
-    --color-bg-quaternary: oklch(94% 0.008 75);
-    --color-bg-selected: oklch(92% 0.025 42);
-    --color-bg-code: oklch(98% 0.004 85);
-    --color-bg-overlay: oklch(98% 0.003 90 / 0.9);
-    --muted-foreground: oklch(42% 0.012 70);
-    --color-text-tertiary: oklch(
-      44% 0.01 65
-    ); /* Decreased from 67% to 44% for improved WCAG AA contrast (4.5:1 minimum) on light backgrounds */
-    --color-text-disabled: oklch(68% 0.008 60);
-    --color-text-inverse: oklch(100% 0 0);
-    --color-accent-hover: oklch(54% 0.17 40);
-    --color-accent-active: oklch(50% 0.175 39);
-    --color-accent-subtle: oklch(95% 0.035 42);
-    --color-accent-light: var(--claude-orange-light);
-    --color-accent-muted: var(--claude-orange-muted);
+@theme inline {
+  /* Color mappings */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  /* Semantic color mappings */
+  --color-success: var(--color-success);
+  --color-success-bg: var(--color-success-bg);
+  --color-success-border: var(--color-success-border);
+  --color-error: var(--color-error);
+  --color-error-bg: var(--color-error-bg);
+  --color-error-border: var(--color-error-border);
+  --color-warning: var(--color-warning);
+  --color-warning-bg: var(--color-warning-bg);
+  --color-warning-border: var(--color-warning-border);
+  --color-info: var(--color-info);
+  --color-info-bg: var(--color-info-bg);
+  --color-info-border: var(--color-info-border);
+  
+  /* Category color mappings - Auto-generates bg-category-*, text-category-*, border-category-* utilities */
+  --color-category-agents: var(--color-category-agents);
+  --color-category-agents-bg: var(--color-category-agents-bg);
+  --color-category-agents-border: var(--color-category-agents-border);
+  --color-category-mcp: var(--color-category-mcp);
+  --color-category-mcp-bg: var(--color-category-mcp-bg);
+  --color-category-mcp-border: var(--color-category-mcp-border);
+  --color-category-commands: var(--color-category-commands);
+  --color-category-commands-bg: var(--color-category-commands-bg);
+  --color-category-commands-border: var(--color-category-commands-border);
+  --color-category-rules: var(--color-category-rules);
+  --color-category-rules-bg: var(--color-category-rules-bg);
+  --color-category-rules-border: var(--color-category-rules-border);
+  --color-category-hooks: var(--color-category-hooks);
+  --color-category-hooks-bg: var(--color-category-hooks-bg);
+  --color-category-hooks-border: var(--color-category-hooks-border);
+  --color-category-statuslines: var(--color-category-statuslines);
+  --color-category-statuslines-bg: var(--color-category-statuslines-bg);
+  --color-category-statuslines-border: var(--color-category-statuslines-border);
+  
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 
-    --border: oklch(92% 0.006 75);
-    --color-border-light: oklch(95% 0.004 80);
-    --color-border-medium: oklch(88% 0.008 70);
-    --color-border-strong: oklch(70% 0.2 35);
+  /* Typography mappings */
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
+  
+  /* Font Size mappings - Auto-generates text-* utilities */
+  /* Extended scale for very small text */
+  --font-size-4xs: var(--font-size-4xs); /* 8px - Very small text (badges, labels) */
+  --font-size-3xs: var(--font-size-3xs); /* 9px - Extra small text (compact badges) */
+  --font-size-2xs: var(--font-size-2xs); /* 10px - Small text (captions, badges) */
+  --font-size-xs: var(--font-size-xs); /* 11px - Small text (navigation labels) */
+  --font-size-sm: var(--font-size-sm); /* 12px - Base small text */
+  --font-size-base: var(--font-size-base); /* 13px - Medium small text (code blocks) */
+  /* Standard Tailwind scale */
+  --font-size-md: var(--font-size-md); /* 14px - Medium text */
+  --font-size-lg: var(--font-size-lg); /* 16px - Large text */
+  --font-size-xl: var(--font-size-xl); /* 18px - Extra large text */
+  --font-size-2xl: var(--font-size-2xl); /* 20px - 2x large text */
+  --font-size-3xl: var(--font-size-3xl); /* 24px - 3x large text */
+  --font-size-4xl: var(--font-size-4xl); /* 30px - 4x large text */
+  --font-size-5xl: var(--font-size-5xl); /* 36px - 5x large text */
+  --font-size-6xl: var(--font-size-6xl); /* 48px - 6x large text */
 
-    --color-success: oklch(52% 0.18 145);
-    --color-success-bg: oklch(96% 0.08 145 / 0.2);
-    --color-success-border: oklch(52% 0.18 145 / 0.3);
-    --color-warning: oklch(58% 0.16 65);
-    --color-warning-bg: oklch(97% 0.08 65 / 0.2);
-    --color-warning-border: oklch(58% 0.16 65 / 0.3);
-    --color-error: oklch(53% 0.19 25);
-    --color-error-bg: oklch(97% 0.08 25 / 0.2);
-    --color-error-border: oklch(53% 0.19 25 / 0.3);
-    --color-info: oklch(54% 0.17 250);
-    --color-info-bg: oklch(97% 0.08 250 / 0.2);
-    --color-info-border: oklch(54% 0.17 250 / 0.3);
-    --shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.06);
-    --shadow-md: 0 4px 6px oklch(0% 0 0 / 0.08);
-    --shadow-lg: 0 10px 15px oklch(0% 0 0 / 0.1);
-    --shadow-xl: 0 15px 20px oklch(0% 0 0 / 0.12);
-    --shadow-2xl: 0 20px 30px oklch(0% 0 0 / 0.18);
-  }
+  /* Spacing scale mappings - Auto-generates gap-*, p-*, m-*, space-* utilities */
+  /* Note: Spacing values are defined in :root block, mapped here for Tailwind utilities */
+  --spacing-0: var(--spacing-0);
+  --spacing-px: var(--spacing-px);
+  --spacing-0_5: var(--spacing-0_5);
+  --spacing-1: var(--spacing-1);
+  --spacing-1_5: var(--spacing-1_5); /* 6px - gap-1.5, p-1.5, m-1.5 */
+  --spacing-2: var(--spacing-2);
+  --spacing-2_5: var(--spacing-2_5);
+  --spacing-3: var(--spacing-3);
+  --spacing-3_5: var(--spacing-3_5);
+  --spacing-4: var(--spacing-4);
+  --spacing-5: var(--spacing-5);
+  --spacing-6: var(--spacing-6);
+  --spacing-7: var(--spacing-7);
+  --spacing-8: var(--spacing-8);
+  --spacing-9: var(--spacing-9);
+  --spacing-10: var(--spacing-10);
+  --spacing-11: var(--spacing-11);
+  --spacing-12: var(--spacing-12);
+  --spacing-14: var(--spacing-14);
+  --spacing-16: var(--spacing-16);
+  --spacing-20: var(--spacing-20);
+  --spacing-24: var(--spacing-24);
+  --spacing-28: var(--spacing-28);
+  --spacing-32: var(--spacing-32);
+
+  /* Size scale mappings - Auto-generates h-*, w-*, min-h-*, min-w-*, max-h-*, max-w-* utilities */
+  /* Note: Size values use spacing scale for consistency */
+  --size-0: var(--spacing-0);
+  --size-px: var(--spacing-px);
+  --size-0_5: var(--spacing-0_5);
+  --size-1: var(--spacing-1);
+  --size-1_5: var(--spacing-1_5); /* 6px */
+  --size-2: var(--spacing-2);
+  --size-2_5: var(--spacing-2_5);
+  --size-3: var(--spacing-3);
+  --size-3_5: var(--spacing-3_5);
+  --size-4: var(--spacing-4);
+  --size-4_5: 1.125rem; /* 18px - for icon sizes (h-4.5, w-4.5) */
+  --size-5: var(--spacing-5);
+  --size-6: var(--spacing-6);
+  --size-7: var(--spacing-7);
+  --size-8: var(--spacing-8);
+  --size-9: var(--spacing-9);
+  --size-10: var(--spacing-10);
+  --size-11: var(--spacing-11);
+  --size-12: var(--spacing-12);
+  --size-14: var(--spacing-14);
+  --size-16: var(--spacing-16);
+  --size-20: var(--spacing-20);
+  --size-24: var(--spacing-24);
+  --size-28: var(--spacing-28);
+  --size-32: var(--spacing-32);
+
+  /* Border radius mappings */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Shadow mappings */
+  --shadow-2xs: var(--shadow-2xs);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
+
+  /* Letter spacing mappings */
+  --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
+  --tracking-tight: calc(var(--tracking-normal) - 0.025em);
+  --tracking-normal: var(--tracking-normal);
+  --tracking-wide: calc(var(--tracking-normal) + 0.025em);
+  --tracking-wider: calc(var(--tracking-normal) + 0.05em);
+  --tracking-widest: calc(var(--tracking-normal) + 0.1em);
 }
+
+body {
+  letter-spacing: var(--tracking-normal);
+}
+
+/* ========================================
+   CUSTOM THEME VARIABLES (Non-tweakcn)
+   These are codebase-specific additions beyond tweakcn core theme
+   ======================================== */
+
+/* ========================================
+   SYSTEM PREFERENCE: LIGHT MODE (DEPRECATED - Use :root defaults instead)
+   ======================================== */
+/* REMOVED: @media (prefers-color-scheme: light) block
+ * Light mode defaults are now in :root block (tweakcn pattern)
+ * Custom variables have been migrated to :root block above
+ */
 
 /* ========================================
    FORCED LIGHT MODE
    ======================================== */
-.light {
-  --background: oklch(99% 0.003 90);
-  --card: oklch(97.5% 0.005 85);
-  --foreground: oklch(15% 0.005 60); /* Text color - dark on light background */
-  --primary: var(--claude-orange); /* Primary brand color (same in both themes) */
-  --secondary: var(--color-bg-tertiary); /* Secondary surface color */
-  --muted: var(--color-bg-tertiary); /* Muted surface color */
-  --destructive: var(--color-error); /* Destructive/error color */
-  --color-bg-tertiary: oklch(96% 0.007 80);
-  --color-bg-quaternary: oklch(94% 0.008 75);
-  --color-bg-selected: oklch(92% 0.025 42);
-  --color-bg-code: oklch(98% 0.004 85);
-  --color-bg-overlay: oklch(98% 0.003 90 / 0.9);
-  --muted-foreground: oklch(42% 0.012 70);
-  --color-text-tertiary: oklch(
-    44% 0.01 65
-  ); /* Decreased from 67% to 44% for improved WCAG AA contrast (4.5:1 minimum) on light backgrounds */
-  --color-text-disabled: oklch(68% 0.008 60);
-  --color-text-inverse: oklch(
-    100% 0 0
-  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
-  --color-accent-hover: oklch(54% 0.17 40);
-  --color-accent-active: oklch(50% 0.175 39);
-  --color-accent-subtle: oklch(95% 0.035 42);
-  --color-accent-light: var(--claude-orange-light);
-  --color-accent-muted: var(--claude-orange-muted);
-
-  --border: oklch(92% 0.006 75);
-  --color-border-light: oklch(95% 0.004 80);
-  --color-border-medium: oklch(88% 0.008 70);
-  --color-border-strong: oklch(70% 0.2 35);
-
-  --color-success: oklch(52% 0.18 145);
-  --color-success-bg: oklch(96% 0.08 145 / 0.2);
-  --color-success-border: oklch(52% 0.18 145 / 0.3);
-  --color-warning: oklch(58% 0.16 65);
-  --color-warning-bg: oklch(97% 0.08 65 / 0.2);
-  --color-warning-border: oklch(58% 0.16 65 / 0.3);
-  --color-error: oklch(53% 0.19 25);
-  --color-error-bg: oklch(97% 0.08 25 / 0.2);
-  --color-error-border: oklch(53% 0.19 25 / 0.3);
-  --color-info: oklch(54% 0.17 250);
-  --color-info-bg: oklch(97% 0.08 250 / 0.2);
-  --color-info-border: oklch(54% 0.17 250 / 0.3);
-  --shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.06);
-  --shadow-md: 0 4px 6px oklch(0% 0 0 / 0.08);
-  --shadow-lg: 0 10px 15px oklch(0% 0 0 / 0.1);
-  --shadow-xl: 0 15px 20px oklch(0% 0 0 / 0.12);
-  --shadow-2xl: 0 20px 30px oklch(0% 0 0 / 0.18);
-}
+/* REMOVED: .light block - Light mode uses :root defaults (tweakcn pattern)
+ * The .light class will inherit from :root automatically
+ * All custom variables have been migrated to :root block above
+ */
 
 /* ========================================
    FORCED DARK MODE
    ======================================== */
-.dark {
-  --background: oklch(24% 0.008 60);
-  --card: oklch(28% 0.006 60);
-  --foreground: oklch(95% 0.005 60); /* Text color - high contrast on dark background */
-  --primary: var(--claude-orange); /* Primary brand color (same in both themes) */
-  --secondary: var(--color-bg-tertiary); /* Secondary surface color */
-  --muted: var(--color-bg-tertiary); /* Muted surface color */
-  --destructive: var(--color-error); /* Destructive/error color */
-  --color-bg-tertiary: oklch(32% 0.008 60);
-  --color-bg-quaternary: oklch(36% 0.009 60);
-  --color-bg-selected: oklch(40% 0.01 60);
-  --color-bg-code: oklch(12% 0.003 60);
-  --color-bg-overlay: oklch(18% 0.005 0 / 0.8);
-  --muted-foreground: oklch(78% 0.008 60);
-  --color-text-tertiary: oklch(
-    72% 0.01 60
-  ); /* Increased from 69% to 72% for improved WCAG AA contrast (4.5:1 minimum) */
-  --color-text-disabled: oklch(57% 0.012 60);
-  --color-text-inverse: oklch(
-    100% 0 0
-  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
-  --color-accent-hover: var(--claude-orange-hover);
-  --color-accent-active: var(--claude-orange-active);
-  --color-accent-subtle: oklch(45% 0.08 35);
-  --color-accent-light: var(--claude-orange-light);
-  --color-accent-muted: var(--claude-orange-muted);
-
-  --border: oklch(30% 0.005 60 / 0.5);
-  --color-border-light: oklch(28% 0.005 60 / 0.3);
-  --color-border-medium: oklch(34% 0.008 60 / 0.6);
-  --color-border-strong: oklch(74% 0.2 35);
-
-  --color-success: oklch(72% 0.19 145); /* Increased from 64% for WCAG AA contrast (4.5:1) */
-  --color-success-bg: oklch(35% 0.08 145 / 0.15);
-  --color-success-border: oklch(64% 0.19 145 / 0.3);
-  --color-warning: oklch(75% 0.155 65); /* Increased from 68% for WCAG AA contrast (4.5:1) */
-  --color-warning-bg: oklch(45% 0.08 65 / 0.15);
-  --color-warning-border: oklch(68% 0.155 65 / 0.3);
-  --color-error: oklch(70% 0.195 25); /* Increased from 63% for WCAG AA contrast (4.5:1) */
-  --color-error-bg: oklch(40% 0.08 25 / 0.15);
-  --color-error-border: oklch(63% 0.195 25 / 0.3);
-  --color-info: oklch(
-    78% 0.168 250
-  ); /* Increased from 65% for WCAG AA contrast (4.5:1) - was worst at 2.82:1 */
-  --color-info-bg: oklch(40% 0.08 250 / 0.15);
-  --color-info-border: oklch(65% 0.168 250 / 0.3);
-  --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.04);
-  --shadow-md: 0 2px 4px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
-  --shadow-lg: 0 4px 6px oklch(0% 0 0 / 0.08), 0 2px 4px oklch(0% 0 0 / 0.05);
-  --shadow-xl: 0 8px 10px oklch(0% 0 0 / 0.1), 0 4px 6px oklch(0% 0 0 / 0.06);
-  --shadow-2xl: 0 12px 20px oklch(0% 0 0 / 0.15);
-}
+/* REMOVED: Duplicate .dark block - Dark mode uses .dark block at top (tweakcn pattern)
+ * All custom variables have been migrated to .dark block above
+ */
 
 @layer base {
   :root {
@@ -1030,9 +1314,10 @@
     color: var(--foreground);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition:
-      background-color 200ms ease-in-out,
-      color 200ms ease-in-out;
+    /* REMOVED: background-color and color transitions
+     * These conflicted with the Motion.dev theme toggle animation overlay,
+     * causing laggy/rough transitions. The overlay animation handles the transition smoothly.
+     */
     letter-spacing: var(--shadow-spread);
   }
 
@@ -1295,25 +1580,12 @@
    * Use: animate-fade-in, animate-slide-up, etc. (auto-generated from --animate-* in @theme)
    */
 
-  /* Navigation styling */
-  .nav-backdrop {
-    background: color-mix(in oklch, var(--color-background), transparent 5%);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .nav-link {
-    color: var(--color-secondary-foreground);
-    transition: var(--transition-normal);
-  }
-
-  .nav-link:hover {
-    color: var(--color-foreground);
-  }
-
-  .nav-link.active {
-    color: var(--color-primary);
-  }
+  /* REMOVED: Unused navigation styling classes (.nav-backdrop, .nav-link)
+   * These classes were defined but never used. Navigation components use Tailwind utilities directly:
+   * - .nav-backdrop → bg-background/95 backdrop-blur-xl border-b border-border/50
+   * - .nav-link → Components use Tailwind classes directly (text-foreground, transition-all, etc.)
+   * Note: 'nav-link' is used as a viewTransitionName (View Transitions API), not a CSS class.
+   */
 
   /* REMOVED: Unused .light .claude-* adjustments
    * These were for removed .claude-* classes.
@@ -1332,12 +1604,12 @@
   @supports (view-transition-name: root) {
     /* Cross-fade old view out smoothly */
     ::view-transition-old(root) {
-      animation: theme-fade-out var(--duration-quick) cubic-bezier(0.4, 0, 0.2, 1);
+      animation: theme-fade-out var(--duration-quick) var(--ease-in-out);
     }
 
     /* Animate new view with smooth circle expansion (no blur for performance) */
     ::view-transition-new(root) {
-      animation: theme-circle-expand var(--duration-quick) cubic-bezier(0.4, 0, 0.2, 1);
+      animation: theme-circle-expand var(--duration-quick) var(--ease-in-out);
       mix-blend-mode: normal;
       /* Animation origin set dynamically via inline style */
     }
@@ -1895,20 +2167,18 @@ body {
   overflow: hidden;
   font-family: var(--font-sans);
   border: 1px solid var(--border);
-  box-shadow:
-    0 10px 38px -10px rgba(22, 23, 24, 0.35),
-    0 10px 20px -15px rgba(22, 23, 24, 0.2);
+  box-shadow: var(--shadow-2xl), 0 0 0 1px var(--border);
   outline: none;
 }
 
 /* Command Dialog - Dialog wrapper */
 [cmdk-dialog] {
-  z-index: 50;
+  z-index: var(--z-50);
 }
 
 /* Command Overlay - Backdrop */
 [cmdk-overlay] {
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--background) / 0.8;
   backdrop-filter: blur(4px);
 }
 
@@ -1948,7 +2218,7 @@ body {
   scroll-padding-block-start: 0.5rem;
   scroll-padding-block-end: 0.5rem;
   /* Smooth height transitions */
-  transition: height 100ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: height 100ms var(--ease-in-out);
 }
 
 /* Command Group - Groups items with heading */
@@ -1989,10 +2259,10 @@ body {
   user-select: none;
   outline: none;
   /* Premium microinteractions - smooth, responsive transitions */
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 200ms var(--ease-in-out);
   color: var(--color-popover-foreground);
   /* Staggered entrance animation - more dramatic */
-  animation: cmdk-item-enter 0.2s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  animation: cmdk-item-enter 0.2s var(--ease-in-out) backwards;
 }
 
 /* Staggered entrance - each item animates with slight delay for beautiful cascade */
@@ -2138,7 +2408,7 @@ body {
   transform: translate(-50%, -50%) !important;
   margin: 0 !important;
   /* CRITICAL: z-index must be higher than overlay to appear above blur */
-  z-index: 100 !important;
+  z-index: var(--z-100) !important;
 }
 
 /* CRITICAL: Command palette specific width constraints - responsive at all breakpoints */

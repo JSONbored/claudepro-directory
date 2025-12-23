@@ -156,7 +156,7 @@ export function GitHubStarsButton({
           className={cn(
             // Match "More" dropdown: absolute badge overlay in top-right corner
             size === 'icon'
-              ? 'text-accent absolute -top-1 -right-1 text-[10px] font-medium'
+              ? 'text-accent absolute -top-1 -right-1 text-xs font-medium' // 10px
               : 'font-medium tabular-nums'
           )}
         >

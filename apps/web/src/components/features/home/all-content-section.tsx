@@ -214,7 +214,7 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
                         <UnifiedBadge
                           variant="base"
                           style="secondary"
-                          className={cn('pointer-events-auto text-[10px] uppercase')}
+                          className={cn('pointer-events-auto text-xs uppercase')} // 10px
                         >
                           New this week
                         </UnifiedBadge>
@@ -232,7 +232,7 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
                         <UnifiedBadge
                           variant="base"
                           style="outline"
-                          className={cn('pointer-events-auto text-[10px] uppercase')}
+                          className={cn('pointer-events-auto text-xs uppercase')} // 10px
                         >
                           Trending
                         </UnifiedBadge>

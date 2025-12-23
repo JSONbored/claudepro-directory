@@ -138,7 +138,7 @@ export function JobsPromo() {
                 className={cn(
                   'flex items-center gap-1',
                   'font-semibold',
-                  'text-green-500 dark:text-green-400'
+                  'text-success'
                 )}
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
                 animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}

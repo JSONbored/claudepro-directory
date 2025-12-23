@@ -822,7 +822,7 @@ export function ProductionCodeBlock({
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className="h-3 w-3 text-green-500" />
+                <Check className="h-3 w-3 text-success" />
               ) : (
                 <Copy className="text-muted-foreground h-3 w-3" />
               )}
@@ -845,7 +845,7 @@ export function ProductionCodeBlock({
                   'text-muted-foreground',
                   'px-3',
                   'py-1',
-                  'text-[10px]',
+                  'text-xs', // 10px
                   'font-semibold',
                   'tracking-wide',
                   'uppercase'
@@ -913,7 +913,7 @@ export function ProductionCodeBlock({
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className="h-3 w-3 text-green-500" />
+                <Check className="h-3 w-3 text-success" />
               ) : (
                 <Copy className="text-muted-foreground h-3 w-3" />
               )}
@@ -936,7 +936,7 @@ export function ProductionCodeBlock({
                   'text-muted-foreground',
                   'px-3',
                   'py-1',
-                  'text-[10px]',
+                  'text-xs', // 10px
                   'font-semibold',
                   'tracking-wide',
                   'uppercase'

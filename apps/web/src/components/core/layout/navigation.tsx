@@ -92,7 +92,7 @@ const NavigationComponent = () => {
                 <Link
                   href={ROUTES.HOME}
                   prefetch
-                  className={`flex flex-shrink-0 items-center no-underline`}
+                  className="flex flex-shrink-0 items-center no-underline"
                   aria-label="heyclaude - Go to homepage"
                 >
                   <HeyClaudeLogo size="md" duration={0} />
@@ -104,13 +104,13 @@ const NavigationComponent = () => {
                 </Suspense>
 
                 {/* Right Side Actions - Desktop Navigation + User Menu */}
-                <div className={cn('flex items-center gap-1', 'gap-1.5')}>
+                <div className="flex items-center gap-1.5">
                   {/* Desktop Navigation - ONLY show at xl: (1280px+) */}
                   <Suspense fallback={<div className="h-10 w-32" />}>
                     <NavigationDesktop isActive={isActive} />
                   </Suspense>
 
-                  <UserMenu className={`hidden md:flex`} />
+                  <UserMenu className="hidden md:flex" />
 
                   {/* Mobile Menu - Show ONLY below md: (< 768px) */}
                   <NavigationMobile

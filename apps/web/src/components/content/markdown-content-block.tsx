@@ -185,7 +185,7 @@ function CaseStudyVariant(props: CaseStudyProps) {
         </div>
 
         <div>
-          <h4 className="mb-2 font-semibold text-green-600 dark:text-green-400">Results</h4>
+          <h4 className="mb-2 font-semibold text-success">Results</h4>
           <ul className="text-muted-foreground list-disc space-y-1 pl-4">
             {results.map((result) => (
               <li key={result}>{result}</li>
@@ -203,10 +203,10 @@ function CaseStudyVariant(props: CaseStudyProps) {
                     <span
                       className={
                         metric.trend === 'up' || metric.trend === '+'
-                          ? 'text-green-500'
+                          ? 'text-success'
                           : metric.trend === 'down'
-                            ? 'text-red-500'
-                            : 'text-gray-500'
+                            ? 'text-error'
+                            : 'text-muted-foreground'
                       }
                     >
                       {metric.trend === 'up' || metric.trend === '+'
@@ -377,7 +377,7 @@ function TLDRVariant(props: TLDRSummaryProps) {
             <ul className="space-y-1">
               {keyPoints.map((point) => (
                 <li key={point} className="flex items-start gap-1 text-sm">
-                  <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
+                  <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-success" />
                   <span>{point}</span>
                 </li>
               ))}

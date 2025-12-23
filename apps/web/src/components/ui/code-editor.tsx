@@ -279,7 +279,7 @@ function CodeEditor({
                   {typeof icon !== 'string' ? icon : null}
                 </div>
               ) : null}
-              <figcaption className={cn('text-muted-foreground flex-1 truncate text-[13px]')}>
+              <figcaption className={cn('text-muted-foreground flex-1 truncate text-base')}> {/* 13px */}
                 {title}
               </figcaption>
             </div>
@@ -290,7 +290,7 @@ function CodeEditor({
               content={code}
               size="sm"
               variant="ghost"
-              className="-me-2 bg-transparent hover:bg-black/5 dark:hover:bg-white/10"
+              className="-me-2 bg-transparent hover:bg-foreground/5"
               {...(onCopy ? { onCopy } : {})}
             />
           ) : null}
@@ -301,7 +301,7 @@ function CodeEditor({
             content={code}
             size="sm"
             variant="ghost"
-            className="absolute top-2 right-2 z-[2] bg-transparent backdrop-blur-md hover:bg-black/5 dark:hover:bg-white/10"
+            className="absolute top-2 right-2 z-10 bg-transparent backdrop-blur-md hover:bg-foreground/5"
             {...(onCopy ? { onCopy } : {})}
           />
         )
@@ -312,7 +312,7 @@ function CodeEditor({
       >
         <div
           className={cn(
-            `[&_code]:text-[13px] [&>pre,_&_code]:border-none [&>pre,_&_code]:!bg-transparent [&>pre,_&_code]:[background:transparent_!important]`,
+            `[&_code]:text-base [&>pre,_&_code]:border-none [&>pre,_&_code]:!bg-transparent [&>pre,_&_code]:[background:transparent_!important]`, // text-base = 13px
             cursor &&
               !isDone &&
               "[&_.line:last-of-type::after]:inline-block [&_.line:last-of-type::after]:w-[1ch] [&_.line:last-of-type::after]:-translate-px [&_.line:last-of-type::after]:animate-pulse [&_.line:last-of-type::after]:content-['|']"

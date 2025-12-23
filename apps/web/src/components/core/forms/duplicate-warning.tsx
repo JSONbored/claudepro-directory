@@ -102,9 +102,9 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
   }
 
   return (
-    <Alert className="border-yellow-500/20 bg-yellow-500/5">
-      <AlertTriangle className="h-4 w-4 text-yellow-400" />
-      <AlertTitle className="text-yellow-400">Suggestion</AlertTitle>
+    <Alert className="border-warning-border bg-warning-bg">
+      <AlertTriangle className="h-4 w-4 text-warning" />
+      <AlertTitle className="text-warning">Suggestion</AlertTitle>
       <AlertDescription>
         <p className="text-muted-foreground text-sm">{warning}</p>
       </AlertDescription>

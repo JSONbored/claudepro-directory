@@ -31,6 +31,7 @@ import {
   Shield,
 } from '@heyclaude/web-runtime/icons';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { CHANGELOG_BADGE_COLOR_MAP } from '@heyclaude/web-runtime/ui/constants';
 import { memo } from 'react';
 
 import dynamic from 'next/dynamic';
@@ -99,24 +100,6 @@ const CATEGORY_ICONS: Record<
 } as const;
 
 /**
- * Badge Color Map - Tailwind utilities for each changelog category
- */
-const BADGE_COLOR_MAP: Record<changelog_category, string> = {
-  Added:
-    'bg-color-badge-changelog-added-bg text-color-badge-changelog-added-text-light dark:text-color-badge-changelog-added-text-dark border-color-badge-changelog-added-border',
-  Changed:
-    'bg-color-badge-changelog-changed-bg text-color-badge-changelog-changed-text-light dark:text-color-badge-changelog-changed-text-dark border-color-badge-changelog-changed-border',
-  Deprecated:
-    'bg-color-badge-changelog-deprecated-bg text-color-badge-changelog-deprecated-text-light dark:text-color-badge-changelog-deprecated-text-dark border-color-badge-changelog-deprecated-border',
-  Removed:
-    'bg-color-badge-changelog-removed-bg text-color-badge-changelog-removed-text-light dark:text-color-badge-changelog-removed-text-dark border-color-badge-changelog-removed-border',
-  Fixed:
-    'bg-color-badge-changelog-fixed-bg text-color-badge-changelog-fixed-text-light dark:text-color-badge-changelog-fixed-text-dark border-color-badge-changelog-fixed-border',
-  Security:
-    'bg-color-badge-changelog-security-bg text-color-badge-changelog-security-text-light dark:text-color-badge-changelog-security-text-dark border-color-badge-changelog-security-border',
-};
-
-/**
  * Render a titled changelog section for a specific category with its items and a count badge.
  *
  * Renders nothing when `items` is empty or undefined.
@@ -141,7 +124,7 @@ function CategorySection({
   if (!items || items.length === 0) return null;
 
   // Direct Tailwind utilities - no wrapper needed
-  const badgeColor = BADGE_COLOR_MAP[category];
+  const badgeColor = CHANGELOG_BADGE_COLOR_MAP[category];
 
   return (
     <section className="border-border/50 mb-6 border-b py-4 last:border-b-0">
@@ -335,7 +318,7 @@ export const ChangelogContent = memo(
                 key={category}
                 variant="base"
                 style="outline"
-                className={`${BADGE_COLOR_MAP[category]} text-sm-medium text-foreground`}
+                className={`${CHANGELOG_BADGE_COLOR_MAP[category]} text-sm-medium text-foreground`}
               >
                 {category}
               </UnifiedBadge>

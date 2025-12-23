@@ -19,12 +19,7 @@ interface SplitAuthLayoutProps {
   mobileHeader: ReactNode;
 }
 
-// Shared card border style for Claude orange accent
-const cardBorderStyle = {
-  borderWidth: '1px',
-  borderStyle: 'solid',
-  borderColor: 'oklch(74% 0.2 35)',
-} as const;
+// Removed: Hardcoded border color - now using Tailwind class border-primary
 
 /**
  * Renders a responsive, split authentication layout with a desktop two-column view and a stacked mobile view.
@@ -60,8 +55,7 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
         {/* Right: Auth card - centered with Claude orange accent */}
         <div className="flex min-h-dvh min-h-screen items-center justify-center px-8">
           <motion.div
-            className="bg-card w-full max-w-md rounded-2xl p-4 shadow-2xl xl:p-12"
-            style={cardBorderStyle}
+            className="border-primary bg-card w-full max-w-md rounded-2xl border p-4 shadow-2xl xl:p-12"
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
@@ -75,7 +69,7 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
       <div className="flex min-h-dvh min-h-screen flex-col lg:hidden">
         {mobileHeader}
         <div className="flex flex-1 items-center justify-center p-6">
-          <div className="bg-card w-full max-w-md rounded-2xl p-8" style={cardBorderStyle}>
+          <div className="border-primary bg-card w-full max-w-md rounded-2xl border p-8">
             {authPanel}
           </div>
         </div>

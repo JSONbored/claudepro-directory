@@ -1,41 +1,38 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { createCrudActionHandlers, executeMutationAction, type ActionContext } from './action-factory';
 import { z } from 'zod';
 
 // Mock run-rpc-instance
-const mockRunRpc = vi.fn();
-vi.mock('./run-rpc-instance', () => ({
+const mockRunRpc = jest.fn();
+jest.mock('./run-rpc-instance', () => ({
   runRpc: (...args: any[]) => mockRunRpc(...args),
 }));
 
 // Mock service-factory
-const mockGetService = vi.fn();
-vi.mock('../data/service-factory', () => ({
+const mockGetService = jest.fn();
+jest.mock('../data/service-factory', () => ({
   getService: (...args: any[]) => mockGetService(...args),
 }));
 
 // Mock next/cache
-const mockRevalidatePath = vi.fn();
-const mockRevalidateTag = vi.fn();
-vi.mock('next/cache', () => ({
+const mockRevalidatePath = jest.fn();
+const mockRevalidateTag = jest.fn();
+jest.mock('next/cache', () => ({
   revalidatePath: (...args: any[]) => mockRevalidatePath(...args),
   revalidateTag: (...args: any[]) => mockRevalidateTag(...args),
 }));
 
 // Mock errors
-vi.mock('../errors', () => ({
-  logActionFailure: vi.fn((name, error, context) => {
+jest.mock('../errors', () => ({
+  logActionFailure: jest.fn((name, error, context) => {
     throw error;
   }),
 }));
 
-// Mock logger
-vi.mock('../logger', () => ({
-  logger: {
-    error: vi.fn(),
-  },
-  toLogContextValue: vi.fn((val) => val),
-}));
+// Mock logger (use real logger per user request)
+// Note: We're not mocking logger since the user requested real logger usage
+// However, action-factory dynamically imports logger, so we can't easily mock it here
+// The test will use the real logger implementation
 
 describe('action-factory', () => {
   const mockCtx: ActionContext = {
@@ -45,7 +42,7 @@ describe('action-factory', () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('executeMutationAction', () => {
@@ -75,7 +72,7 @@ describe('action-factory', () => {
 
     it('should execute service method action successfully', async () => {
       const mockService = {
-        testMethod: vi.fn().mockResolvedValue({ success: true }),
+        testMethod: jest.fn().mockResolvedValue({ success: true }),
       };
       mockGetService.mockResolvedValue(mockService);
 
@@ -122,7 +119,7 @@ describe('action-factory', () => {
     it('should handle post-action hooks', async () => {
       const mockResult = { id: 'result-id' };
       mockRunRpc.mockResolvedValue(mockResult);
-      const mockHook = vi.fn().mockResolvedValue({ id: 'result-id', modified: true });
+      const mockHook = jest.fn().mockResolvedValue({ id: 'result-id', modified: true });
 
       const result = await executeMutationAction(
         {
@@ -203,4 +200,3 @@ describe('action-factory', () => {
     });
   });
 });
-

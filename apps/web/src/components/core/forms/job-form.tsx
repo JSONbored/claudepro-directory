@@ -736,7 +736,7 @@ export function JobForm({
             confirmation.
           </p>
 
-          <div className="card-base mt-4 border-orange-500/30 bg-orange-500/5 p-4">
+          <div className="card-base mt-4 border-primary/30 bg-primary/5 p-4">
             <div className="flex items-start gap-3">
               <Checkbox
                 id={featuredCheckboxId}
@@ -748,12 +748,12 @@ export function JobForm({
                   htmlFor={featuredCheckboxId}
                   className="flex cursor-pointer items-center gap-2 text-sm font-semibold"
                 >
-                  <Star className="h-4 w-4 text-orange-500" />
+                  <Star className="h-4 w-4 text-primary" />
                   Make this a Featured Listing
                 </Label>
                 <p className="text-muted-foreground mt-1 text-xs">{featuredUpsellDescription}</p>
                 {featuredUpgradeLabel ? (
-                  <p className="text-sm-medium mt-2 text-orange-600 dark:text-orange-400">
+                  <p className="text-sm-medium mt-2 text-primary">
                     {featuredUpgradeLabel}
                   </p>
                 ) : null}

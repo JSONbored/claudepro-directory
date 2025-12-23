@@ -39,7 +39,7 @@ const tierConfig: Record<string, { name: string; icon: typeof Zap; color: string
   enterprise: {
     name: 'Enterprise',
     icon: Crown,
-    color: 'bg-yellow-500 text-yellow-900',
+    color: 'bg-[var(--color-warning)] text-[var(--color-warning-foreground,var(--foreground))]',
     features: [
       'Everything in Pro',
       'Dedicated support',

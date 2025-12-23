@@ -73,7 +73,7 @@ export function SubmitPageHeroSkeleton() {
                 initial={!prefersReducedMotion ? { opacity: 0, scale: 0.8 } : false}
                 animate={!prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
                 transition={{ ...SPRING.loading, delay: 0.4 + i * STAGGER.micro }}
-                className={cn('flex items-center gap-[6px]')}
+                className={cn('flex items-center gap-1.5')} // 6px = gap-1.5
               >
                 <Skeleton size="sm" width="xs" rounded="full" className="h-4 w-4" />
                 <Skeleton size="sm" width="xs" className="h-4" />

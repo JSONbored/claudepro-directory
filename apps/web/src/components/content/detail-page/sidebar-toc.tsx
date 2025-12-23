@@ -195,7 +195,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
                 onClick={() => handleHeadingClick(heading)}
                 className={cn(
                   'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-                  'group relative w-full py-1.5 text-left text-[13px] leading-snug transition-colors',
+                  'group relative w-full py-1.5 text-left text-base leading-snug transition-colors', // 13px
                   'hover:text-foreground',
                   isActive ? 'text-foreground' : 'text-muted-foreground'
                 )}

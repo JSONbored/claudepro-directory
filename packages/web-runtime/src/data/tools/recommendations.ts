@@ -40,6 +40,12 @@ export const getConfigRecommendations = createDataFunction<
   onError: () => null,
   operation: 'getConfigRecommendations',
   serviceKey: 'misc', // Consolidated: QuizService methods moved to MiscService
+  validate: (input) => {
+    // Validate limit bounds (1-100) to prevent invalid database queries
+    const limit = input.limit ?? 20;
+    return limit >= 1 && limit <= 100;
+  },
+  validateError: 'Invalid limit: must be between 1 and 100',
   transformArgs: (input) => ({
     p_experience_level: input.experienceLevel as string,
     p_focus_areas: (input.focusAreas ?? []) as string[],

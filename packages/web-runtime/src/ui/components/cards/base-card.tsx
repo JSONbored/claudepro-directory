@@ -40,7 +40,7 @@
  * ```
  */
 
-import { getViewTransitionName } from '../../utils.ts';
+import { getViewTransitionName, cn } from '../../utils.ts';
 import { UnifiedBadge } from '../badges/unified-badge.tsx';
 import { SwipeableCardWrapper } from './swipeable-card.tsx';
 import { motion } from 'motion/react';
@@ -487,15 +487,23 @@ export const BaseCard = memo(
       // For non-navigation cards, use CardComponent. For interactive cards, use motion.div with Card styling
       // Motion.dev handles hover border color via whileHover - no CSS hover classes needed
       // Base classes: layout, border width, background, text - border color comes from CARD_INTERACTIVE for interactive cards
-      const cardBaseClasses =
-        'flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm';
-      // For non-interactive cards, add border color explicitly
-      // For interactive cards, CARD_INTERACTIVE provides border-border/50
-      const cardBorderColor = disableNavigation ? 'border-border/50' : '';
-      const cardInteractiveClasses = disableNavigation
-        ? ''
-        : 'card-gradient transition-smooth group cursor-pointer border-border/50';
-      const cardClassName = `${cardBaseClasses} ${cardBorderColor} ${cardInteractiveClasses} ${variant === 'detailed' ? 'p-6' : ''} ${variant === 'review' ? 'rounded-lg border border-border/50 p-4' : ''} ${compactMode ? 'p-4' : ''} ${className || ''} relative`;
+      const cardClassName = cn(
+        // Base card styles
+        'flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm',
+        // Border color: explicit for non-interactive, provided by card-gradient for interactive
+        disableNavigation && 'border-border/50',
+        // Interactive card styles (hover effects, cursor, etc.)
+        !disableNavigation && 'card-gradient transition-smooth group cursor-pointer border-border/50',
+        // Variant-specific styles
+        variant === 'detailed' && 'p-6',
+        variant === 'review' && 'rounded-lg border border-border/50 p-4',
+        // Compact mode
+        compactMode && 'p-4',
+        // Custom className prop
+        className,
+        // Always relative for positioning
+        'relative'
+      );
 
       const cardElement = disableNavigation ? (
         <CardComponent

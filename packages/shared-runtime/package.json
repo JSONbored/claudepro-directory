@@ -55,6 +55,11 @@
       "types": "./dist/platform/index.d.ts",
       "default": "./src/platform/index.ts"
     },
+    "./utils/serialize": {
+      "development": "./src/utils/serialize.ts",
+      "types": "./dist/utils/serialize.d.ts",
+      "default": "./src/utils/serialize.ts"
+    },
     "./infisical": {
       "development": "./src/infisical/client.ts",
       "types": "./dist/infisical/client.d.ts",

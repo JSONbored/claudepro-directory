@@ -8,7 +8,7 @@
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: var(--duration-default);
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-timing-function: var(--ease-in-out);
 }
 
 /* ===========================
@@ -20,7 +20,7 @@
 ::view-transition-new(config-card) {
   /* Shared transition for all cards */
   animation-duration: var(--duration-slow);
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); /* Spring easing */
+  animation-timing-function: var(--ease-spring); /* Spring easing */
 }
 
 /* Specific card transitions by slug - removed attribute selector as not supported in View Transitions */
@@ -124,7 +124,7 @@
 
 ::view-transition-old(modal),
 ::view-transition-new(modal) {
-  animation: scale-in var(--duration-comfortable) cubic-bezier(0.16, 1, 0.3, 1);
+  animation: scale-in var(--duration-comfortable) var(--ease-spring);
 }
 
 /* ===========================
@@ -135,7 +135,7 @@
 ::view-transition-old(theme-toggle),
 ::view-transition-new(theme-toggle) {
   animation-duration: var(--duration-quick);
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-timing-function: var(--ease-in-out);
 }
 
 /* GPU-accelerated root transition for smooth theme changes
@@ -175,17 +175,17 @@
 
 /* Slide up transition */
 .vt-slide-up::view-transition-new(root) {
-  animation: slide-up var(--duration-default) cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slide-up var(--duration-default) var(--ease-spring);
 }
 
 /* Slide down transition */
 .vt-slide-down::view-transition-new(root) {
-  animation: slide-down var(--duration-default) cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slide-down var(--duration-default) var(--ease-spring);
 }
 
 /* Scale transition */
 .vt-scale::view-transition-new(root) {
-  animation: scale-in var(--duration-comfortable) cubic-bezier(0.16, 1, 0.3, 1);
+  animation: scale-in var(--duration-comfortable) var(--ease-spring);
 }
 
 /* ===========================

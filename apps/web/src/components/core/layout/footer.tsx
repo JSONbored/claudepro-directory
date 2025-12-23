@@ -424,7 +424,7 @@ function FooterComponent() {
                 <span>© {currentYear}</span>
                 <span className="text-border">•</span>
                 <span>Made with</span>
-                <Heart className="h-3.5 w-3.5 fill-red-500/80 text-red-500/80" />
+                <Heart className="h-3.5 w-3.5 fill-error/80 text-error/80" />
                 <span>by</span>
                 <Link
                   href="/consulting"
@@ -486,7 +486,7 @@ function FooterComponent() {
                 <span>© {currentYear}</span>
                 <span className="text-border">•</span>
                 <span>Made with</span>
-                <Heart className="h-3.5 w-3.5 fill-red-500/80 text-red-500/80" />
+                <Heart className="h-3.5 w-3.5 fill-error/80 text-error/80" />
                 <span>by</span>
                 <Link
                   href="/consulting"

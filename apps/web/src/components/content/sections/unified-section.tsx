@@ -574,7 +574,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           {...(props.icon && { icon: props.icon })}
           {...(props.className && { className: props.className })}
         >
-          <EnhancedList items={props.items} color={props.dotColor || 'bg-red-500'} />
+          <EnhancedList items={props.items} color={props.dotColor || 'bg-[var(--color-error)]'} />
         </Wrapper>
       );
     }
@@ -900,7 +900,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             {d.requirements && d.requirements.length > 0 ? (
               <div>
                 <h4 className="mb-2 font-medium">Requirements</h4>
-                <List items={d.requirements} color="bg-orange-500" />
+                <List items={d.requirements} color="bg-primary" />
               </div>
             ) : null}
           </div>

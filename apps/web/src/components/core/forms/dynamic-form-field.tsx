@@ -25,7 +25,7 @@ import {
   type FormFieldConfig,
   type GridColumn,
 } from '@heyclaude/web-runtime/types/component.types';
-import { Input, Label, Textarea } from '@heyclaude/web-runtime/ui';
+import { Input, Label, Textarea, cn } from '@heyclaude/web-runtime/ui';
 
 // ============================================================================
 // GRID LAYOUT SYSTEM
@@ -70,7 +70,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
   const iconPosition = field.iconPosition || 'left';
 
   return (
-    <div className={`space-y-2 ${gridClass}`}>
+    <div className={cn('space-y-2', gridClass)}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       {Icon ? (
         <div className="relative">
@@ -85,7 +85,10 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
             placeholder={field.placeholder}
             required={field.required}
             defaultValue={field.defaultValue}
-            className={iconPosition === 'left' ? 'pl-10' : iconPosition === 'right' ? 'pr-10' : ''}
+            className={cn(
+              iconPosition === 'left' && 'pl-10',
+              iconPosition === 'right' && 'pr-10'
+            )}
           />
           {iconPosition === 'right' && (
             <div className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2">
@@ -128,10 +131,9 @@ function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
 
   const fieldId = `${formId}-${field.name}`;
   const gridClass = GRID_COLUMN_CLASSES[field.gridColumn || 'full'];
-  const monoClass = field.monospace ? 'font-mono text-sm' : '';
 
   return (
-    <div className={`space-y-2 ${gridClass}`}>
+    <div className={cn('space-y-2', gridClass)}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       <Textarea
         id={fieldId}
@@ -140,7 +142,7 @@ function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
         required={field.required}
         rows={field.rows || 4}
         defaultValue={field.defaultValue}
-        className={`${monoClass} resize-y`}
+        className={cn(field.monospace && 'font-mono text-sm', 'resize-y')}
       />
       {field.helpText ? <p className="text-muted-foreground text-xs">{field.helpText}</p> : null}
     </div>
@@ -164,7 +166,7 @@ function NumberFieldRenderer({ field, formId }: FieldRendererProps) {
   const gridClass = GRID_COLUMN_CLASSES[field.gridColumn || 'full'];
 
   return (
-    <div className={`space-y-2 ${gridClass}`}>
+    <div className={cn('space-y-2', gridClass)}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       <Input
         id={fieldId}
@@ -199,7 +201,7 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
   const gridClass = GRID_COLUMN_CLASSES[field.gridColumn || 'full'];
 
   return (
-    <div className={`space-y-2 ${gridClass}`}>
+    <div className={cn('space-y-2', gridClass)}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       <select
         id={fieldId}

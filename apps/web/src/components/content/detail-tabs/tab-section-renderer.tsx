@@ -184,7 +184,7 @@ export function TabSectionRenderer({
           description="Prerequisites and dependencies"
           items={requirements}
           category={validCategory}
-          dotColor="bg-orange-500"
+          dotColor="bg-primary"
         />
       );
     }
@@ -247,7 +247,7 @@ export function TabSectionRenderer({
           title="Troubleshooting"
           description="Common issues and solutions"
           items={troubleshooting}
-          dotColor="bg-red-500"
+          dotColor="bg-[var(--color-error)]"
         />
       );
     }
@@ -263,7 +263,7 @@ export function TabSectionRenderer({
           description="Important security considerations"
           items={sectionData.securityItems}
           category={validCategory}
-          dotColor="bg-orange-500"
+          dotColor="bg-primary"
         />
       );
     }

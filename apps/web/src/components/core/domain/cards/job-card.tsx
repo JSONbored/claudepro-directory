@@ -111,18 +111,18 @@ export function JobCard({ job }: JobCardProps) {
 
   return (
     <Card
-      className={`card-gradient transition-smooth group relative ${
-        isFeatured
-          ? `border-2 border-orange-500/50 bg-gradient-to-br from-orange-500/5 to-orange-600/10 shadow-lg shadow-orange-500/10`
-          : ''
-      }`}
+      className={cn(
+        'card-gradient transition-smooth group relative',
+        isFeatured &&
+          'border-2 border-primary/50 bg-gradient-to-br from-primary/5 to-primary/10 shadow-lg shadow-primary/10'
+      )}
     >
       {isFeatured ? (
         <div className="absolute -top-2 -right-2 z-10">
           <UnifiedBadge
             variant="base"
             style="default"
-            className="border-orange-500 bg-orange-500 text-white"
+            className="border-primary bg-primary text-primary-foreground"
           >
             <Star className="mr-1 h-3 w-3" />
             Featured

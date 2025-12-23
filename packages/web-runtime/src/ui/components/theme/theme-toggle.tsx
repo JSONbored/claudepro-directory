@@ -121,10 +121,24 @@ export function ThemeToggle() {
           : false; // dark -> light
     const newTheme = newIsDarkMode ? 'dark' : 'light';
 
-    // Get theme background colors (matching your design system)
-    const darkBg = 'oklch(24% 0.008 60)'; // matches --background in dark mode
-    const lightBg = 'oklch(99% 0.003 90)'; // matches --background in light mode
-    const newBg = newTheme === 'dark' ? darkBg : lightBg;
+    // Update theme FIRST so we can get the correct background color
+    const html = document.documentElement;
+    html.setAttribute('data-theme', newTheme);
+    html.classList.toggle('dark', newIsDarkMode);
+    html.classList.remove('light');
+    if (!newIsDarkMode) {
+      html.classList.add('light');
+    }
+
+    // Toggle ternary mode (this will update isDarkMode and persist to localStorage)
+    toggleTernaryDarkMode();
+
+    // Force a reflow to ensure theme update is applied
+    html.offsetHeight;
+
+    // Get the new background color from computed styles (now that theme is applied)
+    const newBg = getComputedStyle(html).getPropertyValue('--background').trim() || 
+      (newTheme === 'dark' ? 'oklch(22.21% 0 0)' : 'oklch(100% 0 0)'); // fallback to tweakcn values
 
     // Create overlay element if it doesn't exist
     let overlay = overlayRef.current;
@@ -134,17 +148,24 @@ export function ThemeToggle() {
         position: fixed;
         inset: 0;
         pointer-events: none;
-        z-index: 9999;
+        z-index: var(--z-100);
         background-color: ${newBg};
         clip-path: circle(0% at ${position.x}% ${position.y}%);
         opacity: 0;
+        will-change: clip-path, opacity;
+        transform: translateZ(0);
       `;
       document.body.appendChild(overlay);
       overlayRef.current = overlay;
     } else {
-      // Update background color for new theme
+      // Update overlay for new animation
       overlay.style.backgroundColor = newBg;
+      overlay.style.clipPath = `circle(0% at ${position.x}% ${position.y}%)`;
+      overlay.style.opacity = '0';
     }
+
+    // Force a reflow to ensure overlay is ready for animation
+    overlay.offsetHeight;
 
     // Animate circle expansion with spring physics for beautiful, natural motion
     await animate(
@@ -155,18 +176,9 @@ export function ThemeToggle() {
       },
       {
         ...SPRING.smooth, // Beautiful spring physics for natural motion
-        duration: 0.5, // Slightly longer for smooth, premium feel
+        duration: 0.4, // Slightly faster for snappier feel (was 0.5)
       }
     );
-
-    // Update theme during animation (halfway through for seamless crossfade)
-    // This creates a beautiful, smooth transition
-    setTimeout(() => {
-      document.documentElement.setAttribute('data-theme', newTheme);
-    }, 250); // Halfway through animation
-
-    // Toggle ternary mode (this will update isDarkMode and persist to localStorage)
-    toggleTernaryDarkMode();
 
     // Clean up overlay after animation completes
     if (overlayRef.current) {

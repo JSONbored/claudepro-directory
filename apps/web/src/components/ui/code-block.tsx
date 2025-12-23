@@ -242,7 +242,7 @@ const lineNumberClassNames = cn(
   '[&_.line]:before:[counter-increment:line]',
   '[&_.line]:before:w-4',
   '[&_.line]:before:mr-4',
-  '[&_.line]:before:text-[13px]',
+  '[&_.line]:before:text-base', // 13px
   '[&_.line]:before:text-right',
   '[&_.line]:before:text-muted-foreground/50',
   '[&_.line]:before:font-mono',
@@ -262,14 +262,13 @@ const darkModeClassNames = cn(
 );
 
 const lineHighlightClassNames = cn(
-  '[&_.line.highlighted]:bg-blue-50',
-  '[&_.line.highlighted]:after:bg-blue-500',
+  '[&_.line.highlighted]:bg-[var(--color-info-bg)]',
+  '[&_.line.highlighted]:after:bg-[var(--color-info)]',
   '[&_.line.highlighted]:after:absolute',
   '[&_.line.highlighted]:after:left-0',
   '[&_.line.highlighted]:after:top-0',
   '[&_.line.highlighted]:after:bottom-0',
-  '[&_.line.highlighted]:after:w-0.5',
-  'dark:[&_.line.highlighted]:!bg-blue-500/10'
+  '[&_.line.highlighted]:after:w-0.5'
 );
 
 const lineDiffClassNames = cn(
@@ -278,12 +277,10 @@ const lineDiffClassNames = cn(
   '[&_.line.diff]:after:top-0',
   '[&_.line.diff]:after:bottom-0',
   '[&_.line.diff]:after:w-0.5',
-  '[&_.line.diff.add]:bg-emerald-50',
-  '[&_.line.diff.add]:after:bg-emerald-500',
-  '[&_.line.diff.remove]:bg-rose-50',
-  '[&_.line.diff.remove]:after:bg-rose-500',
-  'dark:[&_.line.diff.add]:!bg-emerald-500/10',
-  'dark:[&_.line.diff.remove]:!bg-rose-500/10'
+  '[&_.line.diff.add]:bg-[var(--color-success-bg)]',
+  '[&_.line.diff.add]:after:bg-[var(--color-success)]',
+  '[&_.line.diff.remove]:bg-[var(--color-error-bg)]',
+  '[&_.line.diff.remove]:after:bg-[var(--color-error)]'
 );
 
 const lineFocusedClassNames = cn(
@@ -292,8 +289,7 @@ const lineFocusedClassNames = cn(
 );
 
 const wordHighlightClassNames = cn(
-  '[&_.highlighted-word]:bg-blue-50',
-  'dark:[&_.highlighted-word]:!bg-blue-500/10'
+  '[&_.highlighted-word]:bg-[var(--color-info-bg)]'
 );
 
 const codeBlockClassName = cn(

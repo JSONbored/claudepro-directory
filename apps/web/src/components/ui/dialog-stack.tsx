@@ -63,7 +63,7 @@ import {
   useState,
   type RefObject,
 } from 'react';
-import { cn } from '@heyclaude/web-runtime/ui';
+import { cn, Button } from '@heyclaude/web-runtime/ui';
 import { useOnClickOutside } from '@heyclaude/web-runtime/hooks/use-on-click-outside';
 import { useScrollLock } from '@heyclaude/web-runtime/hooks/use-scroll-lock';
 
@@ -176,36 +176,15 @@ export const DialogStackTrigger = ({
     onClick?.(e);
   };
 
-  if (asChild && children) {
-    const child = children as ReactElement<{
-      onClick: MouseEventHandler<HTMLButtonElement>;
-      className?: string;
-    }>;
-    return cloneElement(child, {
-      onClick: (e: MouseEvent<HTMLButtonElement>) => {
-        handleClick(e);
-        child.props.onClick?.(e);
-      },
-      className: cn(className, child.props.className),
-      ...props,
-    });
-  }
-
   return (
-    <button
-      className={cn(
-        'inline-flex items-center justify-center rounded-md text-sm font-medium whitespace-nowrap',
-        'ring-offset-background transition-colors focus-visible:ring-2 focus-visible:outline-none',
-        'focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-        'bg-primary text-primary-foreground hover:bg-primary/90',
-        'h-10 px-4 py-2',
-        className
-      )}
+    <Button
+      asChild={asChild}
+      className={className}
       onClick={handleClick}
       {...(props as any)}
     >
-      {children}
-    </button>
+      {asChild ? children : <>{children}</>}
+    </Button>
   );
 };
 
@@ -231,7 +210,7 @@ export const DialogStackOverlay = ({ className, ...props }: DialogStackOverlayPr
     // biome-ignore lint/a11y/useKeyWithClickEvents: "This is a clickable overlay"
     <div
       className={cn(
-        'fixed inset-0 z-50 bg-black/80',
+        'fixed inset-0 z-50 bg-background/80',
         'data-[state=closed]:animate-out data-[state=open]:animate-in',
         'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         className
@@ -398,7 +377,7 @@ export type DialogStackHeaderProps = HTMLAttributes<HTMLDivElement>;
 
 export const DialogStackHeader = ({ className, ...props }: DialogStackHeaderProps) => (
   <div
-    className={cn('flex flex-col gap-[6px] text-center sm:text-left', className)}
+    className={cn('flex flex-col gap-1.5 text-center sm:text-left', className)} // 6px = gap-1.5
     {...(props as any)}
   />
 );
@@ -433,35 +412,25 @@ export const DialogStackNext = ({
     }
   };
 
-  if (asChild && children) {
-    const child = children as ReactElement<{
-      onClick: MouseEventHandler<HTMLButtonElement>;
-      className?: string;
-    }>;
-
-    return cloneElement(child, {
-      onClick: (e: MouseEvent<HTMLButtonElement>) => {
-        handleNext();
-        child.props.onClick?.(e);
-      },
-      className: cn(className, child.props.className),
-      ...(props as any),
-    });
-  }
+  // Compose onClick handlers
+  const handleClick: MouseEventHandler<HTMLButtonElement> = (e) => {
+    handleNext();
+    if (props.onClick) {
+      props.onClick(e);
+    }
+  };
 
   return (
-    <button
-      className={cn(
-        'ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center rounded-md text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
-        className
-      )}
+    <Button
+      asChild={asChild}
+      className={className}
       disabled={context.activeIndex >= context.totalDialogs - 1}
-      onClick={handleNext}
+      onClick={asChild ? undefined : handleClick}
       type="button"
       {...(props as any)}
     >
-      {children || 'Next'}
-    </button>
+      {asChild ? children : <>{children || 'Next'}</>}
+    </Button>
   );
 };
 
@@ -487,34 +456,30 @@ export const DialogStackPrevious = ({
     }
   };
 
-  if (asChild && children) {
-    const child = children as ReactElement<{
-      onClick: MouseEventHandler<HTMLButtonElement>;
-      className?: string;
-    }>;
-
-    return cloneElement(child, {
-      onClick: (e: MouseEvent<HTMLButtonElement>) => {
-        handlePrevious();
-        child.props.onClick?.(e);
-      },
-      className: cn(className, child.props.className),
-      ...(props as any),
-    });
-  }
+  // Compose onClick handlers if asChild
+  const handleClick: MouseEventHandler<HTMLButtonElement> = (e) => {
+    handlePrevious();
+    if (props.onClick) {
+      props.onClick(e);
+    }
+  };
 
   return (
-    <button
-      className={cn(
-        'ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center rounded-md text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
-        className
-      )}
+    <Button
+      asChild={asChild}
+      className={className}
       disabled={context.activeIndex <= 0}
-      onClick={handlePrevious}
+      onClick={asChild ? undefined : handleClick}
       type="button"
       {...(props as any)}
     >
-      {children || 'Previous'}
-    </button>
+      {asChild ? (
+        children
+      ) : (
+        <>
+          {children || 'Previous'}
+        </>
+      )}
+    </Button>
   );
 };

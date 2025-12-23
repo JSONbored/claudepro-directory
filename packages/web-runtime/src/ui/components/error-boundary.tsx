@@ -50,7 +50,7 @@ function ErrorCodeBlock({ content }: { content: string }) {
         aria-label={copied ? 'Copied!' : 'Copy error message'}
       >
         {copied ? (
-          <Check className="h-3 w-3 text-green-500" aria-hidden="true" />
+          <Check className="h-3 w-3 text-[var(--color-success)]" aria-hidden="true" />
         ) : (
           <Copy className="h-3 w-3" aria-hidden="true" />
         )}

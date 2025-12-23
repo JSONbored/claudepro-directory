@@ -70,12 +70,12 @@ const Toaster = ({ ...props }: ToasterProps) => {
           closeButton:
             'group-[.toast]:bg-background group-[.toast]:border-border group-[.toast]:text-muted-foreground group-[.toast]:hover:text-foreground',
           success:
-            'group-[.toaster]:border-green-500/20 group-[.toaster]:bg-green-50 dark:group-[.toaster]:bg-green-950/30',
+            'group-[.toaster]:border-success-border group-[.toaster]:bg-success-bg',
           error:
-            'group-[.toaster]:border-red-500/20 group-[.toaster]:bg-red-50 dark:group-[.toaster]:bg-red-950/30',
+            'group-[.toaster]:border-error-border group-[.toaster]:bg-error-bg',
           warning:
-            'group-[.toaster]:border-yellow-500/20 group-[.toaster]:bg-yellow-50 dark:group-[.toaster]:bg-yellow-950/30',
-          info: 'group-[.toaster]:border-blue-500/20 group-[.toaster]:bg-blue-50 dark:group-[.toaster]:bg-blue-950/30',
+            'group-[.toaster]:border-warning-border group-[.toaster]:bg-warning-bg',
+          info: 'group-[.toaster]:border-info-border group-[.toaster]:bg-info-bg',
         },
       }}
       {...props}

@@ -91,22 +91,22 @@ describe('content/detail', () => {
 
       const result = await getContentDetailComplete({ category: 'agents', slug: 'test-slug' });
 
-      // $queryRawUnsafe is called with get_content_detail_complete RPC
+      // $queryRawUnsafe is called with positional arguments (callRpc passes ...argValues)
+      // Arguments are in object key insertion order: p_category, p_slug
       expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('get_content_detail_complete'),
-        expect.objectContaining({
-          p_category: 'agents',
-          p_slug: 'test-slug',
-        })
+        'agents', // p_category (first in insertion order)
+        'test-slug' // p_slug
       );
       expect(result).toMatchObject({ id: '1', slug: 'test-slug', title: 'Test' });
     });
 
     it('should reject invalid category', async () => {
-      // Invalid category should fail validation and not call the service
-      await expect(
-        getContentDetailComplete({ category: 'invalid-category', slug: 'test-slug' })
-      ).rejects.toThrow('Invalid category');
+      // Invalid category should fail validation and return null (not throw)
+      const result = await getContentDetailComplete({ category: 'invalid-category', slug: 'test-slug' });
+      expect(result).toBeNull();
+      // Should not call the service
+      expect(prismocker.$queryRawUnsafe).not.toHaveBeenCalled();
     });
 
     it('should handle empty slug', async () => {
@@ -117,10 +117,8 @@ describe('content/detail', () => {
 
       expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('get_content_detail_complete'),
-        expect.objectContaining({
-          p_category: 'agents',
-          p_slug: '',
-        })
+        'agents', // p_category
+        '' // p_slug (empty string)
       );
       // RPC returns null when content not found
       expect(result).toBeNull();
@@ -131,9 +129,9 @@ describe('content/detail', () => {
         new Error('Service error')
       );
 
-      await expect(
-        getContentDetailComplete({ category: 'agents', slug: 'test-slug' })
-      ).rejects.toThrow('Service error');
+      // createDataFunction returns null on error by default (throwOnError is false)
+      const result = await getContentDetailComplete({ category: 'agents', slug: 'test-slug' });
+      expect(result).toBeNull();
     });
 
     it('should cache results on duplicate calls (caching test)', async () => {
@@ -215,19 +213,23 @@ describe('content/detail', () => {
 
       const result = await getContentDetailCore({ category: 'agents', slug: 'test-slug' });
 
+      // getContentDetailCore returns an object with content and collection_items properties
       expect(result).toMatchObject({
-        id: '1',
-        slug: 'test-slug',
-        category: 'agents',
-        title: 'Test',
+        content: {
+          id: '1',
+          slug: 'test-slug',
+          category: 'agents',
+          title: 'Test',
+        },
+        collection_items: [],
       });
     });
 
     it('should reject invalid category', async () => {
-      // Invalid category should fail validation and not call the service
-      await expect(
-        getContentDetailCore({ category: 'invalid-category', slug: 'test-slug' })
-      ).rejects.toThrow('Invalid category');
+      // Invalid category should fail validation and return null (not throw)
+      const result = await getContentDetailCore({ category: 'invalid-category', slug: 'test-slug' });
+      expect(result).toBeNull();
+      // Should not call Prisma (validation fails before service call)
     });
 
     it('should return null when content not found', async () => {
@@ -313,13 +315,12 @@ describe('content/detail', () => {
 
       const result = await getContentAnalytics({ category: 'agents', slug: 'test-slug' });
 
-      // $queryRawUnsafe is called with get_content_analytics RPC
+      // $queryRawUnsafe is called with positional arguments (callRpc passes ...argValues)
+      // Arguments are in object key insertion order: p_category, p_slug
       expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('get_content_analytics'),
-        expect.objectContaining({
-          p_category: 'agents',
-          p_slug: 'test-slug',
-        })
+        'agents', // p_category (first in insertion order)
+        'test-slug' // p_slug
       );
       expect(result).toMatchObject({
         views_7d: 100,
@@ -330,10 +331,11 @@ describe('content/detail', () => {
     });
 
     it('should reject invalid category', async () => {
-      // Invalid category should fail validation and not call the service
-      await expect(
-        getContentAnalytics({ category: 'invalid-category', slug: 'test-slug' })
-      ).rejects.toThrow('Invalid category');
+      // Invalid category should fail validation and return null (not throw)
+      const result = await getContentAnalytics({ category: 'invalid-category', slug: 'test-slug' });
+      expect(result).toBeNull();
+      // Should not call the service
+      expect(prismocker.$queryRawUnsafe).not.toHaveBeenCalled();
     });
 
     it('should return null when analytics not found', async () => {

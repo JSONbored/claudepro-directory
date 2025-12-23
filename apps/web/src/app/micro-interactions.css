@@ -39,7 +39,7 @@ select,
 [role='link'] {
   transition-property: transform, opacity, box-shadow, background-color, border-color;
   transition-duration: var(--duration-quick);
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-timing-function: var(--ease-in-out);
 }
 
 /* Focus visible improvements */
@@ -103,7 +103,7 @@ a:not([class*='button']):not([class*='btn']):not(.no-underline)::after {
   background: hsl(var(--primary));
   transform: scaleX(0);
   transform-origin: right;
-  transition: transform var(--duration-default) cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--duration-default) var(--ease-in-out);
 }
 
 a:not([class*='button']):not([class*='btn']):not(.no-underline):hover::after {
@@ -118,7 +118,7 @@ a:not([class*='button']):not([class*='btn']):not(.no-underline):hover::after {
 /* Checkbox and radio button scale on check */
 input[type='checkbox']:checked,
 input[type='radio']:checked {
-  animation: checkScale var(--duration-quick) cubic-bezier(0.4, 0, 0.2, 1);
+  animation: checkScale var(--duration-quick) var(--ease-in-out);
 }
 
 @keyframes checkScale {
@@ -186,7 +186,7 @@ select:focus {
 
 /* Smooth tooltip appearance */
 [role='tooltip'] {
-  animation: tooltipSlide var(--duration-quick) cubic-bezier(0.4, 0, 0.2, 1);
+  animation: tooltipSlide var(--duration-quick) var(--ease-in-out);
 }
 
 @keyframes tooltipSlide {
@@ -255,7 +255,7 @@ aside,
 .theme-transition {
   transition-property: background-color, border-color, color, fill, stroke;
   transition-duration: var(--duration-fast);
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-timing-function: var(--ease-in-out);
 }
 
 /* Cards: exclude border-color from transitions (Motion.dev handles border animations) */
@@ -263,7 +263,7 @@ aside,
 [class*='Card']:not([data-no-transition]) {
   transition-property: background-color, color, fill, stroke;
   transition-duration: var(--duration-fast);
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-timing-function: var(--ease-in-out);
 }
 
 /* Don't transition transforms/opacity (used for animations) */

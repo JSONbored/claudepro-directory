@@ -25,11 +25,10 @@ export const SEARCH = {
    */
   initial: {
     scale: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)', // White border with 15% opacity for glassmorphism
-    backgroundColor: 'rgba(0, 0, 0, 0.25)', // Dark background with 25% opacity for glassmorphism
-    // Use explicit RGB for boxShadow to prevent OKLCH/OKLAB conversion issues with Motion.dev
-    // Equivalent to oklch(0% 0 0 / 0.15) but in RGB format for Motion.dev compatibility
-    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)', // Subtle elevation shadow - RGB format for Motion.dev
+    borderColor: 'var(--foreground) / 0.15', // Theme foreground with 15% opacity for glassmorphism
+    backgroundColor: 'var(--background) / 0.25', // Theme background with 25% opacity for glassmorphism
+    // Use theme shadow variable for consistency
+    boxShadow: 'var(--shadow-lg)', // Subtle elevation shadow from theme
   },
 
   /**

@@ -112,7 +112,8 @@ export const getSearchFacets = createDataFunction<void, SearchFacetAggregate>({
   serviceKey: 'search',
   throwOnError: true,
   transformResult: (result) => {
-    const data = result as GetSearchFacetsReturns;
+    // callRpc might unwrap single-element arrays, so ensure we have an array
+    const data = Array.isArray(result) ? (result as GetSearchFacetsReturns) : [result as GetSearchFacetsReturns[number]];
     const facets = data.map((row) => normalizeFacetRow(row));
     const { authors, categories, tags } = extractAggregatedArrays(data);
     return {

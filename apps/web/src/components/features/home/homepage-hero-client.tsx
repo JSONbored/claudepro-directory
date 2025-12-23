@@ -288,7 +288,7 @@ function HomepageHeroClientComponent({ memberCount, stats }: HomepageHeroClientP
                                   }}
                                   whileHover={{
                                     scale: MICROINTERACTIONS.button.hover.scale,
-                                    borderColor: 'rgba(249, 115, 22, 0.5)',
+                                    borderColor: 'var(--color-primary-hover-border)',
                                     transition: MICROINTERACTIONS.button.transition,
                                   }}
                                   whileTap={{
@@ -364,7 +364,7 @@ function HomepageHeroClientComponent({ memberCount, stats }: HomepageHeroClientP
                                   }}
                                   whileHover={{
                                     scale: MICROINTERACTIONS.button.hover.scale,
-                                    borderColor: 'rgba(249, 115, 22, 0.5)',
+                                    borderColor: 'var(--color-primary-hover-border)',
                                     transition: MICROINTERACTIONS.button.transition,
                                   }}
                                   whileTap={{

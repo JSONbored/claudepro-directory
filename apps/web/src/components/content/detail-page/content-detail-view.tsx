@@ -1470,7 +1470,7 @@ export async function UnifiedDetailPage({
                 description="Prerequisites and dependencies"
                 items={requirements}
                 category={category}
-                dotColor="bg-orange-500"
+                dotColor="bg-primary"
               />
             ) : null}
 
@@ -1524,7 +1524,7 @@ export async function UnifiedDetailPage({
                 description="Important security considerations"
                 items={securityItems}
                 category={category}
-                dotColor="bg-orange-500"
+                dotColor="bg-primary"
               />
             ) : null}
 
@@ -1535,7 +1535,7 @@ export async function UnifiedDetailPage({
                 title="Troubleshooting"
                 description="Common issues and solutions"
                 items={troubleshooting}
-                dotColor="bg-red-500"
+                dotColor="bg-[var(--color-error)]"
               />
             ) : null}
 

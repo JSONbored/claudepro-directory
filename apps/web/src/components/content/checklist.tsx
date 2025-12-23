@@ -52,14 +52,14 @@ export function Checklist(props: ChecklistProps) {
 
   const priorityColors = {
     critical: cn(
-      'text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/20',
+      'text-error bg-error-bg',
       'px-3',
       'py-1',
       'rounded'
     ),
-    high: 'text-red-600 dark:text-red-400',
-    medium: 'text-yellow-600 dark:text-yellow-400',
-    low: 'text-green-600 dark:text-green-400',
+    high: 'text-error',
+    medium: 'text-warning',
+    low: 'text-success',
   };
 
   const typeIcons = {

@@ -22,9 +22,9 @@ export function ErrorTable(props: ErrorTableProps) {
   const validErrors = errors;
 
   const severityColors = {
-    critical: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200',
-    warning: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200',
-    info: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200',
+    critical: 'bg-error-bg text-error border-error-border',
+    warning: 'bg-warning-bg text-warning border-warning-border',
+    info: 'bg-info-bg text-info border-info-border',
   };
 
   const severityIcons = {

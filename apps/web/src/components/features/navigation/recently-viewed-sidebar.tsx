@@ -113,8 +113,8 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
             ? {}
             : {
                 ...MICROINTERACTIONS.card.hover,
-                borderColor: 'rgba(249, 115, 22, 0.5)', // Preserve exact original border color (accent/50)
-                backgroundColor: 'rgba(249, 115, 22, 0.05)', // Preserve exact original background (accent/5)
+                borderColor: 'var(--color-primary-hover-border)',
+                backgroundColor: 'var(--color-primary-hover-bg)',
                 y: 0, // Preserve original (no y movement in original)
               }
         }
@@ -124,8 +124,8 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
         <Link
           href={href}
           className={cn(
-            'card-base border-border/50 bg-card flex flex-col gap-[6px]',
-            'px-3 py-[6px]'
+            'card-base border-border/50 bg-card flex flex-col gap-1.5', // 6px = gap-1.5
+            'px-3 py-1.5' // 6px = py-1.5
           )}
         >
           {/* Header: Badge + Time */}
@@ -148,7 +148,7 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
           <h4 className="text-foreground text-sm-medium line-clamp-1">{item.title}</h4>
 
           {/* Description */}
-          <p className={cn('text-muted-foreground line-clamp-2 text-[9px] leading-tight')}>
+          <p className={cn('text-muted-foreground line-clamp-2 text-3xs leading-tight')}> {/* 9px = text-3xs */}
             {item.description}
           </p>
 
@@ -156,12 +156,12 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
           {item.tags && item.tags.length > 0 ? (
             <div className="mt-1 flex flex-wrap gap-0.5">
               {item.tags.slice(0, 2).map((tag) => (
-                <UnifiedBadge key={tag} variant="base" style="outline" className="text-[9px]">
+                <UnifiedBadge key={tag} variant="base" style="outline" className="text-3xs"> {/* 9px = text-3xs */}
                   {tag}
                 </UnifiedBadge>
               ))}
               {item.tags.length > 2 && (
-                <span className="text-muted-foreground text-[9px]">+{item.tags.length - 2}</span>
+                <span className="text-muted-foreground text-3xs">+{item.tags.length - 2}</span> {/* 9px = text-3xs */}
               )}
             </div>
           ) : null}

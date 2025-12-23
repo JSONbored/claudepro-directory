@@ -200,7 +200,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-1 text-lg">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" aria-hidden="true" />
+              <AlertTriangle className="h-5 w-5 text-[var(--color-warning)]" aria-hidden="true" />
               Prerequisites
             </CardTitle>
           </CardHeader>
@@ -301,9 +301,9 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             <div className="grid grid-cols-2 gap-3">
               <div className="flex items-center gap-2">
                 {compatibility.claudeDesktop ? (
-                  <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
+                  <CheckCircle className="h-4 w-4 text-success" aria-hidden="true" />
                 ) : (
-                  <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
+                  <AlertTriangle className="h-4 w-4 text-error" aria-hidden="true" />
                 )}
                 <span className="text-muted-foreground text-sm">
                   Claude Desktop {compatibility.claudeDesktop ? '(Supported)' : '(Not Supported)'}
@@ -311,9 +311,9 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
               </div>
               <div className="flex items-center gap-2">
                 {compatibility.claudeCode ? (
-                  <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
+                  <CheckCircle className="h-4 w-4 text-success" aria-hidden="true" />
                 ) : (
-                  <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
+                  <AlertTriangle className="h-4 w-4 text-error" aria-hidden="true" />
                 )}
                 <span className="text-muted-foreground text-sm">
                   Claude Code {compatibility.claudeCode ? '(Supported)' : '(Not Supported)'}

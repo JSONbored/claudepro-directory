@@ -321,7 +321,7 @@ export default function RootLayout({
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
-            disableTransitionOnChange={false}
+            disableTransitionOnChange={true}
             enableColorScheme={false}
             enableSystem
             storageKey="claudepro-theme"

@@ -48,9 +48,9 @@ function HighlightText({
       animate={isInView ? { backgroundSize: '100% 100%' } : {}}
       transition={transition}
       style={{
-        // CRITICAL: Use exact highlight color #F0704A at 100% opacity (like logo)
+        // Use theme CSS variable for Claude orange (matches logo)
         // Background gradient that expands from left to right
-        backgroundImage: 'linear-gradient(to right, #F0704A, #F0704A)',
+        backgroundImage: 'linear-gradient(to right, var(--claude-orange), var(--claude-orange))',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'left center',
         display: 'inline',
@@ -58,7 +58,7 @@ function HighlightText({
         padding: '0.125rem 0.375rem',
         borderRadius: '0.375rem',
         // Text color should be white (like logo - white lettering on orange)
-        color: '#FFFFFF',
+        color: 'var(--primary-foreground)', // White text on primary/orange background
         ...props.style,
       }}
       className={cn('relative inline-block', className)}

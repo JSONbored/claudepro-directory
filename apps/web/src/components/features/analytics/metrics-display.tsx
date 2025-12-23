@@ -26,10 +26,10 @@ function BadgeDelta({
 
   const colorClass =
     deltaType === 'increase'
-      ? 'text-green-600 bg-green-100'
+      ? 'text-success bg-success-bg'
       : deltaType === 'decrease'
-        ? 'text-red-600 bg-red-100'
-        : 'text-gray-600 bg-gray-100';
+        ? 'text-error bg-error-bg'
+        : 'text-muted-foreground bg-muted';
 
   return (
     <span
@@ -76,13 +76,13 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
           const deltaType =
             metric.trend === 'up' ? 'increase' : metric.trend === 'down' ? 'decrease' : 'unchanged';
 
-          // Choose gradient based on trend
+          // Choose gradient based on trend - use semantic theme colors
           const gradientClass =
             metric.trend === 'up'
-              ? 'from-green-500/10 to-emerald-500/10 border-green-500/20 hover:border-green-500/40'
+              ? 'bg-success-bg border-success-border hover:border-success-border/60'
               : metric.trend === 'down'
-                ? 'from-blue-500/10 to-cyan-500/10 border-blue-500/20 hover:border-blue-500/40'
-                : 'from-gray-500/10 to-slate-500/10 border-gray-500/20 hover:border-gray-500/40';
+                ? 'bg-info-bg border-info-border hover:border-info-border/60'
+                : 'bg-muted/50 border-border hover:border-border/60';
 
           return (
             <div

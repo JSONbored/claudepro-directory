@@ -217,7 +217,7 @@ function FAQBox(props: FAQVariant) {
                 <div
                   className={cn(
                     'bg-primary/10',
-                    'mt-[18px]',
+                    'mt-4', // 18px ≈ 1rem
                     'flex h-6 w-6 shrink-0 items-center justify-center rounded-full'
                   )}
                 >

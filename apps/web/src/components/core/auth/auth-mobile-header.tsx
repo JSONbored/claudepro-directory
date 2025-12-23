@@ -33,7 +33,7 @@ export function AuthMobileHeader() {
       </div>
 
       <motion.p
-        className="mt-2 text-xs text-white/90"
+        className="mt-2 text-xs text-foreground/90"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: DURATION.moderate, delay: STAGGER.default }}

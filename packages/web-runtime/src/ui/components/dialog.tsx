@@ -38,7 +38,7 @@ const DialogOverlay = ({
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'fixed inset-0 z-[60]',
+      'fixed inset-0 z-60',
       // Vercel's minimal backdrop
       'bg-black/50 backdrop-blur-sm', // Subtle blur
       'data-[state=closed]:animate-out data-[state=open]:animate-in',
@@ -138,7 +138,7 @@ const DialogContent = ({
         element.style.setProperty('right', 'auto', 'important');
         element.style.setProperty('bottom', 'auto', 'important');
         element.style.setProperty('margin', '0', 'important');
-        // CRITICAL: Ensure z-index is higher than overlay (z-[60]) to appear above blur
+        // CRITICAL: Ensure z-index is higher than overlay (z-60) to appear above blur
         element.style.setProperty('z-index', '100', 'important');
         element.style.setProperty('position', 'fixed', 'important');
       }
@@ -201,8 +201,8 @@ const DialogContent = ({
         className={cn(
           // CRITICAL: Use fixed positioning with proper centering
           // Use !important variants to ensure transform classes aren't overridden by Radix UI
-          // CRITICAL: z-index must be higher than overlay (z-[60]) to appear above blur
-          '!fixed !top-[50%] !right-auto !bottom-auto !left-[50%] !z-[100] !m-0 !-translate-x-1/2 !-translate-y-1/2',
+          // CRITICAL: z-index must be higher than overlay (z-60) to appear above blur
+          '!fixed !top-[50%] !right-auto !bottom-auto !left-[50%] !z-100 !m-0 !-translate-x-1/2 !-translate-y-1/2',
           // CRITICAL FIX: Responsive width - never full width, always properly constrained
           // Mobile: viewport minus safe padding (1rem each side)
           // Desktop: auto width with max-width constraint (can be overridden by className prop for specific dialogs like command palette)
@@ -227,7 +227,7 @@ const DialogContent = ({
           transform: 'translate(-50%, -50%)',
           margin: '0',
           // CRITICAL: z-index must be higher than overlay to appear above blur
-          zIndex: 100,
+          zIndex: 'var(--z-100)',
           // Width is handled by className with responsive utilities and CSS
           ...props.style,
         }}

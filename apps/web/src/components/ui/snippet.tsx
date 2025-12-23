@@ -131,7 +131,7 @@ export const SnippetTabsList = TabsList;
 export type SnippetTabsTriggerProps = ComponentProps<typeof TabsTrigger>;
 
 export const SnippetTabsTrigger = ({ className, ...props }: SnippetTabsTriggerProps) => (
-  <TabsTrigger className={cn('gap-[6px]', className)} {...(props as any)} />
+  <TabsTrigger className={cn('gap-1.5', className)} {...(props as any)} /> // 6px = gap-1.5
 );
 
 export type SnippetTabsContentProps = ComponentProps<typeof TabsContent>;

@@ -71,13 +71,13 @@ export function NewsletterOptInTile({
         'from-card/80 via-card/60 to-card/30 bg-linear-to-br backdrop-blur-xl',
         checked
           ? 'border-accent/70 shadow-shadow-glow-orange-large'
-          : 'hover:border-accent/40 hover:shadow-shadow-glow-orange-large-hover border-white/10'
+          : 'hover:border-accent/40 hover:shadow-shadow-glow-orange-large-hover border-foreground/10'
       )}
     >
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">
+            <span className="inline-flex items-center rounded-full bg-foreground/10 px-3 py-1 text-xs font-semibold text-foreground/90">
               {badgeLabel}
             </span>
           </div>

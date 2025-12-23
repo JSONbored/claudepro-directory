@@ -45,13 +45,13 @@ export function RateLimits({ userId }: RateLimitsProps) {
             <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
                 className={`h-full transition-all ${
-                  isNearLimit ? 'bg-yellow-500' : 'bg-primary'
+                  isNearLimit ? 'bg-[var(--color-warning)]' : 'bg-primary'
                 }`}
                 style={{ width: `${Math.min(percentage, 100)}%` }}
               />
             </div>
             {isNearLimit && (
-              <p className="text-yellow-600 dark:text-yellow-400 text-xs">
+              <p className="text-[var(--color-warning)] text-xs">
                 Warning: Approaching rate limit
               </p>
             )}

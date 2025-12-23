@@ -144,16 +144,16 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
             className={cn('text-muted-foreground flex flex-wrap items-center gap-3 text-sm')}
             variants={createItemVariants(shouldReduceMotion)}
           >
-            <div className="flex items-center gap-[6px]">
-              <CheckCircle className="h-4 w-4 text-green-500 dark:text-green-400" />
+            <div className="flex items-center gap-1.5"> {/* 6px ≈ 0.375rem (gap-1.5) */}
+              <CheckCircle className="h-4 w-4 text-success" />
               <span>Auto PR creation</span>
             </div>
-            <div className="flex items-center gap-[6px]">
-              <Clock className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+            <div className="flex items-center gap-1.5"> {/* 6px ≈ 0.375rem (gap-1.5) */}
+              <Clock className="h-4 w-4 text-info" />
               <span>Fast review</span>
             </div>
-            <div className="flex items-center gap-[6px]">
-              <Users className="h-4 w-4 text-purple-500" />
+            <div className="flex items-center gap-1.5"> {/* 6px ≈ 0.375rem (gap-1.5) */}
+              <Users className="h-4 w-4 text-primary" />
               <span>{stats.total}+ configs</span>
             </div>
           </motion.div>

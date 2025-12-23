@@ -78,7 +78,7 @@ export function ProfileCompletionProgress({ profile }: ProfileCompletionProgress
           <div className="space-y-1">
             {completedFields.map((field) => (
               <div key={field} className="flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3 text-green-600" />
+                <CheckCircle2 className="h-3 w-3 text-success" />
                 <span className="text-muted-foreground">{field}</span>
               </div>
             ))}

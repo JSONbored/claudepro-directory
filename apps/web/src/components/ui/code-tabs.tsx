@@ -125,7 +125,7 @@ function CodeTabsContent({
             content={codes[activeValue] ?? ''}
             size="sm"
             variant="ghost"
-            className="-me-2 bg-transparent hover:bg-black/5 dark:hover:bg-white/10"
+            className="-me-2 bg-transparent hover:bg-foreground/5"
             {...(onCopy ? { onCopy: (content: string) => onCopy(content) } : {})}
           />
         )}
@@ -137,7 +137,7 @@ function CodeTabsContent({
           className="flex w-full items-center overflow-auto p-4 text-sm"
           value={code}
         >
-          <div className="w-full [&_.shiki]:bg-transparent! [&_code]:bg-transparent! [&_code]:text-[13px] [&_code]:leading-relaxed [&>pre]:m-0 [&>pre]:border-none [&>pre]:bg-transparent! [&>pre]:p-4 [&>pre]:text-[13px] [&>pre]:leading-relaxed">
+          <div className="w-full [&_.shiki]:bg-transparent! [&_code]:bg-transparent! [&_code]:text-base [&_code]:leading-relaxed [&>pre]:m-0 [&>pre]:border-none [&>pre]:bg-transparent! [&>pre]:p-4 [&>pre]:text-base [&>pre]:leading-relaxed"> {/* text-base = 13px */}
             {highlightedCodes[code] !== undefined && highlightedCodes[code] !== rawCode ? (
               <div dangerouslySetInnerHTML={{ __html: highlightedCodes[code]! }} />
             ) : (

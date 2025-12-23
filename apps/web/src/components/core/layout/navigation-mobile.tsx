@@ -87,9 +87,10 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
       <span className="relative inline-block">
         {children}
         <span
-          className={`bg-accent absolute bottom-0 left-0 h-[2px] transition-all duration-300 ease-out ${
+          className={cn(
+            'bg-accent absolute bottom-0 left-0 h-[2px] transition-all duration-300 ease-out',
             active ? 'w-full' : 'w-0 group-hover:w-full'
-          }`}
+          )}
           aria-hidden="true"
         />
       </span>
@@ -178,7 +179,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
           ) => {
             if (info.offset.y > 100) onOpenChange(false);
           }}
-          whileDrag={shouldReduceMotion ? {} : { scale: 1.2, backgroundColor: 'rgb(249, 115, 22)' }} // Claude orange (was hsl(var(--accent)))
+          whileDrag={shouldReduceMotion ? {} : { scale: 1.2, backgroundColor: 'var(--claude-orange)' }} // Claude orange from theme
           transition={SPRING.smooth}
         />
 
@@ -330,7 +331,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                   aria-label="Account navigation"
                 >
                   <div className="mb-3 px-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground opacity-70">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground opacity-70"> {/* 10px */}
                       Account
                     </p>
                   </div>

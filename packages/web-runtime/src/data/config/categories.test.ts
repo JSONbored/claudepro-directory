@@ -9,7 +9,7 @@ jest.mock('server-only', () => ({}));
 
 // Mock build-time
 jest.mock('../../build-time.ts', () => ({
-  isBuildTime: vi.fn(() => false),
+  isBuildTime: jest.fn(() => false),
 }));
 
 // Mock static configs
@@ -19,26 +19,17 @@ const mockHomepageConfig = {
 };
 
 jest.mock('../../config/static-configs.ts', () => ({
-  getHomepageConfigBundle: vi.fn(() => ({
+  getHomepageConfigBundle: jest.fn(() => ({
     homepageConfig: mockHomepageConfig,
   })),
 }));
 
-// Mock logger
-jest.mock('../../logger.ts', () => ({
-  logger: {
-    child: vi.fn(() => ({
-      debug: vi.fn(),
-      info: vi.fn(),
-      error: vi.fn(),
-      warn: vi.fn(),
-    })),
-  },
-}));
+// Don't mock logger - use real implementation (consistent with detail.test.ts, paginated.test.ts)
+// ERROR logs for validation failures are expected and correct behavior
 
 describe('categories config', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('getHomepageFeaturedCategories', () => {

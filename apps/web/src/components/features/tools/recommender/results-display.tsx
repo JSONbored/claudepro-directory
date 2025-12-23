@@ -438,11 +438,11 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     : undefined;
                 const getMatchScoreColor = (score: number) => {
                   if (score >= 90)
-                    return 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20';
+                    return 'bg-success-bg text-success border-success-border';
                   if (score >= 75)
-                    return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
+                    return 'bg-info-bg text-info border-info-border';
                   if (score >= 60)
-                    return 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20';
+                    return 'bg-warning-bg text-warning border-warning-border';
                   return 'text-muted-foreground';
                 };
                 const getMatchGradient = (score: number) => {

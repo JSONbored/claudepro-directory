@@ -261,8 +261,8 @@ async function EditJobPageContent({
         <p className="text-muted-foreground">Update your job posting details</p>
       </div>
       {hasInvalidData ? (
-        <div className="rounded-md bg-yellow-50 p-4 dark:bg-yellow-900/20">
-          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+        <div className="rounded-md bg-[var(--color-warning-bg)] p-4">
+          <p className="text-sm text-[var(--color-warning)]">
             Some fields contain invalid data and couldn&apos;t be loaded. Please review and update.
           </p>
         </div>
