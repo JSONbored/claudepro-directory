@@ -12,6 +12,12 @@
  * 4. User sees consent screen with client info and scopes
  * 5. User approves/denies access
  * 6. Redirect back to client with authorization code or error
+ *
+ * Error Handling:
+ * - Failed signin: User redirected to /login with redirect parameter to return here after auth
+ * - Cancel/Deny: User clicks Cancel/Deny → denyAuthorization called → redirects to client with error=access_denied
+ * - Timeout/Expired: If authorization_id expires, getAuthorizationDetails returns error → shows error message
+ * - User closes tab: Authorization expires, client will receive error when trying to exchange code
  */
 
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/auth/get-authenticated-user';
@@ -23,9 +29,7 @@ import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
-import { AuthBrandPanel } from '@/src/components/core/auth/auth-brand-panel';
-import { SplitAuthLayout } from '@/src/components/core/auth/auth-layout';
-import { AuthMobileHeader } from '@/src/components/core/auth/auth-mobile-header';
+import { OAuthLayout } from '@/src/components/core/auth/oauth-layout';
 
 import { OAuthConsentClient } from './oauth-consent-client';
 
@@ -85,18 +89,14 @@ export default async function OAuthConsentPage({
         'OAuth consent page accessed without authorization_id'
       );
       return (
-        <SplitAuthLayout
-          authPanel={
-            <div className="flex min-h-[400px] flex-col items-center justify-center p-6">
-              <h1 className="mb-4 text-2xl font-semibold">Invalid Authorization Request</h1>
-              <p className="text-muted-foreground text-center">
-                Missing authorization ID. Please try again from the application requesting access.
-              </p>
-            </div>
-          }
-          brandPanel={<AuthBrandPanel />}
-          mobileHeader={<AuthMobileHeader />}
-        />
+        <OAuthLayout>
+          <div className="flex min-h-screen flex-col items-center justify-center p-6">
+            <h1 className="mb-4 text-2xl font-semibold text-black">Invalid Authorization Request</h1>
+            <p className="text-gray-600 text-center">
+              Missing authorization ID. Please try again from the application requesting access.
+            </p>
+          </div>
+        </OAuthLayout>
       );
     }
 
@@ -139,21 +139,25 @@ export default async function OAuthConsentPage({
         'Failed to get authorization details'
       );
 
+      // Check if authorization expired or is invalid
+      const errorMessage =
+        authError instanceof Error ? authError.message : String(authError);
+      const isExpired =
+        errorMessage.toLowerCase().includes('expired') ||
+        errorMessage.toLowerCase().includes('invalid') ||
+        errorMessage.toLowerCase().includes('not found');
+
       return (
-        <SplitAuthLayout
-          authPanel={
-            <div className="flex min-h-[400px] flex-col items-center justify-center p-6">
-              <h1 className="mb-4 text-2xl font-semibold">Authorization Error</h1>
-              <p className="text-muted-foreground text-center">
-                {authError instanceof Error
-                  ? authError.message
-                  : 'Invalid authorization request. Please try again.'}
-              </p>
-            </div>
-          }
-          brandPanel={<AuthBrandPanel />}
-          mobileHeader={<AuthMobileHeader />}
-        />
+        <OAuthLayout>
+          <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
+            <h1 className="text-2xl font-semibold text-black">Authorization Error</h1>
+            <p className="text-gray-600 text-center">
+              {isExpired
+                ? 'This authorization request has expired or is no longer valid. Please try again from the application requesting access.'
+                : 'Invalid authorization request. Please try again from the application requesting access.'}
+            </p>
+          </div>
+        </OAuthLayout>
       );
     }
 
@@ -169,18 +173,15 @@ export default async function OAuthConsentPage({
       );
 
       return (
-        <SplitAuthLayout
-          authPanel={
-            <div className="flex min-h-[400px] flex-col items-center justify-center p-6">
-              <h1 className="mb-4 text-2xl font-semibold">Authorization Error</h1>
-              <p className="text-muted-foreground text-center">
-                Invalid authorization request. Please try again.
-              </p>
-            </div>
-          }
-          brandPanel={<AuthBrandPanel />}
-          mobileHeader={<AuthMobileHeader />}
-        />
+        <OAuthLayout>
+          <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
+            <h1 className="text-2xl font-semibold text-black">Authorization Error</h1>
+            <p className="text-gray-600 text-center">
+              This authorization request is no longer valid. Please try again from the application
+              requesting access.
+            </p>
+          </div>
+        </OAuthLayout>
       );
     }
 
@@ -196,6 +197,21 @@ export default async function OAuthConsentPage({
       'OAuth consent page loaded'
     );
 
+    // Extract user metadata for avatar and display name
+    const userMetadata = (user.user_metadata ?? {}) as Record<string, unknown>;
+    const avatarUrl =
+      typeof userMetadata['avatar_url'] === 'string'
+        ? userMetadata['avatar_url']
+        : typeof userMetadata['picture'] === 'string'
+          ? userMetadata['picture']
+          : null;
+    const displayName =
+      typeof userMetadata['full_name'] === 'string'
+        ? userMetadata['full_name']
+        : typeof userMetadata['name'] === 'string'
+          ? userMetadata['name']
+          : user.email?.split('@')[0] ?? 'User';
+
     // Map authDetails to expected format for client component
     // Include all available fields from getAuthorizationDetails response
     const clientAuthDetails = {
@@ -210,19 +226,23 @@ export default async function OAuthConsentPage({
     };
 
     return (
-      <SplitAuthLayout
-        authPanel={
-          <Suspense
-            fallback={
-              <div className="flex min-h-[400px] items-center justify-center">Loading...</div>
-            }
-          >
-            <OAuthConsentClient authDetails={clientAuthDetails} authorizationId={authorizationId} />
-          </Suspense>
-        }
-        brandPanel={<AuthBrandPanel />}
-        mobileHeader={<AuthMobileHeader />}
-      />
+      <OAuthLayout>
+        <Suspense
+          fallback={
+            <div className="flex min-h-screen items-center justify-center text-black">Loading...</div>
+          }
+        >
+          <OAuthConsentClient
+            authDetails={clientAuthDetails}
+            authorizationId={authorizationId}
+            user={{
+              email: user.email ?? '',
+              name: displayName,
+              avatarUrl,
+            }}
+          />
+        </Suspense>
+      </OAuthLayout>
     );
   } catch (error) {
     const normalized = normalizeError(error, 'OAuth consent page error');
@@ -236,18 +256,14 @@ export default async function OAuthConsentPage({
     );
 
     return (
-      <SplitAuthLayout
-        authPanel={
-          <div className="flex min-h-[400px] flex-col items-center justify-center p-6">
-            <h1 className="mb-4 text-2xl font-semibold">Error</h1>
-            <p className="text-muted-foreground text-center">
-              An error occurred while processing your authorization request. Please try again.
-            </p>
-          </div>
-        }
-        brandPanel={<AuthBrandPanel />}
-        mobileHeader={<AuthMobileHeader />}
-      />
+      <OAuthLayout>
+        <div className="flex min-h-screen flex-col items-center justify-center p-6">
+          <h1 className="mb-4 text-2xl font-semibold text-black">Error</h1>
+          <p className="text-gray-600 text-center">
+            An error occurred while processing your authorization request. Please try again.
+          </p>
+        </div>
+      </OAuthLayout>
     );
   }
 }

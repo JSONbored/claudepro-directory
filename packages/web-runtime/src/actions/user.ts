@@ -206,11 +206,15 @@ export const isBookmarkedAction = authedAction
   .metadata({ actionName: 'isBookmarked', category: 'user' })
   .action(async ({ parsedInput, ctx }) => {
     const { isBookmarked } = await import('../data/account.ts');
-    return isBookmarked({
+    const result = await isBookmarked({
       userId: ctx.userId,
       content_type: parsedInput.content_type,
       content_slug: parsedInput.content_slug,
     });
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/web-runtime/src/actions/user.ts:207',message:'isBookmarkedAction - before return',data:{result,resultType:typeof result,userId:ctx.userId,content_type:parsedInput.content_type,content_slug:parsedInput.content_slug},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
+    return result;
   });
 
 const addBookmarkBatchSchema = z.object({

@@ -511,10 +511,21 @@ async function executeDataFunction(
 
     const result = await serviceMethod.call(service, serviceArgs);
 
+    // #region agent log
+    if (fnConfig.methodName === 'isBookmarked') {
+      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/web-runtime/src/data/cached-data-factory.ts:512',message:'executeDataFunction - after serviceMethod call',data:{methodName:fnConfig.methodName,result,resultType:typeof result,hasTransformResult:!!fnConfig.transformResult},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    }
+    // #endregion
+
     // Transform result if transformer provided
     let transformedResult: null | unknown = result;
     if (fnConfig.transformResult) {
       transformedResult = fnConfig.transformResult(result, args);
+      // #region agent log
+      if (fnConfig.methodName === 'isBookmarked') {
+        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/web-runtime/src/data/cached-data-factory.ts:517',message:'executeDataFunction - after transformResult',data:{methodName:fnConfig.methodName,transformedResult,transformedResultType:typeof transformedResult},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      }
+      // #endregion
     } else if (fnConfig.normalizeResult) {
       transformedResult = fnConfig.normalizeResult(result);
     }
@@ -527,6 +538,12 @@ async function executeDataFunction(
       Object.assign(logData, fnConfig.logContext(args, transformedResult));
     }
     reqLogger.info(logData, `${fnConfig.operation}: fetched successfully`);
+
+    // #region agent log
+    if (fnConfig.methodName === 'isBookmarked') {
+      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/web-runtime/src/data/cached-data-factory.ts:531',message:'executeDataFunction - returning result',data:{methodName:fnConfig.methodName,transformedResult,transformedResultType:typeof transformedResult},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    }
+    // #endregion
 
     return transformedResult;
   } catch (error) {

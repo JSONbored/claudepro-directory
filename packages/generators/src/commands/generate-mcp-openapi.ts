@@ -224,22 +224,62 @@ function extractToolMetadata(sourceFile: SourceFile): ToolMetadata[] {
 function extractResourceMetadata(sourceFile: SourceFile): ResourceMetadata[] {
   const resources: ResourceMetadata[] = [];
 
+  // #region agent log
+  fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:224',message:'extractResourceMetadata entry',data:{filePath:sourceFile.getFilePath()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
+
   // Find all registerResource calls
-  sourceFile.getDescendantsOfKind(207).forEach((call) => {
+  const allCalls = sourceFile.getDescendantsOfKind(207);
+  
+  // #region agent log
+  fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:228',message:'Found call expressions',data:{totalCalls:allCalls.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
+
+  let propertyAccessCount = 0;
+  let registerResourceCount = 0;
+  let methodNameMismatchCount = 0;
+  let argsLengthMismatchCount = 0;
+  let nameArgInvalidCount = 0;
+  let templateArgInvalidCount = 0;
+  let metadataArgInvalidCount = 0;
+
+  allCalls.forEach((call) => {
     if (!Node.isCallExpression(call)) return;
 
     const expression = call.getExpression();
     if (!Node.isPropertyAccessExpression(expression)) return;
     
+    propertyAccessCount++;
+    
     // Check if method name is 'registerResource'
-    if (expression.getName() !== 'registerResource') return;
+    const methodName = expression.getName();
+    if (methodName !== 'registerResource') {
+      methodNameMismatchCount++;
+      return;
+    }
+
+    registerResourceCount++;
 
     const args = call.getArguments();
-    if (args.length < 4) return;
+    
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:238',message:'registerResource call found',data:{argsLength:args.length,methodName},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+
+    if (args.length < 4) {
+      argsLengthMismatchCount++;
+      return;
+    }
 
     // First arg: resource name (string literal)
     const nameArg = args[0];
-    if (!Node.isStringLiteral(nameArg)) return;
+    if (!Node.isStringLiteral(nameArg)) {
+      nameArgInvalidCount++;
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:242',message:'nameArg invalid',data:{nameArgKind:nameArg.getKindName()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      return;
+    }
     const name = nameArg.getLiteralValue();
 
     // Second arg: ResourceTemplate (new ResourceTemplate(...))
@@ -253,13 +293,29 @@ function extractResourceMetadata(sourceFile: SourceFile): ResourceMetadata[] {
           uriTemplate = firstArg.getLiteralValue();
         } else if (Node.isNoSubstitutionTemplateLiteral(firstArg)) {
           uriTemplate = firstArg.getLiteralValue();
+        } else {
+          templateArgInvalidCount++;
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:251',message:'templateArg firstArg invalid',data:{firstArgKind:firstArg.getKindName()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+          // #endregion
         }
       }
+    } else {
+      templateArgInvalidCount++;
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:248',message:'templateArg not NewExpression',data:{templateArgKind:templateArg.getKindName()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
     }
 
     // Third arg: metadata object
     const metadataArg = args[2];
-    if (!Node.isObjectLiteralExpression(metadataArg)) return;
+    if (!Node.isObjectLiteralExpression(metadataArg)) {
+      metadataArgInvalidCount++;
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:262',message:'metadataArg invalid',data:{metadataArgKind:metadataArg.getKindName()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      return;
+    }
 
     const titleProp = metadataArg.getProperty('title');
     const descriptionProp = metadataArg.getProperty('description');
@@ -313,7 +369,15 @@ function extractResourceMetadata(sourceFile: SourceFile): ResourceMetadata[] {
       mimeType,
       filePath: sourceFile.getFilePath(),
     });
+    
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:308',message:'Resource extracted successfully',data:{name,uriTemplate,title,hasDescription:!!description},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
   });
+
+  // #region agent log
+  fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:318',message:'extractResourceMetadata exit',data:{resourcesFound:resources.length,propertyAccessCount,registerResourceCount,methodNameMismatchCount,argsLengthMismatchCount,nameArgInvalidCount,templateArgInvalidCount,metadataArgInvalidCount},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
 
   return resources;
 }
@@ -447,12 +511,29 @@ function extractToolsViaRegex(sourceText: string): ToolMetadata[] {
 function extractResourcesViaRegex(sourceText: string): ResourceMetadata[] {
   const resources: ResourceMetadata[] = [];
   
+  // #region agent log
+  fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:447',message:'extractResourcesViaRegex entry',data:{sourceTextLength:sourceText.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+  // #endregion
+  
   // Match: mcpServer.registerResource('name', new ResourceTemplate('uri', ...), { title: '...', description: '...', mimeType: '...' }, ...)
+  // Updated regex to handle multi-line descriptions
   const resourceRegex = /mcpServer\.registerResource\s*\(\s*['"]([^'"]+)['"]\s*,\s*new\s+ResourceTemplate\s*\(\s*['"]([^'"]+)['"][^)]*\)\s*,\s*\{[^}]*title:\s*['"]([^'"]+)['"][^}]*description:\s*['"]?([^'"]+)['"]?[^}]*mimeType:\s*['"]([^'"]+)['"]/gs;
   
+  // #region agent log
+  const regexMatches = sourceText.match(/mcpServer\.registerResource/gi);
+  fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:452',message:'registerResource calls found in text',data:{matchesFound:regexMatches?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+  // #endregion
+  
   let match;
+  let matchCount = 0;
   while ((match = resourceRegex.exec(sourceText)) !== null) {
+    matchCount++;
     const [, name, uriTemplate, title, description, mimeType] = match;
+    
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:456',message:'Regex match found',data:{matchCount,name,uriTemplate,title,hasDescription:!!description,descriptionLength:description?.length||0,mimeType},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+    
     if (name && uriTemplate && title) {
       resources.push({
         name: name.trim(),
@@ -462,8 +543,16 @@ function extractResourcesViaRegex(sourceText: string): ResourceMetadata[] {
         mimeType: (mimeType || 'text/plain').trim(),
         filePath: 'packages/mcp-server/src/mcp/resources/register.ts',
       });
+    } else {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:465',message:'Regex match invalid - missing fields',data:{name:!!name,uriTemplate:!!uriTemplate,title:!!title},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
     }
   }
+  
+  // #region agent log
+  fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:473',message:'extractResourcesViaRegex exit',data:{resourcesFound:resources.length,matchCount},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+  // #endregion
   
   return resources;
 }
@@ -542,6 +631,10 @@ async function evaluateSchemas(
   // Evaluate prompt args schemas
   for (const prompt of prompts) {
     if (prompt.argsSchemaName) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:543',message:'Evaluating prompt schema',data:{promptName:prompt.name,argsSchemaName:prompt.argsSchemaName,typesFilePath},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      
       try {
         // Use absolute path to types file
         const typesFilePath = join(projectRoot, 'packages/mcp-server/src/lib/types.ts');
@@ -554,11 +647,23 @@ async function evaluateSchemas(
           prompt.argsSchema = schema;
           prompt.argsSchemaExample = generateExampleFromZodSchema(schema);
           console.log(`   ✅ Evaluated args schema for ${prompt.name}: ${prompt.argsSchemaName}`);
+          
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:556',message:'Prompt schema evaluated successfully',data:{promptName:prompt.name,argsSchemaName:prompt.argsSchemaName},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+          // #endregion
         } else {
           console.warn(`   ⚠️  Could not evaluate schema: ${prompt.argsSchemaName}`);
+          
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:559',message:'Prompt schema evaluation returned null',data:{promptName:prompt.name,argsSchemaName:prompt.argsSchemaName,typesFilePath},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+          // #endregion
         }
       } catch (error) {
         console.warn(`   ⚠️  Error evaluating schema ${prompt.argsSchemaName}: ${error}`);
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:562',message:'Prompt schema evaluation error',data:{promptName:prompt.name,argsSchemaName:prompt.argsSchemaName,error:String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
       }
     }
   }
@@ -786,10 +891,120 @@ async function generateMcpOpenAPI(): Promise<void> {
       '/oauth/authorize': {
         get: {
           summary: 'OAuth Authorization Endpoint',
-          description: 'OAuth 2.1 authorization endpoint (proxies to Supabase Auth)',
+          description:
+            'OAuth 2.1 authorization endpoint (proxies to Supabase Auth). Adds RFC 8707 resource parameter for MCP compliance. Validates PKCE, response_type, and redirect_uri before forwarding to Supabase Auth.',
+          tags: ['oauth'],
+          operationId: 'oauthAuthorize',
+          parameters: [
+            {
+              name: 'client_id',
+              in: 'query',
+              required: true,
+              schema: {
+                type: 'string',
+              },
+              description: 'OAuth client identifier',
+            },
+            {
+              name: 'response_type',
+              in: 'query',
+              required: true,
+              schema: {
+                type: 'string',
+                enum: ['code'],
+              },
+              description: 'Response type (must be "code" for OAuth 2.1)',
+            },
+            {
+              name: 'redirect_uri',
+              in: 'query',
+              required: true,
+              schema: {
+                type: 'string',
+                format: 'uri',
+              },
+              description: 'Redirect URI where authorization code will be sent',
+            },
+            {
+              name: 'scope',
+              in: 'query',
+              required: false,
+              schema: {
+                type: 'string',
+              },
+              description: 'Space-separated list of requested scopes',
+            },
+            {
+              name: 'state',
+              in: 'query',
+              required: false,
+              schema: {
+                type: 'string',
+              },
+              description: 'Opaque value used to maintain state between request and callback',
+            },
+            {
+              name: 'code_challenge',
+              in: 'query',
+              required: true,
+              schema: {
+                type: 'string',
+              },
+              description: 'PKCE code challenge (required for OAuth 2.1)',
+            },
+            {
+              name: 'code_challenge_method',
+              in: 'query',
+              required: true,
+              schema: {
+                type: 'string',
+                enum: ['S256'],
+              },
+              description: 'PKCE code challenge method (must be S256)',
+            },
+          ],
           responses: {
             '302': {
-              description: 'Redirect to Supabase Auth',
+              description: 'Redirect to Supabase Auth OAuth 2.1 Server with resource parameter',
+            },
+            '400': {
+              description: 'Invalid request (missing parameters, invalid response_type, missing PKCE, etc.)',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: {
+                        type: 'string',
+                        enum: ['invalid_request', 'unsupported_response_type', 'invalid_scope'],
+                      },
+                      error_description: {
+                        type: 'string',
+                        description: 'Human-readable error description',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '500': {
+              description: 'Internal server error',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: {
+                        type: 'string',
+                        enum: ['server_error'],
+                      },
+                      error_description: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -798,9 +1013,490 @@ async function generateMcpOpenAPI(): Promise<void> {
         post: {
           summary: 'OAuth Token Endpoint',
           description: 'OAuth 2.1 token exchange endpoint (proxies to Supabase Auth)',
+          tags: ['oauth'],
+          operationId: 'oauthToken',
+          requestBody: {
+            required: true,
+            content: {
+              'application/x-www-form-urlencoded': {
+                schema: {
+                  type: 'object',
+                  required: ['grant_type', 'code', 'redirect_uri', 'client_id', 'code_verifier'],
+                  properties: {
+                    grant_type: {
+                      type: 'string',
+                      enum: ['authorization_code'],
+                      description: 'OAuth grant type (must be authorization_code)',
+                    },
+                    code: {
+                      type: 'string',
+                      description: 'Authorization code received from authorization endpoint',
+                    },
+                    redirect_uri: {
+                      type: 'string',
+                      format: 'uri',
+                      description: 'Redirect URI used in authorization request',
+                    },
+                    client_id: {
+                      type: 'string',
+                      description: 'OAuth client identifier',
+                    },
+                    code_verifier: {
+                      type: 'string',
+                      description: 'PKCE code verifier (required for OAuth 2.1)',
+                    },
+                  },
+                },
+              },
+            },
+          },
           responses: {
             '200': {
-              description: 'Token response',
+              description: 'Token response with access token, refresh token, and metadata',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      access_token: {
+                        type: 'string',
+                        description: 'JWT access token',
+                      },
+                      refresh_token: {
+                        type: 'string',
+                        description: 'Refresh token for obtaining new access tokens',
+                      },
+                      token_type: {
+                        type: 'string',
+                        enum: ['Bearer'],
+                        description: 'Token type (always Bearer)',
+                      },
+                      expires_in: {
+                        type: 'integer',
+                        description: 'Access token expiration time in seconds',
+                      },
+                      scope: {
+                        type: 'string',
+                        description: 'Granted scopes (space-separated)',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '400': {
+              description: 'Invalid request (missing parameters, invalid grant type, etc.)',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: {
+                        type: 'string',
+                        description: 'OAuth error code',
+                      },
+                      error_description: {
+                        type: 'string',
+                        description: 'Human-readable error description',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '500': {
+              description: 'Internal server error',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: {
+                        type: 'string',
+                        enum: ['server_error'],
+                      },
+                      error_description: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '/oauth/revoke': {
+        post: {
+          summary: 'OAuth Token Revocation Endpoint',
+          description:
+            'OAuth 2.1 token revocation endpoint (RFC 7009). Proxies to Supabase Auth OAuth 2.1 Server. Always returns 200 per RFC 7009 to prevent token enumeration attacks.',
+          tags: ['oauth'],
+          operationId: 'oauthRevoke',
+          requestBody: {
+            required: true,
+            content: {
+              'application/x-www-form-urlencoded': {
+                schema: {
+                  type: 'object',
+                  required: ['token'],
+                  properties: {
+                    token: {
+                      type: 'string',
+                      description: 'Access token or refresh token to revoke',
+                    },
+                    token_type_hint: {
+                      type: 'string',
+                      enum: ['access_token', 'refresh_token'],
+                      description: 'Optional hint about the token type',
+                    },
+                    client_id: {
+                      type: 'string',
+                      description: 'Optional client identifier (for public clients)',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description:
+                'Token revocation successful (always returns 200 per RFC 7009, even if token does not exist)',
+            },
+          },
+        },
+      },
+      '/oauth/introspect': {
+        post: {
+          summary: 'OAuth Token Introspection Endpoint',
+          description:
+            'OAuth 2.1 token introspection endpoint (RFC 7662). Proxies to Supabase Auth OAuth 2.1 Server. Allows resource servers to validate tokens and retrieve token metadata.',
+          tags: ['oauth'],
+          operationId: 'oauthIntrospect',
+          requestBody: {
+            required: true,
+            content: {
+              'application/x-www-form-urlencoded': {
+                schema: {
+                  type: 'object',
+                  required: ['token'],
+                  properties: {
+                    token: {
+                      type: 'string',
+                      description: 'Access token or refresh token to introspect',
+                    },
+                    token_type_hint: {
+                      type: 'string',
+                      enum: ['access_token', 'refresh_token'],
+                      description: 'Optional hint about the token type',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Token introspection response',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      active: {
+                        type: 'boolean',
+                        description: 'Whether the token is active (valid and not expired)',
+                      },
+                      scope: {
+                        type: 'string',
+                        description: 'Token scopes (space-separated)',
+                      },
+                      client_id: {
+                        type: 'string',
+                        description: 'Client identifier that issued the token',
+                      },
+                      username: {
+                        type: 'string',
+                        description: 'Username associated with the token',
+                      },
+                      exp: {
+                        type: 'integer',
+                        description: 'Token expiration timestamp (Unix time)',
+                      },
+                      iat: {
+                        type: 'integer',
+                        description: 'Token issuance timestamp (Unix time)',
+                      },
+                      sub: {
+                        type: 'string',
+                        description: 'Subject (user ID) associated with the token',
+                      },
+                      aud: {
+                        type: 'string',
+                        description: 'Audience (resource) the token is intended for',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '400': {
+              description: 'Invalid request (missing token parameter)',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: {
+                        type: 'string',
+                        enum: ['invalid_request'],
+                      },
+                      error_description: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '500': {
+              description: 'Internal server error',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: {
+                        type: 'string',
+                        enum: ['server_error'],
+                      },
+                      error_description: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '/oauth/register': {
+        post: {
+          summary: 'OAuth Dynamic Client Registration Endpoint',
+          description:
+            'OAuth 2.1 dynamic client registration endpoint (RFC 7591). Proxies to Supabase Auth OAuth 2.1 Server. Allows clients to register themselves automatically without manual setup.',
+          tags: ['oauth'],
+          operationId: 'oauthRegister',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['redirect_uris'],
+                  properties: {
+                    redirect_uris: {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                        format: 'uri',
+                      },
+                      description: 'Array of redirect URIs for the client',
+                      minItems: 1,
+                    },
+                    client_name: {
+                      type: 'string',
+                      description: 'Human-readable name for the client',
+                    },
+                    client_uri: {
+                      type: 'string',
+                      format: 'uri',
+                      description: 'URL of the client home page',
+                    },
+                    logo_uri: {
+                      type: 'string',
+                      format: 'uri',
+                      description: 'URL of the client logo',
+                    },
+                    scope: {
+                      type: 'string',
+                      description: 'Space-separated list of scopes the client will request',
+                    },
+                    contacts: {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                        format: 'email',
+                      },
+                      description: 'Array of contact email addresses',
+                    },
+                    tos_uri: {
+                      type: 'string',
+                      format: 'uri',
+                      description: 'URL of the client terms of service',
+                    },
+                    policy_uri: {
+                      type: 'string',
+                      format: 'uri',
+                      description: 'URL of the client privacy policy',
+                    },
+                    grant_types: {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                        enum: ['authorization_code', 'refresh_token'],
+                      },
+                      description: 'Grant types the client will use',
+                    },
+                    response_types: {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                        enum: ['code'],
+                      },
+                      description: 'Response types the client will use',
+                    },
+                    token_endpoint_auth_method: {
+                      type: 'string',
+                      enum: ['none', 'client_secret_post'],
+                      description: 'Client authentication method',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '201': {
+              description: 'Client registration successful',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    required: ['client_id'],
+                    properties: {
+                      client_id: {
+                        type: 'string',
+                        description: 'Unique client identifier',
+                      },
+                      client_secret: {
+                        type: 'string',
+                        description: 'Client secret (if client_secret_post auth method used)',
+                      },
+                      client_id_issued_at: {
+                        type: 'integer',
+                        description: 'Client ID issuance timestamp (Unix time)',
+                      },
+                      client_secret_expires_at: {
+                        type: 'integer',
+                        description: 'Client secret expiration timestamp (0 if no expiration)',
+                      },
+                      redirect_uris: {
+                        type: 'array',
+                        items: {
+                          type: 'string',
+                          format: 'uri',
+                        },
+                        description: 'Registered redirect URIs',
+                      },
+                      grant_types: {
+                        type: 'array',
+                        items: {
+                          type: 'string',
+                        },
+                        description: 'Grant types supported by the client',
+                      },
+                      response_types: {
+                        type: 'array',
+                        items: {
+                          type: 'string',
+                        },
+                        description: 'Response types supported by the client',
+                      },
+                      client_name: {
+                        type: 'string',
+                        description: 'Human-readable client name',
+                      },
+                      client_uri: {
+                        type: 'string',
+                        format: 'uri',
+                        description: 'Client home page URL',
+                      },
+                      logo_uri: {
+                        type: 'string',
+                        format: 'uri',
+                        description: 'Client logo URL',
+                      },
+                      scope: {
+                        type: 'string',
+                        description: 'Default scopes for the client',
+                      },
+                      contacts: {
+                        type: 'array',
+                        items: {
+                          type: 'string',
+                          format: 'email',
+                        },
+                        description: 'Contact email addresses',
+                      },
+                      tos_uri: {
+                        type: 'string',
+                        format: 'uri',
+                        description: 'Terms of service URL',
+                      },
+                      policy_uri: {
+                        type: 'string',
+                        format: 'uri',
+                        description: 'Privacy policy URL',
+                      },
+                      token_endpoint_auth_method: {
+                        type: 'string',
+                        description: 'Client authentication method',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '400': {
+              description: 'Invalid client metadata',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: {
+                        type: 'string',
+                        enum: ['invalid_client_metadata', 'invalid_request'],
+                      },
+                      error_description: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '500': {
+              description: 'Internal server error',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: {
+                        type: 'string',
+                        enum: ['server_error'],
+                      },
+                      error_description: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },

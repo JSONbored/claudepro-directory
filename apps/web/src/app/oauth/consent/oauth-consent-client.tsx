@@ -4,14 +4,23 @@
  * OAuth Consent Client Component
  *
  * Client-side component for handling OAuth consent UI and user interactions.
- * Displays client information, requested scopes, and handles approve/deny actions.
+ * Redesigned to match Vercel's industry-standard MCP OAuth design:
+ * - Dark theme with minimal layout
+ * - MCP logo display
+ * - User account information
+ * - Connected icons visual
+ * - Clear permissions list
+ * - Cancel/Allow buttons
+ * - Terms and Privacy Policy links
  */
 
 import { useBoolean } from '@heyclaude/web-runtime/hooks/use-boolean';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/supabase/browser';
-import { Button, cn, UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { AlertCircle, CheckCircle2, ExternalLink, Shield, XCircle } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage, Button, cn } from '@heyclaude/web-runtime/ui';
+import { optimizeAvatarUrl } from '@heyclaude/web-runtime/utils/optimize-avatar-url';
+import { AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -28,17 +37,28 @@ interface OAuthConsentClientProps {
     scopes?: null | string[];
   };
   authorizationId: string;
+  user: {
+    email: string;
+    name: string;
+    avatarUrl: string | null;
+  };
 }
 
 /**
  * Client component for OAuth consent screen.
  *
  * Displays client information, requested scopes, and handles user approval/denial.
- * @param root0
- * @param root0.authorizationId
- * @param root0.authDetails
+ * Matches Vercel's MCP OAuth design with dark theme and minimal layout.
+ *
+ * @param authDetails - OAuth authorization details from Supabase
+ * @param authorizationId - Authorization ID for approve/deny operations
+ * @param user - Current user information (email, name, avatar)
  */
-export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsentClientProps) {
+export function OAuthConsentClient({
+  authDetails,
+  authorizationId,
+  user,
+}: OAuthConsentClientProps) {
   const router = useRouter();
   const {
     setFalse: setIsProcessingFalse,
@@ -54,9 +74,6 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
   });
 
   // Create Supabase browser client for client-side operations
-  // This client handles cookies automatically for authentication
-  // NOTE: Data fetching (auth.oauth.approveAuthorization/denyAuthorization) is done in event handlers
-  // (handleApprove/handleDeny), not during render, so this is compliant with architectural rules
   const supabase = createSupabaseBrowserClient();
 
   const handleApprove = async () => {
@@ -86,12 +103,12 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
           return;
         }
 
-        // Log successful approval (useLoggedAsync handles error logging)
-
-        // Redirect to the client's redirect URI with authorization code
+        // Redirect to success page first, then to client's redirect URI
         const redirectTo = data.redirect_url;
         if (redirectTo) {
-          globalThis.location.href = redirectTo;
+          // Redirect to success page with redirect_uri parameter
+          const successUrl = `/oauth/success?redirect_uri=${encodeURIComponent(redirectTo)}`;
+          globalThis.location.href = successUrl;
         } else {
           setError('No redirect URL provided');
           setIsProcessingFalse();
@@ -107,6 +124,20 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
     );
   };
 
+  /**
+   * Handle user denial of authorization.
+   *
+   * Flow:
+   * 1. Calls Supabase's denyAuthorization which returns a redirect_url
+   * 2. The redirect_url from Supabase automatically includes error=access_denied parameter
+   *    per OAuth 2.1 specification
+   * 3. Redirects user to client's redirect_uri with error parameter
+   * 4. Client receives error=access_denied and can handle accordingly
+   *
+   * Error scenarios:
+   * - If denyAuthorization fails: Shows error message, user can try again or close tab
+   * - If no redirect_url: Shows message that authorization was denied, user can close tab
+   */
   const handleDeny = async () => {
     setIsProcessingTrue();
     setError(null);
@@ -129,20 +160,23 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
         }
 
         if (!data) {
-          // If no redirect, go back to home
-          router.push('/');
+          // If no redirect, show message and allow user to close tab
+          setError('Authorization denied. You can close this tab.');
+          setIsProcessingFalse();
           return;
         }
 
-        // Log successful denial (useLoggedAsync handles error logging)
-
-        // Redirect to the client's redirect URI with error
+        // Redirect to the client's redirect URI with error parameter
+        // Supabase's denyAuthorization automatically includes error=access_denied in the redirect URL
+        // per OAuth 2.1 specification (RFC 6749 Section 4.1.2.1)
         const redirectTo = data.redirect_url;
         if (redirectTo) {
+          // Redirect immediately - the redirect_url from Supabase already includes error=access_denied
           globalThis.location.href = redirectTo;
         } else {
-          // If no redirect, go back to home
-          router.push('/');
+          // If no redirect, show message and allow user to close tab
+          setError('Authorization denied. You can close this tab.');
+          setIsProcessingFalse();
         }
       },
       {
@@ -176,160 +210,164 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
     authDetails.scopes?.some((scope) => scope.startsWith('mcp:')) ||
     false;
 
-  // MCP-specific access description
-  const mcpAccessDescription = isMcpClient
-    ? 'This AI agent will be able to access the Claude Pro Directory through the Model Context Protocol (MCP). This includes searching content, browsing categories, accessing resources, and submitting new content on your behalf.'
-    : null;
+  // Generate user initials for avatar fallback
+  const userInitials = user.name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || 'U';
 
   return (
-    <div className="mx-auto flex min-h-[400px] max-w-2xl flex-col gap-4 p-6">
-      <div className="flex flex-col gap-2 text-center">
-        <div className="flex-center">
-          <Shield aria-hidden="true" className="text-accent h-12 w-12" />
-        </div>
-        <h1 className="text-3xl font-bold">Authorize Application</h1>
-        <p className="text-muted-foreground text-base">
-          An application is requesting access to your account
-        </p>
-      </div>
-
-      <div className="border-border bg-card card-base flex flex-col gap-4 p-6">
-        {/* Client Information */}
-        <div className="flex flex-col gap-2">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="flex items-center gap-1 text-xl font-semibold">
-              <span>{authDetails.client.name}</span>
-            </h2>
-            <div className="flex items-center gap-2">
-              {isMcpClient ? (
-                <UnifiedBadge className="text-xs" style="default" variant="base">
-                  MCP Client
-                </UnifiedBadge>
-              ) : null}
-              <UnifiedBadge className="text-xs" style="secondary" variant="base">
-                OAuth Client
-              </UnifiedBadge>
-            </div>
-          </div>
-
-          {/* Client Description (if available) */}
-          {authDetails.client.description ? (
-            <p className="text-muted-foreground text-sm">{authDetails.client.description}</p>
-          ) : null}
-
-          {/* MCP Access Description */}
-          {mcpAccessDescription ? (
-            <div className="bg-accent/10 border-accent/20 flex items-start gap-2 rounded-lg border p-3">
-              <Shield aria-hidden="true" className="text-accent mt-0.5 h-4 w-4 flex-shrink-0" />
-              <div className="flex flex-1 flex-col gap-1">
-                <p className="text-sm font-semibold">What this AI agent can access:</p>
-                <p className="text-muted-foreground text-xs">{mcpAccessDescription}</p>
-              </div>
-            </div>
-          ) : null}
-
-          <div className="text-muted-foreground flex flex-col gap-1 text-sm">
-            <div className="flex items-center gap-1">
-              <ExternalLink aria-hidden="true" className="h-3.5 w-3.5" />
-              <span className="font-medium">Redirect URI:</span>
-              <span className="font-mono text-xs break-all">{authDetails.redirect_uri}</span>
-            </div>
-            {authDetails.resource ? (
-              <div className="flex items-center gap-1">
-                <span className="font-medium">Resource:</span>
-                <span className="font-mono text-xs break-all">{authDetails.resource}</span>
-              </div>
-            ) : null}
-            <div className="flex items-center gap-1">
-              <span className="font-medium">Client ID:</span>
-              <span className="font-mono text-xs break-all">{authDetails.client.client_id}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Requested Permissions */}
-        {hasScopes ? (
-          <div className="border-border bg-muted/30 flex flex-col gap-2 rounded-lg border p-4">
-            <h3 className="flex items-center gap-1 text-lg font-semibold">
-              <span>Requested Permissions</span>
-            </h3>
-            <ul className="flex list-none flex-col gap-0.5">
-              {scopes.map((scope) => (
-                <li className="flex items-start gap-1" key={scope}>
-                  <CheckCircle2
-                    aria-hidden="true"
-                    className={cn('text-accent mt-[18px] h-4 w-4 flex-shrink-0')}
-                  />
-                  <span className="flex-1 text-sm">
-                    <span className="font-semibold">{scope}</span>
-                    {scopeDescriptions[scope] ? (
-                      <span className="text-muted-foreground mt-1 block">
-                        {scopeDescriptions[scope]}
-                      </span>
-                    ) : null}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-
-        {/* Error Message */}
-        {error ? (
-          <div className="border-destructive/20 bg-destructive/10 flex items-start gap-2 rounded-lg border p-4">
-            <AlertCircle
-              aria-hidden="true"
-              className={cn('text-destructive mt-[18px] h-5 w-5 flex-shrink-0')}
+    <div className="flex flex-col gap-6">
+      {/* Header with MCP Logo */}
+      <div className="flex flex-col items-center gap-4 text-center">
+        {isMcpClient ? (
+          <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-gray-300 bg-white p-2">
+            <Image
+              src="/partners/mcp.svg"
+              alt="MCP"
+              width={48}
+              height={48}
+              className="h-full w-full object-contain"
+              priority
             />
-            <div className="flex flex-1 flex-col gap-0.5">
-              <p className="text-destructive text-sm font-semibold">Error</p>
-              <p className="text-muted-foreground text-sm">{error}</p>
-            </div>
           </div>
         ) : null}
-
-        {/* Action Buttons */}
-        <div className="mt-6 flex items-center gap-2">
-          <Button
-            className="flex-1 transition-colors"
-            disabled={isProcessing}
-            onClick={() => {
-              void handleDeny();
-            }}
-            size="lg"
-            variant="outline"
-          >
-            <XCircle aria-hidden="true" className="mr-2 h-4 w-4" />
-            Deny
-          </Button>
-          <Button
-            className="hover:bg-accent/20 flex-1 transition-colors"
-            disabled={isProcessing}
-            onClick={() => {
-              void handleApprove();
-            }}
-            size="lg"
-            variant="default"
-          >
-            <CheckCircle2 aria-hidden="true" className="mr-2 h-4 w-4" />
-            {isProcessing ? 'Processing...' : 'Approve'}
-          </Button>
-        </div>
-
-        {/* Security Notice */}
-        <div className="bg-muted/20 mt-4 flex items-start gap-2 rounded-md p-3">
-          <Shield
-            aria-hidden="true"
-            className={cn('text-muted-foreground mt-[18px] h-4 w-4 flex-shrink-0')}
-          />
-          <p className="text-muted-foreground text-xs">
-            You can revoke access to this application at any time from your{' '}
-            <Link className="hover:text-foreground underline" href="/account/connected-accounts">
-              account settings
-            </Link>
-            .
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-semibold text-black">Authorize Application</h1>
+          <p className="text-gray-600 text-sm">
+            {authDetails.client.name} wants to access your account
           </p>
         </div>
+      </div>
+
+      {/* User Account Information */}
+      <div className="border-gray-200 bg-gray-50 flex items-center gap-3 rounded-lg border p-4">
+        <Avatar className="h-10 w-10">
+          {user.avatarUrl ? (
+            <AvatarImage
+              src={optimizeAvatarUrl(user.avatarUrl, 40) ?? user.avatarUrl}
+              alt={user.name}
+            />
+          ) : null}
+          <AvatarFallback className="bg-gray-200 text-gray-700 text-sm font-semibold">
+            {userInitials}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-1 flex-col gap-0.5">
+          <p className="text-sm font-medium text-black">{user.name}</p>
+          <p className="text-xs text-gray-600">{user.email}</p>
+        </div>
+      </div>
+
+      {/* Connected Icons Visual (MCP ↔ Claude Pro Directory) */}
+      {isMcpClient ? (
+        <div className="flex items-center justify-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-gray-300 bg-white p-2">
+            <Image
+              src="/partners/mcp.svg"
+              alt="MCP Client"
+              width={32}
+              height={32}
+              className="h-full w-full object-contain"
+            />
+          </div>
+          <div className="flex h-0.5 w-12 items-center justify-center bg-gray-300">
+            <div className="h-2 w-2 rounded-full bg-gray-400" />
+          </div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-gray-300 bg-white p-2">
+            <Image
+              src="/assets/icons/claudepro-directory-icon.svg"
+              alt="Claude Pro Directory"
+              width={32}
+              height={32}
+              className="h-full w-full object-contain"
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {/* Requested Permissions */}
+      {hasScopes ? (
+        <div className="border-gray-200 flex flex-col gap-3 rounded-lg border p-4">
+          <h2 className="text-sm font-semibold text-black">This application will be able to:</h2>
+          <ul className="flex list-none flex-col gap-3">
+            {scopes.map((scope) => (
+              <li className="flex items-start gap-3" key={scope}>
+                <CheckCircle2
+                  aria-hidden="true"
+                  className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600"
+                />
+                <div className="flex flex-1 flex-col gap-1">
+                  <span className="text-sm font-medium text-black">{scope}</span>
+                  {scopeDescriptions[scope] ? (
+                    <span className="text-xs text-gray-600">{scopeDescriptions[scope]}</span>
+                  ) : null}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {/* Error Message */}
+      {error ? (
+        <div className="border-red-200 bg-red-50 flex items-start gap-3 rounded-lg border p-4">
+          <AlertCircle
+            aria-hidden="true"
+            className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600"
+          />
+          <div className="flex flex-1 flex-col gap-0.5">
+            <p className="text-sm font-semibold text-red-900">Error</p>
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Action Buttons */}
+      <div className="flex items-center gap-3">
+        <Button
+          className="flex-1 bg-white text-black border-gray-300 hover:bg-gray-50"
+          disabled={isProcessing}
+          onClick={() => {
+            void handleDeny();
+          }}
+          size="lg"
+          variant="outline"
+        >
+          <XCircle aria-hidden="true" className="mr-2 h-4 w-4" />
+          Cancel
+        </Button>
+        <Button
+          className="flex-1 bg-black text-white hover:bg-gray-900"
+          disabled={isProcessing}
+          onClick={() => {
+            void handleApprove();
+          }}
+          size="lg"
+          variant="default"
+        >
+          <CheckCircle2 aria-hidden="true" className="mr-2 h-4 w-4" />
+          {isProcessing ? 'Processing...' : 'Allow'}
+        </Button>
+      </div>
+
+      {/* Terms and Privacy Policy Links */}
+      <div className="flex items-center justify-center gap-4 border-t border-gray-200 pt-4">
+        <Link
+          className="text-xs text-gray-600 hover:text-black underline transition-colors"
+          href="/terms"
+        >
+          Terms of Service
+        </Link>
+        <span className="text-gray-400 text-xs">•</span>
+        <Link
+          className="text-xs text-gray-600 hover:text-black underline transition-colors"
+          href="/privacy"
+        >
+          Privacy Policy
+        </Link>
       </div>
     </div>
   );

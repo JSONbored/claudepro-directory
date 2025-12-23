@@ -34,6 +34,9 @@ export { handleHealth } from './routes/health.js';
 export { handleOAuthMetadata } from './routes/oauth-metadata.js';
 export { handleOAuthAuthorize } from './routes/oauth-authorize.js';
 export { handleOAuthToken } from './routes/oauth-token.js';
+export { handleOAuthRevoke } from './routes/oauth-revoke.js';
+export { handleOAuthIntrospect } from './routes/oauth-introspect.js';
+export { handleOAuthRegister } from './routes/oauth-register.js';
 export { handleOpenAPI } from './routes/openapi.js';
 
 // Middleware
@@ -48,6 +51,15 @@ export * from './lib/utils.js';
 export * from './lib/errors.js';
 
 // OAuth shared implementation (for use by runtime-specific adapters)
+export {
+  handleOAuthTokenShared,
+  handleOAuthAuthorizeShared,
+  handleOAuthRevokeShared,
+  handleOAuthIntrospectShared,
+  handleOAuthRegisterShared,
+  type OAuthAdapter,
+  jsonError,
+} from './routes/oauth/shared.js';
 export { handleOAuthTokenShared, handleOAuthAuthorizeShared, jsonError } from './routes/oauth/shared.js';
 export type { OAuthAdapter, OAuthEnvConfig } from './routes/oauth/shared.js';
 

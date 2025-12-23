@@ -244,8 +244,32 @@ export async function handleOAuthAuthorizeShared(
     // This tells Supabase Auth to include the MCP server URL in the token's audience claim
     supabaseAuthUrlObj.searchParams.set('resource', mcpResourceUrl);
 
-    // Preserve optional parameters
+    // Validate and preserve scope parameter
+    // Defense in depth: validate scopes before forwarding to Supabase
+    // Supabase Auth also validates, but we add an extra layer
     if (scope) {
+      const requestedScopes = scope.split(' ').filter((s) => s.length > 0);
+      const supportedScopes = [
+        'openid',
+        'email',
+        'profile',
+        'phone',
+        'mcp:tools',
+        'mcp:resources',
+      ];
+
+      // Check if all requested scopes are supported
+      const invalidScopes = requestedScopes.filter((s) => !supportedScopes.includes(s));
+      if (invalidScopes.length > 0) {
+        log.warn('Invalid scopes requested', { invalidScopes, requestedScopes });
+        return jsonError(
+          'invalid_scope',
+          `Invalid scopes requested: ${invalidScopes.join(', ')}. Supported scopes: ${supportedScopes.join(', ')}`,
+          400,
+          'GET, OPTIONS'
+        );
+      }
+
       supabaseAuthUrlObj.searchParams.set('scope', sanitizeString(scope));
     }
     if (state) {
@@ -263,6 +287,270 @@ export async function handleOAuthAuthorizeShared(
     const normalized = normalizeError(error, 'OAuth authorization proxy failed');
     log.error('OAuth authorization proxy error', normalized);
     return jsonError('server_error', 'Internal server error', 500, 'GET, OPTIONS');
+  }
+}
+
+/**
+ * Shared OAuth token revocation handler implementation (RFC 7009)
+ *
+ * Proxies token revocation requests to Supabase Auth OAuth 2.1 Server.
+ * Always returns 200 per RFC 7009 (even if token doesn't exist).
+ *
+ * @param request - Request object
+ * @param env - Runtime environment
+ * @param adapter - OAuth adapter for runtime-specific operations
+ * @returns Revocation response from Supabase Auth (always 200 per RFC 7009)
+ */
+export async function handleOAuthRevokeShared(
+  request: Request,
+  env: RuntimeEnv,
+  adapter: OAuthAdapter
+): Promise<Response> {
+  const log = adapter.createLogger(env);
+
+  try {
+    const config = await Promise.resolve(adapter.parseEnv(env));
+    const supabaseAuthUrl = `${config.supabase.url}/auth/v1`;
+
+    // Only allow POST requests
+    if (request.method !== 'POST') {
+      return jsonError('invalid_request', 'Only POST method is supported', 400);
+    }
+
+    // Parse request body (form-encoded)
+    const formData = await request.formData();
+    const token = formData.get('token');
+    const tokenTypeHint = formData.get('token_type_hint'); // Optional: 'access_token' or 'refresh_token'
+    const clientId = formData.get('client_id'); // Optional for public clients
+
+    // Validate required parameters
+    if (!token) {
+      return jsonError('invalid_request', 'Missing required parameter: token', 400);
+    }
+
+    // Build Supabase Auth revocation endpoint URL
+    // Note: Supabase may use /oauth/revoke or /auth/v1/oauth/revoke
+    const revokeUrl = `${supabaseAuthUrl}/oauth/revoke`;
+
+    // Forward request to Supabase Auth OAuth 2.1 Server
+    const revokeRequest = new Request(revokeUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        token: sanitizeString(token as string),
+        ...(tokenTypeHint && { token_type_hint: sanitizeString(tokenTypeHint as string) }),
+        ...(clientId && { client_id: sanitizeString(clientId as string) }),
+      }).toString(),
+    });
+
+    log.info('Forwarding token revocation to Supabase Auth', { revokeUrl });
+
+    const revokeResponse = await fetch(revokeRequest);
+
+    // RFC 7009: Always return 200, even if token doesn't exist
+    // This prevents token enumeration attacks
+    return new Response(null, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
+  } catch (error) {
+    const normalized = normalizeError(error, 'OAuth token revocation failed');
+    log.error('OAuth token revocation error', normalized);
+    // RFC 7009: Always return 200, even on error
+    return new Response(null, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
+  }
+}
+
+/**
+ * Shared OAuth token introspection handler implementation (RFC 7662)
+ *
+ * Proxies token introspection requests to Supabase Auth OAuth 2.1 Server.
+ * Allows resource servers to validate tokens and retrieve token metadata.
+ *
+ * @param request - Request object
+ * @param env - Runtime environment
+ * @param adapter - OAuth adapter for runtime-specific operations
+ * @returns Introspection response from Supabase Auth or error response
+ */
+export async function handleOAuthIntrospectShared(
+  request: Request,
+  env: RuntimeEnv,
+  adapter: OAuthAdapter
+): Promise<Response> {
+  const log = adapter.createLogger(env);
+
+  try {
+    const config = await Promise.resolve(adapter.parseEnv(env));
+    const supabaseAuthUrl = `${config.supabase.url}/auth/v1`;
+
+    // Only allow POST requests
+    if (request.method !== 'POST') {
+      return jsonError('invalid_request', 'Only POST method is supported', 400);
+    }
+
+    // Parse request body (form-encoded)
+    const formData = await request.formData();
+    const token = formData.get('token');
+    const tokenTypeHint = formData.get('token_type_hint'); // Optional: 'access_token' or 'refresh_token'
+
+    // Validate required parameters
+    if (!token) {
+      return jsonError('invalid_request', 'Missing required parameter: token', 400);
+    }
+
+    // Build Supabase Auth introspection endpoint URL
+    // Note: Supabase may use /oauth/introspect or /auth/v1/oauth/introspect
+    const introspectUrl = `${supabaseAuthUrl}/oauth/introspect`;
+
+    // Forward request to Supabase Auth OAuth 2.1 Server
+    const introspectRequest = new Request(introspectUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        token: sanitizeString(token as string),
+        ...(tokenTypeHint && { token_type_hint: sanitizeString(tokenTypeHint as string) }),
+      }).toString(),
+    });
+
+    log.info('Forwarding token introspection to Supabase Auth', { introspectUrl });
+
+    const introspectResponse = await fetch(introspectRequest);
+
+    // Get response body
+    const responseBody = await introspectResponse.text();
+
+    // Forward response from Supabase Auth
+    return new Response(responseBody, {
+      status: introspectResponse.status,
+      statusText: introspectResponse.statusText,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        // Forward any additional headers from Supabase
+        ...Object.fromEntries(
+          Array.from(introspectResponse.headers.entries()).filter(([key]) =>
+            !['content-encoding', 'transfer-encoding'].includes(key.toLowerCase())
+          )
+        ),
+      },
+    });
+  } catch (error) {
+    const normalized = normalizeError(error, 'OAuth token introspection failed');
+    log.error('OAuth token introspection error', normalized);
+    return jsonError('server_error', 'Internal server error', 500);
+  }
+}
+
+/**
+ * Shared OAuth dynamic client registration handler implementation (RFC 7591)
+ *
+ * Proxies client registration requests to Supabase Auth OAuth 2.1 Server.
+ * Allows clients to register themselves automatically.
+ *
+ * @param request - Request object
+ * @param env - Runtime environment
+ * @param adapter - OAuth adapter for runtime-specific operations
+ * @returns Registration response from Supabase Auth or error response
+ */
+export async function handleOAuthRegisterShared(
+  request: Request,
+  env: RuntimeEnv,
+  adapter: OAuthAdapter
+): Promise<Response> {
+  const log = adapter.createLogger(env);
+
+  try {
+    const config = await Promise.resolve(adapter.parseEnv(env));
+    const supabaseAuthUrl = `${config.supabase.url}/auth/v1`;
+
+    // Only allow POST requests
+    if (request.method !== 'POST') {
+      return jsonError('invalid_request', 'Only POST method is supported', 400);
+    }
+
+    // Parse request body (JSON for DCR per RFC 7591)
+    const registrationData = await request.json();
+
+    // Validate required fields per RFC 7591
+    if (!registrationData.redirect_uris || !Array.isArray(registrationData.redirect_uris) || registrationData.redirect_uris.length === 0) {
+      return jsonError('invalid_client_metadata', 'Missing or invalid redirect_uris', 400);
+    }
+
+    // Validate each redirect_uri is a valid URL format
+    for (const redirectUri of registrationData.redirect_uris) {
+      if (typeof redirectUri !== 'string') {
+        return jsonError('invalid_client_metadata', 'redirect_uris must be an array of strings', 400);
+      }
+      try {
+        const redirectUrl = new URL(redirectUri);
+        if (!['http:', 'https:'].includes(redirectUrl.protocol)) {
+          return jsonError('invalid_client_metadata', 'Invalid redirect_uri protocol (must be http or https)', 400);
+        }
+      } catch {
+        return jsonError('invalid_client_metadata', `Invalid redirect_uri format: ${redirectUri}`, 400);
+      }
+    }
+
+    // Build Supabase Auth registration endpoint URL
+    // Note: Supabase may use /oauth/register or /auth/v1/oauth/register
+    const registerUrl = `${supabaseAuthUrl}/oauth/register`;
+
+    // Forward request to Supabase Auth OAuth 2.1 Server
+    const registerRequest = new Request(registerUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(registrationData),
+    });
+
+    log.info('Forwarding client registration to Supabase Auth', { registerUrl });
+
+    const registerResponse = await fetch(registerRequest);
+
+    // Get response body
+    const responseBody = await registerResponse.text();
+
+    // Forward response from Supabase Auth
+    return new Response(responseBody, {
+      status: registerResponse.status,
+      statusText: registerResponse.statusText,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        // Forward any additional headers from Supabase
+        ...Object.fromEntries(
+          Array.from(registerResponse.headers.entries()).filter(([key]) =>
+            !['content-encoding', 'transfer-encoding'].includes(key.toLowerCase())
+          )
+        ),
+      },
+    });
+  } catch (error) {
+    const normalized = normalizeError(error, 'OAuth client registration failed');
+    log.error('OAuth client registration error', normalized);
+    return jsonError('server_error', 'Internal server error', 500);
   }
 }
 

@@ -24,6 +24,9 @@ import { convertMcpServerOptions } from '@heyclaude/mcp-server/adapters/cloudfla
 import { handleHealth, handleOAuthMetadata, handleOpenAPI } from '@heyclaude/mcp-server';
 import { handleOAuthToken } from './routes/oauth-token.js';
 import { handleOAuthAuthorize } from './routes/oauth-authorize.js';
+import { handleOAuthRevoke } from './routes/oauth-revoke.js';
+import { handleOAuthIntrospect } from './routes/oauth-introspect.js';
+import { handleOAuthRegister } from './routes/oauth-register.js';
 
 // Import Cloudflare-specific types
 import type { ExtendedEnv } from '@heyclaude/cloudflare-runtime/config/env';
@@ -88,6 +91,21 @@ const handler = {
       // OAuth token endpoint (proxy to Supabase)
       if (url.pathname === '/oauth/token') {
         return await handleOAuthToken(request, env);
+      }
+
+      // OAuth token revocation endpoint (RFC 7009) - proxy to Supabase
+      if (url.pathname === '/oauth/revoke') {
+        return await handleOAuthRevoke(request, env);
+      }
+
+      // OAuth token introspection endpoint (RFC 7662) - proxy to Supabase
+      if (url.pathname === '/oauth/introspect') {
+        return await handleOAuthIntrospect(request, env);
+      }
+
+      // OAuth dynamic client registration endpoint (RFC 7591) - proxy to Supabase
+      if (url.pathname === '/oauth/register') {
+        return await handleOAuthRegister(request, env);
       }
 
       // MCP protocol endpoint (requires authentication)

@@ -1386,6 +1386,10 @@ export class AccountService extends BasePrismaService {
       'isBookmarked',
       'isBookmarked',
       async () => {
+        // #region agent log
+        const allBookmarks = await prisma.bookmarks.findMany({ where: { user_id: args.p_user_id } });
+        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/data-layer/src/services/account.ts:1389',message:'isBookmarked - before Prisma query',data:{args,allBookmarksCount:allBookmarks.length,allBookmarks:allBookmarks.map(b=>({id:b.id,user_id:b.user_id,content_type:b.content_type,content_slug:b.content_slug}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
         const bookmark = await prisma.bookmarks.findFirst({
           where: {
             user_id: args.p_user_id,
@@ -1394,6 +1398,9 @@ export class AccountService extends BasePrismaService {
           },
           select: { id: true }, // Only need to check existence
         });
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/data-layer/src/services/account.ts:1397',message:'isBookmarked - after Prisma query',data:{bookmarkFound:bookmark!==null,bookmarkId:bookmark?.id,result:bookmark!==null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
         return bookmark !== null;
       },
       args

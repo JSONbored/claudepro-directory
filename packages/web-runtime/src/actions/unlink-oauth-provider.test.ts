@@ -1,120 +1,134 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+// Import SafeActionResult type from safemocker for proper typing in tests
+import type { SafeActionResult } from '@jsonbored/safemocker';
+// Import oauth_provider enum from Prisma client
+import { oauth_provider } from '@prisma/client';
 
-// Mock safe-action middleware - standardized pattern
-// Pattern: authedAction.inputSchema().outputSchema().metadata().action()
-vi.mock('./safe-action.ts', async () => {
-  // Import mocked logActionFailure
-  const { logActionFailure } = await import('../errors.ts');
-  
-  // Define all factory functions inside the mock factory to avoid hoisting issues
-  const createActionHandler = (inputSchema: any, outputSchema?: any) => {
-    return vi.fn((handler: any) => {
-      return async (input: unknown) => {
-        try {
-          const parsed = inputSchema ? inputSchema.parse(input) : input;
-          const result = await handler({
-            parsedInput: parsed,
-            ctx: { userId: 'test-user-id', userEmail: 'test@example.com', authToken: 'test-token' },
-          });
-          if (outputSchema) {
-            return outputSchema.parse(result);
-          }
-          return result;
-        } catch (error) {
-          // Simulate middleware error handling - logActionFailure is called by middleware
-          logActionFailure('unlinkOAuthProvider', error, { userId: 'test-user-id' });
-          throw error;
-        }
-      };
-    });
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from data-layer will automatically use PrismockerClient
+
+// Import real cache utilities for proper cache testing
+// Note: Deep relative imports are acceptable for test utilities to avoid circular dependencies
+import { clearRequestCache } from '../../../data-layer/src/utils/request-cache.ts';
+
+// Mock RPC error logging utility (if needed)
+// Note: Deep relative import needed for jest.mock() to work correctly
+jest.mock('../../../data-layer/src/utils/rpc-error-logging.ts', () => ({
+  logRpcError: jest.fn(),
+}));
+
+// Mock server-only FIRST
+jest.mock('server-only', () => ({}));
+
+// DO NOT mock next/headers - safemocker handles this automatically
+// DO NOT mock Supabase client or auth - safemocker handles auth automatically
+// safemocker's __mocks__/next-safe-action.ts provides pre-configured authedAction
+// with auth context already injected (test-user-id, test@example.com, test-token)
+
+// Mock logger (used by safe-action middleware)
+jest.mock('../logger.ts', () => ({
+  logger: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+    child: jest.fn(() => ({
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      debug: jest.fn(),
+    })),
+  },
+  toLogContextValue: (val: unknown) => val,
+}));
+
+// Mock errors (used by safe-action middleware) - keep real behavior for error normalization
+jest.mock('../errors.ts', () => ({
+  normalizeError: (error: unknown, fallback?: string) => {
+    if (error instanceof Error) return error;
+    return new Error(fallback || String(error));
+  },
+  logActionFailure: jest.fn((name, error, context) => {
+    if (error instanceof Error) return error;
+    return new Error(String(error));
+  }),
+}));
+
+// Mock environment (used by safe-action error handling and Prisma client)
+jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
+  const envMock: Record<string, string | undefined> = {
+    NODE_ENV: 'test',
+    POSTGRES_PRISMA_URL: undefined, // Allow undefined in tests (Prismocker doesn't need it)
+    DIRECT_URL: undefined,
+    SUPABASE_SERVICE_ROLE_KEY: undefined,
+    VERCEL: undefined,
+    VITEST: undefined,
   };
-
-  const createMetadataResult = (inputSchema: any, outputSchema?: any) => ({
-    action: createActionHandler(inputSchema, outputSchema),
-  });
-
-  const createOutputSchemaResult = (inputSchema: any, outputSchema?: any) => ({
-    metadata: vi.fn((metadata: any) => createMetadataResult(inputSchema, outputSchema)),
-    action: createActionHandler(inputSchema, outputSchema),
-  });
-
-  const createInputSchemaResult = (inputSchema: any) => ({
-    metadata: vi.fn((metadata: any) => createMetadataResult(inputSchema)),
-    outputSchema: vi.fn((outputSchema: any) => createOutputSchemaResult(inputSchema, outputSchema)),
-    action: createActionHandler(inputSchema),
-  });
-
+  
   return {
-    authedAction: {
-      inputSchema: vi.fn((schema: any) => createInputSchemaResult(schema)),
+    env: new Proxy(envMock, {
+      get: (target, prop: string) => {
+        // Handle isProduction dynamically
+        if (prop === 'isProduction') {
+          return false; // Default to false for tests
+        }
+        return target[prop];
+      },
+    }),
+    get isProduction() {
+      return false; // Default to false for tests
     },
   };
 });
 
-// Mock runRpc
-vi.mock('./run-rpc-instance.ts', () => ({
-  runRpc: vi.fn(),
-}));
+// DO NOT mock safe-action.ts - use REAL middleware to test SafeActionResult structure
+// This ensures we test the complete middleware chain: auth → rate limiting → logging → error handling
+
+// DO NOT mock runRpc - use real runRpc which uses Prismocker
+// This allows us to test the real RPC flow end-to-end
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
-  revalidatePath: vi.fn(),
-  revalidateTag: vi.fn(),
-}));
-
-// Mock errors
-vi.mock('../errors.ts', () => ({
-  logActionFailure: vi.fn((actionName, error, context) => {
-    const err = error instanceof Error ? error : new Error(String(error));
-    err.name = actionName;
-    return err;
-  }),
-  normalizeError: vi.fn((error: unknown, message?: string) => {
-    if (error instanceof Error) return error;
-    return new Error(message || String(error));
-  }),
+const mockRevalidatePath = jest.fn();
+const mockRevalidateTag = jest.fn();
+jest.mock('next/cache', () => ({
+  revalidatePath: (...args: any[]) => mockRevalidatePath(...args),
+  revalidateTag: (...args: any[]) => mockRevalidateTag(...args),
 }));
 
 describe('unlinkOAuthProvider', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+  let prismocker: PrismaClient;
+
+  beforeEach(async () => {
+    // 1. Clear request cache before each test (REQUIRED for test isolation)
+    clearRequestCache();
+
+    // 2. Get Prismocker instance (automatically PrismockerClient via global mock)
+    prismocker = prisma;
+
+    // 3. Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
+    // 4. Clear all mocks
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+
+    // 5. Set up $queryRawUnsafe for RPC testing (if needed)
+    // Use Prismocker's Proxy set handler to override $queryRawUnsafe
+    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
+
+    // 6. Reset mock functions
+    mockRevalidatePath.mockClear();
+    mockRevalidateTag.mockClear();
   });
 
   describe('input validation', () => {
     it('should validate oauth_provider enum', async () => {
       const { unlinkOAuthProvider } = await import('./unlink-oauth-provider.ts');
-      const { oauth_providerSchema } = await import('../prisma-zod-schemas.ts');
-      const { oauth_provider } = await import('@prisma/client');
-      const validProviders = Object.values(oauth_provider);
 
-      expect(() => {
-        oauth_providerSchema.parse(validProviders[0]);
-      }).not.toThrow();
-    });
-
-    it('should reject invalid provider', async () => {
-      const { unlinkOAuthProvider } = await import('./unlink-oauth-provider.ts');
-      const { oauth_providerSchema } = await import('../prisma-zod-schemas.ts');
-
-      expect(() => {
-        oauth_providerSchema.parse('invalid-provider');
-      }).toThrow();
-    });
-
-    it('should require provider', async () => {
-      const { unlinkOAuthProvider } = await import('./unlink-oauth-provider.ts');
-
-      // Missing provider should fail
-      await expect(unlinkOAuthProvider({} as any)).rejects.toThrow();
-    });
-  });
-
-  describe('RPC call', () => {
-    it('should call unlink_oauth_provider RPC with correct parameters', async () => {
-      const { unlinkOAuthProvider } = await import('./unlink-oauth-provider.ts');
-      const { runRpc } = await import('./run-rpc-instance.ts');
-
-      // Mock result must match unlinkOauthProviderResultSchema structure
       const mockResult = {
         success: true,
         message: 'OAuth provider unlinked successfully',
@@ -122,95 +136,168 @@ describe('unlinkOAuthProvider', () => {
         remaining_providers: 1,
         error: null,
       };
-      vi.mocked(runRpc).mockResolvedValue(mockResult as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
+
+      // Use valid enum value from oauth_provider
+      const validProvider = oauth_provider.github;
+
+      const result = await unlinkOAuthProvider({
+        provider: validProvider,
+      });
+
+      // Verify SafeActionResult structure
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<typeof mockResult>;
+      expect(safeResult.data).toBeDefined();
+      expect(safeResult.serverError).toBeUndefined();
+      expect(safeResult.fieldErrors).toBeUndefined();
+    });
+
+    it('should return validation errors for invalid provider', async () => {
+      const { unlinkOAuthProvider } = await import('./unlink-oauth-provider.ts');
+
+      // Invalid provider should fail validation
+      const result = await unlinkOAuthProvider({
+        provider: 'invalid-provider' as any,
+      });
+
+      // Verify SafeActionResult structure - should have fieldErrors
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<unknown>;
+      expect(safeResult.fieldErrors).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
+      expect(safeResult.serverError).toBeUndefined();
+    });
+
+    it('should return validation errors for missing provider', async () => {
+      const { unlinkOAuthProvider } = await import('./unlink-oauth-provider.ts');
+
+      // Missing provider should fail validation
+      const result = await unlinkOAuthProvider({
+        // Missing required field
+      } as any);
+
+      // Verify SafeActionResult structure - should have fieldErrors
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<unknown>;
+      expect(safeResult.fieldErrors).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
+      expect(safeResult.serverError).toBeUndefined();
+    });
+  });
+
+  describe('RPC call', () => {
+    it('should call unlink_oauth_provider RPC with correct parameters', async () => {
+      const { unlinkOAuthProvider } = await import('./unlink-oauth-provider.ts');
+
+      const mockResult = {
+        success: true,
+        message: 'OAuth provider unlinked successfully',
+        provider: 'github' as const,
+        remaining_providers: 1,
+        error: null,
+      };
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
 
       const result = await unlinkOAuthProvider({
         provider: 'github',
       });
 
-      expect(runRpc).toHaveBeenCalledWith(
-        'unlink_oauth_provider',
-        {
-          p_provider: 'github',
-          p_user_id: 'test-user-id',
-        },
-        {
-          action: 'unlinkOAuthProvider.rpc',
-          userId: 'test-user-id',
-        }
+      // Verify SafeActionResult structure
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<typeof mockResult>;
+      expect(safeResult.data).toBeDefined();
+      expect(safeResult.serverError).toBeUndefined();
+      expect(safeResult.fieldErrors).toBeUndefined();
+
+      // Verify RPC was called with correct SQL and parameters
+      // BasePrismaService.callRpc formats SQL with positional parameters (p_param => $1, p_param2 => $2, ...)
+      // and passes values as separate positional arguments
+      // Note: This RPC includes p_user_id in the args, so it will be passed as a parameter
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('SELECT * FROM unlink_oauth_provider'),
+        'github', // $1: p_provider
+        'test-user-id', // $2: p_user_id (from ctx.userId)
       );
 
-      expect(result).toEqual(mockResult);
+      // Verify result matches mock
+      expect(safeResult.data).toEqual(mockResult);
     });
 
-    it('should handle RPC errors', async () => {
+    it('should return server error for RPC failures', async () => {
       const { unlinkOAuthProvider } = await import('./unlink-oauth-provider.ts');
-      const { runRpc } = await import('./run-rpc-instance.ts');
-      const { logActionFailure } = await import('../errors.ts');
 
       const mockError = new Error('Database error');
-      vi.mocked(runRpc).mockRejectedValue(mockError);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(mockError);
 
-      await expect(
-        unlinkOAuthProvider({
-          provider: 'github',
-        })
-      ).rejects.toThrow();
+      const result = await unlinkOAuthProvider({
+        provider: 'github',
+      });
 
-      expect(logActionFailure).toHaveBeenCalledWith(
-        'unlinkOAuthProvider',
-        mockError,
-        expect.objectContaining({
-          userId: 'test-user-id',
-        })
-      );
+      // Verify SafeActionResult structure - should have serverError
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<unknown>;
+      expect(safeResult.serverError).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
+      expect(safeResult.fieldErrors).toBeUndefined();
     });
   });
 
   describe('cache invalidation', () => {
     it('should revalidate paths and tags', async () => {
       const { unlinkOAuthProvider } = await import('./unlink-oauth-provider.ts');
-      const { runRpc } = await import('./run-rpc-instance.ts');
-      const { revalidatePath, revalidateTag } = await import('next/cache');
 
-      vi.mocked(runRpc).mockResolvedValue({
+      const mockResult = {
         success: true,
-        message: null,
+        message: 'OAuth provider unlinked successfully',
         provider: 'github' as const,
         remaining_providers: 1,
         error: null,
-      } as any);
+      };
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
 
-      await unlinkOAuthProvider({
+      const result = await unlinkOAuthProvider({
         provider: 'github',
       });
 
-      expect(revalidatePath).toHaveBeenCalledWith('/account/settings');
-      expect(revalidateTag).toHaveBeenCalledWith('users', 'default');
+      // Verify SafeActionResult structure
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<typeof mockResult>;
+      expect(safeResult.data).toBeDefined();
+      expect(safeResult.serverError).toBeUndefined();
+
+      // Verify cache invalidation
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/account/settings');
+      expect(mockRevalidateTag).toHaveBeenCalledWith('users', 'default');
     });
   });
 
   describe('metadata', () => {
     it('should have correct metadata', async () => {
-      // Metadata is set during action creation, not directly callable
-      // We verify the action works correctly instead
       const { unlinkOAuthProvider } = await import('./unlink-oauth-provider.ts');
-      const { runRpc } = await import('./run-rpc-instance.ts');
 
-      vi.mocked(runRpc).mockResolvedValue({
+      const mockResult = {
         success: true,
-        message: null,
+        message: 'OAuth provider unlinked successfully',
         provider: 'github' as const,
         remaining_providers: 1,
         error: null,
-      } as any);
+      };
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
 
-      await unlinkOAuthProvider({
+      const result = await unlinkOAuthProvider({
         provider: 'github',
       });
 
-      // If action executes successfully, metadata was set correctly
-      expect(runRpc).toHaveBeenCalled();
+      // Verify SafeActionResult structure
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<typeof mockResult>;
+      expect(safeResult.data).toBeDefined();
+      expect(safeResult.serverError).toBeUndefined();
+      expect(safeResult.fieldErrors).toBeUndefined();
+
+      // Metadata is set during action definition, not at runtime
+      // We verify the action works correctly, which implies metadata is set
     });
   });
 });

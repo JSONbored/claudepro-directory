@@ -1,125 +1,223 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+// Import SafeActionResult type from safemocker for proper typing in tests
+import type { SafeActionResult } from '@jsonbored/safemocker';
 
-// Mock safe-action middleware - standardized pattern
-// Pattern: authedAction.inputSchema().metadata().action()
-vi.mock('./safe-action.ts', async () => {
-  // Import mocked logActionFailure
-  const { logActionFailure } = await import('../errors.ts');
-  
-  // Define all factory functions inside the mock factory to avoid hoisting issues
-  const createActionHandler = (inputSchema: any) => {
-    return vi.fn((handler: any) => {
-      return async (input: unknown) => {
-        try {
-          const parsed = inputSchema ? inputSchema.parse(input) : input;
-          const result = await handler({
-            parsedInput: parsed,
-            ctx: { userId: 'test-user-id', userEmail: 'test@example.com', authToken: 'test-token' },
-          });
-          return result;
-        } catch (error) {
-          // Simulate middleware error handling - logActionFailure is called by middleware
-          logActionFailure('reviewsCrud', error, { userId: 'test-user-id' });
-          throw error;
-        }
-      };
-    });
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from data-layer will automatically use PrismockerClient
+
+// Import real cache utilities for proper cache testing
+// Note: Deep relative imports are acceptable for test utilities to avoid circular dependencies
+import { clearRequestCache } from '../../../data-layer/src/utils/request-cache.ts';
+
+// Mock RPC error logging utility (if needed)
+// Note: Deep relative import needed for jest.mock() to work correctly
+jest.mock('../../../data-layer/src/utils/rpc-error-logging.ts', () => ({
+  logRpcError: jest.fn(),
+}));
+
+// Mock server-only FIRST
+jest.mock('server-only', () => ({}));
+
+// DO NOT mock next/headers - safemocker handles this automatically
+// DO NOT mock Supabase client or auth - safemocker handles auth automatically
+// safemocker's __mocks__/next-safe-action.ts provides pre-configured authedAction
+// with auth context already injected (test-user-id, test@example.com, test-token)
+
+// Mock logger (used by safe-action middleware)
+jest.mock('../logger.ts', () => ({
+  logger: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  },
+  toLogContextValue: (val: unknown) => val,
+}));
+
+// Mock errors (used by safe-action middleware) - keep real behavior for error normalization
+jest.mock('../errors.ts', () => ({
+  normalizeError: (error: unknown, fallback?: string) => {
+    if (error instanceof Error) return error;
+    return new Error(fallback || String(error));
+  },
+  logActionFailure: jest.fn((name, error, context) => {
+    if (error instanceof Error) return error;
+    return new Error(String(error));
+  }),
+}));
+
+// Mock environment (used by safe-action error handling and Prisma client)
+jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
+  const envMock: Record<string, string | undefined> = {
+    NODE_ENV: 'test',
+    POSTGRES_PRISMA_URL: undefined, // Allow undefined in tests (Prismocker doesn't need it)
+    DIRECT_URL: undefined,
+    SUPABASE_SERVICE_ROLE_KEY: undefined,
+    VERCEL: undefined,
+    VITEST: undefined,
   };
-
-  const createMetadataResult = (inputSchema: any) => ({
-    action: createActionHandler(inputSchema),
-  });
-
-  const createInputSchemaResult = (inputSchema: any) => ({
-    metadata: vi.fn((metadata: any) => createMetadataResult(inputSchema)),
-    action: createActionHandler(inputSchema),
-  });
-
+  
   return {
-    authedAction: {
-      inputSchema: vi.fn((schema: any) => createInputSchemaResult(schema)),
+    env: new Proxy(envMock, {
+      get: (target, prop: string) => {
+        // Handle isProduction dynamically
+        if (prop === 'isProduction') {
+          return false; // Default to false for tests
+        }
+        return target[prop];
+      },
+    }),
+    get isProduction() {
+      return false; // Default to false for tests
     },
   };
 });
 
-// Mock runRpc
-vi.mock('./run-rpc-instance.ts', () => ({
-  runRpc: vi.fn(),
-}));
+// DO NOT mock safe-action.ts - use REAL middleware to test SafeActionResult structure
+// This ensures we test the complete middleware chain: auth → rate limiting → logging → error handling
+
+// DO NOT mock runRpc - use real runRpc which uses Prismocker
+// This allows us to test the real RPC flow end-to-end
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
-  revalidatePath: vi.fn(),
-  revalidateTag: vi.fn(),
-}));
-
-// Mock errors
-vi.mock('../errors.ts', () => ({
-  logActionFailure: vi.fn((actionName, error, context) => {
-    const err = error instanceof Error ? error : new Error(String(error));
-    err.name = actionName;
-    return err;
-  }),
-  normalizeError: vi.fn((error: unknown, message?: string) => {
-    if (error instanceof Error) return error;
-    return new Error(message || String(error));
-  }),
+const mockRevalidatePath = jest.fn();
+const mockRevalidateTag = jest.fn();
+jest.mock('next/cache', () => ({
+  revalidatePath: (...args: any[]) => mockRevalidatePath(...args),
+  revalidateTag: (...args: any[]) => mockRevalidateTag(...args),
 }));
 
 describe('reviews-crud', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+  let prismocker: PrismaClient;
+
+  beforeEach(async () => {
+    // 1. Clear request cache before each test (REQUIRED for test isolation)
+    clearRequestCache();
+
+    // 2. Get Prismocker instance (automatically PrismockerClient via global mock)
+    prismocker = prisma;
+
+    // 3. Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
+    // 4. Clear all mocks
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+
+    // 5. Set up $queryRawUnsafe for RPC testing (if needed)
+    // Use Prismocker's Proxy set handler to override $queryRawUnsafe
+    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
   });
 
   describe('createReview', () => {
-    describe('RPC call', () => {
-      it('should call manage_review RPC with create action', async () => {
+    describe('input validation', () => {
+      it('should return fieldErrors for invalid input', async () => {
         const { createReview } = await import('./reviews-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
 
-        // Mock result must match ManageReviewReturns structure
-        vi.mocked(runRpc).mockResolvedValue({
-          success: true,
-          review: {
-            id: '123e4567-e89b-12d3-a456-426614174000',
-            user_id: '223e4567-e89b-12d3-a456-426614174001',
-            content_type: 'agents' as const,
+        // Invalid: rating must be a number if provided
+        const result = await createReview({
+          rating: 'invalid' as any,
+        });
+
+        // Verify SafeActionResult structure
+        expect(result.fieldErrors).toBeDefined();
+        expect(result.data).toBeUndefined();
+        expect(result.serverError).toBeUndefined();
+      });
+
+      it('should accept valid input', async () => {
+        const { createReview } = await import('./reviews-crud.ts');
+
+        // Set up RPC mock
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+          {
+            success: true,
+            review: {
+              id: '123e4567-e89b-12d3-a456-426614174000',
+              user_id: 'test-user-id',
+              content_type: 'agents',
+              content_slug: 'test-agent',
+              rating: 5,
+              review_text: 'Great agent!',
+              helpful_count: 0,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+            content_type: 'agents',
             content_slug: 'test-agent',
-            rating: 5,
-            review_text: 'Great agent!',
-            helpful_count: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
           },
-          content_type: 'agents' as const,
-          content_slug: 'test-agent',
-        } as any);
+        ]);
 
-        await createReview({
+        const result = await createReview({
           content_type: 'agents',
           content_slug: 'test-agent',
           rating: 5,
           review_text: 'Great agent!',
         });
 
-        expect(runRpc).toHaveBeenCalledWith(
-          'manage_review',
-          expect.objectContaining({
-            p_action: 'create',
-            p_user_id: 'test-user-id',
-            p_create_data: expect.objectContaining({
+        // Verify SafeActionResult structure
+        expect(result.data).toBeDefined();
+        expect(result.serverError).toBeUndefined();
+        expect(result.fieldErrors).toBeUndefined();
+      });
+    });
+
+    describe('RPC call', () => {
+      it('should call manage_review RPC with create action', async () => {
+        const { createReview } = await import('./reviews-crud.ts');
+
+        // Set up RPC mock
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+          {
+            success: true,
+            review: {
+              id: '123e4567-e89b-12d3-a456-426614174000',
+              user_id: 'test-user-id',
               content_type: 'agents',
               content_slug: 'test-agent',
               rating: 5,
               review_text: 'Great agent!',
-            }),
-            p_update_data: null,
-            p_delete_id: null,
-          }),
+              helpful_count: 0,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+            content_type: 'agents',
+            content_slug: 'test-agent',
+          },
+        ]);
+
+        const result = await createReview({
+          content_type: 'agents',
+          content_slug: 'test-agent',
+          rating: 5,
+          review_text: 'Great agent!',
+        });
+
+        // Verify SafeActionResult structure
+        expect(result.data).toBeDefined();
+        expect(result.serverError).toBeUndefined();
+        expect(result.fieldErrors).toBeUndefined();
+
+        // Verify RPC was called with correct SQL and parameters
+        // BasePrismaService.callRpc formats as: SELECT * FROM function_name(p_param => $1, ...)
+        // Args are passed as positional parameters: $queryRawUnsafe(query, ...argValues)
+        // Order: p_action, p_user_id, p_create_data, p_update_data, p_delete_id
+        expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+          expect.stringContaining('manage_review'),
+          'create', // p_action
+          'test-user-id', // p_user_id (from ctx.userId in authedAction middleware)
           expect.objectContaining({
-            action: 'createReview.rpc',
-            userId: 'test-user-id',
-          })
+            content_type: 'agents',
+            content_slug: 'test-agent',
+            rating: 5,
+            review_text: 'Great agent!',
+          }), // p_create_data
+          null, // p_update_data
+          null // p_delete_id
         );
       });
     });
@@ -127,90 +225,173 @@ describe('reviews-crud', () => {
     describe('cache invalidation', () => {
       it('should revalidate paths and tags based on content', async () => {
         const { createReview } = await import('./reviews-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
-        const { revalidatePath, revalidateTag } = await import('next/cache');
 
-        // Mock result must match ManageReviewReturns structure
-        vi.mocked(runRpc).mockResolvedValue({
-          success: true,
-          review: {
-            id: '123e4567-e89b-12d3-a456-426614174000',
-            user_id: '223e4567-e89b-12d3-a456-426614174001',
-            content_type: 'agents' as const,
+        // Set up RPC mock
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+          {
+            success: true,
+            review: {
+              id: '123e4567-e89b-12d3-a456-426614174000',
+              user_id: 'test-user-id',
+              content_type: 'agents',
+              content_slug: 'test-agent',
+              rating: 5,
+              review_text: 'Great agent!',
+              helpful_count: 0,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+            content_type: 'agents',
             content_slug: 'test-agent',
-            rating: 5,
-            review_text: 'Great agent!',
-            helpful_count: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
           },
-          content_type: 'agents' as const,
-          content_slug: 'test-agent',
-        } as any);
+        ]);
 
-        await createReview({
+        const result = await createReview({
           content_type: 'agents',
           content_slug: 'test-agent',
           rating: 5,
         });
 
-        expect(revalidatePath).toHaveBeenCalledWith('/agents/test-agent');
-        expect(revalidatePath).toHaveBeenCalledWith('/agents');
-        expect(revalidateTag).toHaveBeenCalledWith('reviews:agents:test-agent', 'default');
-        expect(revalidateTag).toHaveBeenCalledWith('content', 'default');
-        expect(revalidateTag).toHaveBeenCalledWith('homepage', 'default');
-        expect(revalidateTag).toHaveBeenCalledWith('trending', 'default');
+        // Verify SafeActionResult structure
+        expect(result.data).toBeDefined();
+        expect(result.serverError).toBeUndefined();
+        expect(result.fieldErrors).toBeUndefined();
+
+        // Verify cache invalidation
+        expect(mockRevalidatePath).toHaveBeenCalledWith('/agents/test-agent');
+        expect(mockRevalidatePath).toHaveBeenCalledWith('/agents');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('reviews:agents:test-agent', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('content', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('homepage', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('trending', 'default');
+      });
+    });
+
+    describe('error handling', () => {
+      it('should return SafeActionResult structure with error properties', async () => {
+        const { createReview } = await import('./reviews-crud.ts');
+
+        // Set up RPC mock to fail
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(
+          new Error('Database error')
+        );
+
+        const result = await createReview({
+          content_type: 'agents',
+          content_slug: 'test-agent',
+          rating: 5,
+        });
+
+        // Verify SafeActionResult structure
+        expect(result.serverError).toBeDefined();
+        expect(result.data).toBeUndefined();
+        expect(result.fieldErrors).toBeUndefined();
       });
     });
   });
 
   describe('updateReview', () => {
-    describe('RPC call', () => {
-      it('should call manage_review RPC with update action', async () => {
+    describe('input validation', () => {
+      it('should return fieldErrors for invalid UUID', async () => {
         const { updateReview } = await import('./reviews-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
 
-        // Mock result must match ManageReviewReturns structure
-        vi.mocked(runRpc).mockResolvedValue({
-          success: true,
-          review: {
-            id: '123e4567-e89b-12d3-a456-426614174000',
-            user_id: '223e4567-e89b-12d3-a456-426614174001',
-            content_type: 'agents' as const,
+        // Invalid: review_id must be a valid UUID
+        const result = await updateReview({
+          review_id: 'invalid-uuid',
+        });
+
+        // Verify SafeActionResult structure
+        expect(result.fieldErrors).toBeDefined();
+        expect(result.data).toBeUndefined();
+        expect(result.serverError).toBeUndefined();
+      });
+
+      it('should accept valid input', async () => {
+        const { updateReview } = await import('./reviews-crud.ts');
+
+        // Set up RPC mock
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+          {
+            success: true,
+            review: {
+              id: '123e4567-e89b-12d3-a456-426614174000',
+              user_id: 'test-user-id',
+              content_type: 'agents',
+              content_slug: 'test-agent',
+              rating: 4,
+              review_text: 'Updated review',
+              helpful_count: 0,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+            content_type: 'agents',
             content_slug: 'test-agent',
-            rating: 5,
-            review_text: 'Great agent!',
-            helpful_count: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
           },
-          content_type: 'agents' as const,
-          content_slug: 'test-agent',
-        } as any);
+        ]);
 
-        await updateReview({
+        const result = await updateReview({
           review_id: '123e4567-e89b-12d3-a456-426614174000',
           rating: 4,
           review_text: 'Updated review',
         });
 
-        expect(runRpc).toHaveBeenCalledWith(
-          'manage_review',
-          expect.objectContaining({
-            p_action: 'update',
-            p_user_id: 'test-user-id',
-            p_create_data: null,
-            p_update_data: expect.objectContaining({
-              review_id: '123e4567-e89b-12d3-a456-426614174000',
+        // Verify SafeActionResult structure
+        expect(result.data).toBeDefined();
+        expect(result.serverError).toBeUndefined();
+        expect(result.fieldErrors).toBeUndefined();
+      });
+    });
+
+    describe('RPC call', () => {
+      it('should call manage_review RPC with update action', async () => {
+        const { updateReview } = await import('./reviews-crud.ts');
+
+        // Set up RPC mock
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+          {
+            success: true,
+            review: {
+              id: '123e4567-e89b-12d3-a456-426614174000',
+              user_id: 'test-user-id',
+              content_type: 'agents',
+              content_slug: 'test-agent',
               rating: 4,
               review_text: 'Updated review',
-            }),
-            p_delete_id: null,
-          }),
+              helpful_count: 0,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+            content_type: 'agents',
+            content_slug: 'test-agent',
+          },
+        ]);
+
+        const result = await updateReview({
+          review_id: '123e4567-e89b-12d3-a456-426614174000',
+          rating: 4,
+          review_text: 'Updated review',
+        });
+
+        // Verify SafeActionResult structure
+        expect(result.data).toBeDefined();
+        expect(result.serverError).toBeUndefined();
+        expect(result.fieldErrors).toBeUndefined();
+
+        // Verify RPC was called with correct SQL and parameters
+        // BasePrismaService.callRpc formats as: SELECT * FROM function_name(p_param => $1, ...)
+        // Args are passed as positional parameters: $queryRawUnsafe(query, ...argValues)
+        // Order: p_action, p_user_id, p_create_data, p_update_data, p_delete_id
+        expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+          expect.stringContaining('manage_review'),
+          'update', // p_action
+          'test-user-id', // p_user_id (from ctx.userId in authedAction middleware)
+          null, // p_create_data
           expect.objectContaining({
-            action: 'updateReview.rpc',
-            userId: 'test-user-id',
-          })
+            review_id: '123e4567-e89b-12d3-a456-426614174000',
+            rating: 4,
+            review_text: 'Updated review',
+          }), // p_update_data
+          null // p_delete_id
         );
       });
     });
@@ -218,69 +399,143 @@ describe('reviews-crud', () => {
     describe('cache invalidation', () => {
       it('should revalidate paths and tags', async () => {
         const { updateReview } = await import('./reviews-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
-        const { revalidatePath, revalidateTag } = await import('next/cache');
 
-        // Mock result must match ManageReviewReturns structure
-        vi.mocked(runRpc).mockResolvedValue({
-          success: true,
-          review: {
-            id: '123e4567-e89b-12d3-a456-426614174000',
-            user_id: '223e4567-e89b-12d3-a456-426614174001',
-            content_type: 'agents' as const,
+        // Set up RPC mock
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+          {
+            success: true,
+            review: {
+              id: '123e4567-e89b-12d3-a456-426614174000',
+              user_id: 'test-user-id',
+              content_type: 'agents',
+              content_slug: 'test-agent',
+              rating: 4,
+              review_text: 'Updated review',
+              helpful_count: 0,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+            content_type: 'agents',
             content_slug: 'test-agent',
-            rating: 5,
-            review_text: 'Great agent!',
-            helpful_count: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
           },
-          content_type: 'agents' as const,
-          content_slug: 'test-agent',
-        } as any);
+        ]);
 
-        await updateReview({
+        const result = await updateReview({
           review_id: '123e4567-e89b-12d3-a456-426614174000',
           rating: 4,
         });
 
-        expect(revalidatePath).toHaveBeenCalledWith('/agents/test-agent');
-        expect(revalidatePath).toHaveBeenCalledWith('/agents');
-        expect(revalidateTag).toHaveBeenCalledWith('reviews:agents:test-agent', 'default');
-        expect(revalidateTag).toHaveBeenCalledWith('content', 'default');
-        expect(revalidateTag).toHaveBeenCalledWith('homepage', 'default');
-        expect(revalidateTag).toHaveBeenCalledWith('trending', 'default');
+        // Verify SafeActionResult structure
+        expect(result.data).toBeDefined();
+        expect(result.serverError).toBeUndefined();
+        expect(result.fieldErrors).toBeUndefined();
+
+        // Verify cache invalidation
+        expect(mockRevalidatePath).toHaveBeenCalledWith('/agents/test-agent');
+        expect(mockRevalidatePath).toHaveBeenCalledWith('/agents');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('reviews:agents:test-agent', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('content', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('homepage', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('trending', 'default');
+      });
+    });
+
+    describe('error handling', () => {
+      it('should return SafeActionResult structure with error properties', async () => {
+        const { updateReview } = await import('./reviews-crud.ts');
+
+        // Set up RPC mock to fail
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(
+          new Error('Database error')
+        );
+
+        const result = await updateReview({
+          review_id: '123e4567-e89b-12d3-a456-426614174000',
+          rating: 4,
+        });
+
+        // Verify SafeActionResult structure
+        expect(result.serverError).toBeDefined();
+        expect(result.data).toBeUndefined();
+        expect(result.fieldErrors).toBeUndefined();
       });
     });
   });
 
   describe('deleteReview', () => {
-    describe('RPC call', () => {
-      it('should call manage_review RPC with delete action', async () => {
+    describe('input validation', () => {
+      it('should return fieldErrors for invalid UUID', async () => {
         const { deleteReview } = await import('./reviews-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
 
-        vi.mocked(runRpc).mockResolvedValue({
-          review: { id: 'review-123' },
-        } as any);
+        // Invalid: delete_id must be a valid UUID
+        const result = await deleteReview({
+          delete_id: 'invalid-uuid',
+        });
 
-        await deleteReview({
+        // Verify SafeActionResult structure
+        expect(result.fieldErrors).toBeDefined();
+        expect(result.data).toBeUndefined();
+        expect(result.serverError).toBeUndefined();
+      });
+
+      it('should accept valid input', async () => {
+        const { deleteReview } = await import('./reviews-crud.ts');
+
+        // Set up RPC mock
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+          {
+            success: true,
+            review: {
+              id: '123e4567-e89b-12d3-a456-426614174000',
+            },
+          },
+        ]);
+
+        const result = await deleteReview({
           delete_id: '123e4567-e89b-12d3-a456-426614174000',
         });
 
-        expect(runRpc).toHaveBeenCalledWith(
-          'manage_review',
-          expect.objectContaining({
-            p_action: 'delete',
-            p_user_id: 'test-user-id',
-            p_create_data: null,
-            p_update_data: null,
-            p_delete_id: '123e4567-e89b-12d3-a456-426614174000',
-          }),
-          expect.objectContaining({
-            action: 'deleteReview.rpc',
-            userId: 'test-user-id',
-          })
+        // Verify SafeActionResult structure
+        expect(result.data).toBeDefined();
+        expect(result.serverError).toBeUndefined();
+        expect(result.fieldErrors).toBeUndefined();
+      });
+    });
+
+    describe('RPC call', () => {
+      it('should call manage_review RPC with delete action', async () => {
+        const { deleteReview } = await import('./reviews-crud.ts');
+
+        // Set up RPC mock
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+          {
+            success: true,
+            review: {
+              id: '123e4567-e89b-12d3-a456-426614174000',
+            },
+          },
+        ]);
+
+        const result = await deleteReview({
+          delete_id: '123e4567-e89b-12d3-a456-426614174000',
+        });
+
+        // Verify SafeActionResult structure
+        expect(result.data).toBeDefined();
+        expect(result.serverError).toBeUndefined();
+        expect(result.fieldErrors).toBeUndefined();
+
+        // Verify RPC was called with correct SQL and parameters
+        // BasePrismaService.callRpc formats as: SELECT * FROM function_name(p_param => $1, ...)
+        // Args are passed as positional parameters: $queryRawUnsafe(query, ...argValues)
+        // Order: p_action, p_user_id, p_create_data, p_update_data, p_delete_id
+        expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+          expect.stringContaining('manage_review'),
+          'delete', // p_action
+          'test-user-id', // p_user_id (from ctx.userId in authedAction middleware)
+          null, // p_create_data
+          null, // p_update_data
+          '123e4567-e89b-12d3-a456-426614174000' // p_delete_id
         );
       });
     });
@@ -288,20 +543,51 @@ describe('reviews-crud', () => {
     describe('cache invalidation', () => {
       it('should revalidate tags only (no paths for delete)', async () => {
         const { deleteReview } = await import('./reviews-crud.ts');
-        const { runRpc } = await import('./run-rpc-instance.ts');
-        const { revalidateTag } = await import('next/cache');
 
-        vi.mocked(runRpc).mockResolvedValue({
-          review: { id: 'review-123' },
-        } as any);
+        // Set up RPC mock
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+          {
+            success: true,
+            review: {
+              id: '123e4567-e89b-12d3-a456-426614174000',
+            },
+          },
+        ]);
 
-        await deleteReview({
+        const result = await deleteReview({
           delete_id: '123e4567-e89b-12d3-a456-426614174000',
         });
 
-        expect(revalidateTag).toHaveBeenCalledWith('content', 'default');
-        expect(revalidateTag).toHaveBeenCalledWith('homepage', 'default');
-        expect(revalidateTag).toHaveBeenCalledWith('trending', 'default');
+        // Verify SafeActionResult structure
+        expect(result.data).toBeDefined();
+        expect(result.serverError).toBeUndefined();
+        expect(result.fieldErrors).toBeUndefined();
+
+        // Verify cache invalidation (delete doesn't revalidate paths)
+        expect(mockRevalidatePath).not.toHaveBeenCalled();
+        expect(mockRevalidateTag).toHaveBeenCalledWith('content', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('homepage', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith('trending', 'default');
+      });
+    });
+
+    describe('error handling', () => {
+      it('should return SafeActionResult structure with error properties', async () => {
+        const { deleteReview } = await import('./reviews-crud.ts');
+
+        // Set up RPC mock to fail
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(
+          new Error('Database error')
+        );
+
+        const result = await deleteReview({
+          delete_id: '123e4567-e89b-12d3-a456-426614174000',
+        });
+
+        // Verify SafeActionResult structure
+        expect(result.serverError).toBeDefined();
+        expect(result.data).toBeUndefined();
+        expect(result.fieldErrors).toBeUndefined();
       });
     });
   });

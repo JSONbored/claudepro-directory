@@ -40,6 +40,12 @@ export async function handleOAuthMetadata(_request: Request, env: RuntimeEnv, pa
         token_endpoint_auth_methods_supported: ['none', 'client_secret_post'],
         // Resource Indicators (RFC 8707) - MCP spec requires this
         resource_parameter_supported: true,
+        // Token revocation endpoint (RFC 7009) - Optional but recommended
+        revocation_endpoint: `${mcpServerUrl}/oauth/revoke`,
+        // Token introspection endpoint (RFC 7662) - Optional but recommended
+        introspection_endpoint: `${mcpServerUrl}/oauth/introspect`,
+        // Dynamic Client Registration endpoint (RFC 7591) - Recommended for MCP
+        registration_endpoint: `${mcpServerUrl}/oauth/register`,
         // Point to Supabase's OAuth 2.1 discovery endpoint (requires OAuth 2.1 Server to be enabled)
         oauth_discovery_url: `${supabaseUrl}/.well-known/oauth-authorization-server/auth/v1`,
         // Point to OIDC discovery for full metadata

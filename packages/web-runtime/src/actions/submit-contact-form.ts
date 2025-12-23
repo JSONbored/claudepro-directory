@@ -41,7 +41,10 @@ export const submitContactForm = authedAction
       );
 
       // insertContactSubmissionReturnsSchema is an array
-      const result: z.infer<typeof insertContactSubmissionReturnsSchema> = rawResult;
+      // callRpc may unwrap single-element arrays, so ensure we always return an array
+      const result: z.infer<typeof insertContactSubmissionReturnsSchema> = Array.isArray(rawResult)
+        ? rawResult
+        : [rawResult];
 
       // Execute post-action hook
       try {
