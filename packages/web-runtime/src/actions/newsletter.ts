@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import type { newsletter_source } from '@prisma/client';
-import { rateLimitedAction } from './safe-action.ts';
+import { rateLimitedAction, authedAction } from './safe-action.ts';
 import { newsletter_sourceSchema } from '../prisma-zod-schemas.ts';
 
 // Email validation schema (reusable)
@@ -114,22 +114,16 @@ const updateTopicPreferencesSchema = z.object({
   optIn: z.boolean(),
 });
 
-export const updateTopicPreferencesAction = rateLimitedAction
+export const updateTopicPreferencesAction = authedAction
   .inputSchema(updateTopicPreferencesSchema)
   .metadata({ actionName: 'newsletter.updateTopicPreferences', category: 'user' })
-  .action(async ({ parsedInput }) => {
-    const { getAuthenticatedUser } = await import('../auth/get-authenticated-user');
+  .action(async ({ parsedInput, ctx }) => {
     const { getResendClient } = await import('../integrations/resend');
     const { getNewsletterSubscriptionByEmail } = await import('../data/newsletter');
     const { logger, normalizeError } = await import('../logging/server');
 
-    // Get authenticated user
-    const authResult = await getAuthenticatedUser({
-      context: 'updateTopicPreferencesAction',
-      requireUser: true,
-    });
-    const user = authResult.user!;
-    const userEmail = user.email;
+    // Use auth context from authedAction (ctx.userEmail is guaranteed)
+    const userEmail = ctx.userEmail;
 
     if (!userEmail) {
       throw new Error('User email is required');
@@ -210,22 +204,16 @@ export const updateTopicPreferencesAction = rateLimitedAction
  */
 const unsubscribeSchema = z.object({});
 
-export const unsubscribeFromNewsletterAction = rateLimitedAction
+export const unsubscribeFromNewsletterAction = authedAction
   .inputSchema(unsubscribeSchema)
   .metadata({ actionName: 'newsletter.unsubscribe', category: 'user' })
-  .action(async () => {
-    const { getAuthenticatedUser } = await import('../auth/get-authenticated-user');
+  .action(async ({ ctx }) => {
     const { getResendClient } = await import('../integrations/resend');
     const { getNewsletterSubscriptionByEmail } = await import('../data/newsletter');
     const { logger, normalizeError } = await import('../logging/server');
 
-    // Get authenticated user
-    const authResult = await getAuthenticatedUser({
-      context: 'unsubscribeFromNewsletterAction',
-      requireUser: true,
-    });
-    const user = authResult.user!;
-    const userEmail = user.email;
+    // Use auth context from authedAction (ctx.userEmail is guaranteed)
+    const userEmail = ctx.userEmail;
 
     if (!userEmail) {
       throw new Error('User email is required');

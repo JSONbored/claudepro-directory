@@ -7,54 +7,94 @@
  * @module web-runtime/inngest/functions/email/transactional.test
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { sendTransactionalEmail } from './transactional';
-import * as resend from '../../../integrations/resend';
-import * as emailTemplates from '../../../email/base-template';
-import { logger } from '../../../logging/server';
-import { normalizeError } from '@heyclaude/shared-runtime';
 
-// Hoist mocks BEFORE importing the function to ensure mocks are applied
-const mockSendEmail = vi.hoisted(() => vi.fn());
-const mockRenderEmailTemplate = vi.hoisted(() => vi.fn());
-const mockLogger = vi.hoisted(() => ({
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn(),
-}));
-const mockCreateWebAppContextWithId = vi.hoisted(() => vi.fn(() => ({
-  requestId: 'test-request-id',
-  operation: 'sendTransactionalEmail',
-  route: '/inngest/email/transactional',
-})));
-const mockNormalizeError = vi.hoisted(() => vi.fn((error: unknown) => {
-  if (error instanceof Error) {
-    return error;
-  }
-  return new Error(String(error));
+// Mock Resend integration, email template rendering, logging, shared-runtime, and monitoring
+// Define mocks directly in jest.mock() factory functions to avoid hoisting issues
+jest.mock('../../../integrations/resend', () => {
+  const mockSendEmail = jest.fn();
+  return {
+    sendEmail: mockSendEmail,
+    __mockSendEmail: mockSendEmail,
+  };
+});
+
+jest.mock('../../../email/base-template', () => {
+  const mockRenderEmailTemplate = jest.fn();
+  return {
+    renderEmailTemplate: mockRenderEmailTemplate,
+    __mockRenderEmailTemplate: mockRenderEmailTemplate,
+  };
+});
+
+jest.mock('../../../logging/server', () => {
+  const mockLogger = {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+  const mockCreateWebAppContextWithId = jest.fn(() => ({
+    requestId: 'test-request-id',
+    operation: 'sendTransactionalEmail',
+    route: '/inngest/email/transactional',
+  }));
+  return {
+    logger: mockLogger,
+    createWebAppContextWithId: mockCreateWebAppContextWithId,
+    __mockLogger: mockLogger,
+    __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
+  };
+});
+
+jest.mock('@heyclaude/shared-runtime', () => {
+  const mockNormalizeError = jest.fn((error: unknown, fallbackMessage?: string) => {
+    // Always return an Error object with a message property
+    if (error instanceof Error) {
+      return error;
+    }
+    return new Error(fallbackMessage || String(error || 'Unknown error'));
+  });
+  return {
+    normalizeError: mockNormalizeError,
+    __mockNormalizeError: mockNormalizeError,
+  };
+});
+
+jest.mock('../../utils/monitoring', () => ({
+  sendCronSuccessHeartbeat: jest.fn(),
+  sendCriticalFailureHeartbeat: jest.fn(),
+  sendBetterStackHeartbeat: jest.fn(),
+  sendApiEndpointHeartbeat: jest.fn(),
+  isBetterStackMonitoringEnabled: jest.fn(() => false),
+  isInngestMonitoringEnabled: jest.fn(() => false),
+  isCriticalFailureMonitoringEnabled: jest.fn(() => false),
+  isCronSuccessMonitoringEnabled: jest.fn(() => false),
+  isApiEndpointMonitoringEnabled: jest.fn(() => false),
 }));
 
-// Mock Resend integration
-vi.mock('../../../integrations/resend', () => ({
-  sendEmail: mockSendEmail,
-}));
-
-// Mock email template rendering
-vi.mock('../../../email/base-template', () => ({
-  renderEmailTemplate: mockRenderEmailTemplate,
-}));
-
-// Mock logging
-vi.mock('../../../logging/server', () => ({
-  logger: mockLogger,
-  createWebAppContextWithId: mockCreateWebAppContextWithId,
-}));
-
-// Mock shared runtime
-vi.mock('@heyclaude/shared-runtime', () => ({
-  normalizeError: mockNormalizeError,
-}));
+// Get mocks for use in tests
+const { __mockSendEmail: mockSendEmail } = jest.requireMock('../../../integrations/resend') as {
+  __mockSendEmail: ReturnType<typeof jest.fn>;
+};
+const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock('../../../email/base-template') as {
+  __mockRenderEmailTemplate: ReturnType<typeof jest.fn>;
+};
+const {
+  __mockLogger: mockLogger,
+  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
+} = jest.requireMock('../../../logging/server') as {
+  __mockLogger: {
+    info: ReturnType<typeof jest.fn>;
+    warn: ReturnType<typeof jest.fn>;
+    error: ReturnType<typeof jest.fn>;
+  };
+  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
+};
+const { __mockNormalizeError: mockNormalizeError } = jest.requireMock('@heyclaude/shared-runtime') as {
+  __mockNormalizeError: ReturnType<typeof jest.fn>;
+};
 
 // Import function AFTER mocks are set up
 describe('sendTransactionalEmail', () => {
@@ -77,7 +117,8 @@ describe('sendTransactionalEmail', () => {
     });
 
     // Reset all mocks to ensure clean state
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
     mockSendEmail.mockReset();
     mockRenderEmailTemplate.mockReset();
 
@@ -87,11 +128,14 @@ describe('sendTransactionalEmail', () => {
       error: null,
     });
     mockRenderEmailTemplate.mockResolvedValue('<html>Mock Email</html>');
-    mockNormalizeError.mockImplementation((error) => {
+    
+    // Restore normalizeError mock implementation after reset
+    // jest.resetAllMocks() resets mocks to return undefined, so we need to restore it
+    mockNormalizeError.mockImplementation((error: unknown, fallbackMessage?: string) => {
       if (error instanceof Error) {
         return error;
       }
-      return new Error(String(error));
+      return new Error(fallbackMessage || String(error || 'Unknown error'));
     });
   });
 
@@ -106,7 +150,7 @@ describe('sendTransactionalEmail', () => {
    * - Verifies email is sent with correct parameters
    */
   it('should send job-posted email successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/transactional',
@@ -121,7 +165,7 @@ describe('sendTransactionalEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; type: string } };
 
     expect(result).toEqual({
       success: true,
@@ -168,7 +212,7 @@ describe('sendTransactionalEmail', () => {
    * - Verifies correct template is rendered with resetUrl
    */
   it('should send password-reset email successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/transactional',
@@ -181,7 +225,7 @@ describe('sendTransactionalEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; type: string } };
 
     expect(result).toEqual({
       success: true,
@@ -216,7 +260,7 @@ describe('sendTransactionalEmail', () => {
    * - Verifies correct template is rendered with confirmUrl and newEmail
    */
   it('should send email-change email successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/transactional',
@@ -230,7 +274,7 @@ describe('sendTransactionalEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; type: string } };
 
     expect(result).toEqual({
       success: true,
@@ -266,7 +310,7 @@ describe('sendTransactionalEmail', () => {
    * - Should log warning with available types
    */
   it('should throw error for invalid email type', async () => {
-    const { error } = await t.execute({
+    const { error } = (await t.execute({
       events: [
         {
           name: 'email/transactional',
@@ -277,10 +321,10 @@ describe('sendTransactionalEmail', () => {
           },
         },
       ],
-    });
+    })) as { error?: Error | { message: string } };
 
     expect(error).toBeDefined();
-    expect(error?.message).toBe('Unknown transactional email type: invalid-type');
+    expect((error as Error | { message: string })?.message).toBe('Unknown transactional email type: invalid-type');
 
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -309,7 +353,7 @@ describe('sendTransactionalEmail', () => {
       error: { message: 'Resend API error' },
     });
 
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/transactional',
@@ -322,7 +366,7 @@ describe('sendTransactionalEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; type: string } };
 
     expect(result).toEqual({
       success: false,
@@ -353,7 +397,7 @@ describe('sendTransactionalEmail', () => {
   it('should handle template rendering failure gracefully', async () => {
     mockRenderEmailTemplate.mockRejectedValue(new Error('Template rendering failed'));
 
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/transactional',
@@ -366,7 +410,7 @@ describe('sendTransactionalEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; type: string } };
 
     expect(result).toEqual({
       success: false,
@@ -394,7 +438,7 @@ describe('sendTransactionalEmail', () => {
    * - Verifies step return value structure
    */
   it('should execute send-email step correctly', async () => {
-    const { result } = await t.executeStep('send-email', {
+    const { result } = (await t.executeStep('send-email', {
       events: [
         {
           name: 'email/transactional',
@@ -407,7 +451,7 @@ describe('sendTransactionalEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { sent: boolean; emailId: string | null } };
 
     expect(result).toEqual({
       sent: true,
@@ -426,7 +470,7 @@ describe('sendTransactionalEmail', () => {
    * - Verifies optional company field is handled
    */
   it('should send job-posted email without company field', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/transactional',
@@ -440,7 +484,7 @@ describe('sendTransactionalEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; type: string } };
 
     expect(result.success).toBe(true);
     expect(mockRenderEmailTemplate).toHaveBeenCalledWith(
@@ -461,7 +505,7 @@ describe('sendTransactionalEmail', () => {
    * - Verifies default values are used when fields are missing
    */
   it('should use default values for missing email data fields', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/transactional',
@@ -472,7 +516,7 @@ describe('sendTransactionalEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; type: string } };
 
     expect(result.success).toBe(true);
     expect(mockRenderEmailTemplate).toHaveBeenCalledWith(
@@ -504,9 +548,9 @@ describe('sendTransactionalEmail', () => {
     };
 
     // Execute same event twice
-    const { result: result1 } = await t.execute({
+    const { result: result1 } = (await t.execute({
       events: [eventData],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; type: string } };
 
     // Create fresh test engine for second execution (simulating idempotency)
     const t2 = new InngestTestEngine({
@@ -515,9 +559,9 @@ describe('sendTransactionalEmail', () => {
     mockSendEmail.mockClear();
     mockRenderEmailTemplate.mockClear();
 
-    const { result: result2 } = await t2.execute({
+    const { result: result2 } = (await t2.execute({
       events: [eventData],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; type: string } };
 
     // Both should succeed
     expect(result1.success).toBe(true);

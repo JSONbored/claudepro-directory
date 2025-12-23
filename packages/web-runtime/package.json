@@ -706,6 +706,7 @@
   },
   "devDependencies": {
     "@inngest/test": "^0.1.9",
+    "@jsonbored/safemocker": "file:../../../safemocker",
     "@types/canvas-confetti": "^1.9.0",
     "@types/react": "19.2.7",
     "next": "16.1.0",

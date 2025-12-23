@@ -1,38 +1,47 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig([
-  // CJS build
+  // CJS build - MUST output CommonJS syntax (module.exports, require)
+  // MUST be first entry to build before ESM
   {
     entry: ['src/index.ts'],
-    format: ['cjs'],
+    format: 'cjs', // Use string, not array
     dts: false, // Generate manually with tsc to avoid tsconfig issues
     splitting: false,
     sourcemap: true,
-    clean: false, // Don't clean - we'll clean manually
+    clean: true, // Clean before CJS build
     treeshake: true,
+    bundle: true, // Bundle all dependencies into single file
     external: ['@prisma/client'],
-    tsconfig: './tsconfig.json',
-    outExtension() {
-      return {
-        js: '.js',
-      };
+    // Use separate tsconfig with CommonJS module setting
+    tsconfig: './tsconfig.cjs.json',
+    outExtension({ format }) {
+      // Use .js extension for CommonJS
+      return { js: format === 'cjs' ? '.js' : '.js' };
+    },
+    // Force esbuild to output CommonJS
+    esbuildOptions(options) {
+      options.format = 'cjs';
+      options.platform = 'node';
+      options.target = 'node18';
     },
   },
-  // ESM build
+  // ESM build - Output ESM syntax (export, import)
+  // Runs after CJS (second entry)
   {
     entry: ['src/index.ts'],
-    format: ['esm'],
+    format: 'esm', // Use string, not array
     dts: false,
     splitting: false,
     sourcemap: true,
-    clean: false, // Don't clean - we'll clean manually
+    clean: false, // Don't clean - CJS already built
     treeshake: true,
+    bundle: true, // Bundle all dependencies into single file
     external: ['@prisma/client'],
     tsconfig: './tsconfig.json',
-    outExtension() {
-      return {
-        js: '.mjs',
-      };
+    outExtension({ format }) {
+      // Use .mjs extension for ESM
+      return { js: format === 'esm' ? '.mjs' : '.mjs' };
     },
   },
   {

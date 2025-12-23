@@ -7,61 +7,100 @@
  * @module web-runtime/inngest/functions/email/job-lifecycle.test
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { sendJobLifecycleEmail } from './job-lifecycle';
-import * as resend from '../../../integrations/resend';
-import * as emailTemplates from '../../../email/base-template';
-import { logger } from '../../../logging/server';
-import { normalizeError } from '@heyclaude/shared-runtime';
 
-// Hoist mocks BEFORE importing the function to ensure mocks are applied
-const mockSendEmail = vi.hoisted(() => vi.fn());
-const mockRenderEmailTemplate = vi.hoisted(() => vi.fn());
-const mockLogger = vi.hoisted(() => ({
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn(),
-}));
-const mockCreateWebAppContextWithId = vi.hoisted(() => vi.fn(() => ({
-  requestId: 'test-request-id',
-  operation: 'sendJobLifecycleEmail',
-  route: '/inngest/email/job-lifecycle',
-})));
-const mockNormalizeError = vi.hoisted(() => vi.fn((error: unknown) => {
-  if (error instanceof Error) {
-    return error;
-  }
-  return new Error(String(error));
-}));
+// Mock Resend integration, email template rendering, logging, shared-runtime, and environment
+// Define mocks directly in jest.mock() factory functions to avoid hoisting issues
+jest.mock('../../../integrations/resend', () => {
+  const mockSendEmail = jest.fn();
+  return {
+    sendEmail: mockSendEmail,
+    __mockSendEmail: mockSendEmail,
+  };
+});
 
-// Mock Resend integration
-vi.mock('../../../integrations/resend', () => ({
-  sendEmail: mockSendEmail,
-}));
+jest.mock('../../../email/base-template', () => {
+  const mockRenderEmailTemplate = jest.fn();
+  return {
+    renderEmailTemplate: mockRenderEmailTemplate,
+    __mockRenderEmailTemplate: mockRenderEmailTemplate,
+  };
+});
 
-// Mock email template rendering
-vi.mock('../../../email/base-template', () => ({
-  renderEmailTemplate: mockRenderEmailTemplate,
-}));
+jest.mock('../../../logging/server', () => {
+  const mockLogger = {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+  const mockCreateWebAppContextWithId = jest.fn(() => ({
+    requestId: 'test-request-id',
+    operation: 'sendJobLifecycleEmail',
+    route: '/inngest/email/job-lifecycle',
+  }));
+  return {
+    logger: mockLogger,
+    createWebAppContextWithId: mockCreateWebAppContextWithId,
+    __mockLogger: mockLogger,
+    __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
+  };
+});
 
-// Mock logging
-vi.mock('../../../logging/server', () => ({
-  logger: mockLogger,
-  createWebAppContextWithId: mockCreateWebAppContextWithId,
-}));
+jest.mock('@heyclaude/shared-runtime', () => {
+  const mockNormalizeError = jest.fn((error: unknown, fallbackMessage?: string) => {
+    // Always return an Error object with a message property
+    if (error instanceof Error) {
+      return error;
+    }
+    return new Error(fallbackMessage || String(error || 'Unknown error'));
+  });
+  return {
+    normalizeError: mockNormalizeError,
+    __mockNormalizeError: mockNormalizeError,
+  };
+});
 
-// Mock shared runtime
-vi.mock('@heyclaude/shared-runtime', () => ({
-  normalizeError: mockNormalizeError,
-}));
-
-// Mock environment
-vi.mock('@heyclaude/shared-runtime/schemas/env', () => ({
+jest.mock('@heyclaude/shared-runtime/schemas/env', () => ({
   env: {
     NEXT_PUBLIC_SITE_URL: 'https://claudepro.directory',
   },
 }));
+
+jest.mock('../../utils/monitoring', () => ({
+  sendCronSuccessHeartbeat: jest.fn(),
+  sendCriticalFailureHeartbeat: jest.fn(),
+  sendBetterStackHeartbeat: jest.fn(),
+  sendApiEndpointHeartbeat: jest.fn(),
+  isBetterStackMonitoringEnabled: jest.fn(() => false),
+  isInngestMonitoringEnabled: jest.fn(() => false),
+  isCriticalFailureMonitoringEnabled: jest.fn(() => false),
+  isCronSuccessMonitoringEnabled: jest.fn(() => false),
+  isApiEndpointMonitoringEnabled: jest.fn(() => false),
+}));
+
+// Get mocks for use in tests
+const { __mockSendEmail: mockSendEmail } = jest.requireMock('../../../integrations/resend') as {
+  __mockSendEmail: ReturnType<typeof jest.fn>;
+};
+const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock('../../../email/base-template') as {
+  __mockRenderEmailTemplate: ReturnType<typeof jest.fn>;
+};
+const {
+  __mockLogger: mockLogger,
+  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
+} = jest.requireMock('../../../logging/server') as {
+  __mockLogger: {
+    info: ReturnType<typeof jest.fn>;
+    warn: ReturnType<typeof jest.fn>;
+    error: ReturnType<typeof jest.fn>;
+  };
+  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
+};
+const { __mockNormalizeError: mockNormalizeError } = jest.requireMock('@heyclaude/shared-runtime') as {
+  __mockNormalizeError: ReturnType<typeof jest.fn>;
+};
 
 // Import function AFTER mocks are set up
 describe('sendJobLifecycleEmail', () => {
@@ -84,7 +123,8 @@ describe('sendJobLifecycleEmail', () => {
     });
 
     // Reset all mocks to ensure clean state
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
     mockSendEmail.mockReset();
     mockRenderEmailTemplate.mockReset();
 
@@ -94,11 +134,14 @@ describe('sendJobLifecycleEmail', () => {
       error: null,
     });
     mockRenderEmailTemplate.mockResolvedValue('<html>Mock Email</html>');
-    mockNormalizeError.mockImplementation((error) => {
+    
+    // Restore normalizeError mock implementation after reset
+    // jest.resetAllMocks() resets mocks to return undefined, so we need to restore it
+    mockNormalizeError.mockImplementation((error: unknown, fallbackMessage?: string) => {
       if (error instanceof Error) {
         return error;
       }
-      return new Error(String(error));
+      return new Error(fallbackMessage || String(error || 'Unknown error'));
     });
   });
 
@@ -108,7 +151,7 @@ describe('sendJobLifecycleEmail', () => {
    * Tests that a job-submitted email is sent successfully.
    */
   it('should send job-submitted email successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/job-lifecycle',
@@ -122,7 +165,7 @@ describe('sendJobLifecycleEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     expect(result).toEqual({
       success: true,
@@ -147,7 +190,7 @@ describe('sendJobLifecycleEmail', () => {
    * Tests that a job-approved email is sent successfully.
    */
   it('should send job-approved email successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/job-lifecycle',
@@ -165,7 +208,7 @@ describe('sendJobLifecycleEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     expect(result.success).toBe(true);
     expect(mockSendEmail).toHaveBeenCalledWith(
@@ -182,7 +225,7 @@ describe('sendJobLifecycleEmail', () => {
    * Tests that a job-rejected email is sent successfully.
    */
   it('should send job-rejected email successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/job-lifecycle',
@@ -197,7 +240,7 @@ describe('sendJobLifecycleEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     expect(result.success).toBe(true);
     expect(mockSendEmail).toHaveBeenCalledWith(
@@ -214,7 +257,7 @@ describe('sendJobLifecycleEmail', () => {
    * Tests that a job-payment-confirmed email is sent successfully.
    */
   it('should send job-payment-confirmed email successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/job-lifecycle',
@@ -232,7 +275,7 @@ describe('sendJobLifecycleEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     expect(result.success).toBe(true);
     expect(mockSendEmail).toHaveBeenCalledWith(
@@ -249,7 +292,7 @@ describe('sendJobLifecycleEmail', () => {
    * Tests that a job-expiring email is sent successfully.
    */
   it('should send job-expiring email successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/job-lifecycle',
@@ -265,7 +308,7 @@ describe('sendJobLifecycleEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     expect(result.success).toBe(true);
     expect(mockSendEmail).toHaveBeenCalledWith(
@@ -282,7 +325,7 @@ describe('sendJobLifecycleEmail', () => {
    * Tests that a job-expired email is sent successfully.
    */
   it('should send job-expired email successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/job-lifecycle',
@@ -299,7 +342,7 @@ describe('sendJobLifecycleEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     expect(result.success).toBe(true);
     expect(mockSendEmail).toHaveBeenCalledWith(
@@ -316,7 +359,7 @@ describe('sendJobLifecycleEmail', () => {
    * Tests that an invalid action throws an error.
    */
   it('should throw error for invalid action', async () => {
-    const { error } = await t.execute({
+    const { error } = (await t.execute({
       events: [
         {
           name: 'email/job-lifecycle',
@@ -329,10 +372,10 @@ describe('sendJobLifecycleEmail', () => {
           },
         },
       ],
-    });
+    })) as { error?: Error };
 
     expect(error).toBeDefined();
-    expect(error?.message).toBe('Unknown job lifecycle action: invalid-action');
+    expect((error as Error)?.message).toBe('Unknown job lifecycle action: invalid-action');
 
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -351,7 +394,7 @@ describe('sendJobLifecycleEmail', () => {
    * Tests that missing employer email skips sending.
    */
   it('should skip sending when employer email is missing', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/job-lifecycle',
@@ -364,7 +407,7 @@ describe('sendJobLifecycleEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     expect(result).toEqual({
       success: false,
@@ -391,7 +434,7 @@ describe('sendJobLifecycleEmail', () => {
       error: { message: 'Resend API error' },
     });
 
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/job-lifecycle',
@@ -404,7 +447,7 @@ describe('sendJobLifecycleEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     expect(result).toEqual({
       success: false,
@@ -431,7 +474,7 @@ describe('sendJobLifecycleEmail', () => {
   it('should handle template rendering failure gracefully', async () => {
     mockRenderEmailTemplate.mockRejectedValue(new Error('Template rendering failed'));
 
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/job-lifecycle',
@@ -444,7 +487,7 @@ describe('sendJobLifecycleEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     expect(result).toEqual({
       success: false,
@@ -469,7 +512,7 @@ describe('sendJobLifecycleEmail', () => {
    * Tests the send-email step individually.
    */
   it('should execute send-email step correctly', async () => {
-    const { result } = await t.executeStep('send-email', {
+    const { result } = (await t.executeStep('send-email', {
       events: [
         {
           name: 'email/job-lifecycle',
@@ -482,7 +525,7 @@ describe('sendJobLifecycleEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { sent: boolean; emailId: string | null } };
 
     expect(result).toEqual({
       sent: true,
@@ -498,7 +541,7 @@ describe('sendJobLifecycleEmail', () => {
    * Tests that safe helpers handle various input types correctly.
    */
   it('should handle safe string/number/date helpers correctly', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/job-lifecycle',
@@ -515,7 +558,7 @@ describe('sendJobLifecycleEmail', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     // Should still succeed with safe conversions
     expect(result.success).toBe(true);
@@ -540,9 +583,9 @@ describe('sendJobLifecycleEmail', () => {
     };
 
     // Execute same event twice
-    const { result: result1 } = await t.execute({
+    const { result: result1 } = (await t.execute({
       events: [eventData],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     // Create fresh test engine for second execution (simulating idempotency)
     const t2 = new InngestTestEngine({
@@ -551,9 +594,9 @@ describe('sendJobLifecycleEmail', () => {
     mockSendEmail.mockClear();
     mockRenderEmailTemplate.mockClear();
 
-    const { result: result2 } = await t2.execute({
+    const { result: result2 } = (await t2.execute({
       events: [eventData],
-    });
+    })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     // Both should succeed
     expect(result1.success).toBe(true);

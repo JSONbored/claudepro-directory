@@ -7,47 +7,83 @@
  * @module web-runtime/inngest/functions/resend/webhook.test
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { handleResendWebhook } from './webhook';
-import * as serviceFactory from '../../../data/service-factory';
-import { logger } from '../../../logging/server';
-import { normalizeError } from '@heyclaude/shared-runtime';
 
-// Hoist mocks BEFORE importing the function to ensure mocks are applied
-const mockGetService = vi.hoisted(() => vi.fn());
-const mockLogger = vi.hoisted(() => ({
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn(),
-}));
-const mockCreateWebAppContextWithId = vi.hoisted(() => vi.fn(() => ({
-  requestId: 'test-request-id',
-  operation: 'handleResendWebhook',
-  route: '/inngest/resend/webhook',
-})));
-const mockNormalizeError = vi.hoisted(() => vi.fn((error: unknown) => {
-  if (error instanceof Error) {
-    return error;
-  }
-  return new Error(String(error));
+// Mock service factory, logging, shared-runtime, and monitoring
+// Define mocks directly in jest.mock() factory functions to avoid hoisting issues
+jest.mock('../../../data/service-factory', () => {
+  const mockGetService = jest.fn();
+  return {
+    getService: mockGetService,
+    __mockGetService: mockGetService,
+  };
+});
+
+jest.mock('../../../logging/server', () => {
+  const mockLogger = {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+  const mockCreateWebAppContextWithId = jest.fn(() => ({
+    requestId: 'test-request-id',
+    operation: 'handleResendWebhook',
+    route: '/inngest/resend/webhook',
+  }));
+  return {
+    logger: mockLogger,
+    createWebAppContextWithId: mockCreateWebAppContextWithId,
+    __mockLogger: mockLogger,
+    __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
+  };
+});
+
+jest.mock('@heyclaude/shared-runtime', () => {
+  const mockNormalizeError = jest.fn((error: unknown, fallbackMessage?: string) => {
+    // Always return an Error object with a message property
+    if (error instanceof Error) {
+      return error;
+    }
+    return new Error(fallbackMessage || String(error || 'Unknown error'));
+  });
+  return {
+    normalizeError: mockNormalizeError,
+    __mockNormalizeError: mockNormalizeError,
+  };
+});
+
+jest.mock('../../utils/monitoring', () => ({
+  sendCronSuccessHeartbeat: jest.fn(),
+  sendCriticalFailureHeartbeat: jest.fn(),
+  sendBetterStackHeartbeat: jest.fn(),
+  sendApiEndpointHeartbeat: jest.fn(),
+  isBetterStackMonitoringEnabled: jest.fn(() => false),
+  isInngestMonitoringEnabled: jest.fn(() => false),
+  isCriticalFailureMonitoringEnabled: jest.fn(() => false),
+  isCronSuccessMonitoringEnabled: jest.fn(() => false),
+  isApiEndpointMonitoringEnabled: jest.fn(() => false),
 }));
 
-// Mock service factory
-vi.mock('../../../data/service-factory', () => ({
-  getService: mockGetService,
-}));
-
-// Mock logging
-vi.mock('../../../logging/server', () => ({
-  logger: mockLogger,
-  createWebAppContextWithId: mockCreateWebAppContextWithId,
-}));
-
-// Mock shared runtime
-vi.mock('@heyclaude/shared-runtime', () => ({
-  normalizeError: mockNormalizeError,
-}));
+// Get mocks for use in tests
+const { __mockGetService: mockGetService } = jest.requireMock('../../../data/service-factory') as {
+  __mockGetService: ReturnType<typeof jest.fn>;
+};
+const {
+  __mockLogger: mockLogger,
+  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
+} = jest.requireMock('../../../logging/server') as {
+  __mockLogger: {
+    info: ReturnType<typeof jest.fn>;
+    warn: ReturnType<typeof jest.fn>;
+    error: ReturnType<typeof jest.fn>;
+  };
+  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
+};
+const { __mockNormalizeError: mockNormalizeError } = jest.requireMock('@heyclaude/shared-runtime') as {
+  __mockNormalizeError: ReturnType<typeof jest.fn>;
+};
 
 // Import function AFTER mocks are set up
 describe('handleResendWebhook', () => {
@@ -60,17 +96,17 @@ describe('handleResendWebhook', () => {
    * Mock services
    */
   let mockMiscService: {
-    getEmailEngagementSummary: ReturnType<typeof vi.fn>;
-    upsertEmailEngagementSummary: ReturnType<typeof vi.fn>;
-    upsertEmailBlocklist: ReturnType<typeof vi.fn>;
+    getEmailEngagementSummary: ReturnType<typeof jest.fn>;
+    upsertEmailEngagementSummary: ReturnType<typeof jest.fn>;
+    upsertEmailBlocklist: ReturnType<typeof jest.fn>;
   };
   let mockNewsletterService: {
-    updateLastEmailSentAt: ReturnType<typeof vi.fn>;
-    getSubscriptionEngagementScore: ReturnType<typeof vi.fn>;
-    updateLastActiveAt: ReturnType<typeof vi.fn>;
-    updateEngagementScore: ReturnType<typeof vi.fn>;
-    updateSubscriptionStatus: ReturnType<typeof vi.fn>;
-    unsubscribeWithTimestamp: ReturnType<typeof vi.fn>;
+    updateLastEmailSentAt: ReturnType<typeof jest.fn>;
+    getSubscriptionEngagementScore: ReturnType<typeof jest.fn>;
+    updateLastActiveAt: ReturnType<typeof jest.fn>;
+    updateEngagementScore: ReturnType<typeof jest.fn>;
+    updateSubscriptionStatus: ReturnType<typeof jest.fn>;
+    unsubscribeWithTimestamp: ReturnType<typeof jest.fn>;
   };
 
   /**
@@ -87,31 +123,32 @@ describe('handleResendWebhook', () => {
     });
 
     // Reset all mocks to ensure clean state
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
     mockGetService.mockReset();
 
     // Set up mock services
     mockMiscService = {
-      getEmailEngagementSummary: vi.fn().mockResolvedValue({
+      getEmailEngagementSummary: jest.fn().mockResolvedValue({
         email: 'test@example.com',
         emails_sent: 0,
         emails_delivered: 0,
         emails_opened: 0,
         emails_clicked: 0,
       }),
-      upsertEmailEngagementSummary: vi.fn().mockResolvedValue(undefined),
-      upsertEmailBlocklist: vi.fn().mockResolvedValue(undefined),
+      upsertEmailEngagementSummary: jest.fn().mockResolvedValue(undefined),
+      upsertEmailBlocklist: jest.fn().mockResolvedValue(undefined),
     };
 
     mockNewsletterService = {
-      updateLastEmailSentAt: vi.fn().mockResolvedValue(undefined),
-      getSubscriptionEngagementScore: vi.fn().mockResolvedValue({
+      updateLastEmailSentAt: jest.fn().mockResolvedValue(undefined),
+      getSubscriptionEngagementScore: jest.fn().mockResolvedValue({
         engagement_score: 50,
       }),
-      updateLastActiveAt: vi.fn().mockResolvedValue(undefined),
-      updateEngagementScore: vi.fn().mockResolvedValue(undefined),
-      updateSubscriptionStatus: vi.fn().mockResolvedValue(undefined),
-      unsubscribeWithTimestamp: vi.fn().mockResolvedValue(undefined),
+      updateLastActiveAt: jest.fn().mockResolvedValue(undefined),
+      updateEngagementScore: jest.fn().mockResolvedValue(undefined),
+      updateSubscriptionStatus: jest.fn().mockResolvedValue(undefined),
+      unsubscribeWithTimestamp: jest.fn().mockResolvedValue(undefined),
     };
 
     // Mock getService to return appropriate service based on name
@@ -125,11 +162,13 @@ describe('handleResendWebhook', () => {
       return {};
     });
 
-    mockNormalizeError.mockImplementation((error) => {
+    // Restore normalizeError mock implementation after reset
+    // jest.resetAllMocks() resets mocks to return undefined, so we need to restore it
+    mockNormalizeError.mockImplementation((error: unknown, fallbackMessage?: string) => {
       if (error instanceof Error) {
         return error;
       }
-      return new Error(String(error));
+      return new Error(fallbackMessage || String(error || 'Unknown error'));
     });
   });
 
@@ -143,7 +182,7 @@ describe('handleResendWebhook', () => {
    * - Should update last_sent_at timestamp
    */
   it('should handle email.sent event successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'resend/email.sent',
@@ -154,7 +193,7 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     expect(result).toEqual({
       success: true,
@@ -184,7 +223,7 @@ describe('handleResendWebhook', () => {
    * - Should update subscription last_email_sent_at
    */
   it('should handle email.delivered event successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'resend/email.delivered',
@@ -195,7 +234,7 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     expect(result).toEqual({
       success: true,
@@ -226,7 +265,7 @@ describe('handleResendWebhook', () => {
    * - Should set health_status to 'active'
    */
   it('should handle email.opened event successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'resend/email.opened',
@@ -237,7 +276,7 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     expect(result).toEqual({
       success: true,
@@ -271,7 +310,7 @@ describe('handleResendWebhook', () => {
    * - Should set health_status to 'active'
    */
   it('should handle email.clicked event successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'resend/email.clicked',
@@ -282,7 +321,7 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     expect(result).toEqual({
       success: true,
@@ -313,7 +352,7 @@ describe('handleResendWebhook', () => {
    * - Should update engagement summary with bounce info
    */
   it('should handle email.bounced event successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'resend/email.bounced',
@@ -324,7 +363,7 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     expect(result).toEqual({
       success: true,
@@ -362,7 +401,7 @@ describe('handleResendWebhook', () => {
    * - Should reset engagement score to 0
    */
   it('should handle email.complained event successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'resend/email.complained',
@@ -373,7 +412,7 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     expect(result).toEqual({
       success: true,
@@ -410,7 +449,7 @@ describe('handleResendWebhook', () => {
    * - Should not update any database records
    */
   it('should handle email.delivery_delayed event successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'resend/email.delivery_delayed',
@@ -421,7 +460,7 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     expect(result).toEqual({
       success: true,
@@ -448,7 +487,7 @@ describe('handleResendWebhook', () => {
    * Tests that events with multiple recipients are processed for each recipient.
    */
   it('should handle multiple recipients correctly', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'resend/email.sent',
@@ -459,7 +498,7 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     expect(result).toEqual({
       success: true,
@@ -481,7 +520,7 @@ describe('handleResendWebhook', () => {
   it('should handle blocklist update failure gracefully for bounced email', async () => {
     mockMiscService.upsertEmailBlocklist.mockRejectedValue(new Error('Database error'));
 
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'resend/email.bounced',
@@ -492,7 +531,7 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     // Should still succeed (error is logged but doesn't stop processing)
     expect(result.success).toBe(true);
@@ -512,7 +551,7 @@ describe('handleResendWebhook', () => {
   it('should handle blocklist update failure gracefully for complained email', async () => {
     mockMiscService.upsertEmailBlocklist.mockRejectedValue(new Error('Database error'));
 
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'resend/email.complained',
@@ -523,7 +562,7 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     // Should still succeed (error is logged but doesn't stop processing)
     expect(result.success).toBe(true);
@@ -546,7 +585,7 @@ describe('handleResendWebhook', () => {
       engagement_score: 98,
     });
 
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'resend/email.opened',
@@ -557,7 +596,7 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     expect(result.success).toBe(true);
     // Should cap at 100 (98 + 5 = 103, but capped at 100)
@@ -573,7 +612,7 @@ describe('handleResendWebhook', () => {
     // Return null for new email address
     mockMiscService.getEmailEngagementSummary.mockResolvedValue(null);
 
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'resend/email.sent',
@@ -584,7 +623,7 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     expect(result.success).toBe(true);
     // Should use 0 as default count
@@ -612,9 +651,9 @@ describe('handleResendWebhook', () => {
     };
 
     // Execute same event twice
-    const { result: result1 } = await t.execute({
+    const { result: result1 } = (await t.execute({
       events: [eventData],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     // Create fresh test engine for second execution (simulating idempotency)
     const t2 = new InngestTestEngine({
@@ -623,9 +662,9 @@ describe('handleResendWebhook', () => {
     mockMiscService.getEmailEngagementSummary.mockClear();
     mockMiscService.upsertEmailEngagementSummary.mockClear();
 
-    const { result: result2 } = await t2.execute({
+    const { result: result2 } = (await t2.execute({
       events: [eventData],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     // Both should succeed
     expect(result1.success).toBe(true);
@@ -638,7 +677,7 @@ describe('handleResendWebhook', () => {
    * Tests that empty recipients array is handled gracefully.
    */
   it('should handle empty recipients array gracefully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'resend/email.sent',
@@ -649,7 +688,7 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
 
     expect(result).toEqual({
       success: true,

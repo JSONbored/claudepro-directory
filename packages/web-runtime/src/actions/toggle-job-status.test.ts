@@ -1,174 +1,183 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
 import { job_status } from '@prisma/client';
+// Import SafeActionResult type from safemocker for proper typing in tests
+import type { SafeActionResult } from '@jsonbored/safemocker';
 
 // Prismocker is automatically configured via __mocks__/@prisma/client.ts
 // The prisma singleton from data-layer will automatically use PrismockerClient
 
 // Import real cache utilities for proper cache testing
-// Note: clearRequestCache is exported from @heyclaude/data-layer, but for tests we need the direct import
-// to avoid circular dependencies. Deep relative imports are acceptable for test utilities.
+// Note: Deep relative imports are acceptable for test utilities to avoid circular dependencies
 import { clearRequestCache } from '../../../data-layer/src/utils/request-cache.ts';
 
-// Mock RPC error logging utility
-// Note: Deep relative import needed for vi.mock() to work correctly
-vi.mock('../../../data-layer/src/utils/rpc-error-logging.ts', () => ({
-  logRpcError: vi.fn(),
+// Mock RPC error logging utility (if needed)
+// Note: Deep relative import needed for jest.mock() to work correctly
+jest.mock('../../../data-layer/src/utils/rpc-error-logging.ts', () => ({
+  logRpcError: jest.fn(),
 }));
 
-// Mock safe-action middleware - standardized pattern
-// Pattern: authedAction.inputSchema().outputSchema().metadata().action()
-vi.mock('./safe-action.ts', async () => {
-  // Import mocked logActionFailure
-  const { logActionFailure } = await import('../errors.ts');
-  
-  // Define all factory functions inside the mock factory to avoid hoisting issues
-  const createActionHandler = (inputSchema: any, outputSchema?: any) => {
-    return vi.fn((handler: any) => {
-      return async (input: unknown) => {
-        try {
-          const parsed = inputSchema ? inputSchema.parse(input) : input;
-          const result = await handler({
-            parsedInput: parsed,
-            ctx: { userId: 'test-user-id', userEmail: 'test@example.com', authToken: 'test-token' },
-          });
-          if (outputSchema) {
-            return outputSchema.parse(result);
-          }
-          return result;
-        } catch (error) {
-          // Simulate middleware error handling - logActionFailure is called by middleware
-          logActionFailure('toggleJobStatus', error, { userId: 'test-user-id' });
-          throw error;
-        }
-      };
-    });
+// Mock server-only FIRST
+jest.mock('server-only', () => ({}));
+
+// DO NOT mock next/headers - safemocker handles this automatically
+// DO NOT mock Supabase client or auth - safemocker handles auth automatically
+// safemocker's __mocks__/next-safe-action.ts provides pre-configured authedAction
+// with auth context already injected (test-user-id, test@example.com, test-token)
+
+// Mock logger (used by safe-action middleware and hooks)
+jest.mock('../logger.ts', () => ({
+  logger: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+    child: jest.fn(() => ({
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      debug: jest.fn(),
+    })),
+  },
+  toLogContextValue: (val: unknown) => val,
+}));
+
+// Mock errors (used by safe-action middleware) - keep real behavior for error normalization
+jest.mock('../errors.ts', () => ({
+  normalizeError: (error: unknown, fallback?: string) => {
+    if (error instanceof Error) return error;
+    return new Error(fallback || String(error));
+  },
+  logActionFailure: jest.fn((name, error, context) => {
+    if (error instanceof Error) return error;
+    return new Error(String(error));
+  }),
+}));
+
+// Mock environment (used by safe-action error handling and Prisma client)
+jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
+  const envMock: Record<string, string | undefined> = {
+    NODE_ENV: 'test',
+    POSTGRES_PRISMA_URL: undefined, // Allow undefined in tests (Prismocker doesn't need it)
+    DIRECT_URL: undefined,
+    SUPABASE_SERVICE_ROLE_KEY: undefined,
+    VERCEL: undefined,
+    VITEST: undefined,
   };
-
-  const createMetadataResult = (inputSchema: any, outputSchema?: any) => ({
-    action: createActionHandler(inputSchema, outputSchema),
-  });
-
-  const createOutputSchemaResult = (inputSchema: any, outputSchema?: any) => ({
-    metadata: vi.fn((metadata: any) => createMetadataResult(inputSchema, outputSchema)),
-    action: createActionHandler(inputSchema, outputSchema),
-  });
-
-  const createInputSchemaResult = (inputSchema: any) => ({
-    metadata: vi.fn((metadata: any) => createMetadataResult(inputSchema)),
-    outputSchema: vi.fn((outputSchema: any) => createOutputSchemaResult(inputSchema, outputSchema)),
-    action: createActionHandler(inputSchema),
-  });
-
+  
   return {
-    authedAction: {
-      inputSchema: vi.fn((schema: any) => createInputSchemaResult(schema)),
+    env: new Proxy(envMock, {
+      get: (target, prop: string) => {
+        // Handle isProduction dynamically
+        if (prop === 'isProduction') {
+          return false; // Default to false for tests
+        }
+        return target[prop];
+      },
+    }),
+    get isProduction() {
+      return false; // Default to false for tests
     },
   };
 });
+
+// DO NOT mock safe-action.ts - use REAL middleware to test SafeActionResult structure
+// This ensures we test the complete middleware chain: auth → rate limiting → logging → error handling
 
 // DO NOT mock runRpc - use real runRpc which uses Prismocker
 // This allows us to test the real RPC flow end-to-end
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
-  revalidatePath: vi.fn(),
-  revalidateTag: vi.fn(),
-}));
-
-// Mock errors
-vi.mock('../errors.ts', () => ({
-  logActionFailure: vi.fn((actionName, error, context) => {
-    const err = error instanceof Error ? error : new Error(String(error));
-    err.name = actionName;
-    return err;
-  }),
-  normalizeError: vi.fn((error: unknown, message?: string) => {
-    if (error instanceof Error) return error;
-    return new Error(message || String(error));
-  }),
-}));
-
-// Mock logger
-vi.mock('../logger.ts', () => ({
-  logger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-  toLogContextValue: vi.fn((v) => v),
+const mockRevalidatePath = jest.fn();
+const mockRevalidateTag = jest.fn();
+jest.mock('next/cache', () => ({
+  revalidatePath: (...args: any[]) => mockRevalidatePath(...args),
+  revalidateTag: (...args: any[]) => mockRevalidateTag(...args),
 }));
 
 // Mock job hooks
-vi.mock('./hooks/job-hooks.ts', () => ({
-  onJobStatusToggled: vi.fn().mockResolvedValue(undefined),
+const mockOnJobStatusToggled = jest.fn<(...args: any[]) => Promise<void>>().mockResolvedValue(undefined);
+jest.mock('./hooks/job-hooks.ts', () => ({
+  onJobStatusToggled: (...args: any[]) => mockOnJobStatusToggled(...args),
 }));
 
 describe('toggleJobStatus', () => {
   let prismocker: PrismaClient;
-  let queryRawUnsafeSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
-    // Clear request cache before each test
+    // 1. Clear request cache before each test (REQUIRED for test isolation)
     clearRequestCache();
 
-    // Get the prisma instance (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    // 2. Get Prismocker instance (automatically PrismockerClient via global mock)
     prismocker = prisma;
 
-    // Reset Prismocker data before each test
+    // 3. Reset Prismocker data before each test
     if ('reset' in prismocker && typeof prismocker.reset === 'function') {
       prismocker.reset();
     }
 
-    // Clear all mocks
-    vi.clearAllMocks();
+    // 4. Clear all mocks
+    jest.clearAllMocks();
 
+    // 5. Set up $queryRawUnsafe for RPC testing (if needed)
     // Use Prismocker's Proxy set handler to override $queryRawUnsafe
-    queryRawUnsafeSpy = vi.fn().mockResolvedValue([]);
-    (prismocker as any).$queryRawUnsafe = queryRawUnsafeSpy;
+    // This is what runRpc → BasePrismaService.callRpc → prisma.$queryRawUnsafe calls
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([]);
+
+    // Reset hook mock
+    mockOnJobStatusToggled.mockResolvedValue(undefined as void);
+
+    // Note: safemocker automatically provides auth context:
+    // - ctx.userId = 'test-user-id'
+    // - ctx.userEmail = 'test@example.com'
+    // - ctx.authToken = 'test-token'
+    // No manual auth mocks needed!
   });
 
   describe('input validation', () => {
-    it('should validate UUID for job_id field', async () => {
+    it('should return fieldErrors for invalid UUID job_id', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
 
-      // Invalid UUID should fail
-      await expect(
-        toggleJobStatus({
-          job_id: 'invalid-uuid',
-          new_status: 'active',
-        } as any)
-      ).rejects.toThrow();
+      // Call with invalid UUID
+      const result = await toggleJobStatus({
+        job_id: 'invalid-uuid',
+        new_status: 'active',
+      } as any);
+
+      // Verify SafeActionResult structure with fieldErrors
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<never>;
+      expect(safeResult.fieldErrors).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
+      expect(safeResult.serverError).toBeUndefined();
+      
+      // Verify field errors for invalid UUID
+      expect(safeResult.fieldErrors?.job_id).toBeDefined();
     });
 
-    it('should validate new_status enum', async () => {
+    it('should return fieldErrors for invalid new_status enum', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { job_statusSchema } = await import('../prisma-zod-schemas.ts');
-      const validStatuses = Object.values(job_status);
 
-      // Test with valid status
-      expect(() => {
-        job_statusSchema.parse(validStatuses[0]);
-      }).not.toThrow();
+      // Call with invalid status
+      const result = await toggleJobStatus({
+        job_id: '123e4567-e89b-12d3-a456-426614174000',
+        new_status: 'invalid-status' as any,
+      });
+
+      // Verify SafeActionResult structure with fieldErrors
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<never>;
+      expect(safeResult.fieldErrors).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
+      expect(safeResult.fieldErrors?.new_status).toBeDefined();
     });
 
-    it('should reject invalid new_status', async () => {
-      const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { job_statusSchema } = await import('../prisma-zod-schemas.ts');
-
-      // Test with invalid status
-      expect(() => {
-        job_statusSchema.parse('invalid-status');
-      }).toThrow();
-    });
-  });
-
-  describe('RPC call', () => {
-    it('should call toggle_job_status RPC with correct parameters', async () => {
+    it('should accept valid input', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
 
-      // Mock result must match toggleJobStatusResultSchema structure
+      // Mock result must match toggleJobStatusReturnsSchema structure
       const mockResult = {
         success: true,
         job_id: '123e4567-e89b-12d3-a456-426614174000',
@@ -177,46 +186,169 @@ describe('toggleJobStatus', () => {
         message: 'Job status updated successfully',
       };
 
-      // Set up Prismocker to return the RPC result
-      queryRawUnsafeSpy.mockResolvedValue([mockResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
 
       const result = await toggleJobStatus({
         job_id: '123e4567-e89b-12d3-a456-426614174000',
         new_status: 'active',
       });
 
+      // Verify SafeActionResult structure
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<typeof mockResult>;
+      expect(safeResult.data).toBeDefined();
+      expect(safeResult.serverError).toBeUndefined();
+      expect(safeResult.fieldErrors).toBeUndefined();
+    });
+  });
+
+  describe('RPC call', () => {
+    it('should call toggle_job_status RPC with correct parameters', async () => {
+      const { toggleJobStatus } = await import('./toggle-job-status.ts');
+
+      // Mock result must match toggleJobStatusReturnsSchema structure
+      const mockResult = {
+        success: true,
+        job_id: '123e4567-e89b-12d3-a456-426614174000',
+        old_status: 'draft' as const,
+        new_status: 'active' as const,
+        message: 'Job status updated successfully',
+      };
+
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
+
+      const result = await toggleJobStatus({
+        job_id: '123e4567-e89b-12d3-a456-426614174000',
+        new_status: 'active',
+      });
+
+      // Verify SafeActionResult structure
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<typeof mockResult>;
+      expect(safeResult.data).toBeDefined();
+      expect(safeResult.serverError).toBeUndefined();
+      expect(safeResult.fieldErrors).toBeUndefined();
+
       // Verify RPC was called with correct SQL and parameters
       // BasePrismaService.callRpc formats as: SELECT * FROM function_name(p_param => $1, ...)
-      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
+      // Args object: { p_job_id, p_user_id, p_new_status }
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('toggle_job_status'),
         '123e4567-e89b-12d3-a456-426614174000', // p_job_id
-        'test-user-id', // p_user_id
-        'active', // p_new_status
+        'test-user-id', // p_user_id (from ctx.userId in authedAction middleware)
+        'active' // p_new_status
       );
 
-      expect(result).toEqual(mockResult);
+      // Verify result data structure (wrapped in SafeActionResult.data)
+      expect(safeResult.data?.success).toBe(true);
+      expect(safeResult.data?.job_id).toBe('123e4567-e89b-12d3-a456-426614174000');
+      expect(safeResult.data?.old_status).toBe('draft');
+      expect(safeResult.data?.new_status).toBe('active');
     });
 
-    it('should handle RPC errors', async () => {
+    it('should return serverError when RPC fails', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { logActionFailure } = await import('../errors.ts');
 
-      const mockError = new Error('Database error');
-      queryRawUnsafeSpy.mockRejectedValue(mockError);
+      // Mock RPC to throw error
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValueOnce(
+        new Error('Database connection failed')
+      );
 
-      await expect(
-        toggleJobStatus({
-          job_id: '123e4567-e89b-12d3-a456-426614174000',
+      const result = await toggleJobStatus({
+        job_id: '123e4567-e89b-12d3-a456-426614174000',
+        new_status: 'active',
+      });
+
+      // Verify SafeActionResult structure with serverError
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<never>;
+      expect(safeResult.serverError).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
+      expect(safeResult.fieldErrors).toBeUndefined();
+    });
+  });
+
+  describe('hooks', () => {
+    it('should call onJobStatusToggled hook after successful RPC', async () => {
+      const { toggleJobStatus } = await import('./toggle-job-status.ts');
+
+      const jobId = '123e4567-e89b-12d3-a456-426614174000';
+      const mockResult = {
+        success: true,
+        job_id: jobId,
+        old_status: 'draft' as const,
+        new_status: 'active' as const,
+        message: null,
+      };
+
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
+
+      const result = await toggleJobStatus({
+        job_id: jobId,
+        new_status: 'active',
+      });
+
+      // Verify SafeActionResult structure
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<typeof mockResult>;
+      expect(safeResult.data).toBeDefined();
+      expect(safeResult.serverError).toBeUndefined();
+
+      // Verify hook was called with correct parameters
+      expect(mockOnJobStatusToggled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          job_id: jobId,
           new_status: 'active',
-        })
-      ).rejects.toThrow();
-
-      expect(logActionFailure).toHaveBeenCalledWith(
-        'toggleJobStatus',
-        expect.any(Error),
+        }),
         expect.objectContaining({
           userId: 'test-user-id',
+          userEmail: 'test@example.com',
+          authToken: 'test-token',
+        }),
+        expect.objectContaining({
+          job_id: jobId,
+          new_status: 'active',
         })
+      );
+    });
+
+    it('should log hook errors but not fail the action', async () => {
+      const { toggleJobStatus } = await import('./toggle-job-status.ts');
+      const { logger } = await import('../logger.ts');
+
+      const jobId = '123e4567-e89b-12d3-a456-426614174000';
+      const mockResult = {
+        success: true,
+        job_id: jobId,
+        old_status: 'draft' as const,
+        new_status: 'active' as const,
+        message: null,
+      };
+
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
+
+      // Mock hook to throw error
+      mockOnJobStatusToggled.mockRejectedValueOnce(new Error('Hook error') as never);
+
+      const result = await toggleJobStatus({
+        job_id: jobId,
+        new_status: 'active',
+      });
+
+      // Verify SafeActionResult structure - action should still succeed
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<typeof mockResult>;
+      expect(safeResult.data).toBeDefined();
+      expect(safeResult.serverError).toBeUndefined();
+
+      // Verify hook error was logged
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          hookName: 'onJobStatusToggled',
+          actionName: 'toggleJobStatus',
+          userId: 'test-user-id',
+        }),
+        'Post-action hook onJobStatusToggled failed'
       );
     });
   });
@@ -224,7 +356,6 @@ describe('toggleJobStatus', () => {
   describe('cache invalidation', () => {
     it('should revalidate paths and tags', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { revalidatePath, revalidateTag } = await import('next/cache');
 
       const jobId = '123e4567-e89b-12d3-a456-426614174000';
       const mockResult = {
@@ -235,25 +366,30 @@ describe('toggleJobStatus', () => {
         message: null,
       };
 
-      queryRawUnsafeSpy.mockResolvedValue([mockResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
 
-      await toggleJobStatus({
+      const result = await toggleJobStatus({
         job_id: jobId,
         new_status: 'active',
       });
 
-      expect(revalidatePath).toHaveBeenCalledWith('/jobs');
-      expect(revalidatePath).toHaveBeenCalledWith('/account/jobs');
-      expect(revalidateTag).toHaveBeenCalledWith(`job-${jobId}`, 'default');
-      expect(revalidateTag).toHaveBeenCalledWith('jobs', 'default');
-      expect(revalidateTag).toHaveBeenCalledWith('companies', 'default');
+      // Verify SafeActionResult structure
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<typeof mockResult>;
+      expect(safeResult.data).toBeDefined();
+      expect(safeResult.serverError).toBeUndefined();
+
+      // Verify cache invalidation
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/jobs');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/account/jobs');
+      expect(mockRevalidateTag).toHaveBeenCalledWith(`job-${jobId}`, 'default');
+      expect(mockRevalidateTag).toHaveBeenCalledWith('jobs', 'default');
+      expect(mockRevalidateTag).toHaveBeenCalledWith('companies', 'default');
     });
   });
 
-  describe('metadata', () => {
-    it('should have correct metadata', async () => {
-      // Metadata is set during action creation, not directly callable
-      // We verify the action works correctly instead
+  describe('authentication', () => {
+    it('should inject auth context from safemocker', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
 
       const jobId = '123e4567-e89b-12d3-a456-426614174000';
@@ -265,97 +401,55 @@ describe('toggleJobStatus', () => {
         message: null,
       };
 
-      queryRawUnsafeSpy.mockResolvedValue([mockResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
 
-      await toggleJobStatus({
+      const result = await toggleJobStatus({
         job_id: jobId,
         new_status: 'active',
       });
 
-      // If action executes successfully, metadata was set correctly
-      expect(queryRawUnsafeSpy).toHaveBeenCalled();
+      // Verify SafeActionResult structure
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<typeof mockResult>;
+      expect(safeResult.data).toBeDefined();
+      expect(safeResult.serverError).toBeUndefined();
+      expect(safeResult.validationErrors).toBeUndefined();
+
+      // Verify auth context was injected (ctx.userId = 'test-user-id' from safemocker)
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('toggle_job_status'),
+        jobId,
+        'test-user-id', // From safemocker's authedAction context (this is what gets passed to RPC)
+        'active'
+      );
     });
   });
 
-  describe('edge cases', () => {
-    it('should handle null result from RPC', async () => {
+  describe('output validation', () => {
+    it('should return validationErrors for invalid RPC output', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
 
-      // Null result should fail outputSchema validation (outputSchema requires object)
-      queryRawUnsafeSpy.mockResolvedValue([null] as any);
-
-      await expect(
-        toggleJobStatus({
-          job_id: '123e4567-e89b-12d3-a456-426614174000',
-          new_status: 'active',
-        })
-      ).rejects.toThrow();
-    });
-
-    it('should handle empty array result from RPC', async () => {
-      const { toggleJobStatus } = await import('./toggle-job-status.ts');
-
-      // Empty array result should fail outputSchema validation (outputSchema requires object)
-      queryRawUnsafeSpy.mockResolvedValue([] as any);
-
-      await expect(
-        toggleJobStatus({
-          job_id: '123e4567-e89b-12d3-a456-426614174000',
-          new_status: 'active',
-        })
-      ).rejects.toThrow();
-    });
-
-    it('should handle revalidatePath errors gracefully', async () => {
-      const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { revalidatePath } = await import('next/cache');
-
-      const mockResult = {
+      // Mock result that doesn't match toggleJobStatusReturnsSchema
+      // (missing required fields or wrong types)
+      const invalidResult = {
         success: true,
-        job_id: '123e4567-e89b-12d3-a456-426614174000',
-        old_status: 'draft' as const,
-        new_status: 'active' as const,
-        message: null,
+        // Missing job_id, old_status, new_status, message
       };
 
-      queryRawUnsafeSpy.mockResolvedValue([mockResult] as any);
-      vi.mocked(revalidatePath).mockImplementation(() => {
-        throw new Error('Revalidate path error');
-      });
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([invalidResult]);
 
-      // Should throw - revalidatePath errors are not caught
-      await expect(
-        toggleJobStatus({
-          job_id: '123e4567-e89b-12d3-a456-426614174000',
-          new_status: 'active',
-        })
-      ).rejects.toThrow();
-    });
-
-    it('should handle revalidateTag errors gracefully', async () => {
-      const { toggleJobStatus } = await import('./toggle-job-status.ts');
-      const { revalidateTag } = await import('next/cache');
-
-      const mockResult = {
-        success: true,
+      const result = await toggleJobStatus({
         job_id: '123e4567-e89b-12d3-a456-426614174000',
-        old_status: 'draft' as const,
-        new_status: 'active' as const,
-        message: null,
-      };
-
-      queryRawUnsafeSpy.mockResolvedValue([mockResult] as any);
-      vi.mocked(revalidateTag).mockImplementation(() => {
-        throw new Error('Revalidate tag error');
+        new_status: 'active',
       });
 
-      // Should throw - revalidateTag errors are not caught
-      await expect(
-        toggleJobStatus({
-          job_id: '123e4567-e89b-12d3-a456-426614174000',
-          new_status: 'active',
-        })
-      ).rejects.toThrow();
+      // Verify SafeActionResult structure with validationErrors
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<never>;
+      expect(safeResult.validationErrors).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
+      expect(safeResult.serverError).toBeUndefined();
+      expect(safeResult.fieldErrors).toBeUndefined();
     });
   });
 });

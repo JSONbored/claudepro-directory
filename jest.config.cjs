@@ -16,6 +16,18 @@ module.exports = {
   // Use ts-jest preset for TypeScript support
   preset: 'ts-jest',
   
+  // CRITICAL: When package.json has "type": "module", Jest tries to parse files as ESM
+  // We must explicitly tell Jest NOT to treat TypeScript files as ESM
+  // ts-jest will transform them to CommonJS
+  // This is the key difference from safemocker - they don't have "type": "module" in package.json
+  extensionsToTreatAsEsm: [], // Don't treat any files as ESM - ts-jest handles transformation
+  
+  // CRITICAL: Force Jest to use CommonJS module system (overrides package.json "type": "module")
+  // This ensures Jest doesn't try to parse TypeScript files as ESM before ts-jest transforms them
+  testEnvironmentOptions: {
+    // Ensure Node.js doesn't treat test files as ESM
+  },
+  
   // Test environment (default: 'node')
   testEnvironment: 'node',
   
@@ -53,6 +65,8 @@ module.exports = {
     '^@heyclaude/data-layer/services/trending$': '<rootDir>/packages/data-layer/src/services/trending.ts',
     // Map @heyclaude/web-runtime/utils/* subpath exports (must come before general pattern)
     '^@heyclaude/web-runtime/utils/(.*)$': '<rootDir>/packages/web-runtime/src/utils/$1',
+    // Map @heyclaude/web-runtime/server/fetch-helpers (must come before general pattern)
+    '^@heyclaude/web-runtime/server/fetch-helpers$': '<rootDir>/packages/web-runtime/src/server/fetch-helpers.ts',
     // Map @heyclaude/web-runtime/prisma-zod-schemas (must come before general pattern)
     '^@heyclaude/web-runtime/prisma-zod-schemas$': '<rootDir>/packages/web-runtime/src/prisma-zod-schemas.ts',
     // Map @heyclaude/* packages to their source files (must come after subpath exports)
@@ -61,6 +75,9 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/apps/web/$1',
     // Map @test-utils/* to config/tests/utils/*
     '^@test-utils/(.*)$': '<rootDir>/config/tests/utils/$1',
+    // Map next-safe-action to our mock (solves ESM compatibility issue)
+    // This ensures Jest uses our CommonJS-compatible mock instead of trying to import the ESM module
+    '^next-safe-action$': '<rootDir>/packages/web-runtime/src/actions/__mocks__/next-safe-action.ts',
   },
   
   // Transform configuration
@@ -68,13 +85,22 @@ module.exports = {
     '^.+\\.tsx?$': [
       'ts-jest',
       {
+        // CRITICAL: When package.json has "type": "module", Jest tries to parse files as ESM
+        // We must explicitly tell ts-jest to use CommonJS transformation
+        // This matches safemocker's jest.config.cjs which works perfectly
+        isolatedModules: false, // Allow type checking during transformation
+        // CRITICAL: Force CommonJS output format (overrides package.json "type": "module")
+        // This is the key difference - safemocker doesn't have "type": "module" so it works
+        // We need to explicitly override it here
+        compiler: 'typescript',
         // Use tsconfig.json for TypeScript compilation
         tsconfig: {
           // Base compiler options from tsconfig.base.json
           target: 'ES2022',
           lib: ['dom', 'dom.iterable', 'esnext'],
-          module: 'commonjs', // Jest requires CommonJS
+          module: 'commonjs', // CRITICAL: Jest requires CommonJS (overrides package.json "type": "module")
           moduleResolution: 'node', // Jest requires node resolution
+          esModuleInterop: true,
           allowJs: true,
           skipLibCheck: true,
           strict: true,
@@ -127,8 +153,9 @@ module.exports = {
   
   // Transform ignore patterns - don't transform pre-built dist files
   // Exception: Transform next-safe-action (ESM module) for real middleware testing
+  // Exception: Transform @jsonbored/safemocker (ESM module) - our mock imports from it
   transformIgnorePatterns: [
-    '/node_modules/(?!(next-safe-action)/)',
+    '/node_modules/(?!(next-safe-action|@jsonbored/safemocker)/)',
     // Don't transform prismocker dist files (they're already compiled)
     '/packages/prismocker/dist/',
   ],

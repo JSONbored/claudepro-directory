@@ -1,76 +1,146 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
+// Import SafeActionResult type from safemocker for proper typing in tests
+import type { SafeActionResult } from '@jsonbored/safemocker';
 
-// Mock safe-action middleware - standardized pattern
-// Pattern: authedAction.inputSchema().metadata().action()
-vi.mock('./safe-action.ts', () => {
-  // Define all factory functions inside the mock factory to avoid hoisting issues
-  const createActionHandler = (inputSchema: any) => {
-    return vi.fn((handler: any) => {
-      return async (input: unknown) => {
-        const parsed = inputSchema ? inputSchema.parse(input) : input;
-        return handler({
-          parsedInput: parsed,
-          ctx: { userId: 'test-user-id', userEmail: 'test@example.com', authToken: 'test-token' },
-        });
-      };
-    });
+// Import real cache utilities for proper cache testing
+// Note: Deep relative imports are acceptable for test utilities to avoid circular dependencies
+import { clearRequestCache } from '../../../data-layer/src/utils/request-cache.ts';
+
+// Mock RPC error logging utility (if needed)
+// Note: Deep relative import needed for jest.mock() to work correctly
+jest.mock('../../../data-layer/src/utils/rpc-error-logging.ts', () => ({
+  logRpcError: jest.fn(),
+}));
+
+// Mock server-only FIRST
+jest.mock('server-only', () => ({}));
+
+// DO NOT mock next/headers - safemocker handles this automatically
+// DO NOT mock Supabase client or auth - safemocker handles auth automatically
+// safemocker's __mocks__/next-safe-action.ts provides pre-configured authedAction
+// with auth context already injected (test-user-id, test@example.com, test-token)
+
+// Mock logger (used by safe-action middleware and actions)
+jest.mock('../logger.ts', () => ({
+  logger: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+    child: jest.fn(() => ({
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      debug: jest.fn(),
+    })),
+  },
+  toLogContextValue: (val: unknown) => val,
+}));
+
+// Mock errors (used by safe-action middleware) - keep real behavior for error normalization
+jest.mock('../errors.ts', () => ({
+  normalizeError: (error: unknown, fallback?: string) => {
+    if (error instanceof Error) return error;
+    return new Error(fallback || String(error));
+  },
+  logActionFailure: jest.fn((name, error, context) => {
+    if (error instanceof Error) return error;
+    return new Error(String(error));
+  }),
+}));
+
+// Mock environment (used by safe-action error handling)
+jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
+  const envMock: Record<string, string | undefined> = {
+    NODE_ENV: 'test',
+    POSTGRES_PRISMA_URL: undefined,
+    DIRECT_URL: undefined,
+    SUPABASE_SERVICE_ROLE_KEY: undefined,
+    VERCEL: undefined,
+    VITEST: undefined,
   };
-
-  const createMetadataResult = (inputSchema: any) => ({
-    action: createActionHandler(inputSchema),
-  });
-
-  const createInputSchemaResult = (inputSchema: any) => ({
-    metadata: vi.fn((metadata: any) => createMetadataResult(inputSchema)),
-    action: createActionHandler(inputSchema),
-  });
-
+  
   return {
-    authedAction: {
-      inputSchema: vi.fn((schema: any) => createInputSchemaResult(schema)),
+    env: new Proxy(envMock, {
+      get: (target, prop: string) => {
+        if (prop === 'isProduction') {
+          return false;
+        }
+        return target[prop];
+      },
+    }),
+    get isProduction() {
+      return false;
     },
   };
 });
 
-// Mock Supabase client
-vi.mock('../supabase/server.ts', () => ({
-  createSupabaseServerClient: vi.fn(),
+// DO NOT mock safe-action.ts - use REAL middleware to test SafeActionResult structure
+// This ensures we test the complete middleware chain: auth → rate limiting → logging → error handling
+
+// Mock Supabase client (MFA functions need Supabase client)
+const mockSupabase = {
+  auth: {
+    mfa: {
+      listFactors: jest.fn(),
+      enrollFactor: jest.fn(),
+      challengeFactor: jest.fn(),
+      verifyChallenge: jest.fn(),
+      unenrollFactor: jest.fn(),
+    },
+    refreshSession: jest.fn().mockResolvedValue({}),
+    getSession: jest.fn().mockResolvedValue({ data: { session: null } }),
+  },
+};
+
+jest.mock('../supabase/server.ts', () => ({
+  createSupabaseServerClient: jest.fn().mockResolvedValue(mockSupabase),
 }));
 
 // Mock MFA functions
-vi.mock('../auth/mfa.ts', () => ({
-  listMFAFactors: vi.fn(),
-  enrollTOTPFactor: vi.fn(),
-  createMFAChallenge: vi.fn(),
-  verifyMFAChallenge: vi.fn(),
-  unenrollMFAFactor: vi.fn(),
-  getAuthenticatorAssuranceLevel: vi.fn(),
-  requiresMFAChallenge: vi.fn(),
+const mockListMFAFactors = jest.fn();
+const mockEnrollTOTPFactor = jest.fn();
+const mockCreateMFAChallenge = jest.fn();
+const mockVerifyMFAChallenge = jest.fn();
+const mockUnenrollMFAFactor = jest.fn();
+const mockGetAuthenticatorAssuranceLevel = jest.fn();
+const mockRequiresMFAChallenge = jest.fn();
+
+jest.mock('../auth/mfa.ts', () => ({
+  listMFAFactors: (...args: any[]) => mockListMFAFactors(...args),
+  enrollTOTPFactor: (...args: any[]) => mockEnrollTOTPFactor(...args),
+  createMFAChallenge: (...args: any[]) => mockCreateMFAChallenge(...args),
+  verifyMFAChallenge: (...args: any[]) => mockVerifyMFAChallenge(...args),
+  unenrollMFAFactor: (...args: any[]) => mockUnenrollMFAFactor(...args),
+  getAuthenticatorAssuranceLevel: (...args: any[]) => mockGetAuthenticatorAssuranceLevel(...args),
+  requiresMFAChallenge: (...args: any[]) => mockRequiresMFAChallenge(...args),
+}));
+
+// Mock Inngest client (used by verifyMFAChallengeAction and unenrollMFAAction)
+const mockInngestSend = jest.fn().mockResolvedValue(undefined);
+jest.mock('../inngest/client.ts', () => ({
+  inngest: {
+    send: (...args: any[]) => mockInngestSend(...args),
+  },
 }));
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
-  revalidatePath: vi.fn(),
+const mockRevalidatePath = jest.fn();
+jest.mock('next/cache', () => ({
+  revalidatePath: (...args: any[]) => mockRevalidatePath(...args),
 }));
 
-describe.skip('listMFAAction', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+describe('listMFAAction', () => {
+  beforeEach(async () => {
+    // 1. Clear request cache before each test (REQUIRED for test isolation)
+    clearRequestCache();
+
+    // 2. Clear all mocks
+    jest.clearAllMocks();
   });
 
   it('should return factors from listMFAFactors', async () => {
     const { listMFAAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { listMFAFactors } = await import('../auth/mfa.ts');
-
-    const mockSupabase = {
-      auth: {
-        mfa: {
-          listFactors: vi.fn(),
-        },
-      },
-    };
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
 
     const mockFactors = [
       {
@@ -82,47 +152,52 @@ describe.skip('listMFAAction', () => {
       },
     ];
 
-    vi.mocked(listMFAFactors).mockResolvedValue({
+    mockListMFAFactors.mockResolvedValue({
       factors: mockFactors,
       error: null,
     });
 
-    const result = await listMFAAction({});
+    const result = await listMFAAction();
 
-    expect(listMFAFactors).toHaveBeenCalledWith(mockSupabase);
-    expect(result).toEqual({ factors: mockFactors });
+    // Verify SafeActionResult structure
+    // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+    const safeResult = result as SafeActionResult<{ factors: typeof mockFactors }>;
+    expect(safeResult.data).toBeDefined();
+    expect(safeResult.serverError).toBeUndefined();
+    expect(safeResult.fieldErrors).toBeUndefined();
+
+    expect(mockListMFAFactors).toHaveBeenCalledWith(mockSupabase);
+    expect(safeResult.data?.factors).toEqual(mockFactors);
   });
 
-  it('should throw error when listMFAFactors returns error', async () => {
+  it('should return serverError when listMFAFactors returns error', async () => {
     const { listMFAAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { listMFAFactors } = await import('../auth/mfa.ts');
-
-    const mockSupabase = {};
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
 
     const mockError = new Error('Failed to list factors');
-    vi.mocked(listMFAFactors).mockResolvedValue({
+    mockListMFAFactors.mockResolvedValue({
       factors: [],
       error: mockError,
     });
 
-    await expect(listMFAAction({})).rejects.toThrow('Failed to list factors');
+    const result = await listMFAAction();
+
+    // Verify SafeActionResult structure with serverError
+    // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+    const safeResult = result as SafeActionResult<never>;
+    expect(safeResult.serverError).toBeDefined();
+    expect(safeResult.data).toBeUndefined();
+    expect(safeResult.fieldErrors).toBeUndefined();
   });
 });
 
-describe.skip('enrollTOTPAction', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+describe('enrollTOTPAction', () => {
+  beforeEach(async () => {
+    clearRequestCache();
+    jest.clearAllMocks();
   });
 
   it('should return enrollment data from enrollTOTPFactor', async () => {
     const { enrollTOTPAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { enrollTOTPFactor } = await import('../auth/mfa.ts');
-
-    const mockSupabase = {};
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
 
     const mockEnrollment = {
       id: 'factor-1',
@@ -131,83 +206,97 @@ describe.skip('enrollTOTPAction', () => {
       uri: 'otpauth://totp/...',
     };
 
-    vi.mocked(enrollTOTPFactor).mockResolvedValue({
+    mockEnrollTOTPFactor.mockResolvedValue({
       data: mockEnrollment,
       error: null,
     });
 
-    const result = await enrollTOTPAction({});
+    const result = await enrollTOTPAction();
 
-    expect(enrollTOTPFactor).toHaveBeenCalledWith(mockSupabase);
-    expect(result).toEqual({ enrollment: mockEnrollment });
+    // Verify SafeActionResult structure
+    // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+    const safeResult = result as SafeActionResult<{ enrollment: typeof mockEnrollment }>;
+    expect(safeResult.data).toBeDefined();
+    expect(safeResult.serverError).toBeUndefined();
+    expect(safeResult.fieldErrors).toBeUndefined();
+
+    expect(mockEnrollTOTPFactor).toHaveBeenCalledWith(mockSupabase);
+    expect(safeResult.data?.enrollment).toEqual(mockEnrollment);
   });
 
-  it('should throw error when enrollTOTPFactor returns error', async () => {
+  it('should return serverError when enrollTOTPFactor returns error', async () => {
     const { enrollTOTPAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { enrollTOTPFactor } = await import('../auth/mfa.ts');
-
-    const mockSupabase = {};
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
 
     const mockError = new Error('Enrollment failed');
-    vi.mocked(enrollTOTPFactor).mockResolvedValue({
+    mockEnrollTOTPFactor.mockResolvedValue({
       data: null,
       error: mockError,
     });
 
-    await expect(enrollTOTPAction({})).rejects.toThrow('Enrollment failed');
+    const result = await enrollTOTPAction();
+
+    // Verify SafeActionResult structure with serverError
+    // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+    const safeResult = result as SafeActionResult<never>;
+    expect(safeResult.serverError).toBeDefined();
+    expect(safeResult.data).toBeUndefined();
   });
 
-  it('should throw error when no data returned', async () => {
+  it('should return serverError when no data returned', async () => {
     const { enrollTOTPAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { enrollTOTPFactor } = await import('../auth/mfa.ts');
 
-    const mockSupabase = {};
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
-
-    vi.mocked(enrollTOTPFactor).mockResolvedValue({
+    mockEnrollTOTPFactor.mockResolvedValue({
       data: null,
       error: null,
     });
 
-    await expect(enrollTOTPAction({})).rejects.toThrow('TOTP enrollment failed');
+    const result = await enrollTOTPAction();
+
+    // Verify SafeActionResult structure with serverError
+    // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+    const safeResult = result as SafeActionResult<never>;
+    expect(safeResult.serverError).toBeDefined();
+    expect(safeResult.data).toBeUndefined();
   });
 });
 
-describe.skip('createMFAChallengeAction', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+describe('createMFAChallengeAction', () => {
+  beforeEach(async () => {
+    clearRequestCache();
+    jest.clearAllMocks();
   });
 
   describe('input validation', () => {
-    it('should validate UUID for factorId', async () => {
+    it('should return fieldErrors for invalid UUID factorId', async () => {
       const { createMFAChallengeAction } = await import('./mfa.ts');
 
-      await expect(
-        createMFAChallengeAction({
-          factorId: 'invalid-uuid',
-        } as any)
-      ).rejects.toThrow('Invalid factor ID');
+      // Call with invalid UUID
+      const result = await createMFAChallengeAction({
+        factorId: 'invalid-uuid',
+      } as any);
+
+      // Verify SafeActionResult structure with fieldErrors
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<never>;
+      expect(safeResult.fieldErrors).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
+      expect(safeResult.serverError).toBeUndefined();
+      
+      // Verify field errors for invalid UUID
+      expect(safeResult.fieldErrors?.factorId).toBeDefined();
     });
   });
 
   describe('challenge creation', () => {
     it('should return challenge data from createMFAChallenge', async () => {
       const { createMFAChallengeAction } = await import('./mfa.ts');
-      const { createSupabaseServerClient } = await import('../supabase/server.ts');
-      const { createMFAChallenge } = await import('../auth/mfa.ts');
-
-      const mockSupabase = {};
-      vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
 
       const mockChallenge = {
         id: 'challenge-1',
         expires_at: '2024-01-01T12:00:00Z',
       };
 
-      vi.mocked(createMFAChallenge).mockResolvedValue({
+      mockCreateMFAChallenge.mockResolvedValue({
         data: mockChallenge,
         error: null,
       });
@@ -216,129 +305,163 @@ describe.skip('createMFAChallengeAction', () => {
         factorId: '123e4567-e89b-12d3-a456-426614174000',
       });
 
-      expect(createMFAChallenge).toHaveBeenCalledWith(
+      // Verify SafeActionResult structure
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<{ challenge: typeof mockChallenge }>;
+      expect(safeResult.data).toBeDefined();
+      expect(safeResult.serverError).toBeUndefined();
+      expect(safeResult.fieldErrors).toBeUndefined();
+
+      expect(mockCreateMFAChallenge).toHaveBeenCalledWith(
         mockSupabase,
         '123e4567-e89b-12d3-a456-426614174000'
       );
-      expect(result).toEqual({ challenge: mockChallenge });
+      expect(safeResult.data?.challenge).toEqual(mockChallenge);
     });
 
-    it('should throw error when createMFAChallenge returns error', async () => {
+    it('should return serverError when createMFAChallenge returns error', async () => {
       const { createMFAChallengeAction } = await import('./mfa.ts');
-      const { createSupabaseServerClient } = await import('../supabase/server.ts');
-      const { createMFAChallenge } = await import('../auth/mfa.ts');
-
-      const mockSupabase = {};
-      vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
 
       const mockError = new Error('Challenge creation failed');
-      vi.mocked(createMFAChallenge).mockResolvedValue({
+      mockCreateMFAChallenge.mockResolvedValue({
         data: null,
         error: mockError,
       });
 
-      await expect(
-        createMFAChallengeAction({
-          factorId: '123e4567-e89b-12d3-a456-426614174000',
-        })
-      ).rejects.toThrow('Challenge creation failed');
+      const result = await createMFAChallengeAction({
+        factorId: '123e4567-e89b-12d3-a456-426614174000',
+      });
+
+      // Verify SafeActionResult structure with serverError
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<never>;
+      expect(safeResult.serverError).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
     });
 
-    it('should throw error when no data returned', async () => {
+    it('should return serverError when no data returned', async () => {
       const { createMFAChallengeAction } = await import('./mfa.ts');
-      const { createSupabaseServerClient } = await import('../supabase/server.ts');
-      const { createMFAChallenge } = await import('../auth/mfa.ts');
 
-      const mockSupabase = {};
-      vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
-
-      vi.mocked(createMFAChallenge).mockResolvedValue({
+      mockCreateMFAChallenge.mockResolvedValue({
         data: null,
         error: null,
       });
 
-      await expect(
-        createMFAChallengeAction({
-          factorId: '123e4567-e89b-12d3-a456-426614174000',
-        })
-      ).rejects.toThrow('MFA challenge creation failed');
+      const result = await createMFAChallengeAction({
+        factorId: '123e4567-e89b-12d3-a456-426614174000',
+      });
+
+      // Verify SafeActionResult structure with serverError
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<never>;
+      expect(safeResult.serverError).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
     });
   });
 });
 
-describe.skip('verifyMFAChallengeAction', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+describe('verifyMFAChallengeAction', () => {
+  beforeEach(async () => {
+    clearRequestCache();
+    jest.clearAllMocks();
   });
 
   describe('input validation', () => {
-    it('should validate UUIDs for factorId and challengeId', async () => {
+    it('should return fieldErrors for invalid UUID factorId', async () => {
       const { verifyMFAChallengeAction } = await import('./mfa.ts');
 
-      await expect(
-        verifyMFAChallengeAction({
-          factorId: 'invalid-uuid',
-          challengeId: '123e4567-e89b-12d3-a456-426614174000',
-          code: '123456',
-        } as any)
-      ).rejects.toThrow('Invalid factor ID');
+      // Call with invalid UUID
+      const result = await verifyMFAChallengeAction({
+        factorId: 'invalid-uuid',
+        challengeId: '123e4567-e89b-12d3-a456-426614174000',
+        code: '123456',
+      } as any);
 
-      await expect(
-        verifyMFAChallengeAction({
-          factorId: '123e4567-e89b-12d3-a456-426614174000',
-          challengeId: 'invalid-uuid',
-          code: '123456',
-        } as any)
-      ).rejects.toThrow('Invalid challenge ID');
+      // Verify SafeActionResult structure with fieldErrors
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<never>;
+      expect(safeResult.fieldErrors).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
+      expect(safeResult.serverError).toBeUndefined();
+      
+      expect(safeResult.fieldErrors?.factorId).toBeDefined();
     });
 
-    it('should validate code format (6 digits)', async () => {
+    it('should return fieldErrors for invalid UUID challengeId', async () => {
       const { verifyMFAChallengeAction } = await import('./mfa.ts');
 
-      // Too short
-      await expect(
-        verifyMFAChallengeAction({
-          factorId: '123e4567-e89b-12d3-a456-426614174000',
-          challengeId: '123e4567-e89b-12d3-a456-426614174000',
-          code: '12345',
-        } as any)
-      ).rejects.toThrow();
+      // Call with invalid UUID
+      const result = await verifyMFAChallengeAction({
+        factorId: '123e4567-e89b-12d3-a456-426614174000',
+        challengeId: 'invalid-uuid',
+        code: '123456',
+      } as any);
 
-      // Too long
-      await expect(
-        verifyMFAChallengeAction({
-          factorId: '123e4567-e89b-12d3-a456-426614174000',
-          challengeId: '123e4567-e89b-12d3-a456-426614174000',
-          code: '1234567',
-        } as any)
-      ).rejects.toThrow();
+      // Verify SafeActionResult structure with fieldErrors
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<never>;
+      expect(safeResult.fieldErrors).toBeDefined();
+      expect(safeResult.fieldErrors?.challengeId).toBeDefined();
+    });
 
-      // Non-numeric
-      await expect(
-        verifyMFAChallengeAction({
-          factorId: '123e4567-e89b-12d3-a456-426614174000',
-          challengeId: '123e4567-e89b-12d3-a456-426614174000',
-          code: 'abcdef',
-        } as any)
-      ).rejects.toThrow();
+    it('should return fieldErrors for invalid code format', async () => {
+      const { verifyMFAChallengeAction } = await import('./mfa.ts');
+
+      // Test with too short code
+      const result1 = await verifyMFAChallengeAction({
+        factorId: '123e4567-e89b-12d3-a456-426614174000',
+        challengeId: '123e4567-e89b-12d3-a456-426614174001',
+        code: '12345',
+      } as any);
+
+      // Verify SafeActionResult structure with fieldErrors
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult1 = result1 as SafeActionResult<never>;
+      expect(safeResult1.fieldErrors).toBeDefined();
+      expect(safeResult1.fieldErrors?.code).toBeDefined();
+
+      // Test with too long code
+      const result2 = await verifyMFAChallengeAction({
+        factorId: '123e4567-e89b-12d3-a456-426614174000',
+        challengeId: '123e4567-e89b-12d3-a456-426614174001',
+        code: '1234567',
+      } as any);
+
+      const safeResult2 = result2 as SafeActionResult<never>;
+      expect(safeResult2.fieldErrors).toBeDefined();
+      expect(safeResult2.fieldErrors?.code).toBeDefined();
+
+      // Test with non-numeric code
+      const result3 = await verifyMFAChallengeAction({
+        factorId: '123e4567-e89b-12d3-a456-426614174000',
+        challengeId: '123e4567-e89b-12d3-a456-426614174001',
+        code: 'abcdef',
+      } as any);
+
+      const safeResult3 = result3 as SafeActionResult<never>;
+      expect(safeResult3.fieldErrors).toBeDefined();
+      expect(safeResult3.fieldErrors?.code).toBeDefined();
     });
   });
 
   describe('verification', () => {
     it('should verify challenge and revalidate paths', async () => {
       const { verifyMFAChallengeAction } = await import('./mfa.ts');
-      const { createSupabaseServerClient } = await import('../supabase/server.ts');
-      const { verifyMFAChallenge } = await import('../auth/mfa.ts');
-      const { revalidatePath } = await import('next/cache');
 
-      const mockSupabase = {
-        auth: {
-          refreshSession: vi.fn().mockResolvedValue({}),
-        },
+      const mockFactor = {
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        friendly_name: 'My TOTP',
+        factor_type: 'totp',
+        status: 'verified',
+        created_at: '2024-01-01',
       };
-      vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
 
-      vi.mocked(verifyMFAChallenge).mockResolvedValue({
+      mockListMFAFactors.mockResolvedValue({
+        factors: [mockFactor],
+        error: null,
+      });
+
+      mockVerifyMFAChallenge.mockResolvedValue({
         success: true,
         error: null,
       });
@@ -349,7 +472,14 @@ describe.skip('verifyMFAChallengeAction', () => {
         code: '123456',
       });
 
-      expect(verifyMFAChallenge).toHaveBeenCalledWith(
+      // Verify SafeActionResult structure
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<{ success: boolean }>;
+      expect(safeResult.data).toBeDefined();
+      expect(safeResult.serverError).toBeUndefined();
+      expect(safeResult.fieldErrors).toBeUndefined();
+
+      expect(mockVerifyMFAChallenge).toHaveBeenCalledWith(
         mockSupabase,
         '123e4567-e89b-12d3-a456-426614174000',
         '123e4567-e89b-12d3-a456-426614174001',
@@ -357,103 +487,125 @@ describe.skip('verifyMFAChallengeAction', () => {
       );
 
       expect(mockSupabase.auth.refreshSession).toHaveBeenCalled();
-      expect(revalidatePath).toHaveBeenCalledWith('/account/settings');
-      expect(revalidatePath).toHaveBeenCalledWith('/account');
-      expect(result).toEqual({ success: true });
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/account/settings');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/account');
+      expect(safeResult.data?.success).toBe(true);
+
+      // Verify Inngest email event was sent
+      expect(mockInngestSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'email/transactional',
+          data: expect.objectContaining({
+            type: 'mfa-factor-added',
+            email: 'test@example.com',
+          }),
+        })
+      );
     });
 
-    it('should throw error when verification fails', async () => {
+    it('should return serverError when verification fails', async () => {
       const { verifyMFAChallengeAction } = await import('./mfa.ts');
-      const { createSupabaseServerClient } = await import('../supabase/server.ts');
-      const { verifyMFAChallenge } = await import('../auth/mfa.ts');
 
-      const mockSupabase = {
-        auth: {
-          refreshSession: vi.fn(),
-        },
-      };
-      vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
+      mockListMFAFactors.mockResolvedValue({
+        factors: [],
+        error: null,
+      });
 
       const mockError = new Error('Verification failed');
-      vi.mocked(verifyMFAChallenge).mockResolvedValue({
+      mockVerifyMFAChallenge.mockResolvedValue({
         success: false,
         error: mockError,
       });
 
-      await expect(
-        verifyMFAChallengeAction({
-          factorId: '123e4567-e89b-12d3-a456-426614174000',
-          challengeId: '123e4567-e89b-12d3-a456-426614174001',
-          code: '123456',
-        })
-      ).rejects.toThrow('Verification failed');
+      const result = await verifyMFAChallengeAction({
+        factorId: '123e4567-e89b-12d3-a456-426614174000',
+        challengeId: '123e4567-e89b-12d3-a456-426614174001',
+        code: '123456',
+      });
+
+      // Verify SafeActionResult structure with serverError
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<never>;
+      expect(safeResult.serverError).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
     });
 
-    it('should throw error when success is false', async () => {
+    it('should return serverError when success is false', async () => {
       const { verifyMFAChallengeAction } = await import('./mfa.ts');
-      const { createSupabaseServerClient } = await import('../supabase/server.ts');
-      const { verifyMFAChallenge } = await import('../auth/mfa.ts');
 
-      const mockSupabase = {
-        auth: {
-          refreshSession: vi.fn(),
-        },
-      };
-      vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
+      mockListMFAFactors.mockResolvedValue({
+        factors: [],
+        error: null,
+      });
 
-      vi.mocked(verifyMFAChallenge).mockResolvedValue({
+      mockVerifyMFAChallenge.mockResolvedValue({
         success: false,
         error: null,
       });
 
-      await expect(
-        verifyMFAChallengeAction({
-          factorId: '123e4567-e89b-12d3-a456-426614174000',
-          challengeId: '123e4567-e89b-12d3-a456-426614174001',
-          code: '123456',
-        })
-      ).rejects.toThrow('MFA verification failed');
+      const result = await verifyMFAChallengeAction({
+        factorId: '123e4567-e89b-12d3-a456-426614174000',
+        challengeId: '123e4567-e89b-12d3-a456-426614174001',
+        code: '123456',
+      });
+
+      // Verify SafeActionResult structure with serverError
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<never>;
+      expect(safeResult.serverError).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
     });
   });
 });
 
-describe.skip('unenrollMFAAction', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+describe('unenrollMFAAction', () => {
+  beforeEach(async () => {
+    clearRequestCache();
+    jest.clearAllMocks();
   });
 
   describe('input validation', () => {
-    it('should validate UUID for factorId', async () => {
+    it('should return fieldErrors for invalid UUID factorId', async () => {
       const { unenrollMFAAction } = await import('./mfa.ts');
 
-      await expect(
-        unenrollMFAAction({
-          factorId: 'invalid-uuid',
-        } as any)
-      ).rejects.toThrow('Invalid factor ID');
+      // Call with invalid UUID
+      const result = await unenrollMFAAction({
+        factorId: 'invalid-uuid',
+      } as any);
+
+      // Verify SafeActionResult structure with fieldErrors
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<never>;
+      expect(safeResult.fieldErrors).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
+      expect(safeResult.serverError).toBeUndefined();
+      
+      expect(safeResult.fieldErrors?.factorId).toBeDefined();
     });
   });
 
   describe('unenrollment', () => {
     it('should unenroll factor and revalidate paths', async () => {
       const { unenrollMFAAction } = await import('./mfa.ts');
-      const { createSupabaseServerClient } = await import('../supabase/server.ts');
-      const { listMFAFactors, unenrollMFAFactor } = await import('../auth/mfa.ts');
-      const { revalidatePath } = await import('next/cache');
 
-      const mockSupabase = {};
-      vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
+      const mockFactorToRemove = {
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        friendly_name: 'My TOTP',
+        factor_type: 'totp',
+        status: 'verified',
+        created_at: '2024-01-01',
+      };
 
       // Mock multiple factors (so unenrollment is allowed)
-      vi.mocked(listMFAFactors).mockResolvedValue({
+      mockListMFAFactors.mockResolvedValue({
         factors: [
           { id: 'factor-1', status: 'verified' },
-          { id: 'factor-2', status: 'verified' },
+          mockFactorToRemove,
         ],
         error: null,
       });
 
-      vi.mocked(unenrollMFAFactor).mockResolvedValue({
+      mockUnenrollMFAFactor.mockResolvedValue({
         success: true,
         error: null,
       });
@@ -462,46 +614,58 @@ describe.skip('unenrollMFAAction', () => {
         factorId: '123e4567-e89b-12d3-a456-426614174000',
       });
 
-      expect(listMFAFactors).toHaveBeenCalledWith(mockSupabase);
-      expect(unenrollMFAFactor).toHaveBeenCalledWith(
+      // Verify SafeActionResult structure
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<{ success: boolean }>;
+      expect(safeResult.data).toBeDefined();
+      expect(safeResult.serverError).toBeUndefined();
+      expect(safeResult.fieldErrors).toBeUndefined();
+
+      expect(mockListMFAFactors).toHaveBeenCalledWith(mockSupabase);
+      expect(mockUnenrollMFAFactor).toHaveBeenCalledWith(
         mockSupabase,
         '123e4567-e89b-12d3-a456-426614174000'
       );
-      expect(revalidatePath).toHaveBeenCalledWith('/account/settings');
-      expect(revalidatePath).toHaveBeenCalledWith('/account');
-      expect(result).toEqual({ success: true });
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/account/settings');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/account');
+      expect(safeResult.data?.success).toBe(true);
+
+      // Verify Inngest email event was sent
+      expect(mockInngestSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'email/transactional',
+          data: expect.objectContaining({
+            type: 'mfa-factor-removed',
+            email: 'test@example.com',
+          }),
+        })
+      );
     });
 
-    it('should prevent unenrolling last factor', async () => {
+    it('should return serverError when trying to unenroll last factor', async () => {
       const { unenrollMFAAction } = await import('./mfa.ts');
-      const { createSupabaseServerClient } = await import('../supabase/server.ts');
-      const { listMFAFactors } = await import('../auth/mfa.ts');
-
-      const mockSupabase = {};
-      vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
 
       // Mock only one verified factor
-      vi.mocked(listMFAFactors).mockResolvedValue({
+      mockListMFAFactors.mockResolvedValue({
         factors: [{ id: 'factor-1', status: 'verified' }],
         error: null,
       });
 
-      await expect(
-        unenrollMFAAction({
-          factorId: '123e4567-e89b-12d3-a456-426614174000',
-        })
-      ).rejects.toThrow('Cannot unenroll your last MFA factor');
+      const result = await unenrollMFAAction({
+        factorId: '123e4567-e89b-12d3-a456-426614174000',
+      });
+
+      // Verify SafeActionResult structure with serverError
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<never>;
+      expect(safeResult.serverError).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
     });
 
-    it('should throw error when unenrollMFAFactor returns error', async () => {
+    it('should return serverError when unenrollMFAFactor returns error', async () => {
       const { unenrollMFAAction } = await import('./mfa.ts');
-      const { createSupabaseServerClient } = await import('../supabase/server.ts');
-      const { listMFAFactors, unenrollMFAFactor } = await import('../auth/mfa.ts');
 
-      const mockSupabase = {};
-      vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
-
-      vi.mocked(listMFAFactors).mockResolvedValue({
+      mockListMFAFactors.mockResolvedValue({
         factors: [
           { id: 'factor-1', status: 'verified' },
           { id: 'factor-2', status: 'verified' },
@@ -510,275 +674,174 @@ describe.skip('unenrollMFAAction', () => {
       });
 
       const mockError = new Error('Unenrollment failed');
-      vi.mocked(unenrollMFAFactor).mockResolvedValue({
+      mockUnenrollMFAFactor.mockResolvedValue({
         success: false,
         error: mockError,
       });
 
-      await expect(
-        unenrollMFAAction({
-          factorId: '123e4567-e89b-12d3-a456-426614174000',
-        })
-      ).rejects.toThrow('Unenrollment failed');
+      const result = await unenrollMFAAction({
+        factorId: '123e4567-e89b-12d3-a456-426614174000',
+      });
+
+      // Verify SafeActionResult structure with serverError
+      // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+      const safeResult = result as SafeActionResult<never>;
+      expect(safeResult.serverError).toBeDefined();
+      expect(safeResult.data).toBeUndefined();
     });
   });
 });
 
-describe.skip('getAALAction', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+describe('getAALAction', () => {
+  beforeEach(async () => {
+    clearRequestCache();
+    jest.clearAllMocks();
   });
 
   it('should return AAL from getAuthenticatorAssuranceLevel', async () => {
     const { getAALAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { getAuthenticatorAssuranceLevel } = await import('../auth/mfa.ts');
-
-    const mockSupabase = {};
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
 
     const mockAAL = {
       currentLevel: 'aal1',
       nextLevel: 'aal2',
     };
 
-    vi.mocked(getAuthenticatorAssuranceLevel).mockResolvedValue({
+    mockGetAuthenticatorAssuranceLevel.mockResolvedValue({
       data: mockAAL,
       error: null,
     });
 
-    const result = await getAALAction({});
+    const result = await getAALAction();
 
-    expect(getAuthenticatorAssuranceLevel).toHaveBeenCalledWith(mockSupabase);
-    expect(result).toEqual({ aal: mockAAL });
+    // Verify SafeActionResult structure
+    // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+    const safeResult = result as SafeActionResult<{ aal: typeof mockAAL }>;
+    expect(safeResult.data).toBeDefined();
+    expect(safeResult.serverError).toBeUndefined();
+    expect(safeResult.fieldErrors).toBeUndefined();
+
+    expect(mockGetAuthenticatorAssuranceLevel).toHaveBeenCalledWith(mockSupabase);
+    expect(safeResult.data?.aal).toEqual(mockAAL);
   });
 
-  it('should throw error when getAuthenticatorAssuranceLevel returns error', async () => {
+  it('should return serverError when getAuthenticatorAssuranceLevel returns error', async () => {
     const { getAALAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { getAuthenticatorAssuranceLevel } = await import('../auth/mfa.ts');
-
-    const mockSupabase = {};
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
 
     const mockError = new Error('Failed to get AAL');
-    vi.mocked(getAuthenticatorAssuranceLevel).mockResolvedValue({
+    mockGetAuthenticatorAssuranceLevel.mockResolvedValue({
       data: null,
       error: mockError,
     });
 
-    await expect(getAALAction({})).rejects.toThrow('Failed to get AAL');
+    const result = await getAALAction();
+
+    // Verify SafeActionResult structure with serverError
+    // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+    const safeResult = result as SafeActionResult<never>;
+    expect(safeResult.serverError).toBeDefined();
+    expect(safeResult.data).toBeUndefined();
   });
 
-  it('should throw error when no data returned', async () => {
+  it('should return serverError when no data returned', async () => {
     const { getAALAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { getAuthenticatorAssuranceLevel } = await import('../auth/mfa.ts');
 
-    const mockSupabase = {};
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
-
-    vi.mocked(getAuthenticatorAssuranceLevel).mockResolvedValue({
+    mockGetAuthenticatorAssuranceLevel.mockResolvedValue({
       data: null,
       error: null,
     });
 
-    await expect(getAALAction({})).rejects.toThrow('Failed to get AAL');
+    const result = await getAALAction();
+
+    // Verify SafeActionResult structure with serverError
+    // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+    const safeResult = result as SafeActionResult<never>;
+    expect(safeResult.serverError).toBeDefined();
+    expect(safeResult.data).toBeUndefined();
   });
 });
 
-describe.skip('checkMFARequiredAction', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+describe('checkMFARequiredAction', () => {
+  beforeEach(async () => {
+    clearRequestCache();
+    jest.clearAllMocks();
   });
 
   it('should return requires status from requiresMFAChallenge', async () => {
     const { checkMFARequiredAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { requiresMFAChallenge } = await import('../auth/mfa.ts');
 
-    const mockSupabase = {};
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
-
-    vi.mocked(requiresMFAChallenge).mockResolvedValue({
+    mockRequiresMFAChallenge.mockResolvedValue({
       requires: true,
       error: null,
     });
 
-    const result = await checkMFARequiredAction({});
+    const result = await checkMFARequiredAction();
 
-    expect(requiresMFAChallenge).toHaveBeenCalledWith(mockSupabase);
-    expect(result).toEqual({ requires: true });
+    // Verify SafeActionResult structure
+    // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+    const safeResult = result as SafeActionResult<{ requires: boolean }>;
+    expect(safeResult.data).toBeDefined();
+    expect(safeResult.serverError).toBeUndefined();
+    expect(safeResult.fieldErrors).toBeUndefined();
+
+    expect(mockRequiresMFAChallenge).toHaveBeenCalledWith(mockSupabase);
+    expect(safeResult.data?.requires).toBe(true);
   });
 
-  it('should throw error when requiresMFAChallenge returns error', async () => {
+  it('should return serverError when requiresMFAChallenge returns error', async () => {
     const { checkMFARequiredAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { requiresMFAChallenge } = await import('../auth/mfa.ts');
-
-    const mockSupabase = {};
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
 
     const mockError = new Error('Failed to check MFA requirement');
-    vi.mocked(requiresMFAChallenge).mockResolvedValue({
+    mockRequiresMFAChallenge.mockResolvedValue({
       requires: false,
       error: mockError,
     });
 
-    await expect(checkMFARequiredAction({})).rejects.toThrow('Failed to check MFA requirement');
+    const result = await checkMFARequiredAction();
+
+    // Verify SafeActionResult structure with serverError
+    // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+    const safeResult = result as SafeActionResult<never>;
+    expect(safeResult.serverError).toBeDefined();
+    expect(safeResult.data).toBeUndefined();
   });
 });
 
-describe.skip('edge cases', () => {
-  it('should handle createSupabaseServerClient errors', async () => {
+describe('authentication', () => {
+  beforeEach(async () => {
+    clearRequestCache();
+    jest.clearAllMocks();
+  });
+
+  it('should inject auth context from safemocker', async () => {
     const { listMFAAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
 
-    vi.mocked(createSupabaseServerClient).mockRejectedValue(new Error('Client creation failed'));
-
-    await expect(listMFAAction({})).rejects.toThrow();
-  });
-
-  it('should handle listMFAFactors returning null factors', async () => {
-    const { listMFAAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { listMFAFactors } = await import('../auth/mfa.ts');
-
-    const mockSupabase = {};
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
-
-    vi.mocked(listMFAFactors).mockResolvedValue({
-      factors: null as any,
-      error: null,
-    });
-
-    const result = await listMFAAction({});
-
-    expect(result.factors).toBeNull();
-  });
-
-  it('should handle refreshSession errors in verifyMFAChallengeAction', async () => {
-    const { verifyMFAChallengeAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { verifyMFAChallenge } = await import('../auth/mfa.ts');
-
-    const mockSupabase = {
-      auth: {
-        refreshSession: vi.fn().mockRejectedValue(new Error('Refresh failed')),
+    const mockFactors = [
+      {
+        id: 'factor-1',
+        friendly_name: 'My TOTP',
+        factor_type: 'totp',
+        status: 'verified',
+        created_at: '2024-01-01',
       },
-    };
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
+    ];
 
-    vi.mocked(verifyMFAChallenge).mockResolvedValue({
-      success: true,
+    mockListMFAFactors.mockResolvedValue({
+      factors: mockFactors,
       error: null,
     });
 
-    // Should still succeed even if refreshSession fails
-    const result = await verifyMFAChallengeAction({
-      factorId: '123e4567-e89b-12d3-a456-426614174000',
-      challengeId: '123e4567-e89b-12d3-a456-426614174001',
-      code: '123456',
-    });
+    const result = await listMFAAction();
 
-    expect(result.success).toBe(true);
-  });
+    // Verify SafeActionResult structure
+    // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+    const safeResult = result as SafeActionResult<{ factors: typeof mockFactors }>;
+    expect(safeResult.data).toBeDefined();
+    expect(safeResult.serverError).toBeUndefined();
+    expect(safeResult.validationErrors).toBeUndefined();
 
-  it('should handle revalidatePath errors gracefully', async () => {
-    const { verifyMFAChallengeAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { verifyMFAChallenge } = await import('../auth/mfa.ts');
-    const { revalidatePath } = await import('next/cache');
-
-    const mockSupabase = {
-      auth: {
-        refreshSession: vi.fn().mockResolvedValue({}),
-      },
-    };
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
-
-    vi.mocked(verifyMFAChallenge).mockResolvedValue({
-      success: true,
-      error: null,
-    });
-
-    vi.mocked(revalidatePath).mockImplementation(() => {
-      throw new Error('Revalidation failed');
-    });
-
-    // Should still succeed even if revalidatePath fails
-    const result = await verifyMFAChallengeAction({
-      factorId: '123e4567-e89b-12d3-a456-426614174000',
-      challengeId: '123e4567-e89b-12d3-a456-426614174001',
-      code: '123456',
-    });
-
-    expect(result.success).toBe(true);
-  });
-
-  it('should handle unenrollMFAAction with factors having null status', async () => {
-    const { unenrollMFAAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { listMFAFactors } = await import('../auth/mfa.ts');
-
-    const mockSupabase = {};
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
-
-    vi.mocked(listMFAFactors).mockResolvedValue({
-      factors: [
-        { id: 'factor-1', status: null as any },
-        { id: 'factor-2', status: 'verified' },
-      ],
-      error: null,
-    });
-
-    // Should filter out null status factors
-    const { unenrollMFAFactor } = await import('../auth/mfa.ts');
-    vi.mocked(unenrollMFAFactor).mockResolvedValue({
-      success: true,
-      error: null,
-    });
-
-    const result = await unenrollMFAAction({
-      factorId: '123e4567-e89b-12d3-a456-426614174000',
-    });
-
-    expect(result.success).toBe(true);
-  });
-
-  it('should handle unenrollMFAAction with empty factors array', async () => {
-    const { unenrollMFAAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { listMFAFactors } = await import('../auth/mfa.ts');
-
-    const mockSupabase = {};
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
-
-    vi.mocked(listMFAFactors).mockResolvedValue({
-      factors: [],
-      error: null,
-    });
-
-    await expect(
-      unenrollMFAAction({
-        factorId: '123e4567-e89b-12d3-a456-426614174000',
-      })
-    ).rejects.toThrow('Cannot unenroll your last MFA factor');
-  });
-
-  it('should handle getAALAction with null data but no error', async () => {
-    const { getAALAction } = await import('./mfa.ts');
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const { getAuthenticatorAssuranceLevel } = await import('../auth/mfa.ts');
-
-    const mockSupabase = {};
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabase as any);
-
-    vi.mocked(getAuthenticatorAssuranceLevel).mockResolvedValue({
-      data: null,
-      error: null,
-    });
-
-    await expect(getAALAction({})).rejects.toThrow('Failed to get AAL');
+    // Verify auth context was injected (ctx.userId = 'test-user-id' from safemocker)
+    // Note: The action doesn't directly use ctx, but safemocker provides it
+    // We verify the action works correctly with auth context
+    expect(safeResult.data?.factors).toEqual(mockFactors);
   });
 });

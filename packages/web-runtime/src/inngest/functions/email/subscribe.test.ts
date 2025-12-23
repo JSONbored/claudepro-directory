@@ -5,84 +5,214 @@
  * This tests the function logic, not the route handler.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { subscribeNewsletter } from './subscribe';
-import * as resend from '../../../integrations/resend';
-import { revalidateTag } from 'next/cache';
 
-// Mock dependencies
-vi.mock('../../../integrations/resend', () => ({
-  syncContactToResend: vi.fn(),
-  buildContactProperties: vi.fn(),
-  resolveNewsletterInterest: vi.fn(),
-  sendEmail: vi.fn(),
-  enrollInOnboardingSequence: vi.fn(),
-}));
+// Mock dependencies - define mocks directly in jest.mock() factory functions
+jest.mock('../../../integrations/resend', () => {
+  const mockSyncContactToResend = jest.fn();
+  const mockBuildContactProperties = jest.fn();
+  const mockResolveNewsletterInterest = jest.fn();
+  const mockSendEmail = jest.fn();
+  const mockEnrollInOnboardingSequence = jest.fn();
+  return {
+    syncContactToResend: mockSyncContactToResend,
+    buildContactProperties: mockBuildContactProperties,
+    resolveNewsletterInterest: mockResolveNewsletterInterest,
+    sendEmail: mockSendEmail,
+    enrollInOnboardingSequence: mockEnrollInOnboardingSequence,
+    __mockSyncContactToResend: mockSyncContactToResend,
+    __mockBuildContactProperties: mockBuildContactProperties,
+    __mockResolveNewsletterInterest: mockResolveNewsletterInterest,
+    __mockSendEmail: mockSendEmail,
+    __mockEnrollInOnboardingSequence: mockEnrollInOnboardingSequence,
+  };
+});
 
-vi.mock('next/cache', () => ({
-  revalidateTag: vi.fn(),
-}));
+jest.mock('next/cache', () => {
+  const mockRevalidateTag = jest.fn();
+  return {
+    revalidateTag: mockRevalidateTag,
+    __mockRevalidateTag: mockRevalidateTag,
+  };
+});
 
-// Hoist mocks to ensure they're available when function executes
-const mockGetService = vi.hoisted(() => vi.fn());
+jest.mock('../../../data/service-factory', () => {
+  const mockGetService = jest.fn();
+  return {
+    getService: mockGetService,
+    __mockGetService: mockGetService,
+  };
+});
 
-vi.mock('../../../data/service-factory', () => ({
-  getService: mockGetService,
-}));
-
-vi.mock('../../../logging/server', () => ({
-  logger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  },
-  createWebAppContextWithId: vi.fn(() => ({
+jest.mock('../../../logging/server', () => {
+  const mockLogger = {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+  const mockCreateWebAppContextWithId = jest.fn(() => ({
     requestId: 'test-request-id',
     operation: 'subscribeNewsletter',
     route: '/inngest/email/subscribe',
-  })),
-}));
+  }));
+  return {
+    logger: mockLogger,
+    createWebAppContextWithId: mockCreateWebAppContextWithId,
+    __mockLogger: mockLogger,
+    __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
+  };
+});
 
-vi.mock('@heyclaude/shared-runtime', () => ({
-  validateEmail: vi.fn((email: string) => ({
+jest.mock('@heyclaude/shared-runtime', () => {
+  const mockValidateEmail = jest.fn((email: string) => ({
     valid: true,
     normalized: email.toLowerCase().trim(),
     error: null,
-  })),
-  normalizeError: vi.fn((error) => error),
+  }));
+  const mockNormalizeError = jest.fn((error: unknown, fallbackMessage?: string) => {
+    // Always return an Error object with a message property
+    if (error instanceof Error) {
+      return error;
+    }
+    return new Error(fallbackMessage || String(error || 'Unknown error'));
+  });
+  return {
+    validateEmail: mockValidateEmail,
+    normalizeError: mockNormalizeError,
+    __mockValidateEmail: mockValidateEmail,
+    __mockNormalizeError: mockNormalizeError,
+  };
+});
+
+jest.mock('../../../email/base-template', () => {
+  const mockRenderEmailTemplate = jest.fn();
+  return {
+    renderEmailTemplate: mockRenderEmailTemplate,
+    __mockRenderEmailTemplate: mockRenderEmailTemplate,
+  };
+});
+
+jest.mock('../../utils/monitoring', () => ({
+  sendCronSuccessHeartbeat: jest.fn(),
+  sendCriticalFailureHeartbeat: jest.fn(),
+  sendBetterStackHeartbeat: jest.fn(),
+  sendApiEndpointHeartbeat: jest.fn(),
+  isBetterStackMonitoringEnabled: jest.fn(() => false),
+  isInngestMonitoringEnabled: jest.fn(() => false),
+  isCriticalFailureMonitoringEnabled: jest.fn(() => false),
+  isCronSuccessMonitoringEnabled: jest.fn(() => false),
+  isApiEndpointMonitoringEnabled: jest.fn(() => false),
 }));
 
+// Get mocks for use in tests
+const {
+  __mockSyncContactToResend: mockSyncContactToResend,
+  __mockBuildContactProperties: mockBuildContactProperties,
+  __mockResolveNewsletterInterest: mockResolveNewsletterInterest,
+  __mockSendEmail: mockSendEmail,
+  __mockEnrollInOnboardingSequence: mockEnrollInOnboardingSequence,
+} = jest.requireMock('../../../integrations/resend') as {
+  __mockSyncContactToResend: ReturnType<typeof jest.fn>;
+  __mockBuildContactProperties: ReturnType<typeof jest.fn>;
+  __mockResolveNewsletterInterest: ReturnType<typeof jest.fn>;
+  __mockSendEmail: ReturnType<typeof jest.fn>;
+  __mockEnrollInOnboardingSequence: ReturnType<typeof jest.fn>;
+};
+const { __mockRevalidateTag: mockRevalidateTag } = jest.requireMock('next/cache') as {
+  __mockRevalidateTag: ReturnType<typeof jest.fn>;
+};
+const { __mockGetService: mockGetService } = jest.requireMock('../../../data/service-factory') as {
+  __mockGetService: ReturnType<typeof jest.fn>;
+};
+const {
+  __mockLogger: mockLogger,
+  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
+} = jest.requireMock('../../../logging/server') as {
+  __mockLogger: {
+    info: ReturnType<typeof jest.fn>;
+    warn: ReturnType<typeof jest.fn>;
+    error: ReturnType<typeof jest.fn>;
+  };
+  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
+};
+const {
+  __mockValidateEmail: mockValidateEmail,
+  __mockNormalizeError: mockNormalizeError,
+} = jest.requireMock('@heyclaude/shared-runtime') as {
+  __mockValidateEmail: ReturnType<typeof jest.fn>;
+  __mockNormalizeError: ReturnType<typeof jest.fn>;
+};
+const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock('../../../email/base-template') as {
+  __mockRenderEmailTemplate: ReturnType<typeof jest.fn>;
+};
+
 describe('subscribeNewsletter', () => {
-  const t = new InngestTestEngine({
-    function: subscribeNewsletter,
-  });
+  /**
+   * Test engine instance - created fresh for each test to avoid state caching
+   */
+  let t: InngestTestEngine;
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(resend.resolveNewsletterInterest).mockReturnValue('agents');
-    vi.mocked(resend.buildContactProperties).mockReturnValue({
+    // Create fresh test engine instance for each test
+    // This prevents step result memoization between tests
+    t = new InngestTestEngine({
+      function: subscribeNewsletter,
+    });
+
+    // Reset all mocks to ensure clean state
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+    mockGetService.mockReset();
+    mockSyncContactToResend.mockReset();
+    mockBuildContactProperties.mockReset();
+    mockResolveNewsletterInterest.mockReset();
+    mockSendEmail.mockReset();
+    mockEnrollInOnboardingSequence.mockReset();
+    mockRevalidateTag.mockReset();
+
+    // Set up default successful mock responses
+    mockResolveNewsletterInterest.mockReturnValue('agents');
+    mockBuildContactProperties.mockReturnValue({
       source: 'homepage',
       primaryInterest: 'agents',
     });
-    vi.mocked(resend.syncContactToResend).mockResolvedValue({
+    mockSyncContactToResend.mockResolvedValue({
       resendContactId: 'contact-id',
       syncStatus: 'synced' as const,
       syncError: null,
       topicIds: [],
     });
-    vi.mocked(resend.sendEmail).mockResolvedValue({ id: 'email-id' });
-    vi.mocked(resend.enrollInOnboardingSequence).mockResolvedValue(undefined);
+    mockSendEmail.mockResolvedValue({ id: 'email-id' });
+    mockEnrollInOnboardingSequence.mockResolvedValue(undefined);
+    mockRenderEmailTemplate.mockResolvedValue('<html>Welcome Email</html>');
+    
+    // Restore normalizeError mock implementation after reset
+    // jest.resetAllMocks() resets mocks to return undefined, so we need to restore it
+    mockNormalizeError.mockImplementation((error: unknown, fallbackMessage?: string) => {
+      if (error instanceof Error) {
+        return error;
+      }
+      return new Error(fallbackMessage || String(error || 'Unknown error'));
+    });
+    
+    // Restore validateEmail mock implementation after reset
+    mockValidateEmail.mockImplementation((email: string) => ({
+      valid: true,
+      normalized: email.toLowerCase().trim(),
+      error: null,
+    }));
   });
 
   it('should subscribe user successfully', async () => {
     const mockService = {
-      subscribeNewsletter: vi.fn().mockResolvedValue({
+      subscribeNewsletter: jest.fn().mockResolvedValue({
         success: true,
         subscription_id: 'sub-id',
         was_resubscribed: false,
       }),
-      getSubscriptionById: vi.fn().mockResolvedValue({
+      getSubscriptionById: jest.fn().mockResolvedValue({
         id: 'sub-id',
         email: 'test@example.com',
         source: 'homepage',
@@ -93,7 +223,7 @@ describe('subscribeNewsletter', () => {
 
     // Execute function - InngestTestEngine will run the actual function code
     // The mocks above will be used when the function executes
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/subscribe',
@@ -103,27 +233,26 @@ describe('subscribeNewsletter', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; subscriptionId: string } };
 
     expect(result).toHaveProperty('success', true);
     expect(result).toHaveProperty('subscriptionId', 'sub-id');
     expect(mockService.subscribeNewsletter).toHaveBeenCalled();
-    expect(resend.sendEmail).toHaveBeenCalled();
-    expect(resend.enrollInOnboardingSequence).toHaveBeenCalled();
-    expect(revalidateTag).toHaveBeenCalledWith('newsletter', 'default');
+    expect(mockSendEmail).toHaveBeenCalled();
+    expect(mockEnrollInOnboardingSequence).toHaveBeenCalled();
+    expect(mockRevalidateTag).toHaveBeenCalledWith('newsletter', 'default');
   });
 
   it('should handle invalid email', async () => {
     // Mock validateEmail to return invalid
-    const { validateEmail } = await import('@heyclaude/shared-runtime');
-    vi.mocked(validateEmail).mockReturnValueOnce({
+    mockValidateEmail.mockReturnValueOnce({
       valid: false,
       normalized: null,
       error: 'Invalid email format',
     });
 
     // Execute function - validation will fail in the validate-email step
-    const { error } = await t.execute({
+    const { error } = (await t.execute({
       events: [
         {
           name: 'email/subscribe',
@@ -133,7 +262,7 @@ describe('subscribeNewsletter', () => {
           },
         },
       ],
-    });
+    })) as { error?: Error | { message: string } };
 
     expect(error).toBeDefined();
     
@@ -153,12 +282,12 @@ describe('subscribeNewsletter', () => {
 
   it('should handle Resend sync failure gracefully', async () => {
     const mockService = {
-      subscribeNewsletter: vi.fn().mockResolvedValue({
+      subscribeNewsletter: jest.fn().mockResolvedValue({
         success: true,
         subscription_id: 'sub-id',
         was_resubscribed: false,
       }),
-      getSubscriptionById: vi.fn().mockResolvedValue({
+      getSubscriptionById: jest.fn().mockResolvedValue({
         id: 'sub-id',
         email: 'test@example.com',
         source: 'homepage',
@@ -168,10 +297,10 @@ describe('subscribeNewsletter', () => {
     mockGetService.mockResolvedValue(mockService as never);
 
     // Mock Resend sync failure - function will catch and continue
-    vi.mocked(resend.syncContactToResend).mockRejectedValue(new Error('Resend API error'));
+    mockSyncContactToResend.mockRejectedValue(new Error('Resend API error'));
 
     // Execute function - Resend sync will fail but subscription should still succeed
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'email/subscribe',
@@ -181,7 +310,7 @@ describe('subscribeNewsletter', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; subscriptionId: string } };
 
     // Should still succeed even if Resend sync fails
     expect(result).toHaveProperty('success', true);

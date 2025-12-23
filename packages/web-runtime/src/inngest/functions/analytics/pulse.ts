@@ -187,8 +187,10 @@ export const processPulseQueue = createInngestFunction(
               processedMsgIds.push(msg.msg_id);
             }
 
-            const inserted = result?.inserted ?? 0;
-            const failed = result?.failed ?? 0;
+            // RPC returns { inserted_count: number }, not { inserted: number }
+            const inserted = result?.inserted_count ?? 0;
+            // Search queries RPC doesn't return failed count, so use 0
+            const failed = 0;
 
             return { inserted, failed };
           } catch (error) {
@@ -279,8 +281,9 @@ export const processPulseQueue = createInngestFunction(
               processedMsgIds.push(msgId);
             }
 
-            const inserted = result?.inserted ?? 0;
-            const failed = result?.failed ?? 0;
+            // RPC returns { inserted_count: number, errors: [] }, not { inserted: number, failed: number }
+            const inserted = result?.inserted_count ?? 0;
+            const failed = result?.errors?.length ?? 0;
 
             return { inserted, failed };
           } catch (error) {

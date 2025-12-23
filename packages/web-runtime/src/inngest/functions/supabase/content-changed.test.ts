@@ -7,52 +7,60 @@
  * @module web-runtime/inngest/functions/supabase/content-changed.test
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { handleSupabaseContentChanged } from './content-changed';
-import { logger } from '../../../logging/server';
-import { normalizeError } from '@heyclaude/shared-runtime';
-import { env } from '@heyclaude/shared-runtime/schemas/env';
 
-// Hoist mocks BEFORE importing the function to ensure mocks are applied
-const mockFetch = vi.hoisted(() => vi.fn());
-const mockLogger = vi.hoisted(() => ({
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn(),
-}));
-const mockCreateWebAppContextWithId = vi.hoisted(() => vi.fn(() => ({
-  requestId: 'test-request-id',
-  operation: 'handleSupabaseContentChanged',
-  route: '/inngest/supabase/content-changed',
-})));
-const mockNormalizeError = vi.hoisted(() => vi.fn((error: unknown) => {
-  if (error instanceof Error) {
-    return error;
-  }
-  return new Error(String(error));
-}));
+// Mock service factory, logging, shared-runtime, environment, and monitoring
+jest.mock('../../../logging/server', () => {
+  const mockLogger = {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+  const mockCreateWebAppContextWithId = jest.fn(() => ({
+    requestId: 'test-request-id',
+    operation: 'handleSupabaseContentChanged',
+    route: '/inngest/supabase/content-changed',
+  }));
+  return {
+    logger: mockLogger,
+    createWebAppContextWithId: mockCreateWebAppContextWithId,
+    __mockLogger: mockLogger,
+    __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
+  };
+});
 
-// Mock global fetch for GitHub API
-global.fetch = mockFetch;
+jest.mock('@heyclaude/shared-runtime', () => {
+  const mockNormalizeError = jest.fn((error: unknown) => {
+    if (error instanceof Error) {
+      return error;
+    }
+    return new Error(String(error));
+  });
+  return {
+    normalizeError: mockNormalizeError,
+    __mockNormalizeError: mockNormalizeError,
+  };
+});
 
-// Mock logging
-vi.mock('../../../logging/server', () => ({
-  logger: mockLogger,
-  createWebAppContextWithId: mockCreateWebAppContextWithId,
-}));
-
-// Mock shared runtime
-vi.mock('@heyclaude/shared-runtime', () => ({
-  normalizeError: mockNormalizeError,
-}));
-
-// Mock environment
-vi.mock('@heyclaude/shared-runtime/schemas/env', () => ({
+jest.mock('@heyclaude/shared-runtime/schemas/env', () => ({
   env: {
     GITHUB_TOKEN: 'test-github-token',
     GITHUB_REPOSITORY: 'JSONbored/claudepro-directory',
   },
+}));
+
+jest.mock('../../utils/monitoring', () => ({
+  isBetterStackMonitoringEnabled: jest.fn().mockReturnValue(false),
+  isInngestMonitoringEnabled: jest.fn().mockReturnValue(false),
+  isCriticalFailureMonitoringEnabled: jest.fn().mockReturnValue(false),
+  isCronSuccessMonitoringEnabled: jest.fn().mockReturnValue(false),
+  isApiEndpointMonitoringEnabled: jest.fn().mockReturnValue(false),
+  sendBetterStackHeartbeat: jest.fn(),
+  sendCriticalFailureHeartbeat: jest.fn(),
+  sendCronSuccessHeartbeat: jest.fn(),
+  sendApiEndpointHeartbeat: jest.fn(),
 }));
 
 // Import function AFTER mocks are set up
@@ -63,12 +71,45 @@ describe('handleSupabaseContentChanged', () => {
   let t: InngestTestEngine;
 
   /**
+   * Mock functions - accessed via jest.requireMock
+   */
+  let mockLogger: {
+    info: ReturnType<typeof jest.fn>;
+    warn: ReturnType<typeof jest.fn>;
+    error: ReturnType<typeof jest.fn>;
+  };
+  let mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
+  let mockNormalizeError: ReturnType<typeof jest.fn>;
+  let mockFetch: ReturnType<typeof jest.fn>;
+
+  /**
    * Setup before each test
    * - Creates fresh test engine instance
    * - Resets all mocks to clean state
    * - Sets up default mock return values
    */
   beforeEach(() => {
+    // Get mocked functions via jest.requireMock
+    const loggingMock = jest.requireMock('../../../logging/server') as {
+      __mockLogger: {
+        info: ReturnType<typeof jest.fn>;
+        warn: ReturnType<typeof jest.fn>;
+        error: ReturnType<typeof jest.fn>;
+      };
+      __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
+    };
+    const sharedRuntimeMock = jest.requireMock('@heyclaude/shared-runtime') as {
+      __mockNormalizeError: ReturnType<typeof jest.fn>;
+    };
+
+    mockLogger = loggingMock.__mockLogger;
+    mockCreateWebAppContextWithId = loggingMock.__mockCreateWebAppContextWithId;
+    mockNormalizeError = sharedRuntimeMock.__mockNormalizeError;
+
+    // Mock global fetch for GitHub API
+    mockFetch = jest.fn();
+    global.fetch = mockFetch as typeof fetch;
+
     // Create fresh test engine instance for each test
     // This prevents step result memoization between tests
     t = new InngestTestEngine({
@@ -76,21 +117,29 @@ describe('handleSupabaseContentChanged', () => {
     });
 
     // Reset all mocks to ensure clean state
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
     mockFetch.mockReset();
+
+    // Restore mock implementations after reset
+    mockCreateWebAppContextWithId.mockReturnValue({
+      requestId: 'test-request-id',
+      operation: 'handleSupabaseContentChanged',
+      route: '/inngest/supabase/content-changed',
+    });
+
+    mockNormalizeError.mockImplementation((error: unknown) => {
+      if (error instanceof Error) {
+        return error;
+      }
+      return new Error(String(error));
+    });
 
     // Set up default successful GitHub API response
     mockFetch.mockResolvedValue({
       ok: true,
       status: 204,
     } as Response);
-
-    mockNormalizeError.mockImplementation((error) => {
-      if (error instanceof Error) {
-        return error;
-      }
-      return new Error(String(error));
-    });
   });
 
   /**
@@ -99,7 +148,7 @@ describe('handleSupabaseContentChanged', () => {
    * Tests that skills INSERT events trigger package generation workflow.
    */
   it('should trigger skill-package-needed workflow for skills INSERT', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'supabase/content-changed',
@@ -118,7 +167,7 @@ describe('handleSupabaseContentChanged', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; eventType: string; category: string; contentId: string; slug: string; webhookId: string; action: string } };
 
     expect(result).toEqual({
       success: true,
@@ -156,7 +205,7 @@ describe('handleSupabaseContentChanged', () => {
    * Tests that MCP INSERT events trigger package generation workflow.
    */
   it('should trigger mcpb-package-needed workflow for mcp INSERT', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'supabase/content-changed',
@@ -175,7 +224,7 @@ describe('handleSupabaseContentChanged', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean } };
 
     expect(result.success).toBe(true);
     expect(mockFetch).toHaveBeenCalledWith(
@@ -192,7 +241,7 @@ describe('handleSupabaseContentChanged', () => {
    * Tests that skills UPDATE events skip package generation if package exists.
    */
   it('should skip package workflow if package already exists', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'supabase/content-changed',
@@ -215,7 +264,7 @@ describe('handleSupabaseContentChanged', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean } };
 
     expect(result.success).toBe(true);
     // Should only trigger README update (package already exists)
@@ -234,7 +283,7 @@ describe('handleSupabaseContentChanged', () => {
    * Tests that non-package categories skip package generation but trigger README update.
    */
   it('should skip package workflow for non-package categories', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'supabase/content-changed',
@@ -252,7 +301,7 @@ describe('handleSupabaseContentChanged', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean } };
 
     expect(result.success).toBe(true);
     // Should only trigger README update (not package generation)
@@ -271,7 +320,7 @@ describe('handleSupabaseContentChanged', () => {
    * Tests that DELETE events are skipped.
    */
   it('should skip DELETE events', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'supabase/content-changed',
@@ -285,7 +334,7 @@ describe('handleSupabaseContentChanged', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; eventType: string; category: string; contentId: string; action: string; reason: string } };
 
     expect(result).toEqual({
       success: true,
@@ -306,7 +355,7 @@ describe('handleSupabaseContentChanged', () => {
    * Tests that UPDATE events with unchanged metadata skip README update.
    */
   it('should skip README update if metadata unchanged', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'supabase/content-changed',
@@ -334,7 +383,7 @@ describe('handleSupabaseContentChanged', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean } };
 
     expect(result.success).toBe(true);
     // Should not trigger any workflows (package exists, metadata unchanged)
@@ -353,7 +402,7 @@ describe('handleSupabaseContentChanged', () => {
       text: async () => 'Unauthorized',
     } as Response);
 
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'supabase/content-changed',
@@ -372,7 +421,7 @@ describe('handleSupabaseContentChanged', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean } };
 
     // Should still succeed (errors are logged but don't fail function)
     expect(result.success).toBe(true);
@@ -392,7 +441,7 @@ describe('handleSupabaseContentChanged', () => {
    * Tests the validate-event step individually.
    */
   it('should execute validate-event step correctly', async () => {
-    const { result } = await t.executeStep('validate-event', {
+    const { result } = (await t.executeStep('validate-event', {
       events: [
         {
           name: 'supabase/content-changed',
@@ -406,7 +455,7 @@ describe('handleSupabaseContentChanged', () => {
           },
         },
       ],
-    });
+    })) as { result: { valid: boolean } };
 
     expect(result).toEqual({
       valid: true,
@@ -441,7 +490,7 @@ describe('handleSupabaseContentChanged', () => {
     });
 
     // Now execute full function to test trigger-package-workflow step
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'supabase/content-changed',
@@ -459,7 +508,7 @@ describe('handleSupabaseContentChanged', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean } };
 
     expect(result.success).toBe(true);
     expect(mockFetch).toHaveBeenCalled();
@@ -488,9 +537,9 @@ describe('handleSupabaseContentChanged', () => {
     };
 
     // Execute same event twice
-    const { result: result1 } = await t.execute({
+    const { result: result1 } = (await t.execute({
       events: [eventData],
-    });
+    })) as { result: { success: boolean } };
 
     // Create fresh test engine for second execution (simulating idempotency)
     const t2 = new InngestTestEngine({
@@ -498,9 +547,9 @@ describe('handleSupabaseContentChanged', () => {
     });
     mockFetch.mockClear();
 
-    const { result: result2 } = await t2.execute({
+    const { result: result2 } = (await t2.execute({
       events: [eventData],
-    });
+    })) as { result: { success: boolean } };
 
     // Both should succeed
     expect(result1.success).toBe(true);
@@ -521,7 +570,7 @@ describe('handleSupabaseContentChanged', () => {
       });
       mockFetch.mockClear();
 
-      const { result } = await t2.execute({
+      const { result } = (await t2.execute({
         events: [
           {
             name: 'supabase/content-changed',
@@ -539,7 +588,7 @@ describe('handleSupabaseContentChanged', () => {
             },
           },
         ],
-      });
+      })) as { result: { success: boolean } };
 
       expect(result.success).toBe(true);
       // Should trigger README update for all categories

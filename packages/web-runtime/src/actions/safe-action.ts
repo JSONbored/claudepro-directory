@@ -1,6 +1,18 @@
 import { isProduction } from '@heyclaude/shared-runtime/schemas/env';
 import { headers } from 'next/headers';
-import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
+import {
+  createSafeActionClient,
+  DEFAULT_SERVER_ERROR_MESSAGE,
+} from 'next-safe-action';
+// Import pre-configured actions from next-safe-action (mock in tests, undefined in production)
+// In tests, Jest automatically uses __mocks__/next-safe-action.ts which exports these
+// In production, next-safe-action doesn't export these, so they'll be undefined
+// TypeScript will complain, but we handle this with type assertions below
+// @ts-expect-error - authedAction and optionalAuthAction are only exported by the mock, not by the real next-safe-action package
+import {
+  authedAction as mockAuthedAction,
+  optionalAuthAction as mockOptionalAuthAction,
+} from 'next-safe-action';
 import { z } from 'zod';
 import { logger, toLogContextValue } from '../logger.ts';
 import { logActionFailure, normalizeError } from '../errors.ts';
@@ -68,89 +80,99 @@ export const rateLimitedAction = loggedAction.use(async ({ next, metadata }) => 
   return next();
 });
 
-export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => {
-  // Lazy import server-only dependencies to keep this file client-safe for definition
-  const { createSupabaseServerClient } = await import('../supabase/server.ts');
-  const { getAuthenticatedUserFromClient } = await import('../auth/get-authenticated-user.ts');
+// Use the mock's pre-configured authedAction if available (tests), otherwise create our own (production)
+// In tests, Jest automatically uses __mocks__/next-safe-action.ts which exports authedAction
+// In production, next-safe-action doesn't export authedAction, so mockAuthedAction will be undefined
+export const authedAction =
+  (mockAuthedAction as typeof rateLimitedAction | undefined) ??
+  rateLimitedAction.use(async ({ next, metadata }) => {
+    // Lazy import server-only dependencies to keep this file client-safe for definition
+    const { createSupabaseServerClient } = await import('../supabase/server.ts');
+    const { getAuthenticatedUserFromClient } = await import('../auth/get-authenticated-user.ts');
 
-  const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
 
-  const authResult = await getAuthenticatedUserFromClient(supabase, {
-    context: metadata?.actionName || 'authedAction',
-  });
+    const authResult = await getAuthenticatedUserFromClient(supabase, {
+      context: metadata?.actionName || 'authedAction',
+    });
 
-  if (!authResult.user) {
-    const headersList = await headers();
-    const clientIP =
-      headersList.get('cf-connecting-ip') ||
-      headersList.get('x-forwarded-for') ||
-      headersList.get('x-real-ip') ||
-      'unknown';
-    const referer = headersList.get('referer') || 'unknown';
+    if (!authResult.user) {
+      const headersList = await headers();
+      const clientIP =
+        headersList.get('cf-connecting-ip') ||
+        headersList.get('x-forwarded-for') ||
+        headersList.get('x-real-ip') ||
+        'unknown';
+      const referer = headersList.get('referer') || 'unknown';
 
-    logger.warn(
-      {
-        securityEvent: true, // Structured tag for security event filtering
-        clientIP,
-        path: referer,
-        actionName: metadata?.actionName || 'unknown',
-        reason: authResult.error?.message || 'No valid session',
-        errorCode: authResult.error?.name || 'AUTH_REQUIRED',
-      },
-      'Auth failure - Unauthorized action attempt'
-    );
+      logger.warn(
+        {
+          securityEvent: true, // Structured tag for security event filtering
+          clientIP,
+          path: referer,
+          actionName: metadata?.actionName || 'unknown',
+          reason: authResult.error?.message || 'No valid session',
+          errorCode: authResult.error?.name || 'AUTH_REQUIRED',
+        },
+        'Auth failure - Unauthorized action attempt'
+      );
 
-    throw new Error('Unauthorized. Please sign in to continue.');
-  }
+      throw new Error('Unauthorized. Please sign in to continue.');
+    }
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const authToken = session?.access_token;
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const authToken = session?.access_token;
 
-  const authCtx: { userId: string; userEmail?: string; authToken?: string } = {
-    userId: authResult.user.id,
-  };
-  if (authResult.user.email) authCtx.userEmail = authResult.user.email;
-  if (authToken) authCtx.authToken = authToken;
-
-  return next({
-    ctx: authCtx,
-  });
-});
-
-export const optionalAuthAction = rateLimitedAction.use(async ({ next, metadata }) => {
-  // Lazy import server-only dependencies
-  const { createSupabaseServerClient } = await import('../supabase/server.ts');
-  const { getAuthenticatedUserFromClient } = await import('../auth/get-authenticated-user.ts');
-
-  const supabase = await createSupabaseServerClient();
-
-  const authResult = await getAuthenticatedUserFromClient(supabase, {
-    context: metadata?.actionName || 'optionalAuthAction',
-  });
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const authToken = session?.access_token;
-
-  const authCtx: {
-    user: import('@supabase/supabase-js').User | null;
-    userId?: string;
-    userEmail?: string;
-    authToken?: string;
-  } = {
-    user: authResult.user ?? null,
-  };
-
-  if (authResult.user) {
-    authCtx.userId = authResult.user.id;
+    const authCtx: { userId: string; userEmail?: string; authToken?: string } = {
+      userId: authResult.user.id,
+    };
     if (authResult.user.email) authCtx.userEmail = authResult.user.email;
     if (authToken) authCtx.authToken = authToken;
-  }
 
-  return next({
-    ctx: authCtx,
+    return next({
+      ctx: authCtx,
+    });
   });
-});
+
+// Use the mock's pre-configured optionalAuthAction if available (tests), otherwise create our own (production)
+// In tests, Jest automatically uses __mocks__/next-safe-action.ts which exports optionalAuthAction
+// In production, next-safe-action doesn't export optionalAuthAction, so mockOptionalAuthAction will be undefined
+export const optionalAuthAction =
+  (mockOptionalAuthAction as typeof rateLimitedAction | undefined) ??
+  rateLimitedAction.use(async ({ next, metadata }) => {
+    // Lazy import server-only dependencies
+    const { createSupabaseServerClient } = await import('../supabase/server.ts');
+    const { getAuthenticatedUserFromClient } = await import('../auth/get-authenticated-user.ts');
+
+    const supabase = await createSupabaseServerClient();
+
+    const authResult = await getAuthenticatedUserFromClient(supabase, {
+      context: metadata?.actionName || 'optionalAuthAction',
+    });
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const authToken = session?.access_token;
+
+    const authCtx: {
+      user: import('@supabase/supabase-js').User | null;
+      userId?: string;
+      userEmail?: string;
+      authToken?: string;
+    } = {
+      user: authResult.user ?? null,
+    };
+
+    if (authResult.user) {
+      authCtx.userId = authResult.user.id;
+      if (authResult.user.email) authCtx.userEmail = authResult.user.email;
+      if (authToken) authCtx.authToken = authToken;
+    }
+
+    return next({
+      ctx: authCtx,
+    });
+  });

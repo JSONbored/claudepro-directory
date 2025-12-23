@@ -7,46 +7,61 @@
  * @module web-runtime/inngest/functions/polar/webhook.test
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { handlePolarWebhook } from './webhook';
-import * as serviceFactory from '../../../data/service-factory';
-import { logger } from '../../../logging/server';
-import { normalizeError } from '@heyclaude/shared-runtime';
 
-// Hoist mocks BEFORE importing the function to ensure mocks are applied
-const mockGetService = vi.hoisted(() => vi.fn());
-const mockLogger = vi.hoisted(() => ({
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn(),
-}));
-const mockCreateWebAppContextWithId = vi.hoisted(() => vi.fn(() => ({
-  requestId: 'test-request-id',
-  operation: 'handlePolarWebhook',
-  route: '/inngest/polar/webhook',
-})));
-const mockNormalizeError = vi.hoisted(() => vi.fn((error: unknown) => {
-  if (error instanceof Error) {
-    return error;
-  }
-  return new Error(String(error));
-}));
+// Mock service factory, logging, shared-runtime, and monitoring
+jest.mock('../../../data/service-factory', () => {
+  const mockGetService = jest.fn();
+  return {
+    getService: mockGetService,
+    __mockGetService: mockGetService,
+  };
+});
 
-// Mock service factory
-vi.mock('../../../data/service-factory', () => ({
-  getService: mockGetService,
-}));
+jest.mock('../../../logging/server', () => {
+  const mockLogger = {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+  const mockCreateWebAppContextWithId = jest.fn(() => ({
+    requestId: 'test-request-id',
+    operation: 'handlePolarWebhook',
+    route: '/inngest/polar/webhook',
+  }));
+  return {
+    logger: mockLogger,
+    createWebAppContextWithId: mockCreateWebAppContextWithId,
+    __mockLogger: mockLogger,
+    __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
+  };
+});
 
-// Mock logging
-vi.mock('../../../logging/server', () => ({
-  logger: mockLogger,
-  createWebAppContextWithId: mockCreateWebAppContextWithId,
-}));
+jest.mock('@heyclaude/shared-runtime', () => {
+  const mockNormalizeError = jest.fn((error: unknown) => {
+    if (error instanceof Error) {
+      return error;
+    }
+    return new Error(String(error));
+  });
+  return {
+    normalizeError: mockNormalizeError,
+    __mockNormalizeError: mockNormalizeError,
+  };
+});
 
-// Mock shared runtime
-vi.mock('@heyclaude/shared-runtime', () => ({
-  normalizeError: mockNormalizeError,
+jest.mock('../../utils/monitoring', () => ({
+  isBetterStackMonitoringEnabled: jest.fn().mockReturnValue(false),
+  isInngestMonitoringEnabled: jest.fn().mockReturnValue(false),
+  isCriticalFailureMonitoringEnabled: jest.fn().mockReturnValue(false),
+  isCronSuccessMonitoringEnabled: jest.fn().mockReturnValue(false),
+  isApiEndpointMonitoringEnabled: jest.fn().mockReturnValue(false),
+  sendBetterStackHeartbeat: jest.fn(),
+  sendCriticalFailureHeartbeat: jest.fn(),
+  sendCronSuccessHeartbeat: jest.fn(),
+  sendApiEndpointHeartbeat: jest.fn(),
 }));
 
 // Import function AFTER mocks are set up
@@ -57,11 +72,23 @@ describe('handlePolarWebhook', () => {
   let t: InngestTestEngine;
 
   /**
+   * Mock functions - accessed via jest.requireMock
+   */
+  let mockGetService: ReturnType<typeof jest.fn>;
+  let mockLogger: {
+    info: ReturnType<typeof jest.fn>;
+    warn: ReturnType<typeof jest.fn>;
+    error: ReturnType<typeof jest.fn>;
+  };
+  let mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
+  let mockNormalizeError: ReturnType<typeof jest.fn>;
+
+  /**
    * Mock MiscService instance
    */
   let mockMiscService: {
-    handlePolarWebhookRpc: ReturnType<typeof vi.fn>;
-    updateWebhookEventStatus: ReturnType<typeof vi.fn>;
+    handlePolarWebhookRpc: ReturnType<typeof jest.fn>;
+    updateWebhookEventStatus: ReturnType<typeof jest.fn>;
   };
 
   /**
@@ -71,6 +98,27 @@ describe('handlePolarWebhook', () => {
    * - Sets up default mock return values
    */
   beforeEach(() => {
+    // Get mocked functions via jest.requireMock
+    const serviceFactoryMock = jest.requireMock('../../../data/service-factory') as {
+      __mockGetService: ReturnType<typeof jest.fn>;
+    };
+    const loggingMock = jest.requireMock('../../../logging/server') as {
+      __mockLogger: {
+        info: ReturnType<typeof jest.fn>;
+        warn: ReturnType<typeof jest.fn>;
+        error: ReturnType<typeof jest.fn>;
+      };
+      __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
+    };
+    const sharedRuntimeMock = jest.requireMock('@heyclaude/shared-runtime') as {
+      __mockNormalizeError: ReturnType<typeof jest.fn>;
+    };
+
+    mockGetService = serviceFactoryMock.__mockGetService;
+    mockLogger = loggingMock.__mockLogger;
+    mockCreateWebAppContextWithId = loggingMock.__mockCreateWebAppContextWithId;
+    mockNormalizeError = sharedRuntimeMock.__mockNormalizeError;
+
     // Create fresh test engine instance for each test
     // This prevents step result memoization between tests
     t = new InngestTestEngine({
@@ -78,23 +126,31 @@ describe('handlePolarWebhook', () => {
     });
 
     // Reset all mocks to ensure clean state
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
     mockGetService.mockReset();
 
-    // Set up mock MiscService
-    mockMiscService = {
-      handlePolarWebhookRpc: vi.fn().mockResolvedValue(undefined),
-      updateWebhookEventStatus: vi.fn().mockResolvedValue(undefined),
-    };
+    // Restore mock implementations after reset
+    mockCreateWebAppContextWithId.mockReturnValue({
+      requestId: 'test-request-id',
+      operation: 'handlePolarWebhook',
+      route: '/inngest/polar/webhook',
+    });
 
-    mockGetService.mockResolvedValue(mockMiscService as never);
-
-    mockNormalizeError.mockImplementation((error) => {
+    mockNormalizeError.mockImplementation((error: unknown) => {
       if (error instanceof Error) {
         return error;
       }
       return new Error(String(error));
     });
+
+    // Set up mock MiscService
+    mockMiscService = {
+      handlePolarWebhookRpc: jest.fn().mockResolvedValue(undefined),
+      updateWebhookEventStatus: jest.fn().mockResolvedValue(undefined),
+    };
+
+    mockGetService.mockResolvedValue(mockMiscService as never);
   });
 
   /**
@@ -103,7 +159,7 @@ describe('handlePolarWebhook', () => {
    * Tests that order.paid events are processed correctly.
    */
   it('should handle order.paid event successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'polar/webhook',
@@ -117,7 +173,7 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; eventType: string; webhookId: string; action: string; rpcName: string } };
 
     expect(result).toEqual({
       success: true,
@@ -140,7 +196,7 @@ describe('handlePolarWebhook', () => {
    * Tests that order.refunded events are processed correctly.
    */
   it('should handle order.refunded event successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'polar/webhook',
@@ -154,7 +210,7 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; eventType: string; webhookId: string; action: string; rpcName: string } };
 
     expect(result).toEqual({
       success: true,
@@ -176,7 +232,7 @@ describe('handlePolarWebhook', () => {
    * Tests that subscription.active events are processed correctly.
    */
   it('should handle subscription.active event successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'polar/webhook',
@@ -189,7 +245,7 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; eventType: string; webhookId: string; action: string; rpcName: string } };
 
     expect(result).toEqual({
       success: true,
@@ -211,7 +267,7 @@ describe('handlePolarWebhook', () => {
    * Tests that subscription.canceled events are processed correctly.
    */
   it('should handle subscription.canceled event successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'polar/webhook',
@@ -224,7 +280,7 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; rpcName: string } };
 
     expect(result.success).toBe(true);
     expect(result.rpcName).toBe('handle_polar_subscription_canceled');
@@ -236,7 +292,7 @@ describe('handlePolarWebhook', () => {
    * Tests that subscription.revoked events are processed correctly.
    */
   it('should handle subscription.revoked event successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'polar/webhook',
@@ -249,7 +305,7 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; rpcName: string } };
 
     expect(result.success).toBe(true);
     expect(result.rpcName).toBe('handle_polar_subscription_revoked');
@@ -261,7 +317,7 @@ describe('handlePolarWebhook', () => {
    * Tests that informational events are logged but not processed via RPC.
    */
   it('should handle informational event (checkout.created) successfully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'polar/webhook',
@@ -274,7 +330,7 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; eventType: string; webhookId: string; action: string; message: string } };
 
     expect(result).toEqual({
       success: true,
@@ -302,7 +358,7 @@ describe('handlePolarWebhook', () => {
    * Tests that unsupported event types are skipped gracefully.
    */
   it('should handle unsupported event type gracefully', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'polar/webhook',
@@ -315,7 +371,7 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; eventType: string; webhookId: string; action: string; message: string } };
 
     expect(result).toEqual({
       success: true,
@@ -342,7 +398,7 @@ describe('handlePolarWebhook', () => {
    * Tests that order events without jobId fail validation.
    */
   it('should fail validation for order event without jobId', async () => {
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'polar/webhook',
@@ -356,7 +412,7 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean; eventType: string; webhookId: string; action: string; error: string } };
 
     expect(result).toEqual({
       success: false,
@@ -386,7 +442,7 @@ describe('handlePolarWebhook', () => {
   it('should handle RPC call failure and throw for retry', async () => {
     mockMiscService.handlePolarWebhookRpc.mockRejectedValue(new Error('Database connection failed'));
 
-    const { error } = await t.execute({
+    const { error } = (await t.execute({
       events: [
         {
           name: 'polar/webhook',
@@ -400,7 +456,7 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    });
+    })) as { error?: Error };
 
     expect(error).toBeDefined();
     expect(error?.message).toContain('Polar webhook processing failed');
@@ -425,7 +481,7 @@ describe('handlePolarWebhook', () => {
   it('should handle webhook status update failure gracefully', async () => {
     mockMiscService.updateWebhookEventStatus.mockRejectedValue(new Error('Database update failed'));
 
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'polar/webhook',
@@ -439,7 +495,7 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean } };
 
     // Should still succeed (status update is non-critical)
     expect(result.success).toBe(true);
@@ -458,7 +514,7 @@ describe('handlePolarWebhook', () => {
    * Tests the classify-event step individually.
    */
   it('should execute classify-event step correctly', async () => {
-    const { result } = await t.executeStep('classify-event', {
+    const { result } = (await t.executeStep('classify-event', {
       events: [
         {
           name: 'polar/webhook',
@@ -472,7 +528,7 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { rpcName: string | null; isInformational: boolean; isSupported: boolean } };
 
     expect(result).toEqual({
       rpcName: 'handle_polar_order_paid',
@@ -505,7 +561,7 @@ describe('handlePolarWebhook', () => {
     });
 
     // Now execute full function to test execute-rpc step
-    const { result } = await t.execute({
+    const { result } = (await t.execute({
       events: [
         {
           name: 'polar/webhook',
@@ -519,7 +575,7 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    });
+    })) as { result: { success: boolean } };
 
     expect(result.success).toBe(true);
     expect(mockMiscService.handlePolarWebhookRpc).toHaveBeenCalledTimes(1);
@@ -544,9 +600,9 @@ describe('handlePolarWebhook', () => {
     };
 
     // Execute same event twice
-    const { result: result1 } = await t.execute({
+    const { result: result1 } = (await t.execute({
       events: [eventData],
-    });
+    })) as { result: { success: boolean } };
 
     // Create fresh test engine for second execution (simulating idempotency)
     const t2 = new InngestTestEngine({
@@ -554,9 +610,9 @@ describe('handlePolarWebhook', () => {
     });
     mockMiscService.handlePolarWebhookRpc.mockClear();
 
-    const { result: result2 } = await t2.execute({
+    const { result: result2 } = (await t2.execute({
       events: [eventData],
-    });
+    })) as { result: { success: boolean } };
 
     // Both should succeed
     expect(result1.success).toBe(true);
@@ -577,7 +633,7 @@ describe('handlePolarWebhook', () => {
       });
       mockMiscService.handlePolarWebhookRpc.mockClear();
 
-      const { result } = await t2.execute({
+      const { result } = (await t2.execute({
         events: [
           {
             name: 'polar/webhook',
@@ -590,7 +646,7 @@ describe('handlePolarWebhook', () => {
             },
           },
         ],
-      });
+      })) as { result: { success: boolean; action: string } };
 
       expect(result.success).toBe(true);
       expect(result.action).toBe('logged');
