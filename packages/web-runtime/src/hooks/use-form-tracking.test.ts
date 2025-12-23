@@ -1,35 +1,39 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { renderHook, act } from '@testing-library/react';
 import { useFormTracking, useStepTimer } from './use-form-tracking';
 import type { FormTrackingMetadata } from './use-form-tracking';
 
-// Mock usePulse
-const mockClick = vi.fn().mockResolvedValue(undefined);
+// Mock usePulse - define mock inside factory to avoid hoisting issues
+const mockClick = jest.fn().mockResolvedValue(undefined);
 
-vi.mock('./use-pulse', () => ({
-  usePulse: vi.fn(() => ({
+jest.mock('./use-pulse', () => ({
+  usePulse: jest.fn(() => ({
     click: mockClick,
-    view: vi.fn(),
-    copy: vi.fn(),
-    share: vi.fn(),
-    screenshot: vi.fn(),
-    download: vi.fn(),
-    bookmark: vi.fn(),
-    filter: vi.fn(),
-    search: vi.fn(),
-    newsletter: vi.fn(),
+    view: jest.fn(),
+    copy: jest.fn(),
+    share: jest.fn(),
+    screenshot: jest.fn(),
+    download: jest.fn(),
+    bookmark: jest.fn(),
+    filter: jest.fn(),
+    search: jest.fn(),
+    newsletter: jest.fn(),
   })),
 }));
 
 describe('useFormTracking', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    vi.useFakeTimers();
+    jest.clearAllMocks();
+    jest.useFakeTimers();
   });
 
   afterEach(() => {
-    vi.useRealTimers();
-    vi.restoreAllMocks();
+    jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it('should return all tracking functions', () => {
@@ -257,13 +261,13 @@ describe('useFormTracking', () => {
 
 describe('useStepTimer', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-01-01T00:00:00Z').getTime());
   });
 
   afterEach(() => {
-    vi.useRealTimers();
-    vi.restoreAllMocks();
+    jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it('should initialize timer', () => {
@@ -277,7 +281,7 @@ describe('useStepTimer', () => {
     const { result } = renderHook(() => useStepTimer());
 
     act(() => {
-      vi.advanceTimersByTime(5000); // 5 seconds
+      jest.advanceTimersByTime(5000); // 5 seconds
     });
 
     expect(result.current.getElapsed()).toBe(5000);
@@ -287,18 +291,17 @@ describe('useStepTimer', () => {
     const { result } = renderHook(() => useStepTimer());
 
     act(() => {
-      vi.advanceTimersByTime(5000);
+      jest.advanceTimersByTime(5000);
     });
 
     expect(result.current.getElapsed()).toBe(5000);
 
     act(() => {
       result.current.reset();
-      vi.setSystemTime(new Date('2024-01-01T00:00:10Z')); // Reset to 10 seconds later
     });
 
     act(() => {
-      vi.advanceTimersByTime(2000);
+      jest.advanceTimersByTime(2000);
     });
 
     expect(result.current.getElapsed()).toBe(2000);

@@ -1,40 +1,49 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useFormSubmit } from './use-form-submit';
 import type { UseFormSubmitOptions } from './use-form-submit';
 
-// Mock dependencies - use vi.hoisted() for variables used in vi.mock()
-const mockPush = vi.hoisted(() => vi.fn());
-const mockRefresh = vi.hoisted(() => vi.fn());
-const mockRouter = vi.hoisted(() => ({
+// Mock dependencies - define mocks directly in jest.mock() factory functions
+const mockPush = jest.fn();
+const mockRefresh = jest.fn();
+const mockRouter = {
   push: mockPush,
   refresh: mockRefresh,
-}));
+};
 
-vi.mock('next/navigation', () => ({
+jest.mock('next/navigation', () => ({
   useRouter: () => mockRouter,
 }));
 
-const mockRunLoggedAsync = vi.hoisted(() => vi.fn());
-vi.mock('./use-logged-async', () => ({
-  useLoggedAsync: vi.fn(() => mockRunLoggedAsync),
+const mockRunLoggedAsync = jest.fn();
+
+jest.mock('./use-logged-async', () => ({
+  useLoggedAsync: jest.fn(() => mockRunLoggedAsync),
 }));
 
-const mockSuccess = vi.hoisted(() => vi.fn());
-const mockError = vi.hoisted(() => vi.fn());
-const mockToasts = vi.hoisted(() => ({
-  raw: {
-    success: mockSuccess,
-    error: mockError,
-  },
-}));
+// Define toast mocks inside factory to avoid hoisting issues
+jest.mock('../client/toast', () => {
+  const mockSuccess = jest.fn();
+  const mockError = jest.fn();
+  return {
+    toasts: {
+      raw: {
+        success: mockSuccess,
+        error: mockError,
+      },
+    },
+    // Export mocks for use in tests
+    __mockSuccess: mockSuccess,
+    __mockError: mockError,
+  };
+});
 
-vi.mock('../client/toast', () => ({
-  toasts: mockToasts,
-}));
-
-vi.mock('@heyclaude/shared-runtime', () => ({
-  normalizeError: vi.fn((error: unknown, message: string) => {
+jest.mock('@heyclaude/shared-runtime', () => ({
+  normalizeError: jest.fn((error: unknown, message: string) => {
     if (error instanceof Error) {
       return error;
     }
@@ -42,14 +51,19 @@ vi.mock('@heyclaude/shared-runtime', () => ({
   }),
 }));
 
+// Get toast mocks for use in tests
+const { toasts } = jest.requireMock('../client/toast');
+const mockSuccess = toasts.raw.success;
+const mockError = toasts.raw.error;
+
 describe('useFormSubmit', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockRunLoggedAsync.mockResolvedValue({ id: '123' });
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should initialize with isPending=false', () => {
@@ -84,10 +98,12 @@ describe('useFormSubmit', () => {
       });
     });
 
-    // Should be pending
-    expect(result.current.isPending).toBe(true);
+    // Wait for transition to start
+    await waitFor(() => {
+      expect(result.current.isPending).toBe(true);
+    });
 
-    act(() => {
+    await act(async () => {
       resolveOperation!({ id: '123' });
     });
 
@@ -154,7 +170,7 @@ describe('useFormSubmit', () => {
   });
 
   it('should call onSuccess callback', async () => {
-    const onSuccess = vi.fn();
+    const onSuccess = jest.fn();
     const { result } = renderHook(() =>
       useFormSubmit({
         scope: 'TestForm',
@@ -242,7 +258,7 @@ describe('useFormSubmit', () => {
 
   it('should call onError callback on error', async () => {
     const error = new Error('Operation failed');
-    const onError = vi.fn();
+    const onError = jest.fn();
     mockRunLoggedAsync.mockRejectedValue(error);
 
     const { result } = renderHook(() =>

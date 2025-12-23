@@ -1,21 +1,32 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { renderHook } from '@testing-library/react';
 import { useReducedMotion } from './use-reduced-motion';
 
-// Mock motion/react
-const mockUseReducedMotion = vi.fn(() => false);
+// Mock motion/react - define mocks inside factory function
+jest.mock('motion/react', () => {
+  const mockUseReducedMotion = jest.fn(() => false);
+  return {
+    useReducedMotion: mockUseReducedMotion,
+    __mockUseReducedMotion: mockUseReducedMotion,
+  };
+});
 
-vi.mock('motion/react', () => ({
-  useReducedMotion: mockUseReducedMotion,
-}));
+// Get mock for use in tests
+const { useReducedMotion: mockUseReducedMotion } = jest.requireMock('motion/react');
+const mockUseReducedMotionFn = mockUseReducedMotion.__mockUseReducedMotion || mockUseReducedMotion;
 
 describe('useReducedMotion', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it('should return false when reduced motion is not enabled', () => {
-    mockUseReducedMotion.mockReturnValue(false);
+    mockUseReducedMotionFn.mockReturnValue(false);
 
     const { result } = renderHook(() => useReducedMotion());
 
@@ -23,7 +34,7 @@ describe('useReducedMotion', () => {
   });
 
   it('should return true when reduced motion is enabled', () => {
-    mockUseReducedMotion.mockReturnValue(true);
+    mockUseReducedMotionFn.mockReturnValue(true);
 
     const { result } = renderHook(() => useReducedMotion());
 
@@ -31,7 +42,7 @@ describe('useReducedMotion', () => {
   });
 
   it('should return false when motion/react returns null/undefined', () => {
-    mockUseReducedMotion.mockReturnValue(null);
+    mockUseReducedMotionFn.mockReturnValue(null);
 
     const { result } = renderHook(() => useReducedMotion());
 
@@ -41,6 +52,6 @@ describe('useReducedMotion', () => {
   it('should call motion/react useReducedMotion', () => {
     renderHook(() => useReducedMotion());
 
-    expect(mockUseReducedMotion).toHaveBeenCalled();
+    expect(mockUseReducedMotionFn).toHaveBeenCalled();
   });
 });

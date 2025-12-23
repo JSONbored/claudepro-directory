@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from '@jest/globals';
 import { sanitizeCacheKey, sanitizeCacheKeyArray, deterministicStringify } from './cache-keys';
 
 describe('cache-keys', () => {

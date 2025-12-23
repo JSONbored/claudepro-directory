@@ -1,45 +1,64 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useRecentlyViewed, getCategoryRoute } from './use-recently-viewed.ts';
 
 // Mock dependencies
-vi.mock('./use-debounce-callback', () => ({
-  useDebounceCallback: vi.fn((fn, delay) => fn),
+jest.mock('./use-debounce-callback', () => ({
+  useDebounceCallback: jest.fn((fn, delay) => fn),
 }));
 
-vi.mock('../config/static-configs.ts', () => ({
-  getRecentlyViewedConfig: vi.fn(() => ({
+jest.mock('../config/static-configs.ts', () => ({
+  getRecentlyViewedConfig: jest.fn(() => ({
     'recently_viewed.max_items': 10,
     'recently_viewed.ttl_days': 30,
     'recently_viewed.max_description_length': 150,
     'recently_viewed.max_tags': 5,
   })),
-  getTimeoutConfig: vi.fn(() => ({
+  getTimeoutConfig: jest.fn(() => ({
     'timeout.ui.form_debounce_ms': 300,
   })),
 }));
 
-vi.mock('../logger.ts', () => ({
+jest.mock('../logger.ts', () => ({
   logger: {
-    warn: vi.fn(),
-    error: vi.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
   },
 }));
 
-vi.mock('../errors.ts', () => ({
-  normalizeError: vi.fn((err) => (err instanceof Error ? err : new Error(String(err)))),
+jest.mock('../errors.ts', () => ({
+  normalizeError: jest.fn((err) => (err instanceof Error ? err : new Error(String(err)))),
 }));
 
 describe('useRecentlyViewed', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    // Clear localStorage before each test to ensure isolation
     if (typeof window !== 'undefined') {
       window.localStorage.clear();
     }
+    // Reset Zustand store state
+    const storeModule = require('./use-recently-viewed.ts');
+    const store = (storeModule as any).useRecentlyViewedStore;
+    if (store && (store as any).__testReset) {
+      (store as any).__testReset();
+    } else if (store && typeof store.setState === 'function') {
+      store.setState({ items: [], isLoaded: false });
+    }
   });
 
-  afterEach(() => {
-    vi.clearAllTimers();
+  afterEach(async () => {
+    jest.clearAllTimers();
+    // Clear localStorage after each test
+    if (typeof window !== 'undefined') {
+      window.localStorage.clear();
+    }
+    // Wait for any debounced saves to complete
+    await new Promise((resolve) => setTimeout(resolve, 350));
   });
 
   it('should initialize with empty list', () => {
@@ -226,6 +245,9 @@ describe('useRecentlyViewed', () => {
   });
 
   it('should persist to localStorage', async () => {
+    // Clear localStorage before this test
+    window.localStorage.clear();
+
     const { result, unmount } = renderHook(() => useRecentlyViewed());
 
     await waitFor(() => {
@@ -241,6 +263,9 @@ describe('useRecentlyViewed', () => {
       });
     });
 
+    // Wait for debounced save to complete
+    await new Promise((resolve) => setTimeout(resolve, 350));
+
     unmount();
 
     // Create new hook instance - should load from localStorage
@@ -255,6 +280,9 @@ describe('useRecentlyViewed', () => {
   });
 
   it('should filter expired items on load', async () => {
+    // Clear localStorage before this test
+    window.localStorage.clear();
+
     // Set up localStorage with expired item
     const expiredItem = {
       category: 'agent',

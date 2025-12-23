@@ -1,43 +1,47 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAuthenticatedUser } from './use-authenticated-user.ts';
 import type { User, Session } from '@supabase/supabase-js';
 
 // Mock dependencies
-vi.mock('../supabase/browser.ts', () => ({
-  createSupabaseBrowserClient: vi.fn(() => ({
+jest.mock('../supabase/browser.ts', () => ({
+  createSupabaseBrowserClient: jest.fn(() => ({
     auth: {
-      getUser: vi.fn(),
-      onAuthStateChange: vi.fn(),
+      getUser: jest.fn(),
+      onAuthStateChange: jest.fn(),
     },
   })),
 }));
 
-vi.mock('../logger.ts', () => ({
+jest.mock('../logger.ts', () => ({
   logger: {
-    error: vi.fn(),
-    debug: vi.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
   },
 }));
 
-vi.mock('../utils/client-logger.ts', () => ({
-  logClientWarn: vi.fn(),
+jest.mock('../utils/client-logger.ts', () => ({
+  logClientWarn: jest.fn(),
 }));
 
-vi.mock('../errors.ts', () => ({
-  normalizeError: vi.fn((err) => (err instanceof Error ? err : new Error(String(err)))),
+jest.mock('../errors.ts', () => ({
+  normalizeError: jest.fn((err) => (err instanceof Error ? err : new Error(String(err)))),
 }));
 
 describe('useAuthenticatedUser', () => {
   let mockSupabase: any;
-  let mockGetUser: ReturnType<typeof vi.fn>;
-  let mockOnAuthStateChange: ReturnType<typeof vi.fn>;
+  let mockGetUser: ReturnType<typeof jest.fn>;
+  let mockOnAuthStateChange: ReturnType<typeof jest.fn>;
 
   beforeEach(async () => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
 
-    mockGetUser = vi.fn();
-    mockOnAuthStateChange = vi.fn();
+    mockGetUser = jest.fn();
+    mockOnAuthStateChange = jest.fn();
 
     mockSupabase = {
       auth: {
@@ -47,16 +51,16 @@ describe('useAuthenticatedUser', () => {
     };
 
     const { createSupabaseBrowserClient } = await import('../supabase/browser.ts');
-    vi.mocked(createSupabaseBrowserClient).mockReturnValue(mockSupabase);
+    jest.mocked(createSupabaseBrowserClient).mockReturnValue(mockSupabase);
   });
 
   afterEach(() => {
-    vi.clearAllTimers();
+    jest.clearAllTimers();
   });
 
   it('should initialize with loading state', () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
-    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } });
+    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: jest.fn() } } });
 
     const { result } = renderHook(() => useAuthenticatedUser());
 
@@ -69,7 +73,7 @@ describe('useAuthenticatedUser', () => {
   it('should set authenticated state when user exists', async () => {
     const mockUser = { id: 'user-123', email: 'test@example.com' } as User;
     mockGetUser.mockResolvedValue({ data: { user: mockUser }, error: null });
-    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } });
+    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: jest.fn() } } });
 
     const { result } = renderHook(() => useAuthenticatedUser());
 
@@ -84,7 +88,7 @@ describe('useAuthenticatedUser', () => {
 
   it('should set unauthenticated state when no user', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
-    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } });
+    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: jest.fn() } } });
 
     const { result } = renderHook(() => useAuthenticatedUser());
 
@@ -100,7 +104,7 @@ describe('useAuthenticatedUser', () => {
   it('should handle auth errors gracefully', async () => {
     const authError = { message: 'Auth error', name: 'AuthError' };
     mockGetUser.mockResolvedValue({ data: { user: null }, error: authError });
-    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } });
+    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: jest.fn() } } });
 
     const { result } = renderHook(() => useAuthenticatedUser());
 
@@ -115,7 +119,7 @@ describe('useAuthenticatedUser', () => {
   it('should handle network errors without logging as errors', async () => {
     const networkError = { message: 'fetch failed', name: 'NetworkError' };
     mockGetUser.mockResolvedValue({ data: { user: null }, error: networkError });
-    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } });
+    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: jest.fn() } } });
 
     const { result } = renderHook(() => useAuthenticatedUser());
 
@@ -125,12 +129,12 @@ describe('useAuthenticatedUser', () => {
 
     // Network errors should be logged as debug, not error
     const { logger } = await import('../logger.ts');
-    expect(vi.mocked(logger.error)).not.toHaveBeenCalled();
+    expect(jest.mocked(logger.error)).not.toHaveBeenCalled();
   });
 
   it('should subscribe to auth state changes when subscribe is true', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
-    const unsubscribe = vi.fn();
+    const unsubscribe = jest.fn();
     mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe } } });
 
     const { result, unmount } = renderHook(() => useAuthenticatedUser({ subscribe: true }));
@@ -161,7 +165,7 @@ describe('useAuthenticatedUser', () => {
     let authStateChangeCallback: ((event: string, session: Session | null) => void) | null = null;
     mockOnAuthStateChange.mockImplementation((callback) => {
       authStateChangeCallback = callback;
-      return { data: { subscription: { unsubscribe: vi.fn() } } };
+      return { data: { subscription: { unsubscribe: jest.fn() } } };
     });
 
     const { result } = renderHook(() => useAuthenticatedUser());
@@ -188,7 +192,7 @@ describe('useAuthenticatedUser', () => {
     mockGetUser
       .mockResolvedValueOnce({ data: { user: initialUser }, error: null })
       .mockResolvedValueOnce({ data: { user: refreshedUser }, error: null });
-    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } });
+    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: jest.fn() } } });
 
     const { result } = renderHook(() => useAuthenticatedUser());
 
@@ -199,14 +203,19 @@ describe('useAuthenticatedUser', () => {
     const refreshed = await result.current.refreshUser();
 
     expect(refreshed).toEqual(refreshedUser);
-    expect(result.current.user).toEqual(refreshedUser);
+    
+    // Wait for state update to be applied
+    await waitFor(() => {
+      expect(result.current.user).toEqual(refreshedUser);
+    });
+    
     expect(mockGetUser).toHaveBeenCalledTimes(2);
   });
 
   it('should use custom context label', async () => {
     const authError = { message: 'Test error', name: 'Error' };
     mockGetUser.mockResolvedValue({ data: { user: null }, error: authError });
-    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } });
+    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: jest.fn() } } });
 
     const { result } = renderHook(() => useAuthenticatedUser({ context: 'CustomContext' }));
 
@@ -216,7 +225,7 @@ describe('useAuthenticatedUser', () => {
 
     // Context should be included in log calls
     const { logger } = await import('../logger.ts');
-    expect(vi.mocked(logger.error)).toHaveBeenCalledWith(
+    expect(jest.mocked(logger.error)).toHaveBeenCalledWith(
       expect.objectContaining({}),
       expect.stringContaining('CustomContext')
     );
@@ -232,7 +241,7 @@ describe('useAuthenticatedUser', () => {
         }, 100);
       });
     });
-    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } });
+    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: jest.fn() } } });
 
     const { result } = renderHook(() => useAuthenticatedUser());
 
@@ -252,7 +261,7 @@ describe('useAuthenticatedUser', () => {
 
   it('should handle Supabase client creation errors', async () => {
     const { createSupabaseBrowserClient } = await import('../supabase/browser.ts');
-    vi.mocked(createSupabaseBrowserClient).mockImplementation(() => {
+    jest.mocked(createSupabaseBrowserClient).mockImplementation(() => {
       throw new Error('Failed to create client');
     });
 
@@ -279,6 +288,6 @@ describe('useAuthenticatedUser', () => {
 
     // Should not crash, just log debug
     const { logger } = await import('../logger.ts');
-    expect(vi.mocked(logger.debug)).toHaveBeenCalled();
+    expect(jest.mocked(logger.debug)).toHaveBeenCalled();
   });
 });

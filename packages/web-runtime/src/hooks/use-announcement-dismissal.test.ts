@@ -1,4 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { renderHook, act } from '@testing-library/react';
 import {
   useAnnouncementDismissal,
@@ -6,28 +10,30 @@ import {
   getAnnouncementDismissalAnalytics,
 } from './use-announcement-dismissal';
 
-// Mock useLocalStorage
-const mockSetValue = vi.fn();
-let mockStoredValue: Record<string, any> = {};
+// Mock useLocalStorage - use a shared object that can be accessed from both mock and tests
+const mockStorageState: { value: Record<string, any>; setValue: ReturnType<typeof jest.fn> } = {
+  value: {},
+  setValue: jest.fn(),
+};
 
-vi.mock('./use-local-storage', () => ({
-  useLocalStorage: vi.fn((key: string, options: any) => {
+jest.mock('./use-local-storage', () => ({
+  useLocalStorage: jest.fn((key: string, options: any) => {
     return {
-      value: mockStoredValue,
-      setValue: mockSetValue,
-      removeValue: vi.fn(),
+      value: mockStorageState.value,
+      setValue: mockStorageState.setValue,
+      removeValue: jest.fn(),
     };
   }),
 }));
 
-vi.mock('../logger', () => ({
+jest.mock('../logger', () => ({
   logger: {
-    error: vi.fn(),
+    error: jest.fn(),
   },
 }));
 
-vi.mock('../errors', () => ({
-  normalizeError: vi.fn((error: unknown, message: string) => {
+jest.mock('../errors', () => ({
+  normalizeError: jest.fn((error: unknown, message: string) => {
     if (error instanceof Error) {
       return error;
     }
@@ -35,12 +41,20 @@ vi.mock('../errors', () => ({
   }),
 }));
 
-vi.mock('../data', () => ({
-  safeParse: vi.fn((value: string, schema: any, options: any) => {
+jest.mock('../data', () => ({
+  safeParse: jest.fn((value: string, schema: any, options: any) => {
     try {
-      return JSON.parse(value);
-    } catch {
-      return {};
+      const parsed = JSON.parse(value);
+      // If schema is provided, validate it (simplified for test)
+      if (schema) {
+        // In real implementation, schema.parse() would validate
+        // For test, just return parsed value
+        return parsed;
+      }
+      return parsed;
+    } catch (error) {
+      // safeParse throws errors when parsing fails (matches real implementation)
+      throw error;
     }
   }),
   ParseStrategy: {
@@ -50,13 +64,13 @@ vi.mock('../data', () => ({
 
 describe('useAnnouncementDismissal', () => {
   beforeEach(() => {
-    mockStoredValue = {};
-    mockSetValue.mockClear();
-    vi.clearAllMocks();
+    mockStorageState.value = {};
+    mockStorageState.setValue.mockClear();
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should initialize with isDismissed=false for new announcement', () => {
@@ -69,7 +83,7 @@ describe('useAnnouncementDismissal', () => {
   });
 
   it('should return isDismissed=true for dismissed announcement', () => {
-    mockStoredValue = {
+    mockStorageState.value = {
       'announcement-1': {
         dismissed: true,
         timestamp: '2024-01-01T00:00:00Z',
@@ -90,7 +104,7 @@ describe('useAnnouncementDismissal', () => {
       result.current.dismiss();
     });
 
-    expect(mockSetValue).toHaveBeenCalledWith(
+    expect(mockStorageState.setValue).toHaveBeenCalledWith(
       expect.objectContaining({
         'announcement-1': expect.objectContaining({
           dismissed: true,
@@ -107,12 +121,12 @@ describe('useAnnouncementDismissal', () => {
       result.current.dismiss();
     });
 
-    const callArgs = mockSetValue.mock.calls[0]?.[0];
+    const callArgs = mockStorageState.setValue.mock.calls[0]?.[0];
     expect(callArgs?.['announcement-1']?.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 
   it('should reset dismissal', () => {
-    mockStoredValue = {
+    mockStorageState.value = {
       'announcement-1': {
         dismissed: true,
         timestamp: '2024-01-01T00:00:00Z',
@@ -131,7 +145,7 @@ describe('useAnnouncementDismissal', () => {
       result.current.reset();
     });
 
-    expect(mockSetValue).toHaveBeenCalledWith({
+    expect(mockStorageState.setValue).toHaveBeenCalledWith({
       'announcement-2': {
         dismissed: true,
         timestamp: '2024-01-01T00:00:00Z',
@@ -140,7 +154,7 @@ describe('useAnnouncementDismissal', () => {
   });
 
   it('should get dismissal timestamp', () => {
-    mockStoredValue = {
+    mockStorageState.value = {
       'announcement-1': {
         dismissed: true,
         timestamp: '2024-01-01T00:00:00Z',
@@ -170,7 +184,7 @@ describe('useAnnouncementDismissal', () => {
     });
 
     // Update mock to reflect dismissal
-    mockStoredValue = {
+    mockStorageState.value = {
       'announcement-1': {
         dismissed: true,
         timestamp: '2024-01-01T00:00:00Z',
@@ -188,11 +202,11 @@ describe('useAnnouncementDismissal', () => {
 
 describe('clearAllAnnouncementDismissals', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should clear all dismissals from localStorage', () => {
-    const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem');
+    const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem');
 
     clearAllAnnouncementDismissals();
 
@@ -201,7 +215,7 @@ describe('clearAllAnnouncementDismissals', () => {
 
   it('should handle localStorage errors gracefully', async () => {
     const { logger } = await import('../logger');
-    const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem');
+    const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem');
     removeItemSpy.mockImplementation(() => {
       throw new Error('localStorage error');
     });
@@ -226,7 +240,7 @@ describe('clearAllAnnouncementDismissals', () => {
 
 describe('getAnnouncementDismissalAnalytics', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should return dismissal analytics from localStorage', () => {
@@ -241,7 +255,7 @@ describe('getAnnouncementDismissalAnalytics', () => {
       },
     };
 
-    vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(JSON.stringify(mockData));
+    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue(JSON.stringify(mockData));
 
     const analytics = getAnnouncementDismissalAnalytics();
 
@@ -249,7 +263,7 @@ describe('getAnnouncementDismissalAnalytics', () => {
   });
 
   it('should return empty object when no dismissals', () => {
-    vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(null);
+    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue(null);
 
     const analytics = getAnnouncementDismissalAnalytics();
 
@@ -258,7 +272,7 @@ describe('getAnnouncementDismissalAnalytics', () => {
 
   it('should handle invalid JSON gracefully', async () => {
     const { logger } = await import('../logger');
-    vi.spyOn(Storage.prototype, 'getItem').mockReturnValue('invalid json');
+    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue('invalid json');
 
     const analytics = getAnnouncementDismissalAnalytics();
 

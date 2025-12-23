@@ -89,6 +89,44 @@ rule:
 message: "Design system package only exports animation constants (SPRING, DURATION, etc.) and gradients. All styling utilities should use Direct Tailwind classes. This import is valid for animation constants only."
 severity: info
 
+---
+# Rule: Detect CSS variables in className attributes (should use Tailwind utilities)
+id: css-variables-in-classname
+language: typescript
+files:
+  - 'apps/web/src/**/*.tsx'
+  - 'packages/web-runtime/src/**/*.tsx'
+rule:
+  all:
+    - pattern: 'className={$CLASSES}'
+    - has:
+        regex: '(text-\[var\(--color-|bg-\[var\(--color-|border-\[var\(--color-|fill-\[var\(--color-|stroke-\[var\(--color-)'
+    - not:
+        inside:
+          has:
+            pattern: '// Acceptable|// Framer Motion|// Animation|// Shiki|// Library requirement'
+message: "CSS variables in className should use Tailwind utilities from @theme block. Use semantic color names (text-success, bg-info-bg, border-warning-border) instead of CSS variables. Define custom colors in @theme block if needed. Acceptable exceptions: Framer Motion animations, Shiki code highlighting, library requirements."
+severity: error
+
+---
+# Rule: Detect CSS variables in template literals (should use Tailwind utilities)
+id: css-variables-in-template-literal
+language: typescript
+files:
+  - 'apps/web/src/**/*.tsx'
+  - 'packages/web-runtime/src/**/*.tsx'
+rule:
+  all:
+    - pattern: 'className={`$CLASSES`}'
+    - has:
+        regex: 'var\(--color-'
+    - not:
+        inside:
+          has:
+            pattern: '// Acceptable|// Framer Motion|// Animation|// Shiki|// Library requirement'
+message: "CSS variables in className template literals should use Tailwind utilities from @theme block. Use semantic color names (text-success, bg-info-bg, border-warning-border) instead of CSS variables."
+severity: error
+
 # Note: Direct Tailwind class usage (mb-4, flex flex-col gap-4, etc.) is CORRECT and should NOT be flagged
 # The design system is defined in @theme block in globals.css, and Tailwind automatically generates utilities
 # Components should use Direct Tailwind classes, not semantic utility wrappers

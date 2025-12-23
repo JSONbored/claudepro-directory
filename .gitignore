@@ -151,6 +151,11 @@ config/tools/SAFE_AUTOFIX_RULES_RESEARCH.md
 config/tools/SAFE_AUTOFIX_RULES_SUMMARY.md
 config/tools/AUTOFIX_RULES_FINAL_SUMMARY.md
 config/tools/eslint-tests/
+config/tools/eslint-rules-tests/**/*.tsx
+config/tools/eslint-rules-tests/**/*.ts
+# Keep README.md and test-runner.js, but ignore test files
+!config/tools/eslint-rules-tests/README.md
+!config/tools/eslint-rules-tests/test-runner.js
 
 # Local Netlify folder
 .netlify

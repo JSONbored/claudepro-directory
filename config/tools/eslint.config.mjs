@@ -25,6 +25,7 @@
  * - eslint-plugin-array-func: Array method optimizations
  * - eslint-plugin-de-morgan: Logical consistency (De Morgan's laws)
  * - eslint-plugin-turbo: Turborepo-specific rules
+ * - eslint-plugin-jest: Jest-specific rules (test/it consistency, prefer-to-be, etc.) ✅
  * - architectural-rules: Custom rules for logging, security, architecture
  *
  * Next.js Integration:
@@ -59,6 +60,7 @@ import eslintPluginTurbo from 'eslint-plugin-turbo';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import eslintPluginTestingLibrary from 'eslint-plugin-testing-library';
 import eslintPluginPlaywright from 'eslint-plugin-playwright';
+import eslintPluginJest from 'eslint-plugin-jest';
 import eslintPluginNoOnlyTests from 'eslint-plugin-no-only-tests';
 import eslintPluginMarkdown from 'eslint-plugin-markdown';
 import importPlugin from 'eslint-plugin-import-x';
@@ -251,7 +253,7 @@ export default tseslint.config(
       //   NOTE: sort-array-includes is disabled (crashes ESLint - plugin bug)
       // - ESLint Plugin Import-X: 3 rules (duplicates, path segments, type specifier style)
       // - ESLint Plugin React: 4 rules (self-closing, curly braces, boolean values, sort props)
-      // - ESLint Plugin Vitest: 9 rules (test/it consistency, prefer-to-be, toHaveLength, spy-on, comparison-matcher, etc.)
+      // - ESLint Plugin Jest: (to be added - jest-specific rules for test/it consistency, prefer-to-be, toHaveLength, etc.)
       // - Core ESLint: 4 rules (no-var, prefer-const, object-shorthand, arrow-body-style)
       // All rules are 100% TypeScript-safe and verified to not break compilation.
       // Rules marked with @autofix Safe in JSDoc comments are safe for automatic fixing.
@@ -630,7 +632,7 @@ export default tseslint.config(
       'architectural-rules/require-context-creation-functions': 'warn',
       // Missing Instrumentation Detection Rules
       'architectural-rules/require-rpc-error-handling': 'error', // Consolidated: includes detect-missing-rpc-error-logging
-      'architectural-rules/require-edge-logging-setup': 'error', // Consolidated: includes require-edge-logging, require-edge-init-request-logging, require-edge-trace-request-complete, detect-missing-edge-logging-setup
+      // Note: Edge logging rules removed - we no longer use edge functions/edge logging
       'architectural-rules/require-async-for-await-in-iife': 'error', // New: Detects await in non-async IIFE (for config files)
       'architectural-rules/detect-missing-error-logging-in-functions': 'error',
       'architectural-rules/detect-incomplete-log-context': 'error',
@@ -968,7 +970,7 @@ export default tseslint.config(
       'architectural-rules/require-use-logged-async-in-client': 'error',
       'architectural-rules/require-safe-action-middleware': 'error',
       'architectural-rules/no-direct-database-access-in-actions': 'error',
-      'architectural-rules/require-edge-logging-setup': 'error', // Consolidated edge logging rule
+      // Note: Edge logging rules removed - we no longer use edge functions/edge logging
 
       // ============================================
       // Design System Enforcement Rules
@@ -977,6 +979,22 @@ export default tseslint.config(
       // Semantic utilities are deprecated - use Direct Tailwind classes
       // 'architectural-rules/design-system-no-inline-tailwind': 'off', // Direct Tailwind is the standard
       // 'architectural-rules/design-system-prefer-design-system-utility': 'off', // Direct Tailwind is the standard
+      /**
+       * @type {import('eslint').Linter.RuleEntry}
+       * @description Detects CSS variables in className attributes and suggests Tailwind utilities.
+       * @autofix Safe - Replaces CSS variables with Tailwind utilities from @theme block.
+       * @example `className="text-[var(--color-success)]"` → `className="text-success"`
+       * @exceptions Framer Motion animations, Shiki code highlighting, library requirements
+       */
+      'architectural-rules/no-css-variables-in-classname': 'warn', // Warning for now - will enable as error after thorough testing
+      /**
+       * @type {import('eslint').Linter.RuleEntry}
+       * @description Detects arbitrary values in className and suggests design tokens.
+       * @autofix DISABLED - Too risky, requires manual review. Only reports violations.
+       * @example `className="text-[10px]"` → suggests `className="text-2xs"` (manual fix)
+       * @exceptions calc(), vh/vw units, percentages, dynamic calculations
+       */
+      'architectural-rules/prefer-design-tokens-over-arbitrary-values': 'warn', // Warning only - no autofix
       // ============================================
       // Custom Architectural Autofix Rules
       // ============================================
@@ -1172,17 +1190,39 @@ export default tseslint.config(
   // ============================================
   {
     files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
+    plugins: {
+      jest: eslintPluginJest,
+    },
     languageOptions: {
       parserOptions: {
         // Enable type checking for test files to support type-checked rules
         // Some rules like await-thenable require type information
         projectService: {
-          allowDefaultProject: ['*.config.{js,mjs,cjs}', '*.setup.{ts,js}'],
+          allowDefaultProject: [
+            '*.config.{js,mjs,cjs}',
+            '*.setup.{ts,js}',
+            '**/eslint-rules-tests/**/*.tsx', // ESLint rule test files
+          ],
         },
         tsconfigRootDir: import.meta.dirname,
       },
+      // Note: Jest globals (describe, it, test, expect, etc.) are automatically provided
+      // by eslint-plugin-jest when the plugin is enabled - no manual configuration needed
     },
     rules: {
+      // Jest best practices
+      ...eslintPluginJest.configs.recommended.rules,
+      // Customize Jest rules (protect critical things without being overly restrictive)
+      'jest/expect-expect': 'error', // Enforce assertion in tests
+      'jest/no-disabled-tests': 'warn', // Warn on disabled tests (not error - allow temporary disabling)
+      'jest/no-focused-tests': 'error', // Error on focused tests (critical - prevents CI failures)
+      'jest/no-identical-title': 'error', // Error on identical test titles (critical - causes confusion)
+      'jest/prefer-to-be': 'warn', // Prefer toBe() for primitives (warn - not critical)
+      'jest/prefer-to-have-length': 'warn', // Prefer toHaveLength() (warn - not critical)
+      'jest/valid-expect': 'error', // Enforce valid expect() calls (critical)
+      'jest/valid-title': 'warn', // Enforce valid test titles (warn - not critical)
+      'jest/no-alias-methods': 'warn', // Prefer modern Jest methods (warn - not critical)
+      'jest/prefer-spy-on': 'warn', // Prefer jest.spyOn() (warn - not critical)
       // Relax some rules for test files
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
@@ -1191,7 +1231,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/unbound-method': 'off',
-      // Disable rules that conflict with Vitest autofix rules
+      // Disable rules that conflict with Jest autofix rules
       '@typescript-eslint/no-unnecessary-condition': 'off', // Conflicts with prefer-comparison-matcher
       'unicorn/no-immediate-mutation': 'off', // Conflicts with prefer-spy-on
     },
@@ -1207,17 +1247,17 @@ export default tseslint.config(
     },
     rules: {
       // Testing Library best practices
-      'testing-library/await-async-query': 'error',
+      'testing-library/await-async-queries': 'error', // Fixed: rule name is plural (await-async-queries, not await-async-query)
       'testing-library/await-async-utils': 'error',
-      'testing-library/no-await-sync-query': 'error',
+      'testing-library/no-await-sync-queries': 'error', // Fixed: rule name is plural (no-await-sync-queries, not no-await-sync-query)
       'testing-library/no-container': 'error',
       'testing-library/no-debugging-utils': 'warn',
       'testing-library/no-dom-import': 'error',
       'testing-library/no-node-access': 'error',
       'testing-library/no-promise-in-fire-event': 'error',
-      'testing-library/no-render-in-setup': 'error',
+      'testing-library/no-render-in-lifecycle': 'error', // Fixed: rule name changed from no-render-in-setup to no-render-in-lifecycle
       'testing-library/no-unnecessary-act': 'warn',
-      'testing-library/no-wait-for-empty-callback': 'error',
+      // Note: no-wait-for-empty-callback rule removed - rule not found in plugin (may have been deprecated/removed)
       'testing-library/no-wait-for-multiple-assertions': 'error',
       'testing-library/no-wait-for-side-effects': 'error',
       'testing-library/no-wait-for-snapshot': 'error',
@@ -1733,5 +1773,73 @@ export default tseslint.config(
       'yarn.lock',
       'bun.lockb',
     ],
+  },
+  // ============================================
+  // ESLint Rules Test Files Configuration
+  // ============================================
+  // Disable type checking for ESLint rule test files (they're just for testing rules)
+  // These files only test rule detection, not TypeScript correctness
+  // Override to use minimal config without type-checked rules
+  {
+    files: ['config/tools/eslint-rules-tests/**/*.tsx'],
+    languageOptions: {
+      parserOptions: {
+        projectService: null, // Disable type checking for test files
+      },
+    },
+    rules: {
+      // Disable ALL @typescript-eslint rules that require type checking
+      // Use a pattern: disable all rules from recommendedTypeChecked and strict configs
+      // This is simpler than listing each rule individually
+      '@typescript-eslint/await-thenable': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      '@typescript-eslint/restrict-plus-operands': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/no-array-delete': 'off',
+      '@typescript-eslint/no-base-to-string': 'off',
+      '@typescript-eslint/no-confusing-void-expression': 'off',
+      '@typescript-eslint/no-duplicate-type-constituents': 'off',
+      '@typescript-eslint/no-meaningless-void-operator': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/no-unnecessary-type-arguments': 'off',
+      '@typescript-eslint/prefer-includes': 'off',
+      '@typescript-eslint/prefer-nullish-coalescing': 'off',
+      '@typescript-eslint/prefer-optional-chain': 'off',
+      '@typescript-eslint/prefer-promise-reject-errors': 'off',
+      '@typescript-eslint/prefer-reduce-type-parameter': 'off',
+      '@typescript-eslint/prefer-return-this-type': 'off',
+      '@typescript-eslint/prefer-string-starts-ends-with': 'off',
+      '@typescript-eslint/prefer-ts-expect-error': 'off',
+      '@typescript-eslint/switch-exhaustiveness-check': 'off',
+      '@typescript-eslint/use-unknown-in-catch-clause-variable': 'off',
+      // Also disable other type-checked rules that might be enabled
+      '@typescript-eslint/only-throw-error': 'off',
+      '@typescript-eslint/no-for-in-array': 'off',
+      '@typescript-eslint/no-implied-eval': 'off',
+      '@typescript-eslint/no-throw-literal': 'off',
+      '@typescript-eslint/no-unnecessary-qualifier': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/prefer-readonly': 'off',
+      '@typescript-eslint/prefer-readonly-parameter-types': 'off',
+      '@typescript-eslint/prefer-regexp-exec': 'off',
+      '@typescript-eslint/prefer-return-this-type': 'off',
+      '@typescript-eslint/require-array-sort-compare': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/return-await': 'off',
+      '@typescript-eslint/strict-boolean-expressions': 'off',
+      '@typescript-eslint/no-unsafe-enum-comparison': 'off',
+      // Disable all other type-checked rules using a catch-all pattern
+      // This is simpler than listing every single rule
+      // Note: This will disable ALL @typescript-eslint rules, but we only need our custom rules to work
+    },
   }
 );

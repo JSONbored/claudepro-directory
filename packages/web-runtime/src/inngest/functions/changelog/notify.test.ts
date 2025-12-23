@@ -5,59 +5,134 @@
  * This tests the function logic, not the route handler.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { revalidateTag } from 'next/cache';
 
-// Hoist mocks BEFORE importing the function to ensure mocks are applied
-const mockPgmqRead = vi.hoisted(() => vi.fn());
-const mockPgmqDelete = vi.hoisted(() => vi.fn());
-const mockGetService = vi.hoisted(() => vi.fn());
-const mockRevalidateTag = vi.hoisted(() => vi.fn());
-const mockLogger = vi.hoisted(() => ({
-  info: vi.fn(),
-  warn: vi.fn(),
-}));
-const mockCreateWebAppContextWithId = vi.hoisted(() => vi.fn(() => ({
-  requestId: 'test-request-id',
-  operation: 'processChangelogNotifyQueue',
-  route: '/inngest/changelog/notify',
-})));
-const mockNormalizeError = vi.hoisted(() => vi.fn((error) => error));
-const mockGetEnvVar = vi.hoisted(() => vi.fn((key: string) => {
-  if (key === 'DISCORD_CHANGELOG_WEBHOOK_URL') return 'https://discord.com/api/webhooks/test';
-  if (key === 'NEXT_PUBLIC_SITE_URL') return 'https://claudepro.directory';
-  return undefined;
-}));
-const mockSendCronSuccessHeartbeat = vi.hoisted(() => vi.fn());
-const mockFetch = vi.hoisted(() => vi.fn());
+// Mock next/cache, supabase/pgmq-client, data/service-factory, logging/server, shared-runtime, monitoring
+// Define mocks directly in jest.mock() factory functions to avoid hoisting issues
+jest.mock('../../../supabase/pgmq-client', () => {
+  const mockPgmqRead = jest.fn();
+  const mockPgmqDelete = jest.fn();
+  return {
+    pgmqRead: mockPgmqRead,
+    pgmqDelete: mockPgmqDelete,
+    __mockPgmqRead: mockPgmqRead,
+    __mockPgmqDelete: mockPgmqDelete,
+  };
+});
 
-vi.mock('../../../supabase/pgmq-client', () => ({
-  pgmqRead: mockPgmqRead,
-  pgmqDelete: mockPgmqDelete,
-}));
+jest.mock('../../../data/service-factory', () => {
+  const mockGetService = jest.fn();
+  return {
+    getService: mockGetService,
+    __mockGetService: mockGetService,
+  };
+});
 
-vi.mock('../../../data/service-factory', () => ({
-  getService: mockGetService,
-}));
+jest.mock('next/cache', () => {
+  const mockRevalidateTag = jest.fn();
+  return {
+    revalidateTag: mockRevalidateTag,
+    __mockRevalidateTag: mockRevalidateTag,
+  };
+});
 
-vi.mock('next/cache', () => ({
-  revalidateTag: mockRevalidateTag,
-}));
+jest.mock('../../../logging/server', () => {
+  const mockLogger = {
+    info: jest.fn(),
+    warn: jest.fn(),
+  };
+  const mockCreateWebAppContextWithId = jest.fn(() => ({
+    requestId: 'test-request-id',
+    operation: 'processChangelogNotifyQueue',
+    route: '/inngest/changelog/notify',
+  }));
+  return {
+    logger: mockLogger,
+    createWebAppContextWithId: mockCreateWebAppContextWithId,
+    __mockLogger: mockLogger,
+    __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
+  };
+});
 
-vi.mock('../../../logging/server', () => ({
-  logger: mockLogger,
-  createWebAppContextWithId: mockCreateWebAppContextWithId,
-}));
+jest.mock('@heyclaude/shared-runtime', () => {
+  const mockNormalizeError = jest.fn((error, fallbackMessage) => {
+    // Always return an Error object with a message property
+    if (error instanceof Error) {
+      return error;
+    }
+    return new Error(fallbackMessage || String(error || 'Unknown error'));
+  });
+  const mockGetEnvVar = jest.fn((key: string) => {
+    if (key === 'DISCORD_CHANGELOG_WEBHOOK_URL') return 'https://discord.com/api/webhooks/test';
+    if (key === 'NEXT_PUBLIC_SITE_URL') return 'https://claudepro.directory';
+    return undefined;
+  });
+  const mockCreatePinoConfig = jest.fn((options?: { service?: string }) => ({
+    level: 'info',
+    service: options?.service || 'test',
+  }));
+  return {
+    normalizeError: mockNormalizeError,
+    getEnvVar: mockGetEnvVar,
+    createPinoConfig: mockCreatePinoConfig,
+    __mockNormalizeError: mockNormalizeError,
+    __mockGetEnvVar: mockGetEnvVar,
+    __mockCreatePinoConfig: mockCreatePinoConfig,
+  };
+});
 
-vi.mock('@heyclaude/shared-runtime', () => ({
-  normalizeError: mockNormalizeError,
-  getEnvVar: mockGetEnvVar,
-}));
+jest.mock('../../utils/monitoring', () => {
+  const mockSendCronSuccessHeartbeat = jest.fn();
+  return {
+    sendCronSuccessHeartbeat: mockSendCronSuccessHeartbeat,
+    __mockSendCronSuccessHeartbeat: mockSendCronSuccessHeartbeat,
+  };
+});
 
-vi.mock('../../utils/monitoring', () => ({
-  sendCronSuccessHeartbeat: mockSendCronSuccessHeartbeat,
-}));
+jest.mock('../../../email/base-template', () => {
+  const mockRenderEmailTemplate = jest.fn().mockResolvedValue('<html>Test Email</html>');
+  return {
+    renderEmailTemplate: mockRenderEmailTemplate,
+    __mockRenderEmailTemplate: mockRenderEmailTemplate,
+  };
+});
+
+jest.mock('../../../integrations/resend', () => {
+  const mockBatchSend = jest.fn().mockResolvedValue({
+    data: { length: 0 },
+  });
+  const mockResendClient = {
+    batch: {
+      send: mockBatchSend,
+    },
+  };
+  const mockGetResendClient = jest.fn(() => mockResendClient);
+  return {
+    getResendClient: mockGetResendClient,
+    __mockGetResendClient: mockGetResendClient,
+    __mockBatchSend: mockBatchSend,
+  };
+});
+
+// Get mocks for use in tests
+const {
+  __mockPgmqRead: mockPgmqRead,
+  __mockPgmqDelete: mockPgmqDelete,
+} = jest.requireMock('../../../supabase/pgmq-client');
+const { __mockGetService: mockGetService } = jest.requireMock('../../../data/service-factory');
+const { __mockRevalidateTag: mockRevalidateTag } = jest.requireMock('next/cache');
+const {
+  __mockLogger: mockLogger,
+  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
+} = jest.requireMock('../../../logging/server');
+const {
+  __mockNormalizeError: mockNormalizeError,
+  __mockGetEnvVar: mockGetEnvVar,
+} = jest.requireMock('@heyclaude/shared-runtime');
+const { __mockSendCronSuccessHeartbeat: mockSendCronSuccessHeartbeat } = jest.requireMock('../../utils/monitoring');
+const mockFetch = jest.fn();
 
 // Mock global fetch for Discord webhook
 global.fetch = mockFetch;
@@ -76,7 +151,8 @@ describe('processChangelogNotifyQueue', () => {
       function: processChangelogNotifyQueue,
     });
 
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
     // Reset mocks to ensure clean state
     mockPgmqRead.mockReset();
     mockPgmqDelete.mockReset();
@@ -137,12 +213,19 @@ describe('processChangelogNotifyQueue', () => {
     mockPgmqRead.mockResolvedValue([mockMessage] as never);
     mockPgmqDelete.mockResolvedValue(undefined);
 
-    // Mock service
-    const mockService = {
-      upsertNotification: vi.fn().mockResolvedValue(undefined),
+    // Mock services
+    const mockMiscService = {
+      upsertNotification: jest.fn().mockResolvedValue(undefined),
+    };
+    const mockNewsletterService = {
+      getActiveSubscribers: jest.fn().mockResolvedValue([]), // No subscribers for this test
     };
     mockGetService.mockReset();
-    mockGetService.mockResolvedValue(mockService as never);
+    mockGetService.mockImplementation((serviceName: string) => {
+      if (serviceName === 'misc') return Promise.resolve(mockMiscService);
+      if (serviceName === 'newsletter') return Promise.resolve(mockNewsletterService);
+      throw new Error(`Unknown service: ${serviceName}`);
+    });
 
     // Mock Discord webhook
     mockFetch.mockResolvedValue({
@@ -160,7 +243,7 @@ describe('processChangelogNotifyQueue', () => {
       notified: 1,
     });
     expect(mockPgmqRead).toHaveBeenCalled();
-    expect(mockService.upsertNotification).toHaveBeenCalled();
+    expect(mockMiscService.upsertNotification).toHaveBeenCalled();
     expect(mockRevalidateTag).toHaveBeenCalledWith('changelog', 'max');
     expect(mockRevalidateTag).toHaveBeenCalledWith('changelog-1-2-0-2025-12-07', 'max');
   });
@@ -189,11 +272,19 @@ describe('processChangelogNotifyQueue', () => {
     mockPgmqRead.mockResolvedValue([mockMessage] as never);
     mockPgmqDelete.mockResolvedValue(undefined);
 
-    const mockService = {
-      upsertNotification: vi.fn().mockResolvedValue(undefined),
+    // Mock services
+    const mockMiscService = {
+      upsertNotification: jest.fn().mockResolvedValue(undefined),
+    };
+    const mockNewsletterService = {
+      getActiveSubscribers: jest.fn().mockResolvedValue([]),
     };
     mockGetService.mockReset();
-    mockGetService.mockResolvedValue(mockService as never);
+    mockGetService.mockImplementation((serviceName: string) => {
+      if (serviceName === 'misc') return Promise.resolve(mockMiscService);
+      if (serviceName === 'newsletter') return Promise.resolve(mockNewsletterService);
+      throw new Error(`Unknown service: ${serviceName}`);
+    });
 
     // Mock Discord webhook failure
     mockFetch.mockReset();
@@ -209,7 +300,7 @@ describe('processChangelogNotifyQueue', () => {
       processed: 1,
       notified: 1, // Still notified because notification was inserted
     });
-    expect(mockService.upsertNotification).toHaveBeenCalled();
+    expect(mockMiscService.upsertNotification).toHaveBeenCalled();
   });
 
   it('should filter invalid messages from queue', async () => {
@@ -247,12 +338,19 @@ describe('processChangelogNotifyQueue', () => {
     mockPgmqRead.mockResolvedValue([validMessage, invalidMessage] as never);
     mockPgmqDelete.mockResolvedValue(undefined);
 
-    // Mock service for valid message processing
-    const mockService = {
-      upsertNotification: vi.fn().mockResolvedValue(undefined),
+    // Mock services for valid message processing
+    const mockMiscService = {
+      upsertNotification: jest.fn().mockResolvedValue(undefined),
+    };
+    const mockNewsletterService = {
+      getActiveSubscribers: jest.fn().mockResolvedValue([]),
     };
     mockGetService.mockReset();
-    mockGetService.mockResolvedValue(mockService as never);
+    mockGetService.mockImplementation((serviceName: string) => {
+      if (serviceName === 'misc') return Promise.resolve(mockMiscService);
+      if (serviceName === 'newsletter') return Promise.resolve(mockNewsletterService);
+      throw new Error(`Unknown service: ${serviceName}`);
+    });
 
     // Mock Discord webhook
     mockFetch.mockReset();
@@ -266,6 +364,6 @@ describe('processChangelogNotifyQueue', () => {
     // Should only process valid message (invalid one is filtered out)
     expect(result.processed).toBe(1); // Only valid message processed
     expect(result.notified).toBe(1);
-    expect(mockService.upsertNotification).toHaveBeenCalledTimes(1); // Only called for valid message
+    expect(mockMiscService.upsertNotification).toHaveBeenCalledTimes(1); // Only called for valid message
   });
 });

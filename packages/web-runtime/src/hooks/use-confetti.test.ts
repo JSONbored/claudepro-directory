@@ -1,15 +1,22 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { renderHook, act } from '@testing-library/react';
 import { useConfetti } from './use-confetti';
 
-// Mock canvas-confetti - use vi.hoisted() for variables used in vi.mock()
-const mockConfetti = vi.hoisted(() => vi.fn());
-vi.mock('canvas-confetti', () => ({
-  default: mockConfetti,
-}));
+// Mock canvas-confetti - define mock inside factory
+jest.mock('canvas-confetti', () => {
+  const mockConfetti = jest.fn();
+  return {
+    __esModule: true,
+    default: mockConfetti,
+  };
+});
 
 // Mock config
-vi.mock('../config/unified-config', () => ({
+jest.mock('../config/unified-config', () => ({
   CONFETTI_CONFIG: {
     'success.particle_count': 50,
     'success.spread': 70,
@@ -27,14 +34,14 @@ vi.mock('../config/unified-config', () => ({
   },
 }));
 
-vi.mock('../logger', () => ({
+jest.mock('../logger', () => ({
   logger: {
-    warn: vi.fn(),
+    warn: jest.fn(),
   },
 }));
 
-vi.mock('../errors', () => ({
-  normalizeError: vi.fn((error: unknown, message: string) => {
+jest.mock('../errors', () => ({
+  normalizeError: jest.fn((error: unknown, message: string) => {
     if (error instanceof Error) {
       return error;
     }
@@ -43,12 +50,16 @@ vi.mock('../errors', () => ({
 }));
 
 describe('useConfetti', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+  let mockConfetti: ReturnType<typeof jest.fn>;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    const confettiModule = await import('canvas-confetti');
+    mockConfetti = jest.mocked(confettiModule.default);
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should return confetti functions', () => {

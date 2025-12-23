@@ -93,7 +93,7 @@ module.exports = {
           esModuleInterop: true,
           resolveJsonModule: true,
           isolatedModules: true,
-          jsx: 'preserve',
+          jsx: 'react-jsx', // Transform JSX for Jest (was 'preserve' which prevented JSX parsing)
           // Path mappings from root tsconfig.json
           baseUrl: '.',
           paths: {

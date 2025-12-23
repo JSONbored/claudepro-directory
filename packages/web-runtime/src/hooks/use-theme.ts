@@ -12,8 +12,8 @@ import { useEffect, useState } from 'react';
  */
 export function useTheme(): 'light' | 'dark' {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    // SSR-safe: default to 'dark' if document not available
-    if (typeof window === 'undefined') return 'dark';
+    // SSR-safe: default to 'dark' if window or document not available
+    if (typeof window === 'undefined' || typeof document === 'undefined') return 'dark';
 
     // Read from data-theme attribute
     const dataTheme = document.documentElement.getAttribute('data-theme');
@@ -22,8 +22,13 @@ export function useTheme(): 'light' | 'dark' {
     }
 
     // Fallback to prefers-color-scheme
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return prefersDark ? 'dark' : 'light';
+    try {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return prefersDark ? 'dark' : 'light';
+    } catch {
+      // matchMedia not supported, default to 'light'
+      return 'light';
+    }
   });
 
   useEffect(() => {

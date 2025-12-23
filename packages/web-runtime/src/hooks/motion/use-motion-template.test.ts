@@ -1,18 +1,24 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { useMotionTemplate } from './use-motion-template';
 
 // Mock motion/react
-const mockUseMotionTemplate = vi.fn((strings: TemplateStringsArray, ...values: any[]) => ({
-  get: () => '',
-}));
-
-vi.mock('motion/react', () => ({
-  useMotionTemplate: mockUseMotionTemplate,
-}));
+jest.mock('motion/react', () => {
+  const mockUseMotionTemplate = jest.fn((strings: TemplateStringsArray, ...values: any[]) => ({
+    get: () => '',
+  }));
+  return {
+    useMotionTemplate: mockUseMotionTemplate,
+    __mockUseMotionTemplate: mockUseMotionTemplate,
+  };
+});
 
 describe('useMotionTemplate', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should be a re-export of motion/react useMotionTemplate', () => {
@@ -23,7 +29,7 @@ describe('useMotionTemplate', () => {
 
   it('should be the same function as motion/react useMotionTemplate', () => {
     // Since it's a direct re-export, they should be the same reference
-    const { useMotionTemplate: original } = require('motion/react');
+    const { useMotionTemplate: original } = jest.requireMock('motion/react');
     expect(useMotionTemplate).toBe(original);
   });
 });

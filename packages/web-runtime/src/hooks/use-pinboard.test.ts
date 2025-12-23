@@ -1,36 +1,46 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { usePinboard } from './use-pinboard.ts';
+import { usePinboard, usePinboardStore } from './use-pinboard.ts';
 
 // Mock dependencies
-vi.mock('./use-pulse.ts', () => ({
-  usePulse: vi.fn(() => ({
-    bookmark: vi.fn(),
+jest.mock('./use-pulse.ts', () => ({
+  usePulse: jest.fn(() => ({
+    bookmark: jest.fn<(...args: any[]) => Promise<void>>().mockResolvedValue(undefined),
   })),
 }));
 
-vi.mock('../logger.ts', () => ({
+jest.mock('../logger.ts', () => ({
   logger: {
-    warn: vi.fn(),
-    error: vi.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
   },
 }));
 
-vi.mock('../errors.ts', () => ({
-  normalizeError: vi.fn((err) => (err instanceof Error ? err : new Error(String(err)))),
+jest.mock('../errors.ts', () => ({
+  normalizeError: jest.fn((err) => (err instanceof Error ? err : new Error(String(err)))),
 }));
 
 describe('usePinboard', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    // Clear localStorage
+    jest.clearAllMocks();
+    // Clear localStorage thoroughly
     if (typeof window !== 'undefined') {
       window.localStorage.clear();
+      // Also clear the specific key used by the hook
+      window.localStorage.removeItem('heyclaude_pinboard');
     }
+    // Reset Zustand store state
+    act(() => {
+      usePinboardStore.setState({ pins: [], isLoaded: false });
+    });
   });
 
   afterEach(() => {
-    vi.clearAllTimers();
+    jest.clearAllTimers();
   });
 
   it('should initialize with empty pinboard', () => {
@@ -42,8 +52,8 @@ describe('usePinboard', () => {
 
   it('should pin an item', async () => {
     const { usePulse } = await import('./use-pulse.ts');
-    const mockBookmark = vi.fn();
-    vi.mocked(usePulse).mockReturnValue({
+    const mockBookmark = jest.fn<(...args: any[]) => Promise<void>>().mockResolvedValue(undefined);
+    jest.mocked(usePulse).mockReturnValue({
       bookmark: mockBookmark,
     } as any);
 
@@ -70,8 +80,8 @@ describe('usePinboard', () => {
 
   it('should unpin an item', async () => {
     const { usePulse } = await import('./use-pulse.ts');
-    const mockBookmark = vi.fn();
-    vi.mocked(usePulse).mockReturnValue({
+    const mockBookmark = jest.fn<(...args: any[]) => Promise<void>>().mockResolvedValue(undefined);
+    jest.mocked(usePulse).mockReturnValue({
       bookmark: mockBookmark,
     } as any);
 
@@ -101,8 +111,8 @@ describe('usePinboard', () => {
 
   it('should toggle pin state', async () => {
     const { usePulse } = await import('./use-pulse.ts');
-    const mockBookmark = vi.fn();
-    vi.mocked(usePulse).mockReturnValue({
+    const mockBookmark = jest.fn<(...args: any[]) => Promise<void>>().mockResolvedValue(undefined);
+    jest.mocked(usePulse).mockReturnValue({
       bookmark: mockBookmark,
     } as any);
 
@@ -135,8 +145,8 @@ describe('usePinboard', () => {
 
   it('should clear all pins', async () => {
     const { usePulse } = await import('./use-pulse.ts');
-    const mockBookmark = vi.fn();
-    vi.mocked(usePulse).mockReturnValue({
+    const mockBookmark = jest.fn<(...args: any[]) => Promise<void>>().mockResolvedValue(undefined);
+    jest.mocked(usePulse).mockReturnValue({
       bookmark: mockBookmark,
     } as any);
 
@@ -170,8 +180,8 @@ describe('usePinboard', () => {
 
   it('should enforce MAX_PINS limit', async () => {
     const { usePulse } = await import('./use-pulse.ts');
-    const mockBookmark = vi.fn();
-    vi.mocked(usePulse).mockReturnValue({
+    const mockBookmark = jest.fn<(...args: any[]) => Promise<void>>().mockResolvedValue(undefined);
+    jest.mocked(usePulse).mockReturnValue({
       bookmark: mockBookmark,
     } as any);
 
@@ -197,8 +207,8 @@ describe('usePinboard', () => {
 
   it('should move existing item to front (LRU)', async () => {
     const { usePulse } = await import('./use-pulse.ts');
-    const mockBookmark = vi.fn();
-    vi.mocked(usePulse).mockReturnValue({
+    const mockBookmark = jest.fn<(...args: any[]) => Promise<void>>().mockResolvedValue(undefined);
+    jest.mocked(usePulse).mockReturnValue({
       bookmark: mockBookmark,
     } as any);
 
@@ -223,6 +233,9 @@ describe('usePinboard', () => {
 
     const firstPinnedAt = result.current.pinnedItems[0]?.pinnedAt;
 
+    // Wait a bit to ensure timestamps are different
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
     act(() => {
       result.current.pinItem({
         category: 'agents',
@@ -231,15 +244,17 @@ describe('usePinboard', () => {
       });
     });
 
-    expect(result.current.pinnedItems[0]?.slug).toBe('agent-1');
-    expect(result.current.pinnedItems[0]?.pinnedAt).not.toBe(firstPinnedAt);
-    expect(result.current.pinnedItems).toHaveLength(2);
+    await waitFor(() => {
+      expect(result.current.pinnedItems[0]?.slug).toBe('agent-1');
+      expect(result.current.pinnedItems[0]?.pinnedAt).not.toBe(firstPinnedAt);
+      expect(result.current.pinnedItems).toHaveLength(2);
+    });
   });
 
   it('should sanitize item data', async () => {
     const { usePulse } = await import('./use-pulse.ts');
-    const mockBookmark = vi.fn();
-    vi.mocked(usePulse).mockReturnValue({
+    const mockBookmark = jest.fn<(...args: any[]) => Promise<void>>().mockResolvedValue(undefined);
+    jest.mocked(usePulse).mockReturnValue({
       bookmark: mockBookmark,
     } as any);
 
@@ -272,8 +287,8 @@ describe('usePinboard', () => {
 
   it('should track bookmark pulse events', async () => {
     const { usePulse } = await import('./use-pulse.ts');
-    const mockBookmark = vi.fn();
-    vi.mocked(usePulse).mockReturnValue({
+    const mockBookmark = jest.fn<(...args: any[]) => Promise<void>>().mockResolvedValue(undefined);
+    jest.mocked(usePulse).mockReturnValue({
       bookmark: mockBookmark,
     } as any);
 
@@ -314,8 +329,8 @@ describe('usePinboard', () => {
 
   it('should persist pins to localStorage', async () => {
     const { usePulse } = await import('./use-pulse.ts');
-    vi.mocked(usePulse).mockReturnValue({
-      bookmark: vi.fn(),
+    jest.mocked(usePulse).mockReturnValue({
+      bookmark: jest.fn<(...args: any[]) => Promise<void>>().mockResolvedValue(undefined),
     } as any);
 
     const { result, unmount } = renderHook(() => usePinboard());
@@ -332,6 +347,9 @@ describe('usePinboard', () => {
       });
     });
 
+    // Wait for debounced save to complete (250ms + buffer)
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
     unmount();
 
     // Create new hook instance - should load from localStorage
@@ -346,15 +364,36 @@ describe('usePinboard', () => {
   });
 
   it('should handle localStorage errors gracefully', async () => {
+    // Clear localStorage before this test
+    if (typeof window !== 'undefined') {
+      window.localStorage.clear();
+      window.localStorage.removeItem('heyclaude_pinboard');
+    }
+
     const { usePulse } = await import('./use-pulse.ts');
-    vi.mocked(usePulse).mockReturnValue({
-      bookmark: vi.fn(),
+    jest.mocked(usePulse).mockReturnValue({
+      bookmark: jest.fn<(...args: any[]) => Promise<void>>().mockResolvedValue(undefined),
     } as any);
 
-    // Mock localStorage to throw error
+    // Mock localStorage to allow isStorageAvailable() to pass, but make savePinsToStorage() fail
     const originalSetItem = window.localStorage.setItem;
-    window.localStorage.setItem = vi.fn(() => {
+    const originalRemoveItem = window.localStorage.removeItem;
+    
+    // Track calls to distinguish between isStorageAvailable() test and actual saves
+    window.localStorage.setItem = jest.fn((key, value) => {
+      // Allow the test item in isStorageAvailable() to be set
+      if (key === '__pinboard_test__') {
+        originalSetItem.call(window.localStorage, key, value);
+        return;
+      }
+      // Throw error for actual pinboard saves
       throw new Error('QuotaExceededError');
+    });
+    
+    window.localStorage.removeItem = jest.fn((key) => {
+      if (key === '__pinboard_test__') {
+        originalRemoveItem.call(window.localStorage, key);
+      }
     });
 
     const { result } = renderHook(() => usePinboard());
@@ -371,10 +410,17 @@ describe('usePinboard', () => {
       });
     });
 
-    // Should not crash, item should still be in state
+    // Should not crash, item should still be in state (state update happens before save)
+    expect(result.current.pinnedItems).toHaveLength(1);
+
+    // Wait for debounced save attempt (which will fail but shouldn't affect state)
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    // State should still be intact
     expect(result.current.pinnedItems).toHaveLength(1);
 
     // Restore
     window.localStorage.setItem = originalSetItem;
+    window.localStorage.removeItem = originalRemoveItem;
   });
 });

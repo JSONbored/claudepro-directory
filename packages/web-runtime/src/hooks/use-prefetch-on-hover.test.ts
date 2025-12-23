@@ -1,40 +1,44 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { renderHook, act } from '@testing-library/react';
 import { usePrefetchOnHover, useBatchPrefetch } from './use-prefetch-on-hover';
 import type { UsePrefetchOnHoverOptions } from './use-prefetch-on-hover';
 
 // Mock Next.js router
-const mockPrefetch = vi.fn();
+const mockPrefetch = jest.fn();
 const mockRouter = {
   prefetch: mockPrefetch,
 };
 
-vi.mock('next/navigation', () => ({
+jest.mock('next/navigation', () => ({
   useRouter: () => mockRouter,
 }));
 
 // Mock config
-vi.mock('../config/static-configs', () => ({
-  getTimeoutConfig: vi.fn(() => ({
+jest.mock('../config/static-configs', () => ({
+  getTimeoutConfig: jest.fn(() => ({
     'timeout.ui.prefetch_delay_ms': 300,
   })),
 }));
 
 // Mock logger
-vi.mock('../errors', () => ({
-  logClientWarning: vi.fn(),
+jest.mock('../errors', () => ({
+  logClientWarning: jest.fn(),
 }));
 
 describe('usePrefetchOnHover', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    jest.useFakeTimers();
     mockPrefetch.mockClear();
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.useRealTimers();
-    vi.restoreAllMocks();
+    jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it('should return event handlers', () => {
@@ -55,7 +59,7 @@ describe('usePrefetchOnHover', () => {
     expect(mockPrefetch).not.toHaveBeenCalled();
 
     act(() => {
-      vi.advanceTimersByTime(300);
+      jest.advanceTimersByTime(300);
     });
 
     expect(mockPrefetch).toHaveBeenCalledWith('/test');
@@ -69,7 +73,7 @@ describe('usePrefetchOnHover', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(150); // Halfway through delay
+      jest.advanceTimersByTime(150); // Halfway through delay
     });
 
     act(() => {
@@ -77,7 +81,7 @@ describe('usePrefetchOnHover', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(300);
+      jest.advanceTimersByTime(300);
     });
 
     expect(mockPrefetch).not.toHaveBeenCalled();
@@ -101,7 +105,7 @@ describe('usePrefetchOnHover', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(300);
+      jest.advanceTimersByTime(300);
     });
 
     expect(mockPrefetch).toHaveBeenCalledTimes(1);
@@ -111,7 +115,7 @@ describe('usePrefetchOnHover', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(300);
+      jest.advanceTimersByTime(300);
     });
 
     // Should not prefetch again
@@ -128,7 +132,7 @@ describe('usePrefetchOnHover', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(300);
+      jest.advanceTimersByTime(300);
     });
 
     expect(mockPrefetch).not.toHaveBeenCalled();
@@ -144,13 +148,13 @@ describe('usePrefetchOnHover', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(300);
+      jest.advanceTimersByTime(300);
     });
 
     expect(mockPrefetch).not.toHaveBeenCalled();
 
     act(() => {
-      vi.advanceTimersByTime(200); // Complete 500ms delay
+      jest.advanceTimersByTime(200); // Complete 500ms delay
     });
 
     expect(mockPrefetch).toHaveBeenCalledWith('/test');
@@ -169,7 +173,7 @@ describe('usePrefetchOnHover', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(300);
+      jest.advanceTimersByTime(300);
     });
 
     expect(logClientWarning).toHaveBeenCalledWith(
@@ -186,7 +190,7 @@ describe('usePrefetchOnHover', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(150);
+      jest.advanceTimersByTime(150);
     });
 
     act(() => {
@@ -194,7 +198,7 @@ describe('usePrefetchOnHover', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(300);
+      jest.advanceTimersByTime(300);
     });
 
     // Should only prefetch once (after second enter completes)
@@ -223,18 +227,18 @@ describe('usePrefetchOnHover', () => {
 describe('useBatchPrefetch', () => {
   beforeEach(() => {
     mockPrefetch.mockClear();
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should prefetch multiple URLs', () => {
     const { result } = renderHook(() => useBatchPrefetch());
 
     act(() => {
-      result(['/page1', '/page2', '/page3']);
+      result.current(['/page1', '/page2', '/page3']);
     });
 
     expect(mockPrefetch).toHaveBeenCalledTimes(3);
@@ -255,7 +259,7 @@ describe('useBatchPrefetch', () => {
     const { result } = renderHook(() => useBatchPrefetch());
 
     act(() => {
-      result(['/page1', '/page2', '/page3']);
+      result.current(['/page1', '/page2', '/page3']);
     });
 
     expect(mockPrefetch).toHaveBeenCalledTimes(3);
@@ -270,7 +274,7 @@ describe('useBatchPrefetch', () => {
     const { result } = renderHook(() => useBatchPrefetch());
 
     act(() => {
-      result([]);
+      result.current([]);
     });
 
     expect(mockPrefetch).not.toHaveBeenCalled();

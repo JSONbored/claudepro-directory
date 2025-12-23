@@ -1,14 +1,17 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useSafeAction } from './use-safe-action';
 
-// Mock next-safe-action - use vi.hoisted() for variables used in vi.mock()
-const mockExecute = vi.hoisted(() => vi.fn());
-const mockExecuteAsync = vi.hoisted(() => vi.fn());
-const mockReset = vi.hoisted(() => vi.fn());
-
-const mockUseAction = vi.hoisted(() =>
-  vi.fn(() => ({
+// Mock next-safe-action - define mocks inside factory function to avoid hoisting issues
+jest.mock('next-safe-action/hooks', () => {
+  const mockExecute = jest.fn();
+  const mockExecuteAsync = jest.fn();
+  const mockReset = jest.fn();
+  const mockUseAction = jest.fn(() => ({
     execute: mockExecute,
     executeAsync: mockExecuteAsync,
     input: undefined,
@@ -22,24 +25,58 @@ const mockUseAction = vi.hoisted(() =>
     hasSucceeded: false,
     hasErrored: false,
     hasNavigated: false,
-  }))
-);
+  }));
+  return {
+    useAction: mockUseAction,
+    __mockExecute: mockExecute,
+    __mockExecuteAsync: mockExecuteAsync,
+    __mockReset: mockReset,
+    __mockUseAction: mockUseAction,
+  };
+});
 
-vi.mock('next-safe-action/hooks', () => ({
-  useAction: mockUseAction,
-}));
+// Get mocks for use in tests
+const {
+  useAction,
+  __mockExecute,
+  __mockExecuteAsync,
+  __mockReset,
+  __mockUseAction,
+} = jest.requireMock('next-safe-action/hooks');
+const mockExecute = __mockExecute;
+const mockExecuteAsync = __mockExecuteAsync;
+const mockReset = __mockReset;
+const mockUseAction = __mockUseAction;
 
 describe('useSafeAction', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+
+    // Reset mockUseAction to default return value
+    mockUseAction.mockReturnValue({
+      execute: mockExecute,
+      executeAsync: mockExecuteAsync,
+      input: undefined,
+      result: {},
+      reset: mockReset,
+      status: 'idle' as const,
+      isIdle: true,
+      isExecuting: false,
+      isTransitioning: false,
+      isPending: false,
+      hasSucceeded: false,
+      hasErrored: false,
+      hasNavigated: false,
+    });
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should return hook result from useAction', () => {
-    const mockAction = vi.fn(async (input: { value: string }) => ({
+    const mockAction = jest.fn(async (input: { value: string }) => ({
       data: { result: input.value },
     }));
 
@@ -53,7 +90,7 @@ describe('useSafeAction', () => {
   });
 
   it('should call execute from useAction', () => {
-    const mockAction = vi.fn(async (input: { value: string }) => ({
+    const mockAction = jest.fn(async (input: { value: string }) => ({
       data: { result: input.value },
     }));
 
@@ -69,7 +106,7 @@ describe('useSafeAction', () => {
   it('should call executeAsync from useAction', async () => {
     mockExecuteAsync.mockResolvedValue({ data: { result: 'test' } });
 
-    const mockAction = vi.fn(async (input: { value: string }) => ({
+    const mockAction = jest.fn(async (input: { value: string }) => ({
       data: { result: input.value },
     }));
 
@@ -100,7 +137,7 @@ describe('useSafeAction', () => {
       hasNavigated: false,
     });
 
-    const mockAction = vi.fn(async (input: { value: string }) => ({
+    const mockAction = jest.fn(async (input: { value: string }) => ({
       data: { result: input.value },
     }));
 
@@ -112,12 +149,12 @@ describe('useSafeAction', () => {
   });
 
   it('should pass callbacks to useAction', () => {
-    const onSuccess = vi.fn();
-    const onError = vi.fn();
-    const onSettled = vi.fn();
-    const onExecute = vi.fn();
+    const onSuccess = jest.fn();
+    const onError = jest.fn();
+    const onSettled = jest.fn();
+    const onExecute = jest.fn();
 
-    const mockAction = vi.fn(async (input: { value: string }) => ({
+    const mockAction = jest.fn(async (input: { value: string }) => ({
       data: { result: input.value },
     }));
 
@@ -142,7 +179,7 @@ describe('useSafeAction', () => {
   });
 
   it('should call reset from useAction', () => {
-    const mockAction = vi.fn(async (input: { value: string }) => ({
+    const mockAction = jest.fn(async (input: { value: string }) => ({
       data: { result: input.value },
     }));
 
@@ -166,7 +203,7 @@ describe('useSafeAction', () => {
       id: string;
     }
 
-    const mockAction = vi.fn(
+    const mockAction = jest.fn(
       async (input: ActionInput): Promise<{ data?: ActionOutput }> => ({
         data: { success: true, id: '123' },
       })
@@ -183,7 +220,7 @@ describe('useSafeAction', () => {
   });
 
   it('should handle actions without data property', async () => {
-    const mockAction = vi.fn(async () => {
+    const mockAction = jest.fn(async () => {
       return { serverError: 'Error occurred' };
     });
 
@@ -203,7 +240,7 @@ describe('useSafeAction', () => {
       validationErrors: { field: 'Invalid value' },
     });
 
-    const mockAction = vi.fn(async () => ({
+    const mockAction = jest.fn(async () => ({
       data: { result: 'success' },
     }));
 
@@ -220,7 +257,7 @@ describe('useSafeAction', () => {
       fetchError: 'Network error',
     });
 
-    const mockAction = vi.fn(async () => ({
+    const mockAction = jest.fn(async () => ({
       data: { result: 'success' },
     }));
 
@@ -249,7 +286,7 @@ describe('useSafeAction', () => {
       hasNavigated: false,
     });
 
-    const mockAction = vi.fn(async (input: { value: string }) => ({
+    const mockAction = jest.fn(async (input: { value: string }) => ({
       data: { result: input.value },
     }));
 
@@ -275,7 +312,7 @@ describe('useSafeAction', () => {
       hasNavigated: false,
     });
 
-    const mockAction = vi.fn(async (input: { value: string }) => ({
+    const mockAction = jest.fn(async (input: { value: string }) => ({
       data: { result: input.value },
     }));
 
@@ -283,5 +320,231 @@ describe('useSafeAction', () => {
 
     expect(result.current.result).toEqual({ data: { result: 'success' } });
     expect(result.current.hasSucceeded).toBe(true);
+  });
+
+  it('should test all status values', () => {
+    const statuses: Array<'idle' | 'executing' | 'transitioning' | 'hasSucceeded' | 'hasErrored' | 'hasNavigated'> = [
+      'idle',
+      'executing',
+      'transitioning',
+      'hasSucceeded',
+      'hasErrored',
+      'hasNavigated',
+    ];
+
+    statuses.forEach((status) => {
+      mockUseAction.mockReturnValue({
+        execute: mockExecute,
+        executeAsync: mockExecuteAsync,
+        input: undefined,
+        result: {},
+        reset: mockReset,
+        status,
+        isIdle: status === 'idle',
+        isExecuting: status === 'executing',
+        isTransitioning: status === 'transitioning',
+        isPending: status === 'executing' || status === 'transitioning',
+        hasSucceeded: status === 'hasSucceeded',
+        hasErrored: status === 'hasErrored',
+        hasNavigated: status === 'hasNavigated',
+      });
+
+      const mockAction = jest.fn(async (input: { value: string }) => ({
+        data: { result: input.value },
+      }));
+
+      const { result } = renderHook(() => useSafeAction(mockAction));
+
+      expect(result.current.status).toBe(status);
+    });
+  });
+
+  it('should test all boolean flags', () => {
+    mockUseAction.mockReturnValue({
+      execute: mockExecute,
+      executeAsync: mockExecuteAsync,
+      input: undefined,
+      result: {},
+      reset: mockReset,
+      status: 'executing' as const,
+      isIdle: false,
+      isExecuting: true,
+      isTransitioning: false,
+      isPending: true,
+      hasSucceeded: false,
+      hasErrored: false,
+      hasNavigated: false,
+    });
+
+    const mockAction = jest.fn(async (input: { value: string }) => ({
+      data: { result: input.value },
+    }));
+
+    const { result } = renderHook(() => useSafeAction(mockAction));
+
+    expect(result.current.isIdle).toBe(false);
+    expect(result.current.isExecuting).toBe(true);
+    expect(result.current.isTransitioning).toBe(false);
+    expect(result.current.isPending).toBe(true);
+    expect(result.current.hasSucceeded).toBe(false);
+    expect(result.current.hasErrored).toBe(false);
+    expect(result.current.hasNavigated).toBe(false);
+  });
+
+  it('should pass action function to useAction', () => {
+    const mockAction = jest.fn(async (input: { value: string }) => ({
+      data: { result: input.value },
+    }));
+
+    renderHook(() => useSafeAction(mockAction));
+
+    expect(mockUseAction).toHaveBeenCalledWith(expect.any(Function), undefined);
+    // Verify the function passed is the action (wrapped due to type assertion)
+    const passedAction = mockUseAction.mock.calls[0]?.[0];
+    expect(typeof passedAction).toBe('function');
+  });
+
+  it('should handle undefined callbacks', () => {
+    const mockAction = jest.fn(async (input: { value: string }) => ({
+      data: { result: input.value },
+    }));
+
+    renderHook(() => useSafeAction(mockAction, undefined));
+
+    expect(mockUseAction).toHaveBeenCalledWith(expect.any(Function), undefined);
+  });
+
+  it('should handle empty callbacks object', () => {
+    const mockAction = jest.fn(async (input: { value: string }) => ({
+      data: { result: input.value },
+    }));
+
+    renderHook(() => useSafeAction(mockAction, {}));
+
+    expect(mockUseAction).toHaveBeenCalledWith(expect.any(Function), {});
+  });
+
+  it('should handle partial callbacks', () => {
+    const onSuccess = jest.fn();
+    const mockAction = jest.fn(async (input: { value: string }) => ({
+      data: { result: input.value },
+    }));
+
+    renderHook(() => useSafeAction(mockAction, { onSuccess }));
+
+    expect(mockUseAction).toHaveBeenCalledWith(expect.any(Function), { onSuccess });
+  });
+
+  it('should return all required properties', () => {
+    const mockAction = jest.fn(async (input: { value: string }) => ({
+      data: { result: input.value },
+    }));
+
+    const { result } = renderHook(() => useSafeAction(mockAction));
+
+    expect(result.current).toHaveProperty('execute');
+    expect(result.current).toHaveProperty('executeAsync');
+    expect(result.current).toHaveProperty('input');
+    expect(result.current).toHaveProperty('result');
+    expect(result.current).toHaveProperty('reset');
+    expect(result.current).toHaveProperty('status');
+    expect(result.current).toHaveProperty('isIdle');
+    expect(result.current).toHaveProperty('isExecuting');
+    expect(result.current).toHaveProperty('isTransitioning');
+    expect(result.current).toHaveProperty('isPending');
+    expect(result.current).toHaveProperty('hasSucceeded');
+    expect(result.current).toHaveProperty('hasErrored');
+    expect(result.current).toHaveProperty('hasNavigated');
+  });
+
+  it('should handle transitioning status', () => {
+    mockUseAction.mockReturnValue({
+      execute: mockExecute,
+      executeAsync: mockExecuteAsync,
+      input: undefined,
+      result: {},
+      reset: mockReset,
+      status: 'transitioning' as const,
+      isIdle: false,
+      isExecuting: false,
+      isTransitioning: true,
+      isPending: true,
+      hasSucceeded: false,
+      hasErrored: false,
+      hasNavigated: false,
+    });
+
+    const mockAction = jest.fn(async (input: { value: string }) => ({
+      data: { result: input.value },
+    }));
+
+    const { result } = renderHook(() => useSafeAction(mockAction));
+
+    expect(result.current.status).toBe('transitioning');
+    expect(result.current.isTransitioning).toBe(true);
+    expect(result.current.isPending).toBe(true);
+  });
+
+  it('should handle hasErrored status', () => {
+    mockUseAction.mockReturnValue({
+      execute: mockExecute,
+      executeAsync: mockExecuteAsync,
+      input: undefined,
+      result: { serverError: 'Error occurred' },
+      reset: mockReset,
+      status: 'hasErrored' as const,
+      isIdle: false,
+      isExecuting: false,
+      isTransitioning: false,
+      isPending: false,
+      hasSucceeded: false,
+      hasErrored: true,
+      hasNavigated: false,
+    });
+
+    const mockAction = jest.fn(async (input: { value: string }) => ({
+      data: { result: input.value },
+    }));
+
+    const { result } = renderHook(() => useSafeAction(mockAction));
+
+    expect(result.current.status).toBe('hasErrored');
+    expect(result.current.hasErrored).toBe(true);
+    expect(result.current.result.serverError).toBe('Error occurred');
+  });
+
+  it('should handle hasNavigated status', () => {
+    mockUseAction.mockReturnValue({
+      execute: mockExecute,
+      executeAsync: mockExecuteAsync,
+      input: undefined,
+      result: {},
+      reset: mockReset,
+      status: 'hasNavigated' as const,
+      isIdle: false,
+      isExecuting: false,
+      isTransitioning: false,
+      isPending: false,
+      hasSucceeded: false,
+      hasErrored: false,
+      hasNavigated: true,
+    });
+
+    const mockAction = jest.fn(async (input: { value: string }) => ({
+      data: { result: input.value },
+    }));
+
+    const { result } = renderHook(() => useSafeAction(mockAction));
+
+    expect(result.current.status).toBe('hasNavigated');
+    expect(result.current.hasNavigated).toBe(true);
+  });
+
+  it('should re-export useAction', () => {
+    // Verify that useAction is exported from the module
+    const { useAction: exportedUseAction } = require('./use-safe-action');
+    expect(typeof exportedUseAction).toBe('function');
+    // It should be the same as the mocked useAction (since it's a re-export)
+    expect(exportedUseAction).toBe(mockUseAction);
   });
 });

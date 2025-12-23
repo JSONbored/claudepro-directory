@@ -152,13 +152,17 @@ export function useUnifiedSearch({
     (tag: string) => {
       setFilters((prev: FilterState) => {
         const currentTags = prev.tags || [];
-        const newTags = currentTags.includes(tag)
+        const tagIncluded = currentTags.includes(tag);
+        const newTags = tagIncluded
           ? currentTags.filter((t: string) => t !== tag)
           : [...currentTags, tag];
-        const newFilters: FilterState = {
-          ...prev,
-          ...(newTags.length > 0 ? { tags: newTags } : {}),
-        };
+        // When newTags is empty, explicitly remove tags property
+        const newFilters: FilterState = newTags.length > 0
+          ? { ...prev, tags: newTags }
+          : (() => {
+              const { tags, ...rest } = prev;
+              return rest;
+            })();
         onFiltersChange?.(newFilters);
         return newFilters;
       });

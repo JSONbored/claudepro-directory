@@ -1,49 +1,97 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useNewsletter } from './use-newsletter.ts';
 
-// Mock dependencies
-vi.mock('./use-pulse.ts', () => ({
-  usePulse: vi.fn(() => ({
-    newsletter: vi.fn(),
-  })),
-}));
+// Mock dependencies - define mocks inside factory functions to avoid hoisting issues
+jest.mock('./use-pulse.ts', () => {
+  const mockNewsletter = jest.fn().mockResolvedValue(undefined);
+  const mockUsePulse = jest.fn(() => ({
+    newsletter: mockNewsletter,
+  }));
+  return {
+    usePulse: mockUsePulse,
+    __mockNewsletter: mockNewsletter,
+    __mockUsePulse: mockUsePulse,
+  };
+});
 
-vi.mock('../actions/newsletter.ts', () => ({
-  subscribeNewsletterAction: vi.fn(),
-}));
+jest.mock('../actions/newsletter.ts', () => {
+  const mockSubscribeNewsletterAction = jest.fn();
+  return {
+    subscribeNewsletterAction: mockSubscribeNewsletterAction,
+    __mockSubscribeNewsletterAction: mockSubscribeNewsletterAction,
+  };
+});
 
-vi.mock('../client/toast.ts', () => ({
-  toasts: {
-    error: {
-      validation: vi.fn(),
+// Define toast mocks inside factory to avoid hoisting issues
+jest.mock('../client/toast.ts', () => {
+  const mockValidation = jest.fn();
+  const mockSuccess = jest.fn();
+  const mockError = jest.fn();
+  return {
+    toasts: {
+      error: {
+        validation: mockValidation,
+      },
+      raw: {
+        success: mockSuccess,
+        error: mockError,
+      },
     },
-    raw: {
-      success: vi.fn(),
-      error: vi.fn(),
-    },
-  },
-}));
+    // Export mocks for use in tests
+    __mockValidation: mockValidation,
+    __mockSuccess: mockSuccess,
+    __mockError: mockError,
+  };
+});
 
-vi.mock('../utils/client-logger.ts', () => ({
-  logClientError: vi.fn(),
-  logClientWarn: vi.fn(),
-}));
+// Define logger mocks inside factory
+jest.mock('../utils/client-logger.ts', () => {
+  const mockLogClientError = jest.fn();
+  const mockLogClientWarn = jest.fn();
+  return {
+    logClientError: mockLogClientError,
+    logClientWarn: mockLogClientWarn,
+    // Export mocks for use in tests
+    __mockLogClientError: mockLogClientError,
+    __mockLogClientWarn: mockLogClientWarn,
+  };
+});
+
+// Get mocks for use in tests
+const { usePulse, __mockNewsletter, __mockUsePulse } = jest.requireMock('./use-pulse.ts');
+const mockNewsletter = __mockNewsletter;
+const mockUsePulse = __mockUsePulse;
+
+const { subscribeNewsletterAction, __mockSubscribeNewsletterAction } = jest.requireMock(
+  '../actions/newsletter.ts'
+);
+const mockSubscribeNewsletterAction = __mockSubscribeNewsletterAction;
+
+const { toasts } = jest.requireMock('../client/toast');
+const mockValidationToast = toasts.error.validation;
+const mockSuccessToast = toasts.raw.success;
+const mockErrorToast = toasts.raw.error;
+
+const { logClientError, logClientWarn } = jest.requireMock('../utils/client-logger');
+const mockLogClientError = logClientError;
+const mockLogClientWarn = logClientWarn;
 
 describe('useNewsletter', () => {
-  let mockSubscribeNewsletterAction: ReturnType<typeof vi.fn>;
-  let mockPulse: ReturnType<typeof vi.fn>;
-
   beforeEach(async () => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
 
-    const { subscribeNewsletterAction } = await import('../actions/newsletter.ts');
-    mockSubscribeNewsletterAction = vi.mocked(subscribeNewsletterAction);
-
-    const { usePulse } = await import('./use-pulse.ts');
-    mockPulse = vi.mocked(usePulse);
-    mockPulse.mockReturnValue({
-      newsletter: vi.fn(),
+    // Reset mocks to default behavior
+    mockSubscribeNewsletterAction.mockClear();
+    // Ensure newsletter mock returns a Promise (required for .catch() calls)
+    mockNewsletter.mockResolvedValue(undefined);
+    mockUsePulse.mockReturnValue({
+      newsletter: mockNewsletter,
     });
   });
 
@@ -81,7 +129,6 @@ describe('useNewsletter', () => {
   });
 
   it('should show validation error for empty email', async () => {
-    const { toasts } = await import('../client/toast.ts');
     const { result } = renderHook(() =>
       useNewsletter({ source: 'footer' as any, showToasts: true })
     );
@@ -91,9 +138,7 @@ describe('useNewsletter', () => {
     });
 
     expect(result.current.error).toBe('Please enter your email address');
-    expect(vi.mocked(toasts.error.validation)).toHaveBeenCalledWith(
-      'Please enter your email address'
-    );
+    expect(mockValidationToast).toHaveBeenCalledWith('Please enter your email address');
   });
 
   it('should call subscribeNewsletterAction with normalized email', async () => {
@@ -123,8 +168,7 @@ describe('useNewsletter', () => {
       data: { success: true },
     });
 
-    const onSuccess = vi.fn();
-    const { toasts } = await import('../client/toast.ts');
+    const onSuccess = jest.fn();
     const { result } = renderHook(() =>
       useNewsletter({
         source: 'footer' as any,
@@ -147,7 +191,7 @@ describe('useNewsletter', () => {
     });
 
     expect(onSuccess).toHaveBeenCalled();
-    expect(vi.mocked(toasts.raw.success)).toHaveBeenCalledWith('Welcome!', {
+    expect(mockSuccessToast).toHaveBeenCalledWith('Welcome!', {
       description: 'Custom success message',
     });
   });
@@ -157,8 +201,7 @@ describe('useNewsletter', () => {
       serverError: 'Email already subscribed',
     });
 
-    const onError = vi.fn();
-    const { toasts } = await import('../client/toast.ts');
+    const onError = jest.fn();
     const { result } = renderHook(() =>
       useNewsletter({
         source: 'footer' as any,
@@ -177,7 +220,7 @@ describe('useNewsletter', () => {
 
     expect(result.current.error).toBe('Email already subscribed');
     expect(onError).toHaveBeenCalledWith('Email already subscribed');
-    expect(vi.mocked(toasts.raw.error)).toHaveBeenCalledWith('Subscription Error', {
+    expect(mockErrorToast).toHaveBeenCalledWith('Subscription Error', {
       description: 'Email already subscribed',
     });
   });
@@ -185,7 +228,6 @@ describe('useNewsletter', () => {
   it('should handle exceptions during subscription', async () => {
     mockSubscribeNewsletterAction.mockRejectedValue(new Error('Network error'));
 
-    const { logClientError } = await import('../utils/client-logger.ts');
     const { result } = renderHook(() => useNewsletter({ source: 'footer' as any }));
 
     act(() => {
@@ -197,19 +239,13 @@ describe('useNewsletter', () => {
     });
 
     expect(result.current.error).toBe('Network error');
-    expect(vi.mocked(logClientError)).toHaveBeenCalled();
+    expect(mockLogClientError).toHaveBeenCalled();
   });
 
   it('should track newsletter signup success', async () => {
     mockSubscribeNewsletterAction.mockResolvedValue({
       data: { success: true },
     });
-
-    const { usePulse } = await import('./use-pulse.ts');
-    const mockNewsletter = vi.fn();
-    vi.mocked(usePulse).mockReturnValue({
-      newsletter: mockNewsletter,
-    } as any);
 
     const { result } = renderHook(() => useNewsletter({ source: 'footer' as any }));
 
@@ -238,12 +274,6 @@ describe('useNewsletter', () => {
       serverError: 'Error',
     });
 
-    const { usePulse } = await import('./use-pulse.ts');
-    const mockNewsletter = vi.fn();
-    vi.mocked(usePulse).mockReturnValue({
-      newsletter: mockNewsletter,
-    } as any);
-
     const { result } = renderHook(() => useNewsletter({ source: 'footer' as any }));
 
     act(() => {
@@ -270,7 +300,6 @@ describe('useNewsletter', () => {
       data: { success: true },
     });
 
-    const { toasts } = await import('../client/toast.ts');
     const { result } = renderHook(() =>
       useNewsletter({ source: 'footer' as any, showToasts: false })
     );
@@ -283,7 +312,7 @@ describe('useNewsletter', () => {
       await result.current.subscribe();
     });
 
-    expect(vi.mocked(toasts.raw.success)).not.toHaveBeenCalled();
+    expect(mockSuccessToast).not.toHaveBeenCalled();
   });
 
   it('should include metadata in subscription request', async () => {

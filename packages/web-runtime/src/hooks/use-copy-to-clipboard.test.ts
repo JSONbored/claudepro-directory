@@ -1,61 +1,43 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCopyToClipboard, useButtonSuccess } from './use-copy-to-clipboard';
-import type { UseCopyToClipboardOptions, UseButtonSuccessOptions } from './use-copy-to-clipboard';
 
-// Mock dependencies - hoist state outside of vi.mock()
-const createMockUseBoolean = vi.hoisted(() => {
-  const stateMap = new Map<symbol, boolean>();
-  return (initialValue = false) => {
-    const id = Symbol();
-    stateMap.set(id, initialValue);
-    return {
-      value: () => stateMap.get(id) ?? initialValue,
-      setValue: (newValue: boolean | ((prev: boolean) => boolean)) => {
-        const current = stateMap.get(id) ?? initialValue;
-        const next = typeof newValue === 'function' ? newValue(current) : newValue;
-        stateMap.set(id, next);
-      },
-      setTrue: () => stateMap.set(id, true),
-      setFalse: () => stateMap.set(id, false),
-      toggle: () => {
-        const current = stateMap.get(id) ?? initialValue;
-        stateMap.set(id, !current);
-      },
-    };
-  };
-});
+// Use real useBoolean hook - it's simple and has no external dependencies
+// No mock needed
 
-vi.mock('./use-boolean', () => ({
-  useBoolean: createMockUseBoolean,
-}));
-
-vi.mock('./use-timeout', () => ({
-  useTimeout: vi.fn((callback: () => void, delay: number | null) => {
+jest.mock('./use-timeout', () => {
+  const mockUseTimeout = jest.fn((callback: () => void, delay: number | null) => {
     // In tests, we'll manually trigger the callback when needed
     if (delay !== null && delay > 0) {
       // Store callback for manual triggering in tests
-      (useTimeout as any).lastCallback = callback;
-      (useTimeout as any).lastDelay = delay;
+      (mockUseTimeout as any).lastCallback = callback;
+      (mockUseTimeout as any).lastDelay = delay;
     }
-  }),
-}));
+  });
+  return {
+    useTimeout: mockUseTimeout,
+  };
+});
 
-vi.mock('../config/static-configs', () => ({
-  getTimeoutConfig: vi.fn(() => ({
+jest.mock('../config/static-configs', () => ({
+  getTimeoutConfig: jest.fn(() => ({
     'timeout.ui.clipboard_reset_delay_ms': 2000,
     'timeout.ui.button_success_duration_ms': 2000,
   })),
 }));
 
-vi.mock('../logger', () => ({
+jest.mock('../logger', () => ({
   logger: {
-    warn: vi.fn(),
+    warn: jest.fn(),
   },
 }));
 
-vi.mock('../errors', () => ({
-  normalizeError: vi.fn((error: unknown, message: string) => {
+jest.mock('../errors', () => ({
+  normalizeError: jest.fn((error: unknown, message: string) => {
     if (error instanceof Error) {
       return error;
     }
@@ -64,21 +46,26 @@ vi.mock('../errors', () => ({
 }));
 
 describe('useCopyToClipboard', () => {
-  let mockWriteText: ReturnType<typeof vi.fn>;
+  let mockWriteText: ReturnType<typeof jest.fn>;
 
   beforeEach(() => {
-    mockWriteText = vi.fn().mockResolvedValue(undefined);
-    global.navigator = {
-      clipboard: {
-        writeText: mockWriteText,
+    jest.clearAllMocks();
+    mockWriteText = jest.fn().mockResolvedValue(undefined);
+    
+    // Ensure navigator.clipboard is properly set up
+    Object.defineProperty(global, 'navigator', {
+      value: {
+        clipboard: {
+          writeText: mockWriteText,
+        },
       },
-    } as any;
-
-    vi.clearAllMocks();
+      writable: true,
+      configurable: true,
+    });
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should initialize with copied=false and error=null', () => {
@@ -106,27 +93,30 @@ describe('useCopyToClipboard', () => {
   it('should set copied to true optimistically before clipboard write', async () => {
     const { result } = renderHook(() => useCopyToClipboard());
 
-    const copyPromise = act(async () => {
-      return result.current.copy('test text');
+    let copyPromise: Promise<boolean>;
+    act(() => {
+      copyPromise = result.current.copy('test text');
     });
 
-    // Check optimistic state immediately
+    // Check optimistic state immediately (before promise resolves)
     expect(result.current.copied).toBe(true);
 
-    await copyPromise;
+    await act(async () => {
+      await copyPromise!;
+    });
   });
 
   it('should call onSuccess callback on successful copy', async () => {
-    const onSuccess = vi.fn();
+    const onSuccess = jest.fn();
     const { result } = renderHook(() =>
-      useCopyToClipboard({ onSuccess } as UseCopyToClipboardOptions)
+      useCopyToClipboard({ onSuccess })
     );
 
     await act(async () => {
       await result.current.copy('test text');
     });
 
-    expect(onSuccess).toHaveBeenCalledOnce();
+    expect(onSuccess).toHaveBeenCalledTimes(1);
   });
 
   it('should handle clipboard write error', async () => {
@@ -147,17 +137,17 @@ describe('useCopyToClipboard', () => {
   it('should call onError callback on copy failure', async () => {
     const error = new Error('Clipboard write failed');
     mockWriteText.mockRejectedValue(error);
-    const onError = vi.fn();
+    const onError = jest.fn();
 
     const { result } = renderHook(() =>
-      useCopyToClipboard({ onError } as UseCopyToClipboardOptions)
+      useCopyToClipboard({ onError })
     );
 
     await act(async () => {
       await result.current.copy('test text');
     });
 
-    expect(onError).toHaveBeenCalledOnce();
+    expect(onError).toHaveBeenCalledTimes(1);
     expect(onError).toHaveBeenCalledWith(expect.any(Error));
   });
 
@@ -169,7 +159,7 @@ describe('useCopyToClipboard', () => {
     const { result } = renderHook(() =>
       useCopyToClipboard({
         context: { component: 'TestComponent', action: 'copy-link' },
-      } as UseCopyToClipboardOptions)
+      })
     );
 
     await act(async () => {
@@ -212,7 +202,7 @@ describe('useCopyToClipboard', () => {
 
   it('should use custom resetDelay from options', () => {
     const { result } = renderHook(() =>
-      useCopyToClipboard({ resetDelay: 5000 } as UseCopyToClipboardOptions)
+      useCopyToClipboard({ resetDelay: 5000 })
     );
 
     // The hook should accept the custom delay
@@ -256,15 +246,50 @@ describe('useCopyToClipboard', () => {
 
     expect(mockWriteText).toHaveBeenCalledTimes(3);
   });
+
+  it('should handle clipboard API unavailable', async () => {
+    const originalNavigator = global.navigator;
+    // @ts-expect-error - Intentionally removing clipboard for test
+    delete (global.navigator as any).clipboard;
+
+    const { result } = renderHook(() => useCopyToClipboard());
+
+    await act(async () => {
+      const success = await result.current.copy('test text');
+      expect(success).toBe(false);
+    });
+
+    expect(result.current.error).toBeInstanceOf(Error);
+
+    // Restore
+    global.navigator = originalNavigator;
+  });
+
+  it('should handle clipboard writeText throwing synchronously', async () => {
+    const error = new Error('Clipboard write failed');
+    mockWriteText.mockImplementation(() => {
+      throw error;
+    });
+
+    const { result } = renderHook(() => useCopyToClipboard());
+
+    await act(async () => {
+      const success = await result.current.copy('test text');
+      expect(success).toBe(false);
+    });
+
+    expect(result.current.copied).toBe(false);
+    expect(result.current.error).toBeInstanceOf(Error);
+  });
 });
 
 describe('useButtonSuccess', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should initialize with isSuccess=false', () => {
@@ -303,7 +328,7 @@ describe('useButtonSuccess', () => {
 
   it('should use custom duration from options', () => {
     const { result } = renderHook(() =>
-      useButtonSuccess({ duration: 5000 } as UseButtonSuccessOptions)
+      useButtonSuccess({ duration: 5000 })
     );
 
     // The hook should accept the custom duration

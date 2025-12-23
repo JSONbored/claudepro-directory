@@ -1,16 +1,20 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { renderHook, act } from '@testing-library/react';
 import { useFieldHighlight } from './use-field-highlight';
 
 describe('useFieldHighlight', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    vi.clearAllMocks();
+    jest.useFakeTimers();
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.useRealTimers();
-    vi.restoreAllMocks();
+    jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it('should initialize with no highlighted fields', () => {
@@ -54,7 +58,7 @@ describe('useFieldHighlight', () => {
     expect(result.current.isHighlighted('field1')).toBe(true);
 
     act(() => {
-      vi.advanceTimersByTime(2000); // HIGHLIGHT_DURATION
+      jest.advanceTimersByTime(2000); // HIGHLIGHT_DURATION
     });
 
     expect(result.current.isHighlighted('field1')).toBe(false);
@@ -124,7 +128,7 @@ describe('useFieldHighlight', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(1000); // Halfway through duration
+      jest.advanceTimersByTime(1000); // Halfway through duration
     });
 
     act(() => {
@@ -132,14 +136,14 @@ describe('useFieldHighlight', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(1000); // First highlight would expire, but second is still active
+      jest.advanceTimersByTime(1000); // First highlight would expire, but second is still active
     });
 
     // Should still be highlighted (second highlight)
     expect(result.current.isHighlighted('field1')).toBe(true);
 
     act(() => {
-      vi.advanceTimersByTime(1000); // Complete second highlight duration
+      jest.advanceTimersByTime(1000); // Complete second highlight duration
     });
 
     expect(result.current.isHighlighted('field1')).toBe(false);

@@ -1,21 +1,26 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { renderHook, act } from '@testing-library/react';
 import { useMultipleIntersectionObserver } from './use-multiple-intersection-observer';
 import type { UseMultipleIntersectionObserverOptions } from './use-multiple-intersection-observer';
 
 describe('useMultipleIntersectionObserver', () => {
   let mockIntersectionObserver: any;
-  let mockObserve: ReturnType<typeof vi.fn>;
-  let mockUnobserve: ReturnType<typeof vi.fn>;
-  let mockDisconnect: ReturnType<typeof vi.fn>;
+  let mockObserve: ReturnType<typeof jest.fn>;
+  let mockUnobserve: ReturnType<typeof jest.fn>;
+  let mockDisconnect: ReturnType<typeof jest.fn>;
   let intersectionCallback: ((entries: IntersectionObserverEntry[]) => void) | null = null;
 
   beforeEach(() => {
-    mockObserve = vi.fn();
-    mockUnobserve = vi.fn();
-    mockDisconnect = vi.fn();
+    jest.clearAllMocks();
+    mockObserve = jest.fn();
+    mockUnobserve = jest.fn();
+    mockDisconnect = jest.fn();
 
-    mockIntersectionObserver = vi.fn(
+    mockIntersectionObserver = jest.fn(
       (
         callback: (entries: IntersectionObserverEntry[]) => void,
         options?: IntersectionObserverInit
@@ -32,17 +37,15 @@ describe('useMultipleIntersectionObserver', () => {
     global.IntersectionObserver = mockIntersectionObserver as any;
 
     // Mock document.getElementById
-    vi.spyOn(document, 'getElementById').mockImplementation((id: string) => {
+    jest.spyOn(document, 'getElementById').mockImplementation((id: string) => {
       const element = document.createElement('div');
       element.id = id;
       return element;
     });
-
-    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should initialize with empty entries map', () => {
@@ -113,6 +116,7 @@ describe('useMultipleIntersectionObserver', () => {
 
     expect(result.current.entries.size).toBe(1);
     expect(result.current.entries.get('element-1')).toBeDefined();
+    expect(result.current.entries.get('element-1')?.isIntersecting).toBe(true);
   });
 
   it('should unobserve elements removed from list', () => {
@@ -130,6 +134,7 @@ describe('useMultipleIntersectionObserver', () => {
     });
 
     expect(mockUnobserve).toHaveBeenCalledWith(element1);
+    expect(mockUnobserve).not.toHaveBeenCalledWith(element2);
   });
 
   it('should not observe elements already being observed', () => {
@@ -197,7 +202,7 @@ describe('useMultipleIntersectionObserver', () => {
   });
 
   it('should call onChange callback when entries change', () => {
-    const onChange = vi.fn();
+    const onChange = jest.fn();
 
     const { result } = renderHook(() =>
       useMultipleIntersectionObserver({ onChange } as UseMultipleIntersectionObserverOptions)
@@ -230,6 +235,17 @@ describe('useMultipleIntersectionObserver', () => {
     );
   });
 
+  it('should not call onChange when entries are empty', () => {
+    const onChange = jest.fn();
+
+    renderHook(() =>
+      useMultipleIntersectionObserver({ onChange } as UseMultipleIntersectionObserverOptions)
+    );
+
+    // onChange should not be called when entries are empty
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it('should disconnect observer on unmount', () => {
     const { unmount } = renderHook(() => useMultipleIntersectionObserver());
 
@@ -253,6 +269,8 @@ describe('useMultipleIntersectionObserver', () => {
 
   it('should handle missing element IDs gracefully', () => {
     const { result } = renderHook(() => useMultipleIntersectionObserver());
+
+    jest.spyOn(document, 'getElementById').mockReturnValue(null);
 
     act(() => {
       result.current.observeElements(['non-existent']);
@@ -322,5 +340,82 @@ describe('useMultipleIntersectionObserver', () => {
 
     // element-2 should win (same ratio, but higher on page)
     expect(result.current.getMostVisibleId()).toBe('element-2');
+  });
+
+  it('should handle elements with intersectionRatio 0 but isIntersecting false', () => {
+    const { result } = renderHook(() => useMultipleIntersectionObserver());
+
+    act(() => {
+      result.current.observeElements(['element-1']);
+    });
+
+    const element1 = document.getElementById('element-1')!;
+
+    act(() => {
+      if (intersectionCallback) {
+        const mockEntry = {
+          target: element1,
+          isIntersecting: false,
+          intersectionRatio: 0,
+          boundingClientRect: { top: 100 } as DOMRectReadOnly,
+        } as IntersectionObserverEntry;
+
+        intersectionCallback([mockEntry]);
+      }
+    });
+
+    // Should not be considered visible
+    expect(result.current.getMostVisibleId()).toBeNull();
+  });
+
+  it('should handle multiple calls to observeElements', () => {
+    const { result } = renderHook(() => useMultipleIntersectionObserver());
+
+    act(() => {
+      result.current.observeElements(['element-1']);
+    });
+
+    act(() => {
+      result.current.observeElements(['element-1', 'element-2']);
+    });
+
+    // Should observe element-2 (new element)
+    expect(mockObserve).toHaveBeenCalledTimes(2);
+  });
+
+  it('should update entries for multiple elements', () => {
+    const { result } = renderHook(() => useMultipleIntersectionObserver());
+
+    act(() => {
+      result.current.observeElements(['element-1', 'element-2']);
+    });
+
+    const element1 = document.getElementById('element-1')!;
+    const element2 = document.getElementById('element-2')!;
+
+    act(() => {
+      if (intersectionCallback) {
+        const entries = [
+          {
+            target: element1,
+            isIntersecting: true,
+            intersectionRatio: 0.5,
+            boundingClientRect: { top: 100 } as DOMRectReadOnly,
+          },
+          {
+            target: element2,
+            isIntersecting: true,
+            intersectionRatio: 0.7,
+            boundingClientRect: { top: 150 } as DOMRectReadOnly,
+          },
+        ] as IntersectionObserverEntry[];
+
+        intersectionCallback(entries);
+      }
+    });
+
+    expect(result.current.entries.size).toBe(2);
+    expect(result.current.entries.get('element-1')).toBeDefined();
+    expect(result.current.entries.get('element-2')).toBeDefined();
   });
 });

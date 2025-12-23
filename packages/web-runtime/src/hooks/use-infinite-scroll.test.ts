@@ -1,65 +1,81 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { renderHook, act } from '@testing-library/react';
 import { useInfiniteScroll } from './use-infinite-scroll';
 import type { UseInfiniteScrollOptions } from './use-infinite-scroll';
 
 // Mock dependencies
-const mockSetTrue = vi.fn();
-const mockSetFalse = vi.fn();
+let mockSetTrue: ReturnType<typeof jest.fn>;
+let mockSetFalse: ReturnType<typeof jest.fn>;
 let mockIsLoading = false;
 
-vi.mock('./use-boolean', () => ({
-  useBoolean: vi.fn(() => ({
-    value: () => mockIsLoading,
-    setTrue: mockSetTrue,
-    setFalse: mockSetFalse,
-    toggle: vi.fn(),
-  })),
+jest.mock('./use-boolean', () => ({
+  useBoolean: jest.fn(() => {
+    // Return object with getter for value to get current mockIsLoading
+    const mockBoolean = {
+      get value() {
+        return mockIsLoading;
+      },
+      setTrue: mockSetTrue,
+      setFalse: mockSetFalse,
+      toggle: jest.fn(),
+    };
+    return mockBoolean;
+  }),
 }));
 
 let mockIsIntersecting = false;
 let mockOnChange: ((isIntersecting: boolean) => void) | null = null;
 
-vi.mock('./use-intersection-observer', () => ({
-  useIntersectionObserver: vi.fn((options: any) => {
+jest.mock('./use-intersection-observer', () => ({
+  useIntersectionObserver: jest.fn((options: any) => {
     mockOnChange = options.onChange;
     return {
-      ref: vi.fn((node: HTMLElement | null) => {}),
+      ref: jest.fn((node: HTMLElement | null) => {}),
       isIntersecting: mockIsIntersecting,
     };
   }),
 }));
 
-vi.mock('../config/static-configs', () => ({
-  getHomepageConfigBundle: vi.fn(() => ({
+jest.mock('../config/static-configs', () => ({
+  getHomepageConfigBundle: jest.fn(() => ({
     appSettings: {
       'hooks.infinite_scroll.batch_size': 30,
       'hooks.infinite_scroll.threshold': 0.1,
     },
   })),
-  getTimeoutConfig: vi.fn(() => ({
+  getTimeoutConfig: jest.fn(() => ({
     'timeout.ui.transition_ms': 200,
   })),
 }));
 
-vi.mock('../logger', () => ({
+jest.mock('../logger', () => ({
   logger: {
-    warn: vi.fn(),
+    warn: jest.fn(),
   },
 }));
 
 describe('useInfiniteScroll', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    jest.useFakeTimers();
     mockIsLoading = false;
     mockIsIntersecting = false;
     mockOnChange = null;
-    vi.clearAllMocks();
+    mockSetTrue = jest.fn(() => {
+      mockIsLoading = true;
+    });
+    mockSetFalse = jest.fn(() => {
+      mockIsLoading = false;
+    });
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.useRealTimers();
-    vi.restoreAllMocks();
+    jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it('should initialize with batchSize items', () => {
@@ -112,7 +128,7 @@ describe('useInfiniteScroll', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(200); // transition_ms delay
+      jest.advanceTimersByTime(200); // transition_ms delay
     });
 
     expect(result.current.displayCount).toBe(60);
@@ -137,7 +153,7 @@ describe('useInfiniteScroll', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(200);
+      jest.advanceTimersByTime(200);
     });
 
     // Should not have increased
@@ -161,7 +177,7 @@ describe('useInfiniteScroll', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(200);
+      jest.advanceTimersByTime(200);
     });
 
     expect(result.current.displayCount).toBe(30);
@@ -184,7 +200,7 @@ describe('useInfiniteScroll', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(200);
+      jest.advanceTimersByTime(200);
     });
 
     // Should be 50 (totalItems), not 60
@@ -206,7 +222,7 @@ describe('useInfiniteScroll', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(200);
+      jest.advanceTimersByTime(200);
     });
 
     expect(result.current.displayCount).toBe(60);
@@ -235,7 +251,7 @@ describe('useInfiniteScroll', () => {
     expect(mockSetTrue).toHaveBeenCalled();
 
     act(() => {
-      vi.advanceTimersByTime(200);
+      jest.advanceTimersByTime(200);
     });
 
     expect(mockSetFalse).toHaveBeenCalled();
@@ -249,7 +265,7 @@ describe('useInfiniteScroll', () => {
       } as UseInfiniteScrollOptions)
     );
 
-    const { useIntersectionObserver } = require('./use-intersection-observer');
+    const { useIntersectionObserver } = jest.requireMock('./use-intersection-observer');
     expect(useIntersectionObserver).toHaveBeenCalledWith(
       expect.objectContaining({
         rootMargin: '1000px',
@@ -265,7 +281,7 @@ describe('useInfiniteScroll', () => {
       } as UseInfiniteScrollOptions)
     );
 
-    const { useIntersectionObserver } = require('./use-intersection-observer');
+    const { useIntersectionObserver } = jest.requireMock('./use-intersection-observer');
     expect(useIntersectionObserver).toHaveBeenCalledWith(
       expect.objectContaining({
         threshold: 0.5,
@@ -274,7 +290,7 @@ describe('useInfiniteScroll', () => {
   });
 
   it('should validate threshold and use default if invalid', () => {
-    const { logger } = require('../logger');
+    const { logger } = jest.requireMock('../logger');
 
     renderHook(() =>
       useInfiniteScroll({
@@ -293,11 +309,281 @@ describe('useInfiniteScroll', () => {
     );
   });
 
+  it('should validate threshold and use default if negative', () => {
+    const { logger } = jest.requireMock('../logger');
+
+    renderHook(() =>
+      useInfiniteScroll({
+        totalItems: 100,
+        threshold: -0.5, // Invalid (< 0)
+      } as UseInfiniteScrollOptions)
+    );
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        component: 'useInfiniteScroll',
+        receivedThreshold: -0.5,
+        usingDefault: 0.1,
+      }),
+      'Invalid threshold for infinite scroll'
+    );
+  });
+
   it('should return sentinelRef function', () => {
     const { result } = renderHook(() =>
       useInfiniteScroll({ totalItems: 100 } as UseInfiniteScrollOptions)
     );
 
     expect(typeof result.current.sentinelRef).toBe('function');
+  });
+
+  it('should load multiple batches sequentially', () => {
+    const { result } = renderHook(() =>
+      useInfiniteScroll({
+        totalItems: 100,
+        batchSize: 30,
+      } as UseInfiniteScrollOptions)
+    );
+
+    expect(result.current.displayCount).toBe(30);
+
+    // First load
+    act(() => {
+      if (mockOnChange) {
+        mockOnChange(true);
+      }
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+
+    expect(result.current.displayCount).toBe(60);
+
+    // Second load
+    act(() => {
+      if (mockOnChange) {
+        mockOnChange(true);
+      }
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+
+    expect(result.current.displayCount).toBe(90);
+  });
+
+  it('should handle zero totalItems', () => {
+    const { result } = renderHook(() =>
+      useInfiniteScroll({
+        totalItems: 0,
+        batchSize: 30,
+      } as UseInfiniteScrollOptions)
+    );
+
+    expect(result.current.displayCount).toBe(30);
+    expect(result.current.hasMore).toBe(false);
+  });
+
+  it('should handle totalItems less than batchSize', () => {
+    const { result } = renderHook(() =>
+      useInfiniteScroll({
+        totalItems: 10,
+        batchSize: 30,
+      } as UseInfiniteScrollOptions)
+    );
+
+    expect(result.current.displayCount).toBe(30);
+    expect(result.current.hasMore).toBe(false);
+  });
+
+  it('should use config default batchSize when not provided', () => {
+    const { result } = renderHook(() =>
+      useInfiniteScroll({
+        totalItems: 100,
+        // batchSize not provided - should use config default (30)
+      } as UseInfiniteScrollOptions)
+    );
+
+    expect(result.current.displayCount).toBe(30);
+  });
+
+  it('should use config default threshold when not provided', () => {
+    renderHook(() =>
+      useInfiniteScroll({
+        totalItems: 100,
+        // threshold not provided - should use config default (0.1)
+      } as UseInfiniteScrollOptions)
+    );
+
+    const { useIntersectionObserver } = jest.requireMock('./use-intersection-observer');
+    expect(useIntersectionObserver).toHaveBeenCalledWith(
+      expect.objectContaining({
+        threshold: 0.1,
+      })
+    );
+  });
+
+  it('should use default rootMargin when not provided', () => {
+    renderHook(() =>
+      useInfiniteScroll({
+        totalItems: 100,
+        // rootMargin not provided - should use default ('600px')
+      } as UseInfiniteScrollOptions)
+    );
+
+    const { useIntersectionObserver } = jest.requireMock('./use-intersection-observer');
+    expect(useIntersectionObserver).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rootMargin: '600px',
+      })
+    );
+  });
+
+  it('should handle custom root element', () => {
+    const customRoot = document.createElement('div');
+
+    renderHook(() =>
+      useInfiniteScroll({
+        totalItems: 100,
+        root: customRoot,
+      } as UseInfiniteScrollOptions)
+    );
+
+    const { useIntersectionObserver } = jest.requireMock('./use-intersection-observer');
+    expect(useIntersectionObserver).toHaveBeenCalledWith(
+      expect.objectContaining({
+        root: customRoot,
+      })
+    );
+  });
+
+  it('should not load more when sentinel becomes invisible', () => {
+    const { result } = renderHook(() =>
+      useInfiniteScroll({
+        totalItems: 100,
+        batchSize: 30,
+      } as UseInfiniteScrollOptions)
+    );
+
+    const initialCount = result.current.displayCount;
+
+    act(() => {
+      if (mockOnChange) {
+        mockOnChange(false); // Sentinel becomes invisible
+      }
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+
+    // Should not have increased
+    expect(result.current.displayCount).toBe(initialCount);
+  });
+
+  it('should handle intersection becoming invisible', () => {
+    const { result } = renderHook(() =>
+      useInfiniteScroll({
+        totalItems: 100,
+        batchSize: 30,
+      } as UseInfiniteScrollOptions)
+    );
+
+    // Intersection becomes visible, triggers load
+    act(() => {
+      if (mockOnChange) {
+        mockOnChange(true);
+      }
+    });
+
+    // Intersection becomes invisible (should not trigger load)
+    act(() => {
+      if (mockOnChange) {
+        mockOnChange(false);
+      }
+    });
+
+    // Complete the load
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+
+    // Should have loaded once
+    expect(result.current.displayCount).toBe(60);
+  });
+
+  it('should reset isLoading state after load', () => {
+    const { result } = renderHook(() =>
+      useInfiniteScroll({
+        totalItems: 100,
+        batchSize: 30,
+      } as UseInfiniteScrollOptions)
+    );
+
+    act(() => {
+      if (mockOnChange) {
+        mockOnChange(true);
+      }
+    });
+
+    expect(mockSetTrue).toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+
+    expect(mockSetFalse).toHaveBeenCalled();
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('should handle reset when already at initial state', () => {
+    const { result } = renderHook(() =>
+      useInfiniteScroll({
+        totalItems: 100,
+        batchSize: 30,
+      } as UseInfiniteScrollOptions)
+    );
+
+    const initialCount = result.current.displayCount;
+
+    act(() => {
+      result.current.reset();
+    });
+
+    expect(result.current.displayCount).toBe(initialCount);
+    expect(mockSetFalse).toHaveBeenCalled();
+  });
+
+  it('should handle reset after multiple loads', () => {
+    const { result } = renderHook(() =>
+      useInfiniteScroll({
+        totalItems: 100,
+        batchSize: 30,
+      } as UseInfiniteScrollOptions)
+    );
+
+    // Load multiple batches
+    for (let i = 0; i < 3; i++) {
+      act(() => {
+        if (mockOnChange) {
+          mockOnChange(true);
+        }
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(200);
+      });
+    }
+
+    expect(result.current.displayCount).toBeGreaterThan(30);
+
+    // Reset
+    act(() => {
+      result.current.reset();
+    });
+
+    expect(result.current.displayCount).toBe(30);
   });
 });

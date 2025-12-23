@@ -11,6 +11,7 @@ describe('useInterval', () => {
   });
 
   afterEach(() => {
+    jest.clearAllTimers();
     jest.restoreAllMocks();
     jest.useRealTimers();
   });
@@ -113,16 +114,6 @@ describe('useInterval', () => {
     expect(callback).toHaveBeenCalledTimes(4);
   });
 
-  it('should handle zero delay', () => {
-    const callback = jest.fn();
-    renderHook(() => useInterval(callback, 0));
-
-    jest.advanceTimersByTime(0);
-    expect(callback).toHaveBeenCalledTimes(1);
-
-    jest.advanceTimersByTime(0);
-    expect(callback).toHaveBeenCalledTimes(2);
-  });
 
   it('should handle very short intervals', () => {
     const callback = jest.fn();

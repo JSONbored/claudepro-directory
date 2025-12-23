@@ -12707,5 +12707,519 @@ export default {
     // rules were removed because they referenced deprecated semantic utilities (marginBottom.*,
     // stack.*, etc.) that don't exist. We use Direct Tailwind with @theme as the design system.
     // New rules for CSS variables and arbitrary values will be added here.
+
+    /**
+     * Rule: no-css-variables-in-classname
+     * Detects CSS variables in className attributes and suggests Tailwind utilities
+     * Exceptions: Framer Motion, Shiki, library requirements
+     */
+    'no-css-variables-in-classname': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description:
+            'CSS variables in className should use Tailwind utilities from @theme block',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: 'code',
+        schema: [],
+        messages: {
+          useTailwindUtility:
+            'CSS variable "{{variable}}" should use Tailwind utility "{{utility}}" from @theme block. Use semantic color names (text-success, bg-info-bg, border-warning-border) instead of CSS variables.',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+
+        /**
+         * Check if a comment indicates this is an acceptable exception
+         */
+        function hasAcceptableComment(node) {
+          const comments = sourceCode.getCommentsBefore(node);
+          for (const comment of comments) {
+            const text = comment.value.toLowerCase();
+            if (
+              text.includes('acceptable') ||
+              text.includes('framer motion') ||
+              text.includes('animation') ||
+              text.includes('shiki') ||
+              text.includes('library requirement')
+            ) {
+              return true;
+            }
+          }
+          return false;
+        }
+
+        /**
+         * Check if this is a Framer Motion component (motion.*)
+         */
+        function isFramerMotionComponent(node) {
+          // Check if parent is JSXOpeningElement with motion.* tag
+          let parent = node.parent;
+          while (parent) {
+            if (parent.type === 'JSXOpeningElement' && parent.name) {
+              if (
+                parent.name.type === 'JSXMemberExpression' &&
+                parent.name.object &&
+                parent.name.object.type === 'JSXIdentifier' &&
+                parent.name.object.name === 'motion'
+              ) {
+                return true;
+              }
+            }
+            parent = parent.parent;
+          }
+          return false;
+        }
+
+        /**
+         * Extract CSS variable name from pattern like var(--color-success)
+         */
+        function extractCssVariable(text) {
+          const match = text.match(/var\(--color-([^)]+)\)/);
+          return match ? match[1] : null;
+        }
+
+        /**
+         * Convert CSS variable to Tailwind utility
+         * Examples:
+         * --color-success -> success
+         * --color-success-bg -> success-bg
+         * --color-success-border -> success-border
+         * --color-info -> info
+         */
+        function cssVariableToTailwindUtility(variable) {
+          // Remove --color- prefix
+          const withoutPrefix = variable.replace(/^--color-/, '');
+          return withoutPrefix;
+        }
+
+        /**
+         * Get the Tailwind utility class for a CSS variable
+         * Examples:
+         * text-[var(--color-success)] -> text-success
+         * bg-[var(--color-info-bg)] -> bg-info-bg
+         * border-[var(--color-warning-border)] -> border-warning-border
+         */
+        function getTailwindUtility(className, variable) {
+          // Extract the prefix (text-, bg-, border-, fill-, stroke-)
+          const prefixMatch = className.match(/^(text-|bg-|border-|fill-|stroke-|from-|to-|group-\[\.\w+\]:|hover:|group-hover:)/);
+          const prefix = prefixMatch ? prefixMatch[1] : '';
+          
+          // Convert variable to utility name
+          const utility = cssVariableToTailwindUtility(variable);
+          
+          return `${prefix}${utility}`;
+        }
+
+        /**
+         * Check and fix CSS variables in a string
+         */
+        function checkStringForCssVariables(node, className) {
+          const cssVarPattern = /(\w+-)?\[var\(--color-([^)]+)\)\]/g;
+          const matches = [];
+          let match;
+
+          while ((match = cssVarPattern.exec(className)) !== null) {
+            const fullMatch = match[0];
+            const prefix = match[1] || '';
+            const variable = match[2];
+            const startIndex = match.index;
+            const endIndex = startIndex + fullMatch.length;
+
+            matches.push({
+              fullMatch,
+              prefix,
+              variable,
+              startIndex,
+              endIndex,
+              matchIndex: match.index, // Store original match index for precise replacement
+            });
+          }
+
+          return matches;
+        }
+
+        /**
+         * Process className value and report violations
+         */
+        function processClassNameValue(node, valueNode) {
+          // Skip if acceptable comment exists
+          if (hasAcceptableComment(node)) {
+            return;
+          }
+
+          // Skip if Framer Motion component
+          if (isFramerMotionComponent(node)) {
+            return;
+          }
+
+          if (valueNode.type === 'Literal' && typeof valueNode.value === 'string') {
+            // String literal className
+            const className = valueNode.value;
+            const violations = checkStringForCssVariables(node, className);
+
+            for (const violation of violations) {
+              const utility = getTailwindUtility(violation.fullMatch, violation.variable);
+              const newClassName = className.replace(
+                violation.fullMatch,
+                utility
+              );
+
+              context.report({
+                node: valueNode,
+                messageId: 'useTailwindUtility',
+                data: {
+                  variable: `--color-${violation.variable}`,
+                  utility,
+                },
+                fix(fixer) {
+                  return fixer.replaceText(valueNode, `"${newClassName}"`);
+                },
+              });
+            }
+          } else if (valueNode.type === 'TemplateLiteral') {
+            // Template literal className
+            for (const quasi of valueNode.quasis) {
+              if (quasi.value) {
+                // Use cooked value (processed) or raw value (unprocessed)
+                const className = quasi.value.cooked || quasi.value.raw || '';
+                if (!className) continue;
+                
+                const violations = checkStringForCssVariables(node, className);
+
+                for (const violation of violations) {
+                  const utility = getTailwindUtility(violation.fullMatch, violation.variable);
+                  const newClassName = className.replace(
+                    violation.fullMatch,
+                    utility
+                  );
+
+                  context.report({
+                    node: quasi,
+                    messageId: 'useTailwindUtility',
+                    data: {
+                      variable: `--color-${violation.variable}`,
+                      utility,
+                    },
+                    fix(fixer) {
+                      // For template literals, we need to replace within the quasi value
+                      // Get the range of the quasi value (excluding backticks)
+                      const quasiStart = quasi.range[0];
+                      const quasiEnd = quasi.range[1];
+                      // Get the text of the quasi
+                      const quasiText = sourceCode.getText(quasi);
+                      
+                      // Find the position of the violation within the quasi text
+                      const violationIndex = quasiText.indexOf(violation.fullMatch);
+                      if (violationIndex === -1) {
+                        // Fallback: try replacing in the entire quasi text
+                        const newQuasiText = quasiText.replace(violation.fullMatch, utility);
+                        return fixer.replaceText(quasi, newQuasiText);
+                      }
+                      
+                      // Calculate the absolute position in the source
+                      const violationStart = quasiStart + violationIndex;
+                      const violationEnd = violationStart + violation.fullMatch.length;
+                      
+                      // Replace the violation with the utility
+                      return fixer.replaceTextRange([violationStart, violationEnd], utility);
+                    },
+                  });
+                }
+              }
+            }
+          } else if (
+            valueNode.type === 'CallExpression' &&
+            valueNode.callee &&
+            valueNode.callee.type === 'Identifier' &&
+            valueNode.callee.name === 'cn'
+          ) {
+            // cn() utility - check all string literal arguments
+            for (const arg of valueNode.arguments) {
+              if (arg.type === 'Literal' && typeof arg.value === 'string') {
+                const className = arg.value;
+                const violations = checkStringForCssVariables(node, className);
+
+                for (const violation of violations) {
+                  const utility = getTailwindUtility(violation.fullMatch, violation.variable);
+                  const newClassName = className.replace(
+                    violation.fullMatch,
+                    utility
+                  );
+
+                  context.report({
+                    node: arg,
+                    messageId: 'useTailwindUtility',
+                    data: {
+                      variable: `--color-${violation.variable}`,
+                      utility,
+                    },
+                    fix(fixer) {
+                      return fixer.replaceText(arg, `"${newClassName}"`);
+                    },
+                  });
+                }
+              }
+            }
+          }
+        }
+
+        return {
+          JSXAttribute(node) {
+            if (
+              node.name &&
+              node.name.type === 'JSXIdentifier' &&
+              node.name.name === 'className' &&
+              node.value
+            ) {
+              // Handle JSXExpressionContainer: className={...}
+              if (node.value.type === 'JSXExpressionContainer') {
+                processClassNameValue(node, node.value.expression);
+              } else {
+                // Handle string literal: className="..."
+                processClassNameValue(node, node.value);
+              }
+            }
+          },
+        };
+      },
+    },
+
+    /**
+     * Rule: prefer-design-tokens-over-arbitrary-values
+     * Detects arbitrary values in className and suggests design tokens
+     * Exceptions: calc(), vh/vw units, percentages, dynamic calculations
+     */
+    'prefer-design-tokens-over-arbitrary-values': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description:
+            'Arbitrary values should use design tokens from @theme block when possible',
+          category: 'Best Practices',
+          recommended: false, // Warning only, not error (some arbitrary values are necessary)
+        },
+        fixable: null, // No autofix - too risky, requires manual review
+        schema: [],
+        messages: {
+          preferDesignToken:
+            'Arbitrary value "{{value}}" should use design token "{{token}}" from @theme block when possible. Exceptions: calc(), vh/vw units, percentages, dynamic calculations.',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+
+        /**
+         * Check if a comment indicates this is an acceptable exception
+         */
+        function hasAcceptableComment(node) {
+          const comments = sourceCode.getCommentsBefore(node);
+          for (const comment of comments) {
+            const text = comment.value.toLowerCase();
+            if (
+              text.includes('acceptable') ||
+              text.includes('dynamic') ||
+              text.includes('calculation') ||
+              text.includes('viewport')
+            ) {
+              return true;
+            }
+          }
+          return false;
+        }
+
+        /**
+         * Check if arbitrary value is acceptable (calc, vh/vw, percentages, etc.)
+         */
+        function isAcceptableArbitraryValue(value) {
+          // Acceptable patterns:
+          // - calc() expressions
+          // - vh/vw units
+          // - percentages
+          // - min/max/clamp functions
+          // - CSS variables
+          const acceptablePatterns = [
+            /calc\(/,
+            /vh/,
+            /vw/,
+            /vmin/,
+            /vmax/,
+            /%/,
+            /min\(/,
+            /max\(/,
+            /clamp\(/,
+            /var\(/,
+          ];
+
+          return acceptablePatterns.some((pattern) => pattern.test(value));
+        }
+
+        /**
+         * Map common arbitrary values to design tokens
+         * This is a conservative mapping - only for values we know have tokens
+         */
+        function getDesignTokenForValue(property, value) {
+          // Font sizes
+          if (property === 'text') {
+            if (value === '8px' || value === '0.5rem') return 'text-4xs';
+            if (value === '9px' || value === '0.5625rem') return 'text-3xs';
+            if (value === '10px' || value === '0.625rem') return 'text-2xs';
+            if (value === '11px' || value === '0.6875rem') return 'text-xs';
+            if (value === '13px' || value === '0.8125rem') return 'text-base';
+          }
+
+          // Spacing
+          if (value === '6px' || value === '0.375rem') {
+            if (property === 'gap') return 'gap-1.5';
+            if (property === 'p' || property === 'px' || property === 'py') return 'p-1.5';
+            if (property === 'm' || property === 'mx' || property === 'my') return 'm-1.5';
+          }
+
+          if (value === '18px' || value === '1.125rem') {
+            if (property === 'h') return 'h-4.5';
+            if (property === 'w') return 'w-4.5';
+            if (property === 'mt' || property === 'mb') return 'mt-4';
+          }
+
+          // Common spacing values
+          if (value === '12px' || value === '0.75rem') {
+            if (property === 'p' || property === 'px' || property === 'py') return 'p-3';
+          }
+
+          // Height/width values that don't have direct tokens
+          // Note: h-[70px] and w-[120px] don't have direct tokens, so we don't report them
+          // Only report values that we know have tokens
+
+          return null;
+        }
+
+        /**
+         * Check and report arbitrary values in a string
+         */
+        function checkStringForArbitraryValues(node, className) {
+          // Pattern: property-[value]
+          // Examples: text-[10px], gap-[6px], h-[70px]
+          const arbitraryPattern = /(\w+)-\[([^\]]+)\]/g;
+          const matches = [];
+          let match;
+
+          while ((match = arbitraryPattern.exec(className)) !== null) {
+            const fullMatch = match[0];
+            const property = match[1];
+            const value = match[2];
+
+            // Skip if acceptable (calc, vh/vw, etc.)
+            if (isAcceptableArbitraryValue(value)) {
+              continue;
+            }
+
+            // Try to find design token
+            const token = getDesignTokenForValue(property, value);
+            if (token) {
+              matches.push({
+                fullMatch,
+                property,
+                value,
+                token,
+              });
+            }
+          }
+
+          return matches;
+        }
+
+        /**
+         * Process className value and report violations
+         */
+        function processClassNameValue(node, valueNode) {
+          // Skip if acceptable comment exists
+          if (hasAcceptableComment(node)) {
+            return;
+          }
+
+          if (valueNode.type === 'Literal' && typeof valueNode.value === 'string') {
+            // String literal className
+            const className = valueNode.value;
+            const violations = checkStringForArbitraryValues(node, className);
+
+            for (const violation of violations) {
+              context.report({
+                node: valueNode,
+                messageId: 'preferDesignToken',
+                data: {
+                  value: violation.fullMatch,
+                  token: violation.token,
+                },
+              });
+            }
+          } else if (valueNode.type === 'TemplateLiteral') {
+            // Template literal className
+            for (const quasi of valueNode.quasis) {
+              if (quasi.value && quasi.value.raw) {
+                const className = quasi.value.raw;
+                const violations = checkStringForArbitraryValues(node, className);
+
+                for (const violation of violations) {
+                  context.report({
+                    node: quasi,
+                    messageId: 'preferDesignToken',
+                    data: {
+                      value: violation.fullMatch,
+                      token: violation.token,
+                    },
+                  });
+                }
+              }
+            }
+          } else if (
+            valueNode.type === 'CallExpression' &&
+            valueNode.callee &&
+            valueNode.callee.type === 'Identifier' &&
+            valueNode.callee.name === 'cn'
+          ) {
+            // cn() utility - check all string literal arguments
+            for (const arg of valueNode.arguments) {
+              if (arg.type === 'Literal' && typeof arg.value === 'string') {
+                const className = arg.value;
+                const violations = checkStringForArbitraryValues(node, className);
+
+                for (const violation of violations) {
+                  context.report({
+                    node: arg,
+                    messageId: 'preferDesignToken',
+                    data: {
+                      value: violation.fullMatch,
+                      token: violation.token,
+                    },
+                  });
+                }
+              }
+            }
+          }
+        }
+
+        return {
+          JSXAttribute(node) {
+            if (
+              node.name &&
+              node.name.type === 'JSXIdentifier' &&
+              node.name.name === 'className' &&
+              node.value
+            ) {
+              // Handle JSXExpressionContainer: className={...}
+              if (node.value.type === 'JSXExpressionContainer') {
+                processClassNameValue(node, node.value.expression);
+              } else {
+                // Handle string literal: className="..."
+                processClassNameValue(node, node.value);
+              }
+            }
+          },
+        };
+      },
+    },
   },
 };

@@ -1,45 +1,59 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { renderHook } from '@testing-library/react';
 import { useAnimationFrame } from './use-animation-frame';
 
-// Mock motion/react - use vi.hoisted() for variables used in vi.mock()
-const mockUseAnimationFrame = vi.hoisted(() => vi.fn());
+// Mock motion/react - define mocks inside factory function
+jest.mock('motion/react', () => {
+  const mockUseAnimationFrame = jest.fn();
+  return {
+    useAnimationFrame: mockUseAnimationFrame,
+    __mockUseAnimationFrame: mockUseAnimationFrame,
+  };
+});
 
-vi.mock('motion/react', () => ({
+// Get mock for use in tests
+const {
   useAnimationFrame: mockUseAnimationFrame,
-}));
+  __mockUseAnimationFrame,
+} = jest.requireMock('motion/react');
+const mockUseAnimationFrameFn = __mockUseAnimationFrame || mockUseAnimationFrame;
 
 describe('useAnimationFrame', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it('should call motion/react useAnimationFrame when callback is provided', () => {
-    const callback = vi.fn();
+    const callback = jest.fn();
 
     renderHook(() => useAnimationFrame(callback));
 
-    expect(mockUseAnimationFrame).toHaveBeenCalledWith(callback);
+    expect(mockUseAnimationFrameFn).toHaveBeenCalledWith(callback);
   });
 
   it('should not call motion/react useAnimationFrame when callback is undefined', () => {
     renderHook(() => useAnimationFrame(undefined));
 
-    expect(mockUseAnimationFrame).not.toHaveBeenCalled();
+    expect(mockUseAnimationFrameFn).not.toHaveBeenCalled();
   });
 
   it('should handle callback changes', () => {
-    const callback1 = vi.fn();
-    const callback2 = vi.fn();
+    const callback1 = jest.fn();
+    const callback2 = jest.fn();
 
     const { rerender } = renderHook(({ cb }) => useAnimationFrame(cb), {
       initialProps: { cb: callback1 },
     });
 
-    expect(mockUseAnimationFrame).toHaveBeenCalledWith(callback1);
+    expect(mockUseAnimationFrameFn).toHaveBeenCalledWith(callback1);
 
     rerender({ cb: callback2 });
 
-    expect(mockUseAnimationFrame).toHaveBeenCalledWith(callback2);
+    expect(mockUseAnimationFrameFn).toHaveBeenCalledWith(callback2);
   });
 });

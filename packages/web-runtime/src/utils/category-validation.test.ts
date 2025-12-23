@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from '@jest/globals';
 import { isValidCategory, VALID_CATEGORIES } from './category-validation';
 import type { content_category } from '../types/client-safe-enums';
 

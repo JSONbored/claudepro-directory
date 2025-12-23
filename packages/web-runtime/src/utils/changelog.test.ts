@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import {
   formatChangelogDate,
   formatChangelogDateShort,
@@ -10,16 +10,16 @@ import {
 } from './changelog';
 
 // Mock formatDate and formatRelativeDate
-const mockFormatDate = vi.fn();
-const mockFormatRelativeDate = vi.fn();
+const mockFormatDate = jest.fn();
+const mockFormatRelativeDate = jest.fn();
 
-vi.mock('../data.ts', () => ({
+jest.mock('../data.ts', () => ({
   formatDate: (...args: any[]) => mockFormatDate(...args),
   formatRelativeDate: (...args: any[]) => mockFormatRelativeDate(...args),
 }));
 
 // Mock APP_CONFIG
-vi.mock('../data/config/constants.ts', () => ({
+jest.mock('../data/config/constants.ts', () => ({
   APP_CONFIG: {
     url: 'https://example.com',
   },
@@ -27,7 +27,7 @@ vi.mock('../data/config/constants.ts', () => ({
 
 describe('changelog utilities', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('formatChangelogDate', () => {

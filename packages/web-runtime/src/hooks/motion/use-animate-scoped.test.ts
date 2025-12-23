@@ -1,19 +1,42 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { renderHook } from '@testing-library/react';
 import { useAnimateScoped } from './use-animate-scoped';
 
-// Mock motion/react - use vi.hoisted() for variables used in vi.mock()
-const mockScope = vi.hoisted(() => ({ current: null }));
-const mockAnimate = vi.hoisted(() => vi.fn());
-const mockUseAnimate = vi.hoisted(() => vi.fn(() => [mockScope, mockAnimate]));
+// Mock motion/react - define mocks inside factory function to avoid hoisting issues
+jest.mock('motion/react', () => {
+  const mockScope = { current: null };
+  const mockAnimate = jest.fn();
+  const mockUseAnimate = jest.fn(() => [mockScope, mockAnimate]);
+  return {
+    useAnimate: mockUseAnimate,
+    __mockScope: mockScope,
+    __mockAnimate: mockAnimate,
+    __mockUseAnimate: mockUseAnimate,
+  };
+});
 
-vi.mock('motion/react', () => ({
-  useAnimate: mockUseAnimate,
-}));
+// Get mocks for use in tests
+const {
+  useAnimate,
+  __mockScope,
+  __mockAnimate,
+  __mockUseAnimate,
+} = jest.requireMock('motion/react');
+const mockScope = __mockScope;
+const mockAnimate = __mockAnimate;
+const mockUseAnimate = __mockUseAnimate;
 
 describe('useAnimateScoped', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+
+    // Reset mockUseAnimate to default return value
+    mockUseAnimate.mockReturnValue([mockScope, mockAnimate]);
   });
 
   it('should return scope and animate function', () => {

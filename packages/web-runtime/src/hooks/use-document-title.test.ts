@@ -1,15 +1,19 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { renderHook } from '@testing-library/react';
 import { useDocumentTitle } from './use-document-title';
 
 describe('useDocumentTitle', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     document.title = '';
-    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should set document title', () => {
@@ -60,5 +64,49 @@ describe('useDocumentTitle', () => {
     renderHook(() => useDocumentTitle(specialTitle));
 
     expect(document.title).toBe(specialTitle);
+  });
+
+  it('should handle unicode characters in title', () => {
+    const unicodeTitle = 'Title with 🎉 emoji and 中文 characters';
+    renderHook(() => useDocumentTitle(unicodeTitle));
+
+    expect(document.title).toBe(unicodeTitle);
+  });
+
+  it('should handle title with newlines and tabs', () => {
+    const titleWithWhitespace = 'Title\nwith\ttabs';
+    renderHook(() => useDocumentTitle(titleWithWhitespace));
+
+    // Browsers may normalize whitespace in document.title
+    // The title should be set, but exact whitespace may vary
+    expect(document.title).toBeTruthy();
+    expect(document.title).toContain('Title');
+    expect(document.title).toContain('with');
+    expect(document.title).toContain('tabs');
+  });
+
+  it('should update title multiple times', () => {
+    const { rerender } = renderHook(({ title }) => useDocumentTitle(title), {
+      initialProps: { title: 'Title 1' },
+    });
+
+    expect(document.title).toBe('Title 1');
+
+    rerender({ title: 'Title 2' });
+    expect(document.title).toBe('Title 2');
+
+    rerender({ title: 'Title 3' });
+    expect(document.title).toBe('Title 3');
+  });
+
+  it('should handle same title being set multiple times', () => {
+    const { rerender } = renderHook(({ title }) => useDocumentTitle(title), {
+      initialProps: { title: 'Same Title' },
+    });
+
+    expect(document.title).toBe('Same Title');
+
+    rerender({ title: 'Same Title' });
+    expect(document.title).toBe('Same Title');
   });
 });

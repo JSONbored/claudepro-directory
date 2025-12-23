@@ -103,6 +103,7 @@ export function useDebounceCallback<T extends (...args: any[]) => any>(
   const lastCallTimeRef = useRef<number | null>(null);
   const funcRef = useRef(func);
   const leadingExecutedRef = useRef(false);
+  const lastArgsRef = useRef<Parameters<T> | null>(null);
 
   // Store latest function in ref to avoid stale closures
   useEffect(() => {
@@ -120,6 +121,7 @@ export function useDebounceCallback<T extends (...args: any[]) => any>(
     }
     lastCallTimeRef.current = null;
     leadingExecutedRef.current = false;
+    lastArgsRef.current = null;
   }, []);
 
   const flush = useCallback(() => {
@@ -131,9 +133,18 @@ export function useDebounceCallback<T extends (...args: any[]) => any>(
       clearTimeout(maxWaitTimeoutRef.current);
       maxWaitTimeoutRef.current = null;
     }
+    
+    // Execute function with last arguments if pending
+    if (lastArgsRef.current !== null) {
+      if (!leading || leadingExecutedRef.current) {
+        funcRef.current(...lastArgsRef.current);
+      }
+      lastArgsRef.current = null;
+    }
+    
     lastCallTimeRef.current = null;
     leadingExecutedRef.current = false;
-  }, []);
+  }, [leading]);
 
   const isPending = useCallback(() => {
     return timeoutRef.current !== null;
@@ -142,6 +153,9 @@ export function useDebounceCallback<T extends (...args: any[]) => any>(
   const debouncedFn = useCallback(
     ((...args: Parameters<T>) => {
       const now = Date.now();
+
+      // Store last arguments for flush()
+      lastArgsRef.current = args;
 
       // Leading edge execution
       if (leading && !leadingExecutedRef.current) {
@@ -162,6 +176,7 @@ export function useDebounceCallback<T extends (...args: any[]) => any>(
           }
           timeoutRef.current = null;
           leadingExecutedRef.current = false;
+          lastArgsRef.current = null;
         }, delay);
       }
 
@@ -178,6 +193,7 @@ export function useDebounceCallback<T extends (...args: any[]) => any>(
           }
           lastCallTimeRef.current = null;
           leadingExecutedRef.current = false;
+          lastArgsRef.current = null;
         }, maxWait);
       }
     }) as DebouncedFunction<T>,

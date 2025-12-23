@@ -140,6 +140,15 @@ const useRecentlyViewedStore = create<RecentlyViewedState>((set) => ({
   setLoaded: (loaded) => set({ isLoaded: loaded }),
 }));
 
+// Export store for testing (allows resetting state between tests)
+if (typeof jest !== 'undefined') {
+  (useRecentlyViewedStore as any).__testReset = () => {
+    useRecentlyViewedStore.setState({ items: [], isLoaded: false });
+  };
+  // Export store for test access
+  (module.exports as any).useRecentlyViewedStore = useRecentlyViewedStore;
+}
+
 // =============================================================================
 // STORAGE UTILITIES
 // =============================================================================

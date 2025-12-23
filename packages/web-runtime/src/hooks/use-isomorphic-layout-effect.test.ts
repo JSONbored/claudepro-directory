@@ -1,14 +1,18 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { renderHook } from '@testing-library/react';
 import { useIsomorphicLayoutEffect } from './use-isomorphic-layout-effect';
 
 describe('useIsomorphicLayoutEffect', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should be useLayoutEffect in browser environment', () => {
@@ -19,8 +23,8 @@ describe('useIsomorphicLayoutEffect', () => {
     expect(typeof useIsomorphicLayoutEffect).toBe('function');
 
     // Test that it executes (useLayoutEffect behavior)
-    const effect = vi.fn();
-    const cleanup = vi.fn();
+    const effect = jest.fn();
+    const cleanup = jest.fn();
 
     renderHook(() => {
       useIsomorphicLayoutEffect(() => {
@@ -34,7 +38,7 @@ describe('useIsomorphicLayoutEffect', () => {
   });
 
   it('should execute effect on mount', () => {
-    const effect = vi.fn();
+    const effect = jest.fn();
 
     renderHook(() => {
       useIsomorphicLayoutEffect(() => {
@@ -42,11 +46,11 @@ describe('useIsomorphicLayoutEffect', () => {
       }, []);
     });
 
-    expect(effect).toHaveBeenCalledOnce();
+    expect(effect).toHaveBeenCalledTimes(1);
   });
 
   it('should execute cleanup on unmount', () => {
-    const cleanup = vi.fn();
+    const cleanup = jest.fn();
 
     const { unmount } = renderHook(() => {
       useIsomorphicLayoutEffect(() => {
@@ -56,11 +60,11 @@ describe('useIsomorphicLayoutEffect', () => {
 
     unmount();
 
-    expect(cleanup).toHaveBeenCalledOnce();
+    expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
   it('should re-run effect when dependencies change', () => {
-    const effect = vi.fn();
+    const effect = jest.fn();
 
     const { rerender } = renderHook(
       ({ dep }) => {
@@ -79,7 +83,7 @@ describe('useIsomorphicLayoutEffect', () => {
   });
 
   it('should not re-run effect when dependencies do not change', () => {
-    const effect = vi.fn();
+    const effect = jest.fn();
 
     const { rerender } = renderHook(
       ({ dep }) => {
@@ -99,7 +103,7 @@ describe('useIsomorphicLayoutEffect', () => {
   });
 
   it('should handle effect without cleanup', () => {
-    const effect = vi.fn();
+    const effect = jest.fn();
 
     const { unmount } = renderHook(() => {
       useIsomorphicLayoutEffect(() => {
@@ -112,7 +116,7 @@ describe('useIsomorphicLayoutEffect', () => {
   });
 
   it('should handle effect with async cleanup', () => {
-    const cleanup = vi.fn();
+    const cleanup = jest.fn();
 
     const { unmount } = renderHook(() => {
       useIsomorphicLayoutEffect(() => {
@@ -125,5 +129,63 @@ describe('useIsomorphicLayoutEffect', () => {
     unmount();
 
     expect(cleanup).toHaveBeenCalled();
+  });
+
+  it('should handle multiple dependencies', () => {
+    const effect = jest.fn();
+
+    const { rerender } = renderHook(
+      ({ dep1, dep2 }) => {
+        useIsomorphicLayoutEffect(() => {
+          effect();
+        }, [dep1, dep2]);
+      },
+      { initialProps: { dep1: 1, dep2: 'a' } }
+    );
+
+    expect(effect).toHaveBeenCalledTimes(1);
+
+    rerender({ dep1: 1, dep2: 'b' });
+    expect(effect).toHaveBeenCalledTimes(2);
+
+    rerender({ dep1: 2, dep2: 'b' });
+    expect(effect).toHaveBeenCalledTimes(3);
+  });
+
+  it('should handle empty dependency array', () => {
+    const effect = jest.fn();
+
+    const { rerender } = renderHook(() => {
+      useIsomorphicLayoutEffect(() => {
+        effect();
+      }, []);
+    });
+
+    expect(effect).toHaveBeenCalledTimes(1);
+
+    rerender();
+
+    // Should not re-run with empty deps
+    expect(effect).toHaveBeenCalledTimes(1);
+  });
+
+  it('should handle effect that accesses refs', () => {
+    const effect = jest.fn();
+    let refValue: string | null = null;
+
+    const { rerender } = renderHook(
+      ({ value }) => {
+        refValue = value;
+        useIsomorphicLayoutEffect(() => {
+          effect(refValue);
+        }, [value]);
+      },
+      { initialProps: { value: 'initial' } }
+    );
+
+    expect(effect).toHaveBeenCalledWith('initial');
+
+    rerender({ value: 'updated' });
+    expect(effect).toHaveBeenCalledWith('updated');
   });
 });

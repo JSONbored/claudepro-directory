@@ -1,56 +1,43 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useUnifiedSearch } from './use-unified-search.ts';
 
-// Mock useLocalStorage - hoist state outside of vi.mock()
-const createMockUseLocalStorage = vi.hoisted(() => {
-  const stateMap = new Map<symbol, { value: any; setValue: ReturnType<typeof vi.fn> }>();
-  return (key: string, options: any) => {
-    const id = Symbol(key);
-    if (!stateMap.has(id)) {
-      const setValueFn = vi.fn((newValue: any) => {
-        const current = stateMap.get(id);
-        if (current) {
-          current.value = typeof newValue === 'function' ? newValue(current.value) : newValue;
-        }
-      });
-      stateMap.set(id, { value: options?.defaultValue || 'trending', setValue: setValueFn });
-    }
-    const state = stateMap.get(id)!;
-    return { value: state.value, setValue: state.setValue };
-  };
-});
+// Mock useLocalStorage - create persistent state map
+const stateMap = new Map<symbol, { value: any; setValue: ReturnType<typeof jest.fn> }>();
+const createMockUseLocalStorage = (key: string, options: any) => {
+  const id = Symbol(key);
+  if (!stateMap.has(id)) {
+    const setValueFn = jest.fn((newValue: any) => {
+      const current = stateMap.get(id);
+      if (current) {
+        current.value = typeof newValue === 'function' ? newValue(current.value) : newValue;
+      }
+    });
+    stateMap.set(id, { value: options?.defaultValue || 'trending', setValue: setValueFn });
+  }
+  const state = stateMap.get(id)!;
+  return { value: state.value, setValue: state.setValue };
+};
 
-vi.mock('./use-local-storage.ts', () => ({
-  useLocalStorage: createMockUseLocalStorage,
+jest.mock('./use-local-storage.ts', () => ({
+  useLocalStorage: jest.fn((key: string, options: any) => createMockUseLocalStorage(key, options)),
 }));
 
-// Mock useBoolean - hoist state outside of vi.mock()
-const createMockUseBoolean = vi.hoisted(() => {
-  const stateMap = new Map<symbol, { value: boolean; setValue: ReturnType<typeof vi.fn> }>();
-  return () => {
-    const id = Symbol();
-    if (!stateMap.has(id)) {
-      const setValueFn = vi.fn((newValue: boolean | ((prev: boolean) => boolean)) => {
-        const current = stateMap.get(id);
-        if (current) {
-          current.value = typeof newValue === 'function' ? newValue(current.value) : newValue;
-        }
-      });
-      stateMap.set(id, { value: false, setValue: setValueFn });
-    }
-    const state = stateMap.get(id)!;
-    return { value: state.value, setValue: state.setValue };
-  };
+// Mock useBoolean - use actual hook for proper state management
+jest.mock('./use-boolean.ts', () => {
+  const actual = jest.requireActual('./use-boolean.ts');
+  return actual;
 });
-
-vi.mock('./use-boolean.ts', () => ({
-  useBoolean: createMockUseBoolean,
-}));
 
 describe('useUnifiedSearch', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    // Reset state maps
+    stateMap.clear();
   });
 
   it('should initialize with default values', () => {
@@ -69,7 +56,7 @@ describe('useUnifiedSearch', () => {
   });
 
   it('should handle search query changes', () => {
-    const onSearchChange = vi.fn();
+    const onSearchChange = jest.fn();
     const { result } = renderHook(() => useUnifiedSearch({ onSearchChange }));
 
     act(() => {
@@ -81,7 +68,7 @@ describe('useUnifiedSearch', () => {
   });
 
   it('should handle filter changes', () => {
-    const onFiltersChange = vi.fn();
+    const onFiltersChange = jest.fn();
     const { result } = renderHook(() => useUnifiedSearch({ onFiltersChange }));
 
     const newFilters = { sort: 'popular' as any, category: 'agents' as any };
@@ -94,7 +81,7 @@ describe('useUnifiedSearch', () => {
   });
 
   it('should handle individual filter field changes', () => {
-    const onFiltersChange = vi.fn();
+    const onFiltersChange = jest.fn();
     const { result } = renderHook(() => useUnifiedSearch({ onFiltersChange }));
 
     act(() => {
@@ -106,25 +93,33 @@ describe('useUnifiedSearch', () => {
   });
 
   it('should toggle tags correctly', () => {
-    const onFiltersChange = vi.fn();
+    const onFiltersChange = jest.fn();
     const { result } = renderHook(() => useUnifiedSearch({ onFiltersChange }));
 
+    // First toggle - add tag
     act(() => {
       result.current.toggleTag('ai');
     });
 
+    // Check that tag was added
     expect(result.current.filters.tags).toContain('ai');
-    expect(onFiltersChange).toHaveBeenCalled();
+    expect(onFiltersChange).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: ['ai'] })
+    );
 
+    // Second toggle - remove tag (functional update should see current state)
     act(() => {
       result.current.toggleTag('ai');
     });
 
-    expect(result.current.filters.tags).not.toContain('ai');
+    // Check that tag was removed
+    // When tags array is empty, the tags property is undefined (not included in spread)
+    // The functional update in setFilters should see the updated state from first toggle
+    expect(result.current.filters.tags).toBeUndefined();
   });
 
   it('should clear filters while keeping sort', () => {
-    const onFiltersChange = vi.fn();
+    const onFiltersChange = jest.fn();
     const { result } = renderHook(() => useUnifiedSearch({ onFiltersChange }));
 
     act(() => {
@@ -208,13 +203,20 @@ describe('useUnifiedSearch', () => {
   });
 
   it('should persist sort preference when filters change', () => {
-    const { useLocalStorage } = await import('./use-local-storage.ts');
-    const mockSetSavedSort = vi.fn();
-    vi.mocked(useLocalStorage).mockReturnValue({
-      value: 'trending' as any,
-      setValue: mockSetSavedSort,
-      removeValue: vi.fn(),
-      error: null,
+    const mockSetSavedSort = jest.fn();
+    
+    // Get the mock and override for this test
+    const { useLocalStorage } = jest.requireMock('./use-local-storage.ts');
+    (useLocalStorage as jest.Mock).mockImplementation((key: string, options: any) => {
+      if (key === 'user-pref-sort') {
+        return {
+          value: 'trending' as any,
+          setValue: mockSetSavedSort,
+          removeValue: jest.fn(),
+          error: null,
+        };
+      }
+      return createMockUseLocalStorage(key, options);
     });
 
     const { result } = renderHook(() => useUnifiedSearch());
@@ -224,5 +226,10 @@ describe('useUnifiedSearch', () => {
     });
 
     expect(mockSetSavedSort).toHaveBeenCalledWith('popular');
+    
+    // Reset mock implementation after test
+    (useLocalStorage as jest.Mock).mockImplementation((key: string, options: any) => 
+      createMockUseLocalStorage(key, options)
+    );
   });
 });

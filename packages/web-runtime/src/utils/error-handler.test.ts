@@ -1,21 +1,21 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { createErrorResponse, handleApiError } from './error-handler';
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock logger
-vi.mock('../logger', () => ({
+jest.mock('../logger', () => ({
   logger: {
-    error: vi.fn(),
+    error: jest.fn(),
   },
 }));
 
 // Mock log-context
-vi.mock('./log-context', () => ({
-  createWebAppContext: vi.fn((route, operation, context) => ({
+jest.mock('./log-context', () => ({
+  createWebAppContext: jest.fn((route, operation, context) => ({
     route,
     operation,
     ...context,
@@ -23,7 +23,7 @@ vi.mock('./log-context', () => ({
 }));
 
 // Mock api-error-codes
-vi.mock('./api-error-codes', () => ({
+jest.mock('./api-error-codes', () => ({
   ApiErrorCode: {
     INTERNAL_ERROR: 'INTERNAL_ERROR',
     VALIDATION_ERROR: 'VALIDATION_ERROR',
@@ -34,17 +34,17 @@ vi.mock('./api-error-codes', () => ({
     RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
     SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
   },
-  determineErrorCode: vi.fn(() => 'INTERNAL_ERROR'),
+  determineErrorCode: jest.fn(() => 'INTERNAL_ERROR'),
 }));
 
 // Mock error-utils
-vi.mock('../error-utils', () => ({
-  formatZodError: vi.fn((error) => ({ field: 'error' })),
-  sanitizeError: vi.fn((error) => 'Sanitized error'),
+jest.mock('../error-utils', () => ({
+  formatZodError: jest.fn((error) => ({ field: 'error' })),
+  sanitizeError: jest.fn((error) => 'Sanitized error'),
 }));
 
 // Mock env - must export env object that platform/env.ts uses
-vi.mock('@heyclaude/shared-runtime/schemas/env', () => ({
+jest.mock('@heyclaude/shared-runtime/schemas/env', () => ({
   env: {
     NODE_ENV: 'test',
     NEXT_PHASE: undefined,
@@ -55,7 +55,7 @@ vi.mock('@heyclaude/shared-runtime/schemas/env', () => ({
 
 describe('error-handler', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('createErrorResponse', () => {

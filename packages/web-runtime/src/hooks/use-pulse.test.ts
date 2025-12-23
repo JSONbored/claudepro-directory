@@ -1,26 +1,30 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { renderHook } from '@testing-library/react';
 import { usePulse } from './use-pulse.ts';
 
 // Mock pulse client functions
-vi.mock('../pulse-client.ts', () => ({
-  trackInteraction: vi.fn(),
-  trackUsage: vi.fn(),
-  trackNewsletterEvent: vi.fn(),
+jest.mock('../pulse-client.ts', () => ({
+  trackInteraction: jest.fn(),
+  trackUsage: jest.fn(),
+  trackNewsletterEvent: jest.fn(),
 }));
 
 describe('usePulse', () => {
-  let mockTrackInteraction: ReturnType<typeof vi.fn>;
-  let mockTrackUsage: ReturnType<typeof vi.fn>;
-  let mockTrackNewsletterEvent: ReturnType<typeof vi.fn>;
+  let mockTrackInteraction: ReturnType<typeof jest.fn>;
+  let mockTrackUsage: ReturnType<typeof jest.fn>;
+  let mockTrackNewsletterEvent: ReturnType<typeof jest.fn>;
 
   beforeEach(async () => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
 
     const pulseClient = await import('../pulse-client.ts');
-    mockTrackInteraction = vi.mocked(pulseClient.trackInteraction);
-    mockTrackUsage = vi.mocked(pulseClient.trackUsage);
-    mockTrackNewsletterEvent = vi.mocked(pulseClient.trackNewsletterEvent);
+    mockTrackInteraction = jest.mocked(pulseClient.trackInteraction);
+    mockTrackUsage = jest.mocked(pulseClient.trackUsage);
+    mockTrackNewsletterEvent = jest.mocked(pulseClient.trackNewsletterEvent);
   });
 
   it('should return memoized tracking methods', () => {
@@ -206,7 +210,7 @@ describe('usePulse', () => {
       expect(mockTrackUsage).toHaveBeenCalledWith({
         content_type: 'agents',
         content_slug: 'test-agent',
-        action_type,
+        action_type: actionType,
       });
     }
   });

@@ -121,6 +121,9 @@ export function useScreen(options: UseScreenOptions = {}): ScreenInfo | undefine
 
     const updateScreenInfo = () => {
       try {
+        if (!window.screen) {
+          return;
+        }
         setScreenInfo({
           width: window.screen.width,
           height: window.screen.height,
@@ -161,14 +164,14 @@ export function useScreen(options: UseScreenOptions = {}): ScreenInfo | undefine
     window.addEventListener('orientationchange', handleOrientationChange);
 
     // Listen for orientation changes (if supported)
-    if (window.screen.orientation) {
+    if (window.screen?.orientation) {
       window.screen.orientation.addEventListener('change', handleOrientationChange);
     }
 
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleOrientationChange);
-      if (window.screen.orientation) {
+      if (window.screen?.orientation) {
         window.screen.orientation.removeEventListener('change', handleOrientationChange);
       }
       if (timeoutId) {

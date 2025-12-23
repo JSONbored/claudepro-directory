@@ -1,14 +1,18 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { renderHook, act } from '@testing-library/react';
 import { useEventCallback } from './use-event-callback';
 
 describe('useEventCallback', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should return a stable callback reference', () => {
-    const fn = vi.fn((value: string) => value.toUpperCase());
+    const fn = jest.fn((value: string) => value.toUpperCase());
 
     const { result, rerender } = renderHook(() => useEventCallback(fn));
 
@@ -22,21 +26,21 @@ describe('useEventCallback', () => {
   });
 
   it('should call the function with arguments', () => {
-    const fn = vi.fn((a: string, b: number) => `${a}-${b}`);
+    const fn = jest.fn((a: string, b: number) => `${a}-${b}`);
 
     const { result } = renderHook(() => useEventCallback(fn));
 
     act(() => {
-      const result = result.current('test', 123);
-      expect(result).toBe('test-123');
+      const returnValue = result.current('test', 123);
+      expect(returnValue).toBe('test-123');
     });
 
     expect(fn).toHaveBeenCalledWith('test', 123);
   });
 
   it('should always use latest function version', () => {
-    const fn1 = vi.fn(() => 'first');
-    const fn2 = vi.fn(() => 'second');
+    const fn1 = jest.fn(() => 'first');
+    const fn2 = jest.fn(() => 'second');
 
     const { result, rerender } = renderHook(({ fn }) => useEventCallback(fn), {
       initialProps: { fn: fn1 },
@@ -59,7 +63,7 @@ describe('useEventCallback', () => {
   });
 
   it('should preserve function return type', () => {
-    const fn = vi.fn((x: number) => x * 2);
+    const fn = jest.fn((x: number) => x * 2);
 
     const { result } = renderHook(() => useEventCallback(fn));
 
@@ -71,7 +75,7 @@ describe('useEventCallback', () => {
   });
 
   it('should handle functions with no arguments', () => {
-    const fn = vi.fn(() => 'result');
+    const fn = jest.fn(() => 'result');
 
     const { result } = renderHook(() => useEventCallback(fn));
 
@@ -84,7 +88,7 @@ describe('useEventCallback', () => {
   });
 
   it('should handle functions with multiple arguments', () => {
-    const fn = vi.fn((a: string, b: number, c: boolean) => `${a}-${b}-${c}`);
+    const fn = jest.fn((a: string, b: number, c: boolean) => `${a}-${b}-${c}`);
 
     const { result } = renderHook(() => useEventCallback(fn));
 
@@ -97,7 +101,7 @@ describe('useEventCallback', () => {
   });
 
   it('should handle async functions', async () => {
-    const fn = vi.fn(async (value: string) => {
+    const fn = jest.fn(async (value: string) => {
       return Promise.resolve(value.toUpperCase());
     });
 
@@ -112,7 +116,7 @@ describe('useEventCallback', () => {
   });
 
   it('should handle functions that throw', () => {
-    const fn = vi.fn(() => {
+    const fn = jest.fn(() => {
       throw new Error('Test error');
     });
 
@@ -128,7 +132,7 @@ describe('useEventCallback', () => {
     // @ts-expect-error - Intentionally setting window to undefined for SSR test
     global.window = undefined;
 
-    const fn = vi.fn((value: string) => value);
+    const fn = jest.fn((value: string) => value);
 
     const { result } = renderHook(() => useEventCallback(fn));
 
@@ -145,7 +149,7 @@ describe('useEventCallback', () => {
   it('should maintain closure access to latest values', () => {
     let externalValue = 'initial';
 
-    const fn = vi.fn(() => externalValue);
+    const fn = jest.fn(() => externalValue);
 
     const { result, rerender } = renderHook(() => useEventCallback(fn));
 
@@ -159,5 +163,99 @@ describe('useEventCallback', () => {
     act(() => {
       expect(result.current()).toBe('updated');
     });
+  });
+
+  it('should handle function reference changes without changing callback identity', () => {
+    const fn1 = jest.fn((x: number) => x * 2);
+    const fn2 = jest.fn((x: number) => x * 3);
+
+    const { result, rerender } = renderHook(({ fn }) => useEventCallback(fn), {
+      initialProps: { fn: fn1 },
+    });
+
+    const firstCallback = result.current;
+
+    act(() => {
+      const value1 = result.current(5);
+      expect(value1).toBe(10);
+    });
+
+    rerender({ fn: fn2 });
+
+    const secondCallback = result.current;
+
+    // Callback reference should remain stable
+    expect(firstCallback).toBe(secondCallback);
+
+    // But should use new function
+    act(() => {
+      const value2 = result.current(5);
+      expect(value2).toBe(15);
+    });
+
+    expect(fn1).toHaveBeenCalledTimes(1);
+    expect(fn2).toHaveBeenCalledTimes(1);
+  });
+
+  it('should handle null and undefined arguments', () => {
+    const fn = jest.fn((a: string | null, b: number | undefined) => `${a}-${b}`);
+
+    const { result } = renderHook(() => useEventCallback(fn));
+
+    act(() => {
+      const returnValue = result.current(null, undefined);
+      expect(returnValue).toBe('null-undefined');
+    });
+
+    expect(fn).toHaveBeenCalledWith(null, undefined);
+  });
+
+  it('should handle object and array arguments', () => {
+    const fn = jest.fn((obj: { id: number }, arr: number[]) => `${obj.id}-${arr.join(',')}`);
+
+    const { result } = renderHook(() => useEventCallback(fn));
+
+    act(() => {
+      const returnValue = result.current({ id: 1 }, [1, 2, 3]);
+      expect(returnValue).toBe('1-1,2,3');
+    });
+
+    expect(fn).toHaveBeenCalledWith({ id: 1 }, [1, 2, 3]);
+  });
+
+  it('should handle multiple rerenders without changing callback identity', () => {
+    const fn = jest.fn((x: string) => x.toUpperCase());
+
+    const { result, rerender } = renderHook(() => useEventCallback(fn));
+
+    const initialCallback = result.current;
+
+    // Multiple rerenders
+    rerender();
+    rerender();
+    rerender();
+
+    const finalCallback = result.current;
+
+    expect(initialCallback).toBe(finalCallback);
+  });
+
+  it('should handle cleanup on unmount', () => {
+    const fn = jest.fn((x: string) => x);
+
+    const { result, unmount } = renderHook(() => useEventCallback(fn));
+
+    act(() => {
+      result.current('test');
+    });
+
+    unmount();
+
+    // Callback should still work after unmount (refs persist)
+    act(() => {
+      result.current('after-unmount');
+    });
+
+    expect(fn).toHaveBeenCalledTimes(2);
   });
 });

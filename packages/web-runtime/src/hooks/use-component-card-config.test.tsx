@@ -1,7 +1,10 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import React from 'react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { renderHook } from '@testing-library/react';
-import { render } from '@testing-library/react';
 import {
   useComponentCardConfig,
   ComponentConfigContextProvider,
@@ -10,7 +13,7 @@ import type { ComponentCardConfig } from './use-component-card-config';
 
 describe('useComponentCardConfig', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should return default config when no provider', () => {

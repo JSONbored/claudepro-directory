@@ -45,7 +45,7 @@ const STORAGE_KEY = 'heyclaude_pinboard';
 const MAX_PINS = 20;
 const DEBOUNCE_MS = 250;
 
-const usePinboardStore = create<PinboardState>((set) => ({
+export const usePinboardStore = create<PinboardState>((set) => ({
   pins: [],
   isLoaded: false,
   setPins: (updater) =>
