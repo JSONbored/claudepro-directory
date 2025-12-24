@@ -427,6 +427,6 @@ When updating existing code:
 
 ## Reference
 
-- **ESLint Rules**: `config/tools/eslint-plugin-architectural-rules.js` (see inline JSDoc comments)
+- **ESLint Rules**: `.trunk/plugins/eslint-plugin-architectural-rules.js` (see inline JSDoc comments)
 - **Logger Configuration**: `packages/shared-runtime/src/logger/config.ts`
 - **Error Handling Utilities**: `packages/shared-runtime/src/error-handling.ts`

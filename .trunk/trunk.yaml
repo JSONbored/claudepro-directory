@@ -10,6 +10,9 @@ plugins:
       ref: v1.7.4
       uri: https://github.com/trunk-io/plugins
     # Custom plugins for knip, madge, ts-prune, ast-grep
+    # TODO: After committing .trunk/plugins/custom/ to GitHub, update the URI below to:
+    # uri: https://github.com/YOUR_USERNAME/YOUR_REPO (or the actual GitHub URL)
+    # For now using local path - will work once committed to GitHub
     - id: custom
       ref: main
       uri: file://.trunk/plugins/custom

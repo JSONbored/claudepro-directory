@@ -4,7 +4,7 @@
 
 # Directories where ast-grep will find rule files
 ruleDirs:
-  - config/coderabbit/ast-grep-rules
+  - .trunk/rules/ast-grep
 
 # Optional: Utility directories (for reusable patterns)
 # utilDirs:

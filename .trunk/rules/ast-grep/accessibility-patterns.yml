@@ -1,0 +1,24 @@
+# Accessibility Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
+# Enforces WCAG 2.1 AA compliance and accessibility best practices
+# Critical for inclusive design and legal compliance
+# Note: JSX-specific patterns are better detected via ESLint (eslint-plugin-jsx-a11y)
+
+---
+# Rule: Detect missing return type annotations in exported functions
+# (Accessibility-related functions should be well-typed)
+id: missing-return-type-annotation
+language: typescript
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export function \w+\([^)]*\)\s*\{'
+    - not:
+        has:
+          regex: :\s*\w+\s*\{
+message: "Exported functions should have explicit return type annotations for better type safety and documentation"
+severity: info

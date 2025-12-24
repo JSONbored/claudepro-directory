@@ -1,0 +1,258 @@
+# Single Dev Team Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
+# High-value patterns especially valuable for solo developers
+# Prevents common mistakes that are easy to overlook without code review
+# Shareable across projects
+
+---
+# Rule: Detect missing parallel query execution (should use Promise.all)
+id: missing-parallel-query-execution
+language: typescript
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        regex: 'const\s+\w+\s*=\s*await\s+\w+\([^)]*\)'
+    - follows:
+        has:
+          regex: 'const\s+\w+\s*=\s*await\s+\w+\([^)]*\)'
+    - has:
+        regex: get|fetch|rpc|query
+    - not:
+        has:
+          regex: 'Promise\.all|Promise\.allSettled'
+message: "Independent queries should run in parallel with Promise.all() for better performance. Sequential queries cause unnecessary delays. Example: const [result1, result2] = await Promise.all([query1(), query2()]); This can improve performance by 50-80% for independent operations."
+severity: warning
+
+---
+# Rule: Detect duplicate data fetching in same component
+id: duplicate-data-fetch-same-component
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
+    - has:
+        pattern: await $FETCH1($ARGS)
+    - has:
+        pattern: await $FETCH2($ARGS)
+    - has:
+        regex: get|fetch|load
+message: "Same data may be fetched multiple times in the same component. Consider fetching once and reusing, or using request-scoped caching (withSmartCache) to prevent duplicate RPC calls within the same request lifecycle."
+severity: warning
+
+---
+# Rule: Detect missing request-scoped logger passing to data functions
+id: missing-logger-passing-to-data-functions
+language: typescript
+files:
+  - 'src/**/data/**/*.ts'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export async function \w+\([^)]*\)\s*\{'
+    - has:
+        regex: 'logger\.(info|warn|error)'
+    - not:
+        has:
+          pattern: reqLogger:.*ReturnType.*logger\.child
+message: "Data functions should receive request-scoped logger from parent component for proper log correlation. Add parameter: reqLogger: ReturnType<typeof logger.child>. This ensures all logs in the request lifecycle share the same context and can be correlated."
+severity: warning
+
+---
+# Rule: Detect missing 'use client' directive on components using hooks
+id: missing-use-client-directive
+language: typescript
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export\s+(function|const)\s+\w+\([^)]*\)\s*\{'
+    - has:
+        regex: useState|useEffect|useCallback|useMemo|useRef|useContext
+    - not:
+        has:
+          regex: 'use client'
+message: "Components using React hooks must have 'use client' directive at the top of the file. Add 'use client' as the first line. Hooks can only be used in Client Components."
+severity: error
+
+---
+# Rule: Detect missing connection() before non-deterministic operations
+id: missing-connection-before-non-deterministic
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
+    - has:
+        regex: Date\.now|Math\.random|new Date|performance\.now|crypto\.randomUUID
+    - not:
+        has:
+          pattern: await connection\(\)
+message: "Components using non-deterministic operations (Date.now(), Math.random(), new Date()) must call await connection() at the start. This defers operations to request time, required for Cache Components. Add: await connection(); at function start. Import: import { connection } from 'next/server';"
+severity: error
+
+---
+# Rule: Detect missing generateStaticParams for popular dynamic routes
+id: missing-generate-static-params-popular
+language: typescript
+files:
+  - 'app/**/[*]/page.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
+    - has:
+        regex: params\.(slug|id)
+    - not:
+        has:
+          pattern: export.*generateStaticParams
+message: "Popular dynamic routes should include generateStaticParams() for build-time pre-rendering. This improves SEO, initial load performance, and reduces server load. Add: export async function generateStaticParams() { return [{ slug: 'popular-slug' }]; }"
+severity: info
+
+---
+# Rule: Detect missing error.tsx for critical routes
+id: missing-error-tsx-critical
+language: typescript
+files:
+  - 'app/**/page.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
+    - has:
+        regex: payment|checkout|auth|login|signup|billing|subscription|account
+    - has:
+        regex: 'await\s+\w+\([^)]*\)'
+message: "Critical user flows (payment, auth, billing, account) must have error.tsx file for error boundaries. Create error.tsx in same directory to prevent full app crashes. This is especially important for revenue-critical flows."
+severity: error
+
+---
+# Rule: Detect missing metadata for public pages
+id: missing-metadata-public-pages
+language: typescript
+files:
+  - 'app/**/page.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
+    - has:
+        regex: page|home|about|contact|help|community|jobs|companies|changelog|trending|search|submit|templates|tools|status|accessibility|privacy|terms|cookies|consulting|partner
+    - not:
+        has:
+          regex: 'export.*metadata|export.*generateMetadata'
+message: "Public pages should export metadata or generateMetadata() for SEO and social sharing. Add: export const metadata: Metadata = { title, description, openGraph, twitter } or export async function generateMetadata() { ... }"
+severity: warning
+
+---
+# Rule: Detect missing loading.tsx for slow data fetching
+id: missing-loading-tsx-slow-fetch
+language: typescript
+files:
+  - 'app/**/page.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
+    - has:
+        regex: 'await\s+\w+\([^)]*\)'
+    - has:
+        regex: rpc|query|fetch|get
+message: "Pages with data fetching should have loading.tsx file for proper loading states. Create loading.tsx in same directory with page-specific skeleton component. This improves UX during data fetching and enables progressive rendering with Suspense."
+severity: warning
+
+---
+# Rule: Detect missing notFound() for 404 scenarios
+id: missing-not-found-404
+language: typescript
+files:
+  - 'app/**/page.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
+    - has:
+        regex: 'await\s+\w+\([^)]*\)'
+    - has:
+        regex: if.*!.*data|if.*data.*===.*null|if.*data.*===.*undefined
+    - not:
+        has:
+          pattern: notFound\(\)
+message: "Pages should call notFound() when data is not found to trigger proper 404 response and SEO handling. Add: if (!data) { notFound(); } after data fetching. Import: import { notFound } from 'next/navigation';"
+severity: warning
+
+---
+# Rule: Detect missing Suspense for async child components
+id: missing-suspense-async-child
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
+    - has:
+        pattern: <$CHILD_COMPONENT />
+    - inside:
+        has:
+          regex: 'export.*async function \w+\([^)]*\)\s*\{'
+    - not:
+        has:
+          pattern: <Suspense
+message: "Async child components should be wrapped in Suspense boundaries for progressive rendering. Add: <Suspense fallback={<Skeleton />}><ChildComponent /></Suspense>. This enables streaming and improves perceived performance."
+severity: warning
+
+---
+# Rule: Detect missing key prop in list rendering
+id: missing-key-prop-list
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        regex: \.map\(
+    - has:
+        regex: =>.*<.*>|=>.*\(.*<.*>
+    - not:
+        has:
+          regex: key=
+message: "List items must have unique key prop for React reconciliation. Add: key={item.id} or key={index} to list items. Use stable identifiers (id) instead of index when possible."
+severity: error
+
+---
+# Rule: Detect missing error boundary for critical sections
+id: missing-error-boundary-critical
+language: typescript
+files:
+  - 'app/**/page.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
+    - has:
+        regex: payment|checkout|auth|login|signup|billing|subscription
+    - has:
+        regex: 'await\s+\w+\([^)]*\)'
+    - not:
+        has:
+          regex: 'error\.tsx|ErrorBoundary'
+message: "Critical user flows (payment, auth, billing, subscription) must have error boundaries to prevent full app crashes. Create error.tsx file in route directory with error boundary component."
+severity: error

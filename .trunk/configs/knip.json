@@ -1,0 +1,138 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignoreDependencies": [
+    "tailwindcss",
+    "postcss", // Used in apps/web/postcss.config.js and by @tailwindcss/postcss
+    // Dependencies used but Knip can't detect (dynamic imports, tree-shaking, etc.)
+    "@supabase/ssr", // Used in apps/web/src/proxy.ts
+    "canvas-confetti", // Used in content-submission-form.tsx
+    "class-variance-authority", // Used via web-runtime/ui (Button variants)
+    "clsx", // Used extensively via web-runtime/ui (cn utility)
+    "cmdk", // Used in packages/web-runtime/src/ui/components/command.tsx
+    "devalue", // Used in Next.js server actions (serialization)
+    "embla-carousel-react", // Used in footer-newsletter-cta.tsx, unified-section.tsx
+    "geist", // Used in apps/web/src/app/layout.tsx (font loading)
+    "next-safe-action", // Used in form components
+    "pino", // Used via packages/web-runtime/src/logger.ts (logging infrastructure)
+    "react-error-boundary", // Used in content-search.tsx
+    "sanitize-html", // Used in markdown/content processing
+    "tailwind-merge", // Used via web-runtime/ui (cn utility)
+    "zustand", // Used for state management
+    // Workspace dependencies - used but not in individual package.json (monorepo pattern)
+    "@heyclaude/*", // All workspace packages (shared-runtime, web-runtime, data-layer, database-types, generators)
+    // Verified false positives (2025-12-11 validation)
+    "@types/sanitize-html", // sanitize-html is used, types needed
+    "pino-pretty", // Used in logger configs for dev pretty-printing (3 locations)
+    "@react-email/components", // Used extensively in email templates
+    "@react-email/render", // Used via Resend (dependency)
+    "@tailwindcss/language-server", // Used in .zed/settings.json (IDE tooling)
+    "@testing-library/user-event", // Used in test files
+    "archiver", // Used in generate-skill-packages.ts
+    "eslint-config-next", // Referenced in ESLint config docs (config package)
+    "ora", // Used in multiple generator commands
+    "openapi-typescript", // Being implemented (generate-openapi script)
+    "@anthropic-ai/mcpb", // Used via npx mcpb pack CLI command (package dependency, not just binary)
+    "@modelcontextprotocol/sdk", // Used in apps/workers/heyclaude-mcp/src/types/agents-mcp.d.ts (type definitions)
+    "@axiomhq/pino", // Used as string target in pino.transport (packages/shared-runtime/src/logger/index.ts:355)
+    "react-email" // CLI tool for email development (used manually via CLI: `pnpm exec react-email dev`) - in devDependencies of web-runtime
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignore": [
+    "apps/web/next-env.d.ts",
+    "apps/web/public/scripts/offline.js",
+    "apps/web/public/scripts/service-worker-init.js",
+    "apps/web/public/service-worker.js",
+    "apps/web/src/components/ui/**",
+    "apps/web/src/components/ui/sonner.tsx",
+    "apps/web/src/lib/analytics/**",
+    "apps/web/src/lib/constants.ts",
+    "apps/web/src/lib/data/jobs.ts",
+    "apps/web/src/lib/icons.tsx",
+    "apps/web/src/lib/structured-data/**",
+    "apps/web/src/lib/ui-constants.ts",
+    "content/skills/**/*.zip",
+    "prisma.config.ts",
+    // Worker files (used but Knip can't detect - Cloudflare Workers entry points)
+    "apps/workers/heyclaude-mcp/src/lib/env-config.ts",
+    "apps/workers/heyclaude-mcp/src/lib/env-utils.ts",
+    "apps/workers/heyclaude-mcp/src/lib/platform-formatters.ts",
+    "apps/workers/heyclaude-mcp/src/lib/storage-utils.ts",
+    "apps/workers/heyclaude-mcp/src/lib/usage-hints.ts",
+    "apps/workers/heyclaude-mcp/src/middleware/rate-limit.ts",
+    "apps/workers/heyclaude-mcp/src/routes/health.ts",
+    "apps/workers/heyclaude-mcp/src/routes/oauth-metadata.ts",
+    "apps/workers/heyclaude-mcp/src/routes/openapi.ts",
+    "reports/knip/**/*.json",
+    "**/.next/**",
+    "**/build/**",
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/*.generated.ts",
+    "**/*.generated.tsx",
+    // Netlify auto-generated configs
+    "apps/web/.netlify/**"
+  ],
+  "ignoreFiles": [
+    // Files that should be excluded from "Unused files" report only
+    // (still analyzed for other issues like unused exports)
+    "apps/web/src/lib/constants.ts",
+    "apps/web/src/lib/icons.tsx",
+    "apps/web/src/lib/ui-constants.ts"
+  ],
+  "ignoreIssues": {
+    // Intentional duplicate exports (both named and default) - valid pattern
+    "apps/web/src/components/content/read-progress.tsx": ["exports"],
+    "packages/web-runtime/src/email/base-template.tsx": ["exports"],
+    "packages/web-runtime/src/email/templates/newsletter-welcome.tsx": ["exports"],
+    "packages/web-runtime/src/email/theme.ts": ["exports"],
+    "packages/web-runtime/src/utils/category-validation.ts": ["exports"],
+    // False positives - config file paths, not binaries
+    "lefthook.yml": ["binaries"],
+    "package.json": ["binaries"]
+  },
+  "ignoreBinaries": [
+    // Removed items that Knip can now detect as used:
+    // - skott, madge, supabase, next, email (CLI tools used in scripts)
+    // - validate:zod-schemas, validate:mcp-tools, sync:*, config/tools/knip.json (npm scripts/config paths)
+    // If any appear as unused binaries after removal, add them back
+  ],
+  "ignoreUnresolved": [
+    // Verified false positives (2025-12-11 validation)
+    "next" // TypeScript plugin name in tsconfig.json, not an import
+    // Note: agents/mcp is a Cloudflare Workers runtime module (not npm package) - handled via workspace ignoreDependencies
+  ],
+  "workspaces": {
+    ".": {
+      "entry": ["config/**/*.ts"],
+      "project": ["config/**/*.ts"]
+    },
+    "apps/web": {
+      "entry": ["src/**/*.{ts,tsx}", "src/proxy.ts", "next.config.mjs"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "paths": {
+        "@test-utils/*": ["../../config/tests/utils/*"]
+      }
+    },
+    "apps/workers/heyclaude-mcp": {
+      "entry": ["src/**/*.{ts,tsx}"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignoreDependencies": ["agents/mcp"] // Cloudflare Workers runtime module (not npm package)
+    },
+    "packages/*": {
+      "entry": ["src/**/*.{ts,tsx}"],
+      "project": ["src/**/*.{ts,tsx}"]
+    }
+  },
+  // Note: Top-level entry/project removed - workspace "." covers config/**/*.ts
+  // If issues occur, can add back with exclusions: "!prisma.config.ts"
+  "eslint": {
+    "config": [
+      "apps/**/.eslintrc.*",
+      "apps/**/eslint.config.*",
+      "packages/**/.eslintrc.*",
+      "packages/**/eslint.config.*",
+      "config/tools/eslint.config.mjs",
+      ".trunk/plugins/eslint-plugin-architectural-rules.js"
+    ]
+  },
+}

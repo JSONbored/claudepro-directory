@@ -156,7 +156,7 @@ reviews:
   tools:
     ast-grep:
       rule_dirs:
-        - config/coderabbit/ast-grep-rules
+        - .trunk/rules/ast-grep
       util_dirs:
         - config/coderabbit/ast-grep-utils
     github-checks:

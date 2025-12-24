@@ -1,0 +1,186 @@
+# Performance Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
+# Comprehensive performance optimization standards
+# Critical patterns for speed, optimization, and resource efficiency
+# Consolidated from: performance-patterns.yml, performance-patterns-enhanced.yml
+
+---
+# Rule: Detect N+1 query problem (sequential database queries in loops)
+id: n-plus-one-query-pattern
+language: typescript
+rule:
+  all:
+    - any:
+      - kind: for_statement
+      - kind: for_in_statement
+      - kind: while_statement
+    - has:
+        regex: 'await prisma\.\w+\('
+    - has:
+        regex: prisma\.(\$queryRawUnsafe|\$queryRaw|findMany|findFirst|findUnique|create|update|delete|upsert)
+message: "N+1 query detected: Prisma queries inside loop. Use Promise.all() for parallel execution, batch query with Prisma's include/select, or use a single query with WHERE IN. Example: await Promise.all(items.map(item => prisma.table.findUnique({ where: { id: item.id } }))) or await prisma.table.findMany({ where: { id: { in: itemIds } } })"
+severity: error
+
+---
+# Rule: Detect await in loops (should use Promise.all)
+id: await-in-loop
+language: typescript
+rule:
+  all:
+    - any:
+      - kind: for_statement
+      - kind: for_in_statement
+      - kind: while_statement
+    - has:
+        regex: 'await\s+\w+\([^)]*\)'
+message: "await in loop causes sequential execution. Use Promise.all() for parallel execution: await Promise.all(items.map(item => asyncOperation(item)))"
+severity: error
+
+---
+# Rule: Detect missing Promise.all for independent parallel operations
+id: missing-parallel-execution
+language: typescript
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        regex: 'const\s+\w+\s*=\s*await\s+\w+\([^)]*\)'
+    - follows:
+        has:
+          regex: 'const\s+\w+\s*=\s*await\s+\w+\([^)]*\)'
+    - has:
+        regex: get|fetch|load|query
+    - not:
+        has:
+          regex: 'Promise\.all|Promise\.allSettled'
+message: "Independent async operations should run in parallel with Promise.all() or Promise.allSettled() for better performance. Example: const [result1, result2] = await Promise.all([async1(), async2()]);"
+severity: warning
+
+---
+# Rule: Detect missing dynamic imports for heavy dependencies
+id: missing-dynamic-import-heavy-deps
+language: typescript
+rule:
+  all:
+    - kind: import_statement
+    - has:
+        regex: (chart|editor|pdf|video|player|monaco|codemirror|ace|three|babylon|fabric|konva|d3|recharts|plotly)
+    - not:
+        has:
+          regex: 'await\s+import\('
+message: "Heavy dependency imported statically. Consider dynamic import for code splitting: const { HeavyLib } = await import('heavy-lib')"
+severity: warning
+
+---
+# Rule: Detect missing useMemo for expensive computations
+id: missing-usememo-expensive-computation
+language: typescript
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        pattern: const $VAR = $COMPUTATION
+    - inside:
+        has:
+          regex: 'use client'
+    - has:
+        regex: (\.map\(|\.filter\(|\.reduce\(|\.sort\(|JSON\.parse|JSON\.stringify|\.flat\(|\.flatMap\()
+    - not:
+        has:
+          regex: 'useMemo\('
+message: "Expensive computation in component without useMemo. Wrap with useMemo to prevent recalculation on every render. Example: const result = useMemo(() => expensiveComputation(), [deps])"
+severity: warning
+
+---
+# Rule: Detect missing useCallback for callback functions
+id: missing-usecallback-callbacks
+language: typescript
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        regex: 'const\s+\w+\s*=\s*\([^)]*\)\s*=>\s*\{'
+    - inside:
+        has:
+          regex: 'use client'
+    - not:
+        has:
+          regex: 'useCallback\('
+message: "Callback functions in client components should use useCallback to prevent unnecessary re-renders. Wrap: const callback = useCallback(() => { ... }, [deps])"
+severity: warning
+
+---
+# Rule: Detect missing React.memo for components with expensive operations
+id: missing-react-memo-expensive
+language: typescript
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export\s+(function|const)\s+\w+\([^)]*\)\s*\{'
+    - has:
+        regex: (\.map\(|\.filter\(|\.reduce\(|\.length > \d+|JSON\.parse|JSON\.stringify)
+    - not:
+        has:
+          pattern: memo($COMPONENT)
+message: "Component with expensive operations should use React.memo to prevent unnecessary re-renders. Wrap: export const Component = React.memo(function Component(props) { ... })"
+severity: warning
+
+---
+# Rule: Detect missing Suspense boundaries for async data
+id: missing-suspense-async-data
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
+    - has:
+        regex: 'await\s+\w+\([^)]*\)'
+    - not:
+        inside:
+          pattern: <Suspense>$$$</Suspense>
+message: "Async data fetching should be wrapped in Suspense boundary for better loading UX. Add: <Suspense fallback={<Loading />}>...</Suspense>"
+severity: warning
+
+---
+# Rule: Detect event listeners without cleanup
+id: memory-leak-event-listener
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        regex: 'addEventListener\('
+    - inside:
+        has:
+          regex: 'useEffect\([^,]+,\s*\[[^\]]*\]\)'
+    - not:
+        has:
+          regex: 'return\s*\(\)\s*=>\s*\{\s*removeEventListener\('
+message: "Event listeners in useEffect must be cleaned up to prevent memory leaks. Add: return () => { removeEventListener(...) } in useEffect cleanup."
+severity: error
+
+---
+# Rule: Detect large dependency imports
+id: large-bundle-import
+language: typescript
+rule:
+  all:
+    - kind: import_statement
+    - has:
+        regex: lodash|moment|date-fns|axios|@mui/material|@material-ui/core
+    - not:
+        has:
+          regex: esm|dist|lib
+message: "Large dependency imported. Consider tree-shakeable alternatives (lodash-es, date-fns/esm) or dynamic imports for code splitting. Check bundle size impact with 'pnpm build'."
+severity: warning
+
+# Note: Inline object/array in JSX props detection is limited in ast-grep
+# This is better handled by ESLint rule: react/jsx-no-bind
+# AST-GREP has limitations with complex JSX pattern matching

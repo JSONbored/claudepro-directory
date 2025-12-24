@@ -778,7 +778,7 @@ pre-push:
         CHANGED_FILES=$(git diff --name-only origin/main...HEAD 2>/dev/null | grep -E '\.(ts|tsx)$' | head -20 || echo "")
         if [ -n "$CHANGED_FILES" ]; then
           # Check only changed files for speed
-          UNUSED_OUTPUT=$(npx knip -c config/tools/knip.json --no-exit-code 2>/dev/null | head -20)
+          UNUSED_OUTPUT=$(npx knip -c .trunk/configs/knip.json --no-exit-code 2>/dev/null | head -20)
           if echo "$UNUSED_OUTPUT" | grep -q "Unused"; then
             UNUSED_COUNT=$(echo "$UNUSED_OUTPUT" | grep -c "Unused" || echo "0")
             echo "   ⚠️  Found ~$UNUSED_COUNT unused export(s) in changed files"
@@ -788,7 +788,7 @@ pre-push:
           fi
         else
           # Full check if no changed files available
-          UNUSED_OUTPUT=$(npx knip -c config/tools/knip.json --no-exit-code 2>/dev/null | head -20)
+          UNUSED_OUTPUT=$(npx knip -c .trunk/configs/knip.json --no-exit-code 2>/dev/null | head -20)
           if echo "$UNUSED_OUTPUT" | grep -q "Unused"; then
             UNUSED_COUNT=$(echo "$UNUSED_OUTPUT" | grep -c "Unused" || echo "0")
             echo "   ⚠️  Found ~$UNUSED_COUNT unused export(s)"
@@ -867,7 +867,7 @@ pre-push:
           
           # Logging patterns (consolidated into pino-logging-patterns.yml)
           echo "   📝 Logging patterns..."
-          CONSOLE_USAGE=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/pino-logging-patterns.yml 2>/dev/null | grep -c "console-usage\|missing-normalize-error\|missing-logger-child" || echo "0")
+          CONSOLE_USAGE=$(npx ast-grep scan --rule .trunk/rules/ast-grep/pino-logging-patterns.yml 2>/dev/null | grep -c "console-usage\|missing-normalize-error\|missing-logger-child" || echo "0")
           if [ "$CONSOLE_USAGE" != "0" ]; then
             echo "      ⚠️  Found logging pattern issues (console.* usage, missing normalizeError, missing logger.child)"
             echo "      💡 Use logger.* from @heyclaude/web-runtime/logging/*"
@@ -878,68 +878,68 @@ pre-push:
           
           # Performance patterns
           echo "   ⚡ Performance patterns..."
-          PERF_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/performance-patterns.yml 2>/dev/null | grep -c "n-plus-one\|await-in-loop\|missing-usememo\|missing-usecallback" || echo "0")
+          PERF_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/performance-patterns.yml 2>/dev/null | grep -c "n-plus-one\|await-in-loop\|missing-usememo\|missing-usecallback" || echo "0")
           if [ "$PERF_ISSUES" != "0" ]; then
             echo "      ⚠️  Found performance optimization opportunities"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/performance-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/performance-patterns.yml"
           fi
           
           # Database optimization patterns
           echo "   🗄️  Database optimization patterns..."
-          DB_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/database-optimization-patterns.yml 2>/dev/null | grep -c "missing-request-scoped-cache\|missing-cache-life\|missing-cache-tag\|missing-rpc-error" || echo "0")
+          DB_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/database-optimization-patterns.yml 2>/dev/null | grep -c "missing-request-scoped-cache\|missing-cache-life\|missing-cache-tag\|missing-rpc-error" || echo "0")
           if [ "$DB_ISSUES" != "0" ]; then
             echo "      ⚠️  Found database optimization opportunities"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/database-optimization-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/database-optimization-patterns.yml"
           fi
           
           # React optimization patterns
           echo "   ⚛️  React optimization patterns..."
-          REACT_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/react-optimization-patterns.yml 2>/dev/null | grep -c "missing-usememo\|missing-usecallback\|missing-useeffect" || echo "0")
+          REACT_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/react-optimization-patterns.yml 2>/dev/null | grep -c "missing-usememo\|missing-usecallback\|missing-useeffect" || echo "0")
           if [ "$REACT_ISSUES" != "0" ]; then
             echo "      ⚠️  Found React optimization opportunities"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/react-optimization-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/react-optimization-patterns.yml"
           fi
           
           # Bundle optimization patterns
           echo "   📦 Bundle optimization patterns..."
-          BUNDLE_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/bundle-optimization-patterns.yml 2>/dev/null | grep -c "missing-dynamic-import\|inefficient-barrel\|missing-code-splitting" || echo "0")
+          BUNDLE_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/bundle-optimization-patterns.yml 2>/dev/null | grep -c "missing-dynamic-import\|inefficient-barrel\|missing-code-splitting" || echo "0")
           if [ "$BUNDLE_ISSUES" != "0" ]; then
             echo "      ⚠️  Found bundle optimization opportunities"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/bundle-optimization-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/bundle-optimization-patterns.yml"
           fi
           
           # Accessibility patterns
           echo "   ♿ Accessibility patterns..."
-          A11Y_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/accessibility-patterns.yml 2>/dev/null | grep -c "missing-aria-label\|missing-alt-text\|missing-keyboard-handler" || echo "0")
+          A11Y_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/accessibility-patterns.yml 2>/dev/null | grep -c "missing-aria-label\|missing-alt-text\|missing-keyboard-handler" || echo "0")
           if [ "$A11Y_ISSUES" != "0" ]; then
             echo "      ⚠️  Found accessibility issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/accessibility-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/accessibility-patterns.yml"
           fi
           
           # Type safety patterns
           echo "   🔷 Type safety patterns..."
-          TYPE_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/type-safety-patterns.yml 2>/dev/null | grep -c "unsafe-as-assertion\|explicit-any\|missing-type-guard" || echo "0")
+          TYPE_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/type-safety-patterns.yml 2>/dev/null | grep -c "unsafe-as-assertion\|explicit-any\|missing-type-guard" || echo "0")
           if [ "$TYPE_ISSUES" != "0" ]; then
             echo "      ⚠️  Found type safety issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/type-safety-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/type-safety-patterns.yml"
           fi
           
           # Prisma migration patterns - REMOVED (migration complete)
           
           # Cache invalidation patterns
           echo "   🗄️  Cache invalidation patterns..."
-          CACHE_INVALID_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/cache-invalidation-patterns.yml 2>/dev/null | grep -c "missing-cache-invalidation\|incorrect-cache-life\|missing-hierarchical" || echo "0")
+          CACHE_INVALID_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/cache-invalidation-patterns.yml 2>/dev/null | grep -c "missing-cache-invalidation\|incorrect-cache-life\|missing-hierarchical" || echo "0")
           if [ "$CACHE_INVALID_ISSUES" != "0" ]; then
             echo "      ⚠️  Found cache invalidation issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/cache-invalidation-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/cache-invalidation-patterns.yml"
           fi
           
           # Skeleton structure patterns
           echo "   💀 Skeleton structure patterns..."
-          SKELETON_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/skeleton-structure-patterns.yml 2>/dev/null | grep -c "missing-loading-file" || echo "0")
+          SKELETON_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/skeleton-structure-patterns.yml 2>/dev/null | grep -c "missing-loading-file" || echo "0")
           if [ "$SKELETON_ISSUES" != "0" ]; then
             echo "      ⚠️  Found skeleton/page structure issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/skeleton-structure-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/skeleton-structure-patterns.yml"
           fi
           
           # Enhanced logging patterns (consolidated into pino-logging-patterns.yml)
@@ -951,105 +951,105 @@ pre-push:
           
           # Motion optimization patterns
           echo "   🎬 Motion optimization patterns..."
-          MOTION_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/motion-optimization-patterns.yml 2>/dev/null | grep -c "missing-reduced-motion\|missing-design-system-animations" || echo "0")
+          MOTION_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/motion-optimization-patterns.yml 2>/dev/null | grep -c "missing-reduced-motion\|missing-design-system-animations" || echo "0")
           if [ "$MOTION_ISSUES" != "0" ]; then
             echo "      ⚠️  Found motion optimization issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/motion-optimization-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/motion-optimization-patterns.yml"
           fi
           
           # Industry-standard security patterns
           # Enhanced security patterns (consolidated)
           echo "   🔒 Security patterns..."
-          SECURITY_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/security-patterns-enhanced.yml 2>/dev/null | grep -c "hardcoded-secrets\|sql-injection\|missing-csrf\|missing-input-validation\|missing-auth" || echo "0")
+          SECURITY_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/security-patterns-enhanced.yml 2>/dev/null | grep -c "hardcoded-secrets\|sql-injection\|missing-csrf\|missing-input-validation\|missing-auth" || echo "0")
           if [ "$SECURITY_ISSUES" != "0" ]; then
             echo "      ⚠️  Found security issues (CRITICAL)"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/security-patterns-enhanced.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/security-patterns-enhanced.yml"
           fi
           
           # Enhanced error handling patterns
           echo "   ⚠️  Enhanced error handling patterns..."
-          ERROR_HANDLING_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/error-handling-enhanced.yml 2>/dev/null | grep -c "unhandled-promise\|missing-error-boundary\|missing-retry" || echo "0")
+          ERROR_HANDLING_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/error-handling-enhanced.yml 2>/dev/null | grep -c "unhandled-promise\|missing-error-boundary\|missing-retry" || echo "0")
           if [ "$ERROR_HANDLING_ISSUES" != "0" ]; then
             echo "      ⚠️  Found error handling issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/error-handling-enhanced.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/error-handling-enhanced.yml"
           fi
           
           # Code quality patterns
           echo "   📋 Code quality patterns..."
-          CODE_QUALITY_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/code-quality-patterns.yml 2>/dev/null | grep -c "untracked-todo\|unvalidated-env\|missing-jsdoc\|deprecated-api" || echo "0")
+          CODE_QUALITY_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/code-quality-patterns.yml 2>/dev/null | grep -c "untracked-todo\|unvalidated-env\|missing-jsdoc\|deprecated-api" || echo "0")
           if [ "$CODE_QUALITY_ISSUES" != "0" ]; then
             echo "      ⚠️  Found code quality issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/code-quality-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/code-quality-patterns.yml"
           fi
           
           # Performance patterns (enhanced rules merged into performance-patterns.yml)
           echo "   ⚡ Performance patterns..."
-          PERF_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/performance-patterns.yml 2>/dev/null | grep -c "memory-leak\|large-bundle\|n-plus-one" || echo "0")
+          PERF_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/performance-patterns.yml 2>/dev/null | grep -c "memory-leak\|large-bundle\|n-plus-one" || echo "0")
           if [ "$PERF_ISSUES" != "0" ]; then
             echo "      ⚠️  Found performance issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/performance-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/performance-patterns.yml"
           fi
           
           # Tool-specific patterns (Pino, Next.js, Prisma, React, Zod)
           echo "   🔧 Tool-specific best practices..."
-          PINO_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/pino-logging-patterns.yml 2>/dev/null | grep -c "direct-pino\|console-usage\|missing-error-normalization" || echo "0")
+          PINO_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/pino-logging-patterns.yml 2>/dev/null | grep -c "direct-pino\|console-usage\|missing-error-normalization" || echo "0")
           if [ "$PINO_ISSUES" != "0" ]; then
             echo "      ⚠️  Found Pino logging issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/pino-logging-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/pino-logging-patterns.yml"
           fi
           
-          CACHE_COMPONENTS_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/cache-components-patterns.yml 2>/dev/null | grep -c "missing-cache\|missing-cache-life\|missing-cache-tag" || echo "0")
+          CACHE_COMPONENTS_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/cache-components-patterns.yml 2>/dev/null | grep -c "missing-cache\|missing-cache-life\|missing-cache-tag" || echo "0")
           if [ "$CACHE_COMPONENTS_ISSUES" != "0" ]; then
             echo "      ⚠️  Found Cache Components issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/cache-components-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/cache-components-patterns.yml"
           fi
           
-          PRISMA_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/prisma-best-practices.yml 2>/dev/null | grep -c "n-plus-one\|missing-transaction\|missing-where" || echo "0")
+          PRISMA_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/prisma-best-practices.yml 2>/dev/null | grep -c "n-plus-one\|missing-transaction\|missing-where" || echo "0")
           if [ "$PRISMA_ISSUES" != "0" ]; then
             echo "      ⚠️  Found Prisma best practice issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/prisma-best-practices.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/prisma-best-practices.yml"
           fi
           
-          REACT_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/react-hooks-best-practices.yml 2>/dev/null | grep -c "conditional-hook\|missing-cleanup\|hook-in-nested" || echo "0")
+          REACT_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/react-hooks-best-practices.yml 2>/dev/null | grep -c "conditional-hook\|missing-cleanup\|hook-in-nested" || echo "0")
           if [ "$REACT_ISSUES" != "0" ]; then
             echo "      ⚠️  Found React hooks issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/react-hooks-best-practices.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/react-hooks-best-practices.yml"
           fi
           
-          ZOD_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/zod-validation-patterns.yml 2>/dev/null | grep -c "missing-zod\|missing-descriptions\|missing-constraints" || echo "0")
+          ZOD_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/zod-validation-patterns.yml 2>/dev/null | grep -c "missing-zod\|missing-descriptions\|missing-constraints" || echo "0")
           if [ "$ZOD_ISSUES" != "0" ]; then
             echo "      ⚠️  Found Zod validation issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/zod-validation-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/zod-validation-patterns.yml"
           fi
           
-          NEXTJS16_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/nextjs-16-patterns.yml 2>/dev/null | grep -c "async-params\|async-searchparams\|server-import" || echo "0")
+          NEXTJS16_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/nextjs-16-patterns.yml 2>/dev/null | grep -c "async-params\|async-searchparams\|server-import" || echo "0")
           if [ "$NEXTJS16_ISSUES" != "0" ]; then
             echo "      ⚠️  Found Next.js 16 pattern issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/nextjs-16-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/nextjs-16-patterns.yml"
           fi
           
           # API routes patterns
           echo "   🛣️  API routes patterns..."
-          API_ROUTE_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/api-routes-patterns.yml 2>/dev/null | grep -c "api-route-not-using-factory\|missing-route-property\|missing-operation-property\|missing-query-schema" || echo "0")
+          API_ROUTE_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/api-routes-patterns.yml 2>/dev/null | grep -c "api-route-not-using-factory\|missing-route-property\|missing-operation-property\|missing-query-schema" || echo "0")
           if [ "$API_ROUTE_ISSUES" != "0" ]; then
             echo "      ⚠️  Found API route pattern issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/api-routes-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/api-routes-patterns.yml"
           fi
           
           # Page data flow patterns
           echo "   🔄 Page data flow patterns..."
-          DATA_FLOW_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/page-data-flow-patterns.yml 2>/dev/null | grep -c "date-object-to-client\|non-serializable\|function-to-client" || echo "0")
+          DATA_FLOW_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/page-data-flow-patterns.yml 2>/dev/null | grep -c "date-object-to-client\|non-serializable\|function-to-client" || echo "0")
           if [ "$DATA_FLOW_ISSUES" != "0" ]; then
             echo "      ⚠️  Found page data flow issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/page-data-flow-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/page-data-flow-patterns.yml"
           fi
           
           # Single dev team patterns
           echo "   👤 Single dev team patterns..."
-          SINGLE_DEV_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/single-dev-team-patterns.yml 2>/dev/null | grep -c "missing-error-handling\|missing-validation\|unsafe-type" || echo "0")
+          SINGLE_DEV_ISSUES=$(npx ast-grep scan --rule .trunk/rules/ast-grep/single-dev-team-patterns.yml 2>/dev/null | grep -c "missing-error-handling\|missing-validation\|unsafe-type" || echo "0")
           if [ "$SINGLE_DEV_ISSUES" != "0" ]; then
             echo "      ⚠️  Found single dev team pattern issues"
-            echo "      💡 Review: config/coderabbit/ast-grep-rules/single-dev-team-patterns.yml"
+            echo "      💡 Review: .trunk/rules/ast-grep/single-dev-team-patterns.yml"
           fi
           
           echo ""
@@ -1155,8 +1155,8 @@ pre-push:
         echo ""
         echo "🔧 Tools:"
         echo "   • ESLint config:      config/tools/eslint.config.mjs"
-        echo "   • ast-grep rules:     config/coderabbit/ast-grep-rules/"
-        echo "   • Knip config:        config/tools/knip.json"
+        echo "   • ast-grep rules:     .trunk/rules/ast-grep/"
+        echo "   • Knip config:        .trunk/configs/knip.json"
         echo "   • Lefthook scripts:  config/lefthook/"
         echo ""
         echo "💡 Note: Renovate handles dependency updates automatically (see renovate.json)"
@@ -1421,8 +1421,8 @@ min_version: 1.13.0
 #   pnpm analyze:all          # Run all analyses
 #
 # Architecture:
-#   npx ast-grep scan --rule config/coderabbit/ast-grep-rules/logging-patterns.yml
-#   npx ast-grep scan --rule config/coderabbit/ast-grep-rules/security-patterns.yml
+#   npx ast-grep scan --rule .trunk/rules/ast-grep/logging-patterns.yml
+#   npx ast-grep scan --rule .trunk/rules/ast-grep/security-patterns.yml
 #
 # Formatting:
 #   pnpm format               # Auto-fix formatting

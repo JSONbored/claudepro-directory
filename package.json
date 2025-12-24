@@ -129,7 +129,7 @@
     "type-check:unused:filtered:exec": "pnpm exec heyclaude-lint-unused",
     "prepare": "command -v lefthook >/dev/null 2>&1 && lefthook install >/dev/null 2>&1 || echo 'Skipping lefthook install (not available)'",
     "analyze:architecture": "npx skott --displayMode=webapp",
-    "analyze:unused": "infisical run --env=dev -- npx knip -c config/tools/knip.json",
+    "analyze:unused": "infisical run --env=dev -- npx knip -c .trunk/configs/knip.json",
     "analyze:circular": "npx madge --circular --extensions ts,tsx apps/web/src/",
     "analyze:circular-graph": "npx madge --circular --extensions ts,tsx --image circular-deps.svg apps/web/src/",
     "analyze:all": "npm run analyze:unused && npm run analyze:circular"

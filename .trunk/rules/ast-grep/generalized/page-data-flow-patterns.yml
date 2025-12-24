@@ -1,0 +1,91 @@
+# Page Data Flow Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
+# Enforces correct data flow architecture between server and client components
+# Critical for preventing serialization errors and architectural issues
+# Shareable across Next.js projects
+
+---
+# Rule: Detect Date objects passed to client components without serialization
+id: date-object-to-client-component
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        regex: 'new Date\('
+    - inside:
+        has:
+          regex: '<\w+\s+\w+=\{[^}]*\}'
+    - not:
+        has:
+          pattern: serializeForClient
+    - not:
+        has:
+          regex: 'toISOString|toJSON'
+message: "Date objects cannot be passed directly to Client Components. Use serializeForClient() to convert Date objects to ISO strings, or call .toISOString() before passing. Import: import { serializeForClient } from 'YOUR_SHARED_RUNTIME_PACKAGE/utils/serialize';"
+severity: error
+
+---
+# Rule: Detect Date.now() or new Date() in server components passing to client
+id: date-now-to-client-component
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        regex: Date\.now|new Date\(
+    - inside:
+        has:
+          regex: '<\w+\s+\w+=\{[^}]*\}'
+    - not:
+        has:
+          pattern: serializeForClient
+message: "Date.now() or new Date() results cannot be passed directly to Client Components. Use serializeForClient() or convert to ISO string first. Import: import { serializeForClient } from 'YOUR_SHARED_RUNTIME_PACKAGE/utils/serialize';"
+severity: error
+
+---
+# Rule: Detect non-serializable data passed to client components
+id: non-serializable-to-client-component
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        regex: 'new (Map|Set|WeakMap|WeakSet)\('
+    - inside:
+        has:
+          regex: '<\w+\s+\w+=\{[^}]*\}'
+    - not:
+        has:
+          pattern: serializeForClient
+message: "Non-serializable data (Map, Set, WeakMap, WeakSet) cannot be passed directly to Client Components. Convert to plain objects/arrays or use serializeForClient(). Import: import { serializeForClient } from 'YOUR_SHARED_RUNTIME_PACKAGE/utils/serialize';"
+severity: error
+
+---
+# Rule: Detect functions passed to client components
+id: function-to-client-component
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - inside:
+        has:
+          regex: '<\w+\s+\w+=\{[^}]*\}'
+    - not:
+        has:
+          regex: 'use client'
+message: "Functions cannot be passed directly from Server Components to Client Components. Pass data and callbacks as props, or move function definition to Client Component. Use Server Actions for server-side functions."
+severity: error
+
+# Note: Next.js Server Components can only pass serializable data to Client Components
+# Use serializeForClient() for complex objects, convert Dates to ISO strings, avoid functions
+

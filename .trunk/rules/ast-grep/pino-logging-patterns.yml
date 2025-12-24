@@ -1,0 +1,178 @@
+# Pino Logging Pattern Rules
+#
+# GENERALIZED: This file has been generalized for reuse across projects
+# Customization: Replace codebase-specific paths and import references as needed
+#
+# Comprehensive Pino logger usage and best practices
+# Shareable across projects using Pino for structured logging
+# Consolidated: This file consolidates all logging patterns from:
+#   - logging-patterns.yml (merged)
+#   - logging-patterns-enhanced.yml (merged, requestId rules excluded - requestId was removed from codebase)
+#   - pino-logging-patterns.yml (original)
+# NOTE: requestId was removed from codebase - do NOT check for it
+
+---
+# Rule: Detect console.* usage (should use Pino logger)
+id: console-usage-instead-of-pino
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        regex: console\.(log|error|warn|info|debug|trace)
+message: "Don't use console.* methods. Use structured logging with Pino logger. Import logger from @heyclaude/shared-runtime/logger or @heyclaude/web-runtime/logging/server (server) or @heyclaude/web-runtime/logging/client (client)."
+severity: error
+
+---
+# Rule: Detect direct Pino logger creation without centralized config
+id: direct-pino-logger-creation
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: pino($CONFIG)
+    - not:
+        inside:
+          has:
+            pattern: createLogger|createPinoConfig
+message: "Don't create Pino loggers directly. Use centralized logger from @heyclaude/shared-runtime/logger or createLogger() with createPinoConfig() for consistent configuration."
+severity: error
+
+---
+# Rule: Detect missing normalizeError in catch blocks
+id: missing-normalize-error
+language: typescript
+rule:
+  all:
+    - kind: catch_clause
+    - not:
+        has:
+          regex: 'normalizeError\('
+message: "Catch blocks must use normalizeError() before logging or throwing. Import normalizeError from @heyclaude/web-runtime/logging/server (server) or @heyclaude/shared-runtime/logger (shared)"
+severity: error
+
+---
+# Rule: Detect missing error normalization before logging
+id: pino-missing-error-normalization
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        regex: 'logger\.(error|warn)\('
+    - has:
+        regex: err:|error
+    - not:
+        has:
+          pattern: normalizeError
+message: "Errors should be normalized before logging. Use normalizeError() to ensure errors are properly formatted. Example: const normalized = normalizeError(error, 'Fallback message'); logger.error({ err: normalized }, 'Error message');"
+severity: error
+
+---
+# Rule: Detect missing logger.child() for request-scoped context in server components
+id: missing-logger-child-context
+language: typescript
+files:
+  - 'apps/web/src/app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
+    - has:
+        regex: logger\.(info|warn|error|debug)
+    - not:
+        has:
+          regex: logger\.child|reqLogger
+message: "Server components/pages must use logger.child({ operation, route, module }) for request-scoped context. Create: const reqLogger = logger.child({ operation: 'PageName', route: '/path', module: 'app/path' }) and use reqLogger for all logs."
+severity: error
+
+---
+# Rule: Detect missing operation/route/module in logger.child() calls
+id: missing-operation-route-module-in-child
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        regex: 'logger\.child\(\s*\{[^}]*\}\)'
+    - not:
+        has:
+          regex: operation:\s*['"]
+    - not:
+        has:
+          regex: route:\s*['"]
+    - not:
+        has:
+          regex: module:\s*['"]
+message: "logger.child() must include operation, route, and module fields. Use: logger.child({ operation: 'PageName', route: '/path', module: 'app/path' })"
+severity: error
+
+---
+# Rule: Detect missing section-based logging in server pages
+id: missing-section-logging
+language: typescript
+files:
+  - 'apps/web/src/app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
+    - has:
+        regex: '\w+Logger\.\w+\('
+    - not:
+        has:
+          regex: section:\s*['"]
+message: "Server pages should use section-based logging with section: 'section-name' in log context. Example: reqLogger.info({ section: 'data-fetch' }, 'message') or reqLogger.info('message', { section: 'data-fetch' })"
+severity: error
+
+---
+# Rule: Detect missing useLoggedAsync in client async operations
+id: missing-use-logged-async
+language: typescript
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        regex: 'const\s+\w+\s*=\s*async\s*\(\)\s*=>\s*\{'
+    - inside:
+        has:
+          regex: 'use client'
+    - not:
+        has:
+          regex: 'useLoggedAsync\('
+message: "Client components with async operations must use useLoggedAsync hook. Import useLoggedAsync from @heyclaude/web-runtime/hooks"
+severity: warning
+
+---
+# Rule: Detect Pino logger with sensitive data (should use redaction)
+id: pino-logger-sensitive-data
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        regex: 'logger\.(info|warn|error|debug)\('
+    - has:
+        regex: password|secret|token|apiKey|api_key
+message: "Sensitive data (passwords, secrets, tokens, API keys) should be redacted in logs. Pino redaction is configured automatically, but ensure sensitive fields use redaction paths. Never log raw passwords, API keys, or tokens."
+severity: error
+
+---
+# Rule: Detect Pino logger with PII (should use hashing)
+id: pino-logger-pii-without-hashing
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        regex: 'logger\.(info|warn|error|debug)\('
+    - has:
+        regex: email|userId|user_id|phone|ssn
+    - not:
+        has:
+          regex: hashPII|hashEmail|hashUserId|logger\.child
+message: "PII (email, userId, phone, ssn) should be hashed before logging for GDPR/CCPA compliance, or use logger.child() which automatically redacts. Use hashPII(), hashEmail(), or hashUserId() utilities before logging, or use logger.child({ userId }) pattern. Example: logger.info({ emailHash: hashPII(user.email) }, 'User action');"
+severity: error

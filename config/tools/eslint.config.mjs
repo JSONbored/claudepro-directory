@@ -69,7 +69,7 @@ import nextPlugin from '@next/eslint-plugin-next';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import inngestPlugin from '@inngest/eslint-plugin';
 import tseslint from 'typescript-eslint';
-import architecturalRules from './eslint-plugin-architectural-rules.js';
+import architecturalRules from '../../.trunk/plugins/eslint-plugin-architectural-rules.js';
 
 export default tseslint.config(
   eslint.configs.recommended,

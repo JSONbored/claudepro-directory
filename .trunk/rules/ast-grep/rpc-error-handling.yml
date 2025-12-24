@@ -1,0 +1,63 @@
+# RPC Error Handling Pattern Rules
+# Enforces RPC error handling standards from ESLint rule: require-rpc-error-handling
+# Matches: config/tools/eslint-plugin-architectural-rules.js -> require-rpc-error-handling
+
+---
+# Rule: Detect missing error destructuring from RPC calls
+id: missing-rpc-error-destructuring
+language: typescript
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        regex: 'const\s+\w+\s*=\s*await\s+\w+\.rpc\('
+    - not:
+        has:
+          regex: 'const\s+\{\s*\w+,\s*error\s*\}\s*=\s*await\s+\w+\.rpc\('
+message: "RPC calls must destructure error from response. Use: const { data, error } = await supabase.rpc(...)"
+severity: error
+
+---
+# Rule: Detect missing error check after RPC call
+id: missing-rpc-error-check
+language: typescript
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        regex: 'const\s+\{\s*\w+,\s*error\s*\}\s*=\s*await\s+\w+\.rpc\('
+    - not:
+        follows:
+          regex: 'if\s*\(\s*error\s*\)\s*\{'
+message: "RPC calls must check for errors after destructuring. Add: if (error) { throw error; } or handle error appropriately"
+severity: error
+
+---
+# Rule: Detect missing normalizeError in RPC error handlers
+id: missing-normalize-error-rpc
+language: typescript
+rule:
+  all:
+    - kind: catch_clause
+      inside:
+        regex: '\w+\.rpc\('
+    - not:
+        has:
+          regex: 'normalizeError\('
+message: "RPC error handlers must use normalizeError() before logging or throwing. Import normalizeError from @heyclaude/web-runtime/logging/server (server) or @heyclaude/shared-runtime/logger (shared)"
+severity: error
+
+---
+# Rule: Detect missing error logging in RPC catch blocks
+id: missing-rpc-error-logging
+language: typescript
+rule:
+  all:
+    - kind: catch_clause
+      inside:
+        regex: '\w+\.rpc\('
+    - not:
+        has:
+          regex: (logger|reqLogger)\.(error|warn)
+message: "RPC error handlers must log errors. Add: reqLogger.error('RPC call failed', normalized, { rpcName: '...', section: 'rpc-call' }) or logger.error('RPC call failed', normalized, { rpcName: '...' })"
+severity: error

@@ -1,0 +1,27 @@
+# Skeleton Structure Pattern Rules
+# Ensures skeleton components match actual page structure
+# Critical for preventing Cumulative Layout Shift (CLS)
+# Note: Full skeleton/page structure validation requires custom tooling
+
+---
+# Rule: Detect missing loading.tsx for async pages
+id: missing-loading-file-for-async-page
+language: typescript
+files:
+  - 'app/**/page.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'export default async function \w+\([^)]*\)\s*\{'
+    - has:
+        regex: 'await\s+\w+\([^)]*\)'
+message: "Async pages should have corresponding loading.tsx file for proper loading states. Create loading.tsx in same directory with page-specific skeleton component."
+severity: warning
+
+# Note: JSX pattern matching for Suspense fallbacks is limited in ast-grep
+# Full skeleton/page structure validation requires custom tooling that:
+# 1. Parses both page.tsx and loading.tsx files
+# 2. Extracts component structure and layout
+# 3. Validates skeleton matches page structure
+# This is better handled by a custom validation script
