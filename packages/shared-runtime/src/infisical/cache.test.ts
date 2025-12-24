@@ -10,17 +10,17 @@
  * - Edge cases
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 
 // Mock server-only to prevent import errors
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock Infisical client module
-const mockIsInfisicalEnabled = vi.fn(() => true);
-const mockGetInfisicalEnvironment = vi.fn(() => 'dev' as const);
-const mockGetInfisicalSecret = vi.fn();
+const mockIsInfisicalEnabled = jest.fn(() => true);
+const mockGetInfisicalEnvironment = jest.fn(() => 'dev' as const);
+const mockGetInfisicalSecret = jest.fn();
 
-vi.mock('./client.ts', () => ({
+jest.mock('./client.ts', () => ({
   isInfisicalEnabled: () => mockIsInfisicalEnabled(),
   getInfisicalEnvironment: () => mockGetInfisicalEnvironment(),
   getInfisicalSecret: mockGetInfisicalSecret,
@@ -41,7 +41,7 @@ describe('Infisical Cache', () => {
   beforeEach(() => {
     // Clear cache before each test
     clearInfisicalCache();
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockIsInfisicalEnabled.mockReturnValue(true);
     mockGetInfisicalEnvironment.mockReturnValue('dev');
     mockGetInfisicalSecret.mockReset();
@@ -52,7 +52,7 @@ describe('Infisical Cache', () => {
 
   afterEach(() => {
     clearInfisicalCache();
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('initializeInfisicalSecrets', () => {

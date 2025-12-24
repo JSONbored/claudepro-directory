@@ -1,11 +1,11 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 
 // Mock run-rpc - use globalThis to avoid hoisting issues
-vi.mock('../rpc/run-rpc', () => {
+jest.mock('../rpc/run-rpc', () => {
   if (!(globalThis as any).__runRpcMocks) {
     (globalThis as any).__runRpcMocks = {
-      mockRpcFunction: vi.fn(),
-      createRunRpc: vi.fn(() => (globalThis as any).__runRpcMocks.mockRpcFunction), // Return a function when called
+      mockRpcFunction: jest.fn(),
+      createRunRpc: jest.fn(() => (globalThis as any).__runRpcMocks.mockRpcFunction), // Return a function when called
     };
   }
   return {

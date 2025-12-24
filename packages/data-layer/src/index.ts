@@ -12,4 +12,4 @@ export { BasePrismaService } from './services/base-prisma-service';
 // Note: prisma export removed to prevent Cloudflare Workers bundling issues
 // Services accept injected PrismaClient via constructor for Cloudflare Workers
 // For Node.js usage, import prisma directly: import { prisma } from '@heyclaude/data-layer/prisma/client'
-export { withSmartCache } from './utils/request-cache';
+export { withSmartCache, clearRequestCache, getRequestCache } from './utils/request-cache';

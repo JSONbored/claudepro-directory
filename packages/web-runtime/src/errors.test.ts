@@ -1,15 +1,15 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { normalizeError, logActionFailure, logClientWarning, logUnhandledPromise } from './errors';
 
 // Mock logger - define mocks inline to avoid hoisting issues
-const mockLoggerError = vi.fn();
-const mockLoggerWarn = vi.fn();
-vi.mock('./logger', () => {
+const mockLoggerError = jest.fn();
+const mockLoggerWarn = jest.fn();
+jest.mock('./logger', () => {
   // Access mocks from globalThis to avoid hoisting issues
   if (!(globalThis as any).__loggerMocks) {
     (globalThis as any).__loggerMocks = {
-      error: vi.fn(),
-      warn: vi.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
     };
   }
   return {
@@ -22,7 +22,7 @@ vi.mock('./logger', () => {
 
 describe('errors', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     // Reset global mocks
     if ((globalThis as any).__loggerMocks) {
       (globalThis as any).__loggerMocks.error.mockClear();

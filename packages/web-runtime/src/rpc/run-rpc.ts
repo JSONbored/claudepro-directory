@@ -40,10 +40,11 @@ class PrismaRpcService extends BasePrismaService {
         rpcName.includes('add') ||
         rpcName.includes('remove');
 
-      return await this.callRpc<ResultType>(rpcName, args, {
+      const result = await this.callRpc<ResultType>(rpcName, args, {
         methodName: context.action,
         useCache: !isMutation,
       });
+      return result;
     } catch (error) {
       // Format error with context for logging
       const dbQueryContext: Record<string, unknown> = {

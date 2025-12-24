@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from '@jest/globals';
 import { timingSafeEqual } from './crypto-utils.ts';
 
 describe('timingSafeEqual', () => {

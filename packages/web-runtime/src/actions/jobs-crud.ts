@@ -172,6 +172,27 @@ const crudHandlers = createCrudActionHandlers<
         },
       },
     ],
+    update: [
+      {
+        name: 'onJobUpdated',
+        handler: async (result, args, ctx) => {
+          const { onJobUpdated } = await import('./hooks/job-hooks.ts');
+          // onJobUpdated hook sends job/published event when status === 'active'
+          // The hook accepts the result and input, processes events, but doesn't change the return structure
+          await onJobUpdated(
+            result as unknown as {
+              job_id: string;
+              slug?: string;
+              title?: string;
+            },
+            ctx,
+            args as unknown as { job_id: string; updates: Record<string, unknown> }
+          );
+          // Return original result - hook processes side effects but doesn't modify the return value
+          return result;
+        },
+      },
+    ],
   },
 });
 

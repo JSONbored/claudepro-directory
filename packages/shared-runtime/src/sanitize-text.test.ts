@@ -1,10 +1,10 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, jest } from '@jest/globals';
 import { sanitizeFilename, sanitizeText, sanitizeUrl } from './sanitize-text.ts';
 
 // Mock logger to prevent console output during tests
-vi.mock('./logger/index.ts', () => ({
+jest.mock('./logger/index.ts', () => ({
   logger: {
-    warn: vi.fn(),
+    warn: jest.fn(),
   },
 }));
 

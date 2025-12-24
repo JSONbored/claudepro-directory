@@ -1,13 +1,13 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
 import { checkRateLimit, RATE_LIMIT_PRESETS, type RateLimitConfig } from './rate-limit.ts';
 
 describe('checkRateLimit', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    jest.useFakeTimers();
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    jest.useRealTimers();
   });
 
   describe('basic rate limiting', () => {
@@ -72,7 +72,7 @@ describe('checkRateLimit', () => {
       expect(result.allowed).toBe(false);
 
       // Advance time past window
-      vi.advanceTimersByTime(61000);
+      jest.advanceTimersByTime(61000);
 
       // Should be allowed again
       result = checkRateLimit(request, config);
@@ -181,7 +181,7 @@ describe('checkRateLimit', () => {
       checkRateLimit(request2, config);
 
       // Advance time past window
-      vi.advanceTimersByTime(2000);
+      jest.advanceTimersByTime(2000);
 
       // Cleanup should happen on next check
       checkRateLimit(request1, config);
@@ -245,7 +245,7 @@ describe('checkRateLimit', () => {
       const config: RateLimitConfig = { maxRequests: 5, windowMs: 100 };
 
       checkRateLimit(request, config);
-      vi.advanceTimersByTime(101);
+      jest.advanceTimersByTime(101);
 
       const result = checkRateLimit(request, config);
       expect(result.allowed).toBe(true);

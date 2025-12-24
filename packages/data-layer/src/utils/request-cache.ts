@@ -151,13 +151,34 @@ export async function withRequestCache<T>(
 
   // Check cache first
   const cached = cache.get<T>(rpcName, args);
+  // #region agent log
+  if (rpcName === 'isBookmarked') {
+    const cacheKey = args ? JSON.stringify(args, Object.keys(args).sort()) : 'no-args';
+    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/data-layer/src/utils/request-cache.ts:153',message:'withRequestCache - cache check',data:{rpcName,args,cacheKey,cached,cachedType:typeof cached,isTrue:cached === true,isFalse:cached === false,cacheSize:cache.getStats().size},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ROOT'})}).catch(()=>{});
+  }
+  // #endregion
   if (cached !== null) {
+    // #region agent log
+    if (rpcName === 'isBookmarked') {
+      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/data-layer/src/utils/request-cache.ts:161',message:'withRequestCache - RETURNING CACHED',data:{rpcName,cached,cachedType:typeof cached,isTrue:cached === true,isFalse:cached === false},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ROOT'})}).catch(()=>{});
+    }
+    // #endregion
     return cached;
   }
 
   // Call RPC and cache result
   const result = await rpcCall();
+  // #region agent log
+  if (rpcName === 'isBookmarked') {
+    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/data-layer/src/utils/request-cache.ts:170',message:'withRequestCache - after rpcCall',data:{rpcName,result,resultType:typeof result,isTrue:result === true,isFalse:result === false},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ROOT'})}).catch(()=>{});
+  }
+  // #endregion
   cache.set(rpcName, args, result);
+  // #region agent log
+  if (rpcName === 'isBookmarked') {
+    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/data-layer/src/utils/request-cache.ts:177',message:'withRequestCache - after cache.set',data:{rpcName,result,resultType:typeof result,isTrue:result === true,isFalse:result === false,cacheSize:cache.getStats().size},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ROOT'})}).catch(()=>{});
+  }
+  // #endregion
 
   return result;
 }

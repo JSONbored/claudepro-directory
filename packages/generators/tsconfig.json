@@ -24,16 +24,10 @@
     "**/*.test.tsx",
     "**/*.spec.ts",
     "**/*.spec.tsx",
-    "src/commands/migrate-ui-classes.ts",
-    "src/commands/migrate-inline-styles.ts",
     "src/commands/analyze-css.ts",
     "src/commands/comprehensive-css-analysis.ts",
-    "src/commands/analyze-inline-styles.ts",
-    "src/bin/migrate-ui-classes.ts",
-    "src/bin/migrate-inline-styles.ts",
     "src/bin/analyze-css.ts",
-    "src/bin/comprehensive-css-analysis.ts",
-    "src/bin/analyze-inline-styles.ts"
+    "src/bin/comprehensive-css-analysis.ts"
   ],
   "references": [
     { "path": "../database-types/tsconfig.json" },

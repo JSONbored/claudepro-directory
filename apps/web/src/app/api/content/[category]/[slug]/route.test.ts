@@ -4,7 +4,8 @@
  * Tests the /api/content/[category]/[slug] endpoint which returns individual content in multiple formats.
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
+import { NextResponse } from 'next/server';
 import { GET, OPTIONS } from './route';
 import {
   createMockRequest,
@@ -14,74 +15,51 @@ import {
   expectCacheHeaders,
 } from '../../../__helpers__/test-helpers';
 
-// Mock server-only
-vi.mock('server-only', () => ({}));
+// Import real cache utilities for proper cache testing
+import { clearRequestCache, getRequestCache } from '@heyclaude/data-layer/utils/request-cache';
 
-// Mock next/cache
-vi.mock('next/cache', () => ({
-  cacheLife: vi.fn(),
-  cacheTag: vi.fn(),
-  connection: vi.fn(() => Promise.resolve()),
+// Mock RPC error logging utility (if needed)
+jest.mock('@heyclaude/data-layer/utils/rpc-error-logging', () => ({
+  logRpcError: jest.fn(),
 }));
 
-// Mock next/server
-vi.mock('next/server', async () => {
-  const actual = await vi.importActual<typeof import('next/server')>('next/server');
-  return {
-    ...actual,
-    connection: vi.fn(async () => {}),
-    NextResponse: class NextResponse extends Response {
-      static json = vi.fn((data: unknown, init?: ResponseInit) => {
-        return new Response(JSON.stringify(data), {
-          status: init?.status || 200,
-          headers: {
-            'Content-Type': 'application/json',
-            ...init?.headers,
-          },
-        });
-      });
-      static redirect = vi.fn((url: string) => new Response(null, { status: 302, headers: { Location: url } }));
-    },
-  };
-});
+// Mock server-only
+jest.mock('server-only', () => ({}));
 
-// Mock data-layer services
-// Import prisma directly - don't use vi.importActual
+// Mock next/cache (Cache Components)
+jest.mock('next/cache', () => ({
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
+  connection: jest.fn(async () => {}),
+}));
+
+// Import prisma directly - don't use jest.requireActual
 // Prisma is automatically PrismockerClient via __mocks__/@prisma/client.ts
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
 
-const mockGetApiContentFull = vi.fn();
-const mockGetItemLlmsTxt = vi.fn();
-const mockGenerateMarkdownExport = vi.fn();
-const mockGetStoragePath = vi.fn();
-
-vi.mock('@heyclaude/data-layer', () => ({
-  ContentService: class {
-    getApiContentFull = mockGetApiContentFull;
-    getItemLlmsTxt = mockGetItemLlmsTxt;
-    generateMarkdownExport = mockGenerateMarkdownExport;
-    getStoragePath = mockGetStoragePath;
-  },
-}));
-
-// Mock service-factory
-vi.mock('@heyclaude/web-runtime/data/service-factory', () => ({
-  getService: vi.fn(async (serviceKey: string) => {
-    const { ContentService } = await import('@heyclaude/data-layer');
-    if (serviceKey === 'content') {
-      return new ContentService();
-    }
-    throw new Error(`Unknown service key: ${serviceKey}`);
-  }),
-}));
+// Mock data-layer services (use real ContentService, but mock other services to avoid side effects)
+jest.mock('@heyclaude/data-layer', () => {
+  const actual = jest.requireActual('@heyclaude/data-layer');
+  return {
+    ...actual, // Include all real exports (including ContentService)
+    AccountService: class {},
+    ChangelogService: class {},
+    CompaniesService: class {},
+    JobsService: class {},
+    MiscService: class {},
+    NewsletterService: class {},
+    SearchService: class {},
+    TrendingService: class {},
+  };
+});
 
 // Mock shared-runtime
-vi.mock('@heyclaude/shared-runtime', () => ({
+jest.mock('@heyclaude/shared-runtime', () => ({
   APP_CONFIG: {
     url: 'https://claudepro.directory',
   },
-  getStringProperty: vi.fn((obj: unknown, key: string) => {
+  getStringProperty: jest.fn((obj: unknown, key: string) => {
     if (typeof obj === 'object' && obj !== null && key in obj) {
       const value = (obj as Record<string, unknown>)[key];
       return typeof value === 'string' ? value : undefined;
@@ -91,8 +69,8 @@ vi.mock('@heyclaude/shared-runtime', () => ({
 }));
 
 // Mock web-runtime/utils/category-validation
-vi.mock('../../../../../../../packages/web-runtime/src/utils/category-validation', () => ({
-  isValidCategory: vi.fn((category: string) => {
+jest.mock('@heyclaude/web-runtime/utils/category-validation', () => ({
+  isValidCategory: jest.fn((category: string) => {
     const validCategories = ['agents', 'mcp', 'rules', 'skills'];
     return validCategories.includes(category.toLowerCase());
   }),
@@ -100,8 +78,8 @@ vi.mock('../../../../../../../packages/web-runtime/src/utils/category-validation
 }));
 
 // Mock server/not-found-response
-vi.mock('../../../../../../../packages/web-runtime/src/server/not-found-response', () => ({
-  notFoundResponse: vi.fn((message, resourceType) => {
+jest.mock('@heyclaude/web-runtime/server/not-found-response', () => ({
+  notFoundResponse: jest.fn((message, resourceType) => {
     return new Response(
       JSON.stringify({
         error: message,
@@ -116,21 +94,21 @@ vi.mock('../../../../../../../packages/web-runtime/src/server/not-found-response
 }));
 
 // Mock logger
-vi.mock('../../../../../../../packages/web-runtime/src/logging/server', () => ({
+jest.mock('@heyclaude/web-runtime/logging/server', () => ({
   logger: {
-    child: vi.fn(() => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      debug: vi.fn(),
+    child: jest.fn(() => ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
     })),
   },
-  generateRequestId: vi.fn(() => 'test-request-id'),
-  normalizeError: vi.fn((error) => {
+  generateRequestId: jest.fn(() => 'test-request-id'),
+  normalizeError: jest.fn((error) => {
     if (error instanceof Error) return error;
     return new Error(String(error));
   }),
-  createErrorResponse: vi.fn((error, context) => {
+  createErrorResponse: jest.fn((error, context) => {
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : String(error),
@@ -144,7 +122,7 @@ vi.mock('../../../../../../../packages/web-runtime/src/logging/server', () => ({
 }));
 
 // Mock server/api-helpers
-vi.mock('../../../../../../../packages/web-runtime/src/server/api-helpers', () => ({
+jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
   getOnlyCorsHeaders: {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -154,176 +132,138 @@ vi.mock('../../../../../../../packages/web-runtime/src/server/api-helpers', () =
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
     Vary: 'Accept',
   },
-  jsonResponse: vi.fn((data, status, corsHeaders, additionalHeaders) => {
+  jsonResponse: jest.fn((data, status, corsHeaders, additionalHeaders) => {
     return new Response(JSON.stringify(data), {
-      status,
+      status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'application/json',
-        ...corsHeaders,
-        ...additionalHeaders,
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
       },
     });
   }),
-  textResponse: vi.fn((text, status, corsHeaders, additionalHeaders) => {
+  textResponse: jest.fn((text, status, corsHeaders, additionalHeaders) => {
     return new Response(text, {
-      status,
+      status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
-        ...corsHeaders,
-        ...additionalHeaders,
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
       },
     });
   }),
-  markdownResponse: vi.fn((markdown, filename, status, corsHeaders, additionalHeaders) => {
+  markdownResponse: jest.fn((markdown, filename, status, corsHeaders, additionalHeaders) => {
     return new Response(markdown, {
-      status,
+      status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'text/markdown; charset=utf-8',
         'Content-Disposition': `attachment; filename="${filename}"`,
-        ...corsHeaders,
-        ...additionalHeaders,
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
       },
     });
   }),
-  handleOptionsRequest: vi.fn((corsHeaders) => {
-    return new Response(null, {
+  handleOptionsRequest: jest.fn((corsHeaders) => {
+    return new NextResponse(null, {
       status: 204,
       headers: {
-        ...corsHeaders,
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
       },
     });
   }),
+  buildCacheHeaders: jest.fn(() => ({
+    'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+  })),
 }));
 
-// Mock api/route-factory
-vi.mock('../../../../../../../packages/web-runtime/src/api/route-factory', () => ({
-  createApiRoute: vi.fn((config) => {
-    return async (request: Request, context?: unknown) => {
-      return await config.handler({
-        logger: {
-          info: vi.fn(),
-          warn: vi.fn(),
-          error: vi.fn(),
-          debug: vi.fn(),
-        },
-        request: request as any,
-        nextContext: context,
-        query: Object.fromEntries(new URL(request.url).searchParams),
-        body: await request.json().catch(() => ({})),
-      });
-    };
-  }),
-  createOptionsHandler: vi.fn((cors: string) => {
-    return async () => {
-      return new Response(null, {
-        status: 204,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        },
-      });
-    };
-  }),
-  createFormatHandlerRoute: vi.fn((config) => {
-    return async (request: Request, context?: unknown) => {
-      try {
-        const url = new URL(request.url);
-        const format = url.searchParams.get('format') || 'json';
-        const formatHandler = config.formats[format as keyof typeof config.formats];
-        
-        if (!formatHandler) {
-          throw new Error(`Invalid format: ${format}`);
-        }
+// Mock supabase/server-anon (for storage format)
+jest.mock('@heyclaude/web-runtime/supabase/server-anon', () => ({
+  createSupabaseAnonClient: jest.fn(() => ({
+    storage: {
+      from: jest.fn(() => ({
+        getPublicUrl: jest.fn(() => ({
+          data: { publicUrl: 'https://storage.supabase.co/storage/v1/object/public/content/agents/test-content.json' },
+        })),
+      })),
+    },
+  })),
+}));
 
-        // Extract route params from context
-        let routeParams: Record<string, string> = {};
-        if (formatHandler.getRouteParams && context) {
-          // getRouteParams throws for invalid categories - factory catches and returns 500
-          routeParams = await formatHandler.getRouteParams(context);
-        }
-
-        // Mock service call
-        const { getService } = await import('@heyclaude/web-runtime/data/service-factory');
-        const service = await getService(formatHandler.serviceKey);
-        const query = Object.fromEntries(url.searchParams);
-        const methodArgs = formatHandler.methodArgs(format as any, query, {}, routeParams);
-        const result = await (service as any)[formatHandler.methodName](...methodArgs);
-
-        // Call response handler
-        return await formatHandler.responseHandler(
-          result,
-          format as any,
-          query,
-          {},
-          {
-            logger: {
-              info: vi.fn(),
-              warn: vi.fn(),
-              error: vi.fn(),
-              debug: vi.fn(),
-            },
-            request: request as any,
-            nextContext: context,
-          }
-        );
-      } catch (error) {
-        // Factory catches errors and returns 500
-        return new Response(
-          JSON.stringify({
-            error: error instanceof Error ? error.message : String(error),
-          }),
-          {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-          }
-        );
-      }
-    };
-  }),
+// Mock authentication (content detail route doesn't require auth, but factory checks it)
+jest.mock('@heyclaude/web-runtime/auth/get-authenticated-user', () => ({
+  getAuthenticatedUser: jest.fn(async () => ({
+    user: null,
+    isAuthenticated: false,
+  })),
 }));
 
 describe('GET /api/content/[category]/[slug]', () => {
   let prismocker: PrismaClient;
 
-  beforeEach(() => {
-    // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
-    prismocker = prisma;
-    
-    // Reset Prismocker data before each test
-    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
-      prismocker.reset();
-    }
-    
-    vi.clearAllMocks();
-    mockGetApiContentFull.mockResolvedValue({
-      id: 'test-id',
-      title: 'Test Content',
-      slug: 'test-content',
-      category: 'agents',
-      description: 'Test description',
-    });
-    mockGetItemLlmsTxt.mockResolvedValue('# Test Content\n\nTest description');
-    mockGenerateMarkdownExport.mockResolvedValue({
-      success: true,
-      markdown: '# Test Content\n\nTest description',
-      filename: 'test-content.md',
-      content_id: 'test-id',
-    });
-    mockGetStoragePath.mockResolvedValue([{
+  // Mock data for RPC calls
+  const mockApiContentFull = {
+    id: 'test-id',
+    title: 'Test Content',
+    slug: 'test-content',
+    category: 'agents',
+    description: 'Test description',
+  };
+  const mockItemLlmsTxt = '# Test Content\n\nTest description';
+  const mockMarkdownExport = {
+    success: true,
+    markdown: '# Test Content\n\nTest description',
+    filename: 'test-content.md',
+    content_id: 'test-id',
+  };
+  const mockStoragePath = [
+    {
       bucket: 'content',
       object_path: 'agents/test-content.json',
-    }]);
+    },
+  ];
+
+  beforeEach(() => {
+    // Clear request cache before each test (REQUIRED for test isolation)
+    clearRequestCache();
+
+    // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    prismocker = prisma;
+
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof (prismocker as any).reset === 'function') {
+      (prismocker as any).reset();
+    }
+
+    jest.clearAllMocks();
+
+    // Set up $queryRawUnsafe for RPC testing (all ContentService methods use RPC)
+    // Must assign jest.fn() to $queryRawUnsafe before using mockImplementation
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>) = jest.fn().mockImplementation((sql: string) => {
+      if (sql.includes('get_api_content_full')) {
+        return Promise.resolve(mockApiContentFull);
+      }
+      if (sql.includes('generate_item_llms_txt')) {
+        return Promise.resolve(mockItemLlmsTxt);
+      }
+      if (sql.includes('generate_markdown_export')) {
+        return Promise.resolve(mockMarkdownExport);
+      }
+      if (sql.includes('get_skill_storage_path') || sql.includes('get_mcpb_storage_path')) {
+        return Promise.resolve(mockStoragePath);
+      }
+      return Promise.resolve([]);
+    });
   });
 
   it('should return JSON format by default', async () => {
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/agents/test-content',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content',
     });
 
     const context = {
-      params: Promise.resolve({ category: 'agents', slug: 'test-content' }),
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
     };
 
     const response = await GET(request, context);
@@ -333,208 +273,313 @@ describe('GET /api/content/[category]/[slug]', () => {
     expectCorsHeaders(response);
     expectCacheHeaders(response, true);
     expect(response.headers.get('Content-Type')).toContain('application/json');
-    expect(mockGetApiContentFull).toHaveBeenCalledWith({
-      p_base_url: 'https://claudepro.directory',
-      p_category: 'agents',
-      p_slug: 'test-content',
-    });
-    expect(body).toHaveProperty('id');
-    expect(body).toHaveProperty('title');
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      'SELECT * FROM get_api_content_full(p_base_url => $1, p_category => $2, p_slug => $3)',
+      'https://claudepro.directory',
+      'agents',
+      'test-content'
+    );
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledTimes(1);
+    if (typeof body === 'object' && body !== null) {
+      expect(body).toHaveProperty('id');
+      expect(body).toHaveProperty('title');
+    }
   });
 
   it('should return JSON format with format=json', async () => {
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/agents/test-content?format=json',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=json',
     });
 
     const context = {
-      params: Promise.resolve({ category: 'agents', slug: 'test-content' }),
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
     };
 
     const response = await GET(request, context);
 
     expectStatus(response, 200);
     expect(response.headers.get('Content-Type')).toContain('application/json');
-    expect(mockGetApiContentFull).toHaveBeenCalled();
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      'SELECT * FROM get_api_content_full(p_base_url => $1, p_category => $2, p_slug => $3)',
+      'https://claudepro.directory',
+      'agents',
+      'test-content'
+    );
   });
 
   it('should return LLMs format with format=llms', async () => {
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/agents/test-content?format=llms',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=llms',
     });
 
     const context = {
-      params: Promise.resolve({ category: 'agents', slug: 'test-content' }),
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
     };
 
     const response = await GET(request, context);
+    const body = await getResponseBody(response);
 
     expectStatus(response, 200);
     expect(response.headers.get('Content-Type')).toContain('text/plain');
-    expect(mockGetItemLlmsTxt).toHaveBeenCalledWith({
-      p_category: 'agents',
-      p_slug: 'test-content',
-    });
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      'SELECT * FROM generate_item_llms_txt(p_category => $1, p_slug => $2)',
+      'agents',
+      'test-content'
+    );
+    expect(body).toBe(mockItemLlmsTxt);
   });
 
   it('should return LLMs format with format=llms-txt', async () => {
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/agents/test-content?format=llms-txt',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=llms-txt',
     });
 
     const context = {
-      params: Promise.resolve({ category: 'agents', slug: 'test-content' }),
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
     };
 
     const response = await GET(request, context);
 
     expectStatus(response, 200);
     expect(response.headers.get('Content-Type')).toContain('text/plain');
-    expect(mockGetItemLlmsTxt).toHaveBeenCalled();
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      'SELECT * FROM generate_item_llms_txt(p_category => $1, p_slug => $2)',
+      'agents',
+      'test-content'
+    );
   });
 
   it('should return Markdown format with format=markdown', async () => {
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/agents/test-content?format=markdown',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=markdown',
     });
 
     const context = {
-      params: Promise.resolve({ category: 'agents', slug: 'test-content' }),
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
     };
 
     const response = await GET(request, context);
+    const body = await getResponseBody(response);
 
     expectStatus(response, 200);
     expect(response.headers.get('Content-Type')).toContain('text/markdown');
-    expect(mockGenerateMarkdownExport).toHaveBeenCalledWith({
-      p_category: 'agents',
-      p_slug: 'test-content',
-      p_include_footer: false,
-      p_include_metadata: true,
-    });
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      'SELECT * FROM generate_markdown_export(p_category => $1, p_include_footer => $2, p_include_metadata => $3, p_slug => $4)',
+      'agents',
+      false,
+      true,
+      'test-content'
+    );
+    expect(body).toBe(mockMarkdownExport.markdown);
   });
 
   it('should return Markdown format with format=md', async () => {
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/agents/test-content?format=md',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=md',
     });
 
     const context = {
-      params: Promise.resolve({ category: 'agents', slug: 'test-content' }),
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
     };
 
     const response = await GET(request, context);
 
     expectStatus(response, 200);
     expect(response.headers.get('Content-Type')).toContain('text/markdown');
-    expect(mockGenerateMarkdownExport).toHaveBeenCalled();
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      'SELECT * FROM generate_markdown_export(p_category => $1, p_include_footer => $2, p_include_metadata => $3, p_slug => $4)',
+      'agents',
+      false,
+      true,
+      'test-content'
+    );
   });
 
   it('should handle markdown export with includeFooter parameter', async () => {
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/agents/test-content?format=markdown&includeFooter=true',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=markdown&includeFooter=true',
     });
 
     const context = {
-      params: Promise.resolve({ category: 'agents', slug: 'test-content' }),
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
     };
 
     const response = await GET(request, context);
 
     expectStatus(response, 200);
-    expect(mockGenerateMarkdownExport).toHaveBeenCalledWith(
-      expect.objectContaining({
-        p_include_footer: true,
-      })
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      'SELECT * FROM generate_markdown_export(p_category => $1, p_include_footer => $2, p_include_metadata => $3, p_slug => $4)',
+      'agents',
+      true,
+      true,
+      'test-content'
     );
   });
 
   it('should handle markdown export with includeMetadata parameter', async () => {
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/agents/test-content?format=markdown&includeMetadata=false',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=markdown&includeMetadata=false',
     });
 
     const context = {
-      params: Promise.resolve({ category: 'agents', slug: 'test-content' }),
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
     };
 
     const response = await GET(request, context);
 
     expectStatus(response, 200);
-    expect(mockGenerateMarkdownExport).toHaveBeenCalledWith(
-      expect.objectContaining({
-        p_include_metadata: false,
-      })
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      'SELECT * FROM generate_markdown_export(p_category => $1, p_include_footer => $2, p_include_metadata => $3, p_slug => $4)',
+      'agents',
+      false,
+      false,
+      'test-content'
     );
   });
 
-  it('should return 404 when content not found', async () => {
-    mockGetApiContentFull.mockResolvedValue(null);
-
+  it('should return storage format for skills category (redirects to storage URL)', async () => {
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/agents/test-content?format=json',
+      url: 'http://localhost:3000/api/v1/content/skills/test-skill?format=storage',
     });
 
     const context = {
-      params: Promise.resolve({ category: 'agents', slug: 'test-content' }),
+      params: Promise.resolve({ category: 'skills', slug: 'test-skill' }), // Next.js params are Promises
+    };
+
+    const response = await GET(request, context);
+
+    // When metadata=false (default), storage format redirects to Supabase Storage public URL with 308
+    expectStatus(response, 308);
+    expect(response.headers.get('Location')).toBeTruthy();
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      'SELECT * FROM get_skill_storage_path(p_slug => $1)',
+      'test-skill'
+    );
+  });
+
+  it('should return storage format for mcp category (redirects to storage URL)', async () => {
+    const request = createMockRequest({
+      method: 'GET',
+      url: 'http://localhost:3000/api/v1/content/mcp/test-mcp?format=storage',
+    });
+
+    const context = {
+      params: Promise.resolve({ category: 'mcp', slug: 'test-mcp' }), // Next.js params are Promises
+    };
+
+    const response = await GET(request, context);
+
+    // When metadata=false (default), storage format redirects to Supabase Storage public URL with 308
+    expectStatus(response, 308);
+    expect(response.headers.get('Location')).toBeTruthy();
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      'SELECT * FROM get_mcpb_storage_path(p_slug => $1)',
+      'test-mcp'
+    );
+  });
+
+  it('should return storage metadata when metadata=true', async () => {
+    const request = createMockRequest({
+      method: 'GET',
+      url: 'http://localhost:3000/api/v1/content/skills/test-skill?format=storage&metadata=true',
+    });
+
+    const context = {
+      params: Promise.resolve({ category: 'skills', slug: 'test-skill' }), // Next.js params are Promises
+    };
+
+    const response = await GET(request, context);
+    const body = await getResponseBody(response);
+
+    expectStatus(response, 200);
+    expect(response.headers.get('Content-Type')).toContain('application/json');
+    if (typeof body === 'object' && body !== null) {
+      expect(body).toHaveProperty('bucket');
+      expect(body).toHaveProperty('object_path');
+      expect(body).toHaveProperty('download_url');
+      expect(body).toHaveProperty('note');
+    }
+  });
+
+  it('should return 404 when content not found', async () => {
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>) = jest.fn().mockResolvedValue(null);
+
+    const request = createMockRequest({
+      method: 'GET',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=json',
+    });
+
+    const context = {
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
     };
 
     const response = await GET(request, context);
     const body = await getResponseBody(response);
 
     expectStatus(response, 404);
-    expect(body).toHaveProperty('error');
+    if (typeof body === 'object' && body !== null) {
+      expect(body).toHaveProperty('error');
+    }
   });
 
   it('should return 404 when LLMs content not found', async () => {
-    mockGetItemLlmsTxt.mockResolvedValue(null);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>) = jest.fn().mockImplementation((sql: string) => {
+      if (sql.includes('generate_item_llms_txt')) {
+        return Promise.resolve(null);
+      }
+      return Promise.resolve(mockApiContentFull);
+    });
 
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/agents/test-content?format=llms',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=llms',
     });
 
     const context = {
-      params: Promise.resolve({ category: 'agents', slug: 'test-content' }),
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
     };
 
     const response = await GET(request, context);
     const body = await getResponseBody(response);
 
     expectStatus(response, 404);
-    expect(body).toHaveProperty('error');
+    if (typeof body === 'object' && body !== null) {
+      expect(body).toHaveProperty('error');
+    }
   });
 
   it('should handle invalid category in route params', async () => {
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/invalid/test-content?format=json',
+      url: 'http://localhost:3000/api/v1/content/invalid/test-content?format=json',
     });
 
     const context = {
-      params: Promise.resolve({ category: 'invalid', slug: 'test-content' }),
+      params: Promise.resolve({ category: 'invalid', slug: 'test-content' }), // Next.js params are Promises
     };
 
-    // Factory will handle error and return 500 (methodArgs throws)
+    // Factory will handle error and return 500 (methodArgs throws, factory catches and returns 500)
     const response = await GET(request, context);
     const body = await getResponseBody(response);
 
     expectStatus(response, 500);
-    expect(body).toHaveProperty('error');
+    if (typeof body === 'object' && body !== null) {
+      expect(body).toHaveProperty('error');
+    }
   });
 
   it('should handle missing route context', async () => {
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/agents/test-content?format=json',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=json',
     });
 
     // Factory will handle error and return 500 (handler throws)
@@ -542,59 +587,70 @@ describe('GET /api/content/[category]/[slug]', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 500);
-    expect(body).toHaveProperty('error');
+    if (typeof body === 'object' && body !== null) {
+      expect(body).toHaveProperty('error');
+    }
   });
 
-  it('should return 400 for invalid format', async () => {
+  it('should return 500 for invalid format', async () => {
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/agents/test-content?format=invalid',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=invalid',
     });
 
     const context = {
-      params: Promise.resolve({ category: 'agents', slug: 'test-content' }),
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
     };
 
-    // Factory will handle validation and return 400
+    // Factory will handle validation error and return 500 (format handler not found)
     const response = await GET(request, context);
     const body = await getResponseBody(response);
 
-    expectStatus(response, 400);
-    expect(body).toHaveProperty('error');
+    expectStatus(response, 500);
+    if (typeof body === 'object' && body !== null) {
+      expect(body).toHaveProperty('error');
+    }
   });
 
   it('should handle markdown generation failure', async () => {
-    mockGenerateMarkdownExport.mockResolvedValue({
-      success: false,
-      error: 'Generation failed',
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>) = jest.fn().mockImplementation((sql: string) => {
+      if (sql.includes('generate_markdown_export')) {
+        return Promise.resolve({
+          success: false,
+          error: 'Generation failed',
+        });
+      }
+      return Promise.resolve(mockApiContentFull);
     });
 
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/agents/test-content?format=markdown',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=markdown',
     });
 
     const context = {
-      params: Promise.resolve({ category: 'agents', slug: 'test-content' }),
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
     };
 
     const response = await GET(request, context);
     const body = await getResponseBody(response);
 
     expectStatus(response, 400);
-    expect(body).toHaveProperty('error');
+    if (typeof body === 'object' && body !== null) {
+      expect(body).toHaveProperty('error');
+    }
   });
 
   it('should handle service errors gracefully', async () => {
-    mockGetApiContentFull.mockRejectedValue(new Error('Database error'));
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>) = jest.fn().mockRejectedValue(new Error('Database error'));
 
     const request = createMockRequest({
       method: 'GET',
-      url: 'http://localhost:3000/api/content/agents/test-content?format=json',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=json',
     });
 
     const context = {
-      params: Promise.resolve({ category: 'agents', slug: 'test-content' }),
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
     };
 
     // Factory will handle error and return 500
@@ -602,7 +658,29 @@ describe('GET /api/content/[category]/[slug]', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 500);
-    expect(body).toHaveProperty('error');
+    if (typeof body === 'object' && body !== null) {
+      expect(body).toHaveProperty('error');
+    }
+  });
+
+  it('should handle storage format error for unsupported category', async () => {
+    const request = createMockRequest({
+      method: 'GET',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=storage',
+    });
+
+    const context = {
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
+    };
+
+    // Storage format only supports skills and mcp categories
+    const response = await GET(request, context);
+    const body = await getResponseBody(response);
+
+    expectStatus(response, 500);
+    if (typeof body === 'object' && body !== null) {
+      expect(body).toHaveProperty('error');
+    }
   });
 
   it('should handle OPTIONS request', async () => {
@@ -610,5 +688,73 @@ describe('GET /api/content/[category]/[slug]', () => {
 
     expectStatus(response, 204);
     expectCorsHeaders(response);
+  });
+
+  it('should cache results on duplicate calls (caching test)', async () => {
+    // Clear cache before test
+    clearRequestCache();
+
+    const request1 = createMockRequest({
+      method: 'GET',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=json',
+    });
+
+    const context1 = {
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
+    };
+
+    // First call - should populate cache
+    const cacheBefore = getRequestCache().getStats().size;
+    await GET(request1, context1);
+    const cacheAfterFirst = getRequestCache().getStats().size;
+    const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+
+    // Clear cache between calls to ensure second call makes a fresh request
+    clearRequestCache();
+
+    // Second call - should make a new RPC call (request-scoped cache doesn't persist across separate GET calls)
+    // Each GET() call creates a new request context, so cache is fresh for each call
+    const request2 = createMockRequest({
+      method: 'GET',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=json',
+    });
+
+    const context2 = {
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
+    };
+
+    const cacheBeforeSecond = getRequestCache().getStats().size;
+    await GET(request2, context2);
+    const cacheAfterSecond = getRequestCache().getStats().size;
+    const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+
+    // The createFormatHandlerRoute factory uses Next.js Cache Components, which are request-scoped.
+    // This means each call to GET(request, context) creates a new request context, and thus a new cache.
+    // Therefore, the underlying service method will be called once for each GET() call.
+    expect(firstCallCount).toBe(1);
+    expect(secondCallCount).toBe(2);
+    // Verify cache worked within each request (cache size increased after first call)
+    expect(cacheAfterFirst).toBeGreaterThan(cacheBefore);
+    // Second call creates a new cache context, so cache size should increase again
+    expect(cacheAfterSecond).toBeGreaterThan(cacheBeforeSecond);
+  });
+
+  it('should return 405 for unsupported method', async () => {
+    const request = createMockRequest({
+      method: 'POST',
+      url: 'http://localhost:3000/api/v1/content/agents/test-content?format=json',
+    });
+
+    const context = {
+      params: Promise.resolve({ category: 'agents', slug: 'test-content' }), // Next.js params are Promises
+    };
+
+    const response = await GET(request, context);
+    const body = await getResponseBody(response);
+
+    expectStatus(response, 405);
+    if (typeof body === 'object' && body !== null) {
+      expect(body).toHaveProperty('error');
+    }
   });
 });

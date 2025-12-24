@@ -211,9 +211,6 @@ export const isBookmarkedAction = authedAction
       content_type: parsedInput.content_type,
       content_slug: parsedInput.content_slug,
     });
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/web-runtime/src/actions/user.ts:207',message:'isBookmarkedAction - before return',data:{result,resultType:typeof result,userId:ctx.userId,content_type:parsedInput.content_type,content_slug:parsedInput.content_slug},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
     return result;
   });
 
@@ -342,12 +339,13 @@ export const getBookmarkStatusBatch = authedAction
     // Ensure data is an array before mapping
     // IsBookmarkedBatchReturns is Array<{ content_type: content_category | null; content_slug: string; is_bookmarked: boolean }>
     const results = Array.isArray(data) ? data : [];
-    return new Map<string, boolean>(
+    const resultMap = new Map<string, boolean>(
       results.map((row: { content_type: content_category | null; content_slug: string; is_bookmarked: boolean }) => [
         `${row.content_type ?? 'unknown'}:${row.content_slug}`,
         row.is_bookmarked,
       ])
     );
+    return resultMap;
   });
 
 /**
@@ -371,9 +369,10 @@ export const getFollowStatusBatch = authedAction
     // Ensure data is an array
     // IsFollowingBatchReturns is Record<string, unknown>[], so use bracket notation
     const results = Array.isArray(data) ? data : [];
-    return new Map(
+    const resultMap = new Map(
       results.map((row) => [row['followed_user_id'] as string, row['is_following'] as boolean])
     );
+    return resultMap;
   });
 
 export const getActivitySummary = authedAction

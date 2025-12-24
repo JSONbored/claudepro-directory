@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
 import { withTimeout, TimeoutError, TIMEOUT_PRESETS } from './timeout.ts';
 
 describe('TimeoutError', () => {
@@ -20,11 +20,11 @@ describe('TimeoutError', () => {
 
 describe('withTimeout', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    jest.useFakeTimers();
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    jest.useRealTimers();
   });
 
   describe('successful operations', () => {
@@ -55,7 +55,7 @@ describe('withTimeout', () => {
       const resultPromise = withTimeout(promise, 1000);
 
       // Advance timers to complete the async function
-      await vi.advanceTimersByTimeAsync(100);
+      await jest.runAllTimersAsync();
 
       const result = await resultPromise;
       expect(result).toBe('async result');
@@ -69,7 +69,7 @@ describe('withTimeout', () => {
       const result = withTimeout(promise, 1000, 'Custom timeout message');
 
       // Advance past timeout
-      vi.advanceTimersByTime(1001);
+      jest.advanceTimersByTime(1001);
 
       await expect(result).rejects.toThrow(TimeoutError);
       await expect(result).rejects.toThrow('Custom timeout message');
@@ -83,7 +83,7 @@ describe('withTimeout', () => {
 
       const result = withTimeout(promise, 5000);
 
-      vi.advanceTimersByTime(5001);
+      jest.advanceTimersByTime(5001);
 
       await expect(result).rejects.toThrow('Operation timed out after 5000ms');
     });
@@ -96,7 +96,7 @@ describe('withTimeout', () => {
 
       const result = withTimeout(promise, 3000);
 
-      vi.advanceTimersByTime(3001);
+      jest.advanceTimersByTime(3001);
 
       try {
         await result;
@@ -112,7 +112,7 @@ describe('withTimeout', () => {
 
       const result = withTimeout(promise, 1);
 
-      vi.advanceTimersByTime(2);
+      jest.advanceTimersByTime(2);
 
       await expect(result).rejects.toThrow(TimeoutError);
     });
@@ -201,7 +201,7 @@ describe('withTimeout', () => {
 
       const result = withTimeout(promise, 1000);
 
-      vi.advanceTimersByTime(1001);
+      jest.advanceTimersByTime(1001);
 
       await expect(result).rejects.toThrow(TimeoutError);
 
@@ -226,7 +226,7 @@ describe('withTimeout', () => {
       await expect(result1).resolves.toBe('p1');
 
       // Advance time for the second to timeout
-      vi.advanceTimersByTime(101);
+      jest.advanceTimersByTime(101);
       await expect(result2).rejects.toThrow(TimeoutError);
     });
   });
@@ -257,7 +257,7 @@ describe('TIMEOUT_PRESETS', () => {
 
 describe('real-world scenarios', () => {
   beforeEach(() => {
-    vi.useRealTimers();
+    jest.useRealTimers();
   });
 
   it('should timeout actual slow operations', async () => {

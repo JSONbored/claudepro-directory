@@ -6,7 +6,7 @@
  * not integration tests that actually terminate processes.
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
 import pino from 'pino';
 import { createPinoConfig } from './config';
 
@@ -78,7 +78,7 @@ describe('Graceful Shutdown', () => {
 
       logger.info('Test message');
 
-      const flushCallback = vi.fn();
+      const flushCallback = jest.fn();
 
       await new Promise<void>((resolve) => {
         logger.flush((err) => {
@@ -101,7 +101,7 @@ describe('Graceful Shutdown', () => {
 
       // Mock process.on to capture registered handlers
       // @ts-expect-error - Mocking process.on
-      process.on = vi.fn((event: string, handler: Function) => {
+      process.on = jest.fn((event: string, handler: Function) => {
         registeredHandlers.set(event, handler);
         return process;
       });
@@ -182,7 +182,7 @@ describe('Graceful Shutdown', () => {
 
       // Create a mock file destination
       const mockDestination = {
-        write: vi.fn().mockReturnValue(true),
+        write: jest.fn().mockReturnValue(true),
       };
 
       const logger = pino(

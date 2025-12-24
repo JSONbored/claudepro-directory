@@ -26,6 +26,11 @@
       "types": "./dist/prisma/client.d.ts",
       "react-server": "./src/prisma/client.ts",
       "default": "./src/prisma/client.ts"
+    },
+    "./utils/request-cache": {
+      "development": "./src/utils/request-cache.ts",
+      "types": "./dist/utils/request-cache.d.ts",
+      "default": "./src/utils/request-cache.ts"
     }
   },
   "scripts": {

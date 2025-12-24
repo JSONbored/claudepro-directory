@@ -127,34 +127,10 @@ jest.mock('../../../email/base-template', () => {
   };
 });
 
-// Get mocks for use in tests
-const { __mockSendEmail: mockSendEmail } = jest.requireMock('../../../integrations/resend') as {
-  __mockSendEmail: ReturnType<typeof jest.fn>;
-};
-const {
-  __mockLogger: mockLogger,
-  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
-} = jest.requireMock('../../../logging/server') as {
-  __mockLogger: {
-    info: ReturnType<typeof jest.fn>;
-    warn: ReturnType<typeof jest.fn>;
-    error: ReturnType<typeof jest.fn>;
-  };
-  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-};
-const {
-  __mockNormalizeError: mockNormalizeError,
-  __mockEscapeHtml: mockEscapeHtml,
-} = jest.requireMock('@heyclaude/shared-runtime') as {
-  __mockNormalizeError: ReturnType<typeof jest.fn>;
-  __mockEscapeHtml: ReturnType<typeof jest.fn>;
-};
-const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock('../../../email/base-template') as {
-  __mockRenderEmailTemplate: ReturnType<typeof jest.fn>;
-};
-
 // Import function AFTER mocks are set up
 import { sendContactEmails } from './contact';
+// Import setup function to eliminate duplication
+import { setupContactEmailMocks } from '../../utils/test-setup';
 
 // Import function AFTER mocks are set up
 describe('sendContactEmails', () => {
@@ -162,6 +138,10 @@ describe('sendContactEmails', () => {
    * Test engine instance - created fresh for each test to avoid state caching
    */
   let t: InngestTestEngine;
+  /**
+   * Mock references (set up via setupContactEmailMocks in beforeEach)
+   */
+  let mocks: ReturnType<typeof setupContactEmailMocks>;
 
   /**
    * Setup before each test
@@ -176,70 +156,8 @@ describe('sendContactEmails', () => {
       function: sendContactEmails,
     });
 
-    // Reset all mocks to ensure clean state
-    jest.clearAllMocks();
-    jest.resetAllMocks();
-    mockSendEmail.mockReset();
-    mockEscapeHtml.mockImplementation((str: string) => str);
-    mockRenderEmailTemplate.mockReset();
-    
-    // Restore mockRenderEmailTemplate implementation after reset
-    mockRenderEmailTemplate.mockImplementation(async (Template, props) => {
-      const propsObj = (props || {}) as {
-        name?: string;
-        category?: string;
-        message?: string;
-        categoryEmoji?: string;
-        submissionId?: string;
-        email?: string;
-        submittedAt?: string;
-      };
-      const { name, category, message, categoryEmoji, submissionId, email, submittedAt } = propsObj;
-      
-      // Check if template is a component (has name property) or is the component itself
-      const templateName = (Template as any)?.name || (Template as any)?.displayName || (typeof Template === 'function' ? Template.name : 'Unknown');
-      
-      if (templateName === 'ContactAdminNotificationEmail' || templateName.includes('ContactAdminNotification')) {
-        // Return HTML that includes all the data the tests expect
-        return `<html>
-          <body>
-            <h1>${categoryEmoji || '📧'} New Contact Submission</h1>
-            <p>Category: ${category}</p>
-            <p>From: ${name}</p>
-            <p>Email: ${email}</p>
-            <p>Submission ID: ${submissionId}</p>
-            <p>Submitted: ${submittedAt || new Date().toISOString()}</p>
-            <p>Message: ${message}</p>
-          </body>
-        </html>`;
-      }
-      
-      if (templateName === 'ContactUserConfirmationEmail' || templateName.includes('ContactUserConfirmation')) {
-        return `<html>
-          <body>
-            <h1>Thanks for reaching out, ${name}!</h1>
-            <p>Category: ${category}</p>
-          </body>
-        </html>`;
-      }
-      
-      return `<html><body>Default Email</body></html>`;
-    });
-
-    // Restore normalizeError mock implementation after reset
-    // jest.resetAllMocks() resets mocks to return undefined, so we need to restore it
-    mockNormalizeError.mockImplementation((error: unknown, fallbackMessage?: string) => {
-      if (error instanceof Error) {
-        return error;
-      }
-      return new Error(fallbackMessage || String(error || 'Unknown error'));
-    });
-
-    // Set up default successful mock responses
-    mockSendEmail.mockResolvedValue({
-      data: { id: 'email-id-123' },
-      error: null,
-    });
+    // Set up mocks using shared setup function (eliminates duplication)
+    mocks = setupContactEmailMocks('sendContactEmails', '/inngest/email/contact');
   });
 
   /**
@@ -278,11 +196,11 @@ describe('sendContactEmails', () => {
     expect(result).toHaveProperty('userEmailId', 'email-id-123');
 
     // Verify both emails were sent
-    expect(mockSendEmail).toHaveBeenCalledTimes(2);
+    expect(mocks.mockSendEmail).toHaveBeenCalledTimes(2);
 
     // Verify admin email parameters
-    expect(mockSendEmail).toHaveBeenCalledTimes(2);
-    const adminCall = mockSendEmail.mock.calls[0]?.[0];
+    expect(mocks.mockSendEmail).toHaveBeenCalledTimes(2);
+    const adminCall = mocks.mockSendEmail.mock.calls[0]?.[0];
     expect(adminCall).toBeDefined();
     expect(adminCall?.to).toBe('hi@claudepro.directory');
     expect(adminCall?.subject).toBe('New Contact: bug - John Doe');
@@ -295,7 +213,7 @@ describe('sendContactEmails', () => {
     expect(adminCall?.html).toContain('Found a bug in the search feature');
 
     // Verify user email parameters
-    const userCall = mockSendEmail.mock.calls[1][0];
+    const userCall = mocks.mockSendEmail.mock.calls[1][0];
     expect(userCall.to).toBe('john@example.com');
     expect(userCall.subject).toBe('We received your message!');
     expect(userCall.tags).toEqual([{ name: 'type', value: 'contact-confirmation' }]);
@@ -329,7 +247,7 @@ describe('sendContactEmails', () => {
     expect(result).toHaveProperty('userEmailSent', true);
 
     // Verify feature category in admin email
-    const adminCall = mockSendEmail.mock.calls[0][0];
+    const adminCall = mocks.mockSendEmail.mock.calls[0][0];
     expect(adminCall.html).toBeDefined();
     expect(adminCall.html).toContain('feature');
   });
@@ -358,7 +276,7 @@ describe('sendContactEmails', () => {
     expect(result).toHaveProperty('success', true);
 
     // Verify partnership category in admin email
-    const adminCall = mockSendEmail.mock.calls[0][0];
+    const adminCall = mocks.mockSendEmail.mock.calls[0][0];
     expect(adminCall.html).toBeDefined();
     expect(adminCall.html).toContain('partnership');
   });
@@ -387,7 +305,7 @@ describe('sendContactEmails', () => {
     expect(result).toHaveProperty('success', true);
 
     // Verify general category in admin email
-    const adminCall = mockSendEmail.mock.calls[0][0];
+    const adminCall = mocks.mockSendEmail.mock.calls[0][0];
     expect(adminCall.html).toBeDefined();
     expect(adminCall.html).toContain('general');
   });
@@ -416,7 +334,7 @@ describe('sendContactEmails', () => {
     expect(result).toHaveProperty('success', true);
 
     // Verify other category in admin email
-    const adminCall = mockSendEmail.mock.calls[0][0];
+    const adminCall = mocks.mockSendEmail.mock.calls[0][0];
     expect(adminCall.html).toBeDefined();
     expect(adminCall.html).toContain('other');
   });
@@ -463,10 +381,10 @@ describe('sendContactEmails', () => {
     expect(errorMessage).toContain('invalid-category');
 
     // Verify no emails were sent
-    expect(mockSendEmail).not.toHaveBeenCalled();
+    expect(mocks.mockSendEmail).not.toHaveBeenCalled();
 
     // Verify error was logged
-    expect(mockLogger.warn).toHaveBeenCalledWith(
+    expect(mocks.mockLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({
         category: 'invalid-category',
       }),
@@ -486,7 +404,7 @@ describe('sendContactEmails', () => {
    */
   it('should handle admin email failure gracefully', async () => {
     // Mock admin email failure, user email success
-    mockSendEmail
+    mocks.mockSendEmail
       .mockResolvedValueOnce({
         data: null,
         error: { message: 'Admin email failed' },
@@ -519,10 +437,10 @@ describe('sendContactEmails', () => {
     expect(result).toHaveProperty('userEmailId', 'user-email-id');
 
     // Verify both emails were attempted
-    expect(mockSendEmail).toHaveBeenCalledTimes(2);
+    expect(mocks.mockSendEmail).toHaveBeenCalledTimes(2);
 
     // Verify error was logged
-    expect(mockLogger.warn).toHaveBeenCalledWith(
+    expect(mocks.mockLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({
         errorMessage: 'Admin email failed',
         submissionId: 'sub-admin-fail',
@@ -543,7 +461,7 @@ describe('sendContactEmails', () => {
    */
   it('should handle user email failure gracefully', async () => {
     // Mock admin email success, user email failure
-    mockSendEmail
+    mocks.mockSendEmail
       .mockResolvedValueOnce({
         data: { id: 'admin-email-id' },
         error: null,
@@ -576,10 +494,10 @@ describe('sendContactEmails', () => {
     expect(result).toHaveProperty('userEmailId', null);
 
     // Verify both emails were attempted
-    expect(mockSendEmail).toHaveBeenCalledTimes(2);
+    expect(mocks.mockSendEmail).toHaveBeenCalledTimes(2);
 
     // Verify error was logged
-    expect(mockLogger.warn).toHaveBeenCalledWith(
+    expect(mocks.mockLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({
         errorMessage: 'User email failed',
         submissionId: 'sub-user-fail',
@@ -600,7 +518,7 @@ describe('sendContactEmails', () => {
    */
   it('should handle both email failures gracefully', async () => {
     // Mock both emails failing
-    mockSendEmail
+    mocks.mockSendEmail
       .mockResolvedValueOnce({
         data: null,
         error: { message: 'Admin email failed' },
@@ -633,7 +551,7 @@ describe('sendContactEmails', () => {
     expect(result).toHaveProperty('userEmailId', null);
 
     // Verify both emails were attempted
-    expect(mockSendEmail).toHaveBeenCalledTimes(2);
+    expect(mocks.mockSendEmail).toHaveBeenCalledTimes(2);
   });
 
   /**
@@ -668,8 +586,8 @@ describe('sendContactEmails', () => {
     });
 
     // Verify admin email was sent
-    expect(mockSendEmail).toHaveBeenCalledTimes(1);
-    const adminCall = mockSendEmail.mock.calls[0][0];
+    expect(mocks.mockSendEmail).toHaveBeenCalledTimes(1);
+    const adminCall = mocks.mockSendEmail.mock.calls[0][0];
     expect(adminCall.to).toBe('hi@claudepro.directory');
   });
 
@@ -716,7 +634,7 @@ describe('sendContactEmails', () => {
     });
 
     // Verify user email was sent
-    expect(mockSendEmail).toHaveBeenCalledTimes(3); // 1 from admin step + 2 from full execution
+    expect(mocks.mockSendEmail).toHaveBeenCalledTimes(3); // 1 from admin step + 2 from full execution
     expect(result).toHaveProperty('userEmailSent', true);
   });
 

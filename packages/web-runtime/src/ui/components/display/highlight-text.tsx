@@ -48,20 +48,15 @@ function HighlightText({
       animate={isInView ? { backgroundSize: '100% 100%' } : {}}
       transition={transition}
       style={{
-        // Use theme CSS variable for Claude orange (matches logo)
-        // Background gradient that expands from left to right
+        // Dynamic: Background gradient animation (Framer Motion controlled)
         backgroundImage: 'linear-gradient(to right, var(--claude-orange), var(--claude-orange))',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'left center',
-        display: 'inline',
-        // Padding for the highlight effect
-        padding: '0.125rem 0.375rem',
-        borderRadius: '0.375rem',
-        // Text color should be white (like logo - white lettering on orange)
+        // Dynamic: Text color from theme (CSS variable)
         color: 'var(--primary-foreground)', // White text on primary/orange background
         ...props.style,
       }}
-      className={cn('relative inline-block', className)}
+      className={cn('relative inline-block inline px-1.5 py-0.5 rounded-sm', className)}
       {...props}
     >
       {text}

@@ -62,12 +62,39 @@ export const POST = createApiRoute({
     );
 
     // Call server action internally
-    const result = await addBookmark({
-      content_slug,
-      content_type,
-      notes: notes || '',
-    });
+    let result;
+    try {
+      result = await addBookmark({
+        content_slug,
+        content_type,
+        notes: notes || '',
+      });
+    } catch (error) {
+      throw error;
+    }
+    if (
+      result &&
+      typeof result === 'object' &&
+      'serverError' in result &&
+      (result as { serverError?: string }).serverError
+    ) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:92',message:'Returning 500 for serverError',data:{serverError:(result as {serverError?:string}).serverError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      logger.error(
+        { serverError: (result as { serverError?: string }).serverError },
+        'Action returned serverError'
+      );
+      return jsonResponse(
+        { error: (result as { serverError?: string }).serverError || 'Internal server error' },
+        500,
+        cors
+      );
+    }
 
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:102',message:'About to return jsonResponse (success)',data:{resultType:typeof result,statusCode:200},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     return jsonResponse(result, 200, cors);
   },
   method: 'POST',

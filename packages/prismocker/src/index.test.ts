@@ -4,92 +4,122 @@
  * These tests verify the core functionality works correctly.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { createPrismocker } from './index.js';
+import { describe, it, expect, beforeEach } from '@jest/globals';
+import { createPrismocker } from './index';
+import type { PrismaClient } from '@prisma/client';
 
 describe('Prismocker', () => {
-  let prisma: any;
+  let prisma: PrismaClient;
 
   beforeEach(() => {
-    prisma = createPrismocker();
-    prisma.reset();
+    prisma = createPrismocker<PrismaClient>();
+    if ('reset' in prisma && typeof (prisma as any).reset === 'function') {
+      (prisma as any).reset();
+    }
   });
 
   it('should create a record', async () => {
-    const user = await prisma.user.create({
-      data: { name: 'John', email: 'john@example.com' },
+    // Use actual Prisma model from schema (e.g., companies)
+    const company = await prisma.companies.create({
+      data: {
+        name: 'Test Company',
+        owner_id: 'test-owner-id',
+        slug: 'test-company',
+      },
     });
 
-    expect(user.name).toBe('John');
-    expect(user.email).toBe('john@example.com');
-    expect(user.id).toBeDefined();
+    expect(company.name).toBe('Test Company');
+    expect(company.slug).toBe('test-company');
+    expect(company.id).toBeDefined();
   });
 
   it('should find many records', async () => {
-    await prisma.user.create({ data: { name: 'John' } });
-    await prisma.user.create({ data: { name: 'Jane' } });
+    await prisma.companies.create({
+      data: { name: 'Company 1', owner_id: 'owner-1', slug: 'company-1' },
+    });
+    await prisma.companies.create({
+      data: { name: 'Company 2', owner_id: 'owner-2', slug: 'company-2' },
+    });
 
-    const users = await prisma.user.findMany();
-    expect(users).toHaveLength(2);
+    const companies = await prisma.companies.findMany();
+    expect(companies).toHaveLength(2);
   });
 
   it('should find unique record', async () => {
-    const created = await prisma.user.create({
-      data: { id: '1', name: 'John' },
+    const created = await prisma.companies.create({
+      data: { id: 'test-id', name: 'Test Company', owner_id: 'owner-1', slug: 'test-company' },
     });
 
-    const found = await prisma.user.findUnique({ where: { id: '1' } });
+    const found = await prisma.companies.findUnique({ where: { id: 'test-id' } });
     expect(found).toEqual(created);
   });
 
   it('should filter records with where clause', async () => {
-    await prisma.user.create({ data: { name: 'John', age: 25 } });
-    await prisma.user.create({ data: { name: 'Jane', age: 30 } });
-
-    const users = await prisma.user.findMany({
-      where: { age: { gt: 25 } },
+    await prisma.companies.create({
+      data: { name: 'Company 1', owner_id: 'owner-1', slug: 'company-1' },
+    });
+    await prisma.companies.create({
+      data: { name: 'Company 2', owner_id: 'owner-2', slug: 'company-2' },
     });
 
-    expect(users).toHaveLength(1);
-    expect(users[0].name).toBe('Jane');
+    const companies = await prisma.companies.findMany({
+      where: { owner_id: 'owner-1' },
+    });
+
+    expect(companies).toHaveLength(1);
+    expect(companies[0].name).toBe('Company 1');
   });
 
   it('should update a record', async () => {
-    const created = await prisma.user.create({ data: { name: 'John' } });
-
-    const updated = await prisma.user.update({
-      where: { id: created.id },
-      data: { name: 'Jane' },
+    const created = await prisma.companies.create({
+      data: { name: 'Original Name', owner_id: 'owner-1', slug: 'original-slug' },
     });
 
-    expect(updated.name).toBe('Jane');
+    const updated = await prisma.companies.update({
+      where: { id: created.id },
+      data: { name: 'Updated Name' },
+    });
+
+    expect(updated.name).toBe('Updated Name');
   });
 
   it('should delete a record', async () => {
-    const created = await prisma.user.create({ data: { name: 'John' } });
+    const created = await prisma.companies.create({
+      data: { name: 'Test Company', owner_id: 'owner-1', slug: 'test-company' },
+    });
 
-    await prisma.user.delete({ where: { id: created.id } });
+    await prisma.companies.delete({ where: { id: created.id } });
 
-    const users = await prisma.user.findMany();
-    expect(users).toHaveLength(0);
+    const companies = await prisma.companies.findMany();
+    expect(companies).toHaveLength(0);
   });
 
   it('should count records', async () => {
-    await prisma.user.create({ data: { name: 'John' } });
-    await prisma.user.create({ data: { name: 'Jane' } });
+    await prisma.companies.create({
+      data: { name: 'Company 1', owner_id: 'owner-1', slug: 'company-1' },
+    });
+    await prisma.companies.create({
+      data: { name: 'Company 2', owner_id: 'owner-2', slug: 'company-2' },
+    });
 
-    const count = await prisma.user.count();
+    const count = await prisma.companies.count();
     expect(count).toBe(2);
   });
 
   it('should reset all data', async () => {
-    await prisma.user.create({ data: { name: 'John' } });
-    await prisma.user.create({ data: { name: 'Jane' } });
+    await prisma.companies.create({
+      data: { name: 'Company 1', owner_id: 'owner-1', slug: 'company-1' },
+    });
+    await prisma.companies.create({
+      data: { name: 'Company 2', owner_id: 'owner-2', slug: 'company-2' },
+    });
 
-    prisma.reset();
+    if ('reset' in prisma && typeof (prisma as any).reset === 'function') {
+      (prisma as any).reset();
+    }
 
-    const users = await prisma.user.findMany();
-    expect(users).toHaveLength(0);
+    const companies = await prisma.companies.findMany();
+    expect(companies).toHaveLength(0);
   });
 
   it('should support $queryRawUnsafe (stub)', async () => {
@@ -98,11 +128,13 @@ describe('Prismocker', () => {
   });
 
   it('should support $transaction (simplified)', async () => {
-    const result = await prisma.$transaction(async (tx: any) => {
-      return await tx.user.create({ data: { name: 'John' } });
+    const result = await prisma.$transaction(async (tx) => {
+      return await tx.companies.create({
+        data: { name: 'Test Company', owner_id: 'owner-1', slug: 'test-company' },
+      });
     });
 
-    expect(result.name).toBe('John');
+    expect(result.name).toBe('Test Company');
   });
 });
 

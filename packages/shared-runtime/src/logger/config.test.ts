@@ -9,7 +9,7 @@
  * - prettyPrint configuration
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
 import pino from 'pino';
 import { createPinoConfig, SENSITIVE_PATTERNS } from './config';
 

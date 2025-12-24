@@ -19,17 +19,32 @@ jest.mock('../../../data-layer/src/utils/rpc-error-logging.ts', () => ({
   logRpcError: jest.fn(),
 }));
 
-// Mock server-only FIRST
-jest.mock('server-only', () => ({}));
+// Mock Resend integration (needed for Inngest function execution)
+// When action sends Inngest event, the function will execute and use these mocks
+// Path: packages/web-runtime/src/integrations/resend (from actions/ directory)
+jest.mock('../integrations/resend', () => {
+  const mockSendEmail = jest.fn();
+  return {
+    sendEmail: mockSendEmail,
+    __mockSendEmail: mockSendEmail,
+  };
+});
 
-// DO NOT mock next/headers - safemocker handles this automatically
-// DO NOT mock Supabase client or auth - safemocker handles auth automatically
-// safemocker's __mocks__/next-safe-action.ts provides pre-configured authedAction
-// with auth context already injected (test-user-id, test@example.com, test-token)
+// Mock email template rendering (needed for Inngest function execution)
+// Path: packages/web-runtime/src/email/base-template (from actions/ directory)
+jest.mock('../email/base-template', () => {
+  const mockRenderEmailTemplate = jest.fn().mockResolvedValue('<html>Mock Email</html>');
+  return {
+    renderEmailTemplate: mockRenderEmailTemplate,
+    __mockRenderEmailTemplate: mockRenderEmailTemplate,
+  };
+});
 
-// Mock logger (used by safe-action middleware)
-jest.mock('../logger.ts', () => ({
-  logger: {
+// Mock logging/server (needed for Inngest function execution and action middleware)
+// The Inngest function uses logger and createWebAppContextWithId
+// Action middleware also uses logger (with child() method)
+jest.mock('../logging/server', () => {
+  const mockLogger = {
     error: jest.fn(),
     warn: jest.fn(),
     info: jest.fn(),
@@ -40,9 +55,51 @@ jest.mock('../logger.ts', () => ({
       info: jest.fn(),
       debug: jest.fn(),
     })),
-  },
-  toLogContextValue: (val: unknown) => val,
-}));
+  };
+  const mockCreateWebAppContextWithId = jest.fn(() => ({
+    requestId: 'test-request-id',
+    operation: 'sendContactEmails',
+    route: '/inngest/email/contact',
+  }));
+  return {
+    logger: mockLogger,
+    createWebAppContextWithId: mockCreateWebAppContextWithId,
+    __mockLogger: mockLogger,
+    __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
+  };
+});
+
+// Mock shared-runtime (needed for Inngest function execution)
+jest.mock('@heyclaude/shared-runtime', () => {
+  const mockNormalizeError = jest.fn((error: unknown, fallbackMessage?: string) => {
+    if (error instanceof Error) return error;
+    return new Error(fallbackMessage || String(error || 'Unknown error'));
+  });
+  const mockEscapeHtml = jest.fn((str: string) => str);
+  return {
+    normalizeError: mockNormalizeError,
+    escapeHtml: mockEscapeHtml,
+    __mockNormalizeError: mockNormalizeError,
+    __mockEscapeHtml: mockEscapeHtml,
+  };
+});
+
+// Mock server-only FIRST
+jest.mock('server-only', () => ({}));
+
+// DO NOT mock next/headers - safemocker handles this automatically
+// DO NOT mock Supabase client or auth - safemocker handles auth automatically
+// safemocker's __mocks__/next-safe-action.ts provides pre-configured authedAction
+// with auth context already injected (test-user-id, test@example.com, test-token)
+
+// Also export logger for action middleware compatibility
+jest.mock('../logger.ts', () => {
+  const { logger } = jest.requireMock('../logging/server');
+  return {
+    logger,
+    toLogContextValue: (val: unknown) => val,
+  };
+});
 
 // Mock errors (used by safe-action middleware) - keep real behavior for error normalization
 jest.mock('../errors.ts', () => ({
@@ -97,21 +154,43 @@ jest.mock('next/cache', () => ({
   revalidateTag: (...args: any[]) => mockRevalidateTag(...args),
 }));
 
-// Mock contact hooks
-const mockOnContactSubmission = jest.fn();
-jest.mock('./hooks/contact-hooks.ts', () => ({
-  onContactSubmission: (...args: any[]) => mockOnContactSubmission(...args),
+// DO NOT mock contact hooks - use REAL implementation
+// onContactSubmission calls Inngest (real client)
+// Using real hook tests: action → onContactSubmission → Inngest (real client) → Inngest function execution
+// This provides true integration testing where Inngest functions are actually executed
+
+// Mock monitoring BEFORE importing Inngest function (function imports monitoring)
+// The Inngest function factory imports monitoring utilities
+jest.mock('../inngest/utils/monitoring', () => ({
+  sendCronSuccessHeartbeat: jest.fn(),
+  sendCriticalFailureHeartbeat: jest.fn(),
+  sendBetterStackHeartbeat: jest.fn(),
+  sendApiEndpointHeartbeat: jest.fn(),
+  isBetterStackMonitoringEnabled: jest.fn(() => false),
+  isInngestMonitoringEnabled: jest.fn(() => false),
+  isCriticalFailureMonitoringEnabled: jest.fn(() => false),
+  isCronSuccessMonitoringEnabled: jest.fn(() => false),
+  isApiEndpointMonitoringEnabled: jest.fn(() => false),
 }));
 
-// Mock Inngest client (used by contact hooks)
-jest.mock('../inngest/client.ts', () => ({
-  inngest: {
-    send: jest.fn().mockResolvedValue({ ids: ['event-id'] }),
-  },
-}));
+// DO NOT mock Inngest client - use REAL client with integration spy
+// Import test helpers to intercept inngest.send() and actually execute Inngest functions
+// This creates true integration: action → Inngest event → Inngest function execution (via InngestTestEngine)
+// No real API calls - uses InngestTestEngine (in-memory execution, same as Inngest function tests)
+import {
+  createInngestIntegrationSpy,
+  registerInngestFunction,
+  expectInngestEvent,
+} from '../inngest/utils/test-helpers';
+import { sendContactEmails } from '../inngest/functions/email/contact';
+// Import setup function from Inngest test utilities (eliminates duplication)
+import { setupContactEmailMocks } from '../inngest/utils/test-setup';
 
 describe('submitContactForm', () => {
   let prismocker: PrismaClient;
+  let inngestSendSpy: ReturnType<typeof jest.spyOn>;
+  // Mocks for Inngest function execution (set up via setupContactEmailMocks in beforeEach)
+  let contactEmailMocks: ReturnType<typeof setupContactEmailMocks>;
 
   beforeEach(async () => {
     // 1. Clear request cache before each test (REQUIRED for test isolation)
@@ -131,12 +210,28 @@ describe('submitContactForm', () => {
 
     // 5. Set up $queryRawUnsafe for RPC testing (if needed)
     // Use Prismocker's Proxy set handler to override $queryRawUnsafe
+    // This is what runRpc → BasePrismaService.callRpc → prisma.$queryRawUnsafe calls
     prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
 
-    // 6. Reset mock functions
+    // 6. Set up Inngest function mocks using shared setup function (eliminates duplication)
+    // This uses the same setup logic as contact.test.ts, ensuring consistency
+    contactEmailMocks = setupContactEmailMocks('sendContactEmails', '/inngest/email/contact');
+
+    // 7. Register Inngest function for integration testing
+    // When action sends 'email/contact' event, sendContactEmails will actually execute
+    // The function will use the mocks above (same as contact.test.ts)
+    registerInngestFunction('email/contact', sendContactEmails);
+
+    // 8. Create integration spy that intercepts inngest.send() and executes functions
+    // This creates true integration: action → Inngest event → Inngest function execution
+    // Uses InngestTestEngine (in-memory, no real API calls, same as Inngest function tests)
+    // The function will execute with the mocks set up above
+    const { inngest } = await import('../inngest/client.ts');
+    inngestSendSpy = createInngestIntegrationSpy(inngest);
+
+    // 9. Reset mock functions
     mockRevalidatePath.mockClear();
     mockRevalidateTag.mockClear();
-    mockOnContactSubmission.mockClear();
   });
 
   describe('input validation', () => {
@@ -357,7 +452,6 @@ describe('submitContactForm', () => {
         },
       ];
       (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockResult);
-      mockOnContactSubmission.mockResolvedValue(null);
 
       const result = await submitContactForm({
         name: 'Test User',
@@ -372,21 +466,20 @@ describe('submitContactForm', () => {
       expect(safeResult.data).toBeDefined();
       expect(safeResult.serverError).toBeUndefined();
 
-      // Verify hook was called with correct parameters
-      expect(mockOnContactSubmission).toHaveBeenCalledWith(
-        { submission_id: '123e4567-e89b-12d3-a456-426614174000' },
-        expect.objectContaining({
-          userId: 'test-user-id',
-          userEmail: 'test@example.com',
-          authToken: 'test-token',
-        }),
-        expect.objectContaining({
-          name: 'Test User',
-          email: 'test@example.com',
-          category: 'general',
-          message: 'Test message',
-        })
-      );
+      // Verify Inngest event was sent via real hook implementation
+      // Using test helper to verify event was sent correctly
+      expectInngestEvent(inngestSendSpy, 'email/contact', {
+        submissionId: '123e4567-e89b-12d3-a456-426614174000',
+        name: 'Test User',
+        email: 'test@example.com',
+        category: 'general',
+        message: 'Test message',
+      });
+
+      // Verify Inngest function actually executed (true integration!)
+      // The function should have sent emails via the mocked sendEmail
+      // This proves: action → Inngest event → Inngest function execution → emails sent
+      expect(contactEmailMocks.mockSendEmail).toHaveBeenCalledTimes(2); // Admin + user emails
     });
 
     it('should not call hook when submission_id is missing', async () => {
@@ -412,8 +505,8 @@ describe('submitContactForm', () => {
       const safeResult = result as SafeActionResult<typeof mockResult>;
       expect(safeResult.data).toBeDefined();
 
-      // Verify hook was NOT called
-      expect(mockOnContactSubmission).not.toHaveBeenCalled();
+      // Verify Inngest event was NOT sent (hook checks for submission_id)
+      expect(inngestSendSpy).not.toHaveBeenCalled();
     });
 
     it('should handle hook errors gracefully without failing the action', async () => {
@@ -427,8 +520,11 @@ describe('submitContactForm', () => {
         },
       ];
       (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockResult);
-      const hookError = new Error('Hook failed');
-      mockOnContactSubmission.mockRejectedValue(hookError);
+      
+      // Mock Inngest function execution to fail (simulating function error)
+      // We'll make the function fail by making sendEmail fail
+      const hookError = new Error('Email send failed');
+      contactEmailMocks.mockSendEmail.mockRejectedValueOnce(hookError);
 
       const result = await submitContactForm({
         name: 'Test User',
@@ -443,8 +539,17 @@ describe('submitContactForm', () => {
       expect(safeResult.data).toBeDefined();
       expect(safeResult.serverError).toBeUndefined();
 
-      // Verify hook error was logged
-      expect(logger.error).toHaveBeenCalled();
+      // Verify Inngest send was attempted (hook tried to send event)
+      expect(inngestSendSpy).toHaveBeenCalled();
+
+      // Verify Inngest function actually executed (true integration!)
+      // The function should have attempted to send emails but failed
+      // This proves error handling works: action → Inngest event → function execution → error handling
+      expect(contactEmailMocks.mockSendEmail).toHaveBeenCalled(); // Function tried to send emails
+
+      // Verify hook error was logged (onContactSubmission catches and logs errors)
+      // The hook catches errors from inngest.send() (which includes function execution errors)
+      expect(logger.warn).toHaveBeenCalled();
     });
   });
 

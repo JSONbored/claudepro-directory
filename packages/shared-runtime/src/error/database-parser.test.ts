@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from '@jest/globals';
 import { isPostgrestError, parseDatabaseError } from './database-parser.ts';
 import type { PostgrestError } from '@supabase/supabase-js';
 

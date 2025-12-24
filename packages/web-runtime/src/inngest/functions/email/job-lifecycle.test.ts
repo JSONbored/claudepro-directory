@@ -80,27 +80,9 @@ jest.mock('../../utils/monitoring', () => ({
   isApiEndpointMonitoringEnabled: jest.fn(() => false),
 }));
 
-// Get mocks for use in tests
-const { __mockSendEmail: mockSendEmail } = jest.requireMock('../../../integrations/resend') as {
-  __mockSendEmail: ReturnType<typeof jest.fn>;
-};
-const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock('../../../email/base-template') as {
-  __mockRenderEmailTemplate: ReturnType<typeof jest.fn>;
-};
-const {
-  __mockLogger: mockLogger,
-  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
-} = jest.requireMock('../../../logging/server') as {
-  __mockLogger: {
-    info: ReturnType<typeof jest.fn>;
-    warn: ReturnType<typeof jest.fn>;
-    error: ReturnType<typeof jest.fn>;
-  };
-  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-};
-const { __mockNormalizeError: mockNormalizeError } = jest.requireMock('@heyclaude/shared-runtime') as {
-  __mockNormalizeError: ReturnType<typeof jest.fn>;
-};
+// Import function AFTER mocks are set up
+// Import setup function to eliminate duplication
+import { setupJobLifecycleEmailMocks } from '../../utils/test-setup';
 
 // Import function AFTER mocks are set up
 describe('sendJobLifecycleEmail', () => {
@@ -108,6 +90,10 @@ describe('sendJobLifecycleEmail', () => {
    * Test engine instance - created fresh for each test to avoid state caching
    */
   let t: InngestTestEngine;
+  /**
+   * Mock references (set up via setupJobLifecycleEmailMocks in beforeEach)
+   */
+  let mocks: ReturnType<typeof setupJobLifecycleEmailMocks>;
 
   /**
    * Setup before each test
@@ -122,27 +108,8 @@ describe('sendJobLifecycleEmail', () => {
       function: sendJobLifecycleEmail,
     });
 
-    // Reset all mocks to ensure clean state
-    jest.clearAllMocks();
-    jest.resetAllMocks();
-    mockSendEmail.mockReset();
-    mockRenderEmailTemplate.mockReset();
-
-    // Set up default successful mock responses
-    mockSendEmail.mockResolvedValue({
-      data: { id: 'email-id-123' },
-      error: null,
-    });
-    mockRenderEmailTemplate.mockResolvedValue('<html>Mock Email</html>');
-    
-    // Restore normalizeError mock implementation after reset
-    // jest.resetAllMocks() resets mocks to return undefined, so we need to restore it
-    mockNormalizeError.mockImplementation((error: unknown, fallbackMessage?: string) => {
-      if (error instanceof Error) {
-        return error;
-      }
-      return new Error(fallbackMessage || String(error || 'Unknown error'));
-    });
+    // Set up mocks using shared setup function (eliminates duplication)
+    mocks = setupJobLifecycleEmailMocks('sendJobLifecycleEmail', '/inngest/email/job-lifecycle');
   });
 
   /**
@@ -174,7 +141,7 @@ describe('sendJobLifecycleEmail', () => {
       jobId: 'job-123',
     });
 
-    expect(mockSendEmail).toHaveBeenCalledWith(
+    expect(mocks.mockSendEmail).toHaveBeenCalledWith(
       expect.objectContaining({
         subject: 'Job Submitted: Senior Software Engineer',
         to: 'employer@example.com',
@@ -211,7 +178,7 @@ describe('sendJobLifecycleEmail', () => {
     })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     expect(result.success).toBe(true);
-    expect(mockSendEmail).toHaveBeenCalledWith(
+    expect(mocks.mockSendEmail).toHaveBeenCalledWith(
       expect.objectContaining({
         subject: 'Job Approved: Senior Software Engineer',
       }),
@@ -243,7 +210,7 @@ describe('sendJobLifecycleEmail', () => {
     })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     expect(result.success).toBe(true);
-    expect(mockSendEmail).toHaveBeenCalledWith(
+    expect(mocks.mockSendEmail).toHaveBeenCalledWith(
       expect.objectContaining({
         subject: 'Action Required: Update Your Job Posting - Senior Software Engineer',
       }),
@@ -278,7 +245,7 @@ describe('sendJobLifecycleEmail', () => {
     })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     expect(result.success).toBe(true);
-    expect(mockSendEmail).toHaveBeenCalledWith(
+    expect(mocks.mockSendEmail).toHaveBeenCalledWith(
       expect.objectContaining({
         subject: 'Your Job is Live: Senior Software Engineer',
       }),
@@ -311,7 +278,7 @@ describe('sendJobLifecycleEmail', () => {
     })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     expect(result.success).toBe(true);
-    expect(mockSendEmail).toHaveBeenCalledWith(
+    expect(mocks.mockSendEmail).toHaveBeenCalledWith(
       expect.objectContaining({
         subject: 'Expiring Soon: Senior Software Engineer (7 days remaining)',
       }),
@@ -345,7 +312,7 @@ describe('sendJobLifecycleEmail', () => {
     })) as { result: { success: boolean; sent: boolean; emailId: string | null; jobId: string } };
 
     expect(result.success).toBe(true);
-    expect(mockSendEmail).toHaveBeenCalledWith(
+    expect(mocks.mockSendEmail).toHaveBeenCalledWith(
       expect.objectContaining({
         subject: 'Job Listing Expired: Senior Software Engineer',
       }),
@@ -377,7 +344,7 @@ describe('sendJobLifecycleEmail', () => {
     expect(error).toBeDefined();
     expect((error as Error)?.message).toBe('Unknown job lifecycle action: invalid-action');
 
-    expect(mockLogger.warn).toHaveBeenCalledWith(
+    expect(mocks.mockLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({
         action: 'invalid-action',
         availableActions: expect.stringContaining('job-submitted'),
@@ -385,7 +352,7 @@ describe('sendJobLifecycleEmail', () => {
       'Unknown job lifecycle action'
     );
 
-    expect(mockSendEmail).not.toHaveBeenCalled();
+    expect(mocks.mockSendEmail).not.toHaveBeenCalled();
   });
 
   /**
@@ -416,8 +383,8 @@ describe('sendJobLifecycleEmail', () => {
       jobId: 'job-123',
     });
 
-    expect(mockSendEmail).not.toHaveBeenCalled();
-    expect(mockLogger.info).toHaveBeenCalledWith(
+    expect(mocks.mockSendEmail).not.toHaveBeenCalled();
+    expect(mocks.mockLogger.info).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'job-submitted', jobId: 'job-123' }),
       'No employer email provided, skipping job lifecycle email'
     );
@@ -429,7 +396,7 @@ describe('sendJobLifecycleEmail', () => {
    * Tests that email send failures are handled gracefully.
    */
   it('should handle email send failure gracefully', async () => {
-    mockSendEmail.mockResolvedValue({
+    mocks.mockSendEmail.mockResolvedValue({
       data: null,
       error: { message: 'Resend API error' },
     });
@@ -456,7 +423,7 @@ describe('sendJobLifecycleEmail', () => {
       jobId: 'job-123',
     });
 
-    expect(mockLogger.warn).toHaveBeenCalledWith(
+    expect(mocks.mockLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({
         action: 'job-submitted',
         jobId: 'job-123',
@@ -472,7 +439,7 @@ describe('sendJobLifecycleEmail', () => {
    * Tests that template rendering failures are handled gracefully.
    */
   it('should handle template rendering failure gracefully', async () => {
-    mockRenderEmailTemplate.mockRejectedValue(new Error('Template rendering failed'));
+    mocks.mockRenderEmailTemplate.mockRejectedValue(new Error('Template rendering failed'));
 
     const { result } = (await t.execute({
       events: [
@@ -496,7 +463,7 @@ describe('sendJobLifecycleEmail', () => {
       jobId: 'job-123',
     });
 
-    expect(mockLogger.warn).toHaveBeenCalledWith(
+    expect(mocks.mockLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({
         action: 'job-submitted',
         jobId: 'job-123',
@@ -532,7 +499,7 @@ describe('sendJobLifecycleEmail', () => {
       emailId: 'email-id-123',
     });
 
-    expect(mockSendEmail).toHaveBeenCalledTimes(1);
+    expect(mocks.mockSendEmail).toHaveBeenCalledTimes(1);
   });
 
   /**
@@ -562,7 +529,7 @@ describe('sendJobLifecycleEmail', () => {
 
     // Should still succeed with safe conversions
     expect(result.success).toBe(true);
-    expect(mockSendEmail).toHaveBeenCalledTimes(1);
+    expect(mocks.mockSendEmail).toHaveBeenCalledTimes(1);
   });
 
   /**
@@ -591,8 +558,8 @@ describe('sendJobLifecycleEmail', () => {
     const t2 = new InngestTestEngine({
       function: sendJobLifecycleEmail,
     });
-    mockSendEmail.mockClear();
-    mockRenderEmailTemplate.mockClear();
+    mocks.mockSendEmail.mockClear();
+    mocks.mockRenderEmailTemplate.mockClear();
 
     const { result: result2 } = (await t2.execute({
       events: [eventData],

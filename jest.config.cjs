@@ -63,8 +63,26 @@ module.exports = {
     '^@heyclaude/data-layer/prisma/client$': '<rootDir>/packages/data-layer/src/prisma/client.ts',
     '^@heyclaude/data-layer/prisma$': '<rootDir>/packages/data-layer/src/prisma/index.ts',
     '^@heyclaude/data-layer/services/trending$': '<rootDir>/packages/data-layer/src/services/trending.ts',
+    '^@heyclaude/data-layer/utils/request-cache$': '<rootDir>/packages/data-layer/src/utils/request-cache.ts',
+    '^@heyclaude/data-layer/utils/rpc-error-logging$': '<rootDir>/packages/data-layer/src/utils/rpc-error-logging.ts',
+    // Map @heyclaude/web-runtime/api/* subpath exports (must come before general pattern)
+    '^@heyclaude/web-runtime/api/(.*)$': '<rootDir>/packages/web-runtime/src/api/$1',
+    // Map @heyclaude/web-runtime/server/* subpath exports (must come before general pattern)
+    '^@heyclaude/web-runtime/server/(.*)$': '<rootDir>/packages/web-runtime/src/server/$1',
+    // Map @heyclaude/web-runtime/logging/* subpath exports (must come before general pattern)
+    '^@heyclaude/web-runtime/logging/(.*)$': '<rootDir>/packages/web-runtime/src/logging/$1',
+    // Map @heyclaude/web-runtime/auth/* subpath exports (must come before general pattern)
+    '^@heyclaude/web-runtime/auth/(.*)$': '<rootDir>/packages/web-runtime/src/auth/$1',
     // Map @heyclaude/web-runtime/utils/* subpath exports (must come before general pattern)
     '^@heyclaude/web-runtime/utils/(.*)$': '<rootDir>/packages/web-runtime/src/utils/$1',
+    // Map @heyclaude/web-runtime/actions/logger and errors FIRST (imported as ../logger.ts and ../errors.ts from actions)
+    // These must come before the general actions/* pattern
+    '^@heyclaude/web-runtime/actions/logger$': '<rootDir>/packages/web-runtime/src/logger.ts',
+    '^@heyclaude/web-runtime/actions/errors$': '<rootDir>/packages/web-runtime/src/errors.ts',
+    // Map @heyclaude/web-runtime/actions/* subpath exports (must come after specific logger/errors mappings)
+    '^@heyclaude/web-runtime/actions/(.*)$': '<rootDir>/packages/web-runtime/src/actions/$1',
+    // Map @heyclaude/web-runtime/supabase/* subpath exports (must come before general pattern)
+    '^@heyclaude/web-runtime/supabase/(.*)$': '<rootDir>/packages/web-runtime/src/supabase/$1',
     // Map @heyclaude/web-runtime/server/fetch-helpers (must come before general pattern)
     '^@heyclaude/web-runtime/server/fetch-helpers$': '<rootDir>/packages/web-runtime/src/server/fetch-helpers.ts',
     // Map @heyclaude/web-runtime/prisma-zod-schemas (must come before general pattern)
@@ -132,6 +150,8 @@ module.exports = {
   },
   
   // Test file patterns
+  // Match both .test.ts (Jest) and .spec.ts (Playwright) files
+  // Note: Playwright spec files will fail in Jest but that's OK - they're run separately
   testMatch: [
     '**/__tests__/**/*.ts',
     '**/__tests__/**/*.tsx',

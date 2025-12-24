@@ -83,18 +83,10 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
 // DO NOT mock safe-action.ts - use REAL middleware to test SafeActionResult structure
 // This ensures we test the complete middleware chain: auth → rate limiting → logging → error handling
 
-// DO NOT mock data functions - use real getNewsletterSubscriberCount which uses Prismocker
-// This allows us to test the real data flow end-to-end with caching
-
-// Mock getNewsletterSubscriptionByEmail (used by updateTopicPreferencesAction and unsubscribeFromNewsletterAction)
-const mockGetNewsletterSubscriptionByEmail = jest.fn<(email: string) => Promise<any>>();
-jest.mock('../data/newsletter.ts', () => {
-  const actual = jest.requireActual('../data/newsletter.ts');
-  return {
-    ...(actual as Record<string, unknown>),
-    getNewsletterSubscriptionByEmail: (...args: unknown[]) => mockGetNewsletterSubscriptionByEmail(...(args as [string])),
-  };
-});
+// DO NOT mock data functions - use real implementations with Prismocker
+// getNewsletterSubscriberCount and getNewsletterSubscriptionByEmail have their own tests
+// Using real implementations tests: action → data function → service → Prismocker
+// This provides true integration testing
 
 // Mock Resend integration
 const mockGetResendClient = jest.fn<() => any>();
@@ -490,9 +482,12 @@ describe('subscribeViaOAuthAction', () => {
 describe('updateTopicPreferencesAction', () => {
   const mockSubscription = {
     id: 'sub-123',
-    email: 'test@example.com',
+    email: 'test@example.com', // Matches safemocker's ctx.userEmail
     resend_contact_id: 'resend-contact-123',
     resend_topics: ['topic-1'],
+    status: 'active' as const,
+    created_at: new Date(),
+    updated_at: new Date(),
   };
 
   const mockResendClient = {
@@ -503,31 +498,38 @@ describe('updateTopicPreferencesAction', () => {
     },
   };
 
-  let mockGetService: ReturnType<typeof jest.spyOn>;
+  let prismocker: PrismaClient;
 
   beforeEach(async () => {
     // 1. Clear request cache before each test (REQUIRED for test isolation)
     clearRequestCache();
 
-    // 2. Clear all mocks
+    // 2. Get Prismocker instance (automatically PrismockerClient via global mock)
+    prismocker = prisma;
+
+    // 3. Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
+    // 4. Clear all mocks
     jest.clearAllMocks();
 
-    // 3. Mock getService for this test suite (needed for updateTopicPreferencesAction)
-    const serviceFactory = await import('../data/service-factory.ts');
-    mockGetService = jest.spyOn(serviceFactory, 'getService').mockResolvedValue({
-      updateResendTopics: jest.fn<(...args: unknown[]) => Promise<void>>().mockResolvedValue(undefined),
-    } as any);
+    // 5. Seed Prismocker data for getNewsletterSubscriptionByEmail (uses real implementation)
+    // getNewsletterSubscriptionByEmail → getService('newsletter') → NewsletterService.getSubscriptionByEmail → Prismocker
+    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+      (prismocker as any).setData('newsletter_subscriptions', [mockSubscription]);
+    }
 
-    // 4. Set up mocks
-    mockGetNewsletterSubscriptionByEmail.mockResolvedValue(mockSubscription);
-    
+    // 6. Set up external service mocks (Resend - cannot make real API calls)
     mockGetResendClient.mockReturnValue(mockResendClient);
     mockGetContactTopics.mockResolvedValue(['topic-1', 'topic-2']);
-    
     mockValidateTopicIds.mockReturnValue(true);
 
     // Note: safemocker automatically provides auth context for authedAction
     // ctx.userId = 'test-user-id', ctx.userEmail = 'test@example.com', ctx.authToken = 'test-token'
+    // Note: DO NOT mock getService - use real service factory which returns real NewsletterService
+    // This allows us to test: action → getNewsletterSubscriptionByEmail → getService → NewsletterService → Prismocker
   });
 
   it('should update topic preferences in Resend and sync to DB', async () => {
@@ -551,11 +553,13 @@ describe('updateTopicPreferencesAction', () => {
     });
     expect(mockGetContactTopics).toHaveBeenCalledWith(mockResendClient, mockSubscription.resend_contact_id);
     
-    const newsletterService = await mockGetService('newsletter');
-    expect(newsletterService.updateResendTopics).toHaveBeenCalledWith(
-      'test@example.com', // From safemocker's authedAction context (ctx.userEmail)
-      ['topic-1', 'topic-2']
-    );
+    // Verify database was updated via real NewsletterService.updateResendTopics
+    // (updateResendTopics uses Prisma update, which Prismocker handles)
+    // We can verify by checking the subscription was updated in Prismocker
+    const updatedSubscription = await prismocker.newsletter_subscriptions.findUnique({
+      where: { email: 'test@example.com' },
+    });
+    expect(updatedSubscription?.resend_topics).toEqual(['topic-1', 'topic-2']);
     expect(safeResult.data?.success).toBe(true);
   });
 
@@ -582,14 +586,20 @@ describe('updateTopicPreferencesAction', () => {
     });
     expect(mockGetContactTopics).toHaveBeenCalledWith(mockResendClient, mockSubscription.resend_contact_id);
     
-    const newsletterService = await mockGetService('newsletter');
-    expect(newsletterService.updateResendTopics).toHaveBeenCalledWith('test@example.com', ['topic-1']);
+    // Verify database was updated via real NewsletterService.updateResendTopics
+    const updatedSubscription = await prismocker.newsletter_subscriptions.findUnique({
+      where: { email: 'test@example.com' },
+    });
+    expect(updatedSubscription?.resend_topics).toEqual(['topic-1']);
   });
 
   it('should return serverError when subscription not found', async () => {
     const { updateTopicPreferencesAction } = await import('./newsletter.ts');
     
-    mockGetNewsletterSubscriptionByEmail.mockResolvedValueOnce(null);
+    // Seed Prismocker with empty data (subscription not found)
+    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+      (prismocker as any).setData('newsletter_subscriptions', []);
+    }
 
     const result = await updateTopicPreferencesAction({
       topicIds: ['topic-1'],
@@ -607,10 +617,13 @@ describe('updateTopicPreferencesAction', () => {
   it('should return serverError when Resend contact ID not found', async () => {
     const { updateTopicPreferencesAction } = await import('./newsletter.ts');
     
-    mockGetNewsletterSubscriptionByEmail.mockResolvedValueOnce({
-      ...mockSubscription,
-      resend_contact_id: null,
-    });
+    // Seed Prismocker with subscription without resend_contact_id
+    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+      (prismocker as any).setData('newsletter_subscriptions', [{
+        ...mockSubscription,
+        resend_contact_id: null,
+      }]);
+    }
 
     const result = await updateTopicPreferencesAction({
       topicIds: ['topic-1'],
@@ -677,11 +690,12 @@ describe('updateTopicPreferencesAction', () => {
       expect(safeResult.serverError).toBeUndefined();
 
       // Verify auth context was used (ctx.userEmail = 'test@example.com' from safemocker)
-      const newsletterService = await mockGetService('newsletter');
-      expect(newsletterService.updateResendTopics).toHaveBeenCalledWith(
-        'test@example.com', // From safemocker's authedAction context
-        expect.any(Array)
-      );
+      // Verify database was updated via real NewsletterService.updateResendTopics
+      const updatedSubscription = await prismocker.newsletter_subscriptions.findUnique({
+        where: { email: 'test@example.com' },
+      });
+      expect(updatedSubscription).toBeDefined();
+      expect(updatedSubscription?.resend_topics).toBeDefined();
     });
   });
 });
@@ -689,8 +703,11 @@ describe('updateTopicPreferencesAction', () => {
 describe('unsubscribeFromNewsletterAction', () => {
   const mockSubscription = {
     id: 'sub-123',
-    email: 'test@example.com',
+    email: 'test@example.com', // Matches safemocker's ctx.userEmail
     resend_contact_id: 'resend-contact-123',
+    status: 'active' as const,
+    created_at: new Date(),
+    updated_at: new Date(),
   };
 
   const mockResendClient = {
@@ -699,28 +716,36 @@ describe('unsubscribeFromNewsletterAction', () => {
     },
   };
 
-  let mockGetService: ReturnType<typeof jest.spyOn>;
+  let prismocker: PrismaClient;
 
   beforeEach(async () => {
     // 1. Clear request cache before each test (REQUIRED for test isolation)
     clearRequestCache();
 
-    // 2. Clear all mocks
+    // 2. Get Prismocker instance (automatically PrismockerClient via global mock)
+    prismocker = prisma;
+
+    // 3. Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
+    // 4. Clear all mocks
     jest.clearAllMocks();
 
-    // 3. Mock getService for this test suite (needed for unsubscribeFromNewsletterAction)
-    const serviceFactory = await import('../data/service-factory.ts');
-    mockGetService = jest.spyOn(serviceFactory, 'getService').mockResolvedValue({
-      unsubscribeWithTimestamp: jest.fn<(...args: unknown[]) => Promise<void>>().mockResolvedValue(undefined),
-    } as any);
+    // 5. Seed Prismocker data for getNewsletterSubscriptionByEmail (uses real implementation)
+    // getNewsletterSubscriptionByEmail → getService('newsletter') → NewsletterService.getSubscriptionByEmail → Prismocker
+    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+      (prismocker as any).setData('newsletter_subscriptions', [mockSubscription]);
+    }
 
-    // 4. Set up mocks
-    mockGetNewsletterSubscriptionByEmail.mockResolvedValue(mockSubscription);
-    
+    // 6. Set up external service mocks (Resend - cannot make real API calls)
     mockGetResendClient.mockReturnValue(mockResendClient);
 
     // Note: safemocker automatically provides auth context for authedAction
     // ctx.userId = 'test-user-id', ctx.userEmail = 'test@example.com', ctx.authToken = 'test-token'
+    // Note: DO NOT mock getService - use real service factory which returns real NewsletterService
+    // This allows us to test: action → getNewsletterSubscriptionByEmail → getService → NewsletterService → Prismocker
   });
 
   it('should unsubscribe user in Resend and update DB', async () => {
@@ -740,15 +765,23 @@ describe('unsubscribeFromNewsletterAction', () => {
       unsubscribed: true,
     });
     
-    const newsletterService = await mockGetService('newsletter');
-    expect(newsletterService.unsubscribeWithTimestamp).toHaveBeenCalledWith('test@example.com'); // From safemocker's authedAction context
+    // Verify database was updated via real NewsletterService.unsubscribeWithTimestamp
+    // (unsubscribeWithTimestamp uses Prisma update, which Prismocker handles)
+    const updatedSubscription = await prismocker.newsletter_subscriptions.findUnique({
+      where: { email: 'test@example.com' },
+    });
+    expect(updatedSubscription?.status).toBe('unsubscribed');
+    expect(updatedSubscription?.unsubscribed_at).toBeDefined();
     expect(safeResult.data?.success).toBe(true);
   });
 
   it('should return serverError when subscription not found', async () => {
     const { unsubscribeFromNewsletterAction } = await import('./newsletter.ts');
     
-    mockGetNewsletterSubscriptionByEmail.mockResolvedValueOnce(null);
+    // Seed Prismocker with empty data (subscription not found)
+    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+      (prismocker as any).setData('newsletter_subscriptions', []);
+    }
 
     const result = await unsubscribeFromNewsletterAction({});
 
@@ -763,10 +796,13 @@ describe('unsubscribeFromNewsletterAction', () => {
   it('should return serverError when Resend contact ID not found', async () => {
     const { unsubscribeFromNewsletterAction } = await import('./newsletter.ts');
     
-    mockGetNewsletterSubscriptionByEmail.mockResolvedValueOnce({
-      ...mockSubscription,
-      resend_contact_id: null,
-    });
+    // Seed Prismocker with subscription without resend_contact_id
+    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+      (prismocker as any).setData('newsletter_subscriptions', [{
+        ...mockSubscription,
+        resend_contact_id: null,
+      }]);
+    }
 
     const result = await unsubscribeFromNewsletterAction({});
 
@@ -807,10 +843,13 @@ describe('unsubscribeFromNewsletterAction', () => {
       expect(safeResult.serverError).toBeUndefined();
 
       // Verify auth context was used (ctx.userEmail = 'test@example.com' from safemocker)
-      const newsletterService = await mockGetService('newsletter');
-      expect(newsletterService.unsubscribeWithTimestamp).toHaveBeenCalledWith(
-        'test@example.com' // From safemocker's authedAction context
-      );
+      // Verify database was updated via real NewsletterService.unsubscribeWithTimestamp
+      const updatedSubscription = await prismocker.newsletter_subscriptions.findUnique({
+        where: { email: 'test@example.com' },
+      });
+      expect(updatedSubscription).toBeDefined();
+      expect(updatedSubscription?.status).toBe('unsubscribed');
+      expect(updatedSubscription?.unsubscribed_at).toBeDefined();
     });
   });
 });

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { createRunRpc } from './run-rpc.ts';
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
@@ -10,24 +10,24 @@ import type { PrismaClient } from '@prisma/client';
 import { clearRequestCache, getRequestCache } from '../../../data-layer/src/utils/request-cache.ts';
 
 // Mock dependencies
-vi.mock('../errors.ts', () => ({
-  normalizeError: vi.fn((error, message) =>
+jest.mock('../errors.ts', () => ({
+  normalizeError: jest.fn((error, message) =>
     error instanceof Error ? error : new Error(message || String(error))
   ),
-  logActionFailure: vi.fn((action, error, context) => {
+  logActionFailure: jest.fn((action, error, context) => {
     const normalized = error instanceof Error ? error : new Error(String(error));
     return normalized;
   }),
 }));
 
-vi.mock('../logger.ts', () => ({
-  toLogContextValue: vi.fn((v) => v),
+jest.mock('../logger.ts', () => ({
+  toLogContextValue: jest.fn((v) => v),
 }));
 
 describe('createRunRpc', () => {
   let runRpc: ReturnType<typeof createRunRpc>;
   let mockPrisma: PrismaClient;
-  let mockQueryRawUnsafe: ReturnType<typeof vi.fn>;
+  let mockQueryRawUnsafe: ReturnType<typeof jest.fn>;
 
   beforeEach(async () => {
     // Clear request cache before each test
@@ -37,14 +37,14 @@ describe('createRunRpc', () => {
     mockPrisma = prisma;
 
     // Reset all mocks
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     if (mockPrisma.reset) {
       mockPrisma.reset();
     }
 
     // Use Prismocker's Proxy set handler to override $queryRawUnsafe
-    mockPrisma.$queryRawUnsafe = vi.fn().mockResolvedValue([]);
-    mockQueryRawUnsafe = mockPrisma.$queryRawUnsafe as ReturnType<typeof vi.fn>;
+    mockPrisma.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
+    mockQueryRawUnsafe = mockPrisma.$queryRawUnsafe as ReturnType<typeof jest.fn>;
 
     // Create runRpc instance (no createClient needed - uses Prisma directly)
     runRpc = createRunRpc();

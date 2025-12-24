@@ -1,4 +1,4 @@
-import { describe, expect, it, jest, beforeEach } from '@jest/globals';
+import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
 import { job_status } from '@prisma/client';
@@ -96,11 +96,12 @@ jest.mock('next/cache', () => ({
   revalidateTag: (...args: any[]) => mockRevalidateTag(...args),
 }));
 
-// Mock job hooks
-const mockOnJobStatusToggled = jest.fn<(...args: any[]) => Promise<void>>().mockResolvedValue(undefined);
-jest.mock('./hooks/job-hooks.ts', () => ({
-  onJobStatusToggled: (...args: any[]) => mockOnJobStatusToggled(...args),
-}));
+// DO NOT mock job hooks - use REAL implementation
+// onJobStatusToggled currently just logs (no Inngest events sent)
+// Status toggle email support is not yet implemented
+
+// DO NOT mock Inngest client - hook doesn't send events currently
+// Status toggle email support is not yet implemented
 
 describe('toggleJobStatus', () => {
   let prismocker: PrismaClient;
@@ -119,6 +120,7 @@ describe('toggleJobStatus', () => {
 
     // 4. Clear all mocks
     jest.clearAllMocks();
+    jest.resetAllMocks();
 
     // 5. Set up $queryRawUnsafe for RPC testing (if needed)
     // Use Prismocker's Proxy set handler to override $queryRawUnsafe
@@ -126,8 +128,9 @@ describe('toggleJobStatus', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([]);
 
-    // Reset hook mock
-    mockOnJobStatusToggled.mockResolvedValue(undefined as void);
+    // 6. Reset cache mocks
+    mockRevalidatePath.mockClear();
+    mockRevalidateTag.mockClear();
 
     // Note: safemocker automatically provides auth context:
     // - ctx.userId = 'test-user-id'
@@ -135,6 +138,7 @@ describe('toggleJobStatus', () => {
     // - ctx.authToken = 'test-token'
     // No manual auth mocks needed!
   });
+
 
   describe('input validation', () => {
     it('should return fieldErrors for invalid UUID job_id', async () => {
@@ -269,8 +273,9 @@ describe('toggleJobStatus', () => {
   });
 
   describe('hooks', () => {
-    it('should call onJobStatusToggled hook after successful RPC', async () => {
+    it('should call onJobStatusToggled hook and log status toggle', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
+      const { logger } = await import('../logger.ts');
 
       const jobId = '123e4567-e89b-12d3-a456-426614174000';
       const mockResult = {
@@ -294,21 +299,14 @@ describe('toggleJobStatus', () => {
       expect(safeResult.data).toBeDefined();
       expect(safeResult.serverError).toBeUndefined();
 
-      // Verify hook was called with correct parameters
-      expect(mockOnJobStatusToggled).toHaveBeenCalledWith(
-        expect.objectContaining({
-          job_id: jobId,
-          new_status: 'active',
-        }),
-        expect.objectContaining({
-          userId: 'test-user-id',
-          userEmail: 'test@example.com',
-          authToken: 'test-token',
-        }),
-        expect.objectContaining({
-          job_id: jobId,
-          new_status: 'active',
-        })
+      // Wait a bit for async hook to complete
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Verify hook logged the status toggle (production behavior - no Inngest events sent)
+      // Status toggle email support is not yet implemented
+      expect(logger.info).toHaveBeenCalledWith(
+        { jobId, newStatus: 'active' },
+        'Job status toggled'
       );
     });
 
@@ -327,8 +325,11 @@ describe('toggleJobStatus', () => {
 
       (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult]);
 
-      // Mock hook to throw error
-      mockOnJobStatusToggled.mockRejectedValueOnce(new Error('Hook error') as never);
+      // Mock logger.info to throw (simulating hook error)
+      const hookError = new Error('Logger failed');
+      logger.info.mockImplementationOnce(() => {
+        throw hookError;
+      });
 
       const result = await toggleJobStatus({
         job_id: jobId,
@@ -341,14 +342,17 @@ describe('toggleJobStatus', () => {
       expect(safeResult.data).toBeDefined();
       expect(safeResult.serverError).toBeUndefined();
 
-      // Verify hook error was logged
-      expect(logger.error).toHaveBeenCalledWith(
+      // Wait a bit for async hook to complete
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Verify hook error was logged (onJobStatusToggled catches and logs errors)
+      // The hook uses logger.warn, not logger.error (hook errors don't fail the action)
+      expect(logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({
-          hookName: 'onJobStatusToggled',
-          actionName: 'toggleJobStatus',
-          userId: 'test-user-id',
+          err: expect.any(Error),
+          jobId,
         }),
-        'Post-action hook onJobStatusToggled failed'
+        'Failed to process job status toggle'
       );
     });
   });

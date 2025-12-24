@@ -22,11 +22,8 @@
     "heyclaude-analyze-commits": "./src/bin/analyze-commits.ts",
     "heyclaude-extract-changelog-entry": "./src/bin/extract-changelog-entry.ts",
     "heyclaude-migrate-theme": "./src/bin/migrate-theme.ts",
-    "heyclaude-analyze-inline-styles": "./src/bin/analyze-inline-styles.ts",
     "heyclaude-consolidate-variables": "./src/bin/consolidate-variables.ts",
     "heyclaude-apply-variable-consolidation": "./src/bin/apply-variable-consolidation.ts",
-    "heyclaude-migrate-inline-styles": "./src/bin/migrate-inline-styles.ts",
-    "heyclaude-migrate-ui-classes": "./src/bin/migrate-ui-classes.ts",
     "heyclaude-knip-design-system": "./src/bin/knip-design-system.ts"
   },
   "exports": {

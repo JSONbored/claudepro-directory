@@ -509,23 +509,13 @@ async function executeDataFunction(
       );
     }
 
-    const result = await serviceMethod.call(service, serviceArgs);
-
-    // #region agent log
-    if (fnConfig.methodName === 'isBookmarked') {
-      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/web-runtime/src/data/cached-data-factory.ts:512',message:'executeDataFunction - after serviceMethod call',data:{methodName:fnConfig.methodName,result,resultType:typeof result,hasTransformResult:!!fnConfig.transformResult},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-    }
-    // #endregion
+    const promiseResult = serviceMethod.call(service, serviceArgs);
+    const result = await promiseResult;
 
     // Transform result if transformer provided
     let transformedResult: null | unknown = result;
     if (fnConfig.transformResult) {
       transformedResult = fnConfig.transformResult(result, args);
-      // #region agent log
-      if (fnConfig.methodName === 'isBookmarked') {
-        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/web-runtime/src/data/cached-data-factory.ts:517',message:'executeDataFunction - after transformResult',data:{methodName:fnConfig.methodName,transformedResult,transformedResultType:typeof transformedResult},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      }
-      // #endregion
     } else if (fnConfig.normalizeResult) {
       transformedResult = fnConfig.normalizeResult(result);
     }
@@ -539,17 +529,12 @@ async function executeDataFunction(
     }
     reqLogger.info(logData, `${fnConfig.operation}: fetched successfully`);
 
-    // #region agent log
-    if (fnConfig.methodName === 'isBookmarked') {
-      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/web-runtime/src/data/cached-data-factory.ts:531',message:'executeDataFunction - returning result',data:{methodName:fnConfig.methodName,transformedResult,transformedResultType:typeof transformedResult},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-    }
-    // #endregion
-
     return transformedResult;
   } catch (error) {
     // Custom error handler
     if (fnConfig.onError) {
-      return fnConfig.onError(error, args);
+      const onErrorResult = fnConfig.onError(error, args);
+      return onErrorResult;
     }
 
     // Default error handling
@@ -718,7 +703,9 @@ export function createDataFunction<TArgs, TReturn>(
       throw new Error(`Data function configuration not found for ${config.operation}`);
     }
 
-    return executeDataFunction(storedConfig, args);
+    const result = await executeDataFunction(storedConfig, args);
+
+    return result;
   };
 
   // Store configuration in Map using string key (stable reference)

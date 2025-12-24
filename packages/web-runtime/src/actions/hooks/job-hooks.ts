@@ -100,7 +100,7 @@ export async function onJobCreated(
       await inngest.send({
         name: 'email/job-lifecycle',
         data: {
-          action: 'submitted',
+          action: 'job-submitted', // Must match JOB_EMAIL_CONFIGS keys in job-lifecycle.ts
           jobId,
           jobTitle: title,
           company,
@@ -200,36 +200,14 @@ export async function onJobStatusToggled(
   input: { job_id: string; new_status: string }
 ) {
   try {
-    const { inngest } = await import('../../inngest/client.ts');
-
-    // Map status to lifecycle action
-    const actionMap: Record<string, string> = {
-      active: 'activated',
-      paused: 'paused',
-      expired: 'expired',
-      draft: 'draft',
-    };
-
-    const action = actionMap[input.new_status];
-
-    if (action) {
-      await inngest.send({
-        name: 'email/job-lifecycle',
-        data: {
-          action,
-          jobId: result.job_id,
-          employerEmail: ctx.userEmail,
-        },
-      });
-
-      logger.info(
-        { jobId: result.job_id, newStatus: input.new_status, action },
-        'Job status change event sent to Inngest'
-      );
-    }
+    // Log that status was toggled (no email sent - status toggle email support not implemented)
+    logger.info(
+      { jobId: result.job_id, newStatus: input.new_status },
+      'Job status toggled'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Job status event failed');
-    logger.warn({ err: normalized, jobId: result.job_id }, 'Failed to send job status event');
+    logger.warn({ err: normalized, jobId: result.job_id }, 'Failed to process job status toggle');
   }
 
   return result;

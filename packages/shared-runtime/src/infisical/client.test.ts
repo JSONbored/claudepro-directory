@@ -10,17 +10,17 @@
  * - Edge cases
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import type { InfisicalSDK } from '@infisical/sdk';
 
 // Mock server-only to prevent import errors
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock @infisical/sdk - define mocks directly in factory to avoid hoisting issues
-vi.mock('@infisical/sdk', () => {
+jest.mock('@infisical/sdk', () => {
   // Define mocks inside factory (hoisted, so accessible)
-  const mockSecrets = vi.fn();
-  const mockLogin = vi.fn();
+  const mockSecrets = jest.fn();
+  const mockLogin = jest.fn();
   
   // Store on globalThis for test access
   if (typeof globalThis !== 'undefined') {
@@ -39,11 +39,11 @@ vi.mock('@infisical/sdk', () => {
   // Create a proper constructor function (not vi.fn() which doesn't work with 'new')
   function MockInfisicalSDK(this: any, _config?: any) {
     // secrets() returns an object with listSecrets method
-    this.secrets = vi.fn(() => ({
+    this.secrets = jest.fn(() => ({
       listSecrets: mockSecrets,
     }));
     // auth() returns an object with universalAuth property
-    this.auth = vi.fn(() => mockAuth);
+    this.auth = jest.fn(() => mockAuth);
     return this;
   }
 
@@ -53,7 +53,7 @@ vi.mock('@infisical/sdk', () => {
 });
 
 // Mock env schema - define inside factory to avoid hoisting issues
-vi.mock('../schemas/env', () => {
+jest.mock('../schemas/env', () => {
   const mockEnv: Record<string, string | undefined> = {
     NODE_ENV: 'development',
     INFISICAL_CLIENT_ID: 'test-client-id',
@@ -95,7 +95,7 @@ describe('Infisical Client', () => {
     resetInfisicalState();
 
     // Reset mocks
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     const mocks = getMocks();
     mocks.mockSecrets.mockReset();
     mocks.mockLogin.mockReset();
@@ -114,7 +114,7 @@ describe('Infisical Client', () => {
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('getInfisicalEnvironment', () => {

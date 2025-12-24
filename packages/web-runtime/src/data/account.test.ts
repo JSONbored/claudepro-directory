@@ -69,15 +69,9 @@ jest.mock('../supabase/server.ts', () => ({
   createSupabaseServerClient: jest.fn(() => Promise.resolve({})),
 }));
 
-// Mock homepage data - getAccountDashboardBundle uses it
-jest.mock('./content/homepage.ts', () => ({
-  getHomepageData: jest.fn(),
-}));
-
-// Mock category config
-jest.mock('./config/category/index.ts', () => ({
-  getHomepageCategoryIds: ['agents', 'mcp'],
-}));
+// DO NOT mock getHomepageData - use REAL implementation with Prismocker
+// getHomepageData has its own tests and uses ContentService.getHomepageOptimized internally
+// Using real implementation tests: getAccountDashboardBundle → getHomepageData → ContentService → Prismocker
 
 // Don't mock createDataFunction - use real implementation
 // Don't mock service-factory - use real implementation
@@ -143,6 +137,11 @@ describe('account data functions', () => {
     }
 
     jest.clearAllMocks();
+
+    // Set up $queryRawUnsafe for RPC testing (if needed)
+    // Use Prismocker's Proxy set handler to override $queryRawUnsafe
+    // This is what runRpc → BasePrismaService.callRpc → prisma.$queryRawUnsafe calls
+    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
 
     // Setup auth mock - getUserCompleteData uses getAuthenticatedUserFromClient
     const { getAuthenticatedUserFromClient } = await import('../auth/get-authenticated-user.ts');
@@ -420,43 +419,92 @@ describe('account data functions', () => {
 
   describe('getAccountDashboardBundle', () => {
     it('should return dashboard bundle with all components', async () => {
-      const { getHomepageData } = await import('./content/homepage.ts');
+      // Import real getHomepageCategoryIds to verify correct category IDs are used
+      const { getHomepageCategoryIds } = await import('./config/category/index.ts');
+      
       seedUserData({
         user: { bookmark_count: 5, name: 'Test User', display_name: 'Test User' },
       });
-      jest.mocked(getHomepageData).mockResolvedValue({ categories: [] } as any);
+
+      // Mock RPC result for getHomepageOptimized (called by getHomepageData → ContentService)
+      // getHomepageData calls ContentService.getHomepageOptimized which calls RPC get_homepage_optimized
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([{
+        featured: [],
+        categories: [
+          {
+            category: 'agents',
+            items: [],
+          },
+          {
+            category: 'mcp',
+            items: [],
+          },
+        ],
+      }]);
 
       const result = await getAccountDashboardBundle('user-123');
 
       expect(result.dashboard).toBeDefined();
       expect(result.library).toBeDefined();
       expect(result.homepage).toBeDefined();
-      expect(getHomepageData).toHaveBeenCalledWith(['agents', 'mcp']);
+      
+      // Verify getHomepageOptimized RPC was called with correct category IDs and limit
+      // (getHomepageData uses real getHomepageCategoryIds if not provided)
+      // callRpc calls $queryRawUnsafe with: SQL query, ...argValues
+      // transformArgs returns: { p_category_ids: [...categoryIds], p_limit: 6 }
+      // So argValues are: [...categoryIds] (array), 6 (number)
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_homepage_optimized'),
+        getHomepageCategoryIds, // Real category IDs from config (first argument: p_category_ids)
+        6 // Second argument: p_limit (from getHomepageData transformArgs)
+      );
     });
 
     it('should use provided categoryIds when given', async () => {
-      const { getHomepageData } = await import('./content/homepage.ts');
       seedUserData();
-      jest.mocked(getHomepageData).mockResolvedValue({ categories: ['custom'] } as any);
+
+      // Mock RPC result for getHomepageOptimized
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([{
+        featured: [],
+        categories: [
+          {
+            category: 'custom',
+            items: [],
+          },
+        ],
+      }]);
 
       const result = await getAccountDashboardBundle('user-123', ['custom']);
 
-      expect(getHomepageData).toHaveBeenCalledWith(['custom']);
+      // Verify getHomepageOptimized RPC was called with provided category IDs and limit
+      // callRpc calls $queryRawUnsafe with: SQL query, ...argValues
+      // transformArgs returns: { p_category_ids: ['custom'], p_limit: 6 }
+      // So argValues are: ['custom'] (array), 6 (number)
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_homepage_optimized'),
+        ['custom'], // Provided category IDs (first argument: p_category_ids)
+        6 // Second argument: p_limit (from getHomepageData transformArgs)
+      );
       expect(result.homepage).toBeDefined();
     });
 
     it('should handle null account_dashboard gracefully', async () => {
-      const { getHomepageData } = await import('./content/homepage.ts');
       // When user doesn't exist, account_dashboard will be null
       // But seedUserData creates a user, so this test verifies the handling logic
       seedUserData();
-      jest.mocked(getHomepageData).mockResolvedValue({ categories: [] } as any);
+
+      // Mock RPC result for getHomepageOptimized
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([{
+        featured: [],
+        categories: [],
+      }]);
 
       const result = await getAccountDashboardBundle('user-123');
 
       // Dashboard should be defined (user exists)
       expect(result.dashboard).toBeDefined();
       expect(result.library).toBeDefined();
+      expect(result.homepage).toBeDefined();
     });
   });
 

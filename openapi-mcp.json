@@ -1724,29 +1724,160 @@
           "fileType": ""
         }
       },
+      "contentResource": {
+        "type": "object",
+        "description": "Export content in various formats (llms.txt, markdown, json, rss, atom). Supports all content categories.",
+        "properties": {
+          "uri": {
+            "type": "string",
+            "format": "uri",
+            "example": "claudepro://content/agents/example-slug/markdown"
+          },
+          "mimeType": {
+            "type": "string",
+            "example": "text/plain"
+          },
+          "text": {
+            "type": "string",
+            "example": "Resource content..."
+          }
+        },
+        "example": {
+          "uri": "claudepro://content/agents/example-slug/markdown",
+          "mimeType": "text/plain",
+          "text": "Resource content..."
+        }
+      },
+      "categoryResource": {
+        "type": "object",
+        "description": "Export all content in a category in various formats (llms.txt, markdown, json, rss, atom).",
+        "properties": {
+          "uri": {
+            "type": "string",
+            "format": "uri",
+            "example": "claudepro://category/agents/markdown"
+          },
+          "mimeType": {
+            "type": "string",
+            "example": "text/plain"
+          },
+          "text": {
+            "type": "string",
+            "example": "Resource content..."
+          }
+        },
+        "example": {
+          "uri": "claudepro://category/agents/markdown",
+          "mimeType": "text/plain",
+          "text": "Resource content..."
+        }
+      },
+      "sitewideResource": {
+        "type": "object",
+        "description": "Export all content across all categories in various formats (llms.txt, markdown, json, rss, atom).",
+        "properties": {
+          "uri": {
+            "type": "string",
+            "format": "uri",
+            "example": "claudepro://sitewide/markdown"
+          },
+          "mimeType": {
+            "type": "string",
+            "example": "text/plain"
+          },
+          "text": {
+            "type": "string",
+            "example": "Resource content..."
+          }
+        },
+        "example": {
+          "uri": "claudepro://sitewide/markdown",
+          "mimeType": "text/plain",
+          "text": "Resource content..."
+        }
+      },
       "submit-content-guideArgs": {
         "type": "object",
-        "description": "Step-by-step guide for submitting new content to the Claude Pro Directory. Provides instructions, requirements, and best practices for each content type."
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "submission_type": {
+            "type": "string"
+          }
+        },
+        "description": "Step-by-step guide for submitting new content to the Claude Pro Directory. Provides instructions, requirements, and best practices for each content type.",
+        "example": {
+          "category": "example",
+          "submission_type": "example"
+        }
       },
       "format-content-for-platformArgs": {
         "type": "object",
-        "description": "Instructions for formatting content for specific platforms (Claude Code, Cursor, etc.) with installation steps and configuration examples."
+        "properties": {
+          "platform": {
+            "type": "string"
+          },
+          "content_type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "platform"
+        ],
+        "description": "Instructions for formatting content for specific platforms (Claude Code, Cursor, etc.) with installation steps and configuration examples.",
+        "example": {
+          "platform": "example",
+          "content_type": "example"
+        }
       },
       "search-optimization-tipsArgs": {
         "type": "object",
-        "description": "Tips and best practices for optimizing search queries to find content more effectively in the Claude Pro Directory."
+        "properties": {
+          "query_type": {
+            "type": "string"
+          }
+        },
+        "description": "Tips and best practices for optimizing search queries to find content more effectively in the Claude Pro Directory.",
+        "example": {
+          "query_type": "example"
+        }
       },
       "mcp-server-setup-guideArgs": {
         "type": "object",
-        "description": "Complete guide on setting up, configuring, and using MCP servers from the directory, including installation and integration steps."
+        "properties": {
+          "server_slug": {
+            "type": "string"
+          }
+        },
+        "description": "Complete guide on setting up, configuring, and using MCP servers from the directory, including installation and integration steps.",
+        "example": {
+          "server_slug": "example"
+        }
       },
       "content-submission-best-practicesArgs": {
         "type": "object",
-        "description": "Best practices, guidelines, and tips for submitting high-quality content that gets accepted and helps the community."
+        "properties": {
+          "content_type": {
+            "type": "string"
+          }
+        },
+        "description": "Best practices, guidelines, and tips for submitting high-quality content that gets accepted and helps the community.",
+        "example": {
+          "content_type": "example"
+        }
       },
       "resource-access-guideArgs": {
         "type": "object",
-        "description": "Guide on accessing and using MCP resources, including content exports, category exports, and sitewide exports in various formats."
+        "properties": {
+          "format": {
+            "type": "string"
+          }
+        },
+        "description": "Guide on accessing and using MCP resources, including content exports, category exports, and sitewide exports in various formats.",
+        "example": {
+          "format": "example"
+        }
       }
     },
     "securitySchemes": {

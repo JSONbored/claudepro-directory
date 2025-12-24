@@ -1382,7 +1382,10 @@ export class AccountService extends BasePrismaService {
    * @returns Boolean indicating if content is bookmarked
    */
   async isBookmarked(args: IsBookmarkedArgs): Promise<boolean> {
-    return withSmartCache(
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/data-layer/src/services/account.ts:1384',message:'AccountService.isBookmarked - ENTRY',data:{args},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ROOT'})}).catch(()=>{});
+    // #endregion
+    const result = await withSmartCache(
       'isBookmarked',
       'isBookmarked',
       async () => {
@@ -1399,12 +1402,14 @@ export class AccountService extends BasePrismaService {
           select: { id: true }, // Only need to check existence
         });
         // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/data-layer/src/services/account.ts:1397',message:'isBookmarked - after Prisma query',data:{bookmarkFound:bookmark!==null,bookmarkId:bookmark?.id,result:bookmark!==null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        const result = bookmark !== null;
+        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/data-layer/src/services/account.ts:1401',message:'isBookmarked - RETURNING FROM SERVICE',data:{bookmarkFound:bookmark!==null,bookmarkId:bookmark?.id,result,resultType:typeof result,isTrue:result === true,isFalse:result === false},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ROOT'})}).catch(()=>{});
         // #endregion
-        return bookmark !== null;
+        return result;
       },
       args
     );
+    return result;
   }
 
   /**

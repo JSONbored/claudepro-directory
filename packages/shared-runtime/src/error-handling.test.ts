@@ -1,28 +1,45 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from '@jest/globals';
+import { normalizeError } from './error-handling';
 
-describe('Error Handling Smoke Test', () => {
-  it('should pass basic assertions', () => {
-    expect(true).toBe(true);
-    expect(1 + 1).toBe(2);
-    expect('hello').toBe('hello');
-  });
+describe('Error Handling', () => {
+  describe('normalizeError', () => {
+    it('should return Error instance as-is', () => {
+      const error = new Error('Test error');
+      const normalized = normalizeError(error);
+      expect(normalized).toBe(error);
+      expect(normalized.message).toBe('Test error');
+    });
 
-  it('should handle Error objects', () => {
-    const error = new Error('Test error');
-    expect(error).toBeInstanceOf(Error);
-    expect(error.message).toBe('Test error');
-  });
+    it('should convert string to Error', () => {
+      const normalized = normalizeError('String error');
+      expect(normalized).toBeInstanceOf(Error);
+      expect(normalized.message).toBe('String error');
+    });
 
-  it('should work with arrays', () => {
-    const arr = [1, 2, 3];
-    expect(arr).toHaveLength(3);
-    expect(arr).toContain(2);
-  });
+    it('should use fallback message for non-Error, non-string values', () => {
+      const normalized = normalizeError(null, 'Fallback message');
+      expect(normalized).toBeInstanceOf(Error);
+      expect(normalized.message).toBe('Fallback message');
+    });
 
-  it('should work with objects', () => {
-    const obj = { name: 'test', value: 42 };
-    expect(obj).toHaveProperty('name');
-    expect(obj.name).toBe('test');
-    expect(obj.value).toBe(42);
+    it('should extract message from PostgrestError-like objects', () => {
+      const postgrestError = {
+        code: 'PGRST116',
+        message: 'Database connection failed',
+        details: 'Connection timeout',
+        hint: 'Check network',
+      };
+      const normalized = normalizeError(postgrestError);
+      expect(normalized).toBeInstanceOf(Error);
+      expect(normalized.message).toBe('Database connection failed');
+    });
+
+    it('should stringify objects when message field not available', () => {
+      const obj = { code: 500, data: { key: 'value' } };
+      const normalized = normalizeError(obj);
+      expect(normalized).toBeInstanceOf(Error);
+      expect(normalized.message).toContain('code');
+      expect(normalized.message).toContain('data');
+    });
   });
 });

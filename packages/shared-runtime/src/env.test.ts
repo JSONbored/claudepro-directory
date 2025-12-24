@@ -10,22 +10,22 @@
  * - Infisical integration edge cases
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 
 // Mock server-only to prevent import errors
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock Infisical cache module
 const mockInfisicalCache = {
-  getSecret: vi.fn(),
-  isInitialized: vi.fn(),
-  getCachedSecretNames: vi.fn(),
+  getSecret: jest.fn(),
+  isInitialized: jest.fn(),
+  getCachedSecretNames: jest.fn(),
 };
 
 // Setup global cache mock
 beforeEach(() => {
   (globalThis as any).__INFISICAL_CACHE__ = mockInfisicalCache;
-  vi.clearAllMocks();
+  jest.clearAllMocks();
   mockInfisicalCache.isInitialized.mockReturnValue(false);
   mockInfisicalCache.getSecret.mockReturnValue(undefined);
   mockInfisicalCache.getCachedSecretNames.mockReturnValue([]);
@@ -37,7 +37,7 @@ afterEach(() => {
   delete process.env.TEST_VAR;
   delete process.env.NEXT_PUBLIC_TEST;
   delete process.env.INFISICAL_TEST_VAR;
-  vi.restoreAllMocks();
+  jest.restoreAllMocks();
 });
 
 // Import after mocks

@@ -6,12 +6,12 @@ jest.mock('server-only', () => ({}));
 
 // Mock cached-data-factory
 jest.mock('../cached-data-factory', () => ({
-  createDataFunction: vi.fn((config: any) => {
+  createDataFunction: jest.fn((config: any) => {
     if (!(globalThis as any).__dataFunctionConfigs) {
       (globalThis as any).__dataFunctionConfigs = new Map();
     }
     (globalThis as any).__dataFunctionConfigs.set(config.operation, config);
-    return vi.fn().mockResolvedValue(null);
+    return jest.fn().mockResolvedValue(null);
   }),
 }));
 

@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { expect } from 'vitest';
+import { expect } from '@jest/globals';
 
 /**
  * Creates a mock NextRequest for testing API routes

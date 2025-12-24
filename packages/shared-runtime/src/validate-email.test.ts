@@ -1,10 +1,10 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { validateEmail } from './validate-email.ts';
 
 // Mock logger to prevent console output during tests
-vi.mock('./logger/index.ts', () => ({
+jest.mock('./logger/index.ts', () => ({
   logger: {
-    warn: vi.fn(),
+    warn: jest.fn(),
   },
 }));
 
@@ -197,7 +197,7 @@ describe('validateEmail', () => {
 
   describe('logging', () => {
     it('should log warning for invalid format', () => {
-      const loggerSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const loggerSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
       validateEmail('invalid-email');
       // Note: logger.warn is called internally, but we can't easily spy on it
       // This test verifies the function doesn't throw

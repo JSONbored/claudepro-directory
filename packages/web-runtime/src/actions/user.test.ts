@@ -28,9 +28,16 @@ jest.mock('server-only', () => ({}));
 // safemocker's __mocks__/next-safe-action.ts provides pre-configured authedAction
 // with auth context already injected (test-user-id, test@example.com, test-token)
 
-// Mock logger (used by safe-action middleware)
+// Mock logger (used by safe-action middleware and data layer functions)
+// NOTE: Must include child() method for data layer functions that use logger.child()
 jest.mock('../logger.ts', () => ({
   logger: {
+    child: jest.fn(() => ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
+    })),
     error: jest.fn(),
     warn: jest.fn(),
     info: jest.fn(),
@@ -108,21 +115,7 @@ jest.mock('../auth/get-authenticated-user.ts', () => ({
   getAuthenticatedUserFromClient: jest.fn(),
 }));
 
-// Mock logger for data layer functions
-jest.mock('../logger.ts', () => ({
-  logger: {
-    child: jest.fn(() => ({
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      debug: jest.fn(),
-    })),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-  },
-}));
+// NOTE: logger mock is already defined above (line 32) with child() method for data layer functions
 
 // Mock normalizeError for data layer functions
 jest.mock('../errors.ts', () => ({
@@ -139,15 +132,13 @@ jest.mock('../supabase/server.ts', () => ({
   createSupabaseServerClient: jest.fn(() => Promise.resolve({})),
 }));
 
-// Mock homepage data - getAccountDashboardBundle uses it
-jest.mock('../data/content/homepage.ts', () => ({
-  getHomepageData: jest.fn(),
-}));
+// DO NOT mock getHomepageData - use REAL implementation with Prismocker
+// getHomepageData has its own tests and uses ContentService.getHomepageOptimized internally
+// Using real implementation tests: action → getHomepageData → ContentService → Prismocker
+// This provides true integration testing
 
-// Mock category config
-jest.mock('../data/config/category/index.ts', () => ({
-  getHomepageCategoryIds: ['agents', 'mcp'],
-}));
+// DO NOT mock getHomepageCategoryIds - use REAL constant export
+// This is just a config constant, no need to mock
 
 describe('user actions', () => {
   let prismocker: PrismaClient;
@@ -224,6 +215,16 @@ describe('user actions', () => {
     // 4. Clear all mocks
     jest.clearAllMocks();
     jest.resetAllMocks();
+
+    // 4b. Restore logger mock implementation after resetAllMocks() clears it
+    // resetAllMocks() resets both call history AND implementation, so we need to restore it
+    const { logger } = await import('../logger.ts');
+    jest.mocked(logger.child).mockImplementation(() => ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
+    }));
 
     // 5. Set up $queryRawUnsafe for RPC testing (if needed)
     // Use Prismocker's Proxy set handler to override $queryRawUnsafe
@@ -534,6 +535,10 @@ describe('user actions', () => {
         content_slug: 'test-agent',
       });
 
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/web-runtime/src/actions/user.test.ts:537',message:'isBookmarkedAction - raw result structure',data:{rawResult:result,rawResultType:typeof result,rawResultKeys:Object.keys(result || {}),hasData:'data' in (result || {}),hasServerError:'serverError' in (result || {}),hasFieldErrors:'fieldErrors' in (result || {})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
+
       // Verify SafeActionResult structure
       const safeResult = result as SafeActionResult<boolean>;
 
@@ -542,7 +547,7 @@ describe('user actions', () => {
       const cacheKeysAfter = Array.from((getRequestCache() as any).cache.keys());
 
       // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/web-runtime/src/actions/user.test.ts:535',message:'isBookmarkedAction - after action call',data:{cacheSizeBefore:cacheBefore,cacheSizeAfter:cacheAfter,cacheKeysBefore,cacheKeysAfter,safeResultData:safeResult.data,safeResultServerError:safeResult.serverError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/web-runtime/src/actions/user.test.ts:548',message:'isBookmarkedAction - after type assertion',data:{cacheSizeBefore:cacheBefore,cacheSizeAfter:cacheAfter,cacheKeysBefore,cacheKeysAfter,safeResultData:safeResult.data,safeResultServerError:safeResult.serverError,safeResultFieldErrors:safeResult.fieldErrors},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
       // #endregion
 
       expect(safeResult.data).toBe(true);
@@ -826,7 +831,10 @@ describe('user actions', () => {
 
       const safeResult = result as SafeActionResult<Map<string, boolean>>;
       expect(safeResult.data).toBeInstanceOf(Map);
-      expect(safeResult.data?.size).toBe(0);
+      // When 1 item is provided, isBookmarkedBatch returns an array with 1 entry (even if not bookmarked)
+      // So the Map should have size 1, not 0
+      expect(safeResult.data?.size).toBe(1);
+      expect(safeResult.data?.get('agents:test')).toBe(false);
     });
   });
 
@@ -895,7 +903,10 @@ describe('user actions', () => {
 
       const safeResult = result as SafeActionResult<Map<string, boolean>>;
       expect(safeResult.data).toBeInstanceOf(Map);
-      expect(safeResult.data?.size).toBe(0);
+      // When 1 user_id is provided, isFollowingBatch returns an array with 1 entry (even if not followed)
+      // So the Map should have size 1, not 0
+      expect(safeResult.data?.size).toBe(1);
+      expect(safeResult.data?.get(validUuid)).toBe(false);
     });
   });
 
@@ -963,7 +974,7 @@ describe('user actions', () => {
         error: new Error('No valid session'),
       });
 
-      const result = await getActivitySummary({});
+      const result = await getActivitySummary(undefined);
 
       // getUserCompleteData returns null on auth failure, which getActivitySummary handles gracefully
       const safeResult = result as SafeActionResult<unknown>;
@@ -1168,23 +1179,16 @@ describe('user actions', () => {
         error: new Error('No valid session'),
       });
 
-      const result = await getUserIdentities({});
+      const result = await getUserIdentities(undefined);
 
       // getUserIdentitiesData returns { identities: [] } when getUserCompleteData returns null
       // This is handled gracefully, not as an error
       const safeResult = result as SafeActionResult<unknown>;
       // When auth fails, getUserCompleteData returns null, and getUserIdentitiesData returns { identities: [] }
       // The action should return this, or handle the error gracefully
-      if (safeResult.data !== undefined) {
-        expect(safeResult.data).toEqual({ identities: [] });
-        expect(safeResult.serverError).toBeUndefined();
-      } else if (safeResult.serverError) {
-        // If there's a server error, that's also acceptable (error handling)
-        expect(safeResult.serverError).toBeDefined();
-      } else {
-        // If both are undefined, something is wrong
-        expect(safeResult.data).toBeDefined();
-      }
+      expect(safeResult.data).toEqual({ identities: [] });
+      expect(safeResult.serverError).toBeUndefined();
+      expect(safeResult.fieldErrors).toBeUndefined();
     });
   });
 

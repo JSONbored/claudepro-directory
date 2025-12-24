@@ -7,7 +7,7 @@
  * - Configuration exports
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import { FEATURE_FLAGS } from './unified-config';
 
 describe('Unified Config - Infisical Feature Flag', () => {

@@ -122,10 +122,15 @@ export const GET = createCachedApiRoute({
     ctx: RouteHandlerContext<{ slug: string }>
   ) => {
     const { logger } = ctx;
-    const profile = result as null | undefined | { [key: string]: unknown; p_slug: string };
+    const profile = result as null | undefined | { company: unknown | null; [key: string]: unknown };
 
-    // Check if profile exists
-    if (!profile || (typeof profile === 'object' && Object.keys(profile).length === 0)) {
+    // Check if profile exists or if company is null
+    // getCompanyProfile returns { company: null, active_jobs: null, stats: null } when not found
+    if (
+      !profile ||
+      (typeof profile === 'object' && Object.keys(profile).length === 0) ||
+      (typeof profile === 'object' && 'company' in profile && profile.company === null)
+    ) {
       logger.warn({ slug: query.slug }, 'Company profile not found');
       return notFoundResponse('Company not found', 'Company');
     }

@@ -35,6 +35,7 @@ import {
   setProjectRoot,
   evaluateSchemaFromFile,
   generateExampleFromZodSchema,
+  createJitiInstance,
 } from '../toolkit/zod-schema-evaluation.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -224,16 +225,8 @@ function extractToolMetadata(sourceFile: SourceFile): ToolMetadata[] {
 function extractResourceMetadata(sourceFile: SourceFile): ResourceMetadata[] {
   const resources: ResourceMetadata[] = [];
 
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:224',message:'extractResourceMetadata entry',data:{filePath:sourceFile.getFilePath()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-  // #endregion
-
   // Find all registerResource calls
   const allCalls = sourceFile.getDescendantsOfKind(207);
-  
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:228',message:'Found call expressions',data:{totalCalls:allCalls.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-  // #endregion
 
   let propertyAccessCount = 0;
   let registerResourceCount = 0;
@@ -261,10 +254,6 @@ function extractResourceMetadata(sourceFile: SourceFile): ResourceMetadata[] {
     registerResourceCount++;
 
     const args = call.getArguments();
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:238',message:'registerResource call found',data:{argsLength:args.length,methodName},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
 
     if (args.length < 4) {
       argsLengthMismatchCount++;
@@ -275,9 +264,6 @@ function extractResourceMetadata(sourceFile: SourceFile): ResourceMetadata[] {
     const nameArg = args[0];
     if (!Node.isStringLiteral(nameArg)) {
       nameArgInvalidCount++;
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:242',message:'nameArg invalid',data:{nameArgKind:nameArg.getKindName()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       return;
     }
     const name = nameArg.getLiteralValue();
@@ -295,25 +281,16 @@ function extractResourceMetadata(sourceFile: SourceFile): ResourceMetadata[] {
           uriTemplate = firstArg.getLiteralValue();
         } else {
           templateArgInvalidCount++;
-          // #region agent log
-          fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:251',message:'templateArg firstArg invalid',data:{firstArgKind:firstArg.getKindName()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-          // #endregion
         }
       }
     } else {
       templateArgInvalidCount++;
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:248',message:'templateArg not NewExpression',data:{templateArgKind:templateArg.getKindName()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
     }
 
     // Third arg: metadata object
     const metadataArg = args[2];
     if (!Node.isObjectLiteralExpression(metadataArg)) {
       metadataArgInvalidCount++;
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:262',message:'metadataArg invalid',data:{metadataArgKind:metadataArg.getKindName()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       return;
     }
 
@@ -369,15 +346,7 @@ function extractResourceMetadata(sourceFile: SourceFile): ResourceMetadata[] {
       mimeType,
       filePath: sourceFile.getFilePath(),
     });
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:308',message:'Resource extracted successfully',data:{name,uriTemplate,title,hasDescription:!!description},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
   });
-
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:318',message:'extractResourceMetadata exit',data:{resourcesFound:resources.length,propertyAccessCount,registerResourceCount,methodNameMismatchCount,argsLengthMismatchCount,nameArgInvalidCount,templateArgInvalidCount,metadataArgInvalidCount},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-  // #endregion
 
   return resources;
 }
@@ -511,48 +480,33 @@ function extractToolsViaRegex(sourceText: string): ToolMetadata[] {
 function extractResourcesViaRegex(sourceText: string): ResourceMetadata[] {
   const resources: ResourceMetadata[] = [];
   
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:447',message:'extractResourcesViaRegex entry',data:{sourceTextLength:sourceText.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  // #endregion
-  
   // Match: mcpServer.registerResource('name', new ResourceTemplate('uri', ...), { title: '...', description: '...', mimeType: '...' }, ...)
-  // Updated regex to handle multi-line descriptions
-  const resourceRegex = /mcpServer\.registerResource\s*\(\s*['"]([^'"]+)['"]\s*,\s*new\s+ResourceTemplate\s*\(\s*['"]([^'"]+)['"][^)]*\)\s*,\s*\{[^}]*title:\s*['"]([^'"]+)['"][^}]*description:\s*['"]?([^'"]+)['"]?[^}]*mimeType:\s*['"]([^'"]+)['"]/gs;
-  
-  // #region agent log
-  const regexMatches = sourceText.match(/mcpServer\.registerResource/gi);
-  fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:452',message:'registerResource calls found in text',data:{matchesFound:regexMatches?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  // #endregion
+  // Handle multi-line descriptions - description can be on the same line or next line after description:
+  // Pattern breakdown:
+  // 1. mcpServer.registerResource('name', ...)
+  // 2. new ResourceTemplate('uri', ...)
+  // 3. { title: '...', description: '...' (can span lines), mimeType: '...' }
+  // Use [\s\S] to match any character including newlines, with non-greedy matching
+  // Match: mcpServer.registerResource('name', new ResourceTemplate('uri', ...), { title: '...', description: '...', mimeType: '...' }, ...)
+  // Handle multi-line descriptions - description can be on the same line or next line after description:
+  // Pattern: description: followed by any content (including newlines), then string literal, then mimeType
+  const resourceRegex = /mcpServer\.registerResource\s*\(\s*['"]([^'"]+)['"]\s*,\s*new\s+ResourceTemplate\s*\(\s*['"]([^'"]+)['"][\s\S]*?title:\s*['"]([^'"]+)['"][\s\S]*?description:[\s\S]*?['"]([^'"]+)['"][\s\S]*?mimeType:\s*['"]([^'"]+)['"]/g;
   
   let match;
-  let matchCount = 0;
   while ((match = resourceRegex.exec(sourceText)) !== null) {
-    matchCount++;
     const [, name, uriTemplate, title, description, mimeType] = match;
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:456',message:'Regex match found',data:{matchCount,name,uriTemplate,title,hasDescription:!!description,descriptionLength:description?.length||0,mimeType},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     
     if (name && uriTemplate && title) {
       resources.push({
         name: name.trim(),
         uriTemplate: uriTemplate.trim(),
         title: title.trim(),
-        description: (description || '').trim(),
+        description: (description || '').trim().replace(/\s+/g, ' '), // Normalize whitespace
         mimeType: (mimeType || 'text/plain').trim(),
         filePath: 'packages/mcp-server/src/mcp/resources/register.ts',
       });
-    } else {
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:465',message:'Regex match invalid - missing fields',data:{name:!!name,uriTemplate:!!uriTemplate,title:!!title},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
     }
   }
-  
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:473',message:'extractResourcesViaRegex exit',data:{resourcesFound:resources.length,matchCount},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  // #endregion
   
   return resources;
 }
@@ -629,41 +583,104 @@ async function evaluateSchemas(
   }
 
   // Evaluate prompt args schemas
+  // Prompt schemas are defined inline in prompts/register.ts as plain objects with Zod properties
+  // We need to evaluate them from that file and convert to z.object()
+  const promptsRegisterPath = join(projectRoot, 'packages/mcp-server/src/mcp/prompts/register.ts');
+  
   for (const prompt of prompts) {
     if (prompt.argsSchemaName) {
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:543',message:'Evaluating prompt schema',data:{promptName:prompt.name,argsSchemaName:prompt.argsSchemaName,typesFilePath},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
-      
       try {
-        // Use absolute path to types file
-        const typesFilePath = join(projectRoot, 'packages/mcp-server/src/lib/types.ts');
-        const schema = await evaluateSchemaFromFile(
-          typesFilePath,
+        // First try to find schema in prompts register file (where they're actually defined)
+        let schema = await evaluateSchemaFromFile(
+          promptsRegisterPath,
           prompt.argsSchemaName,
           projectRoot
         );
+        
+        // If not found as Zod schema, try extracting from source file using AST (schemas are const, not exported)
+        if (!schema && existsSync(promptsRegisterPath)) {
+          try {
+            // Use AST to extract the const declaration (even if not exported)
+            // Create a new Project instance for AST parsing
+            const astProject = new Project({
+              skipAddingFilesFromTsConfig: true,
+              skipFileDependencyResolution: true,
+              skipLoadingLibFiles: true,
+            });
+            const promptsFile = astProject.addSourceFileAtPathIfExists(promptsRegisterPath);
+            if (promptsFile) {
+              let schemaDeclaration: Node | null = null;
+              
+              // Find const declaration (exported or not)
+              promptsFile.forEachDescendant((node) => {
+                if (Node.isVariableStatement(node)) {
+                  const declarationList = node.getDeclarationList();
+                  const declarations = declarationList.getDeclarations();
+                  for (const declaration of declarations) {
+                    if (declaration.getName() === prompt.argsSchemaName) {
+                      schemaDeclaration = declaration;
+                      return;
+                    }
+                  }
+                }
+              });
+              
+              if (schemaDeclaration && Node.isVariableDeclaration(schemaDeclaration)) {
+                const initializer = schemaDeclaration.getInitializer();
+                if (initializer) {
+                  const schemaCode = initializer.getText();
+                  
+                  // Extract imports needed for evaluation
+                  const imports: string[] = [];
+                  for (const imp of promptsFile.getImportDeclarations()) {
+                    const spec = imp.getModuleSpecifierValue();
+                    const namedImports = imp.getNamedImports();
+                    if (namedImports.length > 0) {
+                      const named = namedImports.map((n) => n.getName()).join(', ');
+                      imports.push(`import { ${named} } from '${spec}';`);
+                    }
+                  }
+                  
+                  // Evaluate the schema code - it's a plain object, so wrap in z.object()
+                  // Import evaluateZodSchema from toolkit
+                  const { evaluateZodSchema } = await import('../toolkit/zod-schema-evaluation.js');
+                  
+                  // The schema code is a plain object like { category: z.string().optional() }
+                  // We need to wrap it in z.object() for evaluation
+                  const wrappedSchemaCode = `z.object(${schemaCode})`;
+                  
+                  const evaluatedSchema = await evaluateZodSchema(wrappedSchemaCode, imports, projectRoot);
+                  
+                  if (evaluatedSchema) {
+                    schema = evaluatedSchema;
+                  }
+                }
+              }
+            }
+          } catch (extractError) {
+            // Silently continue - will try types.ts fallback
+          }
+        }
+        
+        // If still not found, try types.ts (for backwards compatibility)
+        if (!schema) {
+          const typesFilePath = join(projectRoot, 'packages/mcp-server/src/lib/types.ts');
+          schema = await evaluateSchemaFromFile(
+            typesFilePath,
+            prompt.argsSchemaName,
+            projectRoot
+          );
+        }
+        
         if (schema) {
           prompt.argsSchema = schema;
           prompt.argsSchemaExample = generateExampleFromZodSchema(schema);
           console.log(`   ✅ Evaluated args schema for ${prompt.name}: ${prompt.argsSchemaName}`);
-          
-          // #region agent log
-          fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:556',message:'Prompt schema evaluated successfully',data:{promptName:prompt.name,argsSchemaName:prompt.argsSchemaName},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-          // #endregion
         } else {
           console.warn(`   ⚠️  Could not evaluate schema: ${prompt.argsSchemaName}`);
-          
-          // #region agent log
-          fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:559',message:'Prompt schema evaluation returned null',data:{promptName:prompt.name,argsSchemaName:prompt.argsSchemaName,typesFilePath},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-          // #endregion
         }
       } catch (error) {
         console.warn(`   ⚠️  Error evaluating schema ${prompt.argsSchemaName}: ${error}`);
-        
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'generate-mcp-openapi.ts:562',message:'Prompt schema evaluation error',data:{promptName:prompt.name,argsSchemaName:prompt.argsSchemaName,error:String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-        // #endregion
       }
     }
   }

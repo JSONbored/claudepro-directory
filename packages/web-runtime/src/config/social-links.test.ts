@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from '@jest/globals';
 import { SOCIAL_LINKS } from './social-links.ts';
 
 describe('SOCIAL_LINKS', () => {
