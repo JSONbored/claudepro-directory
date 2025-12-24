@@ -68,6 +68,7 @@ jest.mock('next/og', () => ({
 }));
 
 // Mock shared-runtime
+// Note: Must include createPinoConfig since real route factory imports data-layer which needs it
 jest.mock('@heyclaude/shared-runtime', () => ({
   OG_DEFAULTS: {
     title: 'Default Title',
@@ -78,6 +79,19 @@ jest.mock('@heyclaude/shared-runtime', () => ({
     width: 1200,
     height: 630,
   },
+  createPinoConfig: jest.fn((options?: { service?: string }) => ({
+    level: 'info',
+    base: {
+      service: options?.service || 'test',
+      env: 'test',
+    },
+    redact: [],
+    serializers: {},
+  })),
+  normalizeError: jest.fn((error: unknown) => {
+    if (error instanceof Error) return error;
+    return new Error(String(error));
+  }),
 }));
 
 // Mock logger

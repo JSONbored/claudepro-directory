@@ -2,7 +2,7 @@
  * Tests for Zod Schemas
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import {
   mcpPaginationSchema,
   mcpCategoryFilterSchema,
@@ -17,7 +17,7 @@ import {
   createContentFilterSchema,
   createPaginatedContentSchema,
   createContentListResponseSchema,
-} from '../../../../packages/mcp-server/src/lib/schemas.js';
+} from '@heyclaude/mcp-server/lib/schemas';
 
 describe('MCP Schemas', () => {
   describe('mcpPaginationSchema', () => {

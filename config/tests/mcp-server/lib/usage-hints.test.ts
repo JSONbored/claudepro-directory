@@ -2,12 +2,12 @@
  * Tests for Usage Hints
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import {
   getContentUsageHints,
   getSearchUsageHints,
   getCategoryUsageHints,
-} from '../../../../packages/mcp-server/src/lib/usage-hints.js';
+} from '@heyclaude/mcp-server/lib/usage-hints';
 
 describe('Usage Hints', () => {
   describe('getContentUsageHints', () => {

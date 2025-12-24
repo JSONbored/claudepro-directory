@@ -2,7 +2,7 @@
  * Tests for Metrics and Observability
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import {
   recordToolCall,
   getToolMetrics,
@@ -11,7 +11,7 @@ import {
   clearMetrics,
   withMetrics,
   type ToolMetrics,
-} from '../../../../packages/mcp-server/src/observability/metrics.js';
+} from '@heyclaude/mcp-server/observability/metrics';
 import { createMockLogger } from '../fixtures/test-utils.js';
 
 describe('Metrics and Observability', () => {
@@ -57,7 +57,7 @@ describe('Metrics and Observability', () => {
       recordToolCall('slowTool', true, 2000, logger); // 2 seconds
 
       expect(logger.warn).toHaveBeenCalled();
-      const warnCall = (logger.warn as ReturnType<typeof vi.fn>).mock.calls[0];
+      const warnCall = (logger.warn as ReturnType<typeof jest.fn>).mock.calls[0];
       expect(warnCall[0]).toContain('slow');
       expect(warnCall[1]).toHaveProperty('duration_ms', 2000);
     });
@@ -138,7 +138,7 @@ describe('Metrics and Observability', () => {
 
   describe('withMetrics', () => {
     it('should wrap handler and track metrics', async () => {
-      const handler = vi.fn().mockResolvedValue({ result: 'success' });
+      const handler = jest.fn().mockResolvedValue({ result: 'success' });
       const wrapped = withMetrics('testTool', handler);
 
       const result = await wrapped({ input: 'test' }, {}) as any;
@@ -154,7 +154,7 @@ describe('Metrics and Observability', () => {
     });
 
     it('should track failed calls', async () => {
-      const handler = vi.fn().mockRejectedValue(new Error('Test error'));
+      const handler = jest.fn().mockRejectedValue(new Error('Test error'));
       const wrapped = withMetrics('failingTool', handler);
 
       await expect(wrapped({ input: 'test' }, {})).rejects.toThrow('Test error');
@@ -167,7 +167,7 @@ describe('Metrics and Observability', () => {
 
     it('should add performance metrics to response', async () => {
       // Add a small delay to ensure executionTime > 0
-      const handler = vi.fn().mockImplementation(async () => {
+      const handler = jest.fn().mockImplementation(async () => {
         await new Promise((resolve) => setTimeout(resolve, 10));
         return { data: 'test' };
       });
@@ -182,7 +182,7 @@ describe('Metrics and Observability', () => {
     });
 
     it('should detect cache usage from result', async () => {
-      const handler = vi.fn().mockResolvedValue({ data: 'test', fromCache: true });
+      const handler = jest.fn().mockResolvedValue({ data: 'test', fromCache: true });
       const wrapped = withMetrics('cachedTool', handler);
 
       const result = await wrapped({ input: 'test' }, {}) as any;

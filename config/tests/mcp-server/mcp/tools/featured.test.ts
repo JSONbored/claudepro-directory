@@ -4,52 +4,28 @@
  * Comprehensive tests for the tool that retrieves featured content from the homepage.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-
-// Mock @prisma/client to use PrismockerClient from __mocks__/@prisma/client.ts
-// This must be called before any imports that use PrismaClient
-// Vitest will hoist this call to the top of the file
-vi.mock('@prisma/client');
-
-import { handleGetFeatured } from '../../../../../packages/mcp-server/src/mcp/tools/featured.js';
-import { createMockLogger, createMockEnv, createMockUser, createMockToken, createMockKvCache } from '../../fixtures/test-utils.js';
-import type { ToolContext } from '../../../../../packages/mcp-server/src/types/runtime.js';
-import { prisma } from '@heyclaude/data-layer/prisma/client';
-import type { PrismaClient } from '@prisma/client';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
 // Prismocker is automatically configured via __mocks__/@prisma/client.ts
 // The prisma singleton from data-layer will automatically use PrismockerClient
+// No need to explicitly mock @prisma/client - Jest uses __mocks__ automatically
 
-// Mock request cache to completely bypass caching
-// Services import using relative paths (../utils/request-cache.ts), so we need to mock the actual file path
-const { mockWithSmartCache, mockClearRequestCache } = vi.hoisted(() => {
-  return {
-    mockWithSmartCache: vi.fn((_rpcName: string, _methodName: string, rpcCall: () => Promise<unknown>) => {
-      // Always call the RPC directly, never cache
-      return rpcCall();
-    }),
-    mockClearRequestCache: vi.fn(() => {
-      // Clear function - no-op since we're bypassing caching entirely
-    }),
-  };
-});
+import { handleGetFeatured } from '@heyclaude/mcp-server/tools/featured';
+import { createMockLogger, createMockEnv, createMockUser, createMockToken, createMockKvCache } from '../../fixtures/test-utils.js';
+import type { ToolContext } from '@heyclaude/mcp-server/types/runtime';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
 
-// Mock the actual file path that services import from (relative path from service files)
-// This matches the pattern used in other data-layer service tests
-vi.mock('../../../../../packages/data-layer/src/utils/request-cache.ts', () => ({
-  withSmartCache: mockWithSmartCache,
-  withRequestCache: vi.fn((_rpcName: string, rpcCall: () => Promise<unknown>) => rpcCall()),
-  clearRequestCache: mockClearRequestCache,
-  getRequestCache: vi.fn(() => ({
-    get: vi.fn(() => null),
-    set: vi.fn(),
-    clear: vi.fn(),
-  })),
-}));
+// Import real cache utilities for proper cache testing
+import { clearRequestCache } from '@heyclaude/data-layer/utils/request-cache';
+
+// DO NOT mock request-cache.ts - use real implementation
+// Cache is cleared in beforeEach for test isolation
+// This allows us to test business logic with fresh cache (each test starts with empty cache)
 
 describe('getFeatured Tool Handler', () => {
   let prismocker: PrismaClient;
-  let queryRawUnsafeSpy: ReturnType<typeof vi.fn>;
+  let queryRawUnsafeSpy: ReturnType<typeof jest.fn>;
   let mockLogger: ReturnType<typeof createMockLogger>;
   let mockEnv: ReturnType<typeof createMockEnv>;
   let context: ToolContext;
@@ -57,37 +33,26 @@ describe('getFeatured Tool Handler', () => {
   /**
    * Helper to safely mock Prismocker model methods
    */
-  function mockPrismockerMethod<T>(
-    model: any,
-    method: string,
-    returnValue: T
-  ): ReturnType<typeof vi.fn> {
-    if (!model) {
-      throw new Error(`Prismocker model does not exist - check if model name matches schema.prisma`);
-    }
-    const mockFn = vi.fn().mockResolvedValue(returnValue as any);
-    model[method] = mockFn;
-    return mockFn;
-  }
-
   beforeEach(() => {
-    // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    // 1. Clear request cache before each test (REQUIRED for test isolation)
+    clearRequestCache();
+
+    // 2. Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
     prismocker = prisma;
 
-    // Reset Prismocker data before each test (must be before clearAllMocks)
+    // 3. Reset Prismocker data before each test
     if ('reset' in prismocker && typeof prismocker.reset === 'function') {
       prismocker.reset();
     }
 
-    // Clear all mocks to ensure clean state
-    mockClearRequestCache();
-    vi.clearAllMocks();
-    vi.resetAllMocks();
-    mockWithSmartCache.mockClear();
+    // 4. Clear all mocks to ensure clean state
+    jest.clearAllMocks();
+    jest.resetAllMocks();
 
-    // Prismocker doesn't support $queryRawUnsafe, so we add it as a mock function
+    // 5. Prismocker doesn't support $queryRawUnsafe, so we add it as a mock function
+    // Use Prismocker's Proxy set handler to override $queryRawUnsafe
     // Create a fresh spy for each test AFTER clearing mocks to ensure proper isolation
-    queryRawUnsafeSpy = vi.fn().mockImplementation(async () => []);
+    queryRawUnsafeSpy = jest.fn().mockImplementation(async () => []);
     (prismocker as any).$queryRawUnsafe = queryRawUnsafeSpy;
 
     // Ensure Prismocker models are initialized
@@ -177,14 +142,14 @@ describe('getFeatured Tool Handler', () => {
     // Uses v_content_list_slim.findMany and count
     // Since queries run in parallel, we need to check the where clause to return different values
     void prismocker.v_content_list_slim;
-    const findManyMock = vi.fn((args: any) => {
+    const findManyMock = jest.fn((args: any) => {
       // Check if category is 'agents' in where clause
       if (args?.where?.category === 'agents') {
         return Promise.resolve(mockCategoryItems as any);
       }
       return Promise.resolve([]);
     });
-    const countMock = vi.fn((args: any) => {
+    const countMock = jest.fn((args: any) => {
       // Check if category is 'agents' in where clause
       if (args?.where?.category === 'agents') {
         return Promise.resolve(1);
@@ -298,7 +263,7 @@ describe('getFeatured Tool Handler', () => {
 
     void prismocker.v_content_list_slim;
     // Mock to return data for 'agents', reject for 'rules', empty for others
-    const findManyMock = vi.fn((args: any) => {
+    const findManyMock = jest.fn((args: any) => {
       if (args?.where?.category === 'agents') {
         return Promise.resolve(mockCategoryItems as any);
       }
@@ -307,7 +272,7 @@ describe('getFeatured Tool Handler', () => {
       }
       return Promise.resolve([]);
     });
-    const countMock = vi.fn((args: any) => {
+    const countMock = jest.fn((args: any) => {
       if (args?.where?.category === 'agents') {
         return Promise.resolve(1);
       }
@@ -363,13 +328,13 @@ describe('getFeatured Tool Handler', () => {
 
     void prismocker.v_content_list_slim;
     // Mock to return data for 'agents' category, empty for others
-    const findManyMock = vi.fn((args: any) => {
+    const findManyMock = jest.fn((args: any) => {
       if (args?.where?.category === 'agents') {
         return Promise.resolve(mockCategoryItems as any);
       }
       return Promise.resolve([]);
     });
-    const countMock = vi.fn((args: any) => {
+    const countMock = jest.fn((args: any) => {
       if (args?.where?.category === 'agents') {
         return Promise.resolve(1);
       }
@@ -393,8 +358,8 @@ describe('getFeatured Tool Handler', () => {
     void prismocker.v_content_list_slim;
     // Make one category query fail - use mockRejectedValue to reject when called
     // The implementation uses Promise.allSettled, so it handles errors gracefully
-    const findManyMock = vi.fn().mockRejectedValue(new Error('Database connection failed'));
-    const countMock = vi.fn().mockResolvedValue(0);
+    const findManyMock = jest.fn().mockRejectedValue(new Error('Database connection failed'));
+    const countMock = jest.fn().mockResolvedValue(0);
     prismocker.v_content_list_slim.findMany = findManyMock;
     prismocker.v_content_list_slim.count = countMock;
 
@@ -465,13 +430,13 @@ describe('getFeatured Tool Handler', () => {
 
     void prismocker.v_content_list_slim;
     // Mock to return data for 'agents' category, empty for others
-    const findManyMock = vi.fn((args: any) => {
+    const findManyMock = jest.fn((args: any) => {
       if (args?.where?.category === 'agents') {
         return Promise.resolve(mockCategoryItems as any);
       }
       return Promise.resolve([]);
     });
-    const countMock = vi.fn((args: any) => {
+    const countMock = jest.fn((args: any) => {
       if (args?.where?.category === 'agents') {
         return Promise.resolve(1);
       }
@@ -526,13 +491,13 @@ describe('getFeatured Tool Handler', () => {
 
     void prismocker.v_content_list_slim;
     // Mock to return data for 'agents' category, empty for others
-    const findManyMock = vi.fn((args: any) => {
+    const findManyMock = jest.fn((args: any) => {
       if (args?.where?.category === 'agents') {
         return Promise.resolve(mockCategoryItems as any);
       }
       return Promise.resolve([]);
     });
-    const countMock = vi.fn((args: any) => {
+    const countMock = jest.fn((args: any) => {
       if (args?.where?.category === 'agents') {
         return Promise.resolve(1);
       }

@@ -2,7 +2,7 @@
  * Tests for Platform Formatters
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import {
   formatForClaudeCode,
   formatForCursor,
@@ -12,7 +12,7 @@ import {
   getTargetDirectory,
   getInstallationInstructions,
   type ContentItem,
-} from '../../../../packages/mcp-server/src/lib/platform-formatters.js';
+} from '@heyclaude/mcp-server/lib/platform-formatters';
 
 // Helper to create a test content item
 function createTestContentItem(overrides?: Partial<ContentItem>): ContentItem {

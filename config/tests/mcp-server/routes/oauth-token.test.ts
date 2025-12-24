@@ -2,8 +2,8 @@
  * Tests for OAuth Token Route
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { handleOAuthToken } from '../../../../packages/mcp-server/src/routes/oauth-token.js';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { handleOAuthToken } from '@heyclaude/mcp-server/routes/oauth-token';
 import { createMockEnv, createMockLogger } from '../fixtures/test-utils.js';
 
 describe('OAuth Token Route', () => {

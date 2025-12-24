@@ -5,13 +5,13 @@
  * packages/mcp-server clean for community distribution.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import {
   McpErrorCode,
   ERROR_MESSAGES,
   ERROR_RECOVERY,
   createErrorResponse,
-} from '../../../../packages/mcp-server/src/lib/errors.js';
+} from '@heyclaude/mcp-server/lib/errors';
 
 describe('MCP Server Error Handling', () => {
   describe('McpErrorCode enum', () => {

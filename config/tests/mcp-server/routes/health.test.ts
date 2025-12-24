@@ -5,20 +5,19 @@
  * packages/mcp-server clean for community distribution.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
-// Mock @prisma/client to use PrismockerClient from __mocks__/@prisma/client.ts
-// This must be called before any imports that use PrismaClient
-// Vitest will hoist this call to the top of the file
-vi.mock('@prisma/client');
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from data-layer will automatically use PrismockerClient
+// No need to explicitly mock @prisma/client - Jest uses __mocks__ automatically
 
-import { handleHealth } from '../../../../packages/mcp-server/src/routes/health.js';
+import { handleHealth } from '@heyclaude/mcp-server/routes/health';
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
 
 describe('Health Check Route', () => {
   let prismocker: PrismaClient;
-  let queryRawSpy: ReturnType<typeof vi.fn>;
+  let queryRawSpy: ReturnType<typeof jest.fn>;
 
   beforeEach(() => {
     // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
@@ -31,10 +30,11 @@ describe('Health Check Route', () => {
 
     // Prismocker doesn't support queryRaw, so we add it as a mock function
     // The health route uses queryRaw (not $queryRaw)
-    queryRawSpy = vi.fn().mockResolvedValue([{ '?column?': 1 }]);
+    // Use Prismocker's Proxy set handler to override queryRaw
+    queryRawSpy = jest.fn().mockResolvedValue([{ '?column?': 1 }]);
     (prismocker as any).queryRaw = queryRawSpy;
 
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should return healthy status when database is available', async () => {

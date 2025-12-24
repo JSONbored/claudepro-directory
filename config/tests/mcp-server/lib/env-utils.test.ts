@@ -2,13 +2,13 @@
  * Tests for Environment Utilities
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import {
   getEnvVar,
   getEnvOrDefault,
   getNumberEnv,
   requireEnvVar,
-} from '../../../../packages/mcp-server/src/lib/env-utils.js';
+} from '@heyclaude/mcp-server/lib/env-utils';
 import { createMockEnv } from '../fixtures/test-utils.js';
 
 describe('Environment Utilities', () => {

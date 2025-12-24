@@ -5,10 +5,10 @@
  * This utility ensures env vars are loaded from Infisical (local dev) or platform (CI/Build).
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 
 // Mock env schema - define everything inside factory to avoid hoisting issues
-vi.mock('@heyclaude/shared-runtime/schemas/env', () => {
+jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
   // Define mockEnv inside factory (no top-level variables)
   const mockEnv: Record<string, string | undefined> = {
     VERCEL: undefined,
@@ -40,11 +40,11 @@ const getMockEnv = (): Record<string, string | undefined> => {
 };
 
 // Mock logger - define inside factory to avoid hoisting issues
-vi.mock('./logger.ts', () => {
+jest.mock('./logger.ts', () => {
   const mockLogger = {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
   };
   
   // Store on globalThis for test access
@@ -59,9 +59,9 @@ vi.mock('./logger.ts', () => {
 
 // Get mockLogger from globalThis for test access
 const getMockLogger = () => (globalThis as any).__generatorsMockLogger as {
-  info: ReturnType<typeof vi.fn>;
-  warn: ReturnType<typeof vi.fn>;
-  error: ReturnType<typeof vi.fn>;
+  info: ReturnType<typeof jest.fn>;
+  warn: ReturnType<typeof jest.fn>;
+  error: ReturnType<typeof jest.fn>;
 };
 const mockLogger = getMockLogger();
 
@@ -70,7 +70,7 @@ import { ensureEnvVars } from './env';
 
 describe('Environment Variable Toolkit', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     // Reset mock env
     const currentMockEnv = getMockEnv();
     Object.keys(currentMockEnv).forEach((key) => {

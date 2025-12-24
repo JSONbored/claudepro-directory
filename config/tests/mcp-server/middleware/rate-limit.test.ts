@@ -2,8 +2,8 @@
  * Tests for Rate Limiting Middleware
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { checkRateLimit, addRateLimitHeaders, createRateLimitErrorResponse, type RateLimitResult, type RateLimitConfig } from '../../../../packages/mcp-server/src/middleware/rate-limit.js';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { checkRateLimit, addRateLimitHeaders, createRateLimitErrorResponse, type RateLimitResult, type RateLimitConfig } from '@heyclaude/mcp-server/middleware/rate-limit';
 
 describe('Rate Limiting Middleware', () => {
   describe('checkRateLimit', () => {
@@ -19,7 +19,7 @@ describe('Rate Limiting Middleware', () => {
 
     it('should check rate limit when binding is configured', async () => {
       const mockRateLimitBinding = {
-        limit: vi.fn().mockResolvedValue({
+        limit: jest.fn().mockResolvedValue({
           success: true,
           limit: 100,
           remaining: 99,
@@ -41,7 +41,7 @@ describe('Rate Limiting Middleware', () => {
 
     it('should handle rate limit exceeded', async () => {
       const mockRateLimitBinding = {
-        limit: vi.fn().mockResolvedValue({
+        limit: jest.fn().mockResolvedValue({
           success: false,
           limit: 100,
           remaining: 0,

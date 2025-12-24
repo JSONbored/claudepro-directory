@@ -2,14 +2,14 @@
  * Tests for Request Deduplication Middleware
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import {
   withRequestDeduplication,
   generateCacheKey,
   getCacheStats,
   clearCache,
   clearExpiredCache,
-} from '../../../../packages/mcp-server/src/middleware/request-deduplication.js';
+} from '@heyclaude/mcp-server/middleware/request-deduplication';
 
 describe('Request Deduplication', () => {
   beforeEach(() => {
@@ -33,7 +33,7 @@ describe('Request Deduplication', () => {
 
   describe('withRequestDeduplication', () => {
     it('should cache results and return cached value on duplicate calls', async () => {
-      const handler = vi.fn().mockResolvedValue({ result: 'cached' });
+      const handler = jest.fn().mockResolvedValue({ result: 'cached' });
       const wrapped = withRequestDeduplication('testTool', handler, { ttl: 5000 });
 
       // First call
@@ -48,7 +48,7 @@ describe('Request Deduplication', () => {
     });
 
     it('should call handler for different inputs', async () => {
-      const handler = vi.fn().mockImplementation((input) => Promise.resolve({ input: input.input }));
+      const handler = jest.fn().mockImplementation((input) => Promise.resolve({ input: input.input }));
       const wrapped = withRequestDeduplication('testTool', handler);
 
       await wrapped({ input: 'test1' }, {});
@@ -58,7 +58,7 @@ describe('Request Deduplication', () => {
     });
 
     it('should skip caching when disabled', async () => {
-      const handler = vi.fn().mockResolvedValue({ result: 'data' });
+      const handler = jest.fn().mockResolvedValue({ result: 'data' });
       const wrapped = withRequestDeduplication('testTool', handler, { enabled: false });
 
       await wrapped({ input: 'test' }, {});
@@ -68,7 +68,7 @@ describe('Request Deduplication', () => {
     });
 
     it('should use custom TTL', async () => {
-      const handler = vi.fn().mockResolvedValue({ result: 'data' });
+      const handler = jest.fn().mockResolvedValue({ result: 'data' });
       const wrapped = withRequestDeduplication('testTool', handler, { ttl: 100 });
 
       // First call
@@ -86,7 +86,7 @@ describe('Request Deduplication', () => {
 
   describe('getCacheStats', () => {
     it('should return cache statistics', async () => {
-      const handler = vi.fn().mockResolvedValue({ result: 'data' });
+      const handler = jest.fn().mockResolvedValue({ result: 'data' });
       const wrapped = withRequestDeduplication('testTool', handler);
 
       await wrapped({ input: 'test1' }, {});
@@ -99,7 +99,7 @@ describe('Request Deduplication', () => {
 
   describe('clearCache', () => {
     it('should clear all cached entries', async () => {
-      const handler = vi.fn().mockResolvedValue({ result: 'data' });
+      const handler = jest.fn().mockResolvedValue({ result: 'data' });
       const wrapped = withRequestDeduplication('testTool', handler);
 
       await wrapped({ input: 'test' }, {});
@@ -116,7 +116,7 @@ describe('Request Deduplication', () => {
 
   describe('clearExpiredCache', () => {
     it('should clear expired entries', async () => {
-      const handler = vi.fn().mockResolvedValue({ result: 'data' });
+      const handler = jest.fn().mockResolvedValue({ result: 'data' });
       const wrapped = withRequestDeduplication('testTool', handler, { ttl: 100 });
 
       await wrapped({ input: 'test' }, {});

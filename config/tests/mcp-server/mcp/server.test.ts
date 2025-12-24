@@ -2,32 +2,31 @@
  * Tests for MCP Server Factory
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
-// Mock @prisma/client to use PrismockerClient from __mocks__/@prisma/client.ts
-// This must be called before any imports that use PrismaClient
-// Vitest will hoist this call to the top of the file
-vi.mock('@prisma/client');
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from data-layer will automatically use PrismockerClient
+// No need to explicitly mock @prisma/client - Jest uses __mocks__ automatically
 
-import { createMcpServer } from '../../../../packages/mcp-server/src/mcp/server.js';
+import { createMcpServer } from '@heyclaude/mcp-server/mcp/server';
 import { createMockLogger, createMockUser, createMockToken, createMockEnv, createMockKvCache } from '../fixtures/test-utils.ts';
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
-import * as toolsRegistration from '../../../../packages/mcp-server/src/mcp/tools/index.js';
-import * as resourcesRegistration from '../../../../packages/mcp-server/src/mcp/resources/index.js';
-import * as promptsRegistration from '../../../../packages/mcp-server/src/mcp/prompts/index.js';
+import * as toolsRegistration from '@heyclaude/mcp-server/tools';
+import * as resourcesRegistration from '@heyclaude/mcp-server/mcp/resources';
+import * as promptsRegistration from '@heyclaude/mcp-server/mcp/prompts';
 
 // Mock the registration functions
-vi.mock('../../../../packages/mcp-server/src/mcp/tools/index.js', () => ({
-  registerAllTools: vi.fn(),
+jest.mock('@heyclaude/mcp-server/tools', () => ({
+  registerAllTools: jest.fn(),
 }));
 
-vi.mock('../../../../packages/mcp-server/src/mcp/resources/index.js', () => ({
-  registerAllResources: vi.fn(),
+jest.mock('@heyclaude/mcp-server/mcp/resources', () => ({
+  registerAllResources: jest.fn(),
 }));
 
-vi.mock('../../../../packages/mcp-server/src/mcp/prompts/index.js', () => ({
-  registerAllPrompts: vi.fn(),
+jest.mock('@heyclaude/mcp-server/mcp/prompts', () => ({
+  registerAllPrompts: jest.fn(),
 }));
 
 describe('MCP Server Factory', () => {
@@ -44,7 +43,7 @@ describe('MCP Server Factory', () => {
       prismocker.reset();
     }
 
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockLogger = createMockLogger();
     mockEnv = createMockEnv();
   });
@@ -71,7 +70,7 @@ describe('MCP Server Factory', () => {
     });
 
     expect(toolsRegistration.registerAllTools).toHaveBeenCalledTimes(1);
-    const callArgs = (toolsRegistration.registerAllTools as ReturnType<typeof vi.fn>).mock.calls[0];
+    const callArgs = (toolsRegistration.registerAllTools as ReturnType<typeof jest.fn>).mock.calls[0];
     expect(callArgs[0]).toBeDefined(); // mcpServer
     expect(callArgs[1]).toBeDefined(); // context
     expect(callArgs[1].prisma).toBe(prismocker);
@@ -88,7 +87,7 @@ describe('MCP Server Factory', () => {
     });
 
     expect(resourcesRegistration.registerAllResources).toHaveBeenCalledTimes(1);
-    const callArgs = (resourcesRegistration.registerAllResources as ReturnType<typeof vi.fn>).mock.calls[0];
+    const callArgs = (resourcesRegistration.registerAllResources as ReturnType<typeof jest.fn>).mock.calls[0];
     expect(callArgs[0]).toBeDefined(); // mcpServer
     expect(callArgs[1]).toBeDefined(); // context
   });
@@ -103,7 +102,7 @@ describe('MCP Server Factory', () => {
     });
 
     expect(promptsRegistration.registerAllPrompts).toHaveBeenCalledTimes(1);
-    const callArgs = (promptsRegistration.registerAllPrompts as ReturnType<typeof vi.fn>).mock.calls[0];
+    const callArgs = (promptsRegistration.registerAllPrompts as ReturnType<typeof jest.fn>).mock.calls[0];
     expect(callArgs[0]).toBeDefined(); // mcpServer
     expect(callArgs[1]).toBeDefined(); // context
   });
@@ -134,7 +133,7 @@ describe('MCP Server Factory', () => {
     expect(server).toBeDefined();
     
     // Verify context has kvCache as null
-    const callArgs = (toolsRegistration.registerAllTools as ReturnType<typeof vi.fn>).mock.calls[0];
+    const callArgs = (toolsRegistration.registerAllTools as ReturnType<typeof jest.fn>).mock.calls[0];
     expect(callArgs[1].kvCache).toBeNull();
   });
 
@@ -150,7 +149,7 @@ describe('MCP Server Factory', () => {
       kvCache: mockKvCache,
     });
 
-    const callArgs = (toolsRegistration.registerAllTools as ReturnType<typeof vi.fn>).mock.calls[0];
+    const callArgs = (toolsRegistration.registerAllTools as ReturnType<typeof jest.fn>).mock.calls[0];
     expect(callArgs[1].kvCache).toBe(mockKvCache);
   });
 
@@ -166,7 +165,7 @@ describe('MCP Server Factory', () => {
       logger: mockLogger,
     });
 
-    const callArgs = (toolsRegistration.registerAllTools as ReturnType<typeof vi.fn>).mock.calls[0];
+    const callArgs = (toolsRegistration.registerAllTools as ReturnType<typeof jest.fn>).mock.calls[0];
     const context = callArgs[1];
     
     expect(context.prisma).toBe(prismocker);

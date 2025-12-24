@@ -4,48 +4,24 @@
  * Comprehensive tests for the tool that retrieves recent content.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-
-// Mock @prisma/client to use PrismockerClient from __mocks__/@prisma/client.ts
-// This must be called before any imports that use PrismaClient
-// Vitest will hoist this call to the top of the file
-vi.mock('@prisma/client');
-
-import { handleGetRecent } from '../../../../../packages/mcp-server/src/mcp/tools/recent.js';
-import { createMockLogger, createMockEnv, createMockUser, createMockToken, createMockKvCache } from '../../fixtures/test-utils.js';
-import type { ToolContext } from '../../../../../packages/mcp-server/src/types/runtime.js';
-import { prisma } from '@heyclaude/data-layer/prisma/client';
-import type { PrismaClient } from '@prisma/client';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 
 // Prismocker is automatically configured via __mocks__/@prisma/client.ts
 // The prisma singleton from data-layer will automatically use PrismockerClient
+// No need to explicitly mock @prisma/client - Jest uses __mocks__ automatically
 
-// Mock request cache to completely bypass caching
-// Services import using relative paths (../utils/request-cache.ts), so we need to mock the actual file path
-const { mockWithSmartCache, mockClearRequestCache } = vi.hoisted(() => {
-  return {
-    mockWithSmartCache: vi.fn((_rpcName: string, _methodName: string, rpcCall: () => Promise<unknown>) => {
-      // Always call the RPC directly, never cache
-      return rpcCall();
-    }),
-    mockClearRequestCache: vi.fn(() => {
-      // Clear function - no-op since we're bypassing caching entirely
-    }),
-  };
-});
+import { handleGetRecent } from '@heyclaude/mcp-server/tools/recent';
+import { createMockLogger, createMockEnv, createMockUser, createMockToken, createMockKvCache } from '../../fixtures/test-utils.js';
+import type { ToolContext } from '@heyclaude/mcp-server/types/runtime';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
 
-// Mock the actual file path that services import from (relative path from service files)
-// This matches the pattern used in other data-layer service tests
-vi.mock('../../../../../packages/data-layer/src/utils/request-cache.ts', () => ({
-  withSmartCache: mockWithSmartCache,
-  withRequestCache: vi.fn((_rpcName: string, rpcCall: () => Promise<unknown>) => rpcCall()),
-  clearRequestCache: mockClearRequestCache,
-  getRequestCache: vi.fn(() => ({
-    get: vi.fn(() => null),
-    set: vi.fn(),
-    clear: vi.fn(),
-  })),
-}));
+// Import real cache utilities for proper cache testing
+import { clearRequestCache } from '@heyclaude/data-layer/utils/request-cache';
+
+// DO NOT mock request-cache.ts - use real implementation
+// Cache is cleared in beforeEach for test isolation
+// This allows us to test business logic with fresh cache (each test starts with empty cache)
 
 describe('getRecent Tool Handler', () => {
   let prismocker: PrismaClient;
@@ -60,40 +36,37 @@ describe('getRecent Tool Handler', () => {
     model: any,
     method: string,
     returnValue: T
-  ): ReturnType<typeof vi.fn> {
+  ): ReturnType<typeof jest.fn> {
     if (!model) {
       // PrismockerClient models are lazy-loaded, so try to access the model to trigger initialization
       // If it still doesn't exist, throw an error
       throw new Error(`Prismocker model does not exist - check if model name matches schema.prisma. PrismockerClient may not be properly initialized.`);
     }
-    const mockFn = vi.fn().mockResolvedValue(returnValue as any);
+    const mockFn = jest.fn().mockResolvedValue(returnValue as any);
     model[method] = mockFn;
     return mockFn;
   }
 
   beforeEach(() => {
-    // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    // 1. Clear request cache before each test (REQUIRED for test isolation)
+    clearRequestCache();
+
+    // 2. Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
     prismocker = prisma;
 
-    // Reset Prismocker data before each test (must be before clearAllMocks)
+    // 3. Reset Prismocker data before each test
     if ('reset' in prismocker && typeof prismocker.reset === 'function') {
       prismocker.reset();
     }
 
-    // Ensure Prismocker models are initialized (lazy-loaded, so access to trigger initialization)
-    // This ensures models are available after reset
-    if (prismocker.content) {
-      // Model exists, no action needed
-    }
+    // 4. Clear all mocks to ensure clean state
+    jest.clearAllMocks();
+    jest.resetAllMocks();
 
-    // Clear all mocks to ensure clean state
-    mockClearRequestCache();
-    vi.clearAllMocks();
-    vi.resetAllMocks();
-    mockWithSmartCache.mockClear();
-    vi.setSystemTime(new Date('2024-12-15T00:00:00Z')); // Set fixed time for date calculations
+    // 5. Set fixed time for date calculations (Jest supports setSystemTime)
+    jest.setSystemTime(new Date('2024-12-15T00:00:00Z'));
 
-    // Ensure Prismocker models are initialized
+    // 6. Ensure Prismocker models are initialized (lazy-loaded, so access to trigger initialization)
     void prismocker.content;
 
     mockLogger = createMockLogger();
@@ -109,7 +82,7 @@ describe('getRecent Tool Handler', () => {
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    jest.useRealTimers();
   });
 
   it('should return recent content without category filter', async () => {
@@ -198,7 +171,7 @@ describe('getRecent Tool Handler', () => {
 
   it('should format relative dates correctly (Today)', async () => {
     const today = new Date('2024-12-15T12:00:00Z');
-    vi.setSystemTime(today);
+    jest.setSystemTime(today);
 
     const mockRecentData = [
       {
@@ -224,7 +197,7 @@ describe('getRecent Tool Handler', () => {
   it('should format relative dates correctly (Yesterday)', async () => {
     const today = new Date('2024-12-15T00:00:00Z');
     const yesterday = new Date('2024-12-14T00:00:00Z');
-    vi.setSystemTime(today);
+    jest.setSystemTime(today);
 
     const mockRecentData = [
       {
@@ -250,7 +223,7 @@ describe('getRecent Tool Handler', () => {
   it('should format relative dates correctly (days ago)', async () => {
     const today = new Date('2024-12-15T00:00:00Z');
     const threeDaysAgo = new Date('2024-12-12T00:00:00Z');
-    vi.setSystemTime(today);
+    jest.setSystemTime(today);
 
     const mockRecentData = [
       {

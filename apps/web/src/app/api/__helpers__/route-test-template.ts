@@ -1,16 +1,16 @@
 /**
  * API Route Test Template
  *
- * Template for creating Vitest unit tests for API routes.
+ * Template for creating Jest unit tests for API routes.
  * Copy this template and customize for each route.
  */
 
 // Mock data-layer services
-// IMPORTANT: Import prisma directly - don't use vi.importActual
+// IMPORTANT: Import prisma directly - don't use jest.requireActual
 // Prisma is automatically PrismockerClient via __mocks__/@prisma/client.ts
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import { type PrismaClient } from '@prisma/client';
-import { beforeEach, describe, it, vi } from 'vitest';
+import { beforeEach, describe, it, jest } from '@jest/globals';
 // TODO: Update import path to your actual route file
 // import { GET, OPTIONS } from './route';
 // TODO: Uncomment when you have a real route
@@ -22,18 +22,18 @@ import { beforeEach, describe, it, vi } from 'vitest';
 // } from '../__helpers__/test-helpers';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
-  cacheLife: vi.fn(),
-  cacheTag: vi.fn(),
-  connection: vi.fn(() => Promise.resolve()),
+jest.mock('next/cache', () => ({
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
+  connection: jest.fn(() => Promise.resolve()),
 }));
 
-const mockServiceMethod = vi.fn();
+const mockServiceMethod = jest.fn();
 
-vi.mock('@heyclaude/data-layer', () => ({
+jest.mock('@heyclaude/data-layer', () => ({
   AccountService: class {},
   ChangelogService: class {},
   CompaniesService: class {
@@ -52,8 +52,8 @@ vi.mock('@heyclaude/data-layer', () => ({
 }));
 
 // Mock logger
-vi.mock('../../../../packages/web-runtime/src/logging/server', () => ({
-  createErrorResponse: vi.fn((error) =>
+jest.mock('../../../../packages/web-runtime/src/logging/server', () => ({
+  createErrorResponse: jest.fn((error) =>
     Response.json(
       {
         error: error instanceof Error ? error.message : String(error),
@@ -65,22 +65,22 @@ vi.mock('../../../../packages/web-runtime/src/logging/server', () => ({
     )
   ),
   logger: {
-    child: vi.fn(() => ({
-      debug: vi.fn(),
-      error: vi.fn(),
-      info: vi.fn(),
-      warn: vi.fn(),
+    child: jest.fn(() => ({
+      debug: jest.fn(),
+      error: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
     })),
   },
-  normalizeError: vi.fn((error) => {
+  normalizeError: jest.fn((error) => {
     if (error instanceof Error) return error;
     return new Error(String(error));
   }),
 }));
 
 // Mock server/api-helpers
-vi.mock('../../../../packages/web-runtime/src/server/api-helpers', () => ({
-  badRequestResponse: vi.fn((message, errors) =>
+jest.mock('../../../../packages/web-runtime/src/server/api-helpers', () => ({
+  badRequestResponse: jest.fn((message, errors) =>
     Response.json(
       {
         error: message,
@@ -100,7 +100,7 @@ vi.mock('../../../../packages/web-runtime/src/server/api-helpers', () => ({
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Origin': '*',
   },
-  handleOptionsRequest: vi.fn(
+  handleOptionsRequest: jest.fn(
     (corsHeaders) =>
       new Response(null, {
         headers: {
@@ -110,7 +110,7 @@ vi.mock('../../../../packages/web-runtime/src/server/api-helpers', () => ({
         status: 204,
       })
   ),
-  jsonResponse: vi.fn((data, status, corsHeaders, additionalHeaders) =>
+  jsonResponse: jest.fn((data, status, corsHeaders, additionalHeaders) =>
     Response.json(data, {
       headers: {
         'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ vi.mock('../../../../packages/web-runtime/src/server/api-helpers', () => ({
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Origin': '*',
   },
-  unauthorizedResponse: vi.fn((message, _authInfo, corsHeaders) =>
+  unauthorizedResponse: jest.fn((message, _authInfo, corsHeaders) =>
     Response.json(
       {
         error: message,
@@ -156,7 +156,7 @@ describe('GET /api/your-route', () => {
       prismocker.reset();
     }
 
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should return 200 with valid data', async () => {

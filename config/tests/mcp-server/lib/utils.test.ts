@@ -5,10 +5,10 @@
  * packages/mcp-server clean for community distribution.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 // Use relative path from test directory to source file
 // This avoids workspace package resolution issues in Vitest
-import { sanitizeString, isValidSlug, isValidUrl } from '../../../../packages/mcp-server/src/lib/utils.js';
+import { sanitizeString, isValidSlug, isValidUrl } from '@heyclaude/mcp-server/lib/utils';
 
 describe('MCP Server Utils', () => {
   describe('sanitizeString', () => {

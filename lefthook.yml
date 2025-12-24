@@ -257,6 +257,7 @@ pre-commit:
       fail_text: "⚠️  Schema validation issues (review before merging)."
 
     # GROUP 4: Linting (non-blocking, auto-fixes staged files)
+    # Optimized: Using Trunk for unified linting and formatting
     linting:
       tags: [linting, code-quality, non-blocking]
       glob: "**/*.{ts,tsx}"
@@ -267,10 +268,12 @@ pre-commit:
         - run: test "$(git diff --cached --name-only | grep -E '\.(ts|tsx)$' | wc -l)" = "0"
       run: |
         set +e
-        # Suppress verbose output, only show summary
-        pnpm lint:build --fix >/dev/null 2>&1
+        # Use Trunk for unified linting and formatting
+        # Trunk automatically uses config/tools/eslint.config.mjs and .prettierrc.json
+        trunk check --filter eslint --filter prettier >/dev/null 2>&1
+        trunk fmt --filter eslint --filter prettier >/dev/null 2>&1
         git add -u
-        echo "✅ Linting completed (auto-fixed where possible)"
+        echo "✅ Linting completed (Trunk - auto-fixed where possible)"
         exit 0
       stage_fixed: true
       fail_text: "⚠️  Linting issues found (non-blocking - auto-fixed where possible)."
@@ -298,6 +301,7 @@ pre-commit:
       fail_text: "⚠️  Tests failed (non-blocking - fix before merging)."
 
     # GROUP 6: Formatting check (non-blocking, informative)
+    # Optimized: Using Trunk for unified formatting checks
     formatting:
       tags: [formatting, code-quality, non-blocking]
       glob: "**/*.{ts,tsx,js,jsx,json,css,md}"
@@ -309,16 +313,13 @@ pre-commit:
         - "**/*.generated.*"
       run: |
         set +e
-        # Only check staged files for speed
-        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx|json|css|md)$' || true)
-        if [ -z "$STAGED_FILES" ]; then
-          exit 0
-        fi
-        FORMAT_ISSUES=$(echo "$STAGED_FILES" | xargs pnpm prettier --check 2>&1 | grep -c "would reformat" || echo "0")
-        if [ "$FORMAT_ISSUES" != "0" ]; then
-          echo "⚠️  $FORMAT_ISSUES file(s) need formatting (run: pnpm format)"
+        # Use Trunk for formatting checks
+        # Trunk automatically uses .prettierrc.json
+        trunk check --filter prettier >/dev/null 2>&1
+        if [ $? -eq 0 ]; then
+          echo "✅ Staged files are properly formatted (Trunk)"
         else
-          echo "✅ Staged files are properly formatted"
+          echo "⚠️  Some files need formatting (run: pnpm format)"
         fi
         exit 0
       fail_text: "💡 Formatting suggestions (non-blocking)."
@@ -1271,19 +1272,21 @@ post-checkout:
 # Usage: lefthook run <group-name>
 
 # Fixer group: Bulk fixes (format, lint, type-check)
+# Optimized: Using Trunk for unified formatting and linting
 fixer:
   commands:
     format:
       tags: [formatting, fixer]
       run: |
-        echo "✨ Formatting code..."
-        pnpm format
+        echo "✨ Formatting code (Trunk)..."
+        trunk fmt
+        pnpm lint:fix
       stage_fixed: true
     lint-fix:
       tags: [linting, fixer]
       run: |
-        echo "🔧 Fixing linting issues..."
-        pnpm lint:build:fix
+        echo "🔧 Fixing linting issues (Trunk)..."
+        trunk fmt --filter eslint
       stage_fixed: true
     type-check:
       tags: [type-checking, fixer]
@@ -1305,6 +1308,7 @@ quality:
       run: pnpm analyze:all
 
 # Security group: Security checks
+# Enhanced: Added Trunk security scanning tools
 security:
   commands:
     secrets:
@@ -1313,6 +1317,11 @@ security:
     audit:
       tags: [security]
       run: pnpm audit
+    trunk-security:
+      tags: [security]
+      run: |
+        echo "🔒 Running Trunk security scans..."
+        trunk check --filter trufflehog --filter checkov --filter osv-scanner
 
 # ============================================================================
 # CONFIGURATION

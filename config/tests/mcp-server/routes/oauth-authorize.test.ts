@@ -2,8 +2,8 @@
  * Tests for OAuth Authorize Route
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { handleOAuthAuthorize } from '../../../../packages/mcp-server/src/routes/oauth-authorize.js';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { handleOAuthAuthorize } from '@heyclaude/mcp-server/routes/oauth-authorize';
 import { createMockEnv, createMockLogger } from '../fixtures/test-utils.js';
 
 describe('OAuth Authorize Route', () => {

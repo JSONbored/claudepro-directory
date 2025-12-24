@@ -1,0 +1,71 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)"
+  ],
+  "enabledManagers": ["npm", "github-actions"],
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^typescript", "@types/*"],
+      "groupName": "TypeScript tooling",
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchPackagePatterns": ["^jest", "@types/jest", "ts-jest"],
+      "groupName": "Jest",
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchPackagePatterns": ["^@prisma/client", "^prisma"],
+      "groupName": "Prisma",
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchPackagePatterns": ["^zod"],
+      "groupName": "Zod",
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchPackagePatterns": ["^tsup"],
+      "groupName": "Build tools",
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "matchUpdateTypes": ["minor"],
+      "automerge": false,
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "schedule": ["before 10am on monday"]
+    }
+  ],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "schedule": ["before 10am on monday"],
+  "timezone": "America/Los_Angeles",
+  "labels": ["dependencies", "automated"],
+  "commitMessagePrefix": "chore",
+  "commitMessageAction": "update",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to {{newVersion}}",
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps"
+}
+

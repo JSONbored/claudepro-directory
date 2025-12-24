@@ -5,10 +5,10 @@
  * packages/mcp-server clean for community distribution.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 // Import sanitization functions from mcp-server
 // Note: These may be re-exported from shared-runtime, check imports
-import { sanitizeString } from '../../../../packages/mcp-server/src/lib/utils.js';
+import { sanitizeString } from '@heyclaude/mcp-server/lib/utils';
 
 describe('Input Sanitization', () => {
   describe('sanitizeString', () => {

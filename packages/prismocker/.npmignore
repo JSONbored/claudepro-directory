@@ -1,7 +1,10 @@
 src/
+__tests__/
 tsconfig.json
 tsup.config.ts
-node_modules/
-*.tsbuildinfo
+*.log
 .DS_Store
+node_modules/
+.cache/
+*.tsbuildinfo
 

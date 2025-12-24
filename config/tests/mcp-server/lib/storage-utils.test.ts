@@ -2,13 +2,13 @@
  * Tests for Storage Utilities
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import {
   getStorageDownloadUrl,
   getStorageFileName,
   getStorageBucket,
   parseRootUri,
-} from '../../../../packages/mcp-server/src/lib/storage-utils.js';
+} from '@heyclaude/mcp-server/lib/storage-utils';
 import { createMockEnv } from '../fixtures/test-utils.js';
 
 describe('Storage Utilities', () => {

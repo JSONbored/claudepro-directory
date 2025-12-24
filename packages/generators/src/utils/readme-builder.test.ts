@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach } from '@jest/globals';
 import { buildReadmeMarkdown } from './readme-builder.ts';
 import type { GenerateReadmeDataReturns } from '@heyclaude/database-types/postgres-types';
 

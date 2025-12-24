@@ -206,7 +206,7 @@ describe('withTimeout', () => {
       await expect(result).rejects.toThrow(TimeoutError);
 
       // Advance past original promise resolution
-      vi.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(1000);
 
       // Should still be rejected with timeout (not resolved with 'late')
       await expect(result).rejects.toThrow(TimeoutError);

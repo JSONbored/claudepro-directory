@@ -2,14 +2,14 @@
  * Tests for Cache Headers
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import {
   generateCacheControl,
   generateCacheHeaders,
   isNotModified,
   createNotModifiedResponse,
   type CacheHeaderConfig,
-} from '../../../../packages/mcp-server/src/cache/cache-headers.js';
+} from '@heyclaude/mcp-server/cache/cache-headers';
 
 describe('Cache Headers', () => {
   describe('generateCacheControl', () => {

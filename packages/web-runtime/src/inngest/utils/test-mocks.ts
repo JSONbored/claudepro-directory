@@ -7,24 +7,24 @@
  * @module web-runtime/inngest/utils/test-mocks
  */
 
-import { vi } from 'vitest';
+import { jest } from '@jest/globals';
 
 /**
  * Logger mock factory
  */
 export function createLoggerMock(): {
-  info: ReturnType<typeof vi.fn>;
-  warn: ReturnType<typeof vi.fn>;
-  error: ReturnType<typeof vi.fn>;
-  debug: ReturnType<typeof vi.fn>;
-  child: ReturnType<typeof vi.fn>;
+  info: ReturnType<typeof jest.fn>;
+  warn: ReturnType<typeof jest.fn>;
+  error: ReturnType<typeof jest.fn>;
+  debug: ReturnType<typeof jest.fn>;
+  child: ReturnType<typeof jest.fn>;
 } {
   return {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-    child: vi.fn((context) => ({
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+    child: jest.fn((context) => ({
       ...createLoggerMock(),
       ...context,
     })),
@@ -34,26 +34,26 @@ export function createLoggerMock(): {
 /**
  * Service factory mock factory
  */
-export function createServiceFactoryMock(): ReturnType<typeof vi.fn> {
-  return vi.fn();
+export function createServiceFactoryMock(): ReturnType<typeof jest.fn> {
+  return jest.fn();
 }
 
 /**
  * Resend integration mocks factory
  */
 export function createResendMocks(): {
-  syncContactToResend: ReturnType<typeof vi.fn>;
-  buildContactProperties: ReturnType<typeof vi.fn>;
-  resolveNewsletterInterest: ReturnType<typeof vi.fn>;
-  sendEmail: ReturnType<typeof vi.fn>;
-  enrollInOnboardingSequence: ReturnType<typeof vi.fn>;
+  syncContactToResend: ReturnType<typeof jest.fn>;
+  buildContactProperties: ReturnType<typeof jest.fn>;
+  resolveNewsletterInterest: ReturnType<typeof jest.fn>;
+  sendEmail: ReturnType<typeof jest.fn>;
+  enrollInOnboardingSequence: ReturnType<typeof jest.fn>;
 } {
   return {
-    syncContactToResend: vi.fn(),
-    buildContactProperties: vi.fn(),
-    resolveNewsletterInterest: vi.fn(),
-    sendEmail: vi.fn(),
-    enrollInOnboardingSequence: vi.fn(),
+    syncContactToResend: jest.fn(),
+    buildContactProperties: jest.fn(),
+    resolveNewsletterInterest: jest.fn(),
+    sendEmail: jest.fn(),
+    enrollInOnboardingSequence: jest.fn(),
   };
 }
 
@@ -61,12 +61,12 @@ export function createResendMocks(): {
  * PGMQ client mocks factory
  */
 export function createPgmqMocks(): {
-  pgmqRead: ReturnType<typeof vi.fn>;
-  pgmqDelete: ReturnType<typeof vi.fn>;
+  pgmqRead: ReturnType<typeof jest.fn>;
+  pgmqDelete: ReturnType<typeof jest.fn>;
 } {
   return {
-    pgmqRead: vi.fn(),
-    pgmqDelete: vi.fn(),
+    pgmqRead: jest.fn(),
+    pgmqDelete: jest.fn(),
   };
 }
 
@@ -74,12 +74,12 @@ export function createPgmqMocks(): {
  * Next.js cache mocks factory
  */
 export function createCacheMocks(): {
-  revalidateTag: ReturnType<typeof vi.fn>;
-  revalidatePath: ReturnType<typeof vi.fn>;
+  revalidateTag: ReturnType<typeof jest.fn>;
+  revalidatePath: ReturnType<typeof jest.fn>;
 } {
   return {
-    revalidateTag: vi.fn(),
-    revalidatePath: vi.fn(),
+    revalidateTag: jest.fn(),
+    revalidatePath: jest.fn(),
   };
 }
 
@@ -87,20 +87,20 @@ export function createCacheMocks(): {
  * Monitoring mocks factory
  */
 export function createMonitoringMocks(): {
-  sendCronSuccessHeartbeat: ReturnType<typeof vi.fn>;
-  sendCriticalFailureHeartbeat: ReturnType<typeof vi.fn>;
+  sendCronSuccessHeartbeat: ReturnType<typeof jest.fn>;
+  sendCriticalFailureHeartbeat: ReturnType<typeof jest.fn>;
 } {
   return {
-    sendCronSuccessHeartbeat: vi.fn(),
-    sendCriticalFailureHeartbeat: vi.fn(),
+    sendCronSuccessHeartbeat: jest.fn(),
+    sendCriticalFailureHeartbeat: jest.fn(),
   };
 }
 
 /**
  * Environment variable mock factory
  */
-export function createEnvVarMock(envVars: Record<string, string | undefined> = {}): ReturnType<typeof vi.fn> {
-  return vi.fn((key: string) => {
+export function createEnvVarMock(envVars: Record<string, string | undefined> = {}): ReturnType<typeof jest.fn> {
+  return jest.fn((key: string) => {
     return envVars[key] ?? undefined;
   });
 }
@@ -108,15 +108,15 @@ export function createEnvVarMock(envVars: Record<string, string | undefined> = {
 /**
  * Fetch mock factory
  */
-export function createFetchMock(): ReturnType<typeof vi.fn> {
-  return vi.fn();
+export function createFetchMock(): ReturnType<typeof jest.fn> {
+  return jest.fn();
 }
 
 /**
  * Create web app context mock factory
  */
-export function createWebAppContextMock(operation: string, route: string): ReturnType<typeof vi.fn> {
-  return vi.fn(() => ({
+export function createWebAppContextMock(operation: string, route: string): ReturnType<typeof jest.fn> {
+  return jest.fn(() => ({
     requestId: 'test-request-id',
     operation,
     route,
@@ -126,8 +126,8 @@ export function createWebAppContextMock(operation: string, route: string): Retur
 /**
  * Normalize error mock factory
  */
-export function createNormalizeErrorMock(): ReturnType<typeof vi.fn> {
-  return vi.fn((error: unknown) => {
+export function createNormalizeErrorMock(): ReturnType<typeof jest.fn> {
+  return jest.fn((error: unknown) => {
     if (error instanceof Error) {
       return error;
     }
@@ -139,12 +139,12 @@ export function createNormalizeErrorMock(): ReturnType<typeof vi.fn> {
  * Shared runtime mocks factory
  */
 export function createSharedRuntimeMocks(): {
-  validateEmail: ReturnType<typeof vi.fn>;
-  normalizeError: ReturnType<typeof vi.fn>;
-  getEnvVar: ReturnType<typeof vi.fn>;
+  validateEmail: ReturnType<typeof jest.fn>;
+  normalizeError: ReturnType<typeof jest.fn>;
+  getEnvVar: ReturnType<typeof jest.fn>;
 } {
   return {
-    validateEmail: vi.fn((email: string) => ({
+    validateEmail: jest.fn((email: string) => ({
       valid: true,
       normalized: email.toLowerCase().trim(),
       error: null,
@@ -217,7 +217,7 @@ export function setupInngestTestMocks(
  * Reset all mocks to clean state
  */
 export function resetInngestTestMocks(mocks: InngestTestMocks): void {
-  vi.clearAllMocks();
+  jest.clearAllMocks();
 
   if (mocks.resend) {
     Object.values(mocks.resend).forEach((mock) => {

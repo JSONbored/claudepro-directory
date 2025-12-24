@@ -135,53 +135,8 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
 // Import SafeActionResult type from safemocker for proper typing in tests
 import type { SafeActionResult } from '@jsonbored/safemocker';
 
-// Mock api/route-factory
-jest.mock('@heyclaude/web-runtime/api/route-factory', () => ({
-  createApiRoute: jest.fn((config) => {
-    return async (request: Request, context?: unknown) => {
-      try {
-        const handlerResult = await config.handler({
-          logger: {
-            info: jest.fn(),
-            warn: jest.fn(),
-            error: jest.fn(),
-            debug: jest.fn(),
-          },
-          request: request as any,
-          nextContext: context,
-          cors: { 'Access-Control-Allow-Origin': '*' },
-        });
-        // Handler returns NextResponse from jsonResponse, factory returns it as-is
-        if (handlerResult instanceof Response) {
-          return handlerResult;
-        }
-        return handlerResult;
-      } catch (error) {
-        // Factory catches errors and returns 500
-        return new Response(
-          JSON.stringify({
-            error: error instanceof Error ? error.message : String(error),
-          }),
-          {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-          }
-        );
-      }
-    };
-  }),
-  createOptionsHandler: jest.fn(() => {
-    return async () => {
-      return new Response(null, {
-        status: 204,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        },
-      });
-    };
-  }),
-}));
+// DO NOT mock route-factory - use REAL factory for integration testing
+// This ensures we test the complete flow: Route → Factory → Handler → Action → RPC → Database (Prismocker)
 
 describe('GET /api/user/profile-image', () => {
   let prismocker: PrismaClient;

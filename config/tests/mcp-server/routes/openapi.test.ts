@@ -2,28 +2,28 @@
  * Tests for OpenAPI Route
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { handleOpenAPI } from '../../../../packages/mcp-server/src/routes/openapi.js';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
+import { handleOpenAPI } from '@heyclaude/mcp-server/routes/openapi';
 import * as fs from 'node:fs/promises';
 import * as fsSync from 'node:fs';
 import * as path from 'node:path';
 
 // Mock filesystem operations
-vi.mock('node:fs/promises', () => ({
-  readFile: vi.fn(),
+jest.mock('node:fs/promises', () => ({
+  readFile: jest.fn(),
 }));
 
-vi.mock('node:fs', () => ({
-  existsSync: vi.fn(),
+jest.mock('node:fs', () => ({
+  existsSync: jest.fn(),
 }));
 
 describe('OpenAPI Route', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should return 404 when spec file does not exist', async () => {
-    vi.mocked(fsSync.existsSync).mockReturnValue(false);
+    (fsSync.existsSync as ReturnType<typeof jest.fn>).mockReturnValue(false);
 
     const response = await handleOpenAPI();
     const data = await response.json();
@@ -42,8 +42,8 @@ describe('OpenAPI Route', () => {
       },
     };
 
-    vi.mocked(fsSync.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(mockSpec));
+    (fsSync.existsSync as ReturnType<typeof jest.fn>).mockReturnValue(true);
+    (fs.readFile as ReturnType<typeof jest.fn>).mockResolvedValue(JSON.stringify(mockSpec));
 
     const response = await handleOpenAPI();
     const data = await response.json();
@@ -54,8 +54,8 @@ describe('OpenAPI Route', () => {
   });
 
   it('should handle filesystem errors gracefully', async () => {
-    vi.mocked(fsSync.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFile).mockRejectedValue(new Error('Permission denied'));
+    (fsSync.existsSync as ReturnType<typeof jest.fn>).mockReturnValue(true);
+    (fs.readFile as ReturnType<typeof jest.fn>).mockRejectedValue(new Error('Permission denied'));
 
     const response = await handleOpenAPI();
     const data = await response.json();
@@ -67,8 +67,8 @@ describe('OpenAPI Route', () => {
 
   it('should set correct headers', async () => {
     const mockSpec = { openapi: '3.1.0', info: { title: 'Test' } };
-    vi.mocked(fsSync.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(mockSpec));
+    (fsSync.existsSync as ReturnType<typeof jest.fn>).mockReturnValue(true);
+    (fs.readFile as ReturnType<typeof jest.fn>).mockResolvedValue(JSON.stringify(mockSpec));
 
     const response = await handleOpenAPI();
 

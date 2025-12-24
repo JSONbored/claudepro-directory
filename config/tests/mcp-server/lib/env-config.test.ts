@@ -2,8 +2,8 @@
  * Tests for Environment Configuration
  */
 
-import { describe, it, expect } from 'vitest';
-import { parseSimpleEnv, type SimpleEnvConfig } from '../../../../packages/mcp-server/src/lib/env-config.js';
+import { describe, it, expect } from '@jest/globals';
+import { parseSimpleEnv, type SimpleEnvConfig } from '@heyclaude/mcp-server/lib/env-config';
 import { createMockEnv } from '../fixtures/test-utils.js';
 
 describe('Environment Configuration', () => {

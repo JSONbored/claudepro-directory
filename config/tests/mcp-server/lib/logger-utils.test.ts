@@ -2,16 +2,16 @@
  * Tests for Logger Utilities
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createSimpleLogger } from '../../../../packages/mcp-server/src/lib/logger-utils.js';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { createSimpleLogger } from '@heyclaude/mcp-server/lib/logger-utils';
 
 describe('Logger Utilities', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
-    vi.spyOn(console, 'debug').mockImplementation(() => {});
+    jest.clearAllMocks();
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'debug').mockImplementation(() => {});
   });
 
   describe('createSimpleLogger', () => {

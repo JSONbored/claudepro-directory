@@ -34,6 +34,166 @@
       "development": "./src/adapters/cloudflare-worker.ts",
       "types": "./dist/adapters/cloudflare-worker.d.ts",
       "default": "./src/adapters/cloudflare-worker.ts"
+    },
+    "./tools/categories": {
+      "development": "./src/mcp/tools/categories.ts",
+      "types": "./dist/mcp/tools/categories.d.ts",
+      "default": "./src/mcp/tools/categories.ts"
+    },
+    "./tools/detail": {
+      "development": "./src/mcp/tools/detail.ts",
+      "types": "./dist/mcp/tools/detail.d.ts",
+      "default": "./src/mcp/tools/detail.ts"
+    },
+    "./tools/featured": {
+      "development": "./src/mcp/tools/featured.ts",
+      "types": "./dist/mcp/tools/featured.d.ts",
+      "default": "./src/mcp/tools/featured.ts"
+    },
+    "./tools/popular": {
+      "development": "./src/mcp/tools/popular.ts",
+      "types": "./dist/mcp/tools/popular.d.ts",
+      "default": "./src/mcp/tools/popular.ts"
+    },
+    "./tools/recent": {
+      "development": "./src/mcp/tools/recent.ts",
+      "types": "./dist/mcp/tools/recent.d.ts",
+      "default": "./src/mcp/tools/recent.ts"
+    },
+    "./tools/search": {
+      "development": "./src/mcp/tools/search.ts",
+      "types": "./dist/mcp/tools/search.d.ts",
+      "default": "./src/mcp/tools/search.ts"
+    },
+    "./tools/trending": {
+      "development": "./src/mcp/tools/trending.ts",
+      "types": "./dist/mcp/tools/trending.d.ts",
+      "default": "./src/mcp/tools/trending.ts"
+    },
+    "./tools": {
+      "development": "./src/mcp/tools/index.ts",
+      "types": "./dist/mcp/tools/index.d.ts",
+      "default": "./src/mcp/tools/index.ts"
+    },
+    "./types/runtime": {
+      "development": "./src/types/runtime.ts",
+      "types": "./dist/types/runtime.d.ts",
+      "default": "./src/types/runtime.ts"
+    },
+    "./lib/env-config": {
+      "development": "./src/lib/env-config.ts",
+      "types": "./dist/lib/env-config.d.ts",
+      "default": "./src/lib/env-config.ts"
+    },
+    "./lib/env-utils": {
+      "development": "./src/lib/env-utils.ts",
+      "types": "./dist/lib/env-utils.d.ts",
+      "default": "./src/lib/env-utils.ts"
+    },
+    "./lib/errors": {
+      "development": "./src/lib/errors.ts",
+      "types": "./dist/lib/errors.d.ts",
+      "default": "./src/lib/errors.ts"
+    },
+    "./lib/logger-utils": {
+      "development": "./src/lib/logger-utils.ts",
+      "types": "./dist/lib/logger-utils.d.ts",
+      "default": "./src/lib/logger-utils.ts"
+    },
+    "./lib/platform-formatters": {
+      "development": "./src/lib/platform-formatters.ts",
+      "types": "./dist/lib/platform-formatters.d.ts",
+      "default": "./src/lib/platform-formatters.ts"
+    },
+    "./lib/schemas": {
+      "development": "./src/lib/schemas.ts",
+      "types": "./dist/lib/schemas.d.ts",
+      "default": "./src/lib/schemas.ts"
+    },
+    "./lib/storage-utils": {
+      "development": "./src/lib/storage-utils.ts",
+      "types": "./dist/lib/storage-utils.d.ts",
+      "default": "./src/lib/storage-utils.ts"
+    },
+    "./lib/usage-hints": {
+      "development": "./src/lib/usage-hints.ts",
+      "types": "./dist/lib/usage-hints.d.ts",
+      "default": "./src/lib/usage-hints.ts"
+    },
+    "./lib/utils": {
+      "development": "./src/lib/utils.ts",
+      "types": "./dist/lib/utils.d.ts",
+      "default": "./src/lib/utils.ts"
+    },
+    "./middleware/rate-limit": {
+      "development": "./src/middleware/rate-limit.ts",
+      "types": "./dist/middleware/rate-limit.d.ts",
+      "default": "./src/middleware/rate-limit.ts"
+    },
+    "./middleware/request-deduplication": {
+      "development": "./src/middleware/request-deduplication.ts",
+      "types": "./dist/middleware/request-deduplication.d.ts",
+      "default": "./src/middleware/request-deduplication.ts"
+    },
+    "./cache/cache-headers": {
+      "development": "./src/cache/cache-headers.ts",
+      "types": "./dist/cache/cache-headers.d.ts",
+      "default": "./src/cache/cache-headers.ts"
+    },
+    "./cache/kv-cache": {
+      "development": "./src/cache/kv-cache.ts",
+      "types": "./dist/cache/kv-cache.d.ts",
+      "default": "./src/cache/kv-cache.ts"
+    },
+    "./observability/metrics": {
+      "development": "./src/observability/metrics.ts",
+      "types": "./dist/observability/metrics.d.ts",
+      "default": "./src/observability/metrics.ts"
+    },
+    "./routes/health": {
+      "development": "./src/routes/health.ts",
+      "types": "./dist/routes/health.d.ts",
+      "default": "./src/routes/health.ts"
+    },
+    "./routes/oauth-authorize": {
+      "development": "./src/routes/oauth-authorize.ts",
+      "types": "./dist/routes/oauth-authorize.d.ts",
+      "default": "./src/routes/oauth-authorize.ts"
+    },
+    "./routes/oauth-metadata": {
+      "development": "./src/routes/oauth-metadata.ts",
+      "types": "./dist/routes/oauth-metadata.d.ts",
+      "default": "./src/routes/oauth-metadata.ts"
+    },
+    "./routes/oauth-token": {
+      "development": "./src/routes/oauth-token.ts",
+      "types": "./dist/routes/oauth-token.d.ts",
+      "default": "./src/routes/oauth-token.ts"
+    },
+    "./routes/oauth/shared": {
+      "development": "./src/routes/oauth/shared.ts",
+      "types": "./dist/routes/oauth/shared.d.ts",
+      "default": "./src/routes/oauth/shared.ts"
+    },
+    "./routes/openapi": {
+      "development": "./src/routes/openapi.ts",
+      "types": "./dist/routes/openapi.d.ts",
+      "default": "./src/routes/openapi.ts"
+    },
+    "./mcp/server": {
+      "development": "./src/mcp/server.ts",
+      "types": "./dist/mcp/server.d.ts",
+      "default": "./src/mcp/server.ts"
+    },
+    "./mcp/resources": {
+      "development": "./src/mcp/resources/index.ts",
+      "types": "./dist/mcp/resources/index.d.ts",
+      "default": "./src/mcp/resources/index.ts"
+    },
+    "./mcp/prompts": {
+      "development": "./src/mcp/prompts/index.ts",
+      "types": "./dist/mcp/prompts/index.d.ts",
+      "default": "./src/mcp/prompts/index.ts"
     }
   },
   "bin": {

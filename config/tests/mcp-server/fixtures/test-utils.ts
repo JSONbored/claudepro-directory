@@ -4,7 +4,7 @@
  * Provides mock factories and utilities for testing MCP server components.
  */
 
-import { vi } from 'vitest';
+import { jest } from '@jest/globals';
 
 /**
  * Create a mock logger for testing
@@ -13,11 +13,11 @@ import { vi } from 'vitest';
  */
 export function createMockLogger() {
   return {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-    child: vi.fn(() => createMockLogger()),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+    child: jest.fn(() => createMockLogger()),
   };
 }
 
@@ -68,14 +68,14 @@ export function createMockKvCache() {
   const cache = new Map<string, { value: string; expirationTtl?: number }>();
   
   return {
-    get: vi.fn(async (key: string) => {
+    get: jest.fn(async (key: string) => {
       const entry = cache.get(key);
       return entry?.value ?? null;
     }),
-    put: vi.fn(async (key: string, value: string, options?: { expirationTtl?: number }) => {
+    put: jest.fn(async (key: string, value: string, options?: { expirationTtl?: number }) => {
       cache.set(key, { value, expirationTtl: options?.expirationTtl });
     }),
-    delete: vi.fn(async (key: string) => {
+    delete: jest.fn(async (key: string) => {
       cache.delete(key);
     }),
   };

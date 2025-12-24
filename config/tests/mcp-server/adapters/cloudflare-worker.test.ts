@@ -4,19 +4,18 @@
  * Tests the adapter that bridges runtime-agnostic MCP server with Cloudflare Workers-specific types.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
-// Mock @prisma/client to use PrismockerClient from __mocks__/@prisma/client.ts
-// This must be called before any imports that use PrismaClient
-// Vitest will hoist this call to the top of the file
-vi.mock('@prisma/client');
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from data-layer will automatically use PrismockerClient
+// No need to explicitly mock @prisma/client - Jest uses __mocks__ automatically
 
 import {
   convertEnv,
   convertLogger,
   convertMcpServerOptions,
   convertToolContext,
-} from '../../../../packages/mcp-server/src/adapters/cloudflare-worker.js';
+} from '@heyclaude/mcp-server/adapters/cloudflare-worker';
 import { createMockUser, createMockToken, createMockEnv, createMockLogger, createMockKvCache } from '../fixtures/test-utils.js';
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
@@ -33,7 +32,7 @@ describe('Cloudflare Worker Adapter', () => {
       prismocker.reset();
     }
 
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('convertEnv', () => {
@@ -57,16 +56,16 @@ describe('Cloudflare Worker Adapter', () => {
   describe('convertLogger', () => {
     it('should convert Cloudflare Logger to RuntimeLogger', () => {
       const cloudflareLogger = {
-        info: vi.fn(),
-        error: vi.fn(),
-        warn: vi.fn(),
-        debug: vi.fn(),
+        info: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+        debug: jest.fn(),
         child: vi.fn(() => ({
-          info: vi.fn(),
-          error: vi.fn(),
-          warn: vi.fn(),
-          debug: vi.fn(),
-          child: vi.fn(),
+          info: jest.fn(),
+          error: jest.fn(),
+          warn: jest.fn(),
+          debug: jest.fn(),
+          child: jest.fn(),
         })),
       };
 
@@ -82,16 +81,16 @@ describe('Cloudflare Worker Adapter', () => {
 
     it('should call Cloudflare logger.info with object-first API', () => {
       const cloudflareLogger = {
-        info: vi.fn(),
-        error: vi.fn(),
-        warn: vi.fn(),
-        debug: vi.fn(),
+        info: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+        debug: jest.fn(),
         child: vi.fn(() => ({
-          info: vi.fn(),
-          error: vi.fn(),
-          warn: vi.fn(),
-          debug: vi.fn(),
-          child: vi.fn(),
+          info: jest.fn(),
+          error: jest.fn(),
+          warn: jest.fn(),
+          debug: jest.fn(),
+          child: jest.fn(),
         })),
       };
 
@@ -103,16 +102,16 @@ describe('Cloudflare Worker Adapter', () => {
 
     it('should call Cloudflare logger.info with empty object when no meta provided', () => {
       const cloudflareLogger = {
-        info: vi.fn(),
-        error: vi.fn(),
-        warn: vi.fn(),
-        debug: vi.fn(),
+        info: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+        debug: jest.fn(),
         child: vi.fn(() => ({
-          info: vi.fn(),
-          error: vi.fn(),
-          warn: vi.fn(),
-          debug: vi.fn(),
-          child: vi.fn(),
+          info: jest.fn(),
+          error: jest.fn(),
+          warn: jest.fn(),
+          debug: jest.fn(),
+          child: jest.fn(),
         })),
       };
 
@@ -124,16 +123,16 @@ describe('Cloudflare Worker Adapter', () => {
 
     it('should call Cloudflare logger.error with error in meta', () => {
       const cloudflareLogger = {
-        info: vi.fn(),
-        error: vi.fn(),
-        warn: vi.fn(),
-        debug: vi.fn(),
+        info: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+        debug: jest.fn(),
         child: vi.fn(() => ({
-          info: vi.fn(),
-          error: vi.fn(),
-          warn: vi.fn(),
-          debug: vi.fn(),
-          child: vi.fn(),
+          info: jest.fn(),
+          error: jest.fn(),
+          warn: jest.fn(),
+          debug: jest.fn(),
+          child: jest.fn(),
         })),
       };
 
@@ -146,18 +145,18 @@ describe('Cloudflare Worker Adapter', () => {
 
     it('should create child logger', () => {
       const childLogger = {
-        info: vi.fn(),
-        error: vi.fn(),
-        warn: vi.fn(),
-        debug: vi.fn(),
-        child: vi.fn(),
+        info: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+        debug: jest.fn(),
+        child: jest.fn(),
       };
 
       const cloudflareLogger = {
-        info: vi.fn(),
-        error: vi.fn(),
-        warn: vi.fn(),
-        debug: vi.fn(),
+        info: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+        debug: jest.fn(),
         child: vi.fn(() => childLogger),
       };
 

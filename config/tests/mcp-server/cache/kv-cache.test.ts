@@ -2,8 +2,8 @@
  * Tests for KV Cache
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { KvResourceCache, createKvCache, generateCacheKey } from '../../../../packages/mcp-server/src/cache/kv-cache.js';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { KvResourceCache, createKvCache, generateCacheKey } from '@heyclaude/mcp-server/cache/kv-cache';
 import { createMockKvCache, createMockLogger } from '../fixtures/test-utils.js';
 
 describe('KV Cache', () => {
@@ -94,7 +94,7 @@ describe('KV Cache', () => {
       await cache.set('test-uri', 'test content', 'text/plain');
 
       expect(mockKv.put).toHaveBeenCalled();
-      const callArgs = (mockKv.put as ReturnType<typeof vi.fn>).mock.calls[0];
+      const callArgs = (mockKv.put as ReturnType<typeof jest.fn>).mock.calls[0];
       expect(callArgs[0]).toContain('test-uri');
       expect(callArgs[1]).toContain('test content');
     });
@@ -143,7 +143,7 @@ describe('KV Cache', () => {
     it('should use custom TTL when provided', async () => {
       await cache.set('test-uri', 'test content', 'text/plain', 7200);
 
-      const callArgs = (mockKv.put as ReturnType<typeof vi.fn>).mock.calls[0];
+      const callArgs = (mockKv.put as ReturnType<typeof jest.fn>).mock.calls[0];
       expect(callArgs[2]).toEqual({ expirationTtl: 7200 });
     });
   });

@@ -2,12 +2,12 @@
  * Tests for OAuth Shared Implementation
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import {
   jsonError,
   handleOAuthTokenShared,
   type OAuthAdapter,
-} from '../../../../packages/mcp-server/src/routes/oauth/shared.js';
+} from '@heyclaude/mcp-server/routes/oauth/shared';
 import { createMockEnv, createMockLogger } from '../fixtures/test-utils.js';
 
 describe('OAuth Shared Implementation', () => {
@@ -39,20 +39,20 @@ describe('OAuth Shared Implementation', () => {
   describe('handleOAuthTokenShared', () => {
     let mockAdapter: OAuthAdapter;
     let mockLogger: ReturnType<typeof createMockLogger>;
-    let mockFetch: ReturnType<typeof vi.fn>;
+    let mockFetch: ReturnType<typeof jest.fn>;
 
     beforeEach(() => {
       mockLogger = createMockLogger();
-      mockFetch = vi.fn();
+      mockFetch = jest.fn();
       global.fetch = mockFetch;
 
       mockAdapter = {
-        parseEnv: vi.fn().mockResolvedValue({
+        parseEnv: jest.fn().mockResolvedValue({
           supabase: {
             url: 'https://supabase.example.com',
           },
         }),
-        createLogger: vi.fn().mockReturnValue(mockLogger),
+        createLogger: jest.fn().mockReturnValue(mockLogger),
       };
     });
 

@@ -4,7 +4,7 @@
  * Tests the API proxy adapter that allows proxying MCP tool calls to API routes.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import {
   proxyToApi,
   mapToolToApiRoute,
@@ -12,19 +12,19 @@ import {
   convertApiResponseToToolOutput,
   executeToolViaApi,
   type ApiProxyConfig,
-} from '../../../../packages/mcp-server/src/adapters/api-proxy.js';
+} from '@heyclaude/mcp-server/adapters';
 
 describe('API Proxy Adapter', () => {
-  let mockFetch: ReturnType<typeof vi.fn>;
+  let mockFetch: ReturnType<typeof jest.fn>;
 
   beforeEach(() => {
-    mockFetch = vi.fn();
-    vi.stubGlobal('fetch', mockFetch);
-    vi.clearAllMocks();
+    mockFetch = jest.fn();
+    global.fetch = mockFetch as any;
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    delete (global as any).fetch;
   });
 
   describe('proxyToApi', () => {

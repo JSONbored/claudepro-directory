@@ -4,89 +4,58 @@
  * Comprehensive tests for the tool that retrieves complete metadata for a specific content item.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
-// Mock @prisma/client to use PrismockerClient from __mocks__/@prisma/client.ts
-// This must be called before any imports that use PrismaClient
-// Vitest will hoist this call to the top of the file
-vi.mock('@prisma/client');
+// Prismocker is automatically configured via __mocks__/@prisma/client.ts
+// The prisma singleton from data-layer will automatically use PrismockerClient
+// No need to explicitly mock @prisma/client - Jest uses __mocks__ automatically
 
-import { handleGetContentDetail } from '../../../../../packages/mcp-server/src/mcp/tools/detail.js';
+import { handleGetContentDetail } from '@heyclaude/mcp-server/tools/detail';
 import { createMockLogger, createMockEnv, createMockUser, createMockToken, createMockKvCache } from '../../fixtures/test-utils.js';
-import type { ToolContext } from '../../../../../packages/mcp-server/src/types/runtime.js';
+import type { ToolContext } from '@heyclaude/mcp-server/types/runtime';
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
 
-// Prismocker is automatically configured via __mocks__/@prisma/client.ts
-// The prisma singleton from '../prisma/client.ts' will automatically use PrismockerClient
-// Following the official Prismocker README approach exactly
+// Import real cache utilities for proper cache testing
+import { clearRequestCache } from '@heyclaude/data-layer/utils/request-cache';
 
-// Mock request cache to completely bypass caching
-// Services import using relative paths (../utils/request-cache.ts), so we need to mock the actual file path
-// Use vi.hoisted to ensure the mock function is available in the mock factory
-const { mockWithSmartCache, mockClearRequestCache } = vi.hoisted(() => {
-  const clearFn = vi.fn(() => {
-    try {
-      const actual = require('../../../../../packages/data-layer/src/utils/request-cache.ts');
-      if (actual.clearRequestCache) {
-        actual.clearRequestCache();
-      }
-    } catch {
-      // Ignore if module not available
-    }
-  });
-  return {
-    mockWithSmartCache: vi.fn((_rpcName: string, _methodName: string, rpcCall: () => Promise<unknown>) => {
-      // Always call the RPC directly, never cache
-      return rpcCall();
-    }),
-    mockClearRequestCache: clearFn,
-  };
-});
-
-// Mock the actual file path that services import from (relative path from service files)
-vi.mock('../../../../../packages/data-layer/src/utils/request-cache.ts', () => ({
-  withSmartCache: mockWithSmartCache,
-  withRequestCache: vi.fn((_rpcName: string, rpcCall: () => Promise<unknown>) => rpcCall()),
-  clearRequestCache: mockClearRequestCache,
-  getRequestCache: vi.fn(() => ({
-    get: vi.fn(() => null),
-    set: vi.fn(),
-    clear: vi.fn(),
-  })),
-}));
+// DO NOT mock request-cache.ts - use real implementation
+// Cache is cleared in beforeEach for test isolation
+// This allows us to test business logic with fresh cache (each test starts with empty cache)
 
 describe('getContentDetail Tool Handler', () => {
   let prismocker: PrismaClient;
-  let contentFindUniqueSpy: ReturnType<typeof vi.fn>;
+  let contentFindUniqueSpy: ReturnType<typeof jest.fn>;
   let mockLogger: ReturnType<typeof createMockLogger>;
   let mockEnv: ReturnType<typeof createMockEnv>;
   let context: ToolContext;
 
   beforeEach(() => {
-    // Get the prisma instance (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    // 1. Clear request cache before each test (REQUIRED for test isolation)
+    clearRequestCache();
+
+    // 2. Get the prisma instance (automatically PrismockerClient via __mocks__/@prisma/client.ts)
     prismocker = prisma;
 
-    // Reset Prismocker data before each test
+    // 3. Reset Prismocker data before each test
     if ('reset' in prismocker && typeof prismocker.reset === 'function') {
       prismocker.reset();
     }
 
-    // Ensure Prismocker models are initialized by accessing them
+    // 4. Ensure Prismocker models are initialized by accessing them
     // Prismocker creates models lazily, so we need to trigger initialization
     // Accessing the model property triggers Prismocker to create it with methods
     void prismocker.content;
 
-    // Create a spy for content.findUnique to control its behavior in tests
+    // 5. Create a spy for content.findUnique to control its behavior in tests
+    // Use Prismocker's Proxy set handler to override findUnique
     // We'll assign this to the model method so we can mock it per test
-    contentFindUniqueSpy = vi.fn();
+    contentFindUniqueSpy = jest.fn();
     (prismocker.content as any).findUnique = contentFindUniqueSpy;
 
-    // Clear all mocks to ensure clean state
-    mockClearRequestCache(); // Clear request cache
-    vi.clearAllMocks();
-    vi.resetAllMocks();
-    mockWithSmartCache.mockClear();
+    // 6. Clear all mocks to ensure clean state
+    jest.clearAllMocks();
+    jest.resetAllMocks();
 
     mockLogger = createMockLogger();
     mockEnv = createMockEnv();

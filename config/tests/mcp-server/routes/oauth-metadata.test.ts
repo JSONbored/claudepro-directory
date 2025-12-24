@@ -2,8 +2,8 @@
  * Tests for OAuth Metadata Route
  */
 
-import { describe, it, expect } from 'vitest';
-import { handleOAuthMetadata } from '../../../../packages/mcp-server/src/routes/oauth-metadata.js';
+import { describe, it, expect } from '@jest/globals';
+import { handleOAuthMetadata } from '@heyclaude/mcp-server/routes/oauth-metadata';
 import { createMockEnv } from '../fixtures/test-utils.js';
 
 describe('OAuth Metadata Route', () => {
