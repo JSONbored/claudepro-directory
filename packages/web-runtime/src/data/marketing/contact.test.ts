@@ -14,13 +14,13 @@ jest.mock('server-only', () => ({}));
 // Mock logger
 jest.mock('../../logger', () => ({
   logger: {
-    warn: vi.fn(),
+    warn: jest.fn(),
   },
 }));
 
 // Mock constants
 jest.mock('../config/constants', () => ({
-  getSocialLink: vi.fn((key: string) => {
+  getSocialLink: jest.fn((key: string) => {
     const links: Record<string, string> = {
       discord: 'https://discord.gg/test',
       email: 'contact@test.com',

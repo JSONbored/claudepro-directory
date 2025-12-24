@@ -43,34 +43,58 @@ export const removeBookmarkSchema = z.object({
 export const POST = createApiRoute({
   bodySchema: removeBookmarkSchema,
   cors: 'auth',
-  handler: async ({ body, cors, logger, user }) => {
+  handler: async ({ body, cors, logger }) => {
     await connection();
-    // user is guaranteed (requireAuth: true)
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
     const { content_slug, content_type } = body;
 
     logger.info(
       {
         contentSlug: content_slug,
         contentType: content_type,
-        userId: user.id,
       },
       'Bookmark remove request'
     );
 
-    // Call server action internally
+    // Call server action - authedAction handles authentication
     const result = await removeBookmark({
       content_slug,
       content_type,
     });
 
+    // Handle authentication errors (authedAction returns serverError for auth failures)
+    if (
+      result &&
+      typeof result === 'object' &&
+      'serverError' in result &&
+      (result as { serverError?: string }).serverError
+    ) {
+      const serverError = (result as { serverError?: string }).serverError || 'Internal server error';
+      
+      // Check if this is an authentication error
+      if (serverError.includes('Unauthorized') || serverError.includes('sign in')) {
+        logger.warn({ serverError }, 'Authentication failed');
+        return jsonResponse(
+          { error: 'Unauthorized', message: 'Authentication required. Please sign in to continue.' },
+          401,
+          cors
+        );
+      }
+
+      // Other server errors
+      logger.error({ serverError }, 'Action returned serverError');
+      return jsonResponse(
+        { error: serverError },
+        500,
+        cors
+      );
+    }
+
+    // Success - return the action result
     return jsonResponse(result, 200, cors);
   },
   method: 'POST',
   openapi: {
-    description: 'Removes a bookmark for the authenticated user. Requires authentication.',
+    description: 'Removes a bookmark for the authenticated user. Requires authentication via authedAction.',
     operationId: 'removeBookmark',
     requestBody: {
       description: 'Bookmark details including content slug and content type',
@@ -131,7 +155,6 @@ export const POST = createApiRoute({
     tags: ['bookmarks', 'user'],
   },
   operation: 'BookmarkAPI',
-  requireAuth: true,
   route: getVersionedRoute('bookmarks/remove'),
 });
 

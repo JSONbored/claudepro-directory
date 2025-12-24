@@ -80,8 +80,6 @@ interface RouteMetadata {
   };
   querySchema?: z.ZodSchema;
   bodySchema?: z.ZodSchema;
-  requireAuth?: boolean;
-  optionalAuth?: boolean;
   filePath: string;
   factoryName: string;
   querySchemaSource?: string; // Source code for schema (for evaluation)
@@ -459,29 +457,20 @@ function extractOpenAPIMetadata(
 /**
  * Extract auth requirements from config object
  */
-function extractAuthRequirements(configObj: ObjectLiteralExpression): {
+/**
+ * Extract auth requirements from config object
+ * 
+ * NOTE: requireAuth and optionalAuth have been removed from route-factory.
+ * Routes should use authedAction server actions for authentication instead.
+ * This function is kept for backwards compatibility but always returns empty object.
+ */
+function extractAuthRequirements(_configObj: ObjectLiteralExpression): {
   requireAuth?: boolean;
   optionalAuth?: boolean;
 } {
-  const result: { requireAuth?: boolean; optionalAuth?: boolean } = {};
-
-  const requireAuthProp = configObj.getProperty('requireAuth');
-  if (requireAuthProp && Node.isPropertyAssignment(requireAuthProp)) {
-    const init = requireAuthProp.getInitializer();
-    if (init && Node.isTrueLiteral(init)) {
-      result.requireAuth = true;
-    }
-  }
-
-  const optionalAuthProp = configObj.getProperty('optionalAuth');
-  if (optionalAuthProp && Node.isPropertyAssignment(optionalAuthProp)) {
-    const init = optionalAuthProp.getInitializer();
-    if (init && Node.isTrueLiteral(init)) {
-      result.optionalAuth = true;
-    }
-  }
-
-  return result;
+  // Routes no longer use requireAuth/optionalAuth - they use authedAction server actions
+  // This function is kept for backwards compatibility but always returns empty object
+  return {};
 }
 
 /**
@@ -571,8 +560,9 @@ async function extractRouteMetadata(filePath: string): Promise<RouteMetadata[]> 
       // Extract OpenAPI metadata
       const openapi = extractOpenAPIMetadata(configObj);
 
-      // Extract auth requirements
-      const { requireAuth, optionalAuth } = extractAuthRequirements(configObj);
+      // Routes no longer use requireAuth/optionalAuth - they use authedAction server actions
+      // Keep extraction call for backwards compatibility (returns empty object)
+      extractAuthRequirements(configObj);
 
       // Extract schema sources for runtime evaluation
       const querySchemaProp = configObj.getProperty('querySchema');
@@ -647,8 +637,7 @@ async function extractRouteMetadata(filePath: string): Promise<RouteMetadata[]> 
         filePath,
         factoryName,
         ...(openapi ? { openapi } : {}),
-        ...(requireAuth ? { requireAuth: true } : {}),
-        ...(optionalAuth ? { optionalAuth: true } : {}),
+        // requireAuth/optionalAuth removed - routes use authedAction server actions
         ...(querySchemaSource ? { querySchemaSource } : {}),
         ...(bodySchemaSource ? { bodySchemaSource } : {}),
         // Store schema names for exported schemas
@@ -3153,10 +3142,8 @@ function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
         }
       }
 
-      // Add security if auth required (fallback to requireAuth if security not explicitly set)
-      if (route.requireAuth && !openapi?.security) {
-        operation.security = [{ bearerAuth: [] }];
-      }
+      // Security should be specified in openapi.security field
+      // Routes using authedAction should include security in their openapi config
 
       // Build requestParams object (zod-openapi will convert to parameters array)
       const requestParams: Record<string, z.ZodSchema> = {};
@@ -3236,11 +3223,7 @@ function buildOpenAPIPaths(routes: RouteMetadata[]): Record<string, any> {
         description: 'Internal Server Error',
       };
 
-      if (route.requireAuth) {
-        responses['401'] = {
-          description: 'Unauthorized',
-        };
-      }
+      // 401 responses should be specified in openapi.responses if route uses authedAction
 
       // Merge with openapi.responses if provided (including response schemas, headers, examples)
       if (route.openapi?.responses) {

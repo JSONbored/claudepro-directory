@@ -4,7 +4,7 @@
  * Tests the /api/v1/openapi.json endpoint which serves the generated OpenAPI specification.
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { GET, OPTIONS } from './route';
 import {
   createMockRequest,
@@ -17,50 +17,50 @@ import { readFile } from 'node:fs/promises';
 import { NextResponse } from 'next/server';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
-  cacheLife: vi.fn(),
-  cacheTag: vi.fn(),
-  connection: vi.fn(() => Promise.resolve()),
+jest.mock('next/cache', () => ({
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
+  connection: jest.fn(() => Promise.resolve()),
 }));
 
 // Mock next/server
-vi.mock('next/server', async () => {
-  const actual = await vi.importActual<typeof import('next/server')>('next/server');
+jest.mock('next/server', () => {
+  const actual = jest.requireActual<typeof import('next/server')>('next/server');
   return {
     ...actual,
-    connection: vi.fn(async () => {}),
+    connection: jest.fn(async () => {}),
   };
 });
 
 // Mock fs/promises
-vi.mock('node:fs/promises', () => ({
-  readFile: vi.fn(),
+jest.mock('node:fs/promises', () => ({
+  readFile: jest.fn(),
 }));
 
 // Mock path
-vi.mock('node:path', () => ({
-  join: vi.fn((...args) => args.join('/')),
+jest.mock('node:path', () => ({
+  join: jest.fn((...args) => args.join('/')),
 }));
 
 // Mock logger
-vi.mock('../../../../../../packages/web-runtime/src/logging/server', () => ({
+jest.mock('@heyclaude/web-runtime/logging/server', () => ({
   logger: {
-    child: vi.fn(() => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      debug: vi.fn(),
+    child: jest.fn(() => ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
     })),
   },
-  generateRequestId: vi.fn(() => 'test-request-id'),
-  normalizeError: vi.fn((error) => {
+  generateRequestId: jest.fn(() => 'test-request-id'),
+  normalizeError: jest.fn((error) => {
     if (error instanceof Error) return error;
     return new Error(String(error));
   }),
-  createErrorResponse: vi.fn((error, context) => {
+  createErrorResponse: jest.fn((error, context) => {
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : String(error),
@@ -73,16 +73,16 @@ vi.mock('../../../../../../packages/web-runtime/src/logging/server', () => ({
   }),
 }));
 
-// Mock server/api-helpers
-vi.mock('../../../../../../packages/web-runtime/src/server/api-helpers', () => ({
+// Mock server/api-helpers and api/route-factory
+jest.mock('@heyclaude/web-runtime/server', () => ({
   getOnlyCorsHeaders: {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
   },
-  buildCacheHeaders: vi.fn((preset) => ({
+  buildCacheHeaders: jest.fn((preset) => ({
     'Cache-Control': preset === 'config' ? 'public, s-maxage=86400, stale-while-revalidate=172800' : 'public',
   })),
-  jsonResponse: vi.fn((data, status, corsHeaders, additionalHeaders) => {
+  jsonResponse: jest.fn((data, status, corsHeaders, additionalHeaders) => {
     return new Response(JSON.stringify(data), {
       status,
       headers: {
@@ -92,7 +92,7 @@ vi.mock('../../../../../../packages/web-runtime/src/server/api-helpers', () => (
       },
     });
   }),
-  handleOptionsRequest: vi.fn((corsHeaders) => {
+  handleOptionsRequest: jest.fn((corsHeaders) => {
     return new Response(null, {
       status: 204,
       headers: {
@@ -101,25 +101,21 @@ vi.mock('../../../../../../packages/web-runtime/src/server/api-helpers', () => (
       },
     });
   }),
-}));
-
-// Mock api/route-factory
-vi.mock('../../../../../../packages/web-runtime/src/api/route-factory', () => ({
-  createApiRoute: vi.fn((config) => {
+  createApiRoute: jest.fn((config) => {
     return async (request: Request, context?: unknown) => {
       return await config.handler({
         logger: {
-          info: vi.fn(),
-          warn: vi.fn(),
-          error: vi.fn(),
-          debug: vi.fn(),
+          info: jest.fn(),
+          warn: jest.fn(),
+          error: jest.fn(),
+          debug: jest.fn(),
         },
         request: request as any,
         nextContext: context,
       });
     };
   }),
-  createOptionsHandler: vi.fn(() => {
+  createOptionsHandler: jest.fn(() => {
     return async () => {
       return new Response(null, {
         status: 204,
@@ -134,9 +130,9 @@ vi.mock('../../../../../../packages/web-runtime/src/api/route-factory', () => ({
 
 describe('GET /api/v1/openapi.json', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     // Reset process.cwd mock
-    vi.spyOn(process, 'cwd').mockReturnValue('/test/project');
+    jest.spyOn(process, 'cwd').mockReturnValue('/test/project');
   });
 
   it('should return 200 with OpenAPI spec when file exists', async () => {
@@ -155,7 +151,7 @@ describe('GET /api/v1/openapi.json', () => {
       },
     };
 
-    vi.mocked(readFile).mockResolvedValue(JSON.stringify(mockSpec));
+    jest.mocked(readFile).mockResolvedValue(JSON.stringify(mockSpec));
 
     const request = createMockRequest({
       method: 'GET',
@@ -175,7 +171,7 @@ describe('GET /api/v1/openapi.json', () => {
   it('should return 404 when OpenAPI spec file does not exist', async () => {
     const error = new Error('File not found') as NodeJS.ErrnoException;
     error.code = 'ENOENT';
-    vi.mocked(readFile).mockRejectedValue(error);
+    jest.mocked(readFile).mockRejectedValue(error);
 
     const request = createMockRequest({
       method: 'GET',
@@ -193,7 +189,7 @@ describe('GET /api/v1/openapi.json', () => {
 
   it('should return 500 when file read fails with non-ENOENT error', async () => {
     const error = new Error('Permission denied');
-    vi.mocked(readFile).mockRejectedValue(error);
+    jest.mocked(readFile).mockRejectedValue(error);
 
     const request = createMockRequest({
       method: 'GET',
@@ -209,7 +205,7 @@ describe('GET /api/v1/openapi.json', () => {
   });
 
   it('should return 500 when JSON parsing fails', async () => {
-    vi.mocked(readFile).mockResolvedValue('invalid json');
+    jest.mocked(readFile).mockResolvedValue('invalid json');
 
     const request = createMockRequest({
       method: 'GET',
@@ -231,7 +227,7 @@ describe('GET /api/v1/openapi.json', () => {
       paths: {},
     };
 
-    vi.mocked(readFile).mockResolvedValue(JSON.stringify(mockSpec));
+    jest.mocked(readFile).mockResolvedValue(JSON.stringify(mockSpec));
 
     const request = createMockRequest({
       method: 'GET',

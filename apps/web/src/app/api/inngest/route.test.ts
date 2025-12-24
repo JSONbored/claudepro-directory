@@ -1,10 +1,11 @@
 /**
- * Unit Tests for Inngest API Route
+ * Integration Tests for Inngest API Route
  *
  * Tests the /api/inngest endpoint which handles Inngest function introspection and invocation.
+ * Uses mocked Inngest handlers for testing.
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { NextResponse } from 'next/server';
 import { GET, POST, PUT, OPTIONS } from './route';
 import {
@@ -15,59 +16,52 @@ import {
 } from '../__helpers__/test-helpers';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
-  cacheLife: vi.fn(),
-  cacheTag: vi.fn(),
-  connection: vi.fn(() => Promise.resolve()),
+jest.mock('next/cache', () => ({
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
+  connection: jest.fn(() => Promise.resolve()),
 }));
 
 // Mock next/server
-vi.mock('next/server', async () => {
-  const actual = await vi.importActual<typeof import('next/server')>('next/server');
+jest.mock('next/server', () => {
+  const actual = jest.requireActual<typeof import('next/server')>('next/server');
   return {
     ...actual,
-    connection: vi.fn(async () => {}),
+    connection: jest.fn(async () => {}),
   };
 });
 
 // Mock web-runtime/inngest/serve
 // serve() returns Next.js route handlers: (request: NextRequest, context?: unknown) => Promise<NextResponse>
-const mockInngestGET = vi.hoisted(() => vi.fn());
-const mockInngestPOST = vi.hoisted(() => vi.fn());
-const mockInngestPUT = vi.hoisted(() => vi.fn());
+const mockInngestGET = jest.fn<(request: Request, context?: unknown) => Promise<Response>>();
+const mockInngestPOST = jest.fn<(request: Request, context?: unknown) => Promise<Response>>();
+const mockInngestPUT = jest.fn<(request: Request, context?: unknown) => Promise<Response>>();
 
-// Hoist NextResponse for use in route-factory mock
-// Note: next/server is mocked below, but we need NextResponse in the route-factory mock
-const getNextResponse = vi.hoisted(async () => {
-  const { NextResponse } = await import('next/server');
-  return NextResponse;
-});
-
-vi.mock('@heyclaude/web-runtime/inngest/serve', () => ({
+jest.mock('@heyclaude/web-runtime/inngest/serve', () => ({
   GET: mockInngestGET,
   POST: mockInngestPOST,
   PUT: mockInngestPUT,
 }));
 
 // Mock logger
-vi.mock('../../../../../packages/web-runtime/src/logging/server', () => ({
+jest.mock('@heyclaude/web-runtime/logging/server', () => ({
   logger: {
-    child: vi.fn(() => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      debug: vi.fn(),
+    child: jest.fn(() => ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
     })),
   },
-  generateRequestId: vi.fn(() => 'test-request-id'),
-  normalizeError: vi.fn((error) => {
+  generateRequestId: jest.fn(() => 'test-request-id'),
+  normalizeError: jest.fn((error) => {
     if (error instanceof Error) return error;
     return new Error(String(error));
   }),
-  createErrorResponse: vi.fn((error, context) => {
+  createErrorResponse: jest.fn((error, context) => {
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : String(error),
@@ -81,12 +75,12 @@ vi.mock('../../../../../packages/web-runtime/src/logging/server', () => ({
 }));
 
 // Mock server/api-helpers
-vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
+jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
   getOnlyCorsHeaders: {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
   },
-  jsonResponse: vi.fn((data, status, corsHeaders, additionalHeaders) => {
+  jsonResponse: jest.fn((data, status, corsHeaders, additionalHeaders) => {
     return new Response(JSON.stringify(data), {
       status,
       headers: {
@@ -96,7 +90,7 @@ vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
       },
     });
   }),
-  handleOptionsRequest: vi.fn((corsHeaders) => {
+  handleOptionsRequest: jest.fn((corsHeaders) => {
     return new Response(null, {
       status: 204,
       headers: {
@@ -108,18 +102,25 @@ vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
 }));
 
 // Mock api/route-factory
-vi.mock('../../../../../packages/web-runtime/src/api/route-factory', async () => {
-  const NextResponseClass = await getNextResponse();
+jest.mock('@heyclaude/web-runtime/api/route-factory', () => {
+  const actualNextServer = jest.requireActual<typeof import('next/server')>('next/server');
   return {
-    createApiRoute: vi.fn((config) => {
+    createApiRoute: jest.fn((config: {
+      cors?: 'anon' | 'auth';
+      handler: (context: {
+        logger: { info: jest.Mock; warn: jest.Mock; error: jest.Mock; debug: jest.Mock };
+        request: Request;
+        nextContext?: unknown;
+      }) => Promise<Response | NextResponse | null | undefined>;
+    }) => {
       return async (request: Request, context?: unknown) => {
         try {
           const handlerResult = await config.handler({
             logger: {
-              info: vi.fn(),
-              warn: vi.fn(),
-              error: vi.fn(),
-              debug: vi.fn(),
+              info: jest.fn(),
+              warn: jest.fn(),
+              error: jest.fn(),
+              debug: jest.fn(),
             },
             request: request as any,
             nextContext: context,
@@ -146,7 +147,7 @@ vi.mock('../../../../../packages/web-runtime/src/api/route-factory', async () =>
             Object.assign(mergedHeaders, corsHeaders);
             
             // Convert Response to NextResponse (factory does this)
-            return new NextResponseClass(handlerResult.body, {
+            return new actualNextServer.NextResponse(handlerResult.body, {
               status: handlerResult.status,
               headers: mergedHeaders,
             });
@@ -154,7 +155,7 @@ vi.mock('../../../../../packages/web-runtime/src/api/route-factory', async () =>
           
           // If handler returns null/undefined, return 500 error
           if (handlerResult === null || handlerResult === undefined) {
-            return new NextResponseClass(
+            return new actualNextServer.NextResponse(
               JSON.stringify({ error: 'Handler returned null or undefined' }),
               {
                 status: 500,
@@ -168,7 +169,7 @@ vi.mock('../../../../../packages/web-runtime/src/api/route-factory', async () =>
           }
           
           // If handler returns something else, wrap it in a NextResponse
-          return new NextResponseClass(JSON.stringify(handlerResult), {
+          return new actualNextServer.NextResponse(JSON.stringify(handlerResult), {
             status: 200,
             headers: {
               'Content-Type': 'application/json',
@@ -178,7 +179,7 @@ vi.mock('../../../../../packages/web-runtime/src/api/route-factory', async () =>
           });
         } catch (error) {
           // Factory catches errors and returns 500
-          return new NextResponseClass(
+          return new actualNextServer.NextResponse(
             JSON.stringify({
               error: error instanceof Error ? error.message : String(error),
             }),
@@ -194,10 +195,10 @@ vi.mock('../../../../../packages/web-runtime/src/api/route-factory', async () =>
         }
       };
     }),
-    createOptionsHandler: vi.fn(() => {
+    createOptionsHandler: jest.fn(() => {
       return async () => {
-        const NextResponseClass = await getNextResponse();
-        return new NextResponseClass(null, {
+        const actualNextServer = jest.requireActual<typeof import('next/server')>('next/server');
+        return new actualNextServer.NextResponse(null, {
           status: 204,
           headers: {
             'Access-Control-Allow-Origin': '*',
@@ -211,7 +212,8 @@ vi.mock('../../../../../packages/web-runtime/src/api/route-factory', async () =>
 
 describe('GET /api/inngest', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
     // serve() returns Next.js route handlers: (request: NextRequest, context?: unknown) => Promise<NextResponse>
     // Mock to return Response (factory converts to NextResponse and adds CORS)
     mockInngestGET.mockResolvedValue(
@@ -291,7 +293,8 @@ describe('GET /api/inngest', () => {
 
 describe('POST /api/inngest', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
     // serve() returns Next.js route handlers
     mockInngestPOST.mockResolvedValue(
       new Response(
@@ -347,7 +350,8 @@ describe('POST /api/inngest', () => {
 
 describe('PUT /api/inngest', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
     // serve() returns Next.js route handlers
     mockInngestPUT.mockResolvedValue(
       new Response(

@@ -1,10 +1,11 @@
 /**
- * Unit Tests for Sitemap API Route
+ * Integration Tests for Sitemap API Route
  *
  * Tests the /api/sitemap endpoint which generates XML or JSON sitemaps.
+ * Uses real MiscService with Prismocker for integration testing.
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { GET, POST, OPTIONS } from './route';
 import {
   createMockRequest,
@@ -14,11 +15,14 @@ import {
   expectCacheHeaders,
 } from '../__helpers__/test-helpers';
 
+// Import real cache utilities for proper cache testing
+import { clearRequestCache } from '@heyclaude/data-layer/utils/request-cache';
+
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock @heyclaude/shared-runtime/schemas/env to avoid module resolution issues
-vi.mock('@heyclaude/shared-runtime/schemas/env', () => ({
+jest.mock('@heyclaude/shared-runtime/schemas/env', () => ({
   env: {
     NODE_ENV: 'test',
     NEXT_PHASE: undefined,
@@ -30,42 +34,45 @@ vi.mock('@heyclaude/shared-runtime/schemas/env', () => ({
 }));
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
-  cacheLife: vi.fn(),
-  cacheTag: vi.fn(),
-  connection: vi.fn(() => Promise.resolve()),
+jest.mock('next/cache', () => ({
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
+  connection: jest.fn(() => Promise.resolve()),
 }));
 
 // Mock next/server
-vi.mock('next/server', async () => {
-  const actual = await vi.importActual<typeof import('next/server')>('next/server');
+jest.mock('next/server', () => {
+  const actual = jest.requireActual<typeof import('next/server')>('next/server');
   return {
     ...actual,
-    connection: vi.fn(async () => {}),
+    connection: jest.fn(async () => {}),
   };
 });
 
-// Mock data-layer services
-const mockGetSiteUrls = vi.fn();
-const mockGenerateSitemapXml = vi.fn();
-const mockGetSiteUrlsFormatted = vi.fn();
-
-// Import prisma directly - don't use vi.importActual
+// Import prisma directly - don't use jest.requireActual
 // Prisma is automatically PrismockerClient via __mocks__/@prisma/client.ts
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
 
-vi.mock('@heyclaude/data-layer', () => ({
-  MiscService: class {
-    getSiteUrls = mockGetSiteUrls;
-    generateSitemapXml = mockGenerateSitemapXml;
-    getSiteUrlsFormatted = mockGetSiteUrlsFormatted;
-  },
-}));
+// Mock data-layer services (use real MiscService, but mock other services to avoid side effects)
+jest.mock('@heyclaude/data-layer', () => {
+  const actual = jest.requireActual('@heyclaude/data-layer');
+  return {
+    ...actual, // Include all real exports (including MiscService)
+    AccountService: class {},
+    ChangelogService: class {},
+    CompaniesService: class {},
+    ContentService: class {},
+    JobsService: class {},
+    NewsletterService: class {},
+    SearchService: class {},
+    TrendingService: class {},
+  };
+});
 
 // Mock service-factory
-vi.mock('@heyclaude/web-runtime/data/service-factory', () => ({
-  getService: vi.fn(async (serviceKey: string) => {
+jest.mock('@heyclaude/web-runtime/data/service-factory', () => ({
+  getService: jest.fn(async (serviceKey: string) => {
     const { MiscService } = await import('@heyclaude/data-layer');
     if (serviceKey === 'misc') {
       return new MiscService();
@@ -75,25 +82,23 @@ vi.mock('@heyclaude/web-runtime/data/service-factory', () => ({
 }));
 
 // Mock shared-runtime
-const mockGetEnvVar = vi.hoisted(() => vi.fn((key: string) => {
-  if (key === 'INDEXNOW_API_KEY') return 'test-api-key';
-  if (key === 'INDEXNOW_TRIGGER_KEY') return 'test-trigger-key';
-  return '';
-}));
-
-vi.mock('@heyclaude/shared-runtime', () => ({
+jest.mock('@heyclaude/shared-runtime', () => ({
   APP_CONFIG: {
     url: 'https://claudepro.directory',
   },
-  getEnvVar: mockGetEnvVar,
-  getNumberProperty: vi.fn((obj: unknown, key: string) => {
+  getEnvVar: jest.fn((key: string) => {
+    if (key === 'INDEXNOW_API_KEY') return 'test-api-key';
+    if (key === 'INDEXNOW_TRIGGER_KEY') return 'test-trigger-key';
+    return '';
+  }),
+  getNumberProperty: jest.fn((obj: unknown, key: string) => {
     if (typeof obj === 'object' && obj !== null && key in obj) {
       const value = (obj as Record<string, unknown>)[key];
       return typeof value === 'number' ? value : undefined;
     }
     return undefined;
   }),
-  getStringProperty: vi.fn((obj: unknown, key: string) => {
+  getStringProperty: jest.fn((obj: unknown, key: string) => {
     if (typeof obj === 'object' && obj !== null && key in obj) {
       const value = (obj as Record<string, unknown>)[key];
       return typeof value === 'string' ? value : undefined;
@@ -103,30 +108,30 @@ vi.mock('@heyclaude/shared-runtime', () => ({
 }));
 
 // Mock web-runtime/inngest/client
-const mockInngestSend = vi.hoisted(() => vi.fn());
+const mockInngestSend = jest.fn();
 
-vi.mock('@heyclaude/web-runtime/inngest/client', () => ({
+jest.mock('@heyclaude/web-runtime/inngest/client', () => ({
   inngest: {
     send: mockInngestSend,
   },
 }));
 
 // Mock logger
-vi.mock('../../../../../packages/web-runtime/src/logging/server', () => ({
+jest.mock('@heyclaude/web-runtime/logging/server', () => ({
   logger: {
-    child: vi.fn(() => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      debug: vi.fn(),
+    child: jest.fn(() => ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
     })),
   },
-  generateRequestId: vi.fn(() => 'test-request-id'),
-  normalizeError: vi.fn((error) => {
+  generateRequestId: jest.fn(() => 'test-request-id'),
+  normalizeError: jest.fn((error) => {
     if (error instanceof Error) return error;
     return new Error(String(error));
   }),
-  createErrorResponse: vi.fn((error, context) => {
+  createErrorResponse: jest.fn((error, context) => {
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : String(error),
@@ -140,12 +145,12 @@ vi.mock('../../../../../packages/web-runtime/src/logging/server', () => ({
 }));
 
 // Mock server/api-helpers
-vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
+jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
   getOnlyCorsHeaders: {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
   },
-  jsonResponse: vi.fn((data, status, corsHeaders, additionalHeaders) => {
+  jsonResponse: jest.fn((data, status, corsHeaders, additionalHeaders) => {
     return new Response(JSON.stringify(data), {
       status,
       headers: {
@@ -155,7 +160,7 @@ vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
       },
     });
   }),
-  xmlResponse: vi.fn((xml, contentType, status, corsHeaders, additionalHeaders) => {
+  xmlResponse: jest.fn((xml, contentType, status, corsHeaders, additionalHeaders) => {
     return new Response(xml, {
       status,
       headers: {
@@ -165,7 +170,7 @@ vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
       },
     });
   }),
-  handleOptionsRequest: vi.fn((corsHeaders) => {
+  handleOptionsRequest: jest.fn((corsHeaders) => {
     return new Response(null, {
       status: 204,
       headers: {
@@ -177,59 +182,132 @@ vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
 }));
 
 // Mock api/route-factory
-vi.mock('../../../../../packages/web-runtime/src/api/route-factory', () => ({
-  createApiRoute: vi.fn((config) => {
+jest.mock('@heyclaude/web-runtime/api/route-factory', () => ({
+  createApiRoute: jest.fn((config: {
+    handler: (context: {
+      logger: { info: jest.Mock; warn: jest.Mock; error: jest.Mock; debug: jest.Mock };
+      request: Request;
+      nextContext?: unknown;
+      query?: Record<string, string | undefined>;
+      body?: unknown;
+    }) => Promise<Response>;
+  }) => {
     return async (request: Request, context?: unknown) => {
-      return await config.handler({
-        logger: {
-          info: vi.fn(),
-          warn: vi.fn(),
-          error: vi.fn(),
-          debug: vi.fn(),
-        },
-        request: request as any,
-        nextContext: context,
-        query: Object.fromEntries(new URL(request.url).searchParams),
-        body: await request.json().catch(() => ({})),
-      });
-    };
-  }),
-  createFormatHandlerRoute: vi.fn((config) => {
-    return async (request: Request, context?: unknown) => {
-      const url = new URL(request.url);
-      const format = url.searchParams.get('format') || config.defaultFormat || 'xml';
-      const formatHandler = config.formats[format as keyof typeof config.formats];
-      
-      if (!formatHandler) {
-        throw new Error(`Invalid format: ${format}`);
-      }
+      try {
+        // Parse body for POST requests
+        let body = {};
+        if (request.method === 'POST' || request.method === 'PUT' || request.method === 'PATCH') {
+          try {
+            const text = await request.text();
+            if (text) {
+              body = JSON.parse(text);
+            }
+          } catch {
+            // Invalid JSON, body remains {}
+          }
+        }
 
-      // Mock service call
-      const { getService } = await import('@heyclaude/web-runtime/data/service-factory');
-      const service = await getService(formatHandler.serviceKey);
-      const methodArgs = formatHandler.methodArgs(format as any, {}, {}, {});
-      const result = await (service as any)[formatHandler.methodName](...methodArgs);
-
-      // Call response handler
-      return await formatHandler.responseHandler(
-        result,
-        format as any,
-        {},
-        {},
-        {
+        const handlerResult = await config.handler({
           logger: {
-            info: vi.fn(),
-            warn: vi.fn(),
-            error: vi.fn(),
-            debug: vi.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+            debug: jest.fn(),
           },
           request: request as any,
           nextContext: context,
+          query: Object.fromEntries(new URL(request.url).searchParams),
+          body,
+        });
+        // Handler returns Response, factory returns it as-is
+        if (handlerResult instanceof Response) {
+          return handlerResult;
         }
-      );
+        return handlerResult;
+      } catch (error) {
+        // Factory catches errors and returns 500
+        return new Response(
+          JSON.stringify({
+            error: error instanceof Error ? error.message : String(error),
+          }),
+          {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+      }
     };
   }),
-  createOptionsHandler: vi.fn(() => {
+  createFormatHandlerRoute: jest.fn((config: {
+    defaultFormat: string;
+    formats: Record<string, {
+      serviceKey: string;
+      methodName: string;
+      methodArgs: (format: string, query: unknown, body: unknown, context: unknown) => unknown[];
+      responseHandler: (result: unknown, format: string, query: unknown, body: unknown, context: {
+        logger: { info: jest.Mock; warn: jest.Mock; error: jest.Mock; debug: jest.Mock };
+        request: Request;
+        nextContext?: unknown;
+      }) => Promise<Response>;
+    }>;
+  }) => {
+    return async (request: Request, context?: unknown) => {
+      try {
+        const url = new URL(request.url);
+        const format = url.searchParams.get('format') || config.defaultFormat || 'xml';
+        const formatHandler = config.formats[format as keyof typeof config.formats];
+        
+        if (!formatHandler) {
+          return new Response(
+            JSON.stringify({
+              error: 'Invalid format parameter',
+              message: `Invalid format. Valid formats: ${Object.keys(config.formats).join(', ')}`,
+            }),
+            {
+              status: 400,
+              headers: { 'Content-Type': 'application/json' },
+            }
+          );
+        }
+
+        // Use real service via service factory
+        const { getService } = await import('@heyclaude/web-runtime/data/service-factory');
+        const service = await getService(formatHandler.serviceKey);
+        const methodArgs = formatHandler.methodArgs(format, {}, {}, {});
+        const result = await (service as any)[formatHandler.methodName](...methodArgs);
+
+        // Call response handler
+        return await formatHandler.responseHandler(
+          result,
+          format,
+          {},
+          {},
+          {
+            logger: {
+              info: jest.fn(),
+              warn: jest.fn(),
+              error: jest.fn(),
+              debug: jest.fn(),
+            },
+            request: request as any,
+            nextContext: context,
+          }
+        );
+      } catch (error) {
+        // Factory catches errors and returns 500
+        return new Response(
+          JSON.stringify({
+            error: error instanceof Error ? error.message : String(error),
+          }),
+          {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+      }
+    };
+  }),
+  createOptionsHandler: jest.fn(() => {
     return async () => {
       return new Response(null, {
         status: 204,
@@ -245,24 +323,35 @@ vi.mock('../../../../../packages/web-runtime/src/api/route-factory', () => ({
 describe('GET /api/sitemap', () => {
   let prismocker: PrismaClient;
 
-  beforeEach(() => {
-    // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+  beforeEach(async () => {
+    // 1. Clear request cache before each test (REQUIRED for test isolation)
+    clearRequestCache();
+
+    // 2. Get Prismocker instance (automatically PrismockerClient via __mocks__/@prisma/client.ts)
     prismocker = prisma;
-    
-    // Reset Prismocker data before each test
-    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
-      prismocker.reset();
+
+    // 3. Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof (prismocker as any).reset === 'function') {
+      (prismocker as any).reset();
     }
-    
-    vi.clearAllMocks();
-    mockGenerateSitemapXml.mockResolvedValue('<?xml version="1.0"?><urlset>...</urlset>');
-    mockGetSiteUrls.mockResolvedValue([
-      { path: '/', lastmod: '2025-01-11', changefreq: 'daily', priority: 1.0 },
-      { path: '/agents', lastmod: '2025-01-10', changefreq: 'weekly', priority: 0.8 },
-    ]);
+
+    // 4. Clear all mocks
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+
+    // 5. Set up $queryRawUnsafe for RPC testing
+    // MiscService.getSiteUrls uses Prisma directly (not RPC)
+    // MiscService.generateSitemapXml uses RPC (generate_sitemap_xml)
+    // MiscService.getSiteUrlsFormatted uses RPC (get_site_urls_formatted)
+    // Default: return successful results
+    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]) as unknown as typeof prismocker.$queryRawUnsafe;
   });
 
   it('should return XML sitemap by default', async () => {
+    // Mock RPC response for generate_sitemap_xml
+    const mockXmlData = [{ xml: '<?xml version="1.0"?><urlset>...</urlset>' }];
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(mockXmlData as any);
+
     const request = createMockRequest({
       method: 'GET',
       url: 'http://localhost:3000/api/sitemap',
@@ -275,10 +364,18 @@ describe('GET /api/sitemap', () => {
     expectCorsHeaders(response);
     expectCacheHeaders(response, true);
     expect(response.headers.get('Content-Type')).toContain('application/xml');
-    expect(mockGenerateSitemapXml).toHaveBeenCalled();
+    // Verify RPC was called for generate_sitemap_xml
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('generate_sitemap_xml'),
+      'https://claudepro.directory' // p_base_url
+    );
   });
 
   it('should return XML sitemap with format=xml', async () => {
+    // Mock RPC response for generate_sitemap_xml
+    const mockXmlData = [{ xml: '<?xml version="1.0"?><urlset>...</urlset>' }];
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(mockXmlData as any);
+
     const request = createMockRequest({
       method: 'GET',
       url: 'http://localhost:3000/api/sitemap?format=xml',
@@ -288,10 +385,21 @@ describe('GET /api/sitemap', () => {
 
     expectStatus(response, 200);
     expect(response.headers.get('Content-Type')).toContain('application/xml');
-    expect(mockGenerateSitemapXml).toHaveBeenCalled();
+    // Verify RPC was called
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('generate_sitemap_xml'),
+      'https://claudepro.directory'
+    );
   });
 
   it('should return JSON sitemap with format=json', async () => {
+    // Mock RPC response for get_site_urls
+    const mockUrlsData = [
+      { path: '/', lastmod: '2025-01-11', changefreq: 'daily', priority: 1.0 },
+      { path: '/agents', lastmod: '2025-01-10', changefreq: 'weekly', priority: 0.8 },
+    ];
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(mockUrlsData as any);
+
     const request = createMockRequest({
       method: 'GET',
       url: 'http://localhost:3000/api/sitemap?format=json',
@@ -302,13 +410,17 @@ describe('GET /api/sitemap', () => {
 
     expectStatus(response, 200);
     expect(response.headers.get('Content-Type')).toContain('application/json');
-    expect(mockGetSiteUrls).toHaveBeenCalled();
+    // Verify RPC was called for get_site_urls
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('get_site_urls')
+    );
     expect(body).toHaveProperty('urls');
     expect(body).toHaveProperty('meta');
   });
 
   it('should handle null XML generation', async () => {
-    mockGenerateSitemapXml.mockResolvedValue(null);
+    // Mock RPC to return null (empty array or null)
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(null as any);
 
     const request = createMockRequest({
       method: 'GET',
@@ -320,10 +432,16 @@ describe('GET /api/sitemap', () => {
 
     expectStatus(response, 500);
     expect(body).toHaveProperty('error');
+    // Verify RPC was called
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('generate_sitemap_xml'),
+      'https://claudepro.directory'
+    );
   });
 
   it('should handle empty URL list for JSON', async () => {
-    mockGetSiteUrls.mockResolvedValue([]);
+    // Mock RPC to return empty array
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce([]);
 
     const request = createMockRequest({
       method: 'GET',
@@ -335,6 +453,10 @@ describe('GET /api/sitemap', () => {
 
     expectStatus(response, 500);
     expect(body).toHaveProperty('error');
+    // Verify RPC was called
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('get_site_urls')
+    );
   });
 
   it('should return 400 for invalid format', async () => {
@@ -359,15 +481,41 @@ describe('GET /api/sitemap', () => {
 });
 
 describe('POST /api/sitemap', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+  let prismocker: PrismaClient;
+
+  beforeEach(async () => {
+    // 1. Clear request cache before each test (REQUIRED for test isolation)
+    clearRequestCache();
+
+    // 2. Get Prismocker instance
+    prismocker = prisma;
+
+    // 3. Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof (prismocker as any).reset === 'function') {
+      (prismocker as any).reset();
+    }
+
+    // 4. Clear all mocks
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+
+    // 5. Set environment variables
     process.env['INDEXNOW_API_KEY'] = 'test-api-key';
     process.env['INDEXNOW_TRIGGER_KEY'] = 'test-trigger-key';
-    mockGetSiteUrlsFormatted.mockResolvedValue([
-      'https://claudepro.directory/',
-      'https://claudepro.directory/agents',
-    ]);
-    // Ensure mock returns a resolved value (not rejected)
+
+    // 6. Set up $queryRawUnsafe for RPC testing
+    // MiscService.getSiteUrlsFormatted uses RPC (get_site_urls_formatted)
+    // Default: return successful results
+    const mockUrlsData = {
+      urls: [
+        'https://claudepro.directory/',
+        'https://claudepro.directory/agents',
+      ],
+      meta: {},
+    };
+    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([mockUrlsData]) as unknown as typeof prismocker.$queryRawUnsafe;
+
+    // 7. Ensure Inngest mock returns a resolved value
     mockInngestSend.mockResolvedValue({ ids: ['test-id'] });
   });
 
@@ -387,6 +535,13 @@ describe('POST /api/sitemap', () => {
     expectCorsHeaders(response);
     expect(body).toHaveProperty('ok', true);
     expect(body).toHaveProperty('submitted');
+    // Verify RPC was called for get_site_urls_formatted
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('get_site_urls_formatted'),
+      expect.any(Number), // p_limit
+      'https://claudepro.directory' // p_site_url
+    );
+    // Verify Inngest was called
     expect(mockInngestSend).toHaveBeenCalled();
   });
 
@@ -401,6 +556,8 @@ describe('POST /api/sitemap', () => {
 
     expectStatus(response, 401);
     expect(body).toHaveProperty('error');
+    // Verify RPC was not called (authentication failed before service call)
+    expect(prismocker.$queryRawUnsafe).not.toHaveBeenCalled();
     expect(mockInngestSend).not.toHaveBeenCalled();
   });
 
@@ -418,6 +575,8 @@ describe('POST /api/sitemap', () => {
 
     expectStatus(response, 401);
     expect(body).toHaveProperty('error');
+    // Verify RPC was not called (authentication failed before service call)
+    expect(prismocker.$queryRawUnsafe).not.toHaveBeenCalled();
     expect(mockInngestSend).not.toHaveBeenCalled();
   });
 
@@ -437,7 +596,8 @@ describe('POST /api/sitemap', () => {
   });
 
   it('should return 500 when no URLs to submit', async () => {
-    mockGetSiteUrlsFormatted.mockResolvedValue([]);
+    // Mock RPC to return empty array
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce([{ urls: [], meta: {} }] as any);
 
     const request = createMockRequest({
       method: 'POST',
@@ -452,10 +612,17 @@ describe('POST /api/sitemap', () => {
 
     expectStatus(response, 500);
     expect(body).toHaveProperty('error');
+    // Verify RPC was called
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('get_site_urls_formatted'),
+      expect.any(Number),
+      'https://claudepro.directory'
+    );
   });
 
   it('should handle Inngest send errors gracefully', async () => {
-    mockInngestSend.mockRejectedValue(new Error('Inngest error'));
+    // Mock Inngest to throw error
+    mockInngestSend.mockRejectedValueOnce(new Error('Inngest error'));
 
     const request = createMockRequest({
       method: 'POST',
@@ -471,5 +638,13 @@ describe('POST /api/sitemap', () => {
     expectStatus(response, 500);
     expect(body).toHaveProperty('error');
     expect(body).toHaveProperty('ok', false);
+    // Verify RPC was called (service call succeeded)
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('get_site_urls_formatted'),
+      expect.any(Number),
+      'https://claudepro.directory'
+    );
+    // Verify Inngest was called (but failed)
+    expect(mockInngestSend).toHaveBeenCalled();
   });
 });

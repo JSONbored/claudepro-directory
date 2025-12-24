@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useSafeAction } from './use-safe-action';
 
-// Mock next-safe-action - define mocks inside factory function to avoid hoisting issues
+// Mock next-safe-action for unit tests - define mocks inside factory function to avoid hoisting issues
 jest.mock('next-safe-action/hooks', () => {
   const mockExecute = jest.fn();
   const mockExecuteAsync = jest.fn();
@@ -35,20 +35,27 @@ jest.mock('next-safe-action/hooks', () => {
   };
 });
 
-// Get mocks for use in tests
-const {
-  useAction,
-  __mockExecute,
-  __mockExecuteAsync,
-  __mockReset,
-  __mockUseAction,
-} = jest.requireMock('next-safe-action/hooks');
-const mockExecute = __mockExecute;
-const mockExecuteAsync = __mockExecuteAsync;
-const mockReset = __mockReset;
-const mockUseAction = __mockUseAction;
+// Get mocks for use in unit tests
+const mockModule = jest.requireMock('next-safe-action/hooks') as {
+  useAction: ReturnType<typeof jest.fn>;
+  __mockExecute: ReturnType<typeof jest.fn>;
+  __mockExecuteAsync: ReturnType<typeof jest.fn>;
+  __mockReset: ReturnType<typeof jest.fn>;
+  __mockUseAction: ReturnType<typeof jest.fn>;
+};
+const mockExecute = mockModule.__mockExecute;
+const mockExecuteAsync = mockModule.__mockExecuteAsync;
+const mockReset = mockModule.__mockReset;
+const mockUseAction = mockModule.__mockUseAction;
 
-describe('useSafeAction', () => {
+/**
+ * Unit Tests
+ * 
+ * These tests verify that useSafeAction correctly wraps useAction and passes through
+ * all properties, callbacks, and status flags. They use mocked useAction to test
+ * the wrapper logic in isolation.
+ */
+describe('useSafeAction (Unit Tests)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetAllMocks();
@@ -546,5 +553,252 @@ describe('useSafeAction', () => {
     expect(typeof exportedUseAction).toBe('function');
     // It should be the same as the mocked useAction (since it's a re-export)
     expect(exportedUseAction).toBe(mockUseAction);
+  });
+});
+
+/**
+ * Integration Tests
+ *
+ * These tests use REAL useAction (not mocked) and REAL server actions,
+ * creating true end-to-end integration: Hook → Action → RPC → Database (Prismocker).
+ *
+ * This verifies the complete flow works correctly with minimal mocks.
+ * 
+ * Uses jest.isolateModules() to get real useAction implementation.
+ */
+describe('useSafeAction (Integration Tests)', () => {
+  // Import integration helpers
+  let setupActionIntegration: () => ReturnType<typeof jest.spyOn>;
+  let registerActionForIntegration: (action: Function) => void;
+  let clearActionRegistry: () => void;
+  let fetchSpy: ReturnType<typeof jest.spyOn>;
+  let prismocker: any; // PrismockerClient (not standard PrismaClient)
+  let clearRequestCache: () => void;
+
+  beforeAll(async () => {
+    // Import integration helpers
+    const integrationHelpers = await import('./__helpers__/integration-helpers');
+    setupActionIntegration = integrationHelpers.setupActionIntegration;
+    registerActionForIntegration = integrationHelpers.registerActionForIntegration;
+    clearActionRegistry = integrationHelpers.clearActionRegistry;
+
+    // Import Prismocker and cache utilities
+    const { prisma } = await import('@heyclaude/data-layer/prisma/client');
+    prismocker = prisma; // PrismockerClient (already typed as any)
+    
+    const requestCache = await import('../../../data-layer/src/utils/request-cache.ts');
+    clearRequestCache = requestCache.clearRequestCache;
+  });
+
+  beforeEach(async () => {
+    // 1. Clear request cache (REQUIRED for test isolation)
+    clearRequestCache();
+
+    // 2. Reset Prismocker data
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
+    // 3. Clear all mocks
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+
+    // 4. Set up $queryRawUnsafe for RPC testing
+    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
+
+    // 5. Clear action registry
+    clearActionRegistry();
+
+    // 6. Set up fetch interceptor (must be before importing useSafeAction)
+    fetchSpy = setupActionIntegration();
+  });
+
+  afterEach(() => {
+    // Clean up
+    if (fetchSpy) {
+      fetchSpy.mockRestore();
+    }
+    clearActionRegistry();
+    jest.clearAllMocks();
+    jest.resetModules(); // Reset modules to clear any cached imports
+  });
+
+  it('should execute real addBookmark action via hook', async () => {
+    // Use jest.isolateModules() to get real useAction (bypassing the global mock)
+    // Wrap in Promise to handle async callback
+    await new Promise<void>((resolve, reject) => {
+      jest.isolateModules(async () => {
+        try {
+      // Import real action
+      const { addBookmark } = await import('@heyclaude/web-runtime/actions/bookmarks');
+
+      // Register action for integration
+      registerActionForIntegration(addBookmark);
+
+      // Mock RPC result
+      const mockResult = {
+        success: true,
+        bookmark: {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          user_id: 'test-user-id',
+          content_type: 'agents',
+          content_slug: 'test-agent',
+          notes: 'My notes',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      };
+
+      (prismocker.$queryRawUnsafe as jest.Mock).mockResolvedValue([mockResult]);
+
+      // Mock next/cache for revalidatePath/revalidateTag
+      jest.doMock('next/cache', () => ({
+        revalidatePath: jest.fn(),
+        revalidateTag: jest.fn(),
+      }));
+
+      // Import useSafeAction in isolated module context (gets real useAction)
+      const { useSafeAction } = await import('./use-safe-action');
+      const { renderHook, act, waitFor } = await import('@testing-library/react');
+
+      const { result } = renderHook(() => useSafeAction(addBookmark));
+
+      // Execute action via hook
+      await act(async () => {
+        await result.current.executeAsync({
+          content_type: 'agents',
+          content_slug: 'test-agent',
+          notes: 'My notes',
+        });
+      });
+
+      // Wait for result
+      await waitFor(() => {
+        expect(result.current.result).toBeDefined();
+      }, { timeout: 5000 });
+
+      // Verify SafeActionResult structure
+      expect(result.current.result?.data).toBeDefined();
+      expect(result.current.result?.serverError).toBeUndefined();
+      expect(result.current.result?.validationErrors).toBeUndefined();
+
+      // Verify result data
+      expect(result.current.result?.data?.success).toBe(true);
+      expect(result.current.result?.data?.bookmark).toBeDefined();
+
+      // Verify RPC was called
+      expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('add_bookmark'),
+        'test-user-id', // From safemocker auth context
+        'agents',
+        'test-agent',
+        'My notes'
+      );
+
+      // Verify fetch was intercepted (action was called via hook)
+      expect(fetchSpy).toHaveBeenCalled();
+          
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+  });
+
+  it('should handle validation errors from real action', async () => {
+    // Use jest.isolateModules() to get real useAction (bypassing the global mock)
+    await new Promise<void>((resolve, reject) => {
+      jest.isolateModules(async () => {
+        try {
+      // Import real action
+      const { addBookmark } = await import('@heyclaude/web-runtime/actions/bookmarks');
+
+      // Register action for integration
+      registerActionForIntegration(addBookmark);
+
+      // Import useSafeAction in isolated module context (gets real useAction)
+      const { useSafeAction } = await import('./use-safe-action');
+      const { renderHook, act, waitFor } = await import('@testing-library/react');
+
+      const { result } = renderHook(() => useSafeAction(addBookmark));
+
+      // Execute with invalid input (missing required fields)
+      await act(async () => {
+        await result.current.executeAsync({
+          // Missing content_type and content_slug
+        } as any);
+      });
+
+      // Wait for result
+      await waitFor(() => {
+        expect(result.current.result).toBeDefined();
+      }, { timeout: 5000 });
+
+      // Verify validation errors in SafeActionResult
+      // useAction returns validationErrors (not fieldErrors from safemocker)
+      expect(result.current.result?.validationErrors).toBeDefined();
+      expect(result.current.result?.data).toBeUndefined();
+      expect(result.current.result?.serverError).toBeUndefined();
+          
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+  });
+
+  it('should handle server errors from real action', async () => {
+    // Use jest.isolateModules() to get real useAction (bypassing the global mock)
+    await new Promise<void>((resolve, reject) => {
+      jest.isolateModules(async () => {
+        try {
+      // Import real action
+      const { addBookmark } = await import('@heyclaude/web-runtime/actions/bookmarks');
+
+      // Register action for integration
+      registerActionForIntegration(addBookmark);
+
+      // Mock RPC to throw error
+      (prismocker.$queryRawUnsafe as jest.Mock).mockRejectedValue(
+        new Error('Database error')
+      );
+
+      // Mock next/cache
+      jest.doMock('next/cache', () => ({
+        revalidatePath: jest.fn(),
+        revalidateTag: jest.fn(),
+      }));
+
+      // Import useSafeAction in isolated module context (gets real useAction)
+      const { useSafeAction } = await import('./use-safe-action');
+      const { renderHook, act, waitFor } = await import('@testing-library/react');
+
+      const { result } = renderHook(() => useSafeAction(addBookmark));
+
+      // Execute action
+      await act(async () => {
+        await result.current.executeAsync({
+          content_type: 'agents',
+          content_slug: 'test-agent',
+        });
+      });
+
+      // Wait for result
+      await waitFor(() => {
+        expect(result.current.result).toBeDefined();
+      }, { timeout: 5000 });
+
+      // Verify server error in SafeActionResult
+      expect(result.current.result?.serverError).toBeDefined();
+      expect(result.current.result?.data).toBeUndefined();
+      expect(result.current.result?.validationErrors).toBeUndefined();
+          
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
   });
 });

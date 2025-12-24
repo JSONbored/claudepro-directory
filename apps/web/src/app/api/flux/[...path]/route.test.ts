@@ -4,7 +4,7 @@
  * Tests the /api/flux/[...path] endpoint which routes requests to Flux handlers.
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { NextResponse } from 'next/server';
 import { GET, POST, OPTIONS } from './route';
 import {
@@ -14,47 +14,47 @@ import {
 } from '../../__helpers__/test-helpers';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
-  cacheLife: vi.fn(),
-  cacheTag: vi.fn(),
-  connection: vi.fn(() => Promise.resolve()),
+jest.mock('next/cache', () => ({
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
+  connection: jest.fn(() => Promise.resolve()),
 }));
 
 // Mock next/server
-vi.mock('next/server', async () => {
-  const actual = await vi.importActual<typeof import('next/server')>('next/server');
+jest.mock('next/server', () => {
+  const actual = jest.requireActual<typeof import('next/server')>('next/server');
   return {
     ...actual,
-    connection: vi.fn(async () => {}),
+    connection: jest.fn(async () => {}),
   };
 });
 
 // Mock web-runtime/flux/router
-const mockRouteFluxRequest = vi.hoisted(() => vi.fn());
+const mockRouteFluxRequest = jest.fn();
 
-vi.mock('@heyclaude/web-runtime/flux/router', () => ({
+jest.mock('@heyclaude/web-runtime/flux/router', () => ({
   routeFluxRequest: mockRouteFluxRequest,
 }));
 
 // Mock logger
-vi.mock('../../../../../../packages/web-runtime/src/logging/server', () => ({
+jest.mock('@heyclaude/web-runtime/logging/server', () => ({
   logger: {
-    child: vi.fn(() => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      debug: vi.fn(),
+    child: jest.fn(() => ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
     })),
   },
-  generateRequestId: vi.fn(() => 'test-request-id'),
-  normalizeError: vi.fn((error) => {
+  generateRequestId: jest.fn(() => 'test-request-id'),
+  normalizeError: jest.fn((error) => {
     if (error instanceof Error) return error;
     return new Error(String(error));
   }),
-  createErrorResponse: vi.fn((error, context) => {
+  createErrorResponse: jest.fn((error, context) => {
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : String(error),
@@ -67,13 +67,13 @@ vi.mock('../../../../../../packages/web-runtime/src/logging/server', () => ({
   }),
 }));
 
-// Mock server/api-helpers
-vi.mock('../../../../../../packages/web-runtime/src/server/api-helpers', () => ({
+// Mock server/api-helpers and api/route-factory
+jest.mock('@heyclaude/web-runtime/server', () => ({
   getOnlyCorsHeaders: {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
   },
-  jsonResponse: vi.fn((data, status, corsHeaders, additionalHeaders) => {
+  jsonResponse: jest.fn((data, status, corsHeaders, additionalHeaders) => {
     return new Response(JSON.stringify(data), {
       status,
       headers: {
@@ -83,7 +83,7 @@ vi.mock('../../../../../../packages/web-runtime/src/server/api-helpers', () => (
       },
     });
   }),
-  handleOptionsRequest: vi.fn((corsHeaders) => {
+  handleOptionsRequest: jest.fn((corsHeaders) => {
     return new Response(null, {
       status: 204,
       headers: {
@@ -92,19 +92,15 @@ vi.mock('../../../../../../packages/web-runtime/src/server/api-helpers', () => (
       },
     });
   }),
-}));
-
-// Mock api/route-factory
-vi.mock('../../../../../../packages/web-runtime/src/api/route-factory', () => ({
-  createApiRoute: vi.fn((config) => {
+  createApiRoute: jest.fn((config) => {
     return async (request: Request, context?: unknown) => {
       try {
         const handlerResult = await config.handler({
           logger: {
-            info: vi.fn(),
-            warn: vi.fn(),
-            error: vi.fn(),
-            debug: vi.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+            debug: jest.fn(),
           },
           request: request as any,
           nextContext: context,
@@ -141,7 +137,7 @@ vi.mock('../../../../../../packages/web-runtime/src/api/route-factory', () => ({
       }
     };
   }),
-  createOptionsHandler: vi.fn(() => {
+  createOptionsHandler: jest.fn(() => {
     return async () => {
       return new NextResponse(null, {
         status: 204,
@@ -156,7 +152,7 @@ vi.mock('../../../../../../packages/web-runtime/src/api/route-factory', () => ({
 
 describe('GET /api/flux/[...path]', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     // routeFluxRequest returns NextResponse
     mockRouteFluxRequest.mockImplementation(async (method: string, path: string[], request: Request) => {
       return new NextResponse(JSON.stringify({ count: 1234 }), {
@@ -276,7 +272,7 @@ describe('GET /api/flux/[...path]', () => {
 
 describe('POST /api/flux/[...path]', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     // routeFluxRequest returns NextResponse
     mockRouteFluxRequest.mockImplementation(async (method: string, path: string[], request: Request) => {
       return new NextResponse(JSON.stringify({ success: true }), {

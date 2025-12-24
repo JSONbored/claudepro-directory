@@ -2,6 +2,7 @@ import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { MiscService } from './misc.ts';
 import { prisma } from '../prisma/client.ts';
 import type { PrismaClient } from '@prisma/client';
+import { clearRequestCache } from '../utils/request-cache.ts';
 
 // Prismocker is automatically configured via __mocks__/@prisma/client.ts
 // The prisma singleton from '../prisma/client.ts' will automatically use PrismockerClient
@@ -38,7 +39,6 @@ describe('MiscService', () => {
     jest.resetAllMocks();
 
     // Clear request cache for test isolation (each test starts with empty cache)
-    const { clearRequestCache } = await import('../utils/request-cache.ts');
     clearRequestCache();
 
     // Prismocker provides $queryRawUnsafe as a stub, but we need to mock it for RPC calls

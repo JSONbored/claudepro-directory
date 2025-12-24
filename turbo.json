@@ -260,7 +260,7 @@
     "type-check:unused:filtered:exec": {
       "dependsOn": ["generators:build"],
       "cache": false
-    },
+    }
   },
   "globalDependencies": ["package.json", "pnpm-lock.yaml"],
   "globalEnv": [

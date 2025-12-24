@@ -140,26 +140,9 @@ vi.mock('../../../../packages/web-runtime/src/server/api-helpers', () => ({
   ),
 }));
 
-// Mock authentication (if route requires auth)
-vi.mock('../../../../packages/web-runtime/src/auth/get-authenticated-user', () => ({
-  getAuthenticatedUser: vi.fn(async (options?: { requireUser?: boolean }) => {
-    if (options?.requireUser) {
-      // For requireAuth routes, return authenticated user
-      return {
-        isAuthenticated: true,
-        user: {
-          email: 'test@example.com',
-          id: 'test-user-id',
-        },
-      };
-    }
-    // For optionalAuth or no auth routes
-    return {
-      isAuthenticated: false,
-      user: null,
-    };
-  }),
-}));
+// NOTE: Routes no longer use requireAuth/optionalAuth in createApiRoute
+// All user-authenticated routes should use authedAction server actions instead
+// See bookmarks/add/route.test.ts and user/profile-image/route.test.ts for examples
 
 describe('GET /api/your-route', () => {
   let prismocker: PrismaClient;

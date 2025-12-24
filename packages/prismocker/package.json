@@ -25,6 +25,26 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
+    "./jest-helpers": {
+      "types": "./dist/jest-helpers.d.ts",
+      "import": "./dist/jest-helpers.mjs",
+      "require": "./dist/jest-helpers.cjs"
+    },
+    "./prisma-types": {
+      "types": "./dist/prisma-types.d.ts",
+      "import": "./dist/prisma-types.mjs",
+      "require": "./dist/prisma-types.cjs"
+    },
+    "./test-utils": {
+      "types": "./dist/test-utils.d.ts",
+      "import": "./dist/test-utils.mjs",
+      "require": "./dist/test-utils.cjs"
+    },
+    "./prisma-ecosystem": {
+      "types": "./dist/prisma-ecosystem.d.ts",
+      "import": "./dist/prisma-ecosystem.mjs",
+      "require": "./dist/prisma-ecosystem.cjs"
+    },
     "./bin/generate-enums": {
       "types": "./dist/bin/generate-enums.d.ts",
       "import": "./dist/bin/generate-enums.mjs",
@@ -33,7 +53,8 @@
   },
   "bin": {
     "prismocker": "./dist/bin/generate-enums.js",
-    "prismocker-generate-enums": "./dist/bin/generate-enums.js"
+    "prismocker-generate-enums": "./dist/bin/generate-enums.js",
+    "prismocker-setup": "./dist/bin/setup.js"
   },
   "files": [
     "dist",
@@ -42,20 +63,30 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsup && pnpm build:types",
-    "build:types": "tsc --declaration --outDir dist",
+    "build:types": "tsc --declaration --outDir dist && cp src/types-augmentation.d.ts dist/types-augmentation.d.ts",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
     "type-check": "tsc --noEmit",
-    "test": "echo 'Tests disabled - migrating to Jest'",
-    "test:watch": "echo 'Tests disabled - migrating to Jest'",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "lint": "eslint src --ext .ts",
     "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
     "@prisma/client": "^7.0.0"
   },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@jest/globals": "^30.2.0",
     "@prisma/client": "^7.2.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.0.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
     "tsup": "^8.5.1",
     "typescript": "^5.0.0"
   },

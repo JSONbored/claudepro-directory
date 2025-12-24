@@ -18,66 +18,84 @@
 
 import 'server-only';
 
-import { prisma } from '@heyclaude/data-layer/prisma/client';
+import { getUserProfileImage } from '@heyclaude/web-runtime/actions/user';
 import {
   errorResponseSchema,
   userProfileImageResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
-import { createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/api/route-factory';
-import { normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { createOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/api/route-factory';
+import { jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
+import { connection } from 'next/server';
 
 /**
  * GET /api/user/profile-image - Get authenticated user's profile image
  *
  * Returns the user's profile image URL from the database.
- * Requires authentication and uses HTTP cache headers for client-side caching.
+ * Requires authentication via authedAction and uses HTTP cache headers for client-side caching.
  */
 export const GET = createApiRoute({
   cors: 'auth',
-  handler: async ({ logger, user }) => {
-    try {
-      // Fetch only the image field from database
-      const userProfile = await prisma.users.findUnique({
-        select: { image: true },
-        where: { id: user.id },
-      });
+  handler: async ({ cors, logger }) => {
+    await connection();
 
-      const imageUrl = userProfile?.image ?? null;
+    logger.info({}, 'GetUserProfileImage: profile image request');
 
-      logger.info(
-        {
-          hasImage: !!imageUrl,
-          section: 'data-fetch',
-        },
-        'GetUserProfileImage: profile image fetched'
-      );
+    // Call server action - authedAction handles authentication
+    const result = await getUserProfileImage();
 
-      // Return with cache headers (5 minutes TTL for user-specific data)
-      return jsonResponse({ imageUrl }, 200, getOnlyCorsHeaders, {
-        'Cache-Control': 'private, s-maxage=300, stale-while-revalidate=60',
-        'X-Generated-By': 'prisma.users.findUnique',
-      });
-    } catch (error) {
-      const normalized = normalizeError(error, 'Failed to fetch user profile image');
-      logger.error(
-        {
-          err: normalized,
-          section: 'data-fetch',
-        },
-        'GetUserProfileImage: error fetching profile image'
-      );
+    // Handle authentication errors (authedAction returns serverError for auth failures)
+    if (
+      result &&
+      typeof result === 'object' &&
+      'serverError' in result &&
+      (result as { serverError?: string }).serverError
+    ) {
+      const serverError = (result as { serverError?: string }).serverError || 'Internal server error';
+      
+      // Check if this is an authentication error
+      if (serverError.includes('Unauthorized') || serverError.includes('sign in')) {
+        logger.warn({ serverError }, 'Authentication failed');
+        return jsonResponse(
+          { error: 'Unauthorized', message: 'Authentication required. Please sign in to continue.' },
+          401,
+          cors
+        );
+      }
+
+      // Other server errors
+      logger.error({ serverError }, 'Action returned serverError');
       return jsonResponse(
-        { error: 'Internal server error', message: normalized.message },
+        { error: serverError },
         500,
-        getOnlyCorsHeaders
+        cors
       );
     }
+
+    // Success - return the action result (SafeActionResult structure)
+    // Extract imageUrl for logging
+    const actionData = result && typeof result === 'object' && 'data' in result
+      ? (result as { data?: { imageUrl: string | null } }).data
+      : null;
+    const imageUrl = actionData?.imageUrl ?? null;
+
+    logger.info(
+      {
+        hasImage: !!imageUrl,
+        section: 'data-fetch',
+      },
+      'GetUserProfileImage: profile image fetched'
+    );
+
+    // Return SafeActionResult with cache headers (5 minutes TTL for user-specific data)
+    return jsonResponse(result, 200, cors, {
+      'Cache-Control': 'private, s-maxage=300, stale-while-revalidate=60',
+      'X-Generated-By': 'getUserProfileImage action',
+    });
   },
   method: 'GET',
   openapi: {
     description:
-      "Returns the authenticated user's profile image URL from the database. Used by the user menu and other components to display the user's profile picture.",
+      "Returns the authenticated user's profile image URL from the database. Used by the user menu and other components to display the user's profile picture. Requires authentication via authedAction.",
     operationId: 'getUserProfileImage',
     responses: {
       200: {
@@ -101,7 +119,7 @@ export const GET = createApiRoute({
         description: 'Authentication required',
         example: {
           error: 'Unauthorized',
-          message: 'Authentication required to access user profile image',
+          message: 'Authentication required. Please sign in to continue.',
         },
         schema: errorResponseSchema,
       },
@@ -118,8 +136,7 @@ export const GET = createApiRoute({
     tags: ['user', 'profile'],
   },
   operation: 'GetUserProfileImage',
-  requireAuth: true,
   route: '/api/user/profile-image',
 });
 
-export const OPTIONS = createApiOptionsHandler('auth');
+export const OPTIONS = createOptionsHandler('auth');

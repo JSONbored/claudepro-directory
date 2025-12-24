@@ -409,6 +409,27 @@ export const getUserIdentities = authedAction
     return data;
   });
 
+/**
+ * Get user profile image URL
+ * Returns the authenticated user's profile image URL from the database.
+ */
+export const getUserProfileImage = authedAction
+  .inputSchema(z.void())
+  .metadata({ actionName: 'getUserProfileImage', category: 'user' })
+  .action(async ({ ctx }) => {
+    const { prisma } = await import('@heyclaude/data-layer/prisma/client');
+    
+    // Fetch only the image field from database
+    const userProfile = await prisma.users.findUnique({
+      select: { image: true },
+      where: { id: ctx.userId },
+    });
+
+    return {
+      imageUrl: userProfile?.image ?? null,
+    };
+  });
+
 // Removed unlinkOAuthProvider - migrated
 
 export async function ensureUserRecord(params: {

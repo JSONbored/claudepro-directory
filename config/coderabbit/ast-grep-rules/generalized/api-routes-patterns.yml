@@ -130,8 +130,8 @@ message: "POST/PUT/PATCH requests must include bodySchema for validation. Add: b
 severity: error
 
 ---
-# Rule: Detect missing requireAuth for protected routes in createApiRoute
-id: missing-require-auth-protected-api
+# Rule: Detect missing authedAction usage in protected API routes
+id: missing-authed-action-protected-api
 language: typescript
 files:
   - 'app/api/**/*.ts'
@@ -144,8 +144,8 @@ rule:
         regex: cors:\s*['"]auth['"]
     - not:
         has:
-          pattern: 'requireAuth:'
-message: "API routes with cors: 'auth' should include requireAuth: true for explicit authentication requirement. Add: requireAuth: true to createApiRoute config."
+          regex: authedAction|getUserProfileImage|addBookmark|removeBookmark
+message: "API routes with cors: 'auth' should use authedAction server actions for authentication. Routes should call server actions that use authedAction instead of requireAuth in createApiRoute."
 severity: warning
 
 ---

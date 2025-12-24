@@ -474,6 +474,10 @@
       "react-server": "./src/supabase/server.ts",
       "default": "./src/supabase/server.ts"
     },
+    "./supabase/server.test": {
+      "types": "./src/supabase/server.test.ts",
+      "default": "./src/supabase/server.test.ts"
+    },
     "./supabase/pgmq-client": {
       "types": "./src/supabase/pgmq-client.ts",
       "react-server": "./src/supabase/pgmq-client.ts",

@@ -1,11 +1,11 @@
 /**
- * Unit Tests for Open Graph Image API Route
+ * Integration Tests for Open Graph Image API Route
  *
  * Tests the /api/og endpoint which generates dynamic Open Graph images.
  * Note: ImageResponse is complex to test, so we focus on query parameter handling and defaults.
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { GET, OPTIONS } from './route';
 import {
   createMockRequest,
@@ -15,21 +15,21 @@ import {
 } from '../__helpers__/test-helpers';
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
-  cacheLife: vi.fn(),
-  cacheTag: vi.fn(),
-  connection: vi.fn(() => Promise.resolve()),
+jest.mock('next/cache', () => ({
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
+  connection: jest.fn(() => Promise.resolve()),
 }));
 
 // Mock next/server
-vi.mock('next/server', async () => {
-  const actual = await vi.importActual<typeof import('next/server')>('next/server');
+jest.mock('next/server', () => {
+  const actual = jest.requireActual<typeof import('next/server')>('next/server');
   return {
     ...actual,
-    connection: vi.fn(async () => {}),
+    connection: jest.fn(async () => {}),
   };
 });
 
@@ -43,11 +43,11 @@ globalThis.React = {
   },
 } as any;
 
-// Mock next/og ImageResponse using vi.hoisted
+// Mock next/og ImageResponse
 // ImageResponse is complex - we mock it to return a simple Response
-const mockImageResponse = vi.hoisted(() => vi.fn());
+const mockImageResponse = jest.fn();
 
-vi.mock('next/og', () => ({
+jest.mock('next/og', () => ({
   ImageResponse: class ImageResponse extends Response {
     constructor(jsx: unknown, options?: { width?: number; height?: number }) {
       // Track that ImageResponse was called
@@ -68,7 +68,7 @@ vi.mock('next/og', () => ({
 }));
 
 // Mock shared-runtime
-vi.mock('@heyclaude/shared-runtime', () => ({
+jest.mock('@heyclaude/shared-runtime', () => ({
   OG_DEFAULTS: {
     title: 'Default Title',
     description: 'Default Description',
@@ -81,21 +81,21 @@ vi.mock('@heyclaude/shared-runtime', () => ({
 }));
 
 // Mock logger
-vi.mock('../../../../../packages/web-runtime/src/logging/server', () => ({
+jest.mock('@heyclaude/web-runtime/logging/server', () => ({
   logger: {
-    child: vi.fn(() => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      debug: vi.fn(),
+    child: jest.fn(() => ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
     })),
   },
-  generateRequestId: vi.fn(() => 'test-request-id'),
-  normalizeError: vi.fn((error) => {
+  generateRequestId: jest.fn(() => 'test-request-id'),
+  normalizeError: jest.fn((error) => {
     if (error instanceof Error) return error;
     return new Error(String(error));
   }),
-  createErrorResponse: vi.fn((error, context) => {
+  createErrorResponse: jest.fn((error, context) => {
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : String(error),
@@ -109,12 +109,12 @@ vi.mock('../../../../../packages/web-runtime/src/logging/server', () => ({
 }));
 
 // Mock server/api-helpers
-vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
+jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
   getOnlyCorsHeaders: {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
   },
-  jsonResponse: vi.fn((data, status, corsHeaders, additionalHeaders) => {
+  jsonResponse: jest.fn((data, status, corsHeaders, additionalHeaders) => {
     return new Response(JSON.stringify(data), {
       status,
       headers: {
@@ -124,7 +124,7 @@ vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
       },
     });
   }),
-  handleOptionsRequest: vi.fn((corsHeaders) => {
+  handleOptionsRequest: jest.fn((corsHeaders) => {
     return new Response(null, {
       status: 204,
       headers: {
@@ -136,16 +136,23 @@ vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
 }));
 
 // Mock api/route-factory
-vi.mock('../../../../../packages/web-runtime/src/api/route-factory', () => ({
-  createApiRoute: vi.fn((config) => {
+jest.mock('@heyclaude/web-runtime/api/route-factory', () => ({
+  createApiRoute: jest.fn((config: {
+    handler: (context: {
+      logger: { info: jest.Mock; warn: jest.Mock; error: jest.Mock; debug: jest.Mock };
+      request: Request;
+      nextContext?: unknown;
+      query: Record<string, string | undefined>;
+    }) => Promise<Response>;
+  }) => {
     return async (request: Request, context?: unknown) => {
       try {
         const handlerResult = await config.handler({
           logger: {
-            info: vi.fn(),
-            warn: vi.fn(),
-            error: vi.fn(),
-            debug: vi.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+            debug: jest.fn(),
           },
           request: request as any,
           nextContext: context,
@@ -170,7 +177,7 @@ vi.mock('../../../../../packages/web-runtime/src/api/route-factory', () => ({
       }
     };
   }),
-  createOptionsHandler: vi.fn(() => {
+  createOptionsHandler: jest.fn(() => {
     return async () => {
       return new Response(null, {
         status: 204,
@@ -185,7 +192,8 @@ vi.mock('../../../../../packages/web-runtime/src/api/route-factory', () => ({
 
 describe('GET /api/og', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it('should return 200 with image when using default parameters', async () => {

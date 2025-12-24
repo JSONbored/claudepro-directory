@@ -7,17 +7,17 @@ jest.mock('server-only', () => ({}));
 // Mock logger
 jest.mock('../logger.ts', () => ({
   logger: {
-    child: vi.fn(() => ({
-      info: vi.fn(),
-      error: vi.fn(),
-      warn: vi.fn(),
+    child: jest.fn(() => ({
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
     })),
   },
 }));
 
 // Mock normalizeError
 jest.mock('../errors.ts', () => ({
-  normalizeError: vi.fn((error, message) => {
+  normalizeError: jest.fn((error, message) => {
     if (error instanceof Error) {
       return error;
     }
@@ -28,14 +28,14 @@ jest.mock('../errors.ts', () => ({
 // Mock service factory
 // Create fresh mock service for each test to avoid state leakage
 const createMockService = () => ({
-  testMethod: vi.fn(),
-  getItems: vi.fn(),
+  testMethod: jest.fn(),
+  getItems: jest.fn(),
 });
 
 const mockService = createMockService();
 
 jest.mock('./service-factory.ts', () => ({
-  getService: vi.fn(async (serviceKey: string) => {
+  getService: jest.fn(async (serviceKey: string) => {
     if (serviceKey === 'test') {
       return mockService;
     }
@@ -45,14 +45,10 @@ jest.mock('./service-factory.ts', () => ({
 
 describe('createDataFunction', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     // Reset mock service methods - ensure they return fresh promises
     mockService.testMethod.mockReset();
     mockService.getItems.mockReset();
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('basic functionality', () => {
@@ -317,7 +313,7 @@ describe('createDataFunction', () => {
       mockService.testMethod.mockReset();
       mockService.testMethod.mockResolvedValue({ count: 5 });
 
-      const mock = jest.fn((args, result?) => {
+      const logContextFn = jest.fn((args, result?) => {
         return {
           inputLength: (args as string).length,
           resultCount: (result as { count: number })?.count ?? 0,
@@ -354,8 +350,8 @@ describe('createDataFunction', () => {
     it('should create independent function instances', async () => {
       // Create a service with both methods
       const mockServiceWithBothMethods = {
-        testMethod: vi.fn().mockResolvedValue('result1'),
-        getItems: vi.fn().mockResolvedValue(['item1', 'item2']),
+        testMethod: jest.fn().mockResolvedValue('result1'),
+        getItems: jest.fn().mockResolvedValue(['item1', 'item2']),
       };
 
       // Update the mock to return service with both methods

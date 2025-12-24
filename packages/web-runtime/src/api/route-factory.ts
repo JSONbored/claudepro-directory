@@ -84,17 +84,14 @@ import 'server-only';
 import { z } from 'zod';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import type { User } from '@supabase/supabase-js';
 
 import { logger, createErrorResponse, normalizeError } from '../logging/server';
-import { getAuthenticatedUser } from '../auth/get-authenticated-user';
 import {
   getOnlyCorsHeaders,
   getWithAuthCorsHeaders,
   postCorsHeaders,
   badRequestResponse,
   handleOptionsRequest,
-  unauthorizedResponse,
 } from '../server/api-helpers';
 
 // =============================================================================
@@ -126,8 +123,6 @@ export interface RouteHandlerContext<TQuery = unknown, TBody = unknown> {
   cors: Record<string, string>;
   /** Next.js route context (for dynamic routes, Inngest, etc.) */
   nextContext?: unknown;
-  /** Authenticated user (if available) - null if not authenticated, undefined if auth not checked */
-  user?: User | null;
 }
 
 /**
@@ -204,16 +199,6 @@ export interface ApiRouteConfig<TQuery = unknown, TBody = unknown> {
   ) => NextResponse;
   /** Optional: OpenAPI metadata for documentation generation */
   openapi?: OpenAPIMetadata;
-  /** Optional: Require authentication (returns 401 if not authenticated) */
-  requireAuth?: boolean;
-  /** Optional: Check authentication but don't require it (user will be null if not authenticated) */
-  optionalAuth?: boolean;
-  /** Optional: Authentication info for user-facing protected endpoints (login/signup URLs) */
-  authInfo?: {
-    loginUrl?: string;
-    signupUrl?: string;
-    message?: string;
-  };
 }
 
 // =============================================================================
@@ -329,9 +314,6 @@ export function createApiRoute<TQuery = unknown, TBody = unknown>(
     bodySchema,
     handler,
     onError,
-    requireAuth,
-    optionalAuth,
-    authInfo,
   } = config;
   const corsHeaders = getCorsHeaders(cors);
 
@@ -364,33 +346,6 @@ export function createApiRoute<TQuery = unknown, TBody = unknown>(
     }
 
     try {
-      // Check authentication if required or optional
-      let user: User | null | undefined = undefined;
-      if (requireAuth || optionalAuth) {
-        try {
-          const authResult = await getAuthenticatedUser({
-            requireUser: requireAuth ?? false,
-            context: operation,
-          });
-
-          if (requireAuth && !authResult.user) {
-            reqLogger.warn({}, 'Authentication required but user not authenticated');
-            return unauthorizedResponse('Authentication required', authInfo, corsHeaders);
-          }
-
-          user = authResult.user ?? null;
-        } catch (error) {
-          // If requireAuth is true, getAuthenticatedUser throws when user is missing
-          // This means authentication failed
-          if (requireAuth) {
-            reqLogger.warn({ err: normalizeError(error) }, 'Authentication failed');
-            return unauthorizedResponse('Authentication required', authInfo, corsHeaders);
-          }
-          // For optionalAuth, just set user to null
-          user = null;
-        }
-      }
-
       // Parse and validate query parameters
       const queryResult = parseQueryParams(request.nextUrl, querySchema);
       if (queryResult.error) {
@@ -415,7 +370,6 @@ export function createApiRoute<TQuery = unknown, TBody = unknown>(
         method: request.method,
         cors: corsHeaders,
         nextContext: context,
-        ...(user !== undefined && { user }),
       };
 
       // Execute handler
@@ -718,9 +672,6 @@ export function createCachedApiRoute<TQuery = unknown, TBody = unknown>(
     transformResult,
     responseHandler,
     onError,
-    requireAuth,
-    optionalAuth,
-    authInfo,
     openapi,
   } = config;
 
@@ -770,9 +721,6 @@ export function createCachedApiRoute<TQuery = unknown, TBody = unknown>(
     ...(querySchema && { querySchema }),
     ...(bodySchema && { bodySchema }),
     ...(onError && { onError }),
-    ...(requireAuth !== undefined && { requireAuth }),
-    ...(optionalAuth !== undefined && { optionalAuth }),
-    ...(authInfo && { authInfo }),
     ...(openapi && { openapi }),
   };
 
@@ -896,9 +844,6 @@ export function createFormatHandlerRoute<TFormat extends string, TQuery = unknow
     defaultFormat,
     formatParamName = 'format',
     onError,
-    requireAuth,
-    optionalAuth,
-    authInfo,
     openapi,
   } = config;
 
@@ -980,9 +925,6 @@ export function createFormatHandlerRoute<TFormat extends string, TQuery = unknow
     ...(querySchema && { querySchema }),
     ...(bodySchema && { bodySchema }),
     ...(onError && { onError }),
-    ...(requireAuth !== undefined && { requireAuth }),
-    ...(optionalAuth !== undefined && { optionalAuth }),
-    ...(authInfo && { authInfo }),
     ...(openapi && { openapi }),
   };
 

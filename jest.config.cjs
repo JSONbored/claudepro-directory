@@ -83,6 +83,8 @@ module.exports = {
     '^@heyclaude/web-runtime/actions/(.*)$': '<rootDir>/packages/web-runtime/src/actions/$1',
     // Map @heyclaude/web-runtime/supabase/* subpath exports (must come before general pattern)
     '^@heyclaude/web-runtime/supabase/(.*)$': '<rootDir>/packages/web-runtime/src/supabase/$1',
+    // Map @heyclaude/web-runtime/pulse subpath export (must come before general pattern)
+    '^@heyclaude/web-runtime/pulse$': '<rootDir>/packages/web-runtime/src/pulse.ts',
     // Map @heyclaude/web-runtime/server/fetch-helpers (must come before general pattern)
     '^@heyclaude/web-runtime/server/fetch-helpers$': '<rootDir>/packages/web-runtime/src/server/fetch-helpers.ts',
     // Map @heyclaude/web-runtime/prisma-zod-schemas (must come before general pattern)

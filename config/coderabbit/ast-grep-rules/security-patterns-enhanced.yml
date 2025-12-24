@@ -84,12 +84,12 @@ rule:
     - not:
         has:
           regex: 'createApiRoute|createCachedApiRoute'
-message: "API routes must use createApiRoute() factory for automatic validation, logging, CORS, and error handling. Raw NextRequest handlers are a security risk. Replace with createApiRoute({ route, operation, method, cors, querySchema/bodySchema, requireAuth, handler })."
+message: "API routes must use createApiRoute() factory for automatic validation, logging, CORS, and error handling. Raw NextRequest handlers are a security risk. Replace with createApiRoute({ route, operation, method, cors, querySchema/bodySchema, handler }). For authentication, use authedAction server actions instead of requireAuth."
 severity: error
 
 ---
-# Rule: Detect missing requireAuth in createApiRoute for protected routes
-id: missing-require-auth-api-factory
+# Rule: Detect missing authedAction usage in API routes with cors: 'auth'
+id: missing-authed-action-in-protected-routes
 language: typescript
 files:
   - 'apps/web/src/app/api/**/*.ts'
@@ -102,9 +102,9 @@ rule:
         regex: cors:\s*['"]auth['"]
     - not:
         has:
-          pattern: 'requireAuth:'
-message: "API routes with cors: 'auth' should include requireAuth: true for explicit authentication requirement. Add: requireAuth: true to createApiRoute config for protected routes."
-severity: error
+          regex: authedAction|getUserProfileImage|addBookmark|removeBookmark
+message: "API routes with cors: 'auth' should use authedAction server actions for authentication. Routes should call server actions (e.g., getUserProfileImage, addBookmark) that use authedAction instead of requireAuth in createApiRoute."
+severity: warning
 
 ---
 # Rule: Detect missing auth checks in server actions

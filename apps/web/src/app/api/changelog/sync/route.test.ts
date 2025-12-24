@@ -1,10 +1,11 @@
 /**
- * Unit Tests for Changelog Sync API Route
+ * Integration Tests for Changelog Sync API Route
  *
  * Tests the /api/changelog/sync endpoint which syncs changelog entries from CHANGELOG.md to database.
+ * Uses real ChangelogService with Prismocker for integration testing.
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { POST, OPTIONS } from './route';
 import {
   createMockRequest,
@@ -13,53 +14,58 @@ import {
   expectCorsHeaders,
 } from '../../__helpers__/test-helpers';
 
+// Import real cache utilities for proper cache testing
+import { clearRequestCache } from '@heyclaude/data-layer/utils/request-cache';
+
 // Mock server-only
-vi.mock('server-only', () => ({}));
+jest.mock('server-only', () => ({}));
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
-  cacheLife: vi.fn(),
-  cacheTag: vi.fn(),
-  connection: vi.fn(() => Promise.resolve()),
+jest.mock('next/cache', () => ({
+  cacheLife: jest.fn(),
+  cacheTag: jest.fn(),
+  connection: jest.fn(() => Promise.resolve()),
 }));
 
 // Mock next/server
-vi.mock('next/server', async () => {
-  const actual = await vi.importActual<typeof import('next/server')>('next/server');
-  return {
-    ...actual,
-    connection: vi.fn(async () => {}),
-  };
-});
+jest.mock('next/server', () => ({
+  NextRequest: jest.requireActual('next/server').NextRequest,
+  NextResponse: jest.requireActual('next/server').NextResponse,
+  connection: jest.fn(async () => {}),
+}));
 
 // Mock node:crypto
-vi.mock('node:crypto', () => ({
-  timingSafeEqual: vi.fn((a, b) => {
+jest.mock('node:crypto', () => ({
+  timingSafeEqual: jest.fn((a, b) => {
     if (a.length !== b.length) return false;
     return a.equals(b);
   }),
 }));
 
-// Import prisma directly - don't use vi.importActual
+// Import prisma directly - don't use jest.requireActual
 // Prisma is automatically PrismockerClient via __mocks__/@prisma/client.ts
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
 
-// Mock data-layer services
-const mockSyncChangelogEntry = vi.fn();
-
-vi.mock('@heyclaude/data-layer', () => ({
-  ChangelogService: class {
-    syncChangelogEntry = mockSyncChangelogEntry;
-  },
-}));
-
-// Don't mock pgmq-client - let it use the real function with PrismockerClient
-// pgmqSend imports prisma from @heyclaude/data-layer, which will be PrismockerClient in tests
+// Mock data-layer services (use real ChangelogService, but mock other services to avoid side effects)
+jest.mock('@heyclaude/data-layer', () => {
+  const actual = jest.requireActual('@heyclaude/data-layer');
+  return {
+    ...actual, // Include all real exports (including ChangelogService)
+    AccountService: class {},
+    CompaniesService: class {},
+    ContentService: class {},
+    JobsService: class {},
+    MiscService: class {},
+    NewsletterService: class {},
+    SearchService: class {},
+    TrendingService: class {},
+  };
+});
 
 // Mock shared-runtime
-vi.mock('@heyclaude/shared-runtime', () => ({
-  requireEnvVar: vi.fn((key: string) => {
+jest.mock('@heyclaude/shared-runtime', () => ({
+  requireEnvVar: jest.fn((key: string) => {
     if (key === 'CHANGELOG_SYNC_TOKEN') {
       return process.env['CHANGELOG_SYNC_TOKEN'] || 'test-token';
     }
@@ -68,21 +74,21 @@ vi.mock('@heyclaude/shared-runtime', () => ({
 }));
 
 // Mock logger
-vi.mock('../../../../../packages/web-runtime/src/logging/server', () => ({
+jest.mock('@heyclaude/web-runtime/logging/server', () => ({
   logger: {
-    child: vi.fn(() => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      debug: vi.fn(),
+    child: jest.fn(() => ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
     })),
   },
-  generateRequestId: vi.fn(() => 'test-request-id'),
-  normalizeError: vi.fn((error) => {
+  generateRequestId: jest.fn(() => 'test-request-id'),
+  normalizeError: jest.fn((error) => {
     if (error instanceof Error) return error;
     return new Error(String(error));
   }),
-  createErrorResponse: vi.fn((error, context) => {
+  createErrorResponse: jest.fn((error, context) => {
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : String(error),
@@ -96,7 +102,7 @@ vi.mock('../../../../../packages/web-runtime/src/logging/server', () => ({
 }));
 
 // Mock server/api-helpers
-vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
+jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
   getOnlyCorsHeaders: {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -105,7 +111,7 @@ vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   },
-  jsonResponse: vi.fn((data, status, corsHeaders, additionalHeaders) => {
+  jsonResponse: jest.fn((data, status, corsHeaders, additionalHeaders) => {
     return new Response(JSON.stringify(data), {
       status,
       headers: {
@@ -115,7 +121,7 @@ vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
       },
     });
   }),
-  unauthorizedResponse: vi.fn((message, authInfo, corsHeaders) => {
+  unauthorizedResponse: jest.fn((message, authInfo, corsHeaders) => {
     return new Response(
       JSON.stringify({
         error: message,
@@ -129,7 +135,7 @@ vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
       }
     );
   }),
-  handleOptionsRequest: vi.fn((corsHeaders) => {
+  handleOptionsRequest: jest.fn((corsHeaders) => {
     return new Response(null, {
       status: 204,
       headers: {
@@ -141,20 +147,51 @@ vi.mock('../../../../../packages/web-runtime/src/server/api-helpers', () => ({
 }));
 
 // Mock api/route-factory
-vi.mock('../../../../../packages/web-runtime/src/api/route-factory', () => ({
-  createApiRoute: vi.fn((config) => {
+jest.mock('@heyclaude/web-runtime/api/route-factory', () => ({
+  createApiRoute: jest.fn((config) => {
     return async (request: Request, context?: unknown) => {
       try {
+        // Parse body for POST requests
+        let body = {};
+        if (request.method === 'POST' || request.method === 'PUT' || request.method === 'PATCH') {
+          try {
+            const text = await request.text();
+            if (text) {
+              body = JSON.parse(text);
+            }
+          } catch {
+            // Invalid JSON, body remains {}
+          }
+        }
+
+        // Validate body schema if provided
+        if (config.bodySchema) {
+          const result = config.bodySchema.safeParse(body);
+          if (!result.success) {
+            return new Response(
+              JSON.stringify({
+                error: 'Invalid request body',
+                message: result.error.errors[0]?.message || 'Validation failed',
+              }),
+              {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
+              }
+            );
+          }
+          body = result.data;
+        }
+
         const handlerResult = await config.handler({
           logger: {
-            info: vi.fn(),
-            warn: vi.fn(),
-            error: vi.fn(),
-            debug: vi.fn(),
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+            debug: jest.fn(),
           },
           request: request as any,
           nextContext: context,
-          body: await request.json().catch(() => ({})),
+          body,
         });
         // Handler returns NextResponse from jsonResponse, factory returns it as-is
         if (handlerResult instanceof Response) {
@@ -175,7 +212,7 @@ vi.mock('../../../../../packages/web-runtime/src/api/route-factory', () => ({
       }
     };
   }),
-  createOptionsHandler: vi.fn(() => {
+  createOptionsHandler: jest.fn(() => {
     return async () => {
       return new Response(null, {
         status: 204,
@@ -191,40 +228,50 @@ vi.mock('../../../../../packages/web-runtime/src/api/route-factory', () => ({
 describe('POST /api/changelog/sync', () => {
   let prismocker: PrismaClient;
 
-  beforeEach(() => {
-    // Use the prisma singleton (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+  beforeEach(async () => {
+    // 1. Clear request cache before each test (REQUIRED for test isolation)
+    clearRequestCache();
+
+    // 2. Get Prismocker instance (automatically PrismockerClient via __mocks__/@prisma/client.ts)
     prismocker = prisma;
-    
-    // Reset Prismocker data before each test
-    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
-      prismocker.reset();
+
+    // 3. Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof (prismocker as any).reset === 'function') {
+      (prismocker as any).reset();
     }
-    
-    vi.clearAllMocks();
+
+    // 4. Clear all mocks
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+
+    // 5. Set environment variable
     process.env['CHANGELOG_SYNC_TOKEN'] = 'test-token';
-    
-    // Prismocker doesn't support $queryRawUnsafe, so we mock it for pgmqSend
-    // pgmqSend uses prisma.$queryRawUnsafe internally
-    const queryRawUnsafeSpy = vi.fn().mockResolvedValue([{ msg_id: BigInt(1) }]);
-    (prismocker as any).$queryRawUnsafe = queryRawUnsafeSpy;
+
+    // 6. Set up $queryRawUnsafe for RPC testing
+    // ChangelogService.syncChangelogEntry uses callRpc → BasePrismaService.callRpc → $queryRawUnsafe
+    // pgmqSend also uses prisma.$queryRawUnsafe internally
+    // Default: return successful results for both RPC and pgmq
+    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([{ msg_id: BigInt(1) }]) as unknown as typeof prismocker.$queryRawUnsafe;
   });
 
   it('should return 200 when changelog is synced successfully', async () => {
     // Use the same Date object to ensure created_at === updated_at (new entry)
     // CRITICAL: Must be the exact same object reference for === comparison
     const sameDate = new Date('2025-12-07T00:00:00Z');
-    const mockChangelogData = {
-      id: 'test-id',
-      slug: '1-2-0-2025-12-07',
-      created_at: sameDate,
-      updated_at: sameDate, // Same object reference ensures === comparison
-      tldr: 'Test summary',
-    };
+    const mockChangelogData = [
+      {
+        id: 'test-id',
+        slug: '1-2-0-2025-12-07',
+        created_at: sameDate,
+        updated_at: sameDate, // Same object reference ensures === comparison
+        tldr: 'Test summary',
+      },
+    ];
 
-    // Ensure mock returns the exact object (not a copy)
-    mockSyncChangelogEntry.mockImplementation(async () => {
-      return mockChangelogData;
-    });
+    // Mock RPC response for sync_changelog_entry
+    // ChangelogService.syncChangelogEntry calls callRpc which uses $queryRawUnsafe
+    // RPC returns TABLE(...) which is an array, so we return array
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(mockChangelogData as any);
 
     const request = createMockRequest({
       method: 'POST',
@@ -248,10 +295,21 @@ describe('POST /api/changelog/sync', () => {
     expect(body).toHaveProperty('id', 'test-id');
     expect(body).toHaveProperty('message', 'Changelog entry synced successfully');
     expect(body).toHaveProperty('slug', '1-2-0-2025-12-07');
-    expect(mockSyncChangelogEntry).toHaveBeenCalled();
+
+    // Verify RPC was called for sync_changelog_entry
+    // Arguments are passed in object key insertion order: p_version, p_date, p_content
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('sync_changelog_entry'),
+      '1.2.0', // p_version (first in insertion order)
+      '2025-12-07', // p_date
+      'Test content' // p_content
+    );
+
     // Verify isNewEntry is true (created_at === updated_at)
     // pgmqSend should have been called (uses prisma.$queryRawUnsafe which is mocked)
-    expect((prismocker as any).$queryRawUnsafe).toHaveBeenCalled();
+    // pgmqSend is called after successful sync, so $queryRawUnsafe should be called at least twice
+    // (once for sync_changelog_entry, once for pgmqSend)
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledTimes(2);
   });
 
   it('should return 401 when token is missing', async () => {
@@ -271,7 +329,8 @@ describe('POST /api/changelog/sync', () => {
     expectStatus(response, 401);
     expectCorsHeaders(response);
     expect(body).toHaveProperty('error');
-    expect(mockSyncChangelogEntry).not.toHaveBeenCalled();
+    // Verify RPC was not called (authentication failed before service call)
+    expect(prismocker.$queryRawUnsafe).not.toHaveBeenCalled();
   });
 
   it('should return 401 when token is invalid', async () => {
@@ -294,19 +353,24 @@ describe('POST /api/changelog/sync', () => {
     expectStatus(response, 401);
     expectCorsHeaders(response);
     expect(body).toHaveProperty('error');
-    expect(mockSyncChangelogEntry).not.toHaveBeenCalled();
+    // Verify RPC was not called (authentication failed before service call)
+    expect(prismocker.$queryRawUnsafe).not.toHaveBeenCalled();
   });
 
   it('should return 200 when entry already exists', async () => {
-    const mockChangelogData = {
-      id: 'test-id',
-      slug: '1-2-0-2025-12-07',
-      created_at: new Date('2025-12-06'),
-      updated_at: new Date('2025-12-07'), // Different from created_at = existing entry
-      tldr: 'Test summary',
-    };
+    // Different dates = existing entry (created_at !== updated_at)
+    const mockChangelogData = [
+      {
+        id: 'test-id',
+        slug: '1-2-0-2025-12-07',
+        created_at: new Date('2025-12-06'),
+        updated_at: new Date('2025-12-07'), // Different from created_at = existing entry
+        tldr: 'Test summary',
+      },
+    ];
 
-    mockSyncChangelogEntry.mockResolvedValue(mockChangelogData);
+    // Mock RPC response for sync_changelog_entry (existing entry)
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(mockChangelogData as any);
 
     const request = createMockRequest({
       method: 'POST',
@@ -327,20 +391,32 @@ describe('POST /api/changelog/sync', () => {
     expectStatus(response, 200);
     expect(body).toHaveProperty('success', true);
     expect(body).toHaveProperty('message', 'Entry already exists');
+    // Verify RPC was called for sync_changelog_entry
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('sync_changelog_entry'),
+      '1.2.0',
+      '2025-12-07',
+      'Test content'
+    );
     // Should not enqueue for existing entries (isNewEntry is false)
-    expect((prismocker as any).$queryRawUnsafe).not.toHaveBeenCalled();
+    // Only one call (sync_changelog_entry), no pgmqSend call
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledTimes(1);
   });
 
   it('should handle optional fields correctly', async () => {
-    const mockChangelogData = {
-      id: 'test-id',
-      slug: '1-2-0-2025-12-07',
-      created_at: new Date('2025-12-07'),
-      updated_at: new Date('2025-12-07'),
-      tldr: null,
-    };
+    const sameDate = new Date('2025-12-07T00:00:00Z');
+    const mockChangelogData = [
+      {
+        id: 'test-id',
+        slug: '1-2-0-2025-12-07',
+        created_at: sameDate,
+        updated_at: sameDate,
+        tldr: null,
+      },
+    ];
 
-    mockSyncChangelogEntry.mockResolvedValue(mockChangelogData);
+    // Mock RPC response for sync_changelog_entry
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(mockChangelogData as any);
 
     const request = createMockRequest({
       method: 'POST',
@@ -366,33 +442,39 @@ describe('POST /api/changelog/sync', () => {
 
     expectStatus(response, 200);
     expect(body).toHaveProperty('success', true);
-    expect(mockSyncChangelogEntry).toHaveBeenCalledWith(
-      expect.objectContaining({
-        p_content: 'Test content',
-        p_date: '2025-12-07',
-        p_version: '1.2.0',
-        p_tldr: 'Test summary',
-        p_what_changed: 'Test changes',
-        p_sections: { Added: ['Feature 1'] },
-        p_raw_content: 'Raw markdown',
-      })
+
+    // Verify RPC was called with all optional fields
+    // Arguments are passed in object key insertion order
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('sync_changelog_entry'),
+      '1.2.0', // p_version
+      '2025-12-07', // p_date
+      'Test content', // p_content
+      expect.objectContaining({ version: '1.2.0' }), // p_metadata
+      'Test summary', // p_tldr
+      'Test changes', // p_what_changed
+      { Added: ['Feature 1'] }, // p_sections
+      'Raw markdown' // p_raw_content
     );
   });
 
   it('should handle notification enqueue failure gracefully', async () => {
     // Use the same Date object to ensure created_at === updated_at (new entry)
     const sameDate = new Date('2025-12-07T00:00:00Z');
-    const mockChangelogData = {
-      id: 'test-id',
-      slug: '1-2-0-2025-12-07',
-      created_at: sameDate,
-      updated_at: sameDate, // Same object reference ensures === comparison
-      tldr: 'Test summary',
-    };
+    const mockChangelogData = [
+      {
+        id: 'test-id',
+        slug: '1-2-0-2025-12-07',
+        created_at: sameDate,
+        updated_at: sameDate, // Same object reference ensures === comparison
+        tldr: 'Test summary',
+      },
+    ];
 
-    mockSyncChangelogEntry.mockResolvedValue(mockChangelogData);
-    // Make $queryRawUnsafe throw to simulate pgmqSend failure
-    (prismocker as any).$queryRawUnsafe.mockRejectedValueOnce(new Error('Queue error'));
+    // Mock RPC response for sync_changelog_entry (success)
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(mockChangelogData as any);
+    // Make $queryRawUnsafe throw on second call to simulate pgmqSend failure
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValueOnce(new Error('Queue error'));
 
     const request = createMockRequest({
       method: 'POST',
@@ -407,12 +489,149 @@ describe('POST /api/changelog/sync', () => {
       },
     });
 
-    // Should still return 200 even if notification fails
+    // Should still return 200 even if notification fails (non-fatal error)
     const response = await POST(request);
     const body = await getResponseBody(response);
 
     expectStatus(response, 200);
     expect(body).toHaveProperty('success', true);
+    // Verify sync_changelog_entry was called (first call)
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('sync_changelog_entry'),
+      '1.2.0',
+      '2025-12-07',
+      'Test content'
+    );
+    // Verify pgmqSend was attempted (second call, which failed)
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledTimes(2);
+  });
+
+  it('should return 401 when CHANGELOG_SYNC_TOKEN is not configured', async () => {
+    // Remove environment variable
+    delete process.env['CHANGELOG_SYNC_TOKEN'];
+
+    // Mock requireEnvVar to throw
+    const { requireEnvVar } = jest.requireMock('@heyclaude/shared-runtime');
+    requireEnvVar.mockImplementationOnce(() => {
+      throw new Error('CHANGELOG_SYNC_TOKEN is required');
+    });
+
+    const request = createMockRequest({
+      method: 'POST',
+      url: 'http://localhost:3000/api/changelog/sync',
+      headers: {
+        authorization: 'Bearer test-token',
+      },
+      body: {
+        version: '1.2.0',
+        date: '2025-12-07',
+        content: 'Test content',
+      },
+    });
+
+    const response = await POST(request);
+    const body = await getResponseBody(response);
+
+    expectStatus(response, 401);
+    expectCorsHeaders(response);
+    expect(body).toHaveProperty('error');
+    // Verify RPC was not called
+    expect(prismocker.$queryRawUnsafe).not.toHaveBeenCalled();
+
+    // Restore environment variable
+    process.env['CHANGELOG_SYNC_TOKEN'] = 'test-token';
+  });
+
+  it('should return 400 when request body is invalid', async () => {
+    const request = createMockRequest({
+      method: 'POST',
+      url: 'http://localhost:3000/api/changelog/sync',
+      headers: {
+        authorization: 'Bearer test-token',
+      },
+      body: {
+        // Missing required fields: version, date, content
+        tldr: 'Test summary',
+      },
+    });
+
+    const response = await POST(request);
+    const body = await getResponseBody(response);
+
+    // createApiRoute factory validates body and returns 400 for invalid input
+    expectStatus(response, 400);
+    expectCorsHeaders(response);
+    expect(body).toHaveProperty('error');
+    // Verify RPC was not called (validation failed before service call)
+    expect(prismocker.$queryRawUnsafe).not.toHaveBeenCalled();
+  });
+
+  it('should return 500 when syncChangelogEntry returns null', async () => {
+    // Mock RPC to return empty array (service returns null)
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce([]);
+
+    const request = createMockRequest({
+      method: 'POST',
+      url: 'http://localhost:3000/api/changelog/sync',
+      headers: {
+        authorization: 'Bearer test-token',
+      },
+      body: {
+        version: '1.2.0',
+        date: '2025-12-07',
+        content: 'Test content',
+      },
+    });
+
+    const response = await POST(request);
+    const body = await getResponseBody(response);
+
+    // Route throws error when syncChangelogEntry returns null
+    expectStatus(response, 500);
+    expectCorsHeaders(response);
+    expect(body).toHaveProperty('error');
+    // Verify RPC was called
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('sync_changelog_entry'),
+      '1.2.0',
+      '2025-12-07',
+      'Test content'
+    );
+  });
+
+  it('should return 500 when service throws error', async () => {
+    // Mock RPC to throw error
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValueOnce(
+      new Error('Database error')
+    );
+
+    const request = createMockRequest({
+      method: 'POST',
+      url: 'http://localhost:3000/api/changelog/sync',
+      headers: {
+        authorization: 'Bearer test-token',
+      },
+      body: {
+        version: '1.2.0',
+        date: '2025-12-07',
+        content: 'Test content',
+      },
+    });
+
+    const response = await POST(request);
+    const body = await getResponseBody(response);
+
+    // createApiRoute factory catches errors and returns 500
+    expectStatus(response, 500);
+    expectCorsHeaders(response);
+    expect(body).toHaveProperty('error');
+    // Verify RPC was called
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('sync_changelog_entry'),
+      '1.2.0',
+      '2025-12-07',
+      'Test content'
+    );
   });
 
   it('should handle OPTIONS request', async () => {

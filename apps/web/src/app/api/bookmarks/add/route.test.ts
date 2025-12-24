@@ -147,16 +147,13 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
   })),
 }));
 
-// Mock authentication (route requires auth via requireAuth: true)
-jest.mock('@heyclaude/web-runtime/auth/get-authenticated-user', () => ({
-  getAuthenticatedUser: jest.fn(async () => ({
-    user: {
-      id: 'test-user-id',
-      email: 'test@example.com',
-    },
-    isAuthenticated: true,
-  })),
-}));
+// DO NOT mock getAuthenticatedUser - route no longer uses requireAuth: true
+// Authentication is handled by authedAction (via safemocker in tests)
+
+// Set up test cookie store for real Supabase client testing
+import { setupTestCookies, clearTestCookies } from '@heyclaude/web-runtime/supabase/server.test';
+// Import SafeActionResult type from safemocker for proper typing in tests
+import type { SafeActionResult } from '@jsonbored/safemocker';
 
 // Mock safe-action middleware (used by addBookmark action)
 // safe-action imports from '../logger.ts' and '../errors.ts' relative to actions directory
@@ -207,15 +204,14 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
 
 describe('POST /api/bookmarks/add', () => {
   let prismocker: PrismaClient;
-  let mockGetAuthenticatedUser: ReturnType<typeof jest.fn>;
 
   // Mock result structure matching addBookmarkReturnsSchema
-  // Note: user_id must be a valid UUID (not 'test-user-id') to pass schema validation
+  // Note: user_id must match safemocker's test-user-id (safemocker provides ctx.userId = 'test-user-id')
   const mockBookmarkResult = {
     success: true,
     bookmark: {
       id: '123e4567-e89b-12d3-a456-426614174000',
-      user_id: '123e4567-e89b-12d3-a456-426614174001', // Valid UUID (matches action test pattern)
+      user_id: 'test-user-id', // Safemocker provides ctx.userId = 'test-user-id' by default
       content_type: 'mcp',
       content_slug: 'my-server',
       notes: 'Optional notes',
@@ -224,6 +220,9 @@ describe('POST /api/bookmarks/add', () => {
   };
 
   beforeEach(async () => {
+    // Set up test cookie store for real Supabase client
+    setupTestCookies();
+
     // Clear request cache before each test (REQUIRED for test isolation)
     clearRequestCache();
 
@@ -240,24 +239,17 @@ describe('POST /api/bookmarks/add', () => {
 
     // Set up $queryRawUnsafe for RPC testing (addBookmark uses runRpc → BasePrismaService.callRpc → $queryRawUnsafe)
     // Assign jest.fn() directly to $queryRawUnsafe (Prismocker's Proxy set handler)
-    (prismocker.$queryRawUnsafe as unknown as ReturnType<typeof jest.fn>) = jest
-      .fn()
-      .mockResolvedValue([mockBookmarkResult]);
+    const mockQueryRawUnsafe = jest.fn<() => Promise<typeof mockBookmarkResult[]>>().mockResolvedValue([mockBookmarkResult]);
+    (prismocker.$queryRawUnsafe as unknown as typeof mockQueryRawUnsafe) = mockQueryRawUnsafe;
 
-    // Get mock for getAuthenticatedUser
-    const authModule = await import('@heyclaude/web-runtime/auth/get-authenticated-user');
-    mockGetAuthenticatedUser = jest.mocked(
-      authModule.getAuthenticatedUser
-    ) as unknown as ReturnType<typeof jest.fn>;
+    // Reset revalidate mocks
+    mockRevalidatePath.mockClear();
+    mockRevalidateTag.mockClear();
+  });
 
-    // Default: authenticated user
-    mockGetAuthenticatedUser.mockResolvedValue({
-      user: {
-        id: 'test-user-id',
-        email: 'test@example.com',
-      },
-      isAuthenticated: true,
-    });
+  afterEach(() => {
+    // Clear test cookies after each test
+    clearTestCookies();
   });
 
   it('should add bookmark for authenticated user', async () => {
@@ -285,16 +277,17 @@ describe('POST /api/bookmarks/add', () => {
 
     // Route returns SafeActionResult structure from addBookmark action
     if (typeof body === 'object' && body !== null) {
-      const result = body as { data?: unknown; serverError?: string; fieldErrors?: unknown };
+      const result = body as SafeActionResult<unknown>;
       expect(result.data).toBeDefined();
       expect(result.serverError).toBeUndefined();
       expect(result.fieldErrors).toBeUndefined();
 
       // Verify RPC was called with correct SQL and parameters
       // BasePrismaService.callRpc formats as: SELECT * FROM function_name(p_param => $1, ...)
+      // Safemocker provides ctx.userId = 'test-user-id' by default
       expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('add_bookmark'),
-        'test-user-id', // p_user_id (from ctx.userId in authedAction middleware)
+        'test-user-id', // p_user_id (from ctx.userId in authedAction middleware via safemocker)
         'mcp', // p_content_type
         'my-server', // p_content_slug
         'Optional notes' // p_notes
@@ -311,9 +304,8 @@ describe('POST /api/bookmarks/add', () => {
       },
     };
     // Reassign jest.fn() for this test
-    (prismocker.$queryRawUnsafe as unknown as ReturnType<typeof jest.fn>) = jest
-      .fn()
-      .mockResolvedValue([mockResultWithoutNotes]);
+    const mockQueryRawUnsafe = jest.fn<() => Promise<typeof mockResultWithoutNotes[]>>().mockResolvedValue([mockResultWithoutNotes]);
+    (prismocker.$queryRawUnsafe as unknown as typeof mockQueryRawUnsafe) = mockQueryRawUnsafe;
 
     const request = createMockRequest({
       method: 'POST',
@@ -329,7 +321,7 @@ describe('POST /api/bookmarks/add', () => {
 
     expectStatus(response, 200);
     if (typeof body === 'object' && body !== null) {
-      const result = body as { data?: unknown; serverError?: string; fieldErrors?: unknown };
+      const result = body as SafeActionResult<unknown>;
       expect(result.data).toBeDefined();
       expect(result.serverError).toBeUndefined();
 
@@ -345,10 +337,8 @@ describe('POST /api/bookmarks/add', () => {
   });
 
   it('should return 401 for unauthenticated user', async () => {
-    mockGetAuthenticatedUser.mockResolvedValue({
-      user: null,
-      isAuthenticated: false,
-    });
+    // Safemocker automatically handles unauthenticated users when cookies are cleared
+    clearTestCookies();
 
     const request = createMockRequest({
       method: 'POST',
@@ -362,8 +352,22 @@ describe('POST /api/bookmarks/add', () => {
     const response = await POST(request);
     const body = await getResponseBody(response);
 
+    // Route returns SafeActionResult structure - authedAction returns serverError for auth failures
     expectStatus(response, 401);
-    expectErrorResponse(body);
+    
+    if (typeof body === 'object' && body !== null) {
+      const result = body as SafeActionResult<unknown>;
+      expect(result.serverError).toBeDefined();
+      expect(result.data).toBeUndefined();
+      expect(result.fieldErrors).toBeUndefined();
+    } else {
+      // Fallback: direct error property
+      expectErrorResponse(body);
+      if (typeof body === 'object' && body !== null && 'error' in body) {
+        expect((body as { error?: string }).error).toBe('Unauthorized');
+      }
+    }
+    
     // RPC should not be called if authentication fails
     expect(prismocker.$queryRawUnsafe).not.toHaveBeenCalled();
   });
@@ -562,10 +566,10 @@ describe('POST /api/bookmarks/add', () => {
       const body = await getResponseBody(response);
 
       expectStatus(response, 200);
-      if (typeof body === 'object' && body !== null) {
-        const result = body as { data?: unknown; serverError?: string; fieldErrors?: unknown };
-        expect(result.data).toBeDefined();
-        expect(result.serverError).toBeUndefined();
+    if (typeof body === 'object' && body !== null) {
+      const result = body as SafeActionResult<unknown>;
+      expect(result.data).toBeDefined();
+      expect(result.serverError).toBeUndefined();
       }
     }
   });

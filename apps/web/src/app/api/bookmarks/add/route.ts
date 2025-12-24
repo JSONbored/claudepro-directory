@@ -44,62 +44,59 @@ export const addBookmarkSchema = z.object({
 export const POST = createApiRoute({
   bodySchema: addBookmarkSchema,
   cors: 'auth',
-  handler: async ({ body, cors, logger, user }) => {
+  handler: async ({ body, cors, logger }) => {
     await connection();
-    // user is guaranteed (requireAuth: true)
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
     const { content_slug, content_type, notes } = body;
 
     logger.info(
       {
         contentSlug: content_slug,
         contentType: content_type,
-        userId: user.id,
       },
       'Bookmark add request'
     );
 
-    // Call server action internally
-    let result;
-    try {
-      result = await addBookmark({
-        content_slug,
-        content_type,
-        notes: notes || '',
-      });
-    } catch (error) {
-      throw error;
-    }
+    // Call server action - authedAction handles authentication
+    const result = await addBookmark({
+      content_slug,
+      content_type,
+      notes: notes || '',
+    });
+
+    // Handle authentication errors (authedAction returns serverError for auth failures)
     if (
       result &&
       typeof result === 'object' &&
       'serverError' in result &&
       (result as { serverError?: string }).serverError
     ) {
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:92',message:'Returning 500 for serverError',data:{serverError:(result as {serverError?:string}).serverError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
-      logger.error(
-        { serverError: (result as { serverError?: string }).serverError },
-        'Action returned serverError'
-      );
+      const serverError = (result as { serverError?: string }).serverError || 'Internal server error';
+      
+      // Check if this is an authentication error
+      if (serverError.includes('Unauthorized') || serverError.includes('sign in')) {
+        logger.warn({ serverError }, 'Authentication failed');
+        return jsonResponse(
+          { error: 'Unauthorized', message: 'Authentication required. Please sign in to continue.' },
+          401,
+          cors
+        );
+      }
+
+      // Other server errors
+      logger.error({ serverError }, 'Action returned serverError');
       return jsonResponse(
-        { error: (result as { serverError?: string }).serverError || 'Internal server error' },
+        { error: serverError },
         500,
         cors
       );
     }
 
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'route.ts:102',message:'About to return jsonResponse (success)',data:{resultType:typeof result,statusCode:200},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
+    // Success - return the action result
     return jsonResponse(result, 200, cors);
   },
   method: 'POST',
   openapi: {
-    description: 'Adds a bookmark for the authenticated user. Requires authentication.',
+    description: 'Adds a bookmark for the authenticated user. Requires authentication via authedAction.',
     operationId: 'addBookmark',
     requestBody: {
       description: 'Bookmark details including content slug, content type, and optional notes',
@@ -137,7 +134,7 @@ export const POST = createApiRoute({
         description: 'Unauthorized - user not authenticated',
         example: {
           error: 'Unauthorized',
-          message: 'Authentication required. Please provide a valid JWT token.',
+          message: 'Authentication required. Please sign in to continue.',
         },
         headers: {
           'WWW-Authenticate': {
@@ -161,7 +158,6 @@ export const POST = createApiRoute({
     tags: ['bookmarks', 'user'],
   },
   operation: 'BookmarkAPI',
-  requireAuth: true,
   route: getVersionedRoute('bookmarks/add'),
 });
 
