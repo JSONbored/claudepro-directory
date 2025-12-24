@@ -12,28 +12,36 @@ export type { PrismockerOptions } from './types.js';
 export { QueryCache } from './query-cache.js';
 export { IndexManager } from './index-manager.js';
 export type { IndexConfig } from './index-manager.js';
+export type { ExtractModels, PrismockerMethods, ModelName, ModelType } from './prisma-types.js';
 
 import { PrismockerClient } from './client.js';
+import type { ExtractModels } from './prisma-types.js';
+import type { PrismaClient } from '@prisma/client';
 
 /**
- * Creates a new PrismockerClient instance typed as the specified PrismaClient type.
+ * Creates a new PrismockerClient instance with full type safety.
  *
  * Prismocker is a type-safe, in-memory Prisma Client mock that provides a drop-in
  * replacement for PrismaClient in tests. It supports all Prisma operations including
  * CRUD operations, relations, transactions, aggregations, and more.
  *
- * @template T - The PrismaClient type (usually inferred from @prisma/client)
+ * The returned instance preserves all model types from the PrismaClient, allowing
+ * full type safety without the need for `as any` assertions. All model access
+ * (e.g., `prisma.companies`, `prisma.jobs`) is fully typed.
+ *
+ * @template T - The PrismaClient type (must extend PrismaClient, defaults to PrismaClient)
  * @param options - Configuration options for Prismocker behavior
- * @returns A PrismockerClient instance typed as T, which can be used exactly like PrismaClient
+ * @returns A PrismockerClient instance typed as ExtractModels<T>, which preserves all model types
  *
  * @example
  * ```typescript
  * import { createPrismocker } from 'prismocker';
  * import type { PrismaClient } from '@prisma/client';
  *
- * // Basic usage
+ * // Basic usage - fully type-safe!
  * const prisma = createPrismocker<PrismaClient>();
- * const users = await prisma.user.findMany();
+ * const companies = await prisma.companies.findMany(); // ✅ Fully typed!
+ * const company = await prisma.companies.findUnique({ where: { id: '1' } }); // ✅ Fully typed!
  *
  * // With options
  * const prisma = createPrismocker<PrismaClient>({
@@ -44,11 +52,12 @@ import { PrismockerClient } from './client.js';
  * ```
  *
  * @see {@link PrismockerOptions} for all available configuration options
+ * @see {@link ExtractModels} for details on how type preservation works
  */
-export function createPrismocker<T = any>(
+export function createPrismocker<T extends PrismaClient = PrismaClient>(
   options?: import('./types.js').PrismockerOptions
-): T {
-  return PrismockerClient.create(options) as unknown as T;
+): ExtractModels<T> {
+  return PrismockerClient.create(options) as ExtractModels<T>;
 }
 
 /**

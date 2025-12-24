@@ -76,46 +76,8 @@ jest.mock('@heyclaude/web-runtime/logging/server', () => ({
   }),
 }));
 
-// Mock server/api-helpers
-jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
-  getOnlyCorsHeaders: {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  },
-  jsonResponse: jest.fn((data, status, corsHeaders, additionalHeaders) => {
-    return new Response(JSON.stringify(data), {
-      status,
-      headers: {
-        'Content-Type': 'application/json',
-        ...corsHeaders,
-        ...additionalHeaders,
-      },
-    });
-  }),
-  unauthorizedResponse: jest.fn((message, authInfo, corsHeaders) => {
-    return new Response(
-      JSON.stringify({
-        error: message,
-      }),
-      {
-        status: 401,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
-      }
-    );
-  }),
-  handleOptionsRequest: jest.fn((corsHeaders) => {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        ...corsHeaders,
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      },
-    });
-  }),
-}));
+// DO NOT mock api-helpers - use REAL helpers for integration testing
+// The route factory uses these helpers internally, so we need the real implementations
 
 // DO NOT mock getAuthenticatedUser - route no longer uses requireAuth: true
 // Authentication is handled by authedAction (via safemocker in tests)

@@ -4,8 +4,8 @@ A type-safe, in-memory Prisma Client mock for testing. Works perfectly with pnpm
 
 **Why Prismocker?** Prismocker solves the critical problem of testing Prisma-based applications without a real database. It provides a complete, type-safe mock that works seamlessly with all Prisma generators and extensions, making it the perfect testing companion for modern Prisma applications.
 
-[![npm version](https://img.shields.io/npm/v/prismocker)](https://www.npmjs.com/package/prismocker)
-[![License](https://img.shields.io/npm/l/prismocker)](https://github.com/JSONbored/prismocker/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/prisma)](https://www.npmjs.com/package/prisma)
+[![License](https://img.shields.io/npm/l/prisma)](https://github.com/JSONbored/prisma/blob/main/LICENSE)
 
 ## Table of Contents
 
@@ -66,11 +66,11 @@ Prismocker provides a complete, type-safe mock for Prisma Client that:
 ## Installation
 
 ```bash
-npm install prismocker --save-dev
+npm install prisma --save-dev
 # or
-pnpm add -D prismocker
+pnpm add -D prisma
 # or
-yarn add -D prismocker
+yarn add -D prisma
 ```
 
 **Peer Dependencies:**
@@ -83,7 +83,7 @@ yarn add -D prismocker
 The easiest way to get started with Prismocker is using the auto-setup command:
 
 ```bash
-npx prismocker setup
+npx prisma setup
 ```
 
 This command will:
@@ -98,16 +98,16 @@ This command will:
 
 ```bash
 # Specify framework manually
-npx prismocker setup --framework jest
+npx prisma setup --framework jest
 
 # Custom schema/mock paths
-npx prismocker setup --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
+npx prisma setup --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
 
 # Skip example files
-npx prismocker setup --skip-examples
+npx prisma setup --skip-examples
 ```
 
-After setup, run `npx prismocker generate-enums` whenever you add or modify enums in your Prisma schema.
+After setup, run `npx prisma generate-enums` whenever you add or modify enums in your Prisma schema.
 
 ## Quick Start
 
@@ -115,23 +115,48 @@ After setup, run `npx prismocker generate-enums` whenever you add or modify enum
 <summary><strong>Basic Usage</strong></summary>
 
 ```typescript
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
 
+// ✅ Fully type-safe! Returns ExtractModels<PrismaClient>
 const prisma = createPrismocker<PrismaClient>();
 
-// Use just like PrismaClient
-const users = await prisma.user.findMany();
-await prisma.user.create({ data: { name: 'John', email: 'john@example.com' } });
-const user = await prisma.user.findUnique({ where: { id: '1' } });
+// ✅ All model access is fully typed - no `as any` needed!
+const companies = await prisma.companies.findMany();
+// companies is typed as Company[] (from your Prisma schema)
+
+const company = await prisma.companies.findUnique({ 
+  where: { id: 'company-1' } 
+});
+// company is typed as Company | null
+
+await prisma.companies.create({ 
+  data: { 
+    name: 'Company 1', 
+    owner_id: 'user-1', 
+    slug: 'company-1' 
+  } 
+});
+// ✅ Full type checking - TypeScript will error if fields don't match schema
+
+// ✅ Prismocker methods are also fully typed
+prisma.reset();
+prisma.setData('companies', []);
+const data = prisma.getData('companies');
 ```
+
+**Key Benefits:**
+- ✅ **Full Type Safety** - All model access is typed using Prisma's generated types
+- ✅ **No Type Assertions** - No need for `as any` or `as unknown` assertions
+- ✅ **IntelliSense Support** - Full autocomplete and type checking in your IDE
+- ✅ **Type Preservation** - `ExtractModels<T>` preserves all model types through Proxy
 
 </details>
 
 <details>
 <summary><strong>Jest Integration</strong></summary>
 
-> **💡 Tip:** Use `npx prismocker setup` to automatically set up Jest integration!
+> **💡 Tip:** Use `npx prisma setup` to automatically set up Jest integration!
 
 ### Manual Setup
 
@@ -140,7 +165,7 @@ const user = await prisma.user.findUnique({ where: { id: '1' } });
 Create `__mocks__/@prisma/client.ts` in your project root:
 
 ```typescript
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
 
 // Create PrismockerClient instance
@@ -172,7 +197,7 @@ export const Prisma = {
 };
 
 // Export Prisma enum stubs (auto-generated - see Enum Support section)
-// Run: npx prismocker generate-enums
+// Run: npx prisma generate-enums
 export { job_status, job_type /* ... other enums */ } from './enums';
 ```
 
@@ -183,27 +208,27 @@ import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
 
 describe('MyService', () => {
-  let prismocker: PrismaClient;
+  let prisma: PrismaClient;
 
   beforeEach(() => {
     // PrismaClient is automatically PrismockerClient in tests
-    prismocker = prisma;
+    prisma = prisma;
 
     // Reset data before each test
-    if ('reset' in prismocker && typeof (prismocker as any).reset === 'function') {
-      (prismocker as any).reset();
+    if ('reset' in prisma && typeof (prisma as any).reset === 'function') {
+      (prisma as any).reset();
     }
 
     // Seed test data
-    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
-      (prismocker as any).setData('companies', [
+    if ('setData' in prisma && typeof (prisma as any).setData === 'function') {
+      (prisma as any).setData('companies', [
         { id: 'company-1', name: 'Company 1', owner_id: 'user-1' },
       ]);
     }
   });
 
   it('should query companies', async () => {
-    const companies = await prismocker.companies.findMany();
+    const companies = await prisma.companies.findMany();
     expect(companies).toHaveLength(1);
   });
 });
@@ -218,7 +243,7 @@ Jest will automatically use `__mocks__/@prisma/client.ts` when you import `@pris
 <details>
 <summary><strong>Vitest Integration</strong></summary>
 
-> **💡 Tip:** Use `npx prismocker setup` to automatically set up Vitest integration!
+> **💡 Tip:** Use `npx prisma setup` to automatically set up Vitest integration!
 
 ### Manual Setup
 
@@ -227,7 +252,7 @@ Jest will automatically use `__mocks__/@prisma/client.ts` when you import `@pris
 Create `__mocks__/@prisma/client.ts` (same as Jest):
 
 ```typescript
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
 
 const PrismockerClientClass = createPrismocker<PrismaClient>();
@@ -272,7 +297,7 @@ const prisma = new PrismaClient();
 Creates a new PrismockerClient instance that implements the PrismaClient interface.
 
 ```typescript
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
 
 const prisma = createPrismocker<PrismaClient>({
@@ -284,7 +309,7 @@ const prisma = createPrismocker<PrismaClient>({
 
 **Type Parameters:**
 
-- `T` - PrismaClient type (usually `PrismaClient` from `@prisma/client`)
+- `T` - PrismaClient type (must extend `PrismaClient`, defaults to `PrismaClient`)
 
 **Options:**
 
@@ -294,7 +319,36 @@ const prisma = createPrismocker<PrismaClient>({
 - `zodSchemasPath?: string` - Path to generated Zod schemas (default: `'@prisma/zod'`)
 - `zodSchemaLoader?: (modelName: string, operation: string) => Promise<any> | any | undefined` - Custom schema loader
 
-**Returns:** `T` - PrismockerClient instance typed as PrismaClient
+**Returns:** `ExtractModels<T>` - PrismockerClient instance with full type preservation
+
+**Type Safety:**
+
+The returned instance is typed as `ExtractModels<T>`, which:
+- ✅ Preserves all model types from `PrismaClient` (e.g., `prisma.companies` is fully typed)
+- ✅ Preserves all Prisma methods (`$queryRaw`, `$transaction`, etc.)
+- ✅ Adds Prismocker-specific methods (`reset`, `setData`, `getData`, etc.)
+- ✅ Eliminates the need for `as any` assertions for models in your schema
+
+**Example:**
+
+```typescript
+import { createPrismocker } from 'prisma';
+import type { PrismaClient } from '@prisma/client';
+import type { ExtractModels } from 'prisma/prisma-types';
+
+const prisma = createPrismocker<PrismaClient>();
+
+// ✅ prisma is typed as ExtractModels<PrismaClient>
+const _typeCheck: ExtractModels<PrismaClient> = prisma;
+
+// ✅ prisma.companies is fully typed as PrismaClient['companies']
+const companies = await prisma.companies.findMany();
+// companies is typed as Company[] (from your Prisma schema)
+
+// ✅ No type assertions needed!
+prisma.reset();
+prisma.setData('companies', []);
+```
 
 </details>
 
@@ -304,7 +358,7 @@ const prisma = createPrismocker<PrismaClient>({
 Convenience function for creating a test PrismaClient instance with sensible defaults.
 
 ```typescript
-import { createTestPrisma } from 'prismocker/test-utils';
+import { createTestPrisma } from 'prisma/test-utils';
 import type { PrismaClient } from '@prisma/client';
 
 const prisma = createTestPrisma();
@@ -321,7 +375,7 @@ const prisma = createTestPrisma();
 Type-safe utilities for Jest testing:
 
 ```typescript
-import { isPrismockerClient, createMockQueryRawUnsafe } from 'prismocker/jest-helpers';
+import { isPrismockerClient, createMockQueryRawUnsafe } from 'prisma/jest-helpers';
 import type { PrismaClient } from '@prisma/client';
 
 let prisma: PrismaClient;
@@ -362,7 +416,7 @@ import {
   createTestDataFactory,
   snapshotPrismocker,
   restorePrismocker,
-} from 'prismocker/test-utils';
+} from 'prisma/test-utils';
 import type { PrismaClient } from '@prisma/client';
 
 const prisma = createTestPrisma();
@@ -407,28 +461,85 @@ it('should handle complex state', async () => {
 <details>
 <summary><strong>Prisma Type Helpers</strong></summary>
 
-Type-safe utilities for working with Prisma models:
+Type-safe utilities for working with Prisma models and types:
+
+### ExtractModels<T> - Type Preservation
+
+The core type utility that preserves all model types from `PrismaClient`:
 
 ```typescript
-import { setDataTyped, getDataTyped } from 'prismocker/prisma-types';
+import type { ExtractModels } from 'prisma/prisma-types';
+import type { PrismaClient } from '@prisma/client';
+
+// ExtractModels<T> preserves all model types
+type PrismockerClient = ExtractModels<PrismaClient>;
+
+// This means:
+// - prisma.companies → PrismaClient['companies'] (fully typed)
+// - prisma.jobs → PrismaClient['jobs'] (fully typed)
+// - All Prisma methods preserved
+// - Prismocker methods added
+
+const prisma = createPrismocker<PrismaClient>();
+// prisma is typed as ExtractModels<PrismaClient>
+
+// ✅ Full type safety - no assertions needed!
+const companies = await prisma.companies.findMany();
+// companies is typed as Company[] (from your Prisma schema)
+```
+
+### Type Helpers
+
+```typescript
+import { 
+  ExtractModels, 
+  ModelName, 
+  ModelType,
+  setDataTyped, 
+  getDataTyped 
+} from 'prisma/prisma-types';
 import type { PrismaClient } from '@prisma/client';
 
 const prisma = createPrismocker<PrismaClient>();
 
+// ExtractModels<T> - Preserves all model types
+type PrismockerClient = ExtractModels<PrismaClient>;
+
+// ModelName<T> - Extract model name type
+type CompanyModelName = ModelName<'companies'>; // 'companies'
+
+// ModelType<TClient, TModel> - Extract model delegate type
+type CompanyModel = ModelType<PrismaClient, 'companies'>;
+// CompanyModel is the type of prisma.companies
+
 // ✅ Type-safe setData with model type inference
-setDataTyped(prisma, 'companies', [{ id: '1', name: 'Company 1', owner_id: 'user-1' }]);
+setDataTyped(prisma, 'companies', [
+  { id: '1', name: 'Company 1', owner_id: 'user-1', slug: 'company-1' }
+]);
 
 // ✅ Type-safe getData
 const companies = getDataTyped(prisma, 'companies');
-// companies is properly typed as Company[]
+// companies is typed as any[] (can be explicitly typed if needed)
 ```
 
-**Available Helpers:**
+**Available Type Helpers:**
 
-- `setDataTyped<TClient, TModel>(prisma: TClient, model: TModel, data: any[]): void` - Type-safe data seeding
-- `getDataTyped<TClient, TModel>(prisma: TClient, model: TModel): any[]` - Type-safe data retrieval
-- `ModelName<T>` - Extract model name type
-- `ModelType<TClient, TModel>` - Extract model delegate type
+- `ExtractModels<T>` - **Core type utility** that preserves all model types from `PrismaClient`
+- `ModelName<T>` - Extract model name type from `Prisma.ModelName`
+- `ModelType<TClient, TModel>` - Extract model delegate type from `PrismaClient`
+- `setDataTyped<TClient>(prisma: TClient, model: string, data: any[]): void` - Type-safe data seeding
+- `getDataTyped<TClient>(prisma: TClient, model: string): any[]` - Type-safe data retrieval
+
+**Note:** `setDataTyped` and `getDataTyped` accept `string` for model names to support dynamic models. For models in your schema, you can use direct model access without these helpers:
+
+```typescript
+// ✅ Direct model access (fully typed for models in schema)
+const companies = await prisma.companies.findMany();
+
+// ✅ Helper functions (useful for dynamic models or test utilities)
+setDataTyped(prisma, 'companies', []);
+const data = getDataTyped(prisma, 'companies');
+```
 
 </details>
 
@@ -483,35 +594,33 @@ interface PrismockerOptions {
 <details>
 <summary><strong>Service Layer Testing</strong></summary>
 
-Test your service layer with Prismocker:
+Test your service layer with Prismocker - fully type-safe:
 
 ```typescript
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { prisma } from '@heyclaude/data-layer/prisma/client';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
+import { isPrismockerClient } from 'prisma/jest-helpers';
 import { CompaniesService } from './companies-service';
 
 describe('CompaniesService', () => {
-  let prismocker: PrismaClient;
+  let prisma: PrismaClient;
   let service: CompaniesService;
 
   beforeEach(() => {
-    prismocker = prisma;
+    // ✅ Create Prismocker instance - fully typed!
+    prisma = createPrismocker<PrismaClient>();
 
-    // Reset data before each test
-    if ('reset' in prismocker && typeof (prismocker as any).reset === 'function') {
-      (prismocker as any).reset();
-    }
-
-    // Seed test data
-    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
-      (prismocker as any).setData('companies', [
+    // ✅ Type-safe reset and seeding
+    if (isPrismockerClient(prisma)) {
+      prisma.reset(); // ✅ No type assertion needed
+      prisma.setData('companies', [
         { id: 'company-1', name: 'Company 1', owner_id: 'user-1', slug: 'company-1' },
         { id: 'company-2', name: 'Company 2', owner_id: 'user-2', slug: 'company-2' },
-      ]);
+      ]); // ✅ Fully typed
     }
 
-    service = new CompaniesService(prismocker);
+    service = new CompaniesService(prisma);
   });
 
   it('should get company by slug', async () => {
@@ -534,7 +643,7 @@ describe('CompaniesService', () => {
     expect(company.name).toBe('New Company');
 
     // Verify it was created
-    const allCompanies = await prismocker.companies.findMany();
+    const allCompanies = await prisma.companies.findMany();
     expect(allCompanies).toHaveLength(3);
   });
 });
@@ -555,18 +664,18 @@ import type { PrismaClient } from '@prisma/client';
 import { GET } from './route';
 
 describe('GET /api/company', () => {
-  let prismocker: PrismaClient;
+  let prisma: PrismaClient;
 
   beforeEach(() => {
-    prismocker = prisma;
+    prisma = prisma;
 
-    if ('reset' in prismocker && typeof (prismocker as any).reset === 'function') {
-      (prismocker as any).reset();
+    if ('reset' in prisma && typeof (prisma as any).reset === 'function') {
+      (prisma as any).reset();
     }
 
     // Seed test data
-    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
-      (prismocker as any).setData('companies', [
+    if ('setData' in prisma && typeof (prisma as any).setData === 'function') {
+      (prisma as any).setData('companies', [
         { id: 'company-1', name: 'Company 1', slug: 'company-1', owner_id: 'user-1' },
       ]);
     }
@@ -599,35 +708,35 @@ describe('GET /api/company', () => {
 <details>
 <summary><strong>Complex Query Testing</strong></summary>
 
-Test complex Prisma queries with filters, sorting, and pagination:
+Test complex Prisma queries with filters, sorting, and pagination - fully type-safe:
 
 ```typescript
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { prisma } from '@heyclaude/data-layer/prisma/client';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
+import { isPrismockerClient } from 'prisma/jest-helpers';
 
 describe('Complex Queries', () => {
-  let prismocker: PrismaClient;
+  let prisma: PrismaClient;
 
   beforeEach(() => {
-    prismocker = prisma;
+    // ✅ Create Prismocker instance - fully typed!
+    prisma = createPrismocker<PrismaClient>();
 
-    if ('reset' in prismocker && typeof (prismocker as any).reset === 'function') {
-      (prismocker as any).reset();
-    }
-
-    // Seed test data
-    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
-      (prismocker as any).setData('jobs', [
+    // ✅ Type-safe reset and seeding
+    if (isPrismockerClient(prisma)) {
+      prisma.reset(); // ✅ No type assertion needed
+      prisma.setData('jobs', [
         { id: 'job-1', title: 'Senior Engineer', status: 'published', view_count: 100 },
         { id: 'job-2', title: 'Junior Engineer', status: 'published', view_count: 50 },
         { id: 'job-3', title: 'Product Manager', status: 'draft', view_count: 200 },
-      ]);
+      ]); // ✅ Fully typed
     }
   });
 
   it('should filter by status and sort by view_count', async () => {
-    const jobs = await prismocker.jobs.findMany({
+    // ✅ Model access and queries are fully typed!
+    const jobs = await prisma.jobs.findMany({
       where: {
         status: 'published',
       },
@@ -642,25 +751,28 @@ describe('Complex Queries', () => {
   });
 
   it('should paginate results', async () => {
-    const page1 = await prismocker.jobs.findMany({
+    // ✅ Pagination is fully typed!
+    const page1 = await prisma.jobs.findMany({
       skip: 0,
       take: 2,
       orderBy: { view_count: 'desc' },
     });
+    // page1 is typed as Job[]
 
     expect(page1).toHaveLength(2);
 
-    const page2 = await prismocker.jobs.findMany({
+    const page2 = await prisma.jobs.findMany({
       skip: 2,
       take: 2,
       orderBy: { view_count: 'desc' },
     });
+    // page2 is typed as Job[]
 
     expect(page2).toHaveLength(1);
   });
 
   it('should use complex where clauses', async () => {
-    const jobs = await prismocker.jobs.findMany({
+    const jobs = await prisma.jobs.findMany({
       where: {
         AND: [{ status: 'published' }, { view_count: { gte: 75 } }],
         OR: [{ title: { contains: 'Engineer' } }, { title: { contains: 'Manager' } }],
@@ -686,18 +798,18 @@ import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
 
 describe('Aggregations', () => {
-  let prismocker: PrismaClient;
+  let prisma: PrismaClient;
 
   beforeEach(() => {
-    prismocker = prisma;
+    prisma = prisma;
 
-    if ('reset' in prismocker && typeof (prismocker as any).reset === 'function') {
-      (prismocker as any).reset();
+    if ('reset' in prisma && typeof (prisma as any).reset === 'function') {
+      (prisma as any).reset();
     }
 
     // Seed test data with numeric values
-    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
-      (prismocker as any).setData('jobs', [
+    if ('setData' in prisma && typeof (prisma as any).setData === 'function') {
+      (prisma as any).setData('jobs', [
         { id: 'job-1', company_id: 'company-1', title: 'Job 1', view_count: 100 },
         { id: 'job-2', company_id: 'company-1', title: 'Job 2', view_count: 200 },
         { id: 'job-3', company_id: 'company-2', title: 'Job 3', view_count: 150 },
@@ -708,7 +820,7 @@ describe('Aggregations', () => {
   });
 
   it('should aggregate with _count, _avg, _sum, _min, _max', async () => {
-    const stats = await prismocker.jobs.aggregate({
+    const stats = await prisma.jobs.aggregate({
       _count: { id: true },
       _avg: { view_count: true },
       _sum: { view_count: true },
@@ -724,7 +836,7 @@ describe('Aggregations', () => {
   });
 
   it('should aggregate with _stddev (standard deviation)', async () => {
-    const stats = await prismocker.jobs.aggregate({
+    const stats = await prisma.jobs.aggregate({
       _stddev: { view_count: true },
     });
 
@@ -736,7 +848,7 @@ describe('Aggregations', () => {
   });
 
   it('should aggregate with _variance', async () => {
-    const stats = await prismocker.jobs.aggregate({
+    const stats = await prisma.jobs.aggregate({
       _variance: { view_count: true },
     });
 
@@ -745,7 +857,7 @@ describe('Aggregations', () => {
   });
 
   it('should aggregate with _countDistinct', async () => {
-    const stats = await prismocker.jobs.aggregate({
+    const stats = await prisma.jobs.aggregate({
       _countDistinct: { company_id: true },
     });
 
@@ -755,14 +867,14 @@ describe('Aggregations', () => {
 
   it('should handle _stddev with single value', async () => {
     // Reset and create single record
-    if ('reset' in prismocker && typeof (prismocker as any).reset === 'function') {
-      (prismocker as any).reset();
+    if ('reset' in prisma && typeof (prisma as any).reset === 'function') {
+      (prisma as any).reset();
     }
-    await prismocker.jobs.create({
+    await prisma.jobs.create({
       data: { id: 'job-1', company_id: 'company-1', title: 'Job 1', view_count: 100 },
     });
 
-    const stats = await prismocker.jobs.aggregate({
+    const stats = await prisma.jobs.aggregate({
       _stddev: { view_count: true },
     });
 
@@ -772,14 +884,14 @@ describe('Aggregations', () => {
 
   it('should handle _variance with single value', async () => {
     // Reset and create single record
-    if ('reset' in prismocker && typeof (prismocker as any).reset === 'function') {
-      (prismocker as any).reset();
+    if ('reset' in prisma && typeof (prisma as any).reset === 'function') {
+      (prisma as any).reset();
     }
-    await prismocker.jobs.create({
+    await prisma.jobs.create({
       data: { id: 'job-1', company_id: 'company-1', title: 'Job 1', view_count: 100 },
     });
 
-    const stats = await prismocker.jobs.aggregate({
+    const stats = await prisma.jobs.aggregate({
       _variance: { view_count: true },
     });
 
@@ -788,7 +900,7 @@ describe('Aggregations', () => {
   });
 
   it('should handle aggregations with where clause', async () => {
-    const stats = await prismocker.jobs.aggregate({
+    const stats = await prisma.jobs.aggregate({
       where: { company_id: 'company-1' },
       _count: { id: true },
       _avg: { view_count: true },
@@ -834,7 +946,7 @@ Similar to `findUnique`, but throws an error if no record is found:
 
 ```typescript
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
 
 describe('findUniqueOrThrow', () => {
@@ -926,33 +1038,33 @@ Prismocker supports full relation functionality including `include`, `select`, a
 
 ```typescript
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { prisma } from '@heyclaude/data-layer/prisma/client';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
+import { isPrismockerClient } from 'prisma/jest-helpers';
 
 describe('Relations', () => {
-  let prismocker: PrismaClient;
+  let prisma: PrismaClient;
 
   beforeEach(() => {
-    prismocker = prisma;
+    // ✅ Create Prismocker instance - fully typed!
+    prisma = createPrismocker<PrismaClient>();
 
-    if ('reset' in prismocker && typeof (prismocker as any).reset === 'function') {
-      (prismocker as any).reset();
-    }
-
-    // Seed related data
-    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
-      (prismocker as any).setData('companies', [
+    // ✅ Type-safe reset and seeding
+    if (isPrismockerClient(prisma)) {
+      prisma.reset(); // ✅ No type assertion needed
+      prisma.setData('companies', [
         { id: 'company-1', name: 'Company 1', owner_id: 'user-1' },
-      ]);
-      (prismocker as any).setData('jobs', [
+      ]); // ✅ Fully typed
+      prisma.setData('jobs', [
         { id: 'job-1', company_id: 'company-1', title: 'Job 1', status: 'published' },
         { id: 'job-2', company_id: 'company-1', title: 'Job 2', status: 'draft' },
-      ]);
+      ]); // ✅ Fully typed
     }
   });
 
   it('should load one-to-many relations with include', async () => {
-    const company = await prismocker.companies.findUnique({
+    // ✅ Model access and relations are fully typed!
+    const company = await prisma.companies.findUnique({
       where: { id: 'company-1' },
       include: {
         jobs: true, // Include all job fields
@@ -964,7 +1076,7 @@ describe('Relations', () => {
   });
 
   it('should load relations with select', async () => {
-    const company = await prismocker.companies.findUnique({
+    const company = await prisma.companies.findUnique({
       where: { id: 'company-1' },
       select: {
         id: true,
@@ -985,7 +1097,7 @@ describe('Relations', () => {
   });
 
   it('should load nested relations', async () => {
-    const company = await prismocker.companies.findUnique({
+    const company = await prisma.companies.findUnique({
       where: { id: 'company-1' },
       include: {
         jobs: {
@@ -1008,8 +1120,8 @@ Prismocker supports filtering records based on related records:
 
 ```typescript
 it('should filter by relation with some', async () => {
-  // Find companies that have at least one published job
-  const companies = await prismocker.companies.findMany({
+  // ✅ Find companies that have at least one published job - fully typed!
+  const companies = await prisma.companies.findMany({
     where: {
       jobs: {
         some: {
@@ -1018,14 +1130,15 @@ it('should filter by relation with some', async () => {
       },
     },
   });
+  // companies is typed as Company[]
 
   expect(companies).toHaveLength(1);
   expect(companies[0].id).toBe('company-1');
 });
 
 it('should filter by relation with every', async () => {
-  // Find companies where ALL jobs are published
-  const companies = await prismocker.companies.findMany({
+  // ✅ Find companies where ALL jobs are published - fully typed!
+  const companies = await prisma.companies.findMany({
     where: {
       jobs: {
         every: {
@@ -1034,14 +1147,15 @@ it('should filter by relation with every', async () => {
       },
     },
   });
+  // companies is typed as Company[]
 
   // This company has both published and draft jobs, so it won't match
   expect(companies).toHaveLength(0);
 });
 
 it('should filter by relation with none', async () => {
-  // Find companies that have NO draft jobs
-  const companies = await prismocker.companies.findMany({
+  // ✅ Find companies that have NO draft jobs - fully typed!
+  const companies = await prisma.companies.findMany({
     where: {
       jobs: {
         none: {
@@ -1050,6 +1164,7 @@ it('should filter by relation with none', async () => {
       },
     },
   });
+  // companies is typed as Company[]
 
   // This company has a draft job, so it won't match
   expect(companies).toHaveLength(0);
@@ -1061,11 +1176,11 @@ it('should filter by relation with none', async () => {
 ```typescript
 it('should load one-to-one relations', async () => {
   // Seed one-to-one relation data
-  (prismocker as any).setData('profiles', [
+  (prisma as any).setData('profiles', [
     { id: 'profile-1', company_id: 'company-1', bio: 'Company bio' },
   ]);
 
-  const company = await prismocker.companies.findUnique({
+  const company = await prisma.companies.findUnique({
     where: { id: 'company-1' },
     include: {
       profile: true,
@@ -1097,28 +1212,32 @@ Prismocker supports full transaction functionality with automatic rollback on er
 
 ```typescript
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { prisma } from '@heyclaude/data-layer/prisma/client';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
+import { isPrismockerClient } from 'prisma/jest-helpers';
 
 describe('Transactions', () => {
-  let prismocker: PrismaClient;
+  let prisma: PrismaClient;
 
   beforeEach(() => {
-    prismocker = prisma;
+    // ✅ Create Prismocker instance - fully typed!
+    prisma = createPrismocker<PrismaClient>();
 
-    if ('reset' in prismocker && typeof (prismocker as any).reset === 'function') {
-      (prismocker as any).reset();
+    // ✅ Type-safe reset
+    if (isPrismockerClient(prisma)) {
+      prisma.reset(); // ✅ No type assertion needed
     }
   });
 
   it('should commit transaction on success', async () => {
-    // Create initial data
-    await prismocker.companies.create({
+    // ✅ Model access is fully typed!
+    await prisma.companies.create({
       data: { name: 'Company 1', owner_id: 'user-1', slug: 'company-1' },
     });
 
-    // Execute successful transaction
-    await prismocker.$transaction(async (tx) => {
+    // ✅ Transaction callback receives fully typed tx!
+    await prisma.$transaction(async (tx) => {
+      // tx is typed as ExtractModels<PrismaClient> - full type safety!
       await tx.companies.create({
         data: { name: 'Company 2', owner_id: 'user-2', slug: 'company-2' },
       });
@@ -1127,13 +1246,15 @@ describe('Transactions', () => {
       });
     });
 
-    // Verify all changes were committed
-    const companies = await prismocker.companies.findMany();
+    // ✅ Verify all changes were committed - fully typed!
+    const companies = await prisma.companies.findMany();
+    // companies is typed as Company[]
     expect(companies).toHaveLength(3);
   });
 
   it('should return transaction result', async () => {
-    const result = await prismocker.$transaction(async (tx) => {
+    // ✅ Transaction result is fully typed!
+    const result = await prisma.$transaction(async (tx) => {
       const company = await tx.companies.create({
         data: { name: 'Company 1', owner_id: 'user-1', slug: 'company-1' },
       });
@@ -1157,14 +1278,15 @@ Prismocker automatically rolls back all changes if an error occurs:
 
 ```typescript
 it('should rollback transaction on error', async () => {
-  // Create initial data
-  await prismocker.companies.create({
+  // ✅ Create initial data - fully typed!
+  await prisma.companies.create({
     data: { name: 'Company 1', owner_id: 'user-1', slug: 'company-1' },
   });
 
-  // Execute transaction that fails
+  // ✅ Execute transaction that fails - tx is fully typed!
   try {
-    await prismocker.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
+      // tx is typed as ExtractModels<PrismaClient> - full type safety!
       await tx.companies.create({
         data: { name: 'Company 2', owner_id: 'user-2', slug: 'company-2' },
       });
@@ -1178,20 +1300,20 @@ it('should rollback transaction on error', async () => {
   }
 
   // Verify rollback - only original company should exist
-  const companies = await prismocker.companies.findMany();
+  const companies = await prisma.companies.findMany();
   expect(companies).toHaveLength(1);
   expect(companies[0].name).toBe('Company 1');
 });
 
 it('should rollback all changes in transaction on error', async () => {
   // Create initial data
-  await prismocker.companies.create({
+  await prisma.companies.create({
     data: { name: 'Company 1', owner_id: 'user-1', slug: 'company-1' },
   });
 
   // Execute transaction with multiple operations that fails
   try {
-    await prismocker.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       await tx.companies.create({
         data: { name: 'Company 2', owner_id: 'user-2', slug: 'company-2' },
       });
@@ -1208,23 +1330,23 @@ it('should rollback all changes in transaction on error', async () => {
   }
 
   // Verify rollback - none of the transaction changes should be committed
-  const companies = await prismocker.companies.findMany();
+  const companies = await prisma.companies.findMany();
   expect(companies).toHaveLength(1);
   expect(companies[0].name).toBe('Company 1');
 });
 
 it('should rollback updates and deletes in transaction', async () => {
   // Create initial data
-  const company1 = await prismocker.companies.create({
+  const company1 = await prisma.companies.create({
     data: { name: 'Company 1', owner_id: 'user-1', slug: 'company-1' },
   });
-  const company2 = await prismocker.companies.create({
+  const company2 = await prisma.companies.create({
     data: { name: 'Company 2', owner_id: 'user-2', slug: 'company-2' },
   });
 
   // Execute transaction with updates and delete that fails
   try {
-    await prismocker.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       await tx.companies.update({
         where: { id: company1.id },
         data: { name: 'Updated Company 1' },
@@ -1242,7 +1364,7 @@ it('should rollback updates and deletes in transaction', async () => {
   }
 
   // Verify rollback - original state should be restored
-  const companies = await prismocker.companies.findMany();
+  const companies = await prisma.companies.findMany();
   expect(companies).toHaveLength(2);
   expect(companies.find((c) => c.id === company1.id)?.name).toBe('Company 1');
   expect(companies.find((c) => c.id === company2.id)?.name).toBe('Company 2');
@@ -1267,7 +1389,7 @@ Test with optional Zod validation from `prisma-zod-generator`:
 
 ```typescript
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
 
 describe('Zod Validation', () => {
@@ -1322,7 +1444,7 @@ Prismocker is fully compatible with the Prisma ecosystem:
 If you use `prisma-zod-generator`, you can enable optional validation:
 
 ```typescript
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
 
 const prisma = createPrismocker<PrismaClient>({
@@ -1364,7 +1486,7 @@ await prisma.content.create({
 Prismocker supports Prisma Client extensions:
 
 ```typescript
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
 
 const basePrisma = createPrismocker<PrismaClient>();
@@ -1564,33 +1686,157 @@ console.log(metrics.queryStats); // Detailed statistics available
 <details>
 <summary><strong>Type Safety</strong></summary>
 
-Prismocker eliminates the need for `as any` type assertions:
+Prismocker provides **full type safety** through a type-preserving Proxy system that eliminates the need for `as any` type assertions.
+
+### How It Works
+
+Prismocker uses `ExtractModels<T>` to preserve all model types from your `PrismaClient`:
+
+```typescript
+import { createPrismocker } from 'prisma';
+import type { PrismaClient } from '@prisma/client';
+import type { ExtractModels } from 'prisma/prisma-types';
+
+// ✅ Returns ExtractModels<PrismaClient> - full type preservation!
+const prisma = createPrismocker<PrismaClient>();
+
+// ✅ prisma.companies is fully typed as PrismaClient['companies']
+const companies = await prisma.companies.findMany();
+// companies is typed as Company[] (from your Prisma schema)
+
+// ✅ All Prisma operations are fully typed
+const company = await prisma.companies.findUnique({ 
+  where: { id: 'company-1' } 
+});
+// company is typed as Company | null
+
+await prisma.companies.create({ 
+  data: { 
+    name: 'Company 1', 
+    owner_id: 'user-1', 
+    slug: 'company-1' 
+  } 
+});
+// ✅ TypeScript will error if fields don't match your schema
+
+// ✅ Prismocker methods are also fully typed
+prisma.reset();
+prisma.setData('companies', []);
+const data = prisma.getData('companies');
+```
+
+### Type Preservation with ExtractModels<T>
+
+The `ExtractModels<T>` type utility:
+
+1. **Preserves Model Types** - Maps all `Prisma.ModelName` values to their corresponding model delegate types
+2. **Preserves Prisma Methods** - Maintains types for `$queryRaw`, `$transaction`, `$connect`, etc.
+3. **Adds Prismocker Methods** - Includes `reset`, `setData`, `getData`, `enableDebugMode`, etc.
+
+**Example:**
+
+```typescript
+import type { ExtractModels } from 'prisma/prisma-types';
+
+// ExtractModels<PrismaClient> preserves:
+// - prisma.companies → PrismaClient['companies'] (fully typed)
+// - prisma.jobs → PrismaClient['jobs'] (fully typed)
+// - prisma.$transaction → PrismaClient['$transaction'] (fully typed)
+// - prisma.reset() → void (Prismocker method)
+// - prisma.setData() → void (Prismocker method)
+```
+
+### Before vs After
 
 **Before (with type assertions):**
 
 ```typescript
 const prisma = createPrismocker<PrismaClient>();
 
-// ❌ Requires type assertions
+// ❌ Requires type assertions for model access
+const companies = await (prisma as any).companies.findMany();
 (prisma as any).reset();
 (prisma as any).setData('companies', []);
 ```
 
-**After (type-safe):**
+**After (fully type-safe):**
 
 ```typescript
-import { isPrismockerClient } from 'prismocker/jest-helpers';
-
 const prisma = createPrismocker<PrismaClient>();
 
-// ✅ Type-safe, no assertions needed
-if (isPrismockerClient(prisma)) {
-  prisma.reset();
-  prisma.setData('companies', []);
+// ✅ Fully typed - no assertions needed!
+const companies = await prisma.companies.findMany();
+// companies is typed as Company[]
+
+prisma.reset(); // ✅ Fully typed
+prisma.setData('companies', []); // ✅ Fully typed
+```
+
+### Transaction Type Safety
+
+Transaction callbacks also receive fully typed transaction clients:
+
+```typescript
+await prisma.$transaction(async (tx) => {
+  // ✅ tx is typed as ExtractModels<PrismaClient>
+  // ✅ All model access is fully typed
+  const companies = await tx.companies.findMany();
+  await tx.companies.create({ 
+    data: { name: 'New Company', owner_id: 'user-1', slug: 'new-company' } 
+  });
+  // ✅ Full type checking - TypeScript will error if fields don't match
+});
+```
+
+### Dynamic Models (Not in Schema)
+
+For dynamic models that don't exist in your Prisma schema (e.g., test-only models), you may still need `as any`:
+
+```typescript
+// If 'users' doesn't exist in your Prisma schema:
+const users = await (prisma as any).users.findMany();
+// TypeScript can't infer types for models not in Prisma.ModelName
+```
+
+**Note:** This is expected behavior - TypeScript can only provide type safety for models that exist in your Prisma schema. For models in your schema, full type safety is guaranteed without any assertions.
+
+### Type Helpers
+
+Prismocker provides additional type helpers for advanced use cases:
+
+```typescript
+import type { ExtractModels, ModelName, ModelType } from 'prisma/prisma-types';
+
+// ExtractModels<T> - Preserves all model types
+type PrismockerClient = ExtractModels<PrismaClient>;
+
+// ModelName<T> - Extract model name type
+type CompanyModelName = ModelName<'companies'>; // 'companies'
+
+// ModelType<TClient, TModel> - Extract model delegate type
+type CompanyModel = ModelType<PrismaClient, 'companies'>;
+// CompanyModel is the type of prisma.companies
+```
+
+### Module Augmentation
+
+Prismocker uses TypeScript module augmentation to add Prismocker-specific methods to `PrismaClient`:
+
+```typescript
+// types-augmentation.d.ts automatically extends PrismaClient
+declare module '@prisma/client' {
+  interface PrismaClient {
+    reset(): void;
+    setData<T = any>(modelName: string, data: T[]): void;
+    getData<T = any>(modelName: string): T[];
+    enableDebugMode(enabled?: boolean): void;
+    getQueryStats(): QueryStats;
+    visualizeState(options?: VisualizationOptions): string;
+  }
 }
 ```
 
-Prismocker uses TypeScript module augmentation to extend `PrismaClient` types with Prismocker-specific methods, making them available without type assertions.
+This means all Prismocker methods are available on any `PrismaClient` instance when using Prismocker, with full type safety.
 
 </details>
 
@@ -1600,7 +1846,7 @@ Prismocker uses TypeScript module augmentation to extend `PrismaClient` types wi
 Prismocker provides convenient test utilities:
 
 ```typescript
-import { createTestPrisma, resetAndSeed, createTestDataFactory } from 'prismocker/test-utils';
+import { createTestPrisma, resetAndSeed, createTestDataFactory } from 'prisma/test-utils';
 
 const prisma = createTestPrisma();
 
@@ -1635,7 +1881,7 @@ Prismocker includes an automatic index manager that optimizes query performance 
 Indexes are enabled by default and automatically maintained:
 
 ```typescript
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
 
 // Indexes are enabled by default
@@ -1673,7 +1919,7 @@ const prisma = createPrismocker<PrismaClient>({
 Prismocker can cache query results to improve performance for repeated queries:
 
 ```typescript
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
 
 // Enable query caching
@@ -1718,7 +1964,7 @@ The cache is automatically invalidated when:
 Prismocker can load relations lazily (on-demand) instead of eagerly:
 
 ```typescript
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
 
 // Enable lazy relation loading
@@ -2015,7 +2261,7 @@ Prismocker: seedTestData requires a PrismockerClient instance.
 You passed a real PrismaClient. In tests, use createTestPrisma() or createPrismocker<PrismaClient>() to get a PrismockerClient instance.
 
 Example:
-  import { createTestPrisma } from 'prismocker/test-utils';
+  import { createTestPrisma } from 'prisma/test-utils';
   const prisma = createTestPrisma();
   seedTestData(prisma, { companies: [...] });
 ```
@@ -2165,12 +2411,82 @@ const withoutDescription = await prisma.companies.findMany({
 <details>
 <summary><strong>Type System</strong></summary>
 
-Prismocker leverages TypeScript's type system:
+Prismocker leverages TypeScript's advanced type system to provide full type safety:
 
-- Uses Prisma's generated types from `@prisma/client`
-- Module augmentation extends `PrismaClient` with Prismocker methods
-- Type guards ensure type safety without assertions
-- Full IntelliSense support in IDEs
+### Type Preservation Architecture
+
+**ExtractModels<T> Type Utility:**
+
+```typescript
+import type { ExtractModels } from 'prisma/prisma-types';
+
+// ExtractModels<T> preserves all model types from PrismaClient
+type PrismockerClient = ExtractModels<PrismaClient>;
+
+// This means:
+// - prisma.companies → PrismaClient['companies'] (fully typed)
+// - prisma.jobs → PrismaClient['jobs'] (fully typed)
+// - All Prisma methods preserved with original types
+// - Prismocker methods added with proper types
+```
+
+**How It Works:**
+
+1. **Model Type Mapping** - Maps all `Prisma.ModelName` values to their corresponding model delegate types from `PrismaClient`
+2. **Method Preservation** - Preserves types for all Prisma-specific methods (`$queryRaw`, `$transaction`, `$connect`, etc.)
+3. **Prismocker Methods** - Adds Prismocker-specific methods (`reset`, `setData`, `getData`, etc.) with proper types
+4. **Proxy Type Safety** - Uses TypeScript's type system to preserve types through Proxy interception
+
+### Type Flow
+
+```
+createPrismocker<PrismaClient>()
+  → Returns ExtractModels<PrismaClient>
+  → Proxy intercepts property access
+  → prisma.companies → Returns PrismaClient['companies'] (fully typed)
+  → ModelProxy.findMany() → Returns Company[] (from Prisma schema)
+```
+
+### Key Features
+
+- ✅ **Uses Prisma's Generated Types** - Leverages types from `@prisma/client`
+- ✅ **Module Augmentation** - Extends `PrismaClient` with Prismocker methods
+- ✅ **Type Guards** - `isPrismockerClient()` for runtime type narrowing
+- ✅ **Full IntelliSense** - Complete autocomplete and type checking in IDEs
+- ✅ **No Type Assertions** - Eliminates need for `as any` for models in schema
+- ✅ **Transaction Type Safety** - Transaction callbacks receive fully typed clients
+
+### Example: Full Type Safety
+
+```typescript
+import { createPrismocker } from 'prisma';
+import type { PrismaClient } from '@prisma/client';
+
+const prisma = createPrismocker<PrismaClient>();
+
+// ✅ All operations are fully typed
+const companies = await prisma.companies.findMany();
+// Type: Company[]
+
+const company = await prisma.companies.findUnique({ 
+  where: { id: 'company-1' } 
+});
+// Type: Company | null
+
+await prisma.companies.create({ 
+  data: { 
+    name: 'Company 1', 
+    owner_id: 'user-1', 
+    slug: 'company-1' 
+  } 
+});
+// ✅ TypeScript validates all fields match schema
+
+// ✅ Prismocker methods are also typed
+prisma.reset(); // Type: () => void
+prisma.setData('companies', []); // Type: (modelName: string, data: any[]) => void
+const data = prisma.getData('companies'); // Type: any[]
+```
 
 </details>
 
@@ -2456,10 +2772,10 @@ For complex raw queries or RPC calls, it's often best to provide a custom execut
 
 ```typescript
 // Mock $queryRawUnsafe for RPC calls
-prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([{ id: 'result-1' }]);
+prisma.$queryRawUnsafe = jest.fn().mockResolvedValue([{ id: 'result-1' }]);
 
 // Mock $executeRawUnsafe for DML operations
-prismocker.$executeRawUnsafe = jest.fn().mockResolvedValue(1); // 1 row affected
+prisma.$executeRawUnsafe = jest.fn().mockResolvedValue(1); // 1 row affected
 ```
 
 </details>
@@ -2536,8 +2852,8 @@ ls __mocks__/@prisma/client.ts
 ```typescript
 beforeEach(() => {
   // Seed related data
-  (prismocker as any).setData('companies', [{ id: 'company-1', name: 'Company 1' }]);
-  (prismocker as any).setData('jobs', [{ id: 'job-1', company_id: 'company-1', title: 'Job 1' }]);
+  (prisma as any).setData('companies', [{ id: 'company-1', name: 'Company 1' }]);
+  (prisma as any).setData('jobs', [{ id: 'job-1', company_id: 'company-1', title: 'Job 1' }]);
 });
 ```
 
@@ -2582,7 +2898,7 @@ const prismock = new PrismockClient();
 **After (Prismocker):**
 
 ```typescript
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
 
 const prisma = createPrismocker<PrismaClient>();
@@ -2617,7 +2933,7 @@ jest.mock('@prisma/client', () => ({
 
 ```typescript
 // __mocks__/@prisma/client.ts
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from 'prisma';
 import type { PrismaClient } from '@prisma/client';
 
 export const PrismaClient = createPrismocker<PrismaClient>();
@@ -2634,7 +2950,7 @@ export const PrismaClient = createPrismocker<PrismaClient>();
 
 ## CLI Commands
 
-### `npx prismocker setup`
+### `npx prisma setup`
 
 Automatically sets up Prismocker in your project. See [Auto-Setup](#auto-setup-recommended) section for details.
 
@@ -2651,25 +2967,25 @@ Automatically sets up Prismocker in your project. See [Auto-Setup](#auto-setup-r
 
 ```bash
 # Full setup
-npx prismocker setup
+npx prisma setup
 
 # Only create mock file
-npx prismocker setup --only-mock
+npx prisma setup --only-mock
 
 # Only generate enums
-npx prismocker setup --only-enums
+npx prisma setup --only-enums
 ```
 
-### `npx prismocker verify`
+### `npx prisma verify`
 
 Verifies that Prismocker is properly set up in your project.
 
 ```bash
 # Verify setup
-npx prismocker verify
+npx prisma verify
 
 # Custom paths
-npx prismocker verify --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
+npx prisma verify --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
 ```
 
 **Checks:**
@@ -2680,16 +2996,16 @@ npx prismocker verify --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma
 
 **Exit Code:** Returns `0` if all checks pass, `1` if any issues are found.
 
-### `npx prismocker fix`
+### `npx prisma fix`
 
 Automatically fixes Prismocker setup issues.
 
 ```bash
 # Fix setup issues
-npx prismocker fix
+npx prisma fix
 
 # Custom paths
-npx prismocker fix --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
+npx prisma fix --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
 ```
 
 **Actions:**
@@ -2698,32 +3014,32 @@ npx prismocker fix --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/cl
 - Updates setup file configuration
 - Generates enum stubs
 
-### `npx prismocker rollback`
+### `npx prisma rollback`
 
 Removes Prismocker setup from your project.
 
 ```bash
 # Remove mock file only
-npx prismocker rollback
+npx prisma rollback
 
 # Remove mock file and setup file references
-npx prismocker rollback --remove-setup
+npx prisma rollback --remove-setup
 ```
 
 **Options:**
 
 - `--remove-setup` - Also prompts to remove setup file references (manual removal required)
 
-### `npx prismocker generate-enums`
+### `npx prisma generate-enums`
 
 Generates enum stubs from your Prisma schema for use in mock files.
 
 ```bash
 # Basic usage (uses defaults)
-npx prismocker generate-enums
+npx prisma generate-enums
 
 # Custom paths
-npx prismocker generate-enums --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
+npx prisma generate-enums --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
 ```
 
 **When to run:**

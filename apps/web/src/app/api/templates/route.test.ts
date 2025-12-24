@@ -69,47 +69,8 @@ jest.mock('@heyclaude/web-runtime/logging/server', () => ({
   }),
 }));
 
-// Mock server/api-helpers
-jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
-  getOnlyCorsHeaders: {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  },
-  jsonResponse: jest.fn((data, status, corsHeaders, additionalHeaders) => {
-    return new Response(JSON.stringify(data), {
-      status,
-      headers: {
-        'Content-Type': 'application/json',
-        ...corsHeaders,
-        ...additionalHeaders,
-      },
-    });
-  }),
-  badRequestResponse: jest.fn((message, corsHeaders) => {
-    return new Response(
-      JSON.stringify({
-        error: message,
-      }),
-      {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
-      }
-    );
-  }),
-  handleOptionsRequest: jest.fn(() => {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      },
-    });
-  }),
-  buildSecurityHeaders: jest.fn(() => ({})),
-}));
+// DO NOT mock api-helpers - use REAL helpers for integration testing
+// The route factory uses these helpers internally, so we need the real implementations
 
 // Mock auth (templates route doesn't require auth)
 jest.mock('@heyclaude/web-runtime/auth/get-authenticated-user', () => ({
@@ -119,84 +80,8 @@ jest.mock('@heyclaude/web-runtime/auth/get-authenticated-user', () => ({
   })),
 }));
 
-// Mock api/route-factory
-jest.mock('@heyclaude/web-runtime/api/route-factory', () => ({
-  createCachedApiRoute: jest.fn((config: {
-    service: {
-      serviceKey: string;
-      methodName: string;
-      methodArgs: (query: unknown) => unknown[];
-    };
-    responseHandler: (result: unknown, query: unknown, body: unknown, context: {
-      logger: { info: jest.Mock; warn: jest.Mock; error: jest.Mock; debug: jest.Mock };
-      request: Request;
-      nextContext?: unknown;
-    }) => Promise<Response>;
-    querySchema?: unknown;
-  }) => {
-    return async (request: Request, context?: unknown) => {
-      try {
-        // Parse query from URL
-        const url = new URL(request.url);
-        const query: Record<string, string> = {};
-        url.searchParams.forEach((value, key) => {
-          query[key] = value;
-        });
-
-        // Validate query schema if provided
-        if (config.querySchema) {
-          // Simplified validation - in real factory, Zod validates
-          // For tests, we'll let the service handle validation
-        }
-
-        // Get service via service factory
-        const { getService } = await import('@heyclaude/web-runtime/data/service-factory');
-        const service = await getService(config.service.serviceKey);
-        const methodArgs = config.service.methodArgs(query);
-        const result = await (service as any)[config.service.methodName](...methodArgs);
-
-        // Call response handler
-        return await config.responseHandler(
-          result,
-          query,
-          {},
-          {
-            logger: {
-              info: jest.fn(),
-              warn: jest.fn(),
-              error: jest.fn(),
-              debug: jest.fn(),
-            },
-            request: request as any,
-            nextContext: context,
-          }
-        );
-      } catch (error) {
-        // Factory catches errors and returns 500
-        return new Response(
-          JSON.stringify({
-            error: error instanceof Error ? error.message : String(error),
-          }),
-          {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-          }
-        );
-      }
-    };
-  }),
-  createOptionsHandler: jest.fn(() => {
-    return async () => {
-      return new Response(null, {
-        status: 204,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        },
-      });
-    };
-  }),
-}));
+// DO NOT mock route-factory - use REAL factory for integration testing
+// This ensures we test the complete flow: Route → Factory → Service → RPC → Database (Prismocker)
 
 describe('GET /api/templates', () => {
   let prismocker: PrismaClient;

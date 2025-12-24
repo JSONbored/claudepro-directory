@@ -23,15 +23,15 @@ describe('Transaction Feature Tests', () => {
   describe('Successful Transactions', () => {
     it('should commit multiple create operations', async () => {
       await prisma.$transaction(async (tx) => {
-        await (tx as any).companies.create({
+        await tx.companies.create({
           data: { id: 'comp-1', name: 'Company 1', owner_id: 'owner-1', slug: 'company-1' },
         });
-        await (tx as any).companies.create({
+        await tx.companies.create({
           data: { id: 'comp-2', name: 'Company 2', owner_id: 'owner-2', slug: 'company-2' },
         });
       });
 
-      const companies = await (prisma as any).companies.findMany();
+      const companies = await prisma.companies.findMany();
       expect(companies).toHaveLength(2);
     });
 
@@ -44,12 +44,12 @@ describe('Transaction Feature Tests', () => {
       }
 
       await prisma.$transaction(async (tx) => {
-        await (tx as any).companies.update({ where: { id: 'comp-1' }, data: { featured: true } });
-        await (tx as any).companies.update({ where: { id: 'comp-2' }, data: { featured: true } });
+        await tx.companies.update({ where: { id: 'comp-1' }, data: { featured: true } });
+        await tx.companies.update({ where: { id: 'comp-2' }, data: { featured: true } });
       });
 
-      const comp1 = await (prisma as any).companies.findUnique({ where: { id: 'comp-1' } });
-      const comp2 = await (prisma as any).companies.findUnique({ where: { id: 'comp-2' } });
+      const comp1 = await prisma.companies.findUnique({ where: { id: 'comp-1' } });
+      const comp2 = await prisma.companies.findUnique({ where: { id: 'comp-2' } });
       expect(comp1?.featured).toBe(true);
       expect(comp2?.featured).toBe(true);
     });
@@ -62,14 +62,14 @@ describe('Transaction Feature Tests', () => {
       }
 
       await prisma.$transaction(async (tx) => {
-        await (tx as any).companies.create({
+        await tx.companies.create({
           data: { id: 'comp-2', name: 'Company 2', owner_id: 'owner-2', slug: 'company-2' },
         });
-        await (tx as any).companies.update({ where: { id: 'comp-1' }, data: { name: 'Company 1 Updated' } });
-        await (tx as any).companies.delete({ where: { id: 'comp-1' } });
+        await tx.companies.update({ where: { id: 'comp-1' }, data: { name: 'Company 1 Updated' } });
+        await tx.companies.delete({ where: { id: 'comp-1' } });
       });
 
-      const companies = await (prisma as any).companies.findMany();
+      const companies = await prisma.companies.findMany();
       expect(companies).toHaveLength(1);
       expect(companies[0].id).toBe('comp-2');
     });

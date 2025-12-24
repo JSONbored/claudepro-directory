@@ -4,6 +4,10 @@
  * This module augments PrismaClient types to include Prismocker-specific methods
  * when using Prismocker in tests. This eliminates the need for `as any` type assertions.
  *
+ * When using `createPrismocker<PrismaClient>()`, the returned type is `ExtractModels<PrismaClient>`,
+ * which preserves all model types from PrismaClient while adding Prismocker-specific methods.
+ * This means `prisma.companies`, `prisma.jobs`, etc. are fully typed without any assertions.
+ *
  * @example
  * ```typescript
  * import type { PrismaClient } from '@prisma/client';
@@ -15,7 +19,13 @@
  * prisma.reset();
  * prisma.setData('companies', []);
  * const data = prisma.getData('companies');
+ *
+ * // ✅ Model access is fully typed!
+ * const companies = await prisma.companies.findMany(); // Fully typed!
+ * const company = await prisma.companies.findUnique({ where: { id: '1' } }); // Fully typed!
  * ```
+ *
+ * @see {@link ExtractModels} for details on how type preservation works
  */
 
 import type { PrismaClient } from '@prisma/client';

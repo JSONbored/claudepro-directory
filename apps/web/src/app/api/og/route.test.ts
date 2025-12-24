@@ -108,87 +108,11 @@ jest.mock('@heyclaude/web-runtime/logging/server', () => ({
   }),
 }));
 
-// Mock server/api-helpers
-jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
-  getOnlyCorsHeaders: {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  },
-  jsonResponse: jest.fn((data, status, corsHeaders, additionalHeaders) => {
-    return new Response(JSON.stringify(data), {
-      status,
-      headers: {
-        'Content-Type': 'application/json',
-        ...corsHeaders,
-        ...additionalHeaders,
-      },
-    });
-  }),
-  handleOptionsRequest: jest.fn((corsHeaders) => {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        ...corsHeaders,
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      },
-    });
-  }),
-}));
+// DO NOT mock api-helpers - use REAL helpers for integration testing
+// The route factory uses these helpers internally, so we need the real implementations
 
-// Mock api/route-factory
-jest.mock('@heyclaude/web-runtime/api/route-factory', () => ({
-  createApiRoute: jest.fn((config: {
-    handler: (context: {
-      logger: { info: jest.Mock; warn: jest.Mock; error: jest.Mock; debug: jest.Mock };
-      request: Request;
-      nextContext?: unknown;
-      query: Record<string, string | undefined>;
-    }) => Promise<Response>;
-  }) => {
-    return async (request: Request, context?: unknown) => {
-      try {
-        const handlerResult = await config.handler({
-          logger: {
-            info: jest.fn(),
-            warn: jest.fn(),
-            error: jest.fn(),
-            debug: jest.fn(),
-          },
-          request: request as any,
-          nextContext: context,
-          query: Object.fromEntries(new URL(request.url).searchParams),
-        });
-        // Handler returns ImageResponse (extends Response), factory converts to NextResponse
-        if (handlerResult instanceof Response) {
-          return handlerResult;
-        }
-        return handlerResult;
-      } catch (error) {
-        // Factory catches errors and returns 500
-        return new Response(
-          JSON.stringify({
-            error: error instanceof Error ? error.message : String(error),
-          }),
-          {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-          }
-        );
-      }
-    };
-  }),
-  createOptionsHandler: jest.fn(() => {
-    return async () => {
-      return new Response(null, {
-        status: 204,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        },
-      });
-    };
-  }),
-}));
+// DO NOT mock route-factory - use REAL factory for integration testing
+// This ensures we test the complete flow: Route → Factory → Handler → ImageResponse
 
 describe('GET /api/og', () => {
   beforeEach(() => {

@@ -80,6 +80,10 @@ export class PrismockerClient {
    * - Prisma-specific methods (e.g., `$queryRaw`, `$transaction`)
    * - Prismocker-specific methods (e.g., `reset()`, `setData()`)
    *
+   * **Type Safety Note:** The Proxy handler returns `any` at runtime, but TypeScript
+   * uses `ExtractModels<T>` (from `createPrismocker`) to understand the correct types.
+   * This allows full type safety while maintaining runtime flexibility.
+   *
    * @param options - Configuration options for Prismocker behavior
    * @returns A proxied PrismockerClient instance that behaves like PrismaClient
    *

@@ -33,7 +33,7 @@ describe('Prismocker Integration Tests', () => {
       }
 
       // Complex query: featured companies owned by specific owners
-      const result = await (prisma as any).companies.findMany({
+      const result = await prisma.companies.findMany({
         where: {
           AND: [
             { featured: true },
@@ -71,7 +71,7 @@ describe('Prismocker Integration Tests', () => {
       }
 
       // Get second page of published jobs, sorted by view_count
-      const result = await (prisma as any).jobs.findMany({
+      const result = await prisma.jobs.findMany({
         where: { status: 'published' },
         orderBy: { view_count: 'desc' },
         skip: 5,
@@ -93,11 +93,11 @@ describe('Prismocker Integration Tests', () => {
       }
 
       await prisma.$transaction(async (tx) => {
-        await (tx as any).companies.update({
+        await tx.companies.update({
           where: { id: 'comp-1' },
           data: { featured: true },
         });
-        await (tx as any).jobs.create({
+        await tx.jobs.create({
           data: {
             id: 'job-1',
             title: 'Job 1',
@@ -112,9 +112,9 @@ describe('Prismocker Integration Tests', () => {
         });
       });
 
-      const company = await (prisma as any).companies.findUnique({ where: { id: 'comp-1' } });
+      const company = await prisma.companies.findUnique({ where: { id: 'comp-1' } });
       expect(company?.featured).toBe(true);
-      const jobs = await (prisma as any).jobs.findMany();
+      const jobs = await prisma.jobs.findMany();
       expect(jobs).toHaveLength(1);
     });
 
@@ -127,7 +127,7 @@ describe('Prismocker Integration Tests', () => {
 
       try {
         await prisma.$transaction(async (tx) => {
-          await (tx as any).companies.update({
+          await tx.companies.update({
             where: { id: 'comp-1' },
             data: { featured: true },
           });
@@ -137,7 +137,7 @@ describe('Prismocker Integration Tests', () => {
         // Expected error
       }
 
-      const company = await (prisma as any).companies.findUnique({ where: { id: 'comp-1' } });
+      const company = await prisma.companies.findUnique({ where: { id: 'comp-1' } });
       expect(company?.featured).toBe(false); // Should be unchanged
     });
   });
@@ -174,7 +174,7 @@ describe('Prismocker Integration Tests', () => {
         ]);
       }
 
-      const company = await (prisma as any).companies.findUnique({
+      const company = await prisma.companies.findUnique({
         where: { id: 'comp-1' },
         include: { jobs: true },
       });
@@ -230,7 +230,7 @@ describe('Prismocker Integration Tests', () => {
       }
 
       // Companies with at least one published job
-      const companiesWithPublishedJobs = await (prisma as any).companies.findMany({
+      const companiesWithPublishedJobs = await prisma.companies.findMany({
         where: {
           jobs: { some: { status: 'published' } },
         },
@@ -255,7 +255,7 @@ describe('Prismocker Integration Tests', () => {
       }
 
       const start = Date.now();
-      const result = await (prisma as any).companies.findUnique({ where: { id: 'comp-500' } });
+      const result = await prisma.companies.findUnique({ where: { id: 'comp-500' } });
       const duration = Date.now() - start;
 
       expect(result).toBeDefined();
@@ -283,7 +283,7 @@ describe('Prismocker Integration Tests', () => {
       }
 
       const start = Date.now();
-      const result = await (prisma as any).jobs.findMany({
+      const result = await prisma.jobs.findMany({
         where: { status: 'published', view_count: { gte: 5000 } },
         orderBy: { view_count: 'desc' },
         take: 10,
@@ -326,7 +326,7 @@ describe('Prismocker Integration Tests', () => {
       );
       expect(result).toBe(1);
 
-      const company = await (customPrisma as any).companies.findUnique({ where: { id: 'comp-1' } });
+      const company = await customPrisma.companies.findUnique({ where: { id: 'comp-1' } });
       expect(company?.name).toBe('Updated Company');
     });
   });
@@ -339,8 +339,8 @@ describe('Prismocker Integration Tests', () => {
         return next(params);
       });
 
-      await (prisma as any).companies.findMany();
-      await (prisma as any).companies.create({
+      await prisma.companies.findMany();
+      await prisma.companies.create({
         data: { id: 'comp-1', name: 'Company 1', owner_id: 'owner-1', slug: 'company-1' },
       });
 
@@ -356,7 +356,7 @@ describe('Prismocker Integration Tests', () => {
         return next(params);
       });
 
-      const company = await (prisma as any).companies.create({
+      const company = await prisma.companies.create({
         data: { id: 'comp-1', name: 'company 1', owner_id: 'owner-1', slug: 'company-1' },
       });
       expect(company.name).toBe('COMPANY 1');
@@ -370,8 +370,8 @@ describe('Prismocker Integration Tests', () => {
         events.push(event);
       });
 
-      await (prisma as any).companies.findMany();
-      await (prisma as any).companies.create({
+      await prisma.companies.findMany();
+      await prisma.companies.create({
         data: { id: 'comp-1', name: 'Company 1', owner_id: 'owner-1', slug: 'company-1' },
       });
 

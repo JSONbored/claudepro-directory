@@ -28,50 +28,34 @@
  */
 
 import type { PrismaClient } from '@prisma/client';
+import type { ExtractModels, PrismockerMethods } from './prisma-types.js';
 
 /**
  * Type guard to check if a PrismaClient instance is actually a PrismockerClient
  *
  * This allows TypeScript to narrow the type and access Prismocker-specific methods
- * without type assertions.
+ * without type assertions. When used with `createPrismocker<PrismaClient>()`, the
+ * returned type already includes Prismocker methods via type augmentation.
  *
+ * @template T - PrismaClient type (must extend PrismaClient)
  * @param prisma - PrismaClient instance to check
- * @returns True if the instance is a PrismockerClient
+ * @returns True if the instance is a PrismockerClient, narrowing type to T & PrismockerMethods
  *
  * @example
  * ```typescript
+ * const prisma = createPrismocker<PrismaClient>();
+ *
  * if (isPrismockerClient(prisma)) {
+ *   // prisma is narrowed to PrismaClient & PrismockerMethods
  *   prisma.reset(); // ✅ Type-safe, no assertion needed
+ *   prisma.setData('companies', []); // ✅ Type-safe
+ *   const companies = await prisma.companies.findMany(); // ✅ Fully typed!
  * }
  * ```
  */
-export function isPrismockerClient(
-  prisma: PrismaClient
-): prisma is PrismaClient & {
-  reset(): void;
-  getData<T = any>(modelName: string): T[];
-  setData<T = any>(modelName: string, data: T[]): void;
-  enableDebugMode(enabled?: boolean): void;
-  getQueryStats(): {
-    totalQueries: number;
-    queriesByModel: Record<string, number>;
-    queriesByOperation: Record<string, number>;
-    averageDuration: number;
-    queries: Array<{
-      modelName: string;
-      operation: string;
-      timestamp: number;
-      duration?: number;
-      args?: any;
-      resultCount?: number;
-    }>;
-  };
-  visualizeState(options?: {
-    maxRecordsPerModel?: number;
-    includeIndexes?: boolean;
-    includeCache?: boolean;
-  }): string;
-} {
+export function isPrismockerClient<T extends PrismaClient>(
+  prisma: T
+): prisma is T & PrismockerMethods {
   return (
     'reset' in prisma &&
     typeof (prisma as any).reset === 'function' &&
