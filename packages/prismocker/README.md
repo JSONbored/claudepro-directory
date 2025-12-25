@@ -1,49 +1,64 @@
+<div align="center">
+
 # Prismocker
 
-A type-safe, in-memory Prisma Client mock for testing. Works perfectly with pnpm, Jest, and Vitest. Fully compatible with the Prisma ecosystem including generated Zod schemas, PrismaJson types, and Prisma extensions.
+**A type-safe, in-memory Prisma Client mock for testing**
+
+Works perfectly with pnpm, Jest, and Vitest. Fully compatible with the Prisma ecosystem including generated Zod schemas, PrismaJson types, and Prisma extensions.
 
 **Why Prismocker?** Prismocker solves the critical problem of testing Prisma-based applications without a real database. It provides a complete, type-safe mock that works seamlessly with all Prisma generators and extensions, making it the perfect testing companion for modern Prisma applications.
 
-[![npm version](https://img.shields.io/npm/v/prisma)](https://www.npmjs.com/package/prisma)
-[![License](https://img.shields.io/npm/l/prisma)](https://github.com/JSONbored/prisma/blob/main/LICENSE)
+**Package Info**
+[![npm version](https://img.shields.io/npm/v/@jsonbored/prismocker?style=flat-square)](https://www.npmjs.com/package/@jsonbored/prismocker)
+[![npm downloads](https://img.shields.io/npm/dm/@jsonbored/prismocker?style=flat-square)](https://www.npmjs.com/package/@jsonbored/prismocker)
+[![License](https://img.shields.io/npm/l/@jsonbored/prismocker?style=flat-square)](https://github.com/JSONbored/prismocker/blob/main/LICENSE)
 
-## Table of Contents
+**Status**
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org/)
 
-* [Overview](#overview)
-* [Installation](#installation)
-* [Auto-Setup (Recommended)](#auto-setup-recommended)
-* [Quick Start](#quick-start)
+</div>
+
+## 📑 Table of Contents
+
+* [✨ Features](#-features)
+* [🆚 Why Prismocker?](#-why-prismocker)
+* [🚀 Quick Start](#-quick-start)
+* [📦 Installation](#-installation)
+* [⚡ Auto-Setup (Recommended)](#-auto-setup-recommended)
+* [📚 Quick Start Guide](#-quick-start-guide)
   * [Basic Usage](#basic-usage)
   * [Jest Integration](#jest-integration)
   * [Vitest Integration](#vitest-integration)
-* [API Reference](#api-reference)
+* [📖 API Reference](#-api-reference)
   * [Factory Functions](#factory-functions)
   * [Type-Safe Helpers](#type-safe-helpers)
   * [Configuration Options](#configuration-options)
-* [Usage Examples](#usage-examples)
+* [💡 Usage Examples](#-usage-examples)
   * [Service Layer Testing](#service-layer-testing)
   * [API Route Testing](#api-route-testing)
   * [Complex Query Testing](#complex-query-testing)
   * [Relation Testing](#relation-testing)
   * [Transaction Testing](#transaction-testing)
   * [Zod Validation Testing](#zod-validation-testing)
-* [Advanced Features](#advanced-features)
+* [🚀 Advanced Features](#-advanced-features)
   * [Prisma Ecosystem Compatibility](#prisma-ecosystem-compatibility)
   * [Type Safety](#type-safety)
   * [Test Utilities](#test-utilities)
   * [Query Logging](#query-logging)
-* [How It Works](#how-it-works)
+* [⚙️ How It Works](#️-how-it-works)
   * [In-Memory Storage](#in-memory-storage)
   * [Query Engine](#query-engine)
   * [Type System](#type-system)
-* [Example Files](#example-files)
-* [Caveats & Considerations](#caveats--considerations)
-* [Troubleshooting](#troubleshooting)
-* [Migration Guide](#migration-guide)
-* [CLI Commands](#cli-commands)
-* [Contributing](#contributing)
+* [📁 Example Files](#-example-files)
+* [⚠️ Caveats & Considerations](#️-caveats--considerations)
+* [🔧 Troubleshooting](#-troubleshooting)
+* [🔄 Migration Guide](#-migration-guide)
+* [🛠️ CLI Commands](#️-cli-commands)
+* [🤝 Contributing](#-contributing)
+* [🔗 Related Projects](#-related-projects)
 
-## Overview
+## ✨ Features
 
 Prismocker provides a complete, type-safe mock for Prisma Client that:
 
@@ -63,14 +78,58 @@ Prismocker provides a complete, type-safe mock for Prisma Client that:
 * ✅ **Environment Agnostic** - Works with any Prisma generator setup, not tied to specific environments
 * ✅ **Standalone Package** - Can be extracted to separate repo for OSS distribution
 
-## Installation
+## 🆚 Why Prismocker?
+
+| Feature | Prismocker | Prismock | Manual Mocks |
+|:---|:---:|:---:|:---:|
+| Type Safety | ✅ Full (ExtractModels<T>) | ⚠️ Good (Prisma types) | ❌ None |
+| pnpm Support | ✅ Perfect | ✅ Works | ✅ Works |
+| Prisma API Coverage | ✅ Complete | ✅ Most operations* | ❌ Manual |
+| Setup Complexity | ✅ Auto-setup CLI | ⚠️ Schema parsing required | ❌ Complex |
+| Relations | ✅ Full (include/select/filters) | ✅ Good (include/select) | ❌ Manual |
+| Transactions | ✅ Full rollback support | ⚠️ Basic support | ❌ Manual |
+| Ecosystem Compatible | ✅ Zod/Extensions/PrismaJson | ⚠️ Basic compatibility | ❌ None |
+| Zero Dependencies | ✅ Only @prisma/client | ⚠️ Additional deps | ✅ None |
+
+<small>*Prismock supports most Prisma operations but has limitations with some nested operations (set, disconnect, delete in nested queries) and certain onDelete/onUpdate behaviors.</small>
+
+## 🚀 Quick Start
+
+```typescript
+import { createPrismocker } from '@jsonbored/prismocker';
+import type { PrismaClient } from '@prisma/client';
+
+// ✅ Fully type-safe! Returns ExtractModels<PrismaClient>
+const prisma = createPrismocker<PrismaClient>();
+
+// Seed test data
+prisma.setData('companies', [
+  { id: '1', name: 'Acme Corp', owner_id: 'user-1' }
+]);
+
+// Use like real Prisma - fully typed!
+const companies = await prisma.companies.findMany();
+const company = await prisma.companies.findUnique({
+  where: { id: '1' }
+});
+
+// All operations are type-safe
+await prisma.companies.create({
+  data: { name: 'New Corp', owner_id: 'user-2', slug: 'new-corp' }
+});
+```
+
+<details>
+<summary>📖 View full installation and setup guide</summary>
+
+## 📦 Installation
 
 ```bash
-npm install prisma --save-dev
+npm install @jsonbored/prismocker --save-dev
 # or
-pnpm add -D prisma
+pnpm add -D @jsonbored/prismocker
 # or
-yarn add -D prisma
+yarn add -D @jsonbored/prismocker
 ```
 
 **Peer Dependencies:**
@@ -78,12 +137,12 @@ yarn add -D prisma
 * `@prisma/client` (^7.0.0 or higher)
 * `zod` (optional, for Zod validation support)
 
-## Auto-Setup (Recommended)
+## ⚡ Auto-Setup (Recommended)
 
 The easiest way to get started with Prismocker is using the auto-setup command:
 
 ```bash
-npx prisma setup
+npx @jsonbored/prismocker setup
 ```
 
 This command will:
@@ -98,24 +157,26 @@ This command will:
 
 ```bash
 # Specify framework manually
-npx prisma setup --framework jest
+npx @jsonbored/prismocker setup --framework jest
 
 # Custom schema/mock paths
-npx prisma setup --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
+npx @jsonbored/prismocker setup --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
 
 # Skip example files
-npx prisma setup --skip-examples
+npx @jsonbored/prismocker setup --skip-examples
 ```
 
-After setup, run `npx prisma generate-enums` whenever you add or modify enums in your Prisma schema.
+After setup, run `npx @jsonbored/prismocker generate-enums` whenever you add or modify enums in your Prisma schema.
 
-## Quick Start
+</details>
+
+## 📚 Quick Start Guide
 
 <details>
 <summary><strong>Basic Usage</strong></summary>
 
 ```typescript
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 // ✅ Fully type-safe! Returns ExtractModels<PrismaClient>
@@ -157,7 +218,7 @@ const data = prisma.getData('companies');
 <details>
 <summary><strong>Jest Integration</strong></summary>
 
-> **💡 Tip:** Use `npx prisma setup` to automatically set up Jest integration!
+> **💡 Tip:** Use `npx @jsonbored/prismocker setup` to automatically set up Jest integration!
 
 ### Manual Setup
 
@@ -166,7 +227,7 @@ const data = prisma.getData('companies');
 Create `__mocks__/@prisma/client.ts` in your project root:
 
 ```typescript
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 // Create PrismockerClient instance
@@ -244,7 +305,7 @@ Jest will automatically use `__mocks__/@prisma/client.ts` when you import `@pris
 <details>
 <summary><strong>Vitest Integration</strong></summary>
 
-> **💡 Tip:** Use `npx prisma setup` to automatically set up Vitest integration!
+> **💡 Tip:** Use `npx @jsonbored/prismocker setup` to automatically set up Vitest integration!
 
 ### Manual Setup
 
@@ -253,7 +314,7 @@ Jest will automatically use `__mocks__/@prisma/client.ts` when you import `@pris
 Create `__mocks__/@prisma/client.ts` (same as Jest):
 
 ```typescript
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 const PrismockerClientClass = createPrismocker<PrismaClient>();
@@ -288,7 +349,7 @@ const prisma = new PrismaClient();
 
 </details>
 
-## API Reference
+## 📖 API Reference
 
 ### Factory Functions
 
@@ -298,7 +359,7 @@ const prisma = new PrismaClient();
 Creates a new PrismockerClient instance that implements the PrismaClient interface.
 
 ```typescript
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 const prisma = createPrismocker<PrismaClient>({
@@ -334,7 +395,7 @@ The returned instance is typed as `ExtractModels<T>`, which:
 **Example:**
 
 ```typescript
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 import type { ExtractModels } from 'prisma/prisma-types';
 
@@ -591,7 +652,7 @@ interface PrismockerOptions {
 
 </details>
 
-## Usage Examples
+## 💡 Usage Examples
 
 <details>
 <summary><strong>Service Layer Testing</strong></summary>
@@ -600,7 +661,7 @@ Test your service layer with Prismocker - fully type-safe:
 
 ```typescript
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 import { isPrismockerClient } from 'prisma/jest-helpers';
 import { CompaniesService } from './companies-service';
@@ -714,7 +775,7 @@ Test complex Prisma queries with filters, sorting, and pagination - fully type-s
 
 ```typescript
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 import { isPrismockerClient } from 'prisma/jest-helpers';
 
@@ -948,7 +1009,7 @@ Similar to `findUnique`, but throws an error if no record is found:
 
 ```typescript
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 describe('findUniqueOrThrow', () => {
@@ -1040,7 +1101,7 @@ Prismocker supports full relation functionality including `include`, `select`, a
 
 ```typescript
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 import { isPrismockerClient } from 'prisma/jest-helpers';
 
@@ -1212,7 +1273,7 @@ Prismocker supports full transaction functionality with automatic rollback on er
 
 ```typescript
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 import { isPrismockerClient } from 'prisma/jest-helpers';
 
@@ -1389,7 +1450,7 @@ Test with optional Zod validation from `prisma-zod-generator`:
 
 ```typescript
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 describe('Zod Validation', () => {
@@ -1432,7 +1493,7 @@ describe('Zod Validation', () => {
 
 </details>
 
-## Advanced Features
+## 🚀 Advanced Features
 
 <details>
 <summary><strong>Prisma Ecosystem Compatibility</strong></summary>
@@ -1444,7 +1505,7 @@ Prismocker is fully compatible with the Prisma ecosystem:
 If you use `prisma-zod-generator`, you can enable optional validation:
 
 ```typescript
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 const prisma = createPrismocker<PrismaClient>({
@@ -1486,7 +1547,7 @@ await prisma.content.create({
 Prismocker supports Prisma Client extensions:
 
 ```typescript
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 const basePrisma = createPrismocker<PrismaClient>();
@@ -1699,7 +1760,7 @@ Prismocker provides **full type safety** through a type-preserving Proxy system 
 Prismocker uses `ExtractModels<T>` to preserve all model types from your `PrismaClient`:
 
 ```typescript
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 import type { ExtractModels } from 'prisma/prisma-types';
 
@@ -1887,7 +1948,7 @@ Prismocker includes an automatic index manager that optimizes query performance 
 Indexes are enabled by default and automatically maintained:
 
 ```typescript
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 // Indexes are enabled by default
@@ -1925,7 +1986,7 @@ const prisma = createPrismocker<PrismaClient>({
 Prismocker can cache query results to improve performance for repeated queries:
 
 ```typescript
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 // Enable query caching
@@ -1971,7 +2032,7 @@ The cache is automatically invalidated when:
 Prismocker can load relations lazily (on-demand) instead of eagerly:
 
 ```typescript
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 // Enable lazy relation loading
@@ -2470,7 +2531,7 @@ createPrismocker<PrismaClient>()
 ### Example: Full Type Safety
 
 ```typescript
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 const prisma = createPrismocker<PrismaClient>();
@@ -2501,7 +2562,7 @@ const data = prisma.getData('companies'); // Type: any[]
 
 </details>
 
-## Example Files
+## 📁 Example Files
 
 The Prismocker package includes comprehensive examples demonstrating its power:
 
@@ -2657,7 +2718,7 @@ These patterns enforce best practices that have proven effective in real-world a
 
 </details>
 
-## Caveats & Considerations
+## ⚠️ Caveats & Considerations
 
 <details>
 <summary><strong>Relations</strong></summary>
@@ -2816,7 +2877,7 @@ prisma.$executeRawUnsafe = jest.fn().mockResolvedValue(1); // 1 row affected
 
 </details>
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
 <details>
 <summary><strong>Jest: "Cannot find module '@prisma/client'"</strong></summary>
@@ -2899,7 +2960,7 @@ const prisma = createPrismocker<PrismaClient>({
 
 </details>
 
-## Migration Guide
+## 🔄 Migration Guide
 
 <details>
 <summary><strong>From Prismock</strong></summary>
@@ -2915,7 +2976,7 @@ const prismock = new PrismockClient();
 **After (Prismocker):**
 
 ```typescript
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 const prisma = createPrismocker<PrismaClient>();
@@ -2950,7 +3011,7 @@ jest.mock('@prisma/client', () => ({
 
 ```typescript
 // __mocks__/@prisma/client.ts
-import { createPrismocker } from 'prisma';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 export const PrismaClient = createPrismocker<PrismaClient>();
@@ -2965,9 +3026,9 @@ export const PrismaClient = createPrismocker<PrismaClient>();
 
 </details>
 
-## CLI Commands
+## 🛠️ CLI Commands
 
-### `npx prisma setup`
+### `npx @jsonbored/prismocker setup`
 
 Automatically sets up Prismocker in your project. See [Auto-Setup](#auto-setup-recommended) section for details.
 
@@ -2984,13 +3045,13 @@ Automatically sets up Prismocker in your project. See [Auto-Setup](#auto-setup-r
 
 ```bash
 # Full setup
-npx prisma setup
+npx @jsonbored/prismocker setup
 
 # Only create mock file
-npx prisma setup --only-mock
+npx @jsonbored/prismocker setup --only-mock
 
 # Only generate enums
-npx prisma setup --only-enums
+npx @jsonbored/prismocker setup --only-enums
 ```
 
 ### `npx prisma verify`
@@ -3065,7 +3126,7 @@ npx prisma generate-enums --schema ./prisma/schema.prisma --mock ./__mocks__/@pr
 * After modifying enum values in your Prisma schema
 * After running `prisma generate` (consider adding to postgenerate hook)
 
-## Contributing
+## 🤝 Contributing
 
 This package is designed to be standalone and extractable. Contributions welcome!
 
@@ -3074,35 +3135,18 @@ This package is designed to be standalone and extractable. Contributions welcome
 * Comprehensive JSDoc documentation
 * Additional test utilities
 
-## Why Prismocker?
+## 🔗 Related Projects
 
-Prismocker was created to solve real problems in Prisma testing:
+* **[Prisma](https://www.prisma.io/)** - The ORM being mocked
+* **[safemocker](https://github.com/JSONbored/safemocker)** - Similar type-safe mocking tool for next-safe-action (sister package)
+* **[ClaudePro Directory](https://github.com/JSONbored/claudepro-directory)** - The parent project where prismocker and safemocker were originally developed
+* **[prisma-zod-generator](https://github.com/omar-dulaimi/prisma-zod-generator)** - Zod schema generator for Prisma
+* **[prisma-json-types-generator](https://github.com/olivierwilkinson/prisma-json-types-generator)** - JSON type generator for Prisma
 
-1. **pnpm Compatibility** - Other Prisma mocks (like Prismock) have module resolution issues with pnpm
-2. **Type Safety** - Eliminates `as any` assertions with proper TypeScript integration
-3. **Ecosystem Compatibility** - Works with all Prisma generators and extensions
-4. **Simplicity** - No schema parsing overhead, just fast in-memory storage
-5. **Maintainability** - You control the code, can extend as needed
-6. **Standalone** - Environment-agnostic, works with any Prisma setup
-
-**Perfect For:**
-
-* ✅ Unit testing Prisma-based services
-* ✅ API route testing
-* ✅ Complex query testing
-* ✅ Integration testing (without database)
-* ✅ CI/CD pipelines (fast, no database setup)
-
-## License
+## 📄 License
 
 MIT
 
-## Author
+## 👤 Author
 
 JSONbored
-
-## Related Projects
-
-* [Prisma](https://www.prisma.io/) - The ORM being mocked
-* [prisma-zod-generator](https://github.com/omar-dulaimi/prisma-zod-generator) - Zod schema generator for Prisma
-* [prisma-json-types-generator](https://github.com/olivierwilkinson/prisma-json-types-generator) - JSON type generator for Prisma

@@ -407,4 +407,137 @@ describe('Prismocker Integration Tests', () => {
       expect(events.some((e) => e.action === 'create')).toBe(true);
     });
   });
+
+  describe('Lifecycle Methods', () => {
+    it('should support $connect() (no-op for in-memory)', async () => {
+      // $connect() should not throw and should complete immediately
+      await expect(prisma.$connect()).resolves.toBeUndefined();
+    });
+
+    it('should support $disconnect() (no-op for in-memory)', async () => {
+      // $disconnect() should not throw and should complete immediately
+      await expect(prisma.$disconnect()).resolves.toBeUndefined();
+    });
+
+    it('should support $metrics() API', async () => {
+      // Create a new prisma instance with logQueries enabled to track query stats
+      const metricsPrisma = createPrismocker<PrismaClient>({
+        logQueries: true, // Enable query logging to track stats
+      });
+
+      // Seed some data and perform operations to generate metrics
+      if (isPrismockerClient(metricsPrisma)) {
+        setDataTyped(metricsPrisma, 'companies', [
+          { id: 'comp-1', name: 'Company 1', owner_id: 'owner-1', slug: 'company-1' },
+        ]);
+      }
+
+      // Perform some operations
+      await metricsPrisma.companies.findMany();
+      await metricsPrisma.companies.findUnique({ where: { id: 'comp-1' } });
+
+      // Get metrics
+      const metrics = await metricsPrisma.$metrics();
+
+      // Verify metrics structure
+      expect(metrics).toBeDefined();
+      expect(metrics.counters).toBeDefined();
+      expect(Array.isArray(metrics.counters)).toBe(true);
+      expect(metrics.counters.length).toBeGreaterThan(0);
+
+      // Verify query count counter exists
+      const queryCounter = metrics.counters.find(
+        (c: any) => c.key === 'prisma_client_queries_total'
+      );
+      expect(queryCounter).toBeDefined();
+      expect(queryCounter.value).toBeGreaterThanOrEqual(2); // At least 2 queries performed
+    });
+  });
+
+  describe('Error-Throwing Operations', () => {
+    it('should throw error when findFirstOrThrow finds no records', async () => {
+      if (isPrismockerClient(prisma)) {
+        setDataTyped(prisma, 'companies', []);
+      }
+
+      await expect(
+        prisma.companies.findFirstOrThrow({
+          where: { name: 'Non-existent' },
+        })
+      ).rejects.toThrow();
+    });
+
+    it('should return record when findFirstOrThrow finds a match', async () => {
+      if (isPrismockerClient(prisma)) {
+        setDataTyped(prisma, 'companies', [
+          { id: 'comp-1', name: 'Company 1', owner_id: 'owner-1', slug: 'company-1' },
+        ]);
+      }
+
+      const result = await prisma.companies.findFirstOrThrow({
+        where: { name: 'Company 1' },
+      });
+
+      expect(result).toBeDefined();
+      expect(result.name).toBe('Company 1');
+    });
+  });
+
+  describe('Upsert Operations', () => {
+    it('should create record when upsert finds no match', async () => {
+      if (isPrismockerClient(prisma)) {
+        setDataTyped(prisma, 'companies', []);
+      }
+
+      const result = await prisma.companies.upsert({
+        where: { id: 'comp-1' },
+        create: {
+          id: 'comp-1',
+          name: 'New Company',
+          owner_id: 'owner-1',
+          slug: 'new-company',
+        },
+        update: {
+          name: 'Updated Company',
+        },
+      });
+
+      expect(result).toBeDefined();
+      expect(result.name).toBe('New Company');
+
+      // Verify record was created
+      const allCompanies = await prisma.companies.findMany();
+      expect(allCompanies).toHaveLength(1);
+      expect(allCompanies[0].name).toBe('New Company');
+    });
+
+    it('should update record when upsert finds a match', async () => {
+      if (isPrismockerClient(prisma)) {
+        setDataTyped(prisma, 'companies', [
+          { id: 'comp-1', name: 'Original Company', owner_id: 'owner-1', slug: 'original-company' },
+        ]);
+      }
+
+      const result = await prisma.companies.upsert({
+        where: { id: 'comp-1' },
+        create: {
+          id: 'comp-1',
+          name: 'New Company',
+          owner_id: 'owner-1',
+          slug: 'new-company',
+        },
+        update: {
+          name: 'Updated Company',
+        },
+      });
+
+      expect(result).toBeDefined();
+      expect(result.name).toBe('Updated Company');
+
+      // Verify record was updated (not duplicated)
+      const allCompanies = await prisma.companies.findMany();
+      expect(allCompanies).toHaveLength(1);
+      expect(allCompanies[0].name).toBe('Updated Company');
+    });
+  });
 });
