@@ -57,7 +57,6 @@ export const subscribeNewsletter = createInngestFunction(
   },
   { event: 'email/subscribe' },
   async ({ event, step, logContext }: InngestHandlerContext) => {
-
     const { email, source, referrer, copyType, copyCategory, copySlug } = event.data;
 
     // Step 1: Validate email

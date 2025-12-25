@@ -34,4 +34,3 @@ describe('announcements data functions', () => {
     });
   });
 });
-

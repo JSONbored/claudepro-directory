@@ -70,18 +70,18 @@ jest.mock('../../utils/monitoring', () => ({
 const { __mockGetService: mockGetService } = jest.requireMock('../../../data/service-factory') as {
   __mockGetService: ReturnType<typeof jest.fn>;
 };
-const {
-  __mockLogger: mockLogger,
-  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
-} = jest.requireMock('../../../logging/server') as {
-  __mockLogger: {
-    info: ReturnType<typeof jest.fn>;
-    warn: ReturnType<typeof jest.fn>;
-    error: ReturnType<typeof jest.fn>;
+const { __mockLogger: mockLogger, __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId } =
+  jest.requireMock('../../../logging/server') as {
+    __mockLogger: {
+      info: ReturnType<typeof jest.fn>;
+      warn: ReturnType<typeof jest.fn>;
+      error: ReturnType<typeof jest.fn>;
+    };
+    __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
   };
-  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-};
-const { __mockNormalizeError: mockNormalizeError } = jest.requireMock('@heyclaude/shared-runtime') as {
+const { __mockNormalizeError: mockNormalizeError } = jest.requireMock(
+  '@heyclaude/shared-runtime'
+) as {
   __mockNormalizeError: ReturnType<typeof jest.fn>;
 };
 
@@ -193,7 +193,9 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -234,7 +236,9 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -276,7 +280,9 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -293,8 +299,13 @@ describe('handleResendWebhook', () => {
         health_status: 'active',
       })
     );
-    expect(mockNewsletterService.getSubscriptionEngagementScore).toHaveBeenCalledWith('user@example.com');
-    expect(mockNewsletterService.updateEngagementScore).toHaveBeenCalledWith('user@example.com', 55); // 50 + 5
+    expect(mockNewsletterService.getSubscriptionEngagementScore).toHaveBeenCalledWith(
+      'user@example.com'
+    );
+    expect(mockNewsletterService.updateEngagementScore).toHaveBeenCalledWith(
+      'user@example.com',
+      55
+    ); // 50 + 5
     expect(mockNewsletterService.updateLastActiveAt).toHaveBeenCalledWith('user@example.com');
   });
 
@@ -321,7 +332,9 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -338,7 +351,10 @@ describe('handleResendWebhook', () => {
         health_status: 'active',
       })
     );
-    expect(mockNewsletterService.updateEngagementScore).toHaveBeenCalledWith('user@example.com', 60); // 50 + 10
+    expect(mockNewsletterService.updateEngagementScore).toHaveBeenCalledWith(
+      'user@example.com',
+      60
+    ); // 50 + 10
   });
 
   /**
@@ -363,7 +379,9 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -378,7 +396,10 @@ describe('handleResendWebhook', () => {
       notes: 'Bounced email_id: email-123',
       updated_at: expect.any(String),
     });
-    expect(mockNewsletterService.updateSubscriptionStatus).toHaveBeenCalledWith('user@example.com', 'bounced');
+    expect(mockNewsletterService.updateSubscriptionStatus).toHaveBeenCalledWith(
+      'user@example.com',
+      'bounced'
+    );
     expect(mockMiscService.upsertEmailEngagementSummary).toHaveBeenCalledWith(
       expect.objectContaining({
         email: 'user@example.com',
@@ -412,7 +433,9 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -460,7 +483,9 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -498,7 +523,9 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -531,7 +558,9 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     // Should still succeed (error is logged but doesn't stop processing)
     expect(result.success).toBe(true);
@@ -562,7 +591,9 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     // Should still succeed (error is logged but doesn't stop processing)
     expect(result.success).toBe(true);
@@ -596,11 +627,16 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     expect(result.success).toBe(true);
     // Should cap at 100 (98 + 5 = 103, but capped at 100)
-    expect(mockNewsletterService.updateEngagementScore).toHaveBeenCalledWith('user@example.com', 100);
+    expect(mockNewsletterService.updateEngagementScore).toHaveBeenCalledWith(
+      'user@example.com',
+      100
+    );
   });
 
   /**
@@ -623,7 +659,9 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     expect(result.success).toBe(true);
     // Should use 0 as default count
@@ -653,7 +691,9 @@ describe('handleResendWebhook', () => {
     // Execute same event twice
     const { result: result1 } = (await t.execute({
       events: [eventData],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     // Create fresh test engine for second execution (simulating idempotency)
     const t2 = new InngestTestEngine({
@@ -664,7 +704,9 @@ describe('handleResendWebhook', () => {
 
     const { result: result2 } = (await t2.execute({
       events: [eventData],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     // Both should succeed
     expect(result1.success).toBe(true);
@@ -688,7 +730,9 @@ describe('handleResendWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; action: string; emailId: string; processedCount: number } };
+    })) as {
+      result: { success: boolean; action: string; emailId: string; processedCount: number };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -701,4 +745,3 @@ describe('handleResendWebhook', () => {
     expect(mockMiscService.getEmailEngagementSummary).not.toHaveBeenCalled();
   });
 });
-

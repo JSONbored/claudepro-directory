@@ -5,5 +5,8 @@
 --
 -- Description: Remove get_days_ago RPC function - Not found in codebase, codebase uses TypeScript date utilities
 -- Function signature: get_days_ago(input_date timestamp with time zone)
-
-DROP FUNCTION IF EXISTS public.get_days_ago(timestamp with time zone);
+DROP FUNCTION IF EXISTS public.get_days_ago (
+  timestamp
+  with
+    time zone
+);

@@ -1,6 +1,9 @@
+---
 # CI Pipeline
-# Optimizations: path-based filtering, parallel jobs, shallow clones (fetch-depth: 1), Turbo cache
-# Uses actions/checkout@v6 for improved performance and sparse checkout support
+# Optimizations: path-based filtering, parallel jobs, shallow
+# clones (fetch-depth: 1), Turbo cache
+# Uses actions/checkout@v6 for improved performance and sparse
+# checkout support
 name: CI
 
 on:
@@ -15,36 +18,39 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # Required for Turbo remote cache; builds without these use local cache only
+  # Required for Turbo remote cache; builds without these use
+  # local cache only
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
-  # Fast path detection - only checkout minimal history needed for path filtering
+  # Fast path detection - only checkout minimal history needed
+  # for path filtering
   changes:
     name: Detect Changes
     runs-on: ubuntu-latest
     timeout-minutes: 2
     outputs:
       packages: ${{ steps.filter.outputs.packages }}
+      mcp-server: ${{ steps.filter.outputs.mcp-server }}
       web: ${{ steps.filter.outputs.web }}
-      edge: ${{ steps.filter.outputs.edge }}
       generators: ${{ steps.filter.outputs.generators }}
       content: ${{ steps.filter.outputs.content }}
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 1 # Shallow clone - only need current commit for path filtering
+          fetch-depth: 1
       - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
             packages:
               - 'packages/**'
+              - '!packages/mcp-server/**'
+            mcp-server:
+              - 'packages/mcp-server/**'
             web:
               - 'apps/web/**'
-            edge:
-              - 'apps/edge/**'
             generators:
               - 'packages/generators/**'
             content:
@@ -55,17 +61,21 @@ jobs:
   type-check:
     name: Type Check
     needs: changes
-    if: needs.changes.outputs.packages == 'true' || needs.changes.outputs.web == 'true' || needs.changes.outputs.generators == 'true'
+    if: >-
+      (needs.changes.outputs.packages == 'true' ||
+       needs.changes.outputs.web == 'true' ||
+       needs.changes.outputs.generators == 'true') &&
+      needs.changes.outputs.mcp-server != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       # Checkout first to make composite action files available
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 1 # Shallow clone - only need current commit
+          fetch-depth: 1
       - uses: ./.github/actions/setup
         with:
-          skip-checkout: true # Already checked out above
+          skip-checkout: true
       - name: Type check
         run: pnpm type-check
         env:
@@ -75,21 +85,27 @@ jobs:
   build:
     name: Build
     needs: changes
-    if: needs.changes.outputs.web == 'true' || needs.changes.outputs.packages == 'true' || needs.changes.outputs.generators == 'true'
+    if: >-
+      (needs.changes.outputs.web == 'true' ||
+       needs.changes.outputs.packages == 'true' ||
+       needs.changes.outputs.generators == 'true') &&
+      needs.changes.outputs.mcp-server != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       # Checkout first to make composite action files available
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 1 # Shallow clone - only need current commit
+          fetch-depth: 1
       - uses: ./.github/actions/setup
         with:
           skip-checkout: true # Already checked out above
       - name: Build
         run: pnpm build
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: >-
+            ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: >-
+            ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           TURBO_TOKEN: ${{ env.TURBO_TOKEN }}
           TURBO_TEAM: ${{ env.TURBO_TEAM }}

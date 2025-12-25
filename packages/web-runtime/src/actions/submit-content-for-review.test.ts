@@ -66,7 +66,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {
@@ -278,7 +278,7 @@ describe('submitContentForReview', () => {
         { key: 'value' }, // $6: p_content_data
         undefined, // $7: p_author_profile_url (optional)
         undefined, // $8: p_github_url (optional)
-        ['tag1'], // $9: p_tags (optional)
+        ['tag1'] // $9: p_tags (optional)
       );
 
       // Verify result matches mock

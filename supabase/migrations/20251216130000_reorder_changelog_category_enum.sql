@@ -15,15 +15,14 @@
 -- - Function parameters (text type, not enum type)
 -- - JSON keys in the changes field (which are strings, not enum values)
 -- So we can safely recreate it without affecting data.
-
 -- Step 1: Create new enum with correct order
 CREATE TYPE public.changelog_category_new AS ENUM (
-    'Added',
-    'Changed',
-    'Fixed',
-    'Security',
-    'Deprecated',
-    'Removed'
+  'Added',
+  'Changed',
+  'Fixed',
+  'Security',
+  'Deprecated',
+  'Removed'
 );
 
 -- Step 2: Drop the old enum
@@ -31,4 +30,5 @@ CREATE TYPE public.changelog_category_new AS ENUM (
 DROP TYPE public.changelog_category;
 
 -- Step 3: Rename the new enum to the original name
-ALTER TYPE public.changelog_category_new RENAME TO changelog_category;
+ALTER TYPE public.changelog_category_new
+RENAME TO changelog_category;

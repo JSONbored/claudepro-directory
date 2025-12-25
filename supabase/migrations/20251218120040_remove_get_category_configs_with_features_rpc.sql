@@ -9,5 +9,4 @@
 --
 -- Function signature: get_category_configs_with_features()
 -- Related: ContentService.getCategoryConfigs uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_category_configs_with_features();
+DROP FUNCTION IF EXISTS public.get_category_configs_with_features ();

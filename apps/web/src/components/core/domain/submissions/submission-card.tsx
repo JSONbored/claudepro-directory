@@ -180,14 +180,14 @@ export function SubmissionCard({
         </div>
 
         {status === SubmissionStatus.rejected && submission.rejection_reason ? (
-          <div className="mb-4 rounded-lg border border-error-border bg-error-bg p-3">
-            <p className="text-sm-medium mb-1 text-error">Rejection Reason:</p>
+          <div className="border-error-border bg-error-bg mb-4 rounded-lg border p-3">
+            <p className="text-sm-medium text-error mb-1">Rejection Reason:</p>
             <p className="text-muted-foreground text-sm">{submission.rejection_reason}</p>
           </div>
         ) : null}
 
         {status === SubmissionStatus.merged && ( // 'merged'
-          <div className="mb-4 rounded-lg border border-success-border bg-success-bg p-3">
+          <div className="border-success-border bg-success-bg mb-4 rounded-lg border p-3">
             <p className="text-sm-medium text-success">
               🎉 Your contribution is now live on ClaudePro Directory!
             </p>

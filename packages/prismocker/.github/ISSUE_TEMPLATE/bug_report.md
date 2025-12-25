@@ -1,9 +1,11 @@
 ---
+
 name: Bug Report
 about: Report a bug or issue with prismocker
-title: '[BUG] '
+title: '\[BUG] '
 labels: bug
 assignees: ''
+
 ---
 
 ## Description
@@ -28,9 +30,7 @@ import type { PrismaClient } from '@prisma/client';
 const prisma = createPrismocker<PrismaClient>();
 
 // Seed data
-prisma.setData('users', [
-  { id: 'user-1', name: 'Test User' },
-]);
+prisma.setData('users', [{ id: 'user-1', name: 'Test User' }]);
 
 // Issue occurs here...
 const users = await prisma.users.findMany();
@@ -47,13 +47,12 @@ What actually happened.
 
 ## Environment
 
-- **prismocker version:** 
-- **@prisma/client version:** 
-- **Jest/Vitest version:** 
-- **Node.js version:** 
-- **OS:** 
+- **prismocker version:**
+- **@prisma/client version:**
+- **Jest/Vitest version:**
+- **Node.js version:**
+- **OS:**
 
 ## Additional Context
 
 Add any other context, screenshots, or error messages about the problem here.
-

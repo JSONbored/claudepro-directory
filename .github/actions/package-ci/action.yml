@@ -1,0 +1,114 @@
+---
+# Composite Action: Package CI
+#
+# Reusable CI steps for standalone packages in the monorepo.
+# Provides consistent CI pipeline for packages that need independent
+# testing and building.
+#
+# **Purpose:**
+# This composite action standardizes the CI workflow for standalone
+# packages (like mcp-server, prismocker, safemocker) within the
+# monorepo. It handles checkout, dependency installation, type
+# checking, building, and testing in a consistent, reusable way.
+#
+# **What It Does:**
+# 1. Checks out repository (optional, can skip if already checked out)
+# 2. Sets up pnpm package manager
+# 3. Sets up Node.js with pnpm caching
+# 4. Installs dependencies (frozen lockfile for reproducibility)
+# 5. Runs type-check in package directory
+# 6. Builds the package
+# 7. Runs tests in package directory
+#
+# **Usage:**
+# ```yaml
+# - uses: ./.github/actions/package-ci
+#   with:
+#     package-path: packages/mcp-server
+#     node-version: '20'
+#     pnpm-version: '10'
+# ```
+#
+# **Benefits:**
+# - Reduces duplication across package workflows
+# - Ensures consistent CI steps for all packages
+# - Easy to update: change once, applies to all packages
+# - Maintains package isolation (each package has its own workflow)
+#
+# **Integration:**
+# Used by package-specific workflows (e.g.,
+# packages/mcp-server/.github/workflows/ci.yml) to provide consistent
+# CI behavior while maintaining package-level workflow files.
+#
+# @see {@link ../package-release/action.yml | Package Release Action}
+# @see {@link ../../packages/mcp-server/.github/workflows/ci.yml | Example}
+name: 'Package CI'
+description: >-
+  Reusable CI steps for standalone packages (type-check, build, test)
+
+inputs:
+  package-path:
+    description: >-
+      Path to package directory (e.g., packages/mcp-server).
+      Must be relative to repository root.
+    required: true
+  node-version:
+    description: >-
+      Node.js version to use (e.g., "20", "22"). Defaults to "20".
+    required: false
+    default: '20'
+  pnpm-version:
+    description: 'pnpm version to use (e.g., "10", "9"). Defaults to "10".'
+    required: false
+    default: '10'
+  fetch-depth:
+    description: >-
+      Git fetch depth (0 for full history, 1 for shallow clone).
+      Defaults to "1" for faster CI.
+    required: false
+    default: '1'
+  skip-checkout:
+    description: >-
+      Skip checkout step (use "true" when repository is already checked out).
+      Defaults to "false".
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      if: inputs.skip-checkout != 'true'
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ inputs.pnpm-version }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      shell: bash
+
+    - name: Type check
+      working-directory: ${{ inputs.package-path }}
+      run: pnpm type-check
+      shell: bash
+
+    - name: Build
+      working-directory: ${{ inputs.package-path }}
+      run: pnpm build
+      shell: bash
+
+    - name: Run tests
+      working-directory: ${{ inputs.package-path }}
+      run: pnpm test
+      shell: bash

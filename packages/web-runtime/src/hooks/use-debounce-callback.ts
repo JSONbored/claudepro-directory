@@ -133,7 +133,7 @@ export function useDebounceCallback<T extends (...args: any[]) => any>(
       clearTimeout(maxWaitTimeoutRef.current);
       maxWaitTimeoutRef.current = null;
     }
-    
+
     // Execute function with last arguments if pending
     if (lastArgsRef.current !== null) {
       if (!leading || leadingExecutedRef.current) {
@@ -141,7 +141,7 @@ export function useDebounceCallback<T extends (...args: any[]) => any>(
       }
       lastArgsRef.current = null;
     }
-    
+
     lastCallTimeRef.current = null;
     leadingExecutedRef.current = false;
   }, [leading]);

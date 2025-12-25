@@ -70,4 +70,3 @@ export async function handleOAuthIntrospect(request: Request, env: ExtendedEnv):
 
   return handleOAuthIntrospectShared(request, env, adapter);
 }
-

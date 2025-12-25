@@ -2,34 +2,34 @@
   "name": "@heyclaude/data-layer",
   "version": "1.1.0",
   "private": true,
-  "type": "module",
   "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
-      "development": "./src/index.ts",
       "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
       "default": "./src/index.ts"
     },
     "./services/trending": {
-      "development": "./src/services/trending.ts",
       "types": "./dist/services/trending.d.ts",
+      "development": "./src/services/trending.ts",
       "default": "./src/services/trending.ts"
     },
     "./prisma": {
-      "development": "./src/prisma/index.ts",
       "types": "./dist/prisma/index.d.ts",
+      "development": "./src/prisma/index.ts",
       "react-server": "./src/prisma/index.ts",
       "default": "./src/prisma/index.ts"
     },
     "./prisma/client": {
-      "development": "./src/prisma/client.ts",
       "types": "./dist/prisma/client.d.ts",
+      "development": "./src/prisma/client.ts",
       "react-server": "./src/prisma/client.ts",
       "default": "./src/prisma/client.ts"
     },
     "./utils/request-cache": {
-      "development": "./src/utils/request-cache.ts",
       "types": "./dist/utils/request-cache.d.ts",
+      "development": "./src/utils/request-cache.ts",
       "default": "./src/utils/request-cache.ts"
     }
   },

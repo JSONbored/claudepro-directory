@@ -11,5 +11,4 @@
 --
 -- Related Changes:
 -- - packages/data-layer/src/services/account.ts: Converted isBookmarkedBatch() to use Prisma
-
-DROP FUNCTION IF EXISTS public.is_bookmarked_batch(uuid, jsonb);
+DROP FUNCTION IF EXISTS public.is_bookmarked_batch (uuid, jsonb);

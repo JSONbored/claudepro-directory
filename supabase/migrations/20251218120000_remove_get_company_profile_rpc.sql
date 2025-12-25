@@ -8,5 +8,4 @@
 --
 -- Function signature: get_company_profile(p_slug text)
 -- Related: CompaniesService.getCompanyProfile uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_company_profile(text);
+DROP FUNCTION IF EXISTS public.get_company_profile (text);

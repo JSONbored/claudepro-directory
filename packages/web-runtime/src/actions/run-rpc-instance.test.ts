@@ -41,4 +41,3 @@ describe('run-rpc-instance', () => {
     expect(typeof runRpc).toBe('function');
   });
 });
-

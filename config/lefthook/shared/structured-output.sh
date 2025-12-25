@@ -23,36 +23,35 @@ _CURRENT_TASK=""
 _TASK_START_TIME=0
 
 task_start() {
-  _CURRENT_TASK="$1"
-  _TASK_START_TIME=$(date +%s%N)
-  echo -e "${CYAN}┃  ${_CURRENT_TASK} ❯${NC}"
+	_CURRENT_TASK="$1"
+	_TASK_START_TIME=$(date +%s%N)
+	echo -e "${CYAN}┃  ${_CURRENT_TASK} ❯${NC}"
 }
 
 task_success() {
-  local message="${1:-completed}"
-  local duration=$(( ($(date +%s%N) - _TASK_START_TIME) / 1000000 ))
-  echo -e "${GREEN}│  ✅ ${message}${NC} (${duration}ms)"
-  _CURRENT_TASK=""
+	local message="${1:-completed}"
+	local duration=$((($(date +%s%N) - _TASK_START_TIME) / 1000000))
+	echo -e "${GREEN}│  ✅ ${message}${NC} (${duration}ms)"
+	_CURRENT_TASK=""
 }
 
 task_warning() {
-  local message="$1"
-  echo -e "${YELLOW}│  ⚠️  ${message}${NC}"
+	local message="$1"
+	echo -e "${YELLOW}│  ⚠️  ${message}${NC}"
 }
 
 task_error() {
-  local message="$1"
-  echo -e "${RED}│  ❌ ${message}${NC}"
+	local message="$1"
+	echo -e "${RED}│  ❌ ${message}${NC}"
 }
 
 task_skip() {
-  local message="${1:-skipped}"
-  echo -e "${BLUE}│  ⏭️  ${message}${NC}"
-  _CURRENT_TASK=""
+	local message="${1:-skipped}"
+	echo -e "${BLUE}│  ⏭️  ${message}${NC}"
+	_CURRENT_TASK=""
 }
 
 task_info() {
-  local message="$1"
-  echo -e "${BLUE}│  ℹ️  ${message}${NC}"
+	local message="$1"
+	echo -e "${BLUE}│  ℹ️  ${message}${NC}"
 }
-

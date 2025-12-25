@@ -31,6 +31,7 @@ These rule files have been modified to:
 ## Files Included
 
 ### High Generalizability (Ready to Use)
+
 - `react-hooks-best-practices.yml` - React hooks patterns
 - `react-optimization-patterns.yml` - React performance patterns
 - `nextjs-16-patterns.yml` - Next.js 16 async patterns
@@ -79,15 +80,17 @@ Replace these placeholders with your actual package paths:
 #### Example 1: Logger Import
 
 **Before (generalized):**
+
 ```yaml
-message: "Import logger from YOUR_LOGGER_PACKAGE (server)"
+message: 'Import logger from YOUR_LOGGER_PACKAGE (server)'
 files:
   - 'app/**/*.tsx'
 ```
 
 **After (customized for your project):**
+
 ```yaml
-message: "Import logger from @mycompany/logger/server"
+message: 'Import logger from @mycompany/logger/server'
 files:
   - 'src/app/**/*.tsx'
 ```
@@ -95,29 +98,33 @@ files:
 #### Example 2: API Route Factory Pattern
 
 **Before (generalized):**
+
 ```yaml
 files:
   - 'app/api/**/*.ts'
-message: "Import from YOUR_WEB_RUNTIME_PACKAGE/server"
+message: 'Import from YOUR_WEB_RUNTIME_PACKAGE/server'
 ```
 
 **After (customized for your project):**
+
 ```yaml
 files:
   - 'src/app/api/**/*.ts'
-message: "Import from @mycompany/web-runtime/server"
+message: 'Import from @mycompany/web-runtime/server'
 ```
 
 #### Example 3: Serialization Utility
 
 **Before (generalized):**
+
 ```yaml
-message: "Import from YOUR_SHARED_RUNTIME_PACKAGE/utils/serialize"
+message: 'Import from YOUR_SHARED_RUNTIME_PACKAGE/utils/serialize'
 ```
 
 **After (customized for your project):**
+
 ```yaml
-message: "Import from @mycompany/utils/serialize"
+message: 'Import from @mycompany/utils/serialize'
 ```
 
 ### Use Case Examples
@@ -127,12 +134,14 @@ message: "Import from @mycompany/utils/serialize"
 The `react-hooks-best-practices.yml` file helps enforce React's Rules of Hooks:
 
 **What it catches:**
+
 - Hooks called conditionally
 - Hooks called in loops
 - Hooks called in nested functions
 - Missing cleanup functions in useEffect
 
 **Example violation:**
+
 ```typescript
 // ❌ Bad: Hook called conditionally
 if (condition) {
@@ -151,11 +160,13 @@ if (condition) {
 The `nextjs-16-patterns.yml` file ensures proper async handling in Next.js 16:
 
 **What it catches:**
+
 - Async params accessed without await
 - Async searchParams accessed without await
 - Async cookies accessed without await
 
 **Example violation:**
+
 ```typescript
 // ❌ Bad: params accessed directly
 export default async function Page({ params }: { params: { slug: string } }) {
@@ -174,11 +185,13 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 The `api-routes-patterns.yml` file ensures all API routes use the factory pattern:
 
 **What it catches:**
+
 - Raw NextRequest handlers
 - Missing factory configuration properties
 - Missing validation schemas
 
 **Example violation:**
+
 ```typescript
 // ❌ Bad: Raw NextRequest handler
 export async function GET(request: NextRequest) {
@@ -202,11 +215,13 @@ export const GET = createApiRoute({
 The `page-data-flow-patterns.yml` file prevents serialization errors:
 
 **What it catches:**
+
 - Date objects passed to client components
 - Non-serializable data passed to client components
 - Functions passed to client components
 
 **Example violation:**
+
 ```typescript
 // ❌ Bad: Date object passed directly
 export default async function Page() {

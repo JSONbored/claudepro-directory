@@ -33,7 +33,7 @@ rule:
     - not:
         has:
           regex: SPRING|STAGGER|MICROINTERACTIONS
-message: "Motion components should use design system animation utilities (SPRING, STAGGER, MICROINTERACTIONS) from @heyclaude/web-runtime/design-system for consistency and performance."
+message: 'Motion components should use design system animation utilities (SPRING, STAGGER, MICROINTERACTIONS) from @heyclaude/web-runtime/design-system for consistency and performance.'
 severity: warning
 
 # Note: JSX pattern matching for motion components is limited in ast-grep

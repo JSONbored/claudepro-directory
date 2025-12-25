@@ -340,10 +340,13 @@ export const getBookmarkStatusBatch = authedAction
     // IsBookmarkedBatchReturns is Array<{ content_type: content_category | null; content_slug: string; is_bookmarked: boolean }>
     const results = Array.isArray(data) ? data : [];
     const resultMap = new Map<string, boolean>(
-      results.map((row: { content_type: content_category | null; content_slug: string; is_bookmarked: boolean }) => [
-        `${row.content_type ?? 'unknown'}:${row.content_slug}`,
-        row.is_bookmarked,
-      ])
+      results.map(
+        (row: {
+          content_type: content_category | null;
+          content_slug: string;
+          is_bookmarked: boolean;
+        }) => [`${row.content_type ?? 'unknown'}:${row.content_slug}`, row.is_bookmarked]
+      )
     );
     return resultMap;
   });
@@ -418,7 +421,7 @@ export const getUserProfileImage = authedAction
   .metadata({ actionName: 'getUserProfileImage', category: 'user' })
   .action(async ({ ctx }) => {
     const { prisma } = await import('@heyclaude/data-layer/prisma/client');
-    
+
     // Fetch only the image field from database
     const userProfile = await prisma.users.findUnique({
       select: { image: true },

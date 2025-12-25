@@ -40,7 +40,7 @@ describe('marketing contact data functions', () => {
   describe('getSocialLinks', () => {
     it('should return all social links', () => {
       const links = getSocialLinks();
-      
+
       expect(links).toHaveProperty('discord');
       expect(links).toHaveProperty('email');
       expect(links).toHaveProperty('github');
@@ -53,7 +53,7 @@ describe('marketing contact data functions', () => {
   describe('getContactChannels', () => {
     it('should return contact channels', () => {
       const channels = getContactChannels();
-      
+
       expect(channels).toHaveProperty('discord');
       expect(channels).toHaveProperty('email');
       expect(channels).toHaveProperty('github');
@@ -64,7 +64,7 @@ describe('marketing contact data functions', () => {
   describe('getPartnerContactChannels', () => {
     it('should return partner contact channels', () => {
       const channels = getPartnerContactChannels();
-      
+
       expect(channels).toHaveProperty('hiEmail');
       expect(channels).toHaveProperty('partnerEmail');
       expect(channels).toHaveProperty('securityEmail');
@@ -75,18 +75,18 @@ describe('marketing contact data functions', () => {
   describe('getPartnerCtas', () => {
     it('should return partner CTAs with default recipient', () => {
       const ctas = getPartnerCtas();
-      
+
       expect(ctas).toHaveProperty('jobListing');
       expect(ctas).toHaveProperty('partnershipInquiry');
       expect(ctas).toHaveProperty('sponsoredListing');
-      
+
       expect(ctas.jobListing.href).toContain('mailto:');
       expect(ctas.jobListing.subject).toBe('Job Listing - Get Started');
     });
 
     it('should use specified recipient email', () => {
       const ctas = getPartnerCtas('hiEmail');
-      
+
       expect(ctas.jobListing.href).toContain('hi@test.com');
     });
   });
@@ -102,4 +102,3 @@ describe('marketing contact data functions', () => {
     });
   });
 });
-

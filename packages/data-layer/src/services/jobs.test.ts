@@ -246,7 +246,7 @@ describe('JobsService', () => {
         ...mockJob,
         company_id: companyId, // Foreign key for companies relation
       };
-      
+
       if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
         (prismocker as any).setData('jobs', [jobWithCompanyId]);
         (prismocker as any).setData('companies', [
@@ -307,7 +307,7 @@ describe('JobsService', () => {
         ...mockJob,
         company_id: companyId, // Foreign key for companies relation
       };
-      
+
       if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
         (prismocker as any).setData('jobs', [jobWithCompanyId]);
         (prismocker as any).setData('companies', [
@@ -401,7 +401,7 @@ describe('JobsService', () => {
         ...mockJob,
         company_id: companyId, // Foreign key for companies relation
       };
-      
+
       if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
         (prismocker as any).setData('jobs', [jobWithCompanyId]);
         (prismocker as any).setData('companies', [
@@ -470,7 +470,7 @@ describe('JobsService', () => {
         created_at: new Date(),
         updated_at: new Date(),
       }));
-      
+
       if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
         // Seed real jobs (count will return 2)
         (prismocker as any).setData('jobs', [...fullMockRealJobs, ...fullMockPlaceholders]);
@@ -799,7 +799,7 @@ describe('JobsService', () => {
       // Note: getJobBillingSummaries uses $queryRaw, which is not cached by withSmartCache
       const queryRawSpy = jest.fn().mockResolvedValue([]);
       (prismocker as any).$queryRaw = queryRawSpy;
-      
+
       const result = await service.getJobBillingSummaries({
         p_job_ids: [],
       });

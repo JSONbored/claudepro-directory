@@ -55,10 +55,7 @@ jest.mock('jiti', () => {
 
 describe('OpenAPI Generator', () => {
   const PROJECT_ROOT = process.cwd();
-  const companyRoutePath = join(
-    PROJECT_ROOT,
-    'apps/web/src/app/api/company/route.ts'
-  );
+  const companyRoutePath = join(PROJECT_ROOT, 'apps/web/src/app/api/company/route.ts');
 
   describe('extractRouteMetadata', () => {
     it('should extract route metadata from company route', async () => {
@@ -156,4 +153,3 @@ describe('OpenAPI Generator', () => {
     });
   });
 });
-

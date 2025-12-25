@@ -99,7 +99,9 @@ export function createMonitoringMocks(): {
 /**
  * Environment variable mock factory
  */
-export function createEnvVarMock(envVars: Record<string, string | undefined> = {}): ReturnType<typeof jest.fn> {
+export function createEnvVarMock(
+  envVars: Record<string, string | undefined> = {}
+): ReturnType<typeof jest.fn> {
   return jest.fn((key: string) => {
     return envVars[key] ?? undefined;
   });
@@ -115,7 +117,10 @@ export function createFetchMock(): ReturnType<typeof jest.fn> {
 /**
  * Create web app context mock factory
  */
-export function createWebAppContextMock(operation: string, route: string): ReturnType<typeof jest.fn> {
+export function createWebAppContextMock(
+  operation: string,
+  route: string
+): ReturnType<typeof jest.fn> {
   return jest.fn(() => ({
     requestId: 'test-request-id',
     operation,
@@ -260,4 +265,3 @@ export function resetInngestTestMocks(mocks: InngestTestMocks): void {
     } as Response);
   }
 }
-

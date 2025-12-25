@@ -55,13 +55,11 @@ export function setupContactEmailMocks(
     };
     __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
   };
-  const {
-    __mockNormalizeError: mockNormalizeError,
-    __mockEscapeHtml: mockEscapeHtml,
-  } = jest.requireMock('@heyclaude/shared-runtime') as {
-    __mockNormalizeError: ReturnType<typeof jest.fn>;
-    __mockEscapeHtml: ReturnType<typeof jest.fn>;
-  };
+  const { __mockNormalizeError: mockNormalizeError, __mockEscapeHtml: mockEscapeHtml } =
+    jest.requireMock('@heyclaude/shared-runtime') as {
+      __mockNormalizeError: ReturnType<typeof jest.fn>;
+      __mockEscapeHtml: ReturnType<typeof jest.fn>;
+    };
   const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock(
     '../../email/base-template'
   ) as {
@@ -325,13 +323,11 @@ export function setupJobPostingDripCampaignMocks(
     };
     __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
   };
-  const {
-    __mockNormalizeError: mockNormalizeError,
-    __mockEscapeHtml: mockEscapeHtml,
-  } = jest.requireMock('@heyclaude/shared-runtime') as {
-    __mockNormalizeError: ReturnType<typeof jest.fn>;
-    __mockEscapeHtml: ReturnType<typeof jest.fn>;
-  };
+  const { __mockNormalizeError: mockNormalizeError, __mockEscapeHtml: mockEscapeHtml } =
+    jest.requireMock('@heyclaude/shared-runtime') as {
+      __mockNormalizeError: ReturnType<typeof jest.fn>;
+      __mockEscapeHtml: ReturnType<typeof jest.fn>;
+    };
 
   // Reset all mocks
   jest.clearAllMocks();
@@ -380,4 +376,3 @@ export function setupJobPostingDripCampaignMocks(
     mockEscapeHtml,
   };
 }
-

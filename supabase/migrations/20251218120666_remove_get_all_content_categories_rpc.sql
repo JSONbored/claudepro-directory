@@ -17,5 +17,4 @@
 -- Note: Category data is likely fetched via Prisma directly or from static config
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.get_all_content_categories();
+DROP FUNCTION IF EXISTS public.get_all_content_categories ();

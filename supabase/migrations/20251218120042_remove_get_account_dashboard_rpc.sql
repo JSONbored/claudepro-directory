@@ -9,5 +9,4 @@
 --
 -- Function signature: get_account_dashboard(p_user_id uuid)
 -- Related: AccountService.getAccountDashboard uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_account_dashboard(uuid);
+DROP FUNCTION IF EXISTS public.get_account_dashboard (uuid);

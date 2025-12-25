@@ -57,7 +57,7 @@ export const searchCompaniesAction = authedAction
     const { searchCompanies } = await import('../data/companies.ts');
     const { getTimeoutConfig } = await import('../config/static-configs.ts');
     const { logActionFailure } = await import('../errors.ts');
-    
+
     try {
       const limit = parsedInput.limit ?? 10;
       const companies = await searchCompanies(parsedInput.query, limit);

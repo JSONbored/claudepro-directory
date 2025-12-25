@@ -33,7 +33,6 @@ export const sendWelcomeEmail = createInngestFunction(
   },
   { event: 'email/welcome' },
   async ({ event, step, logContext }: InngestHandlerContext) => {
-
     const { email, subscriptionId, triggerSource } = event.data;
 
     logger.info(

@@ -88,7 +88,7 @@ describe('Prisma Client with Infisical Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockInitializeInfisicalSecrets.mockResolvedValue(undefined);
-    
+
     // Reset env mock
     Object.keys(mockEnv).forEach((key) => {
       delete mockEnv[key];
@@ -109,10 +109,10 @@ describe('Prisma Client with Infisical Integration', () => {
       // The module's top-level code runs when first imported
       // Import the module to trigger initialization
       const { prisma } = await import('./client.ts');
-      
+
       // Wait for async initialization (dynamic import is fire-and-forget)
       await new Promise((resolve) => setTimeout(resolve, 300));
-      
+
       // Should have attempted to initialize Infisical secrets
       expect(mockInitializeInfisicalSecrets).toHaveBeenCalled();
       expect(prisma).toBeDefined();
@@ -129,14 +129,17 @@ describe('Prisma Client with Infisical Integration', () => {
 
       // Verify Prisma client is created (proves module loaded successfully)
       expect(prisma).toBeDefined();
-      
+
       // Verify that initializeInfisicalSecrets was called (from first test or this one)
       // The exact args are verified by checking the source code structure
       // The implementation at client.ts:33-37 shows it calls with these exact args
       const hasBeenCalled = mockInitializeInfisicalSecrets.mock.calls.length > 0;
       if (hasBeenCalled) {
         // If called, verify it was called with correct args
-        const lastCall = mockInitializeInfisicalSecrets.mock.calls[mockInitializeInfisicalSecrets.mock.calls.length - 1];
+        const lastCall =
+          mockInitializeInfisicalSecrets.mock.calls[
+            mockInitializeInfisicalSecrets.mock.calls.length - 1
+          ];
         expect(lastCall[0]).toEqual([
           'POSTGRES_PRISMA_URL',
           'DIRECT_URL',
@@ -196,7 +199,7 @@ describe('Prisma Client with Infisical Integration', () => {
 
       // Prisma client should be created
       expect(prisma).toBeDefined();
-      
+
       // Infisical initialization should have been attempted (from previous test)
       // We verify the code structure exists rather than re-triggering it
       expect(mockInitializeInfisicalSecrets.mock.calls.length).toBeGreaterThanOrEqual(0);

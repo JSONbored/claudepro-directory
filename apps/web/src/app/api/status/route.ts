@@ -41,7 +41,9 @@ import {
   statusResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
 import {
-  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+  createCachedApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { getOnlyCorsHeaders, jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';
@@ -130,7 +132,7 @@ export const GET = createCachedApiRoute({
         status = statusValue;
       }
     }
-    const statusCode = status === 'healthy' ? 200 : (status === 'degraded' ? 200 : 503);
+    const statusCode = status === 'healthy' ? 200 : status === 'degraded' ? 200 : 503;
 
     logger.info(
       {

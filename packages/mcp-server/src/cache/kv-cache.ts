@@ -28,7 +28,6 @@ interface CacheEntry {
   cacheVersion: number;
 }
 
-
 /**
  * Current cache version (increment when schema changes)
  */
@@ -66,7 +65,7 @@ function generateETag(content: string): string {
   let hash = 0;
   for (let i = 0; i < content.length; i++) {
     const char = content.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
   return `"${Math.abs(hash).toString(16)}"`;
@@ -122,7 +121,9 @@ export class KvResourceCache {
    * @param uri - Resource URI
    * @returns Cached entry or null if not found/expired
    */
-  async get(uri: string): Promise<{ text: string; mimeType: string; etag: string; cachedAt: string } | null> {
+  async get(
+    uri: string
+  ): Promise<{ text: string; mimeType: string; etag: string; cachedAt: string } | null> {
     if (!this.enabled || !this.kv) {
       return null;
     }
@@ -136,7 +137,9 @@ export class KvResourceCache {
       }
 
       // KV.get with type: 'json' returns parsed JSON or string - handle both cases
-      const entry = (typeof cached === 'string' ? JSON.parse(cached) : cached) as unknown as CacheEntry;
+      const entry = (typeof cached === 'string'
+        ? JSON.parse(cached)
+        : cached) as unknown as CacheEntry;
 
       // Check cache version
       if (entry.cacheVersion !== this.cacheVersion) {
@@ -165,7 +168,11 @@ export class KvResourceCache {
     } catch (error) {
       // Cache read error - return null (graceful degradation)
       if (this.logger) {
-        this.logger.error('KV cache read error', error instanceof Error ? error : new Error(String(error)), { uri });
+        this.logger.error(
+          'KV cache read error',
+          error instanceof Error ? error : new Error(String(error)),
+          { uri }
+        );
       }
       return null;
     }
@@ -205,7 +212,11 @@ export class KvResourceCache {
     } catch (error) {
       // Cache write error - log but don't throw (graceful degradation)
       if (this.logger) {
-        this.logger.error('KV cache write error', error instanceof Error ? error : new Error(String(error)), { uri });
+        this.logger.error(
+          'KV cache write error',
+          error instanceof Error ? error : new Error(String(error)),
+          { uri }
+        );
       }
     }
   }
@@ -226,7 +237,11 @@ export class KvResourceCache {
     } catch (error) {
       // Cache delete error - log but don't throw
       if (this.logger) {
-        this.logger.error('KV cache delete error', error instanceof Error ? error : new Error(String(error)), { uri });
+        this.logger.error(
+          'KV cache delete error',
+          error instanceof Error ? error : new Error(String(error)),
+          { uri }
+        );
       }
     }
   }
@@ -252,7 +267,9 @@ export class KvResourceCache {
       }
 
       // KV.get with type: 'json' returns parsed JSON or string - handle both cases
-      const entry = (typeof cached === 'string' ? JSON.parse(cached) : cached) as unknown as CacheEntry;
+      const entry = (typeof cached === 'string'
+        ? JSON.parse(cached)
+        : cached) as unknown as CacheEntry;
 
       // Check cache version
       if (entry.cacheVersion !== this.cacheVersion) {
@@ -313,4 +330,3 @@ export function createKvCache(
     ...options,
   });
 }
-

@@ -5,5 +5,4 @@
 --
 -- Description: Remove get_my_submissions RPC function - Only exists in generated types, no codebase calls
 -- Function signature: get_my_submissions(p_limit integer DEFAULT 20, p_offset integer DEFAULT 0)
-
-DROP FUNCTION IF EXISTS public.get_my_submissions(integer, integer);
+DROP FUNCTION IF EXISTS public.get_my_submissions (integer, integer);

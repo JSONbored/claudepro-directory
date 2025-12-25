@@ -114,7 +114,7 @@ export function JobCard({ job }: JobCardProps) {
       className={cn(
         'card-gradient transition-smooth group relative',
         isFeatured &&
-          'border-2 border-primary/50 bg-gradient-to-br from-primary/5 to-primary/10 shadow-lg shadow-primary/10'
+          'border-primary/50 from-primary/5 to-primary/10 shadow-primary/10 border-2 bg-gradient-to-br shadow-lg'
       )}
     >
       {isFeatured ? (

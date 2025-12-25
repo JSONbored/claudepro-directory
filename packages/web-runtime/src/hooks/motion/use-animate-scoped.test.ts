@@ -20,12 +20,8 @@ jest.mock('motion/react', () => {
 });
 
 // Get mocks for use in tests
-const {
-  useAnimate,
-  __mockScope,
-  __mockAnimate,
-  __mockUseAnimate,
-} = jest.requireMock('motion/react');
+const { useAnimate, __mockScope, __mockAnimate, __mockUseAnimate } =
+  jest.requireMock('motion/react');
 const mockScope = __mockScope;
 const mockAnimate = __mockAnimate;
 const mockUseAnimate = __mockUseAnimate;

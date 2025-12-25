@@ -100,7 +100,7 @@ export async function handleHealth(options: { prisma?: unknown } = {}): Promise<
 
   // Check dependencies
   const dependencies: DependencyHealth[] = [];
-  
+
   // Database health check
   const dbHealth = await checkDatabaseHealth(prisma);
   dependencies.push(dbHealth);
@@ -130,14 +130,11 @@ export async function handleHealth(options: { prisma?: unknown } = {}): Promise<
   // Return appropriate status code
   const statusCode = overallStatus === 'unhealthy' ? 503 : overallStatus === 'degraded' ? 200 : 200;
 
-  return new Response(
-    JSON.stringify(healthResult),
-    {
-      status: statusCode,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-    }
-  );
+  return new Response(JSON.stringify(healthResult), {
+    status: statusCode,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+    },
+  });
 }

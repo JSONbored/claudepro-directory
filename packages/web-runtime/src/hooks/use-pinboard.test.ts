@@ -378,7 +378,7 @@ describe('usePinboard', () => {
     // Mock localStorage to allow isStorageAvailable() to pass, but make savePinsToStorage() fail
     const originalSetItem = window.localStorage.setItem;
     const originalRemoveItem = window.localStorage.removeItem;
-    
+
     // Track calls to distinguish between isStorageAvailable() test and actual saves
     window.localStorage.setItem = jest.fn((key, value) => {
       // Allow the test item in isStorageAvailable() to be set
@@ -389,7 +389,7 @@ describe('usePinboard', () => {
       // Throw error for actual pinboard saves
       throw new Error('QuotaExceededError');
     });
-    
+
     window.localStorage.removeItem = jest.fn((key) => {
       if (key === '__pinboard_test__') {
         originalRemoveItem.call(window.localStorage, key);

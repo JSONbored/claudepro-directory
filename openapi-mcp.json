@@ -45,17 +45,11 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "jsonrpc",
-                  "method",
-                  "id"
-                ],
+                "required": ["jsonrpc", "method", "id"],
                 "properties": {
                   "jsonrpc": {
                     "type": "string",
-                    "enum": [
-                      "2.0"
-                    ]
+                    "enum": ["2.0"]
                   },
                   "method": {
                     "type": "string"
@@ -85,16 +79,11 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "jsonrpc",
-                    "id"
-                  ],
+                  "required": ["jsonrpc", "id"],
                   "properties": {
                     "jsonrpc": {
                       "type": "string",
-                      "enum": [
-                        "2.0"
-                      ]
+                      "enum": ["2.0"]
                     },
                     "result": {
                       "type": "object"
@@ -177,9 +166,7 @@
       "get": {
         "summary": "OAuth Authorization Endpoint",
         "description": "OAuth 2.1 authorization endpoint (proxies to Supabase Auth). Adds RFC 8707 resource parameter for MCP compliance. Validates PKCE, response_type, and redirect_uri before forwarding to Supabase Auth.",
-        "tags": [
-          "oauth"
-        ],
+        "tags": ["oauth"],
         "operationId": "oauthAuthorize",
         "parameters": [
           {
@@ -197,9 +184,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "enum": [
-                "code"
-              ]
+              "enum": ["code"]
             },
             "description": "Response type (must be \"code\" for OAuth 2.1)"
           },
@@ -246,9 +231,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "enum": [
-                "S256"
-              ]
+              "enum": ["S256"]
             },
             "description": "PKCE code challenge method (must be S256)"
           }
@@ -266,11 +249,7 @@
                   "properties": {
                     "error": {
                       "type": "string",
-                      "enum": [
-                        "invalid_request",
-                        "unsupported_response_type",
-                        "invalid_scope"
-                      ]
+                      "enum": ["invalid_request", "unsupported_response_type", "invalid_scope"]
                     },
                     "error_description": {
                       "type": "string",
@@ -290,9 +269,7 @@
                   "properties": {
                     "error": {
                       "type": "string",
-                      "enum": [
-                        "server_error"
-                      ]
+                      "enum": ["server_error"]
                     },
                     "error_description": {
                       "type": "string"
@@ -309,9 +286,7 @@
       "post": {
         "summary": "OAuth Token Endpoint",
         "description": "OAuth 2.1 token exchange endpoint (proxies to Supabase Auth)",
-        "tags": [
-          "oauth"
-        ],
+        "tags": ["oauth"],
         "operationId": "oauthToken",
         "requestBody": {
           "required": true,
@@ -319,19 +294,11 @@
             "application/x-www-form-urlencoded": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "grant_type",
-                  "code",
-                  "redirect_uri",
-                  "client_id",
-                  "code_verifier"
-                ],
+                "required": ["grant_type", "code", "redirect_uri", "client_id", "code_verifier"],
                 "properties": {
                   "grant_type": {
                     "type": "string",
-                    "enum": [
-                      "authorization_code"
-                    ],
+                    "enum": ["authorization_code"],
                     "description": "OAuth grant type (must be authorization_code)"
                   },
                   "code": {
@@ -374,9 +341,7 @@
                     },
                     "token_type": {
                       "type": "string",
-                      "enum": [
-                        "Bearer"
-                      ],
+                      "enum": ["Bearer"],
                       "description": "Token type (always Bearer)"
                     },
                     "expires_in": {
@@ -421,9 +386,7 @@
                   "properties": {
                     "error": {
                       "type": "string",
-                      "enum": [
-                        "server_error"
-                      ]
+                      "enum": ["server_error"]
                     },
                     "error_description": {
                       "type": "string"
@@ -440,9 +403,7 @@
       "post": {
         "summary": "OAuth Token Revocation Endpoint",
         "description": "OAuth 2.1 token revocation endpoint (RFC 7009). Proxies to Supabase Auth OAuth 2.1 Server. Always returns 200 per RFC 7009 to prevent token enumeration attacks.",
-        "tags": [
-          "oauth"
-        ],
+        "tags": ["oauth"],
         "operationId": "oauthRevoke",
         "requestBody": {
           "required": true,
@@ -450,9 +411,7 @@
             "application/x-www-form-urlencoded": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "token"
-                ],
+                "required": ["token"],
                 "properties": {
                   "token": {
                     "type": "string",
@@ -460,10 +419,7 @@
                   },
                   "token_type_hint": {
                     "type": "string",
-                    "enum": [
-                      "access_token",
-                      "refresh_token"
-                    ],
+                    "enum": ["access_token", "refresh_token"],
                     "description": "Optional hint about the token type"
                   },
                   "client_id": {
@@ -486,9 +442,7 @@
       "post": {
         "summary": "OAuth Token Introspection Endpoint",
         "description": "OAuth 2.1 token introspection endpoint (RFC 7662). Proxies to Supabase Auth OAuth 2.1 Server. Allows resource servers to validate tokens and retrieve token metadata.",
-        "tags": [
-          "oauth"
-        ],
+        "tags": ["oauth"],
         "operationId": "oauthIntrospect",
         "requestBody": {
           "required": true,
@@ -496,9 +450,7 @@
             "application/x-www-form-urlencoded": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "token"
-                ],
+                "required": ["token"],
                 "properties": {
                   "token": {
                     "type": "string",
@@ -506,10 +458,7 @@
                   },
                   "token_type_hint": {
                     "type": "string",
-                    "enum": [
-                      "access_token",
-                      "refresh_token"
-                    ],
+                    "enum": ["access_token", "refresh_token"],
                     "description": "Optional hint about the token type"
                   }
                 }
@@ -571,9 +520,7 @@
                   "properties": {
                     "error": {
                       "type": "string",
-                      "enum": [
-                        "invalid_request"
-                      ]
+                      "enum": ["invalid_request"]
                     },
                     "error_description": {
                       "type": "string"
@@ -592,9 +539,7 @@
                   "properties": {
                     "error": {
                       "type": "string",
-                      "enum": [
-                        "server_error"
-                      ]
+                      "enum": ["server_error"]
                     },
                     "error_description": {
                       "type": "string"
@@ -611,9 +556,7 @@
       "post": {
         "summary": "OAuth Dynamic Client Registration Endpoint",
         "description": "OAuth 2.1 dynamic client registration endpoint (RFC 7591). Proxies to Supabase Auth OAuth 2.1 Server. Allows clients to register themselves automatically without manual setup.",
-        "tags": [
-          "oauth"
-        ],
+        "tags": ["oauth"],
         "operationId": "oauthRegister",
         "requestBody": {
           "required": true,
@@ -621,9 +564,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "redirect_uris"
-                ],
+                "required": ["redirect_uris"],
                 "properties": {
                   "redirect_uris": {
                     "type": "array",
@@ -674,10 +615,7 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "enum": [
-                        "authorization_code",
-                        "refresh_token"
-                      ]
+                      "enum": ["authorization_code", "refresh_token"]
                     },
                     "description": "Grant types the client will use"
                   },
@@ -685,18 +623,13 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "enum": [
-                        "code"
-                      ]
+                      "enum": ["code"]
                     },
                     "description": "Response types the client will use"
                   },
                   "token_endpoint_auth_method": {
                     "type": "string",
-                    "enum": [
-                      "none",
-                      "client_secret_post"
-                    ],
+                    "enum": ["none", "client_secret_post"],
                     "description": "Client authentication method"
                   }
                 }
@@ -711,9 +644,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "client_id"
-                  ],
+                  "required": ["client_id"],
                   "properties": {
                     "client_id": {
                       "type": "string",
@@ -807,10 +738,7 @@
                   "properties": {
                     "error": {
                       "type": "string",
-                      "enum": [
-                        "invalid_client_metadata",
-                        "invalid_request"
-                      ]
+                      "enum": ["invalid_client_metadata", "invalid_request"]
                     },
                     "error_description": {
                       "type": "string"
@@ -829,9 +757,7 @@
                   "properties": {
                     "error": {
                       "type": "string",
-                      "enum": [
-                        "server_error"
-                      ]
+                      "enum": ["server_error"]
                     },
                     "error_description": {
                       "type": "string"
@@ -849,17 +775,11 @@
     "schemas": {
       "JsonRpcRequest": {
         "type": "object",
-        "required": [
-          "jsonrpc",
-          "method",
-          "id"
-        ],
+        "required": ["jsonrpc", "method", "id"],
         "properties": {
           "jsonrpc": {
             "type": "string",
-            "enum": [
-              "2.0"
-            ]
+            "enum": ["2.0"]
           },
           "method": {
             "type": "string"
@@ -881,16 +801,11 @@
       },
       "JsonRpcResponse": {
         "type": "object",
-        "required": [
-          "jsonrpc",
-          "id"
-        ],
+        "required": ["jsonrpc", "id"],
         "properties": {
           "jsonrpc": {
             "type": "string",
-            "enum": [
-              "2.0"
-            ]
+            "enum": ["2.0"]
           },
           "result": {
             "type": "object"
@@ -955,10 +870,7 @@
           },
           "tags": {
             "description": "Filter by tags",
-            "example": [
-              "ai",
-              "automation"
-            ],
+            "example": ["ai", "automation"],
             "type": "array",
             "items": {
               "type": "string"
@@ -1018,10 +930,7 @@
             ]
           }
         },
-        "required": [
-          "slug",
-          "category"
-        ],
+        "required": ["slug", "category"],
         "description": "Get complete metadata for a specific content item by slug and category. Includes full description, tags, author info, and stats.",
         "example": {
           "slug": "example",
@@ -1204,10 +1113,7 @@
             "example": "llms-txt",
             "default": "llms-txt",
             "type": "string",
-            "enum": [
-              "llms-txt",
-              "json"
-            ]
+            "enum": ["llms-txt", "json"]
           }
         },
         "description": "Get changelog of content updates in LLMs.txt format. Helps AI agents understand recent changes and stay current.",
@@ -1239,9 +1145,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "query"
-        ],
+        "required": ["query"],
         "description": "Get search suggestions based on query history. Helps discover popular searches and provides autocomplete functionality for AI agents.",
         "example": {
           "query": "example",
@@ -1301,10 +1205,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "slug",
-          "category"
-        ],
+        "required": ["slug", "category"],
         "description": "Get related content for a given slug and category. Uses similarity matching based on tags and content.",
         "example": {
           "slug": "example",
@@ -1317,10 +1218,7 @@
         "properties": {
           "tags": {
             "description": "Tags to filter by",
-            "example": [
-              "ai",
-              "automation"
-            ],
+            "example": ["ai", "automation"],
             "minItems": 1,
             "type": "array",
             "items": {
@@ -1332,10 +1230,7 @@
             "example": "OR",
             "default": "OR",
             "type": "string",
-            "enum": [
-              "AND",
-              "OR"
-            ]
+            "enum": ["AND", "OR"]
           },
           "category": {
             "description": "Filter by category (optional)",
@@ -1364,9 +1259,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "tags"
-        ],
+        "required": ["tags"],
         "description": "Get content filtered by specific tags with AND/OR logic support. Can optionally filter by category.",
         "example": {
           "tags": [],
@@ -1407,12 +1300,7 @@
             "example": "claude-code",
             "default": "claude-code",
             "type": "string",
-            "enum": [
-              "claude-code",
-              "cursor",
-              "chatgpt-codex",
-              "generic"
-            ]
+            "enum": ["claude-code", "cursor", "chatgpt-codex", "generic"]
           },
           "targetDirectory": {
             "description": "Optional: Target directory path (e.g., \"/Users/username/project/.claude\")",
@@ -1421,10 +1309,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "category",
-          "slug"
-        ],
+        "required": ["category", "slug"],
         "description": "Download content formatted for a specific platform (Claude Code, Cursor, ChatGPT Codex, or generic). Returns formatted content with installation instructions.",
         "example": {
           "category": "",
@@ -1446,15 +1331,7 @@
             "description": "Type of content to submit (required for complete submission)",
             "example": "agents",
             "type": "string",
-            "enum": [
-              "agents",
-              "mcp",
-              "rules",
-              "commands",
-              "hooks",
-              "statuslines",
-              "skills"
-            ]
+            "enum": ["agents", "mcp", "rules", "commands", "hooks", "statuslines", "skills"]
           },
           "category": {
             "description": "Content category (usually matches submission_type)",
@@ -1493,10 +1370,7 @@
             "description": "Content data object (structure varies by type)",
             "example": {
               "version": "1.0.0",
-              "features": [
-                "feature1",
-                "feature2"
-              ]
+              "features": ["feature1", "feature2"]
             }
           },
           "author_profile_url": {
@@ -1513,11 +1387,7 @@
           },
           "tags": {
             "description": "Optional: Array of relevant tags",
-            "example": [
-              "ai",
-              "automation",
-              "agents"
-            ],
+            "example": ["ai", "automation", "agents"],
             "type": "array",
             "items": {
               "type": "string"
@@ -1545,11 +1415,7 @@
             "example": "github",
             "default": "github",
             "type": "string",
-            "enum": [
-              "github",
-              "google",
-              "discord"
-            ]
+            "enum": ["github", "google", "discord"]
           },
           "newsletterOptIn": {
             "description": "Whether to automatically subscribe to newsletter (default: false)",
@@ -1606,9 +1472,7 @@
             "additionalProperties": {}
           }
         },
-        "required": [
-          "email"
-        ],
+        "required": ["email"],
         "description": "Subscribes a user to the newsletter via Inngest. Sends event to Inngest which handles email validation, Resend audience sync, database subscription, welcome email, and drip campaign enrollment.",
         "example": {
           "email": "example",
@@ -1633,9 +1497,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "slug"
-        ],
+        "required": ["slug"],
         "description": "Downloads a Skills ZIP file from Supabase Storage. If rootUri is provided, writes to client filesystem using Roots. Otherwise, returns download URL for manual download.",
         "example": {
           "slug": "example",
@@ -1658,9 +1520,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "slug"
-        ],
+        "required": ["slug"],
         "description": "Downloads an MCP server .mcpb file from Supabase Storage. If rootUri is provided, writes to client filesystem using Roots. Otherwise, returns download URL for manual download.",
         "example": {
           "slug": "example",
@@ -1704,18 +1564,10 @@
             "description": "Optional: File type hint for better handling",
             "example": "zip",
             "type": "string",
-            "enum": [
-              "zip",
-              "mcpb",
-              "json",
-              "other"
-            ]
+            "enum": ["zip", "mcpb", "json", "other"]
           }
         },
-        "required": [
-          "category",
-          "slug"
-        ],
+        "required": ["category", "slug"],
         "description": "Generic tool for downloading any storage file from Supabase Storage. Supports Skills ZIPs, MCP server .mcpb files, and future storage file types. If rootUri is provided, writes to client filesystem using Roots. Otherwise, returns download URL for manual download.",
         "example": {
           "category": "",
@@ -1822,9 +1674,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "platform"
-        ],
+        "required": ["platform"],
         "description": "Instructions for formatting content for specific platforms (Claude Code, Cursor, etc.) with installation steps and configuration examples.",
         "example": {
           "platform": "example",

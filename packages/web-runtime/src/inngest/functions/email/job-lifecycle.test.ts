@@ -570,4 +570,3 @@ describe('sendJobLifecycleEmail', () => {
     expect(result2.success).toBe(true);
   });
 });
-

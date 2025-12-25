@@ -8,5 +8,4 @@
 --
 -- Function signature: get_user_settings(p_user_id uuid)
 -- Related: AccountService.getUserSettings uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_user_settings(uuid);
+DROP FUNCTION IF EXISTS public.get_user_settings (uuid);

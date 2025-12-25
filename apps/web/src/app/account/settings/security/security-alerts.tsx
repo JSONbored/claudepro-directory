@@ -48,7 +48,7 @@ export function SecurityAlerts({ userId }: SecurityAlertsProps) {
     <div className="space-y-3">
       {alerts.map((alert) => {
         const Icon =
-          alert.type === 'success' ? CheckCircle : (alert.type === 'warning' ? AlertTriangle : Info);
+          alert.type === 'success' ? CheckCircle : alert.type === 'warning' ? AlertTriangle : Info;
 
         const bgColor =
           alert.type === 'success'

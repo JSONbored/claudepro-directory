@@ -21,7 +21,7 @@ jest.mock('@infisical/sdk', () => {
   // Define mocks inside factory (hoisted, so accessible)
   const mockSecrets = jest.fn();
   const mockLogin = jest.fn();
-  
+
   // Store on globalThis for test access
   if (typeof globalThis !== 'undefined') {
     (globalThis as any).__infisicalMocks = {
@@ -29,13 +29,13 @@ jest.mock('@infisical/sdk', () => {
       mockLogin,
     };
   }
-  
+
   const mockAuth = {
     universalAuth: {
       login: mockLogin,
     },
   };
-  
+
   // Create a proper constructor function (not vi.fn() which doesn't work with 'new')
   function MockInfisicalSDK(this: any, _config?: any) {
     // secrets() returns an object with listSecrets method
@@ -61,12 +61,12 @@ jest.mock('../schemas/env', () => {
     INFISICAL_ENABLED: undefined,
     INFISICAL_ENV: undefined,
   };
-  
+
   // Store on globalThis for test access
   if (typeof globalThis !== 'undefined') {
     (globalThis as any).__mockEnv = mockEnv;
   }
-  
+
   return {
     env: new Proxy(mockEnv, {
       get: (target, prop: string) => target[prop],
@@ -244,9 +244,7 @@ describe('Infisical Client', () => {
       mockEnv.INFISICAL_CLIENT_ID = undefined;
       mockEnv.INFISICAL_CLIENT_SECRET = undefined;
 
-      await expect(getInfisicalClient()).rejects.toThrow(
-        'Infisical credentials not found'
-      );
+      await expect(getInfisicalClient()).rejects.toThrow('Infisical credentials not found');
     });
 
     it('should cache authenticated client', async () => {
@@ -268,9 +266,7 @@ describe('Infisical Client', () => {
       const mocks = getMocks();
       mocks.mockLogin.mockRejectedValue(authError);
 
-      await expect(getInfisicalClient()).rejects.toThrow(
-        'Infisical authentication failed'
-      );
+      await expect(getInfisicalClient()).rejects.toThrow('Infisical authentication failed');
     });
 
     it('should wait for in-progress authentication', async () => {
@@ -386,9 +382,7 @@ describe('Infisical Client', () => {
       const mocks = getMocks();
       mocks.mockSecrets.mockRejectedValue(authError);
 
-      await expect(getInfisicalSecret('TEST_SECRET', 'dev')).rejects.toThrow(
-        '401 Unauthorized'
-      );
+      await expect(getInfisicalSecret('TEST_SECRET', 'dev')).rejects.toThrow('401 Unauthorized');
     });
 
     it('should handle API errors', async () => {
@@ -422,4 +416,3 @@ describe('Infisical Client', () => {
     });
   });
 });
-

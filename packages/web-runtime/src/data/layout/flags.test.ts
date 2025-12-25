@@ -5,7 +5,7 @@ describe('layout flags', () => {
   describe('getLayoutFlags', () => {
     it('should return default flags', () => {
       const flags = getLayoutFlags();
-      
+
       expect(flags).toHaveProperty('ctaVariant', 'value_focused');
       expect(flags).toHaveProperty('fabNotifications', false);
       expect(flags).toHaveProperty('footerDelayVariant', '30s');
@@ -14,7 +14,7 @@ describe('layout flags', () => {
 
     it('should compute derived flags correctly', () => {
       const flags = getLayoutFlags();
-      
+
       // Derived flags should be computed
       expect(flags).toHaveProperty('fabNotificationsEnabled');
       expect(flags).toHaveProperty('notificationsEnabled');
@@ -24,7 +24,7 @@ describe('layout flags', () => {
 
     it('should return all required flag properties', () => {
       const flags = getLayoutFlags();
-      
+
       expect(flags).toHaveProperty('ctaVariant');
       expect(flags).toHaveProperty('fabNotifications');
       expect(flags).toHaveProperty('fabNotificationsEnabled');
@@ -38,4 +38,3 @@ describe('layout flags', () => {
     });
   });
 });
-

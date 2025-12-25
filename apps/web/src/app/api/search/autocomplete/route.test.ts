@@ -94,8 +94,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'application/json',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -105,7 +109,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),

@@ -94,7 +94,10 @@ export async function handleGetCategoryConfigs(
     };
   } catch (error) {
     const normalized = normalizeError(error, 'getCategoryConfigs tool failed');
-    logger.error('getCategoryConfigs tool error', normalized, { tool: 'getCategoryConfigs', category });
+    logger.error('getCategoryConfigs tool error', normalized, {
+      tool: 'getCategoryConfigs',
+      category,
+    });
     throw normalized;
   }
 }

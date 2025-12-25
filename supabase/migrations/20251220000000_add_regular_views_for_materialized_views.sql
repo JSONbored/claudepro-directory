@@ -21,21 +21,38 @@
 -- - prisma/schema.prisma: Add "views" to previewFeatures
 -- - packages/data-layer/src/services/content.ts: Update getContentPaginatedSlim to use Prisma queries
 -- - packages/data-layer/src/services/search.ts: Update getTrendingSearches to use Prisma queries
-
 -- View for content list slim (reads from materialized view)
 -- Note: PostgreSQL doesn't support IF NOT EXISTS for CREATE VIEW, so we use CREATE OR REPLACE
-CREATE OR REPLACE VIEW public.v_content_list_slim AS
-SELECT * FROM public.mv_content_list_slim;
+CREATE
+OR REPLACE VIEW public.v_content_list_slim AS
+SELECT
+  *
+FROM
+  public.mv_content_list_slim;
 
 -- View for trending searches (reads from materialized view)
 -- Note: PostgreSQL doesn't support IF NOT EXISTS for CREATE VIEW, so we use CREATE OR REPLACE
-CREATE OR REPLACE VIEW public.v_trending_searches AS
-SELECT * FROM public.trending_searches;
+CREATE
+OR REPLACE VIEW public.v_trending_searches AS
+SELECT
+  *
+FROM
+  public.trending_searches;
 
 -- Grant permissions for views (same as materialized views)
-GRANT SELECT ON public.v_content_list_slim TO anon, authenticated, service_role;
-GRANT SELECT ON public.v_trending_searches TO anon, authenticated, service_role;
+GRANT
+SELECT
+  ON public.v_content_list_slim TO anon,
+  authenticated,
+  service_role;
+
+GRANT
+SELECT
+  ON public.v_trending_searches TO anon,
+  authenticated,
+  service_role;
 
 -- Add comments for documentation
 COMMENT ON VIEW public.v_content_list_slim IS 'Regular view that reads from mv_content_list_slim materialized view. Used by Prisma for type-safe queries. The materialized view must be refreshed manually for data updates.';
+
 COMMENT ON VIEW public.v_trending_searches IS 'Regular view that reads from trending_searches materialized view. Used by Prisma for type-safe queries. The materialized view must be refreshed manually for data updates.';

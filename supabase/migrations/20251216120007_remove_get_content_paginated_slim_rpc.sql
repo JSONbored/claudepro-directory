@@ -19,8 +19,7 @@
 -- Related Changes:
 -- - packages/data-layer/src/services/content.ts: Converted getContentPaginatedSlim() to use Prisma
 -- - Types defined locally using contentModel (ContentPaginatedSlimItem = contentModel)
-
-DROP FUNCTION IF EXISTS public.get_content_paginated_slim(
+DROP FUNCTION IF EXISTS public.get_content_paginated_slim (
   p_category public.content_category,
   p_limit integer,
   p_offset integer,

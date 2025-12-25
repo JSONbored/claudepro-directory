@@ -295,11 +295,11 @@ describe('useDarkMode', () => {
     // The hook uses defaultValue for osPreference when window is undefined
     // Since storedPreference is null (from useLocalStorage with defaultValue: null),
     // isDarkMode = osPreference = defaultValue
-    
+
     // However, the mock useLocalStorage may not properly simulate SSR behavior
     // The actual behavior in SSR would be: osPreference = defaultValue, storedPreference = null
     // So isDarkMode = osPreference = defaultValue
-    
+
     // For this test, we verify the hook handles SSR without crashing
     const originalWindow = global.window;
     // @ts-expect-error - Intentionally setting window to undefined for SSR test

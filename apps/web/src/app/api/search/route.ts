@@ -33,7 +33,8 @@ import {
   searchResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
 import {
-  createOptionsHandler as createApiOptionsHandler, createApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  createApiRoute,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { searchQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';

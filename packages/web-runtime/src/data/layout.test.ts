@@ -110,4 +110,3 @@ describe('layout data functions', () => {
     });
   });
 });
-

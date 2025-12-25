@@ -52,16 +52,12 @@ export const submitContactForm = authedAction
         const id = firstElement?.submission_id;
         if (id) {
           const { onContactSubmission } = await import('./hooks/contact-hooks.ts');
-          await onContactSubmission(
-            { submission_id: id },
-            ctx,
-            {
-              name: parsedInput.name,
-              email: parsedInput.email,
-              category: parsedInput.category,
-              message: parsedInput.message,
-            }
-          );
+          await onContactSubmission({ submission_id: id }, ctx, {
+            name: parsedInput.name,
+            email: parsedInput.email,
+            category: parsedInput.category,
+            message: parsedInput.message,
+          });
           // Hook doesn't modify the result array, just processes side effects
         }
       } catch (hookError) {

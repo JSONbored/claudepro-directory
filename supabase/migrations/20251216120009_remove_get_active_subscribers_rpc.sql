@@ -27,5 +27,4 @@
 -- Related Changes:
 -- - packages/data-layer/src/services/newsletter.ts: Converted getActiveSubscribers() to use Prisma
 -- - Return type: Promise<string[]> (array of emails)
-
-DROP FUNCTION IF EXISTS public.get_active_subscribers();
+DROP FUNCTION IF EXISTS public.get_active_subscribers ();

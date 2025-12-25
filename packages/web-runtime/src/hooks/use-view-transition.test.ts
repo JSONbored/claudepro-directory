@@ -196,16 +196,19 @@ describe('useViewTransition', () => {
     });
 
     // Wait for async error handling (Promise.resolve().catch() is async)
-    await waitFor(() => {
-      expect(logClientWarn).toHaveBeenCalledWith(
-        'useViewTransition: fallback update failed (unsupported)',
-        expect.any(Error),
-        'useViewTransition.fallback',
-        expect.objectContaining({
-          component: 'useViewTransition',
-        })
-      );
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        expect(logClientWarn).toHaveBeenCalledWith(
+          'useViewTransition: fallback update failed (unsupported)',
+          expect.any(Error),
+          'useViewTransition.fallback',
+          expect.objectContaining({
+            component: 'useViewTransition',
+          })
+        );
+      },
+      { timeout: 1000 }
+    );
   });
 
   it('should return stable function references', () => {

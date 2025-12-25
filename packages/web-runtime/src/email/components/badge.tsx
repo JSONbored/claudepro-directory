@@ -125,4 +125,3 @@ export function EmailBadge({
 
   return <Text style={badgeStyle}>{children}</Text>;
 }
-

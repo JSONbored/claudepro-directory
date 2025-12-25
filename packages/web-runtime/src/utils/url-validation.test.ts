@@ -9,22 +9,36 @@ import {
 describe('url-validation', () => {
   describe('getSafeRepositoryUrl', () => {
     it('should return sanitized URL for valid GitHub HTTPS URLs', () => {
-      expect(getSafeRepositoryUrl('https://github.com/user/repo')).toBe('https://github.com/user/repo');
-      expect(getSafeRepositoryUrl('https://www.github.com/user/repo')).toBe('https://www.github.com/user/repo');
+      expect(getSafeRepositoryUrl('https://github.com/user/repo')).toBe(
+        'https://github.com/user/repo'
+      );
+      expect(getSafeRepositoryUrl('https://www.github.com/user/repo')).toBe(
+        'https://www.github.com/user/repo'
+      );
     });
 
     it('should return sanitized URL for valid GitLab HTTPS URLs', () => {
-      expect(getSafeRepositoryUrl('https://gitlab.com/user/repo')).toBe('https://gitlab.com/user/repo');
-      expect(getSafeRepositoryUrl('https://www.gitlab.com/user/repo')).toBe('https://www.gitlab.com/user/repo');
+      expect(getSafeRepositoryUrl('https://gitlab.com/user/repo')).toBe(
+        'https://gitlab.com/user/repo'
+      );
+      expect(getSafeRepositoryUrl('https://www.gitlab.com/user/repo')).toBe(
+        'https://www.gitlab.com/user/repo'
+      );
     });
 
     it('should remove query strings and fragments', () => {
-      expect(getSafeRepositoryUrl('https://github.com/user/repo?ref=main#readme')).toBe('https://github.com/user/repo');
-      expect(getSafeRepositoryUrl('https://github.com/user/repo?branch=dev&file=test.js')).toBe('https://github.com/user/repo');
+      expect(getSafeRepositoryUrl('https://github.com/user/repo?ref=main#readme')).toBe(
+        'https://github.com/user/repo'
+      );
+      expect(getSafeRepositoryUrl('https://github.com/user/repo?branch=dev&file=test.js')).toBe(
+        'https://github.com/user/repo'
+      );
     });
 
     it('should remove credentials', () => {
-      expect(getSafeRepositoryUrl('https://user:pass@github.com/user/repo')).toBe('https://github.com/user/repo');
+      expect(getSafeRepositoryUrl('https://user:pass@github.com/user/repo')).toBe(
+        'https://github.com/user/repo'
+      );
     });
 
     it('should return null for HTTP URLs', () => {
@@ -49,20 +63,28 @@ describe('url-validation', () => {
 
   describe('isTrustedDocumentationUrl', () => {
     it('should return sanitized URL for valid HTTPS URLs', () => {
-      expect(isTrustedDocumentationUrl('https://docs.example.com/path')).toBe('https://docs.example.com/path');
+      expect(isTrustedDocumentationUrl('https://docs.example.com/path')).toBe(
+        'https://docs.example.com/path'
+      );
     });
 
     it('should remove credentials', () => {
-      expect(isTrustedDocumentationUrl('https://user:pass@docs.example.com/path')).toBe('https://docs.example.com/path');
+      expect(isTrustedDocumentationUrl('https://user:pass@docs.example.com/path')).toBe(
+        'https://docs.example.com/path'
+      );
     });
 
     it('should normalize hostname (lowercase, remove trailing dot)', () => {
       // The function removes trailing dots and lowercases
-      expect(isTrustedDocumentationUrl('https://DOCS.EXAMPLE.COM./path')).toBe('https://docs.example.com/path');
+      expect(isTrustedDocumentationUrl('https://DOCS.EXAMPLE.COM./path')).toBe(
+        'https://docs.example.com/path'
+      );
     });
 
     it('should remove default HTTPS port', () => {
-      expect(isTrustedDocumentationUrl('https://docs.example.com:443/path')).toBe('https://docs.example.com/path');
+      expect(isTrustedDocumentationUrl('https://docs.example.com:443/path')).toBe(
+        'https://docs.example.com/path'
+      );
     });
 
     it('should return null for HTTP URLs', () => {
@@ -130,4 +152,3 @@ describe('url-validation', () => {
     });
   });
 });
-

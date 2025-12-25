@@ -17,7 +17,11 @@ import { parseEnv, getEnvOrDefault } from '@heyclaude/cloudflare-runtime/config/
  * @param pathname - Request pathname
  * @returns OAuth metadata response
  */
-export async function handleOAuthMetadata(_request: Request, env: ExtendedEnv, pathname: string): Promise<Response> {
+export async function handleOAuthMetadata(
+  _request: Request,
+  env: ExtendedEnv,
+  pathname: string
+): Promise<Response> {
   const config = await parseEnv(env);
   const mcpServerUrl = getEnvOrDefault(env, 'MCP_SERVER_URL', 'https://mcp.claudepro.directory');
   const mcpResourceUrl = `${mcpServerUrl}/mcp`;

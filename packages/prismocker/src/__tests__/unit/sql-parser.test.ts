@@ -41,7 +41,9 @@ describe('SqlParser Unit Tests', () => {
     });
 
     it('should parse SELECT with WHERE, LIMIT, and OFFSET', () => {
-      const parsed = parseSimpleSelect("SELECT * FROM users WHERE status = 'active' LIMIT 10 OFFSET 5");
+      const parsed = parseSimpleSelect(
+        "SELECT * FROM users WHERE status = 'active' LIMIT 10 OFFSET 5"
+      );
       expect(parsed).toEqual({
         tableName: 'users',
         where: { status: 'active' },
@@ -66,7 +68,9 @@ describe('SqlParser Unit Tests', () => {
     });
 
     it('should return null for complex queries (JOINs, subqueries)', () => {
-      const parsed = parseSimpleSelect('SELECT * FROM users JOIN posts ON users.id = posts.user_id');
+      const parsed = parseSimpleSelect(
+        'SELECT * FROM users JOIN posts ON users.id = posts.user_id'
+      );
       expect(parsed).toBeNull();
     });
   });
@@ -141,4 +145,3 @@ describe('SqlParser Unit Tests', () => {
     });
   });
 });
-

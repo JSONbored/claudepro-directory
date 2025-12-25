@@ -16,12 +16,12 @@ language: typescript
 rule:
   all:
     - any:
-      - kind: if_statement
-      - kind: for_statement
-      - kind: while_statement
+        - kind: if_statement
+        - kind: for_statement
+        - kind: while_statement
     - has:
         regex: use[A-Z]|useState|useEffect|useCallback|useMemo|useRef|useContext|useReducer
-message: "React hooks must be called unconditionally at the top level. Move hook call outside conditional/loop/nested function. Hooks must be called in the same order on every render."
+message: 'React hooks must be called unconditionally at the top level. Move hook call outside conditional/loop/nested function. Hooks must be called in the same order on every render.'
 severity: error
 
 ---
@@ -38,7 +38,7 @@ rule:
           regex: 'function \w+\([^)]*\)\s*\{'
     - has:
         regex: use[A-Z]|useState|useEffect|useCallback|useMemo
-message: "React hooks must be called at the top level of a component or custom hook, not inside nested functions, callbacks, or loops. Move hook to component level."
+message: 'React hooks must be called at the top level of a component or custom hook, not inside nested functions, callbacks, or loops. Move hook to component level.'
 severity: error
 
 ---
@@ -55,7 +55,7 @@ rule:
     - not:
         has:
           regex: 'return\s*\(\)\s*=>\s*\{'
-message: "useEffect with side effects (event listeners, timers, subscriptions) must include cleanup function. Add: return () => { removeEventListener(...); clearInterval(...); unsubscribe(...); } to prevent memory leaks."
+message: 'useEffect with side effects (event listeners, timers, subscriptions) must include cleanup function. Add: return () => { removeEventListener(...); clearInterval(...); unsubscribe(...); } to prevent memory leaks.'
 severity: error
 
 ---
@@ -75,7 +75,7 @@ rule:
     - not:
         has:
           regex: 'return\s*\(\)\s*=>\s*\{'
-message: "Custom hooks with subscriptions/timers/event listeners must return cleanup function. Add: return () => { cleanup code }"
+message: 'Custom hooks with subscriptions/timers/event listeners must return cleanup function. Add: return () => { cleanup code }'
 severity: error
 
 ---
@@ -107,7 +107,7 @@ rule:
         regex: '(useMemo|useCallback)\([^,]+,\s*\[\]\)'
     - has:
         regex: '\w+|\w+'
-message: "useMemo/useCallback should include all dependencies used in the callback. Empty dependency array [] is only correct if callback uses no external values. Add missing dependencies or use ESLint exhaustive-deps rule."
+message: 'useMemo/useCallback should include all dependencies used in the callback. Empty dependency array [] is only correct if callback uses no external values. Add missing dependencies or use ESLint exhaustive-deps rule.'
 severity: warning
 
 ---
@@ -138,7 +138,7 @@ rule:
         pattern: (useCallback|useMemo)($FUNC, $DEPS)
     - has:
         regex: '(useCallback|useMemo)\(\s*\(\)\s*=>\s*[^,]+,\s*[^)]+\)'
-message: "useCallback/useMemo is unnecessary for simple values or functions passed to native DOM elements. Only use for expensive computations or when passing to memoized components. Remove useCallback/useMemo for simple cases."
+message: 'useCallback/useMemo is unnecessary for simple values or functions passed to native DOM elements. Only use for expensive computations or when passing to memoized components. Remove useCallback/useMemo for simple cases.'
 severity: info
 
 # Note: Missing useEffect dependency detection is better handled by ESLint exhaustive-deps rule

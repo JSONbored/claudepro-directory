@@ -92,14 +92,160 @@
     }
   ],
   "paths": {
+    "/api/v1/trending": {
+      "get": {
+        "summary": "Get trending, popular, or recent content",
+        "description": "Returns trending, popular, or recent content based on tab selection. Supports both page and sidebar modes with category filtering.",
+        "tags": ["content", "trending"],
+        "operationId": "getTrending",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tab",
+            "schema": {
+              "description": "Trending page tab selection",
+              "example": "trending",
+              "enum": ["trending", "popular", "recent"],
+              "default": "trending",
+              "type": "string"
+            },
+            "description": "Trending page tab selection"
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "description": "Content category filter (use \"all\" or omit for all categories)",
+              "example": "skills",
+              "type": "string"
+            },
+            "description": "Content category filter (use \"all\" or omit for all categories)"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "description": "Maximum number of results to return (1-100)",
+              "example": 12,
+              "minimum": 1,
+              "maximum": 100,
+              "default": 12,
+              "type": "integer"
+            },
+            "description": "Maximum number of results to return (1-100)"
+          },
+          {
+            "in": "query",
+            "name": "mode",
+            "schema": {
+              "description": "Response mode (page or sidebar)",
+              "example": "page",
+              "enum": ["page", "sidebar"],
+              "default": "page",
+              "type": "string"
+            },
+            "description": "Response mode (page or sidebar)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trending content retrieved successfully",
+            "headers": {
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              },
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "items": [
+                    {
+                      "category": "skills",
+                      "id": "content-1",
+                      "popularity_score": 95.5,
+                      "slug": "example-content",
+                      "title": "Example Content"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid tab or category parameter",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid tab or category parameter",
+                  "message": "Invalid tab. Valid tabs: trending, popular, recent"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while fetching trending content"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/templates": {
       "get": {
         "summary": "Get content templates by category",
         "description": "Fetches content templates by category for client-side consumption. Used by the wizard to load templates dynamically.",
-        "tags": [
-          "content",
-          "templates"
-        ],
+        "tags": ["content", "templates"],
         "operationId": "getTemplates",
         "parameters": [
           {
@@ -117,12 +263,6 @@
           "200": {
             "description": "Templates retrieved successfully",
             "headers": {
-              "'X-RateLimit-Remaining'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Remaining rate limit requests"
-              },
               "'Cache-Control'": {
                 "schema": {
                   "type": "string"
@@ -134,20 +274,26 @@
                   "type": "string"
                 },
                 "description": "Source of the response data"
+              },
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
               }
             },
             "content": {
               "application/json": {
                 "example": {
-                  "success": true,
                   "category": "skills",
                   "count": 25,
+                  "success": true,
                   "templates": [
                     {
-                      "id": "template-1",
-                      "title": "Example Template",
+                      "category": "skills",
                       "description": "An example template for demonstration",
-                      "category": "skills"
+                      "id": "template-1",
+                      "title": "Example Template"
                     }
                   ]
                 },
@@ -191,21 +337,12 @@
                             "type": "string"
                           }
                         },
-                        "required": [
-                          "id",
-                          "title",
-                          "category"
-                        ],
+                        "required": ["id", "title", "category"],
                         "additionalProperties": {}
                       }
                     }
                   },
-                  "required": [
-                    "success",
-                    "category",
-                    "count",
-                    "templates"
-                  ],
+                  "required": ["success", "category", "count", "templates"],
                   "additionalProperties": false
                 }
               }
@@ -231,9 +368,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -259,172 +394,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/trending": {
-      "get": {
-        "summary": "Get trending, popular, or recent content",
-        "description": "Returns trending, popular, or recent content based on tab selection. Supports both page and sidebar modes with category filtering.",
-        "tags": [
-          "content",
-          "trending"
-        ],
-        "operationId": "getTrending",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tab",
-            "schema": {
-              "description": "Trending page tab selection",
-              "example": "trending",
-              "enum": [
-                "trending",
-                "popular",
-                "recent"
-              ],
-              "default": "trending",
-              "type": "string"
-            },
-            "description": "Trending page tab selection"
-          },
-          {
-            "in": "query",
-            "name": "category",
-            "schema": {
-              "description": "Content category filter (use \"all\" or omit for all categories)",
-              "example": "skills",
-              "type": "string"
-            },
-            "description": "Content category filter (use \"all\" or omit for all categories)"
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "description": "Maximum number of results to return (1-100)",
-              "example": 12,
-              "minimum": 1,
-              "maximum": 100,
-              "default": 12,
-              "type": "integer"
-            },
-            "description": "Maximum number of results to return (1-100)"
-          },
-          {
-            "in": "query",
-            "name": "mode",
-            "schema": {
-              "description": "Response mode (page or sidebar)",
-              "example": "page",
-              "enum": [
-                "page",
-                "sidebar"
-              ],
-              "default": "page",
-              "type": "string"
-            },
-            "description": "Response mode (page or sidebar)"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Trending content retrieved successfully",
-            "headers": {
-              "'X-RateLimit-Remaining'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Remaining rate limit requests"
-              },
-              "'Cache-Control'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Cache control directive"
-              },
-              "'X-Generated-By'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Source of the response data"
-              }
-            },
-            "content": {
-              "application/json": {
-                "example": {
-                  "items": [
-                    {
-                      "id": "content-1",
-                      "title": "Example Content",
-                      "slug": "example-content",
-                      "category": "skills",
-                      "popularity_score": 95.5
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid tab or category parameter",
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": "Invalid tab or category parameter",
-                  "message": "Invalid tab. Valid tabs: trending, popular, recent"
-                },
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "description": "Error message",
-                      "type": "string"
-                    },
-                    "message": {
-                      "description": "Additional error details",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": "Internal server error",
-                  "message": "An unexpected error occurred while fetching trending content"
-                },
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "description": "Error message",
-                      "type": "string"
-                    },
-                    "message": {
-                      "description": "Additional error details",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -437,10 +407,7 @@
       "get": {
         "summary": "Get API health status",
         "description": "Returns the current health status of the API and database connections. Used for monitoring, uptime checks, and health dashboards.",
-        "tags": [
-          "health",
-          "monitoring"
-        ],
+        "tags": ["health", "monitoring"],
         "operationId": "getApiStatus",
         "responses": {
           "200": {
@@ -462,8 +429,8 @@
             "content": {
               "application/json": {
                 "example": {
-                  "status": "healthy",
                   "database": "connected",
+                  "status": "healthy",
                   "timestamp": "2025-01-11T12:00:00Z",
                   "version": "1.1.0"
                 },
@@ -473,11 +440,7 @@
                     "status": {
                       "description": "API health status",
                       "type": "string",
-                      "enum": [
-                        "healthy",
-                        "degraded",
-                        "unhealthy"
-                      ]
+                      "enum": ["healthy", "degraded", "unhealthy"]
                     },
                     "database": {
                       "description": "Database connection status",
@@ -494,9 +457,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "status"
-                  ],
+                  "required": ["status"],
                   "additionalProperties": {}
                 }
               }
@@ -525,9 +486,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -546,8 +505,8 @@
             "content": {
               "application/json": {
                 "example": {
-                  "status": "unhealthy",
                   "database": "disconnected",
+                  "status": "unhealthy",
                   "timestamp": "2025-01-11T12:00:00Z"
                 },
                 "schema": {
@@ -556,11 +515,7 @@
                     "status": {
                       "description": "API health status",
                       "type": "string",
-                      "enum": [
-                        "healthy",
-                        "degraded",
-                        "unhealthy"
-                      ]
+                      "enum": ["healthy", "degraded", "unhealthy"]
                     },
                     "database": {
                       "description": "Database connection status",
@@ -577,9 +532,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "status"
-                  ],
+                  "required": ["status"],
                   "additionalProperties": {}
                 }
               }
@@ -592,10 +545,7 @@
       "get": {
         "summary": "Get sitemap in XML or JSON format",
         "description": "Generates XML or JSON sitemaps for search engines. Supports both XML (default) and JSON formats.",
-        "tags": [
-          "sitemap",
-          "seo"
-        ],
+        "tags": ["sitemap", "seo"],
         "operationId": "getSitemap",
         "parameters": [
           {
@@ -604,10 +554,7 @@
             "schema": {
               "description": "Sitemap export format",
               "example": "xml",
-              "enum": [
-                "xml",
-                "json"
-              ],
+              "enum": ["xml", "json"],
               "default": "xml",
               "type": "string"
             },
@@ -618,17 +565,17 @@
           "200": {
             "description": "Sitemap generated successfully",
             "headers": {
-              "'Content-Type'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Content type (application/xml for xml, application/json for json)"
-              },
               "'Cache-Control'": {
                 "schema": {
                   "type": "string"
                 },
                 "description": "Cache control directive"
+              },
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (application/xml for xml, application/json for json)"
               },
               "'X-Content-Source'": {
                 "schema": {
@@ -675,9 +622,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -703,9 +648,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -716,11 +659,7 @@
       "post": {
         "summary": "Submit URLs to IndexNow",
         "description": "Submits site URLs to IndexNow for search engine indexing. Requires authentication via x-indexnow-trigger-key header.",
-        "tags": [
-          "sitemap",
-          "seo",
-          "indexnow"
-        ],
+        "tags": ["sitemap", "seo", "indexnow"],
         "operationId": "submitIndexNow",
         "security": [
           {
@@ -763,11 +702,7 @@
                       "maximum": 9007199254740991
                     }
                   },
-                  "required": [
-                    "message",
-                    "ok",
-                    "submitted"
-                  ],
+                  "required": ["message", "ok", "submitted"],
                   "additionalProperties": false
                 }
               }
@@ -804,9 +739,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -832,9 +765,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -860,215 +791,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/revalidate": {
-      "post": {
-        "summary": "Trigger on-demand ISR revalidation",
-        "description": "Trigger on-demand ISR revalidation and cache tag invalidation for specified targets. Called by edge function via Supabase Realtime (logical replication).",
-        "tags": [
-          "cache",
-          "revalidation",
-          "webhook"
-        ],
-        "operationId": "revalidate",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "description": "Revalidation request with secret token, optional category/slug for path revalidation, and optional tags for cache invalidation",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "category": {
-                    "description": "Content category to revalidate",
-                    "type": "string"
-                  },
-                  "secret": {
-                    "description": "Revalidation secret token",
-                    "type": "string"
-                  },
-                  "slug": {
-                    "description": "Content slug to revalidate",
-                    "type": "string"
-                  },
-                  "tags": {
-                    "description": "Cache tags to invalidate",
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Revalidation completed successfully",
-            "headers": {
-              "'X-RateLimit-Remaining'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Remaining rate limit requests"
-              }
-            },
-            "content": {
-              "application/json": {
-                "example": {
-                  "revalidated": true,
-                  "paths": [
-                    "/",
-                    "/agents",
-                    "/agents/code-reviewer"
-                  ],
-                  "tags": [
-                    "content",
-                    "homepage",
-                    "trending"
-                  ],
-                  "timestamp": "2025-01-11T12:00:00Z"
-                },
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "revalidated": {
-                      "description": "Revalidation success status",
-                      "type": "boolean"
-                    },
-                    "paths": {
-                      "description": "Revalidated paths",
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "tags": {
-                      "description": "Invalidated cache tags",
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "timestamp": {
-                      "description": "Revalidation timestamp (ISO 8601)",
-                      "type": "string",
-                      "format": "date-time",
-                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
-                    }
-                  },
-                  "required": [
-                    "revalidated",
-                    "timestamp"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid request payload or missing category/tags",
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": "Invalid request payload",
-                  "message": "Missing category or tags in webhook payload"
-                },
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "description": "Error message",
-                      "type": "string"
-                    },
-                    "message": {
-                      "description": "Additional error details",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - invalid secret",
-            "headers": {
-              "'WWW-Authenticate'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Authentication challenge"
-              }
-            },
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": "Unauthorized",
-                  "message": "Missing secret parameter"
-                },
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "description": "Error message",
-                      "type": "string"
-                    },
-                    "message": {
-                      "description": "Additional error details",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": "Internal server error",
-                  "message": "An unexpected error occurred during revalidation"
-                },
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "description": "Error message",
-                      "type": "string"
-                    },
-                    "message": {
-                      "description": "Additional error details",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -1081,11 +804,7 @@
       "get": {
         "summary": "Unified search across content, jobs, companies, and users",
         "description": "Provides comprehensive search with filtering, sorting, pagination, and job-specific filters. Supports content, jobs, companies, and users in a single unified search.",
-        "tags": [
-          "search",
-          "content",
-          "jobs"
-        ],
+        "tags": ["search", "content", "jobs"],
         "operationId": "search",
         "parameters": [
           {
@@ -1162,10 +881,7 @@
             "name": "entities",
             "schema": {
               "description": "Entity types to include in search",
-              "example": [
-                "content",
-                "job"
-              ],
+              "example": ["content", "job"],
               "type": "string"
             },
             "description": "Entity types to include in search"
@@ -1178,12 +894,7 @@
               "example": "relevance",
               "default": "relevance",
               "type": "string",
-              "enum": [
-                "relevance",
-                "popularity",
-                "newest",
-                "alphabetical"
-              ]
+              "enum": ["relevance", "popularity", "newest", "alphabetical"]
             },
             "description": "Sort order for results"
           },
@@ -1219,13 +930,7 @@
               "description": "Job employment type filter",
               "example": "full-time",
               "type": "string",
-              "enum": [
-                "full-time",
-                "part-time",
-                "contract",
-                "freelance",
-                "internship"
-              ]
+              "enum": ["full-time", "part-time", "contract", "freelance", "internship"]
             },
             "description": "Job employment type filter"
           },
@@ -1246,10 +951,7 @@
               "description": "Filter for remote jobs (true/false)",
               "example": true,
               "type": "string",
-              "enum": [
-                "true",
-                "false"
-              ]
+              "enum": ["true", "false"]
             },
             "description": "Filter for remote jobs (true/false)"
           }
@@ -1258,6 +960,12 @@
           "200": {
             "description": "Search results retrieved successfully",
             "headers": {
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
               "'X-RateLimit-Remaining'": {
                 "schema": {
                   "type": "string"
@@ -1269,43 +977,32 @@
                   "type": "string"
                 },
                 "description": "Rate limit reset timestamp"
-              },
-              "'Cache-Control'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Cache control directive"
               }
             },
             "content": {
               "application/json": {
                 "example": {
+                  "filters": {
+                    "categories": ["agents"],
+                    "sort": "relevance",
+                    "tags": ["ai", "automation"]
+                  },
+                  "pagination": {
+                    "hasMore": true,
+                    "limit": 20,
+                    "offset": 0,
+                    "total": 42
+                  },
                   "query": "ai agents",
                   "results": [
                     {
-                      "id": "content-1",
-                      "title": "AI Agent Framework",
-                      "slug": "ai-agent-framework",
                       "category": "agents",
-                      "description": "A comprehensive framework for building AI agents"
+                      "description": "A comprehensive framework for building AI agents",
+                      "id": "content-1",
+                      "slug": "ai-agent-framework",
+                      "title": "AI Agent Framework"
                     }
                   ],
-                  "filters": {
-                    "sort": "relevance",
-                    "categories": [
-                      "agents"
-                    ],
-                    "tags": [
-                      "ai",
-                      "automation"
-                    ]
-                  },
-                  "pagination": {
-                    "total": 42,
-                    "limit": 20,
-                    "offset": 0,
-                    "hasMore": true
-                  },
                   "searchType": "content"
                 },
                 "schema": {
@@ -1393,12 +1090,7 @@
                           "maximum": 9007199254740991
                         }
                       },
-                      "required": [
-                        "hasMore",
-                        "limit",
-                        "offset",
-                        "total"
-                      ],
+                      "required": ["hasMore", "limit", "offset", "total"],
                       "additionalProperties": false
                     },
                     "query": {
@@ -1432,29 +1124,17 @@
                             "type": "string"
                           }
                         },
-                        "required": [
-                          "id"
-                        ],
+                        "required": ["id"],
                         "additionalProperties": {}
                       }
                     },
                     "searchType": {
                       "description": "Type of search performed",
                       "type": "string",
-                      "enum": [
-                        "content",
-                        "jobs",
-                        "unified"
-                      ]
+                      "enum": ["content", "jobs", "unified"]
                     }
                   },
-                  "required": [
-                    "filters",
-                    "pagination",
-                    "query",
-                    "results",
-                    "searchType"
-                  ],
+                  "required": ["filters", "pagination", "query", "results", "searchType"],
                   "additionalProperties": false
                 }
               }
@@ -1480,9 +1160,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -1508,9 +1186,192 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/revalidate": {
+      "post": {
+        "summary": "Trigger on-demand ISR revalidation",
+        "description": "Trigger on-demand ISR revalidation and cache tag invalidation for specified targets. Called by edge function via Supabase Realtime (logical replication).",
+        "tags": ["cache", "revalidation", "webhook"],
+        "operationId": "revalidate",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Revalidation request with secret token, optional category/slug for path revalidation, and optional tags for cache invalidation",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category": {
+                    "description": "Content category to revalidate",
+                    "type": "string"
+                  },
+                  "secret": {
+                    "description": "Revalidation secret token",
+                    "type": "string"
+                  },
+                  "slug": {
+                    "description": "Content slug to revalidate",
+                    "type": "string"
+                  },
+                  "tags": {
+                    "description": "Cache tags to invalidate",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Revalidation completed successfully",
+            "headers": {
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "paths": ["/", "/agents", "/agents/code-reviewer"],
+                  "revalidated": true,
+                  "tags": ["content", "homepage", "trending"],
+                  "timestamp": "2025-01-11T12:00:00Z"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "revalidated": {
+                      "description": "Revalidation success status",
+                      "type": "boolean"
+                    },
+                    "paths": {
+                      "description": "Revalidated paths",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "tags": {
+                      "description": "Invalidated cache tags",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "timestamp": {
+                      "description": "Revalidation timestamp (ISO 8601)",
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    }
+                  },
+                  "required": ["revalidated", "timestamp"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request payload or missing category/tags",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid request payload",
+                  "message": "Missing category or tags in webhook payload"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid secret",
+            "headers": {
+              "'WWW-Authenticate'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Authentication challenge"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Unauthorized",
+                  "message": "Missing secret parameter"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred during revalidation"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -1523,10 +1384,7 @@
       "get": {
         "summary": "Inngest introspection endpoint",
         "description": "Handles GET requests from Inngest for function introspection. Delegates to Inngest runtime.",
-        "tags": [
-          "inngest",
-          "webhooks"
-        ],
+        "tags": ["inngest", "webhooks"],
         "operationId": "inngestIntrospection",
         "responses": {
           "200": {
@@ -1583,9 +1441,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -1596,10 +1452,7 @@
       "post": {
         "summary": "Inngest function invocation endpoint",
         "description": "Handles POST requests from Inngest to invoke functions. Delegates to Inngest runtime.",
-        "tags": [
-          "inngest",
-          "webhooks"
-        ],
+        "tags": ["inngest", "webhooks"],
         "operationId": "inngestInvoke",
         "responses": {
           "200": {
@@ -1615,11 +1468,11 @@
             "content": {
               "application/json": {
                 "example": {
-                  "success": true,
                   "functionId": "changelog/notify",
                   "result": {
                     "notified": true
-                  }
+                  },
+                  "success": true
                 },
                 "schema": {
                   "description": "Inngest function response (varies by function)"
@@ -1650,9 +1503,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -1663,10 +1514,7 @@
       "put": {
         "summary": "Inngest sync endpoint",
         "description": "Handles PUT requests from Inngest for function synchronization. Delegates to Inngest runtime.",
-        "tags": [
-          "inngest",
-          "webhooks"
-        ],
+        "tags": ["inngest", "webhooks"],
         "operationId": "inngestSync",
         "responses": {
           "200": {
@@ -1714,9 +1562,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -1729,11 +1575,7 @@
       "get": {
         "summary": "Generate RSS or Atom feeds",
         "description": "Generates RSS or Atom feeds for content or changelog entries. Supports category filtering and changelog-specific feeds.",
-        "tags": [
-          "feeds",
-          "rss",
-          "atom"
-        ],
+        "tags": ["feeds", "rss", "atom"],
         "operationId": "getFeeds",
         "parameters": [
           {
@@ -1742,10 +1584,7 @@
             "schema": {
               "description": "Feed format (RSS or Atom)",
               "example": "rss",
-              "enum": [
-                "rss",
-                "atom"
-              ],
+              "enum": ["rss", "atom"],
               "default": "rss",
               "type": "string"
             },
@@ -1773,17 +1612,17 @@
           "200": {
             "description": "Feed generated successfully (RSS or Atom XML)",
             "headers": {
-              "'Content-Type'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Content type (application/rss+xml or application/atom+xml)"
-              },
               "'Cache-Control'": {
                 "schema": {
                   "type": "string"
                 },
                 "description": "Cache control directive"
+              },
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (application/rss+xml or application/atom+xml)"
               },
               "'X-Content-Source'": {
                 "schema": {
@@ -1834,9 +1673,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -1862,9 +1699,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -1877,10 +1712,7 @@
       "get": {
         "summary": "Get company profile by slug",
         "description": "Returns company profile data by slug identifier. Used to display company information on company profile pages.",
-        "tags": [
-          "company",
-          "profiles"
-        ],
+        "tags": ["company", "profiles"],
         "operationId": "getCompanyProfile",
         "parameters": [
           {
@@ -1900,12 +1732,6 @@
           "200": {
             "description": "Company profile retrieved successfully",
             "headers": {
-              "'X-RateLimit-Remaining'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Remaining rate limit requests"
-              },
               "'Cache-Control'": {
                 "schema": {
                   "type": "string"
@@ -1917,17 +1743,23 @@
                   "type": "string"
                 },
                 "description": "Source of the response data"
+              },
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
               }
             },
             "content": {
               "application/json": {
                 "example": {
+                  "description": "A leading technology company",
                   "id": "123e4567-e89b-12d3-a456-426614174000",
+                  "logo_url": "https://acme.com/logo.png",
                   "name": "Acme Corp",
                   "slug": "acme-corp",
-                  "description": "A leading technology company",
-                  "website": "https://acme.com",
-                  "logo_url": "https://acme.com/logo.png"
+                  "website": "https://acme.com"
                 },
                 "schema": {
                   "type": "object",
@@ -1959,11 +1791,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "id",
-                    "name",
-                    "slug"
-                  ],
+                  "required": ["id", "name", "slug"],
                   "additionalProperties": {}
                 }
               }
@@ -1989,9 +1817,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -2017,9 +1843,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -2045,9 +1869,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -2060,37 +1882,34 @@
       "get": {
         "summary": "Get OpenAPI specification",
         "description": "Serves the generated OpenAPI specification JSON file. Used by API documentation tools like Scalar API Reference.",
-        "tags": [
-          "openapi",
-          "documentation"
-        ],
+        "tags": ["openapi", "documentation"],
         "operationId": "getOpenApiSpec",
         "responses": {
           "200": {
             "description": "OpenAPI specification retrieved successfully",
             "headers": {
-              "'Content-Type'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Content type (application/json)"
-              },
               "'Cache-Control'": {
                 "schema": {
                   "type": "string"
                 },
                 "description": "Cache control directive"
+              },
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (application/json)"
               }
             },
             "content": {
               "application/json": {
                 "example": {
-                  "openapi": "3.1.0",
                   "info": {
+                    "description": "API documentation for ClaudePro Directory",
                     "title": "ClaudePro Directory API",
-                    "version": "1.1.0",
-                    "description": "API documentation for ClaudePro Directory"
+                    "version": "1.1.0"
                   },
+                  "openapi": "3.1.0",
                   "paths": {}
                 }
               }
@@ -2119,9 +1938,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -2147,9 +1964,115 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/profile-image": {
+      "get": {
+        "summary": "Get user profile image",
+        "description": "Returns the authenticated user's profile image URL from the database. Used by the user menu and other components to display the user's profile picture. Requires authentication via authedAction.",
+        "tags": ["user", "profile"],
+        "operationId": "getUserProfileImage",
+        "responses": {
+          "200": {
+            "description": "Profile image URL retrieved successfully",
+            "headers": {
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive (private, 5 minutes TTL)"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "imageUrl": "https://supabase.co/storage/v1/object/public/avatars/user-123/avatar.jpg"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "imageUrl": {
+                      "description": "User profile image URL from database, or null if not set",
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": ["imageUrl"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Unauthorized",
+                  "message": "Authentication required. Please sign in to continue."
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "Failed to fetch user profile image"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -2162,10 +2085,7 @@
       "get": {
         "summary": "Get search facets",
         "description": "Returns available search facets (categories, tags, authors) for filtering search results. Used by the search interface to populate filter dropdowns and facet counts.",
-        "tags": [
-          "search",
-          "facets"
-        ],
+        "tags": ["search", "facets"],
         "operationId": "getSearchFacets",
         "responses": {
           "200": {
@@ -2189,29 +2109,16 @@
                 "example": {
                   "facets": [
                     {
+                      "authors": ["user1", "user2"],
                       "category": "skills",
                       "content_count": 150,
-                      "tags": [
-                        "javascript",
-                        "typescript",
-                        "react"
-                      ],
-                      "authors": [
-                        "user1",
-                        "user2"
-                      ]
+                      "tags": ["javascript", "typescript", "react"]
                     },
                     {
+                      "authors": ["user3"],
                       "category": "agents",
                       "content_count": 75,
-                      "tags": [
-                        "ai",
-                        "automation",
-                        "llm"
-                      ],
-                      "authors": [
-                        "user3"
-                      ]
+                      "tags": ["ai", "automation", "llm"]
                     }
                   ]
                 },
@@ -2253,9 +2160,7 @@
                       }
                     }
                   },
-                  "required": [
-                    "facets"
-                  ],
+                  "required": ["facets"],
                   "additionalProperties": false
                 }
               }
@@ -2284,9 +2189,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -2299,10 +2202,7 @@
       "get": {
         "summary": "Get search autocomplete suggestions",
         "description": "Returns search autocomplete suggestions based on a query string. Used by the search interface to provide real-time search suggestions as users type.",
-        "tags": [
-          "search",
-          "autocomplete"
-        ],
+        "tags": ["search", "autocomplete"],
         "operationId": "getSearchAutocomplete",
         "parameters": [
           {
@@ -2335,17 +2235,17 @@
           "200": {
             "description": "Autocomplete suggestions retrieved successfully",
             "headers": {
-              "'X-RateLimit-Remaining'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Remaining rate limit requests"
-              },
               "'Cache-Control'": {
                 "schema": {
                   "type": "string"
                 },
                 "description": "Cache control directive"
+              },
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
               }
             },
             "content": {
@@ -2354,14 +2254,14 @@
                   "query": "react",
                   "suggestions": [
                     {
-                      "text": "react hooks",
+                      "is_popular": true,
                       "search_count": 150,
-                      "is_popular": true
+                      "text": "react hooks"
                     },
                     {
-                      "text": "react native",
+                      "is_popular": false,
                       "search_count": 120,
-                      "is_popular": false
+                      "text": "react native"
                     }
                   ]
                 },
@@ -2393,17 +2293,12 @@
                             "type": "boolean"
                           }
                         },
-                        "required": [
-                          "text"
-                        ],
+                        "required": ["text"],
                         "additionalProperties": false
                       }
                     }
                   },
-                  "required": [
-                    "query",
-                    "suggestions"
-                  ],
+                  "required": ["query", "suggestions"],
                   "additionalProperties": false
                 }
               }
@@ -2429,9 +2324,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -2457,9 +2350,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -2472,10 +2363,7 @@
       "post": {
         "summary": "Forward browser logs to Axiom",
         "description": "Receives browser logs from Pino transmit and forwards them to Axiom with server-side context. Used internally by Pino browser transmit.",
-        "tags": [
-          "logs",
-          "internal"
-        ],
+        "tags": ["logs", "internal"],
         "operationId": "forwardClientLogs",
         "requestBody": {
           "required": true,
@@ -2499,11 +2387,7 @@
                     "maximum": 9007199254740991
                   }
                 },
-                "required": [
-                  "level",
-                  "msg",
-                  "time"
-                ],
+                "required": ["level", "msg", "time"],
                 "additionalProperties": {}
               }
             }
@@ -2522,190 +2406,11 @@
         }
       }
     },
-    "/api/v1/content/sitewide": {
-      "get": {
-        "summary": "Get sitewide content in various formats",
-        "description": "Serves sitewide content in multiple export formats: LLMs text format (default), README JSON data, or complete JSON array. Used for exporting the entire directory content.",
-        "tags": [
-          "content",
-          "export",
-          "sitewide"
-        ],
-        "operationId": "getSitewideContent",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "format",
-            "schema": {
-              "description": "Sitewide content export format",
-              "example": "llms",
-              "enum": [
-                "llms",
-                "llms-txt",
-                "readme",
-                "json"
-              ],
-              "default": "llms",
-              "type": "string"
-            },
-            "description": "Sitewide content export format"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Sitewide content retrieved successfully in requested format",
-            "headers": {
-              "'Content-Type'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Content type (text/plain for llms formats, application/json for json/readme)"
-              },
-              "'Cache-Control'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Cache control directive"
-              },
-              "'X-Generated-By'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Source of the response data"
-              }
-            },
-            "content": {
-              "application/json": {
-                "example": "# Sitewide Content\n\n## Skills\n- Example Skill 1\n- Example Skill 2\n\n## Agents\n- Example Agent 1",
-                "schema": {
-                  "anyOf": [
-                    {
-                      "description": "LLMs.txt format (plain text)",
-                      "type": "string"
-                    },
-                    {
-                      "description": "README format (JSON)",
-                      "type": "object",
-                      "properties": {
-                        "categories": {
-                          "description": "Content categories",
-                          "type": "array",
-                          "items": {}
-                        },
-                        "total_count": {
-                          "description": "Total content count",
-                          "type": "integer",
-                          "minimum": -9007199254740991,
-                          "maximum": 9007199254740991
-                        }
-                      },
-                      "additionalProperties": {}
-                    },
-                    {
-                      "description": "JSON format (array of content)",
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "description": "Content ID",
-                            "type": "string"
-                          },
-                          "title": {
-                            "description": "Content title",
-                            "type": "string"
-                          },
-                          "slug": {
-                            "description": "Content slug",
-                            "type": "string"
-                          },
-                          "category": {
-                            "description": "Content category",
-                            "type": "string"
-                          },
-                          "description": {
-                            "description": "Content description",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id"
-                        ],
-                        "additionalProperties": {}
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid format parameter",
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": "Invalid format parameter",
-                  "message": "Invalid format. Valid formats: llms, llms-txt, readme, json"
-                },
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "description": "Error message",
-                      "type": "string"
-                    },
-                    "message": {
-                      "description": "Additional error details",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Failed to generate sitewide export",
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": "Failed to generate sitewide export",
-                  "message": "An unexpected error occurred while generating sitewide content"
-                },
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "description": "Error message",
-                      "type": "string"
-                    },
-                    "message": {
-                      "description": "Additional error details",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/flux/{...path}": {
       "get": {
         "summary": "Flux catch-all GET handler",
         "description": "Routes GET requests to appropriate Flux handlers based on path segments (e.g., /api/flux/email/count). Supports dynamic routing for internal services.",
-        "tags": [
-          "flux",
-          "internal"
-        ],
+        "tags": ["flux", "internal"],
         "operationId": "fluxGet",
         "parameters": [
           {
@@ -2723,17 +2428,17 @@
           "200": {
             "description": "Request routed successfully",
             "headers": {
-              "'X-RateLimit-Remaining'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Remaining rate limit requests"
-              },
               "'Cache-Control'": {
                 "schema": {
                   "type": "string"
                 },
                 "description": "Cache control directive"
+              },
+              "'X-RateLimit-Remaining'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Remaining rate limit requests"
               }
             },
             "content": {
@@ -2770,9 +2475,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -2798,9 +2501,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -2811,10 +2512,7 @@
       "post": {
         "summary": "Flux catch-all POST handler",
         "description": "Routes POST requests to appropriate Flux handlers based on path segments (e.g., /api/flux/discord/direct). Supports dynamic routing for internal services.",
-        "tags": [
-          "flux",
-          "internal"
-        ],
+        "tags": ["flux", "internal"],
         "operationId": "fluxPost",
         "parameters": [
           {
@@ -2842,8 +2540,8 @@
             "content": {
               "application/json": {
                 "example": {
-                  "success": true,
-                  "message": "Discord notification sent"
+                  "message": "Discord notification sent",
+                  "success": true
                 },
                 "schema": {
                   "description": "Flux handler response (varies by handler)"
@@ -2874,9 +2572,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -2902,9 +2598,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -2917,10 +2611,7 @@
       "get": {
         "summary": "Get paginated content",
         "description": "Returns paginated content with optional category filtering. Supports offset/limit pagination and category filtering.",
-        "tags": [
-          "content",
-          "pagination"
-        ],
+        "tags": ["content", "pagination"],
         "operationId": "getPaginatedContent",
         "parameters": [
           {
@@ -3005,9 +2696,7 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "id"
-                    ],
+                    "required": ["id"],
                     "additionalProperties": {}
                   }
                 }
@@ -3034,9 +2723,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -3062,153 +2749,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/content/{category}": {
-      "get": {
-        "summary": "Get category content",
-        "description": "Returns category content in multiple formats (LLMs.txt or JSON). Supports filtering by content category with optimized caching.",
-        "tags": [
-          "content",
-          "categories",
-          "export"
-        ],
-        "operationId": "getCategoryContent",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "category",
-            "schema": {
-              "description": "Path parameter: category",
-              "type": "string"
-            },
-            "required": true,
-            "description": "Path parameter: category"
-          },
-          {
-            "in": "query",
-            "name": "format",
-            "schema": {
-              "description": "Category content export format",
-              "example": "llms-category",
-              "enum": [
-                "llms-category",
-                "json"
-              ],
-              "default": "llms-category",
-              "type": "string"
-            },
-            "description": "Category content export format"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Category content retrieved successfully",
-            "headers": {
-              "'Content-Type'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Content type (text/plain for llms-category, application/json for json)"
-              },
-              "'Cache-Control'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Cache control directive"
-              },
-              "'X-Generated-By'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Source of the response data"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid category or format parameter",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "description": "Error message",
-                      "type": "string"
-                    },
-                    "message": {
-                      "description": "Additional error details",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Category content not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": "Category content not found",
-                  "message": "No content found for the specified category"
-                },
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "description": "Error message",
-                      "type": "string"
-                    },
-                    "message": {
-                      "description": "Additional error details",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": "Internal server error",
-                  "message": "An unexpected error occurred while fetching category content"
-                },
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "description": "Error message",
-                      "type": "string"
-                    },
-                    "message": {
-                      "description": "Additional error details",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -3221,11 +2762,7 @@
       "get": {
         "summary": "Get changelog in LLMs.txt format",
         "description": "Returns the changelog in LLMs.txt format for AI/LLM consumption. Used for exporting changelog data in a standardized text format.",
-        "tags": [
-          "content",
-          "changelog",
-          "export"
-        ],
+        "tags": ["content", "changelog", "export"],
         "operationId": "getChangelogIndex",
         "parameters": [
           {
@@ -3234,9 +2771,7 @@
             "schema": {
               "description": "Changelog export format",
               "example": "llms-changelog",
-              "enum": [
-                "llms-changelog"
-              ],
+              "enum": ["llms-changelog"],
               "default": "llms-changelog",
               "type": "string"
             },
@@ -3247,17 +2782,17 @@
           "200": {
             "description": "Changelog LLMs.txt content retrieved successfully",
             "headers": {
-              "'Content-Type'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Content type (text/plain)"
-              },
               "'Cache-Control'": {
                 "schema": {
                   "type": "string"
                 },
                 "description": "Cache control directive"
+              },
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (text/plain)"
               },
               "'X-Generated-By'": {
                 "schema": {
@@ -3296,9 +2831,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -3324,9 +2857,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -3339,11 +2870,7 @@
       "get": {
         "summary": "Get category configurations",
         "description": "Returns category configuration data including features, metadata, and display settings. Used by the frontend to render category-specific UI and determine available features.",
-        "tags": [
-          "content",
-          "categories",
-          "config"
-        ],
+        "tags": ["content", "categories", "config"],
         "operationId": "getCategoryConfigs",
         "responses": {
           "200": {
@@ -3393,9 +2920,7 @@
                         "additionalProperties": {}
                       }
                     },
-                    "required": [
-                      "category"
-                    ],
+                    "required": ["category"],
                     "additionalProperties": {}
                   }
                 }
@@ -3425,9 +2950,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -3436,109 +2959,119 @@
         }
       }
     },
-    "/api/v1/bookmarks/add": {
-      "post": {
-        "summary": "Add bookmark",
-        "description": "Adds a bookmark for the authenticated user. Requires authentication.",
-        "tags": [
-          "bookmarks",
-          "user"
-        ],
-        "operationId": "addBookmark",
-        "security": [
+    "/api/v1/content/sitewide": {
+      "get": {
+        "summary": "Get sitewide content in various formats",
+        "description": "Serves sitewide content in multiple export formats: LLMs text format (default), README JSON data, or complete JSON array. Used for exporting the entire directory content.",
+        "tags": ["content", "export", "sitewide"],
+        "operationId": "getSitewideContent",
+        "parameters": [
           {
-            "bearerAuth": []
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "description": "Sitewide content export format",
+              "example": "llms",
+              "enum": ["llms", "llms-txt", "readme", "json"],
+              "default": "llms",
+              "type": "string"
+            },
+            "description": "Sitewide content export format"
           }
         ],
-        "requestBody": {
-          "description": "Bookmark details including content slug, content type, and optional notes",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "content_slug": {
-                    "type": "string"
-                  },
-                  "content_type": {
-                    "type": "string"
-                  },
-                  "notes": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "content_slug",
-                  "content_type"
-                ]
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "description": "Bookmark added successfully",
+            "description": "Sitewide content retrieved successfully in requested format",
             "headers": {
-              "'X-RateLimit-Remaining'": {
+              "'Cache-Control'": {
                 "schema": {
                   "type": "string"
                 },
-                "description": "Remaining rate limit requests"
+                "description": "Cache control directive"
+              },
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (text/plain for llms formats, application/json for json/readme)"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
               }
             },
             "content": {
               "application/json": {
-                "example": {
-                  "success": true,
-                  "data": {
-                    "id": "bookmark-123",
-                    "content_slug": "my-server",
-                    "content_type": "mcp",
-                    "notes": "Optional notes"
-                  }
-                },
+                "example": "# Sitewide Content\n\n## Skills\n- Example Skill 1\n- Example Skill 2\n\n## Agents\n- Example Agent 1",
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "description": "Operation success status",
-                      "type": "boolean"
+                  "anyOf": [
+                    {
+                      "description": "LLMs.txt format (plain text)",
+                      "type": "string"
                     },
-                    "data": {
+                    {
+                      "description": "README format (JSON)",
                       "type": "object",
                       "properties": {
-                        "id": {
-                          "description": "Bookmark ID",
-                          "type": "string"
+                        "categories": {
+                          "description": "Content categories",
+                          "type": "array",
+                          "items": {}
                         },
-                        "content_slug": {
-                          "description": "Content slug",
-                          "type": "string"
-                        },
-                        "content_type": {
-                          "description": "Content type",
-                          "type": "string"
+                        "total_count": {
+                          "description": "Total content count",
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
                         }
                       },
                       "additionalProperties": {}
+                    },
+                    {
+                      "description": "JSON format (array of content)",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "description": "Content ID",
+                            "type": "string"
+                          },
+                          "title": {
+                            "description": "Content title",
+                            "type": "string"
+                          },
+                          "slug": {
+                            "description": "Content slug",
+                            "type": "string"
+                          },
+                          "category": {
+                            "description": "Content category",
+                            "type": "string"
+                          },
+                          "description": {
+                            "description": "Content description",
+                            "type": "string"
+                          }
+                        },
+                        "required": ["id"],
+                        "additionalProperties": {}
+                      }
                     }
-                  },
-                  "required": [
-                    "success"
-                  ],
-                  "additionalProperties": false
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid request body",
+            "description": "Invalid format parameter",
             "content": {
               "application/json": {
                 "example": {
-                  "error": "Invalid request body",
-                  "message": "content_slug is required and must be a string"
+                  "error": "Invalid format parameter",
+                  "message": "Invalid format. Valid formats: llms, llms-txt, readme, json"
                 },
                 "schema": {
                   "type": "object",
@@ -3552,29 +3085,19 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
             }
           },
-          "401": {
-            "description": "Unauthorized - user not authenticated",
-            "headers": {
-              "'WWW-Authenticate'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Authentication challenge"
-              }
-            },
+          "500": {
+            "description": "Failed to generate sitewide export",
             "content": {
               "application/json": {
                 "example": {
-                  "error": "Unauthorized",
-                  "message": "Authentication required. Please provide a valid JWT token."
+                  "error": "Failed to generate sitewide export",
+                  "message": "An unexpected error occurred while generating sitewide content"
                 },
                 "schema": {
                   "type": "object",
@@ -3588,9 +3111,112 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/content/{category}": {
+      "get": {
+        "summary": "Get category content",
+        "description": "Returns category content in multiple formats (LLMs.txt or JSON). Supports filtering by content category with optimized caching.",
+        "tags": ["content", "categories", "export"],
+        "operationId": "getCategoryContent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "category",
+            "schema": {
+              "description": "Path parameter: category",
+              "type": "string"
+            },
+            "required": true,
+            "description": "Path parameter: category"
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "description": "Category content export format",
+              "example": "llms-category",
+              "enum": ["llms-category", "json"],
+              "default": "llms-category",
+              "type": "string"
+            },
+            "description": "Category content export format"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category content retrieved successfully",
+            "headers": {
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (text/plain for llms-category, application/json for json)"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid category or format parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category content not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Category content not found",
+                  "message": "No content found for the specified category"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -3602,7 +3228,7 @@
               "application/json": {
                 "example": {
                   "error": "Internal server error",
-                  "message": "An unexpected error occurred while adding the bookmark"
+                  "message": "An unexpected error occurred while fetching category content"
                 },
                 "schema": {
                   "type": "object",
@@ -3616,9 +3242,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -3631,11 +3255,7 @@
       "post": {
         "summary": "Sync changelog entry",
         "description": "Syncs changelog entry from CHANGELOG.md to database and enqueues notification. Called by GitHub Actions after generating changelog and creating tag. Requires Bearer token authentication.",
-        "tags": [
-          "changelog",
-          "sync",
-          "webhook"
-        ],
+        "tags": ["changelog", "sync", "webhook"],
         "operationId": "syncChangelog",
         "security": [
           {
@@ -3684,11 +3304,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "content",
-                  "date",
-                  "version"
-                ]
+                "required": ["content", "date", "version"]
               }
             }
           }
@@ -3707,10 +3323,10 @@
             "content": {
               "application/json": {
                 "example": {
-                  "success": true,
                   "id": "changelog-entry-123",
+                  "message": "Changelog entry synced successfully",
                   "slug": "1-2-0-2025-12-07",
-                  "message": "Changelog entry synced successfully"
+                  "success": true
                 },
                 "schema": {
                   "type": "object",
@@ -3732,12 +3348,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "success",
-                    "id",
-                    "slug",
-                    "message"
-                  ],
+                  "required": ["success", "id", "slug", "message"],
                   "additionalProperties": false
                 }
               }
@@ -3763,9 +3374,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -3799,9 +3408,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -3827,9 +3434,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -3841,11 +3446,8 @@
     "/api/v1/bookmarks/remove": {
       "post": {
         "summary": "Remove bookmark",
-        "description": "Removes a bookmark for the authenticated user. Requires authentication.",
-        "tags": [
-          "bookmarks",
-          "user"
-        ],
+        "description": "Removes a bookmark for the authenticated user. Requires authentication via authedAction.",
+        "tags": ["bookmarks", "user"],
         "operationId": "removeBookmark",
         "security": [
           {
@@ -3867,10 +3469,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "content_slug",
-                  "content_type"
-                ]
+                "required": ["content_slug", "content_type"]
               }
             }
           }
@@ -3889,12 +3488,12 @@
             "content": {
               "application/json": {
                 "example": {
-                  "success": true,
                   "data": {
-                    "id": "bookmark-123",
                     "content_slug": "my-server",
-                    "content_type": "mcp"
-                  }
+                    "content_type": "mcp",
+                    "id": "bookmark-123"
+                  },
+                  "success": true
                 },
                 "schema": {
                   "type": "object",
@@ -3922,9 +3521,7 @@
                       "additionalProperties": {}
                     }
                   },
-                  "required": [
-                    "success"
-                  ],
+                  "required": ["success"],
                   "additionalProperties": false
                 }
               }
@@ -3950,9 +3547,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -3986,9 +3581,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -4014,9 +3607,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -4025,165 +3616,101 @@
         }
       }
     },
-    "/api/v1/content/{category}/{slug}": {
-      "get": {
-        "summary": "Get content detail in multiple formats",
-        "description": "Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage). Supports various export options including metadata and footer inclusion.",
-        "tags": [
-          "content",
-          "export"
-        ],
-        "operationId": "getContentDetail",
-        "parameters": [
+    "/api/v1/bookmarks/add": {
+      "post": {
+        "summary": "Add bookmark",
+        "description": "Adds a bookmark for the authenticated user. Requires authentication via authedAction.",
+        "tags": ["bookmarks", "user"],
+        "operationId": "addBookmark",
+        "security": [
           {
-            "in": "path",
-            "name": "category",
-            "schema": {
-              "description": "Path parameter: category",
-              "type": "string"
-            },
-            "required": true,
-            "description": "Path parameter: category"
-          },
-          {
-            "in": "path",
-            "name": "slug",
-            "schema": {
-              "description": "Path parameter: slug",
-              "type": "string"
-            },
-            "required": true,
-            "description": "Path parameter: slug"
-          },
-          {
-            "in": "query",
-            "name": "format",
-            "schema": {
-              "description": "Export format for content",
-              "example": "json",
-              "enum": [
-                "json",
-                "markdown",
-                "md",
-                "llms",
-                "llms-txt",
-                "storage"
-              ],
-              "default": "json",
-              "type": "string"
-            },
-            "description": "Export format for content"
-          },
-          {
-            "in": "query",
-            "name": "includeMetadata",
-            "schema": {
-              "description": "Include metadata in markdown export (default: true)",
-              "example": true,
-              "type": "string",
-              "enum": [
-                "true",
-                "false"
-              ]
-            },
-            "description": "Include metadata in markdown export (default: true)"
-          },
-          {
-            "in": "query",
-            "name": "includeFooter",
-            "schema": {
-              "description": "Include footer in markdown export (default: false)",
-              "example": false,
-              "type": "string",
-              "enum": [
-                "true",
-                "false"
-              ]
-            },
-            "description": "Include footer in markdown export (default: false)"
-          },
-          {
-            "in": "query",
-            "name": "metadata",
-            "schema": {
-              "description": "Return metadata only for storage format (default: false)",
-              "example": false,
-              "type": "string",
-              "enum": [
-                "true",
-                "false"
-              ]
-            },
-            "description": "Return metadata only for storage format (default: false)"
+            "bearerAuth": []
           }
         ],
+        "requestBody": {
+          "description": "Bookmark details including content slug, content type, and optional notes",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content_slug": {
+                    "type": "string"
+                  },
+                  "content_type": {
+                    "type": "string"
+                  },
+                  "notes": {
+                    "type": "string"
+                  }
+                },
+                "required": ["content_slug", "content_type"]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Content detail retrieved successfully",
+            "description": "Bookmark added successfully",
             "headers": {
-              "'Content-Type'": {
+              "'X-RateLimit-Remaining'": {
                 "schema": {
                   "type": "string"
                 },
-                "description": "Content type (application/json for json, text/markdown for markdown, text/plain for llms, application/json for storage)"
-              },
-              "'Cache-Control'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Cache control directive"
-              },
-              "'X-Generated-By'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Source of the response data"
+                "description": "Remaining rate limit requests"
               }
             },
             "content": {
               "application/json": {
                 "example": {
-                  "id": "content-1",
-                  "title": "Code Reviewer Agent",
-                  "slug": "code-reviewer",
-                  "category": "agents",
-                  "description": "An AI agent that reviews code for quality and best practices",
-                  "content": "Full content here..."
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid category, format, or query parameters",
-            "content": {
-              "application/json": {
+                  "data": {
+                    "content_slug": "my-server",
+                    "content_type": "mcp",
+                    "id": "bookmark-123",
+                    "notes": "Optional notes"
+                  },
+                  "success": true
+                },
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "error": {
-                      "description": "Error message",
-                      "type": "string"
+                    "success": {
+                      "description": "Operation success status",
+                      "type": "boolean"
                     },
-                    "message": {
-                      "description": "Additional error details",
-                      "type": "string"
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "description": "Bookmark ID",
+                          "type": "string"
+                        },
+                        "content_slug": {
+                          "description": "Content slug",
+                          "type": "string"
+                        },
+                        "content_type": {
+                          "description": "Content type",
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": {}
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["success"],
                   "additionalProperties": false
                 }
               }
             }
           },
-          "404": {
-            "description": "Content not found",
+          "400": {
+            "description": "Invalid request body",
             "content": {
               "application/json": {
                 "example": {
-                  "error": "Content not found",
-                  "message": "No content found with slug \"invalid-slug\" in category \"agents\""
+                  "error": "Invalid request body",
+                  "message": "content_slug is required and must be a string"
                 },
                 "schema": {
                   "type": "object",
@@ -4197,9 +3724,41 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated",
+            "headers": {
+              "'WWW-Authenticate'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Authentication challenge"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Unauthorized",
+                  "message": "Authentication required. Please sign in to continue."
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -4211,7 +3770,7 @@
               "application/json": {
                 "example": {
                   "error": "Internal server error",
-                  "message": "An unexpected error occurred while fetching content detail"
+                  "message": "An unexpected error occurred while adding the bookmark"
                 },
                 "schema": {
                   "type": "object",
@@ -4225,9 +3784,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -4240,11 +3797,7 @@
       "get": {
         "summary": "Get changelog entry in LLMs.txt format",
         "description": "Returns a changelog entry as an LLMs-compliant plain-text file for the given slug. Validates the format query parameter (must be 'llms-entry').",
-        "tags": [
-          "content",
-          "changelog",
-          "export"
-        ],
+        "tags": ["content", "changelog", "export"],
         "operationId": "getChangelogEntry",
         "parameters": [
           {
@@ -4263,9 +3816,7 @@
             "schema": {
               "description": "Changelog entry export format",
               "example": "llms-entry",
-              "enum": [
-                "llms-entry"
-              ],
+              "enum": ["llms-entry"],
               "default": "llms-entry",
               "type": "string"
             },
@@ -4276,17 +3827,17 @@
           "200": {
             "description": "Changelog entry LLMs.txt content retrieved successfully",
             "headers": {
-              "'Content-Type'": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Content type (text/plain)"
-              },
               "'Cache-Control'": {
                 "schema": {
                   "type": "string"
                 },
                 "description": "Cache control directive"
+              },
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (text/plain)"
               },
               "'X-Generated-By'": {
                 "schema": {
@@ -4325,9 +3876,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -4353,9 +3902,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -4381,9 +3928,193 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ],
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/content/{category}/{slug}": {
+      "get": {
+        "summary": "Get content detail in multiple formats",
+        "description": "Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage). Supports various export options including metadata and footer inclusion.",
+        "tags": ["content", "export"],
+        "operationId": "getContentDetail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "category",
+            "schema": {
+              "description": "Path parameter: category",
+              "type": "string"
+            },
+            "required": true,
+            "description": "Path parameter: category"
+          },
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "description": "Path parameter: slug",
+              "type": "string"
+            },
+            "required": true,
+            "description": "Path parameter: slug"
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "description": "Export format for content",
+              "example": "json",
+              "enum": ["json", "markdown", "md", "llms", "llms-txt", "storage"],
+              "default": "json",
+              "type": "string"
+            },
+            "description": "Export format for content"
+          },
+          {
+            "in": "query",
+            "name": "includeMetadata",
+            "schema": {
+              "description": "Include metadata in markdown export (default: true)",
+              "example": true,
+              "type": "string",
+              "enum": ["true", "false"]
+            },
+            "description": "Include metadata in markdown export (default: true)"
+          },
+          {
+            "in": "query",
+            "name": "includeFooter",
+            "schema": {
+              "description": "Include footer in markdown export (default: false)",
+              "example": false,
+              "type": "string",
+              "enum": ["true", "false"]
+            },
+            "description": "Include footer in markdown export (default: false)"
+          },
+          {
+            "in": "query",
+            "name": "metadata",
+            "schema": {
+              "description": "Return metadata only for storage format (default: false)",
+              "example": false,
+              "type": "string",
+              "enum": ["true", "false"]
+            },
+            "description": "Return metadata only for storage format (default: false)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Content detail retrieved successfully",
+            "headers": {
+              "'Cache-Control'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Cache control directive"
+              },
+              "'Content-Type'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Content type (application/json for json, text/markdown for markdown, text/plain for llms, application/json for storage)"
+              },
+              "'X-Generated-By'": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Source of the response data"
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "category": "agents",
+                  "content": "Full content here...",
+                  "description": "An AI agent that reviews code for quality and best practices",
+                  "id": "content-1",
+                  "slug": "code-reviewer",
+                  "title": "Code Reviewer Agent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid category, format, or query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Content not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Content not found",
+                  "message": "No content found with slug \"invalid-slug\" in category \"agents\""
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal server error",
+                  "message": "An unexpected error occurred while fetching content detail"
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "Additional error details",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
@@ -4424,10 +4155,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "ip_address"
-        ]
+        "required": ["id", "ip_address"]
       },
       "flow_state": {
         "type": "object",
@@ -4528,14 +4256,7 @@
             "$ref": "#/components/schemas/auth_users"
           }
         },
-        "required": [
-          "provider_id",
-          "user_id",
-          "identity_data",
-          "provider",
-          "id",
-          "users"
-        ]
+        "required": ["provider_id", "user_id", "identity_data", "provider", "id", "users"]
       },
       "instances": {
         "type": "object",
@@ -4559,9 +4280,7 @@
             "format": "date-time"
           }
         },
-        "required": [
-          "id"
-        ]
+        "required": ["id"]
       },
       "mfa_amr_claims": {
         "type": "object",
@@ -4629,13 +4348,7 @@
             "$ref": "#/components/schemas/mfa_factors"
           }
         },
-        "required": [
-          "id",
-          "factor_id",
-          "created_at",
-          "ip_address",
-          "mfa_factors"
-        ]
+        "required": ["id", "factor_id", "created_at", "ip_address", "mfa_factors"]
       },
       "mfa_factors": {
         "type": "object",
@@ -4802,11 +4515,7 @@
             "format": "date-time"
           }
         },
-        "required": [
-          "id",
-          "provider_type",
-          "created_at"
-        ]
+        "required": ["id", "provider_type", "created_at"]
       },
       "oauth_clients": {
         "type": "object",
@@ -4914,15 +4623,7 @@
             "$ref": "#/components/schemas/auth_users"
           }
         },
-        "required": [
-          "id",
-          "user_id",
-          "client_id",
-          "scopes",
-          "granted_at",
-          "oauth_clients",
-          "users"
-        ]
+        "required": ["id", "user_id", "client_id", "scopes", "granted_at", "oauth_clients", "users"]
       },
       "one_time_tokens": {
         "type": "object",
@@ -5004,9 +4705,7 @@
             "$ref": "#/components/schemas/sessions"
           }
         },
-        "required": [
-          "id"
-        ]
+        "required": ["id"]
       },
       "saml_providers": {
         "type": "object",
@@ -5046,13 +4745,7 @@
             "$ref": "#/components/schemas/sso_providers"
           }
         },
-        "required": [
-          "id",
-          "sso_provider_id",
-          "entity_id",
-          "metadata_xml",
-          "sso_providers"
-        ]
+        "required": ["id", "sso_provider_id", "entity_id", "metadata_xml", "sso_providers"]
       },
       "saml_relay_states": {
         "type": "object",
@@ -5091,12 +4784,7 @@
             "$ref": "#/components/schemas/sso_providers"
           }
         },
-        "required": [
-          "id",
-          "sso_provider_id",
-          "request_id",
-          "sso_providers"
-        ]
+        "required": ["id", "sso_provider_id", "request_id", "sso_providers"]
       },
       "schema_migrations": {
         "type": "object",
@@ -5106,9 +4794,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "version"
-        ]
+        "required": ["version"]
       },
       "sessions": {
         "type": "object",
@@ -5183,13 +4869,7 @@
             "$ref": "#/components/schemas/auth_users"
           }
         },
-        "required": [
-          "id",
-          "user_id",
-          "mfa_amr_claims",
-          "refresh_tokens",
-          "users"
-        ]
+        "required": ["id", "user_id", "mfa_amr_claims", "refresh_tokens", "users"]
       },
       "sso_domains": {
         "type": "object",
@@ -5216,12 +4896,7 @@
             "$ref": "#/components/schemas/sso_providers"
           }
         },
-        "required": [
-          "id",
-          "sso_provider_id",
-          "domain",
-          "sso_providers"
-        ]
+        "required": ["id", "sso_provider_id", "domain", "sso_providers"]
       },
       "sso_providers": {
         "type": "object",
@@ -5263,12 +4938,7 @@
             }
           }
         },
-        "required": [
-          "id",
-          "saml_providers",
-          "saml_relay_states",
-          "sso_domains"
-        ]
+        "required": ["id", "saml_providers", "saml_relay_states", "sso_domains"]
       },
       "auth_users": {
         "type": "object",
@@ -6067,15 +5737,7 @@
             }
           }
         },
-        "required": [
-          "id",
-          "slug",
-          "name",
-          "created_at",
-          "updated_at",
-          "jobs",
-          "user_mcps"
-        ]
+        "required": ["id", "slug", "name", "created_at", "updated_at", "jobs", "user_mcps"]
       },
       "contact_commands": {
         "type": "object",
@@ -6525,13 +6187,7 @@
             "$ref": "#/components/schemas/content_category"
           }
         },
-        "required": [
-          "id",
-          "content_a_slug",
-          "content_b_slug",
-          "similarity_score",
-          "calculated_at"
-        ]
+        "required": ["id", "content_a_slug", "content_b_slug", "similarity_score", "calculated_at"]
       },
       "content_submissions": {
         "type": "object",
@@ -6801,13 +6457,7 @@
             "$ref": "#/components/schemas/content"
           }
         },
-        "required": [
-          "id",
-          "content_slug",
-          "content_type",
-          "created_at",
-          "content"
-        ]
+        "required": ["id", "content_slug", "content_type", "created_at", "content"]
       },
       "email_blocklist": {
         "type": "object",
@@ -6831,12 +6481,7 @@
             "format": "date-time"
           }
         },
-        "required": [
-          "email",
-          "reason",
-          "created_at",
-          "updated_at"
-        ]
+        "required": ["email", "reason", "created_at", "updated_at"]
       },
       "email_engagement_summary": {
         "type": "object",
@@ -6930,12 +6575,7 @@
             "$ref": "#/components/schemas/newsletter_subscriptions"
           }
         },
-        "required": [
-          "id",
-          "email",
-          "created_at",
-          "updated_at"
-        ]
+        "required": ["id", "email", "created_at", "updated_at"]
       },
       "email_sequence_schedule": {
         "type": "object",
@@ -7180,13 +6820,7 @@
             "format": "date-time"
           }
         },
-        "required": [
-          "id",
-          "job_name",
-          "status",
-          "created_at",
-          "updated_at"
-        ]
+        "required": ["id", "job_name", "status", "created_at", "updated_at"]
       },
       "job_subscription_audit_log": {
         "type": "object",
@@ -7219,14 +6853,7 @@
             "$ref": "#/components/schemas/jobs"
           }
         },
-        "required": [
-          "id",
-          "job_id",
-          "issue",
-          "resolved",
-          "created_at",
-          "jobs"
-        ]
+        "required": ["id", "job_id", "issue", "resolved", "created_at", "jobs"]
       },
       "jobs": {
         "type": "object",
@@ -7473,11 +7100,7 @@
             "format": "date-time"
           }
         },
-        "required": [
-          "user_id",
-          "factor_id",
-          "last_failed_at"
-        ]
+        "required": ["user_id", "factor_id", "last_failed_at"]
       },
       "newsletter_subscriptions": {
         "type": "object",
@@ -7728,11 +7351,7 @@
             "format": "int32"
           }
         },
-        "required": [
-          "user_id",
-          "last_failed_at",
-          "failed_attempts"
-        ]
+        "required": ["user_id", "last_failed_at", "failed_attempts"]
       },
       "payment_plan_catalog": {
         "type": "object",
@@ -7976,9 +7595,7 @@
             "format": "date-time"
           }
         },
-        "required": [
-          "identifier"
-        ]
+        "required": ["identifier"]
       },
       "review_helpful_votes": {
         "type": "object",
@@ -8107,13 +7724,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "script",
-          "artifact_name",
-          "hash",
-          "generated_at"
-        ]
+        "required": ["id", "script", "artifact_name", "hash", "generated_at"]
       },
       "script_cache": {
         "type": "object",
@@ -8137,12 +7748,7 @@
             "format": "date-time"
           }
         },
-        "required": [
-          "cache_key",
-          "script",
-          "hash",
-          "updated_at"
-        ]
+        "required": ["cache_key", "script", "hash", "updated_at"]
       },
       "search_queries": {
         "type": "object",
@@ -8178,11 +7784,7 @@
             "$ref": "#/components/schemas/auth_users"
           }
         },
-        "required": [
-          "id",
-          "query",
-          "created_at"
-        ]
+        "required": ["id", "query", "created_at"]
       },
       "sponsored_content": {
         "type": "object",
@@ -8521,14 +8123,7 @@
             "$ref": "#/components/schemas/user_tier"
           }
         },
-        "required": [
-          "label",
-          "css_classes",
-          "display_order",
-          "created_at",
-          "updated_at",
-          "tier"
-        ]
+        "required": ["label", "css_classes", "display_order", "created_at", "updated_at", "tier"]
       },
       "user_collections": {
         "type": "object",
@@ -8706,11 +8301,7 @@
             "$ref": "#/components/schemas/public_users"
           }
         },
-        "required": [
-          "id",
-          "created_at",
-          "interaction_type"
-        ]
+        "required": ["id", "created_at", "interaction_type"]
       },
       "user_mcps": {
         "type": "object",
@@ -9351,71 +8942,39 @@
             "format": "int64"
           }
         },
-        "required": [
-          "search_query",
-          "search_count",
-          "last_searched",
-          "unique_users"
-        ]
+        "required": ["search_query", "search_count", "last_searched", "unique_users"]
       },
       "aal_level": {
         "type": "string",
-        "enum": [
-          "aal1",
-          "aal2",
-          "aal3"
-        ]
+        "enum": ["aal1", "aal2", "aal3"]
       },
       "code_challenge_method": {
         "type": "string",
-        "enum": [
-          "s256",
-          "plain"
-        ]
+        "enum": ["s256", "plain"]
       },
       "factor_status": {
         "type": "string",
-        "enum": [
-          "unverified",
-          "verified"
-        ]
+        "enum": ["unverified", "verified"]
       },
       "factor_type": {
         "type": "string",
-        "enum": [
-          "totp",
-          "webauthn",
-          "phone"
-        ]
+        "enum": ["totp", "webauthn", "phone"]
       },
       "oauth_authorization_status": {
         "type": "string",
-        "enum": [
-          "pending",
-          "approved",
-          "denied",
-          "expired"
-        ]
+        "enum": ["pending", "approved", "denied", "expired"]
       },
       "oauth_client_type": {
         "type": "string",
-        "enum": [
-          "public",
-          "confidential"
-        ]
+        "enum": ["public", "confidential"]
       },
       "oauth_registration_type": {
         "type": "string",
-        "enum": [
-          "dynamic",
-          "manual"
-        ]
+        "enum": ["dynamic", "manual"]
       },
       "oauth_response_type": {
         "type": "string",
-        "enum": [
-          "code"
-        ]
+        "enum": ["code"]
       },
       "one_time_token_type": {
         "type": "string",
@@ -9430,48 +8989,23 @@
       },
       "announcement_icon": {
         "type": "string",
-        "enum": [
-          "ArrowUpRight",
-          "ArrowRight",
-          "AlertTriangle",
-          "Calendar",
-          "BookOpen",
-          "Sparkles"
-        ]
+        "enum": ["ArrowUpRight", "ArrowRight", "AlertTriangle", "Calendar", "BookOpen", "Sparkles"]
       },
       "announcement_priority": {
         "type": "string",
-        "enum": [
-          "high",
-          "medium",
-          "low"
-        ]
+        "enum": ["high", "medium", "low"]
       },
       "announcement_tag": {
         "type": "string",
-        "enum": [
-          "Feature",
-          "New"
-        ]
+        "enum": ["Feature", "New"]
       },
       "announcement_variant": {
         "type": "string",
-        "enum": [
-          "default",
-          "outline",
-          "secondary",
-          "destructive"
-        ]
+        "enum": ["default", "outline", "secondary", "destructive"]
       },
       "app_setting_category": {
         "type": "string",
-        "enum": [
-          "feature_flag",
-          "config",
-          "secret",
-          "experimental",
-          "maintenance"
-        ]
+        "enum": ["feature_flag", "config", "secret", "experimental", "maintenance"]
       },
       "category_icon": {
         "type": "string",
@@ -9488,22 +9022,11 @@
       },
       "changelog_category": {
         "type": "string",
-        "enum": [
-          "Added",
-          "Changed",
-          "Fixed",
-          "Security",
-          "Deprecated",
-          "Removed"
-        ]
+        "enum": ["Added", "Changed", "Fixed", "Security", "Deprecated", "Removed"]
       },
       "changelog_source": {
         "type": "string",
-        "enum": [
-          "manual",
-          "jsonbored",
-          "automation"
-        ]
+        "enum": ["manual", "jsonbored", "automation"]
       },
       "company_size": {
         "type": "string",
@@ -9518,50 +9041,23 @@
       },
       "confetti_variant": {
         "type": "string",
-        "enum": [
-          "success",
-          "celebration",
-          "milestone",
-          "subtle"
-        ]
+        "enum": ["success", "celebration", "milestone", "subtle"]
       },
       "config_format": {
         "type": "string",
-        "enum": [
-          "json",
-          "multi",
-          "hook"
-        ]
+        "enum": ["json", "multi", "hook"]
       },
       "contact_action_type": {
         "type": "string",
-        "enum": [
-          "internal",
-          "external",
-          "route",
-          "sheet",
-          "easter_egg"
-        ]
+        "enum": ["internal", "external", "route", "sheet", "easter_egg"]
       },
       "contact_category": {
         "type": "string",
-        "enum": [
-          "bug",
-          "feature",
-          "partnership",
-          "general",
-          "other"
-        ]
+        "enum": ["bug", "feature", "partnership", "general", "other"]
       },
       "contact_command_category": {
         "type": "string",
-        "enum": [
-          "hidden",
-          "info",
-          "social",
-          "support",
-          "utility"
-        ]
+        "enum": ["hidden", "info", "social", "support", "utility"]
       },
       "contact_command_icon": {
         "type": "string",
@@ -9594,112 +9090,55 @@
       },
       "content_field_type": {
         "type": "string",
-        "enum": [
-          "installation",
-          "use_cases",
-          "troubleshooting",
-          "requirements"
-        ]
+        "enum": ["installation", "use_cases", "troubleshooting", "requirements"]
       },
       "content_source": {
         "type": "string",
-        "enum": [
-          "claudepro",
-          "community",
-          "official"
-        ]
+        "enum": ["claudepro", "community", "official"]
       },
       "copy_type": {
         "type": "string",
-        "enum": [
-          "llmstxt",
-          "markdown",
-          "code",
-          "link"
-        ]
+        "enum": ["llmstxt", "markdown", "code", "link"]
       },
       "crud_action": {
         "type": "string",
-        "enum": [
-          "create",
-          "update",
-          "delete",
-          "add_item",
-          "remove_item"
-        ]
+        "enum": ["create", "update", "delete", "add_item", "remove_item"]
       },
       "educational_level": {
         "type": "string",
-        "enum": [
-          "Beginner",
-          "Intermediate",
-          "Advanced"
-        ]
+        "enum": ["Beginner", "Intermediate", "Advanced"]
       },
       "email_blocklist_reason": {
         "type": "string",
-        "enum": [
-          "spam_complaint",
-          "hard_bounce",
-          "repeated_soft_bounce",
-          "manual"
-        ]
+        "enum": ["spam_complaint", "hard_bounce", "repeated_soft_bounce", "manual"]
       },
       "email_frequency": {
         "type": "string",
-        "enum": [
-          "weekly",
-          "biweekly",
-          "monthly",
-          "paused"
-        ]
+        "enum": ["weekly", "biweekly", "monthly", "paused"]
       },
       "email_sequence_id": {
         "type": "string",
-        "enum": [
-          "onboarding"
-        ]
+        "enum": ["onboarding"]
       },
       "email_sequence_status": {
         "type": "string",
-        "enum": [
-          "active",
-          "completed",
-          "cancelled"
-        ]
+        "enum": ["active", "completed", "cancelled"]
       },
       "environment": {
         "type": "string",
-        "enum": [
-          "development",
-          "preview",
-          "production"
-        ]
+        "enum": ["development", "preview", "production"]
       },
       "experience_level": {
         "type": "string",
-        "enum": [
-          "beginner",
-          "intermediate",
-          "advanced"
-        ]
+        "enum": ["beginner", "intermediate", "advanced"]
       },
       "field_scope": {
         "type": "string",
-        "enum": [
-          "common",
-          "type_specific",
-          "tags"
-        ]
+        "enum": ["common", "type_specific", "tags"]
       },
       "field_type": {
         "type": "string",
-        "enum": [
-          "text",
-          "textarea",
-          "number",
-          "select"
-        ]
+        "enum": ["text", "textarea", "number", "select"]
       },
       "focus_area_type": {
         "type": "string",
@@ -9714,76 +9153,39 @@
       },
       "follow_action": {
         "type": "string",
-        "enum": [
-          "follow",
-          "unfollow"
-        ]
+        "enum": ["follow", "unfollow"]
       },
       "form_field_icon": {
         "type": "string",
-        "enum": [
-          "Github"
-        ]
+        "enum": ["Github"]
       },
       "form_field_type": {
         "type": "string",
-        "enum": [
-          "text",
-          "textarea",
-          "number",
-          "select"
-        ]
+        "enum": ["text", "textarea", "number", "select"]
       },
       "form_grid_column": {
         "type": "string",
-        "enum": [
-          "full",
-          "half",
-          "third",
-          "two_thirds"
-        ]
+        "enum": ["full", "half", "third", "two_thirds"]
       },
       "form_icon_position": {
         "type": "string",
-        "enum": [
-          "left",
-          "right"
-        ]
+        "enum": ["left", "right"]
       },
       "generation_source": {
         "type": "string",
-        "enum": [
-          "ai",
-          "manual",
-          "import",
-          "migration"
-        ]
+        "enum": ["ai", "manual", "import", "migration"]
       },
       "grid_column": {
         "type": "string",
-        "enum": [
-          "full",
-          "half",
-          "third",
-          "two_thirds"
-        ]
+        "enum": ["full", "half", "third", "two_thirds"]
       },
       "guide_subcategory": {
         "type": "string",
-        "enum": [
-          "tutorials",
-          "comparisons",
-          "workflows",
-          "use_cases",
-          "troubleshooting"
-        ]
+        "enum": ["tutorials", "comparisons", "workflows", "use_cases", "troubleshooting"]
       },
       "icon_position": {
         "type": "string",
-        "enum": [
-          "left",
-          "right"
-        ]
+        "enum": ["left", "right"]
       },
       "integration_type": {
         "type": "string",
@@ -9845,21 +9247,11 @@
       },
       "job_plan": {
         "type": "string",
-        "enum": [
-          "one_time",
-          "subscription"
-        ]
+        "enum": ["one_time", "subscription"]
       },
       "job_run_status": {
         "type": "string",
-        "enum": [
-          "queued",
-          "running",
-          "retrying",
-          "succeeded",
-          "failed",
-          "cancelled"
-        ]
+        "enum": ["queued", "running", "retrying", "succeeded", "failed", "cancelled"]
       },
       "job_status": {
         "type": "string",
@@ -9875,20 +9267,11 @@
       },
       "job_tier": {
         "type": "string",
-        "enum": [
-          "standard",
-          "featured"
-        ]
+        "enum": ["standard", "featured"]
       },
       "job_type": {
         "type": "string",
-        "enum": [
-          "full_time",
-          "part_time",
-          "contract",
-          "freelance",
-          "internship"
-        ]
+        "enum": ["full_time", "part_time", "contract", "freelance", "internship"]
       },
       "newsletter_interest": {
         "type": "string",
@@ -9922,105 +9305,51 @@
       },
       "newsletter_subscription_status": {
         "type": "string",
-        "enum": [
-          "active",
-          "unsubscribed",
-          "bounced",
-          "complained"
-        ]
+        "enum": ["active", "unsubscribed", "bounced", "complained"]
       },
       "newsletter_sync_status": {
         "type": "string",
-        "enum": [
-          "pending",
-          "synced",
-          "failed",
-          "skipped"
-        ]
+        "enum": ["pending", "synced", "failed", "skipped"]
       },
       "notification_priority": {
         "type": "string",
-        "enum": [
-          "high",
-          "medium",
-          "low"
-        ]
+        "enum": ["high", "medium", "low"]
       },
       "notification_type": {
         "type": "string",
-        "enum": [
-          "announcement",
-          "feedback"
-        ]
+        "enum": ["announcement", "feedback"]
       },
       "oauth_provider": {
         "type": "string",
-        "enum": [
-          "discord",
-          "github",
-          "google"
-        ]
+        "enum": ["discord", "github", "google"]
       },
       "open_graph_type": {
         "type": "string",
-        "enum": [
-          "profile",
-          "website"
-        ]
+        "enum": ["profile", "website"]
       },
       "payment_product_type": {
         "type": "string",
-        "enum": [
-          "job_listing",
-          "mcp_listing",
-          "user_content",
-          "subscription",
-          "premium_membership"
-        ]
+        "enum": ["job_listing", "mcp_listing", "user_content", "subscription", "premium_membership"]
       },
       "payment_transaction_status": {
         "type": "string",
-        "enum": [
-          "pending",
-          "completed",
-          "failed",
-          "refunded"
-        ]
+        "enum": ["pending", "completed", "failed", "refunded"]
       },
       "primary_action_type": {
         "type": "string",
-        "enum": [
-          "notification",
-          "copy_command",
-          "copy_script",
-          "scroll",
-          "download",
-          "github_link"
-        ]
+        "enum": ["notification", "copy_command", "copy_script", "scroll", "download", "github_link"]
       },
       "route_group": {
         "type": "string",
-        "enum": [
-          "primary",
-          "secondary",
-          "actions"
-        ]
+        "enum": ["primary", "secondary", "actions"]
       },
       "setting_type": {
         "type": "string",
-        "enum": [
-          "boolean",
-          "string",
-          "number",
-          "json"
-        ]
+        "enum": ["boolean", "string", "number", "json"]
       },
       "sort_direction": {
         "type": "string",
-        "enum": [
-          "asc",
-          "desc"
-        ]
+        "enum": ["asc", "desc"]
       },
       "sort_option": {
         "type": "string",
@@ -10037,12 +9366,7 @@
       },
       "sponsorship_tier": {
         "type": "string",
-        "enum": [
-          "featured",
-          "promoted",
-          "spotlight",
-          "sponsored"
-        ]
+        "enum": ["featured", "promoted", "spotlight", "sponsored"]
       },
       "static_route_icon": {
         "type": "string",
@@ -10073,64 +9397,27 @@
       },
       "submission_status": {
         "type": "string",
-        "enum": [
-          "pending",
-          "approved",
-          "rejected",
-          "spam",
-          "merged"
-        ]
+        "enum": ["pending", "approved", "rejected", "spam", "merged"]
       },
       "submission_type": {
         "type": "string",
-        "enum": [
-          "agents",
-          "mcp",
-          "rules",
-          "commands",
-          "hooks",
-          "statuslines",
-          "skills"
-        ]
+        "enum": ["agents", "mcp", "rules", "commands", "hooks", "statuslines", "skills"]
       },
       "subscription_status": {
         "type": "string",
-        "enum": [
-          "active",
-          "cancelled",
-          "past_due",
-          "paused",
-          "revoked"
-        ]
+        "enum": ["active", "cancelled", "past_due", "paused", "revoked"]
       },
       "trending_metric": {
         "type": "string",
-        "enum": [
-          "views",
-          "likes",
-          "shares",
-          "downloads",
-          "all"
-        ]
+        "enum": ["views", "likes", "shares", "downloads", "all"]
       },
       "trending_period": {
         "type": "string",
-        "enum": [
-          "today",
-          "week",
-          "month",
-          "year",
-          "all"
-        ]
+        "enum": ["today", "week", "month", "year", "all"]
       },
       "twitter_card_type": {
         "type": "string",
-        "enum": [
-          "summary_large_image",
-          "summary",
-          "app",
-          "player"
-        ]
+        "enum": ["summary_large_image", "summary", "app", "player"]
       },
       "use_case_type": {
         "type": "string",
@@ -10148,34 +9435,19 @@
       },
       "user_role": {
         "type": "string",
-        "enum": [
-          "user",
-          "admin",
-          "moderator"
-        ]
+        "enum": ["user", "admin", "moderator"]
       },
       "user_tier": {
         "type": "string",
-        "enum": [
-          "free",
-          "pro",
-          "enterprise"
-        ]
+        "enum": ["free", "pro", "enterprise"]
       },
       "webhook_delivery_status": {
         "type": "string",
-        "enum": [
-          "running",
-          "succeeded",
-          "failed"
-        ]
+        "enum": ["running", "succeeded", "failed"]
       },
       "webhook_direction": {
         "type": "string",
-        "enum": [
-          "inbound",
-          "outbound"
-        ]
+        "enum": ["inbound", "outbound"]
       },
       "webhook_event_type": {
         "type": "string",
@@ -10209,22 +9481,11 @@
       },
       "webhook_source": {
         "type": "string",
-        "enum": [
-          "resend",
-          "vercel",
-          "discord",
-          "supabase_db",
-          "custom",
-          "polar"
-        ]
+        "enum": ["resend", "vercel", "discord", "supabase_db", "custom", "polar"]
       },
       "workplace_type": {
         "type": "string",
-        "enum": [
-          "Remote",
-          "On_site",
-          "Hybrid"
-        ]
+        "enum": ["Remote", "On_site", "Hybrid"]
       }
     }
   }

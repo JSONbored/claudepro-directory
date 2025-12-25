@@ -415,13 +415,13 @@ See [ESLint Architectural Rules](../tools/eslint-plugin-architectural-rules.js) 
 
 When updating existing code:
 
-- [ ] Replace `console.*` with `logger.*`
-- [ ] Add `requestId` to all logs
-- [ ] Add `route` and `operation` to all logs
-- [ ] Add error logging to all catch blocks
-- [ ] Use `normalizeError()` for all errors
-- [ ] Use `useLoggedAsync` in client components
-- [ ] Verify ESLint rules pass
+- \[ ] Replace `console.*` with `logger.*`
+- \[ ] Add `requestId` to all logs
+- \[ ] Add `route` and `operation` to all logs
+- \[ ] Add error logging to all catch blocks
+- \[ ] Use `normalizeError()` for all errors
+- \[ ] Use `useLoggedAsync` in client components
+- \[ ] Verify ESLint rules pass
 
 ---
 

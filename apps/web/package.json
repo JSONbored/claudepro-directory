@@ -4,13 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --turbopack",
-    "dev:clean": "pnpm --filter @heyclaude/web-runtime clear-caches && next dev --turbopack",
     "build": "next build --turbopack",
     "build:analyze": "ANALYZE=true next build --webpack",
-    "start": "next start",
-    "lint": "eslint --config ../../config/tools/eslint.config.mjs .",
+    "dev": "next dev --turbopack",
+    "dev:clean": "pnpm --filter @heyclaude/web-runtime clear-caches && next dev --turbopack",
     "format": "eslint --config ../../config/tools/eslint.config.mjs . --fix",
+    "lint": "eslint --config ../../config/tools/eslint.config.mjs .",
+    "start": "next start",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

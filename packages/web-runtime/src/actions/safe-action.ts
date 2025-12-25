@@ -1,9 +1,6 @@
 import { isProduction } from '@heyclaude/shared-runtime/schemas/env';
 import { headers } from 'next/headers';
-import {
-  createSafeActionClient,
-  DEFAULT_SERVER_ERROR_MESSAGE,
-} from 'next-safe-action';
+import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
 // Import pre-configured actions from next-safe-action (mock in tests, undefined in production)
 // In tests, Jest automatically uses __mocks__/next-safe-action.ts which exports these
 // In production, next-safe-action doesn't export these, so they'll be undefined

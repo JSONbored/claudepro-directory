@@ -118,7 +118,9 @@ export function validateAndSanitizeSlug(slug: string): string {
   }
 
   if (!slugPattern.test(trimmed)) {
-    throw new Error('Slug must contain only lowercase letters, numbers, hyphens, underscores, and dots');
+    throw new Error(
+      'Slug must contain only lowercase letters, numbers, hyphens, underscores, and dots'
+    );
   }
 
   return trimmed;
@@ -188,11 +190,12 @@ export function validateAndSanitizeInput<T>(
   options: InputSanitizationOptions = {}
 ): T {
   // First, sanitize string values in the input
-  const sanitizedInput = typeof input === 'string'
-    ? sanitizeString(input, options)
-    : typeof input === 'object' && input !== null && !Array.isArray(input)
-    ? sanitizeObject(input as Record<string, unknown>, options)
-    : input;
+  const sanitizedInput =
+    typeof input === 'string'
+      ? sanitizeString(input, options)
+      : typeof input === 'object' && input !== null && !Array.isArray(input)
+        ? sanitizeObject(input as Record<string, unknown>, options)
+        : input;
 
   // Then validate with Zod
   return schema.parse(sanitizedInput);
@@ -219,4 +222,3 @@ export function withInputSanitization<TInput, TOutput>(
     return handler(sanitizedInput, context);
   };
 }
-

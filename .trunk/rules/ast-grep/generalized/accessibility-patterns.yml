@@ -20,5 +20,5 @@ rule:
     - not:
         has:
           regex: :\s*\w+\s*\{
-message: "Exported functions should have explicit return type annotations for better type safety and documentation"
+message: 'Exported functions should have explicit return type annotations for better type safety and documentation'
 severity: info

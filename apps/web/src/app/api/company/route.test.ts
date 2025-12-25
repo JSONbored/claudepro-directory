@@ -120,8 +120,12 @@ jest.mock('../../../../../../packages/web-runtime/src/server/api-helpers', () =>
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'application/json',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -211,7 +215,7 @@ describe('GET /api/company', () => {
     expectStatus(response, 200);
     expectCorsHeaders(response);
     expectCacheHeaders(response, true);
-    
+
     // Verify response structure matches GetCompanyProfileReturns
     if (typeof body === 'object' && body !== null && 'company' in body) {
       const response = body as { company: unknown; active_jobs: unknown; stats: unknown };
@@ -224,7 +228,7 @@ describe('GET /api/company', () => {
       expect(response).toHaveProperty('active_jobs');
       expect(response).toHaveProperty('stats');
     }
-    
+
     expect(response.headers.get('x-generated-by')).toBe('prisma.rpc.get_company_profile');
   });
 
@@ -528,25 +532,37 @@ describe('GET /api/company', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 200);
-    
+
     if (typeof body === 'object' && body !== null && 'active_jobs' in body) {
       const response = body as { active_jobs: unknown };
       // Verify active_jobs array structure
       expect(response).toHaveProperty('active_jobs');
       if (Array.isArray(response.active_jobs)) {
         expect(body.active_jobs).toHaveLength(2);
-        
+
         // Verify both jobs are present
-        const activeJobs = response.active_jobs as Array<{ id: string; slug: string; title: string; tier: string; category: string; plan: unknown; remote: boolean; posted_at: unknown; expires_at: unknown; view_count: number; click_count: number }>;
+        const activeJobs = response.active_jobs as Array<{
+          id: string;
+          slug: string;
+          title: string;
+          tier: string;
+          category: string;
+          plan: unknown;
+          remote: boolean;
+          posted_at: unknown;
+          expires_at: unknown;
+          view_count: number;
+          click_count: number;
+        }>;
         expect(activeJobs).toHaveLength(2);
-        
+
         // Find jobs by ID (order may vary if Prismocker doesn't fully support complex ordering)
         const job1 = activeJobs.find((job) => job.id === 'job-1');
         const job2 = activeJobs.find((job) => job.id === 'job-2');
-        
+
         expect(job1).toBeDefined();
         expect(job2).toBeDefined();
-        
+
         // Verify job-1 structure (featured job)
         expect(job1).toHaveProperty('slug', 'job-1');
         expect(job1).toHaveProperty('title', 'Senior Engineer');
@@ -558,12 +574,12 @@ describe('GET /api/company', () => {
         expect(job1).toHaveProperty('expires_at'); // ISO string
         expect(job1).toHaveProperty('view_count', 100);
         expect(job1).toHaveProperty('click_count', 10);
-        
+
         // Verify job-2 structure (standard job)
         expect(job2).toHaveProperty('slug', 'job-2');
         expect(job2).toHaveProperty('title', 'Junior Engineer');
         expect(job2).toHaveProperty('tier', 'standard');
-        
+
         // Verify ordering if Prismocker supports it (featured should come before standard)
         // If ordering doesn't work, at least verify both jobs are present with correct structure
         const featuredIndex = activeJobs.findIndex((job) => job.id === 'job-1');
@@ -675,8 +691,13 @@ describe('GET /api/company', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 200);
-    
-    if (typeof body === 'object' && body !== null && 'active_jobs' in body && Array.isArray(body.active_jobs)) {
+
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      'active_jobs' in body &&
+      Array.isArray(body.active_jobs)
+    ) {
       const activeJobs = body.active_jobs as Array<{ id: string }>;
       // Only active job should appear (expired job filtered out)
       expect(activeJobs).toHaveLength(1);
@@ -808,8 +829,13 @@ describe('GET /api/company', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 200);
-    
-    if (typeof body === 'object' && body !== null && 'active_jobs' in body && Array.isArray(body.active_jobs)) {
+
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      'active_jobs' in body &&
+      Array.isArray(body.active_jobs)
+    ) {
       const activeJobs = body.active_jobs as Array<{ id: string }>;
       // Only active job should appear (inactive jobs filtered out)
       expect(activeJobs).toHaveLength(1);
@@ -942,8 +968,14 @@ describe('GET /api/company', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 200);
-    
-    if (typeof body === 'object' && body !== null && 'stats' in body && typeof body.stats === 'object' && body.stats !== null) {
+
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      'stats' in body &&
+      typeof body.stats === 'object' &&
+      body.stats !== null
+    ) {
       const stats = body.stats as {
         total_jobs: number;
         active_jobs: number;
@@ -955,38 +987,38 @@ describe('GET /api/company', () => {
         click_through_rate: number | null;
         latest_job_posted_at: string | null;
       };
-      
+
       // total_jobs: All jobs (3)
       expect(stats).toHaveProperty('total_jobs', 3);
-      
+
       // active_jobs: Only active jobs (status='active', active=true, expires_at > now) = 2
       expect(stats).toHaveProperty('active_jobs', 2);
-      
+
       // featured_jobs: Jobs with tier='featured' = 1
       expect(stats).toHaveProperty('featured_jobs', 1);
-      
+
       // remote_jobs: Jobs with remote=true = 2 (job-1 and job-3)
       expect(stats).toHaveProperty('remote_jobs', 2);
-      
+
       // avg_salary_min: Salary parsing extracts ALL numbers from string and concatenates them
       // "$100,000 - $150,000" → "100000150000" → parseFloat("100000150000") = 100000150000
       // "$50,000 - $75,000" → "5000075000" → parseFloat("5000075000") = 5000075000
       // Average: (100000150000 + 5000075000) / 2 = 52500112500
       // Note: This is the actual production behavior - extracts all digits, not just first number
       expect(stats).toHaveProperty('avg_salary_min', 52500112500);
-      
+
       // total_views: Sum of all view_count = 100 + 50 + 25 = 175
       expect(stats).toHaveProperty('total_views', 175);
-      
+
       // total_clicks: Sum of all click_count = 10 + 5 + 2 = 17
       expect(stats).toHaveProperty('total_clicks', 17);
-      
+
       // click_through_rate: total_clicks / total_views = 17 / 175 ≈ 0.0971
       expect(stats).toHaveProperty('click_through_rate');
       if (stats.click_through_rate !== null) {
         expect(stats.click_through_rate).toBeCloseTo(17 / 175, 4);
       }
-      
+
       // latest_job_posted_at: Most recent posted_at = now (job-2)
       expect(stats).toHaveProperty('latest_job_posted_at');
       if (stats.latest_job_posted_at !== null) {
@@ -1029,8 +1061,14 @@ describe('GET /api/company', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 200);
-    
-    if (typeof body === 'object' && body !== null && 'company' in body && typeof body.company === 'object' && body.company !== null) {
+
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      'company' in body &&
+      typeof body.company === 'object' &&
+      body.company !== null
+    ) {
       const company = body.company as {
         size?: string;
         industry?: string;
@@ -1083,10 +1121,16 @@ describe('GET /api/company', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 200);
-    
+
     // Validate response structure matches companyProfileResponseSchema
     // Schema expects: id, name, slug, description (optional), website (optional), logo_url (optional)
-    if (typeof body === 'object' && body !== null && 'company' in body && typeof body.company === 'object' && body.company !== null) {
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      'company' in body &&
+      typeof body.company === 'object' &&
+      body.company !== null
+    ) {
       const company = body.company as {
         id?: string;
         name?: string;

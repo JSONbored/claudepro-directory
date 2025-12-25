@@ -8,5 +8,4 @@
 --
 -- Function signature: get_content_detail_core(p_category content_category, p_slug text)
 -- Related: ContentService.getContentDetailCore uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_content_detail_core(public.content_category, text);
+DROP FUNCTION IF EXISTS public.get_content_detail_core (public.content_category, text);

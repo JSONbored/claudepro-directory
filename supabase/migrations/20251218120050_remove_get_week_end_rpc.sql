@@ -9,5 +9,8 @@
 --
 -- Function signature: get_week_end(week_start timestamp with time zone)
 -- Related: format_week_range RPC was removed (was the only caller)
-
-DROP FUNCTION IF EXISTS public.get_week_end(timestamp with time zone);
+DROP FUNCTION IF EXISTS public.get_week_end (
+  timestamp
+  with
+    time zone
+);

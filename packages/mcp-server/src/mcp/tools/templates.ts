@@ -106,11 +106,8 @@ export async function handleGetTemplates(
               : typeof template['category'] === 'string'
                 ? template['category']
                 : '',
-        description:
-          typeof template['description'] === 'string' ? template['description'] : '',
-        fields: (Array.isArray(template['fields'])
-          ? template['fields']
-          : []) as TemplateField[],
+        description: typeof template['description'] === 'string' ? template['description'] : '',
+        fields: (Array.isArray(template['fields']) ? template['fields'] : []) as TemplateField[],
         requiredFields: (Array.isArray(template['required_fields'])
           ? template['required_fields']
           : Array.isArray(template['requiredFields'])

@@ -40,4 +40,3 @@ export async function handleOAuthIntrospect(
 
   return handleOAuthIntrospectShared(request, env, adapter);
 }
-

@@ -8,5 +8,4 @@
 --
 -- Function signature: get_user_activity_summary(p_user_id uuid)
 -- Related: AccountService.getUserActivitySummary uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_user_activity_summary(uuid);
+DROP FUNCTION IF EXISTS public.get_user_activity_summary (uuid);

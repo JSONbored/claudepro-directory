@@ -78,21 +78,23 @@ jest.mock('../../utils/monitoring', () => ({
 const { __mockSendEmail: mockSendEmail } = jest.requireMock('../../../integrations/resend') as {
   __mockSendEmail: ReturnType<typeof jest.fn>;
 };
-const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock('../../../email/base-template') as {
+const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock(
+  '../../../email/base-template'
+) as {
   __mockRenderEmailTemplate: ReturnType<typeof jest.fn>;
 };
-const {
-  __mockLogger: mockLogger,
-  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
-} = jest.requireMock('../../../logging/server') as {
-  __mockLogger: {
-    info: ReturnType<typeof jest.fn>;
-    warn: ReturnType<typeof jest.fn>;
-    error: ReturnType<typeof jest.fn>;
+const { __mockLogger: mockLogger, __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId } =
+  jest.requireMock('../../../logging/server') as {
+    __mockLogger: {
+      info: ReturnType<typeof jest.fn>;
+      warn: ReturnType<typeof jest.fn>;
+      error: ReturnType<typeof jest.fn>;
+    };
+    __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
   };
-  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-};
-const { __mockNormalizeError: mockNormalizeError } = jest.requireMock('@heyclaude/shared-runtime') as {
+const { __mockNormalizeError: mockNormalizeError } = jest.requireMock(
+  '@heyclaude/shared-runtime'
+) as {
   __mockNormalizeError: ReturnType<typeof jest.fn>;
 };
 
@@ -128,7 +130,7 @@ describe('sendTransactionalEmail', () => {
       error: null,
     });
     mockRenderEmailTemplate.mockResolvedValue('<html>Mock Email</html>');
-    
+
     // Restore normalizeError mock implementation after reset
     // jest.resetAllMocks() resets mocks to return undefined, so we need to restore it
     mockNormalizeError.mockImplementation((error: unknown, fallbackMessage?: string) => {
@@ -324,7 +326,9 @@ describe('sendTransactionalEmail', () => {
     })) as { error?: Error | { message: string } };
 
     expect(error).toBeDefined();
-    expect((error as Error | { message: string })?.message).toBe('Unknown transactional email type: invalid-type');
+    expect((error as Error | { message: string })?.message).toBe(
+      'Unknown transactional email type: invalid-type'
+    );
 
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -487,13 +491,10 @@ describe('sendTransactionalEmail', () => {
     })) as { result: { success: boolean; sent: boolean; emailId: string | null; type: string } };
 
     expect(result.success).toBe(true);
-    expect(mockRenderEmailTemplate).toHaveBeenCalledWith(
-      expect.anything(),
-      {
-        jobTitle: 'Software Engineer',
-        jobSlug: 'software-engineer',
-      }
-    );
+    expect(mockRenderEmailTemplate).toHaveBeenCalledWith(expect.anything(), {
+      jobTitle: 'Software Engineer',
+      jobSlug: 'software-engineer',
+    });
   });
 
   /**
@@ -519,12 +520,9 @@ describe('sendTransactionalEmail', () => {
     })) as { result: { success: boolean; sent: boolean; emailId: string | null; type: string } };
 
     expect(result.success).toBe(true);
-    expect(mockRenderEmailTemplate).toHaveBeenCalledWith(
-      expect.anything(),
-      {
-        resetUrl: 'https://claudepro.directory/reset-password',
-      }
-    );
+    expect(mockRenderEmailTemplate).toHaveBeenCalledWith(expect.anything(), {
+      resetUrl: 'https://claudepro.directory/reset-password',
+    });
   });
 
   /**
@@ -568,4 +566,3 @@ describe('sendTransactionalEmail', () => {
     expect(result2.success).toBe(true);
   });
 });
-

@@ -39,7 +39,7 @@ rule:
     - not:
         inside:
           regex: 'withSmartCache\('
-message: "Prisma $queryRawUnsafe calls in service methods should use withSmartCache() for request-scoped caching. This prevents duplicate queries within the same request lifecycle. Wrap the query in withSmartCache()."
+message: 'Prisma $queryRawUnsafe calls in service methods should use withSmartCache() for request-scoped caching. This prevents duplicate queries within the same request lifecycle. Wrap the query in withSmartCache().'
 severity: error
 
 ---
@@ -59,7 +59,7 @@ rule:
         inside:
           has:
             regex: 'try.*catch'
-message: "Prisma queries should include error handling. Wrap in try/catch to handle PrismaClientKnownRequestError, PrismaClientValidationError, and other Prisma errors. Use normalizeError() for consistent error handling."
+message: 'Prisma queries should include error handling. Wrap in try/catch to handle PrismaClientKnownRequestError, PrismaClientValidationError, and other Prisma errors. Use normalizeError() for consistent error handling.'
 severity: warning
 
 ---
@@ -76,7 +76,7 @@ rule:
     - not:
         has:
           regex: 'select:|include:'
-message: "Prisma findMany/findFirst/findUnique queries should use select or include to fetch only needed fields. This reduces data transfer and improves performance. Example: await prisma.user.findMany({ select: { id: true, name: true } });"
+message: 'Prisma findMany/findFirst/findUnique queries should use select or include to fetch only needed fields. This reduces data transfer and improves performance. Example: await prisma.user.findMany({ select: { id: true, name: true } });'
 severity: warning
 
 ---
@@ -97,7 +97,7 @@ rule:
         inside:
           has:
             regex: '// All records|// Intentionally|// Testing|// Small dataset'
-message: "Prisma findMany/findFirst queries should include where clause to avoid full table scans. Add where: { ... } to filter results. If you need all records, add a comment explaining why."
+message: 'Prisma findMany/findFirst queries should include where clause to avoid full table scans. Add where: { ... } to filter results. If you need all records, add a comment explaining why.'
 severity: warning
 
 ---
@@ -118,7 +118,7 @@ rule:
         inside:
           has:
             regex: '// Small dataset|// Cached|// Limited results|// All records needed'
-message: "Prisma findMany queries for potentially large datasets should include pagination (take/skip or cursor). Add take: limit, skip: offset for pagination, or use cursor-based pagination for better performance."
+message: 'Prisma findMany queries for potentially large datasets should include pagination (take/skip or cursor). Add take: limit, skip: offset for pagination, or use cursor-based pagination for better performance.'
 severity: warning
 
 ---
@@ -169,7 +169,7 @@ rule:
     - not:
         has:
           pattern: 'try.*catch'
-message: "Prisma $queryRawUnsafe/$queryRaw calls should be wrapped in try/catch for error handling. Prisma raw queries can throw errors that should be caught and normalized. Use normalizeError() for consistent error handling."
+message: 'Prisma $queryRawUnsafe/$queryRaw calls should be wrapped in try/catch for error handling. Prisma raw queries can throw errors that should be caught and normalized. Use normalizeError() for consistent error handling.'
 severity: warning
 
 # Note: Supabase RPC patterns are deprecated - codebase uses Prisma ORM

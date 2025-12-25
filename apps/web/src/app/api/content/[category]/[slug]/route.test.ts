@@ -137,8 +137,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'application/json',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -147,8 +151,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -158,8 +166,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       headers: {
         'Content-Type': 'text/markdown; charset=utf-8',
         'Content-Disposition': `attachment; filename="${filename}"`,
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -167,7 +179,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
     return new NextResponse(null, {
       status: 204,
       headers: {
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
       },
     });
@@ -183,7 +197,10 @@ jest.mock('@heyclaude/web-runtime/supabase/server-anon', () => ({
     storage: {
       from: jest.fn(() => ({
         getPublicUrl: jest.fn(() => ({
-          data: { publicUrl: 'https://storage.supabase.co/storage/v1/object/public/content/agents/test-content.json' },
+          data: {
+            publicUrl:
+              'https://storage.supabase.co/storage/v1/object/public/content/agents/test-content.json',
+          },
         })),
       })),
     },
@@ -239,21 +256,23 @@ describe('GET /api/content/[category]/[slug]', () => {
 
     // Set up $queryRawUnsafe for RPC testing (all ContentService methods use RPC)
     // Must assign jest.fn() to $queryRawUnsafe before using mockImplementation
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>) = jest.fn().mockImplementation((sql: string) => {
-      if (sql.includes('get_api_content_full')) {
-        return Promise.resolve(mockApiContentFull);
-      }
-      if (sql.includes('generate_item_llms_txt')) {
-        return Promise.resolve(mockItemLlmsTxt);
-      }
-      if (sql.includes('generate_markdown_export')) {
-        return Promise.resolve(mockMarkdownExport);
-      }
-      if (sql.includes('get_skill_storage_path') || sql.includes('get_mcpb_storage_path')) {
-        return Promise.resolve(mockStoragePath);
-      }
-      return Promise.resolve([]);
-    });
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>) = jest
+      .fn()
+      .mockImplementation((sql: string) => {
+        if (sql.includes('get_api_content_full')) {
+          return Promise.resolve(mockApiContentFull);
+        }
+        if (sql.includes('generate_item_llms_txt')) {
+          return Promise.resolve(mockItemLlmsTxt);
+        }
+        if (sql.includes('generate_markdown_export')) {
+          return Promise.resolve(mockMarkdownExport);
+        }
+        if (sql.includes('get_skill_storage_path') || sql.includes('get_mcpb_storage_path')) {
+          return Promise.resolve(mockStoragePath);
+        }
+        return Promise.resolve([]);
+      });
   });
 
   it('should return JSON format by default', async () => {
@@ -531,12 +550,14 @@ describe('GET /api/content/[category]/[slug]', () => {
   });
 
   it('should return 404 when LLMs content not found', async () => {
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>) = jest.fn().mockImplementation((sql: string) => {
-      if (sql.includes('generate_item_llms_txt')) {
-        return Promise.resolve(null);
-      }
-      return Promise.resolve(mockApiContentFull);
-    });
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>) = jest
+      .fn()
+      .mockImplementation((sql: string) => {
+        if (sql.includes('generate_item_llms_txt')) {
+          return Promise.resolve(null);
+        }
+        return Promise.resolve(mockApiContentFull);
+      });
 
     const request = createMockRequest({
       method: 'GET',
@@ -613,15 +634,17 @@ describe('GET /api/content/[category]/[slug]', () => {
   });
 
   it('should handle markdown generation failure', async () => {
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>) = jest.fn().mockImplementation((sql: string) => {
-      if (sql.includes('generate_markdown_export')) {
-        return Promise.resolve({
-          success: false,
-          error: 'Generation failed',
-        });
-      }
-      return Promise.resolve(mockApiContentFull);
-    });
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>) = jest
+      .fn()
+      .mockImplementation((sql: string) => {
+        if (sql.includes('generate_markdown_export')) {
+          return Promise.resolve({
+            success: false,
+            error: 'Generation failed',
+          });
+        }
+        return Promise.resolve(mockApiContentFull);
+      });
 
     const request = createMockRequest({
       method: 'GET',
@@ -642,7 +665,9 @@ describe('GET /api/content/[category]/[slug]', () => {
   });
 
   it('should handle service errors gracefully', async () => {
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>) = jest.fn().mockRejectedValue(new Error('Database error'));
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>) = jest
+      .fn()
+      .mockRejectedValue(new Error('Database error'));
 
     const request = createMockRequest({
       method: 'GET',
@@ -707,7 +732,8 @@ describe('GET /api/content/[category]/[slug]', () => {
     const cacheBefore = getRequestCache().getStats().size;
     await GET(request1, context1);
     const cacheAfterFirst = getRequestCache().getStats().size;
-    const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+    const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls
+      .length;
 
     // Clear cache between calls to ensure second call makes a fresh request
     clearRequestCache();
@@ -726,7 +752,8 @@ describe('GET /api/content/[category]/[slug]', () => {
     const cacheBeforeSecond = getRequestCache().getStats().size;
     await GET(request2, context2);
     const cacheAfterSecond = getRequestCache().getStats().size;
-    const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+    const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls
+      .length;
 
     // The createFormatHandlerRoute factory uses Next.js Cache Components, which are request-scoped.
     // This means each call to GET(request, context) creates a new request context, and thus a new cache.

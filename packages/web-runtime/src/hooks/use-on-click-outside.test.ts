@@ -283,11 +283,10 @@ describe('useOnClickOutside', () => {
       })
     );
 
-    expect(addEventListenerSpy).toHaveBeenCalledWith(
-      'mousedown',
-      expect.any(Function),
-      { capture: true, once: true }
-    );
+    expect(addEventListenerSpy).toHaveBeenCalledWith('mousedown', expect.any(Function), {
+      capture: true,
+      once: true,
+    });
   });
 
   it('should handle SSR (document undefined)', () => {

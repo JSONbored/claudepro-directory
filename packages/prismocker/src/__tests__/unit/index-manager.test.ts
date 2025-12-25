@@ -177,4 +177,3 @@ describe('IndexManager Unit Tests', () => {
     });
   });
 });
-

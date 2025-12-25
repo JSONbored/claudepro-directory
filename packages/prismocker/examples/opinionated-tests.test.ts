@@ -21,11 +21,7 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { createPrismocker } from '../src/index.js';
 import type { PrismaClient } from '@prisma/client';
-import {
-  createTestPrisma,
-  resetAndSeed,
-  createTestDataFactory,
-} from '../src/test-utils.js';
+import { createTestPrisma, resetAndSeed, createTestDataFactory } from '../src/test-utils.js';
 import { setDataTyped, getDataTyped } from '../src/prisma-types.js';
 import { isPrismockerClient } from '../src/jest-helpers.js';
 
@@ -152,9 +148,7 @@ describe('Opinionated Pattern 3: Error Scenario Testing', () => {
 
     if (isPrismockerClient(prisma)) {
       resetAndSeed(prisma, {
-        companies: [
-          { id: '1', name: 'Company 1', owner_id: 'user-1', slug: 'company-1' },
-        ] as any,
+        companies: [{ id: '1', name: 'Company 1', owner_id: 'user-1', slug: 'company-1' }] as any,
       });
     }
   });
@@ -271,7 +265,7 @@ describe('Opinionated Pattern 4: Edge Case Testing', () => {
         companies: [
           {
             id: '1',
-            name: "Company with 'quotes' and \"double quotes\"",
+            name: 'Company with \'quotes\' and "double quotes"',
             owner_id: 'user-1',
             slug: 'company-with-special-chars',
             description: 'Description with <tags> and & symbols',
@@ -319,11 +313,7 @@ describe('Opinionated Pattern 5: Performance Testing', () => {
       const startTime = Date.now();
       const results = await (prisma as any).companies.findMany({
         where: {
-          OR: [
-            { owner_id: 'user-1' },
-            { owner_id: 'user-2' },
-            { owner_id: 'user-3' },
-          ],
+          OR: [{ owner_id: 'user-1' }, { owner_id: 'user-2' }, { owner_id: 'user-3' }],
         },
         orderBy: { name: 'asc' },
         take: 10,
@@ -529,4 +519,3 @@ describe('Opinionated Pattern 7: Transaction Testing', () => {
     expect(company).toBeNull();
   });
 });
-

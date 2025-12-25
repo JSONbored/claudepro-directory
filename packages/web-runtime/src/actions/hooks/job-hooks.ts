@@ -201,10 +201,7 @@ export async function onJobStatusToggled(
 ) {
   try {
     // Log that status was toggled (no email sent - status toggle email support not implemented)
-    logger.info(
-      { jobId: result.job_id, newStatus: input.new_status },
-      'Job status toggled'
-    );
+    logger.info({ jobId: result.job_id, newStatus: input.new_status }, 'Job status toggled');
   } catch (error) {
     const normalized = normalizeError(error, 'Job status event failed');
     logger.warn({ err: normalized, jobId: result.job_id }, 'Failed to process job status toggle');

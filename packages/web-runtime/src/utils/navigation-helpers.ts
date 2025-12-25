@@ -42,32 +42,26 @@ export function getIconBackgroundClass(href: string): string {
     return 'bg-muted/50 text-muted-foreground group-hover/item:bg-muted';
   if (href.includes('/guides'))
     return 'bg-muted/50 text-muted-foreground group-hover/item:bg-muted';
-  if (href.includes('/jobs'))
-    return 'bg-primary/10 text-primary group-hover/item:bg-primary/20';
+  if (href.includes('/jobs')) return 'bg-primary/10 text-primary group-hover/item:bg-primary/20';
   if (href.includes('/changelog'))
     return 'bg-muted/50 text-muted-foreground group-hover/item:bg-muted';
 
   // Feature-based gradients using theme colors
-  if (href.includes('/search'))
-    return 'bg-info-bg text-info group-hover/item:bg-info-bg/60';
+  if (href.includes('/search')) return 'bg-info-bg text-info group-hover/item:bg-info-bg/60';
   if (href.includes('/trending'))
     return 'bg-primary/10 text-primary group-hover/item:bg-primary/20';
-  if (href.includes('/help'))
-    return 'bg-success-bg text-success group-hover/item:bg-success-bg/60';
+  if (href.includes('/help')) return 'bg-success-bg text-success group-hover/item:bg-success-bg/60';
   if (href.includes('/tools'))
     return 'bg-category-mcp-bg text-category-mcp group-hover/item:bg-category-mcp-hover';
-  if (href.includes('/submit'))
-    return 'bg-primary/10 text-primary group-hover/item:bg-primary/20';
-  if (href.includes('/community'))
-    return 'bg-info-bg text-info group-hover/item:bg-info-bg/60';
+  if (href.includes('/submit')) return 'bg-primary/10 text-primary group-hover/item:bg-primary/20';
+  if (href.includes('/community')) return 'bg-info-bg text-info group-hover/item:bg-info-bg/60';
   if (href.includes('/companies'))
     return 'bg-muted/50 text-muted-foreground group-hover/item:bg-muted';
   if (href.includes('/partner'))
     return 'bg-warning-bg text-warning group-hover/item:bg-warning-bg/60';
   if (href.includes('/consulting'))
     return 'bg-primary/10 text-primary group-hover/item:bg-primary/20';
-  if (href.includes('/contact'))
-    return 'bg-info-bg text-info group-hover/item:bg-info-bg/60';
+  if (href.includes('/contact')) return 'bg-info-bg text-info group-hover/item:bg-info-bg/60';
   if (href.includes('/rss') || href.includes('/feeds'))
     return 'bg-primary/10 text-primary group-hover/item:bg-primary/20';
   if (href.includes('/llms.txt'))

@@ -85,7 +85,6 @@ export const handlePolarWebhook = createInngestFunction(
   },
   { event: 'polar/webhook' },
   async ({ event, step, logContext }) => {
-
     const { eventType, webhookId, svixId, payload, jobId, userId } = event.data;
 
     logger.info(

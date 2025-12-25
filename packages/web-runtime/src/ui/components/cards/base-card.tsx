@@ -493,7 +493,8 @@ export const BaseCard = memo(
         // Border color: explicit for non-interactive, provided by card-gradient for interactive
         disableNavigation && 'border-border/50',
         // Interactive card styles (hover effects, cursor, etc.)
-        !disableNavigation && 'card-gradient transition-smooth group cursor-pointer border-border/50',
+        !disableNavigation &&
+          'card-gradient transition-smooth group cursor-pointer border-border/50',
         // Variant-specific styles
         variant === 'detailed' && 'p-6',
         variant === 'review' && 'rounded-lg border border-border/50 p-4',

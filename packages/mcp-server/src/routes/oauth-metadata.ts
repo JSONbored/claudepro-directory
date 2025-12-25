@@ -17,7 +17,11 @@ import { parseSimpleEnv, getEnvOrDefault } from '../lib/env-config.js';
  * @param pathname - Request pathname
  * @returns OAuth metadata response
  */
-export async function handleOAuthMetadata(_request: Request, env: RuntimeEnv, pathname: string): Promise<Response> {
+export async function handleOAuthMetadata(
+  _request: Request,
+  env: RuntimeEnv,
+  pathname: string
+): Promise<Response> {
   const config = parseSimpleEnv(env);
   const mcpServerUrl = getEnvOrDefault(env, 'MCP_SERVER_URL', 'https://mcp.claudepro.directory');
   const mcpResourceUrl = `${mcpServerUrl}/mcp`;

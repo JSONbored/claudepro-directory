@@ -113,8 +113,7 @@ export function isInfisicalEnabled(): boolean {
   // This allows Infisical to work in dev even if feature flag system isn't loaded
   // If credentials are present in dev, assume Infisical should be enabled
   const hasEnvCredentials =
-    Boolean(env.INFISICAL_CLIENT_ID) &&
-    Boolean(env.INFISICAL_CLIENT_SECRET);
+    Boolean(env.INFISICAL_CLIENT_ID) && Boolean(env.INFISICAL_CLIENT_SECRET);
 
   // Only enable if we're in dev and have credentials
   isEnabled = currentEnv === 'dev' && hasEnvCredentials;
@@ -306,4 +305,3 @@ export function getInfisicalEnvironment(): 'dev' | 'staging' | 'prod' {
   // Default to 'dev' for safety (less risky than defaulting to 'prod')
   return 'dev';
 }
-

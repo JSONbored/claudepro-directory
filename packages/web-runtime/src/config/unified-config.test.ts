@@ -32,4 +32,3 @@ describe('Unified Config - Infisical Feature Flag', () => {
     });
   });
 });
-

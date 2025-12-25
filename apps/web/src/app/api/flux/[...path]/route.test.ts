@@ -7,11 +7,7 @@
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { NextResponse } from 'next/server';
 import { GET, POST, OPTIONS } from './route';
-import {
-  createMockRequest,
-  getResponseBody,
-  expectStatus,
-} from '../../__helpers__/test-helpers';
+import { createMockRequest, getResponseBody, expectStatus } from '../../__helpers__/test-helpers';
 
 // Mock server-only
 jest.mock('server-only', () => ({}));
@@ -154,15 +150,17 @@ describe('GET /api/flux/[...path]', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // routeFluxRequest returns NextResponse
-    mockRouteFluxRequest.mockImplementation(async (method: string, path: string[], request: Request) => {
-      return new NextResponse(JSON.stringify({ count: 1234 }), {
-        status: 200,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-      });
-    });
+    mockRouteFluxRequest.mockImplementation(
+      async (method: string, path: string[], request: Request) => {
+        return new NextResponse(JSON.stringify({ count: 1234 }), {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        });
+      }
+    );
   });
 
   it('should route email/count request', async () => {
@@ -187,28 +185,30 @@ describe('GET /api/flux/[...path]', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 200);
-    expect(mockRouteFluxRequest).toHaveBeenCalledWith('GET', ['email', 'count'], expect.any(Object));
+    expect(mockRouteFluxRequest).toHaveBeenCalledWith(
+      'GET',
+      ['email', 'count'],
+      expect.any(Object)
+    );
     expect(body).toHaveProperty('count', 1234);
   });
 
   it('should route other flux paths', async () => {
-    const paths = [
-      ['discord', 'direct'],
-      ['revalidation'],
-      ['webhook', 'external'],
-    ];
+    const paths = [['discord', 'direct'], ['revalidation'], ['webhook', 'external']];
 
     for (const path of paths) {
       // Reset mock for each path to ensure it returns a NextResponse
-      mockRouteFluxRequest.mockImplementationOnce(async (method: string, path: string[], request: Request) => {
-        return new NextResponse(JSON.stringify({ success: true }), {
-          status: 200,
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-          },
-        });
-      });
+      mockRouteFluxRequest.mockImplementationOnce(
+        async (method: string, path: string[], request: Request) => {
+          return new NextResponse(JSON.stringify({ success: true }), {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+            },
+          });
+        }
+      );
 
       const request = createMockRequest({
         method: 'GET',
@@ -274,15 +274,17 @@ describe('POST /api/flux/[...path]', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // routeFluxRequest returns NextResponse
-    mockRouteFluxRequest.mockImplementation(async (method: string, path: string[], request: Request) => {
-      return new NextResponse(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-      });
-    });
+    mockRouteFluxRequest.mockImplementation(
+      async (method: string, path: string[], request: Request) => {
+        return new NextResponse(JSON.stringify({ success: true }), {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        });
+      }
+    );
   });
 
   it('should route POST requests to flux handlers', async () => {
@@ -300,7 +302,11 @@ describe('POST /api/flux/[...path]', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 200);
-    expect(mockRouteFluxRequest).toHaveBeenCalledWith('POST', ['discord', 'direct'], expect.any(Object));
+    expect(mockRouteFluxRequest).toHaveBeenCalledWith(
+      'POST',
+      ['discord', 'direct'],
+      expect.any(Object)
+    );
     expect(body).toHaveProperty('success', true);
   });
 

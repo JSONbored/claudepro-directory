@@ -8,5 +8,4 @@
 --
 -- Function signature: get_jobs_count()
 -- Related: JobsService.getJobsCount uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_jobs_count();
+DROP FUNCTION IF EXISTS public.get_jobs_count ();

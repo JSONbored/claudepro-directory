@@ -17,7 +17,7 @@ rule:
     - not:
         has:
           regex: 'createApiRoute|createCachedApiRoute'
-message: "API routes must use createApiRoute() factory. Replace raw NextRequest handler with createApiRoute({ route, operation, method, cors, querySchema/bodySchema, handler }). Import from @heyclaude/web-runtime/server. Factory handles validation, logging, CORS, and error handling automatically."
+message: 'API routes must use createApiRoute() factory. Replace raw NextRequest handler with createApiRoute({ route, operation, method, cors, querySchema/bodySchema, handler }). Import from @heyclaude/web-runtime/server. Factory handles validation, logging, CORS, and error handling automatically.'
 severity: error
 
 ---
@@ -104,7 +104,7 @@ rule:
     - not:
         has:
           pattern: 'querySchema:'
-message: "GET requests using query parameters must include querySchema for validation. Add: querySchema: z.object({ ... }) to createApiRoute config. Import Zod schemas from @heyclaude/web-runtime/server."
+message: 'GET requests using query parameters must include querySchema for validation. Add: querySchema: z.object({ ... }) to createApiRoute config. Import Zod schemas from @heyclaude/web-runtime/server.'
 severity: error
 
 ---
@@ -123,7 +123,7 @@ rule:
     - not:
         has:
           pattern: 'bodySchema:'
-message: "POST/PUT/PATCH requests must include bodySchema for validation. Add: bodySchema: z.object({ ... }) to createApiRoute config. Import Zod schemas from @heyclaude/web-runtime/server."
+message: 'POST/PUT/PATCH requests must include bodySchema for validation. Add: bodySchema: z.object({ ... }) to createApiRoute config. Import Zod schemas from @heyclaude/web-runtime/server.'
 severity: error
 
 ---
@@ -178,7 +178,7 @@ rule:
     - not:
         has:
           pattern: 'openapi:'
-message: "API routes should include OpenAPI metadata for documentation. Add: openapi: { summary, description, tags, operationId, responses } to createApiRoute config. See .cursor/rules/api-design-standards.mdc"
+message: 'API routes should include OpenAPI metadata for documentation. Add: openapi: { summary, description, tags, operationId, responses } to createApiRoute config. See .cursor/rules/api-design-standards.mdc'
 severity: info
 
 ---
@@ -195,7 +195,7 @@ rule:
     - not:
         has:
           regex: 'createApiRoute|createCachedApiRoute'
-message: "Raw NextRequest handlers are deprecated. Use createApiRoute() factory instead. Factory handles validation, logging, CORS, and error handling automatically. See .cursor/rules/api-route-patterns.mdc"
+message: 'Raw NextRequest handlers are deprecated. Use createApiRoute() factory instead. Factory handles validation, logging, CORS, and error handling automatically. See .cursor/rules/api-route-patterns.mdc'
 severity: error
 
 # Note: All API routes should use createApiRoute() factory

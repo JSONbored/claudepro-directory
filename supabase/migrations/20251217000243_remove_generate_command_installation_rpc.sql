@@ -5,5 +5,4 @@
 --
 -- Description: Remove generate_command_installation RPC function - Only defined, not called
 -- Function signature: generate_command_installation(p_slug text, p_title text)
-
-DROP FUNCTION IF EXISTS public.generate_command_installation(text, text);
+DROP FUNCTION IF EXISTS public.generate_command_installation (text, text);

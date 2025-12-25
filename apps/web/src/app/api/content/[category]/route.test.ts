@@ -137,8 +137,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'application/json',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -147,8 +151,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -213,7 +221,9 @@ describe('GET /api/content/[category]', () => {
 
   it('should return JSON format for valid category', async () => {
     // Mock RPC call for getCategoryContentList
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockCategoryContentList);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(
+      mockCategoryContentList
+    );
 
     const request = createMockRequest({
       method: 'GET',
@@ -248,7 +258,9 @@ describe('GET /api/content/[category]', () => {
 
   it('should return LLMs format for valid category', async () => {
     // Mock RPC call for getCategoryLlmsTxt
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockCategoryLlmsTxt]);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+      mockCategoryLlmsTxt,
+    ]);
 
     const request = createMockRequest({
       method: 'GET',
@@ -372,7 +384,9 @@ describe('GET /api/content/[category]', () => {
 
   it('should handle service errors gracefully', async () => {
     // Mock RPC call to throw error
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(new Error('Database error'));
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(
+      new Error('Database error')
+    );
 
     const request = createMockRequest({
       method: 'GET',
@@ -405,7 +419,9 @@ describe('GET /api/content/[category]', () => {
     clearRequestCache();
 
     // Mock RPC call for getCategoryContentList
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockCategoryContentList);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(
+      mockCategoryContentList
+    );
 
     // First call - should populate cache
     const cacheBefore = getRequestCache().getStats().size;

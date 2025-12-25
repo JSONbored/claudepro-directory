@@ -105,53 +105,53 @@ export class ModelProxy {
         }
 
         // Check query cache first
-    const queryCache = this.client.getQueryCache();
-    if (queryCache) {
-      const cached = queryCache.get(this.modelName, 'findMany', args);
-      if (cached !== null) {
-        const duration = Date.now() - startTime;
-        this.client.recordQuery(this.modelName, 'findMany', args, cached.length, duration);
-        return cached;
-      }
-    }
+        const queryCache = this.client.getQueryCache();
+        if (queryCache) {
+          const cached = queryCache.get(this.modelName, 'findMany', args);
+          if (cached !== null) {
+            const duration = Date.now() - startTime;
+            this.client.recordQuery(this.modelName, 'findMany', args, cached.length, duration);
+            return cached;
+          }
+        }
 
-    const store = this.client.getStore(this.modelName);
-    let results = [...store];
+        const store = this.client.getStore(this.modelName);
+        let results = [...store];
 
-    // Apply where clause
-    if (args?.where) {
-      results = this.queryEngine.filter(results, args.where);
-    }
+        // Apply where clause
+        if (args?.where) {
+          results = this.queryEngine.filter(results, args.where);
+        }
 
-    // Apply orderBy
-    if (args?.orderBy) {
-      results = this.queryEngine.sort(results, args.orderBy);
-    }
+        // Apply orderBy
+        if (args?.orderBy) {
+          results = this.queryEngine.sort(results, args.orderBy);
+        }
 
-    // Apply skip
-    if (args?.skip !== undefined) {
-      results = results.slice(args.skip);
-    }
+        // Apply skip
+        if (args?.skip !== undefined) {
+          results = results.slice(args.skip);
+        }
 
-    // Apply take
-    if (args?.take !== undefined) {
-      results = results.slice(0, args.take);
-    }
+        // Apply take
+        if (args?.take !== undefined) {
+          results = results.slice(0, args.take);
+        }
 
-    // Apply select (with relation support)
-    if (args?.select) {
-      results = results.map((record) => this.applySelect(record, args.select));
-    }
+        // Apply select (with relation support)
+        if (args?.select) {
+          results = results.map((record) => this.applySelect(record, args.select));
+        }
 
-    // Apply include (with relation support)
-    if (args?.include) {
-      results = results.map((record) => this.applyInclude(record, args.include));
-    }
+        // Apply include (with relation support)
+        if (args?.include) {
+          results = results.map((record) => this.applyInclude(record, args.include));
+        }
 
-    // Cache the result
-    if (queryCache) {
-      queryCache.set(this.modelName, 'findMany', args, results);
-    }
+        // Cache the result
+        if (queryCache) {
+          queryCache.set(this.modelName, 'findMany', args, results);
+        }
 
         const duration = Date.now() - startTime;
         this.client.recordQuery(this.modelName, 'findMany', args, results.length, duration);
@@ -311,11 +311,7 @@ export class ModelProxy {
   /**
    * Create a lazy relation proxy that loads data on first access
    */
-  private createLazyRelation(
-    record: any,
-    relationName: string,
-    relationConfig: any
-  ): any {
+  private createLazyRelation(record: any, relationName: string, relationConfig: any): any {
     let cachedValue: any = undefined;
     let loaded = false;
 
@@ -348,7 +344,15 @@ export class ModelProxy {
             if (typeof prop === 'string' && /^\d+$/.test(prop)) {
               return cachedValue[Number(prop)];
             }
-            if (prop === Symbol.iterator || prop === 'forEach' || prop === 'map' || prop === 'filter' || prop === 'find' || prop === 'some' || prop === 'every') {
+            if (
+              prop === Symbol.iterator ||
+              prop === 'forEach' ||
+              prop === 'map' ||
+              prop === 'filter' ||
+              prop === 'find' ||
+              prop === 'some' ||
+              prop === 'every'
+            ) {
               return cachedValue[prop as keyof typeof cachedValue];
             }
             // For any other access, return the actual array
@@ -432,7 +436,7 @@ export class ModelProxy {
     // Common pattern: relation name matches model name (e.g., "jobs" -> "jobs" model)
     // Handle singular/plural: "profile" -> "profiles", "post" -> "posts"
     let relatedModelName = relationName;
-    
+
     // Try singular relation name first (e.g., "profile" -> "profiles")
     if (!relationName.endsWith('s') && relationName.length > 1) {
       const pluralName = `${relationName}s`;
@@ -441,7 +445,7 @@ export class ModelProxy {
         relatedModelName = pluralName;
       }
     }
-    
+
     // If plural name doesn't exist, try the original name
     if (relatedModelName === relationName) {
       const originalStore = this.client.getStore(relationName);
@@ -637,7 +641,11 @@ export class ModelProxy {
           // Use the related model's ModelProxy to apply nested includes
           const relatedModelProxy = this.client.getModel(relatedModelName);
           if (relatedModelProxy) {
-            return relatedModelProxy['applyInclude'](relatedRecord, relationSelect.include, relatedModelName);
+            return relatedModelProxy['applyInclude'](
+              relatedRecord,
+              relationSelect.include,
+              relatedModelName
+            );
           }
           // Fallback to current model's applyInclude
           return this.applyInclude(relatedRecord, relationSelect.include, relatedModelName);
@@ -662,7 +670,11 @@ export class ModelProxy {
             // Use the related model's ModelProxy to apply nested includes
             const relatedModelProxy = this.client.getModel(relatedModelName);
             if (relatedModelProxy) {
-              return relatedModelProxy['applyInclude'](relatedRecord, relationSelect.include, relatedModelName);
+              return relatedModelProxy['applyInclude'](
+                relatedRecord,
+                relationSelect.include,
+                relatedModelName
+              );
             }
             // Fallback to current model's applyInclude
             return this.applyInclude(relatedRecord, relationSelect.include, relatedModelName);
@@ -695,7 +707,11 @@ export class ModelProxy {
           // Use the related model's ModelProxy to apply nested includes
           const relatedModelProxy = this.client.getModel(relatedModelName);
           if (relatedModelProxy) {
-            return relatedModelProxy['applyInclude'](relatedRecord, relationSelect.include, relatedModelName);
+            return relatedModelProxy['applyInclude'](
+              relatedRecord,
+              relationSelect.include,
+              relatedModelName
+            );
           }
           // Fallback to current model's applyInclude
           return this.applyInclude(relatedRecord, relationSelect.include, relatedModelName);
@@ -831,92 +847,92 @@ export class ModelProxy {
         }
 
         // Check query cache first
-    const queryCache = this.client.getQueryCache();
-    if (queryCache) {
-      const cached = queryCache.get(this.modelName, 'findUnique', args);
-      if (cached !== null) {
-        const duration = Date.now() - startTime;
-        this.client.recordQuery(this.modelName, 'findUnique', args, cached.length, duration);
-        return cached.length > 0 ? cached[0] : null;
-      }
-    }
+        const queryCache = this.client.getQueryCache();
+        if (queryCache) {
+          const cached = queryCache.get(this.modelName, 'findUnique', args);
+          if (cached !== null) {
+            const duration = Date.now() - startTime;
+            this.client.recordQuery(this.modelName, 'findUnique', args, cached.length, duration);
+            return cached.length > 0 ? cached[0] : null;
+          }
+        }
 
-    const store = this.client.getStore(this.modelName);
-    let results: any[];
+        const store = this.client.getStore(this.modelName);
+        let results: any[];
 
-    // Try to use index for simple equality lookups (e.g., { id: 'value' })
-    const indexManager = this.client.getIndexManager();
-    if (indexManager && args.where) {
-      const whereKeys = Object.keys(args.where);
-      // If where clause is a simple equality on a single field, try index lookup
-      if (whereKeys.length === 1) {
-        const fieldName = whereKeys[0];
-        const fieldValue = args.where[fieldName];
-        // Check if it's a simple equality (not an object with operators)
-        if (fieldValue !== null && fieldValue !== undefined && typeof fieldValue !== 'object') {
-          const recordIndices = indexManager.getRecordIndices(
-            this.modelName,
-            fieldName,
-            fieldValue
-          );
-          if (recordIndices && recordIndices.size > 0) {
-            // Use index lookup - much faster than filtering all records
-            results = (Array.from(recordIndices) as number[])
-              .map((idx) => store[idx])
-              .filter((r) => r !== undefined);
+        // Try to use index for simple equality lookups (e.g., { id: 'value' })
+        const indexManager = this.client.getIndexManager();
+        if (indexManager && args.where) {
+          const whereKeys = Object.keys(args.where);
+          // If where clause is a simple equality on a single field, try index lookup
+          if (whereKeys.length === 1) {
+            const fieldName = whereKeys[0];
+            const fieldValue = args.where[fieldName];
+            // Check if it's a simple equality (not an object with operators)
+            if (fieldValue !== null && fieldValue !== undefined && typeof fieldValue !== 'object') {
+              const recordIndices = indexManager.getRecordIndices(
+                this.modelName,
+                fieldName,
+                fieldValue
+              );
+              if (recordIndices && recordIndices.size > 0) {
+                // Use index lookup - much faster than filtering all records
+                results = (Array.from(recordIndices) as number[])
+                  .map((idx) => store[idx])
+                  .filter((r) => r !== undefined);
+              } else {
+                // Index exists but no matches
+                results = [];
+              }
+            } else {
+              // Complex where clause - use normal filtering
+              results = this.queryEngine.filter(store, args.where);
+            }
           } else {
-            // Index exists but no matches
-            results = [];
+            // Multiple fields or complex where clause - use normal filtering
+            results = this.queryEngine.filter(store, args.where);
           }
         } else {
-          // Complex where clause - use normal filtering
+          // No index manager or no where clause - use normal filtering
           results = this.queryEngine.filter(store, args.where);
         }
-      } else {
-        // Multiple fields or complex where clause - use normal filtering
-        results = this.queryEngine.filter(store, args.where);
-      }
-    } else {
-      // No index manager or no where clause - use normal filtering
-      results = this.queryEngine.filter(store, args.where);
-    }
 
-    if (results.length === 0) {
-      return null;
-    }
+        if (results.length === 0) {
+          return null;
+        }
 
-    if (results.length > 1) {
-      const whereStr = JSON.stringify(args?.where, null, 2);
-      throw new Error(
-        `Prismocker: findUnique found ${results.length} records (expected 0 or 1). Unique constraint violation.\n\n` +
-          `Where clause: ${whereStr}\n\n` +
-          `This usually means:\n` +
-          `  1. Multiple records match the unique constraint in your test data\n` +
-          `  2. The unique constraint fields are not actually unique in your seed data\n\n` +
-          `To fix:\n` +
-          `  - Ensure your test data has unique values for the constraint fields\n` +
-          `  - Check that you're using the correct unique field(s) in your where clause\n` +
-          `  - Use findFirst() instead if you expect multiple matches\n` +
-          `  - Review your seed data: ${this.modelName} has ${this.client.getStore(this.modelName).length} total records`
-      );
-    }
+        if (results.length > 1) {
+          const whereStr = JSON.stringify(args?.where, null, 2);
+          throw new Error(
+            `Prismocker: findUnique found ${results.length} records (expected 0 or 1). Unique constraint violation.\n\n` +
+              `Where clause: ${whereStr}\n\n` +
+              `This usually means:\n` +
+              `  1. Multiple records match the unique constraint in your test data\n` +
+              `  2. The unique constraint fields are not actually unique in your seed data\n\n` +
+              `To fix:\n` +
+              `  - Ensure your test data has unique values for the constraint fields\n` +
+              `  - Check that you're using the correct unique field(s) in your where clause\n` +
+              `  - Use findFirst() instead if you expect multiple matches\n` +
+              `  - Review your seed data: ${this.modelName} has ${this.client.getStore(this.modelName).length} total records`
+          );
+        }
 
-    let result = results[0] || null;
+        let result = results[0] || null;
 
-    // Apply select (with relation support)
-    if (args?.select && result) {
-      result = this.applySelect(result, args.select);
-    }
+        // Apply select (with relation support)
+        if (args?.select && result) {
+          result = this.applySelect(result, args.select);
+        }
 
-    // Apply include (with relation support)
-    if (args?.include && result) {
-      result = this.applyInclude(result, args.include);
-    }
+        // Apply include (with relation support)
+        if (args?.include && result) {
+          result = this.applyInclude(result, args.include);
+        }
 
-    // Cache the result
-    if (queryCache) {
-      queryCache.set(this.modelName, 'findUnique', args, result ? [result] : []);
-    }
+        // Cache the result
+        if (queryCache) {
+          queryCache.set(this.modelName, 'findUnique', args, result ? [result] : []);
+        }
 
         const duration = Date.now() - startTime;
         this.client.recordQuery(this.modelName, 'findUnique', args, result ? 1 : 0, duration);
@@ -1226,52 +1242,52 @@ export class ModelProxy {
         }
 
         // Optional Zod validation
-    let validatedData = args.data;
-    if (this.options.validateWithZod) {
-      try {
-        const schema = this.options.zodSchemaLoader
-          ? await this.options.zodSchemaLoader(this.modelName, 'create')
-          : await loadZodSchema(this.modelName, 'create', this.options.zodSchemasPath);
-
-        if (schema) {
-          validatedData = validateWithZod(schema, args.data, this.modelName, 'create');
-        }
-      } catch (error: any) {
-        // Log validation error but don't fail if validation is optional
-        if (this.options.logQueries) {
-          this.options.logger?.(
-            `[Prismocker] Zod validation warning for ${this.modelName}.create: ${error.message}`
-          );
-        }
-        // If validation fails and it's enabled, throw the error
+        let validatedData = args.data;
         if (this.options.validateWithZod) {
-          throw error;
+          try {
+            const schema = this.options.zodSchemaLoader
+              ? await this.options.zodSchemaLoader(this.modelName, 'create')
+              : await loadZodSchema(this.modelName, 'create', this.options.zodSchemasPath);
+
+            if (schema) {
+              validatedData = validateWithZod(schema, args.data, this.modelName, 'create');
+            }
+          } catch (error: any) {
+            // Log validation error but don't fail if validation is optional
+            if (this.options.logQueries) {
+              this.options.logger?.(
+                `[Prismocker] Zod validation warning for ${this.modelName}.create: ${error.message}`
+              );
+            }
+            // If validation fails and it's enabled, throw the error
+            if (this.options.validateWithZod) {
+              throw error;
+            }
+          }
         }
-      }
-    }
 
-    const store = this.client.getStore(this.modelName);
-    const record = {
-      ...validatedData,
-      id: validatedData.id || this.generateId(),
-      createdAt: validatedData.createdAt || new Date(),
-      updatedAt: validatedData.updatedAt || new Date(),
-    };
+        const store = this.client.getStore(this.modelName);
+        const record = {
+          ...validatedData,
+          id: validatedData.id || this.generateId(),
+          createdAt: validatedData.createdAt || new Date(),
+          updatedAt: validatedData.updatedAt || new Date(),
+        };
 
-    const recordIndex = store.length;
-    store.push(record);
+        const recordIndex = store.length;
+        store.push(record);
 
-    // Update indexes
-    const indexManager = this.client.getIndexManager();
-    if (indexManager) {
-      indexManager.addRecord(this.modelName, record, recordIndex);
-    }
+        // Update indexes
+        const indexManager = this.client.getIndexManager();
+        if (indexManager) {
+          indexManager.addRecord(this.modelName, record, recordIndex);
+        }
 
-    // Invalidate query cache for this model
-    const queryCache = this.client.getQueryCache();
-    if (queryCache) {
-      queryCache.invalidateModel(this.modelName);
-    }
+        // Invalidate query cache for this model
+        const queryCache = this.client.getQueryCache();
+        if (queryCache) {
+          queryCache.invalidateModel(this.modelName);
+        }
 
         const duration = Date.now() - startTime;
         this.client.recordQuery(this.modelName, 'create', args, 1, duration);
@@ -1425,85 +1441,87 @@ export class ModelProxy {
           this.options.logger?.(`[Prismocker] ${this.modelName}.update`, { args });
         }
 
-    // Optional Zod validation
-    let validatedData = args.data;
-    if (this.options.validateWithZod) {
-      try {
-        const schema = this.options.zodSchemaLoader
-          ? await this.options.zodSchemaLoader(this.modelName, 'update')
-          : await loadZodSchema(this.modelName, 'update', this.options.zodSchemasPath);
+        // Optional Zod validation
+        let validatedData = args.data;
+        if (this.options.validateWithZod) {
+          try {
+            const schema = this.options.zodSchemaLoader
+              ? await this.options.zodSchemaLoader(this.modelName, 'update')
+              : await loadZodSchema(this.modelName, 'update', this.options.zodSchemasPath);
 
-        if (schema) {
-          validatedData = validateWithZod(schema, args.data, this.modelName, 'update');
+            if (schema) {
+              validatedData = validateWithZod(schema, args.data, this.modelName, 'update');
+            }
+          } catch (error: any) {
+            // Log validation error but don't fail if validation is optional
+            if (this.options.logQueries) {
+              this.options.logger?.(
+                `[Prismocker] Zod validation warning for ${this.modelName}.update: ${error.message}`
+              );
+            }
+            // If validation fails and it's enabled, throw the error
+            if (this.options.validateWithZod) {
+              throw error;
+            }
+          }
         }
-      } catch (error: any) {
-        // Log validation error but don't fail if validation is optional
-        if (this.options.logQueries) {
-          this.options.logger?.(
-            `[Prismocker] Zod validation warning for ${this.modelName}.update: ${error.message}`
+
+        const store = this.client.getStore(this.modelName);
+        const index = store.findIndex((record: any) =>
+          this.queryEngine.matches(record, args.where)
+        );
+
+        if (index === -1) {
+          const whereStr = JSON.stringify(args.where, null, 2);
+          const totalRecords = store.length;
+          const sampleRecords = store.slice(0, 3).map((r: any) => {
+            const sample: any = {};
+            // Show id and first few fields for debugging
+            if (r.id) sample.id = r.id;
+            const keys = Object.keys(r).slice(0, 3);
+            keys.forEach((key) => {
+              if (key !== 'id') sample[key] = r[key];
+            });
+            return sample;
+          });
+
+          throw new Error(
+            `Prismocker: Record not found for update in ${this.modelName}.\n\n` +
+              `Where clause: ${whereStr}\n` +
+              `Total records in ${this.modelName}: ${totalRecords}\n` +
+              (sampleRecords.length > 0
+                ? `Sample records (first 3):\n${JSON.stringify(sampleRecords, null, 2)}\n\n`
+                : `\n`) +
+              `This usually means:\n` +
+              `  1. No record matches the where clause in your test data\n` +
+              `  2. The where clause fields don't match any existing records\n` +
+              `  3. You need to seed data before updating\n\n` +
+              `To fix:\n` +
+              `  - Check that your where clause matches an existing record\n` +
+              `  - Seed test data before calling update: prisma.setData('${this.modelName}', [...])` +
+              `  - Use findFirst() to verify a matching record exists\n` +
+              `  - Consider using upsert() if you want to create or update`
           );
         }
-        // If validation fails and it's enabled, throw the error
-        if (this.options.validateWithZod) {
-          throw error;
+
+        const oldRecord = store[index];
+        const updated = {
+          ...oldRecord,
+          ...validatedData,
+          updatedAt: new Date(),
+        };
+
+        // Update indexes
+        const indexManager = this.client.getIndexManager();
+        if (indexManager) {
+          indexManager.updateRecord(this.modelName, index, oldRecord, updated);
         }
-      }
-    }
 
-    const store = this.client.getStore(this.modelName);
-    const index = store.findIndex((record: any) => this.queryEngine.matches(record, args.where));
-
-    if (index === -1) {
-      const whereStr = JSON.stringify(args.where, null, 2);
-      const totalRecords = store.length;
-      const sampleRecords = store.slice(0, 3).map((r: any) => {
-        const sample: any = {};
-        // Show id and first few fields for debugging
-        if (r.id) sample.id = r.id;
-        const keys = Object.keys(r).slice(0, 3);
-        keys.forEach((key) => {
-          if (key !== 'id') sample[key] = r[key];
-        });
-        return sample;
-      });
-
-      throw new Error(
-        `Prismocker: Record not found for update in ${this.modelName}.\n\n` +
-          `Where clause: ${whereStr}\n` +
-          `Total records in ${this.modelName}: ${totalRecords}\n` +
-          (sampleRecords.length > 0
-            ? `Sample records (first 3):\n${JSON.stringify(sampleRecords, null, 2)}\n\n`
-            : `\n`) +
-          `This usually means:\n` +
-          `  1. No record matches the where clause in your test data\n` +
-          `  2. The where clause fields don't match any existing records\n` +
-          `  3. You need to seed data before updating\n\n` +
-          `To fix:\n` +
-          `  - Check that your where clause matches an existing record\n` +
-          `  - Seed test data before calling update: prisma.setData('${this.modelName}', [...])` +
-          `  - Use findFirst() to verify a matching record exists\n` +
-          `  - Consider using upsert() if you want to create or update`
-      );
-    }
-
-    const oldRecord = store[index];
-    const updated = {
-      ...oldRecord,
-      ...validatedData,
-      updatedAt: new Date(),
-    };
-
-    // Update indexes
-    const indexManager = this.client.getIndexManager();
-    if (indexManager) {
-      indexManager.updateRecord(this.modelName, index, oldRecord, updated);
-    }
-
-    // Invalidate query cache
-    const queryCache = this.client.getQueryCache();
-    if (queryCache) {
-      queryCache.invalidateModel(this.modelName);
-    }
+        // Invalidate query cache
+        const queryCache = this.client.getQueryCache();
+        if (queryCache) {
+          queryCache.invalidateModel(this.modelName);
+        }
 
         const duration = Date.now() - startTime;
         this.client.recordQuery(this.modelName, 'update', args, 1, duration);
@@ -1627,51 +1645,53 @@ export class ModelProxy {
         }
 
         const store = this.client.getStore(this.modelName);
-    const index = store.findIndex((record: any) => this.queryEngine.matches(record, args.where));
+        const index = store.findIndex((record: any) =>
+          this.queryEngine.matches(record, args.where)
+        );
 
-    if (index === -1) {
-      const whereStr = JSON.stringify(args.where, null, 2);
-      const totalRecords = store.length;
-      const sampleRecords = store.slice(0, 3).map((r: any) => {
-        const sample: any = {};
-        // Show id and first few fields for debugging
-        if (r.id) sample.id = r.id;
-        const keys = Object.keys(r).slice(0, 3);
-        keys.forEach((key) => {
-          if (key !== 'id') sample[key] = r[key];
-        });
-        return sample;
-      });
+        if (index === -1) {
+          const whereStr = JSON.stringify(args.where, null, 2);
+          const totalRecords = store.length;
+          const sampleRecords = store.slice(0, 3).map((r: any) => {
+            const sample: any = {};
+            // Show id and first few fields for debugging
+            if (r.id) sample.id = r.id;
+            const keys = Object.keys(r).slice(0, 3);
+            keys.forEach((key) => {
+              if (key !== 'id') sample[key] = r[key];
+            });
+            return sample;
+          });
 
-      throw new Error(
-        `Prismocker: Record not found for delete in ${this.modelName}.\n\n` +
-          `Where clause: ${whereStr}\n` +
-          `Total records in ${this.modelName}: ${totalRecords}\n` +
-          (sampleRecords.length > 0
-            ? `Sample records (first 3):\n${JSON.stringify(sampleRecords, null, 2)}\n\n`
-            : `\n`) +
-          `This usually means:\n` +
-          `  1. No record matches the where clause in your test data\n` +
-          `  2. The where clause fields don't match any existing records\n` +
-          `  3. You need to seed data before deleting\n\n` +
-          `To fix:\n` +
-          `  - Check that your where clause matches an existing record\n` +
-          `  - Seed test data before calling delete: prisma.setData('${this.modelName}', [...])` +
-          `  - Use findFirst() to verify a matching record exists\n` +
-          `  - Consider using deleteMany() if you want to delete multiple records`
-      );
-    }
+          throw new Error(
+            `Prismocker: Record not found for delete in ${this.modelName}.\n\n` +
+              `Where clause: ${whereStr}\n` +
+              `Total records in ${this.modelName}: ${totalRecords}\n` +
+              (sampleRecords.length > 0
+                ? `Sample records (first 3):\n${JSON.stringify(sampleRecords, null, 2)}\n\n`
+                : `\n`) +
+              `This usually means:\n` +
+              `  1. No record matches the where clause in your test data\n` +
+              `  2. The where clause fields don't match any existing records\n` +
+              `  3. You need to seed data before deleting\n\n` +
+              `To fix:\n` +
+              `  - Check that your where clause matches an existing record\n` +
+              `  - Seed test data before calling delete: prisma.setData('${this.modelName}', [...])` +
+              `  - Use findFirst() to verify a matching record exists\n` +
+              `  - Consider using deleteMany() if you want to delete multiple records`
+          );
+        }
 
-    const deleted = store[index];
+        const deleted = store[index];
 
-    // Update indexes before removing
-    const indexManager = this.client.getIndexManager();
-    if (indexManager) {
-      indexManager.removeRecord(this.modelName, index, deleted);
-      // Rebuild indexes after deletion to fix indices (simplified approach)
-      // In production, we'd update indices for all records after the deleted one
-      indexManager.buildIndexes(this.modelName, store);
-    }
+        // Update indexes before removing
+        const indexManager = this.client.getIndexManager();
+        if (indexManager) {
+          indexManager.removeRecord(this.modelName, index, deleted);
+          // Rebuild indexes after deletion to fix indices (simplified approach)
+          // In production, we'd update indices for all records after the deleted one
+          indexManager.buildIndexes(this.modelName, store);
+        }
 
         store.splice(index, 1);
 

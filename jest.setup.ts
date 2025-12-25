@@ -119,7 +119,8 @@ process.env.NEXT_PUBLIC_SUPABASE_URL =
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key';
 // Provide POSTGRES_PRISMA_URL for tests (Prismocker doesn't need it, but some code checks for it)
-process.env.POSTGRES_PRISMA_URL = process.env.POSTGRES_PRISMA_URL || 'postgresql://test:test@localhost:5432/test';
+process.env.POSTGRES_PRISMA_URL =
+  process.env.POSTGRES_PRISMA_URL || 'postgresql://test:test@localhost:5432/test';
 
 // ============================================================================
 // Global Test Utilities
@@ -140,7 +141,7 @@ afterAll(async () => {
   // CRITICAL: Flush all Pino logger instances to ensure async logs are written
   // Pino uses async logging by default, which means log messages are buffered
   // and written asynchronously. We need to flush them before Jest exits.
-  
+
   // Import logger instances (they may not be imported in all tests, so we import here)
   // Use dynamic imports to avoid circular dependencies and ensure loggers are initialized
   const flushLoggers = async () => {
@@ -177,7 +178,8 @@ afterAll(async () => {
 
       // Flush data-layer logger (if it exists)
       try {
-        const { logger: dataLayerLogger } = await import('./packages/data-layer/src/utils/rpc-error-logging.ts');
+        const { logger: dataLayerLogger } =
+          await import('./packages/data-layer/src/utils/rpc-error-logging.ts');
         if (dataLayerLogger && typeof dataLayerLogger.flush === 'function') {
           await new Promise<void>((resolve, reject) => {
             dataLayerLogger.flush((err) => {
@@ -208,4 +210,3 @@ afterAll(async () => {
   // Give a small buffer for any remaining async operations to complete
   await new Promise((resolve) => setTimeout(resolve, 50));
 });
-

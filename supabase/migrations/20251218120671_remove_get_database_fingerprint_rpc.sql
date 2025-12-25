@@ -19,5 +19,4 @@
 -- Note: This appears to be a diagnostic/admin function that may have been used for monitoring
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.get_database_fingerprint();
+DROP FUNCTION IF EXISTS public.get_database_fingerprint ();

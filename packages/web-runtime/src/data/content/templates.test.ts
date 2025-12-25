@@ -19,7 +19,10 @@ jest.mock('next/cache', () => ({
 
 // Import real cache utilities for proper cache testing
 // Note: Deep relative imports are acceptable for test utilities to avoid circular dependencies
-import { clearRequestCache, getRequestCache } from '../../../../data-layer/src/utils/request-cache.ts';
+import {
+  clearRequestCache,
+  getRequestCache,
+} from '../../../../data-layer/src/utils/request-cache.ts';
 
 // Mock RPC error logging utility (if needed)
 // Note: Deep relative import needed for jest.mock() to work correctly

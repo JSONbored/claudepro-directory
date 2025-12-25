@@ -261,7 +261,7 @@ export function ProfileAvatarUpload({
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
       <div className="relative shrink-0">
         {avatarPreview ? (
-          <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-border sm:h-24 sm:w-24">
+          <div className="ring-border relative h-20 w-20 overflow-hidden rounded-full ring-2 sm:h-24 sm:w-24">
             <Image
               src={avatarPreview}
               alt="Avatar preview"
@@ -271,17 +271,17 @@ export function ProfileAvatarUpload({
             />
           </div>
         ) : (
-          <div className="bg-muted flex h-20 w-20 items-center justify-center rounded-full ring-2 ring-border sm:h-24 sm:w-24">
-            <Camera className="h-6 w-6 text-muted-foreground sm:h-8 sm:w-8" />
+          <div className="bg-muted ring-border flex h-20 w-20 items-center justify-center rounded-full ring-2 sm:h-24 sm:w-24">
+            <Camera className="text-muted-foreground h-6 w-6 sm:h-8 sm:w-8" />
           </div>
         )}
         {isUploading && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+          <div className="bg-background/80 absolute inset-0 flex items-center justify-center rounded-full backdrop-blur-sm">
+            <div className="border-accent h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-2 min-w-0 flex-1">
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button
             type="button"
@@ -327,4 +327,3 @@ export function ProfileAvatarUpload({
     </div>
   );
 }
-

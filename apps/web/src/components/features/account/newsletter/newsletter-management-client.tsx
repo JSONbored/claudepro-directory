@@ -6,7 +6,15 @@
  * Displays user's newsletter subscription status and allows management of topic preferences.
  */
 
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Switch } from '@heyclaude/web-runtime/ui';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Switch,
+} from '@heyclaude/web-runtime/ui';
 import { CheckCircle, Mail, XCircle } from '@heyclaude/web-runtime/icons';
 import { useState } from 'react';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks/use-logged-async';
@@ -146,7 +154,8 @@ export function NewsletterManagementClient({
     });
   };
 
-  const isActive = subscription?.status === 'active' && subscription?.confirmed && !subscription?.unsubscribed_at;
+  const isActive =
+    subscription?.status === 'active' && subscription?.confirmed && !subscription?.unsubscribed_at;
 
   if (!subscription) {
     return (
@@ -213,7 +222,8 @@ export function NewsletterManagementClient({
           <CardHeader>
             <CardTitle>Email Preferences</CardTitle>
             <CardDescription>
-              Choose which types of emails you'd like to receive. You can update these preferences at any time.
+              Choose which types of emails you'd like to receive. You can update these preferences
+              at any time.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -225,7 +235,7 @@ export function NewsletterManagementClient({
                     key={topic.id}
                     className="flex items-start justify-between rounded-lg border p-4"
                   >
-                    <div className="space-y-1 flex-1">
+                    <div className="flex-1 space-y-1">
                       <div className="font-medium">{topic.name}</div>
                       <div className="text-muted-foreground text-sm">{topic.description}</div>
                     </div>
@@ -246,7 +256,7 @@ export function NewsletterManagementClient({
       {isActive && (
         <Card className="border-destructive/50">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
+            <CardTitle className="text-destructive flex items-center gap-2">
               <XCircle className="h-5 w-5" />
               Unsubscribe
             </CardTitle>
@@ -259,7 +269,8 @@ export function NewsletterManagementClient({
               Unsubscribe from All Emails
             </Button>
             <p className="text-muted-foreground mt-2 text-sm">
-              This will unsubscribe you from all newsletter communications. You can resubscribe at any time.
+              This will unsubscribe you from all newsletter communications. You can resubscribe at
+              any time.
             </p>
           </CardContent>
         </Card>
@@ -267,4 +278,3 @@ export function NewsletterManagementClient({
     </div>
   );
 }
-

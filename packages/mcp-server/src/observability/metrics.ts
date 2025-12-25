@@ -86,15 +86,18 @@ export interface ToolMetrics {
  */
 class MetricsStore {
   private metrics: MetricEntry[] = [];
-  private toolStats = new Map<string, {
-    totalCalls: number;
-    successCount: number;
-    failureCount: number;
-    totalDuration: number;
-    minDuration: number;
-    maxDuration: number;
-    lastCalledAt: number;
-  }>();
+  private toolStats = new Map<
+    string,
+    {
+      totalCalls: number;
+      successCount: number;
+      failureCount: number;
+      totalDuration: number;
+      minDuration: number;
+      maxDuration: number;
+      lastCalledAt: number;
+    }
+  >();
 
   /**
    * Record a metric
@@ -110,11 +113,7 @@ class MetricsStore {
   /**
    * Record tool call
    */
-  recordToolCall(
-    toolName: string,
-    success: boolean,
-    duration: number
-  ): void {
+  recordToolCall(toolName: string, success: boolean, duration: number): void {
     const stats = this.toolStats.get(toolName) || {
       totalCalls: 0,
       successCount: 0,
@@ -257,7 +256,13 @@ export interface PerformanceMetrics {
  * Check if an object has a `_meta` property
  */
 function hasMeta(obj: unknown): obj is { _meta: Record<string, unknown> } {
-  return typeof obj === 'object' && obj !== null && '_meta' in obj && typeof (obj as { _meta: unknown })._meta === 'object' && (obj as { _meta: unknown })._meta !== null;
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    '_meta' in obj &&
+    typeof (obj as { _meta: unknown })._meta === 'object' &&
+    (obj as { _meta: unknown })._meta !== null
+  );
 }
 
 /**
@@ -267,7 +272,10 @@ function hasMeta(obj: unknown): obj is { _meta: Record<string, unknown> } {
  * @param metrics - Performance metrics
  * @returns Enhanced response with metrics in _meta
  */
-function addPerformanceMetricsToResponse<TOutput>(result: TOutput, metrics: PerformanceMetrics): TOutput {
+function addPerformanceMetricsToResponse<TOutput>(
+  result: TOutput,
+  metrics: PerformanceMetrics
+): TOutput {
   // If result has _meta, add metrics to it
   if (hasMeta(result)) {
     return {
@@ -383,4 +391,3 @@ export function getRecentMetrics(limit: number = 100): MetricEntry[] {
 export function clearMetrics(): void {
   globalMetricsStore.clear();
 }
-

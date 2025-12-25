@@ -97,9 +97,9 @@ export function ConsultingClient() {
 
         {/* Particles Effect (simplified with CSS) */}
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-1/4 left-1/4 h-2 w-2 animate-ping rounded-full bg-primary [animation-delay:0s] [animation-duration:3s]" />
-          <div className="absolute top-1/3 right-1/4 h-1.5 w-1.5 animate-ping rounded-full bg-primary [animation-delay:1s] [animation-duration:4s]" />
-          <div className="absolute bottom-1/4 left-1/3 h-1 w-1 animate-ping rounded-full bg-primary/80 [animation-delay:2s] [animation-duration:5s]" />
+          <div className="bg-primary absolute top-1/4 left-1/4 h-2 w-2 animate-ping rounded-full [animation-delay:0s] [animation-duration:3s]" />
+          <div className="bg-primary absolute top-1/3 right-1/4 h-1.5 w-1.5 animate-ping rounded-full [animation-delay:1s] [animation-duration:4s]" />
+          <div className="bg-primary/80 absolute bottom-1/4 left-1/3 h-1 w-1 animate-ping rounded-full [animation-delay:2s] [animation-duration:5s]" />
         </div>
 
         <div className="relative z-10 container mx-auto px-4 py-4 sm:px-6 sm:py-4">
@@ -116,10 +116,7 @@ export function ConsultingClient() {
               transition={{ ...SPRING.smooth, delay: 0.1 }}
               className="inline-flex"
             >
-              <UnifiedBadge
-                variant="base"
-                className="border-primary/30 bg-primary/10 text-primary"
-              >
+              <UnifiedBadge variant="base" className="border-primary/30 bg-primary/10 text-primary">
                 <Sparkles className="mr-0.5 h-3 w-3" />
                 Available for New Projects
               </UnifiedBadge>
@@ -284,7 +281,7 @@ export function ConsultingClient() {
                     Cosmos blockchain validators (securing $100MM+ in network assets). Built{' '}
                     <Link
                       href="/"
-                      className={`text-primary underline underline-offset-4 transition-colors hover:text-primary/80`}
+                      className={`text-primary hover:text-primary/80 underline underline-offset-4 transition-colors`}
                     >
                       Claude Pro Directory
                     </Link>{' '}
@@ -293,7 +290,7 @@ export function ConsultingClient() {
                       href="https://github.com/jsonbored/claudepro-directory"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`inline-flex items-center gap-1 text-primary underline underline-offset-4 transition-colors hover:text-primary/80`}
+                      className={`text-primary hover:text-primary/80 inline-flex items-center gap-1 underline underline-offset-4 transition-colors`}
                     >
                       GitHub
                       <ExternalLink className="h-3 w-3" />
@@ -505,12 +502,12 @@ export function ConsultingClient() {
                 viewport={{ once: true }}
                 transition={SPRING.smooth}
               >
-                <Card className="h-full border-2 border-primary/30 bg-gradient-to-br from-primary/10 to-primary/10 backdrop-blur-sm">
+                <Card className="border-primary/30 from-primary/10 to-primary/10 h-full border-2 bg-gradient-to-br backdrop-blur-sm">
                   <CardHeader>
                     <div className="mb-4 flex items-start justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="rounded-lg border border-primary/30 bg-primary/20 p-2">
-                          <Sparkles className="h-5 w-5 text-primary" />
+                        <div className="border-primary/30 bg-primary/20 rounded-lg border p-2">
+                          <Sparkles className="text-primary h-5 w-5" />
                         </div>
                         <CardTitle className="text-lg">Claude Pro Directory</CardTitle>
                       </div>
@@ -552,12 +549,12 @@ export function ConsultingClient() {
                 viewport={{ once: true }}
                 transition={{ ...SPRING.smooth, delay: 0.1 }}
               >
-                <Card className="h-full border-2 border-primary/30 bg-gradient-to-br from-primary/10 to-primary/10 backdrop-blur-sm">
+                <Card className="border-primary/30 from-primary/10 to-primary/10 h-full border-2 bg-gradient-to-br backdrop-blur-sm">
                   <CardHeader>
                     <div className="mb-4 flex items-start justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="rounded-lg border border-primary/30 bg-primary/20 p-2">
-                          <Network className="h-5 w-5 text-primary" />
+                        <div className="border-primary/30 bg-primary/20 rounded-lg border p-2">
+                          <Network className="text-primary h-5 w-5" />
                         </div>
                         <CardTitle className="text-lg">Blockchain Validators</CardTitle>
                       </div>
@@ -676,8 +673,8 @@ export function ConsultingClient() {
                   transition={SPRING.smooth}
                   className="border-border/50 bg-card/50 rounded-xl border py-6 text-center backdrop-blur-sm"
                 >
-                  <div className="mb-4 inline-flex rounded-lg border border-primary/30 bg-primary/10 p-3">
-                    <Icon className="h-6 w-6 text-primary" />
+                  <div className="border-primary/30 bg-primary/10 mb-4 inline-flex rounded-lg border p-3">
+                    <Icon className="text-primary h-6 w-6" />
                   </div>
                   <div className="mb-2 text-3xl font-bold">
                     {stat.value.includes('%') ? (
@@ -805,7 +802,7 @@ export function ConsultingClient() {
                       ) : (
                         <div className="flex-center h-[600px]">
                           <div className="space-y-3 text-center">
-                            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-primary" />
+                            <div className="border-primary mx-auto h-12 w-12 animate-spin rounded-full border-b-2" />
                             <p className="text-muted-foreground">Loading calendar...</p>
                           </div>
                         </div>
@@ -827,7 +824,7 @@ export function ConsultingClient() {
                   Prefer email?{' '}
                   <a
                     href="mailto:ghost@zeronode.sh"
-                    className={`text-primary underline underline-offset-4 transition-colors hover:text-primary/80`}
+                    className={`text-primary hover:text-primary/80 underline underline-offset-4 transition-colors`}
                   >
                     ghost@zeronode.sh
                   </a>

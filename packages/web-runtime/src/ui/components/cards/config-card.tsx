@@ -140,9 +140,7 @@ export const ConfigCard = memo(
         category: 'category' in item && isValidCategory(item.category) ? item.category : null,
       });
       const defaultCategoryValue = 'agents' as content_category;
-      const cardCategory: content_category = isValidCategory(
-        item.category ?? defaultCategoryValue
-      )
+      const cardCategory: content_category = isValidCategory(item.category ?? defaultCategoryValue)
         ? ((item.category ?? defaultCategoryValue) as content_category)
         : defaultCategoryValue;
       const cardSlug = typeof item.slug === 'string' ? item.slug : null;
@@ -1094,7 +1092,9 @@ export const ConfigCard = memo(
                       contentType={(() => {
                         const defaultCategoryValue = 'agents' as content_category;
                         const cat = item.category ?? defaultCategoryValue;
-                        return isValidCategory(cat) ? (cat as content_category) : defaultCategoryValue;
+                        return isValidCategory(cat)
+                          ? (cat as content_category)
+                          : defaultCategoryValue;
                       })()}
                       contentSlug={item.slug}
                       {...(initialBookmarked !== undefined ? { initialBookmarked } : {})}

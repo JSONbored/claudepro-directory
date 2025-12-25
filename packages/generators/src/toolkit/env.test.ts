@@ -17,12 +17,12 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     GITHUB_ACTIONS: undefined,
     TEST_VAR: 'test-value',
   };
-  
+
   // Store on globalThis for test access
   if (typeof globalThis !== 'undefined') {
     (globalThis as any).__generatorsMockEnv = mockEnv;
   }
-  
+
   return {
     env: new Proxy(mockEnv, {
       get: (target, prop: string) => target[prop],
@@ -46,23 +46,24 @@ jest.mock('./logger.ts', () => {
     warn: jest.fn(),
     error: jest.fn(),
   };
-  
+
   // Store on globalThis for test access
   if (typeof globalThis !== 'undefined') {
     (globalThis as any).__generatorsMockLogger = mockLogger;
   }
-  
+
   return {
     logger: mockLogger,
   };
 });
 
 // Get mockLogger from globalThis for test access
-const getMockLogger = () => (globalThis as any).__generatorsMockLogger as {
-  info: ReturnType<typeof jest.fn>;
-  warn: ReturnType<typeof jest.fn>;
-  error: ReturnType<typeof jest.fn>;
-};
+const getMockLogger = () =>
+  (globalThis as any).__generatorsMockLogger as {
+    info: ReturnType<typeof jest.fn>;
+    warn: ReturnType<typeof jest.fn>;
+    error: ReturnType<typeof jest.fn>;
+  };
 const mockLogger = getMockLogger();
 
 // Import after mocks
@@ -91,9 +92,7 @@ describe('Environment Variable Toolkit', () => {
       currentMockEnv.TEST_VAR = 'test-value';
       currentMockEnv.ANOTHER_VAR = 'another-value';
 
-      await expect(
-        ensureEnvVars(['TEST_VAR', 'ANOTHER_VAR'])
-      ).resolves.not.toThrow();
+      await expect(ensureEnvVars(['TEST_VAR', 'ANOTHER_VAR'])).resolves.not.toThrow();
 
       expect(mockLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('Environment variables already loaded'),
@@ -203,9 +202,7 @@ describe('Environment Variable Toolkit', () => {
       currentMockEnv.CI = undefined;
       currentMockEnv.MISSING_VAR = undefined;
 
-      await expect(ensureEnvVars(['MISSING_VAR'])).rejects.toThrow(
-        'infisical run --env=dev'
-      );
+      await expect(ensureEnvVars(['MISSING_VAR'])).rejects.toThrow('infisical run --env=dev');
     });
 
     it('should handle multiple missing vars', async () => {
@@ -214,9 +211,7 @@ describe('Environment Variable Toolkit', () => {
       currentMockEnv.MISSING_VAR_1 = undefined;
       currentMockEnv.MISSING_VAR_2 = undefined;
 
-      await expect(
-        ensureEnvVars(['MISSING_VAR_1', 'MISSING_VAR_2'])
-      ).rejects.toThrow();
+      await expect(ensureEnvVars(['MISSING_VAR_1', 'MISSING_VAR_2'])).rejects.toThrow();
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.any(String),
@@ -239,4 +234,3 @@ describe('Environment Variable Toolkit', () => {
     });
   });
 });
-

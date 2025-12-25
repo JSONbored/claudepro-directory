@@ -51,7 +51,7 @@ describe('useCopyToClipboard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockWriteText = jest.fn().mockResolvedValue(undefined);
-    
+
     // Ensure navigator.clipboard is properly set up
     Object.defineProperty(global, 'navigator', {
       value: {
@@ -108,9 +108,7 @@ describe('useCopyToClipboard', () => {
 
   it('should call onSuccess callback on successful copy', async () => {
     const onSuccess = jest.fn();
-    const { result } = renderHook(() =>
-      useCopyToClipboard({ onSuccess })
-    );
+    const { result } = renderHook(() => useCopyToClipboard({ onSuccess }));
 
     await act(async () => {
       await result.current.copy('test text');
@@ -139,9 +137,7 @@ describe('useCopyToClipboard', () => {
     mockWriteText.mockRejectedValue(error);
     const onError = jest.fn();
 
-    const { result } = renderHook(() =>
-      useCopyToClipboard({ onError })
-    );
+    const { result } = renderHook(() => useCopyToClipboard({ onError }));
 
     await act(async () => {
       await result.current.copy('test text');
@@ -201,9 +197,7 @@ describe('useCopyToClipboard', () => {
   });
 
   it('should use custom resetDelay from options', () => {
-    const { result } = renderHook(() =>
-      useCopyToClipboard({ resetDelay: 5000 })
-    );
+    const { result } = renderHook(() => useCopyToClipboard({ resetDelay: 5000 }));
 
     // The hook should accept the custom delay
     // Actual timeout behavior is tested via useTimeout
@@ -327,9 +321,7 @@ describe('useButtonSuccess', () => {
   });
 
   it('should use custom duration from options', () => {
-    const { result } = renderHook(() =>
-      useButtonSuccess({ duration: 5000 })
-    );
+    const { result } = renderHook(() => useButtonSuccess({ duration: 5000 }));
 
     // The hook should accept the custom duration
     // Actual timeout behavior is tested via useTimeout

@@ -122,7 +122,8 @@ export function useScrollLock(options: UseScrollLockOptions = {}): {
     outer.style.overflow = 'scroll';
     // msOverflowStyle is IE-specific and not in standard CSS types
     // Use type assertion to access legacy IE property
-    (outer.style as CSSStyleDeclaration & { msOverflowStyle?: string }).msOverflowStyle = 'scrollbar';
+    (outer.style as CSSStyleDeclaration & { msOverflowStyle?: string }).msOverflowStyle =
+      'scrollbar';
     document.body.appendChild(outer);
 
     const inner = document.createElement('div');

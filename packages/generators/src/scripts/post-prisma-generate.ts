@@ -356,17 +356,17 @@ async function createMissingViewSchemas() {
           /from\s+['"]\.\/objects\/([a-zA-Z0-9_]+CreateManyInput)\.schema['"]/g,
           /from\s+['"]\.\/objects\/([a-zA-Z0-9_]+UpdateManyMutationInput)\.schema['"]/g,
         ];
-        
-            for (const pattern of importPatterns) {
-              let match;
-              while ((match = pattern.exec(content)) !== null) {
-                const schemaName = match[1];
-                if (!schemaName) continue; // Skip if match[1] is undefined
-                const schemaType = schemaName.includes('WhereUniqueInput') 
-                  ? 'WhereUniqueInput' 
-                  : schemaName.includes('CreateManyInput')
-                  ? 'CreateManyInput'
-                  : schemaName.includes('UpdateManyMutationInput')
+
+        for (const pattern of importPatterns) {
+          let match;
+          while ((match = pattern.exec(content)) !== null) {
+            const schemaName = match[1];
+            if (!schemaName) continue; // Skip if match[1] is undefined
+            const schemaType = schemaName.includes('WhereUniqueInput')
+              ? 'WhereUniqueInput'
+              : schemaName.includes('CreateManyInput')
+                ? 'CreateManyInput'
+                : schemaName.includes('UpdateManyMutationInput')
                   ? 'UpdateManyMutationInput'
                   : 'unknown';
             const schemaFilePath = join(objectsDir, `${schemaName}.schema.ts`);
@@ -548,7 +548,7 @@ async function removeInvalidViewSchemas() {
     const schemasDir = join(process.cwd(), 'packages/database-types/src/prisma/zod/schemas');
     const objectsDir = join(schemasDir, 'objects');
     const viewNames = ['v_content_list_slim', 'v_trending_searches'];
-    
+
     // Invalid schema patterns for views (in schemas/ directory)
     const invalidSchemaPatterns = [
       'createManyAndReturn',
@@ -667,15 +667,9 @@ async function fixViewSchemaCursorImports() {
   try {
     const schemasDir = join(process.cwd(), 'packages/database-types/src/prisma/zod/schemas');
     const viewNames = ['v_content_list_slim', 'v_trending_searches'];
-    
+
     // Schema files that use cursor parameter
-    const schemaFiles = [
-      'aggregate',
-      'count',
-      'findMany',
-      'findFirst',
-      'findFirstOrThrow',
-    ];
+    const schemaFiles = ['aggregate', 'count', 'findMany', 'findFirst', 'findFirstOrThrow'];
 
     let fixedCount = 0;
     const fixedFiles: string[] = [];
@@ -687,13 +681,13 @@ async function fixViewSchemaCursorImports() {
 
         try {
           const content = await readFile(filePath, 'utf-8');
-          
+
           // Check if file imports WhereUniqueInput
           const whereUniqueInputPattern = new RegExp(
             `import.*${viewName}WhereUniqueInput.*from.*['"]\\./objects/${viewName}WhereUniqueInput\\.schema['"]`,
             'g'
           );
-          
+
           if (!whereUniqueInputPattern.test(content)) {
             // File doesn't import WhereUniqueInput, skip
             continue;
@@ -786,10 +780,10 @@ async function removeInvalidSchemaExports() {
       script: 'post-prisma-generate',
       operation: 'remove-invalid-schema-exports',
     });
-    
+
     const schemasDir = join(process.cwd(), 'packages/database-types/src/prisma/zod/schemas');
     const indexPath = join(schemasDir, 'index.ts');
-    
+
     // Check if index.ts exists
     try {
       await access(indexPath);
@@ -810,7 +804,7 @@ async function removeInvalidSchemaExports() {
     const content = await readFile(indexPath, 'utf-8');
     const lines = content.split('\n');
     const viewNames = ['v_content_list_slim', 'v_trending_searches'];
-    
+
     // Invalid schema patterns for views
     const invalidSchemaPatterns = [
       'createManyAndReturn',
@@ -842,7 +836,7 @@ async function removeInvalidSchemaExports() {
       const exportPath: string = matchedGroup;
       // Remove leading './' if present
       const relativePath: string = exportPath.startsWith('./') ? exportPath.slice(2) : exportPath;
-      
+
       // Check if this is an invalid view schema export
       // The export path might be './findUniqueOrThrowv_content_list_slim.schema' (no .ts extension)
       // or './findUniqueOrThrowv_content_list_slim.schema.ts' (with .ts extension)
@@ -863,11 +857,9 @@ async function removeInvalidSchemaExports() {
       if (isInvalidViewSchema) {
         // Check if the file actually exists
         // relativePath is guaranteed to be a string here because we checked matchedPath above
-        const fileName: string = relativePath.endsWith('.ts') 
-          ? relativePath 
-          : `${relativePath}.ts`;
+        const fileName: string = relativePath.endsWith('.ts') ? relativePath : `${relativePath}.ts`;
         const filePath = join(schemasDir, fileName);
-        
+
         try {
           await access(filePath);
           // File exists, keep the export (shouldn't happen, but be safe)
@@ -909,7 +901,10 @@ async function removeInvalidSchemaExports() {
       });
     }
   } catch (error) {
-    const normalized = normalizeError(error, 'Could not remove invalid schema exports from index.ts');
+    const normalized = normalizeError(
+      error,
+      'Could not remove invalid schema exports from index.ts'
+    );
     logger.error('Could not remove invalid schema exports from index.ts', normalized, {
       script: 'post-prisma-generate',
       operation: 'remove-invalid-schema-exports',

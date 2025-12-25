@@ -83,11 +83,15 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
       <Tabs defaultValue="recent" className="w-full">
         <CardHeader className="pb-2">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="recent" className={cn('flex items-center gap-1.5')}> {/* 6px = gap-1.5 */}
+            <TabsTrigger value="recent" className={cn('flex items-center gap-1.5')}>
+              {' '}
+              {/* 6px = gap-1.5 */}
               <Clock className="h-3 w-3" />
               Recent
             </TabsTrigger>
-            <TabsTrigger value="tips" className={cn('flex items-center gap-1.5')}> {/* 6px = gap-1.5 */}
+            <TabsTrigger value="tips" className={cn('flex items-center gap-1.5')}>
+              {' '}
+              {/* 6px = gap-1.5 */}
               <Lightbulb className="h-3 w-3" />
               Tips
             </TabsTrigger>
@@ -116,9 +120,7 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
                       'border-border/50 border-b pb-3 last:border-0 last:pb-0'
                     )}
                   >
-                    <CheckCircle
-                      className={cn('mt-0.5 h-4 w-4 shrink-0 text-success')}
-                    />
+                    <CheckCircle className={cn('text-success mt-0.5 h-4 w-4 shrink-0')} />
                     <div className="min-w-0 flex-1">
                       <p className={cn('text-sm-medium truncate')}>{submission.content_name}</p>
                       <div className={cn('mt-1 flex flex-wrap items-center gap-2')}>
@@ -154,7 +156,8 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
               <ul className="list-none space-y-2">
                 {tips.map((tip) => (
                   <li key={tip} className="flex items-start gap-2">
-                    <span className={cn('mt-4 text-xs text-info')}>•</span> {/* 18px ≈ 1rem (mt-4) */}
+                    <span className={cn('text-info mt-4 text-xs')}>•</span>{' '}
+                    {/* 18px ≈ 1rem (mt-4) */}
                     <span className="text-muted-foreground text-xs">{tip}</span>
                   </li>
                 ))}

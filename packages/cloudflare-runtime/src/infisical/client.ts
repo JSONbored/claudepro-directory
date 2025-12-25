@@ -19,7 +19,7 @@ import { getSecret } from '../config/env.js';
 
 /**
  * Infisical configuration
- * 
+ *
  * Project ID comes from .infisical.json workspaceId.
  * This is the Infisical project/workspace where secrets are stored.
  */
@@ -94,7 +94,7 @@ export async function getInfisicalClient(env: ExtendedEnv): Promise<InfisicalSDK
  *
  * Fetches the secret for the specified environment (dev, staging, prod).
  * Infisical supports different values per environment for the same secret name.
- * 
+ *
  * Uses recursive search to find secrets in subdirectories, matching the CLI behavior
  * when using the `--recursive` flag.
  *
@@ -128,9 +128,7 @@ export async function getInfisicalSecret(
 
     // Find the secret by name (case-sensitive match)
     // Secret object has secretKey property (name of the secret)
-    const secret = secrets.secrets?.find(
-      (s) => s.secretKey === secretName
-    );
+    const secret = secrets.secrets?.find((s) => s.secretKey === secretName);
 
     if (!secret) {
       return undefined;

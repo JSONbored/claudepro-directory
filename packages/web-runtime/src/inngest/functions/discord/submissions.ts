@@ -129,7 +129,6 @@ export const processDiscordSubmissionsQueue = createInngestFunction(
   },
   { cron: '*/30 * * * *' }, // Every 30 minutes
   async ({ step, logContext }) => {
-
     const adminWebhookUrl = env.DISCORD_SUBMISSIONS_WEBHOOK_URL;
     const announcementWebhookUrl = env.DISCORD_ANNOUNCEMENTS_WEBHOOK_URL;
 

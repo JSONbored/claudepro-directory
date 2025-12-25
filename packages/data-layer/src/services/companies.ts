@@ -288,10 +288,7 @@ export class CompaniesService extends BasePrismaService {
             click_count: true,
             link: true,
           },
-          orderBy: [
-            { tier: 'desc' },
-            { posted_at: 'desc' },
-          ],
+          orderBy: [{ tier: 'desc' }, { posted_at: 'desc' }],
         });
 
         // Transform active jobs to match RPC return structure (company_profile_job_item)

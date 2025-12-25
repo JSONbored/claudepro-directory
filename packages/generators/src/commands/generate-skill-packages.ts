@@ -46,7 +46,6 @@ export async function runGenerateSkillPackages(): Promise<void> {
   await generatePackages(config);
 }
 
-
 async function generateZipBuffer(slug: string, skillMdContent: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const buffers: Buffer[] = [];
@@ -126,4 +125,3 @@ async function uploadToStorage(
 
   return publicUrl;
 }
-

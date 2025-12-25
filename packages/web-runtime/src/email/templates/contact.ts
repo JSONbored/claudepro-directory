@@ -13,4 +13,3 @@ export {
   ContactUserConfirmationEmail,
   type ContactUserConfirmationEmailProps,
 } from './contact-user-confirmation';
-

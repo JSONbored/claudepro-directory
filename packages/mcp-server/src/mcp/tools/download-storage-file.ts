@@ -10,7 +10,12 @@
 import type { DownloadStorageFileInput } from '../../lib/types.js';
 import { McpErrorCode, createErrorResponse } from '../../lib/errors';
 import { sanitizeString, isValidSlug } from '../../lib/utils';
-import { getStorageDownloadUrl, getStorageFileName, getStorageBucket, parseRootUri } from '../../lib/storage-utils.js';
+import {
+  getStorageDownloadUrl,
+  getStorageFileName,
+  getStorageBucket,
+  parseRootUri,
+} from '../../lib/storage-utils.js';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import type { ToolContext } from '../../types/runtime.js';
 
@@ -137,7 +142,7 @@ export async function handleDownloadStorageFile(
     // Build response text
     const responseText: string[] = [];
     responseText.push(`## Storage File Download: ${category}/${slug}\n`);
-    
+
     if (filePath) {
       responseText.push(`✅ **Downloaded to:** \`${filePath}\``);
       responseText.push(`\nThe storage file has been downloaded to your filesystem.`);
@@ -148,7 +153,9 @@ export async function handleDownloadStorageFile(
       responseText.push(`\nTo download this storage file:`);
       responseText.push(`1. Visit the download URL above`);
       responseText.push(`2. Save the file to your desired location`);
-      responseText.push(`\n**Note:** To enable automatic filesystem downloads, provide a \`rootUri\` parameter (e.g., \`file:///Users/username/.claude/packages\`).`);
+      responseText.push(
+        `\n**Note:** To enable automatic filesystem downloads, provide a \`rootUri\` parameter (e.g., \`file:///Users/username/.claude/packages\`).`
+      );
     }
 
     responseText.push(`\n**File Name:** ${fileName}`);
@@ -198,4 +205,3 @@ export async function handleDownloadStorageFile(
     throw normalized;
   }
 }
-

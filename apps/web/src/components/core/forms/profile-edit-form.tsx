@@ -252,7 +252,7 @@ export function ProfileEditForm({ profile, avatarUrl, heroUrl }: ProfileEditForm
       <ProfileCompletionProgress profile={profileFields} />
 
       {/* Profile Images Section */}
-      <div className="space-y-4 rounded-lg border border-border/50 bg-card/50 p-4">
+      <div className="border-border/50 bg-card/50 space-y-4 rounded-lg border p-4">
         <h3 className="text-sm font-semibold">Profile Images</h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <ProfileAvatarUpload currentAvatarUrl={avatarUrl} />

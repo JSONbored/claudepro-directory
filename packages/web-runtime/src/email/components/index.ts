@@ -25,12 +25,7 @@ export type { JobDetailItem, JobDetailsSectionProps } from './job';
 export { EmailMetrics, EmailMetricsGrid } from './metrics';
 export type { EmailMetricsGridProps, EmailMetricsProps } from './metrics';
 
-export {
-  BulletListSection,
-  CardListSection,
-  HeroBlock,
-  StepCardList,
-} from './sections';
+export { BulletListSection, CardListSection, HeroBlock, StepCardList } from './sections';
 export type {
   BulletListItem,
   BulletListSectionProps,
@@ -39,4 +34,3 @@ export type {
   HeroBlockProps,
   StepCardItem,
 } from './sections';
-

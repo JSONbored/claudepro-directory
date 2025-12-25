@@ -23,38 +23,38 @@ echo -e "${YELLOW}Clearing all development caches...${NC}"
 
 # Clear .next directory
 if [ -d "$WEB_APP_DIR/.next" ]; then
-  echo -e "${YELLOW}Removing .next directory...${NC}"
-  rm -rf "$WEB_APP_DIR/.next"
-  echo -e "${GREEN}✓ Cleared .next directory${NC}"
+	echo -e "${YELLOW}Removing .next directory...${NC}"
+	rm -rf "$WEB_APP_DIR/.next"
+	echo -e "${GREEN}✓ Cleared .next directory${NC}"
 else
-  echo -e "${GREEN}✓ .next directory not found (already clean)${NC}"
+	echo -e "${GREEN}✓ .next directory not found (already clean)${NC}"
 fi
 
 # Clear .turbo directory
 if [ -d "$PROJECT_ROOT/.turbo" ]; then
-  echo -e "${YELLOW}Removing .turbo directory...${NC}"
-  rm -rf "$PROJECT_ROOT/.turbo"
-  echo -e "${GREEN}✓ Cleared .turbo directory${NC}"
+	echo -e "${YELLOW}Removing .turbo directory...${NC}"
+	rm -rf "$PROJECT_ROOT/.turbo"
+	echo -e "${GREEN}✓ Cleared .turbo directory${NC}"
 else
-  echo -e "${GREEN}✓ .turbo directory not found (already clean)${NC}"
+	echo -e "${GREEN}✓ .turbo directory not found (already clean)${NC}"
 fi
 
 # Clear node_modules/.cache
 if [ -d "$PROJECT_ROOT/node_modules/.cache" ]; then
-  echo -e "${YELLOW}Removing node_modules/.cache...${NC}"
-  rm -rf "$PROJECT_ROOT/node_modules/.cache"
-  echo -e "${GREEN}✓ Cleared node_modules/.cache${NC}"
+	echo -e "${YELLOW}Removing node_modules/.cache...${NC}"
+	rm -rf "$PROJECT_ROOT/node_modules/.cache"
+	echo -e "${GREEN}✓ Cleared node_modules/.cache${NC}"
 else
-  echo -e "${GREEN}✓ node_modules/.cache not found (already clean)${NC}"
+	echo -e "${GREEN}✓ node_modules/.cache not found (already clean)${NC}"
 fi
 
 # Clear app-specific node_modules/.cache
 if [ -d "$WEB_APP_DIR/node_modules/.cache" ]; then
-  echo -e "${YELLOW}Removing apps/web/node_modules/.cache...${NC}"
-  rm -rf "$WEB_APP_DIR/node_modules/.cache"
-  echo -e "${GREEN}✓ Cleared apps/web/node_modules/.cache${NC}"
+	echo -e "${YELLOW}Removing apps/web/node_modules/.cache...${NC}"
+	rm -rf "$WEB_APP_DIR/node_modules/.cache"
+	echo -e "${GREEN}✓ Cleared apps/web/node_modules/.cache${NC}"
 else
-  echo -e "${GREEN}✓ apps/web/node_modules/.cache not found (already clean)${NC}"
+	echo -e "${GREEN}✓ apps/web/node_modules/.cache not found (already clean)${NC}"
 fi
 
 # Note about service worker caches

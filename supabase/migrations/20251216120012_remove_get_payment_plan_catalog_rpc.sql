@@ -20,4 +20,4 @@
 -- Related Changes:
 -- - packages/data-layer/src/services/jobs.ts: Converted getPaymentPlanCatalog() to use Prisma
 -- - Return type: Promise<GetPaymentPlanCatalogReturns> (local type matching RPC structure)
-DROP FUNCTION IF EXISTS public.get_payment_plan_catalog();
+DROP FUNCTION IF EXISTS public.get_payment_plan_catalog ();

@@ -9,5 +9,4 @@
 --
 -- Function signature: auto_populate_generated_fields()
 -- Related: No triggers found using this function
-
-DROP FUNCTION IF EXISTS public.auto_populate_generated_fields();
+DROP FUNCTION IF EXISTS public.auto_populate_generated_fields ();

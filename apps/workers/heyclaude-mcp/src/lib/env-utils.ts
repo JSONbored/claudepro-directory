@@ -26,4 +26,3 @@ export function getEnvOrDefault(env: RuntimeEnv, key: string, defaultValue: stri
   }
   return defaultValue;
 }
-

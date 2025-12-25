@@ -79,7 +79,7 @@ export function generateCacheHeaders(
 ): Record<string, string> {
   const headers: Record<string, string> = {
     'Cache-Control': generateCacheControl(config),
-    'ETag': etag,
+    ETag: etag,
     'Last-Modified': new Date(cachedAt).toUTCString(),
   };
 
@@ -94,11 +94,7 @@ export function generateCacheHeaders(
  * @param cachedAt - Cache timestamp
  * @returns true if resource is unchanged (304 Not Modified)
  */
-export function isNotModified(
-  requestHeaders: Headers,
-  etag: string,
-  cachedAt: string
-): boolean {
+export function isNotModified(requestHeaders: Headers, etag: string, cachedAt: string): boolean {
   // Check If-None-Match header
   const ifNoneMatch = requestHeaders.get('if-none-match');
   if (ifNoneMatch && ifNoneMatch === etag) {
@@ -137,4 +133,3 @@ export function createNotModifiedResponse(
     headers,
   });
 }
-

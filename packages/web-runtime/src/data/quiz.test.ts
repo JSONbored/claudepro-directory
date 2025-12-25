@@ -27,4 +27,3 @@ describe('quiz data functions', () => {
     });
   });
 });
-

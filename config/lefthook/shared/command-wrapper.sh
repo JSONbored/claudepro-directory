@@ -18,24 +18,23 @@ OUTPUT=$($COMMAND 2>&1)
 EXIT_CODE=$?
 
 # Calculate duration
-DURATION=$(( ($(date +%s%N) - START) / 1000000 ))
+DURATION=$((($(date +%s%N) - START) / 1000000))
 
 # Display output if present (suppress empty output)
 if [ -n "$OUTPUT" ]; then
-  # Indent output for readability
-  echo "$OUTPUT" | sed 's/^/│  /'
+	# Indent output for readability
+	echo "$OUTPUT" | sed 's/^/│  /'
 fi
 
 # Show status based on exit code
 if [ $EXIT_CODE -eq 0 ]; then
-  echo "✅ ${STEP_NAME} completed (${DURATION}ms)"
+	echo "✅ ${STEP_NAME} completed (${DURATION}ms)"
 else
-  if [ "$BLOCKING" = "true" ]; then
-    echo "❌ ${STEP_NAME} failed (exit code: $EXIT_CODE)"
-  else
-    echo "⚠️  ${STEP_NAME} failed (non-blocking, exit code: $EXIT_CODE)"
-  fi
+	if [ "$BLOCKING" = "true" ]; then
+		echo "❌ ${STEP_NAME} failed (exit code: $EXIT_CODE)"
+	else
+		echo "⚠️  ${STEP_NAME} failed (non-blocking, exit code: $EXIT_CODE)"
+	fi
 fi
 
 exit $EXIT_CODE
-

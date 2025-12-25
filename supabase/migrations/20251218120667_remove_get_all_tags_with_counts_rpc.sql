@@ -18,5 +18,4 @@
 -- - Comment mentions "/tags/[tag] pages" but no such routes found
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.get_all_tags_with_counts(integer, integer);
+DROP FUNCTION IF EXISTS public.get_all_tags_with_counts (integer, integer);

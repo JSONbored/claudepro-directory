@@ -2,12 +2,12 @@
 
 /**
  * ESLint Rules Test Runner
- * 
+ *
  * Tests ESLint rules on test files ONLY (not the entire codebase)
- * 
+ *
  * Usage:
  *   node config/tools/eslint-rules-tests/test-runner.js
- * 
+ *
  * This script:
  * 1. Runs ESLint on test files in eslint-rules-tests/
  * 2. Verifies violations are caught
@@ -52,7 +52,9 @@ async function testRule(ruleName, testFiles) {
       } else {
         console.log(`  📊 Found ${messages.length} violation(s):`);
         messages.forEach((msg) => {
-          console.log(`     ${msg.severity === 2 ? '❌' : '⚠️ '} Line ${msg.line}:${msg.column} - ${msg.message}`);
+          console.log(
+            `     ${msg.severity === 2 ? '❌' : '⚠️ '} Line ${msg.line}:${msg.column} - ${msg.message}`
+          );
           if (msg.ruleId) {
             console.log(`        Rule: ${msg.ruleId}`);
           }
@@ -144,4 +146,3 @@ async function main() {
 }
 
 main().catch(console.error);
-

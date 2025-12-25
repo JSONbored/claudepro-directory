@@ -70,4 +70,3 @@ export async function handleOAuthRevoke(request: Request, env: ExtendedEnv): Pro
 
   return handleOAuthRevokeShared(request, env, adapter);
 }
-

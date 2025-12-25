@@ -5,7 +5,6 @@
  * Supports newsletter opt-in during account creation.
  */
 
-
 import type { CreateAccountInput } from '../../lib/types.js';
 import { McpErrorCode, createErrorResponse } from '../../lib/errors';
 import { sanitizeString, isValidUrl } from '../../lib/utils';
@@ -103,7 +102,7 @@ export async function handleCreateAccount(
 
   try {
     // Get URLs from environment (runtime-agnostic)
-    const config = await import('../../lib/env-config.js').then(m => m.parseSimpleEnv(env));
+    const config = await import('../../lib/env-config.js').then((m) => m.parseSimpleEnv(env));
     const APP_URL = getEnvOrDefault(env, 'APP_URL', 'https://claudepro.directory');
     const supabaseUrl = config.supabase.url || getEnvOrDefault(env, 'SUPABASE_URL', '');
 

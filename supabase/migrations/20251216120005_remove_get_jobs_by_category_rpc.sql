@@ -17,5 +17,4 @@
 --
 -- Related Changes:
 -- - packages/data-layer/src/services/jobs.ts: Converted getJobsByCategory() to use Prisma
-
-DROP FUNCTION IF EXISTS public.get_jobs_by_category(public.job_category);
+DROP FUNCTION IF EXISTS public.get_jobs_by_category (public.job_category);

@@ -77,4 +77,3 @@ export function createPrismocker<T extends PrismaClient = PrismaClient>(
  * ```
  */
 export default createPrismocker;
-

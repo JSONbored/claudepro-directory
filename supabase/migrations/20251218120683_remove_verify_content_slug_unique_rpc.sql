@@ -17,5 +17,4 @@
 -- Note: Slug uniqueness is likely enforced via UNIQUE constraints or application logic
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.verify_content_slug_unique(text, public.content_category);
+DROP FUNCTION IF EXISTS public.verify_content_slug_unique (text, public.content_category);

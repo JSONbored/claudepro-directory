@@ -54,10 +54,7 @@ export function DigestPreviewEmail({ email }: DigestPreviewEmailProps) {
   const utm = EMAIL_UTM_TEMPLATES.DRIP_DIGEST_PREVIEW;
 
   return (
-    <BaseLayout
-      preview="📬 Your Weekly Digest is Coming!"
-      utm={utm}
-    >
+    <BaseLayout preview="📬 Your Weekly Digest is Coming!" utm={utm}>
       <Section style={contentSectionStyle}>
         <Text style={titleStyle}>📬 Your Weekly Digest is Coming!</Text>
         <Text style={paragraphStyle}>
@@ -172,4 +169,3 @@ const primaryCtaStyle: React.CSSProperties = {
   textDecoration: 'none',
   fontSize: typography.fontSize.base,
 };
-

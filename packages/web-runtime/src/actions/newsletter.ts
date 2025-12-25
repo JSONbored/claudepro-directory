@@ -240,10 +240,7 @@ export const unsubscribeFromNewsletterAction = authedAction
     try {
       // Unsubscribe in Resend by updating contact's unsubscribed status
       type ResendContactsApi = {
-        update: (args: {
-          id: string;
-          unsubscribed?: boolean;
-        }) => Promise<{
+        update: (args: { id: string; unsubscribed?: boolean }) => Promise<{
           data: unknown;
           error: { message?: string } | null;
         }>;

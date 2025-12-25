@@ -15,11 +15,7 @@ import type { RuntimeEnv } from '../types/runtime.js';
  * @param env - Runtime environment
  * @returns Download URL for the storage file
  */
-export function getStorageDownloadUrl(
-  category: string,
-  slug: string,
-  env: RuntimeEnv
-): string {
+export function getStorageDownloadUrl(category: string, slug: string, env: RuntimeEnv): string {
   const APP_URL = getEnvOrDefault(env, 'APP_URL', 'https://claudepro.directory');
   return `${APP_URL}/api/v1/content/${category}/${slug}?format=storage`;
 }
@@ -80,4 +76,3 @@ export function parseRootUri(rootUri: string, fileName: string): string | null {
   const cleanPath = path.endsWith('/') ? path.slice(0, -1) : path;
   return `${cleanPath}/${fileName}`;
 }
-

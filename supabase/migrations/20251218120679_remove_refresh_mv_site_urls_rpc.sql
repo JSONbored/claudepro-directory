@@ -18,5 +18,4 @@
 -- Note: Materialized view refreshes are likely handled by triggers or pg_cron
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.refresh_mv_site_urls();
+DROP FUNCTION IF EXISTS public.refresh_mv_site_urls ();

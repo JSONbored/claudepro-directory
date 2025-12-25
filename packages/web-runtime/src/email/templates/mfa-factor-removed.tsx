@@ -123,9 +123,7 @@ export function MFAFactorRemovedEmail({
 
       <EmailCard>
         <Section style={cardContentSection}>
-          <Text style={introTextStyle}>
-            Hello,
-          </Text>
+          <Text style={introTextStyle}>Hello,</Text>
 
           <Text style={bodyTextStyle}>
             A two-factor authentication method was removed from your account:
@@ -161,7 +159,8 @@ export function MFAFactorRemovedEmail({
             <Section style={warningSection}>
               <Text style={warningTitleStyle}>⚠️ Security Warning</Text>
               <Text style={warningTextStyle}>
-                Your account no longer has any two-factor authentication methods enabled. We strongly recommend adding a new MFA factor to keep your account secure.
+                Your account no longer has any two-factor authentication methods enabled. We
+                strongly recommend adding a new MFA factor to keep your account secure.
               </Text>
             </Section>
           )}
@@ -169,7 +168,8 @@ export function MFAFactorRemovedEmail({
           <Section style={securitySection}>
             <Text style={securityTitleStyle}>🔒 Security Information</Text>
             <Text style={securityTextStyle}>
-              If you didn't remove this authentication method, please secure your account immediately:
+              If you didn't remove this authentication method, please secure your account
+              immediately:
             </Text>
             <ul style={securityListStyle}>
               <li style={securityListItemStyle}>
@@ -181,12 +181,8 @@ export function MFAFactorRemovedEmail({
               <li style={securityListItemStyle}>
                 Add a new MFA factor to restore two-factor authentication
               </li>
-              <li style={securityListItemStyle}>
-                Review your recent account activity
-              </li>
-              <li style={securityListItemStyle}>
-                Contact support if you need assistance
-              </li>
+              <li style={securityListItemStyle}>Review your recent account activity</li>
+              <li style={securityListItemStyle}>Contact support if you need assistance</li>
             </ul>
           </Section>
 
@@ -331,4 +327,3 @@ const securityListItemStyle: React.CSSProperties = {
   marginBottom: spacing.sm,
   lineHeight: typography.lineHeight.relaxed,
 };
-

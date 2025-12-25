@@ -9,5 +9,4 @@
 --
 -- Function signature: reject_submission(p_submission_id uuid, p_moderator_notes text)
 -- Related: approve_submission was already removed in migration 20251216233928
-
-DROP FUNCTION IF EXISTS public.reject_submission(uuid, text);
+DROP FUNCTION IF EXISTS public.reject_submission (uuid, text);

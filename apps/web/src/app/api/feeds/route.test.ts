@@ -114,7 +114,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
         status: 400,
         headers: {
           'Content-Type': 'application/json',
-          ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+          ...(typeof corsHeaders === 'object' && corsHeaders !== null
+            ? (corsHeaders as Record<string, string>)
+            : {}),
         },
       }
     );
@@ -123,7 +125,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
     return new NextResponse(null, {
       status: 204,
       headers: {
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
       },
     });
@@ -137,7 +141,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
         status: 401,
         headers: {
           'Content-Type': 'application/json',
-          ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+          ...(typeof corsHeaders === 'object' && corsHeaders !== null
+            ? (corsHeaders as Record<string, string>)
+            : {}),
         },
       }
     );
@@ -147,8 +153,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': contentType,
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -169,10 +179,14 @@ describe('GET /api/feeds', () => {
   let prismocker: PrismaClient;
 
   // Mock data for RPC calls
-  const mockRssFeed = '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Claude Pro Directory</title></channel></rss>';
-  const mockAtomFeed = '<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom"><title>Claude Pro Directory</title></feed>';
-  const mockChangelogRssFeed = '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Changelog</title></channel></rss>';
-  const mockChangelogAtomFeed = '<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom"><title>Changelog</title></feed>';
+  const mockRssFeed =
+    '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Claude Pro Directory</title></channel></rss>';
+  const mockAtomFeed =
+    '<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom"><title>Claude Pro Directory</title></feed>';
+  const mockChangelogRssFeed =
+    '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Changelog</title></channel></rss>';
+  const mockChangelogAtomFeed =
+    '<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom"><title>Changelog</title></feed>';
 
   beforeEach(() => {
     // Clear request cache before each test (REQUIRED for test isolation)
@@ -353,7 +367,9 @@ describe('GET /api/feeds', () => {
   });
 
   it('should handle service errors gracefully', async () => {
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(new Error('Database error'));
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(
+      new Error('Database error')
+    );
 
     const request = createMockRequest({
       method: 'GET',
@@ -432,7 +448,8 @@ describe('GET /api/feeds', () => {
     const cacheBefore = getRequestCache().getStats().size;
     await GET(request1);
     const cacheAfterFirst = getRequestCache().getStats().size;
-    const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+    const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls
+      .length;
 
     // Clear cache between calls to ensure second call makes a fresh request
     clearRequestCache();
@@ -446,7 +463,8 @@ describe('GET /api/feeds', () => {
     const cacheBeforeSecond = getRequestCache().getStats().size;
     await GET(request2);
     const cacheAfterSecond = getRequestCache().getStats().size;
-    const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+    const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls
+      .length;
 
     // The createFormatHandlerRoute factory uses Next.js Cache Components, which are request-scoped.
     // This means each call to GET(request) creates a new request context, and thus a new cache.

@@ -154,18 +154,13 @@ export function getNonEmptyCategories(categories: unknown): changelog_category[]
   if (!cats) return nonEmpty;
 
   // Return database category names directly (Added, Changed, Fixed, etc.)
-  if (Array.isArray(cats['Added']) && cats['Added'].length > 0)
-    nonEmpty.push('Added');
-  if (Array.isArray(cats['Changed']) && cats['Changed'].length > 0)
-    nonEmpty.push('Changed');
+  if (Array.isArray(cats['Added']) && cats['Added'].length > 0) nonEmpty.push('Added');
+  if (Array.isArray(cats['Changed']) && cats['Changed'].length > 0) nonEmpty.push('Changed');
   if (Array.isArray(cats['Deprecated']) && cats['Deprecated'].length > 0)
     nonEmpty.push('Deprecated');
-  if (Array.isArray(cats['Removed']) && cats['Removed'].length > 0)
-    nonEmpty.push('Removed');
-  if (Array.isArray(cats['Fixed']) && cats['Fixed'].length > 0)
-    nonEmpty.push('Fixed');
-  if (Array.isArray(cats['Security']) && cats['Security'].length > 0)
-    nonEmpty.push('Security');
+  if (Array.isArray(cats['Removed']) && cats['Removed'].length > 0) nonEmpty.push('Removed');
+  if (Array.isArray(cats['Fixed']) && cats['Fixed'].length > 0) nonEmpty.push('Fixed');
+  if (Array.isArray(cats['Security']) && cats['Security'].length > 0) nonEmpty.push('Security');
 
   return nonEmpty;
 }

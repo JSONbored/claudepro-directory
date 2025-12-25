@@ -64,7 +64,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {
@@ -103,7 +103,9 @@ jest.mock('../integrations/resend.ts', () => {
 });
 
 // Mock Inngest client
-const mockInngestSend = jest.fn<(...args: unknown[]) => Promise<{ ids: string[] }>>().mockResolvedValue({ ids: ['event-id'] });
+const mockInngestSend = jest
+  .fn<(...args: unknown[]) => Promise<{ ids: string[] }>>()
+  .mockResolvedValue({ ids: ['event-id'] });
 jest.mock('../inngest/client.ts', () => {
   const actual = jest.requireActual('../inngest/client.ts');
   return {
@@ -234,7 +236,9 @@ describe('subscribeNewsletterAction', () => {
   beforeEach(async () => {
     clearRequestCache();
     jest.clearAllMocks();
-    (mockInngestSend as jest.MockedFunction<(...args: unknown[]) => Promise<{ ids: string[] }>>).mockResolvedValue({ ids: ['event-id'] });
+    (
+      mockInngestSend as jest.MockedFunction<(...args: unknown[]) => Promise<{ ids: string[] }>>
+    ).mockResolvedValue({ ids: ['event-id'] });
   });
 
   describe('input validation', () => {
@@ -253,7 +257,7 @@ describe('subscribeNewsletterAction', () => {
       expect(safeResult.fieldErrors).toBeDefined();
       expect(safeResult.data).toBeUndefined();
       expect(safeResult.serverError).toBeUndefined();
-      
+
       // Verify field errors for invalid email
       expect(safeResult.fieldErrors?.email).toBeDefined();
     });
@@ -341,7 +345,9 @@ describe('subscribeNewsletterAction', () => {
       const { subscribeNewsletterAction } = await import('./newsletter.ts');
 
       const mockError = new Error('Inngest error');
-      (mockInngestSend as jest.MockedFunction<(...args: unknown[]) => Promise<{ ids: string[] }>>).mockRejectedValueOnce(mockError);
+      (
+        mockInngestSend as jest.MockedFunction<(...args: unknown[]) => Promise<{ ids: string[] }>>
+      ).mockRejectedValueOnce(mockError);
 
       const result = await subscribeNewsletterAction({
         email: 'test@example.com',
@@ -362,7 +368,9 @@ describe('subscribeViaOAuthAction', () => {
   beforeEach(async () => {
     clearRequestCache();
     jest.clearAllMocks();
-    (mockInngestSend as jest.MockedFunction<(...args: unknown[]) => Promise<{ ids: string[] }>>).mockResolvedValue({ ids: ['event-id'] });
+    (
+      mockInngestSend as jest.MockedFunction<(...args: unknown[]) => Promise<{ ids: string[] }>>
+    ).mockResolvedValue({ ids: ['event-id'] });
   });
 
   describe('input validation', () => {
@@ -380,7 +388,7 @@ describe('subscribeViaOAuthAction', () => {
       expect(safeResult.fieldErrors).toBeDefined();
       expect(safeResult.data).toBeUndefined();
       expect(safeResult.serverError).toBeUndefined();
-      
+
       // Verify field errors for invalid email
       expect(safeResult.fieldErrors?.email).toBeDefined();
     });
@@ -463,7 +471,9 @@ describe('subscribeViaOAuthAction', () => {
       const { subscribeViaOAuthAction } = await import('./newsletter.ts');
 
       const mockError = new Error('Inngest error');
-      (mockInngestSend as jest.MockedFunction<(...args: unknown[]) => Promise<{ ids: string[] }>>).mockRejectedValueOnce(mockError);
+      (
+        mockInngestSend as jest.MockedFunction<(...args: unknown[]) => Promise<{ ids: string[] }>>
+      ).mockRejectedValueOnce(mockError);
 
       const result = await subscribeViaOAuthAction({
         email: 'test@example.com',
@@ -493,7 +503,9 @@ describe('updateTopicPreferencesAction', () => {
   const mockResendClient = {
     contacts: {
       topics: {
-        update: jest.fn<(...args: unknown[]) => Promise<any>>().mockResolvedValue({ data: {}, error: null }),
+        update: jest
+          .fn<(...args: unknown[]) => Promise<any>>()
+          .mockResolvedValue({ data: {}, error: null }),
       },
     },
   };
@@ -551,8 +563,11 @@ describe('updateTopicPreferencesAction', () => {
       id: mockSubscription.resend_contact_id,
       topics: [{ id: 'topic-2', subscription: 'opt_in' }],
     });
-    expect(mockGetContactTopics).toHaveBeenCalledWith(mockResendClient, mockSubscription.resend_contact_id);
-    
+    expect(mockGetContactTopics).toHaveBeenCalledWith(
+      mockResendClient,
+      mockSubscription.resend_contact_id
+    );
+
     // Verify database was updated via real NewsletterService.updateResendTopics
     // (updateResendTopics uses Prisma update, which Prismocker handles)
     // We can verify by checking the subscription was updated in Prismocker
@@ -584,8 +599,11 @@ describe('updateTopicPreferencesAction', () => {
       id: mockSubscription.resend_contact_id,
       topics: [{ id: 'topic-2', subscription: 'opt_out' }],
     });
-    expect(mockGetContactTopics).toHaveBeenCalledWith(mockResendClient, mockSubscription.resend_contact_id);
-    
+    expect(mockGetContactTopics).toHaveBeenCalledWith(
+      mockResendClient,
+      mockSubscription.resend_contact_id
+    );
+
     // Verify database was updated via real NewsletterService.updateResendTopics
     const updatedSubscription = await prismocker.newsletter_subscriptions.findUnique({
       where: { email: 'test@example.com' },
@@ -595,7 +613,7 @@ describe('updateTopicPreferencesAction', () => {
 
   it('should return serverError when subscription not found', async () => {
     const { updateTopicPreferencesAction } = await import('./newsletter.ts');
-    
+
     // Seed Prismocker with empty data (subscription not found)
     if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
       (prismocker as any).setData('newsletter_subscriptions', []);
@@ -616,13 +634,15 @@ describe('updateTopicPreferencesAction', () => {
 
   it('should return serverError when Resend contact ID not found', async () => {
     const { updateTopicPreferencesAction } = await import('./newsletter.ts');
-    
+
     // Seed Prismocker with subscription without resend_contact_id
     if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
-      (prismocker as any).setData('newsletter_subscriptions', [{
-        ...mockSubscription,
-        resend_contact_id: null,
-      }]);
+      (prismocker as any).setData('newsletter_subscriptions', [
+        {
+          ...mockSubscription,
+          resend_contact_id: null,
+        },
+      ]);
     }
 
     const result = await updateTopicPreferencesAction({
@@ -712,7 +732,9 @@ describe('unsubscribeFromNewsletterAction', () => {
 
   const mockResendClient = {
     contacts: {
-      update: jest.fn<(...args: unknown[]) => Promise<any>>().mockResolvedValue({ data: {}, error: null }),
+      update: jest
+        .fn<(...args: unknown[]) => Promise<any>>()
+        .mockResolvedValue({ data: {}, error: null }),
     },
   };
 
@@ -764,7 +786,7 @@ describe('unsubscribeFromNewsletterAction', () => {
       id: mockSubscription.resend_contact_id,
       unsubscribed: true,
     });
-    
+
     // Verify database was updated via real NewsletterService.unsubscribeWithTimestamp
     // (unsubscribeWithTimestamp uses Prisma update, which Prismocker handles)
     const updatedSubscription = await prismocker.newsletter_subscriptions.findUnique({
@@ -777,7 +799,7 @@ describe('unsubscribeFromNewsletterAction', () => {
 
   it('should return serverError when subscription not found', async () => {
     const { unsubscribeFromNewsletterAction } = await import('./newsletter.ts');
-    
+
     // Seed Prismocker with empty data (subscription not found)
     if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
       (prismocker as any).setData('newsletter_subscriptions', []);
@@ -795,13 +817,15 @@ describe('unsubscribeFromNewsletterAction', () => {
 
   it('should return serverError when Resend contact ID not found', async () => {
     const { unsubscribeFromNewsletterAction } = await import('./newsletter.ts');
-    
+
     // Seed Prismocker with subscription without resend_contact_id
     if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
-      (prismocker as any).setData('newsletter_subscriptions', [{
-        ...mockSubscription,
-        resend_contact_id: null,
-      }]);
+      (prismocker as any).setData('newsletter_subscriptions', [
+        {
+          ...mockSubscription,
+          resend_contact_id: null,
+        },
+      ]);
     }
 
     const result = await unsubscribeFromNewsletterAction({});

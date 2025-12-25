@@ -201,7 +201,7 @@ describe('companies', () => {
 
       // Verify results are the same (indicating cache was used)
       expect(result1).toEqual(result2);
-      
+
       // Verify Prisma methods were only called once (cached on second call)
       expect(secondFindUniqueCalls).toBe(firstFindUniqueCalls);
 
@@ -315,7 +315,7 @@ describe('companies', () => {
 
       // Verify results are the same (indicating cache was used)
       expect(result1).toEqual(result2);
-      
+
       // Verify Prisma methods were only called once (cached on second call)
       expect(secondFindFirstCalls).toBe(firstFindFirstCalls);
 
@@ -467,7 +467,7 @@ describe('companies', () => {
 
       // Verify results are the same (indicating cache was used)
       expect(result1).toEqual(result2);
-      
+
       // Verify Prisma methods were only called once (cached on second call)
       expect(secondCountCalls).toBe(firstCountCalls);
       expect(secondFindManyCalls).toBe(firstFindManyCalls);
@@ -494,7 +494,9 @@ describe('companies', () => {
         total_count: 1,
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await searchCompanies('company', 10);
 
@@ -525,7 +527,9 @@ describe('companies', () => {
     it('should trim whitespace from query', async () => {
       // RPC returns { results: [...], total_count: number }
       const mockRpcResult = { results: [], total_count: 0 };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await searchCompanies('  company  ', 10);
 
@@ -535,7 +539,9 @@ describe('companies', () => {
 
     it('should use default limit of 10', async () => {
       const mockRpcResult = { results: [], total_count: 0 };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await searchCompanies('company');
 
@@ -545,7 +551,9 @@ describe('companies', () => {
 
     it('should handle custom limit', async () => {
       const mockRpcResult = { results: [], total_count: 0 };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await searchCompanies('company', 50);
 
@@ -555,7 +563,9 @@ describe('companies', () => {
 
     it('should return empty array on error', async () => {
       // fetchCompanySearchResults has onError: () => [] so errors return empty array
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(new Error('Search error'));
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(
+        new Error('Search error')
+      );
 
       const result = await searchCompanies('company', 10);
 
@@ -573,7 +583,9 @@ describe('companies', () => {
         total_count: 3,
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await searchCompanies('company', 10);
 
@@ -602,7 +614,9 @@ describe('companies', () => {
       // RPC returns { results: [...], total_count: number }
       // When results is empty, transformResult returns empty array
       const mockRpcResult = { results: [], total_count: 0 };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await searchCompanies('company', 10);
 
@@ -615,7 +629,9 @@ describe('companies', () => {
       // transformResult extracts result.data, which would be undefined
       // The code uses: const results = searchResponse.data || [];
       const mockRpcResult = { total_count: 0 }; // No 'results' property
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await searchCompanies('company', 10);
 
@@ -633,7 +649,9 @@ describe('companies', () => {
 
     it('should handle exactly 2 character query', async () => {
       const mockRpcResult = { results: [], total_count: 0 };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await searchCompanies('co', 10);
 
@@ -651,7 +669,9 @@ describe('companies', () => {
 
     it('should handle zero limit', async () => {
       const mockRpcResult = { results: [], total_count: 0 };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await searchCompanies('company', 0);
 
@@ -661,7 +681,9 @@ describe('companies', () => {
 
     it('should handle negative limit', async () => {
       const mockRpcResult = { results: [], total_count: 0 };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await searchCompanies('company', -10);
 
@@ -682,19 +704,23 @@ describe('companies', () => {
         total_count: 1,
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       // First call - should hit database and populate cache
       const result1 = await searchCompanies('company', 10);
-      const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+      const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls
+        .length;
 
       // Second call - should hit cache (no database call)
       const result2 = await searchCompanies('company', 10);
-      const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+      const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls
+        .length;
 
       // Verify results are the same (indicating cache was used)
       expect(result1).toEqual(result2);
-      
+
       // Verify $queryRawUnsafe was only called once (cached on second call)
       expect(secondCallCount).toBe(firstCallCount);
     });

@@ -38,7 +38,13 @@ export type GetTrendingSearchesReturns = Array<{
   count: number; // Converted from bigint to number in transformation
   label: string;
 }>;
-import type { Prisma, PrismaClient, experience_level, job_category, job_type } from '@prisma/client';
+import type {
+  Prisma,
+  PrismaClient,
+  experience_level,
+  job_category,
+  job_type,
+} from '@prisma/client';
 type jobsModel = Prisma.jobsGetPayload<{}>;
 import { BasePrismaService } from './base-prisma-service';
 import { withSmartCache } from '../utils/request-cache';

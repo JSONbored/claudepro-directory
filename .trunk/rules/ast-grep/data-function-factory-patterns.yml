@@ -21,7 +21,7 @@ rule:
     - not:
         has:
           pattern: 'createDataFunction'
-message: "Data functions should use createDataFunction() factory instead of manually instantiating services. Factory handles logging, error handling, and service instantiation automatically. Use: const cachedFn = createDataFunction<Args, Return>({ serviceKey, methodName, operation, ... }); return await cachedFn(args);"
+message: 'Data functions should use createDataFunction() factory instead of manually instantiating services. Factory handles logging, error handling, and service instantiation automatically. Use: const cachedFn = createDataFunction<Args, Return>({ serviceKey, methodName, operation, ... }); return await cachedFn(args);'
 severity: error
 
 ---
@@ -40,7 +40,7 @@ rule:
     - not:
         has:
           pattern: 'createDataFunction'
-message: "Data functions should use createDataFunction() factory instead of calling getService() directly. Factory handles service instantiation, logging, and error handling. Use createDataFunction() factory."
+message: 'Data functions should use createDataFunction() factory instead of calling getService() directly. Factory handles service instantiation, logging, and error handling. Use createDataFunction() factory.'
 severity: error
 
 ---
@@ -61,7 +61,7 @@ rule:
     - not:
         has:
           pattern: 'createDataFunction'
-message: "Data functions should use createDataFunction() factory for automatic error handling. Factory handles normalizeError() and logging automatically. Use createDataFunction() instead of manual try/catch with normalizeError."
+message: 'Data functions should use createDataFunction() factory for automatic error handling. Factory handles normalizeError() and logging automatically. Use createDataFunction() instead of manual try/catch with normalizeError.'
 severity: warning
 
 ---
@@ -86,7 +86,7 @@ rule:
         inside:
           has:
             regex: '// Wrapper|// Transformer|// Simple helper'
-message: "Data functions calling service methods should use createDataFunction() factory. Factory eliminates boilerplate for logging, error handling, and service instantiation. Use: const cachedFn = createDataFunction<Args, Return>({ serviceKey, methodName, operation, ... });"
+message: 'Data functions calling service methods should use createDataFunction() factory. Factory eliminates boilerplate for logging, error handling, and service instantiation. Use: const cachedFn = createDataFunction<Args, Return>({ serviceKey, methodName, operation, ... });'
 severity: error
 
 ---

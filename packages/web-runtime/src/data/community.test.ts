@@ -95,7 +95,9 @@ describe('community data functions', () => {
         top_contributors: [],
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getCommunityDirectory({});
 
@@ -126,7 +128,9 @@ describe('community data functions', () => {
         total_count: 1n,
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockSearchRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockSearchRpcResult,
+      ] as any);
 
       const result = await getCommunityDirectory({ searchQuery: 'test' });
 
@@ -164,9 +168,11 @@ describe('community data functions', () => {
       // This means the try-catch in getCommunityDirectory won't catch an error
       // Instead, searchUsersUnified will return [] on error, and getCommunityDirectory
       // will return { all_users: [], new_members: [], top_contributors: [] }
-      
+
       // Mock search_unified RPC to fail
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(new Error('Search failed'));
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(
+        new Error('Search failed')
+      );
 
       const result = await getCommunityDirectory({ searchQuery: 'test' });
 
@@ -188,7 +194,9 @@ describe('community data functions', () => {
         top_contributors: [],
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getCommunityDirectory({ searchQuery: '   ' });
 
@@ -207,7 +215,9 @@ describe('community data functions', () => {
         top_contributors: [],
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       // First call
       const cacheBefore = getRequestCache().getStats().size;
@@ -236,7 +246,9 @@ describe('community data functions', () => {
         top_contributors: [],
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getCommunityDirectory({ limit: 50 });
 
@@ -261,7 +273,9 @@ describe('community data functions', () => {
         created_at: '2024-01-01',
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getPublicUserProfile({ slug: 'test-user' });
 
@@ -283,7 +297,9 @@ describe('community data functions', () => {
         created_at: '2024-01-01',
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       await getPublicUserProfile({ slug: 'test-user', viewerId: 'viewer-id' });
 
@@ -315,7 +331,9 @@ describe('community data functions', () => {
         created_at: '2024-01-01',
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const args = { slug: 'test-user' };
 
@@ -354,7 +372,9 @@ describe('community data functions', () => {
         updated_at: '2024-01-01',
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getPublicCollectionDetail({
         userSlug: 'user',
@@ -382,7 +402,9 @@ describe('community data functions', () => {
         updated_at: '2024-01-01',
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       await getPublicCollectionDetail({
         userSlug: 'user',
@@ -423,7 +445,9 @@ describe('community data functions', () => {
         updated_at: '2024-01-01',
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const args = {
         userSlug: 'user',

@@ -115,7 +115,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
         status: 400,
         headers: {
           'Content-Type': 'application/json',
-          ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+          ...(typeof corsHeaders === 'object' && corsHeaders !== null
+            ? (corsHeaders as Record<string, string>)
+            : {}),
         },
       }
     );
@@ -124,7 +126,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
     return new NextResponse(null, {
       status: 204,
       headers: {
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
       },
     });
@@ -138,7 +142,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
         status: 401,
         headers: {
           'Content-Type': 'application/json',
-          ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+          ...(typeof corsHeaders === 'object' && corsHeaders !== null
+            ? (corsHeaders as Record<string, string>)
+            : {}),
         },
       }
     );
@@ -148,8 +154,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -186,7 +196,8 @@ describe('GET /api/content/changelog/[slug]', () => {
   let prismocker: PrismaClient;
 
   // Mock data for RPC calls
-  const mockChangelogEntryLlmsTxt = '# Changelog Entry\n\n## [1.0.0] - 2025-01-11\n- Added new feature\n- Fixed bug';
+  const mockChangelogEntryLlmsTxt =
+    '# Changelog Entry\n\n## [1.0.0] - 2025-01-11\n- Added new feature\n- Fixed bug';
 
   beforeEach(async () => {
     // 1. Clear request cache before each test (REQUIRED for test isolation)
@@ -206,7 +217,9 @@ describe('GET /api/content/changelog/[slug]', () => {
     // 5. Set up $queryRawUnsafe for RPC testing (ContentService uses callRpc → BasePrismaService.callRpc → $queryRawUnsafe)
     // Assign jest.fn() directly to $queryRawUnsafe (Prismocker's Proxy set handler)
     // Default mock for changelog entry LLMs text
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue(mockChangelogEntryLlmsTxt) as unknown as typeof prismocker.$queryRawUnsafe;
+    prismocker.$queryRawUnsafe = jest
+      .fn()
+      .mockResolvedValue(mockChangelogEntryLlmsTxt) as unknown as typeof prismocker.$queryRawUnsafe;
   });
 
   it('should return changelog entry in llms format', async () => {
@@ -315,7 +328,11 @@ describe('GET /api/content/changelog/[slug]', () => {
   });
 
   it('should handle service errors gracefully', async () => {
-    prismocker.$queryRawUnsafe = jest.fn().mockRejectedValue(new Error('Database error')) as unknown as typeof prismocker.$queryRawUnsafe;
+    prismocker.$queryRawUnsafe = jest
+      .fn()
+      .mockRejectedValue(
+        new Error('Database error')
+      ) as unknown as typeof prismocker.$queryRawUnsafe;
 
     const request = createMockRequest({
       method: 'GET',
@@ -352,13 +369,17 @@ describe('GET /api/content/changelog/[slug]', () => {
 
     const response = await GET(request, context);
 
-    expect(response.headers.get('x-generated-by')).toBe('prisma.rpc.generate_changelog_entry_llms_txt');
+    expect(response.headers.get('x-generated-by')).toBe(
+      'prisma.rpc.generate_changelog_entry_llms_txt'
+    );
   });
 
   it('should replace escaped newlines with actual newlines', async () => {
     // Set up RPC mock to return text with escaped newlines
     const textWithEscapedNewlines = 'Line 1\\nLine 2\\nLine 3';
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue(textWithEscapedNewlines) as unknown as typeof prismocker.$queryRawUnsafe;
+    prismocker.$queryRawUnsafe = jest
+      .fn()
+      .mockResolvedValue(textWithEscapedNewlines) as unknown as typeof prismocker.$queryRawUnsafe;
 
     const request = createMockRequest({
       method: 'GET',
@@ -385,7 +406,9 @@ describe('GET /api/content/changelog/[slug]', () => {
   it('should return 404 for empty string result (treated as not found)', async () => {
     // Set up RPC mock to return empty string
     // Empty string is falsy, so responseHandler treats it as not found
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue('') as unknown as typeof prismocker.$queryRawUnsafe;
+    prismocker.$queryRawUnsafe = jest
+      .fn()
+      .mockResolvedValue('') as unknown as typeof prismocker.$queryRawUnsafe;
 
     const request = createMockRequest({
       method: 'GET',
@@ -398,7 +421,7 @@ describe('GET /api/content/changelog/[slug]', () => {
     };
 
     const response = await GET(request, context);
-    const body = await getResponseBody(response) as { error?: string };
+    const body = (await getResponseBody(response)) as { error?: string };
 
     // Empty string is falsy, so responseHandler returns 404
     expectStatus(response, 404);
@@ -417,7 +440,7 @@ describe('GET /api/content/changelog/[slug]', () => {
     const context = {} as { params: Promise<{ slug: string }> };
 
     const response = await GET(request, context);
-    const body = await getResponseBody(response) as { error?: string };
+    const body = (await getResponseBody(response)) as { error?: string };
 
     expectStatus(response, 500);
     expect(body).toHaveProperty('error');
@@ -437,7 +460,7 @@ describe('GET /api/content/changelog/[slug]', () => {
     };
 
     const response = await GET(request, context);
-    const body = await getResponseBody(response) as { error?: string };
+    const body = (await getResponseBody(response)) as { error?: string };
 
     expectStatus(response, 500);
     expect(body).toHaveProperty('error');

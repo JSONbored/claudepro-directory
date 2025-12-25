@@ -87,11 +87,11 @@ export const verifyMFAChallengeAction = authedAction
   .metadata({ actionName: 'verifyMFAChallenge', category: 'mfa' })
   .action(async ({ parsedInput, ctx }) => {
     const supabase = await createSupabaseServerClient();
-    
+
     // Get factor details BEFORE verification (to include in email)
     const { factors: allFactors } = await listMFAFactors(supabase);
     const factor = allFactors.find((f) => f.id === parsedInput.factorId);
-    
+
     const { success, error } = await verifyMFAChallenge(
       supabase,
       parsedInput.factorId,
@@ -130,8 +130,14 @@ export const verifyMFAChallengeAction = authedAction
         );
       } catch (emailError) {
         // Log but don't fail the action if email event fails
-        const normalized = normalizeError(emailError, 'Failed to send MFA factor added email event');
-        logger.warn({ err: normalized, factorId: parsedInput.factorId }, 'MFA factor added email event failed');
+        const normalized = normalizeError(
+          emailError,
+          'Failed to send MFA factor added email event'
+        );
+        logger.warn(
+          { err: normalized, factorId: parsedInput.factorId },
+          'MFA factor added email event failed'
+        );
       }
     }
 
@@ -192,8 +198,14 @@ export const unenrollMFAAction = authedAction
         );
       } catch (emailError) {
         // Log but don't fail the action if email event fails
-        const normalized = normalizeError(emailError, 'Failed to send MFA factor removed email event');
-        logger.warn({ err: normalized, factorId: parsedInput.factorId }, 'MFA factor removed email event failed');
+        const normalized = normalizeError(
+          emailError,
+          'Failed to send MFA factor removed email event'
+        );
+        logger.warn(
+          { err: normalized, factorId: parsedInput.factorId },
+          'MFA factor removed email event failed'
+        );
       }
     }
 

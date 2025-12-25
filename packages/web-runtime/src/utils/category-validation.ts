@@ -1,4 +1,7 @@
-import { content_category as ContentCategory, type content_category } from '../types/client-safe-enums.ts';
+import {
+  content_category as ContentCategory,
+  type content_category,
+} from '../types/client-safe-enums.ts';
 
 // Use client-safe enum values
 const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];

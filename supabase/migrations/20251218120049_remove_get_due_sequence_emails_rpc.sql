@@ -9,5 +9,4 @@
 --
 -- Function signature: get_due_sequence_emails()
 -- Related: MiscService.getDueSequenceEmails uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_due_sequence_emails();
+DROP FUNCTION IF EXISTS public.get_due_sequence_emails ();

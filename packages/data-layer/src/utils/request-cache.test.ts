@@ -47,7 +47,8 @@ describe('Request Cache', () => {
     });
 
     it('should call RPC again with different args', async () => {
-      const mockRpcCall = jest.fn()
+      const mockRpcCall = jest
+        .fn()
         .mockResolvedValueOnce({ id: '1', name: 'Test 1' })
         .mockResolvedValueOnce({ id: '2', name: 'Test 2' });
 
@@ -92,13 +93,14 @@ describe('Request Cache', () => {
     });
 
     it('should handle errors and not cache them', async () => {
-      const mockRpcCall = jest.fn()
+      const mockRpcCall = jest
+        .fn()
         .mockRejectedValueOnce(new Error('First error'))
         .mockResolvedValueOnce({ id: '1' });
 
-      await expect(
-        withRequestCache('get_item', mockRpcCall, { p_id: '123' })
-      ).rejects.toThrow('First error');
+      await expect(withRequestCache('get_item', mockRpcCall, { p_id: '123' })).rejects.toThrow(
+        'First error'
+      );
 
       // Second call should retry (not cached)
       const result = await withRequestCache('get_item', mockRpcCall, { p_id: '123' });
@@ -313,7 +315,8 @@ describe('Request Cache', () => {
 
   describe('cache management', () => {
     it('should clear cache with clearRequestCache', async () => {
-      const mockRpcCall = jest.fn()
+      const mockRpcCall = jest
+        .fn()
         .mockResolvedValueOnce({ id: '1' })
         .mockResolvedValueOnce({ id: '2' });
 
@@ -363,7 +366,8 @@ describe('Request Cache', () => {
     });
 
     it('should generate different keys for different RPC names', async () => {
-      const mockRpcCall = jest.fn()
+      const mockRpcCall = jest
+        .fn()
         .mockResolvedValueOnce({ id: '1' })
         .mockResolvedValueOnce({ id: '2' });
 

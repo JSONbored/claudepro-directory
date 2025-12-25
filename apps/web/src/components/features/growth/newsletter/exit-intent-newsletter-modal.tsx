@@ -146,7 +146,8 @@ export function ExitIntentNewsletterModal({
         <DialogHeader>
           <DialogTitle>Wait! Don't miss out</DialogTitle>
           <DialogDescription>
-            Join {subscriberCountLabel} developers staying updated on the latest Claude content, tools, and resources.
+            Join {subscriberCountLabel} developers staying updated on the latest Claude content,
+            tools, and resources.
           </DialogDescription>
         </DialogHeader>
 
@@ -173,7 +174,7 @@ export function ExitIntentNewsletterModal({
                   type="submit"
                   disabled={isSubmitting}
                   size="icon"
-                  className="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"
+                  className="absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2"
                 >
                   {isSubmitting ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -184,11 +185,11 @@ export function ExitIntentNewsletterModal({
                 </Button>
               )}
             </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <p className="text-destructive text-sm">{error}</p>}
           </div>
         </form>
 
-        <div className="mt-4 text-center text-sm text-muted-foreground">
+        <div className="text-muted-foreground mt-4 text-center text-sm">
           <p>Get weekly updates on new agents, MCP servers, rules, and more.</p>
           <p className="mt-1">Unsubscribe anytime. No spam, ever.</p>
         </div>
@@ -196,4 +197,3 @@ export function ExitIntentNewsletterModal({
     </Dialog>
   );
 }
-

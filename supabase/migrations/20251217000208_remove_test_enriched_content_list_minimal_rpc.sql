@@ -5,5 +5,4 @@
 --
 -- Description: Remove test_enriched_content_list_minimal RPC function - Test function, not used in production
 -- Function signature: test_enriched_content_list_minimal(p_category content_category)
-
-DROP FUNCTION IF EXISTS public.test_enriched_content_list_minimal(public.content_category);
+DROP FUNCTION IF EXISTS public.test_enriched_content_list_minimal (public.content_category);

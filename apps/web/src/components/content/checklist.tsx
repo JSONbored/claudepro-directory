@@ -51,12 +51,7 @@ export function Checklist(props: ChecklistProps) {
     validItems.length > 0 ? Math.round((checkedItems.size / validItems.length) * 100) : 0;
 
   const priorityColors = {
-    critical: cn(
-      'text-error bg-error-bg',
-      'px-3',
-      'py-1',
-      'rounded'
-    ),
+    critical: cn('text-error bg-error-bg', 'px-3', 'py-1', 'rounded'),
     high: 'text-error',
     medium: 'text-warning',
     low: 'text-success',

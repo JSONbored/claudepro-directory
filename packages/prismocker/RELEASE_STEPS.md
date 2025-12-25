@@ -4,22 +4,22 @@ This document provides the steps needed to prepare and release Prismocker v0.1.0
 
 ## Prerequisites
 
-- ✅ All files have been created/updated (GitHub Actions, templates, CHANGELOG, etc.)
-- ✅ Package is built and tested locally
-- ✅ All tests pass (`pnpm test`)
-- ✅ Type checking passes (`pnpm type-check`)
-- ✅ Build succeeds (`pnpm build`)
+* ✅ All files have been created/updated (GitHub Actions, templates, CHANGELOG, etc.)
+* ✅ Package is built and tested locally
+* ✅ All tests pass (`pnpm test`)
+* ✅ Type checking passes (`pnpm type-check`)
+* ✅ Build succeeds (`pnpm build`)
 
 ## Pre-Release Checklist
 
 Before creating the release, verify:
 
-- [ ] `package.json` version is `0.1.0`
-- [ ] `CHANGELOG.md` has `[0.1.0]` entry with today's date
-- [ ] All files are committed to git
-- [ ] Repository is set up on GitHub (https://github.com/JSONbored/prismocker)
-- [ ] GitHub Actions secrets are configured:
-  - `NPM_TOKEN` - npm authentication token for publishing
+* \[ ] `package.json` version is `0.1.0`
+* \[ ] `CHANGELOG.md` has `[0.1.0]` entry with today's date
+* \[ ] All files are committed to git
+* \[ ] Repository is set up on GitHub (https://github.com/JSONbored/prismocker)
+* \[ ] GitHub Actions secrets are configured:
+  * `NPM_TOKEN` - npm authentication token for publishing
 
 ## Release Steps
 
@@ -118,10 +118,10 @@ After pushing the tag:
 2. Verify the "Release" workflow is running
 3. Wait for it to complete (should take ~5-10 minutes)
 4. Verify:
-   - ✅ Tests pass
-   - ✅ Build succeeds
-   - ✅ Package is published to npm
-   - ✅ GitHub release is created with changelog
+   * ✅ Tests pass
+   * ✅ Build succeeds
+   * ✅ Package is published to npm
+   * ✅ GitHub release is created with changelog
 
 ### 7. Verify npm Publication
 
@@ -145,10 +145,10 @@ npm view prismocker
 
 After successful release:
 
-- [ ] Update README.md badges (if needed) with actual npm package name
-- [ ] Verify npm package is installable: `npm install prismocker --save-dev`
-- [ ] Test installation in a fresh project
-- [ ] Share release announcement (if desired)
+* \[ ] Update README.md badges (if needed) with actual npm package name
+* \[ ] Verify npm package is installable: `npm install prismocker --save-dev`
+* \[ ] Test installation in a fresh project
+* \[ ] Share release announcement (if desired)
 
 ## Troubleshooting
 
@@ -158,10 +158,10 @@ If the release workflow fails:
 
 1. Check GitHub Actions logs for errors
 2. Common issues:
-   - `NPM_TOKEN` secret not configured → Add it in GitHub repo settings
-   - Version mismatch → Verify `package.json` version matches tag
-   - Build failures → Check build logs
-   - Test failures → Check test logs
+   * `NPM_TOKEN` secret not configured → Add it in GitHub repo settings
+   * Version mismatch → Verify `package.json` version matches tag
+   * Build failures → Check build logs
+   * Test failures → Check test logs
 
 ### Version Mismatch
 
@@ -188,16 +188,15 @@ If npm publish fails:
 
 ## Notes
 
-- The release workflow automatically:
-  - Extracts version from tag
-  - Verifies package.json version matches
-  - Builds and tests
-  - Publishes to npm
-  - Creates GitHub release with changelog
+* The release workflow automatically:
+  * Extracts version from tag
+  * Verifies package.json version matches
+  * Builds and tests
+  * Publishes to npm
+  * Creates GitHub release with changelog
 
-- The CI workflow runs on every PR and push to main
+* The CI workflow runs on every PR and push to main
 
-- Renovate will automatically create PRs for dependency updates
+* Renovate will automatically create PRs for dependency updates
 
-- All files are standalone - the package can be copied to a separate repo
-
+* All files are standalone - the package can be copied to a separate repo

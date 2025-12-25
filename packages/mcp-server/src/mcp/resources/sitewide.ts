@@ -19,10 +19,10 @@ import {
  * Format mapping for sitewide resources
  */
 const SITEWIDE_FORMAT_MAP: Record<string, string> = {
-  'llms': 'llms',
+  llms: 'llms',
   'llms-txt': 'llms',
-  'readme': 'readme',
-  'json': 'json',
+  readme: 'readme',
+  json: 'json',
 };
 
 /**
@@ -47,7 +47,15 @@ export async function handleSitewideResource(
   logger: RuntimeLogger,
   kvCache?: KvResourceCache | null,
   requestHeaders?: Headers
-): Promise<{ uri: string; mimeType: string; text: string; etag?: string; cachedAt?: string; cacheHeaders?: Record<string, string>; fromCache?: boolean }> {
+): Promise<{
+  uri: string;
+  mimeType: string;
+  text: string;
+  etag?: string;
+  cachedAt?: string;
+  cacheHeaders?: Record<string, string>;
+  fromCache?: boolean;
+}> {
   // Parse URI: claudepro://sitewide/{format}
   const parts = parseResourceUri(
     uri,
@@ -83,10 +91,18 @@ export async function handleSitewideResource(
 
   // Create resource response with cache metadata
   const response = createResourceResponse(uri, result.text, result.mimeType);
-  const responseWithCache: { uri: string; mimeType: string; text: string; etag?: string; cachedAt?: string; cacheHeaders?: Record<string, string>; fromCache?: boolean } = {
+  const responseWithCache: {
+    uri: string;
+    mimeType: string;
+    text: string;
+    etag?: string;
+    cachedAt?: string;
+    cacheHeaders?: Record<string, string>;
+    fromCache?: boolean;
+  } = {
     ...response,
   };
-  
+
   // Add cache metadata only if present
   if (result.etag !== undefined) {
     responseWithCache.etag = result.etag;
@@ -100,6 +116,6 @@ export async function handleSitewideResource(
   if (result.fromCache !== undefined) {
     responseWithCache.fromCache = result.fromCache;
   }
-  
+
   return responseWithCache;
 }

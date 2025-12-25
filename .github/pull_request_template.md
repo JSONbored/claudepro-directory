@@ -1,7 +1,7 @@
 ## What type of change is this?
 
-- [ ] **Code change** (bug fix, feature, refactor, performance, documentation)
-- [ ] **Content submission** (agent, MCP, rule, command, hook, statusline, skill, collection)
+- \[ ] **Code change** (bug fix, feature, refactor, performance, documentation)
+- \[ ] **Content submission** (agent, MCP, rule, command, hook, statusline, skill, collection)
 
 ---
 
@@ -36,38 +36,38 @@ Our database-driven submission system provides:
 
 **Type of change:**
 
-- [ ] Bug fix (non-breaking change fixing an issue)
-- [ ] New feature (non-breaking change adding functionality)
-- [ ] Breaking change (fix or feature causing existing functionality to change)
-- [ ] Refactor (code change that neither fixes a bug nor adds a feature)
-- [ ] Documentation update
-- [ ] Performance improvement
-- [ ] Test coverage improvement
+- \[ ] Bug fix (non-breaking change fixing an issue)
+- \[ ] New feature (non-breaking change adding functionality)
+- \[ ] Breaking change (fix or feature causing existing functionality to change)
+- \[ ] Refactor (code change that neither fixes a bug nor adds a feature)
+- \[ ] Documentation update
+- \[ ] Performance improvement
+- \[ ] Test coverage improvement
 
 **Testing:**
 
-- [ ] Build passes (`pnpm build`)
-- [ ] Linting passes (`pnpm lint`)
-- [ ] Type checking passes (`pnpm type-check`)
-- [ ] Tested locally
-- [ ] Added/updated tests if applicable
+- \[ ] Build passes (`pnpm build`)
+- \[ ] Linting passes (`pnpm lint`)
+- \[ ] Type checking passes (`pnpm type-check`)
+- \[ ] Tested locally
+- \[ ] Added/updated tests if applicable
 
 **Checklist:**
 
-- [ ] Code follows project style guide (database-first architecture)
-- [ ] Self-reviewed my code
-- [ ] Commented complex logic
-- [ ] Updated documentation if needed
-- [ ] No breaking changes (or documented in PR description)
-- [ ] Verified against database schema if touching data layer
+- \[ ] Code follows project style guide (database-first architecture)
+- \[ ] Self-reviewed my code
+- \[ ] Commented complex logic
+- \[ ] Updated documentation if needed
+- \[ ] No breaking changes (or documented in PR description)
+- \[ ] Verified against database schema if touching data layer
 
 **Database Changes (if applicable):**
 
-- [ ] Migration file included
-- [ ] RPC functions tested
-- [ ] RLS policies verified
-- [ ] Generated types updated (`pnpm generate:types`)
-- [ ] Database indexes considered
+- \[ ] Migration file included
+- \[ ] RPC functions tested
+- \[ ] RLS policies verified
+- \[ ] Generated types updated (`pnpm generate:types`)
+- \[ ] Database indexes considered
 
 ---
 

@@ -141,10 +141,7 @@ export function ChangelogReleaseEmail({
   const hasSections = Array.isArray(sections) && sections.length > 0;
 
   return (
-    <BaseLayout
-      preview={`New Release: ${title} - ${tldr}`}
-      utm={utm}
-    >
+    <BaseLayout preview={`New Release: ${title} - ${tldr}`} utm={utm}>
       <Section style={heroSection}>
         <EmailBadge variant="primary" size="default">
           New Release
@@ -177,18 +174,14 @@ export function ChangelogReleaseEmail({
                     </li>
                   ))}
                   {section.commits.length > 5 && (
-                    <Text style={moreCommitsStyle}>
-                      +{section.commits.length - 5} more changes
-                    </Text>
+                    <Text style={moreCommitsStyle}>+{section.commits.length - 5} more changes</Text>
                   )}
                 </ul>
               )}
             </EmailCard>
           ))}
           {sections.length > 6 && (
-            <Text style={moreSectionsStyle}>
-              +{sections.length - 6} more sections
-            </Text>
+            <Text style={moreSectionsStyle}>+{sections.length - 6} more sections</Text>
           )}
         </Section>
       )}
@@ -325,4 +318,3 @@ const ctaButtonStyle: React.CSSProperties = {
   fontWeight: typography.fontWeight.semibold,
   fontSize: typography.fontSize.base,
 };
-

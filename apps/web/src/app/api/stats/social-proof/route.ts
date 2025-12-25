@@ -34,7 +34,9 @@ import {
   socialProofStatsResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
 import {
-  createOptionsHandler as createApiOptionsHandler, createCachedApiRoute, type RouteHandlerContext,
+  createOptionsHandler as createApiOptionsHandler,
+  createCachedApiRoute,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { jsonResponse } from '@heyclaude/web-runtime/server/api-helpers';

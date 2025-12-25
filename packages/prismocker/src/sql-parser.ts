@@ -59,7 +59,9 @@ export function parseSimpleSelect(query: string): {
 
   // Match simple SELECT queries
   // Pattern: SELECT ... FROM table_name [WHERE ...] [LIMIT ...] [OFFSET ...]
-  const selectMatch = normalized.match(/^select\s+.+\s+from\s+(\w+)(?:\s+where\s+(.+?))?(?:\s+limit\s+(\d+))?(?:\s+offset\s+(\d+))?$/i);
+  const selectMatch = normalized.match(
+    /^select\s+.+\s+from\s+(\w+)(?:\s+where\s+(.+?))?(?:\s+limit\s+(\d+))?(?:\s+offset\s+(\d+))?$/i
+  );
 
   if (!selectMatch) {
     return null;
@@ -159,4 +161,3 @@ export function executeSimpleSelect(
 
   return results;
 }
-

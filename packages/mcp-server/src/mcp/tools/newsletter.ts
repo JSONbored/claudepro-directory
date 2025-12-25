@@ -44,8 +44,7 @@ async function sendInngestEvent(
   const inngestEventKey = config.inngest.eventKey;
   const inngestSigningKey = config.inngest.signingKey;
   const inngestUrl =
-    config.inngest.url ||
-    (inngestSigningKey ? 'https://api.inngest.com' : 'http://localhost:8288'); // Default based on signing key presence
+    config.inngest.url || (inngestSigningKey ? 'https://api.inngest.com' : 'http://localhost:8288'); // Default based on signing key presence
 
   if (!inngestEventKey) {
     // For local dev, event key might not be required
@@ -132,7 +131,10 @@ export async function handleSubscribeNewsletter(
     try {
       await sendInngestEvent(normalizedEmail, source, env, referrer, input.metadata);
     } catch (error) {
-      const normalized = normalizeError(error, 'Failed to send newsletter subscription event to Inngest');
+      const normalized = normalizeError(
+        error,
+        'Failed to send newsletter subscription event to Inngest'
+      );
       logger.error('Failed to send Inngest event', normalized, {
         tool: 'subscribeNewsletter',
         email: normalizedEmail, // Auto-hashed by logger

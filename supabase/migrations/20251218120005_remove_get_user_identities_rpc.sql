@@ -8,5 +8,4 @@
 --
 -- Function signature: get_user_identities(p_user_id uuid)
 -- Related: AccountService.getUserIdentities uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_user_identities(uuid);
+DROP FUNCTION IF EXISTS public.get_user_identities (uuid);

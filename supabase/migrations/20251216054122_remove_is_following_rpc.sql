@@ -11,5 +11,4 @@
 --
 -- Related Changes:
 -- - packages/data-layer/src/services/account.ts: Converted isFollowing() to use Prisma
-
-DROP FUNCTION IF EXISTS public.is_following(uuid, uuid);
+DROP FUNCTION IF EXISTS public.is_following (uuid, uuid);

@@ -77,7 +77,9 @@ describe('SearchService', () => {
       // Actually, looking at searchContent: result?.results - if result is array, this is undefined
       // So the issue is that callRpc should unwrap, but doesn't for 'search' functions
       // Let me check if the result[0] check is needed or if we should fix callRpc
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockResult,
+      ] as any);
 
       const result = await service.searchContent({
         p_query: 'typescript',
@@ -115,7 +117,9 @@ describe('SearchService', () => {
         results: mockData,
         total_count: BigInt(1),
       };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockResult,
+      ] as any);
 
       // First call
       await service.searchContent({
@@ -143,7 +147,9 @@ describe('SearchService', () => {
         results: [],
         total_count: BigInt(0),
       };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockResult,
+      ] as any);
 
       const result = await service.searchContent({
         p_query: 'nonexistent-query-xyz',
@@ -172,7 +178,9 @@ describe('SearchService', () => {
         results: [],
         total_count: BigInt(0),
       };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockResult,
+      ] as any);
 
       const result = await service.searchContent({
         p_query: 'test & query | with (special) characters',
@@ -192,7 +200,9 @@ describe('SearchService', () => {
         total_count: 1n,
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockResult,
+      ] as any);
 
       const result = await service.searchUnified({
         p_query: 'test',
@@ -215,7 +225,9 @@ describe('SearchService', () => {
         total_count: 1n,
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockResult,
+      ] as any);
 
       // First call
       await service.searchUnified({
@@ -256,7 +268,9 @@ describe('SearchService', () => {
         jobs: [{ id: 'job-1', title: 'Developer', category: 'engineering' }],
         total_count: BigInt(1),
       };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       const result = await service.filterJobs({
         p_category: 'engineering',
@@ -277,7 +291,9 @@ describe('SearchService', () => {
         jobs: [{ id: 'job-1', title: 'Developer', category: 'engineering' }],
         total_count: BigInt(1),
       };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       // First call
       await service.filterJobs({
@@ -307,7 +323,9 @@ describe('SearchService', () => {
         tags: ['react', 'typescript'],
         authors: ['author1', 'author2'],
       };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       const result = await service.getSearchFacets();
 
@@ -325,7 +343,9 @@ describe('SearchService', () => {
         tags: ['react', 'typescript'],
         authors: ['author1', 'author2'],
       };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       // First call
       await service.getSearchFacets();
@@ -348,7 +368,9 @@ describe('SearchService', () => {
         categories: [{ name: 'Agents', count: 10 }],
         tags: [{ name: 'React', count: 5 }],
       };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       const result = await service.getSearchFacetsFormatted();
 
@@ -365,7 +387,9 @@ describe('SearchService', () => {
         categories: [{ name: 'Agents', count: 10 }],
         tags: [{ name: 'React', count: 5 }],
       };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       // First call
       await service.getSearchFacetsFormatted();
@@ -432,7 +456,9 @@ describe('SearchService', () => {
       // batchInsertSearchQueries uses callRpc which formats SQL as: SELECT * FROM batch_insert_search_queries(p_queries => $1)
       const mockData = { inserted_count: 3 };
       // callRpc unwraps single-element arrays for composite types (objects)
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       const result = await service.batchInsertSearchQueries({
         p_queries: [
@@ -452,7 +478,9 @@ describe('SearchService', () => {
 
     it('should not use cache for mutations', async () => {
       const mockData = { inserted_count: 0 };
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       await service.batchInsertSearchQueries({
         p_queries: [],
@@ -480,7 +508,7 @@ describe('SearchService', () => {
           unique_users: BigInt(40),
         },
       ];
-      
+
       // Use Prismocker's setData to seed test data
       if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
         (prismocker as any).setData('v_trending_searches', mockData);
@@ -506,7 +534,7 @@ describe('SearchService', () => {
           unique_users: BigInt(50),
         },
       ];
-      
+
       // Use Prismocker's setData to seed test data
       if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
         (prismocker as any).setData('v_trending_searches', mockData);

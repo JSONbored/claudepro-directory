@@ -18,7 +18,10 @@ jest.mock('next/cache', () => ({
 
 // Import real cache utilities for proper cache testing
 // Note: Deep relative imports are acceptable for test utilities to avoid circular dependencies
-import { clearRequestCache, getRequestCache } from '../../../../data-layer/src/utils/request-cache.ts';
+import {
+  clearRequestCache,
+  getRequestCache,
+} from '../../../../data-layer/src/utils/request-cache.ts';
 
 // Mock RPC error logging utility (if needed)
 // Note: Deep relative import needed for jest.mock() to work correctly
@@ -78,7 +81,9 @@ describe('related content data functions', () => {
 
       // get_related_content returns SETOF, so $queryRawUnsafe returns array of rows directly
       // callRpc with _content in name treats it as array return type, returns array directly
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockRpcResult as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(
+        mockRpcResult as any
+      );
 
       const result = await getRelatedContent({
         currentCategory: 'agents',
@@ -119,7 +124,9 @@ describe('related content data functions', () => {
 
       // get_related_content returns SETOF, so $queryRawUnsafe returns array of rows directly
       // callRpc with _content in name treats it as array return type, returns array directly
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockRpcResult as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(
+        mockRpcResult as any
+      );
 
       const input: RelatedContentInput = {
         currentCategory: 'agents',
@@ -175,7 +182,9 @@ describe('related content data functions', () => {
 
       // get_related_content returns SETOF, so $queryRawUnsafe returns array of rows directly
       // callRpc with _content in name treats it as array return type, returns array directly
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockRpcResult as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(
+        mockRpcResult as any
+      );
 
       const result = await getRelatedContent({
         currentCategory: 'agents',
@@ -215,7 +224,9 @@ describe('related content data functions', () => {
 
       // get_related_content returns SETOF, so $queryRawUnsafe returns array of rows directly
       // callRpc with _content in name treats it as array return type, returns array directly
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockRpcResult as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(
+        mockRpcResult as any
+      );
 
       const result = await getRelatedContent({
         currentCategory: 'agents',
@@ -265,7 +276,9 @@ describe('related content data functions', () => {
 
       // get_related_content returns SETOF, so $queryRawUnsafe returns array of rows directly
       // callRpc with _content in name treats it as array return type, returns array directly
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockRpcResult as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(
+        mockRpcResult as any
+      );
 
       await getRelatedContent({
         currentCategory: 'agents',
@@ -296,7 +309,9 @@ describe('related content data functions', () => {
 
       // get_related_content returns SETOF, so $queryRawUnsafe returns array of rows directly
       // callRpc with _content in name treats it as array return type, returns array directly
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockRpcResult as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(
+        mockRpcResult as any
+      );
 
       // First call - should populate cache
       const cacheBefore = getRequestCache().getStats().size;

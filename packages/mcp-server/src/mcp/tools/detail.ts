@@ -150,7 +150,12 @@ ${details.content ? `## Content\n${details.content}` : ''}
     const usageHints = getContentUsageHints(details.category, details.slug);
 
     const duration = Date.now() - startTime;
-    logger.info('getContentDetail completed successfully', {tool: 'getContentDetail', duration_ms: duration, category, slug,});
+    logger.info('getContentDetail completed successfully', {
+      tool: 'getContentDetail',
+      duration_ms: duration,
+      category,
+      slug,
+    });
 
     return {
       content: [
@@ -172,7 +177,12 @@ ${details.content ? `## Content\n${details.content}` : ''}
     };
   } catch (error) {
     const normalized = normalizeError(error, 'getContentDetail tool failed');
-    logger.error('getContentDetail tool error', {error: normalized, tool: 'getContentDetail', category, slug});
+    logger.error('getContentDetail tool error', {
+      error: normalized,
+      tool: 'getContentDetail',
+      category,
+      slug,
+    });
 
     // Check if it's a "not found" error
     if (error instanceof Error && error.message.includes('not found')) {

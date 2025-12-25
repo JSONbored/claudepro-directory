@@ -27,7 +27,9 @@ function isValidNotificationType(value: string): value is notification_type {
 }
 
 function isValidNotificationPriority(value: string): value is notification_priority {
-  const validPriorities = Object.values(NotificationPriorityEnum) as readonly notification_priority[];
+  const validPriorities = Object.values(
+    NotificationPriorityEnum
+  ) as readonly notification_priority[];
   return validPriorities.includes(value as notification_priority);
 }
 
@@ -52,7 +54,6 @@ export const createNotification = createInngestFunction(
   },
   { event: 'notification/create' },
   async ({ event, step, logContext }) => {
-
     const { title, message, type, priority, action_label, action_href, id } = event.data;
 
     logger.info(
@@ -164,7 +165,6 @@ export const broadcastNotification = createInngestFunction(
   },
   { event: 'notification/broadcast' },
   async ({ event, step, logContext }) => {
-
     const { title, message, type, priority, action_label, action_href } = event.data;
 
     logger.info(

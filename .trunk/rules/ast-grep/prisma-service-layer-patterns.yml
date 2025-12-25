@@ -39,7 +39,7 @@ rule:
         inside:
           has:
             regex: 'class.*Service|extends BasePrismaService'
-message: "Direct Prisma usage should be in service classes, not data functions or pages. Create a service class extending BasePrismaService and call service methods from data functions. This ensures proper error handling, logging, and request-scoped caching."
+message: 'Direct Prisma usage should be in service classes, not data functions or pages. Create a service class extending BasePrismaService and call service methods from data functions. This ensures proper error handling, logging, and request-scoped caching.'
 severity: error
 
 ---
@@ -82,7 +82,7 @@ rule:
         inside:
           has:
             regex: 'try.*catch'
-message: "Service methods using this.callRpc() should include error handling. BasePrismaService.callRpc() handles errors internally, but wrap in try/catch if you need custom error handling. Use normalizeError() for consistent error handling."
+message: 'Service methods using this.callRpc() should include error handling. BasePrismaService.callRpc() handles errors internally, but wrap in try/catch if you need custom error handling. Use normalizeError() for consistent error handling.'
 severity: warning
 
 ---

@@ -57,7 +57,12 @@ export async function handleGetChangelog(
       // For JSON format, parse and return structured data
       // Note: LLMs.txt format is primarily text-based, so JSON format may be limited
       const duration = Date.now() - startTime;
-      logger.info('getChangelog completed successfully (JSON format requested)', {tool: 'getChangelog', duration_ms: duration, format, length: formatted.length,});
+      logger.info('getChangelog completed successfully (JSON format requested)', {
+        tool: 'getChangelog',
+        duration_ms: duration,
+        format,
+        length: formatted.length,
+      });
 
       return {
         content: [
@@ -76,7 +81,12 @@ export async function handleGetChangelog(
 
     // LLMs.txt format (default)
     const duration = Date.now() - startTime;
-    logger.info('getChangelog completed successfully', {tool: 'getChangelog', duration_ms: duration, format, length: formatted.length,});
+    logger.info('getChangelog completed successfully', {
+      tool: 'getChangelog',
+      duration_ms: duration,
+      format,
+      length: formatted.length,
+    });
 
     return {
       content: [

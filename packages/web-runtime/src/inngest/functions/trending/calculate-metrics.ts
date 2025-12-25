@@ -31,7 +31,6 @@ export const calculateTrendingMetrics = createInngestFunction(
   },
   { cron: '0 * * * *' }, // Every hour (optimized from 30 minutes)
   async ({ step, logContext }) => {
-
     const trendingService = await getService('trending');
 
     // Step 1: Calculate time-windowed metrics from user_interactions

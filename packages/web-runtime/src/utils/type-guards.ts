@@ -5,12 +5,7 @@
  * and ensure type safety at runtime.
  */
 
-import type {
-  content_category,
-  job_type,
-  experience_level,
-  job_category,
-} from '@prisma/client';
+import type { content_category, job_type, experience_level, job_category } from '@prisma/client';
 import {
   content_category as ContentCategory,
   job_type as JobType,

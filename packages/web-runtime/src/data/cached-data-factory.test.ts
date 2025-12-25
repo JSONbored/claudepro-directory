@@ -301,7 +301,7 @@ describe('createDataFunction', () => {
       const result = await dataFunction('input');
 
       expect(result).toBeNull();
-      
+
       // Restore mock for subsequent tests
       jest.mocked(getService).mockResolvedValue(mockService);
     });

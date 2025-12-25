@@ -6,5 +6,4 @@
 -- Description: Remove get_analytics_summary RPC function
 -- This function is unused in the codebase.
 -- Function signature: get_analytics_summary(content_category)
-
-DROP FUNCTION IF EXISTS public.get_analytics_summary(content_category);
+DROP FUNCTION IF EXISTS public.get_analytics_summary (content_category);

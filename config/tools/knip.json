@@ -133,5 +133,5 @@
       "packages/**/eslint.config.*",
       "config/tools/eslint.config.mjs"
     ]
-  },
+  }
 }

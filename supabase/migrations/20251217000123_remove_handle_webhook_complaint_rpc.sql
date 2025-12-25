@@ -5,5 +5,4 @@
 --
 -- Description: Remove handle_webhook_complaint RPC function - Resend webhook handler uses Inngest, not RPCs
 -- Function signature: handle_webhook_complaint(p_webhook_id uuid, p_event_data jsonb)
-
-DROP FUNCTION IF EXISTS public.handle_webhook_complaint(uuid, jsonb);
+DROP FUNCTION IF EXISTS public.handle_webhook_complaint (uuid, jsonb);

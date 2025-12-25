@@ -2,12 +2,12 @@
   "name": "@heyclaude/web-runtime",
   "version": "1.1.0",
   "private": true,
-  "type": "module",
   "sideEffects": false,
+  "type": "module",
   "exports": {
     "./server-edge": {
-      "development": "./src/server-edge.ts",
       "types": "./dist/server-edge.d.ts",
+      "development": "./src/server-edge.ts",
       "default": "./src/server-edge.ts"
     },
     "./actions/bookmarks": {
@@ -439,8 +439,8 @@
       "default": "./src/api/schemas.ts"
     },
     "./api/response-schemas": {
-      "development": "./src/api/response-schemas.ts",
       "types": "./dist/src/api/response-schemas.d.ts",
+      "development": "./src/api/response-schemas.ts",
       "react-server": "./src/api/response-schemas.ts",
       "default": "./src/api/response-schemas.ts"
     },
@@ -650,6 +650,12 @@
       "default": "./src/api/query-helpers.ts"
     }
   },
+  "scripts": {
+    "build": "tsc --build",
+    "clear-caches": "bash scripts/clear-caches.sh",
+    "lint": "eslint --config ../../config/tools/eslint.config.mjs src --ignore-pattern '**/*.generated.ts' --ignore-pattern '**/*.generated.tsx'",
+    "type-check": "tsc --noEmit"
+  },
   "dependencies": {
     "@heyclaude/data-layer": "workspace:*",
     "@heyclaude/database-types": "workspace:*",
@@ -697,17 +703,6 @@
     "zod": "^4.2.1",
     "zustand": "^5.0.9"
   },
-  "scripts": {
-    "build": "tsc --build",
-    "type-check": "tsc --noEmit",
-    "lint": "eslint --config ../../config/tools/eslint.config.mjs src --ignore-pattern '**/*.generated.ts' --ignore-pattern '**/*.generated.tsx'",
-    "clear-caches": "bash scripts/clear-caches.sh"
-  },
-  "peerDependencies": {
-    "next": "^16.0.9",
-    "react": "^19.2.2",
-    "react-dom": "^19.2.2"
-  },
   "devDependencies": {
     "@inngest/test": "^0.1.9",
     "@jsonbored/safemocker": "file:../../../safemocker",
@@ -718,5 +713,10 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-email": "^5.1.0"
+  },
+  "peerDependencies": {
+    "next": "^16.0.9",
+    "react": "^19.2.2",
+    "react-dom": "^19.2.2"
   }
 }

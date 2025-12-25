@@ -217,7 +217,7 @@ jobs:
             cat > submission.json << 'SUBMISSION_EOF'
             ${{ steps.extract.outputs.result.submission }}
             SUBMISSION_EOF
-            
+
             # Run RPC call
             node insert-via-rpc.mjs
 
@@ -230,7 +230,7 @@ jobs:
           script: |
             const result = ${{ steps.extract.outputs.result }};
             const submission = result.submission;
-            
+
             // Extract project ID from Supabase URL (format: https://PROJECT_ID.supabase.co)
             const supabaseUrl = process.env.SUPABASE_URL || '';
             const projectId = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || 'PROJECT_ID';

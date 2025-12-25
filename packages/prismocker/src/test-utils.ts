@@ -46,9 +46,7 @@ import { createPrismocker } from './index.js';
  * await prisma.companies.create({ data: { name: 'Test' } });
  * ```
  */
-export function createTestPrisma(
-  options?: import('./types.js').PrismockerOptions
-): PrismaClient {
+export function createTestPrisma(options?: import('./types.js').PrismockerOptions): PrismaClient {
   return createPrismocker<PrismaClient>(options);
 }
 
@@ -90,27 +88,24 @@ function isPrismockerInstance(prisma: PrismaClient): prisma is PrismaClient & {
  * });
  * ```
  */
-export function seedTestData<T extends Record<string, any[]>>(
-  prisma: PrismaClient,
-  data: T
-): void {
+export function seedTestData<T extends Record<string, any[]>>(prisma: PrismaClient, data: T): void {
   if (!isPrismockerInstance(prisma)) {
     const isPrismaClient = prisma && typeof prisma === 'object' && 'findMany' in prisma;
     const suggestion = isPrismaClient
       ? 'You passed a real PrismaClient. In tests, use createTestPrisma() or createPrismocker<PrismaClient>() to get a PrismockerClient instance.'
       : 'The provided instance is not a PrismockerClient. Use createTestPrisma() or createPrismocker<PrismaClient>() to create a test instance.';
-    
+
     throw new Error(
       `Prismocker: seedTestData requires a PrismockerClient instance.\n\n` +
-      `${suggestion}\n\n` +
-      `Example:\n` +
-      `  import { createTestPrisma } from 'prismocker/test-utils';\n` +
-      `  const prisma = createTestPrisma<PrismaClient>();\n` +
-      `  seedTestData(prisma, { companies: [...] });\n\n` +
-      `Or:\n` +
-      `  import { createPrismocker } from 'prismocker';\n` +
-      `  const prisma = createPrismocker<PrismaClient>();\n` +
-      `  seedTestData(prisma, { companies: [...] });`
+        `${suggestion}\n\n` +
+        `Example:\n` +
+        `  import { createTestPrisma } from 'prismocker/test-utils';\n` +
+        `  const prisma = createTestPrisma<PrismaClient>();\n` +
+        `  seedTestData(prisma, { companies: [...] });\n\n` +
+        `Or:\n` +
+        `  import { createPrismocker } from 'prismocker';\n` +
+        `  const prisma = createPrismocker<PrismaClient>();\n` +
+        `  seedTestData(prisma, { companies: [...] });`
     );
   }
 
@@ -146,19 +141,19 @@ export function resetAndSeed<T extends Record<string, any[]>>(
     const suggestion = isPrismaClient
       ? 'You passed a real PrismaClient. In tests, use createTestPrisma() or createPrismocker<PrismaClient>() to get a PrismockerClient instance.'
       : 'The provided instance is not a PrismockerClient. Use createTestPrisma() or createPrismocker<PrismaClient>() to create a test instance.';
-    
+
     throw new Error(
       `Prismocker: resetAndSeed requires a PrismockerClient instance.\n\n` +
-      `${suggestion}\n\n` +
-      `Example:\n` +
-      `  import { createTestPrisma, resetAndSeed } from 'prismocker/test-utils';\n` +
-      `  const prisma = createTestPrisma<PrismaClient>();\n` +
-      `  resetAndSeed(prisma, { companies: [...] });\n\n` +
-      `Or:\n` +
-      `  import { createPrismocker } from 'prismocker';\n` +
-      `  import { resetAndSeed } from 'prismocker/test-utils';\n` +
-      `  const prisma = createPrismocker<PrismaClient>();\n` +
-      `  resetAndSeed(prisma, { companies: [...] });`
+        `${suggestion}\n\n` +
+        `Example:\n` +
+        `  import { createTestPrisma, resetAndSeed } from 'prismocker/test-utils';\n` +
+        `  const prisma = createTestPrisma<PrismaClient>();\n` +
+        `  resetAndSeed(prisma, { companies: [...] });\n\n` +
+        `Or:\n` +
+        `  import { createPrismocker } from 'prismocker';\n` +
+        `  import { resetAndSeed } from 'prismocker/test-utils';\n` +
+        `  const prisma = createPrismocker<PrismaClient>();\n` +
+        `  resetAndSeed(prisma, { companies: [...] });`
     );
   }
 
@@ -189,9 +184,7 @@ export function resetAndSeed<T extends Record<string, any[]>>(
  * const company2 = companyFactory({ name: 'Company 2', slug: 'company-2' });
  * ```
  */
-export function createTestDataFactory<T extends Record<string, any>>(
-  defaults: Partial<T>
-) {
+export function createTestDataFactory<T extends Record<string, any>>(defaults: Partial<T>) {
   return (overrides?: Partial<T>): T => {
     return {
       ...defaults,
@@ -225,19 +218,19 @@ export function snapshotPrismocker(
     const suggestion = isPrismaClient
       ? 'You passed a real PrismaClient. In tests, use createTestPrisma() or createPrismocker<PrismaClient>() to get a PrismockerClient instance.'
       : 'The provided instance is not a PrismockerClient. Use createTestPrisma() or createPrismocker<PrismaClient>() to create a test instance.';
-    
+
     throw new Error(
       `Prismocker: snapshotPrismocker requires a PrismockerClient instance.\n\n` +
-      `${suggestion}\n\n` +
-      `Example:\n` +
-      `  import { createTestPrisma, snapshotPrismocker } from 'prismocker/test-utils';\n` +
-      `  const prisma = createTestPrisma<PrismaClient>();\n` +
-      `  const snapshot = snapshotPrismocker(prisma, ['companies', 'jobs']);\n\n` +
-      `Or:\n` +
-      `  import { createPrismocker } from 'prismocker';\n` +
-      `  import { snapshotPrismocker } from 'prismocker/test-utils';\n` +
-      `  const prisma = createPrismocker<PrismaClient>();\n` +
-      `  const snapshot = snapshotPrismocker(prisma, ['companies', 'jobs']);`
+        `${suggestion}\n\n` +
+        `Example:\n` +
+        `  import { createTestPrisma, snapshotPrismocker } from 'prismocker/test-utils';\n` +
+        `  const prisma = createTestPrisma<PrismaClient>();\n` +
+        `  const snapshot = snapshotPrismocker(prisma, ['companies', 'jobs']);\n\n` +
+        `Or:\n` +
+        `  import { createPrismocker } from 'prismocker';\n` +
+        `  import { snapshotPrismocker } from 'prismocker/test-utils';\n` +
+        `  const prisma = createPrismocker<PrismaClient>();\n` +
+        `  const snapshot = snapshotPrismocker(prisma, ['companies', 'jobs']);`
     );
   }
 
@@ -252,15 +245,15 @@ export function snapshotPrismocker(
     // Snapshot all models (requires tracking model names)
     // For now, we'll need to pass model names or track them
     // This is a limitation - we could enhance PrismockerClient to track models
-      throw new Error(
-        `Prismocker: snapshotPrismocker without modelNames is not yet supported.\n\n` +
+    throw new Error(
+      `Prismocker: snapshotPrismocker without modelNames is not yet supported.\n\n` +
         `Prismocker needs to know which models to snapshot. Please provide an array of model names.\n\n` +
         `Example:\n` +
         `  const snapshot = snapshotPrismocker(prisma, ['companies', 'jobs', 'users']);\n\n` +
         `This limitation exists because Prismocker doesn't track model names automatically.\n` +
         `You can get model names from your Prisma schema or by checking which models you've used in your tests.\n\n` +
         `Future enhancement: This may be supported in a future version when Prismocker tracks model names automatically.`
-      );
+    );
   }
 
   return snapshot;
@@ -282,31 +275,28 @@ export function snapshotPrismocker(
  * restorePrismocker(prisma, snapshot);
  * ```
  */
-export function restorePrismocker(
-  prisma: PrismaClient,
-  snapshot: Record<string, any[]>
-): void {
+export function restorePrismocker(prisma: PrismaClient, snapshot: Record<string, any[]>): void {
   if (!isPrismockerInstance(prisma)) {
     const isPrismaClient = prisma && typeof prisma === 'object' && 'findMany' in prisma;
     const suggestion = isPrismaClient
       ? 'You passed a real PrismaClient. In tests, use createTestPrisma() or createPrismocker<PrismaClient>() to get a PrismockerClient instance.'
       : 'The provided instance is not a PrismockerClient. Use createTestPrisma() or createPrismocker<PrismaClient>() to create a test instance.';
-    
+
     throw new Error(
       `Prismocker: restorePrismocker requires a PrismockerClient instance.\n\n` +
-      `${suggestion}\n\n` +
-      `Example:\n` +
-      `  import { createTestPrisma, snapshotPrismocker, restorePrismocker } from 'prismocker/test-utils';\n` +
-      `  const prisma = createTestPrisma<PrismaClient>();\n` +
-      `  const snapshot = snapshotPrismocker(prisma, ['companies']);\n` +
-      `  // ... modify data ...\n` +
-      `  restorePrismocker(prisma, snapshot);\n\n` +
-      `Or:\n` +
-      `  import { createPrismocker } from 'prismocker';\n` +
-      `  import { snapshotPrismocker, restorePrismocker } from 'prismocker/test-utils';\n` +
-      `  const prisma = createPrismocker<PrismaClient>();\n` +
-      `  const snapshot = snapshotPrismocker(prisma, ['companies']);\n` +
-      `  restorePrismocker(prisma, snapshot);`
+        `${suggestion}\n\n` +
+        `Example:\n` +
+        `  import { createTestPrisma, snapshotPrismocker, restorePrismocker } from 'prismocker/test-utils';\n` +
+        `  const prisma = createTestPrisma<PrismaClient>();\n` +
+        `  const snapshot = snapshotPrismocker(prisma, ['companies']);\n` +
+        `  // ... modify data ...\n` +
+        `  restorePrismocker(prisma, snapshot);\n\n` +
+        `Or:\n` +
+        `  import { createPrismocker } from 'prismocker';\n` +
+        `  import { snapshotPrismocker, restorePrismocker } from 'prismocker/test-utils';\n` +
+        `  const prisma = createPrismocker<PrismaClient>();\n` +
+        `  const snapshot = snapshotPrismocker(prisma, ['companies']);\n` +
+        `  restorePrismocker(prisma, snapshot);`
     );
   }
 
@@ -315,4 +305,3 @@ export function restorePrismocker(
     prisma.setData(model, data);
   }
 }
-

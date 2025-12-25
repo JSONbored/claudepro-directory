@@ -301,7 +301,11 @@ export const changelogSyncResponseSchema = z.object({
  * User profile image response
  */
 export const userProfileImageResponseSchema = z.object({
-  imageUrl: z.string().url().nullable().describe('User profile image URL from database, or null if not set'),
+  imageUrl: z
+    .string()
+    .url()
+    .nullable()
+    .describe('User profile image URL from database, or null if not set'),
 });
 
 // =============================================================================

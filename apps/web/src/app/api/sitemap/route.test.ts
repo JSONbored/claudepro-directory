@@ -174,13 +174,17 @@ describe('GET /api/sitemap', () => {
     // MiscService.generateSitemapXml uses RPC (generate_sitemap_xml)
     // MiscService.getSiteUrlsFormatted uses RPC (get_site_urls_formatted)
     // Default: return successful results
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]) as unknown as typeof prismocker.$queryRawUnsafe;
+    prismocker.$queryRawUnsafe = jest
+      .fn()
+      .mockResolvedValue([]) as unknown as typeof prismocker.$queryRawUnsafe;
   });
 
   it('should return XML sitemap by default', async () => {
     // Mock RPC response for generate_sitemap_xml
     const mockXmlData = [{ xml: '<?xml version="1.0"?><urlset>...</urlset>' }];
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(mockXmlData as any);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(
+      mockXmlData as any
+    );
 
     const request = createMockRequest({
       method: 'GET',
@@ -204,7 +208,9 @@ describe('GET /api/sitemap', () => {
   it('should return XML sitemap with format=xml', async () => {
     // Mock RPC response for generate_sitemap_xml
     const mockXmlData = [{ xml: '<?xml version="1.0"?><urlset>...</urlset>' }];
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(mockXmlData as any);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(
+      mockXmlData as any
+    );
 
     const request = createMockRequest({
       method: 'GET',
@@ -228,7 +234,9 @@ describe('GET /api/sitemap', () => {
       { path: '/', lastmod: '2025-01-11', changefreq: 'daily', priority: 1.0 },
       { path: '/agents', lastmod: '2025-01-10', changefreq: 'weekly', priority: 0.8 },
     ];
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(mockUrlsData as any);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(
+      mockUrlsData as any
+    );
 
     const request = createMockRequest({
       method: 'GET',
@@ -337,13 +345,12 @@ describe('POST /api/sitemap', () => {
     // MiscService.getSiteUrlsFormatted uses RPC (get_site_urls_formatted)
     // Default: return successful results
     const mockUrlsData = {
-      urls: [
-        'https://claudepro.directory/',
-        'https://claudepro.directory/agents',
-      ],
+      urls: ['https://claudepro.directory/', 'https://claudepro.directory/agents'],
       meta: {},
     };
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([mockUrlsData]) as unknown as typeof prismocker.$queryRawUnsafe;
+    prismocker.$queryRawUnsafe = jest
+      .fn()
+      .mockResolvedValue([mockUrlsData]) as unknown as typeof prismocker.$queryRawUnsafe;
 
     // 7. Ensure Inngest mock returns a resolved value
     mockInngestSend.mockResolvedValue({ ids: ['test-id'] });
@@ -419,7 +426,6 @@ describe('POST /api/sitemap', () => {
     // This is a limitation of testing module-level constants - the actual code works correctly
     // In production, if INDEXNOW_TRIGGER_KEY is not set, getEnvVar returns undefined/empty,
     // and the route correctly returns 503
-    
     // For now, we'll skip this test or test it differently
     // The route code correctly returns 503 when INDEXNOW_TRIGGER_KEY is falsy (line 279-287)
     // This is verified by code review - the test limitation is due to module-level constants
@@ -427,7 +433,9 @@ describe('POST /api/sitemap', () => {
 
   it('should return 500 when no URLs to submit', async () => {
     // Mock RPC to return empty array
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce([{ urls: [], meta: {} }] as any);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce([
+      { urls: [], meta: {} },
+    ] as any);
 
     const request = createMockRequest({
       method: 'POST',

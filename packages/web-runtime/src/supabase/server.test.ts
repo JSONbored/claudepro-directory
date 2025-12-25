@@ -69,7 +69,7 @@ beforeEach(() => {
 
 /**
  * In-memory cookie store for tests
- * 
+ *
  * Compatible with ReadonlyRequestCookies but includes additional test methods (set, delete, clear).
  * The set/delete methods are needed for test manipulation.
  */
@@ -137,7 +137,9 @@ export function setupTestCookies(): void {
   const nextHeaders = require('next/headers') as typeof import('next/headers');
   jest.spyOn(nextHeaders, 'cookies').mockImplementation(async () => {
     if (!testCookieStore) {
-      throw new Error('Test cookie store not initialized. Call setupTestCookies() in beforeEach().');
+      throw new Error(
+        'Test cookie store not initialized. Call setupTestCookies() in beforeEach().'
+      );
     }
     return testCookieStore as any;
   });
@@ -380,4 +382,3 @@ describe('createSupabaseServerClient', () => {
     );
   });
 });
-

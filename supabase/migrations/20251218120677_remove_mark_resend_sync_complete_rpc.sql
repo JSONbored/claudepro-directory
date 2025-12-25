@@ -15,5 +15,4 @@
 -- - Not found in apps/edge/ (no edge function usage)
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.mark_resend_sync_complete(uuid, text, boolean, text);
+DROP FUNCTION IF EXISTS public.mark_resend_sync_complete (uuid, text, boolean, text);

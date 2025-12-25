@@ -47,7 +47,8 @@ export function getDeploymentEnv(): DeploymentEnv {
 
   // Priority 1: Explicit DEPLOYMENT_ENV (platform-agnostic)
   // DEPLOYMENT_ENV is not in schema (platform-specific), use getEnvVar for dynamic access
-  const explicitEnv = typeof process !== 'undefined' && process.env ? process.env['DEPLOYMENT_ENV'] : undefined;
+  const explicitEnv =
+    typeof process !== 'undefined' && process.env ? process.env['DEPLOYMENT_ENV'] : undefined;
   if (explicitEnv) {
     const normalized = explicitEnv.toLowerCase().trim();
     if (
@@ -65,7 +66,8 @@ export function getDeploymentEnv(): DeploymentEnv {
     case 'aws':
       // AWS Amplify uses AMPLIFY_ENV
       // Platform-specific env vars not in schema - use process.env directly
-      const amplifyEnvVar = typeof process !== 'undefined' && process.env ? process.env['AMPLIFY_ENV'] : undefined;
+      const amplifyEnvVar =
+        typeof process !== 'undefined' && process.env ? process.env['AMPLIFY_ENV'] : undefined;
       if (amplifyEnvVar) {
         const amplifyEnv = amplifyEnvVar.toLowerCase();
         if (amplifyEnv === 'production') return 'production';
@@ -76,7 +78,8 @@ export function getDeploymentEnv(): DeploymentEnv {
     case 'cloudflare':
       // CF_PAGES_BRANCH: main (production) or branch name (preview)
       // Platform-specific env vars not in schema - use process.env directly
-      const cfPagesBranch = typeof process !== 'undefined' && process.env ? process.env['CF_PAGES_BRANCH'] : undefined;
+      const cfPagesBranch =
+        typeof process !== 'undefined' && process.env ? process.env['CF_PAGES_BRANCH'] : undefined;
       if (cfPagesBranch) {
         return cfPagesBranch === 'main' ? 'production' : 'preview';
       }
@@ -85,7 +88,8 @@ export function getDeploymentEnv(): DeploymentEnv {
     case 'netlify':
       // NETLIFY_CONTEXT: production, deploy-preview, branch-deploy, dev
       // Platform-specific env vars not in schema - use process.env directly
-      const netlifyContext = typeof process !== 'undefined' && process.env ? process.env['NETLIFY_CONTEXT'] : undefined;
+      const netlifyContext =
+        typeof process !== 'undefined' && process.env ? process.env['NETLIFY_CONTEXT'] : undefined;
       if (netlifyContext) {
         const context = netlifyContext.toLowerCase();
         if (context === 'production') return 'production';
@@ -97,7 +101,10 @@ export function getDeploymentEnv(): DeploymentEnv {
     case 'railway':
       // Railway uses RAILWAY_ENVIRONMENT
       // Platform-specific env vars not in schema - use process.env directly
-      const railwayEnv = typeof process !== 'undefined' && process.env ? process.env['RAILWAY_ENVIRONMENT'] : undefined;
+      const railwayEnv =
+        typeof process !== 'undefined' && process.env
+          ? process.env['RAILWAY_ENVIRONMENT']
+          : undefined;
       if (railwayEnv) {
         return railwayEnv === 'production' ? 'production' : 'preview';
       }
@@ -106,7 +113,8 @@ export function getDeploymentEnv(): DeploymentEnv {
     case 'render':
       // Render uses RENDER_ENV
       // Platform-specific env vars not in schema - use process.env directly
-      const renderEnvVar = typeof process !== 'undefined' && process.env ? process.env['RENDER_ENV'] : undefined;
+      const renderEnvVar =
+        typeof process !== 'undefined' && process.env ? process.env['RENDER_ENV'] : undefined;
       if (renderEnvVar) {
         const renderEnv = renderEnvVar.toLowerCase();
         if (renderEnv === 'production') return 'production';
@@ -186,7 +194,8 @@ export function getDeploymentUrl(): string | undefined {
 
   // Priority 1: Explicit DEPLOYMENT_URL
   // DEPLOYMENT_URL is not in schema (platform-specific), use process.env directly
-  const deploymentUrl = typeof process !== 'undefined' && process.env ? process.env['DEPLOYMENT_URL'] : undefined;
+  const deploymentUrl =
+    typeof process !== 'undefined' && process.env ? process.env['DEPLOYMENT_URL'] : undefined;
   if (deploymentUrl) {
     return process.env['DEPLOYMENT_URL'];
   }

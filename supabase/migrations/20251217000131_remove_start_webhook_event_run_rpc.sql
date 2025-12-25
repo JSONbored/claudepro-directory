@@ -5,5 +5,4 @@
 --
 -- Description: Remove start_webhook_event_run RPC function - No codebase usage found
 -- Function signature: start_webhook_event_run(p_webhook_event_id uuid)
-
-DROP FUNCTION IF EXISTS public.start_webhook_event_run(uuid);
+DROP FUNCTION IF EXISTS public.start_webhook_event_run (uuid);

@@ -85,10 +85,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
             placeholder={field.placeholder}
             required={field.required}
             defaultValue={field.defaultValue}
-            className={cn(
-              iconPosition === 'left' && 'pl-10',
-              iconPosition === 'right' && 'pr-10'
-            )}
+            className={cn(iconPosition === 'left' && 'pl-10', iconPosition === 'right' && 'pr-10')}
           />
           {iconPosition === 'right' && (
             <div className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2">

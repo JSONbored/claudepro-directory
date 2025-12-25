@@ -85,21 +85,23 @@ const {
   __mockSendEmail: ReturnType<typeof jest.fn>;
   __mockEnrollInOnboardingSequence: ReturnType<typeof jest.fn>;
 };
-const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock('../../../email/base-template') as {
+const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock(
+  '../../../email/base-template'
+) as {
   __mockRenderEmailTemplate: ReturnType<typeof jest.fn>;
 };
-const {
-  __mockLogger: mockLogger,
-  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
-} = jest.requireMock('../../../logging/server') as {
-  __mockLogger: {
-    info: ReturnType<typeof jest.fn>;
-    warn: ReturnType<typeof jest.fn>;
-    error: ReturnType<typeof jest.fn>;
+const { __mockLogger: mockLogger, __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId } =
+  jest.requireMock('../../../logging/server') as {
+    __mockLogger: {
+      info: ReturnType<typeof jest.fn>;
+      warn: ReturnType<typeof jest.fn>;
+      error: ReturnType<typeof jest.fn>;
+    };
+    __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
   };
-  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-};
-const { __mockNormalizeError: mockNormalizeError } = jest.requireMock('@heyclaude/shared-runtime') as {
+const { __mockNormalizeError: mockNormalizeError } = jest.requireMock(
+  '@heyclaude/shared-runtime'
+) as {
   __mockNormalizeError: ReturnType<typeof jest.fn>;
 };
 
@@ -137,7 +139,7 @@ describe('sendWelcomeEmail', () => {
       error: null,
     });
     mockEnrollInOnboardingSequence.mockResolvedValue(undefined);
-    
+
     // Restore normalizeError mock implementation after reset
     // jest.resetAllMocks() resets mocks to return undefined, so we need to restore it
     mockNormalizeError.mockImplementation((error: unknown, fallbackMessage?: string) => {
@@ -172,7 +174,9 @@ describe('sendWelcomeEmail', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; sent: boolean; emailId: string | null; subscriptionId?: string } };
+    })) as {
+      result: { success: boolean; sent: boolean; emailId: string | null; subscriptionId?: string };
+    };
 
     // Verify function completed successfully
     expect(result).toHaveProperty('success', true);
@@ -226,7 +230,9 @@ describe('sendWelcomeEmail', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; sent: boolean; emailId: string | null; subscriptionId?: string } };
+    })) as {
+      result: { success: boolean; sent: boolean; emailId: string | null; subscriptionId?: string };
+    };
 
     // Verify function completed successfully
     expect(result).toHaveProperty('success', true);
@@ -268,7 +274,9 @@ describe('sendWelcomeEmail', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; sent: boolean; emailId: string | null; subscriptionId?: string } };
+    })) as {
+      result: { success: boolean; sent: boolean; emailId: string | null; subscriptionId?: string };
+    };
 
     // Verify function completed successfully
     expect(result).toHaveProperty('success', true);
@@ -308,7 +316,9 @@ describe('sendWelcomeEmail', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; sent: boolean; emailId: string | null; subscriptionId?: string } };
+    })) as {
+      result: { success: boolean; sent: boolean; emailId: string | null; subscriptionId?: string };
+    };
 
     // Verify function completed but email was not sent
     expect(result).toHaveProperty('success', false);
@@ -352,7 +362,9 @@ describe('sendWelcomeEmail', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; sent: boolean; emailId: string | null; subscriptionId?: string } };
+    })) as {
+      result: { success: boolean; sent: boolean; emailId: string | null; subscriptionId?: string };
+    };
 
     // Verify function completed but email was not sent
     expect(result).toHaveProperty('success', false);
@@ -398,7 +410,9 @@ describe('sendWelcomeEmail', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; sent: boolean; emailId: string | null; subscriptionId?: string } };
+    })) as {
+      result: { success: boolean; sent: boolean; emailId: string | null; subscriptionId?: string };
+    };
 
     // Verify function still completed successfully (email was sent)
     expect(result).toHaveProperty('success', true);
@@ -488,7 +502,9 @@ describe('sendWelcomeEmail', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; sent: boolean; emailId: string | null; subscriptionId?: string } };
+    })) as {
+      result: { success: boolean; sent: boolean; emailId: string | null; subscriptionId?: string };
+    };
 
     // Verify onboarding enrollment was called
     expect(mockEnrollInOnboardingSequence).toHaveBeenCalledTimes(1);
@@ -582,4 +598,3 @@ describe('sendWelcomeEmail', () => {
     expect(call2.tags[0].value).toBe('auth-signup');
   });
 });
-

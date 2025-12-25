@@ -34,14 +34,14 @@
    ======================================== */
 :root {
   /* Core Theme Colors - Pure Grayscale (tweakcn values) */
-  --background: oklch(1.0000 0 0);
+  --background: oklch(1 0 0);
   --foreground: oklch(0.2478 0 0);
   --card: oklch(0.9702 0 0);
   --card-foreground: oklch(0.2478 0 0);
-  --popover: oklch(1.0000 0 0);
+  --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2478 0 0);
   --primary: oklch(0.6916 0.1669 37.2264);
-  --primary-foreground: oklch(1.0000 0 0);
+  --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.9491 0 0);
   --secondary-foreground: oklch(0.2478 0 0);
   --muted: oklch(0.9702 0 0);
@@ -53,32 +53,32 @@
   --border: oklch(0.9067 0 0);
   --input: oklch(0.9067 0 0);
   --ring: oklch(0.6916 0.1669 37.2264);
-  
+
   /* Chart Colors */
   --chart-1: oklch(0.6916 0.1669 37.2264);
   --chart-2: oklch(0.6731 0.1624 144.2083);
-  --chart-3: oklch(0.6582 0.1690 248.8135);
+  --chart-3: oklch(0.6582 0.169 248.8135);
   --chart-4: oklch(0.8442 0.1722 84.9338);
   --chart-5: oklch(0.5168 0.2151 321.2386);
-  
+
   /* Sidebar Colors */
   --sidebar: oklch(0.9702 0 0);
   --sidebar-foreground: oklch(0.2478 0 0);
   --sidebar-primary: oklch(0.6916 0.1669 37.2264);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
+  --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.6916 0.1669 37.2264);
   --sidebar-accent-foreground: oklch(0.6916 0.1669 37.2264);
   --sidebar-border: oklch(0.9067 0 0);
   --sidebar-ring: oklch(0.6916 0.1669 37.2264);
-  
+
   /* Typography */
   --font-sans: sans-serif;
   --font-serif: serif;
   --font-mono: monospace;
-  
+
   /* Border Radius */
   --radius: 0.5rem;
-  
+
   /* Shadows */
   --shadow-x: 0rem;
   --shadow-y: 0.25rem;
@@ -88,19 +88,23 @@
   --shadow-color: oklch(0% 0 0); /* Pure black for shadows */
   --shadow-2xs: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.03);
   --shadow-xs: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.03);
-  --shadow-sm: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.05), 0rem 1px 2px -1px oklch(0% 0 0 / 0.05);
+  --shadow-sm:
+    0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.05), 0rem 1px 2px -1px oklch(0% 0 0 / 0.05);
   --shadow: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.05), 0rem 1px 2px -1px oklch(0% 0 0 / 0.05);
-  --shadow-md: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.05), 0rem 2px 4px -1px oklch(0% 0 0 / 0.05);
-  --shadow-lg: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.05), 0rem 4px 6px -1px oklch(0% 0 0 / 0.05);
-  --shadow-xl: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.05), 0rem 8px 10px -1px oklch(0% 0 0 / 0.05);
+  --shadow-md:
+    0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.05), 0rem 2px 4px -1px oklch(0% 0 0 / 0.05);
+  --shadow-lg:
+    0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.05), 0rem 4px 6px -1px oklch(0% 0 0 / 0.05);
+  --shadow-xl:
+    0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.05), 0rem 8px 10px -1px oklch(0% 0 0 / 0.05);
   --shadow-2xl: 0rem 0.25rem 0.5rem 0rem oklch(0% 0 0 / 0.13);
-  
+
   /* Letter Spacing */
   --tracking-normal: 0rem;
-  
+
   /* Spacing */
   --spacing: 0.25rem;
-  
+
   /* Custom variables - Light mode defaults (preserved from original theme) */
   --claude-orange: oklch(74% 0.2 35);
   --color-bg-tertiary: oklch(96% 0.007 80);
@@ -142,7 +146,7 @@
   --popover: oklch(0.2645 0 0);
   --popover-foreground: oklch(0.9067 0 0);
   --primary: oklch(0.6916 0.1669 37.2264);
-  --primary-foreground: oklch(1.0000 0 0);
+  --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.3092 0 0);
   --secondary-foreground: oklch(0.9067 0 0);
   --muted: oklch(0.2891 0 0);
@@ -151,35 +155,35 @@
   --accent-foreground: oklch(0.6916 0.1669 37.2264);
   --destructive: oklch(0.6368 0.2078 25.3313);
   --destructive-foreground: oklch(0.9851 0 0);
-  --border: oklch(0.3600 0 0);
+  --border: oklch(0.36 0 0);
   --input: oklch(0.3211 0 0);
   --ring: oklch(0.6916 0.1669 37.2264);
-  
+
   /* Chart Colors (same as light mode) */
   --chart-1: oklch(0.6916 0.1669 37.2264);
   --chart-2: oklch(0.6731 0.1624 144.2083);
-  --chart-3: oklch(0.6582 0.1690 248.8135);
+  --chart-3: oklch(0.6582 0.169 248.8135);
   --chart-4: oklch(0.8442 0.1722 84.9338);
   --chart-5: oklch(0.5168 0.2151 321.2386);
-  
+
   /* Sidebar Colors */
   --sidebar: oklch(0.2393 0 0);
   --sidebar-foreground: oklch(0.9067 0 0);
   --sidebar-primary: oklch(0.6916 0.1669 37.2264);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
+  --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.6916 0.1669 37.2264);
   --sidebar-accent-foreground: oklch(0.6916 0.1669 37.2264);
-  --sidebar-border: oklch(0.3600 0 0);
+  --sidebar-border: oklch(0.36 0 0);
   --sidebar-ring: oklch(0.6916 0.1669 37.2264);
-  
+
   /* Typography (same as light mode) */
   --font-sans: sans-serif;
   --font-serif: serif;
   --font-mono: monospace;
-  
+
   /* Border Radius (same as light mode) */
   --radius: 0.5rem;
-  
+
   /* Shadows (dark mode specific) */
   --shadow-x: 0rem;
   --shadow-y: 0.5rem;
@@ -187,15 +191,20 @@
   --shadow-spread: -0.25rem;
   --shadow-opacity: 0.2;
   --shadow-color: oklch(0% 0 0); /* Pure black for shadows - OKLCH format for consistency */
-  --shadow-2xs: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.10);
-  --shadow-xs: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.10);
-  --shadow-sm: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.20), 0rem 1px 2px -1.25px oklch(0% 0 0 / 0.20);
-  --shadow: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.20), 0rem 1px 2px -1.25px oklch(0% 0 0 / 0.20);
-  --shadow-md: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.20), 0rem 2px 4px -1.25px oklch(0% 0 0 / 0.20);
-  --shadow-lg: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.20), 0rem 4px 6px -1.25px oklch(0% 0 0 / 0.20);
-  --shadow-xl: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.20), 0rem 8px 10px -1.25px oklch(0% 0 0 / 0.20);
-  --shadow-2xl: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.50);
-  
+  --shadow-2xs: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.1);
+  --shadow-xs: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.1);
+  --shadow-sm:
+    0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.2), 0rem 1px 2px -1.25px oklch(0% 0 0 / 0.2);
+  --shadow:
+    0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.2), 0rem 1px 2px -1.25px oklch(0% 0 0 / 0.2);
+  --shadow-md:
+    0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.2), 0rem 2px 4px -1.25px oklch(0% 0 0 / 0.2);
+  --shadow-lg:
+    0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.2), 0rem 4px 6px -1.25px oklch(0% 0 0 / 0.2);
+  --shadow-xl:
+    0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.2), 0rem 8px 10px -1.25px oklch(0% 0 0 / 0.2);
+  --shadow-2xl: 0rem 0.5rem 0.75rem -0.25rem oklch(0% 0 0 / 0.5);
+
   /* Custom variables - Dark mode overrides (preserved from original theme) */
   --claude-orange: oklch(74% 0.2 35);
   --color-bg-tertiary: oklch(32% 0.008 60);
@@ -1009,7 +1018,7 @@
    * The @theme inline block maps CSS variables (--background, --foreground, etc.) 
    * from :root/.dark to Tailwind utilities (--color-background, --color-foreground, etc.)
    */
-  
+
   /* Primary color - maps to Claude orange brand color */
   --primary-foreground: var(--color-text-inverse);
 
@@ -1093,7 +1102,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  
+
   /* Semantic color mappings */
   --color-success: var(--color-success);
   --color-success-bg: var(--color-success-bg);
@@ -1107,7 +1116,7 @@
   --color-info: var(--color-info);
   --color-info-bg: var(--color-info-bg);
   --color-info-border: var(--color-info-border);
-  
+
   /* Category color mappings - Auto-generates bg-category-*, text-category-*, border-category-* utilities */
   --color-category-agents: var(--color-category-agents);
   --color-category-agents-bg: var(--color-category-agents-bg);
@@ -1133,7 +1142,7 @@
   --color-category-statuslines-bg: var(--color-category-statuslines-bg);
   --color-category-statuslines-border: var(--color-category-statuslines-border);
   --color-category-statuslines-hover: var(--color-category-statuslines-hover);
-  
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -1152,7 +1161,7 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
-  
+
   /* Font Size mappings - Auto-generates text-* utilities */
   /* Extended scale for very small text */
   --font-size-4xs: var(--font-size-4xs); /* 8px - Very small text (badges, labels) */
@@ -2173,7 +2182,9 @@ body {
   overflow: hidden;
   font-family: var(--font-sans);
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-2xl), 0 0 0 1px var(--border);
+  box-shadow:
+    var(--shadow-2xl),
+    0 0 0 1px var(--border);
   outline: none;
 }
 

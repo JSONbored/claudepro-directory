@@ -34,8 +34,9 @@ interface AxiomConfig {
 async function getAxiomConfig(env: ExtendedEnv): Promise<AxiomConfig | undefined> {
   // Import Infisical utilities (dynamic import to avoid circular dependencies)
   // Using main export since specific path export may not be available until package is built
-  const { getInfisicalSecret, getInfisicalEnvironment } = await import('@heyclaude/cloudflare-runtime');
-  
+  const { getInfisicalSecret, getInfisicalEnvironment } =
+    await import('@heyclaude/cloudflare-runtime');
+
   // Determine environment (dev, staging, prod) from worker config
   const infisicalEnv = getInfisicalEnvironment(env);
 

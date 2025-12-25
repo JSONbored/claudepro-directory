@@ -97,10 +97,10 @@ describe('QueryCache Unit Tests', () => {
       const cacheWithTTL = new QueryCache(optionsWithTTL);
       const result = [{ id: '1', name: 'Alice' }];
       cacheWithTTL.set('users', 'findMany', {}, result);
-      
+
       // Should be available immediately
       expect(cacheWithTTL.get('users', 'findMany', {})).toEqual(result);
-      
+
       // Wait for TTL to expire
       return new Promise<void>((resolve) => {
         setTimeout(() => {
@@ -118,12 +118,12 @@ describe('QueryCache Unit Tests', () => {
         queryCacheMaxSize: 2,
       };
       const cacheWithLimit = new QueryCache(optionsWithLimit);
-      
+
       // Add 3 entries (exceeds limit)
       cacheWithLimit.set('users', 'findMany', { where: { id: '1' } }, [{ id: '1' }]);
       cacheWithLimit.set('users', 'findMany', { where: { id: '2' } }, [{ id: '2' }]);
       cacheWithLimit.set('users', 'findMany', { where: { id: '3' } }, [{ id: '3' }]);
-      
+
       const stats = cacheWithLimit.getStats();
       expect(stats.size).toBeLessThanOrEqual(2); // Should not exceed limit
     });
@@ -151,4 +151,3 @@ describe('QueryCache Unit Tests', () => {
     });
   });
 });
-

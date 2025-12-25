@@ -119,7 +119,7 @@ export function OAuthProviderButton({
       {/* Circular icon button */}
       <motion.div
         className={cn(
-          'flex h-16 w-16 items-center justify-center rounded-full border bg-foreground/5',
+          'bg-foreground/5 flex h-16 w-16 items-center justify-center rounded-full border',
           'border-color-border-focus',
           loading && 'cursor-wait'
         )}

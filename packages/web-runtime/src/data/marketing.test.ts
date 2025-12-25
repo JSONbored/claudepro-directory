@@ -23,7 +23,7 @@ describe('marketing data functions', () => {
   describe('getPartnerPricing', () => {
     it('should return partner pricing configuration', () => {
       const result = getPartnerPricing();
-      
+
       expect(result).toEqual({
         jobs: {
           discounted: 50,
@@ -44,11 +44,10 @@ describe('marketing data functions', () => {
 
     it('should use values from PRICING_CONFIG', () => {
       const result = getPartnerPricing();
-      
+
       expect(result.jobs.discounted).toBe(PRICING_CONFIG['jobs.discounted']);
       expect(result.jobs.regular).toBe(PRICING_CONFIG['jobs.regular']);
       expect(result.launch.discountPercent).toBe(PRICING_CONFIG.launch_discount_percent);
     });
   });
 });
-

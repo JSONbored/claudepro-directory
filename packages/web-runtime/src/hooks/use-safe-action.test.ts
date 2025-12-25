@@ -50,7 +50,7 @@ const mockUseAction = mockModule.__mockUseAction;
 
 /**
  * Unit Tests
- * 
+ *
  * These tests verify that useSafeAction correctly wraps useAction and passes through
  * all properties, callbacks, and status flags. They use mocked useAction to test
  * the wrapper logic in isolation.
@@ -330,14 +330,9 @@ describe('useSafeAction (Unit Tests)', () => {
   });
 
   it('should test all status values', () => {
-    const statuses: Array<'idle' | 'executing' | 'transitioning' | 'hasSucceeded' | 'hasErrored' | 'hasNavigated'> = [
-      'idle',
-      'executing',
-      'transitioning',
-      'hasSucceeded',
-      'hasErrored',
-      'hasNavigated',
-    ];
+    const statuses: Array<
+      'idle' | 'executing' | 'transitioning' | 'hasSucceeded' | 'hasErrored' | 'hasNavigated'
+    > = ['idle', 'executing', 'transitioning', 'hasSucceeded', 'hasErrored', 'hasNavigated'];
 
     statuses.forEach((status) => {
       mockUseAction.mockReturnValue({
@@ -563,7 +558,7 @@ describe('useSafeAction (Unit Tests)', () => {
  * creating true end-to-end integration: Hook → Action → RPC → Database (Prismocker).
  *
  * This verifies the complete flow works correctly with minimal mocks.
- * 
+ *
  * Uses jest.doMock() to override the hoisted mock with real implementation.
  */
 describe('useSafeAction (Integration Tests)', () => {
@@ -587,7 +582,7 @@ describe('useSafeAction (Integration Tests)', () => {
     // Import Prismocker and cache utilities
     const { prisma } = await import('@heyclaude/data-layer/prisma/client');
     prismocker = prisma; // PrismockerClient (already typed as any)
-    
+
     const requestCache = await import('../../../data-layer/src/utils/request-cache.ts');
     clearRequestCache = requestCache.clearRequestCache;
 
@@ -687,9 +682,12 @@ describe('useSafeAction (Integration Tests)', () => {
     });
 
     // Wait for result
-    await waitFor(() => {
-      expect(result.current.result).toBeDefined();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(result.current.result).toBeDefined();
+      },
+      { timeout: 5000 }
+    );
 
     // Verify SafeActionResult structure
     expect(result.current.result?.data).toBeDefined();
@@ -739,9 +737,12 @@ describe('useSafeAction (Integration Tests)', () => {
     });
 
     // Wait for result
-    await waitFor(() => {
-      expect(result.current.result).toBeDefined();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(result.current.result).toBeDefined();
+      },
+      { timeout: 5000 }
+    );
 
     // Verify validation errors in SafeActionResult
     // useAction returns validationErrors (not fieldErrors from safemocker)
@@ -758,9 +759,7 @@ describe('useSafeAction (Integration Tests)', () => {
     registerActionForIntegration(addBookmark);
 
     // Mock RPC to throw error
-    (prismocker.$queryRawUnsafe as jest.Mock).mockRejectedValue(
-      new Error('Database error')
-    );
+    (prismocker.$queryRawUnsafe as jest.Mock).mockRejectedValue(new Error('Database error'));
 
     // Import useSafeAction (gets real useAction due to jest.doMock() override)
     const { useSafeAction } = await import('./use-safe-action');
@@ -777,9 +776,12 @@ describe('useSafeAction (Integration Tests)', () => {
     });
 
     // Wait for result
-    await waitFor(() => {
-      expect(result.current.result).toBeDefined();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(result.current.result).toBeDefined();
+      },
+      { timeout: 5000 }
+    );
 
     // Verify server error in SafeActionResult
     expect(result.current.result?.serverError).toBeDefined();

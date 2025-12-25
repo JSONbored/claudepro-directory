@@ -81,27 +81,33 @@ jest.mock('../../utils/monitoring', () => {
 const { __mockGetService: mockGetService } = jest.requireMock('../../../data/service-factory') as {
   __mockGetService: ReturnType<typeof jest.fn>;
 };
-const { __mockGetResendClient: mockGetResendClient } = jest.requireMock('../../../integrations/resend') as {
+const { __mockGetResendClient: mockGetResendClient } = jest.requireMock(
+  '../../../integrations/resend'
+) as {
   __mockGetResendClient: ReturnType<typeof jest.fn>;
 };
-const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock('../../../email/base-template') as {
+const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock(
+  '../../../email/base-template'
+) as {
   __mockRenderEmailTemplate: ReturnType<typeof jest.fn>;
 };
-const {
-  __mockLogger: mockLogger,
-  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
-} = jest.requireMock('../../../logging/server') as {
-  __mockLogger: {
-    info: ReturnType<typeof jest.fn>;
-    warn: ReturnType<typeof jest.fn>;
-    error: ReturnType<typeof jest.fn>;
+const { __mockLogger: mockLogger, __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId } =
+  jest.requireMock('../../../logging/server') as {
+    __mockLogger: {
+      info: ReturnType<typeof jest.fn>;
+      warn: ReturnType<typeof jest.fn>;
+      error: ReturnType<typeof jest.fn>;
+    };
+    __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
   };
-  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-};
-const { __mockNormalizeError: mockNormalizeError } = jest.requireMock('@heyclaude/shared-runtime') as {
+const { __mockNormalizeError: mockNormalizeError } = jest.requireMock(
+  '@heyclaude/shared-runtime'
+) as {
   __mockNormalizeError: ReturnType<typeof jest.fn>;
 };
-const { __mockSendCronSuccessHeartbeat: mockSendCronSuccessHeartbeat } = jest.requireMock('../../utils/monitoring') as {
+const { __mockSendCronSuccessHeartbeat: mockSendCronSuccessHeartbeat } = jest.requireMock(
+  '../../utils/monitoring'
+) as {
   __mockSendCronSuccessHeartbeat: ReturnType<typeof jest.fn>;
 };
 
@@ -207,9 +213,24 @@ describe('sendWeeklyDigest', () => {
     // Mock newsletter service
     const mockNewsletterService = {
       getActiveSubscribersWithPreferences: jest.fn().mockResolvedValue([
-        { email: 'subscriber1@example.com', categories_visited: [], engagement_score: 0, primary_interest: null },
-        { email: 'subscriber2@example.com', categories_visited: [], engagement_score: 0, primary_interest: null },
-        { email: 'subscriber3@example.com', categories_visited: [], engagement_score: 0, primary_interest: null },
+        {
+          email: 'subscriber1@example.com',
+          categories_visited: [],
+          engagement_score: 0,
+          primary_interest: null,
+        },
+        {
+          email: 'subscriber2@example.com',
+          categories_visited: [],
+          engagement_score: 0,
+          primary_interest: null,
+        },
+        {
+          email: 'subscriber3@example.com',
+          categories_visited: [],
+          engagement_score: 0,
+          primary_interest: null,
+        },
       ]),
     };
 
@@ -296,7 +317,16 @@ describe('sendWeeklyDigest', () => {
         week_of: 'December 16-22, 2025',
         week_start: '2025-12-16',
         week_end: '2025-12-22',
-        new_content: [{ category: 'agents', slug: 'test', title: 'Test', description: 'Test', date_added: '2025-12-17', url: 'https://example.com' }],
+        new_content: [
+          {
+            category: 'agents',
+            slug: 'test',
+            title: 'Test',
+            description: 'Test',
+            date_added: '2025-12-17',
+            url: 'https://example.com',
+          },
+        ],
         trending_content: [],
       }),
     };
@@ -382,7 +412,16 @@ describe('sendWeeklyDigest', () => {
         week_of: 'December 16-22, 2025',
         week_start: '2025-12-16',
         week_end: '2025-12-22',
-        new_content: [{ category: 'agents', slug: 'test', title: 'Test', description: 'Test', date_added: '2025-12-17', url: 'https://example.com' }],
+        new_content: [
+          {
+            category: 'agents',
+            slug: 'test',
+            title: 'Test',
+            description: 'Test',
+            date_added: '2025-12-17',
+            url: 'https://example.com',
+          },
+        ],
         trending_content: [],
       }),
     };
@@ -467,7 +506,16 @@ describe('sendWeeklyDigest', () => {
         week_of: 'December 16-22, 2025',
         week_start: '2025-12-16',
         week_end: '2025-12-22',
-        new_content: [{ category: 'agents', slug: 'test', title: 'Test', description: 'Test', date_added: '2025-12-17', url: 'https://example.com' }],
+        new_content: [
+          {
+            category: 'agents',
+            slug: 'test',
+            title: 'Test',
+            description: 'Test',
+            date_added: '2025-12-17',
+            url: 'https://example.com',
+          },
+        ],
         trending_content: [],
       }),
     };
@@ -517,15 +565,34 @@ describe('sendWeeklyDigest', () => {
         week_of: 'December 16-22, 2025',
         week_start: '2025-12-16',
         week_end: '2025-12-22',
-        new_content: [{ category: 'agents', slug: 'test', title: 'Test', description: 'Test', date_added: '2025-12-17', url: 'https://example.com' }],
+        new_content: [
+          {
+            category: 'agents',
+            slug: 'test',
+            title: 'Test',
+            description: 'Test',
+            date_added: '2025-12-17',
+            url: 'https://example.com',
+          },
+        ],
         trending_content: [],
       }),
     };
 
     const mockNewsletterService = {
       getActiveSubscribersWithPreferences: jest.fn().mockResolvedValue([
-        { email: 'subscriber1@example.com', categories_visited: [], engagement_score: 0, primary_interest: null },
-        { email: 'subscriber2@example.com', categories_visited: [], engagement_score: 0, primary_interest: null },
+        {
+          email: 'subscriber1@example.com',
+          categories_visited: [],
+          engagement_score: 0,
+          primary_interest: null,
+        },
+        {
+          email: 'subscriber2@example.com',
+          categories_visited: [],
+          engagement_score: 0,
+          primary_interest: null,
+        },
       ]),
     };
 
@@ -576,14 +643,28 @@ describe('sendWeeklyDigest', () => {
         week_of: 'December 16-22, 2025',
         week_start: '2025-12-16',
         week_end: '2025-12-22',
-        new_content: [{ category: 'agents', slug: 'test', title: 'Test', description: 'Test', date_added: '2025-12-17', url: 'https://example.com' }],
+        new_content: [
+          {
+            category: 'agents',
+            slug: 'test',
+            title: 'Test',
+            description: 'Test',
+            date_added: '2025-12-17',
+            url: 'https://example.com',
+          },
+        ],
         trending_content: [],
       }),
     };
 
     const mockNewsletterService = {
       getActiveSubscribersWithPreferences: jest.fn().mockResolvedValue([
-        { email: 'subscriber1@example.com', categories_visited: [], engagement_score: 0, primary_interest: null },
+        {
+          email: 'subscriber1@example.com',
+          categories_visited: [],
+          engagement_score: 0,
+          primary_interest: null,
+        },
       ]),
     };
 
@@ -626,14 +707,28 @@ describe('sendWeeklyDigest', () => {
         week_of: 'December 16-22, 2025',
         week_start: '2025-12-16',
         week_end: '2025-12-22',
-        new_content: [{ category: 'agents', slug: 'test', title: 'Test', description: 'Test', date_added: '2025-12-17', url: 'https://example.com' }],
+        new_content: [
+          {
+            category: 'agents',
+            slug: 'test',
+            title: 'Test',
+            description: 'Test',
+            date_added: '2025-12-17',
+            url: 'https://example.com',
+          },
+        ],
         trending_content: [], // No trending content
       }),
     };
 
     const mockNewsletterService = {
       getActiveSubscribersWithPreferences: jest.fn().mockResolvedValue([
-        { email: 'subscriber@example.com', categories_visited: [], engagement_score: 0, primary_interest: null },
+        {
+          email: 'subscriber@example.com',
+          categories_visited: [],
+          engagement_score: 0,
+          primary_interest: null,
+        },
       ]),
     };
 
@@ -663,13 +758,27 @@ describe('sendWeeklyDigest', () => {
         week_start: '2025-12-16',
         week_end: '2025-12-22',
         new_content: [], // No new content
-        trending_content: [{ category: 'mcp', slug: 'test', title: 'Test', description: 'Test', url: 'https://example.com', views_total: 1000 }],
+        trending_content: [
+          {
+            category: 'mcp',
+            slug: 'test',
+            title: 'Test',
+            description: 'Test',
+            url: 'https://example.com',
+            views_total: 1000,
+          },
+        ],
       }),
     };
 
     const mockNewsletterService = {
       getActiveSubscribersWithPreferences: jest.fn().mockResolvedValue([
-        { email: 'subscriber@example.com', categories_visited: [], engagement_score: 0, primary_interest: null },
+        {
+          email: 'subscriber@example.com',
+          categories_visited: [],
+          engagement_score: 0,
+          primary_interest: null,
+        },
       ]),
     };
 
@@ -741,7 +850,16 @@ describe('sendWeeklyDigest', () => {
         week_of: 'December 16-22, 2025',
         week_start: '2025-12-16',
         week_end: '2025-12-22',
-        new_content: [{ category: 'agents', slug: 'test', title: 'Test', description: 'Test', date_added: '2025-12-17', url: 'https://example.com' }],
+        new_content: [
+          {
+            category: 'agents',
+            slug: 'test',
+            title: 'Test',
+            description: 'Test',
+            date_added: '2025-12-17',
+            url: 'https://example.com',
+          },
+        ],
         trending_content: [],
       }),
     };
@@ -757,7 +875,12 @@ describe('sendWeeklyDigest', () => {
     // (fetch-subscribers step requires digest content to be available)
     const mockNewsletterService = {
       getActiveSubscribersWithPreferences: jest.fn().mockResolvedValue([
-        { email: 'subscriber@example.com', categories_visited: [], engagement_score: 0, primary_interest: null },
+        {
+          email: 'subscriber@example.com',
+          categories_visited: [],
+          engagement_score: 0,
+          primary_interest: null,
+        },
       ]),
     };
 
@@ -791,14 +914,28 @@ describe('sendWeeklyDigest', () => {
         week_of: 'December 16-22, 2025',
         week_start: '2025-12-16',
         week_end: '2025-12-22',
-        new_content: [{ category: 'agents', slug: 'test', title: 'Test', description: 'Test', date_added: '2025-12-17', url: 'https://example.com' }],
+        new_content: [
+          {
+            category: 'agents',
+            slug: 'test',
+            title: 'Test',
+            description: 'Test',
+            date_added: '2025-12-17',
+            url: 'https://example.com',
+          },
+        ],
         trending_content: [],
       }),
     };
 
     const mockNewsletterService = {
       getActiveSubscribersWithPreferences: jest.fn().mockResolvedValue([
-        { email: 'subscriber@example.com', categories_visited: [], engagement_score: 0, primary_interest: null },
+        {
+          email: 'subscriber@example.com',
+          categories_visited: [],
+          engagement_score: 0,
+          primary_interest: null,
+        },
       ]),
     };
 
@@ -836,7 +973,16 @@ describe('sendWeeklyDigest', () => {
         week_of: 'December 16-22, 2025',
         week_start: '2025-12-16',
         week_end: '2025-12-22',
-        new_content: [{ category: 'agents', slug: 'test', title: 'Test', description: 'Test', date_added: '2025-12-17', url: 'https://example.com' }],
+        new_content: [
+          {
+            category: 'agents',
+            slug: 'test',
+            title: 'Test',
+            description: 'Test',
+            date_added: '2025-12-17',
+            url: 'https://example.com',
+          },
+        ],
         trending_content: [],
       }),
     };
@@ -873,4 +1019,3 @@ describe('sendWeeklyDigest', () => {
     expect(result).toHaveProperty('rate', '97.1%'); // 100/103 = 97.087% ≈ 97.1%
   });
 });
-

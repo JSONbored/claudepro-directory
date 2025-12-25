@@ -47,7 +47,7 @@ describe('useTimeout', () => {
 
     // Advance to when timeout should fire
     jest.advanceTimersByTime(1500);
-    
+
     // Should use latest callback (callback2), not the original (callback1)
     expect(callback1).not.toHaveBeenCalled();
     expect(callback2).toHaveBeenCalledTimes(1);

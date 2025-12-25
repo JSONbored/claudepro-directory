@@ -8,5 +8,4 @@
 --
 -- Function signature: get_user_companies(p_user_id uuid)
 -- Related: AccountService.getUserCompanies uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_user_companies(uuid);
+DROP FUNCTION IF EXISTS public.get_user_companies (uuid);

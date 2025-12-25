@@ -64,10 +64,11 @@ describe('Raw Queries Feature Tests', () => {
       }
 
       const userId = 'user-1';
-      const result = (await customPrisma.$queryRaw`SELECT * FROM users WHERE id = ${userId}`) as Array<{
-        id: string;
-        name: string;
-      }>;
+      const result =
+        (await customPrisma.$queryRaw`SELECT * FROM users WHERE id = ${userId}`) as Array<{
+          id: string;
+          name: string;
+        }>;
 
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('user-1');
@@ -155,7 +156,8 @@ describe('Raw Queries Feature Tests', () => {
 
       const userId = 'user-1';
       const newName = 'Alice Updated';
-      const result = await customPrisma.$executeRaw`UPDATE users SET name = ${newName} WHERE id = ${userId}`;
+      const result =
+        await customPrisma.$executeRaw`UPDATE users SET name = ${newName} WHERE id = ${userId}`;
 
       expect(result).toBe(1);
 
@@ -183,12 +185,12 @@ describe('Raw Queries Feature Tests', () => {
     it('should handle numeric values in SQL', async () => {
       const customPrisma = createPrismocker<PrismaClient>({ enableSqlParsing: true });
       if (isPrismockerClient(customPrisma)) {
-        setDataTyped(customPrisma, 'users', [
-          { id: 'user-1', name: 'Alice', age: 25 },
-        ]);
+        setDataTyped(customPrisma, 'users', [{ id: 'user-1', name: 'Alice', age: 25 }]);
       }
 
-      const result = await customPrisma.$executeRawUnsafe('UPDATE users SET age = 30 WHERE id = \'user-1\'');
+      const result = await customPrisma.$executeRawUnsafe(
+        "UPDATE users SET age = 30 WHERE id = 'user-1'"
+      );
 
       expect(result).toBe(1);
 
@@ -197,4 +199,3 @@ describe('Raw Queries Feature Tests', () => {
     });
   });
 });
-

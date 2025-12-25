@@ -47,7 +47,9 @@ describe('ChangelogService', () => {
         total_count: 0,
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       const result = await changelogService.getChangelogOverview({
         p_limit: 10,
@@ -84,7 +86,9 @@ describe('ChangelogService', () => {
         total_count: 0,
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       // First call
       await changelogService.getChangelogOverview({
@@ -114,7 +118,9 @@ describe('ChangelogService', () => {
         content: 'Test changelog content',
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       const result = await changelogService.getChangelogDetail({
         p_slug: '1-2-0-2025-12-07',
@@ -147,7 +153,9 @@ describe('ChangelogService', () => {
         content: 'Test changelog content',
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       // First call
       await changelogService.getChangelogDetail({
@@ -174,7 +182,9 @@ describe('ChangelogService', () => {
         category_stats: [],
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       const result = await changelogService.getChangelogWithCategoryStats({
         p_limit: 10,
@@ -195,7 +205,9 @@ describe('ChangelogService', () => {
         category_stats: [],
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       // First call
       await changelogService.getChangelogWithCategoryStats({

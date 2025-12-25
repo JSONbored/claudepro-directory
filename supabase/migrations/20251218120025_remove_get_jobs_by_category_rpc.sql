@@ -8,5 +8,4 @@
 --
 -- Function signature: get_jobs_by_category(p_category job_category)
 -- Related: JobsService.getJobsByCategory uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_jobs_by_category(public.job_category);
+DROP FUNCTION IF EXISTS public.get_jobs_by_category (public.job_category);

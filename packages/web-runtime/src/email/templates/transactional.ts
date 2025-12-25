@@ -10,4 +10,3 @@ export type { JobPostedEmailProps } from './job-posted';
 
 export { PasswordResetEmail } from './password-reset';
 export type { PasswordResetEmailProps } from './password-reset';
-

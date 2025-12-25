@@ -43,10 +43,14 @@ function parseArgs(): { type: PackageType } {
       if (value === 'skills' || value === 'mcpb' || value === 'all') {
         type = value as PackageType;
       } else {
-        logger.error(`Invalid package type: ${value}. Must be one of: skills, mcpb, all`, undefined, {
-          script: 'generate-packages',
-          type: value,
-        });
+        logger.error(
+          `Invalid package type: ${value}. Must be one of: skills, mcpb, all`,
+          undefined,
+          {
+            script: 'generate-packages',
+            type: value,
+          }
+        );
         showHelp();
         process.exit(1);
       }
@@ -158,4 +162,3 @@ export async function runGeneratePackages(): Promise<void> {
 
   logger.info('\n✨ All package generation complete!\n', { script: 'generate-packages' });
 }
-

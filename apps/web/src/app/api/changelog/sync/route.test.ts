@@ -133,7 +133,9 @@ describe('POST /api/changelog/sync', () => {
     // ChangelogService.syncChangelogEntry uses callRpc → BasePrismaService.callRpc → $queryRawUnsafe
     // pgmqSend also uses prisma.$queryRawUnsafe internally
     // Default: return successful results for both RPC and pgmq
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([{ msg_id: BigInt(1) }]) as unknown as typeof prismocker.$queryRawUnsafe;
+    prismocker.$queryRawUnsafe = jest
+      .fn()
+      .mockResolvedValue([{ msg_id: BigInt(1) }]) as unknown as typeof prismocker.$queryRawUnsafe;
   });
 
   it('should return 200 when changelog is synced successfully', async () => {
@@ -153,7 +155,9 @@ describe('POST /api/changelog/sync', () => {
     // Mock RPC response for sync_changelog_entry
     // ChangelogService.syncChangelogEntry calls callRpc which uses $queryRawUnsafe
     // RPC returns TABLE(...) which is an array, so we return array
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(mockChangelogData as any);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(
+      mockChangelogData as any
+    );
 
     const request = createMockRequest({
       method: 'POST',
@@ -252,7 +256,9 @@ describe('POST /api/changelog/sync', () => {
     ];
 
     // Mock RPC response for sync_changelog_entry (existing entry)
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(mockChangelogData as any);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(
+      mockChangelogData as any
+    );
 
     const request = createMockRequest({
       method: 'POST',
@@ -298,7 +304,9 @@ describe('POST /api/changelog/sync', () => {
     ];
 
     // Mock RPC response for sync_changelog_entry
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(mockChangelogData as any);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(
+      mockChangelogData as any
+    );
 
     const request = createMockRequest({
       method: 'POST',
@@ -354,9 +362,13 @@ describe('POST /api/changelog/sync', () => {
     ];
 
     // Mock RPC response for sync_changelog_entry (success)
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(mockChangelogData as any);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValueOnce(
+      mockChangelogData as any
+    );
     // Make $queryRawUnsafe throw on second call to simulate pgmqSend failure
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValueOnce(new Error('Queue error'));
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValueOnce(
+      new Error('Queue error')
+    );
 
     const request = createMockRequest({
       method: 'POST',

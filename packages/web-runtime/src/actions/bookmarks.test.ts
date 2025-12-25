@@ -58,7 +58,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {
@@ -258,7 +258,7 @@ describe('bookmarks', () => {
       expect(safeResult.fieldErrors).toBeDefined();
       expect(safeResult.data).toBeUndefined();
       expect(safeResult.serverError).toBeUndefined();
-      
+
       // Verify field errors for missing required fields
       expect(safeResult.fieldErrors?.content_type).toBeDefined();
       expect(safeResult.fieldErrors?.content_slug).toBeDefined();
@@ -289,7 +289,7 @@ describe('bookmarks', () => {
       // Use valid UUID format for user_id to match addBookmarkReturnsSchema validation
       // The schema expects UUID format, not 'test-user-id'
       const testUserId = '123e4567-e89b-12d3-a456-426614174001'; // Valid UUID format
-      
+
       const mockResult = {
         success: true,
         bookmark: {

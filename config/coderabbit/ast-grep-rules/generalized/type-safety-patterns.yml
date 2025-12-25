@@ -30,7 +30,7 @@ rule:
     - not:
         has:
           regex: :\s*\w+\s*\{
-message: "Exported functions should have explicit return type annotations for better type safety and documentation"
+message: 'Exported functions should have explicit return type annotations for better type safety and documentation'
 severity: info
 
 ---
@@ -45,7 +45,7 @@ rule:
     - not:
         has:
           regex: \$PARAM:\s*\w+
-message: "Function parameters should have explicit type annotations. Add: function func(param: Type) { ... }"
+message: 'Function parameters should have explicit type annotations. Add: function func(param: Type) { ... }'
 severity: warning
 
 ---
@@ -57,5 +57,5 @@ rule:
     - kind: non_null_expression
     - has:
         pattern: $VALUE!
-message: "Non-null assertion (!) used. Consider adding comment explaining why value is guaranteed to be non-null"
+message: 'Non-null assertion (!) used. Consider adding comment explaining why value is guaranteed to be non-null'
 severity: warning

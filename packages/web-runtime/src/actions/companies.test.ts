@@ -62,7 +62,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {
@@ -175,7 +175,7 @@ describe('companies', () => {
         expect(safeResult.fieldErrors).toBeDefined();
         expect(safeResult.data).toBeUndefined();
         expect(safeResult.serverError).toBeUndefined();
-        
+
         // Verify field errors for invalid query length
         expect(safeResult.fieldErrors?.query).toBeDefined();
       });
@@ -194,7 +194,7 @@ describe('companies', () => {
         expect(safeResult.fieldErrors).toBeDefined();
         expect(safeResult.data).toBeUndefined();
         expect(safeResult.serverError).toBeUndefined();
-        
+
         // Verify field errors for invalid query length
         expect(safeResult.fieldErrors?.query).toBeDefined();
       });
@@ -256,7 +256,10 @@ describe('companies', () => {
 
         // Verify SafeActionResult structure
         // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
-        const safeResult = result as SafeActionResult<{ companies: typeof mockCompanies; debounceMs: number }>;
+        const safeResult = result as SafeActionResult<{
+          companies: typeof mockCompanies;
+          debounceMs: number;
+        }>;
         expect(safeResult.data).toBeDefined();
         expect(safeResult.serverError).toBeUndefined();
         expect(safeResult.fieldErrors).toBeUndefined();
@@ -264,7 +267,7 @@ describe('companies', () => {
 
         // Verify RPC was called (searchCompanies → fetchCompanySearchResults → SearchService.searchUnified → RPC)
         expect(prismocker.$queryRawUnsafe).toHaveBeenCalled();
-        
+
         // Verify result data structure (wrapped in SafeActionResult.data)
         expect(safeResult.data).toEqual({
           companies: mockCompanies,
@@ -321,7 +324,7 @@ describe('companies', () => {
         const safeResult = result as SafeActionResult<{ companies: any[]; debounceMs: number }>;
         expect(safeResult.data).toBeDefined();
         expect(safeResult.serverError).toBeUndefined();
-        
+
         // Verify result data structure (wrapped in SafeActionResult.data)
         expect(safeResult.data).toEqual({
           companies: [],
@@ -333,7 +336,9 @@ describe('companies', () => {
         const { searchCompaniesAction } = await import('./companies.ts');
 
         mockGetTimeoutConfig.mockReturnValue(null);
-        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([{ data: [] }]);
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+          { data: [] },
+        ]);
 
         // Call action - now returns SafeActionResult structure
         const result = await searchCompaniesAction({
@@ -351,7 +356,9 @@ describe('companies', () => {
         const { searchCompaniesAction } = await import('./companies.ts');
 
         mockGetTimeoutConfig.mockReturnValue({});
-        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([{ data: [] }]);
+        (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+          { data: [] },
+        ]);
 
         // Call action - now returns SafeActionResult structure
         const result = await searchCompaniesAction({
@@ -460,7 +467,7 @@ describe('companies', () => {
         expect(safeResult.fieldErrors).toBeDefined();
         expect(safeResult.data).toBeUndefined();
         expect(safeResult.serverError).toBeUndefined();
-        
+
         // Verify field errors for invalid UUID
         expect(safeResult.fieldErrors?.companyId).toBeDefined();
       });
@@ -750,7 +757,7 @@ describe('companies', () => {
         expect(safeResult.fieldErrors).toBeDefined();
         expect(safeResult.data).toBeUndefined();
         expect(safeResult.serverError).toBeUndefined();
-        
+
         // Verify field errors for invalid UUID
         expect(safeResult.fieldErrors?.companyId).toBeDefined();
       });
@@ -774,7 +781,7 @@ describe('companies', () => {
         expect(safeResult.fieldErrors).toBeDefined();
         expect(safeResult.data).toBeUndefined();
         expect(safeResult.serverError).toBeUndefined();
-        
+
         // Verify field errors for invalid URL
         expect(safeResult.fieldErrors?.oldLogoUrl).toBeDefined();
       });
@@ -821,7 +828,9 @@ describe('companies', () => {
         const safeResult = result as SafeActionResult<never>;
         expect(safeResult.serverError).toBeDefined();
         expect(safeResult.data).toBeUndefined();
-        expect(safeResult.serverError).toContain('You do not have permission to manage this company');
+        expect(safeResult.serverError).toContain(
+          'You do not have permission to manage this company'
+        );
       });
 
       it('should return serverError when company not found', async () => {
@@ -917,7 +926,11 @@ describe('companies', () => {
         expect(safeResult.data).toBeDefined();
         expect(safeResult.serverError).toBeUndefined();
 
-        expect(mockDeleteImageFromStorage).toHaveBeenCalledWith('company-logos', 'logos/old-logo.png', {});
+        expect(mockDeleteImageFromStorage).toHaveBeenCalledWith(
+          'company-logos',
+          'logos/old-logo.png',
+          {}
+        );
       });
 
       it('should return serverError when upload fails', async () => {

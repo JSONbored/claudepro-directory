@@ -56,7 +56,6 @@ export const processEmailSequence = createInngestFunction(
   },
   { cron: '0 */6 * * *' }, // Every 6 hours
   async ({ step, logContext }) => {
-
     // Step 1: Fetch due sequence emails
     const dueEmails = await step.run('fetch-due-emails', async (): Promise<SequenceEmailItem[]> => {
       const service = await getService('misc'); // Consolidated: EmailService methods moved to MiscService

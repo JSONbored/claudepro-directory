@@ -171,21 +171,18 @@ export class MiscService extends BasePrismaService {
         // OPTIMIZATION: Use Prisma query builder instead of raw SQL for better type safety and maintainability
         // Since we're in withSmartCache (skips during build), Date.now() is safe here
         const now = new Date();
-        
+
         const notifications = await prisma.notifications.findMany({
           where: {
             active: true,
-            OR: [
-              { expires_at: null },
-              { expires_at: { gt: now } },
-            ],
+            OR: [{ expires_at: null }, { expires_at: { gt: now } }],
             ...(p_dismissed_ids.length > 0 && {
               id: { notIn: p_dismissed_ids },
             }),
           },
           orderBy: { created_at: 'desc' },
         });
-        
+
         return notifications;
       },
       args
@@ -212,31 +209,22 @@ export class MiscService extends BasePrismaService {
         // OPTIMIZATION: Use Prisma query builder instead of raw SQL for better type safety and maintainability
         // Since we're in withSmartCache (skips during build), Date.now() is safe here
         const now = new Date();
-        
+
         const result = await prisma.announcements.findFirst({
           where: {
             active: true,
             AND: [
               {
-                OR: [
-                  { start_date: null },
-                  { start_date: { lte: now } },
-                ],
+                OR: [{ start_date: null }, { start_date: { lte: now } }],
               },
               {
-                OR: [
-                  { end_date: null },
-                  { end_date: { gte: now } },
-                ],
+                OR: [{ end_date: null }, { end_date: { gte: now } }],
               },
             ],
           },
-          orderBy: [
-            { priority: 'desc' },
-            { start_date: { sort: 'desc', nulls: 'last' } },
-          ],
+          orderBy: [{ priority: 'desc' }, { start_date: { sort: 'desc', nulls: 'last' } }],
         });
-        
+
         return result;
       },
       args
@@ -413,7 +401,7 @@ export class MiscService extends BasePrismaService {
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        
+
         // OPTIMIZATION: Use Prisma queries instead of raw SQL for better type safety
         const [
           recentSubmissionsCount,
@@ -914,7 +902,7 @@ export class MiscService extends BasePrismaService {
     // OPTIMIZATION: Use Prisma query builder instead of raw SQL for better type safety and maintainability
     // Since this is not in withSmartCache, we can safely use new Date()
     const now = new Date();
-    
+
     const dueSchedules = await prisma.email_sequence_schedule.findMany({
       where: {
         sequence_id: 'onboarding',

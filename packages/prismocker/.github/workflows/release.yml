@@ -5,29 +5,29 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'  # Triggers on version tags (e.g., v0.1.0, v1.2.3)
+      - 'v*.*.*' # Triggers on version tags (e.g., v0.1.0, v1.2.3)
 
 jobs:
   release:
     name: Publish to npm and create GitHub release
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     permissions:
-      contents: write  # Required to create GitHub releases
+      contents: write # Required to create GitHub releases
       id-token: write # Required for npm publish (if using OIDC)
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for changelog generation
-      
+          fetch-depth: 0 # Full history for changelog generation
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -36,23 +36,23 @@ jobs:
           cache: 'pnpm'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Build
         run: pnpm build
-      
+
       - name: Run tests
         run: pnpm test
-      
+
       - name: Extract version from tag
         id: version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "Tag version: $VERSION"
-      
+
       - name: Verify package.json version matches tag
         run: |
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
@@ -62,12 +62,12 @@ jobs:
             exit 1
           fi
           echo "✅ Version match: $PACKAGE_VERSION"
-      
+
       - name: Publish to npm
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      
+
       - name: Extract changelog for version
         id: changelog
         run: |
@@ -83,7 +83,7 @@ jobs:
             found { print }
           ' CHANGELOG.md > /tmp/release-notes.md
           echo "notes_path=/tmp/release-notes.md" >> $GITHUB_OUTPUT
-      
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -95,4 +95,3 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

@@ -244,7 +244,10 @@ describe('jobs-crud', () => {
     (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([]);
 
     // 6. Set up Inngest function mocks using shared setup functions (eliminates duplication)
-    jobLifecycleMocks = setupJobLifecycleEmailMocks('sendJobLifecycleEmail', '/inngest/email/job-lifecycle');
+    jobLifecycleMocks = setupJobLifecycleEmailMocks(
+      'sendJobLifecycleEmail',
+      '/inngest/email/job-lifecycle'
+    );
     jobPostingMocks = setupJobPostingDripCampaignMocks(
       'jobPostingDripCampaign',
       '/inngest/email/drip-campaigns/job-posting'
@@ -283,13 +286,13 @@ describe('jobs-crud', () => {
   afterEach(async () => {
     // Clear all timers (prevents setTimeout/setInterval from keeping tests alive)
     jest.clearAllTimers();
-    
+
     // Ensure all pending promises are resolved
     await new Promise((resolve) => setImmediate(resolve));
-    
+
     // Clear the Inngest function registry to prevent function persistence between tests
     clearInngestFunctionRegistry();
-    
+
     // Clear the integration spy to prevent event history from persisting
     if (inngestSendSpy) {
       inngestSendSpy.mockClear();
@@ -480,9 +483,18 @@ describe('jobs-crud', () => {
         // Verify cache invalidation
         expect(mockRevalidatePath).toHaveBeenCalledWith('/jobs');
         expect(mockRevalidatePath).toHaveBeenCalledWith('/account/jobs');
-        expect(mockRevalidateTag).toHaveBeenCalledWith('job-123e4567-e89b-12d3-a456-426614174000', 'default');
-        expect(mockRevalidateTag).toHaveBeenCalledWith('company-223e4567-e89b-12d3-a456-426614174001', 'default');
-        expect(mockRevalidateTag).toHaveBeenCalledWith('company-id-223e4567-e89b-12d3-a456-426614174001', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith(
+          'job-123e4567-e89b-12d3-a456-426614174000',
+          'default'
+        );
+        expect(mockRevalidateTag).toHaveBeenCalledWith(
+          'company-223e4567-e89b-12d3-a456-426614174001',
+          'default'
+        );
+        expect(mockRevalidateTag).toHaveBeenCalledWith(
+          'company-id-223e4567-e89b-12d3-a456-426614174001',
+          'default'
+        );
         expect(mockRevalidateTag).toHaveBeenCalledWith('jobs', 'default');
         expect(mockRevalidateTag).toHaveBeenCalledWith('companies', 'default');
       });
@@ -647,10 +659,15 @@ describe('jobs-crud', () => {
 
         // Verify cache invalidation
         expect(mockRevalidatePath).toHaveBeenCalledWith('/account/jobs');
-        expect(mockRevalidatePath).toHaveBeenCalledWith('/account/jobs/123e4567-e89b-12d3-a456-426614174000/edit');
+        expect(mockRevalidatePath).toHaveBeenCalledWith(
+          '/account/jobs/123e4567-e89b-12d3-a456-426614174000/edit'
+        );
         expect(mockRevalidatePath).toHaveBeenCalledWith('/jobs');
         // Tags: ['job-${job_id}', 'jobs', 'companies']
-        expect(mockRevalidateTag).toHaveBeenCalledWith('job-123e4567-e89b-12d3-a456-426614174000', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith(
+          'job-123e4567-e89b-12d3-a456-426614174000',
+          'default'
+        );
         expect(mockRevalidateTag).toHaveBeenCalledWith('jobs', 'default');
         expect(mockRevalidateTag).toHaveBeenCalledWith('companies', 'default');
       });
@@ -845,7 +862,10 @@ describe('jobs-crud', () => {
         expect(mockRevalidatePath).toHaveBeenCalledWith('/jobs');
         expect(mockRevalidatePath).toHaveBeenCalledWith('/account/jobs');
         // Tags: ['job-${job_id}', 'jobs', 'companies']
-        expect(mockRevalidateTag).toHaveBeenCalledWith('job-123e4567-e89b-12d3-a456-426614174000', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith(
+          'job-123e4567-e89b-12d3-a456-426614174000',
+          'default'
+        );
         expect(mockRevalidateTag).toHaveBeenCalledWith('jobs', 'default');
         expect(mockRevalidateTag).toHaveBeenCalledWith('companies', 'default');
       });

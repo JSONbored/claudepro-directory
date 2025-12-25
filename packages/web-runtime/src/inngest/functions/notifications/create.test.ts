@@ -227,7 +227,7 @@ describe('createNotification', () => {
     // Inngest test engine may not capture synchronous errors before step.run
     // Check error property (standard format)
     const error = (executeResult as { error?: Error | { message: string } })?.error;
-    
+
     // If error is not captured, at least verify the validation logic ran via logger
     if (!error) {
       // Validation ran (logger.warn was called), but error wasn't captured by test engine
@@ -236,7 +236,7 @@ describe('createNotification', () => {
       expect(mockLogger.warn).toHaveBeenCalled();
       return;
     }
-    
+
     // Handle both Error instances and error objects
     let errorMessage: string;
     if (error instanceof Error) {
@@ -246,7 +246,7 @@ describe('createNotification', () => {
     } else {
       errorMessage = String(error);
     }
-    
+
     expect(errorMessage).toBe('Invalid notification: title is required');
   });
 
@@ -276,7 +276,7 @@ describe('createNotification', () => {
     // Inngest test engine may not capture synchronous errors before step.run
     // Check error property (standard format)
     const error = (executeResult as { error?: Error | { message: string } })?.error;
-    
+
     // If error is not captured, at least verify the validation logic ran via logger
     if (!error) {
       // Validation ran (logger.warn was called), but error wasn't captured by test engine
@@ -285,7 +285,7 @@ describe('createNotification', () => {
       expect(mockLogger.warn).toHaveBeenCalled();
       return;
     }
-    
+
     // Handle both Error instances and error objects
     let errorMessage: string;
     if (error instanceof Error) {
@@ -295,7 +295,7 @@ describe('createNotification', () => {
     } else {
       errorMessage = String(error);
     }
-    
+
     expect(errorMessage).toBe('Invalid notification: message is required');
   });
 
@@ -329,7 +329,7 @@ describe('createNotification', () => {
     // Inngest test engine may not capture synchronous errors before step.run
     // Check error property (standard format)
     const error = (executeResult as { error?: Error | { message: string } })?.error;
-    
+
     // If error is not captured, at least verify the validation logic ran via logger
     if (!error) {
       // Validation ran (logger.warn was called), but error wasn't captured by test engine
@@ -338,7 +338,7 @@ describe('createNotification', () => {
       expect(mockLogger.warn).toHaveBeenCalled();
       return;
     }
-    
+
     // Handle both Error instances and error objects
     let errorMessage: string;
     if (error instanceof Error) {
@@ -348,7 +348,7 @@ describe('createNotification', () => {
     } else {
       errorMessage = String(error);
     }
-    
+
     expect(errorMessage).toBe('Invalid action_href: only http and https URLs are allowed');
   });
 
@@ -382,7 +382,7 @@ describe('createNotification', () => {
     // Inngest test engine may not capture synchronous errors before step.run
     // Check error property (standard format)
     const error = (executeResult as { error?: Error | { message: string } })?.error;
-    
+
     // If error is not captured, at least verify the validation logic ran via logger
     if (!error) {
       // Validation ran (logger.warn was called), but error wasn't captured by test engine
@@ -391,7 +391,7 @@ describe('createNotification', () => {
       expect(mockLogger.warn).toHaveBeenCalled();
       return;
     }
-    
+
     // Handle both Error instances and error objects
     let errorMessage: string;
     if (error instanceof Error) {
@@ -401,7 +401,7 @@ describe('createNotification', () => {
     } else {
       errorMessage = String(error);
     }
-    
+
     expect(errorMessage).toBe('Invalid action_href: must be a valid URL');
 
     expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -609,7 +609,7 @@ describe('broadcastNotification', () => {
     // Inngest test engine may not capture synchronous errors before step.run
     // Check error property (standard format)
     const error = (executeResult as { error?: Error | { message: string } })?.error;
-    
+
     // If error is not captured, at least verify the validation logic ran via logger
     if (!error) {
       // Validation ran (logger.warn was called), but error wasn't captured by test engine
@@ -618,7 +618,7 @@ describe('broadcastNotification', () => {
       expect(mockLogger.warn).toHaveBeenCalled();
       return;
     }
-    
+
     // Handle both Error instances and error objects
     let errorMessage: string;
     if (error instanceof Error) {
@@ -628,7 +628,7 @@ describe('broadcastNotification', () => {
     } else {
       errorMessage = String(error);
     }
-    
+
     expect(errorMessage).toBe('Invalid notification: title is required');
   });
 
@@ -658,7 +658,7 @@ describe('broadcastNotification', () => {
     // Inngest test engine may not capture synchronous errors before step.run
     // Check error property (standard format)
     const error = (executeResult as { error?: Error | { message: string } })?.error;
-    
+
     // If error is not captured, at least verify the validation logic ran via logger
     if (!error) {
       // Validation ran (logger.warn was called), but error wasn't captured by test engine
@@ -667,7 +667,7 @@ describe('broadcastNotification', () => {
       expect(mockLogger.warn).toHaveBeenCalled();
       return;
     }
-    
+
     // Handle both Error instances and error objects
     let errorMessage: string;
     if (error instanceof Error) {
@@ -677,8 +677,7 @@ describe('broadcastNotification', () => {
     } else {
       errorMessage = String(error);
     }
-    
+
     expect(errorMessage).toBe('Invalid notification: message is required');
   });
 });
-

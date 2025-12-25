@@ -119,7 +119,7 @@ describe('BasePrismaService', () => {
 
     // Mock executeRawUnsafe (alias for $queryRawUnsafe)
     executeRawUnsafeSpy = queryRawUnsafeSpy;
-    
+
     service = new TestService(prismocker);
     jest.clearAllMocks();
   });
@@ -134,12 +134,16 @@ describe('BasePrismaService', () => {
         const mockResult = [{ id: '1', name: 'Test' }];
         queryRawUnsafeSpy.mockResolvedValue(mockResult);
 
-        const result = await service.testCallRpc('get_all_items', {}, {
-          returnType: 'array', // Explicitly specify array return type
-        });
+        const result = await service.testCallRpc(
+          'get_all_items',
+          {},
+          {
+            returnType: 'array', // Explicitly specify array return type
+          }
+        );
 
         expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
-          'SELECT * FROM get_all_items()',
+          'SELECT * FROM get_all_items()'
           // No arguments
         );
         // get_all_items has 'list' in name, so it should return array (not unwrapped)
@@ -154,7 +158,7 @@ describe('BasePrismaService', () => {
 
         expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
           'SELECT * FROM get_item_by_id(p_id => $1)',
-          '123',
+          '123'
         );
         // get_item_by_id returns single object, so it should be unwrapped
         expect(result).toEqual({ id: '1', name: 'Test' });
@@ -174,7 +178,7 @@ describe('BasePrismaService', () => {
           'SELECT * FROM get_items(p_category => $1, p_limit => $2, p_offset => $3)',
           'agents',
           10,
-          0,
+          0
         );
         // get_items has no 'list' in name, but returns single object, so it should be unwrapped
         expect(result).toEqual({ id: '1', name: 'Test' });
@@ -186,9 +190,13 @@ describe('BasePrismaService', () => {
         const mockResult = [{ id: '1', name: 'Test' }];
         queryRawUnsafeSpy.mockResolvedValue(mockResult);
 
-        const result = await service.testCallRpc('get_item', { p_id: '123' }, {
-          returnType: 'single',
-        });
+        const result = await service.testCallRpc(
+          'get_item',
+          { p_id: '123' },
+          {
+            returnType: 'single',
+          }
+        );
 
         expect(result).toEqual({ id: '1', name: 'Test' }); // Unwrapped
       });
@@ -197,9 +205,13 @@ describe('BasePrismaService', () => {
         const mockResult = [{ id: '1' }, { id: '2' }];
         queryRawUnsafeSpy.mockResolvedValue(mockResult);
 
-        const result = await service.testCallRpc('get_items', { p_category: 'agents' }, {
-          returnType: 'array',
-        });
+        const result = await service.testCallRpc(
+          'get_items',
+          { p_category: 'agents' },
+          {
+            returnType: 'array',
+          }
+        );
 
         expect(result).toEqual(mockResult); // Not unwrapped
       });
@@ -208,9 +220,13 @@ describe('BasePrismaService', () => {
         const mockResult = [{ id: '1', name: 'Test', data: { nested: 'value' } }];
         queryRawUnsafeSpy.mockResolvedValue(mockResult);
 
-        const result = await service.testCallRpc('get_item_detail', { p_id: '123' }, {
-          returnType: 'auto',
-        });
+        const result = await service.testCallRpc(
+          'get_item_detail',
+          { p_id: '123' },
+          {
+            returnType: 'auto',
+          }
+        );
 
         expect(result).toEqual({ id: '1', name: 'Test', data: { nested: 'value' } }); // Unwrapped
       });
@@ -219,9 +235,13 @@ describe('BasePrismaService', () => {
         const mockResult = [{ id: '1' }, { id: '2' }];
         queryRawUnsafeSpy.mockResolvedValue(mockResult);
 
-        const result = await service.testCallRpc('get_content_list', { p_category: 'agents' }, {
-          returnType: 'auto',
-        });
+        const result = await service.testCallRpc(
+          'get_content_list',
+          { p_category: 'agents' },
+          {
+            returnType: 'auto',
+          }
+        );
 
         expect(result).toEqual(mockResult); // Not unwrapped (has 'list' in name)
       });
@@ -229,9 +249,13 @@ describe('BasePrismaService', () => {
       it('should return empty array for array return type when no results', async () => {
         queryRawUnsafeSpy.mockResolvedValue([]);
 
-        const result = await service.testCallRpc('get_items', { p_category: 'agents' }, {
-          returnType: 'array',
-        });
+        const result = await service.testCallRpc(
+          'get_items',
+          { p_category: 'agents' },
+          {
+            returnType: 'array',
+          }
+        );
 
         expect(result).toEqual([]);
       });
@@ -239,9 +263,13 @@ describe('BasePrismaService', () => {
       it('should return undefined for single return type when no results', async () => {
         queryRawUnsafeSpy.mockResolvedValue([]);
 
-        const result = await service.testCallRpc('get_item', { p_id: '123' }, {
-          returnType: 'single',
-        });
+        const result = await service.testCallRpc(
+          'get_item',
+          { p_id: '123' },
+          {
+            returnType: 'single',
+          }
+        );
 
         expect(result).toBeUndefined();
       });
@@ -251,11 +279,15 @@ describe('BasePrismaService', () => {
         const mockResult = [{ results: [], total_count: 0 }];
         queryRawUnsafeSpy.mockResolvedValue(mockResult);
 
-        const result = await service.testCallRpc('search_content_optimized', {
-          p_query: 'test',
-        }, {
-          returnType: 'auto',
-        });
+        const result = await service.testCallRpc(
+          'search_content_optimized',
+          {
+            p_query: 'test',
+          },
+          {
+            returnType: 'auto',
+          }
+        );
 
         expect(result).toEqual({ results: [], total_count: 0 }); // Unwrapped (composite type)
       });
@@ -266,10 +298,14 @@ describe('BasePrismaService', () => {
         const mockResult = [{ id: '1' }];
         (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockResult);
 
-        await service.testCallRpc('get_item', { p_id: '123' }, {
-          useCache: true,
-          methodName: 'getItem',
-        });
+        await service.testCallRpc(
+          'get_item',
+          { p_id: '123' },
+          {
+            useCache: true,
+            methodName: 'getItem',
+          }
+        );
 
         // Verify RPC was called
         expect(prismocker.$queryRawUnsafe).toHaveBeenCalled();
@@ -279,9 +315,13 @@ describe('BasePrismaService', () => {
         const mockResult = [{ id: '1' }];
         (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockResult);
 
-        await service.testCallRpc('get_item', { p_id: '123' }, {
-          useCache: false,
-        });
+        await service.testCallRpc(
+          'get_item',
+          { p_id: '123' },
+          {
+            useCache: false,
+          }
+        );
 
         expect(prismocker.$queryRawUnsafe).toHaveBeenCalled();
       });
@@ -293,24 +333,34 @@ describe('BasePrismaService', () => {
         const cache = getRequestCache();
 
         // First call - should hit database and populate cache
-        const result1 = await service.testCallRpc('get_item', { p_id: '123' }, {
-          useCache: true,
-          methodName: 'getItem',
-        });
+        const result1 = await service.testCallRpc(
+          'get_item',
+          { p_id: '123' },
+          {
+            useCache: true,
+            methodName: 'getItem',
+          }
+        );
         const cacheSizeAfterFirst = cache.getStats().size;
-        const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+        const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls
+          .length;
 
         // Second call - should hit cache (no database call)
-        const result2 = await service.testCallRpc('get_item', { p_id: '123' }, {
-          useCache: true,
-          methodName: 'getItem',
-        });
+        const result2 = await service.testCallRpc(
+          'get_item',
+          { p_id: '123' },
+          {
+            useCache: true,
+            methodName: 'getItem',
+          }
+        );
         const cacheSizeAfterSecond = cache.getStats().size;
-        const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+        const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock
+          .calls.length;
 
         // Verify results are the same (indicating cache was used)
         expect(result1).toEqual(result2);
-        
+
         // Verify cache was populated (cache size should increase after first call)
         if (cacheSizeAfterFirst > 0) {
           expect(cacheSizeAfterSecond).toBe(cacheSizeAfterFirst); // Cache size unchanged (hit cache)
@@ -329,9 +379,9 @@ describe('BasePrismaService', () => {
         queryRawUnsafeSpy.mockRejectedValue(mockError);
         const logRpcErrorSpy = jest.spyOn(rpcErrorLoggingModule, 'logRpcError');
 
-        await expect(
-          service.testCallRpc('get_item', { p_id: '123' })
-        ).rejects.toThrow('Database error');
+        await expect(service.testCallRpc('get_item', { p_id: '123' })).rejects.toThrow(
+          'Database error'
+        );
 
         expect(logRpcErrorSpy).toHaveBeenCalledWith(mockError, {
           rpcName: 'get_item',
@@ -347,9 +397,9 @@ describe('BasePrismaService', () => {
         queryRawUnsafeSpy.mockRejectedValue(mockError);
         const logRpcErrorSpy = jest.spyOn(rpcErrorLoggingModule, 'logRpcError');
 
-        await expect(
-          service.testCallRpc('get_item', { p_id: '123' })
-        ).rejects.toThrow('Validation error');
+        await expect(service.testCallRpc('get_item', { p_id: '123' })).rejects.toThrow(
+          'Validation error'
+        );
 
         expect(logRpcErrorSpy).toHaveBeenCalledWith(mockError, {
           rpcName: 'get_item',
@@ -363,9 +413,9 @@ describe('BasePrismaService', () => {
         queryRawUnsafeSpy.mockRejectedValue(mockError);
         const logRpcErrorSpy = jest.spyOn(rpcErrorLoggingModule, 'logRpcError');
 
-        await expect(
-          service.testCallRpc('get_item', { p_id: '123' })
-        ).rejects.toThrow('Generic error');
+        await expect(service.testCallRpc('get_item', { p_id: '123' })).rejects.toThrow(
+          'Generic error'
+        );
 
         expect(logRpcErrorSpy).toHaveBeenCalledWith(mockError, {
           rpcName: 'get_item',
@@ -380,9 +430,13 @@ describe('BasePrismaService', () => {
         const logRpcErrorSpy = jest.spyOn(rpcErrorLoggingModule, 'logRpcError');
 
         await expect(
-          service.testCallRpc('get_item', { p_id: '123' }, {
-            methodName: 'getItemById',
-          })
+          service.testCallRpc(
+            'get_item',
+            { p_id: '123' },
+            {
+              methodName: 'getItemById',
+            }
+          )
         ).rejects.toThrow();
 
         expect(logRpcErrorSpy).toHaveBeenCalledWith(mockError, {
@@ -400,10 +454,7 @@ describe('BasePrismaService', () => {
 
         const result = await service.testCallRpc('get_item', { p_id: null });
 
-        expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
-          'SELECT * FROM get_item(p_id => $1)',
-          null,
-        );
+        expect(queryRawUnsafeSpy).toHaveBeenCalledWith('SELECT * FROM get_item(p_id => $1)', null);
         // get_item returns single object, so it should be unwrapped
         expect(result).toEqual({ id: '1' });
       });
@@ -416,7 +467,7 @@ describe('BasePrismaService', () => {
 
         expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
           'SELECT * FROM get_item(p_id => $1)',
-          undefined,
+          undefined
         );
         // get_item returns single object, so it should be unwrapped
         expect(result).toEqual({ id: '1' });
@@ -426,12 +477,16 @@ describe('BasePrismaService', () => {
         const mockResult = [{ id: '1' }];
         queryRawUnsafeSpy.mockResolvedValue(mockResult);
 
-        const result = await service.testCallRpc('get_all_items', {}, {
-          returnType: 'array', // Explicitly specify array return type
-        });
+        const result = await service.testCallRpc(
+          'get_all_items',
+          {},
+          {
+            returnType: 'array', // Explicitly specify array return type
+          }
+        );
 
         expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
-          'SELECT * FROM get_all_items()',
+          'SELECT * FROM get_all_items()'
           // No arguments
         );
         // get_all_items has 'list' in name, so it should return array (not unwrapped)
@@ -461,7 +516,7 @@ describe('BasePrismaService', () => {
 
       expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         'SELECT COUNT(*) as count FROM content WHERE category = $1',
-        'agents',
+        'agents'
       );
       expect(result).toEqual(mockResult);
     });
@@ -473,13 +528,13 @@ describe('BasePrismaService', () => {
       const result = await service.testExecuteRaw(
         'SELECT * FROM content WHERE category = $1 AND slug = $2',
         'agents',
-        'test-slug',
+        'test-slug'
       );
 
       expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         'SELECT * FROM content WHERE category = $1 AND slug = $2',
         'agents',
-        'test-slug',
+        'test-slug'
       );
       expect(result).toEqual(mockResult);
     });
@@ -491,7 +546,7 @@ describe('BasePrismaService', () => {
       const result = await service.testExecuteRaw('SELECT COUNT(*) as count FROM content');
 
       expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
-        'SELECT COUNT(*) as count FROM content',
+        'SELECT COUNT(*) as count FROM content'
         // No parameters
       );
       expect(result).toEqual(mockResult);
@@ -502,9 +557,7 @@ describe('BasePrismaService', () => {
       queryRawUnsafeSpy.mockRejectedValue(mockError);
       const logRpcErrorSpy = jest.spyOn(rpcErrorLoggingModule, 'logRpcError');
 
-      await expect(
-        service.testExecuteRaw('INVALID SQL QUERY')
-      ).rejects.toThrow('SQL syntax error');
+      await expect(service.testExecuteRaw('INVALID SQL QUERY')).rejects.toThrow('SQL syntax error');
 
       expect(logRpcErrorSpy).toHaveBeenCalledWith(mockError, {
         rpcName: 'executeRaw',
@@ -519,9 +572,7 @@ describe('BasePrismaService', () => {
       queryRawUnsafeSpy.mockRejectedValue(mockError);
       const logRpcErrorSpy = jest.spyOn(rpcErrorLoggingModule, 'logRpcError');
 
-      await expect(
-        service.testExecuteRaw(longQuery, 'agents')
-      ).rejects.toThrow();
+      await expect(service.testExecuteRaw(longQuery, 'agents')).rejects.toThrow();
 
       expect(logRpcErrorSpy).toHaveBeenCalledWith(mockError, {
         rpcName: 'executeRaw',
@@ -544,13 +595,10 @@ describe('BasePrismaService', () => {
 
       const result = await service.testTransaction(transactionCallback);
 
-      expect(transactionSpy).toHaveBeenCalledWith(
-        expect.any(Function),
-        {
-          maxWait: 30000,
-          timeout: 30000,
-        },
-      );
+      expect(transactionSpy).toHaveBeenCalledWith(expect.any(Function), {
+        maxWait: 30000,
+        timeout: 30000,
+      });
       expect(transactionCallback).toHaveBeenCalled();
       expect(result).toEqual(mockResult);
     });
@@ -561,13 +609,10 @@ describe('BasePrismaService', () => {
 
       await service.testTransaction(transactionCallback, { timeout: 10000 });
 
-      expect(transactionSpy).toHaveBeenCalledWith(
-        expect.any(Function),
-        {
-          maxWait: 10000,
-          timeout: 10000,
-        },
-      );
+      expect(transactionSpy).toHaveBeenCalledWith(expect.any(Function), {
+        maxWait: 10000,
+        timeout: 10000,
+      });
     });
 
     it('should use custom isolation level', async () => {
@@ -578,14 +623,11 @@ describe('BasePrismaService', () => {
         isolationLevel: 'ReadCommitted',
       });
 
-      expect(transactionSpy).toHaveBeenCalledWith(
-        expect.any(Function),
-        {
-          maxWait: 30000,
-          timeout: 30000,
-          isolationLevel: 'ReadCommitted',
-        },
-      );
+      expect(transactionSpy).toHaveBeenCalledWith(expect.any(Function), {
+        maxWait: 30000,
+        timeout: 30000,
+        isolationLevel: 'ReadCommitted',
+      });
     });
 
     it('should handle transaction errors', async () => {

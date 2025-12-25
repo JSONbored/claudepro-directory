@@ -231,11 +231,11 @@ function getGlobalTestQueue(): TestPgmqQueue {
 
 /**
  * Create or get the global test queue instance
- * 
+ *
  * @example
  * ```typescript
  * import { createTestPgmqQueue } from '../supabase/pgmq-client.test';
- * 
+ *
  * const testQueue = createTestPgmqQueue();
  * // Use testQueue in your tests
  * ```
@@ -265,30 +265,34 @@ export function getTestPgmqQueue(): TestPgmqQueue | null {
 /**
  * Mock implementations for pgmqSend, pgmqRead, pgmqDelete
  * These can be used in jest.mock() to replace the real implementations
- * 
+ *
  * @example
  * ```typescript
  * const testQueue = createTestPgmqQueue();
  * const mocks = createPgmqMocks(testQueue);
- * 
+ *
  * jest.mock('../supabase/pgmq-client', () => mocks);
  * ```
  */
 export function createPgmqMocks(testQueue: TestPgmqQueue) {
-  const mockPgmqSend = jest.fn(async (
-    queueName: string,
-    msg: Record<string, unknown>,
-    options?: { sleepSeconds?: number }
-  ) => {
-    return await testQueue.send(queueName, msg, options);
-  });
+  const mockPgmqSend = jest.fn(
+    async (
+      queueName: string,
+      msg: Record<string, unknown>,
+      options?: { sleepSeconds?: number }
+    ) => {
+      return await testQueue.send(queueName, msg, options);
+    }
+  );
 
-  const mockPgmqRead = jest.fn(async <T = Record<string, unknown>>(
-    queueName: string,
-    options?: { vt?: number; qty?: number }
-  ) => {
-    return await testQueue.read<T>(queueName, options);
-  });
+  const mockPgmqRead = jest.fn(
+    async <T = Record<string, unknown>>(
+      queueName: string,
+      options?: { vt?: number; qty?: number }
+    ) => {
+      return await testQueue.read<T>(queueName, options);
+    }
+  );
 
   const mockPgmqDelete = jest.fn(async (queueName: string, msgId: bigint) => {
     return await testQueue.delete(queueName, msgId);
@@ -387,7 +391,9 @@ describe('pgmq-client', () => {
 
       // normalizeError returns the original error if it's already an Error
       // The error message will be the original error message
-      await expect(pgmqSend('test-queue', { key: 'value' })).rejects.toThrow('Database connection failed');
+      await expect(pgmqSend('test-queue', { key: 'value' })).rejects.toThrow(
+        'Database connection failed'
+      );
     });
   });
 
@@ -417,7 +423,7 @@ describe('pgmq-client', () => {
         'SELECT * FROM pgmq_public.read($1, $2, $3)',
         'test-queue',
         30, // Default vt
-        10  // Default qty
+        10 // Default qty
       );
       expect(result).toHaveLength(2);
       expect(result?.[0]?.message).toEqual({ key: 'value1' });
@@ -442,7 +448,7 @@ describe('pgmq-client', () => {
         'SELECT * FROM pgmq_public.read($1, $2, $3)',
         'test-queue',
         120, // Custom vt
-        100  // Custom qty
+        100 // Custom qty
       );
       expect(result).toHaveLength(1);
     });
@@ -541,7 +547,9 @@ describe('pgmq-client', () => {
 
       // normalizeError returns the original error if it's already an Error
       // The error message will be the original error message
-      await expect(pgmqDelete('test-queue', BigInt(123))).rejects.toThrow('Database connection failed');
+      await expect(pgmqDelete('test-queue', BigInt(123))).rejects.toThrow(
+        'Database connection failed'
+      );
     });
   });
 
@@ -549,8 +557,8 @@ describe('pgmq-client', () => {
     it('should delete multiple messages successfully', async () => {
       // Mock pgmqDelete to succeed for all messages
       (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>)
-        .mockResolvedValueOnce([true])  // First delete
-        .mockResolvedValueOnce([true])  // Second delete
+        .mockResolvedValueOnce([true]) // First delete
+        .mockResolvedValueOnce([true]) // Second delete
         .mockResolvedValueOnce([true]); // Third delete
 
       const result = await pgmqDeleteBatch('test-queue', [BigInt(1), BigInt(2), BigInt(3)]);
@@ -562,9 +570,9 @@ describe('pgmq-client', () => {
     it('should handle partial failures', async () => {
       // Mock pgmqDelete to succeed for some, fail for others
       (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>)
-        .mockResolvedValueOnce([true])   // First delete succeeds
-        .mockResolvedValueOnce([false])  // Second delete fails (not found)
-        .mockResolvedValueOnce([true]);  // Third delete succeeds
+        .mockResolvedValueOnce([true]) // First delete succeeds
+        .mockResolvedValueOnce([false]) // Second delete fails (not found)
+        .mockResolvedValueOnce([true]); // Third delete succeeds
 
       const result = await pgmqDeleteBatch('test-queue', [BigInt(1), BigInt(2), BigInt(3)]);
 
@@ -573,7 +581,7 @@ describe('pgmq-client', () => {
 
     it('should process messages in chunks of 10', async () => {
       const msgIds = Array.from({ length: 25 }, (_, i) => BigInt(i + 1));
-      
+
       // Mock 25 successful deletes
       (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([true]);
 

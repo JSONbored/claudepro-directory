@@ -20,12 +20,12 @@ function getOpenAPISpecPath(): string | null {
     if (typeof import.meta === 'undefined' || typeof import.meta.url === 'undefined') {
       return null;
     }
-const __filename = fileURLToPath(import.meta.url);
-// Calculate PROJECT_ROOT: from apps/workers/heyclaude-mcp/src/routes/ -> project root
-let PROJECT_ROOT = join(__filename, '../../../../../');
-if (!existsSync(join(PROJECT_ROOT, 'apps/workers/heyclaude-mcp'))) {
-  PROJECT_ROOT = process.cwd();
-}
+    const __filename = fileURLToPath(import.meta.url);
+    // Calculate PROJECT_ROOT: from apps/workers/heyclaude-mcp/src/routes/ -> project root
+    let PROJECT_ROOT = join(__filename, '../../../../../');
+    if (!existsSync(join(PROJECT_ROOT, 'apps/workers/heyclaude-mcp'))) {
+      PROJECT_ROOT = process.cwd();
+    }
     return join(PROJECT_ROOT, 'openapi-mcp.json');
   } catch {
     // If import.meta.url is unavailable, return null

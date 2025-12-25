@@ -187,7 +187,7 @@ export async function fixPrismaClientCommonJSWrapper(projectRoot: string): Promi
         // This is needed for @prisma/client package's main entry point
         const PRISMA_DEFAULT_TS = join(PRISMA_CLIENT_DIR, 'default.ts');
         const PRISMA_DEFAULT_JS = join(PRISMA_CLIENT_DIR, 'default.js');
-        
+
         try {
           // Create default.ts if it doesn't exist (Prisma doesn't generate it)
           try {

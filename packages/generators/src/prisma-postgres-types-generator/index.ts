@@ -170,9 +170,10 @@ generatorHandler({
       // Fallback to POSTGRES_PRISMA_URL for compatibility
       // Uses isomorphic env schema for type-safe, validated access
       // Type assertion needed because these are server-only env vars but generator runs at build time
-      let connectionString = (env as { DIRECT_URL?: string; POSTGRES_PRISMA_URL?: string }).DIRECT_URL || 
-                             (env as { DIRECT_URL?: string; POSTGRES_PRISMA_URL?: string }).POSTGRES_PRISMA_URL || 
-                             '';
+      let connectionString =
+        (env as { DIRECT_URL?: string; POSTGRES_PRISMA_URL?: string }).DIRECT_URL ||
+        (env as { DIRECT_URL?: string; POSTGRES_PRISMA_URL?: string }).POSTGRES_PRISMA_URL ||
+        '';
 
       // Try to get from Prisma's datasource if available (for compatibility with older Prisma versions)
       if (!connectionString) {
@@ -211,10 +212,11 @@ generatorHandler({
         // This allows schema validation to pass without database connection
         // For actual generation, connection string is required
         // PRISMA_VALIDATE is not in schema, use process.env directly for this build-time flag
-        const isValidationMode = (typeof process !== 'undefined' && process.env?.['PRISMA_VALIDATE'] === 'true') || 
-                                  process.argv.includes('validate') ||
-                                  !process.argv.includes('generate');
-        
+        const isValidationMode =
+          (typeof process !== 'undefined' && process.env?.['PRISMA_VALIDATE'] === 'true') ||
+          process.argv.includes('validate') ||
+          !process.argv.includes('generate');
+
         if (isValidationMode) {
           // During validation, skip introspection and return empty metadata
           // This allows schema validation to pass without database connection
@@ -224,7 +226,7 @@ generatorHandler({
             enums: [],
           };
         }
-        
+
         throw new Error(
           'Database connection string not found. Please set DIRECT_URL (for Prisma 7.1.0+ migrations/introspection) or POSTGRES_PRISMA_URL environment variable.\n' +
             'For local development: infisical run --env=dev -- prisma generate\n' +
@@ -760,7 +762,7 @@ export { PrismaClient, Prisma } from '@prisma/client';
 export type * from '@prisma/client';
 `;
       await writeFile(prismaIndexPath, prismaIndexContent, 'utf-8');
-      
+
       // Explicit return to satisfy TypeScript's "not all code paths return a value" check
       return;
     } catch (error) {

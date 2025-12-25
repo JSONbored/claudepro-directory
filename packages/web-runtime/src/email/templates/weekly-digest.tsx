@@ -274,4 +274,3 @@ const emptyStateStyle: React.CSSProperties = {
   textAlign: 'center',
   margin: 0,
 };
-

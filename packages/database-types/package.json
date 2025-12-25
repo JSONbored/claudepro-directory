@@ -2,51 +2,42 @@
   "name": "@heyclaude/database-types",
   "version": "1.1.0",
   "private": true,
-  "type": "module",
   "sideEffects": false,
-  "scripts": {
-    "build": "tsc --build",
-    "type-check": "tsc --noEmit",
-    "lint": "echo 'Skipping lint for generated types'"
-  },
-  "dependencies": {
-    "decimal.js": "^10.6.0",
-    "zod": "^4.2.1"
-  },
+  "type": "module",
   "exports": {
     "./prisma": {
-      "development": "./src/prisma/index.ts",
       "types": "./dist/prisma/index.d.ts",
+      "development": "./src/prisma/index.ts",
       "default": "./src/prisma/index.ts"
     },
     "./prisma/browser": {
-      "development": "./src/prisma/browser.ts",
       "types": "./dist/prisma/browser.d.ts",
+      "development": "./src/prisma/browser.ts",
       "default": "./src/prisma/browser.ts"
     },
     "./prisma/zod": {
-      "development": "./src/prisma/zod/index.ts",
       "types": "./dist/prisma/zod/index.d.ts",
+      "development": "./src/prisma/zod/index.ts",
       "default": "./src/prisma/zod/index.ts"
     },
     "./prisma/zod/schemas": {
-      "development": "./src/prisma/zod/schemas/index.ts",
       "types": "./dist/prisma/zod/schemas/index.d.ts",
+      "development": "./src/prisma/zod/schemas/index.ts",
       "default": "./src/prisma/zod/schemas/index.ts"
     },
     "./prisma/zod/*": {
-      "development": "./src/prisma/zod/*.ts",
       "types": "./dist/prisma/zod/*.d.ts",
+      "development": "./src/prisma/zod/*.ts",
       "default": "./src/prisma/zod/*.ts"
     },
     "./postgres-types": {
-      "development": "./src/postgres-types/index.ts",
       "types": "./dist/postgres-types/index.d.ts",
+      "development": "./src/postgres-types/index.ts",
       "default": "./src/postgres-types/index.ts"
     },
     "./postgres-types/*": {
-      "development": "./src/postgres-types/*.ts",
       "types": "./dist/postgres-types/*.d.ts",
+      "development": "./src/postgres-types/*.ts",
       "default": "./src/postgres-types/*.ts"
     },
     "./openapi": {
@@ -57,8 +48,8 @@
       "default": "./src/openapi/openapi.yaml"
     },
     "./api-client": {
-      "development": "./src/api-client/client.generated.ts",
       "types": "./dist/api-client/client.generated.d.ts",
+      "development": "./src/api-client/client.generated.ts",
       "default": "./src/api-client/client.generated.ts"
     },
     "./docs": {
@@ -67,5 +58,14 @@
     "./docs/index.html": {
       "default": "./docs/index.html"
     }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "lint": "echo 'Skipping lint for generated types'",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "decimal.js": "^10.6.0",
+    "zod": "^4.2.1"
   }
 }

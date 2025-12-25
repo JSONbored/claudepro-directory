@@ -58,7 +58,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {

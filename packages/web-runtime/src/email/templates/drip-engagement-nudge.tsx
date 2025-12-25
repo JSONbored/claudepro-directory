@@ -34,7 +34,7 @@ const VALUE_PROPOSITIONS = [
   },
   {
     title: 'MCP Servers',
-    description: 'Extend Claude\'s capabilities with custom tools',
+    description: "Extend Claude's capabilities with custom tools",
   },
   {
     title: 'Cursor Rules',
@@ -58,10 +58,7 @@ export function EngagementNudgeEmail({ email }: EngagementNudgeEmailProps) {
   const utm = EMAIL_UTM_TEMPLATES.DRIP_ENGAGEMENT_NUDGE;
 
   return (
-    <BaseLayout
-      preview="Did you know? 5 ways to supercharge your Claude experience"
-      utm={utm}
-    >
+    <BaseLayout preview="Did you know? 5 ways to supercharge your Claude experience" utm={utm}>
       <Section style={contentSectionStyle}>
         <Text style={titleStyle}>Did you know? 5 ways to supercharge your Claude experience</Text>
         <Text style={paragraphStyle}>
@@ -93,9 +90,7 @@ export function EngagementNudgeEmail({ email }: EngagementNudgeEmailProps) {
           </Link>
         </div>
 
-        <Text style={helpTextStyle}>
-          If you have any questions, just reply to this email!
-        </Text>
+        <Text style={helpTextStyle}>If you have any questions, just reply to this email!</Text>
       </Section>
 
       <EmailFooterNote lines={buildSubscriptionFooter('weeklyDigest', { email })} />
@@ -193,4 +188,3 @@ const helpTextStyle: React.CSSProperties = {
   textAlign: 'center',
   fontStyle: 'italic',
 };
-

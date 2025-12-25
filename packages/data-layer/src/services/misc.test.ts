@@ -482,9 +482,7 @@ describe('MiscService', () => {
 
       const result = await miscService.getApiHealth();
 
-      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
-        expect.stringContaining('get_api_health')
-      );
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(expect.stringContaining('get_api_health'));
       expect(result).toEqual(mockData);
     });
   });
@@ -518,9 +516,7 @@ describe('MiscService', () => {
 
       const result = await miscService.getSiteUrls();
 
-      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
-        expect.stringContaining('get_site_urls')
-      );
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(expect.stringContaining('get_site_urls'));
       expect(result).toEqual(mockData);
     });
   });

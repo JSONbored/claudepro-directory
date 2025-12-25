@@ -49,7 +49,7 @@ rule:
     - not:
         has:
           regex: 'normalizeError\('
-message: "Catch blocks must use normalizeError() before logging or throwing. Import normalizeError from YOUR_LOGGER_PACKAGE (server) (server) or YOUR_SHARED_RUNTIME_PACKAGE/logger (shared)"
+message: 'Catch blocks must use normalizeError() before logging or throwing. Import normalizeError from YOUR_LOGGER_PACKAGE (server) (server) or YOUR_SHARED_RUNTIME_PACKAGE/logger (shared)'
 severity: error
 
 ---
@@ -143,7 +143,7 @@ rule:
     - not:
         has:
           regex: 'useLoggedAsync\('
-message: "Client components with async operations must use useLoggedAsync hook. Import useLoggedAsync from YOUR_WEB_RUNTIME_PACKAGE/hooks"
+message: 'Client components with async operations must use useLoggedAsync hook. Import useLoggedAsync from YOUR_WEB_RUNTIME_PACKAGE/hooks'
 severity: warning
 
 ---
@@ -157,7 +157,7 @@ rule:
         regex: 'logger\.(info|warn|error|debug)\('
     - has:
         regex: password|secret|token|apiKey|api_key
-message: "Sensitive data (passwords, secrets, tokens, API keys) should be redacted in logs. Pino redaction is configured automatically, but ensure sensitive fields use redaction paths. Never log raw passwords, API keys, or tokens."
+message: 'Sensitive data (passwords, secrets, tokens, API keys) should be redacted in logs. Pino redaction is configured automatically, but ensure sensitive fields use redaction paths. Never log raw passwords, API keys, or tokens.'
 severity: error
 
 ---

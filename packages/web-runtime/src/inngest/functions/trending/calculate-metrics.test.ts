@@ -264,4 +264,3 @@ describe('calculateTrendingMetrics', () => {
     expect(mockTrendingService.refreshTrendingMetricsView).toHaveBeenCalled();
   });
 });
-

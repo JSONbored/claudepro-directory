@@ -14,9 +14,9 @@ language: typescript
 rule:
   all:
     - any:
-      - kind: for_statement
-      - kind: for_in_statement
-      - kind: while_statement
+        - kind: for_statement
+        - kind: for_in_statement
+        - kind: while_statement
     - has:
         regex: 'await prisma\.\w+\('
     - has:
@@ -31,12 +31,12 @@ language: typescript
 rule:
   all:
     - any:
-      - kind: for_statement
-      - kind: for_in_statement
-      - kind: while_statement
+        - kind: for_statement
+        - kind: for_in_statement
+        - kind: while_statement
     - has:
         regex: 'await\s+\w+\([^)]*\)'
-message: "await in loop causes sequential execution. Use Promise.all() for parallel execution: await Promise.all(items.map(item => asyncOperation(item)))"
+message: 'await in loop causes sequential execution. Use Promise.all() for parallel execution: await Promise.all(items.map(item => asyncOperation(item)))'
 severity: error
 
 ---
@@ -56,7 +56,7 @@ rule:
     - not:
         has:
           regex: 'Promise\.all|Promise\.allSettled'
-message: "Independent async operations should run in parallel with Promise.all() or Promise.allSettled() for better performance. Example: const [result1, result2] = await Promise.all([async1(), async2()]);"
+message: 'Independent async operations should run in parallel with Promise.all() or Promise.allSettled() for better performance. Example: const [result1, result2] = await Promise.all([async1(), async2()]);'
 severity: warning
 
 ---
@@ -91,7 +91,7 @@ rule:
     - not:
         has:
           regex: 'useMemo\('
-message: "Expensive computation in component without useMemo. Wrap with useMemo to prevent recalculation on every render. Example: const result = useMemo(() => expensiveComputation(), [deps])"
+message: 'Expensive computation in component without useMemo. Wrap with useMemo to prevent recalculation on every render. Example: const result = useMemo(() => expensiveComputation(), [deps])'
 severity: warning
 
 ---
@@ -109,7 +109,7 @@ rule:
     - not:
         has:
           regex: 'useCallback\('
-message: "Callback functions in client components should use useCallback to prevent unnecessary re-renders. Wrap: const callback = useCallback(() => { ... }, [deps])"
+message: 'Callback functions in client components should use useCallback to prevent unnecessary re-renders. Wrap: const callback = useCallback(() => { ... }, [deps])'
 severity: warning
 
 ---
@@ -126,7 +126,7 @@ rule:
     - not:
         has:
           pattern: memo($COMPONENT)
-message: "Component with expensive operations should use React.memo to prevent unnecessary re-renders. Wrap: export const Component = React.memo(function Component(props) { ... })"
+message: 'Component with expensive operations should use React.memo to prevent unnecessary re-renders. Wrap: export const Component = React.memo(function Component(props) { ... })'
 severity: warning
 
 ---
@@ -145,7 +145,7 @@ rule:
     - not:
         inside:
           pattern: <Suspense>$$$</Suspense>
-message: "Async data fetching should be wrapped in Suspense boundary for better loading UX. Add: <Suspense fallback={<Loading />}>...</Suspense>"
+message: 'Async data fetching should be wrapped in Suspense boundary for better loading UX. Add: <Suspense fallback={<Loading />}>...</Suspense>'
 severity: warning
 
 ---
@@ -163,7 +163,7 @@ rule:
     - not:
         has:
           regex: 'return\s*\(\)\s*=>\s*\{\s*removeEventListener\('
-message: "Event listeners in useEffect must be cleaned up to prevent memory leaks. Add: return () => { removeEventListener(...) } in useEffect cleanup."
+message: 'Event listeners in useEffect must be cleaned up to prevent memory leaks. Add: return () => { removeEventListener(...) } in useEffect cleanup.'
 severity: error
 
 ---

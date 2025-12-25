@@ -16,7 +16,7 @@ import type { RuntimeLogger } from '../types/runtime.js';
  */
 export function createSimpleLogger(name?: string): RuntimeLogger {
   const prefix = name ? `[${name}]` : '';
-  
+
   return {
     info: (message: string, meta?: Record<string, unknown>) => {
       console.log(`${prefix} ${message}`, meta ? JSON.stringify(meta) : '');
@@ -37,4 +37,3 @@ export function createSimpleLogger(name?: string): RuntimeLogger {
     },
   };
 }
-

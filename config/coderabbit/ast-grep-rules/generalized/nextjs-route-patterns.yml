@@ -40,7 +40,7 @@ rule:
         regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: 'await\s+\w+\([^)]*\)'
-message: "Routes with data fetching should have error.tsx file in the same directory for error boundaries. Create error.tsx with error boundary component to prevent full app crashes. This is especially important for critical user flows (payment, auth, billing)."
+message: 'Routes with data fetching should have error.tsx file in the same directory for error boundaries. Create error.tsx with error boundary component to prevent full app crashes. This is especially important for critical user flows (payment, auth, billing).'
 severity: warning
 
 ---
@@ -56,7 +56,7 @@ rule:
         regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: 'await\s+\w+\([^)]*\)'
-message: "Async pages should have corresponding loading.tsx file in the same directory for proper loading states. Create loading.tsx with page-specific skeleton component. This improves UX during data fetching and enables progressive rendering."
+message: 'Async pages should have corresponding loading.tsx file in the same directory for proper loading states. Create loading.tsx with page-specific skeleton component. This improves UX during data fetching and enables progressive rendering.'
 severity: warning
 
 ---
@@ -73,7 +73,7 @@ rule:
     - not:
         has:
           regex: 'export.*metadata|export.*generateMetadata'
-message: "Pages should export metadata or generateMetadata() for SEO. Add: export const metadata: Metadata = { ... } or export async function generateMetadata() { ... }. This improves search engine visibility and social sharing."
+message: 'Pages should export metadata or generateMetadata() for SEO. Add: export const metadata: Metadata = { ... } or export async function generateMetadata() { ... }. This improves search engine visibility and social sharing.'
 severity: warning
 
 ---
@@ -147,7 +147,7 @@ rule:
     - not:
         has:
           regex: 'try.*catch|\.catch\('
-message: "generateStaticParams() should include error handling. Wrap data fetching in try/catch and return empty array or placeholder on error. This prevents build failures when data is unavailable."
+message: 'generateStaticParams() should include error handling. Wrap data fetching in try/catch and return empty array or placeholder on error. This prevents build failures when data is unavailable.'
 severity: warning
 
 ---
@@ -166,7 +166,7 @@ rule:
     - not:
         has:
           pattern: export.*dynamicParams
-message: "Dynamic routes with generateStaticParams() should export dynamicParams configuration. Add: export const dynamicParams = true; (default) to allow dynamic rendering for routes not in generateStaticParams, or false to return 404 for unknown routes."
+message: 'Dynamic routes with generateStaticParams() should export dynamicParams configuration. Add: export const dynamicParams = true; (default) to allow dynamic rendering for routes not in generateStaticParams, or false to return 404 for unknown routes.'
 severity: info
 
 ---
@@ -185,5 +185,5 @@ rule:
     - not:
         has:
           pattern: export.*revalidate
-message: "Pages with generateStaticParams() should consider exporting revalidate for Incremental Static Regeneration (ISR). Add: export const revalidate = 3600; (in seconds) to enable ISR. This keeps static pages fresh without full rebuilds."
+message: 'Pages with generateStaticParams() should consider exporting revalidate for Incremental Static Regeneration (ISR). Add: export const revalidate = 3600; (in seconds) to enable ISR. This keeps static pages fresh without full rebuilds.'
 severity: info

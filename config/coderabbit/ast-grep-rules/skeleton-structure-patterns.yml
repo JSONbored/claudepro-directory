@@ -16,7 +16,7 @@ rule:
         regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: 'await\s+\w+\([^)]*\)'
-message: "Async pages should have corresponding loading.tsx file for proper loading states. Create loading.tsx in same directory with page-specific skeleton component."
+message: 'Async pages should have corresponding loading.tsx file for proper loading states. Create loading.tsx in same directory with page-specific skeleton component.'
 severity: warning
 
 # Note: JSX pattern matching for Suspense fallbacks is limited in ast-grep

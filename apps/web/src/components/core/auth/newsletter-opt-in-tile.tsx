@@ -77,7 +77,7 @@ export function NewsletterOptInTile({
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-foreground/10 px-3 py-1 text-xs font-semibold text-foreground/90">
+            <span className="bg-foreground/10 text-foreground/90 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold">
               {badgeLabel}
             </span>
           </div>

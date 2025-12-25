@@ -66,7 +66,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {
@@ -217,7 +217,7 @@ describe('unlinkOAuthProvider', () => {
       expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('SELECT * FROM unlink_oauth_provider'),
         'github', // $1: p_provider
-        'test-user-id', // $2: p_user_id (from ctx.userId)
+        'test-user-id' // $2: p_user_id (from ctx.userId)
       );
 
       // Verify result matches mock

@@ -126,9 +126,7 @@ describe('useSessionStorage', () => {
   });
 
   it('should handle function initial value', () => {
-    const { result } = renderHook(() =>
-      useSessionStorage('test-key', () => 'computed-initial')
-    );
+    const { result } = renderHook(() => useSessionStorage('test-key', () => 'computed-initial'));
 
     expect(result.current[0]).toBe('computed-initial');
   });

@@ -8,5 +8,4 @@
 --
 -- Function signature: get_job_detail(p_slug text)
 -- Related: JobsService.getJobBySlug uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_job_detail(text);
+DROP FUNCTION IF EXISTS public.get_job_detail (text);

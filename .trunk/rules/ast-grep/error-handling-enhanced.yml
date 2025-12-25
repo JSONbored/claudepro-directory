@@ -22,7 +22,7 @@ rule:
         inside:
           has:
             regex: 'try.*catch|\.catch\(|await'
-message: "Async function call without error handling. Add try/catch or .catch() to handle rejections. Unhandled rejections crash Node.js processes."
+message: 'Async function call without error handling. Add try/catch or .catch() to handle rejections. Unhandled rejections crash Node.js processes.'
 severity: error
 
 ---
@@ -41,7 +41,7 @@ rule:
     - not:
         has:
           regex: 'error\.tsx|ErrorBoundary'
-message: "Critical user flows (payment, auth, billing) must have error boundaries to prevent full app crashes. Create error.tsx file in route directory."
+message: 'Critical user flows (payment, auth, billing) must have error boundaries to prevent full app crashes. Create error.tsx file in route directory.'
 severity: error
 
 ---
@@ -73,7 +73,7 @@ rule:
     - not:
         inside:
           regex: '<ErrorBoundary[^>]*>'
-message: "Server components should be wrapped in error boundaries for error handling. Add <ErrorBoundary> wrapper or create error.tsx file"
+message: 'Server components should be wrapped in error boundaries for error handling. Add <ErrorBoundary> wrapper or create error.tsx file'
 severity: warning
 
 ---
@@ -90,7 +90,7 @@ rule:
     - not:
         has:
           regex: '(logClientErrorBoundary|logger\.error|reqLogger\.error)\('
-message: "Error boundaries must log errors. Use logClientErrorBoundary() for client error boundaries (from @heyclaude/web-runtime/logging/client) or logger.error()/reqLogger.error() for server error boundaries (from @heyclaude/web-runtime/logging/server)"
+message: 'Error boundaries must log errors. Use logClientErrorBoundary() for client error boundaries (from @heyclaude/web-runtime/logging/client) or logger.error()/reqLogger.error() for server error boundaries (from @heyclaude/web-runtime/logging/server)'
 severity: error
 
 ---
@@ -113,5 +113,5 @@ rule:
     - not:
         has:
           regex: 'useLoggedAsync\('
-message: "Client components with async operations should be wrapped in error boundaries or use useLoggedAsync for error handling. Add <ErrorBoundary> wrapper or use useLoggedAsync hook from @heyclaude/web-runtime/hooks"
+message: 'Client components with async operations should be wrapped in error boundaries or use useLoggedAsync for error handling. Add <ErrorBoundary> wrapper or use useLoggedAsync hook from @heyclaude/web-runtime/hooks'
 severity: warning

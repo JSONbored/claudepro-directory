@@ -69,4 +69,3 @@ export function getNonEmptyCategories(changes: ChangelogChanges): changelog_cate
   if (changes.Deprecated && changes.Deprecated.length > 0) categories.push('Deprecated');
   return categories;
 }
-

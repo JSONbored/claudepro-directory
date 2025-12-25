@@ -91,8 +91,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'application/json',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -105,7 +109,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
         status: 401,
         headers: {
           'Content-Type': 'application/json',
-          ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+          ...(typeof corsHeaders === 'object' && corsHeaders !== null
+            ? (corsHeaders as Record<string, string>)
+            : {}),
         },
       }
     );
@@ -114,7 +120,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
     return new NextResponse(null, {
       status: 204,
       headers: {
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
       },
     });
@@ -145,7 +153,7 @@ describe('POST /api/revalidate', () => {
     });
 
     const response = await POST(request);
-    const body = await getResponseBody(response) as {
+    const body = (await getResponseBody(response)) as {
       revalidated?: boolean;
       paths?: string[];
       timestamp?: string;
@@ -174,7 +182,7 @@ describe('POST /api/revalidate', () => {
     });
 
     const response = await POST(request);
-    const body = await getResponseBody(response) as {
+    const body = (await getResponseBody(response)) as {
       revalidated?: boolean;
       paths?: string[];
       timestamp?: string;
@@ -202,7 +210,7 @@ describe('POST /api/revalidate', () => {
     });
 
     const response = await POST(request);
-    const body = await getResponseBody(response) as {
+    const body = (await getResponseBody(response)) as {
       revalidated?: boolean;
       tags?: string[];
       timestamp?: string;
@@ -231,7 +239,7 @@ describe('POST /api/revalidate', () => {
     });
 
     const response = await POST(request);
-    const body = await getResponseBody(response) as {
+    const body = (await getResponseBody(response)) as {
       revalidated?: boolean;
       paths?: string[];
       tags?: string[];
@@ -262,7 +270,7 @@ describe('POST /api/revalidate', () => {
     });
 
     const response = await POST(request);
-    const body = await getResponseBody(response) as { error?: string };
+    const body = (await getResponseBody(response)) as { error?: string };
 
     expectStatus(response, 401);
     expectCorsHeaders(response);
@@ -283,7 +291,7 @@ describe('POST /api/revalidate', () => {
     });
 
     const response = await POST(request);
-    const body = await getResponseBody(response) as { error?: string };
+    const body = (await getResponseBody(response)) as { error?: string };
 
     expectStatus(response, 401);
     expectCorsHeaders(response);
@@ -304,7 +312,7 @@ describe('POST /api/revalidate', () => {
 
     // Route throws error which factory catches and returns 500
     const response = await POST(request);
-    const body = await getResponseBody(response) as { error?: string };
+    const body = (await getResponseBody(response)) as { error?: string };
 
     expectStatus(response, 500);
     expect(body).toHaveProperty('error');
@@ -325,7 +333,7 @@ describe('POST /api/revalidate', () => {
 
     // Route throws error which factory catches and returns 500
     const response = await POST(request);
-    const body = await getResponseBody(response) as { error?: string };
+    const body = (await getResponseBody(response)) as { error?: string };
 
     expectStatus(response, 500);
     expect(body).toHaveProperty('error');
@@ -345,7 +353,7 @@ describe('POST /api/revalidate', () => {
     });
 
     const response = await POST(request);
-    const body = await getResponseBody(response) as {
+    const body = (await getResponseBody(response)) as {
       revalidated?: boolean;
       paths?: string[];
       timestamp?: string;
@@ -373,7 +381,7 @@ describe('POST /api/revalidate', () => {
     });
 
     const response = await POST(request);
-    const body = await getResponseBody(response) as { error?: string };
+    const body = (await getResponseBody(response)) as { error?: string };
 
     expectStatus(response, 405);
     expect(body).toHaveProperty('error');

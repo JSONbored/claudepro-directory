@@ -211,12 +211,13 @@ export function OAuthConsentClient({
     false;
 
   // Generate user initials for avatar fallback
-  const userInitials = user.name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2) || 'U';
+  const userInitials =
+    user.name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || 'U';
 
   return (
     <div className="flex flex-col gap-6">
@@ -236,14 +237,14 @@ export function OAuthConsentClient({
         ) : null}
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold text-black">Authorize Application</h1>
-          <p className="text-gray-600 text-sm">
+          <p className="text-sm text-gray-600">
             {authDetails.client.name} wants to access your account
           </p>
         </div>
       </div>
 
       {/* User Account Information */}
-      <div className="border-gray-200 bg-gray-50 flex items-center gap-3 rounded-lg border p-4">
+      <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
         <Avatar className="h-10 w-10">
           {user.avatarUrl ? (
             <AvatarImage
@@ -251,7 +252,7 @@ export function OAuthConsentClient({
               alt={user.name}
             />
           ) : null}
-          <AvatarFallback className="bg-gray-200 text-gray-700 text-sm font-semibold">
+          <AvatarFallback className="bg-gray-200 text-sm font-semibold text-gray-700">
             {userInitials}
           </AvatarFallback>
         </Avatar>
@@ -290,7 +291,7 @@ export function OAuthConsentClient({
 
       {/* Requested Permissions */}
       {hasScopes ? (
-        <div className="border-gray-200 flex flex-col gap-3 rounded-lg border p-4">
+        <div className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4">
           <h2 className="text-sm font-semibold text-black">This application will be able to:</h2>
           <ul className="flex list-none flex-col gap-3">
             {scopes.map((scope) => (
@@ -313,11 +314,8 @@ export function OAuthConsentClient({
 
       {/* Error Message */}
       {error ? (
-        <div className="border-red-200 bg-red-50 flex items-start gap-3 rounded-lg border p-4">
-          <AlertCircle
-            aria-hidden="true"
-            className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600"
-          />
+        <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
+          <AlertCircle aria-hidden="true" className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
           <div className="flex flex-1 flex-col gap-0.5">
             <p className="text-sm font-semibold text-red-900">Error</p>
             <p className="text-sm text-red-700">{error}</p>
@@ -328,7 +326,7 @@ export function OAuthConsentClient({
       {/* Action Buttons */}
       <div className="flex items-center gap-3">
         <Button
-          className="flex-1 bg-white text-black border-gray-300 hover:bg-gray-50"
+          className="flex-1 border-gray-300 bg-white text-black hover:bg-gray-50"
           disabled={isProcessing}
           onClick={() => {
             void handleDeny();
@@ -356,14 +354,14 @@ export function OAuthConsentClient({
       {/* Terms and Privacy Policy Links */}
       <div className="flex items-center justify-center gap-4 border-t border-gray-200 pt-4">
         <Link
-          className="text-xs text-gray-600 hover:text-black underline transition-colors"
+          className="text-xs text-gray-600 underline transition-colors hover:text-black"
           href="/terms"
         >
           Terms of Service
         </Link>
-        <span className="text-gray-400 text-xs">•</span>
+        <span className="text-xs text-gray-400">•</span>
         <Link
-          className="text-xs text-gray-600 hover:text-black underline transition-colors"
+          className="text-xs text-gray-600 underline transition-colors hover:text-black"
           href="/privacy"
         >
           Privacy Policy

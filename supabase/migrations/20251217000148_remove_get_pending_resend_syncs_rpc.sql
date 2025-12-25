@@ -5,5 +5,4 @@
 --
 -- Description: Remove get_pending_resend_syncs RPC function - Not found in Inngest functions, only in generated types
 -- Function signature: get_pending_resend_syncs(p_limit integer DEFAULT 100)
-
-DROP FUNCTION IF EXISTS public.get_pending_resend_syncs(integer);
+DROP FUNCTION IF EXISTS public.get_pending_resend_syncs (integer);

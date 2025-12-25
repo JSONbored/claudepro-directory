@@ -214,7 +214,7 @@ describe('useCountdown', () => {
     // so we need to capture it before calling
     const callbackBeforeSecondTick = mockIntervalCallback;
     expect(callbackBeforeSecondTick).toBeTruthy();
-    
+
     act(() => {
       if (callbackBeforeSecondTick) {
         callbackBeforeSecondTick(); // This will: 1) setCount(2), 2) stopRunning() (clears callback)

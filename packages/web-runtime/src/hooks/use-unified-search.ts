@@ -157,12 +157,13 @@ export function useUnifiedSearch({
           ? currentTags.filter((t: string) => t !== tag)
           : [...currentTags, tag];
         // When newTags is empty, explicitly remove tags property
-        const newFilters: FilterState = newTags.length > 0
-          ? { ...prev, tags: newTags }
-          : (() => {
-              const { tags, ...rest } = prev;
-              return rest;
-            })();
+        const newFilters: FilterState =
+          newTags.length > 0
+            ? { ...prev, tags: newTags }
+            : (() => {
+                const { tags, ...rest } = prev;
+                return rest;
+              })();
         onFiltersChange?.(newFilters);
         return newFilters;
       });

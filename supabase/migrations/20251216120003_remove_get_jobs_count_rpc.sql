@@ -13,5 +13,4 @@
 --
 -- Related Changes:
 -- - packages/data-layer/src/services/jobs.ts: Converted getJobsCount() to use Prisma
-
-DROP FUNCTION IF EXISTS public.get_jobs_count();
+DROP FUNCTION IF EXISTS public.get_jobs_count ();

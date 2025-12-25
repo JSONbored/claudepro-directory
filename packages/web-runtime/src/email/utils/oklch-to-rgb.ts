@@ -31,9 +31,7 @@ function parseOklch(oklchString: string): {
   alpha?: number; // Opacity (0-1)
 } {
   // Match: oklch(L% C H) or oklch(L% C H / alpha)
-  const match = oklchString.match(
-    /oklch\(([\d.]+)%\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)/
-  );
+  const match = oklchString.match(/oklch\(([\d.]+)%\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)/);
 
   if (!match) {
     throw new Error(`Invalid OKLCH format: ${oklchString}`);
@@ -51,7 +49,11 @@ function parseOklch(oklchString: string): {
  * Convert OKLCH to OKLab (intermediate step)
  * OKLCH → OKLab conversion
  */
-function oklchToOklab(l: number, c: number, h: number): {
+function oklchToOklab(
+  l: number,
+  c: number,
+  h: number
+): {
   l: number;
   a: number;
   b: number;
@@ -68,11 +70,7 @@ function oklchToOklab(l: number, c: number, h: number): {
  * Convert OKLab to linear RGB (via XYZ)
  * Using D65 white point and sRGB color space
  */
-function oklabToLinearRgb(
-  l: number,
-  a: number,
-  b: number
-): { r: number; g: number; b: number } {
+function oklabToLinearRgb(l: number, a: number, b: number): { r: number; g: number; b: number } {
   // OKLab to linear OKLMS (via matrix)
   const l_ = l + 0.3963377774 * a + 0.2158037573 * b;
   const m_ = l - 0.1055613458 * a - 0.0638541728 * b;
@@ -84,15 +82,9 @@ function oklabToLinearRgb(
   const lmsS = Math.pow(s_, 3);
 
   // Linear LMS to XYZ (D65 white point)
-  const x =
-    +1.2268798758459243 * lmsL - 0.5578149944602171 * lmsM +
-    0.2813910456659647 * lmsS;
-  const y =
-    -0.0405757452148008 * lmsL + 1.112286803280317 * lmsM -
-    0.0717110580655164 * lmsS;
-  const z =
-    -0.0763729366746601 * lmsL - 0.4214933324022432 * lmsM +
-    1.5869240198367816 * lmsS;
+  const x = +1.2268798758459243 * lmsL - 0.5578149944602171 * lmsM + 0.2813910456659647 * lmsS;
+  const y = -0.0405757452148008 * lmsL + 1.112286803280317 * lmsM - 0.0717110580655164 * lmsS;
+  const z = -0.0763729366746601 * lmsL - 0.4214933324022432 * lmsM + 1.5869240198367816 * lmsS;
 
   // XYZ to linear RGB (sRGB matrix, D65)
   const r = +3.2409699419045226 * x - 1.537383177570094 * y - 0.4986107602930034 * z;
@@ -105,7 +97,11 @@ function oklabToLinearRgb(
 /**
  * Convert linear RGB to sRGB (gamma correction)
  */
-function linearRgbToSrgb(r: number, g: number, b: number): {
+function linearRgbToSrgb(
+  r: number,
+  g: number,
+  b: number
+): {
   r: number;
   g: number;
   b: number;
@@ -138,12 +134,7 @@ function rgbToHex(r: number, g: number, b: number): string {
 /**
  * Convert RGB values (0-1) to RGB/RGBA string
  */
-function rgbToString(
-  r: number,
-  g: number,
-  b: number,
-  alpha?: number
-): string {
+function rgbToString(r: number, g: number, b: number, alpha?: number): string {
   const rInt = Math.round(r * 255);
   const gInt = Math.round(g * 255);
   const bInt = Math.round(b * 255);
@@ -210,9 +201,7 @@ export function convertOklchToRgb(oklchString: string): string {
  * // Returns: { primary: '#FF6F4A', secondary: '#5A8BC8' }
  * ```
  */
-export function batchConvertOklchToHex(
-  oklchMap: Record<string, string>
-): Record<string, string> {
+export function batchConvertOklchToHex(oklchMap: Record<string, string>): Record<string, string> {
   const result: Record<string, string> = {};
   for (const [key, oklch] of Object.entries(oklchMap)) {
     try {
@@ -224,4 +213,3 @@ export function batchConvertOklchToHex(
   }
   return result;
 }
-

@@ -48,6 +48,7 @@ eslint-rules-tests/
 ## Autofix Safety Policy
 
 **CRITICAL:** Never add autofixes unless:
+
 - ✅ Exhaustively tested on dedicated test files
 - ✅ Verified 110% safe (no risk of breaking code)
 - ✅ Tested on edge cases (template literals, conditional classes, etc.)

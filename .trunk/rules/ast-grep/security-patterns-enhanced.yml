@@ -39,7 +39,7 @@ rule:
         inside:
           has:
             regex: 'createApiRoute|createDataFunction'
-message: "Database queries should validate input with Zod schemas before execution. Add input validation using z.object() from zod. API routes using createApiRoute() factory automatically validate via querySchema/bodySchema."
+message: 'Database queries should validate input with Zod schemas before execution. Add input validation using z.object() from zod. API routes using createApiRoute() factory automatically validate via querySchema/bodySchema.'
 severity: error
 
 ---
@@ -53,7 +53,7 @@ rule:
         regex: SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP
     - has:
         regex: \$\{
-message: "String interpolation in SQL queries risks SQL injection. Use parameterized queries (RPC functions) instead. Never build SQL queries with string interpolation."
+message: 'String interpolation in SQL queries risks SQL injection. Use parameterized queries (RPC functions) instead. Never build SQL queries with string interpolation.'
 severity: error
 
 ---
@@ -67,7 +67,7 @@ rule:
         pattern: 'new URL($INPUT, $BASE)'
     - has:
         regex: user|input|param|query|body
-message: "URL construction with user input must be validated/sanitized. Use URL validation or sanitization before constructing URLs"
+message: 'URL construction with user input must be validated/sanitized. Use URL validation or sanitization before constructing URLs'
 severity: error
 
 ---
@@ -84,7 +84,7 @@ rule:
     - not:
         has:
           regex: 'createApiRoute|createCachedApiRoute'
-message: "API routes must use createApiRoute() factory for automatic validation, logging, CORS, and error handling. Raw NextRequest handlers are a security risk. Replace with createApiRoute({ route, operation, method, cors, querySchema/bodySchema, handler }). For authentication, use authedAction server actions instead of requireAuth."
+message: 'API routes must use createApiRoute() factory for automatic validation, logging, CORS, and error handling. Raw NextRequest handlers are a security risk. Replace with createApiRoute({ route, operation, method, cors, querySchema/bodySchema, handler }). For authentication, use authedAction server actions instead of requireAuth.'
 severity: error
 
 ---
@@ -121,7 +121,7 @@ rule:
     - not:
         has:
           regex: '(authedAction|optionalAuthAction|rateLimitedAction|actionClient)\('
-message: "Server actions must use safe-action middleware (authedAction, optionalAuthAction, rateLimitedAction, or actionClient) for authentication. Import from @heyclaude/web-runtime/actions/safe-action"
+message: 'Server actions must use safe-action middleware (authedAction, optionalAuthAction, rateLimitedAction, or actionClient) for authentication. Import from @heyclaude/web-runtime/actions/safe-action'
 severity: error
 
 ---
@@ -141,7 +141,7 @@ rule:
     - not:
         has:
           regex: '(hashUserId|hashEmail|hashPII)\('
-message: "PII (userId, email, etc.) in log context must be hashed. Use hashUserId() or hashEmail() from @heyclaude/shared-runtime/privacy. NOTE: logger.child({ userId }) automatically hashes via redaction - use that pattern instead."
+message: 'PII (userId, email, etc.) in log context must be hashed. Use hashUserId() or hashEmail() from @heyclaude/shared-runtime/privacy. NOTE: logger.child({ userId }) automatically hashes via redaction - use that pattern instead.'
 severity: warning
 
 ---
@@ -156,7 +156,7 @@ rule:
     - kind: new_expression
       has:
         regex: 'new Function\('
-message: "eval() and Function() are dangerous and should be avoided. Use safer alternatives like JSON.parse() or schema validation"
+message: 'eval() and Function() are dangerous and should be avoided. Use safer alternatives like JSON.parse() or schema validation'
 severity: error
 
 ---
@@ -168,7 +168,7 @@ rule:
     - pattern: 'dangerouslySetInnerHTML={{ __html: $INPUT }}'
       has:
         regex: user|input|param|query|body
-message: "User input in dangerouslySetInnerHTML must be sanitized. Use DOMPurify or similar sanitization library"
+message: 'User input in dangerouslySetInnerHTML must be sanitized. Use DOMPurify or similar sanitization library'
 severity: error
 
 ---
@@ -206,7 +206,7 @@ rule:
         inside:
           has:
             regex: '// CSRF handled by|// Internal API'
-message: "Mutating routes (POST/PUT/DELETE) should include CSRF protection. createApiRoute() factory handles CSRF automatically, but verify CSRF is enabled for public-facing mutation endpoints."
+message: 'Mutating routes (POST/PUT/DELETE) should include CSRF protection. createApiRoute() factory handles CSRF automatically, but verify CSRF is enabled for public-facing mutation endpoints.'
 severity: warning
 
 # Note: dangerouslySetInnerHTML detection requires JSX parsing

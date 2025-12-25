@@ -31,7 +31,7 @@ describe('contact data functions', () => {
       const configs = (globalThis as any).__dataFunctionConfigs;
       const config = configs?.get('fetchContactCommands');
       const normalizeResult = config?.normalizeResult;
-      
+
       const mockCommands = [
         {
           id: 'cmd-1',
@@ -40,7 +40,7 @@ describe('contact data functions', () => {
           action_value: '/path',
         },
       ];
-      
+
       expect(normalizeResult(mockCommands)).toEqual(mockCommands[0]);
       expect(normalizeResult([])).toBeNull();
       expect(normalizeResult(null)).toBeNull();
@@ -48,4 +48,3 @@ describe('contact data functions', () => {
     });
   });
 });
-

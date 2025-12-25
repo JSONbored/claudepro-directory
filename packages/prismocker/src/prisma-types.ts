@@ -179,7 +179,7 @@ export type ModelName<T> = T extends Prisma.ModelName ? T : never;
  */
 export type ModelType<
   TClient extends PrismaClient,
-  TModel extends Prisma.ModelName
+  TModel extends Prisma.ModelName,
 > = TModel extends keyof TClient ? TClient[TModel] : never;
 
 /**
@@ -195,7 +195,7 @@ export type ModelType<
  *
  * ```typescript
  * import type { Prisma } from '@prisma/client';
- * 
+ *
  * const data: Prisma.CompanyCreateInput[] = [
  *   { name: 'Company 1', owner_id: 'user-1', slug: 'company-1' },
  * ];
@@ -212,14 +212,14 @@ export type ModelType<
  * setDataTyped(prisma, 'companies', [
  *   { name: 'Company 1', owner_id: 'user-1', slug: 'company-1' },
  * ]);
- * 
+ *
  * // With explicit typing for better type safety
  * import type { Prisma } from '@prisma/client';
  * const companies: Prisma.CompanyCreateInput[] = [
  *   { name: 'Company 1', owner_id: 'user-1', slug: 'company-1' },
  * ];
  * setDataTyped(prisma, 'companies', companies);
- * 
+ *
  * // Works with dynamic models too
  * setDataTyped(prisma, 'users', [
  *   { id: 'user-1', name: 'Alice' },
@@ -253,7 +253,7 @@ export function setDataTyped<TClient extends PrismaClient>(
  *
  * ```typescript
  * import type { Prisma } from '@prisma/client';
- * 
+ *
  * const companies = getDataTyped(prisma, 'companies') as Prisma.CompanyGetPayload<{}>[];
  * // companies is now typed as Company[]
  * ```
@@ -266,12 +266,12 @@ export function setDataTyped<TClient extends PrismaClient>(
  * ```typescript
  * // Basic usage (returns any[] for flexibility)
  * const companies = getDataTyped(prisma, 'companies');
- * 
+ *
  * // With explicit typing for better type safety
  * import type { Prisma } from '@prisma/client';
  * const companies = getDataTyped(prisma, 'companies') as Prisma.CompanyGetPayload<{}>[];
  * // companies is now fully typed as Company[]
- * 
+ *
  * // Works with dynamic models too
  * const users = getDataTyped(prisma, 'users');
  * ```
@@ -289,4 +289,3 @@ export function getDataTyped<TClient extends PrismaClient>(
   }
   return [];
 }
-

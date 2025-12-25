@@ -144,7 +144,7 @@ describe('useIntersectionObserver', () => {
     rerender({ threshold: 0.1 });
 
     const observerInstance = mockIntersectionObserver.mock.results[0]?.value;
-    
+
     // First, make it intersecting
     const entry1 = {
       isIntersecting: true,

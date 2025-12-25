@@ -32,8 +32,15 @@ export interface RuntimeLogger {
  * KV namespace interface (runtime-agnostic)
  */
 export interface KvNamespace {
-  get(key: string, options?: { type?: 'text' | 'json' | 'arrayBuffer' | 'stream' }): Promise<string | null>;
-  put(key: string, value: string | ArrayBuffer | ArrayBufferView | ReadableStream, options?: { expirationTtl?: number }): Promise<void>;
+  get(
+    key: string,
+    options?: { type?: 'text' | 'json' | 'arrayBuffer' | 'stream' }
+  ): Promise<string | null>;
+  put(
+    key: string,
+    value: string | ArrayBuffer | ArrayBufferView | ReadableStream,
+    options?: { expirationTtl?: number }
+  ): Promise<void>;
   delete(key: string): Promise<void>;
 }
 
@@ -77,4 +84,3 @@ export interface McpServerOptions {
   /** Optional KV cache for resource caching (Cloudflare Workers only) */
   kvCache?: KvNamespace | null;
 }
-

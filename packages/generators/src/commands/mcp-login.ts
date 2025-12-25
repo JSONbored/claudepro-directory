@@ -41,9 +41,7 @@ function loadEnvFile(): void {
 // Environment variables are provided by Infisical (no .env file loading)
 loadEnvFile();
 
-const SUPABASE_URL =
-  env.NEXT_PUBLIC_SUPABASE_URL ??
-  'https://hgtjdifxfapoltfflowc.supabase.co';
+const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://hgtjdifxfapoltfflowc.supabase.co';
 
 const SUPABASE_ANON_KEY = env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 

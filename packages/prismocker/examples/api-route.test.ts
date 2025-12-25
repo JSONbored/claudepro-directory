@@ -191,17 +191,17 @@ describe('GET /api/company', () => {
     });
   });
 
-    it('should include jobs', async () => {
-      const request = new NextRequest('http://localhost/api/company?slug=acme-corp');
-      const response = await GET(request);
-      const data = await response.json();
+  it('should include jobs', async () => {
+    const request = new NextRequest('http://localhost/api/company?slug=acme-corp');
+    const response = await GET(request);
+    const data = await response.json();
 
-      expect(response.status).toBe(200);
-      if (data.jobs) {
-        expect(data.jobs.length).toBeGreaterThan(0);
-        expect(data.jobs[0].title).toBe('Senior Engineer');
-      }
-    });
+    expect(response.status).toBe(200);
+    if (data.jobs) {
+      expect(data.jobs.length).toBeGreaterThan(0);
+      expect(data.jobs[0].title).toBe('Senior Engineer');
+    }
+  });
 
   it('should return 404 for non-existent company', async () => {
     const request = new NextRequest('http://localhost/api/company?slug=non-existent');
@@ -255,11 +255,11 @@ describe('POST /api/company', () => {
       owner_id: 'user-1',
     });
 
-      // Verify it was created
-      const company = await (prisma as any).companies.findUnique({
-        where: { slug: 'new-company' },
-      });
-      expect(company).toBeTruthy();
+    // Verify it was created
+    const company = await (prisma as any).companies.findUnique({
+      where: { slug: 'new-company' },
+    });
+    expect(company).toBeTruthy();
   });
 
   it('should return 400 when required fields are missing', async () => {
@@ -389,11 +389,11 @@ describe('DELETE /api/company', () => {
     expect(response.status).toBe(200);
     expect(data.success).toBe(true);
 
-      // Verify it was deleted
-      const company = await (prisma as any).companies.findUnique({
-        where: { slug: 'acme-corp' },
-      });
-      expect(company).toBeNull();
+    // Verify it was deleted
+    const company = await (prisma as any).companies.findUnique({
+      where: { slug: 'acme-corp' },
+    });
+    expect(company).toBeNull();
   });
 
   it('should return 404 for non-existent company', async () => {
@@ -420,4 +420,3 @@ describe('DELETE /api/company', () => {
     expect(data.error).toBe('Slug parameter is required');
   });
 });
-

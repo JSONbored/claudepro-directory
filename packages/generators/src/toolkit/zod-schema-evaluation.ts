@@ -32,11 +32,7 @@ export function getProjectRoot(): string {
   }
 
   // Try to find project root by looking for apps/web or apps/workers
-  const possibleRoots = [
-    process.cwd(),
-    join(process.cwd(), '..'),
-    join(process.cwd(), '../..'),
-  ];
+  const possibleRoots = [process.cwd(), join(process.cwd(), '..'), join(process.cwd(), '../..')];
 
   for (const root of possibleRoots) {
     if (existsSync(join(root, 'apps/web')) || existsSync(join(root, 'apps/workers'))) {
@@ -76,7 +72,10 @@ const WORKSPACE_PACKAGE_MAP: Record<string, string> = {
 /**
  * Resolve workspace package import to source file path
  */
-export function resolveWorkspacePackage(moduleSpecifier: string, projectRoot?: string): string | null {
+export function resolveWorkspacePackage(
+  moduleSpecifier: string,
+  projectRoot?: string
+): string | null {
   const root = projectRoot || getProjectRoot();
 
   if (!moduleSpecifier.startsWith('@heyclaude/')) {
@@ -194,16 +193,13 @@ export async function resolveModuleSpecifier(
 export function preprocessImports(importCode: string, projectRoot?: string): string {
   const root = projectRoot || getProjectRoot();
 
-  return importCode.replace(
-    /from\s+['"](@heyclaude\/[^'"]+)['"]/g,
-    (match, moduleSpecifier) => {
-      const resolved = resolveWorkspacePackage(moduleSpecifier, root);
-      if (resolved) {
-        return `from '${resolved}'`;
-      }
-      return match; // Keep original if can't resolve
+  return importCode.replace(/from\s+['"](@heyclaude\/[^'"]+)['"]/g, (match, moduleSpecifier) => {
+    const resolved = resolveWorkspacePackage(moduleSpecifier, root);
+    if (resolved) {
+      return `from '${resolved}'`;
     }
-  );
+    return match; // Keep original if can't resolve
+  });
 }
 
 /**
@@ -221,19 +217,14 @@ export function createJitiInstance(projectRoot?: string): ReturnType<typeof jiti
  */
 export function isZodSchema(value: unknown): value is z.ZodSchema {
   return (
-    value !== null &&
-    typeof value === 'object' &&
-    ('_def' in value || value instanceof z.ZodType)
+    value !== null && typeof value === 'object' && ('_def' in value || value instanceof z.ZodType)
   );
 }
 
 /**
  * Extract schema from module by name
  */
-export function extractSchemaFromModule(
-  module: any,
-  schemaName: string
-): z.ZodSchema | null {
+export function extractSchemaFromModule(module: any, schemaName: string): z.ZodSchema | null {
   if (!module || !module[schemaName]) {
     return null;
   }
@@ -324,12 +315,12 @@ function extractSchemaImports(_imports: string, schemaCode: string): string {
   // For now, we'll include all exports from the types file
   // This is a simple heuristic - in a real implementation, we'd parse the AST
   const schemaNames: string[] = [];
-  
+
   // Common schema patterns: CategorySchema, etc.
   if (schemaCode.includes('CategorySchema')) {
     schemaNames.push('CategorySchema');
   }
-  
+
   // If we have schema names, try to import them from the same file
   // For now, return empty string - the full file will be evaluated
   return '';
@@ -364,20 +355,21 @@ export async function evaluateZodSchema(
   const preprocessedImports = preprocessImports(filteredImports.join('\n'), root);
 
   // Check if zod is already imported
-  const hasZodImport = preprocessedImports.includes("from 'zod'") || 
-                       preprocessedImports.includes('from "zod"') ||
-                       preprocessedImports.includes("from 'zod") ||
-                       preprocessedImports.includes('from "zod');
-  
-  const hasZodOpenApiImport = preprocessedImports.includes("'zod-openapi'") ||
-                               preprocessedImports.includes('"zod-openapi"');
+  const hasZodImport =
+    preprocessedImports.includes("from 'zod'") ||
+    preprocessedImports.includes('from "zod"') ||
+    preprocessedImports.includes("from 'zod") ||
+    preprocessedImports.includes('from "zod');
+
+  const hasZodOpenApiImport =
+    preprocessedImports.includes("'zod-openapi'") || preprocessedImports.includes('"zod-openapi"');
 
   // Create temporary module
   // Only import zod and zod-openapi if not already imported
-  const zodImports = [
-    !hasZodImport && "import { z } from 'zod';",
-    !hasZodOpenApiImport && "import 'zod-openapi';",
-  ].filter(Boolean).join('\n') + (hasZodImport || hasZodOpenApiImport ? '\n' : '');
+  const zodImports =
+    [!hasZodImport && "import { z } from 'zod';", !hasZodOpenApiImport && "import 'zod-openapi';"]
+      .filter(Boolean)
+      .join('\n') + (hasZodImport || hasZodOpenApiImport ? '\n' : '');
 
   // Extract all schema names from the file to include them in the temp module
   // This is a simple approach - extract all exported const declarations that look like schemas
@@ -393,7 +385,10 @@ export const schema = ${schemaCode};
 `;
 
   // Write to temp file
-  const tempPath = join(root, `.temp-schema-${Date.now()}-${Math.random().toString(36).slice(2)}.ts`);
+  const tempPath = join(
+    root,
+    `.temp-schema-${Date.now()}-${Math.random().toString(36).slice(2)}.ts`
+  );
   writeFileSync(tempPath, tempModuleCode, 'utf-8');
 
   try {
@@ -552,4 +547,3 @@ export async function evaluateSchemaFromModule(
     return null;
   }
 }
-

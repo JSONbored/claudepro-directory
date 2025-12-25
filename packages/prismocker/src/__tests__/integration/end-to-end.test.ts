@@ -26,19 +26,34 @@ describe('Prismocker Integration Tests', () => {
       // Seed data using companies model (from actual schema)
       if (isPrismockerClient(prisma)) {
         setDataTyped(prisma, 'companies', [
-          { id: 'comp-1', name: 'Company A', owner_id: 'owner-1', slug: 'company-a', featured: true },
-          { id: 'comp-2', name: 'Company B', owner_id: 'owner-2', slug: 'company-b', featured: true },
-          { id: 'comp-3', name: 'Company C', owner_id: 'owner-3', slug: 'company-c', featured: false },
+          {
+            id: 'comp-1',
+            name: 'Company A',
+            owner_id: 'owner-1',
+            slug: 'company-a',
+            featured: true,
+          },
+          {
+            id: 'comp-2',
+            name: 'Company B',
+            owner_id: 'owner-2',
+            slug: 'company-b',
+            featured: true,
+          },
+          {
+            id: 'comp-3',
+            name: 'Company C',
+            owner_id: 'owner-3',
+            slug: 'company-c',
+            featured: false,
+          },
         ]);
       }
 
       // Complex query: featured companies owned by specific owners
       const result = await prisma.companies.findMany({
         where: {
-          AND: [
-            { featured: true },
-            { owner_id: { in: ['owner-1', 'owner-2'] } },
-          ],
+          AND: [{ featured: true }, { owner_id: { in: ['owner-1', 'owner-2'] } }],
         },
         orderBy: { name: 'asc' },
       });
@@ -87,7 +102,13 @@ describe('Prismocker Integration Tests', () => {
     it('should handle successful transaction with multiple operations', async () => {
       if (isPrismockerClient(prisma)) {
         setDataTyped(prisma, 'companies', [
-          { id: 'comp-1', name: 'Company 1', owner_id: 'owner-1', slug: 'company-1', featured: false },
+          {
+            id: 'comp-1',
+            name: 'Company 1',
+            owner_id: 'owner-1',
+            slug: 'company-1',
+            featured: false,
+          },
         ]);
         setDataTyped(prisma, 'jobs', []);
       }
@@ -121,7 +142,13 @@ describe('Prismocker Integration Tests', () => {
     it('should rollback transaction on error', async () => {
       if (isPrismockerClient(prisma)) {
         setDataTyped(prisma, 'companies', [
-          { id: 'comp-1', name: 'Company 1', owner_id: 'owner-1', slug: 'company-1', featured: false },
+          {
+            id: 'comp-1',
+            name: 'Company 1',
+            owner_id: 'owner-1',
+            slug: 'company-1',
+            featured: false,
+          },
         ]);
       }
 
@@ -381,4 +408,3 @@ describe('Prismocker Integration Tests', () => {
     });
   });
 });
-

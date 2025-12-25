@@ -47,13 +47,17 @@ const CONSTRAINT_MESSAGES: Record<string, string | (() => string)> = {
   // Content
   content_slug_pattern: 'Slug must be 3-100 lowercase characters (letters, numbers, hyphens only)',
   content_category_check: () => {
-    const values = ContentCategory ? Object.values(ContentCategory).join(', ') : 'agents, mcp, rules, configurations';
+    const values = ContentCategory
+      ? Object.values(ContentCategory).join(', ')
+      : 'agents, mcp, rules, configurations';
     return `Invalid category. Must be one of: ${values}`;
   },
   content_avg_rating_check: 'Rating must be between 0 and 5',
   content_download_url_check: 'Download URL must start with /downloads/ or https://',
   content_guide_subcategory_check: () => {
-    const values = GuideSubcategory ? Object.values(GuideSubcategory).join(', ') : 'getting_started, advanced, troubleshooting';
+    const values = GuideSubcategory
+      ? Object.values(GuideSubcategory).join(', ')
+      : 'getting_started, advanced, troubleshooting';
     return `Guide subcategory must be one of: ${values}`;
   },
 
@@ -147,7 +151,8 @@ export function parseDatabaseError(error: PostgrestError): Error {
 
     if (friendlyMessageOrFn) {
       // Handle both string messages and lazy functions
-      const friendlyMessage = typeof friendlyMessageOrFn === 'function' ? friendlyMessageOrFn() : friendlyMessageOrFn;
+      const friendlyMessage =
+        typeof friendlyMessageOrFn === 'function' ? friendlyMessageOrFn() : friendlyMessageOrFn;
       return new Error(friendlyMessage);
     }
   }

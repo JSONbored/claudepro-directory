@@ -5,5 +5,4 @@
 --
 -- Description: Remove increment RPC function - Only defined, not called in migration file
 -- Function signature: increment(table_name text, row_id uuid, column_name text, increment_by integer DEFAULT 1)
-
-DROP FUNCTION IF EXISTS public.increment(text, uuid, text, integer);
+DROP FUNCTION IF EXISTS public.increment (text, uuid, text, integer);

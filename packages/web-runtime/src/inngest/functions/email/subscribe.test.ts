@@ -126,25 +126,23 @@ const { __mockRevalidateTag: mockRevalidateTag } = jest.requireMock('next/cache'
 const { __mockGetService: mockGetService } = jest.requireMock('../../../data/service-factory') as {
   __mockGetService: ReturnType<typeof jest.fn>;
 };
-const {
-  __mockLogger: mockLogger,
-  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
-} = jest.requireMock('../../../logging/server') as {
-  __mockLogger: {
-    info: ReturnType<typeof jest.fn>;
-    warn: ReturnType<typeof jest.fn>;
-    error: ReturnType<typeof jest.fn>;
+const { __mockLogger: mockLogger, __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId } =
+  jest.requireMock('../../../logging/server') as {
+    __mockLogger: {
+      info: ReturnType<typeof jest.fn>;
+      warn: ReturnType<typeof jest.fn>;
+      error: ReturnType<typeof jest.fn>;
+    };
+    __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
   };
-  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-};
-const {
-  __mockValidateEmail: mockValidateEmail,
-  __mockNormalizeError: mockNormalizeError,
-} = jest.requireMock('@heyclaude/shared-runtime') as {
-  __mockValidateEmail: ReturnType<typeof jest.fn>;
-  __mockNormalizeError: ReturnType<typeof jest.fn>;
-};
-const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock('../../../email/base-template') as {
+const { __mockValidateEmail: mockValidateEmail, __mockNormalizeError: mockNormalizeError } =
+  jest.requireMock('@heyclaude/shared-runtime') as {
+    __mockValidateEmail: ReturnType<typeof jest.fn>;
+    __mockNormalizeError: ReturnType<typeof jest.fn>;
+  };
+const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock(
+  '../../../email/base-template'
+) as {
   __mockRenderEmailTemplate: ReturnType<typeof jest.fn>;
 };
 
@@ -187,7 +185,7 @@ describe('subscribeNewsletter', () => {
     mockSendEmail.mockResolvedValue({ id: 'email-id' });
     mockEnrollInOnboardingSequence.mockResolvedValue(undefined);
     mockRenderEmailTemplate.mockResolvedValue('<html>Welcome Email</html>');
-    
+
     // Restore normalizeError mock implementation after reset
     // jest.resetAllMocks() resets mocks to return undefined, so we need to restore it
     mockNormalizeError.mockImplementation((error: unknown, fallbackMessage?: string) => {
@@ -196,7 +194,7 @@ describe('subscribeNewsletter', () => {
       }
       return new Error(fallbackMessage || String(error || 'Unknown error'));
     });
-    
+
     // Restore validateEmail mock implementation after reset
     mockValidateEmail.mockImplementation((email: string) => ({
       valid: true,
@@ -265,7 +263,7 @@ describe('subscribeNewsletter', () => {
     })) as { error?: Error | { message: string } };
 
     expect(error).toBeDefined();
-    
+
     // InngestTestEngine returns errors as objects with message property, not Error instances
     // Handle both Error instances and error objects
     let errorMessage: string;

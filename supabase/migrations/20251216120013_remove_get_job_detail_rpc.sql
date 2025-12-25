@@ -24,4 +24,4 @@
 -- - packages/data-layer/src/services/jobs.ts: Converted getJobBySlug() to use Prisma
 -- - packages/web-runtime/src/data/jobs.ts: Updated to handle null return (service now returns GetJobDetailReturns | null)
 -- - Return type: Promise<GetJobDetailReturns | null> (local type matching RPC composite structure)
-DROP FUNCTION IF EXISTS public.get_job_detail(text);
+DROP FUNCTION IF EXISTS public.get_job_detail (text);

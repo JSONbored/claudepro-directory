@@ -6,11 +6,7 @@
  */
 
 import { Resend } from 'resend';
-import type {
-  content_category,
-  newsletter_source,
-  newsletter_interest,
-} from '@prisma/client';
+import type { content_category, newsletter_source, newsletter_interest } from '@prisma/client';
 import type { newsletter_sync_status } from '@prisma/client';
 import { newsletter_interest as NewsletterInterest } from '@prisma/client';
 import type { EnrollInEmailSequenceArgs } from '@heyclaude/database-types/postgres-types';
@@ -236,7 +232,7 @@ const VALID_TOPIC_IDS = new Set(Object.values(RESEND_TOPIC_IDS));
  * @returns true if all topic IDs are valid, false otherwise
  */
 export function validateTopicIds(topicIds: string[]): boolean {
-  return topicIds.every((id): id is typeof RESEND_TOPIC_IDS[keyof typeof RESEND_TOPIC_IDS] => 
+  return topicIds.every((id): id is (typeof RESEND_TOPIC_IDS)[keyof typeof RESEND_TOPIC_IDS] =>
     VALID_TOPIC_IDS.has(id as any)
   );
 }
@@ -428,7 +424,7 @@ export function buildContactProperties(params: {
 
 /**
  * Resend Segment IDs
- * 
+ *
  * @todo Create "changelog" segment in Resend dashboard and update RESEND_SEGMENT_IDS.changelog with the actual segment ID.
  * See .cursor/resend-emails/CHANGELOG-SEGMENT-SETUP.md for detailed instructions.
  */
@@ -706,10 +702,10 @@ export async function updateContactEngagement(
 
 /**
  * Add a contact to the changelog segment.
- * 
+ *
  * NOTE: The changelog segment must be created in the Resend dashboard first.
  * Update RESEND_SEGMENT_IDS.changelog with the actual segment ID after creation.
- * 
+ *
  * @param resend - Resend client instance
  * @param contactId - Resend contact ID
  * @returns Promise that resolves when contact is added to segment
@@ -805,10 +801,7 @@ async function listSegmentsWithRetry(resend: Resend, contactId: string): Promise
  * @param contactId - Resend contact ID
  * @returns Promise that resolves to array of topic IDs the contact is opted into
  */
-export async function getContactTopics(
-  resend: Resend,
-  contactId: string
-): Promise<string[]> {
+export async function getContactTopics(resend: Resend, contactId: string): Promise<string[]> {
   const logContext: LogContext = {
     utility: 'resend',
     operation: 'get-contact-topics',
@@ -824,19 +817,16 @@ export async function getContactTopics(
     };
 
     const topicsApi = resend.contacts.topics as unknown as ResendContactTopicsApi;
-    const response = await runWithRetry(
-      () => topicsApi.list({ id: contactId }),
-      {
-        attempts: 3,
-        baseDelayMs: 500,
-        onRetry(attempt, error, delay) {
-          logger.warn(
-            { ...logContext, attempt, delay, reason: error.message },
-            '[resend] topic list throttled'
-          );
-        },
-      }
-    );
+    const response = await runWithRetry(() => topicsApi.list({ id: contactId }), {
+      attempts: 3,
+      baseDelayMs: 500,
+      onRetry(attempt, error, delay) {
+        logger.warn(
+          { ...logContext, attempt, delay, reason: error.message },
+          '[resend] topic list throttled'
+        );
+      },
+    });
 
     if (response.error || !response.data) {
       throw new ResendApiError(

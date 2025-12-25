@@ -293,10 +293,16 @@ function generateFunctionFile(
     }
 
     const excludedCompositeToPrismaModel: Record<string, { type: string; schema: string }> = {
-      announcements: { type: 'Prisma.announcementsGetPayload<{}>', schema: 'announcementsModelSchema' },
+      announcements: {
+        type: 'Prisma.announcementsGetPayload<{}>',
+        schema: 'announcementsModelSchema',
+      },
       content: { type: 'Prisma.contentGetPayload<{}>', schema: 'contentModelSchema' },
       jobs: { type: 'Prisma.jobsGetPayload<{}>', schema: 'jobsModelSchema' },
-      notifications: { type: 'Prisma.notificationsGetPayload<{}>', schema: 'notificationsModelSchema' },
+      notifications: {
+        type: 'Prisma.notificationsGetPayload<{}>',
+        schema: 'notificationsModelSchema',
+      },
     };
 
     const isExcludedReturnType =
@@ -331,10 +337,16 @@ function generateFunctionFile(
   // Import composite types and schemas if needed
   // Map excluded composite types to Prisma model types and their Zod schemas
   const excludedCompositeToPrismaModel: Record<string, { type: string; schema: string }> = {
-    announcements: { type: 'Prisma.announcementsGetPayload<{}>', schema: 'announcementsModelSchema' },
+    announcements: {
+      type: 'Prisma.announcementsGetPayload<{}>',
+      schema: 'announcementsModelSchema',
+    },
     content: { type: 'Prisma.contentGetPayload<{}>', schema: 'contentModelSchema' },
     jobs: { type: 'Prisma.jobsGetPayload<{}>', schema: 'jobsModelSchema' },
-    notifications: { type: 'Prisma.notificationsGetPayload<{}>', schema: 'notificationsModelSchema' },
+    notifications: {
+      type: 'Prisma.notificationsGetPayload<{}>',
+      schema: 'notificationsModelSchema',
+    },
   };
 
   // Always generate imports if we have any dependencies OR Prisma imports

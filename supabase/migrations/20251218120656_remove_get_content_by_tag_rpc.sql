@@ -16,5 +16,4 @@
 -- - Comment says "Used for /tags/[tag] pages" but no such pages found
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.get_content_by_tag(text, public.content_category, integer, integer);
+DROP FUNCTION IF EXISTS public.get_content_by_tag (text, public.content_category, integer, integer);

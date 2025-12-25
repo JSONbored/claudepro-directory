@@ -187,4 +187,3 @@ const primaryButtonStyle: React.CSSProperties = {
   textDecoration: 'none',
   display: 'inline-block',
 };
-

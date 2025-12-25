@@ -55,12 +55,8 @@ export function registerAllPrompts(mcpServer: McpServer, context: ToolContext): 
       argsSchema: categoryPromptArgSchema,
     },
     async ({ category, submission_type }) => {
-      const categoryText = category
-        ? ` for the **${category}** category`
-        : '';
-      const typeText = submission_type
-        ? ` as a **${submission_type}**`
-        : '';
+      const categoryText = category ? ` for the **${category}** category` : '';
+      const typeText = submission_type ? ` as a **${submission_type}**` : '';
 
       const guide = `# Content Submission Guide${categoryText}${typeText}
 
@@ -149,7 +145,8 @@ Ready to submit? Use the \`submitContent\` tool to begin!`;
       argsSchema: platformPromptArgSchema,
     },
     async ({ platform, content_type }) => {
-      const platformName = platform === 'claude-code' ? 'Claude Code' : platform === 'cursor' ? 'Cursor' : platform;
+      const platformName =
+        platform === 'claude-code' ? 'Claude Code' : platform === 'cursor' ? 'Cursor' : platform;
       const contentType = content_type || 'content';
 
       const guide = `# Formatting Content for ${platformName}

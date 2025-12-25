@@ -94,8 +94,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'application/json',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -105,7 +109,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -151,7 +157,9 @@ describe('GET /api/search/facets', () => {
     // 5. Set up $queryRawUnsafe for RPC testing (SearchService uses callRpc → BasePrismaService.callRpc → $queryRawUnsafe)
     // Assign jest.fn() directly to $queryRawUnsafe (Prismocker's Proxy set handler)
     // Default mock for facets (no arguments for get_search_facets_formatted)
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue(mockFacets) as unknown as typeof prismocker.$queryRawUnsafe;
+    prismocker.$queryRawUnsafe = jest
+      .fn()
+      .mockResolvedValue(mockFacets) as unknown as typeof prismocker.$queryRawUnsafe;
   });
 
   it('should return search facets', async () => {
@@ -209,7 +217,9 @@ describe('GET /api/search/facets', () => {
 
   it('should handle empty facets array', async () => {
     // Set up RPC mock to return empty array
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]) as unknown as typeof prismocker.$queryRawUnsafe;
+    prismocker.$queryRawUnsafe = jest
+      .fn()
+      .mockResolvedValue([]) as unknown as typeof prismocker.$queryRawUnsafe;
 
     const request = createMockRequest({
       method: 'GET',
@@ -228,7 +238,11 @@ describe('GET /api/search/facets', () => {
 
   it('should handle service errors gracefully', async () => {
     // Set up RPC mock to throw an error
-    prismocker.$queryRawUnsafe = jest.fn().mockRejectedValue(new Error('Database error')) as unknown as typeof prismocker.$queryRawUnsafe;
+    prismocker.$queryRawUnsafe = jest
+      .fn()
+      .mockRejectedValue(
+        new Error('Database error')
+      ) as unknown as typeof prismocker.$queryRawUnsafe;
 
     const request = createMockRequest({
       method: 'GET',
@@ -295,7 +309,7 @@ describe('GET /api/search/facets', () => {
     });
 
     const response = await GET(request);
-    const body = await getResponseBody(response) as { error?: string };
+    const body = (await getResponseBody(response)) as { error?: string };
 
     expectStatus(response, 405);
     expect(body).toHaveProperty('error');

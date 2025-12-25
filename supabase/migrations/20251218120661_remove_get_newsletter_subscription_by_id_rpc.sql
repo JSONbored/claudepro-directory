@@ -16,5 +16,4 @@
 -- - Not found in apps/edge/ (no edge function usage)
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.get_newsletter_subscription_by_id(uuid);
+DROP FUNCTION IF EXISTS public.get_newsletter_subscription_by_id (uuid);

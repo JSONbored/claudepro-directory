@@ -114,7 +114,6 @@ describe('useInterval', () => {
     expect(callback).toHaveBeenCalledTimes(4);
   });
 
-
   it('should handle very short intervals', () => {
     const callback = jest.fn();
     renderHook(() => useInterval(callback, 1));

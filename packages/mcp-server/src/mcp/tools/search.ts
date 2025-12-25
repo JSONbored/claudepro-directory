@@ -82,12 +82,14 @@ export async function handleSearchContent(
         p_offset: offset,
         p_sort: 'relevance',
       };
-      
+
       if (category) {
         // Type assertion needed because CategorySchema may not include all database categories
         // Database supports: agents, mcp, rules, commands, hooks, statuslines, skills, collections, guides, jobs, changelog
         // Cast to satisfy exactOptionalPropertyTypes - we know category exists
-        const categories = [category as DatabaseCategory] as NonNullable<SearchContentOptimizedArgs['p_categories']>;
+        const categories = [category as DatabaseCategory] as NonNullable<
+          SearchContentOptimizedArgs['p_categories']
+        >;
         contentArgs.p_categories = categories;
       }
       if (tags && tags.length > 0) {
@@ -124,7 +126,13 @@ export async function handleSearchContent(
 
     if (!results || results.length === 0) {
       const duration = Date.now() - startTime;
-      logger.info('searchContent completed with no results', {tool: 'searchContent', duration_ms: duration, query, category, resultCount: 0,});
+      logger.info('searchContent completed with no results', {
+        tool: 'searchContent',
+        duration_ms: duration,
+        query,
+        category,
+        resultCount: 0,
+      });
 
       const structuredOutput = {
         items: [],
@@ -208,7 +216,15 @@ export async function handleSearchContent(
       .join('\n\n');
 
     const duration = Date.now() - startTime;
-    logger.info('searchContent completed successfully', {tool: 'searchContent', duration_ms: duration, query, category, resultCount: formattedItems.length, total, page,});
+    logger.info('searchContent completed successfully', {
+      tool: 'searchContent',
+      duration_ms: duration,
+      query,
+      category,
+      resultCount: formattedItems.length,
+      total,
+      page,
+    });
 
     const structuredOutput = {
       items: formattedItems,
@@ -253,7 +269,11 @@ export async function handleSearchContent(
     };
   } catch (error) {
     const normalized = normalizeError(error, 'searchContent tool failed');
-    logger.error('searchContent tool error', normalized, { tool: 'searchContent', query, category });
+    logger.error('searchContent tool error', normalized, {
+      tool: 'searchContent',
+      query,
+      category,
+    });
     throw normalized;
   }
 }

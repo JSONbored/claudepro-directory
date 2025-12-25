@@ -70,4 +70,3 @@ export async function handleOAuthRegister(request: Request, env: ExtendedEnv): P
 
   return handleOAuthRegisterShared(request, env, adapter);
 }
-

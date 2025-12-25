@@ -15,5 +15,4 @@
 -- - Not found in apps/web/src/app/ (no page usage)
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.get_generation_config(public.content_category);
+DROP FUNCTION IF EXISTS public.get_generation_config (public.content_category);

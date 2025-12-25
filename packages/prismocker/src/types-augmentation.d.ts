@@ -158,4 +158,3 @@ declare module '@prisma/client' {
     }): string;
   }
 }
-

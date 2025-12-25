@@ -5,5 +5,8 @@
 --
 -- Description: Remove is_in_past RPC function - Not found in codebase, codebase uses TypeScript date utilities
 -- Function signature: is_in_past(input_date timestamp with time zone)
-
-DROP FUNCTION IF EXISTS public.is_in_past(timestamp with time zone);
+DROP FUNCTION IF EXISTS public.is_in_past (
+  timestamp
+  with
+    time zone
+);

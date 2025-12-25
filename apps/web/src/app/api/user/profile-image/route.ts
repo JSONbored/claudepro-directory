@@ -50,13 +50,17 @@ export const GET = createApiRoute({
       'serverError' in result &&
       (result as { serverError?: string }).serverError
     ) {
-      const serverError = (result as { serverError?: string }).serverError || 'Internal server error';
-      
+      const serverError =
+        (result as { serverError?: string }).serverError || 'Internal server error';
+
       // Check if this is an authentication error
       if (serverError.includes('Unauthorized') || serverError.includes('sign in')) {
         logger.warn({ serverError }, 'Authentication failed');
         return jsonResponse(
-          { error: 'Unauthorized', message: 'Authentication required. Please sign in to continue.' },
+          {
+            error: 'Unauthorized',
+            message: 'Authentication required. Please sign in to continue.',
+          },
           401,
           cors
         );
@@ -64,18 +68,15 @@ export const GET = createApiRoute({
 
       // Other server errors
       logger.error({ serverError }, 'Action returned serverError');
-      return jsonResponse(
-        { error: serverError },
-        500,
-        cors
-      );
+      return jsonResponse({ error: serverError }, 500, cors);
     }
 
     // Success - return the action result (SafeActionResult structure)
     // Extract imageUrl for logging
-    const actionData = result && typeof result === 'object' && 'data' in result
-      ? (result as { data?: { imageUrl: string | null } }).data
-      : null;
+    const actionData =
+      result && typeof result === 'object' && 'data' in result
+        ? (result as { data?: { imageUrl: string | null } }).data
+        : null;
     const imageUrl = actionData?.imageUrl ?? null;
 
     logger.info(

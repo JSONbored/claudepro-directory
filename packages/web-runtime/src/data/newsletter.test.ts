@@ -31,11 +31,10 @@ describe('newsletter data functions', () => {
       const configs = (globalThis as any).__dataFunctionConfigs;
       const config = configs?.get('getNewsletterSubscriberCount');
       const transformResult = config?.transformResult;
-      
+
       expect(transformResult(null)).toBe(0);
       expect(transformResult(undefined)).toBe(0);
       expect(transformResult(100)).toBe(100);
     });
   });
 });
-

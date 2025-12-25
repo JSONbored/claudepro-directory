@@ -7,7 +7,13 @@
 
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { GET, OPTIONS } from './route';
-import { createMockRequest, getResponseBody, expectStatus, expectCorsHeaders, expectCacheHeaders } from '../__helpers__/test-helpers';
+import {
+  createMockRequest,
+  getResponseBody,
+  expectStatus,
+  expectCorsHeaders,
+  expectCacheHeaders,
+} from '../__helpers__/test-helpers';
 
 // Import real cache utilities for proper cache testing
 import { clearRequestCache, getRequestCache } from '@heyclaude/data-layer/utils/request-cache';

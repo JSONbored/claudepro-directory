@@ -38,8 +38,20 @@ describe('Transaction Feature Tests', () => {
     it('should commit multiple update operations', async () => {
       if (isPrismockerClient(prisma)) {
         setDataTyped(prisma, 'companies', [
-          { id: 'comp-1', name: 'Company 1', owner_id: 'owner-1', slug: 'company-1', featured: false },
-          { id: 'comp-2', name: 'Company 2', owner_id: 'owner-2', slug: 'company-2', featured: false },
+          {
+            id: 'comp-1',
+            name: 'Company 1',
+            owner_id: 'owner-1',
+            slug: 'company-1',
+            featured: false,
+          },
+          {
+            id: 'comp-2',
+            name: 'Company 2',
+            owner_id: 'owner-2',
+            slug: 'company-2',
+            featured: false,
+          },
         ]);
       }
 
@@ -105,7 +117,10 @@ describe('Transaction Feature Tests', () => {
       try {
         await prisma.$transaction(async (tx) => {
           await (tx as any).users.create({ data: { id: 'user-3', name: 'Charlie' } });
-          await (tx as any).users.update({ where: { id: 'user-1' }, data: { name: 'Alice Updated' } });
+          await (tx as any).users.update({
+            where: { id: 'user-1' },
+            data: { name: 'Alice Updated' },
+          });
           throw new Error('Transaction failed');
         });
       } catch (error) {
@@ -126,8 +141,13 @@ describe('Transaction Feature Tests', () => {
 
       try {
         await prisma.$transaction(async (tx) => {
-          await (tx as any).users.update({ where: { id: 'user-1' }, data: { name: 'Alice Updated' } });
-          await (tx as any).posts.create({ data: { id: 'post-1', user_id: 'user-1', title: 'Post 1' } });
+          await (tx as any).users.update({
+            where: { id: 'user-1' },
+            data: { name: 'Alice Updated' },
+          });
+          await (tx as any).posts.create({
+            data: { id: 'post-1', user_id: 'user-1', title: 'Post 1' },
+          });
           throw new Error('Transaction failed');
         });
       } catch (error) {
@@ -196,4 +216,3 @@ describe('Transaction Feature Tests', () => {
     });
   });
 });
-

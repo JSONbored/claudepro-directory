@@ -14,7 +14,7 @@ import type { ExtendedEnv } from '@heyclaude/cloudflare-runtime/config/env';
 
 /**
  * Rate limit result from Cloudflare Rate Limiting binding
- * 
+ *
  * The binding returns: { success: boolean, limit: number, remaining: number, reset: number }
  * - success: true if request allowed, false if rate limited
  * - limit: Maximum number of requests allowed
@@ -38,12 +38,12 @@ export interface RateLimitConfig {
 
 /**
  * Cloudflare Rate Limiting binding type
- * 
+ *
  * Based on Cloudflare docs: https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
- * 
+ *
  * The binding has a `limit()` method that takes:
  * - options: { key: string } - Object with key property (unique identifier)
- * 
+ *
  * Returns Promise<{ success: boolean, limit: number, remaining: number, reset: number }>
  */
 type RateLimitBinding = {

@@ -70,7 +70,6 @@ export const processDiscordErrorsQueue = createInngestFunction(
   },
   { cron: '*/30 * * * *' }, // Every 30 minutes (optimized from 15 minutes)
   async ({ step, logContext }) => {
-
     // Step 1: Read messages from queue
     const messages = await step.run('read-queue', async () => {
       logger.info(logContext, 'Reading discord_errors queue');

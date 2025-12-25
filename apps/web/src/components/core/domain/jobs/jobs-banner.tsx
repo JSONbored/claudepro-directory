@@ -135,11 +135,7 @@ export function JobsPromo() {
             <div className={cn('flex items-center justify-between', 'text-sm')}>
               <span className="text-muted-foreground">Growth rate</span>
               <motion.span
-                className={cn(
-                  'flex items-center gap-1',
-                  'font-semibold',
-                  'text-success'
-                )}
+                className={cn('flex items-center gap-1', 'font-semibold', 'text-success')}
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
                 animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                 transition={{ delay: STAGGER.extended }}

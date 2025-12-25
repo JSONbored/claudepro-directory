@@ -105,7 +105,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
         status: 400,
         headers: {
           'Content-Type': 'application/json',
-          ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+          ...(typeof corsHeaders === 'object' && corsHeaders !== null
+            ? (corsHeaders as Record<string, string>)
+            : {}),
         },
       }
     );
@@ -114,7 +116,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
     return new NextResponse(null, {
       status: 204,
       headers: {
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
       },
     });
@@ -128,7 +132,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
         status: 401,
         headers: {
           'Content-Type': 'application/json',
-          ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+          ...(typeof corsHeaders === 'object' && corsHeaders !== null
+            ? (corsHeaders as Record<string, string>)
+            : {}),
         },
       }
     );
@@ -138,8 +144,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -160,7 +170,8 @@ describe('GET /api/content/changelog', () => {
   let prismocker: PrismaClient;
 
   // Mock data for RPC calls
-  const mockChangelogLlmsTxt = '# Changelog\n\n## [1.0.0] - 2025-01-11\n- Added new feature\n- Fixed bug\n\n## [0.9.0] - 2025-01-10\n- Initial release';
+  const mockChangelogLlmsTxt =
+    '# Changelog\n\n## [1.0.0] - 2025-01-11\n- Added new feature\n- Fixed bug\n\n## [0.9.0] - 2025-01-10\n- Initial release';
 
   beforeEach(() => {
     // Clear request cache before each test (REQUIRED for test isolation)
@@ -202,7 +213,7 @@ describe('GET /api/content/changelog', () => {
     }
     // Verify RPC was called for generate_changelog_llms_txt
     expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
-      'SELECT * FROM generate_changelog_llms_txt()',
+      'SELECT * FROM generate_changelog_llms_txt()'
     );
     expect(prismocker.$queryRawUnsafe).toHaveBeenCalledTimes(1);
   });
@@ -225,7 +236,7 @@ describe('GET /api/content/changelog', () => {
     expect(typeof body === 'string').toBe(true);
     // Verify RPC was called
     expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
-      'SELECT * FROM generate_changelog_llms_txt()',
+      'SELECT * FROM generate_changelog_llms_txt()'
     );
     expect(prismocker.$queryRawUnsafe).toHaveBeenCalledTimes(1);
   });
@@ -247,7 +258,9 @@ describe('GET /api/content/changelog', () => {
   });
 
   it('should handle service errors gracefully', async () => {
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(new Error('Database error'));
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(
+      new Error('Database error')
+    );
 
     const request = createMockRequest({
       method: 'GET',
@@ -262,7 +275,7 @@ describe('GET /api/content/changelog', () => {
     expect(body).toHaveProperty('error');
     // Verify RPC was called before error
     expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
-      'SELECT * FROM generate_changelog_llms_txt()',
+      'SELECT * FROM generate_changelog_llms_txt()'
     );
   });
 
@@ -314,7 +327,8 @@ describe('GET /api/content/changelog', () => {
     const cacheBefore = getRequestCache().getStats().size;
     await GET(request1);
     const cacheAfterFirst = getRequestCache().getStats().size;
-    const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+    const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls
+      .length;
 
     // Clear cache between calls to ensure second call makes a fresh request
     clearRequestCache();
@@ -329,7 +343,8 @@ describe('GET /api/content/changelog', () => {
     const cacheBeforeSecond = getRequestCache().getStats().size;
     await GET(request2);
     const cacheAfterSecond = getRequestCache().getStats().size;
-    const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+    const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls
+      .length;
 
     // The createCachedApiRoute factory uses Next.js Cache Components, which are request-scoped.
     // This means each call to GET(request) creates a new request context, and thus a new cache.

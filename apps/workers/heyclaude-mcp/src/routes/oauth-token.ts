@@ -19,10 +19,7 @@ import { handleOAuthTokenShared, type OAuthAdapter } from '@heyclaude/mcp-server
  * @param env - Cloudflare Workers env
  * @returns Token response from Supabase Auth or error response
  */
-export async function handleOAuthToken(
-  request: Request,
-  env: ExtendedEnv
-): Promise<Response> {
+export async function handleOAuthToken(request: Request, env: ExtendedEnv): Promise<Response> {
   // Create adapter with Cloudflare-specific async env parsing and Pino logger
   const adapter: OAuthAdapter = {
     parseEnv: async (e: ExtendedEnv) => {

@@ -1260,7 +1260,7 @@ Redesigned the hero section with modern animations and refined the search experi
   - Character-by-character 3D rotation effect (shadcn-style)
   - Cycles through words: enthusiasts → developers → power users → beginners → builders
   - Hardware-accelerated transforms with proper perspective
-  - Smooth easing with custom cubic-bezier curve [0.16, 1, 0.3, 1]
+  - Smooth easing with custom cubic-bezier curve \[0.16, 1, 0.3, 1]
   - 600ms rotation duration with 50ms character delays
   - Accessibility support with screen reader announcements
 
@@ -2125,7 +2125,7 @@ Implemented comprehensive personalization infrastructure that learns from user b
   - After bookmark: "Users who saved this also saved..."
   - After copy: "Complete your setup with..." (complementary tools)
   - Extended time on page: "Related configs you might like..."
-  - Category browsing: "Since you're exploring [category]..."
+  - Category browsing: "Since you're exploring \[category]..."
   - Complementarity rules (MCP ↔ agents, rules ↔ commands)
 
 - **Background Processing**

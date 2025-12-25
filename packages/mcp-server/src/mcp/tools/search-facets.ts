@@ -15,9 +15,7 @@ import { normalizeError } from '@heyclaude/shared-runtime';
  * @param context - Tool handler context
  * @returns Search facets with categories, tags, and authors
  */
-export async function handleGetSearchFacets(
-  context: ToolContext
-): Promise<{
+export async function handleGetSearchFacets(context: ToolContext): Promise<{
   content: Array<{ type: 'text'; text: string }>;
   _meta: {
     facets: Array<{

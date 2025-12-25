@@ -19,11 +19,15 @@
 -- 4. idx_subscriptions_polar_id (duplicates subscriptions_polar_subscription_id_key UNIQUE)
 -- 5. idx_user_mcps_slug (duplicates user_mcps_slug_key UNIQUE)
 -- 6. idx_users_email (duplicates users_email_key UNIQUE)
-
 -- Remove duplicate indexes (safe - UNIQUE constraints provide the same functionality)
 DROP INDEX IF EXISTS public.idx_app_settings_key;
+
 DROP INDEX IF EXISTS public.idx_newsletter_resend_contact_id;
+
 DROP INDEX IF EXISTS public.idx_payments_polar_transaction_id;
+
 DROP INDEX IF EXISTS public.idx_subscriptions_polar_id;
+
 DROP INDEX IF EXISTS public.idx_user_mcps_slug;
+
 DROP INDEX IF EXISTS public.idx_users_email;

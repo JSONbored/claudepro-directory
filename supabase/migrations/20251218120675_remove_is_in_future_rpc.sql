@@ -18,5 +18,8 @@
 -- Note: Date comparisons are likely done in TypeScript/application layer
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.is_in_future(timestamp with time zone);
+DROP FUNCTION IF EXISTS public.is_in_future (
+  timestamp
+  with
+    time zone
+);

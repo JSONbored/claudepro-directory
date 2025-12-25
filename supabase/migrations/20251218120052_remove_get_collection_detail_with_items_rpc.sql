@@ -9,5 +9,4 @@
 --
 -- Function signature: get_collection_detail_with_items(p_slug text, p_user_id uuid)
 -- Related: AccountService.getCollectionDetailWithItems uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_collection_detail_with_items(text, uuid);
+DROP FUNCTION IF EXISTS public.get_collection_detail_with_items (text, uuid);

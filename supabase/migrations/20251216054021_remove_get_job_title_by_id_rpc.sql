@@ -11,5 +11,4 @@
 --
 -- Related Changes:
 -- - packages/data-layer/src/services/jobs.ts: Converted getJobTitleById() to use Prisma
-
-DROP FUNCTION IF EXISTS public.get_job_title_by_id(uuid);
+DROP FUNCTION IF EXISTS public.get_job_title_by_id (uuid);

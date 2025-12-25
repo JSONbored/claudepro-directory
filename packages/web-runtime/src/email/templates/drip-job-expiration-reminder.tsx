@@ -50,10 +50,7 @@ export function JobExpirationReminderEmail({
   const manageJobsUrl = `${baseUrl}/account/jobs`;
 
   return (
-    <BaseLayout
-      preview={`⏰ Your job posting expires in 5 days - renew now?`}
-      utm={utm}
-    >
+    <BaseLayout preview={`⏰ Your job posting expires in 5 days - renew now?`} utm={utm}>
       <Section style={contentSectionStyle}>
         <Text style={titleStyle}>⏰ Your Job Posting Expires in 5 Days</Text>
         <Text style={greetingStyle}>Hi {name},</Text>
@@ -156,4 +153,3 @@ const primaryCtaStyle: React.CSSProperties = {
   textDecoration: 'none',
   fontSize: typography.fontSize.base,
 };
-

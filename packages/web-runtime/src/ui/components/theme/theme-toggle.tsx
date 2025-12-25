@@ -137,7 +137,8 @@ export function ThemeToggle() {
     html.offsetHeight;
 
     // Get the new background color from computed styles (now that theme is applied)
-    const newBg = getComputedStyle(html).getPropertyValue('--background').trim() || 
+    const newBg =
+      getComputedStyle(html).getPropertyValue('--background').trim() ||
       (newTheme === 'dark' ? 'oklch(22.21% 0 0)' : 'oklch(100% 0 0)'); // fallback to tweakcn values
 
     // Create overlay element if it doesn't exist

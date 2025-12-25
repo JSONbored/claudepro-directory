@@ -23,7 +23,8 @@ import {
   errorResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
 import {
-  createOptionsHandler as createApiOptionsHandler, createApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  createApiRoute,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { content_categorySchema } from '@heyclaude/web-runtime/prisma-zod-schemas';
@@ -70,13 +71,17 @@ export const POST = createApiRoute({
       'serverError' in result &&
       (result as { serverError?: string }).serverError
     ) {
-      const serverError = (result as { serverError?: string }).serverError || 'Internal server error';
-      
+      const serverError =
+        (result as { serverError?: string }).serverError || 'Internal server error';
+
       // Check if this is an authentication error
       if (serverError.includes('Unauthorized') || serverError.includes('sign in')) {
         logger.warn({ serverError }, 'Authentication failed');
         return jsonResponse(
-          { error: 'Unauthorized', message: 'Authentication required. Please sign in to continue.' },
+          {
+            error: 'Unauthorized',
+            message: 'Authentication required. Please sign in to continue.',
+          },
           401,
           cors
         );
@@ -84,11 +89,7 @@ export const POST = createApiRoute({
 
       // Other server errors
       logger.error({ serverError }, 'Action returned serverError');
-      return jsonResponse(
-        { error: serverError },
-        500,
-        cors
-      );
+      return jsonResponse({ error: serverError }, 500, cors);
     }
 
     // Success - return the action result
@@ -96,7 +97,8 @@ export const POST = createApiRoute({
   },
   method: 'POST',
   openapi: {
-    description: 'Adds a bookmark for the authenticated user. Requires authentication via authedAction.',
+    description:
+      'Adds a bookmark for the authenticated user. Requires authentication via authedAction.',
     operationId: 'addBookmark',
     requestBody: {
       description: 'Bookmark details including content slug, content type, and optional notes',

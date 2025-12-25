@@ -5,5 +5,4 @@
 --
 -- Description: Remove get_generation_config RPC function - Only defined, not called internally or externally
 -- Function signature: get_generation_config(p_category content_category)
-
-DROP FUNCTION IF EXISTS public.get_generation_config(public.content_category);
+DROP FUNCTION IF EXISTS public.get_generation_config (public.content_category);

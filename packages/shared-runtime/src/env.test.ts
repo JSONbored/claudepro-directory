@@ -162,10 +162,7 @@ describe('Environment Variables with Infisical Integration', () => {
     it('should skip NEXT_PUBLIC_* vars from Infisical cache', () => {
       process.env.NEXT_PUBLIC_TEST = 'next-public-value';
       mockInfisicalCache.isInitialized.mockReturnValue(true);
-      mockInfisicalCache.getCachedSecretNames.mockReturnValue([
-        'NEXT_PUBLIC_TEST',
-        'REGULAR_VAR',
-      ]);
+      mockInfisicalCache.getCachedSecretNames.mockReturnValue(['NEXT_PUBLIC_TEST', 'REGULAR_VAR']);
       mockInfisicalCache.getSecret.mockImplementation((name: string) => {
         if (name === 'NEXT_PUBLIC_TEST') return 'infisical-next-public';
         if (name === 'REGULAR_VAR') return 'infisical-regular';
@@ -291,4 +288,3 @@ describe('Environment Variables with Infisical Integration', () => {
     });
   });
 });
-

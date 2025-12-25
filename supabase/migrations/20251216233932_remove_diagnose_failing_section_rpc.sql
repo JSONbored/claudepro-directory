@@ -6,5 +6,4 @@
 -- Description: Remove diagnose_failing_section RPC function
 -- This was a debug utility that is no longer used.
 -- Function signature: diagnose_failing_section(text, integer)
-
-DROP FUNCTION IF EXISTS public.diagnose_failing_section(text, integer);
+DROP FUNCTION IF EXISTS public.diagnose_failing_section (text, integer);

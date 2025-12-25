@@ -136,7 +136,9 @@ export async function cli(): Promise<void> {
 
     server.listen(() => {
       console.log(`✅ MCP server running on http://localhost:${config.port}`);
-      console.log(`📡 Proxying to: ${config.apiProxy?.apiBaseUrl || 'https://claudepro.directory'}`);
+      console.log(
+        `📡 Proxying to: ${config.apiProxy?.apiBaseUrl || 'https://claudepro.directory'}`
+      );
       console.log(`\nConfigure in mcp.json:`);
       console.log(`{
   "mcpServers": {
@@ -197,4 +199,3 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exit(1);
   });
 }
-

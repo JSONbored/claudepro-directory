@@ -224,19 +224,31 @@ describe('useWindowSize', () => {
     // Multiple rapid resize events
     act(() => {
       window.dispatchEvent(new Event('resize'));
-      Object.defineProperty(window, 'innerWidth', { value: 800, writable: true, configurable: true });
+      Object.defineProperty(window, 'innerWidth', {
+        value: 800,
+        writable: true,
+        configurable: true,
+      });
     });
 
     act(() => {
       jest.advanceTimersByTime(50);
       window.dispatchEvent(new Event('resize'));
-      Object.defineProperty(window, 'innerWidth', { value: 900, writable: true, configurable: true });
+      Object.defineProperty(window, 'innerWidth', {
+        value: 900,
+        writable: true,
+        configurable: true,
+      });
     });
 
     act(() => {
       jest.advanceTimersByTime(50);
       window.dispatchEvent(new Event('resize'));
-      Object.defineProperty(window, 'innerWidth', { value: 1000, writable: true, configurable: true });
+      Object.defineProperty(window, 'innerWidth', {
+        value: 1000,
+        writable: true,
+        configurable: true,
+      });
     });
 
     // Should still be original value
@@ -255,7 +267,9 @@ describe('useWindowSize', () => {
     // Note: The hook implementation uses the same handleResize function for both
     // resize and orientationchange events, so orientationchange is also debounced
     // This is the current behavior (may be a potential optimization opportunity)
-    const { result } = renderHook(() => useWindowSize({ debounceDelay: 100 } as UseWindowSizeOptions));
+    const { result } = renderHook(() =>
+      useWindowSize({ debounceDelay: 100 } as UseWindowSizeOptions)
+    );
 
     Object.defineProperty(window, 'innerWidth', {
       writable: true,

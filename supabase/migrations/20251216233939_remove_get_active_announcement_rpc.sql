@@ -6,5 +6,8 @@
 -- Description: Remove get_active_announcement RPC function
 -- Migrated to Prisma: MiscService.getActiveAnnouncement()
 -- Function signature: get_active_announcement(timestamp with time zone)
-
-DROP FUNCTION IF EXISTS public.get_active_announcement(timestamp with time zone);
+DROP FUNCTION IF EXISTS public.get_active_announcement (
+  timestamp
+  with
+    time zone
+);

@@ -405,12 +405,9 @@ describe('useCardNavigation', () => {
   });
 
   it('should return new function references when path changes', () => {
-    const { result, rerender } = renderHook(
-      ({ path }) => useCardNavigation(path),
-      {
-        initialProps: { path: '/path1' },
-      }
-    );
+    const { result, rerender } = renderHook(({ path }) => useCardNavigation(path), {
+      initialProps: { path: '/path1' },
+    });
 
     const firstHandleClick = result.current.handleCardClick;
 

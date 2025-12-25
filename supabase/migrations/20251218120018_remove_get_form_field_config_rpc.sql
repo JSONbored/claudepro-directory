@@ -8,5 +8,4 @@
 --
 -- Function signature: get_form_field_config(p_form_type text)
 -- Related: MiscService.getFormFieldConfig uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_form_field_config(text);
+DROP FUNCTION IF EXISTS public.get_form_field_config (text);

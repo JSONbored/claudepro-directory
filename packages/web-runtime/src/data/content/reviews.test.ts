@@ -19,7 +19,10 @@ jest.mock('next/cache', () => ({
 
 // Import real cache utilities for proper cache testing
 // Note: Deep relative imports are acceptable for test utilities to avoid circular dependencies
-import { clearRequestCache, getRequestCache } from '../../../../data-layer/src/utils/request-cache.ts';
+import {
+  clearRequestCache,
+  getRequestCache,
+} from '../../../../data-layer/src/utils/request-cache.ts';
 
 // Mock RPC error logging utility (if needed)
 // Note: Deep relative import needed for jest.mock() to work correctly
@@ -84,7 +87,9 @@ describe('reviews data functions', () => {
 
       // RPC returns composite type (object), so $queryRawUnsafe returns [{ reviews, stats }]
       // callRpc unwraps single-element arrays for composite types
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getReviewsWithStatsData({
         contentSlug: 'test-slug',
@@ -127,7 +132,9 @@ describe('reviews data functions', () => {
         },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const params: ReviewsWithStatsParameters = {
         contentSlug: 'test-slug',
@@ -164,7 +171,9 @@ describe('reviews data functions', () => {
         },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const params: ReviewsWithStatsParameters = {
         contentSlug: 'test-slug',
@@ -206,7 +215,9 @@ describe('reviews data functions', () => {
         },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       // First call - should populate cache
       const cacheBefore = getRequestCache().getStats().size;

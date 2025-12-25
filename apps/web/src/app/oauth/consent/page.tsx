@@ -91,8 +91,10 @@ export default async function OAuthConsentPage({
       return (
         <OAuthLayout>
           <div className="flex min-h-screen flex-col items-center justify-center p-6">
-            <h1 className="mb-4 text-2xl font-semibold text-black">Invalid Authorization Request</h1>
-            <p className="text-gray-600 text-center">
+            <h1 className="mb-4 text-2xl font-semibold text-black">
+              Invalid Authorization Request
+            </h1>
+            <p className="text-center text-gray-600">
               Missing authorization ID. Please try again from the application requesting access.
             </p>
           </div>
@@ -140,8 +142,7 @@ export default async function OAuthConsentPage({
       );
 
       // Check if authorization expired or is invalid
-      const errorMessage =
-        authError instanceof Error ? authError.message : String(authError);
+      const errorMessage = authError instanceof Error ? authError.message : String(authError);
       const isExpired =
         errorMessage.toLowerCase().includes('expired') ||
         errorMessage.toLowerCase().includes('invalid') ||
@@ -151,7 +152,7 @@ export default async function OAuthConsentPage({
         <OAuthLayout>
           <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
             <h1 className="text-2xl font-semibold text-black">Authorization Error</h1>
-            <p className="text-gray-600 text-center">
+            <p className="text-center text-gray-600">
               {isExpired
                 ? 'This authorization request has expired or is no longer valid. Please try again from the application requesting access.'
                 : 'Invalid authorization request. Please try again from the application requesting access.'}
@@ -176,7 +177,7 @@ export default async function OAuthConsentPage({
         <OAuthLayout>
           <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
             <h1 className="text-2xl font-semibold text-black">Authorization Error</h1>
-            <p className="text-gray-600 text-center">
+            <p className="text-center text-gray-600">
               This authorization request is no longer valid. Please try again from the application
               requesting access.
             </p>
@@ -210,7 +211,7 @@ export default async function OAuthConsentPage({
         ? userMetadata['full_name']
         : typeof userMetadata['name'] === 'string'
           ? userMetadata['name']
-          : user.email?.split('@')[0] ?? 'User';
+          : (user.email?.split('@')[0] ?? 'User');
 
     // Map authDetails to expected format for client component
     // Include all available fields from getAuthorizationDetails response
@@ -229,7 +230,9 @@ export default async function OAuthConsentPage({
       <OAuthLayout>
         <Suspense
           fallback={
-            <div className="flex min-h-screen items-center justify-center text-black">Loading...</div>
+            <div className="flex min-h-screen items-center justify-center text-black">
+              Loading...
+            </div>
           }
         >
           <OAuthConsentClient
@@ -259,7 +262,7 @@ export default async function OAuthConsentPage({
       <OAuthLayout>
         <div className="flex min-h-screen flex-col items-center justify-center p-6">
           <h1 className="mb-4 text-2xl font-semibold text-black">Error</h1>
-          <p className="text-gray-600 text-center">
+          <p className="text-center text-gray-600">
             An error occurred while processing your authorization request. Please try again.
           </p>
         </div>

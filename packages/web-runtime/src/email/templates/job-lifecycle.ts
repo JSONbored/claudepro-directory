@@ -19,4 +19,3 @@ export type { JobRejectedEmailProps } from './job-rejected';
 
 export { JobSubmittedEmail } from './job-submitted';
 export type { JobSubmittedEmailProps } from './job-submitted';
-

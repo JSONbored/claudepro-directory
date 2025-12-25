@@ -9,5 +9,11 @@
 --
 -- Function signature: get_social_proof_stats(p_week_ago timestamp with time zone, p_month_ago timestamp with time zone)
 -- Related: MiscService.getSocialProofStats uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_social_proof_stats(timestamp with time zone, timestamp with time zone);
+DROP FUNCTION IF EXISTS public.get_social_proof_stats (
+  timestamp
+  with
+    time zone,
+    timestamp
+  with
+    time zone
+);

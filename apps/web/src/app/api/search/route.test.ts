@@ -90,8 +90,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'application/json',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -242,7 +246,7 @@ describe('GET /api/search', () => {
     expect(body).toHaveProperty('searchType', 'content');
     expect(Array.isArray((body as { results: unknown[] }).results)).toBe(true);
     expect((body as { results: unknown[] }).results.length).toBeGreaterThan(0);
-    
+
     // Verify RPC was called (callRpc uses positional parameters)
     expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
       expect.stringContaining('SELECT * FROM search_content_optimized'),
@@ -316,8 +320,11 @@ describe('GET /api/search', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 200);
-    expect((body as { filters: { categories?: string[] } }).filters.categories).toEqual(['agents', 'mcp']);
-    
+    expect((body as { filters: { categories?: string[] } }).filters.categories).toEqual([
+      'agents',
+      'mcp',
+    ]);
+
     // Verify RPC was called (callRpc uses positional parameters)
     expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
       expect.stringContaining('SELECT * FROM search_content_optimized'),
@@ -362,7 +369,7 @@ describe('GET /api/search', () => {
 
       expectStatus(response, 200);
       expect((body as { filters: { sort: string } }).filters.sort).toBe(sortType);
-      
+
       // Verify sort is passed to RPC
       expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('SELECT * FROM search_content_optimized'),
@@ -398,13 +405,14 @@ describe('GET /api/search', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 200);
-    const pagination = (body as { pagination: { total: number; limit: number; offset: number; hasMore: boolean } })
-      .pagination;
+    const pagination = (
+      body as { pagination: { total: number; limit: number; offset: number; hasMore: boolean } }
+    ).pagination;
     expect(pagination.total).toBe(100);
     expect(pagination.limit).toBe(20);
     expect(pagination.offset).toBe(40);
     expect(pagination.hasMore).toBe(true);
-    
+
     // Verify pagination params are passed to RPC
     expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
       expect.stringContaining('SELECT * FROM search_content_optimized'),
@@ -462,8 +470,11 @@ describe('GET /api/search', () => {
 
     expectStatus(response, 200);
     expect(body).toHaveProperty('searchType', 'unified');
-    expect((body as { filters: { entities?: string[] } }).filters.entities).toEqual(['content', 'company']);
-    
+    expect((body as { filters: { entities?: string[] } }).filters.entities).toEqual([
+      'content',
+      'company',
+    ]);
+
     // Verify RPC was called (callRpc uses positional parameters)
     expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
       expect.stringContaining('SELECT * FROM search_unified'),
@@ -501,8 +512,11 @@ describe('GET /api/search', () => {
 
     expectStatus(response, 200);
     expect((body as { filters: { tags?: string[] } }).filters.tags).toEqual(['ai', 'automation']);
-    expect((body as { filters: { authors?: string[] } }).filters.authors).toEqual(['user1', 'user2']);
-    
+    expect((body as { filters: { authors?: string[] } }).filters.authors).toEqual([
+      'user1',
+      'user2',
+    ]);
+
     // Verify RPC was called (callRpc uses positional parameters)
     expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
       expect.stringContaining('SELECT * FROM search_content_optimized'),
@@ -584,7 +598,7 @@ describe('GET /api/search', () => {
 
     expectStatus(response, 200);
     expect((body as { query: string }).query).toBe('ai agents');
-    
+
     // Verify trimmed query is passed to RPC (check the actual call)
     const rpcCall = prismocker.$queryRawUnsafe.mock.calls[0];
     expect(rpcCall[3]).toBe('ai agents'); // p_query is the 4th parameter (index 3)
@@ -618,11 +632,17 @@ describe('GET /api/search', () => {
 
     expectStatus(response, 200);
     expect(body).toHaveProperty('searchType', 'jobs');
-    expect((body as { filters: { job_category?: string } }).filters.job_category).toBe('engineering');
-    expect((body as { filters: { job_employment?: string } }).filters.job_employment).toBe('full-time');
-    expect((body as { filters: { job_experience?: string } }).filters.job_experience).toBe('intermediate');
+    expect((body as { filters: { job_category?: string } }).filters.job_category).toBe(
+      'engineering'
+    );
+    expect((body as { filters: { job_employment?: string } }).filters.job_employment).toBe(
+      'full-time'
+    );
+    expect((body as { filters: { job_experience?: string } }).filters.job_experience).toBe(
+      'intermediate'
+    );
     expect((body as { filters: { job_remote?: boolean } }).filters.job_remote).toBe(true);
-    
+
     // Verify RPC was called (callRpc uses positional parameters)
     expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
       expect.stringContaining('SELECT * FROM filter_jobs'),
@@ -676,7 +696,7 @@ describe('GET /api/search', () => {
     // Verify cache worked (cache size increased after first call, stayed same after second)
     expect(cacheAfterFirst).toBeGreaterThan(cacheBefore);
     expect(cacheAfterSecond).toBeGreaterThanOrEqual(cacheAfterFirst);
-    
+
     // Results should be equal (indicating cache was used)
     expect(body1).toEqual(body2);
   });
@@ -812,8 +832,9 @@ describe('GET /api/search', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 200);
-    const pagination = (body as { pagination: { total: number; limit: number; offset: number; hasMore: boolean } })
-      .pagination;
+    const pagination = (
+      body as { pagination: { total: number; limit: number; offset: number; hasMore: boolean } }
+    ).pagination;
     expect(pagination.total).toBe(10);
     expect(pagination.offset).toBe(100);
     expect(pagination.hasMore).toBe(false);
@@ -863,7 +884,10 @@ describe('GET /api/search', () => {
     // Since we have 'invalid-category' which gets filtered out, but 'agents' and 'mcp' are valid,
     // the route should succeed with only valid categories
     expectStatus(response, 200);
-    expect((body as { filters: { categories?: string[] } }).filters.categories).toEqual(['agents', 'mcp']);
+    expect((body as { filters: { categories?: string[] } }).filters.categories).toEqual([
+      'agents',
+      'mcp',
+    ]);
   });
 
   it('should handle job_remote as boolean string', async () => {
@@ -891,7 +915,7 @@ describe('GET /api/search', () => {
 
     expectStatus(response, 200);
     expect((body as { filters: { job_remote?: boolean } }).filters.job_remote).toBe(true);
-    
+
     // Test with 'false' string
     prismocker.$queryRawUnsafe = jest.fn().mockResolvedValueOnce([
       {

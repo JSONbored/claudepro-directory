@@ -5,5 +5,4 @@
 --
 -- Description: Remove invoke_edge_function_endpoint RPC function - Only defined, not called (public-api deleted)
 -- Function signature: invoke_edge_function_endpoint(endpoint text)
-
-DROP FUNCTION IF EXISTS public.invoke_edge_function_endpoint(text);
+DROP FUNCTION IF EXISTS public.invoke_edge_function_endpoint (text);

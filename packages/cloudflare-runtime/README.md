@@ -38,7 +38,10 @@ const users = await prisma.user.findMany();
 ### Supabase Auth
 
 ```typescript
-import { createSupabaseServiceRoleClient, requireAuthUser } from '@heyclaude/cloudflare-runtime/auth/supabase';
+import {
+  createSupabaseServiceRoleClient,
+  requireAuthUser,
+} from '@heyclaude/cloudflare-runtime/auth/supabase';
 
 const supabase = createSupabaseServiceRoleClient(env);
 const authResult = await requireAuthUser(supabase, request);
@@ -72,18 +75,19 @@ try {
 
 This package replaces `@heyclaude/edge-runtime` for Cloudflare Workers:
 
-| Feature | Edge Runtime (Deno) | Cloudflare Runtime |
-|---------|---------------------|-------------------|
-| **Environment** | `Deno.env.get()` | `env` parameter in handler |
-| **Prisma** | Singleton pattern | Factory function (per-request) |
-| **Auth** | Deno-specific imports | Cloudflare Workers compatible |
-| **Logging** | Deno console | Pino → Workers Logs |
+| Feature         | Edge Runtime (Deno)   | Cloudflare Runtime             |
+| --------------- | --------------------- | ------------------------------ |
+| **Environment** | `Deno.env.get()`      | `env` parameter in handler     |
+| **Prisma**      | Singleton pattern     | Factory function (per-request) |
+| **Auth**        | Deno-specific imports | Cloudflare Workers compatible  |
+| **Logging**     | Deno console          | Pino → Workers Logs            |
 
 ---
 
 ## Usage
 
 This package is designed for Cloudflare Workers only. For Next.js apps, use:
+
 - `@heyclaude/web-runtime` - Next.js/React utilities
 - `@heyclaude/shared-runtime` - Universal utilities
 - `@heyclaude/data-layer` - Prisma services (works in both)

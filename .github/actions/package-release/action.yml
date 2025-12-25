@@ -1,0 +1,290 @@
+---
+# Composite Action: Package Release
+#
+# Reusable release steps for standalone packages in the monorepo.
+# Provides complete release automation: build, test, version verification,
+# npm publish, changelog generation, and GitHub release creation.
+#
+# **Purpose:**
+# This composite action standardizes the release workflow for standalone
+# packages within the monorepo. It handles the entire release process
+# from tag push to npm publication and GitHub release creation, with
+# automatic changelog generation using git-cliff.
+#
+# **What It Does:**
+# 1. Checks out repository with full history (needed for changelog
+#    generation)
+# 2. Sets up pnpm and Node.js with npm registry configuration
+# 3. Installs dependencies
+# 4. Builds the package
+# 5. Runs tests
+# 6. Extracts version from namespaced tag
+#    (e.g., mcp-server-v1.0.0 → 1.0.0)
+# 7. Verifies package.json version matches tag version
+# 8. Automatically generates changelog using git-cliff (if enabled)
+# 9. Extracts changelog section for the version
+# 10. Publishes package to npm
+# 11. Creates GitHub Release with changelog notes
+#    (or auto-generated notes)
+#
+# **Automatic Changelog Generation:**
+# When `auto-generate-changelog` is `true` (default):
+# - Checks if git-cliff is installed (installs if missing on
+#   Ubuntu/macOS)
+# - Generates changelog using `heyclaude-changelog-package` script
+# - Filters commits to only those affecting the package directory
+# - Writes to `packages/{package-name}/CHANGELOG.md`
+# - Falls back gracefully if generation fails (uses existing
+#   CHANGELOG.md or auto-generated notes)
+#
+# **Namespaced Tags:**
+# Supports namespaced tags to prevent conflicts in monorepos:
+# - Format: `{package-name}-v{version}` (e.g., `mcp-server-v1.0.0`)
+# - Extracts version by removing `{package-name}-v` prefix
+# - Verifies extracted version matches package.json version
+#
+# **Usage:**
+# ```yaml
+# - uses: ./.github/actions/package-release
+#   with:
+#     package-path: packages/mcp-server
+#     package-name: mcp-server
+#     auto-generate-changelog: 'true'
+# ```
+#
+# **Trigger:**
+# Typically triggered by pushing a namespaced tag:
+# ```bash
+# git tag mcp-server-v1.0.0
+# git push origin main --tags
+# ```
+#
+# **Permissions Required:**
+# - `contents: write` - To create GitHub releases
+# - `id-token: write` - For npm publish (if using OIDC)
+#
+# **Secrets Required:**
+# - `NPM_TOKEN` - NPM authentication token for publishing
+# - `GITHUB_TOKEN` - Automatically provided by GitHub Actions
+#
+# **Benefits:**
+# - Fully automated release process (no manual steps)
+# - Automatic changelog generation (no manual changelog updates)
+# - Consistent release workflow across all packages
+# - Version verification prevents mismatched releases
+# - Graceful fallbacks if changelog generation fails
+#
+# **Integration:**
+# Used by package-specific release workflows (e.g.,
+# packages/mcp-server/.github/workflows/release.yml) to provide
+# consistent release behavior while maintaining package-level
+# workflow files.
+#
+# @see {@link ../package-ci/action.yml | Package CI}
+# @see {@link ../../packages/mcp-server/.github/workflows/release.yml | Example}
+# @see changelog-package.ts for changelog generation
+name: 'Package Release'
+description: >-
+  Reusable release steps for standalone packages (build, test, publish, release)
+
+inputs:
+  package-path:
+    description: >-
+      Path to package directory (e.g., packages/mcp-server).
+      Must be relative to repository root.
+    required: true
+  package-name:
+    description: >-
+      Package name for tag prefix (e.g., "mcp-server" for tags like
+      "mcp-server-v1.0.0"). Used to extract version from namespaced tags.
+    required: true
+  node-version:
+    description: 'Node.js version to use (e.g., "20", "22"). Defaults to "20".'
+    required: false
+    default: '20'
+  pnpm-version:
+    description: 'pnpm version to use (e.g., "10", "9"). Defaults to "10".'
+    required: false
+    default: '10'
+  npm-token:
+    description: >-
+      NPM authentication token for publishing. If not provided, uses
+      secrets.NPM_TOKEN. Useful for custom tokens or testing.
+    required: false
+    default: ''
+  auto-generate-changelog:
+    description: >-
+      Automatically generate changelog before release using git-cliff.
+      Set to "false" to skip changelog generation. Defaults to "true".
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0 # Full history for changelog generation
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ inputs.pnpm-version }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+        registry-url: 'https://registry.npmjs.org'
+        cache: 'pnpm'
+      env:
+        NODE_AUTH_TOKEN: >-
+          ${{ inputs.npm-token != '' && inputs.npm-token || secrets.NPM_TOKEN }}
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      shell: bash
+
+    - name: Build
+      working-directory: ${{ inputs.package-path }}
+      run: pnpm build
+      shell: bash
+
+    - name: Run tests
+      working-directory: ${{ inputs.package-path }}
+      run: pnpm test
+      shell: bash
+
+    - name: Extract version from tag
+      id: version
+      run: |
+        # Extract version from namespaced tag
+        # (e.g., mcp-server-v1.0.0 -> 1.0.0)
+        TAG_NAME="${{ github.ref_name }}"
+        PREFIX="${{ inputs.package-name }}-v"
+        VERSION="${TAG_NAME#${PREFIX}}"
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Tag version: $VERSION"
+      shell: bash
+
+    - name: Verify package.json version matches tag
+      working-directory: ${{ inputs.package-path }}
+      run: |
+        PACKAGE_VERSION=$(node -p "require('./package.json').version")
+        TAG_VERSION="${{ steps.version.outputs.VERSION }}"
+        if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
+          MSG="❌ Version mismatch: package.json ($PACKAGE_VERSION) != tag"
+          echo "$MSG ($TAG_VERSION)" >&2
+          exit 1
+        fi
+        echo "✅ Version match: $PACKAGE_VERSION"
+      shell: bash
+
+    - name: Check if git-cliff is installed
+      id: git-cliff-check
+      run: |
+        if command -v git-cliff &> /dev/null; then
+          echo "installed=true" >> $GITHUB_OUTPUT
+        else
+          echo "installed=false" >> $GITHUB_OUTPUT
+        fi
+      shell: bash
+
+    - name: Install git-cliff (if needed)
+      if: >-
+        steps.git-cliff-check.outputs.installed == 'false' &&
+        (inputs.auto-generate-changelog == 'true' ||
+         inputs.auto-generate-changelog == true)
+      run: |
+        # Try to install via package manager (works on Ubuntu)
+        if command -v apt-get &> /dev/null; then
+          sudo apt-get update && sudo apt-get install -y git-cliff || \
+            echo "⚠️ git-cliff installation failed, will skip changelog" >&2
+        elif command -v brew &> /dev/null; then
+          brew install git-cliff || \
+            echo "⚠️ git-cliff installation failed, will skip" >&2
+        else
+          echo "⚠️ Cannot install git-cliff automatically, will skip" >&2
+        fi
+      shell: bash
+
+    - name: Auto-generate changelog
+      if: >-
+        inputs.auto-generate-changelog == 'true' ||
+        inputs.auto-generate-changelog == true
+      run: |
+        # Generate changelog using package-specific script
+        # Extract package directory name from package-path
+        # (e.g., packages/mcp-server -> mcp-server)
+        PACKAGE_DIR=$(basename "${{ inputs.package-path }}")
+        # Generate changelog with git-cliff, filtering commits to package
+        pnpm exec heyclaude-changelog-package "$PACKAGE_DIR" \
+          --tag "${{ github.ref_name }}" || {
+          echo "⚠️ Changelog generation failed (non-critical)" >&2
+          exit 0
+        }
+      continue-on-error: true
+      shell: bash
+
+    - name: Extract changelog for version
+      id: changelog
+      working-directory: ${{ inputs.package-path }}
+      run: |
+        VERSION="${{ steps.version.outputs.VERSION }}"
+        if [ -f "CHANGELOG.md" ]; then
+          # Extract the version section from CHANGELOG.md
+          # Find the line with [VERSION] and extract until the next version
+          # section or end of file
+          awk -v version="${VERSION}" '
+            BEGIN { found=0 }
+            /^## \[/ {
+              if (found) exit
+              if (index($0, "[" version "]") > 0) found=1
+            }
+            found { print }
+          ' CHANGELOG.md > /tmp/release-notes.md || {
+            echo "⚠️ Failed to extract changelog section" >&2
+            echo "notes_path=" >> $GITHUB_OUTPUT
+            exit 0
+          }
+          echo "notes_path=/tmp/release-notes.md" >> $GITHUB_OUTPUT
+        else
+          echo "⚠️ CHANGELOG.md not found, will use auto-generated notes" >&2
+          echo "notes_path=" >> $GITHUB_OUTPUT
+        fi
+      continue-on-error: true
+      shell: bash
+
+    - name: Publish to npm
+      working-directory: ${{ inputs.package-path }}
+      run: npm publish --access public
+      env:
+        NODE_AUTH_TOKEN: >-
+          ${{ inputs.npm-token != '' && inputs.npm-token || secrets.NPM_TOKEN }}
+      shell: bash
+
+    - name: Create GitHub Release (with changelog)
+      if: steps.changelog.outputs.notes_path != ''
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: ${{ github.ref_name }}
+        body_path: ${{ steps.changelog.outputs.notes_path }}
+        generate_release_notes: false
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create GitHub Release (without changelog)
+      if: steps.changelog.outputs.notes_path == ''
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: ${{ github.ref_name }}
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

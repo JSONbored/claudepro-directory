@@ -57,9 +57,7 @@ export {
   handleOAuthRevokeShared,
   handleOAuthIntrospectShared,
   handleOAuthRegisterShared,
-  type OAuthAdapter,
   jsonError,
+  type OAuthAdapter,
+  type OAuthEnvConfig,
 } from './routes/oauth/shared.js';
-export { handleOAuthTokenShared, handleOAuthAuthorizeShared, jsonError } from './routes/oauth/shared.js';
-export type { OAuthAdapter, OAuthEnvConfig } from './routes/oauth/shared.js';
-

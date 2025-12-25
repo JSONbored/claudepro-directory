@@ -118,7 +118,8 @@ function wrapToolHandler<TInput, TOutput>(
 
     // 2. Request deduplication
     try {
-      const { withRequestDeduplication } = await import('../../middleware/request-deduplication.js');
+      const { withRequestDeduplication } =
+        await import('../../middleware/request-deduplication.js');
       const deduplicatedHandler = withRequestDeduplication<TInput, TOutput, ToolContext>(
         toolName,
         wrappedHandler,
@@ -173,12 +174,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: ListCategoriesInputSchema,
       outputSchema: ListCategoriesOutputSchema,
     },
-    wrapToolHandler(
-      handleListCategories,
-      'listCategories',
-      30000,
-      context
-    )
+    wrapToolHandler(handleListCategories, 'listCategories', 30000, context)
   );
 
   // 2. searchContent - Search with filters and pagination
@@ -191,12 +187,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: SearchContentInputSchema,
       outputSchema: SearchContentOutputSchema,
     },
-    wrapToolHandler(
-      handleSearchContent,
-      'searchContent',
-      30000,
-      context
-    )
+    wrapToolHandler(handleSearchContent, 'searchContent', 30000, context)
   );
 
   // 3. getContentDetail - Get complete content metadata
@@ -209,12 +200,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: GetContentDetailInputSchema,
       outputSchema: GetContentDetailOutputSchema,
     },
-    wrapToolHandler(
-      handleGetContentDetail,
-      'getContentDetail',
-      30000,
-      context
-    )
+    wrapToolHandler(handleGetContentDetail, 'getContentDetail', 30000, context)
   );
 
   // 4. getTrending - Get trending content
@@ -227,12 +213,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: GetTrendingInputSchema,
       outputSchema: GetTrendingOutputSchema,
     },
-    wrapToolHandler(
-      handleGetTrending,
-      'getTrending',
-      30000,
-      context
-    )
+    wrapToolHandler(handleGetTrending, 'getTrending', 30000, context)
   );
 
   // 5. getFeatured - Get featured/highlighted content
@@ -245,12 +226,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: GetFeaturedInputSchema,
       outputSchema: GetFeaturedOutputSchema,
     },
-    wrapToolHandler(
-      handleGetFeatured,
-      'getFeatured',
-      45000,
-      context
-    )
+    wrapToolHandler(handleGetFeatured, 'getFeatured', 45000, context)
   );
 
   // 6. getPopular - Get popular content
@@ -263,12 +239,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: GetPopularInputSchema,
       outputSchema: GetPopularOutputSchema,
     },
-    wrapToolHandler(
-      handleGetPopular,
-      'getPopular',
-      30000,
-      context
-    )
+    wrapToolHandler(handleGetPopular, 'getPopular', 30000, context)
   );
 
   // 7. getRecent - Get recently added content
@@ -281,12 +252,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: GetRecentInputSchema,
       outputSchema: GetRecentOutputSchema,
     },
-    wrapToolHandler(
-      handleGetRecent,
-      'getRecent',
-      30000,
-      context
-    )
+    wrapToolHandler(handleGetRecent, 'getRecent', 30000, context)
   );
 
   // 8. getTemplates - Get submission templates
@@ -299,12 +265,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: GetTemplatesInputSchema,
       outputSchema: GetTemplatesOutputSchema,
     },
-    wrapToolHandler(
-      handleGetTemplates,
-      'getTemplates',
-      30000,
-      context
-    )
+    wrapToolHandler(handleGetTemplates, 'getTemplates', 30000, context)
   );
 
   // 9. getCategoryConfigs - Get category configurations
@@ -317,12 +278,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: GetCategoryConfigsInputSchema,
       outputSchema: GetCategoryConfigsOutputSchema,
     },
-    wrapToolHandler(
-      handleGetCategoryConfigs,
-      'getCategoryConfigs',
-      30000,
-      context
-    )
+    wrapToolHandler(handleGetCategoryConfigs, 'getCategoryConfigs', 30000, context)
   );
 
   // 10. getChangelog - Get changelog in LLMs.txt format
@@ -335,12 +291,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: GetChangelogInputSchema,
       outputSchema: GetChangelogOutputSchema,
     },
-    wrapToolHandler(
-      handleGetChangelog,
-      'getChangelog',
-      30000,
-      context
-    )
+    wrapToolHandler(handleGetChangelog, 'getChangelog', 30000, context)
   );
 
   // 11. getSearchFacets - Get available search facets
@@ -372,12 +323,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: GetSearchSuggestionsInputSchema,
       outputSchema: GetSearchSuggestionsOutputSchema,
     },
-    wrapToolHandler(
-      handleGetSearchSuggestions,
-      'getSearchSuggestions',
-      30000,
-      context
-    )
+    wrapToolHandler(handleGetSearchSuggestions, 'getSearchSuggestions', 30000, context)
   );
 
   // 13. getMcpServers - Get MCP servers from directory
@@ -390,12 +336,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: GetMcpServersInputSchema,
       outputSchema: GetMcpServersOutputSchema,
     },
-    wrapToolHandler(
-      handleGetMcpServers,
-      'getMcpServers',
-      30000,
-      context
-    )
+    wrapToolHandler(handleGetMcpServers, 'getMcpServers', 30000, context)
   );
 
   // 14. getRelatedContent - Get related content
@@ -408,12 +349,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: GetRelatedContentInputSchema,
       outputSchema: GetRelatedContentOutputSchema,
     },
-    wrapToolHandler(
-      handleGetRelatedContent,
-      'getRelatedContent',
-      30000,
-      context
-    )
+    wrapToolHandler(handleGetRelatedContent, 'getRelatedContent', 30000, context)
   );
 
   // 15. getContentByTag - Get content by tags
@@ -426,12 +362,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: GetContentByTagInputSchema,
       outputSchema: GetContentByTagOutputSchema,
     },
-    wrapToolHandler(
-      handleGetContentByTag,
-      'getContentByTag',
-      30000,
-      context
-    )
+    wrapToolHandler(handleGetContentByTag, 'getContentByTag', 30000, context)
   );
 
   // 16. downloadContentForPlatform - Download content formatted for platform
@@ -444,12 +375,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: DownloadContentForPlatformInputSchema,
       outputSchema: DownloadContentForPlatformOutputSchema,
     },
-    wrapToolHandler(
-      handleDownloadContentForPlatform,
-      'downloadContentForPlatform',
-      30000,
-      context
-    )
+    wrapToolHandler(handleDownloadContentForPlatform, 'downloadContentForPlatform', 30000, context)
   );
 
   // 17. getSocialProofStats - Get community statistics
@@ -462,12 +388,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: GetSocialProofStatsInputSchema,
       outputSchema: GetSocialProofStatsOutputSchema,
     },
-    wrapToolHandler(
-      handleGetSocialProofStats,
-      'getSocialProofStats',
-      30000,
-      context
-    )
+    wrapToolHandler(handleGetSocialProofStats, 'getSocialProofStats', 30000, context)
   );
 
   // 18. submitContent - Guide content submission
@@ -480,12 +401,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: SubmitContentInputSchema,
       outputSchema: SubmitContentOutputSchema,
     },
-    wrapToolHandler(
-      handleSubmitContent,
-      'submitContent',
-      30000,
-      context
-    )
+    wrapToolHandler(handleSubmitContent, 'submitContent', 30000, context)
   );
 
   // 19. createAccount - Create account via OAuth
@@ -498,12 +414,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: CreateAccountInputSchema,
       outputSchema: CreateAccountOutputSchema,
     },
-    wrapToolHandler(
-      handleCreateAccount,
-      'createAccount',
-      30000,
-      context
-    )
+    wrapToolHandler(handleCreateAccount, 'createAccount', 30000, context)
   );
 
   // 20. subscribeNewsletter - Subscribe to newsletter
@@ -516,12 +427,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: SubscribeNewsletterInputSchema,
       outputSchema: SubscribeNewsletterOutputSchema,
     },
-    wrapToolHandler(
-      handleSubscribeNewsletter,
-      'subscribeNewsletter',
-      30000,
-      context
-    )
+    wrapToolHandler(handleSubscribeNewsletter, 'subscribeNewsletter', 30000, context)
   );
 
   // 21. downloadSkillPackage - Download Skills ZIP file from Supabase Storage
@@ -534,12 +440,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: DownloadSkillPackageInputSchema,
       outputSchema: DownloadSkillPackageOutputSchema,
     },
-    wrapToolHandler(
-      handleDownloadSkillPackage,
-      'downloadSkillPackage',
-      60000,
-      context
-    )
+    wrapToolHandler(handleDownloadSkillPackage, 'downloadSkillPackage', 60000, context)
   );
 
   // 22. downloadMcpServerPackage - Download MCP server .mcpb file from Supabase Storage
@@ -552,12 +453,7 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: DownloadMcpServerPackageInputSchema,
       outputSchema: DownloadMcpServerPackageOutputSchema,
     },
-    wrapToolHandler(
-      handleDownloadMcpServerPackage,
-      'downloadMcpServerPackage',
-      60000,
-      context
-    )
+    wrapToolHandler(handleDownloadMcpServerPackage, 'downloadMcpServerPackage', 60000, context)
   );
 
   // 23. downloadStorageFile - Generic tool for downloading any storage file
@@ -570,11 +466,6 @@ export function registerAllTools(mcpServer: McpServer, context: ToolContext): vo
       inputSchema: DownloadStorageFileInputSchema,
       outputSchema: DownloadStorageFileOutputSchema,
     },
-    wrapToolHandler(
-      handleDownloadStorageFile,
-      'downloadStorageFile',
-      60000,
-      context
-    )
+    wrapToolHandler(handleDownloadStorageFile, 'downloadStorageFile', 60000, context)
   );
 }

@@ -139,13 +139,17 @@ const serverEnvSchema = z
       .describe('Comma-separated list of whitelisted email domains for development'),
 
     // GitHub integration (optional)
-    GITHUB_TOKEN: nonEmptyString.optional().describe('GitHub personal access token for API operations'),
+    GITHUB_TOKEN: nonEmptyString
+      .optional()
+      .describe('GitHub personal access token for API operations'),
     GITHUB_REPOSITORY: nonEmptyString
       .optional()
       .describe('GitHub repository in format owner/repo (e.g., JSONbored/claudepro-directory)'),
 
     // IndexNow (optional - for search engine indexing)
-    INDEXNOW_API_KEY: nonEmptyString.optional().describe('IndexNow API key for search engine indexing'),
+    INDEXNOW_API_KEY: nonEmptyString
+      .optional()
+      .describe('IndexNow API key for search engine indexing'),
     INDEXNOW_TRIGGER_KEY: nonEmptyString
       .optional()
       .describe('IndexNow trigger key for search engine indexing'),
@@ -177,11 +181,15 @@ const serverEnvSchema = z
     INFISICAL_ENV: z
       .enum(['dev', 'staging', 'prod'])
       .optional()
-      .describe('Infisical environment override (defaults to dev for development, prod for production)'),
+      .describe(
+        'Infisical environment override (defaults to dev for development, prod for production)'
+      ),
     INFISICAL_ENABLED: z
       .enum(['true', 'false', '1', '0'])
       .optional()
-      .describe('Feature flag to enable/disable Infisical SDK (overrides unified-config FEATURE_FLAGS)'),
+      .describe(
+        'Feature flag to enable/disable Infisical SDK (overrides unified-config FEATURE_FLAGS)'
+      ),
   })
   .describe(
     'Server-side environment variables containing sensitive data only accessible on the server'

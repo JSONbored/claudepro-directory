@@ -299,7 +299,9 @@ describe('Zod Validation Integration', () => {
           } catch (error: any) {
             if (error instanceof z.ZodError) {
               // Return user-friendly error
-              throw new Error(`Validation failed: ${error.errors.map((e) => e.message).join(', ')}`);
+              throw new Error(
+                `Validation failed: ${error.errors.map((e) => e.message).join(', ')}`
+              );
             }
             throw error;
           }
@@ -379,4 +381,3 @@ describe('Zod Validation Integration', () => {
     });
   });
 });
-

@@ -8,5 +8,4 @@
 --
 -- Function signature: get_companies_list(p_limit integer, p_offset integer)
 -- Related: CompaniesService.getCompaniesList uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_companies_list(integer, integer);
+DROP FUNCTION IF EXISTS public.get_companies_list (integer, integer);

@@ -8,9 +8,9 @@ log_info "Checking bundle size..."
 
 # Check if .next directory exists (needs build)
 if [ ! -d "apps/web/.next" ]; then
-  log_warning "No build found - skipping bundle size check"
-  echo "   💡 Run: pnpm build"
-  exit 0
+	log_warning "No build found - skipping bundle size check"
+	echo "   💡 Run: pnpm build"
+	exit 0
 fi
 
 # This is a placeholder - actual implementation would:

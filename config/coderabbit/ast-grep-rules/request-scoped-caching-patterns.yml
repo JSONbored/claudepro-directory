@@ -63,7 +63,7 @@ rule:
     - not:
         has:
           pattern: 'withSmartCache($RPC_NAME, $METHOD_NAME, async'
-message: "withSmartCache() parameter order: (rpcName, methodName, rpcCall, args). Ensure methodName is the second parameter (string), and rpcCall is the third parameter (async function)."
+message: 'withSmartCache() parameter order: (rpcName, methodName, rpcCall, args). Ensure methodName is the second parameter (string), and rpcCall is the third parameter (async function).'
 severity: error
 
 ---
@@ -84,7 +84,7 @@ rule:
         inside:
           has:
             regex: 'class.*Service extends BasePrismaService'
-message: "Prisma queries should be in service classes extending BasePrismaService, not in data functions or pages. Create a service method and call it from data functions. This ensures proper error handling, logging, and request-scoped caching."
+message: 'Prisma queries should be in service classes extending BasePrismaService, not in data functions or pages. Create a service method and call it from data functions. This ensures proper error handling, logging, and request-scoped caching.'
 severity: error
 
 ---
@@ -109,7 +109,7 @@ rule:
     - not:
         has:
           regex: 'this\.callRpc\('
-message: "Read operations in service methods should use withSmartCache() for request-scoped caching. This prevents duplicate queries within the same request. Wrap the query in withSmartCache(). Mutations are automatically excluded from caching."
+message: 'Read operations in service methods should use withSmartCache() for request-scoped caching. This prevents duplicate queries within the same request. Wrap the query in withSmartCache(). Mutations are automatically excluded from caching.'
 severity: error
 
 ---
@@ -125,7 +125,7 @@ rule:
         regex: 'withSmartCache\('
     - has:
         regex: create|update|delete|upsert|insert|remove|add|sync
-message: "Note: withSmartCache() automatically excludes mutations from caching. Mutations (create, update, delete, etc.) will not be cached even when wrapped in withSmartCache(). This is correct behavior - mutations should not be cached."
+message: 'Note: withSmartCache() automatically excludes mutations from caching. Mutations (create, update, delete, etc.) will not be cached even when wrapped in withSmartCache(). This is correct behavior - mutations should not be cached.'
 severity: info
 
 # Note: withSmartCache() provides request-scoped caching for Prisma queries

@@ -8,5 +8,4 @@
 --
 -- Function signature: get_user_library(p_user_id uuid)
 -- Related: AccountService.getUserLibrary uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_user_library(uuid);
+DROP FUNCTION IF EXISTS public.get_user_library (uuid);

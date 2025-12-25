@@ -1,8 +1,5 @@
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
-import {
-  getHomepageFeaturedCategories,
-  getHomepageTabCategories,
-} from './categories';
+import { getHomepageFeaturedCategories, getHomepageTabCategories } from './categories';
 
 // Mock server-only
 jest.mock('server-only', () => ({}));

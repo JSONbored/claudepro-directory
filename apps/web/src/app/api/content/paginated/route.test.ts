@@ -137,8 +137,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'application/json',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -374,7 +378,9 @@ describe('GET /api/content/paginated', () => {
     // Simulate database error by making Prisma query fail
     // Override findMany to throw error
     const originalFindMany = prismocker.v_content_list_slim.findMany;
-    (prismocker.v_content_list_slim.findMany as any) = jest.fn().mockRejectedValue(new Error('Database error'));
+    (prismocker.v_content_list_slim.findMany as any) = jest
+      .fn()
+      .mockRejectedValue(new Error('Database error'));
 
     const request = createMockRequest({
       method: 'GET',

@@ -49,20 +49,14 @@ export const ListCategoriesInputSchema = z.object({});
 
 // 2. searchContent
 export const SearchContentInputSchema = z.object({
-  query: z
-    .string()
-    .optional()
-    .describe('Search query string')
-    .meta({
-      description: 'Search query string',
-      example: 'ai agents',
-    }),
-  category: CategorySchema.optional()
-    .describe('Filter by category')
-    .meta({
-      description: 'Filter by category',
-      example: 'agents',
-    }),
+  query: z.string().optional().describe('Search query string').meta({
+    description: 'Search query string',
+    example: 'ai agents',
+  }),
+  category: CategorySchema.optional().describe('Filter by category').meta({
+    description: 'Filter by category',
+    example: 'agents',
+  }),
   tags: z
     .array(z.string())
     .optional()
@@ -71,42 +65,25 @@ export const SearchContentInputSchema = z.object({
       description: 'Filter by tags',
       example: ['ai', 'automation'],
     }),
-  page: z
-    .number()
-    .int()
-    .min(1)
-    .default(1)
-    .describe('Page number for pagination')
-    .meta({
-      description: 'Page number for pagination',
-      example: 1,
-      minimum: 1,
-    }),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(50)
-    .default(20)
-    .describe('Items per page (max 50)')
-    .meta({
-      description: 'Items per page (max 50)',
-      example: 20,
-      minimum: 1,
-      maximum: 50,
-    }),
+  page: z.number().int().min(1).default(1).describe('Page number for pagination').meta({
+    description: 'Page number for pagination',
+    example: 1,
+    minimum: 1,
+  }),
+  limit: z.number().int().min(1).max(50).default(20).describe('Items per page (max 50)').meta({
+    description: 'Items per page (max 50)',
+    example: 20,
+    minimum: 1,
+    maximum: 50,
+  }),
 });
 
 // 3. getContentDetail
 export const GetContentDetailInputSchema = z.object({
-  slug: z
-    .string()
-    .min(1)
-    .describe('Content slug identifier')
-    .meta({
-      description: 'Content slug identifier',
-      example: 'ai-agent-framework',
-    }),
+  slug: z.string().min(1).describe('Content slug identifier').meta({
+    description: 'Content slug identifier',
+    example: 'ai-agent-framework',
+  }),
   category: CategorySchema.describe('Content category').meta({
     description: 'Content category',
     example: 'agents',
@@ -115,12 +92,10 @@ export const GetContentDetailInputSchema = z.object({
 
 // 4. getTrending
 export const GetTrendingInputSchema = z.object({
-  category: CategorySchema.optional()
-    .describe('Filter by category (optional)')
-    .meta({
-      description: 'Filter by category (optional)',
-      example: 'agents',
-    }),
+  category: CategorySchema.optional().describe('Filter by category (optional)').meta({
+    description: 'Filter by category (optional)',
+    example: 'agents',
+  }),
   limit: z
     .number()
     .int()
@@ -168,14 +143,10 @@ export const GetMcpServersInputSchema = z.object({
 
 // 8. getRelatedContent
 export const GetRelatedContentInputSchema = z.object({
-  slug: z
-    .string()
-    .min(1)
-    .describe('Reference content slug')
-    .meta({
-      description: 'Reference content slug',
-      example: 'ai-agent-framework',
-    }),
+  slug: z.string().min(1).describe('Reference content slug').meta({
+    description: 'Reference content slug',
+    example: 'ai-agent-framework',
+  }),
   category: CategorySchema.describe('Reference content category').meta({
     description: 'Reference content category',
     example: 'agents',
@@ -205,79 +176,48 @@ export const GetContentByTagInputSchema = z.object({
       description: 'Tags to filter by',
       example: ['ai', 'automation'],
     }),
-  logic: z
-    .enum(['AND', 'OR'])
-    .default('OR')
-    .describe('Logical operator for multiple tags')
-    .meta({
-      description: 'Logical operator for multiple tags',
-      example: 'OR',
-    }),
-  category: CategorySchema.optional()
-    .describe('Filter by category (optional)')
-    .meta({
-      description: 'Filter by category (optional)',
-      example: 'agents',
-    }),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(50)
-    .default(20)
-    .describe('Number of items (max 50)')
-    .meta({
-      description: 'Number of items (max 50)',
-      example: 20,
-      minimum: 1,
-      maximum: 50,
-    }),
+  logic: z.enum(['AND', 'OR']).default('OR').describe('Logical operator for multiple tags').meta({
+    description: 'Logical operator for multiple tags',
+    example: 'OR',
+  }),
+  category: CategorySchema.optional().describe('Filter by category (optional)').meta({
+    description: 'Filter by category (optional)',
+    example: 'agents',
+  }),
+  limit: z.number().int().min(1).max(50).default(20).describe('Number of items (max 50)').meta({
+    description: 'Number of items (max 50)',
+    example: 20,
+    minimum: 1,
+    maximum: 50,
+  }),
 });
 
 // 10. getPopular
 export const GetPopularInputSchema = z.object({
-  category: CategorySchema.optional()
-    .describe('Filter by category (optional)')
-    .meta({
-      description: 'Filter by category (optional)',
-      example: 'agents',
-    }),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(50)
-    .default(20)
-    .describe('Number of items (max 50)')
-    .meta({
-      description: 'Number of items (max 50)',
-      example: 20,
-      minimum: 1,
-      maximum: 50,
-    }),
+  category: CategorySchema.optional().describe('Filter by category (optional)').meta({
+    description: 'Filter by category (optional)',
+    example: 'agents',
+  }),
+  limit: z.number().int().min(1).max(50).default(20).describe('Number of items (max 50)').meta({
+    description: 'Number of items (max 50)',
+    example: 20,
+    minimum: 1,
+    maximum: 50,
+  }),
 });
 
 // 11. getRecent
 export const GetRecentInputSchema = z.object({
-  category: CategorySchema.optional()
-    .describe('Filter by category (optional)')
-    .meta({
-      description: 'Filter by category (optional)',
-      example: 'agents',
-    }),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(50)
-    .default(20)
-    .describe('Number of items (max 50)')
-    .meta({
-      description: 'Number of items (max 50)',
-      example: 20,
-      minimum: 1,
-      maximum: 50,
-    }),
+  category: CategorySchema.optional().describe('Filter by category (optional)').meta({
+    description: 'Filter by category (optional)',
+    example: 'agents',
+  }),
+  limit: z.number().int().min(1).max(50).default(20).describe('Number of items (max 50)').meta({
+    description: 'Number of items (max 50)',
+    example: 20,
+    minimum: 1,
+    maximum: 50,
+  }),
 });
 
 // 12. downloadContentForPlatform
@@ -286,14 +226,10 @@ export const DownloadContentForPlatformInputSchema = z.object({
     description: 'Content category',
     example: 'agents',
   }),
-  slug: z
-    .string()
-    .min(1)
-    .describe('Content slug identifier')
-    .meta({
-      description: 'Content slug identifier',
-      example: 'ai-agent-framework',
-    }),
+  slug: z.string().min(1).describe('Content slug identifier').meta({
+    description: 'Content slug identifier',
+    example: 'ai-agent-framework',
+  }),
   platform: z
     .enum(['claude-code', 'cursor', 'chatgpt-codex', 'generic'])
     .default('claude-code')
@@ -315,12 +251,10 @@ export const DownloadContentForPlatformInputSchema = z.object({
 
 // 13. getCategoryConfigs
 export const GetCategoryConfigsInputSchema = z.object({
-  category: CategorySchema.optional()
-    .describe('Filter by specific category (optional)')
-    .meta({
-      description: 'Filter by specific category (optional)',
-      example: 'agents',
-    }),
+  category: CategorySchema.optional().describe('Filter by specific category (optional)').meta({
+    description: 'Filter by specific category (optional)',
+    example: 'agents',
+  }),
 });
 
 // 14. getChangelog
@@ -340,15 +274,11 @@ export const GetSearchFacetsInputSchema = z.object({});
 
 // 16. getSearchSuggestions
 export const GetSearchSuggestionsInputSchema = z.object({
-  query: z
-    .string()
-    .min(2)
-    .describe('Search query string (minimum 2 characters)')
-    .meta({
-      description: 'Search query string (minimum 2 characters)',
-      example: 'ai',
-      minLength: 2,
-    }),
+  query: z.string().min(2).describe('Search query string (minimum 2 characters)').meta({
+    description: 'Search query string (minimum 2 characters)',
+    example: 'ai',
+    minLength: 2,
+  }),
   limit: z
     .number()
     .int()
@@ -383,30 +313,18 @@ export const SubmitContentInputSchema = z.object({
       description: 'Content category (usually matches submission_type)',
       example: 'agents',
     }),
-  name: z
-    .string()
-    .optional()
-    .describe('Title/name of the content (required)')
-    .meta({
-      description: 'Title/name of the content (required)',
-      example: 'AI Agent Framework',
-    }),
-  description: z
-    .string()
-    .optional()
-    .describe('Brief description of the content (required)')
-    .meta({
-      description: 'Brief description of the content (required)',
-      example: 'A comprehensive framework for building AI agents',
-    }),
-  author: z
-    .string()
-    .optional()
-    .describe('Author name or handle (required)')
-    .meta({
-      description: 'Author name or handle (required)',
-      example: 'johndoe',
-    }),
+  name: z.string().optional().describe('Title/name of the content (required)').meta({
+    description: 'Title/name of the content (required)',
+    example: 'AI Agent Framework',
+  }),
+  description: z.string().optional().describe('Brief description of the content (required)').meta({
+    description: 'Brief description of the content (required)',
+    example: 'A comprehensive framework for building AI agents',
+  }),
+  author: z.string().optional().describe('Author name or handle (required)').meta({
+    description: 'Author name or handle (required)',
+    example: 'johndoe',
+  }),
   content_data: z
     .any()
     .optional()
@@ -415,26 +333,16 @@ export const SubmitContentInputSchema = z.object({
       description: 'Content data object (structure varies by type)',
       example: { version: '1.0.0', features: ['feature1', 'feature2'] },
     }),
-  author_profile_url: z
-    .string()
-    .url()
-    .optional()
-    .describe('Optional: Author profile URL')
-    .meta({
-      description: 'Optional: Author profile URL',
-      example: 'https://github.com/johndoe',
-      format: 'uri',
-    }),
-  github_url: z
-    .string()
-    .url()
-    .optional()
-    .describe('Optional: GitHub repository URL')
-    .meta({
-      description: 'Optional: GitHub repository URL',
-      example: 'https://github.com/johndoe/ai-agent-framework',
-      format: 'uri',
-    }),
+  author_profile_url: z.string().url().optional().describe('Optional: Author profile URL').meta({
+    description: 'Optional: Author profile URL',
+    example: 'https://github.com/johndoe',
+    format: 'uri',
+  }),
+  github_url: z.string().url().optional().describe('Optional: GitHub repository URL').meta({
+    description: 'Optional: GitHub repository URL',
+    example: 'https://github.com/johndoe/ai-agent-framework',
+    format: 'uri',
+  }),
   tags: z
     .array(z.string())
     .optional()
@@ -476,15 +384,11 @@ export const CreateAccountInputSchema = z.object({
 
 // 20. subscribeNewsletter
 export const SubscribeNewsletterInputSchema = z.object({
-  email: z
-    .string()
-    .email()
-    .describe('Email address to subscribe')
-    .meta({
-      description: 'Email address to subscribe',
-      example: 'user@example.com',
-      format: 'email',
-    }),
+  email: z.string().email().describe('Email address to subscribe').meta({
+    description: 'Email address to subscribe',
+    example: 'user@example.com',
+    format: 'email',
+  }),
   source: z
     .string()
     .default('mcp')
@@ -493,15 +397,11 @@ export const SubscribeNewsletterInputSchema = z.object({
       description: 'Newsletter subscription source (default: "mcp")',
       example: 'mcp',
     }),
-  referrer: z
-    .string()
-    .optional()
-    .describe('Optional: Referrer URL or source identifier')
-    .meta({
-      description: 'Optional: Referrer URL or source identifier',
-      example: 'https://claudepro.directory',
-      format: 'uri',
-    }),
+  referrer: z.string().optional().describe('Optional: Referrer URL or source identifier').meta({
+    description: 'Optional: Referrer URL or source identifier',
+    example: 'https://claudepro.directory',
+    format: 'uri',
+  }),
   metadata: z
     .record(z.string(), z.unknown())
     .optional()
@@ -514,18 +414,16 @@ export const SubscribeNewsletterInputSchema = z.object({
 
 // 21. downloadSkillPackage - Download Skills ZIP file from Supabase Storage
 export const DownloadSkillPackageInputSchema = z.object({
-  slug: z
-    .string()
-    .min(1)
-    .describe('Slug identifier of the skill to download')
-    .meta({
-      description: 'Slug identifier of the skill to download',
-      example: 'my-awesome-skill',
-    }),
+  slug: z.string().min(1).describe('Slug identifier of the skill to download').meta({
+    description: 'Slug identifier of the skill to download',
+    example: 'my-awesome-skill',
+  }),
   rootUri: z
     .string()
     .optional()
-    .describe('Optional: Root URI for file download (e.g., file:///Users/username/.claude/packages). If not provided, returns download URL.')
+    .describe(
+      'Optional: Root URI for file download (e.g., file:///Users/username/.claude/packages). If not provided, returns download URL.'
+    )
     .meta({
       description: 'Optional: Root URI for file download. If not provided, returns download URL.',
       example: 'file:///Users/username/.claude/packages',
@@ -535,18 +433,16 @@ export const DownloadSkillPackageInputSchema = z.object({
 
 // 22. downloadMcpServerPackage - Download MCP server .mcpb file from Supabase Storage
 export const DownloadMcpServerPackageInputSchema = z.object({
-  slug: z
-    .string()
-    .min(1)
-    .describe('Slug identifier of the MCP server to download')
-    .meta({
-      description: 'Slug identifier of the MCP server to download',
-      example: 'example-mcp-server',
-    }),
+  slug: z.string().min(1).describe('Slug identifier of the MCP server to download').meta({
+    description: 'Slug identifier of the MCP server to download',
+    example: 'example-mcp-server',
+  }),
   rootUri: z
     .string()
     .optional()
-    .describe('Optional: Root URI for file download (e.g., file:///Users/username/.claude/mcp). If not provided, returns download URL.')
+    .describe(
+      'Optional: Root URI for file download (e.g., file:///Users/username/.claude/mcp). If not provided, returns download URL.'
+    )
     .meta({
       description: 'Optional: Root URI for file download. If not provided, returns download URL.',
       example: 'file:///Users/username/.claude/mcp',
@@ -560,14 +456,10 @@ export const DownloadStorageFileInputSchema = z.object({
     description: 'Content category',
     example: 'skills',
   }),
-  slug: z
-    .string()
-    .min(1)
-    .describe('Slug identifier of the content to download')
-    .meta({
-      description: 'Slug identifier of the content to download',
-      example: 'my-content',
-    }),
+  slug: z.string().min(1).describe('Slug identifier of the content to download').meta({
+    description: 'Slug identifier of the content to download',
+    example: 'my-content',
+  }),
   rootUri: z
     .string()
     .optional()
@@ -634,18 +526,38 @@ export const ListCategoriesOutputSchema = z
       )
       .meta({ description: 'Array of available categories' }),
     total: z.number().meta({ example: 10, description: 'Total number of categories' }),
-    usageHints: z.array(z.string()).meta({ example: ['Use category slug in searchContent to filter', 'Use getCategoryConfigs for category details'] }),
+    usageHints: z.array(z.string()).meta({
+      example: [
+        'Use category slug in searchContent to filter',
+        'Use getCategoryConfigs for category details',
+      ],
+    }),
     relatedTools: z.array(z.string()).meta({ example: ['searchContent', 'getCategoryConfigs'] }),
   })
   .meta({
     description: 'Output schema for listCategories tool - returns all available content categories',
     example: {
       categories: [
-        { name: 'AI Agents', slug: 'agents', description: 'AI agents and assistants', count: 150, icon: '🤖' },
-        { name: 'MCP Servers', slug: 'mcp', description: 'Model Context Protocol servers', count: 25, icon: '🔌' },
+        {
+          name: 'AI Agents',
+          slug: 'agents',
+          description: 'AI agents and assistants',
+          count: 150,
+          icon: '🤖',
+        },
+        {
+          name: 'MCP Servers',
+          slug: 'mcp',
+          description: 'Model Context Protocol servers',
+          count: 25,
+          icon: '🔌',
+        },
       ],
       total: 10,
-      usageHints: ['Use category slug in searchContent to filter', 'Use getCategoryConfigs for category details'],
+      usageHints: [
+        'Use category slug in searchContent to filter',
+        'Use getCategoryConfigs for category details',
+      ],
       relatedTools: ['searchContent', 'getCategoryConfigs'],
     },
   });
@@ -659,11 +571,16 @@ export const SearchContentOutputSchema = z
           slug: z.string().meta({ example: 'ai-agent-framework' }),
           title: z.string().meta({ example: 'AI Agent Framework' }),
           category: z.string().meta({ example: 'agents' }),
-          description: z.string().meta({ example: 'A comprehensive framework for building AI agents' }),
+          description: z
+            .string()
+            .meta({ example: 'A comprehensive framework for building AI agents' }),
           wasTruncated: z.boolean().meta({ example: false }),
           tags: z.array(z.string()).meta({ example: ['ai', 'automation'] }),
           author: z.string().meta({ example: 'johndoe' }),
-          dateAdded: z.string().datetime().meta({ example: '2024-01-15T10:30:00Z', format: 'date-time' }),
+          dateAdded: z
+            .string()
+            .datetime()
+            .meta({ example: '2024-01-15T10:30:00Z', format: 'date-time' }),
         })
       )
       .meta({ description: 'Array of search result items' }),
@@ -678,11 +595,17 @@ export const SearchContentOutputSchema = z
         hasMore: z.boolean().meta({ example: true }),
       })
       .meta({ description: 'Pagination information' }),
-    usageHints: z.array(z.string()).meta({ example: ['Use getContentDetail to get full content', 'Filter by category for better results'] }),
+    usageHints: z.array(z.string()).meta({
+      example: [
+        'Use getContentDetail to get full content',
+        'Filter by category for better results',
+      ],
+    }),
     relatedTools: z.array(z.string()).meta({ example: ['getContentDetail', 'getRelatedContent'] }),
   })
   .meta({
-    description: 'Output schema for searchContent tool - returns paginated search results with metadata',
+    description:
+      'Output schema for searchContent tool - returns paginated search results with metadata',
     example: {
       items: [
         {
@@ -696,8 +619,19 @@ export const SearchContentOutputSchema = z
           dateAdded: '2024-01-15T10:30:00Z',
         },
       ],
-      pagination: { total: 150, page: 1, limit: 20, totalPages: 8, hasNext: true, hasPrev: false, hasMore: true },
-      usageHints: ['Use getContentDetail to get full content', 'Filter by category for better results'],
+      pagination: {
+        total: 150,
+        page: 1,
+        limit: 20,
+        totalPages: 8,
+        hasNext: true,
+        hasPrev: false,
+        hasMore: true,
+      },
+      usageHints: [
+        'Use getContentDetail to get full content',
+        'Filter by category for better results',
+      ],
       relatedTools: ['getContentDetail', 'getRelatedContent'],
     },
   });
@@ -709,7 +643,10 @@ export const GetContentDetailOutputSchema = z
     title: z.string().meta({ example: 'AI Agent Framework' }),
     category: z.string().meta({ example: 'agents' }),
     description: z.string().meta({ example: 'A comprehensive framework for building AI agents' }),
-    fullDescription: z.string().optional().meta({ example: 'Full detailed description of the content...' }),
+    fullDescription: z
+      .string()
+      .optional()
+      .meta({ example: 'Full detailed description of the content...' }),
     author: z.string().meta({ example: 'johndoe' }),
     dateAdded: z.string().datetime().meta({ example: '2024-01-15T10:30:00Z', format: 'date-time' }),
     tags: z.array(z.string()).meta({ example: ['ai', 'automation', 'agents'] }),
@@ -719,11 +656,19 @@ export const GetContentDetailOutputSchema = z
         bookmarks: z.number().meta({ example: 45 }),
       })
       .meta({ description: 'Content statistics' }),
-    usageHints: z.array(z.string()).meta({ example: ['Use downloadContentForPlatform to download', 'Use getRelatedContent for similar items'] }),
-    relatedTools: z.array(z.string()).meta({ example: ['downloadContentForPlatform', 'getRelatedContent'] }),
+    usageHints: z.array(z.string()).meta({
+      example: [
+        'Use downloadContentForPlatform to download',
+        'Use getRelatedContent for similar items',
+      ],
+    }),
+    relatedTools: z
+      .array(z.string())
+      .meta({ example: ['downloadContentForPlatform', 'getRelatedContent'] }),
   })
   .meta({
-    description: 'Output schema for getContentDetail tool - returns complete content details with metadata',
+    description:
+      'Output schema for getContentDetail tool - returns complete content details with metadata',
     example: {
       slug: 'ai-agent-framework',
       title: 'AI Agent Framework',
@@ -734,7 +679,10 @@ export const GetContentDetailOutputSchema = z
       dateAdded: '2024-01-15T10:30:00Z',
       tags: ['ai', 'automation', 'agents'],
       stats: { views: 1250, bookmarks: 45 },
-      usageHints: ['Use downloadContentForPlatform to download', 'Use getRelatedContent for similar items'],
+      usageHints: [
+        'Use downloadContentForPlatform to download',
+        'Use getRelatedContent for similar items',
+      ],
       relatedTools: ['downloadContentForPlatform', 'getRelatedContent'],
     },
   });
@@ -748,10 +696,15 @@ export const GetTrendingOutputSchema = z
           slug: z.string().meta({ example: 'ai-agent-framework' }),
           title: z.string().meta({ example: 'AI Agent Framework' }),
           category: z.string().meta({ example: 'agents' }),
-          description: z.string().meta({ example: 'A comprehensive framework for building AI agents' }),
+          description: z
+            .string()
+            .meta({ example: 'A comprehensive framework for building AI agents' }),
           tags: z.array(z.string()).meta({ example: ['ai', 'automation'] }),
           author: z.string().meta({ example: 'johndoe' }),
-          dateAdded: z.string().datetime().meta({ example: '2024-01-15T10:30:00Z', format: 'date-time' }),
+          dateAdded: z
+            .string()
+            .datetime()
+            .meta({ example: '2024-01-15T10:30:00Z', format: 'date-time' }),
           trendingScore: z.number().optional().meta({ example: 95.5 }),
         })
       )
@@ -759,7 +712,8 @@ export const GetTrendingOutputSchema = z
     count: z.number().meta({ example: 20, description: 'Total number of trending items returned' }),
   })
   .meta({
-    description: 'Output schema for getTrending tool - returns trending content items sorted by popularity',
+    description:
+      'Output schema for getTrending tool - returns trending content items sorted by popularity',
     example: {
       items: [
         {
@@ -786,10 +740,15 @@ export const GetFeaturedOutputSchema = z
           slug: z.string().meta({ example: 'ai-agent-framework' }),
           title: z.string().meta({ example: 'AI Agent Framework' }),
           category: z.string().meta({ example: 'agents' }),
-          description: z.string().meta({ example: 'A comprehensive framework for building AI agents' }),
+          description: z
+            .string()
+            .meta({ example: 'A comprehensive framework for building AI agents' }),
           tags: z.array(z.string()).meta({ example: ['ai', 'automation'] }),
           author: z.string().meta({ example: 'johndoe' }),
-          dateAdded: z.string().datetime().meta({ example: '2024-01-15T10:30:00Z', format: 'date-time' }),
+          dateAdded: z
+            .string()
+            .datetime()
+            .meta({ example: '2024-01-15T10:30:00Z', format: 'date-time' }),
         })
       )
       .meta({ description: 'Array of featured content items' }),
@@ -822,7 +781,10 @@ export const GetTemplatesOutputSchema = z
           id: z.string().meta({ example: 'template-123' }),
           type: z.string().meta({ example: 'agent' }),
           name: z.string().meta({ example: 'Basic Agent Template' }),
-          description: z.string().nullable().meta({ example: 'A basic template for creating AI agents' }),
+          description: z
+            .string()
+            .nullable()
+            .meta({ example: 'A basic template for creating AI agents' }),
           category: z.string().nullable().meta({ example: 'agents' }),
           tags: z.string().nullable().meta({ example: 'ai,automation' }),
         })
@@ -857,12 +819,24 @@ export const GetMcpServersOutputSchema = z
           title: z.string().meta({ example: 'Example MCP Server' }),
           description: z.string().meta({ example: 'An example MCP server implementation' }),
           author: z.string().meta({ example: 'johndoe' }),
-          dateAdded: z.string().datetime().meta({ example: '2024-01-15T10:30:00Z', format: 'date-time' }),
+          dateAdded: z
+            .string()
+            .datetime()
+            .meta({ example: '2024-01-15T10:30:00Z', format: 'date-time' }),
           tags: z.array(z.string()).meta({ example: ['mcp', 'server', 'example'] }),
-          mcpbUrl: z.string().url().nullable().meta({ example: 'https://mcpb.io/example', format: 'uri' }),
+          mcpbUrl: z
+            .string()
+            .url()
+            .nullable()
+            .meta({ example: 'https://mcpb.io/example', format: 'uri' }),
           requiresAuth: z.boolean().meta({ example: false }),
           tools: z
-            .array(z.object({ name: z.string().meta({ example: 'getData' }), description: z.string().meta({ example: 'Get data from server' }) }))
+            .array(
+              z.object({
+                name: z.string().meta({ example: 'getData' }),
+                description: z.string().meta({ example: 'Get data from server' }),
+              })
+            )
             .meta({ description: 'Available tools on this MCP server' }),
           stats: z
             .object({
@@ -876,7 +850,8 @@ export const GetMcpServersOutputSchema = z
     count: z.number().meta({ example: 15, description: 'Total number of MCP servers returned' }),
   })
   .meta({
-    description: 'Output schema for getMcpServers tool - returns available MCP servers with metadata',
+    description:
+      'Output schema for getMcpServers tool - returns available MCP servers with metadata',
     example: {
       servers: [
         {
@@ -919,7 +894,8 @@ export const GetRelatedContentOutputSchema = z
     count: z.number().meta({ example: 5, description: 'Total number of related items returned' }),
   })
   .meta({
-    description: 'Output schema for getRelatedContent tool - returns content items related to a source item',
+    description:
+      'Output schema for getRelatedContent tool - returns content items related to a source item',
     example: {
       items: [
         {
@@ -944,16 +920,28 @@ export const GetContentByTagOutputSchema = z
           slug: z.string().meta({ example: 'ai-agent-framework' }),
           title: z.string().meta({ example: 'AI Agent Framework' }),
           category: z.string().meta({ example: 'agents' }),
-          description: z.string().meta({ example: 'A comprehensive framework for building AI agents' }),
+          description: z
+            .string()
+            .meta({ example: 'A comprehensive framework for building AI agents' }),
           tags: z.array(z.string()).meta({ example: ['ai', 'automation'] }),
           author: z.string().meta({ example: 'johndoe' }),
-          dateAdded: z.string().datetime().meta({ example: '2024-01-15T10:30:00Z', format: 'date-time' }),
+          dateAdded: z
+            .string()
+            .datetime()
+            .meta({ example: '2024-01-15T10:30:00Z', format: 'date-time' }),
         })
       )
       .meta({ description: 'Array of content items matching tags' }),
-    tags: z.array(z.string()).meta({ example: ['ai', 'automation'], description: 'Tags used for filtering' }),
-    logic: z.enum(['AND', 'OR']).meta({ example: 'OR', description: 'Logical operator used for tag matching' }),
-    category: z.string().optional().meta({ example: 'agents', description: 'Category filter applied (if any)' }),
+    tags: z
+      .array(z.string())
+      .meta({ example: ['ai', 'automation'], description: 'Tags used for filtering' }),
+    logic: z
+      .enum(['AND', 'OR'])
+      .meta({ example: 'OR', description: 'Logical operator used for tag matching' }),
+    category: z
+      .string()
+      .optional()
+      .meta({ example: 'agents', description: 'Category filter applied (if any)' }),
     count: z.number().meta({ example: 25, description: 'Total number of items matching tags' }),
   })
   .meta({
@@ -986,18 +974,27 @@ export const GetPopularOutputSchema = z
           slug: z.string().meta({ example: 'ai-agent-framework' }),
           title: z.string().meta({ example: 'AI Agent Framework' }),
           category: z.string().meta({ example: 'agents' }),
-          description: z.string().meta({ example: 'A comprehensive framework for building AI agents' }),
+          description: z
+            .string()
+            .meta({ example: 'A comprehensive framework for building AI agents' }),
           tags: z.array(z.string()).meta({ example: ['ai', 'automation'] }),
           author: z.string().meta({ example: 'johndoe' }),
-          dateAdded: z.string().datetime().meta({ example: '2024-01-15T10:30:00Z', format: 'date-time' }),
-          popularityScore: z.number().optional().meta({ example: 95.5, description: 'Popularity score (0-100)' }),
+          dateAdded: z
+            .string()
+            .datetime()
+            .meta({ example: '2024-01-15T10:30:00Z', format: 'date-time' }),
+          popularityScore: z
+            .number()
+            .optional()
+            .meta({ example: 95.5, description: 'Popularity score (0-100)' }),
         })
       )
       .meta({ description: 'Array of popular content items' }),
     count: z.number().meta({ example: 20, description: 'Total number of popular items returned' }),
   })
   .meta({
-    description: 'Output schema for getPopular tool - returns popular content items sorted by engagement',
+    description:
+      'Output schema for getPopular tool - returns popular content items sorted by engagement',
     example: {
       items: [
         {
@@ -1024,17 +1021,23 @@ export const GetRecentOutputSchema = z
           slug: z.string().meta({ example: 'new-agent-framework' }),
           title: z.string().meta({ example: 'New Agent Framework' }),
           category: z.string().meta({ example: 'agents' }),
-          description: z.string().meta({ example: 'A newly added framework for building AI agents' }),
+          description: z
+            .string()
+            .meta({ example: 'A newly added framework for building AI agents' }),
           tags: z.array(z.string()).meta({ example: ['ai', 'automation', 'new'] }),
           author: z.string().meta({ example: 'johndoe' }),
-          dateAdded: z.string().datetime().meta({ example: '2024-12-21T10:30:00Z', format: 'date-time' }),
+          dateAdded: z
+            .string()
+            .datetime()
+            .meta({ example: '2024-12-21T10:30:00Z', format: 'date-time' }),
         })
       )
       .meta({ description: 'Array of recently added content items' }),
     count: z.number().meta({ example: 20, description: 'Total number of recent items returned' }),
   })
   .meta({
-    description: 'Output schema for getRecent tool - returns recently added content items sorted by date',
+    description:
+      'Output schema for getRecent tool - returns recently added content items sorted by date',
     example: {
       items: [
         {
@@ -1054,16 +1057,30 @@ export const GetRecentOutputSchema = z
 // 12. downloadContentForPlatform output
 export const DownloadContentForPlatformOutputSchema = z
   .object({
-    platform: z.enum(['claude-code', 'cursor', 'chatgpt-codex', 'generic']).meta({ example: 'claude-code', description: 'Target platform' }),
+    platform: z
+      .enum(['claude-code', 'cursor', 'chatgpt-codex', 'generic'])
+      .meta({ example: 'claude-code', description: 'Target platform' }),
     category: z.string().meta({ example: 'agents', description: 'Content category' }),
     slug: z.string().meta({ example: 'ai-agent-framework', description: 'Content slug' }),
-    targetDirectory: z.string().optional().meta({ example: '/Users/username/project/.claude', format: 'path', description: 'Target directory path' }),
-    filePath: z.string().meta({ example: '/Users/username/project/.claude/rules.md', format: 'path', description: 'Full file path where content was saved' }),
-    content: z.string().meta({ example: '# AI Agent Framework\n\nContent here...', description: 'Downloaded content' }),
+    targetDirectory: z.string().optional().meta({
+      example: '/Users/username/project/.claude',
+      format: 'path',
+      description: 'Target directory path',
+    }),
+    filePath: z.string().meta({
+      example: '/Users/username/project/.claude/rules.md',
+      format: 'path',
+      description: 'Full file path where content was saved',
+    }),
+    content: z.string().meta({
+      example: '# AI Agent Framework\n\nContent here...',
+      description: 'Downloaded content',
+    }),
     format: z.string().meta({ example: 'markdown', description: 'Content format' }),
   })
   .meta({
-    description: 'Output schema for downloadContentForPlatform tool - returns download confirmation with file path and content',
+    description:
+      'Output schema for downloadContentForPlatform tool - returns download confirmation with file path and content',
     example: {
       platform: 'claude-code',
       category: 'agents',
@@ -1082,17 +1099,32 @@ export const GetCategoryConfigsOutputSchema = z
       .array(
         z.object({
           category: z.string().meta({ example: 'agents', description: 'Category identifier' }),
-          title: z.string().nullable().meta({ example: 'AI Agents', description: 'Category display title' }),
-          description: z.string().nullable().meta({ example: 'AI agents and assistants', description: 'Category description' }),
+          title: z
+            .string()
+            .nullable()
+            .meta({ example: 'AI Agents', description: 'Category display title' }),
+          description: z
+            .string()
+            .nullable()
+            .meta({ example: 'AI agents and assistants', description: 'Category description' }),
           icon: z.string().nullable().meta({ example: '🤖', description: 'Category icon' }),
-          features: z.record(z.string(), z.unknown()).optional().meta({ example: { searchable: true, filterable: true }, description: 'Category-specific features' }),
+          features: z
+            .record(z.string(), z.unknown())
+            .optional()
+            .meta({
+              example: { searchable: true, filterable: true },
+              description: 'Category-specific features',
+            }),
         })
       )
       .meta({ description: 'Array of category configurations' }),
-    count: z.number().meta({ example: 10, description: 'Total number of category configs returned' }),
+    count: z
+      .number()
+      .meta({ example: 10, description: 'Total number of category configs returned' }),
   })
   .meta({
-    description: 'Output schema for getCategoryConfigs tool - returns category configuration metadata',
+    description:
+      'Output schema for getCategoryConfigs tool - returns category configuration metadata',
     example: {
       configs: [
         {
@@ -1110,12 +1142,24 @@ export const GetCategoryConfigsOutputSchema = z
 // 14. getChangelog output
 export const GetChangelogOutputSchema = z
   .object({
-    format: z.enum(['llms-txt', 'json']).meta({ example: 'llms-txt', description: 'Output format' }),
-    content: z.string().meta({ example: '# Changelog\n\n## 2024-12-21\n- Added new features...', description: 'Changelog content' }),
-    entries: z.array(z.unknown()).optional().meta({ example: [{ version: '1.0.0', date: '2024-12-21', changes: ['Feature 1', 'Feature 2'] }], description: 'Parsed changelog entries (JSON format only)' }),
+    format: z
+      .enum(['llms-txt', 'json'])
+      .meta({ example: 'llms-txt', description: 'Output format' }),
+    content: z.string().meta({
+      example: '# Changelog\n\n## 2024-12-21\n- Added new features...',
+      description: 'Changelog content',
+    }),
+    entries: z
+      .array(z.unknown())
+      .optional()
+      .meta({
+        example: [{ version: '1.0.0', date: '2024-12-21', changes: ['Feature 1', 'Feature 2'] }],
+        description: 'Parsed changelog entries (JSON format only)',
+      }),
   })
   .meta({
-    description: 'Output schema for getChangelog tool - returns changelog content in requested format',
+    description:
+      'Output schema for getChangelog tool - returns changelog content in requested format',
     example: {
       format: 'llms-txt',
       content: '# Changelog\n\n## 2024-12-21\n- Added new features...',
@@ -1130,7 +1174,9 @@ export const GetSearchFacetsOutputSchema = z
       .array(
         z.object({
           category: z.string().meta({ example: 'agents', description: 'Category identifier' }),
-          content_count: z.number().meta({ example: 150, description: 'Number of content items in this category' }),
+          content_count: z
+            .number()
+            .meta({ example: 150, description: 'Number of content items in this category' }),
         })
       )
       .meta({ description: 'Available categories with content counts' }),
@@ -1138,13 +1184,16 @@ export const GetSearchFacetsOutputSchema = z
       .array(
         z.object({
           tag: z.string().meta({ example: 'ai', description: 'Tag name' }),
-          content_count: z.number().meta({ example: 75, description: 'Number of content items with this tag' }),
+          content_count: z
+            .number()
+            .meta({ example: 75, description: 'Number of content items with this tag' }),
         })
       )
       .meta({ description: 'Available tags with content counts' }),
   })
   .meta({
-    description: 'Output schema for getSearchFacets tool - returns search facets (categories and tags) with counts',
+    description:
+      'Output schema for getSearchFacets tool - returns search facets (categories and tags) with counts',
     example: {
       categories: [{ category: 'agents', content_count: 150 }],
       tags: [{ tag: 'ai', content_count: 75 }],
@@ -1158,14 +1207,18 @@ export const GetSearchSuggestionsOutputSchema = z
       .array(
         z.object({
           query: z.string().meta({ example: 'ai agents', description: 'Suggested search query' }),
-          count: z.number().optional().meta({ example: 25, description: 'Number of results for this query' }),
+          count: z
+            .number()
+            .optional()
+            .meta({ example: 25, description: 'Number of results for this query' }),
         })
       )
       .meta({ description: 'Array of search query suggestions' }),
     count: z.number().meta({ example: 10, description: 'Total number of suggestions returned' }),
   })
   .meta({
-    description: 'Output schema for getSearchSuggestions tool - returns autocomplete search suggestions',
+    description:
+      'Output schema for getSearchSuggestions tool - returns autocomplete search suggestions',
     example: {
       suggestions: [{ query: 'ai agents', count: 25 }],
       count: 10,
@@ -1176,7 +1229,9 @@ export const GetSearchSuggestionsOutputSchema = z
 export const GetSocialProofStatsOutputSchema = z
   .object({
     totalViews: z.number().meta({ example: 50000, description: 'Total views across all content' }),
-    totalBookmarks: z.number().meta({ example: 1500, description: 'Total bookmarks across all content' }),
+    totalBookmarks: z
+      .number()
+      .meta({ example: 1500, description: 'Total bookmarks across all content' }),
     totalContent: z.number().meta({ example: 500, description: 'Total number of content items' }),
     statsByCategory: z
       .record(
@@ -1186,15 +1241,25 @@ export const GetSocialProofStatsOutputSchema = z
           bookmarks: z.number().meta({ example: 300 }),
         })
       )
-      .meta({ example: { agents: { views: 10000, bookmarks: 300 }, rules: { views: 5000, bookmarks: 150 } }, description: 'Statistics broken down by category' }),
+      .meta({
+        example: {
+          agents: { views: 10000, bookmarks: 300 },
+          rules: { views: 5000, bookmarks: 150 },
+        },
+        description: 'Statistics broken down by category',
+      }),
   })
   .meta({
-    description: 'Output schema for getSocialProofStats tool - returns aggregate social proof statistics',
+    description:
+      'Output schema for getSocialProofStats tool - returns aggregate social proof statistics',
     example: {
       totalViews: 50000,
       totalBookmarks: 1500,
       totalContent: 500,
-      statsByCategory: { agents: { views: 10000, bookmarks: 300 }, rules: { views: 5000, bookmarks: 150 } },
+      statsByCategory: {
+        agents: { views: 10000, bookmarks: 300 },
+        rules: { views: 5000, bookmarks: 150 },
+      },
     },
   });
 
@@ -1203,11 +1268,19 @@ export const SubmitContentOutputSchema = z
   .object({
     success: z.boolean().meta({ example: true }),
     message: z.string().meta({ example: 'Content submitted successfully' }),
-    submissionUrl: z.string().url().optional().meta({ example: 'https://claudepro.directory/submit/123', format: 'uri' }),
-    instructions: z.array(z.string()).optional().meta({ example: ['Review your submission', 'Wait for approval'] }),
+    submissionUrl: z
+      .string()
+      .url()
+      .optional()
+      .meta({ example: 'https://claudepro.directory/submit/123', format: 'uri' }),
+    instructions: z
+      .array(z.string())
+      .optional()
+      .meta({ example: ['Review your submission', 'Wait for approval'] }),
   })
   .meta({
-    description: 'Output schema for submitContent tool - returns submission confirmation with next steps',
+    description:
+      'Output schema for submitContent tool - returns submission confirmation with next steps',
     example: {
       success: true,
       message: 'Content submitted successfully',
@@ -1221,11 +1294,15 @@ export const CreateAccountOutputSchema = z
   .object({
     success: z.boolean().meta({ example: true }),
     message: z.string().meta({ example: 'Account creation initiated' }),
-    authUrl: z.string().url().meta({ example: 'https://claudepro.directory/auth/github?redirect=/account', format: 'uri' }),
+    authUrl: z.string().url().meta({
+      example: 'https://claudepro.directory/auth/github?redirect=/account',
+      format: 'uri',
+    }),
     provider: z.enum(['github', 'google', 'discord']).meta({ example: 'github' }),
   })
   .meta({
-    description: 'Output schema for createAccount tool - returns OAuth authorization URL for account creation',
+    description:
+      'Output schema for createAccount tool - returns OAuth authorization URL for account creation',
     example: {
       success: true,
       message: 'Account creation initiated',
@@ -1242,7 +1319,8 @@ export const SubscribeNewsletterOutputSchema = z
     email: z.string().email().meta({ example: 'user@example.com', format: 'email' }),
   })
   .meta({
-    description: 'Output schema for subscribeNewsletter tool - returns newsletter subscription confirmation',
+    description:
+      'Output schema for subscribeNewsletter tool - returns newsletter subscription confirmation',
     example: {
       success: true,
       message: 'Successfully subscribed to newsletter',
@@ -1253,24 +1331,50 @@ export const SubscribeNewsletterOutputSchema = z
 // 21. downloadSkillPackage output
 export const DownloadSkillPackageOutputSchema = z
   .object({
-    success: z.boolean().meta({ example: true, description: 'Whether the download was successful' }),
-    message: z.string().meta({ example: 'Skill package downloaded successfully', description: 'Success message' }),
+    success: z
+      .boolean()
+      .meta({ example: true, description: 'Whether the download was successful' }),
+    message: z
+      .string()
+      .meta({ example: 'Skill package downloaded successfully', description: 'Success message' }),
     slug: z.string().meta({ example: 'my-awesome-skill', description: 'Skill slug identifier' }),
-    fileName: z.string().meta({ example: 'my-awesome-skill.zip', description: 'Downloaded file name' }),
-    downloadUrl: z.string().url().meta({ example: 'https://claudepro.directory/api/v1/content/skills/my-awesome-skill?format=storage', format: 'uri', description: 'Direct download URL from Supabase Storage' }),
-    filePath: z.string().optional().meta({ example: '/Users/username/.claude/packages/my-awesome-skill.zip', format: 'path', description: 'Local file path if downloaded to filesystem (requires rootUri)' }),
-    rootUri: z.string().optional().meta({ example: 'file:///Users/username/.claude/packages', format: 'uri', description: 'Root URI used for download (if provided)' }),
-    fileSize: z.number().optional().meta({ example: 1024000, description: 'File size in bytes (if available)' }),
-    mimeType: z.string().optional().meta({ example: 'application/zip', description: 'File MIME type' }),
+    fileName: z
+      .string()
+      .meta({ example: 'my-awesome-skill.zip', description: 'Downloaded file name' }),
+    downloadUrl: z.string().url().meta({
+      example: 'https://claudepro.directory/api/v1/content/skills/my-awesome-skill?format=storage',
+      format: 'uri',
+      description: 'Direct download URL from Supabase Storage',
+    }),
+    filePath: z.string().optional().meta({
+      example: '/Users/username/.claude/packages/my-awesome-skill.zip',
+      format: 'path',
+      description: 'Local file path if downloaded to filesystem (requires rootUri)',
+    }),
+    rootUri: z.string().optional().meta({
+      example: 'file:///Users/username/.claude/packages',
+      format: 'uri',
+      description: 'Root URI used for download (if provided)',
+    }),
+    fileSize: z
+      .number()
+      .optional()
+      .meta({ example: 1024000, description: 'File size in bytes (if available)' }),
+    mimeType: z
+      .string()
+      .optional()
+      .meta({ example: 'application/zip', description: 'File MIME type' }),
   })
   .meta({
-    description: 'Output schema for downloadSkillPackage tool - returns download confirmation with file path or URL',
+    description:
+      'Output schema for downloadSkillPackage tool - returns download confirmation with file path or URL',
     example: {
       success: true,
       message: 'Skill package downloaded successfully',
       slug: 'my-awesome-skill',
       fileName: 'my-awesome-skill.zip',
-      downloadUrl: 'https://claudepro.directory/api/v1/content/skills/my-awesome-skill?format=storage',
+      downloadUrl:
+        'https://claudepro.directory/api/v1/content/skills/my-awesome-skill?format=storage',
       filePath: '/Users/username/.claude/packages/my-awesome-skill.zip',
       rootUri: 'file:///Users/username/.claude/packages',
       fileSize: 1024000,
@@ -1281,24 +1385,53 @@ export const DownloadSkillPackageOutputSchema = z
 // 22. downloadMcpServerPackage output
 export const DownloadMcpServerPackageOutputSchema = z
   .object({
-    success: z.boolean().meta({ example: true, description: 'Whether the download was successful' }),
-    message: z.string().meta({ example: 'MCP server package downloaded successfully', description: 'Success message' }),
-    slug: z.string().meta({ example: 'example-mcp-server', description: 'MCP server slug identifier' }),
-    fileName: z.string().meta({ example: 'example-mcp-server.mcpb', description: 'Downloaded file name' }),
-    downloadUrl: z.string().url().meta({ example: 'https://claudepro.directory/api/v1/content/mcp/example-mcp-server?format=storage', format: 'uri', description: 'Direct download URL from Supabase Storage' }),
-    filePath: z.string().optional().meta({ example: '/Users/username/.claude/mcp/example-mcp-server.mcpb', format: 'path', description: 'Local file path if downloaded to filesystem (requires rootUri)' }),
-    rootUri: z.string().optional().meta({ example: 'file:///Users/username/.claude/mcp', format: 'uri', description: 'Root URI used for download (if provided)' }),
-    fileSize: z.number().optional().meta({ example: 2048000, description: 'File size in bytes (if available)' }),
-    mimeType: z.string().optional().meta({ example: 'application/zip', description: 'File MIME type (.mcpb is a ZIP file)' }),
+    success: z
+      .boolean()
+      .meta({ example: true, description: 'Whether the download was successful' }),
+    message: z.string().meta({
+      example: 'MCP server package downloaded successfully',
+      description: 'Success message',
+    }),
+    slug: z
+      .string()
+      .meta({ example: 'example-mcp-server', description: 'MCP server slug identifier' }),
+    fileName: z
+      .string()
+      .meta({ example: 'example-mcp-server.mcpb', description: 'Downloaded file name' }),
+    downloadUrl: z.string().url().meta({
+      example: 'https://claudepro.directory/api/v1/content/mcp/example-mcp-server?format=storage',
+      format: 'uri',
+      description: 'Direct download URL from Supabase Storage',
+    }),
+    filePath: z.string().optional().meta({
+      example: '/Users/username/.claude/mcp/example-mcp-server.mcpb',
+      format: 'path',
+      description: 'Local file path if downloaded to filesystem (requires rootUri)',
+    }),
+    rootUri: z.string().optional().meta({
+      example: 'file:///Users/username/.claude/mcp',
+      format: 'uri',
+      description: 'Root URI used for download (if provided)',
+    }),
+    fileSize: z
+      .number()
+      .optional()
+      .meta({ example: 2048000, description: 'File size in bytes (if available)' }),
+    mimeType: z
+      .string()
+      .optional()
+      .meta({ example: 'application/zip', description: 'File MIME type (.mcpb is a ZIP file)' }),
   })
   .meta({
-    description: 'Output schema for downloadMcpServerPackage tool - returns download confirmation with file path or URL',
+    description:
+      'Output schema for downloadMcpServerPackage tool - returns download confirmation with file path or URL',
     example: {
       success: true,
       message: 'MCP server package downloaded successfully',
       slug: 'example-mcp-server',
       fileName: 'example-mcp-server.mcpb',
-      downloadUrl: 'https://claudepro.directory/api/v1/content/mcp/example-mcp-server?format=storage',
+      downloadUrl:
+        'https://claudepro.directory/api/v1/content/mcp/example-mcp-server?format=storage',
       filePath: '/Users/username/.claude/mcp/example-mcp-server.mcpb',
       rootUri: 'file:///Users/username/.claude/mcp',
       fileSize: 2048000,
@@ -1309,21 +1442,50 @@ export const DownloadMcpServerPackageOutputSchema = z
 // 23. downloadStorageFile output
 export const DownloadStorageFileOutputSchema = z
   .object({
-    success: z.boolean().meta({ example: true, description: 'Whether the download was successful' }),
-    message: z.string().meta({ example: 'Storage file downloaded successfully', description: 'Success message' }),
+    success: z
+      .boolean()
+      .meta({ example: true, description: 'Whether the download was successful' }),
+    message: z
+      .string()
+      .meta({ example: 'Storage file downloaded successfully', description: 'Success message' }),
     category: z.string().meta({ example: 'skills', description: 'Content category' }),
     slug: z.string().meta({ example: 'my-content', description: 'Content slug identifier' }),
     fileName: z.string().meta({ example: 'my-content.zip', description: 'Downloaded file name' }),
-    downloadUrl: z.string().url().meta({ example: 'https://claudepro.directory/api/v1/content/skills/my-content?format=storage', format: 'uri', description: 'Direct download URL from Supabase Storage' }),
-    filePath: z.string().optional().meta({ example: '/Users/username/.claude/packages/my-content.zip', format: 'path', description: 'Local file path if downloaded to filesystem (requires rootUri)' }),
-    rootUri: z.string().optional().meta({ example: 'file:///Users/username/.claude/packages', format: 'uri', description: 'Root URI used for download (if provided)' }),
-    fileType: z.enum(['zip', 'mcpb', 'json', 'other']).optional().meta({ example: 'zip', description: 'Detected or specified file type' }),
-    fileSize: z.number().optional().meta({ example: 1536000, description: 'File size in bytes (if available)' }),
-    mimeType: z.string().optional().meta({ example: 'application/zip', description: 'File MIME type' }),
-    bucket: z.string().optional().meta({ example: 'skills', description: 'Supabase Storage bucket name' }),
+    downloadUrl: z.string().url().meta({
+      example: 'https://claudepro.directory/api/v1/content/skills/my-content?format=storage',
+      format: 'uri',
+      description: 'Direct download URL from Supabase Storage',
+    }),
+    filePath: z.string().optional().meta({
+      example: '/Users/username/.claude/packages/my-content.zip',
+      format: 'path',
+      description: 'Local file path if downloaded to filesystem (requires rootUri)',
+    }),
+    rootUri: z.string().optional().meta({
+      example: 'file:///Users/username/.claude/packages',
+      format: 'uri',
+      description: 'Root URI used for download (if provided)',
+    }),
+    fileType: z
+      .enum(['zip', 'mcpb', 'json', 'other'])
+      .optional()
+      .meta({ example: 'zip', description: 'Detected or specified file type' }),
+    fileSize: z
+      .number()
+      .optional()
+      .meta({ example: 1536000, description: 'File size in bytes (if available)' }),
+    mimeType: z
+      .string()
+      .optional()
+      .meta({ example: 'application/zip', description: 'File MIME type' }),
+    bucket: z
+      .string()
+      .optional()
+      .meta({ example: 'skills', description: 'Supabase Storage bucket name' }),
   })
   .meta({
-    description: 'Output schema for downloadStorageFile tool - returns download confirmation with file path or URL for any storage file',
+    description:
+      'Output schema for downloadStorageFile tool - returns download confirmation with file path or URL for any storage file',
     example: {
       success: true,
       message: 'Storage file downloaded successfully',
@@ -1348,20 +1510,14 @@ export const DownloadStorageFileOutputSchema = z
 // Category prompt args (for submit-content-guide, etc.)
 export const CategoryPromptArgSchema = z
   .object({
-    category: CategorySchema.optional()
-      .describe('Content category filter')
-      .meta({
-        description: 'Content category filter',
-        example: 'agents',
-      }),
-    submission_type: z
-      .string()
-      .optional()
-      .describe('Type of content submission')
-      .meta({
-        description: 'Type of content submission',
-        example: 'agents',
-      }),
+    category: CategorySchema.optional().describe('Content category filter').meta({
+      description: 'Content category filter',
+      example: 'agents',
+    }),
+    submission_type: z.string().optional().describe('Type of content submission').meta({
+      description: 'Type of content submission',
+      example: 'agents',
+    }),
   })
   .meta({ description: 'Arguments for category-based prompts' });
 
@@ -1375,56 +1531,40 @@ export const PlatformPromptArgSchema = z
         description: 'Target platform for content',
         example: 'claude-code',
       }),
-    content_type: z
-      .string()
-      .optional()
-      .describe('Type of content')
-      .meta({
-        description: 'Type of content',
-        example: 'rules',
-      }),
+    content_type: z.string().optional().describe('Type of content').meta({
+      description: 'Type of content',
+      example: 'rules',
+    }),
   })
   .meta({ description: 'Arguments for platform-specific prompts' });
 
 // Query type prompt args
 export const QueryTypePromptArgSchema = z
   .object({
-    query_type: z
-      .string()
-      .optional()
-      .describe('Type of query or search')
-      .meta({
-        description: 'Type of query or search',
-        example: 'search',
-      }),
+    query_type: z.string().optional().describe('Type of query or search').meta({
+      description: 'Type of query or search',
+      example: 'search',
+    }),
   })
   .meta({ description: 'Arguments for query type prompts' });
 
 // Server slug prompt args
 export const ServerSlugPromptArgSchema = z
   .object({
-    server_slug: z
-      .string()
-      .optional()
-      .describe('MCP server slug identifier')
-      .meta({
-        description: 'MCP server slug identifier',
-        example: 'example-mcp-server',
-      }),
+    server_slug: z.string().optional().describe('MCP server slug identifier').meta({
+      description: 'MCP server slug identifier',
+      example: 'example-mcp-server',
+    }),
   })
   .meta({ description: 'Arguments for server slug prompts' });
 
 // Content type prompt args
 export const ContentTypePromptArgSchema = z
   .object({
-    content_type: z
-      .string()
-      .optional()
-      .describe('Type of content')
-      .meta({
-        description: 'Type of content',
-        example: 'rules',
-      }),
+    content_type: z.string().optional().describe('Type of content').meta({
+      description: 'Type of content',
+      example: 'rules',
+    }),
   })
   .meta({ description: 'Arguments for content type prompts' });
 

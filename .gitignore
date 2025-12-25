@@ -119,7 +119,8 @@ supabase/migrations/*.orig
 .turbo
 
 # Playwright test artifacts
-test-results/
+# All test results now go to .trunk/test-results/ (centralized with Trunk)
+.trunk/test-results/
 playwright-report/
 *.spec.ts-snapshots/
 *.spec.tsx-snapshots/

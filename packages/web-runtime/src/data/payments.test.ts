@@ -1,5 +1,10 @@
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
-import { getPaymentPlanCatalog, getJobBillingSummaries, type PaymentPlanCatalogEntry, type JobBillingSummaryEntry } from './payments';
+import {
+  getPaymentPlanCatalog,
+  getJobBillingSummaries,
+  type PaymentPlanCatalogEntry,
+  type JobBillingSummaryEntry,
+} from './payments';
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
 
@@ -41,7 +46,13 @@ function createPaymentPlan(overrides: {
   description?: string | null;
   is_subscription: boolean;
   job_expiry_days: number | null;
-  product_type: 'job_listing' | 'mcp_listing' | 'user_content' | 'subscription' | 'premium_membership' | null;
+  product_type:
+    | 'job_listing'
+    | 'mcp_listing'
+    | 'user_content'
+    | 'subscription'
+    | 'premium_membership'
+    | null;
 }): any {
   return {
     plan: overrides.plan,
@@ -331,7 +342,9 @@ describe('payments data functions', () => {
       // Verify we get all plans with correct data
       const oneTimeStandard = result.find((p) => p.plan === 'one-time' && p.tier === 'standard');
       const oneTimeFeatured = result.find((p) => p.plan === 'one-time' && p.tier === 'featured');
-      const subscriptionFeatured = result.find((p) => p.plan === 'subscription' && p.tier === 'featured');
+      const subscriptionFeatured = result.find(
+        (p) => p.plan === 'subscription' && p.tier === 'featured'
+      );
 
       expect(oneTimeStandard).toBeDefined();
       expect(oneTimeFeatured).toBeDefined();

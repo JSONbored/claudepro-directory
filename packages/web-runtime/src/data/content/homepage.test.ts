@@ -30,7 +30,7 @@ describe('homepage data functions', () => {
       const configs = (globalThis as any).__dataFunctionConfigs;
       const config = configs?.get('getHomepageData');
       const transformArgs = config?.transformArgs;
-      
+
       expect(transformArgs(['category1', 'category2'])).toEqual({
         p_category_ids: ['category1', 'category2'],
         p_limit: 6,
@@ -41,10 +41,10 @@ describe('homepage data functions', () => {
       const configs = (globalThis as any).__dataFunctionConfigs;
       const config = configs?.get('getHomepageData');
       const logContext = config?.logContext;
-      
+
       const result1 = logContext(['b', 'a', 'c']);
       const result2 = logContext(['a', 'b', 'c']);
-      
+
       // Both should have same sorted categoryIds string
       expect(result1.categoryIds).toBe('a,b,c');
       expect(result2.categoryIds).toBe('a,b,c');
@@ -52,4 +52,3 @@ describe('homepage data functions', () => {
     });
   });
 });
-

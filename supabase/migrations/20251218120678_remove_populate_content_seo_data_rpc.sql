@@ -18,5 +18,4 @@
 -- Note: SEO data is likely populated via triggers or application logic
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.populate_content_seo_data();
+DROP FUNCTION IF EXISTS public.populate_content_seo_data ();

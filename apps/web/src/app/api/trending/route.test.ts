@@ -138,8 +138,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'application/json',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -300,7 +304,10 @@ describe('GET /api/trending', () => {
     // Sidebar mode calls both get_sidebar_trending_formatted and get_sidebar_recent_formatted
     // Override $queryRawUnsafe to return different values for each call
     // Reset mock call history to ensure accurate count
-    if (prismocker.$queryRawUnsafe && typeof (prismocker.$queryRawUnsafe as any).mockClear === 'function') {
+    if (
+      prismocker.$queryRawUnsafe &&
+      typeof (prismocker.$queryRawUnsafe as any).mockClear === 'function'
+    ) {
       (prismocker.$queryRawUnsafe as any).mockClear();
     }
     prismocker.$queryRawUnsafe = jest
@@ -336,11 +343,11 @@ describe('GET /api/trending', () => {
     // Verify both expected RPC calls were made (trending + recent)
     // Note: May be called additional times due to internal retries or other operations
     const calls = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls;
-    const trendingCalls = calls.filter((call) =>
-      typeof call[0] === 'string' && call[0].includes('get_sidebar_trending_formatted')
+    const trendingCalls = calls.filter(
+      (call) => typeof call[0] === 'string' && call[0].includes('get_sidebar_trending_formatted')
     );
-    const recentCalls = calls.filter((call) =>
-      typeof call[0] === 'string' && call[0].includes('get_sidebar_recent_formatted')
+    const recentCalls = calls.filter(
+      (call) => typeof call[0] === 'string' && call[0].includes('get_sidebar_recent_formatted')
     );
     expect(trendingCalls.length).toBeGreaterThanOrEqual(1);
     expect(recentCalls.length).toBeGreaterThanOrEqual(1);

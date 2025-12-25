@@ -15,7 +15,7 @@ import type { SafeActionResult } from '@jsonbored/safemocker';
 /**
  * Registry of action functions for integration testing
  * Maps action function references to their implementations
- * 
+ *
  * Note: Since we can't easily match HTTP requests to specific actions,
  * we try all registered actions until one succeeds. This works because:
  * 1. Actions validate their input schemas
@@ -124,9 +124,10 @@ export function setupActionIntegration(): ReturnType<typeof jest.spyOn> {
 
   // Create spy that intercepts fetch calls
   const fetchSpy = jest.spyOn(global, 'fetch').mockImplementation(async (input, init) => {
-    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+    const url =
+      typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
     const method = init?.method || 'GET';
-    
+
     // Parse request body
     let requestBody: unknown = undefined;
     if (init?.body) {
@@ -143,24 +144,23 @@ export function setupActionIntegration(): ReturnType<typeof jest.spyOn> {
       // Try each registered action until one succeeds
       // Actions validate their input schemas, so only the correct action will succeed
       const errors: Error[] = [];
-      
+
       for (const action of ACTION_REGISTRY) {
         try {
           // Call the real action function with the request body
           // The body from next-safe-action contains the input data
-          const result = await (action as (input: unknown) => Promise<SafeActionResult<unknown>>)(requestBody);
-          
+          const result = await (action as (input: unknown) => Promise<SafeActionResult<unknown>>)(
+            requestBody
+          );
+
           // Return the result in the format next-safe-action expects
           // next-safe-action expects a Response with JSON body containing SafeActionResult
-          return new Response(
-            JSON.stringify(result),
-            {
-              status: 200,
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            }
-          );
+          return new Response(JSON.stringify(result), {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
         } catch (error) {
           // This action didn't match (validation error or other error)
           // Store the error and try the next action
@@ -173,7 +173,7 @@ export function setupActionIntegration(): ReturnType<typeof jest.spyOn> {
       // This helps identify when an action isn't registered
       return new Response(
         JSON.stringify({
-          serverError: `No registered action matched the request. Tried ${ACTION_REGISTRY.size} action(s). Errors: ${errors.map(e => e.message).join('; ')}`,
+          serverError: `No registered action matched the request. Tried ${ACTION_REGISTRY.size} action(s). Errors: ${errors.map((e) => e.message).join('; ')}`,
         }),
         {
           status: 500,
@@ -189,7 +189,7 @@ export function setupActionIntegration(): ReturnType<typeof jest.spyOn> {
     if (typeof originalFetch === 'function') {
       return originalFetch(input as RequestInfo, init as RequestInit);
     }
-    
+
     // Fallback: return error for unhandled requests
     return new Response(
       JSON.stringify({ serverError: 'Unhandled fetch request in test environment' }),
@@ -226,17 +226,17 @@ export function expectActionCalled(
   actionInput?: Record<string, unknown>
 ): void {
   expect(fetchSpy).toHaveBeenCalled();
-  
+
   if (actionInput) {
     // Check if any call matches the expected input
     const matchingCall = fetchSpy.mock.calls.find((call) => {
       const init = call[1] as RequestInit | undefined;
       if (!init?.body) return false;
-      
+
       const body = typeof init.body === 'string' ? JSON.parse(init.body) : init.body;
       return Object.entries(actionInput).every(([key, value]) => body[key] === value);
     });
-    
+
     expect(matchingCall).toBeDefined();
   }
 }
@@ -265,4 +265,3 @@ export function getActionCalls(fetchSpy: ReturnType<typeof jest.spyOn>): unknown
 export function clearActionCalls(fetchSpy: ReturnType<typeof jest.spyOn>): void {
   fetchSpy.mockClear();
 }
-

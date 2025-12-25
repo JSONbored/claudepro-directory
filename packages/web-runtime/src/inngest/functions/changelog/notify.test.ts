@@ -117,21 +117,17 @@ jest.mock('../../../integrations/resend', () => {
 });
 
 // Get mocks for use in tests
-const {
-  __mockPgmqRead: mockPgmqRead,
-  __mockPgmqDelete: mockPgmqDelete,
-} = jest.requireMock('../../../supabase/pgmq-client');
+const { __mockPgmqRead: mockPgmqRead, __mockPgmqDelete: mockPgmqDelete } = jest.requireMock(
+  '../../../supabase/pgmq-client'
+);
 const { __mockGetService: mockGetService } = jest.requireMock('../../../data/service-factory');
 const { __mockRevalidateTag: mockRevalidateTag } = jest.requireMock('next/cache');
-const {
-  __mockLogger: mockLogger,
-  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
-} = jest.requireMock('../../../logging/server');
-const {
-  __mockNormalizeError: mockNormalizeError,
-  __mockGetEnvVar: mockGetEnvVar,
-} = jest.requireMock('@heyclaude/shared-runtime');
-const { __mockSendCronSuccessHeartbeat: mockSendCronSuccessHeartbeat } = jest.requireMock('../../utils/monitoring');
+const { __mockLogger: mockLogger, __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId } =
+  jest.requireMock('../../../logging/server');
+const { __mockNormalizeError: mockNormalizeError, __mockGetEnvVar: mockGetEnvVar } =
+  jest.requireMock('@heyclaude/shared-runtime');
+const { __mockSendCronSuccessHeartbeat: mockSendCronSuccessHeartbeat } =
+  jest.requireMock('../../utils/monitoring');
 const mockFetch = jest.fn();
 
 // Mock global fetch for Discord webhook

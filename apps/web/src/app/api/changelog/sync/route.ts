@@ -70,7 +70,9 @@ import {
   errorResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
 import {
-  createApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+  createApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';

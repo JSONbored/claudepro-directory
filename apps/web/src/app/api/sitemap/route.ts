@@ -32,7 +32,11 @@ import {
   sitemapXmlResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
 import {
-  createOptionsHandler as createApiOptionsHandler, createApiRoute, createFormatHandlerRoute, type FormatHandlerConfig, type RouteHandlerContext,
+  createOptionsHandler as createApiOptionsHandler,
+  createApiRoute,
+  createFormatHandlerRoute,
+  type FormatHandlerConfig,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { sitemapFormatSchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';

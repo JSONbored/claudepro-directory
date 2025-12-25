@@ -43,7 +43,9 @@ describe('Relations Feature Tests', () => {
     it('should include one-to-one relations', async () => {
       if (isPrismockerClient(prisma)) {
         setDataTyped(prisma, 'users', [{ id: 'user-1', name: 'Alice' }]);
-        setDataTyped(prisma, 'profiles', [{ id: 'profile-1', user_id: 'user-1', bio: 'Alice bio' }]);
+        setDataTyped(prisma, 'profiles', [
+          { id: 'profile-1', user_id: 'user-1', bio: 'Alice bio' },
+        ]);
       }
 
       const user = await prisma.users.findUnique({
@@ -86,7 +88,9 @@ describe('Relations Feature Tests', () => {
   describe('Select Relations', () => {
     it('should select specific relation fields', async () => {
       if (isPrismockerClient(prisma)) {
-        setDataTyped(prisma, 'users', [{ id: 'user-1', name: 'Alice', email: 'alice@example.com' }]);
+        setDataTyped(prisma, 'users', [
+          { id: 'user-1', name: 'Alice', email: 'alice@example.com' },
+        ]);
         setDataTyped(prisma, 'posts', [
           { id: 'post-1', user_id: 'user-1', title: 'Post 1', content: 'Content 1' },
         ]);
@@ -187,9 +191,7 @@ describe('Relations Feature Tests', () => {
     it('should load relations lazily when accessed', async () => {
       if (isPrismockerClient(prisma)) {
         setDataTyped(prisma, 'users', [{ id: 'user-1', name: 'Alice' }]);
-        setDataTyped(prisma, 'posts', [
-          { id: 'post-1', user_id: 'user-1', title: 'Post 1' },
-        ]);
+        setDataTyped(prisma, 'posts', [{ id: 'post-1', user_id: 'user-1', title: 'Post 1' }]);
       }
 
       const user = await (prisma as any).users.findUnique({
@@ -204,4 +206,3 @@ describe('Relations Feature Tests', () => {
     });
   });
 });
-

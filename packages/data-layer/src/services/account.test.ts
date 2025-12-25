@@ -67,12 +67,12 @@ describe('AccountService', () => {
 
       const args = { p_user_id: 'user123' };
       const result = await accountService.getAccountDashboard(args);
-      
+
       // account_age is calculated in JavaScript (days since created_at)
       const expectedAccountAge = Math.floor(
         (Date.now() - mockUser.created_at.getTime()) / (1000 * 60 * 60 * 24)
       );
-      
+
       expect(result).toEqual({
         bookmark_count: 5,
         profile: {
@@ -106,9 +106,9 @@ describe('AccountService', () => {
 
     it('should handle database errors', async () => {
       // Use spy to throw error
-      const findUniqueSpy = jest.spyOn(prismocker.public_users, 'findUnique').mockRejectedValue(
-        new Error('Database connection failed')
-      );
+      const findUniqueSpy = jest
+        .spyOn(prismocker.public_users, 'findUnique')
+        .mockRejectedValue(new Error('Database connection failed'));
 
       await expect(accountService.getAccountDashboard({ p_user_id: 'user123' })).rejects.toThrow(
         'Database connection failed'
@@ -151,7 +151,7 @@ describe('AccountService', () => {
   describe('getUserLibrary', () => {
     it('should return user library with collections and items', async () => {
       const args = { p_user_id: 'user123' };
-      
+
       // Use Prismocker's setData to seed test data
       const mockBookmarks = [
         {
@@ -164,7 +164,7 @@ describe('AccountService', () => {
           updated_at: new Date(),
         },
       ];
-      
+
       const mockCollections = [
         {
           id: 'collection-1',
@@ -268,7 +268,7 @@ describe('AccountService', () => {
     it('should return user dashboard data', async () => {
       // getUserDashboard uses Prisma model clients
       const args = { p_user_id: 'user123' };
-      
+
       const mockSubmissions = [
         {
           id: 'submission-1',
@@ -285,7 +285,7 @@ describe('AccountService', () => {
           merged_at: null,
         },
       ];
-      
+
       const mockCompanies = [
         {
           id: 'company-1',
@@ -399,7 +399,9 @@ describe('AccountService', () => {
       const args = { p_user_id: 'user123' };
 
       // Use spy to throw error
-      const findUniqueSpy = jest.spyOn(prismocker.public_users, 'findUnique').mockRejectedValue(mockError);
+      const findUniqueSpy = jest
+        .spyOn(prismocker.public_users, 'findUnique')
+        .mockRejectedValue(mockError);
 
       await expect(accountService.getAccountDashboard(args)).rejects.toThrow('Database error');
 
@@ -1186,9 +1188,7 @@ describe('AccountService', () => {
 
       const args = {
         p_user_id: 'user123',
-        p_items: [
-          { content_type: 'agents', content_slug: 'bookmarked-1' },
-        ],
+        p_items: [{ content_type: 'agents', content_slug: 'bookmarked-1' }],
       };
 
       // First call
@@ -1712,7 +1712,7 @@ describe('AccountService', () => {
         inserted_count: 5,
         errors: [],
       };
-      
+
       // Reset and set up mock return value
       queryRawUnsafeSpy.mockReset();
       queryRawUnsafeSpy.mockResolvedValue([mockData] as any);

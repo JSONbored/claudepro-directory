@@ -13,7 +13,10 @@
 // agents/mcp is a Cloudflare runtime module - use dynamic import to avoid bundling issues
 // This will be resolved at runtime by Cloudflare Workers
 import { createPrismaClient } from '@heyclaude/cloudflare-runtime/prisma/client';
-import { createSupabaseServiceRoleClient, requireAuthUser } from '@heyclaude/cloudflare-runtime/auth/supabase';
+import {
+  createSupabaseServiceRoleClient,
+  requireAuthUser,
+} from '@heyclaude/cloudflare-runtime/auth/supabase';
 import { createLogger } from '@heyclaude/cloudflare-runtime/logging/pino';
 
 // Import MCP server setup from package
@@ -32,7 +35,11 @@ import { handleOAuthRegister } from './routes/oauth-register.js';
 import type { ExtendedEnv } from '@heyclaude/cloudflare-runtime/config/env';
 
 // Import middleware from package
-import { checkRateLimit, addRateLimitHeaders, createRateLimitErrorResponse } from '@heyclaude/mcp-server';
+import {
+  checkRateLimit,
+  addRateLimitHeaders,
+  createRateLimitErrorResponse,
+} from '@heyclaude/mcp-server';
 
 // Import OpenTelemetry instrumentation (Cloudflare-specific, lives in Worker app)
 import { instrumentHandler } from './observability/axiom.js';
@@ -48,7 +55,11 @@ import { instrumentHandler } from './observability/axiom.js';
 // ExtendedEnv type is from @heyclaude/cloudflare-runtime/config/env
 // Type annotations are stripped during compilation, safe for JavaScript deployment
 const handler = {
-  async fetch(request: Request, env: Record<string, unknown>, ctx: ExecutionContext): Promise<Response> {
+  async fetch(
+    request: Request,
+    env: Record<string, unknown>,
+    ctx: ExecutionContext
+  ): Promise<Response> {
     const logger = createLogger({ name: 'heyclaude-mcp' });
     const url = new URL(request.url);
 
@@ -60,7 +71,8 @@ const handler = {
           headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization, Mcp-Session-Id, MCP-Protocol-Version',
+            'Access-Control-Allow-Headers':
+              'Content-Type, Authorization, Mcp-Session-Id, MCP-Protocol-Version',
             'Access-Control-Max-Age': '86400', // 24 hours
           },
         });
@@ -79,7 +91,10 @@ const handler = {
       }
 
       // OAuth metadata endpoints (no auth required)
-      if (url.pathname === '/.well-known/oauth-authorization-server' || url.pathname === '/.well-known/oauth-protected-resource') {
+      if (
+        url.pathname === '/.well-known/oauth-authorization-server' ||
+        url.pathname === '/.well-known/oauth-protected-resource'
+      ) {
         return await handleOAuthMetadata(request, env, url.pathname);
       }
 
@@ -116,7 +131,8 @@ const handler = {
           cors: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization, Mcp-Session-Id, MCP-Protocol-Version',
+            'Access-Control-Allow-Headers':
+              'Content-Type, Authorization, Mcp-Session-Id, MCP-Protocol-Version',
           },
           errorMessage: 'Missing or invalid Authorization header',
         });
@@ -144,7 +160,8 @@ const handler = {
           return createRateLimitErrorResponse(rateLimitResult, rateLimitConfig, {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization, Mcp-Session-Id, MCP-Protocol-Version',
+            'Access-Control-Allow-Headers':
+              'Content-Type, Authorization, Mcp-Session-Id, MCP-Protocol-Version',
           });
         }
 
@@ -157,11 +174,17 @@ const handler = {
         // Type assertion: Hyperdrive is provided by Cloudflare Workers runtime
         // TypeScript type-checking happens at compile time, runtime is untyped
         const hyperdrive = hyperdriveRaw as unknown as Parameters<typeof createPrismaClient>[0];
-        
+
         const prisma = createPrismaClient(hyperdrive);
 
         // Get KV cache binding from env (MCP_CACHE)
-        const kvCacheBinding = env['MCP_CACHE'] as { get(key: string, options?: { type?: 'text' | 'json' }): Promise<string | null>; put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>; delete(key: string): Promise<void> } | undefined;
+        const kvCacheBinding = env['MCP_CACHE'] as
+          | {
+              get(key: string, options?: { type?: 'text' | 'json' }): Promise<string | null>;
+              put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
+              delete(key: string): Promise<void>;
+            }
+          | undefined;
 
         // Create MCP server instance using package
         // Convert Cloudflare-specific types to runtime-agnostic types
@@ -195,7 +218,9 @@ const handler = {
       return new Response(
         JSON.stringify({
           error: 'Internal server error',
-          ...(process.env['NODE_ENV'] === 'development' ? { stack: error instanceof Error ? error.stack : undefined } : {}),
+          ...(process.env['NODE_ENV'] === 'development'
+            ? { stack: error instanceof Error ? error.stack : undefined }
+            : {}),
         }),
         {
           status: 500,

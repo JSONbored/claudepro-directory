@@ -63,7 +63,7 @@ export function OAuthSuccessClient({ redirectUri }: OAuthSuccessClientProps) {
       {/* Success Message */}
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold text-black">Authentication Successful</h1>
-        <p className="text-gray-600 text-sm">
+        <p className="text-sm text-gray-600">
           {redirectUri
             ? `Redirecting in ${countdown} second${countdown !== 1 ? 's' : ''}...`
             : 'You have successfully authorized the application.'}
@@ -105,16 +105,16 @@ export function OAuthSuccessClient({ redirectUri }: OAuthSuccessClientProps) {
       )}
 
       {/* Terms and Privacy Policy Links */}
-      <div className="flex items-center justify-center gap-4 border-t border-gray-200 pt-4 w-full">
+      <div className="flex w-full items-center justify-center gap-4 border-t border-gray-200 pt-4">
         <Link
-          className="text-xs text-gray-600 hover:text-black underline transition-colors"
+          className="text-xs text-gray-600 underline transition-colors hover:text-black"
           href="/terms"
         >
           Terms of Service
         </Link>
-        <span className="text-gray-400 text-xs">•</span>
+        <span className="text-xs text-gray-400">•</span>
         <Link
-          className="text-xs text-gray-600 hover:text-black underline transition-colors"
+          className="text-xs text-gray-600 underline transition-colors hover:text-black"
           href="/privacy"
         >
           Privacy Policy
@@ -123,4 +123,3 @@ export function OAuthSuccessClient({ redirectUri }: OAuthSuccessClientProps) {
     </div>
   );
 }
-

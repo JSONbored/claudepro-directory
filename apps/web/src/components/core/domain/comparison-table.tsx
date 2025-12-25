@@ -68,7 +68,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
                   <td className="p-4">
                     {typeof item.option1 === 'boolean' ? (
                       item.option1 ? (
-                        <CheckCircle className="h-5 w-5 text-success" />
+                        <CheckCircle className="text-success h-5 w-5" />
                       ) : (
                         <span className="text-muted-foreground">—</span>
                       )
@@ -79,7 +79,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
                   <td className="p-4">
                     {typeof item.option2 === 'boolean' ? (
                       item.option2 ? (
-                        <CheckCircle className="h-5 w-5 text-success" />
+                        <CheckCircle className="text-success h-5 w-5" />
                       ) : (
                         <span className="text-muted-foreground">—</span>
                       )
@@ -91,7 +91,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
                     <td className="p-4">
                       {typeof item.option3 === 'boolean' ? (
                         item.option3 ? (
-                          <CheckCircle className="h-5 w-5 text-success" />
+                          <CheckCircle className="text-success h-5 w-5" />
                         ) : (
                           <span className="text-muted-foreground">—</span>
                         )

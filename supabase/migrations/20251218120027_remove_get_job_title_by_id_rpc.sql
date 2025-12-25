@@ -8,5 +8,4 @@
 --
 -- Function signature: get_job_title_by_id(p_job_id uuid)
 -- Related: JobsService.getJobTitleById uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_job_title_by_id(uuid);
+DROP FUNCTION IF EXISTS public.get_job_title_by_id (uuid);

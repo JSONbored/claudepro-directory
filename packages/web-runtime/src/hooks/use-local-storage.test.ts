@@ -174,9 +174,12 @@ describe('useLocalStorage', () => {
     });
 
     // Error state should be set (may need to wait for state update)
-    await waitFor(() => {
-      expect(result.current.error).toBeTruthy();
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        expect(result.current.error).toBeTruthy();
+      },
+      { timeout: 1000 }
+    );
 
     expect(result.current.error?.message).toBe('QuotaExceededError');
 
@@ -226,7 +229,9 @@ describe('useLocalStorage', () => {
     };
 
     const { result } = renderHook(() =>
-      useLocalStorage('test-key', { defaultValue: { nested: { array: [], string: '', number: 0 } } })
+      useLocalStorage('test-key', {
+        defaultValue: { nested: { array: [], string: '', number: 0 } },
+      })
     );
 
     act(() => {

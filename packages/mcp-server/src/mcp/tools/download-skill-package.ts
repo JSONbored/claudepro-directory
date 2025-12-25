@@ -9,7 +9,11 @@
 import type { DownloadSkillPackageInput } from '../../lib/types.js';
 import { McpErrorCode, createErrorResponse } from '../../lib/errors';
 import { sanitizeString, isValidSlug } from '../../lib/utils';
-import { getStorageDownloadUrl, getStorageFileName, parseRootUri } from '../../lib/storage-utils.js';
+import {
+  getStorageDownloadUrl,
+  getStorageFileName,
+  parseRootUri,
+} from '../../lib/storage-utils.js';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import type { ToolContext } from '../../types/runtime.js';
 
@@ -61,7 +65,8 @@ export async function handleDownloadSkillPackage(
   if (!rootUri && context.elicit) {
     const elicited = await context.elicit({
       type: 'string',
-      description: 'Enter the target directory path for the Skills package (e.g., file:///Users/username/.claude/packages). Leave empty to get download URL only.',
+      description:
+        'Enter the target directory path for the Skills package (e.g., file:///Users/username/.claude/packages). Leave empty to get download URL only.',
     });
     if (typeof elicited === 'string' && elicited) {
       rootUri = sanitizeString(elicited);
@@ -100,7 +105,7 @@ export async function handleDownloadSkillPackage(
     // Build response text
     const responseText: string[] = [];
     responseText.push(`## Skill Package Download: ${slug}\n`);
-    
+
     if (filePath) {
       responseText.push(`✅ **Downloaded to:** \`${filePath}\``);
       responseText.push(`\nThe Skills ZIP file has been downloaded to your filesystem.`);
@@ -111,7 +116,9 @@ export async function handleDownloadSkillPackage(
       responseText.push(`\nTo download this Skills package:`);
       responseText.push(`1. Visit the download URL above`);
       responseText.push(`2. Save the ZIP file to your desired location`);
-      responseText.push(`\n**Note:** To enable automatic filesystem downloads, provide a \`rootUri\` parameter (e.g., \`file:///Users/username/.claude/packages\`).`);
+      responseText.push(
+        `\n**Note:** To enable automatic filesystem downloads, provide a \`rootUri\` parameter (e.g., \`file:///Users/username/.claude/packages\`).`
+      );
     }
 
     responseText.push(`\n**File Name:** ${fileName}`);
@@ -152,4 +159,3 @@ export async function handleDownloadSkillPackage(
     throw normalized;
   }
 }
-

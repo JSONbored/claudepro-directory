@@ -179,7 +179,9 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
           ) => {
             if (info.offset.y > 100) onOpenChange(false);
           }}
-          whileDrag={shouldReduceMotion ? {} : { scale: 1.2, backgroundColor: 'var(--claude-orange)' }} // Claude orange from theme
+          whileDrag={
+            shouldReduceMotion ? {} : { scale: 1.2, backgroundColor: 'var(--claude-orange)' }
+          } // Claude orange from theme
           transition={SPRING.smooth}
         />
 
@@ -331,7 +333,9 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                   aria-label="Account navigation"
                 >
                   <div className="mb-3 px-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground opacity-70"> {/* 10px */}
+                    <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase opacity-70">
+                      {' '}
+                      {/* 10px */}
                       Account
                     </p>
                   </div>

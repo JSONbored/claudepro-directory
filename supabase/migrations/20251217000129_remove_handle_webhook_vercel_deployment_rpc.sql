@@ -5,5 +5,4 @@
 --
 -- Description: Remove handle_webhook_vercel_deployment RPC function - No codebase usage found
 -- Function signature: handle_webhook_vercel_deployment(p_webhook_id uuid, p_event_data jsonb)
-
-DROP FUNCTION IF EXISTS public.handle_webhook_vercel_deployment(uuid, jsonb);
+DROP FUNCTION IF EXISTS public.handle_webhook_vercel_deployment (uuid, jsonb);

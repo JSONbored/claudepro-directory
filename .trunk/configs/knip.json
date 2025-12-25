@@ -134,5 +134,5 @@
       "config/tools/eslint.config.mjs",
       ".trunk/plugins/eslint-plugin-architectural-rules.js"
     ]
-  },
+  }
 }

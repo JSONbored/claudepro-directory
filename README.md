@@ -364,11 +364,17 @@ Customizable status line configurations for Claude Code CLI with real-time sessi
 Thanks to everyone who has contributed to making Claude better for everyone!
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+
 <!-- prettier-ignore-start -->
+
 <!-- markdownlint-disable -->
+
 <!-- Add contributors here -->
+
 <!-- markdownlint-enable -->
+
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 <a href="https://github.com/JSONbored/claudepro-directory/graphs/contributors">

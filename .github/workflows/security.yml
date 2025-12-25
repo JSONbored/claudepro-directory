@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: github.event_name != 'schedule'
-    
+
     steps:
       - uses: actions/checkout@v6
         with:

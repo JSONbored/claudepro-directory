@@ -15,5 +15,4 @@
 -- Related Changes:
 -- - packages/data-layer/src/services/jobs.ts: Converted getFeaturedJobs() to use Prisma
 -- - packages/web-runtime/src/data/jobs.ts: Updated to use Prisma model types
-
-DROP FUNCTION IF EXISTS public.get_featured_jobs();
+DROP FUNCTION IF EXISTS public.get_featured_jobs ();

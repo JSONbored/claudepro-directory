@@ -173,7 +173,15 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; eventType: string; webhookId: string; action: string; rpcName: string } };
+    })) as {
+      result: {
+        success: boolean;
+        eventType: string;
+        webhookId: string;
+        action: string;
+        rpcName: string;
+      };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -210,7 +218,15 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; eventType: string; webhookId: string; action: string; rpcName: string } };
+    })) as {
+      result: {
+        success: boolean;
+        eventType: string;
+        webhookId: string;
+        action: string;
+        rpcName: string;
+      };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -220,10 +236,13 @@ describe('handlePolarWebhook', () => {
       rpcName: 'handle_polar_order_refunded',
     });
 
-    expect(mockMiscService.handlePolarWebhookRpc).toHaveBeenCalledWith('handle_polar_order_refunded', {
-      webhook_id: 'webhook-123',
-      webhook_data: { data: { amount: 9900, currency: 'usd' } },
-    });
+    expect(mockMiscService.handlePolarWebhookRpc).toHaveBeenCalledWith(
+      'handle_polar_order_refunded',
+      {
+        webhook_id: 'webhook-123',
+        webhook_data: { data: { amount: 9900, currency: 'usd' } },
+      }
+    );
   });
 
   /**
@@ -245,7 +264,15 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; eventType: string; webhookId: string; action: string; rpcName: string } };
+    })) as {
+      result: {
+        success: boolean;
+        eventType: string;
+        webhookId: string;
+        action: string;
+        rpcName: string;
+      };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -255,10 +282,13 @@ describe('handlePolarWebhook', () => {
       rpcName: 'handle_polar_subscription_renewal',
     });
 
-    expect(mockMiscService.handlePolarWebhookRpc).toHaveBeenCalledWith('handle_polar_subscription_renewal', {
-      webhook_id: 'webhook-123',
-      webhook_data: { data: { subscription_id: 'sub-123' } },
-    });
+    expect(mockMiscService.handlePolarWebhookRpc).toHaveBeenCalledWith(
+      'handle_polar_subscription_renewal',
+      {
+        webhook_id: 'webhook-123',
+        webhook_data: { data: { subscription_id: 'sub-123' } },
+      }
+    );
   });
 
   /**
@@ -330,7 +360,15 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; eventType: string; webhookId: string; action: string; message: string } };
+    })) as {
+      result: {
+        success: boolean;
+        eventType: string;
+        webhookId: string;
+        action: string;
+        message: string;
+      };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -371,7 +409,15 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; eventType: string; webhookId: string; action: string; message: string } };
+    })) as {
+      result: {
+        success: boolean;
+        eventType: string;
+        webhookId: string;
+        action: string;
+        message: string;
+      };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -412,7 +458,15 @@ describe('handlePolarWebhook', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; eventType: string; webhookId: string; action: string; error: string } };
+    })) as {
+      result: {
+        success: boolean;
+        eventType: string;
+        webhookId: string;
+        action: string;
+        error: string;
+      };
+    };
 
     expect(result).toEqual({
       success: false,
@@ -440,7 +494,9 @@ describe('handlePolarWebhook', () => {
    * Tests that RPC call failures are handled and function throws for retry.
    */
   it('should handle RPC call failure and throw for retry', async () => {
-    mockMiscService.handlePolarWebhookRpc.mockRejectedValue(new Error('Database connection failed'));
+    mockMiscService.handlePolarWebhookRpc.mockRejectedValue(
+      new Error('Database connection failed')
+    );
 
     const { error } = (await t.execute({
       events: [
@@ -654,4 +710,3 @@ describe('handlePolarWebhook', () => {
     }
   });
 });
-

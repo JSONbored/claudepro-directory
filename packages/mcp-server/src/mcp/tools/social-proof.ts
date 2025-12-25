@@ -88,7 +88,10 @@ export async function handleGetSocialProofStats(
       recentSubmissions = recentResult.value as SubmissionRow[];
     } else {
       const normalized = normalizeError(recentResult.reason, 'Failed to fetch recent submissions');
-      logger.warn('Failed to fetch recent submissions (non-critical)', { error: normalized, tool: 'getSocialProofStats' });
+      logger.warn('Failed to fetch recent submissions (non-critical)', {
+        error: normalized,
+        tool: 'getSocialProofStats',
+      });
     }
 
     let monthSubmissions: StatusRow[] = [];
@@ -96,7 +99,10 @@ export async function handleGetSocialProofStats(
       monthSubmissions = monthResult.value as StatusRow[];
     } else {
       const normalized = normalizeError(monthResult.reason, 'Failed to fetch month submissions');
-      logger.warn('Failed to fetch month submissions (non-critical)', { error: normalized, tool: 'getSocialProofStats' });
+      logger.warn('Failed to fetch month submissions (non-critical)', {
+        error: normalized,
+        tool: 'getSocialProofStats',
+      });
     }
 
     let contentCount: number = 0;
@@ -104,7 +110,10 @@ export async function handleGetSocialProofStats(
       contentCount = contentResult.value as number;
     } else {
       const normalized = normalizeError(contentResult.reason, 'Failed to fetch content count');
-      logger.warn('Failed to fetch content count (non-critical)', { error: normalized, tool: 'getSocialProofStats' });
+      logger.warn('Failed to fetch content count (non-critical)', {
+        error: normalized,
+        tool: 'getSocialProofStats',
+      });
     }
 
     // Calculate stats

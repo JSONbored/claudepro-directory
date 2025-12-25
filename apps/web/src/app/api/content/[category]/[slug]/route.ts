@@ -29,7 +29,10 @@ import {
   errorResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
 import {
-  createFormatHandlerRoute, createOptionsHandler as createApiOptionsHandler, type FormatHandlerConfig, type RouteHandlerContext,
+  createFormatHandlerRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  type FormatHandlerConfig,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { contentDetailQuerySchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';

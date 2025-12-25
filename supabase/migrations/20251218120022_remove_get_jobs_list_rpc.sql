@@ -8,5 +8,4 @@
 --
 -- Function signature: get_jobs_list()
 -- Related: JobsService.getJobs uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_jobs_list();
+DROP FUNCTION IF EXISTS public.get_jobs_list ();

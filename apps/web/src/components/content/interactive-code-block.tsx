@@ -822,7 +822,7 @@ export function ProductionCodeBlock({
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className="h-3 w-3 text-success" />
+                <Check className="text-success h-3 w-3" />
               ) : (
                 <Copy className="text-muted-foreground h-3 w-3" />
               )}
@@ -913,7 +913,7 @@ export function ProductionCodeBlock({
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className="h-3 w-3 text-success" />
+                <Check className="text-success h-3 w-3" />
               ) : (
                 <Copy className="text-muted-foreground h-3 w-3" />
               )}

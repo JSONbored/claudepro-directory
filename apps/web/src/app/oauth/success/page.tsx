@@ -59,4 +59,3 @@ export default async function OAuthSuccessPage({
     </OAuthLayout>
   );
 }
-

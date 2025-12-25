@@ -5,5 +5,4 @@
 --
 -- Description: Remove generate_slug_from_filename RPC function - Only defined, not called
 -- Function signature: generate_slug_from_filename(p_filename text)
-
-DROP FUNCTION IF EXISTS public.generate_slug_from_filename(text);
+DROP FUNCTION IF EXISTS public.generate_slug_from_filename (text);

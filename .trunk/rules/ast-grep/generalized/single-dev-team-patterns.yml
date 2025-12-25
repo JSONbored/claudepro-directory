@@ -24,7 +24,7 @@ rule:
     - not:
         has:
           regex: 'Promise\.all|Promise\.allSettled'
-message: "Independent queries should run in parallel with Promise.all() for better performance. Sequential queries cause unnecessary delays. Example: const [result1, result2] = await Promise.all([query1(), query2()]); This can improve performance by 50-80% for independent operations."
+message: 'Independent queries should run in parallel with Promise.all() for better performance. Sequential queries cause unnecessary delays. Example: const [result1, result2] = await Promise.all([query1(), query2()]); This can improve performance by 50-80% for independent operations.'
 severity: warning
 
 ---
@@ -44,7 +44,7 @@ rule:
         pattern: await $FETCH2($ARGS)
     - has:
         regex: get|fetch|load
-message: "Same data may be fetched multiple times in the same component. Consider fetching once and reusing, or using request-scoped caching (withSmartCache) to prevent duplicate RPC calls within the same request lifecycle."
+message: 'Same data may be fetched multiple times in the same component. Consider fetching once and reusing, or using request-scoped caching (withSmartCache) to prevent duplicate RPC calls within the same request lifecycle.'
 severity: warning
 
 ---
@@ -63,7 +63,7 @@ rule:
     - not:
         has:
           pattern: reqLogger:.*ReturnType.*logger\.child
-message: "Data functions should receive request-scoped logger from parent component for proper log correlation. Add parameter: reqLogger: ReturnType<typeof logger.child>. This ensures all logs in the request lifecycle share the same context and can be correlated."
+message: 'Data functions should receive request-scoped logger from parent component for proper log correlation. Add parameter: reqLogger: ReturnType<typeof logger.child>. This ensures all logs in the request lifecycle share the same context and can be correlated.'
 severity: warning
 
 ---
@@ -136,7 +136,7 @@ rule:
         regex: payment|checkout|auth|login|signup|billing|subscription|account
     - has:
         regex: 'await\s+\w+\([^)]*\)'
-message: "Critical user flows (payment, auth, billing, account) must have error.tsx file for error boundaries. Create error.tsx in same directory to prevent full app crashes. This is especially important for revenue-critical flows."
+message: 'Critical user flows (payment, auth, billing, account) must have error.tsx file for error boundaries. Create error.tsx in same directory to prevent full app crashes. This is especially important for revenue-critical flows.'
 severity: error
 
 ---
@@ -155,7 +155,7 @@ rule:
     - not:
         has:
           regex: 'export.*metadata|export.*generateMetadata'
-message: "Public pages should export metadata or generateMetadata() for SEO and social sharing. Add: export const metadata: Metadata = { title, description, openGraph, twitter } or export async function generateMetadata() { ... }"
+message: 'Public pages should export metadata or generateMetadata() for SEO and social sharing. Add: export const metadata: Metadata = { title, description, openGraph, twitter } or export async function generateMetadata() { ... }'
 severity: warning
 
 ---
@@ -173,7 +173,7 @@ rule:
         regex: 'await\s+\w+\([^)]*\)'
     - has:
         regex: rpc|query|fetch|get
-message: "Pages with data fetching should have loading.tsx file for proper loading states. Create loading.tsx in same directory with page-specific skeleton component. This improves UX during data fetching and enables progressive rendering with Suspense."
+message: 'Pages with data fetching should have loading.tsx file for proper loading states. Create loading.tsx in same directory with page-specific skeleton component. This improves UX during data fetching and enables progressive rendering with Suspense.'
 severity: warning
 
 ---
@@ -216,7 +216,7 @@ rule:
     - not:
         has:
           pattern: <Suspense
-message: "Async child components should be wrapped in Suspense boundaries for progressive rendering. Add: <Suspense fallback={<Skeleton />}><ChildComponent /></Suspense>. This enables streaming and improves perceived performance."
+message: 'Async child components should be wrapped in Suspense boundaries for progressive rendering. Add: <Suspense fallback={<Skeleton />}><ChildComponent /></Suspense>. This enables streaming and improves perceived performance.'
 severity: warning
 
 ---
@@ -233,7 +233,7 @@ rule:
     - not:
         has:
           regex: key=
-message: "List items must have unique key prop for React reconciliation. Add: key={item.id} or key={index} to list items. Use stable identifiers (id) instead of index when possible."
+message: 'List items must have unique key prop for React reconciliation. Add: key={item.id} or key={index} to list items. Use stable identifiers (id) instead of index when possible.'
 severity: error
 
 ---
@@ -254,5 +254,5 @@ rule:
     - not:
         has:
           regex: 'error\.tsx|ErrorBoundary'
-message: "Critical user flows (payment, auth, billing, subscription) must have error boundaries to prevent full app crashes. Create error.tsx file in route directory with error boundary component."
+message: 'Critical user flows (payment, auth, billing, subscription) must have error boundaries to prevent full app crashes. Create error.tsx file in route directory with error boundary component.'
 severity: error

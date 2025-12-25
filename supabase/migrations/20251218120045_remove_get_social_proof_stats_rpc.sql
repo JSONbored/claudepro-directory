@@ -9,5 +9,4 @@
 --
 -- Function signature: get_social_proof_stats()
 -- Related: MiscService.getSocialProofStats uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_social_proof_stats();
+DROP FUNCTION IF EXISTS public.get_social_proof_stats ();

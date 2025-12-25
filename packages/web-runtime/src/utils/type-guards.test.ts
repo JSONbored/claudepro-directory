@@ -5,12 +5,7 @@ import {
   isValidExperienceLevel,
   isValidJobCategory,
 } from './type-guards';
-import {
-  content_category,
-  job_type,
-  experience_level,
-  job_category,
-} from '@prisma/client';
+import { content_category, job_type, experience_level, job_category } from '@prisma/client';
 
 describe('type-guards', () => {
   describe('isValidContentCategory', () => {
@@ -100,4 +95,3 @@ describe('type-guards', () => {
     });
   });
 });
-

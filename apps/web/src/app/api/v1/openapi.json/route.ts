@@ -24,7 +24,8 @@ import { join } from 'node:path';
 
 import { errorResponseSchema } from '@heyclaude/web-runtime/api/response-schemas';
 import {
-  createOptionsHandler as createApiOptionsHandler, createApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  createApiRoute,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
 import {

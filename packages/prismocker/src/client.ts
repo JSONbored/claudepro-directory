@@ -264,7 +264,10 @@ export class PrismockerClient {
               // sqlQuery is now a string (converted above)
               const parsed = parseSimpleSelect(sqlQuery);
               if (parsed) {
-                const result = executeSimpleSelect(parsed, this.stores as ReadonlyMap<string, any[]>);
+                const result = executeSimpleSelect(
+                  parsed,
+                  this.stores as ReadonlyMap<string, any[]>
+                );
                 if (this.options.logQueries) {
                   this.options.logger?.(`[Prismocker] ${methodName} executed via SQL parser`, {
                     tableName: parsed.tableName,
@@ -285,9 +288,12 @@ export class PrismockerClient {
 
           // Default: return empty array (can be overridden by user)
           if (this.options.logQueries) {
-            this.options.logger?.(`[Prismocker] ${methodName} returning empty array (no executor/parser)`, {
-              hint: 'Provide queryRawExecutor or enable enableSqlParsing for query execution',
-            });
+            this.options.logger?.(
+              `[Prismocker] ${methodName} returning empty array (no executor/parser)`,
+              {
+                hint: 'Provide queryRawExecutor or enable enableSqlParsing for query execution',
+              }
+            );
           }
           return [];
         };
@@ -348,11 +354,7 @@ export class PrismockerClient {
           // Try custom executor first
           if (this.options.executeRawExecutor) {
             try {
-              const result = await this.options.executeRawExecutor(
-                sqlQuery,
-                values,
-                this.stores
-              );
+              const result = await this.options.executeRawExecutor(sqlQuery, values, this.stores);
               if (this.options.logQueries) {
                 this.options.logger?.(`[Prismocker] ${methodName} executed via custom executor`, {
                   affectedRows: typeof result === 'number' ? result : 0,
@@ -514,7 +516,10 @@ export class PrismockerClient {
 
       case '$on':
         // Event listener support
-        return (event: 'query' | 'info' | 'warn' | 'error' | 'connect' | 'disconnect', callback: (event: any) => void): void => {
+        return (
+          event: 'query' | 'info' | 'warn' | 'error' | 'connect' | 'disconnect',
+          callback: (event: any) => void
+        ): void => {
           if (this.options.logQueries) {
             this.options.logger?.(`[Prismocker] $on listener registered for event: ${event}`);
           }
@@ -547,18 +552,19 @@ export class PrismockerClient {
                 labels: {},
               },
             ],
-            histograms: this.queryStats.length > 0
-              ? [
-                  {
-                    key: 'prisma_client_queries_duration_histogram_ms',
-                    value: this.queryStats
-                      .filter((q) => q.duration !== undefined)
-                      .map((q) => q.duration!),
-                    labels: {},
-                    buckets: [1, 5, 10, 50, 100, 500, 1000, 5000],
-                  },
-                ]
-              : [],
+            histograms:
+              this.queryStats.length > 0
+                ? [
+                    {
+                      key: 'prisma_client_queries_duration_histogram_ms',
+                      value: this.queryStats
+                        .filter((q) => q.duration !== undefined)
+                        .map((q) => q.duration!),
+                      labels: {},
+                      buckets: [1, 5, 10, 50, 100, 500, 1000, 5000],
+                    },
+                  ]
+                : [],
             // Include query statistics if available
             ...(this.debugMode && {
               queryStats: {
@@ -911,10 +917,7 @@ export class PrismockerClient {
       if (displayCount > 0) {
         for (let i = 0; i < displayCount; i++) {
           const record = store[i];
-          const preview = JSON.stringify(record, null, 2)
-            .split('\n')
-            .slice(0, 3)
-            .join('\n');
+          const preview = JSON.stringify(record, null, 2).split('\n').slice(0, 3).join('\n');
           lines.push(`    [${i}] ${preview}${record ? '...' : ''}`);
         }
         if (recordCount > maxRecords) {
@@ -946,7 +949,9 @@ export class PrismockerClient {
       lines.push(`  TTL: ${cacheStats.ttl}ms`);
       if (cacheStats.entries.length > 0) {
         lines.push(`  Oldest entry: ${cacheStats.entries[0]?.age}ms ago`);
-        lines.push(`  Newest entry: ${cacheStats.entries[cacheStats.entries.length - 1]?.age}ms ago`);
+        lines.push(
+          `  Newest entry: ${cacheStats.entries[cacheStats.entries.length - 1]?.age}ms ago`
+        );
       }
       lines.push('');
     }
@@ -1187,7 +1192,7 @@ export class PrismockerClient {
   private createTransactionClient(snapshot: Map<string, any[]>): PrismockerClient {
     // Create a new client instance with the same options
     const txClient = new PrismockerClient(this.options);
-    
+
     // Replace its stores with the snapshot stores (deep clone to avoid reference issues)
     txClient.stores.clear();
     for (const [modelName, data] of snapshot.entries()) {
@@ -1215,14 +1220,14 @@ export class PrismockerClient {
         })
       );
     }
-    
+
     // Rebuild indexes for transaction client
     if (this.options.enableIndexes) {
       for (const [modelName, data] of txClient.stores.entries()) {
         txClient.indexManager.buildIndexes(modelName, data);
       }
     }
-    
+
     return txClient;
   }
 
@@ -1265,22 +1270,22 @@ export class PrismockerClient {
         })
       );
     }
-    
+
     // Rebuild indexes for main client
     if (this.options.enableIndexes) {
       for (const [modelName, data] of this.stores.entries()) {
         this.indexManager.buildIndexes(modelName, data);
       }
     }
-    
+
     // Clear model proxies so they get recreated with fresh query engines
     this.modelProxies.clear();
-    
+
     // Invalidate query cache for all models that were modified
     for (const modelName of txClient.stores.keys()) {
       this.queryCache.invalidateModel(modelName);
     }
-    
+
     if (this.options.logQueries) {
       this.options.logger?.('[Prismocker] Transaction committed to main stores');
     }
@@ -1315,14 +1320,19 @@ export class PrismockerClient {
 
     // INSERT statement
     if (trimmed.startsWith('INSERT')) {
-      const insertMatch = sqlQuery.match(/INSERT\s+INTO\s+([a-zA-Z_]+)\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/i);
+      const insertMatch = sqlQuery.match(
+        /INSERT\s+INTO\s+([a-zA-Z_]+)\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/i
+      );
       if (insertMatch) {
         const tableName = insertMatch[1].trim();
         const columns = insertMatch[2].split(',').map((c) => c.trim());
         const values = insertMatch[3].split(',').map((v) => {
           const trimmed = v.trim();
           // Remove quotes for strings
-          if ((trimmed.startsWith("'") && trimmed.endsWith("'")) || (trimmed.startsWith('"') && trimmed.endsWith('"'))) {
+          if (
+            (trimmed.startsWith("'") && trimmed.endsWith("'")) ||
+            (trimmed.startsWith('"') && trimmed.endsWith('"'))
+          ) {
             return trimmed.slice(1, -1);
           }
           // Parse numbers
@@ -1365,7 +1375,9 @@ export class PrismockerClient {
       // Handle quoted strings and stop at WHERE clause
       // Pattern: UPDATE table SET field = 'value' WHERE field = 'value'
       // or: UPDATE table SET field = value WHERE field = value
-      const updateMatch = sqlQuery.match(/UPDATE\s+([a-zA-Z_]+)\s+SET\s+([a-zA-Z_]+)\s*=\s*((?:'[^']*'|"[^"]*"|[^\s]+))(?:\s+WHERE\s+(.+))?/i);
+      const updateMatch = sqlQuery.match(
+        /UPDATE\s+([a-zA-Z_]+)\s+SET\s+([a-zA-Z_]+)\s*=\s*((?:'[^']*'|"[^"]*"|[^\s]+))(?:\s+WHERE\s+(.+))?/i
+      );
       if (updateMatch) {
         const tableName = updateMatch[1].trim();
         const setField = updateMatch[2].trim();
@@ -1377,7 +1389,10 @@ export class PrismockerClient {
 
         // Parse set value
         let parsedValue: any = setValue;
-        if ((setValue.startsWith("'") && setValue.endsWith("'")) || (setValue.startsWith('"') && setValue.endsWith('"'))) {
+        if (
+          (setValue.startsWith("'") && setValue.endsWith("'")) ||
+          (setValue.startsWith('"') && setValue.endsWith('"'))
+        ) {
           parsedValue = setValue.slice(1, -1);
         } else if (!isNaN(Number(setValue))) {
           parsedValue = Number(setValue);
@@ -1400,7 +1415,10 @@ export class PrismockerClient {
               const whereField = whereMatch[1].trim();
               let whereValue: any = whereMatch[2].trim();
               // Parse where value
-              if ((whereValue.startsWith("'") && whereValue.endsWith("'")) || (whereValue.startsWith('"') && whereValue.endsWith('"'))) {
+              if (
+                (whereValue.startsWith("'") && whereValue.endsWith("'")) ||
+                (whereValue.startsWith('"') && whereValue.endsWith('"'))
+              ) {
                 whereValue = whereValue.slice(1, -1);
               } else if (!isNaN(Number(whereValue))) {
                 whereValue = Number(whereValue);
@@ -1463,7 +1481,10 @@ export class PrismockerClient {
               const whereField = whereMatch[1].trim();
               let whereValue: any = whereMatch[2].trim();
               // Parse where value
-              if ((whereValue.startsWith("'") && whereValue.endsWith("'")) || (whereValue.startsWith('"') && whereValue.endsWith('"'))) {
+              if (
+                (whereValue.startsWith("'") && whereValue.endsWith("'")) ||
+                (whereValue.startsWith('"') && whereValue.endsWith('"'))
+              ) {
                 whereValue = whereValue.slice(1, -1);
               } else if (!isNaN(Number(whereValue))) {
                 whereValue = Number(whereValue);

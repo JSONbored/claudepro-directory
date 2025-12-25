@@ -41,7 +41,7 @@ export function useUserProfileImage(): string | null {
     // Check localStorage cache first
     const cacheKey = `user-profile-image-${user.id}`;
     const cached = localStorage.getItem(cacheKey);
-    
+
     if (cached) {
       try {
         const { imageUrl: cachedUrl, timestamp } = JSON.parse(cached);
@@ -61,12 +61,12 @@ export function useUserProfileImage(): string | null {
 
     // Fetch from API
     setIsLoading(true);
-    
+
     // Cancel previous request if any
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    
+
     abortControllerRef.current = new AbortController();
 
     fetch('/api/user/profile-image', {
@@ -79,7 +79,7 @@ export function useUserProfileImage(): string | null {
         }
         const data = await response.json();
         const fetchedUrl = data.imageUrl ?? null;
-        
+
         // Update state
         setImageUrl(fetchedUrl);
         fetchedUserIdRef.current = user.id;
@@ -118,4 +118,3 @@ export function useUserProfileImage(): string | null {
 
   return imageUrl;
 }
-

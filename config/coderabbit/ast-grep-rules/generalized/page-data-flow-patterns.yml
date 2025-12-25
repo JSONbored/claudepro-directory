@@ -83,7 +83,7 @@ rule:
     - not:
         has:
           regex: 'use client'
-message: "Functions cannot be passed directly from Server Components to Client Components. Pass data and callbacks as props, or move function definition to Client Component. Use Server Actions for server-side functions."
+message: 'Functions cannot be passed directly from Server Components to Client Components. Pass data and callbacks as props, or move function definition to Client Component. Use Server Actions for server-side functions.'
 severity: error
 
 # Note: Next.js Server Components can only pass serializable data to Client Components

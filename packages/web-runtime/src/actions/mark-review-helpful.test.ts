@@ -64,7 +64,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {
@@ -141,7 +141,7 @@ describe('markReviewHelpful', () => {
       expect(safeResult.fieldErrors).toBeDefined();
       expect(safeResult.data).toBeUndefined();
       expect(safeResult.serverError).toBeUndefined();
-      
+
       // Verify field errors for invalid UUID
       expect(safeResult.fieldErrors?.review_id).toBeDefined();
     });

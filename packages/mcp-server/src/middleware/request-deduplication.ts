@@ -205,4 +205,3 @@ export function getCacheStats(): { size: number } {
     size: globalCache.size(),
   };
 }
-

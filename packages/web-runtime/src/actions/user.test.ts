@@ -68,7 +68,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {
@@ -300,7 +300,7 @@ describe('user actions', () => {
       expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('SELECT * FROM update_user_profile'),
         'test-user-id', // $1: p_user_id
-        '', // $2: p_website
+        '' // $2: p_website
       );
 
       const safeResult = result as SafeActionResult<typeof mockResult>;
@@ -331,7 +331,7 @@ describe('user actions', () => {
         expect.stringContaining('SELECT * FROM update_user_profile'),
         'test-user-id', // $1: p_user_id
         'Test User', // $2: p_display_name
-        'test-user', // $3: p_username
+        'test-user' // $3: p_username
       );
 
       const safeResult = result as SafeActionResult<typeof mockResult>;
@@ -361,7 +361,7 @@ describe('user actions', () => {
       expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('SELECT * FROM update_user_profile'),
         'test-user-id', // $1: p_user_id
-        'Test User', // $2: p_display_name
+        'Test User' // $2: p_display_name
         // p_username is not provided, so it's not passed
       );
     });
@@ -428,7 +428,7 @@ describe('user actions', () => {
       // Verify RPC was called with correct SQL and parameters
       expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('SELECT * FROM refresh_profile_from_oauth'),
-        'test-user-id', // $1: user_id
+        'test-user-id' // $1: user_id
       );
 
       expect(mockRevalidatePath).toHaveBeenCalledWith('/u/test-user');
@@ -527,7 +527,25 @@ describe('user actions', () => {
       const cacheKeysBefore = Array.from((getRequestCache() as any).cache.keys());
 
       // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/web-runtime/src/actions/user.test.ts:520',message:'isBookmarkedAction - before action call',data:{cacheSize:cacheBefore,cacheKeys:cacheKeysBefore,prismockerBookmarksCount:(await prismocker.bookmarks.findMany({where:{user_id:'test-user-id'}})).length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'packages/web-runtime/src/actions/user.test.ts:520',
+          message: 'isBookmarkedAction - before action call',
+          data: {
+            cacheSize: cacheBefore,
+            cacheKeys: cacheKeysBefore,
+            prismockerBookmarksCount: (
+              await prismocker.bookmarks.findMany({ where: { user_id: 'test-user-id' } })
+            ).length,
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'A',
+        }),
+      }).catch(() => {});
       // #endregion
 
       const result = await isBookmarkedAction({
@@ -536,7 +554,26 @@ describe('user actions', () => {
       });
 
       // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/web-runtime/src/actions/user.test.ts:537',message:'isBookmarkedAction - raw result structure',data:{rawResult:result,rawResultType:typeof result,rawResultKeys:Object.keys(result || {}),hasData:'data' in (result || {}),hasServerError:'serverError' in (result || {}),hasFieldErrors:'fieldErrors' in (result || {})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'packages/web-runtime/src/actions/user.test.ts:537',
+          message: 'isBookmarkedAction - raw result structure',
+          data: {
+            rawResult: result,
+            rawResultType: typeof result,
+            rawResultKeys: Object.keys(result || {}),
+            hasData: 'data' in (result || {}),
+            hasServerError: 'serverError' in (result || {}),
+            hasFieldErrors: 'fieldErrors' in (result || {}),
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'E',
+        }),
+      }).catch(() => {});
       // #endregion
 
       // Verify SafeActionResult structure
@@ -547,7 +584,27 @@ describe('user actions', () => {
       const cacheKeysAfter = Array.from((getRequestCache() as any).cache.keys());
 
       // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/web-runtime/src/actions/user.test.ts:548',message:'isBookmarkedAction - after type assertion',data:{cacheSizeBefore:cacheBefore,cacheSizeAfter:cacheAfter,cacheKeysBefore,cacheKeysAfter,safeResultData:safeResult.data,safeResultServerError:safeResult.serverError,safeResultFieldErrors:safeResult.fieldErrors},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'packages/web-runtime/src/actions/user.test.ts:548',
+          message: 'isBookmarkedAction - after type assertion',
+          data: {
+            cacheSizeBefore: cacheBefore,
+            cacheSizeAfter: cacheAfter,
+            cacheKeysBefore,
+            cacheKeysAfter,
+            safeResultData: safeResult.data,
+            safeResultServerError: safeResult.serverError,
+            safeResultFieldErrors: safeResult.fieldErrors,
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'E',
+        }),
+      }).catch(() => {});
       // #endregion
 
       expect(safeResult.data).toBe(true);
@@ -638,7 +695,7 @@ describe('user actions', () => {
         expect.arrayContaining([
           { content_type: 'agents', content_slug: 'test-agent-1' },
           { content_type: 'mcp', content_slug: 'test-mcp-1' },
-        ]), // $2: p_items
+        ]) // $2: p_items
       );
 
       expect(mockRevalidatePath).toHaveBeenCalledWith('/account');
@@ -699,7 +756,7 @@ describe('user actions', () => {
         expect.stringContaining('SELECT * FROM toggle_follow'),
         'test-user-id', // $1: p_follower_id
         '123e4567-e89b-12d3-a456-426614174000', // $2: p_following_id
-        'follow', // $3: p_action
+        'follow' // $3: p_action
       );
 
       expect(mockRevalidatePath).toHaveBeenCalledWith('/u/target-user');
@@ -1210,7 +1267,7 @@ describe('user actions', () => {
 
       expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('SELECT * FROM refresh_profile_from_oauth'),
-        'test-user-id', // $1: user_id
+        'test-user-id' // $1: user_id
       );
 
       expect(result).toEqual({ success: true, slug: 'test-user' });
@@ -1288,7 +1345,7 @@ describe('user actions', () => {
         'Test User', // $3: p_name
         'https://example.com/avatar.jpg', // $4: p_image
         true, // $5: p_profile_public
-        true, // $6: p_follow_email
+        true // $6: p_follow_email
       );
 
       expect(mockRevalidateTag).toHaveBeenCalledWith('user-test-user-id', 'default');
@@ -1330,7 +1387,7 @@ describe('user actions', () => {
         null, // $3: p_name
         null, // $4: p_image
         true, // $5: p_profile_public
-        true, // $6: p_follow_email
+        true // $6: p_follow_email
       );
     });
   });

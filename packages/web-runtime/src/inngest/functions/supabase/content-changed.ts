@@ -117,7 +117,6 @@ export const handleSupabaseContentChanged = createInngestFunction(
   },
   { event: 'supabase/content-changed' },
   async ({ event, step, logContext }) => {
-
     const { webhookId, eventType, category, contentId, slug, record } = event.data;
 
     logger.info(

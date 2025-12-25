@@ -76,25 +76,24 @@ jest.mock('../../utils/monitoring', () => ({
 }));
 
 // Get mocks for use in tests
-const {
-  __mockPgmqRead: mockPgmqRead,
-  __mockPgmqDelete: mockPgmqDelete,
-} = jest.requireMock('../../../supabase/pgmq-client') as {
+const { __mockPgmqRead: mockPgmqRead, __mockPgmqDelete: mockPgmqDelete } = jest.requireMock(
+  '../../../supabase/pgmq-client'
+) as {
   __mockPgmqRead: ReturnType<typeof jest.fn>;
   __mockPgmqDelete: ReturnType<typeof jest.fn>;
 };
-const {
-  __mockLogger: mockLogger,
-  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
-} = jest.requireMock('../../../logging/server') as {
-  __mockLogger: {
-    info: ReturnType<typeof jest.fn>;
-    warn: ReturnType<typeof jest.fn>;
-    error: ReturnType<typeof jest.fn>;
+const { __mockLogger: mockLogger, __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId } =
+  jest.requireMock('../../../logging/server') as {
+    __mockLogger: {
+      info: ReturnType<typeof jest.fn>;
+      warn: ReturnType<typeof jest.fn>;
+      error: ReturnType<typeof jest.fn>;
+    };
+    __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
   };
-  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-};
-const { __mockNormalizeError: mockNormalizeError } = jest.requireMock('@heyclaude/shared-runtime') as {
+const { __mockNormalizeError: mockNormalizeError } = jest.requireMock(
+  '@heyclaude/shared-runtime'
+) as {
   __mockNormalizeError: ReturnType<typeof jest.fn>;
 };
 const mockFetch = jest.fn();
@@ -576,4 +575,3 @@ describe('processDiscordSubmissionsQueue', () => {
     });
   });
 });
-

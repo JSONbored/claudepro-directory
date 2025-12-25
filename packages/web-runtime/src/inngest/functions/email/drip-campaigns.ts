@@ -64,7 +64,6 @@ export const newsletterDripCampaign = createInngestFunction(
   },
   { event: 'email/welcome' },
   async ({ event, step, logContext }) => {
-
     const { email, triggerSource } = event.data;
 
     logger.info({ ...logContext, email, triggerSource }, 'Starting newsletter drip campaign');
@@ -191,7 +190,6 @@ export const jobPostingDripCampaign = createInngestFunction(
   },
   { event: 'job/published' },
   async ({ event, step, logContext }) => {
-
     const { jobId, employerEmail, employerName, jobTitle, jobSlug } = event.data;
     const safeJobTitle = escapeHtml(jobTitle);
     const safeName = escapeHtml(employerName || 'there');
@@ -316,4 +314,3 @@ export const jobPostingDripCampaign = createInngestFunction(
     return { jobId, employerEmail, completed: true };
   }
 );
-

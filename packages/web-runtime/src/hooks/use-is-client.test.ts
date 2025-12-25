@@ -6,7 +6,6 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useIsClient } from './use-is-client.ts';
 
 describe('useIsClient', () => {
-
   it('should return true after mount (client)', async () => {
     const { result } = renderHook(() => useIsClient());
 
@@ -29,8 +28,6 @@ describe('useIsClient', () => {
     expect(result.current).toBe(true);
     expect(result.current).toBe(firstValue);
   });
-
-
 
   it('should remain true on multiple rerenders', async () => {
     const { result, rerender } = renderHook(() => useIsClient());

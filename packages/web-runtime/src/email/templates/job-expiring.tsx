@@ -47,11 +47,7 @@ export interface JobExpiringEmailProps {
  * />
  * ```
  */
-export function JobExpiringEmail({
-  jobTitle,
-  daysRemaining,
-  renewalUrl,
-}: JobExpiringEmailProps) {
+export function JobExpiringEmail({ jobTitle, daysRemaining, renewalUrl }: JobExpiringEmailProps) {
   const utm = EMAIL_UTM_TEMPLATES.JOB_EXPIRING || {
     source: 'email',
     medium: 'transactional',
@@ -153,4 +149,3 @@ const primaryButtonStyle: React.CSSProperties = {
   textDecoration: 'none',
   display: 'inline-block',
 };
-

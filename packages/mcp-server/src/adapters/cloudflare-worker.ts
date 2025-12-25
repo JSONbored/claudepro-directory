@@ -9,7 +9,13 @@
 // Added as devDependency for type-checking in standalone package
 import type { ExtendedEnv } from '@heyclaude/cloudflare-runtime/config/env';
 import type { Logger } from '@heyclaude/cloudflare-runtime/logging/pino';
-import type { RuntimeEnv, RuntimeLogger, ToolContext, McpServerOptions, KvNamespace } from '../types/runtime.js';
+import type {
+  RuntimeEnv,
+  RuntimeLogger,
+  ToolContext,
+  McpServerOptions,
+  KvNamespace,
+} from '../types/runtime.js';
 import type { PrismaClient } from '@prisma/client';
 import type { User } from '@supabase/supabase-js';
 
@@ -84,4 +90,3 @@ export function convertToolContext(context: ToolContext): {
     logger: context.logger as Logger,
   };
 }
-

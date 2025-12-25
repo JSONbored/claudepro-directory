@@ -21,5 +21,4 @@
 -- - packages/web-runtime/src/actions/contact.ts: Updated to use direct array (not nested)
 -- - packages/web-runtime/src/data/contact.ts: Updated to use direct array (not nested)
 -- - Return type: Promise<contact_commandsModel[]>
-
-DROP FUNCTION IF EXISTS public.get_contact_commands();
+DROP FUNCTION IF EXISTS public.get_contact_commands ();

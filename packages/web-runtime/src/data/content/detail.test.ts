@@ -1,9 +1,5 @@
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
-import {
-  getContentDetailComplete,
-  getContentDetailCore,
-  getContentAnalytics,
-} from './detail';
+import { getContentDetailComplete, getContentDetailCore, getContentAnalytics } from './detail';
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
 
@@ -22,7 +18,10 @@ jest.mock('next/cache', () => ({
 
 // Import real cache utilities for proper cache testing
 // Note: Deep relative imports are acceptable for test utilities to avoid circular dependencies
-import { clearRequestCache, getRequestCache } from '../../../../data-layer/src/utils/request-cache.ts';
+import {
+  clearRequestCache,
+  getRequestCache,
+} from '../../../../data-layer/src/utils/request-cache.ts';
 
 // Mock RPC error logging utility (if needed)
 // Note: Deep relative import needed for jest.mock() to work correctly
@@ -87,7 +86,9 @@ describe('content/detail', () => {
         content_votes: [],
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockDetail] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockDetail,
+      ] as any);
 
       const result = await getContentDetailComplete({ category: 'agents', slug: 'test-slug' });
 
@@ -103,7 +104,10 @@ describe('content/detail', () => {
 
     it('should reject invalid category', async () => {
       // Invalid category should fail validation and return null (not throw)
-      const result = await getContentDetailComplete({ category: 'invalid-category', slug: 'test-slug' });
+      const result = await getContentDetailComplete({
+        category: 'invalid-category',
+        slug: 'test-slug',
+      });
       expect(result).toBeNull();
       // Should not call the service
       expect(prismocker.$queryRawUnsafe).not.toHaveBeenCalled();
@@ -159,7 +163,9 @@ describe('content/detail', () => {
         content_votes: [],
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockDetail] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockDetail,
+      ] as any);
 
       // First call - should populate cache
       const cacheBefore = getRequestCache().getStats().size;
@@ -227,7 +233,10 @@ describe('content/detail', () => {
 
     it('should reject invalid category', async () => {
       // Invalid category should fail validation and return null (not throw)
-      const result = await getContentDetailCore({ category: 'invalid-category', slug: 'test-slug' });
+      const result = await getContentDetailCore({
+        category: 'invalid-category',
+        slug: 'test-slug',
+      });
       expect(result).toBeNull();
       // Should not call Prisma (validation fails before service call)
     });

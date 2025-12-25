@@ -463,4 +463,3 @@ describe('sendDiscordDirect', () => {
     expect(mockFetch).toHaveBeenCalled();
   });
 });
-

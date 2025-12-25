@@ -20,6 +20,6 @@
 -- Note: get_content_analytics (singular) is still used and should NOT be removed
 --
 -- Safe to remove: No codebase references found for either overload
+DROP FUNCTION IF EXISTS public.get_content_with_analytics (public.content_category, integer);
 
-DROP FUNCTION IF EXISTS public.get_content_with_analytics(public.content_category, integer);
-DROP FUNCTION IF EXISTS public.get_content_with_analytics(public.content_category, text);
+DROP FUNCTION IF EXISTS public.get_content_with_analytics (public.content_category, text);

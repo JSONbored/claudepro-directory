@@ -319,9 +319,9 @@ describe('useScreen', () => {
     expect(result.current?.orientation?.type).toBe('landscape-primary');
 
     // Get the orientation change handler
-    const orientationHandler = (mockScreen.orientation?.addEventListener as ReturnType<
-      typeof jest.fn
-    >).mock.calls[0]?.[1] as () => void;
+    const orientationHandler = (
+      mockScreen.orientation?.addEventListener as ReturnType<typeof jest.fn>
+    ).mock.calls[0]?.[1] as () => void;
 
     // Update screen orientation
     const newScreen = {

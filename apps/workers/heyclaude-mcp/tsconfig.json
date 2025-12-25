@@ -11,8 +11,12 @@
     "noEmit": false,
     "allowImportingTsExtensions": false,
     "paths": {
-      "@heyclaude/database-types/postgres-types": ["../../../packages/database-types/src/postgres-types/index.ts"],
-      "@heyclaude/database-types/postgres-types/*": ["../../../packages/database-types/src/postgres-types/*"]
+      "@heyclaude/database-types/postgres-types": [
+        "../../../packages/database-types/src/postgres-types/index.ts"
+      ],
+      "@heyclaude/database-types/postgres-types/*": [
+        "../../../packages/database-types/src/postgres-types/*"
+      ]
     }
   },
   "include": ["src/**/*", "src/types/**/*.d.ts"],

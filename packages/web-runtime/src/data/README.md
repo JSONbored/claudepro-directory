@@ -2,14 +2,14 @@
 
 All cached reads and repository-wide configuration now live under `src/lib/data`. Each subdirectory maps to a domain:
 
-- `content/` – public content loaders (detail, lists, trending, templates, navigation, related content)
-- `companies/` – public vs admin company fetchers
-- `account/` – authenticated helpers (user dashboards, submissions, sponsorships)
-- `notifications/` – notification fetch/cache helpers
-- `forms/` – form field configuration
-- `config/` – shared configuration data (constants, category config, cache helpers, static config accessors)
-- `marketing/` – partner pricing, manifest copy, site-wide audience metrics, contact channels
-- `seo/` – metadata + structured data fetchers (edge SEO API client)
+* `content/` – public content loaders (detail, lists, trending, templates, navigation, related content)
+* `companies/` – public vs admin company fetchers
+* `account/` – authenticated helpers (user dashboards, submissions, sponsorships)
+* `notifications/` – notification fetch/cache helpers
+* `forms/` – form field configuration
+* `config/` – shared configuration data (constants, category config, cache helpers, static config accessors)
+* `marketing/` – partner pricing, manifest copy, site-wide audience metrics, contact channels
+* `seo/` – metadata + structured data fetchers (edge SEO API client)
 
 When adding a new cached read:
 
@@ -48,47 +48,47 @@ Available `cacheLife` profiles (configured in `next.config.mjs`):
 
 **`'short'`** - Use for data that changes frequently (every 5-15 minutes):
 
-- Search results (`getSearchResults`, `getSearchAutocomplete`)
-- Newsletter subscriber counts (`getNewsletterCount`)
-- Health status (`getApiHealthFormatted`)
-- Social proof stats (`getSocialProofStats`)
-- Any data that needs near-real-time freshness
+* Search results (`getSearchResults`, `getSearchAutocomplete`)
+* Newsletter subscriber counts (`getNewsletterCount`)
+* Health status (`getApiHealthFormatted`)
+* Social proof stats (`getSocialProofStats`)
+* Any data that needs near-real-time freshness
 
 **`'medium'`** - Use for data that changes moderately (every 1-6 hours):
 
-- Content detail pages (`getContentDetail`, `getContentDetailCore`, `getContentAnalytics`)
-- Content templates (`getContentTemplates`)
-- Job listings (`getJobs`, `getJobBySlug`, `getFeaturedJobs`)
-- Company profiles (`getCompanyProfile`, `getCompaniesList`)
-- Content category lists (`getContentByCategory`)
-- Related content (`getRelatedContent`)
-- Search facets (`getSearchFacets`)
-- Changelog entries (`getChangelogOverview`, `getChangelogEntryBySlug`)
-- Form field templates (`getSubmissionFormFields`)
-- Contact commands (`getContactCommands`)
+* Content detail pages (`getContentDetail`, `getContentDetailCore`, `getContentAnalytics`)
+* Content templates (`getContentTemplates`)
+* Job listings (`getJobs`, `getJobBySlug`, `getFeaturedJobs`)
+* Company profiles (`getCompanyProfile`, `getCompaniesList`)
+* Content category lists (`getContentByCategory`)
+* Related content (`getRelatedContent`)
+* Search facets (`getSearchFacets`)
+* Changelog entries (`getChangelogOverview`, `getChangelogEntryBySlug`)
+* Form field templates (`getSubmissionFormFields`)
+* Contact commands (`getContactCommands`)
 
 **`'long'`** - Use for data that rarely changes (daily or weekly):
 
-- SEO metadata (`generatePageMetadata`)
-- Paginated content (`getContentPaginated`)
-- Navigation menus (`getLayoutData`)
-- Site-wide configuration
-- Homepage data (`getHomepageData`)
-- Marketing stats (`getContentDescription`, `getPartnerHeroStats`)
-- Announcements (`getActiveAnnouncement`)
-- Community directory (`getCommunityDirectory`)
-- Changelog index (`getChangelogLlmsTxt`)
-- Content exports (LLMs.txt, JSON, Markdown)
-- Sitemap data
-- Category configs
-- Company profiles (low traffic)
-- Static pages (terms, privacy, help, etc.)
+* SEO metadata (`generatePageMetadata`)
+* Paginated content (`getContentPaginated`)
+* Navigation menus (`getLayoutData`)
+* Site-wide configuration
+* Homepage data (`getHomepageData`)
+* Marketing stats (`getContentDescription`, `getPartnerHeroStats`)
+* Announcements (`getActiveAnnouncement`)
+* Community directory (`getCommunityDirectory`)
+* Changelog index (`getChangelogLlmsTxt`)
+* Content exports (LLMs.txt, JSON, Markdown)
+* Sitemap data
+* Category configs
+* Company profiles (low traffic)
+* Static pages (terms, privacy, help, etc.)
 
 **`'userProfile'`** - Use for user-specific data:
 
-- SEO metadata (`getPageMetadata`, `getPageMetadataWithSchemas`)
-- Paginated content (`getPaginatedContent`)
-- Data that can be cached for extended periods
+* SEO metadata (`getPageMetadata`, `getPageMetadataWithSchemas`)
+* Paginated content (`getPaginatedContent`)
+* Data that can be cached for extended periods
 
 ### User-Specific Data (`'use cache: private'`)
 
@@ -102,16 +102,16 @@ cacheTag(`user-${userId}`);
 
 This pattern is used for:
 
-- Account dashboard data (`getUserCompleteData` - returns `account_dashboard` and `user_dashboard`)
-- User library/bookmarks (`getUserCompleteData` - returns `user_library`, `getUserBookmarksForCollections`)
-- User settings (`getUserCompleteData` - returns `user_settings`)
-- User activity (`getUserCompleteData` - returns `activity_summary` and `activity_timeline`)
-- User companies (`getUserCompleteData` - returns `user_dashboard.companies`, `getUserCompanyById`)
-- User jobs (`getUserJobById`)
-- User profiles (`getPublicUserProfile`)
-- Collections (`getCollectionDetail`)
-- Notifications (`getActiveNotifications`)
-- Bookmark/follow status checks (`isBookmarked`, `isFollowing`, `isBookmarkedBatch`, `isFollowingBatch`)
+* Account dashboard data (`getUserCompleteData` - returns `account_dashboard` and `user_dashboard`)
+* User library/bookmarks (`getUserCompleteData` - returns `user_library`, `getUserBookmarksForCollections`)
+* User settings (`getUserCompleteData` - returns `user_settings`)
+* User activity (`getUserCompleteData` - returns `activity_summary` and `activity_timeline`)
+* User companies (`getUserCompleteData` - returns `user_dashboard.companies`, `getUserCompanyById`)
+* User jobs (`getUserJobById`)
+* User profiles (`getPublicUserProfile`)
+* Collections (`getCollectionDetail`)
+* Notifications (`getActiveNotifications`)
+* Bookmark/follow status checks (`isBookmarked`, `isFollowing`, `isBookmarkedBatch`, `isFollowingBatch`)
 
 **Why custom values?** User-specific data needs shorter cache times (1min stale, 5min revalidate, 30min expire) to ensure users see their own updates quickly while still benefiting from cross-request caching.
 
@@ -160,25 +160,25 @@ export const getContentByCategory = createCachedDataFunction<
 
 **Benefits:**
 
-- ✅ Automatic caching with `'use cache'` or `'use cache: private'`
-- ✅ Automatic `cacheLife()` and `cacheTag()` configuration
-- ✅ Automatic error handling and logging
-- ✅ Type-safe service method calls
-- ✅ Consistent cache tag generation
-- ✅ Request-scoped logging with proper context
+* ✅ Automatic caching with `'use cache'` or `'use cache: private'`
+* ✅ Automatic `cacheLife()` and `cacheTag()` configuration
+* ✅ Automatic error handling and logging
+* ✅ Type-safe service method calls
+* ✅ Consistent cache tag generation
+* ✅ Request-scoped logging with proper context
 
 **When to Use:**
 
-- ✅ For all new data fetching functions
-- ✅ When migrating existing functions
-- ✅ For simple RPC/service method calls
-- ✅ When you need consistent caching and error handling
+* ✅ For all new data fetching functions
+* ✅ When migrating existing functions
+* ✅ For simple RPC/service method calls
+* ✅ When you need consistent caching and error handling
 
 **When NOT to Use:**
 
-- ❌ For complex aggregation functions (e.g., `getTrendingPageData`, `getContentBatchBySlugs`)
-- ❌ For functions that read from local config files (e.g., `getPartnerPricing`)
-- ❌ For functions with complex conditional logic that doesn't fit the factory pattern
+* ❌ For complex aggregation functions (e.g., `getTrendingPageData`, `getContentBatchBySlugs`)
+* ❌ For functions that read from local config files (e.g., `getPartnerPricing`)
+* ❌ For functions with complex conditional logic that doesn't fit the factory pattern
 
 ### Service Factory (`getService`)
 
@@ -198,23 +198,23 @@ const service = new ContentService();
 
 **Benefits:**
 
-- ✅ Singleton pattern (services are stateless, so singletons are safe)
-- ✅ Lazy loading (services only loaded when needed)
-- ✅ Type-safe service keys
-- ✅ Consistent service access pattern
-- ✅ Automatic service registry
+* ✅ Singleton pattern (services are stateless, so singletons are safe)
+* ✅ Lazy loading (services only loaded when needed)
+* ✅ Type-safe service keys
+* ✅ Consistent service access pattern
+* ✅ Automatic service registry
 
 **Available Services:**
 
-- `'account'` - AccountService
-- `'changelog'` - ChangelogService
-- `'companies'` - CompaniesService
-- `'content'` - ContentService
-- `'jobs'` - JobsService
-- `'misc'` - MiscService (consolidated: SEO, Community, Quiz, Email methods)
-- `'newsletter'` - NewsletterService
-- `'search'` - SearchService
-- `'trending'` - TrendingService
+* `'account'` - AccountService
+* `'changelog'` - ChangelogService
+* `'companies'` - CompaniesService
+* `'content'` - ContentService
+* `'jobs'` - JobsService
+* `'misc'` - MiscService (consolidated: SEO, Community, Quiz, Email methods)
+* `'newsletter'` - NewsletterService
+* `'search'` - SearchService
+* `'trending'` - TrendingService
 
 ### Cache Tag Helpers
 
@@ -237,30 +237,30 @@ const tags = generateResourceTags('jobs', slug, ['additional', 'tags']);
 ### Completed Migrations
 
 1. **Removed Legacy Caching Systems:**
-   - ✅ `unstable_cache()` - Removed from all data functions
-   - ✅ `React.cache()` - Removed from all data functions
-   - ✅ `fetchCached` utility - Deleted file and all references
-   - ✅ `CACHE_TTL` config - Removed from `unified-config.ts`
-   - ✅ `CACHE_INVALIDATION` config - Removed from `unified-config.ts`
-   - ✅ `CACHE_BEHAVIOR` config - Removed from `unified-config.ts`
-   - ✅ `cache-config.ts` - Deleted entire file
-   - ✅ `getCacheTtl()` function - Removed, replaced with `cacheLife()` profiles
-   - ✅ `getCacheInvalidateTags()` - Removed, replaced with direct `cacheTag()` calls
-   - ✅ Route Segment Config exports - Removed all `dynamic`, `revalidate`, `runtime` exports
+   * ✅ `unstable_cache()` - Removed from all data functions
+   * ✅ `React.cache()` - Removed from all data functions
+   * ✅ `fetchCached` utility - Deleted file and all references
+   * ✅ `CACHE_TTL` config - Removed from `unified-config.ts`
+   * ✅ `CACHE_INVALIDATION` config - Removed from `unified-config.ts`
+   * ✅ `CACHE_BEHAVIOR` config - Removed from `unified-config.ts`
+   * ✅ `cache-config.ts` - Deleted entire file
+   * ✅ `getCacheTtl()` function - Removed, replaced with `cacheLife()` profiles
+   * ✅ `getCacheInvalidateTags()` - Removed, replaced with direct `cacheTag()` calls
+   * ✅ Route Segment Config exports - Removed all `dynamic`, `revalidate`, `runtime` exports
 
 2. **Migrated to Cache Components:**
-   - ✅ All 75+ async data functions now use `'use cache'` or `'use cache: private'`
-   - ✅ All data functions use `cacheLife()` profiles or custom values
-   - ✅ All data functions use `cacheTag()` for invalidation
-   - ✅ All account/user-specific data uses `'use cache: private'` with per-user tags
+   * ✅ All 75+ async data functions now use `'use cache'` or `'use cache: private'`
+   * ✅ All data functions use `cacheLife()` profiles or custom values
+   * ✅ All data functions use `cacheTag()` for invalidation
+   * ✅ All account/user-specific data uses `'use cache: private'` with per-user tags
 
 3. **PPR Optimizations:**
-   - ✅ Category listing pages - Static hero shell, dynamic content streams
-   - ✅ Search page - Static header/layout, facets/results stream
-   - ✅ Company pages - Static shell, header/jobs/stats stream separately
-   - ✅ Jobs listing page - Static hero/filters, jobs list streams
-   - ✅ Content detail pages - Core content blocking (LCP), analytics/related stream
-   - ✅ Account pages - Sidebar streams in Suspense with cached data
+   * ✅ Category listing pages - Static hero shell, dynamic content streams
+   * ✅ Search page - Static header/layout, facets/results stream
+   * ✅ Company pages - Static shell, header/jobs/stats stream separately
+   * ✅ Jobs listing page - Static hero/filters, jobs list streams
+   * ✅ Content detail pages - Core content blocking (LCP), analytics/related stream
+   * ✅ Account pages - Sidebar streams in Suspense with cached data
 
 ### Cache Invalidation
 
@@ -412,9 +412,9 @@ export default async function JobsPage({ searchParams }) {
 
 ## Guidelines
 
-- Keep fetch logic server-only; React components should consume helpers rather than hitting Supabase directly.
-- Prefer domain-specific helper names (`getCompanyProfile`, `getActiveNotifications`) over generic loaders.
-- Document any new helpers in this folder if they require non-obvious behaviour (e.g., special invalidation rules).
-- Use `'use cache'` for public data, `'use cache: private'` for user-specific data.
-- Always use `cacheTag()` with meaningful, hierarchical tags for proper invalidation.
-- Use named `cacheLife()` profiles for consistency, custom values only for user-specific data.
+* Keep fetch logic server-only; React components should consume helpers rather than hitting Supabase directly.
+* Prefer domain-specific helper names (`getCompanyProfile`, `getActiveNotifications`) over generic loaders.
+* Document any new helpers in this folder if they require non-obvious behaviour (e.g., special invalidation rules).
+* Use `'use cache'` for public data, `'use cache: private'` for user-specific data.
+* Always use `cacheTag()` with meaningful, hierarchical tags for proper invalidation.
+* Use named `cacheLife()` profiles for consistency, custom values only for user-specific data.

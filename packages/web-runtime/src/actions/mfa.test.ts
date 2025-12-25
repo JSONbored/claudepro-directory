@@ -59,7 +59,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {
@@ -281,7 +281,7 @@ describe('createMFAChallengeAction', () => {
       expect(safeResult.fieldErrors).toBeDefined();
       expect(safeResult.data).toBeUndefined();
       expect(safeResult.serverError).toBeUndefined();
-      
+
       // Verify field errors for invalid UUID
       expect(safeResult.fieldErrors?.factorId).toBeDefined();
     });
@@ -383,7 +383,7 @@ describe('verifyMFAChallengeAction', () => {
       expect(safeResult.fieldErrors).toBeDefined();
       expect(safeResult.data).toBeUndefined();
       expect(safeResult.serverError).toBeUndefined();
-      
+
       expect(safeResult.fieldErrors?.factorId).toBeDefined();
     });
 
@@ -579,7 +579,7 @@ describe('unenrollMFAAction', () => {
       expect(safeResult.fieldErrors).toBeDefined();
       expect(safeResult.data).toBeUndefined();
       expect(safeResult.serverError).toBeUndefined();
-      
+
       expect(safeResult.fieldErrors?.factorId).toBeDefined();
     });
   });
@@ -598,10 +598,7 @@ describe('unenrollMFAAction', () => {
 
       // Mock multiple factors (so unenrollment is allowed)
       mockListMFAFactors.mockResolvedValue({
-        factors: [
-          { id: 'factor-1', status: 'verified' },
-          mockFactorToRemove,
-        ],
+        factors: [{ id: 'factor-1', status: 'verified' }, mockFactorToRemove],
         error: null,
       });
 

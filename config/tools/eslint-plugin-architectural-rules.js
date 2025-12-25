@@ -3091,7 +3091,7 @@ export default {
 
         // Edge functions (Supabase Edge Functions) have been migrated to Cloudflare Workers
         // This rule is no longer needed - return empty config
-          return {};
+        return {};
 
         // Check if helper functions are imported (using AST)
         let hasHelperImports = false;
@@ -7061,7 +7061,7 @@ export default {
 
         // Edge functions (Supabase Edge Functions) have been migrated to Cloudflare Workers
         // This rule is no longer needed - return empty config
-          return {};
+        return {};
 
         return {
           CallExpression(node) {
@@ -12717,8 +12717,7 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description:
-            'CSS variables in className should use Tailwind utilities from @theme block',
+          description: 'CSS variables in className should use Tailwind utilities from @theme block',
           category: 'Best Practices',
           recommended: true,
         },
@@ -12805,12 +12804,14 @@ export default {
          */
         function getTailwindUtility(className, variable) {
           // Extract the prefix (text-, bg-, border-, fill-, stroke-)
-          const prefixMatch = className.match(/^(text-|bg-|border-|fill-|stroke-|from-|to-|group-\[\.\w+\]:|hover:|group-hover:)/);
+          const prefixMatch = className.match(
+            /^(text-|bg-|border-|fill-|stroke-|from-|to-|group-\[\.\w+\]:|hover:|group-hover:)/
+          );
           const prefix = prefixMatch ? prefixMatch[1] : '';
-          
+
           // Convert variable to utility name
           const utility = cssVariableToTailwindUtility(variable);
-          
+
           return `${prefix}${utility}`;
         }
 
@@ -12863,10 +12864,7 @@ export default {
 
             for (const violation of violations) {
               const utility = getTailwindUtility(violation.fullMatch, violation.variable);
-              const newClassName = className.replace(
-                violation.fullMatch,
-                utility
-              );
+              const newClassName = className.replace(violation.fullMatch, utility);
 
               context.report({
                 node: valueNode,
@@ -12887,15 +12885,12 @@ export default {
                 // Use cooked value (processed) or raw value (unprocessed)
                 const className = quasi.value.cooked || quasi.value.raw || '';
                 if (!className) continue;
-                
+
                 const violations = checkStringForCssVariables(node, className);
 
                 for (const violation of violations) {
                   const utility = getTailwindUtility(violation.fullMatch, violation.variable);
-                  const newClassName = className.replace(
-                    violation.fullMatch,
-                    utility
-                  );
+                  const newClassName = className.replace(violation.fullMatch, utility);
 
                   context.report({
                     node: quasi,
@@ -12911,7 +12906,7 @@ export default {
                       const quasiEnd = quasi.range[1];
                       // Get the text of the quasi
                       const quasiText = sourceCode.getText(quasi);
-                      
+
                       // Find the position of the violation within the quasi text
                       const violationIndex = quasiText.indexOf(violation.fullMatch);
                       if (violationIndex === -1) {
@@ -12919,11 +12914,11 @@ export default {
                         const newQuasiText = quasiText.replace(violation.fullMatch, utility);
                         return fixer.replaceText(quasi, newQuasiText);
                       }
-                      
+
                       // Calculate the absolute position in the source
                       const violationStart = quasiStart + violationIndex;
                       const violationEnd = violationStart + violation.fullMatch.length;
-                      
+
                       // Replace the violation with the utility
                       return fixer.replaceTextRange([violationStart, violationEnd], utility);
                     },
@@ -12945,10 +12940,7 @@ export default {
 
                 for (const violation of violations) {
                   const utility = getTailwindUtility(violation.fullMatch, violation.variable);
-                  const newClassName = className.replace(
-                    violation.fullMatch,
-                    utility
-                  );
+                  const newClassName = className.replace(violation.fullMatch, utility);
 
                   context.report({
                     node: arg,
@@ -12997,8 +12989,7 @@ export default {
       meta: {
         type: 'suggestion',
         docs: {
-          description:
-            'Arbitrary values should use design tokens from @theme block when possible',
+          description: 'Arbitrary values should use design tokens from @theme block when possible',
           category: 'Best Practices',
           recommended: false, // Warning only, not error (some arbitrary values are necessary)
         },

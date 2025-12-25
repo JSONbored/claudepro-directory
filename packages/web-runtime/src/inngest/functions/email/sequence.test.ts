@@ -89,21 +89,23 @@ const { __mockGetService: mockGetService } = jest.requireMock('../../../data/ser
 const { __mockSendEmail: mockSendEmail } = jest.requireMock('../../../integrations/resend') as {
   __mockSendEmail: ReturnType<typeof jest.fn>;
 };
-const {
-  __mockLogger: mockLogger,
-  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
-} = jest.requireMock('../../../logging/server') as {
-  __mockLogger: {
-    info: ReturnType<typeof jest.fn>;
-    warn: ReturnType<typeof jest.fn>;
-    error: ReturnType<typeof jest.fn>;
+const { __mockLogger: mockLogger, __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId } =
+  jest.requireMock('../../../logging/server') as {
+    __mockLogger: {
+      info: ReturnType<typeof jest.fn>;
+      warn: ReturnType<typeof jest.fn>;
+      error: ReturnType<typeof jest.fn>;
+    };
+    __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
   };
-  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-};
-const { __mockNormalizeError: mockNormalizeError } = jest.requireMock('@heyclaude/shared-runtime') as {
+const { __mockNormalizeError: mockNormalizeError } = jest.requireMock(
+  '@heyclaude/shared-runtime'
+) as {
   __mockNormalizeError: ReturnType<typeof jest.fn>;
 };
-const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock('../../../email/base-template') as {
+const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock(
+  '../../../email/base-template'
+) as {
   __mockRenderEmailTemplate: ReturnType<typeof jest.fn>;
 };
 
@@ -158,7 +160,7 @@ describe('processEmailSequence', () => {
       error: null,
     });
     mockRenderEmailTemplate.mockResolvedValue('<html>Mock Email</html>');
-    
+
     // Restore normalizeError mock implementation after reset
     // jest.resetAllMocks() resets mocks to return undefined, so we need to restore it
     mockNormalizeError.mockImplementation((error: unknown, fallbackMessage?: string) => {
@@ -448,7 +450,7 @@ describe('processEmailSequence', () => {
       }),
       'Resend sequence email send timed out'
     );
-    
+
     // Verify claimEmailSequenceStep was called for both
     expect(mockMiscService.claimEmailSequenceStep).toHaveBeenCalledTimes(2);
     expect(mockMiscService.claimEmailSequenceStep).toHaveBeenCalledWith('seq-1', 1);
@@ -579,7 +581,7 @@ describe('processEmailSequence', () => {
 
     // Verify no email was sent (claim failed, so email was skipped)
     expect(mockSendEmail).not.toHaveBeenCalled();
-    
+
     // Verify claimEmailSequenceStep was called
     expect(mockMiscService.claimEmailSequenceStep).toHaveBeenCalledWith('seq-not-found', 1);
 
@@ -841,4 +843,3 @@ describe('processEmailSequence', () => {
     );
   });
 });
-

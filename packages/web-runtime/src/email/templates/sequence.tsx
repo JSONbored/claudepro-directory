@@ -72,7 +72,7 @@ const SEQUENCE_STEPS = {
       },
       {
         title: 'Explore MCP Servers',
-        description: 'Extend Claude\'s capabilities',
+        description: "Extend Claude's capabilities",
         href: 'https://claudepro.directory/mcp',
       },
       {
@@ -98,7 +98,7 @@ const SEQUENCE_STEPS = {
       },
       {
         title: 'Check the Trending page',
-        description: 'See what\'s hot this week',
+        description: "See what's hot this week",
       },
       {
         title: 'Copy configurations',
@@ -155,7 +155,7 @@ const SEQUENCE_STEPS = {
       {
         emoji: '💬',
         title: 'Rate and review',
-        description: 'Share feedback on tools you\'ve tried',
+        description: "Share feedback on tools you've tried",
       },
     ],
     closing: 'Happy building!',
@@ -407,4 +407,3 @@ const closingStyle: React.CSSProperties = {
   color: emailTheme.textPrimary,
   margin: `${spacing.lg} 0 0`,
 };
-

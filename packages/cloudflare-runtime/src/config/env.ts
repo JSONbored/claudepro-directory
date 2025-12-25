@@ -15,7 +15,7 @@ import { z } from 'zod';
 
 /**
  * Base Env type for Cloudflare Workers
- * 
+ *
  * Cloudflare Workers env is a Record<string, unknown> with bindings.
  * We extend this with Secrets Store bindings in ExtendedEnv.
  */
@@ -25,7 +25,7 @@ type Env = Record<string, unknown>;
  * Extended Env interface with Secrets Store bindings
  *
  * Secrets Store bindings have a `get()` method that returns a Promise<string>.
- * 
+ *
  * IMPORTANT: We use Infisical SDK for most secrets (single name, environment-specific values).
  * Only Infisical authentication credentials are stored in Cloudflare Secrets Store.
  * All other secrets (Supabase, Inngest) are fetched from Infisical at runtime.
@@ -39,7 +39,7 @@ export interface ExtendedEnv extends Env {
   INFISICAL_CLIENT_SECRET_SECRET?: {
     get(): Promise<string>;
   };
-  
+
   // Optional: Explicit environment override (dev, staging, prod)
   // If not set, determined from NODE_ENV or worker name
   INFISICAL_ENV?: string;
@@ -205,7 +205,7 @@ export interface CloudflareEnv {
 export async function parseEnv(env: ExtendedEnv): Promise<CloudflareEnv> {
   // Import Infisical utilities (dynamic import to avoid circular dependencies)
   const { getInfisicalSecret, getInfisicalEnvironment } = await import('../infisical/client.js');
-  
+
   // Determine environment (dev, staging, prod) from worker config
   const infisicalEnv = getInfisicalEnvironment(env);
 
@@ -220,13 +220,19 @@ export async function parseEnv(env: ExtendedEnv): Promise<CloudflareEnv> {
 
   // Validate required Supabase secrets
   if (!supabaseUrl) {
-    throw new Error(`Missing NEXT_PUBLIC_SUPABASE_URL secret in Infisical (environment: ${infisicalEnv})`);
+    throw new Error(
+      `Missing NEXT_PUBLIC_SUPABASE_URL secret in Infisical (environment: ${infisicalEnv})`
+    );
   }
   if (!supabaseAnonKey) {
-    throw new Error(`Missing NEXT_PUBLIC_SUPABASE_ANON_KEY secret in Infisical (environment: ${infisicalEnv})`);
+    throw new Error(
+      `Missing NEXT_PUBLIC_SUPABASE_ANON_KEY secret in Infisical (environment: ${infisicalEnv})`
+    );
   }
   if (!supabaseServiceRoleKey) {
-    throw new Error(`Missing SUPABASE_SERVICE_ROLE_KEY secret in Infisical (environment: ${infisicalEnv})`);
+    throw new Error(
+      `Missing SUPABASE_SERVICE_ROLE_KEY secret in Infisical (environment: ${infisicalEnv})`
+    );
   }
 
   // Inngest secrets are optional

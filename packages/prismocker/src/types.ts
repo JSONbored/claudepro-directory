@@ -173,4 +173,3 @@ export interface PrismockerOptions {
     stores: Map<string, any[]>
   ) => Promise<number> | number;
 }
-

@@ -8,5 +8,4 @@
 --
 -- Function signature: is_bookmarked_batch(p_user_id uuid, p_items jsonb)
 -- Related: AccountService.isBookmarkedBatch uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.is_bookmarked_batch(uuid, jsonb);
+DROP FUNCTION IF EXISTS public.is_bookmarked_batch (uuid, jsonb);

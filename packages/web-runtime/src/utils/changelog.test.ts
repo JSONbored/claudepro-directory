@@ -68,7 +68,9 @@ describe('changelog utilities', () => {
     it('should call formatRelativeDate with simple style', () => {
       mockFormatRelativeDate.mockReturnValue('2 days ago');
       const result = getRelativeTime('2024-01-13T00:00:00Z');
-      expect(mockFormatRelativeDate).toHaveBeenCalledWith('2024-01-13T00:00:00Z', { style: 'simple' });
+      expect(mockFormatRelativeDate).toHaveBeenCalledWith('2024-01-13T00:00:00Z', {
+        style: 'simple',
+      });
       expect(result).toBe('2 days ago');
     });
   });
@@ -139,4 +141,3 @@ describe('changelog utilities', () => {
     });
   });
 });
-

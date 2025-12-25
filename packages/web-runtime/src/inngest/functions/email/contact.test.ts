@@ -47,16 +47,18 @@ jest.mock('@heyclaude/shared-runtime', () => {
     }
     return new Error(fallbackMessage || String(error || 'Unknown error'));
   });
-  const mockEscapeHtml = jest.fn((str: string) => str.replace(/[&<>"']/g, (char) => {
-    const map: Record<string, string> = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#039;',
-    };
-    return map[char] || char;
-  }));
+  const mockEscapeHtml = jest.fn((str: string) =>
+    str.replace(/[&<>"']/g, (char) => {
+      const map: Record<string, string> = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+      };
+      return map[char] || char;
+    })
+  );
   return {
     normalizeError: mockNormalizeError,
     escapeHtml: mockEscapeHtml,
@@ -91,11 +93,17 @@ jest.mock('../../../email/base-template', () => {
       submittedAt?: string;
     };
     const { name, category, message, categoryEmoji, submissionId, email, submittedAt } = propsObj;
-    
+
     // Check if template is a component (has name property) or is the component itself
-    const templateName = (Template as any)?.name || (Template as any)?.displayName || (typeof Template === 'function' ? Template.name : 'Unknown');
-    
-    if (templateName === 'ContactAdminNotificationEmail' || templateName.includes('ContactAdminNotification')) {
+    const templateName =
+      (Template as any)?.name ||
+      (Template as any)?.displayName ||
+      (typeof Template === 'function' ? Template.name : 'Unknown');
+
+    if (
+      templateName === 'ContactAdminNotificationEmail' ||
+      templateName.includes('ContactAdminNotification')
+    ) {
       // Return HTML that includes all the data the tests expect
       return `<html>
         <body>
@@ -109,8 +117,11 @@ jest.mock('../../../email/base-template', () => {
         </body>
       </html>`;
     }
-    
-    if (templateName === 'ContactUserConfirmationEmail' || templateName.includes('ContactUserConfirmation')) {
+
+    if (
+      templateName === 'ContactUserConfirmationEmail' ||
+      templateName.includes('ContactUserConfirmation')
+    ) {
       return `<html>
         <body>
           <h1>Thanks for reaching out, ${name}!</h1>
@@ -118,7 +129,7 @@ jest.mock('../../../email/base-template', () => {
         </body>
       </html>`;
     }
-    
+
     return `<html><body>Default Email</body></html>`;
   });
   return {
@@ -689,4 +700,3 @@ describe('sendContactEmails', () => {
     expect((result2 as any).submissionId).toBe('sub-idempotent');
   });
 });
-

@@ -1,6 +1,6 @@
 /**
  * Basic tests for Prismocker
- * 
+ *
  * These tests verify the core functionality works correctly.
  */
 
@@ -392,7 +392,12 @@ describe('Prismocker', () => {
 
   it('should support isSet operator', async () => {
     await prisma.companies.create({
-      data: { name: 'Company 1', owner_id: 'owner-1', slug: 'company-1', description: 'Description' },
+      data: {
+        name: 'Company 1',
+        owner_id: 'owner-1',
+        slug: 'company-1',
+        description: 'Description',
+      },
     });
     await prisma.companies.create({
       data: { name: 'Company 2', owner_id: 'owner-2', slug: 'company-2', description: null },
@@ -423,7 +428,9 @@ describe('Prismocker', () => {
     });
 
     expect(withoutDescription).toHaveLength(2);
-    expect(withoutDescription.every((c: any) => !c.description || c.description === null)).toBe(true);
+    expect(withoutDescription.every((c: any) => !c.description || c.description === null)).toBe(
+      true
+    );
   });
 
   it('should use indexes for fast findUnique lookups', async () => {
@@ -740,7 +747,9 @@ describe('Prismocker', () => {
       });
 
       // Execute simple SELECT query
-      const results = (await prisma.$queryRawUnsafe('SELECT * FROM companies')) as Array<{ name: string }>;
+      const results = (await prisma.$queryRawUnsafe('SELECT * FROM companies')) as Array<{
+        name: string;
+      }>;
       expect(results).toHaveLength(2);
       expect(results[0].name).toBe('Company 1');
     });
@@ -754,7 +763,9 @@ describe('Prismocker', () => {
       });
 
       // Execute SELECT with WHERE
-      const results = (await prisma.$queryRawUnsafe("SELECT * FROM companies WHERE id = 'company-1'")) as Array<{ name: string }>;
+      const results = (await prisma.$queryRawUnsafe(
+        "SELECT * FROM companies WHERE id = 'company-1'"
+      )) as Array<{ name: string }>;
       expect(results).toHaveLength(1);
       expect(results[0].name).toBe('Company 1');
     });
@@ -784,7 +795,10 @@ describe('Prismocker', () => {
 
       // Execute $queryRaw with template string
       const companyId = 'company-1';
-      const results = (await prisma.$queryRaw`SELECT * FROM companies WHERE id = ${companyId}`) as Array<{ name: string }>;
+      const results =
+        (await prisma.$queryRaw`SELECT * FROM companies WHERE id = ${companyId}`) as Array<{
+          name: string;
+        }>;
       expect(results).toHaveLength(1);
       expect(results[0].name).toBe('Company 1');
     });
@@ -867,9 +881,14 @@ describe('Prismocker', () => {
         ]);
       }
 
-      const result = await customPrisma.$executeRawUnsafe('DELETE FROM users WHERE name = $1', 'Alice');
+      const result = await customPrisma.$executeRawUnsafe(
+        'DELETE FROM users WHERE name = $1',
+        'Alice'
+      );
       expect(result).toBe(1); // One user deleted
-      const remainingUsers = isPrismockerClient(customPrisma) ? getDataTyped(customPrisma, 'users') : [];
+      const remainingUsers = isPrismockerClient(customPrisma)
+        ? getDataTyped(customPrisma, 'users')
+        : [];
       expect(remainingUsers).toHaveLength(1);
       expect(remainingUsers[0].name).toBe('Bob');
     });
@@ -939,13 +958,16 @@ describe('Prismocker', () => {
       }
 
       // Verify data is accessible
-      const usersBefore = isPrismockerClient(customPrisma) ? getDataTyped(customPrisma, 'users') : [];
+      const usersBefore = isPrismockerClient(customPrisma)
+        ? getDataTyped(customPrisma, 'users')
+        : [];
       expect(usersBefore).toHaveLength(1);
       expect(usersBefore[0].id).toBe('user-1');
 
       const userId = 'user-1';
       const newName = 'John';
-      const result = await customPrisma.$executeRaw`UPDATE users SET name = ${newName} WHERE id = ${userId}`;
+      const result =
+        await customPrisma.$executeRaw`UPDATE users SET name = ${newName} WHERE id = ${userId}`;
       expect(result).toBe(1);
 
       const users = isPrismockerClient(customPrisma) ? getDataTyped(customPrisma, 'users') : [];
@@ -1100,7 +1122,9 @@ describe('Prismocker', () => {
 
     it('should visualize state without indexes and cache', () => {
       if (isPrismockerClient(prisma)) {
-        setDataTyped(prisma, 'companies', [{ id: 'company-1', name: 'Company 1', owner_id: 'user-1', slug: 'company-1' }]);
+        setDataTyped(prisma, 'companies', [
+          { id: 'company-1', name: 'Company 1', owner_id: 'user-1', slug: 'company-1' },
+        ]);
 
         const visualization = prisma.visualizeState({
           maxRecordsPerModel: 5,
@@ -1345,7 +1369,9 @@ describe('Prismocker', () => {
       await prisma.companies.findUnique({ where: { id: 'company-1' } });
 
       const metrics = await prisma.$metrics();
-      const queriesCounter = metrics.counters.find((c: any) => c.key === 'prisma_client_queries_total');
+      const queriesCounter = metrics.counters.find(
+        (c: any) => c.key === 'prisma_client_queries_total'
+      );
       expect(queriesCounter).toBeDefined();
       expect(queriesCounter.value).toBe(2);
     });
@@ -1360,4 +1386,3 @@ describe('Prismocker', () => {
     });
   });
 });
-

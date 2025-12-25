@@ -44,7 +44,11 @@ export function OAuthLayout({ children }: OAuthLayoutProps) {
     const html = document.documentElement;
     html.classList.add('dark');
     // Store original theme preference to restore later if needed
-    const originalTheme = html.classList.contains('light') ? 'light' : html.classList.contains('dark') ? 'dark' : null;
+    const originalTheme = html.classList.contains('light')
+      ? 'light'
+      : html.classList.contains('dark')
+        ? 'dark'
+        : null;
 
     return () => {
       // Cleanup: restore original theme or remove dark class
@@ -54,10 +58,10 @@ export function OAuthLayout({ children }: OAuthLayoutProps) {
   }, []);
 
   return (
-    <div className="bg-black relative min-h-dvh min-h-screen flex items-center justify-center p-4">
+    <div className="relative flex min-h-dvh min-h-screen items-center justify-center bg-black p-4">
       {/* Centered card - white background (pure white to match Vercel) */}
       <motion.div
-        className="bg-white text-black w-full max-w-lg rounded-lg p-8 shadow-lg"
+        className="w-full max-w-lg rounded-lg bg-white p-8 text-black shadow-lg"
         initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         transition={SPRING.smooth}
@@ -67,4 +71,3 @@ export function OAuthLayout({ children }: OAuthLayoutProps) {
     </div>
   );
 }
-

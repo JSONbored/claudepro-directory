@@ -30,32 +30,32 @@ interface EnumDefinition {
  */
 function parsePrismaEnums(schemaContent: string): EnumDefinition[] {
   const enums: EnumDefinition[] = [];
-  
+
   // Match enum blocks: enum name { ... }
   const enumRegex = /enum\s+(\w+)\s*\{([^}]+)\}/g;
   let match;
-  
+
   while ((match = enumRegex.exec(schemaContent)) !== null) {
     const enumName = match[1];
     const enumBody = match[2];
-    
+
     // Parse enum values (handles @map() directives)
     const valueRegex = /(\w+)(?:\s+@map\(["']([^"']+)["']\))?/g;
     const values: Array<{ key: string; value: string }> = [];
     let valueMatch;
-    
+
     while ((valueMatch = valueRegex.exec(enumBody)) !== null) {
       const key = valueMatch[1];
       // If @map() exists, use mapped value; otherwise use key as value
       const value = valueMatch[2] || key;
       values.push({ key, value });
     }
-    
+
     if (values.length > 0) {
       enums.push({ name: enumName, values });
     }
   }
-  
+
   return enums;
 }
 
@@ -66,7 +66,7 @@ function generateEnumStub(enumDef: EnumDefinition): string {
   const entries = enumDef.values
     .map(({ key, value }) => `  ${key}: ${JSON.stringify(value)}`)
     .join(',\n');
-  
+
   return `export const ${enumDef.name} = {\n${entries},\n} as const;`;
 }
 
@@ -99,11 +99,11 @@ automatic ENUM mocking when using Prismocker with Vitest.
  */
 async function main() {
   const args = process.argv.slice(2);
-  
+
   // Parse arguments
   let schemaPath = './prisma/schema.prisma';
   let mockPath = './__mocks__/@prisma/client.ts';
-  
+
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === '--help' || arg === '-h') {
@@ -115,12 +115,12 @@ async function main() {
       mockPath = args[++i];
     }
   }
-  
+
   // Resolve paths relative to current working directory
   const cwd = process.cwd();
   const resolvedSchemaPath = resolve(cwd, schemaPath);
   const resolvedMockPath = resolve(cwd, mockPath);
-  
+
   try {
     // Check if schema file exists
     if (!existsSync(resolvedSchemaPath)) {
@@ -128,24 +128,24 @@ async function main() {
       console.error(`   Please provide a valid path to your Prisma schema file.`);
       process.exit(1);
     }
-    
+
     // Read Prisma schema
     const schemaContent = await readFile(resolvedSchemaPath, 'utf-8');
-    
+
     // Parse enums
     const enums = parsePrismaEnums(schemaContent);
-    
+
     if (enums.length === 0) {
       console.log('⚠️  No enums found in schema file');
       process.exit(0);
     }
-    
+
     console.log(`Found ${enums.length} enums in schema`);
-    
+
     // Check if mock file exists
     const mockFileExists = existsSync(resolvedMockPath);
     let mockContent = '';
-    
+
     if (mockFileExists) {
       // Read existing mock file
       mockContent = await readFile(resolvedMockPath, 'utf-8');
@@ -153,7 +153,7 @@ async function main() {
       // Create basic mock file structure if it doesn't exist
       console.log(`⚠️  Mock file not found: ${resolvedMockPath}`);
       console.log(`   Creating new mock file...`);
-      
+
       mockContent = `/**
  * Prismocker Mock for @prisma/client
  *
@@ -204,14 +204,14 @@ export const Prisma = {
 
 `;
     }
-    
+
     // Find the section where enums are exported
     const enumStartMarker = '// Export Prisma enum stubs';
     const enumEndMarker = '// NOTE: This section is auto-generated';
-    
+
     let startIndex = mockContent.indexOf(enumStartMarker);
     let endIndex = mockContent.indexOf(enumEndMarker, startIndex);
-    
+
     // If markers not found, try alternative markers
     if (startIndex === -1) {
       const altMarker = '// Export Prisma enum stubs to prevent Vitest';
@@ -220,7 +220,7 @@ export const Prisma = {
         endIndex = mockContent.indexOf('// NOTE:', startIndex);
       }
     }
-    
+
     // If still not found, append to end of file
     if (startIndex === -1 || endIndex === -1) {
       // Append enum section to end of file
@@ -242,9 +242,9 @@ ${enumExports}
       // Replace enum section
       const beforeEnums = mockContent.substring(0, startIndex);
       const afterEnums = mockContent.substring(endIndex);
-      
+
       const enumExports = enums.map(generateEnumStub).join('\n\n');
-      
+
       mockContent = `${beforeEnums}// Export Prisma enum stubs to prevent Vitest from trying to load the actual @prisma/client module
 // These are stub objects that match the structure of Prisma-generated enums
 // When code imports \`import { enum_name } from '@prisma/client'\`, Vitest will use these stubs
@@ -259,15 +259,15 @@ ${enumExports}
 
 ${afterEnums}`;
     }
-    
+
     // Ensure directory exists
     await mkdir(dirname(resolvedMockPath), { recursive: true });
-    
+
     // Write updated mock file
     await writeFile(resolvedMockPath, mockContent, 'utf-8');
-    
+
     console.log(`✅ Generated ${enums.length} enum stubs in ${mockPath}`);
-    console.log(`   Enums: ${enums.map(e => e.name).join(', ')}`);
+    console.log(`   Enums: ${enums.map((e) => e.name).join(', ')}`);
   } catch (error) {
     console.error('❌ Error generating enum stubs:', error);
     process.exit(1);

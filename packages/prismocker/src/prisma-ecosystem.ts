@@ -196,23 +196,25 @@ export function validateWithZod(
     return schema.parse(data);
   } catch (error: any) {
     const dataPreview = JSON.stringify(data, null, 2).slice(0, 500);
-    const issues = error.issues ? JSON.stringify(error.issues, null, 2) : 'No detailed issues available';
-    
+    const issues = error.issues
+      ? JSON.stringify(error.issues, null, 2)
+      : 'No detailed issues available';
+
     throw new Error(
       `Prismocker: Zod validation failed for ${modelName}.${operation}\n\n` +
-      `Validation error: ${error.message}\n\n` +
-      `Data being validated:\n${dataPreview}${dataPreview.length >= 500 ? '...' : ''}\n\n` +
-      (error.issues ? `Validation issues:\n${issues}\n\n` : '') +
-      `This usually means:\n` +
-      `  1. The data doesn't match the Zod schema requirements\n` +
-      `  2. Required fields are missing or have wrong types\n` +
-      `  3. The Zod schema path is incorrect or schema is outdated\n\n` +
-      `To fix:\n` +
-      `  - Check that all required fields are present and correctly typed\n` +
-      `  - Verify your Zod schema path: ${modelName}${operation === 'create' ? 'CreateInputSchema' : 'UpdateInputSchema'}\n` +
-      `  - Regenerate Zod schemas: npx prisma generate\n` +
-      `  - Disable Zod validation: createPrismocker({ validateWithZod: false })\n` +
-      `  - Check the validation issues above for specific field problems`
+        `Validation error: ${error.message}\n\n` +
+        `Data being validated:\n${dataPreview}${dataPreview.length >= 500 ? '...' : ''}\n\n` +
+        (error.issues ? `Validation issues:\n${issues}\n\n` : '') +
+        `This usually means:\n` +
+        `  1. The data doesn't match the Zod schema requirements\n` +
+        `  2. Required fields are missing or have wrong types\n` +
+        `  3. The Zod schema path is incorrect or schema is outdated\n\n` +
+        `To fix:\n` +
+        `  - Check that all required fields are present and correctly typed\n` +
+        `  - Verify your Zod schema path: ${modelName}${operation === 'create' ? 'CreateInputSchema' : 'UpdateInputSchema'}\n` +
+        `  - Regenerate Zod schemas: npx prisma generate\n` +
+        `  - Disable Zod validation: createPrismocker({ validateWithZod: false })\n` +
+        `  - Check the validation issues above for specific field problems`
     );
   }
 }
@@ -255,8 +257,7 @@ export async function loadZodSchema(
 ): Promise<any | undefined> {
   try {
     // Convert model name to PascalCase (e.g., 'companies' -> 'Companies')
-    const pascalModelName =
-      modelName.charAt(0).toUpperCase() + modelName.slice(1);
+    const pascalModelName = modelName.charAt(0).toUpperCase() + modelName.slice(1);
 
     // Map operation to schema suffix
     const schemaSuffixMap: Record<string, string> = {
@@ -272,7 +273,7 @@ export async function loadZodSchema(
     // Try to import the schema using dynamic import
     const schemas = await dynamicImport(zodSchemasPath);
     if (!schemas) return undefined;
-    
+
     return schemas[schemaName];
   } catch {
     // Schema not available - this is fine, validation is optional
@@ -291,7 +292,7 @@ export async function loadZodSchema(
  */
 export type ExtendedPrismaClient<
   TBase extends PrismaClient = PrismaClient,
-  TExtensions = unknown
+  TExtensions = unknown,
 > = TBase & TExtensions;
 
 /**
@@ -337,10 +338,7 @@ export function hasExtensions(prisma: PrismaClient): boolean {
  * });
  * ```
  */
-export function applyExtensions<T extends PrismaClient>(
-  prisma: T,
-  extensions: any
-): T {
+export function applyExtensions<T extends PrismaClient>(prisma: T, extensions: any): T {
   // Prisma's $extends() creates a new client with extensions
   // For Prismocker, we can simulate this by adding methods to the proxy
   // This is a simplified implementation - full support would require
@@ -377,4 +375,3 @@ export function createPrismockerWithEcosystem<T extends PrismaClient>(
   const { createPrismocker } = require('./index.js');
   return createPrismocker(options) as T;
 }
-

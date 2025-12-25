@@ -32,8 +32,7 @@ export async function ensureEnvVars(
   const missingOptionalVars = optionalVars.filter((v) => !getEnvValue(v));
 
   if (missingVars.length === 0) {
-    const source =
-      env.VERCEL || env.VERCEL_ENV ? 'Platform (Vercel/CI)' : 'Infisical';
+    const source = env.VERCEL || env.VERCEL_ENV ? 'Platform (Vercel/CI)' : 'Infisical';
     if (missingOptionalVars.length > 0) {
       logger.info(
         `✅ Required environment variables loaded from ${source} (${missingOptionalVars.length} optional vars missing)`,
@@ -56,11 +55,7 @@ export async function ensureEnvVars(
     env.VERCEL_ENV !== undefined;
 
   if (isCI) {
-    const environment = env.VERCEL
-      ? 'vercel'
-      : getEnvValue('GITHUB_ACTIONS')
-        ? 'github'
-        : 'ci';
+    const environment = env.VERCEL ? 'vercel' : getEnvValue('GITHUB_ACTIONS') ? 'github' : 'ci';
     logger.warn(`⚠️  Missing environment variables in CI/Build: ${missingVars.join(', ')}`, {
       command: 'env',
       missingVarsCount: missingVars.length,

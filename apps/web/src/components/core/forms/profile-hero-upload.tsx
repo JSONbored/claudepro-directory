@@ -254,24 +254,18 @@ export function ProfileHeroUpload({ currentHeroUrl, onHeroChange }: ProfileHeroU
   return (
     <div className="space-y-3">
       {heroPreview ? (
-        <div className="relative h-48 w-full overflow-hidden rounded-lg border border-border">
-          <Image
-            src={heroPreview}
-            alt="Hero preview"
-            fill
-            className="object-cover"
-            unoptimized
-          />
+        <div className="border-border relative h-48 w-full overflow-hidden rounded-lg border">
+          <Image src={heroPreview} alt="Hero preview" fill className="object-cover" unoptimized />
           {isUploading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+            <div className="bg-background/80 absolute inset-0 flex items-center justify-center backdrop-blur-sm">
+              <div className="border-accent h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
             </div>
           )}
         </div>
       ) : (
-        <div className="bg-muted flex h-48 w-full items-center justify-center rounded-lg border border-dashed border-border">
+        <div className="bg-muted border-border flex h-48 w-full items-center justify-center rounded-lg border border-dashed">
           <div className="text-center">
-            <Camera className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
+            <Camera className="text-muted-foreground mx-auto mb-2 h-12 w-12" />
             <p className="text-muted-foreground text-sm">No hero image</p>
           </div>
         </div>
@@ -321,4 +315,3 @@ export function ProfileHeroUpload({ currentHeroUrl, onHeroChange }: ProfileHeroU
     </div>
   );
 }
-

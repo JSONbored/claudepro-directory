@@ -5,5 +5,4 @@
 --
 -- Description: Remove get_all_app_settings RPC function
 -- Codebase uses MiscService.getAppSetting() for individual settings instead.
-
-DROP FUNCTION IF EXISTS public.get_all_app_settings();
+DROP FUNCTION IF EXISTS public.get_all_app_settings ();

@@ -25,5 +25,4 @@
 -- Related Changes:
 -- - packages/data-layer/src/services/content.ts: Converted getContentTemplates() to use Prisma
 -- - Types defined locally in service file (ContentTemplatesItem, ContentTemplatesResult)
-
-DROP FUNCTION IF EXISTS public.get_content_templates(public.content_category);
+DROP FUNCTION IF EXISTS public.get_content_templates (public.content_category);

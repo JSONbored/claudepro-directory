@@ -572,7 +572,6 @@ describe('ContentService', () => {
         (prismaMock as any).setData('sponsored_content', mockSponsored);
       }
 
-
       const result = await contentService.getEnrichedContentList({
         p_category: 'agents',
         p_limit: 10,
@@ -658,8 +657,6 @@ describe('ContentService', () => {
         (prismaMock as any).setData('sponsored_content', mockSponsored);
       }
 
-
-
       const result = await contentService.getEnrichedContentList({
         p_slugs: ['test-1', 'test-2'],
         p_limit: 10,
@@ -680,8 +677,6 @@ describe('ContentService', () => {
         (prismaMock as any).setData('content', []);
         (prismaMock as any).setData('sponsored_content', []);
       }
-
-
 
       const result = await contentService.getEnrichedContentList({
         p_category: 'agents',
@@ -787,7 +782,7 @@ describe('ContentService', () => {
       expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
         expect.stringContaining('get_related_content'),
         expect.anything(), // p_category
-        expect.anything(), // p_limit  
+        expect.anything(), // p_limit
         expect.anything() // p_slug
       );
       // Single-return function unwraps array
@@ -814,7 +809,6 @@ describe('ContentService', () => {
         (prismaMock as any).setData('content_templates', mockTemplates as any);
       }
 
-
       const result = await contentService.getContentTemplates({
         p_category: 'agents',
       });
@@ -829,8 +823,6 @@ describe('ContentService', () => {
       if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
         (prismaMock as any).setData('content_templates', []);
       }
-
-
 
       const result = await contentService.getContentTemplates({
         p_category: 'nonexistent',
@@ -922,7 +914,6 @@ describe('ContentService', () => {
         (prismaMock as any).setData('v_content_list_slim', items as any);
       }
 
-
       const result = await contentService.getContentPaginatedSlim({});
 
       expect(result).toHaveProperty('items');
@@ -995,7 +986,6 @@ describe('ContentService', () => {
     });
 
     it('should validate limit range', async () => {
-
       await expect(contentService.getContentPaginatedSlim({ p_limit: 0 })).rejects.toThrow(
         'Invalid limit'
       );
@@ -1006,14 +996,12 @@ describe('ContentService', () => {
     });
 
     it('should validate offset', async () => {
-
       await expect(contentService.getContentPaginatedSlim({ p_offset: -1 })).rejects.toThrow(
         'Invalid offset'
       );
     });
 
     it('should validate order_by', async () => {
-
       await expect(
         contentService.getContentPaginatedSlim({
           p_order_by: 'invalid',
@@ -1022,7 +1010,6 @@ describe('ContentService', () => {
     });
 
     it('should validate order_direction', async () => {
-
       await expect(
         contentService.getContentPaginatedSlim({
           p_order_direction: 'invalid',
@@ -1068,7 +1055,6 @@ describe('ContentService', () => {
         (prismaMock as any).setData('v_content_list_slim', items as any);
       }
 
-
       const result = await contentService.getContentPaginatedSlim({
         p_category: 'agents',
         p_limit: 20,
@@ -1083,8 +1069,6 @@ describe('ContentService', () => {
       if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
         (prismaMock as any).setData('v_content_list_slim', []);
       }
-
-
 
       const result = await contentService.getContentPaginatedSlim({
         p_category: 'nonexistent',
@@ -1157,8 +1141,6 @@ describe('ContentService', () => {
         (prismaMock as any).setData('v_content_list_slim', items as any);
       }
 
-
-
       const result = await contentService.getContentPaginatedSlim({
         p_limit: 10,
         p_offset: 0,
@@ -1203,7 +1185,6 @@ describe('ContentService', () => {
       if ('setData' in prismaMock && typeof (prismaMock as any).setData === 'function') {
         (prismaMock as any).setData('content', [mockContent]);
       }
-
 
       const result = await contentService.getContentDetailCore({
         p_category: 'agents',
@@ -1350,9 +1331,7 @@ describe('ContentService', () => {
 
       const result = await contentService.getWeeklyDigest();
 
-      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(
-        expect.stringContaining('get_weekly_digest')
-      );
+      expect(queryRawUnsafeSpy).toHaveBeenCalledWith(expect.stringContaining('get_weekly_digest'));
       expect(result).toEqual(mockData);
     });
 

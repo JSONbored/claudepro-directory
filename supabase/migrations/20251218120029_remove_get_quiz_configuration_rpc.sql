@@ -8,5 +8,4 @@
 --
 -- Function signature: get_quiz_configuration()
 -- Related: MiscService.getQuizConfiguration uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_quiz_configuration();
+DROP FUNCTION IF EXISTS public.get_quiz_configuration ();

@@ -137,8 +137,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'application/json',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -309,7 +313,7 @@ describe('POST /api/bookmarks/remove', () => {
 
     // Route returns SafeActionResult structure - authedAction returns serverError for auth failures
     expectStatus(response, 401);
-    
+
     if (typeof body === 'object' && body !== null) {
       const result = body as SafeActionResult<unknown>;
       expect(result.serverError).toBeDefined();

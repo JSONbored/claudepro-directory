@@ -359,4 +359,3 @@ describe('Infisical Cache', () => {
     });
   });
 });
-

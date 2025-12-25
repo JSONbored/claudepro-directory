@@ -14,7 +14,7 @@ rule:
     - not:
         has:
           regex: 'const\s+\{\s*\w+,\s*error\s*\}\s*=\s*await\s+\w+\.rpc\('
-message: "RPC calls must destructure error from response. Use: const { data, error } = await supabase.rpc(...)"
+message: 'RPC calls must destructure error from response. Use: const { data, error } = await supabase.rpc(...)'
 severity: error
 
 ---
@@ -29,7 +29,7 @@ rule:
     - not:
         follows:
           regex: 'if\s*\(\s*error\s*\)\s*\{'
-message: "RPC calls must check for errors after destructuring. Add: if (error) { throw error; } or handle error appropriately"
+message: 'RPC calls must check for errors after destructuring. Add: if (error) { throw error; } or handle error appropriately'
 severity: error
 
 ---
@@ -44,7 +44,7 @@ rule:
     - not:
         has:
           regex: 'normalizeError\('
-message: "RPC error handlers must use normalizeError() before logging or throwing. Import normalizeError from @heyclaude/web-runtime/logging/server (server) or @heyclaude/shared-runtime/logger (shared)"
+message: 'RPC error handlers must use normalizeError() before logging or throwing. Import normalizeError from @heyclaude/web-runtime/logging/server (server) or @heyclaude/shared-runtime/logger (shared)'
 severity: error
 
 ---

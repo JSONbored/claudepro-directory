@@ -14,7 +14,7 @@ rule:
     - inside:
         has:
           regex: 'use client'
-message: "Client components cannot import server-only utilities. Use client-compatible alternatives from YOUR_LOGGER_PACKAGE (client)"
+message: 'Client components cannot import server-only utilities. Use client-compatible alternatives from YOUR_LOGGER_PACKAGE (client)'
 severity: error
 
 ---
@@ -30,7 +30,7 @@ rule:
     - inside:
         has:
           regex: 'use client'
-message: "Client components cannot use Node.js APIs (fs, path, crypto, etc.). These are server-only"
+message: 'Client components cannot use Node.js APIs (fs, path, crypto, etc.). These are server-only'
 severity: error
 
 ---
@@ -45,7 +45,7 @@ rule:
         inside:
           has:
             regex: 'use client'
-message: "Server components cannot use browser APIs (window, document, localStorage, etc.). Move to client component or use server-safe alternatives"
+message: 'Server components cannot use browser APIs (window, document, localStorage, etc.). Move to client component or use server-safe alternatives'
 severity: error
 
 ---
@@ -77,7 +77,7 @@ rule:
     - inside:
         has:
           regex: 'use client'
-message: "Client components must use client logging utilities (logClientError, logClientWarn, etc.), not server logger. Import from YOUR_LOGGER_PACKAGE (client)"
+message: 'Client components must use client logging utilities (logClientError, logClientWarn, etc.), not server logger. Import from YOUR_LOGGER_PACKAGE (client)'
 severity: error
 
 ---
@@ -94,7 +94,7 @@ rule:
         inside:
           has:
             regex: 'use client'
-message: "Server components must use server logging (logger), not client logging utilities. Import logger from YOUR_LOGGER_PACKAGE (server)"
+message: 'Server components must use server logging (logger), not client logging utilities. Import logger from YOUR_LOGGER_PACKAGE (server)'
 severity: error
 
 ---

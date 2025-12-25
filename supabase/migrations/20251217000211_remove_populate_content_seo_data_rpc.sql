@@ -5,5 +5,4 @@
 --
 -- Description: Remove populate_content_seo_data RPC function - Not found in codebase, only in generated types
 -- Function signature: populate_content_seo_data()
-
-DROP FUNCTION IF EXISTS public.populate_content_seo_data();
+DROP FUNCTION IF EXISTS public.populate_content_seo_data ();

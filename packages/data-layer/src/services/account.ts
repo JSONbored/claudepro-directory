@@ -388,9 +388,7 @@ export class AccountService extends BasePrismaService {
    * @param args - Arguments with p_user_id
    * @returns Account dashboard data matching RPC return structure
    */
-  async getAccountDashboard(
-    args: GetAccountDashboardArgs
-  ): Promise<
+  async getAccountDashboard(args: GetAccountDashboardArgs): Promise<
     GetAccountDashboardReturns & {
       profile: (GetAccountDashboardReturns['profile'] & { account_age?: number }) | null;
     }
@@ -1041,7 +1039,10 @@ export class AccountService extends BasePrismaService {
 
         // Calculate days active in JavaScript (safe within withSmartCache)
         const daysActive = sponsorship.start_date
-          ? Math.max(0, Math.floor((now.getTime() - sponsorship.start_date.getTime()) / (1000 * 60 * 60 * 24)))
+          ? Math.max(
+              0,
+              Math.floor((now.getTime() - sponsorship.start_date.getTime()) / (1000 * 60 * 60 * 24))
+            )
           : 0;
 
         const impressionCount = sponsorship.impression_count ?? 0;
@@ -1254,7 +1255,7 @@ export class AccountService extends BasePrismaService {
         const weekStart = new Date();
         weekStart.setUTCDate(weekStart.getUTCDate() - weekStart.getUTCDay()); // Start of week (Sunday)
         weekStart.setUTCHours(0, 0, 0, 0);
-        
+
         // Fetch stats, recent merged submissions, and top contributors in parallel
         const [totalCount, pendingCount, mergedThisWeekCountResult, recentMerged, topContributors] =
           await Promise.all([
@@ -1383,15 +1384,50 @@ export class AccountService extends BasePrismaService {
    */
   async isBookmarked(args: IsBookmarkedArgs): Promise<boolean> {
     // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/data-layer/src/services/account.ts:1384',message:'AccountService.isBookmarked - ENTRY',data:{args},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ROOT'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'packages/data-layer/src/services/account.ts:1384',
+        message: 'AccountService.isBookmarked - ENTRY',
+        data: { args },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'ROOT',
+      }),
+    }).catch(() => {});
     // #endregion
     const result = await withSmartCache(
       'isBookmarked',
       'isBookmarked',
       async () => {
         // #region agent log
-        const allBookmarks = await prisma.bookmarks.findMany({ where: { user_id: args.p_user_id } });
-        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/data-layer/src/services/account.ts:1389',message:'isBookmarked - before Prisma query',data:{args,allBookmarksCount:allBookmarks.length,allBookmarks:allBookmarks.map(b=>({id:b.id,user_id:b.user_id,content_type:b.content_type,content_slug:b.content_slug}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        const allBookmarks = await prisma.bookmarks.findMany({
+          where: { user_id: args.p_user_id },
+        });
+        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'packages/data-layer/src/services/account.ts:1389',
+            message: 'isBookmarked - before Prisma query',
+            data: {
+              args,
+              allBookmarksCount: allBookmarks.length,
+              allBookmarks: allBookmarks.map((b) => ({
+                id: b.id,
+                user_id: b.user_id,
+                content_type: b.content_type,
+                content_slug: b.content_slug,
+              })),
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'B',
+          }),
+        }).catch(() => {});
         // #endregion
         const bookmark = await prisma.bookmarks.findFirst({
           where: {
@@ -1403,7 +1439,26 @@ export class AccountService extends BasePrismaService {
         });
         // #region agent log
         const result = bookmark !== null;
-        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'packages/data-layer/src/services/account.ts:1401',message:'isBookmarked - RETURNING FROM SERVICE',data:{bookmarkFound:bookmark!==null,bookmarkId:bookmark?.id,result,resultType:typeof result,isTrue:result === true,isFalse:result === false},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ROOT'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7243/ingest/2d0592d2-813e-46fd-8d41-08438ca12c51', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'packages/data-layer/src/services/account.ts:1401',
+            message: 'isBookmarked - RETURNING FROM SERVICE',
+            data: {
+              bookmarkFound: bookmark !== null,
+              bookmarkId: bookmark?.id,
+              result,
+              resultType: typeof result,
+              isTrue: result === true,
+              isFalse: result === false,
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'ROOT',
+          }),
+        }).catch(() => {});
         // #endregion
         return result;
       },

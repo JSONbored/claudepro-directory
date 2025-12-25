@@ -9,5 +9,4 @@
 --
 -- Function signature: get_submission_dashboard(p_recent_limit integer, p_contributors_limit integer)
 -- Related: AccountService.getSubmissionDashboard uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_submission_dashboard(integer, integer);
+DROP FUNCTION IF EXISTS public.get_submission_dashboard (integer, integer);

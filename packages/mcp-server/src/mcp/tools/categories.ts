@@ -68,14 +68,18 @@ export async function handleListCategories(
       const facetsResult = await searchService.getSearchFacets();
       // GetSearchFacetsReturns is an array of objects with category and content_count
       if (Array.isArray(facetsResult)) {
-        facetsData = facetsResult.map((f: { category: string | null; content_count: number | null }) => ({
-          category: f.category || '',
-          content_count: f.content_count || 0,
-        }));
+        facetsData = facetsResult.map(
+          (f: { category: string | null; content_count: number | null }) => ({
+            category: f.category || '',
+            content_count: f.content_count || 0,
+          })
+        );
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to fetch search facets');
-      logger.warn('SearchService.getSearchFacets failed in listCategories (non-critical)', { error: normalized });
+      logger.warn('SearchService.getSearchFacets failed in listCategories (non-critical)', {
+        error: normalized,
+      });
       // Continue without counts - not critical
     }
 

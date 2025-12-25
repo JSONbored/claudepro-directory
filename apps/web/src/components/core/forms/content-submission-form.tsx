@@ -531,7 +531,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
           transition={springSmooth}
         >
-          <Card className="mb-6 border-success-border bg-success-bg">
+          <Card className="border-success-border bg-success-bg mb-6">
             <CardContent className="pt-6">
               <div className="flex flex-col items-center">
                 <motion.div
@@ -539,11 +539,11 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, rotate: 0 }}
                   transition={{ ...springBouncy, delay: STAGGER.default }}
                 >
-                  <CheckCircle className="mt-0.5 h-6 w-6 flex-shrink-0 text-success" />
+                  <CheckCircle className="text-success mt-0.5 h-6 w-6 flex-shrink-0" />
                 </motion.div>
                 <div className="min-w-0 flex-1">
                   <motion.p
-                    className="text-lg font-semibold text-success"
+                    className="text-success text-lg font-semibold"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: STAGGER.slow }}
@@ -807,7 +807,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         {/* Info Box */}
         <div className="card-base border-info-border bg-info-bg p-3 sm:p-4">
           <div className="flex gap-1 sm:gap-2">
-            <Github className="mt-0.5 h-5 w-5 flex-shrink-0 text-info" />
+            <Github className="text-info mt-0.5 h-5 w-5 flex-shrink-0" />
             <div className="min-w-0 flex-1">
               <p className="text-sm-medium text-info">How it works</p>
               <p className="text-muted-foreground mt-1 text-sm">

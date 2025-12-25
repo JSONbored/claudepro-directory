@@ -2,44 +2,44 @@
   "name": "@heyclaude/cloudflare-runtime",
   "version": "1.1.0",
   "private": true,
-  "type": "module",
   "sideEffects": [
     "./src/prisma/node-globals-polyfill.ts"
   ],
+  "type": "module",
   "exports": {
     ".": {
-      "development": "./src/index.ts",
       "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
       "default": "./src/index.ts"
     },
     "./config/env": {
-      "development": "./src/config/env.ts",
       "types": "./dist/config/env.d.ts",
+      "development": "./src/config/env.ts",
       "default": "./src/config/env.ts"
     },
     "./prisma/client": {
-      "development": "./src/prisma/client.ts",
       "types": "./dist/prisma/client.d.ts",
+      "development": "./src/prisma/client.ts",
       "default": "./src/prisma/client.ts"
     },
     "./auth/supabase": {
-      "development": "./src/auth/supabase.ts",
       "types": "./dist/auth/supabase.d.ts",
+      "development": "./src/auth/supabase.ts",
       "default": "./src/auth/supabase.ts"
     },
     "./logging/pino": {
-      "development": "./src/logging/pino.ts",
       "types": "./dist/logging/pino.d.ts",
+      "development": "./src/logging/pino.ts",
       "default": "./src/logging/pino.ts"
     },
     "./utils/errors": {
-      "development": "./src/utils/errors.ts",
       "types": "./dist/utils/errors.d.ts",
+      "development": "./src/utils/errors.ts",
       "default": "./src/utils/errors.ts"
     },
     "./infisical/client": {
-      "development": "./src/infisical/client.ts",
       "types": "./dist/infisical/client.d.ts",
+      "development": "./src/infisical/client.ts",
       "default": "./src/infisical/client.ts"
     }
   },

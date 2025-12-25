@@ -5,5 +5,4 @@
 --
 -- Description: Remove cancel_email_sequence RPC function - Not found in EmailService or Inngest functions, only in generated types
 -- Function signature: cancel_email_sequence(p_email text)
-
-DROP FUNCTION IF EXISTS public.cancel_email_sequence(text);
+DROP FUNCTION IF EXISTS public.cancel_email_sequence (text);

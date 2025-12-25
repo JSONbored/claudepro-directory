@@ -9,5 +9,4 @@
 --
 -- Function signature: get_contact_commands()
 -- Related: MiscService.getContactCommands uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_contact_commands();
+DROP FUNCTION IF EXISTS public.get_contact_commands ();

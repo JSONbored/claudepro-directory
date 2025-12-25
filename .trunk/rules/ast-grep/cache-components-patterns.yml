@@ -55,7 +55,7 @@ rule:
     - has:
         regex: 'use cache'
     - has:
-          pattern: 'cacheLife'
+        pattern: 'cacheLife'
     - not:
         has:
           pattern: 'cacheTag'
@@ -159,7 +159,7 @@ rule:
     - has:
         regex: 'use cache'
     - has:
-          pattern: "cacheTag('content')"
+        pattern: "cacheTag('content')"
     - has:
         pattern: 'await params'
     - not:

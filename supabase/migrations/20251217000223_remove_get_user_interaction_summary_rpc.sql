@@ -5,5 +5,4 @@
 --
 -- Description: Remove get_user_interaction_summary RPC function - Not found in codebase, only in generated types
 -- Function signature: get_user_interaction_summary(p_user_id uuid)
-
-DROP FUNCTION IF EXISTS public.get_user_interaction_summary(uuid);
+DROP FUNCTION IF EXISTS public.get_user_interaction_summary (uuid);

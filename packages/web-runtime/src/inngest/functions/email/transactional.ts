@@ -14,10 +14,7 @@ import {
   JobPostedEmail,
   PasswordResetEmail,
 } from '../../../email/templates/transactional';
-import {
-  MFAFactorAddedEmail,
-  MFAFactorRemovedEmail,
-} from '../../../email/templates/mfa';
+import { MFAFactorAddedEmail, MFAFactorRemovedEmail } from '../../../email/templates/mfa';
 import { sendEmail } from '../../../integrations/resend';
 import { logger } from '../../../logging/server';
 import { createInngestFunction } from '../../utils/function-factory';

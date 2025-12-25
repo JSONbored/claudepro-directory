@@ -187,7 +187,7 @@ describe('GET /api/status', () => {
     expectStatus(response, 200);
     expectCorsHeaders(response);
     expectCacheHeaders(response, true); // Optional in test env (cacheLife/cacheTag are mocked)
-    
+
     // Verify response body
     if (typeof body === 'object' && body !== null) {
       const statusValue = 'status' in body ? body.status : undefined;
@@ -197,7 +197,7 @@ describe('GET /api/status', () => {
     // Verify RPC was called correctly
     // callRpc generates SQL like: "SELECT * FROM get_api_health_formatted()"
     expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
-      expect.stringContaining('SELECT * FROM get_api_health_formatted'),
+      expect.stringContaining('SELECT * FROM get_api_health_formatted')
       // No arguments for this RPC call
     );
   });
@@ -356,7 +356,7 @@ describe('GET /api/status', () => {
 
     // Verify cache size increased after first call
     expect(cacheAfterFirst).toBeGreaterThan(cacheBefore);
-    
+
     // Verify $queryRawUnsafe was called twice (once per request)
     // Each GET() call creates a new request context with a fresh cache
     expect(prismocker.$queryRawUnsafe).toHaveBeenCalledTimes(2);

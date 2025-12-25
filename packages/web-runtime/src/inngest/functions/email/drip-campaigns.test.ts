@@ -98,21 +98,23 @@ jest.mock('../../utils/monitoring', () => ({
 const { __mockGetService: mockGetService } = jest.requireMock('../../../data/service-factory') as {
   __mockGetService: ReturnType<typeof jest.fn>;
 };
-const {
-  __mockLogger: mockLogger,
-  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
-} = jest.requireMock('../../../logging/server') as {
-  __mockLogger: {
-    info: ReturnType<typeof jest.fn>;
-    warn: ReturnType<typeof jest.fn>;
-    error: ReturnType<typeof jest.fn>;
+const { __mockLogger: mockLogger, __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId } =
+  jest.requireMock('../../../logging/server') as {
+    __mockLogger: {
+      info: ReturnType<typeof jest.fn>;
+      warn: ReturnType<typeof jest.fn>;
+      error: ReturnType<typeof jest.fn>;
+    };
+    __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
   };
-  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-};
-const { __mockNormalizeError: mockNormalizeError } = jest.requireMock('@heyclaude/shared-runtime') as {
+const { __mockNormalizeError: mockNormalizeError } = jest.requireMock(
+  '@heyclaude/shared-runtime'
+) as {
   __mockNormalizeError: ReturnType<typeof jest.fn>;
 };
-const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock('../../../email/base-template') as {
+const { __mockRenderEmailTemplate: mockRenderEmailTemplate } = jest.requireMock(
+  '../../../email/base-template'
+) as {
   __mockRenderEmailTemplate: ReturnType<typeof jest.fn>;
 };
 const { __mockSendEmail: mockSendEmail } = jest.requireMock('../../../integrations/resend') as {
@@ -184,10 +186,10 @@ describe('newsletterDripCampaign', () => {
   afterEach(async () => {
     // Clear all timers
     jest.clearAllTimers();
-    
+
     // Ensure all pending promises are resolved
     await new Promise((resolve) => setImmediate(resolve));
-    
+
     // Clear the test engine reference to allow garbage collection
     // Note: InngestTestEngine doesn't have an explicit cleanup method,
     // but clearing the reference helps ensure no lingering handles
@@ -498,10 +500,10 @@ describe('jobPostingDripCampaign', () => {
   afterEach(async () => {
     // Clear all timers
     jest.clearAllTimers();
-    
+
     // Ensure all pending promises are resolved
     await new Promise((resolve) => setImmediate(resolve));
-    
+
     // Clear the test engine reference to allow garbage collection
     // Note: InngestTestEngine doesn't have an explicit cleanup method,
     // but clearing the reference helps ensure no lingering handles
@@ -926,4 +928,3 @@ describe('jobPostingDripCampaign', () => {
     expect(mockSendEmail).toHaveBeenCalled();
   });
 });
-

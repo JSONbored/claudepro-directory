@@ -155,10 +155,7 @@ export function analyzeDependencies(): DependencyAnalysis {
   try {
     // Try to find tsconfig.json - check multiple possible locations
     let tsConfigPath: string | undefined;
-    const possiblePaths = [
-      join(PROJECT_ROOT, 'tsconfig.json'),
-      join(MCP_ROOT, 'tsconfig.json'),
-    ];
+    const possiblePaths = [join(PROJECT_ROOT, 'tsconfig.json'), join(MCP_ROOT, 'tsconfig.json')];
 
     for (const path of possiblePaths) {
       if (existsSync(path)) {

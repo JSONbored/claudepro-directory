@@ -5,5 +5,4 @@
 --
 -- Description: Remove replay_webhook_event RPC function - No codebase usage found
 -- Function signature: replay_webhook_event(p_webhook_event_id uuid)
-
-DROP FUNCTION IF EXISTS public.replay_webhook_event(uuid);
+DROP FUNCTION IF EXISTS public.replay_webhook_event (uuid);

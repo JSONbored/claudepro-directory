@@ -22,8 +22,8 @@ echo "🚀 Deploying heyclaude-mcp to ${ENV} environment..."
 CLI_TOKEN_VALUE=$(infisical run --env=${ENV} --recursive -- bash -c 'echo "$CLI_TOKEN"' 2>/dev/null | tail -1)
 
 if [ -z "$CLI_TOKEN_VALUE" ]; then
-  echo "❌ Error: CLI_TOKEN not found in Infisical (env: ${ENV}, path: cloudflare/)"
-  exit 1
+	echo "❌ Error: CLI_TOKEN not found in Infisical (env: ${ENV}, path: cloudflare/)"
+	exit 1
 fi
 
 # Deploy with wrangler bundling (agents/mcp is a runtime module, will be resolved at runtime)

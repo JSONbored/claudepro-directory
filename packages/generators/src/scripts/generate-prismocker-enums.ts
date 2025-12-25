@@ -24,22 +24,22 @@ interface EnumDefinition {
  */
 function parsePrismaEnums(schemaContent: string): EnumDefinition[] {
   const enums: EnumDefinition[] = [];
-  
+
   // Match enum blocks: enum name { ... }
   const enumRegex = /enum\s+(\w+)\s*\{([^}]+)\}/g;
   let match;
-  
+
   while ((match = enumRegex.exec(schemaContent)) !== null) {
     const enumName = match[1];
     const enumBody = match[2];
-    
+
     if (!enumName || !enumBody) continue; // Skip if match groups are undefined
-    
+
     // Parse enum values (handles @map() directives)
     const valueRegex = /(\w+)(?:\s+@map\(["']([^"']+)["']\))?/g;
     const values: Array<{ key: string; value: string }> = [];
     let valueMatch: RegExpExecArray | null = null;
-    
+
     while ((valueMatch = valueRegex.exec(enumBody)) !== null) {
       // Capture group 1 is always defined when regex matches (it's the required \w+)
       const key = valueMatch[1]!; // Non-null assertion: regex guarantees this exists
@@ -47,12 +47,12 @@ function parsePrismaEnums(schemaContent: string): EnumDefinition[] {
       const value: string = valueMatch[2] ?? key;
       values.push({ key, value });
     }
-    
+
     if (values.length > 0 && enumName) {
       enums.push({ name: enumName, values });
     }
   }
-  
+
   return enums;
 }
 
@@ -63,7 +63,7 @@ function generateEnumStub(enumDef: EnumDefinition): string {
   const entries = enumDef.values
     .map(({ key, value }) => `  ${key}: ${JSON.stringify(value)}`)
     .join(',\n');
-  
+
   return `export const ${enumDef.name} = {\n${entries},\n} as const;`;
 }
 
@@ -74,38 +74,39 @@ async function main() {
   const projectRoot = process.cwd();
   const schemaPath = join(projectRoot, 'prisma/schema.prisma');
   const mockPath = join(projectRoot, '__mocks__/@prisma/client.ts');
-  
+
   try {
     // Read Prisma schema
     const schemaContent = await readFile(schemaPath, 'utf-8');
-    
+
     // Parse enums
     const enums = parsePrismaEnums(schemaContent);
-    
+
     console.log(`Found ${enums.length} enums in schema`);
-    
+
     // Read existing mock file
     const mockContent = await readFile(mockPath, 'utf-8');
-    
+
     // Find the section where enums are exported
     // Look for the comment "Export Prisma enum stubs..."
-    const enumStartMarker = '// Export Prisma enum stubs to prevent Vitest from trying to load the actual @prisma/client module';
+    const enumStartMarker =
+      '// Export Prisma enum stubs to prevent Vitest from trying to load the actual @prisma/client module';
     const enumEndMarker = '// NOTE: If you need additional enums';
-    
+
     const startIndex = mockContent.indexOf(enumStartMarker);
     const endIndex = mockContent.indexOf(enumEndMarker);
-    
+
     if (startIndex === -1 || endIndex === -1) {
       throw new Error('Could not find enum section in mock file');
     }
-    
+
     // Generate enum exports
     const enumExports = enums.map(generateEnumStub).join('\n\n');
-    
+
     // Replace enum section
     const beforeEnums = mockContent.substring(0, startIndex);
     const afterEnums = mockContent.substring(endIndex);
-    
+
     const newMockContent = `${beforeEnums}${enumStartMarker}
 // These are stub objects that match the structure of Prisma-generated enums
 // When code imports \`import { job_status } from '@prisma/client'\`, Vitest will use these stubs
@@ -119,12 +120,12 @@ async function main() {
 ${enumExports}
 
 ${afterEnums}`;
-    
+
     // Write updated mock file
     await writeFile(mockPath, newMockContent, 'utf-8');
-    
+
     console.log(`✅ Generated ${enums.length} enum stubs in __mocks__/@prisma/client.ts`);
-    console.log(`   Enums: ${enums.map(e => e.name).join(', ')}`);
+    console.log(`   Enums: ${enums.map((e) => e.name).join(', ')}`);
   } catch (error) {
     console.error('❌ Error generating enum stubs:', error);
     process.exit(1);
@@ -132,5 +133,3 @@ ${afterEnums}`;
 }
 
 main();
-
-

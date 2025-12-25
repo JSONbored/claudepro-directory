@@ -8,5 +8,4 @@
 --
 -- Function signature: get_trending_searches(limit_count integer)
 -- Related: SearchService.getTrendingSearches uses Prisma $queryRawUnsafe instead
-
-DROP FUNCTION IF EXISTS public.get_trending_searches(integer);
+DROP FUNCTION IF EXISTS public.get_trending_searches (integer);

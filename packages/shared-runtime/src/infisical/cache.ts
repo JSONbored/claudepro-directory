@@ -108,9 +108,7 @@ const COMMON_SECRET_NAMES = [
  * @param secretNames - Optional list of secret names to pre-fetch. If not provided, uses COMMON_SECRET_NAMES.
  * @returns Promise that resolves when initialization is complete
  */
-export async function initializeInfisicalSecrets(
-  secretNames?: readonly string[]
-): Promise<void> {
+export async function initializeInfisicalSecrets(secretNames?: readonly string[]): Promise<void> {
   // If already initialized, return immediately
   if (isInitialized) {
     if (initializationError) {
@@ -173,14 +171,14 @@ export async function initializeInfisicalSecrets(
         }
       }
 
-             isInitialized = true;
-             
-             // Register cache on global object for env.ts to access (avoids importing server-only module)
-             globalEnv.__INFISICAL_CACHE__ = {
-               getSecret: (name: string) => infisicalCache.get(name),
-               isInitialized: () => isInitialized,
-               getCachedSecretNames: () => Array.from(infisicalCache.keys()),
-             };
+      isInitialized = true;
+
+      // Register cache on global object for env.ts to access (avoids importing server-only module)
+      globalEnv.__INFISICAL_CACHE__ = {
+        getSecret: (name: string) => infisicalCache.get(name),
+        isInitialized: () => isInitialized,
+        getCachedSecretNames: () => Array.from(infisicalCache.keys()),
+      };
     } catch (error) {
       // Log error but don't throw - allow fallback to process.env
       // This ensures the app continues to work even if Infisical fails
@@ -263,4 +261,3 @@ export function clearInfisicalCache(): void {
 export function getCachedSecretNames(): string[] {
   return Array.from(infisicalCache.keys());
 }
-

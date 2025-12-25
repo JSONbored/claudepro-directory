@@ -13,11 +13,7 @@ import { createKvCache } from '../../cache/kv-cache.js';
 import { handleContentResource } from './content.js';
 import { handleCategoryResource } from './category.js';
 import { handleSitewideResource } from './sitewide.js';
-import {
-  getCategoryCompletions,
-  getSlugCompletions,
-  getFormatCompletions,
-} from './completions.js';
+import { getCategoryCompletions, getSlugCompletions, getFormatCompletions } from './completions.js';
 
 /**
  * Register all resources on the MCP server
@@ -27,7 +23,7 @@ import {
  */
 export function registerAllResources(mcpServer: McpServer, context: ToolContext): void {
   const { prisma, logger, kvCache } = context;
-  
+
   // Create KV cache instance if KV binding is available
   const resourceCache = kvCache ? createKvCache(kvCache, { ttl: 3600 }) : null;
 

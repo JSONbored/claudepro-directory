@@ -110,8 +110,7 @@ export async function handleGetFeatured(
     }
 
     // Extract latest and popular results
-    const latest =
-      latestData.status === 'fulfilled' && latestData.value ? latestData.value : [];
+    const latest = latestData.status === 'fulfilled' && latestData.value ? latestData.value : [];
     const popular =
       popularData.status === 'fulfilled' && popularData.value ? popularData.value : [];
 
@@ -129,10 +128,7 @@ export async function handleGetFeatured(
     });
 
     // Flatten featured by category into a single array (take top 3 per category)
-    const formattedHero = Object.values(featuredByCategory)
-      .flat()
-      .slice(0, limit)
-      .map(formatItem);
+    const formattedHero = Object.values(featuredByCategory).flat().slice(0, limit).map(formatItem);
     const formattedLatest = latest.map(formatItem);
     const formattedPopular = popular.map(formatItem);
 
@@ -180,7 +176,14 @@ export async function handleGetFeatured(
     const total = formattedHero.length + formattedLatest.length + formattedPopular.length;
 
     const duration = Date.now() - startTime;
-    logger.info('getFeatured completed successfully', {tool: 'getFeatured', duration_ms: duration, heroCount: formattedHero.length, latestCount: formattedLatest.length, popularCount: formattedPopular.length, total,});
+    logger.info('getFeatured completed successfully', {
+      tool: 'getFeatured',
+      duration_ms: duration,
+      heroCount: formattedHero.length,
+      latestCount: formattedLatest.length,
+      popularCount: formattedPopular.length,
+      total,
+    });
 
     return {
       content: [

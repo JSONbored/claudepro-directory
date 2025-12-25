@@ -18,5 +18,8 @@
 -- Note: Date calculations are likely done in TypeScript/application layer
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.get_days_ago(timestamp with time zone);
+DROP FUNCTION IF EXISTS public.get_days_ago (
+  timestamp
+  with
+    time zone
+);

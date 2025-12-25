@@ -5,5 +5,4 @@
 --
 -- Description: Remove audit_job_subscription_state RPC function
 -- This RPC function is unused in the codebase. No calls found.
-
-DROP FUNCTION IF EXISTS public.audit_job_subscription_state();
+DROP FUNCTION IF EXISTS public.audit_job_subscription_state ();

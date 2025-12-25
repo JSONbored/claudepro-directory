@@ -5,5 +5,4 @@
 --
 -- Description: Remove refresh_trending_metrics_view RPC function - Not found in codebase, only in generated types
 -- Function signature: refresh_trending_metrics_view()
-
-DROP FUNCTION IF EXISTS public.refresh_trending_metrics_view();
+DROP FUNCTION IF EXISTS public.refresh_trending_metrics_view ();

@@ -191,7 +191,7 @@ describe('GET /api/user/profile-image', () => {
     expectStatus(response, 200);
     expectCorsHeaders(response);
     expectCacheHeaders(response, true);
-    
+
     // Route returns SafeActionResult structure from getUserProfileImage action
     if (typeof body === 'object' && body !== null) {
       const result = body as SafeActionResult<{ imageUrl: string | null }>;
@@ -226,7 +226,7 @@ describe('GET /api/user/profile-image', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 200);
-    
+
     // Route returns SafeActionResult structure from getUserProfileImage action
     if (typeof body === 'object' && body !== null && 'data' in body) {
       const result = body as SafeActionResult<{ imageUrl: string | null }>;
@@ -251,7 +251,7 @@ describe('GET /api/user/profile-image', () => {
 
     // Route returns SafeActionResult structure - authedAction returns serverError for auth failures
     expectStatus(response, 401);
-    
+
     if (typeof body === 'object' && body !== null) {
       const result = body as SafeActionResult<{ imageUrl: string | null }>;
       expect(result.serverError).toBeDefined();
@@ -277,7 +277,7 @@ describe('GET /api/user/profile-image', () => {
     const body = await getResponseBody(response);
 
     expectStatus(response, 500);
-    
+
     // Route returns SafeActionResult structure - errors are returned as serverError
     if (typeof body === 'object' && body !== null) {
       const result = body as SafeActionResult<{ imageUrl: string | null }>;
@@ -323,4 +323,3 @@ describe('GET /api/user/profile-image', () => {
     // This test verifies the route works correctly on duplicate calls
   });
 });
-

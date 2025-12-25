@@ -90,8 +90,8 @@ export function Navigation3DCard({
         }}
         className={cn(
           'h-16 w-28 rounded-2xl', // 70px ≈ 4rem (h-16), 120px ≈ 7rem (w-28)
-          'border border-foreground/10 bg-background shadow-lg',
-          'overflow-hidden transition-all duration-700 group-hover/pin:border-foreground/20'
+          'border-foreground/10 bg-background border shadow-lg',
+          'group-hover/pin:border-foreground/20 overflow-hidden transition-all duration-700'
         )}
       >
         <div
@@ -99,7 +99,7 @@ export function Navigation3DCard({
             'flex flex-col',
             'basis-full',
             'p-2',
-            'h-full w-full tracking-tight text-foreground/50'
+            'text-foreground/50 h-full w-full tracking-tight'
           )}
         >
           {/* Title */}
@@ -109,7 +109,7 @@ export function Navigation3DCard({
               'pb-0.5',
               '!m-0 font-bold',
               'text-xs', // 10px ≈ text-xs (0.75rem)
-              'leading-tight text-foreground'
+              'text-foreground leading-tight'
             )}
           >
             {label}
@@ -128,9 +128,7 @@ export function Navigation3DCard({
           )}
 
           {/* Gradient block at bottom (shadcn 3d-pin style) */}
-          <div
-            className={cn('flex w-full flex-1 rounded-lg', 'mt-1', gradient)}
-          />
+          <div className={cn('flex w-full flex-1 rounded-lg', 'mt-1', gradient)} />
         </div>
       </div>
     </div>

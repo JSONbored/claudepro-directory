@@ -1,9 +1,11 @@
 ---
+
 name: Feature Request
 about: Suggest a new feature or enhancement
-title: '[FEATURE] '
+title: '\[FEATURE] '
 labels: enhancement
 assignees: ''
+
 ---
 
 ## Description
@@ -40,4 +42,3 @@ Have you considered any alternative solutions or workarounds?
 ## Additional Context
 
 Add any other context, examples, or screenshots about the feature request here.
-

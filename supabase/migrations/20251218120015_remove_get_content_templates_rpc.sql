@@ -8,5 +8,4 @@
 --
 -- Function signature: get_content_templates(p_category content_category)
 -- Related: ContentService.getContentTemplates uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_content_templates(public.content_category);
+DROP FUNCTION IF EXISTS public.get_content_templates (public.content_category);

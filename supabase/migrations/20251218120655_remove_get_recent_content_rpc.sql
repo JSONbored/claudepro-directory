@@ -20,5 +20,4 @@
 --
 -- Related Changes:
 -- - packages/data-layer/src/services/trending.ts: Converted getRecentContent() to use Prisma
-
-DROP FUNCTION IF EXISTS public.get_recent_content(public.content_category, integer, integer);
+DROP FUNCTION IF EXISTS public.get_recent_content (public.content_category, integer, integer);

@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
     "build": "tsc",
-    "type-check": "tsc --noEmit",
-    "lint": "eslint . --config ../../../config/tools/eslint.config.mjs"
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "lint": "eslint . --config ../../../config/tools/eslint.config.mjs",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@heyclaude/cloudflare-runtime": "workspace:*",

@@ -17,9 +17,5 @@ declare module 'agents/mcp' {
    */
   export function createMcpHandler(
     mcpServer: McpServer
-  ): (
-    request: Request,
-    env: unknown,
-    ctx: ExecutionContext
-  ) => Promise<Response>;
+  ): (request: Request, env: unknown, ctx: ExecutionContext) => Promise<Response>;
 }

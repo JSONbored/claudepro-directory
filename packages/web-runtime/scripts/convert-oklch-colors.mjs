@@ -152,4 +152,3 @@ for (const [name, oklch] of Object.entries(keyColors)) {
 }
 
 console.log('\n\nConversion complete. Use these values in theme.ts');
-

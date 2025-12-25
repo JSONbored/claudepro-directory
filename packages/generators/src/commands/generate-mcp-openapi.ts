@@ -56,10 +56,10 @@ if (!existsSync(join(PROJECT_ROOT, 'packages/mcp-server'))) {
     } else {
       throw new Error(
         `Could not find project root. Tried:\n` +
-        `  - ${PROJECT_ROOT}\n` +
-        `  - ${altPath}\n` +
-        `  - ${cwdPath}\n` +
-        `Looking for: packages/mcp-server`
+          `  - ${PROJECT_ROOT}\n` +
+          `  - ${altPath}\n` +
+          `  - ${cwdPath}\n` +
+          `Looking for: packages/mcp-server`
       );
     }
   }
@@ -104,12 +104,12 @@ interface PromptMetadata {
  */
 function extractToolMetadata(sourceFile: SourceFile): ToolMetadata[] {
   const tools: ToolMetadata[] = [];
-  
+
   // Debug: Count all call expressions
   const allCalls = sourceFile.getDescendantsOfKind(207);
   let propertyAccessCount = 0;
   let registerToolCount = 0;
-  
+
   console.log(`   🔍 Scanning ${allCalls.length} call expressions in ${sourceFile.getBaseName()}`);
 
   // Find all registerTool calls (mcpServer.registerTool or any variable.registerTool)
@@ -119,13 +119,13 @@ function extractToolMetadata(sourceFile: SourceFile): ToolMetadata[] {
 
     const expression = call.getExpression();
     if (!Node.isPropertyAccessExpression(expression)) return;
-    
+
     propertyAccessCount++;
-    
+
     // Check if method name is 'registerTool'
     const methodName = expression.getName();
     if (methodName !== 'registerTool') return;
-    
+
     registerToolCount++;
 
     const args = call.getArguments();
@@ -167,8 +167,14 @@ function extractToolMetadata(sourceFile: SourceFile): ToolMetadata[] {
           const parts: string[] = [];
           for (const part of init.getTemplateSpans()) {
             const literal = part.getLiteral();
-            if (Node.isTemplateHead(literal) || Node.isTemplateMiddle(literal) || Node.isTemplateTail(literal)) {
-              parts.push(literal.getText().replace(/`/g, '').replace(/\$\{/g, '').replace(/\}/g, '').trim());
+            if (
+              Node.isTemplateHead(literal) ||
+              Node.isTemplateMiddle(literal) ||
+              Node.isTemplateTail(literal)
+            ) {
+              parts.push(
+                literal.getText().replace(/`/g, '').replace(/\$\{/g, '').replace(/\}/g, '').trim()
+              );
             }
           }
           description = parts.join(' ').trim();
@@ -209,11 +215,15 @@ function extractToolMetadata(sourceFile: SourceFile): ToolMetadata[] {
       filePath: sourceFile.getFilePath(),
     });
   });
-  
+
   // Debug output
-  console.log(`   📊 Found ${propertyAccessCount} property access calls, ${registerToolCount} registerTool calls, extracted ${tools.length} tools`);
+  console.log(
+    `   📊 Found ${propertyAccessCount} property access calls, ${registerToolCount} registerTool calls, extracted ${tools.length} tools`
+  );
   if (tools.length === 0 && registerToolCount > 0) {
-    console.warn(`⚠️  Found ${registerToolCount} registerTool calls but extracted 0 tools. Check argument parsing.`);
+    console.warn(
+      `⚠️  Found ${registerToolCount} registerTool calls but extracted 0 tools. Check argument parsing.`
+    );
   }
 
   return tools;
@@ -241,9 +251,9 @@ function extractResourceMetadata(sourceFile: SourceFile): ResourceMetadata[] {
 
     const expression = call.getExpression();
     if (!Node.isPropertyAccessExpression(expression)) return;
-    
+
     propertyAccessCount++;
-    
+
     // Check if method name is 'registerResource'
     const methodName = expression.getName();
     if (methodName !== 'registerResource') {
@@ -321,8 +331,14 @@ function extractResourceMetadata(sourceFile: SourceFile): ResourceMetadata[] {
           const parts: string[] = [];
           for (const part of init.getTemplateSpans()) {
             const literal = part.getLiteral();
-            if (Node.isTemplateHead(literal) || Node.isTemplateMiddle(literal) || Node.isTemplateTail(literal)) {
-              parts.push(literal.getText().replace(/`/g, '').replace(/\$\{/g, '').replace(/\}/g, '').trim());
+            if (
+              Node.isTemplateHead(literal) ||
+              Node.isTemplateMiddle(literal) ||
+              Node.isTemplateTail(literal)
+            ) {
+              parts.push(
+                literal.getText().replace(/`/g, '').replace(/\$\{/g, '').replace(/\}/g, '').trim()
+              );
             }
           }
           description = parts.join(' ').trim();
@@ -363,7 +379,7 @@ function extractPromptMetadata(sourceFile: SourceFile): PromptMetadata[] {
 
     const expression = call.getExpression();
     if (!Node.isPropertyAccessExpression(expression)) return;
-    
+
     // Check if method name is 'registerPrompt'
     if (expression.getName() !== 'registerPrompt') return;
 
@@ -406,8 +422,14 @@ function extractPromptMetadata(sourceFile: SourceFile): PromptMetadata[] {
           const parts: string[] = [];
           for (const part of init.getTemplateSpans()) {
             const literal = part.getLiteral();
-            if (Node.isTemplateHead(literal) || Node.isTemplateMiddle(literal) || Node.isTemplateTail(literal)) {
-              parts.push(literal.getText().replace(/`/g, '').replace(/\$\{/g, '').replace(/\}/g, '').trim());
+            if (
+              Node.isTemplateHead(literal) ||
+              Node.isTemplateMiddle(literal) ||
+              Node.isTemplateTail(literal)
+            ) {
+              parts.push(
+                literal.getText().replace(/`/g, '').replace(/\$\{/g, '').replace(/\}/g, '').trim()
+              );
             }
           }
           description = parts.join(' ').trim();
@@ -449,11 +471,12 @@ function extractPromptMetadata(sourceFile: SourceFile): PromptMetadata[] {
  */
 function extractToolsViaRegex(sourceText: string): ToolMetadata[] {
   const tools: ToolMetadata[] = [];
-  
+
   // Match: mcpServer.registerTool('name', { title: '...', description: '...', inputSchema: SchemaName }, ...)
   // More comprehensive regex to capture inputSchema name
-  const toolRegex = /mcpServer\.registerTool\s*\(\s*['"]([^'"]+)['"]\s*,\s*\{[^}]*title:\s*['"]([^'"]+)['"][^}]*description:\s*['"]?([^'"]+)['"]?[^}]*inputSchema:\s*([A-Za-z][A-Za-z0-9_]*)/gs;
-  
+  const toolRegex =
+    /mcpServer\.registerTool\s*\(\s*['"]([^'"]+)['"]\s*,\s*\{[^}]*title:\s*['"]([^'"]+)['"][^}]*description:\s*['"]?([^'"]+)['"]?[^}]*inputSchema:\s*([A-Za-z][A-Za-z0-9_]*)/gs;
+
   let match;
   while ((match = toolRegex.exec(sourceText)) !== null) {
     const [, name, title, description, inputSchemaName] = match;
@@ -470,7 +493,7 @@ function extractToolsViaRegex(sourceText: string): ToolMetadata[] {
       tools.push(tool);
     }
   }
-  
+
   return tools;
 }
 
@@ -479,7 +502,7 @@ function extractToolsViaRegex(sourceText: string): ToolMetadata[] {
  */
 function extractResourcesViaRegex(sourceText: string): ResourceMetadata[] {
   const resources: ResourceMetadata[] = [];
-  
+
   // Match: mcpServer.registerResource('name', new ResourceTemplate('uri', ...), { title: '...', description: '...', mimeType: '...' }, ...)
   // Handle multi-line descriptions - description can be on the same line or next line after description:
   // Pattern breakdown:
@@ -490,12 +513,13 @@ function extractResourcesViaRegex(sourceText: string): ResourceMetadata[] {
   // Match: mcpServer.registerResource('name', new ResourceTemplate('uri', ...), { title: '...', description: '...', mimeType: '...' }, ...)
   // Handle multi-line descriptions - description can be on the same line or next line after description:
   // Pattern: description: followed by any content (including newlines), then string literal, then mimeType
-  const resourceRegex = /mcpServer\.registerResource\s*\(\s*['"]([^'"]+)['"]\s*,\s*new\s+ResourceTemplate\s*\(\s*['"]([^'"]+)['"][\s\S]*?title:\s*['"]([^'"]+)['"][\s\S]*?description:[\s\S]*?['"]([^'"]+)['"][\s\S]*?mimeType:\s*['"]([^'"]+)['"]/g;
-  
+  const resourceRegex =
+    /mcpServer\.registerResource\s*\(\s*['"]([^'"]+)['"]\s*,\s*new\s+ResourceTemplate\s*\(\s*['"]([^'"]+)['"][\s\S]*?title:\s*['"]([^'"]+)['"][\s\S]*?description:[\s\S]*?['"]([^'"]+)['"][\s\S]*?mimeType:\s*['"]([^'"]+)['"]/g;
+
   let match;
   while ((match = resourceRegex.exec(sourceText)) !== null) {
     const [, name, uriTemplate, title, description, mimeType] = match;
-    
+
     if (name && uriTemplate && title) {
       resources.push({
         name: name.trim(),
@@ -507,7 +531,7 @@ function extractResourcesViaRegex(sourceText: string): ResourceMetadata[] {
       });
     }
   }
-  
+
   return resources;
 }
 
@@ -516,11 +540,12 @@ function extractResourcesViaRegex(sourceText: string): ResourceMetadata[] {
  */
 function extractPromptsViaRegex(sourceText: string): PromptMetadata[] {
   const prompts: PromptMetadata[] = [];
-  
+
   // Match: mcpServer.registerPrompt('name', { title: '...', description: '...', argsSchema: SchemaName }, ...)
   // More comprehensive regex to capture argsSchema name
-  const promptRegex = /mcpServer\.registerPrompt\s*\(\s*['"]([^'"]+)['"]\s*,\s*\{[^}]*title:\s*['"]([^'"]+)['"][^}]*description:\s*['"]?([^'"]+)['"]?[^}]*argsSchema:\s*([A-Za-z][A-Za-z0-9_]*)/gs;
-  
+  const promptRegex =
+    /mcpServer\.registerPrompt\s*\(\s*['"]([^'"]+)['"]\s*,\s*\{[^}]*title:\s*['"]([^'"]+)['"][^}]*description:\s*['"]?([^'"]+)['"]?[^}]*argsSchema:\s*([A-Za-z][A-Za-z0-9_]*)/gs;
+
   let match;
   while ((match = promptRegex.exec(sourceText)) !== null) {
     const [, name, title, description, argsSchemaName] = match;
@@ -537,7 +562,7 @@ function extractPromptsViaRegex(sourceText: string): PromptMetadata[] {
       prompts.push(prompt);
     }
   }
-  
+
   return prompts;
 }
 
@@ -550,7 +575,7 @@ async function evaluateSchemas(
   projectRoot: string
 ): Promise<void> {
   const typesFilePath = join(projectRoot, 'packages/mcp-server/src/lib/types.ts');
-  
+
   if (!existsSync(typesFilePath)) {
     console.warn(`⚠️  Types file not found: ${typesFilePath}`);
     return;
@@ -586,7 +611,7 @@ async function evaluateSchemas(
   // Prompt schemas are defined inline in prompts/register.ts as plain objects with Zod properties
   // We need to evaluate them from that file and convert to z.object()
   const promptsRegisterPath = join(projectRoot, 'packages/mcp-server/src/mcp/prompts/register.ts');
-  
+
   for (const prompt of prompts) {
     if (prompt.argsSchemaName) {
       try {
@@ -596,7 +621,7 @@ async function evaluateSchemas(
           prompt.argsSchemaName,
           projectRoot
         );
-        
+
         // If not found as Zod schema, try extracting from source file using AST (schemas are const, not exported)
         if (!schema && existsSync(promptsRegisterPath)) {
           try {
@@ -610,7 +635,7 @@ async function evaluateSchemas(
             const promptsFile = astProject.addSourceFileAtPathIfExists(promptsRegisterPath);
             if (promptsFile) {
               let schemaDeclaration: Node | null = null;
-              
+
               // Find const declaration (exported or not)
               promptsFile.forEachDescendant((node) => {
                 if (Node.isVariableStatement(node)) {
@@ -624,12 +649,12 @@ async function evaluateSchemas(
                   }
                 }
               });
-              
+
               if (schemaDeclaration && Node.isVariableDeclaration(schemaDeclaration)) {
                 const initializer = schemaDeclaration.getInitializer();
                 if (initializer) {
                   const schemaCode = initializer.getText();
-                  
+
                   // Extract imports needed for evaluation
                   const imports: string[] = [];
                   for (const imp of promptsFile.getImportDeclarations()) {
@@ -640,17 +665,21 @@ async function evaluateSchemas(
                       imports.push(`import { ${named} } from '${spec}';`);
                     }
                   }
-                  
+
                   // Evaluate the schema code - it's a plain object, so wrap in z.object()
                   // Import evaluateZodSchema from toolkit
                   const { evaluateZodSchema } = await import('../toolkit/zod-schema-evaluation.js');
-                  
+
                   // The schema code is a plain object like { category: z.string().optional() }
                   // We need to wrap it in z.object() for evaluation
                   const wrappedSchemaCode = `z.object(${schemaCode})`;
-                  
-                  const evaluatedSchema = await evaluateZodSchema(wrappedSchemaCode, imports, projectRoot);
-                  
+
+                  const evaluatedSchema = await evaluateZodSchema(
+                    wrappedSchemaCode,
+                    imports,
+                    projectRoot
+                  );
+
                   if (evaluatedSchema) {
                     schema = evaluatedSchema;
                   }
@@ -661,17 +690,13 @@ async function evaluateSchemas(
             // Silently continue - will try types.ts fallback
           }
         }
-        
+
         // If still not found, try types.ts (for backwards compatibility)
         if (!schema) {
           const typesFilePath = join(projectRoot, 'packages/mcp-server/src/lib/types.ts');
-          schema = await evaluateSchemaFromFile(
-            typesFilePath,
-            prompt.argsSchemaName,
-            projectRoot
-          );
+          schema = await evaluateSchemaFromFile(typesFilePath, prompt.argsSchemaName, projectRoot);
         }
-        
+
         if (schema) {
           prompt.argsSchema = schema;
           prompt.argsSchemaExample = generateExampleFromZodSchema(schema);
@@ -729,12 +754,12 @@ async function generateMcpOpenAPI(): Promise<void> {
   const toolsFile = project.addSourceFileAtPath(toolsPath);
   const resourcesFile = project.addSourceFileAtPath(resourcesPath);
   const promptsFile = project.addSourceFileAtPath(promptsPath);
-  
+
   // Verify files loaded and have content
   const toolsText = toolsFile.getText();
   const resourcesText = resourcesFile.getText();
   const promptsText = promptsFile.getText();
-  
+
   console.log(`📁 Files loaded:`);
   console.log(`   - Tools: ${toolsText.length} chars`);
   console.log(`   - Resources: ${resourcesText.length} chars`);
@@ -744,7 +769,7 @@ async function generateMcpOpenAPI(): Promise<void> {
   const tools = extractToolMetadata(toolsFile);
   const resources = extractResourceMetadata(resourcesFile);
   const prompts = extractPromptMetadata(promptsFile);
-  
+
   // Fallback: If AST parsing fails, use regex extraction
   if (tools.length === 0) {
     console.log(`⚠️  AST parsing found 0 tools, trying regex fallback...`);
@@ -754,7 +779,7 @@ async function generateMcpOpenAPI(): Promise<void> {
       tools.push(...regexTools);
     }
   }
-  
+
   if (resources.length === 0) {
     console.log(`⚠️  AST parsing found 0 resources, trying regex fallback...`);
     const regexResources = extractResourcesViaRegex(resourcesText);
@@ -763,7 +788,7 @@ async function generateMcpOpenAPI(): Promise<void> {
       resources.push(...regexResources);
     }
   }
-  
+
   if (prompts.length === 0) {
     console.log(`⚠️  AST parsing found 0 prompts, trying regex fallback...`);
     const regexPrompts = extractPromptsViaRegex(promptsText);
@@ -778,10 +803,12 @@ async function generateMcpOpenAPI(): Promise<void> {
   console.log(`   - Tools: ${tools.length}`);
   console.log(`   - Resources: ${resources.length}`);
   console.log(`   - Prompts: ${prompts.length}`);
-  
+
   if (tools.length === 0 && resources.length === 0 && prompts.length === 0) {
     console.warn('⚠️  Warning: No tools, resources, or prompts found.');
-    console.warn('   This is expected for now - AST parsing needs enhancement for full schema extraction.');
+    console.warn(
+      '   This is expected for now - AST parsing needs enhancement for full schema extraction.'
+    );
     console.warn('   The OpenAPI spec will be generated with placeholder schemas.');
   }
 
@@ -985,7 +1012,8 @@ async function generateMcpOpenAPI(): Promise<void> {
               description: 'Redirect to Supabase Auth OAuth 2.1 Server with resource parameter',
             },
             '400': {
-              description: 'Invalid request (missing parameters, invalid response_type, missing PKCE, etc.)',
+              description:
+                'Invalid request (missing parameters, invalid response_type, missing PKCE, etc.)',
               content: {
                 'application/json': {
                   schema: {
@@ -1572,15 +1600,15 @@ async function generateMcpOpenAPI(): Promise<void> {
   if (document.components?.schemas) {
     for (const tool of tools) {
       const schemaName = `${tool.name}Input`;
-      
+
       if (tool.inputSchema) {
         // Convert Zod schema to OpenAPI schema using zod-openapi
         try {
           // Use zod-openapi's .openapi() method if available
           const zodSchema = tool.inputSchema as z.ZodSchema & { openapi?: (options?: any) => any };
-          
+
           let openApiSchema: Record<string, unknown>;
-          
+
           if (typeof zodSchema.openapi === 'function') {
             // Use .openapi() method from zod-openapi
             openApiSchema = zodSchema.openapi({
@@ -1608,17 +1636,21 @@ async function generateMcpOpenAPI(): Promise<void> {
                 },
               },
             });
-            
+
             // Extract schema from the converted document
-            const requestBodySchema = (mockDocument.paths?.['/temp']?.post?.requestBody as any)?.content?.['application/json']?.schema;
+            const requestBodySchema = (mockDocument.paths?.['/temp']?.post?.requestBody as any)
+              ?.content?.['application/json']?.schema;
             openApiSchema = requestBodySchema || { type: 'object' };
           }
-          
+
           // Ensure openApiSchema is an object before spreading
-          const baseSchema: Record<string, unknown> = typeof openApiSchema === 'object' && openApiSchema !== null && !Array.isArray(openApiSchema)
-            ? { ...(openApiSchema as Record<string, unknown>) }
-            : { type: 'object' };
-          
+          const baseSchema: Record<string, unknown> =
+            typeof openApiSchema === 'object' &&
+            openApiSchema !== null &&
+            !Array.isArray(openApiSchema)
+              ? { ...(openApiSchema as Record<string, unknown>) }
+              : { type: 'object' };
+
           const finalSchema: Record<string, unknown> = {
             ...baseSchema,
             description: tool.description || `Input schema for ${tool.name} tool`,
@@ -1654,7 +1686,7 @@ async function generateMcpOpenAPI(): Promise<void> {
         .replace('{category}', 'agents')
         .replace('{slug}', 'example-slug')
         .replace('{format}', 'markdown');
-      
+
       document.components.schemas[`${resource.name}Resource`] = {
         type: 'object',
         description: resource.description,
@@ -1674,15 +1706,15 @@ async function generateMcpOpenAPI(): Promise<void> {
     // Add prompt schemas
     for (const prompt of prompts) {
       const schemaName = `${prompt.name}Args`;
-      
+
       if (prompt.argsSchema) {
         // Convert Zod schema to OpenAPI schema using zod-openapi
         try {
           // Use zod-openapi's .openapi() method if available
           const zodSchema = prompt.argsSchema as z.ZodSchema & { openapi?: (options?: any) => any };
-          
+
           let openApiSchema: Record<string, unknown>;
-          
+
           if (typeof zodSchema.openapi === 'function') {
             // Use .openapi() method from zod-openapi
             openApiSchema = zodSchema.openapi({
@@ -1710,17 +1742,21 @@ async function generateMcpOpenAPI(): Promise<void> {
                 },
               },
             });
-            
+
             // Extract schema from the converted document
-            const requestBodySchema = (mockDocument.paths?.['/temp']?.post?.requestBody as any)?.content?.['application/json']?.schema;
+            const requestBodySchema = (mockDocument.paths?.['/temp']?.post?.requestBody as any)
+              ?.content?.['application/json']?.schema;
             openApiSchema = requestBodySchema || { type: 'object' };
           }
-          
+
           // Ensure openApiSchema is an object
-          const baseSchema: Record<string, unknown> = typeof openApiSchema === 'object' && openApiSchema !== null && !Array.isArray(openApiSchema)
-            ? { ...(openApiSchema as Record<string, unknown>) }
-            : { type: 'object' };
-          
+          const baseSchema: Record<string, unknown> =
+            typeof openApiSchema === 'object' &&
+            openApiSchema !== null &&
+            !Array.isArray(openApiSchema)
+              ? { ...(openApiSchema as Record<string, unknown>) }
+              : { type: 'object' };
+
           const finalSchema: Record<string, unknown> = {
             ...baseSchema,
             description: prompt.description || `Arguments for ${prompt.name} prompt`,

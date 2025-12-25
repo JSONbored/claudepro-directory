@@ -137,8 +137,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'application/json',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -239,7 +243,9 @@ describe('POST /api/bookmarks/add', () => {
 
     // Set up $queryRawUnsafe for RPC testing (addBookmark uses runRpc → BasePrismaService.callRpc → $queryRawUnsafe)
     // Assign jest.fn() directly to $queryRawUnsafe (Prismocker's Proxy set handler)
-    const mockQueryRawUnsafe = jest.fn<() => Promise<typeof mockBookmarkResult[]>>().mockResolvedValue([mockBookmarkResult]);
+    const mockQueryRawUnsafe = jest
+      .fn<() => Promise<(typeof mockBookmarkResult)[]>>()
+      .mockResolvedValue([mockBookmarkResult]);
     (prismocker.$queryRawUnsafe as unknown as typeof mockQueryRawUnsafe) = mockQueryRawUnsafe;
 
     // Reset revalidate mocks
@@ -304,7 +310,9 @@ describe('POST /api/bookmarks/add', () => {
       },
     };
     // Reassign jest.fn() for this test
-    const mockQueryRawUnsafe = jest.fn<() => Promise<typeof mockResultWithoutNotes[]>>().mockResolvedValue([mockResultWithoutNotes]);
+    const mockQueryRawUnsafe = jest
+      .fn<() => Promise<(typeof mockResultWithoutNotes)[]>>()
+      .mockResolvedValue([mockResultWithoutNotes]);
     (prismocker.$queryRawUnsafe as unknown as typeof mockQueryRawUnsafe) = mockQueryRawUnsafe;
 
     const request = createMockRequest({
@@ -354,7 +362,7 @@ describe('POST /api/bookmarks/add', () => {
 
     // Route returns SafeActionResult structure - authedAction returns serverError for auth failures
     expectStatus(response, 401);
-    
+
     if (typeof body === 'object' && body !== null) {
       const result = body as SafeActionResult<unknown>;
       expect(result.serverError).toBeDefined();
@@ -367,7 +375,7 @@ describe('POST /api/bookmarks/add', () => {
         expect((body as { error?: string }).error).toBe('Unauthorized');
       }
     }
-    
+
     // RPC should not be called if authentication fails
     expect(prismocker.$queryRawUnsafe).not.toHaveBeenCalled();
   });
@@ -514,9 +522,11 @@ describe('POST /api/bookmarks/add', () => {
         notes: 'Optional notes',
       },
     });
-    const callCountBefore = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+    const callCountBefore = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls
+      .length;
     await POST(request1);
-    const callCountAfterFirst = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+    const callCountAfterFirst = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock
+      .calls.length;
 
     // Second call (new request object - NextRequest body can only be read once)
     const request2 = createMockRequest({
@@ -529,7 +539,8 @@ describe('POST /api/bookmarks/add', () => {
       },
     });
     await POST(request2);
-    const callCountAfterSecond = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+    const callCountAfterSecond = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock
+      .calls.length;
 
     // Verify RPC was called for each POST request
     // Mutations (add_bookmark) don't use cache, so each call should trigger an RPC call
@@ -566,10 +577,10 @@ describe('POST /api/bookmarks/add', () => {
       const body = await getResponseBody(response);
 
       expectStatus(response, 200);
-    if (typeof body === 'object' && body !== null) {
-      const result = body as SafeActionResult<unknown>;
-      expect(result.data).toBeDefined();
-      expect(result.serverError).toBeUndefined();
+      if (typeof body === 'object' && body !== null) {
+        const result = body as SafeActionResult<unknown>;
+        expect(result.data).toBeDefined();
+        expect(result.serverError).toBeUndefined();
       }
     }
   });

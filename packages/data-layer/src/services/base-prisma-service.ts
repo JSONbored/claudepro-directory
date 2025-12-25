@@ -30,7 +30,9 @@ function isCloudflareWorkers(): boolean {
   // Also check for Cloudflare-specific globals
   return (
     typeof globalThis.navigator !== 'undefined' &&
-    (typeof process === 'undefined' || typeof process.env === 'undefined' || !process.env['NODE_ENV'])
+    (typeof process === 'undefined' ||
+      typeof process.env === 'undefined' ||
+      !process.env['NODE_ENV'])
   );
 }
 
@@ -214,13 +216,14 @@ export abstract class BasePrismaService {
           (returnType === 'auto' &&
             result.length === 1 &&
             // Allow unwrapping for primitives (string, number, boolean) or objects (not arrays)
-            (typeof result[0] !== 'object' || (typeof result[0] === 'object' && !Array.isArray(result[0]))) &&
+            (typeof result[0] !== 'object' ||
+              (typeof result[0] === 'object' && !Array.isArray(result[0]))) &&
             // Simple heuristic: functions with 'list' typically return arrays
             // Functions with 'search' can return composite types (objects) which should be unwrapped
             // Only exclude unwrapping if result[0] is an array (indicating array return type)
             !(functionName.includes('list') && Array.isArray(result[0])));
-            // Note: We allow unwrapping for 'search' functions if result[0] is an object (composite type)
-            // This fixes issues with search_content_optimized, search_unified which return composite types
+        // Note: We allow unwrapping for 'search' functions if result[0] is an object (composite type)
+        // This fixes issues with search_content_optimized, search_unified which return composite types
 
         if (shouldUnwrap && result.length === 1) {
           return result[0] as T;

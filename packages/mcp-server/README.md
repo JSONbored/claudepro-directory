@@ -8,13 +8,13 @@ The HeyClaude MCP Server provides programmatic access to the Claude Pro Director
 
 ## Features
 
-- **20 MCP Tools**: Search, browse, filter, and interact with directory content
-- **3 Resource Templates**: Access content in various formats (llms.txt, markdown, JSON, RSS, Atom)
-- **OAuth 2.1 Authentication**: Secure authentication via Supabase Auth
-- **Dual Deployment**: Hosted Cloudflare Worker or self-hosted NPM package
-- **Request Deduplication**: Automatic caching to reduce redundant requests
-- **Enhanced Metrics**: Detailed observability for tool usage and performance
-- **Input Sanitization**: Comprehensive input validation and sanitization
+* **20 MCP Tools**: Search, browse, filter, and interact with directory content
+* **3 Resource Templates**: Access content in various formats (llms.txt, markdown, JSON, RSS, Atom)
+* **OAuth 2.1 Authentication**: Secure authentication via Supabase Auth
+* **Dual Deployment**: Hosted Cloudflare Worker or self-hosted NPM package
+* **Request Deduplication**: Automatic caching to reduce redundant requests
+* **Enhanced Metrics**: Detailed observability for tool usage and performance
+* **Input Sanitization**: Comprehensive input validation and sanitization
 
 ## Installation
 
@@ -82,48 +82,55 @@ npx @heyclaude/mcp-server start --api-base-url https://api.example.com
 ## Available Tools
 
 ### Content Discovery
-- `listCategories` - List all content categories
-- `searchContent` - Search content with filters and pagination
-- `getContentDetail` - Get complete content metadata
-- `getTrending` - Get trending content
-- `getFeatured` - Get featured/highlighted content
-- `getPopular` - Get popular content
-- `getRecent` - Get recently added content
-- `getRelatedContent` - Get related content
-- `getContentByTag` - Get content filtered by tags
+
+* `listCategories` - List all content categories
+* `searchContent` - Search content with filters and pagination
+* `getContentDetail` - Get complete content metadata
+* `getTrending` - Get trending content
+* `getFeatured` - Get featured/highlighted content
+* `getPopular` - Get popular content
+* `getRecent` - Get recently added content
+* `getRelatedContent` - Get related content
+* `getContentByTag` - Get content filtered by tags
 
 ### Search & Discovery
-- `getSearchFacets` - Get available search facets (categories, tags, authors)
-- `getSearchSuggestions` - Get search suggestions
+
+* `getSearchFacets` - Get available search facets (categories, tags, authors)
+* `getSearchSuggestions` - Get search suggestions
 
 ### Configuration & Metadata
-- `getCategoryConfigs` - Get category-specific configurations
-- `getTemplates` - Get content submission templates
-- `getMcpServers` - Get MCP servers from directory
-- `getChangelog` - Get changelog in LLMs.txt format
-- `getSocialProofStats` - Get community statistics
+
+* `getCategoryConfigs` - Get category-specific configurations
+* `getTemplates` - Get content submission templates
+* `getMcpServers` - Get MCP servers from directory
+* `getChangelog` - Get changelog in LLMs.txt format
+* `getSocialProofStats` - Get community statistics
 
 ### Actions
-- `downloadContentForPlatform` - Download content formatted for platform
-- `submitContent` - Guide content submission
-- `createAccount` - Create account via OAuth
-- `subscribeNewsletter` - Subscribe to newsletter
+
+* `downloadContentForPlatform` - Download content formatted for platform
+* `submitContent` - Guide content submission
+* `createAccount` - Create account via OAuth
+* `subscribeNewsletter` - Subscribe to newsletter
 
 ## Resources
 
 ### Content Resource
+
 ```
 claudepro://content/{category}/{slug}/{format}
 ```
 
 Export individual content items in various formats:
-- `llms.txt` - LLMs.txt format
-- `markdown` - Markdown format
-- `json` - JSON format
-- `rss` - RSS feed
-- `atom` - Atom feed
+
+* `llms.txt` - LLMs.txt format
+* `markdown` - Markdown format
+* `json` - JSON format
+* `rss` - RSS feed
+* `atom` - Atom feed
 
 ### Category Resource
+
 ```
 claudepro://category/{category}/{format}
 ```
@@ -131,6 +138,7 @@ claudepro://category/{category}/{format}
 Export all content in a category in various formats.
 
 ### Sitewide Resource
+
 ```
 claudepro://sitewide/{format}
 ```
@@ -171,165 +179,172 @@ pnpm lint
 ### Version Format
 
 This package follows [Semantic Versioning](https://semver.org/) (SemVer):
-- **MAJOR** (X.0.0): Breaking changes
-- **MINOR** (0.X.0): New features (backward compatible)
-- **PATCH** (0.0.X): Bug fixes (backward compatible)
+
+* **MAJOR** (X.0.0): Breaking changes
+* **MINOR** (0.X.0): New features (backward compatible)
+* **PATCH** (0.0.X): Bug fixes (backward compatible)
 
 **Starting Version**: `1.0.0` (initial release)
 
-### Version Bumps
+### Standalone Package
 
-Version bumps are managed via GitHub Actions workflows:
+This package is **100% standalone** and can be used independently:
 
-#### Automatic Version Bumps (Recommended)
+* ✅ All internal dependencies (`@heyclaude/data-layer`, `@heyclaude/database-types`, `@heyclaude/shared-runtime`) are **bundled** into the package
+* ✅ No `workspace:*` dependencies in published package
+* ✅ Can be installed and used in any Node.js project
+* ✅ Fully self-contained with all required code included
 
-**Workflow**: `.github/workflows/auto-release.yml`
+**Bundling**: The package uses `tsup` to bundle internal dependencies, ensuring it works as a standalone npm package.
 
-**Trigger**: PR merged to `main` branch
+### Release Process
 
-**Process**:
-1. Analyzes commits since last tag to determine bump type (major/minor/patch)
-2. Auto-bumps version in `package.json`
-3. Auto-generates changelog entry
-4. Commits version + changelog changes
-5. Creates and pushes tag (`vX.Y.Z`)
-6. Creates GitHub Release
+#### Step 1: Bump Version
 
-**Commit Message Conventions**:
-- `feat:` → Minor bump (new features)
-- `fix:` → Patch bump (bug fixes)
-- `BREAKING CHANGE:` → Major bump (breaking changes)
+Use package-specific version bump commands:
 
-#### Manual Version Bumps
-
-**Workflow**: `.github/workflows/release.yml`
-
-**Trigger**: Manual tag push or workflow dispatch
-
-**Process**:
-1. Developer bumps version: `pnpm bump:minor` (or `bump:major`, `bump:patch`)
-2. Developer generates changelog: `pnpm changelog:generate`
-3. Developer commits: `git commit -m "chore: bump version to X.Y.Z"`
-4. Developer tags: `git tag vX.Y.Z && git push origin main --tags`
-5. Workflow creates GitHub Release
-
-**Version Bump Commands**:
 ```bash
 # Bump major version (1.0.0 → 2.0.0)
-pnpm bump:major
+pnpm bump:mcp-server:major
 
 # Bump minor version (1.0.0 → 1.1.0)
-pnpm bump:minor
+pnpm bump:mcp-server:minor
 
 # Bump patch version (1.0.0 → 1.0.1)
-pnpm bump:patch
-
-# Auto-detect bump type from commits
-pnpm bump:auto
+pnpm bump:mcp-server:patch
 ```
 
-**Script Location**: `packages/generators/src/commands/bump-version.ts`
+**What it does**:
 
-### GitHub Release Management
+* Updates `packages/mcp-server/package.json` version
+* Provides next steps (commit, tag, push)
 
-**Automatic Releases**:
-- Created automatically when PR is merged to `main` (via `auto-release.yml`)
-- Created automatically when tag is pushed (via `release.yml`)
+**Script**: `packages/generators/src/commands/bump-version-package.ts`
 
-**Release Notes**:
-- Generated from `CHANGELOG.md` entries
-- Merged with auto-generated release notes from GitHub
+#### Step 2: Generate Changelog
 
-**Release Tags**:
-- Format: `vX.Y.Z` (e.g., `v1.0.0`)
-- Created automatically by workflows
+Generate changelog entries for the package:
+
+```bash
+# Generate changelog (writes to packages/mcp-server/CHANGELOG.md)
+pnpm changelog:generate:mcp-server
+
+# Preview without writing (dry run)
+pnpm changelog:generate:mcp-server:dry
+
+# Generate from specific date
+pnpm exec heyclaude-changelog-package mcp-server --since "2025-01-01"
+```
+
+**What it does**:
+
+* Filters commits to only those affecting `packages/mcp-server/**`
+* Generates changelog entry using `git-cliff`
+* Prepends to `packages/mcp-server/CHANGELOG.md`
+
+**Script**: `packages/generators/src/commands/changelog-package.ts`
+
+#### Step 3: Commit Changes
+
+```bash
+git add packages/mcp-server/package.json packages/mcp-server/CHANGELOG.md
+git commit -m "chore(mcp-server): bump version to X.Y.Z"
+```
+
+#### Step 4: Create and Push Tag
+
+Use **namespaced tags** for monorepo packages:
+
+```bash
+# Create namespaced tag (format: mcp-server-vX.Y.Z)
+git tag mcp-server-v1.0.0
+
+# Push tag
+git push origin main --tags
+```
+
+**Tag Format**: `mcp-server-vX.Y.Z` (e.g., `mcp-server-v1.0.0`)
+
+**Why namespaced?**: In a monorepo, multiple packages can have version tags. Namespacing prevents conflicts (e.g., `mcp-server-v1.0.0` vs `prismocker-v1.0.0`).
+
+#### Step 5: GitHub Release (Automatic)
+
+When you push a namespaced tag (`mcp-server-v*.*.*`), the **Release workflow** automatically:
+
+1. ✅ Verifies package version matches tag version
+2. ✅ Builds the package (`pnpm build`)
+3. ✅ Runs tests (`pnpm test`)
+4. ✅ Publishes to npm (`npm publish`)
+5. ✅ Creates GitHub Release with changelog notes
+
+**Workflow**: `packages/mcp-server/.github/workflows/release.yml`
+
+**Trigger**: Push tag matching `mcp-server-v*.*.*`
+
+**Manual Trigger**: You can also trigger via GitHub Actions UI (workflow dispatch)
+
+### CI Pipeline
+
+**Workflow**: `packages/mcp-server/.github/workflows/ci.yml`
+
+**Triggers**:
+
+* Pull requests to `main`
+* Pushes to `main`
+
+**What it does**:
+
+1. ✅ Type checks (`pnpm type-check`)
+2. ✅ Builds package (`pnpm build`)
+3. ✅ Runs tests (`pnpm test`)
+
+**Purpose**: Ensures package health before merging PRs
 
 ### NPM Package Publishing
 
-**IMPORTANT**: Publishing is **NOT** automated. Manual steps required:
+**Automatic**: Publishing is **automated** via the Release workflow when you push a namespaced tag.
 
-#### Pre-Publishing Checklist
+**Manual Publishing** (if needed):
 
-1. **Version Bump**: Ensure version is bumped in `package.json`
-2. **Changelog**: Ensure `CHANGELOG.md` is updated
-3. **Git Tag**: Ensure tag exists (`vX.Y.Z`)
-4. **GitHub Release**: Ensure GitHub Release exists
-5. **Build**: Ensure package builds successfully (`pnpm build`)
-6. **Tests**: Ensure all tests pass (if applicable)
+```bash
+cd packages/mcp-server
 
-#### Publishing Process
+# Build the package
+pnpm build
 
-1. **Build the package**:
-   ```bash
-   cd packages/mcp-server
-   pnpm build
-   ```
+# Verify package contents
+pnpm pack --dry-run
 
-2. **Verify package contents**:
-   ```bash
-   # Check what will be published
-   pnpm pack --dry-run
-   ```
+# Publish (dry run first)
+pnpm publish --dry-run
 
-3. **Publish to NPM**:
-   ```bash
-   # Dry run first (recommended)
-   pnpm publish --dry-run
+# Actual publish
+pnpm publish
+```
 
-   # Actual publish
-   pnpm publish
-   ```
+**Package Configuration**:
 
-4. **Verify publication**:
-   ```bash
-   # Check NPM registry
-   npm view @heyclaude/mcp-server
-   ```
-
-#### NPM Package Configuration
-
-**Package Name**: `@heyclaude/mcp-server`
-
-**Registry**: `https://registry.npmjs.org/` (public)
-
-**Access**: Public (`"publishConfig": { "access": "public" }`)
-
-**Version Sync**: 
-- NPM package version should match GitHub Release tag version
-- Example: GitHub Release `v1.0.0` → NPM package `1.0.0`
-
-#### Post-Publishing
-
-1. **Verify Installation**:
-   ```bash
-   npx @heyclaude/mcp-server@latest --version
-   ```
-
-2. **Update Documentation**: Update any version references in docs
-
-3. **Announce Release**: Announce new version (if applicable)
-
-### Version Bump Workflow Integration
-
-The package integrates with existing GitHub Actions workflows:
-
-**Workflows Used**:
-- `.github/workflows/auto-release.yml` - Auto-release on PR merge
-- `.github/workflows/release.yml` - Manual release via tag
-
-**Scripts Used**:
-- `packages/generators/src/commands/bump-version.ts` - Version bumping
-- `packages/generators/src/commands/changelog.ts` - Changelog generation
-
-**Integration Points**:
-1. Version is bumped in `packages/mcp-server/package.json`
-2. Changelog is updated in `CHANGELOG.md` (root or package-specific)
-3. GitHub Release is created with version tag
-4. NPM package can be published manually (version matches GitHub Release)
+* **Name**: `@heyclaude/mcp-server`
+* **Registry**: `https://registry.npmjs.org/` (public)
+* **Access**: Public
+* **Version**: Must match GitHub Release tag (without `mcp-server-v` prefix)
 
 ### Version History
 
-- `1.0.0` - Initial release (standalone package with dual deployment support)
+See `packages/mcp-server/CHANGELOG.md` for detailed version history.
+
+### Release Checklist
+
+Before creating a release:
+
+* \[ ] Version bumped in `packages/mcp-server/package.json`
+* \[ ] Changelog generated and reviewed (`pnpm changelog:generate:mcp-server`)
+* \[ ] Changes committed
+* \[ ] Namespaced tag created (`mcp-server-vX.Y.Z`)
+* \[ ] Tag pushed to trigger Release workflow
+* \[ ] GitHub Release created automatically
+* \[ ] NPM package published automatically
+* \[ ] Verify installation: `npx @heyclaude/mcp-server@latest --version`
 
 ## License
 
@@ -338,4 +353,3 @@ MIT
 ## Repository
 
 https://github.com/JSONbored/claudepro-directory/tree/main/packages/mcp-server
-

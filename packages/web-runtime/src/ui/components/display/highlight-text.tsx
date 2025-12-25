@@ -56,7 +56,7 @@ function HighlightText({
         color: 'var(--primary-foreground)', // White text on primary/orange background
         ...props.style,
       }}
-      className={cn('relative inline-block inline px-1.5 py-0.5 rounded-sm', className)}
+      className={cn('relative inline inline-block rounded-sm px-1.5 py-0.5', className)}
       {...props}
     >
       {text}

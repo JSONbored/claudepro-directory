@@ -12,14 +12,16 @@ import { normalizeError } from '../errors';
 import { logger } from '../logger';
 import { revalidatePath } from 'next/cache';
 
-const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required'),
-  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string().min(1, 'Please confirm your new password'),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-});
+const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your new password'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 export const changePassword = authedAction
   .inputSchema(changePasswordSchema)
@@ -89,7 +91,9 @@ export const signOutSession = authedAction
       const supabase = await createSupabaseServerClient();
 
       // Get current session to check if we're signing out the current session
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       // If signing out current session, use signOut
       if (session?.id === parsedInput.sessionId) {
@@ -108,14 +112,17 @@ export const signOutSession = authedAction
       // Since we don't have direct access to admin API, we'll note this limitation
       // In production, you'd need to create an RPC function or use Supabase Admin API
       reqLogger.warn({}, 'signOutSession: non-current session sign out not fully implemented');
-      
+
       // For now, return success but note the limitation
       revalidatePath('/account/settings/security');
-      return { success: true, signedOutCurrent: false, note: 'Only current session can be signed out directly' };
+      return {
+        success: true,
+        signedOutCurrent: false,
+        note: 'Only current session can be signed out directly',
+      };
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to sign out session');
       reqLogger.error({ err: normalized }, 'signOutSession: error occurred');
       throw normalized;
     }
   });
-

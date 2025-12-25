@@ -366,10 +366,9 @@ describe('useDebounceCallback', () => {
     const callback1 = jest.fn();
     const callback2 = jest.fn();
 
-    const { result, rerender } = renderHook(
-      ({ callback }) => useDebounceCallback(callback, 500),
-      { initialProps: { callback: callback1 } }
-    );
+    const { result, rerender } = renderHook(({ callback }) => useDebounceCallback(callback, 500), {
+      initialProps: { callback: callback1 },
+    });
 
     act(() => {
       result.current('arg1');
@@ -389,10 +388,9 @@ describe('useDebounceCallback', () => {
 
   it('should handle delay changes', () => {
     const callback = jest.fn();
-    const { result, rerender } = renderHook(
-      ({ delay }) => useDebounceCallback(callback, delay),
-      { initialProps: { delay: 500 } }
-    );
+    const { result, rerender } = renderHook(({ delay }) => useDebounceCallback(callback, delay), {
+      initialProps: { delay: 500 },
+    });
 
     act(() => {
       result.current('arg1');

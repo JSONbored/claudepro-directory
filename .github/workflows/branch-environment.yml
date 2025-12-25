@@ -64,7 +64,7 @@ jobs:
               PLATFORM="netlify"
             fi
           fi
-          
+
           echo "platform=$PLATFORM" >> $GITHUB_OUTPUT
           echo "is-vercel=$([ "$PLATFORM" = "vercel" ] && echo "true" || echo "false")" >> $GITHUB_OUTPUT
           echo "is-netlify=$([ "$PLATFORM" = "netlify" ] && echo "true" || echo "false")" >> $GITHUB_OUTPUT
@@ -85,17 +85,17 @@ jobs:
         id: wait
         run: |
           echo "⏳ Waiting for Supabase branch to be ready..."
-          
+
           # Supabase GitHub integration creates a status check
           # We poll for the status check to complete
           PR_NUMBER="${{ github.event.pull_request.number }}"
           BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
-          
+
           # Wait up to 4 minutes for Supabase branch to be ready
           MAX_WAIT=240
           ELAPSED=0
           INTERVAL=10
-          
+
           while [ $ELAPSED -lt $MAX_WAIT ]; do
             # Check for Supabase Preview status check
             STATUS=$(gh api repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}/statuses \
@@ -120,7 +120,7 @@ jobs:
             sleep $INTERVAL
             ELAPSED=$((ELAPSED + INTERVAL))
           done
-          
+
           echo "⚠️ Timeout waiting for Supabase branch"
           echo "ready=false" >> $GITHUB_OUTPUT
         env:
@@ -140,30 +140,30 @@ jobs:
       - name: Sync Supabase env vars to Netlify
         run: |
           echo "🔄 Syncing Supabase branch env vars to Netlify..."
-          
+
           # Get Netlify site ID and auth token
           NETLIFY_SITE_ID="${{ vars.NETLIFY_SITE_ID || secrets.NETLIFY_SITE_ID }}"
           NETLIFY_AUTH_TOKEN="${{ secrets.NETLIFY_AUTH_TOKEN }}"
-          
+
           if [ -z "$NETLIFY_SITE_ID" ] || [ -z "$NETLIFY_AUTH_TOKEN" ]; then
             echo "⚠️ Netlify credentials not configured, skipping env var sync"
             echo "Note: Supabase → Netlify integration may not exist, manual sync may be needed"
             exit 0
           fi
-          
+
           # Get Supabase branch credentials (via Supabase API)
           # This requires SUPABASE_ACCESS_TOKEN and project ref
           SUPABASE_PROJECT_REF="${{ vars.SUPABASE_PROJECT_REF || 'hgtjdifxfapoltfflowc' }}"
           SUPABASE_ACCESS_TOKEN="${{ secrets.SUPABASE_ACCESS_TOKEN }}"
-          
+
           if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
             echo "⚠️ Supabase access token not configured, skipping env var sync"
             exit 0
           fi
-          
+
           # Get branch name
           BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
-          
+
           # TODO: Implement Supabase Management API integration for env var sync
           # 
           # Current Status: Placeholder - env vars must be set manually in Netlify dashboard
@@ -201,20 +201,20 @@ jobs:
       - name: Aggregate and post deployment URLs
         run: |
           echo "📦 Aggregating deployment URLs..."
-          
+
           PLATFORM="${{ needs.detect-platform.outputs.platform }}"
           SUPABASE_URL="${{ needs.wait-for-supabase.outputs.supabase-url }}"
           PR_NUMBER="${{ github.event.pull_request.number }}"
-          
+
           # Build comment body
           COMMENT="## 🚀 Preview Deployment Ready
-          
+
           ### Database
           - **Supabase Branch:** $SUPABASE_URL
-          
+
           ### Application
           "
-          
+
           if [ "$PLATFORM" = "vercel" ]; then
             # Vercel preview URL is available via VERCEL_URL env var in deployment
             # For PR comments, we construct it from known patterns
@@ -228,15 +228,15 @@ jobs:
             COMMENT="$COMMENT- **Netlify Preview:** $NETLIFY_PREVIEW_URL
           "
           fi
-          
+
           COMMENT="$COMMENT
           ### Inngest
           - **Environment:** \`preview-$PR_NUMBER\` (auto-configured)
-          
+
           ---
           *This comment is automatically updated when deployments are ready.*
           "
-          
+
           # Post or update PR comment
           gh pr comment $PR_NUMBER --body "$COMMENT" || \
             echo "⚠️ Failed to post PR comment (may need GITHUB_TOKEN permissions)"
@@ -254,17 +254,17 @@ jobs:
       - name: Delete Supabase branch
         run: |
           echo "🧹 Cleaning up Supabase branch..."
-          
+
           BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
           SUPABASE_PROJECT_REF="${{ vars.SUPABASE_PROJECT_REF || 'hgtjdifxfapoltfflowc' }}"
           SUPABASE_ACCESS_TOKEN="${{ secrets.SUPABASE_ACCESS_TOKEN }}"
-          
+
           if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
             echo "⚠️ Supabase access token not configured, skipping branch deletion"
             echo "Note: Supabase branches auto-pause after inactivity, but don't auto-delete"
             exit 0
           fi
-          
+
           # TODO: Implement Supabase Management API integration for branch deletion
           # 
           # Current Status: Placeholder - branches auto-pause after inactivity but don't auto-delete

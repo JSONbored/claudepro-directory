@@ -299,12 +299,7 @@ export const interaction_type = {
 } as const;
 
 // Contact action type enum - matches contact_action_type in database
-export type contact_action_type =
-  | 'internal'
-  | 'external'
-  | 'route'
-  | 'sheet'
-  | 'easter-egg';
+export type contact_action_type = 'internal' | 'external' | 'route' | 'sheet' | 'easter-egg';
 
 export const contact_action_type = {
   internal: 'internal' as const,
@@ -333,13 +328,7 @@ export const contact_command_icon = {
 } as const;
 
 // Contact category enum - matches contact_category in database
-export type contact_category =
-  | 'general'
-  | 'bug'
-  | 'feature'
-  | 'question'
-  | 'feedback'
-  | 'support';
+export type contact_category = 'general' | 'bug' | 'feature' | 'question' | 'feedback' | 'support';
 
 export const contact_category = {
   general: 'general' as const,
@@ -372,7 +361,14 @@ export const submission_status = {
 } as const;
 
 // Submission type enum - matches submission_type in database
-export type submission_type = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills';
+export type submission_type =
+  | 'agents'
+  | 'mcp'
+  | 'rules'
+  | 'commands'
+  | 'hooks'
+  | 'statuslines'
+  | 'skills';
 
 export const submission_type = {
   agents: 'agents' as const,
@@ -446,7 +442,14 @@ export const trending_period = {
 } as const;
 
 // Job status enum - matches job_status in database
-export type job_status = 'draft' | 'pending_payment' | 'pending_review' | 'active' | 'expired' | 'rejected' | 'deleted';
+export type job_status =
+  | 'draft'
+  | 'pending_payment'
+  | 'pending_review'
+  | 'active'
+  | 'expired'
+  | 'rejected'
+  | 'deleted';
 
 export const job_status = {
   draft: 'draft' as const,

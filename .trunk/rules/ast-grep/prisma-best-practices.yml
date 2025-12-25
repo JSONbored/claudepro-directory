@@ -39,7 +39,7 @@ rule:
     - not:
         has:
           regex: '\$transaction|prisma\.\$transaction'
-message: "Multiple related Prisma operations should use transactions to ensure atomicity. Wrap operations in prisma.$transaction([...]) to ensure all operations succeed or fail together."
+message: 'Multiple related Prisma operations should use transactions to ensure atomicity. Wrap operations in prisma.$transaction([...]) to ensure all operations succeed or fail together.'
 severity: warning
 
 ---
@@ -55,7 +55,7 @@ rule:
         inside:
           has:
             regex: 'try.*catch'
-message: "Prisma queries should include error handling. Wrap in try/catch to handle PrismaClientKnownRequestError, PrismaClientValidationError, and other Prisma errors. Use normalizeError() for consistent error handling."
+message: 'Prisma queries should include error handling. Wrap in try/catch to handle PrismaClientKnownRequestError, PrismaClientValidationError, and other Prisma errors. Use normalizeError() for consistent error handling.'
 severity: warning
 
 ---
@@ -70,7 +70,7 @@ rule:
     - not:
         has:
           regex: 'select:|include:'
-message: "Prisma queries should use select or include to fetch only needed fields. This reduces data transfer and improves performance. Example: await prisma.user.findMany({ select: { id: true, name: true } });"
+message: 'Prisma queries should use select or include to fetch only needed fields. This reduces data transfer and improves performance. Example: await prisma.user.findMany({ select: { id: true, name: true } });'
 severity: warning
 
 ---
@@ -89,7 +89,7 @@ rule:
         inside:
           has:
             regex: '// All records|// Intentionally|// Testing'
-message: "Prisma findMany/findFirst queries should include where clause to avoid full table scans. Add where: { ... } to filter results. If you need all records, add a comment explaining why."
+message: 'Prisma findMany/findFirst queries should include where clause to avoid full table scans. Add where: { ... } to filter results. If you need all records, add a comment explaining why.'
 severity: warning
 
 ---
@@ -108,7 +108,7 @@ rule:
         inside:
           has:
             regex: '// Small dataset|// Cached|// Limited results'
-message: "Prisma findMany queries for potentially large datasets should include pagination (take/skip or cursor). Add take: limit, skip: offset for pagination, or use cursor-based pagination for better performance."
+message: 'Prisma findMany queries for potentially large datasets should include pagination (take/skip or cursor). Add take: limit, skip: offset for pagination, or use cursor-based pagination for better performance.'
 severity: warning
 
 ---

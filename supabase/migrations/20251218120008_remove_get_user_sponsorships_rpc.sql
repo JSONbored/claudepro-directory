@@ -8,5 +8,4 @@
 --
 -- Function signature: get_user_sponsorships(p_user_id uuid)
 -- Related: AccountService.getUserSponsorships uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_user_sponsorships(uuid);
+DROP FUNCTION IF EXISTS public.get_user_sponsorships (uuid);

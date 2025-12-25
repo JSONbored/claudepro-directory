@@ -1,11 +1,11 @@
 /**
  * pnpmfile.cjs - Package Manifest Modification Hook
- * 
+ *
  * This file modifies package manifests during installation to optimize dependencies.
  * Platform-aware Sharp binary configuration:
  * - Local development: Allows current platform binaries (macOS, Linux, etc.)
  * - Netlify/CI builds: Restricts to Linux x64 only (for Netlify Functions)
- * 
+ *
  * @see https://pnpm.io/pnpmfile
  */
 
@@ -18,13 +18,13 @@ function readPackage(pkg, context) {
     const isCI = process.env.CI === 'true' || process.env.NETLIFY === 'true';
     const isProduction = process.env.NODE_ENV === 'production';
     const isNetlifyBuild = process.env.NETLIFY === 'true';
-    
+
     // Only restrict to Linux x64 for Netlify builds or CI environments
     // Local development needs platform-specific binaries
     if (isNetlifyBuild || (isCI && isProduction)) {
       // Store original count for logging
       const originalCount = Object.keys(pkg.optionalDependencies || {}).length;
-      
+
       // Keep only Linux x64 binaries (needed for Netlify Functions)
       // Remove all other platform binaries (macOS, ARM, Windows, etc.)
       const linuxX64Only = {
@@ -35,7 +35,7 @@ function readPackage(pkg, context) {
       };
 
       // Remove undefined entries (in case version doesn't match)
-      Object.keys(linuxX64Only).forEach(key => {
+      Object.keys(linuxX64Only).forEach((key) => {
         if (!linuxX64Only[key]) {
           delete linuxX64Only[key];
         }
@@ -44,12 +44,12 @@ function readPackage(pkg, context) {
       // Replace optionalDependencies with Linux x64 only
       if (Object.keys(linuxX64Only).length > 0) {
         pkg.optionalDependencies = linuxX64Only;
-        
+
         // Log what we're doing
         console.log(
           `[pnpmfile] Modified sharp@${pkg.version} for ${isNetlifyBuild ? 'Netlify' : 'CI'} build: ` +
-          `Keeping only Linux x64 binaries (${Object.keys(linuxX64Only).length} packages) ` +
-          `instead of ${originalCount} platform binaries`
+            `Keeping only Linux x64 binaries (${Object.keys(linuxX64Only).length} packages) ` +
+            `instead of ${originalCount} platform binaries`
         );
       }
     } else {

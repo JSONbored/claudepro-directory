@@ -50,14 +50,12 @@ export function PowerUserTipsEmail({ email }: PowerUserTipsEmailProps) {
   const utm = EMAIL_UTM_TEMPLATES.DRIP_POWER_USER_TIPS;
 
   return (
-    <BaseLayout
-      preview="🚀 Pro tips for getting the most out of Claude"
-      utm={utm}
-    >
+    <BaseLayout preview="🚀 Pro tips for getting the most out of Claude" utm={utm}>
       <Section style={contentSectionStyle}>
         <Text style={titleStyle}>🚀 Pro Tips for Claude Power Users</Text>
         <Text style={paragraphStyle}>
-          Since you're actively exploring Claude Pro Directory, here are some tips to get even more value:
+          Since you're actively exploring Claude Pro Directory, here are some tips to get even more
+          value:
         </Text>
 
         <div style={tipsContainerStyle}>
@@ -159,4 +157,3 @@ const primaryCtaStyle: React.CSSProperties = {
   textDecoration: 'none',
   fontSize: typography.fontSize.base,
 };
-

@@ -23,7 +23,7 @@ rule:
     - not:
         has:
           regex: 'useMemo\('
-message: "Array operations in components should use useMemo to prevent recalculation. Wrap: const result = useMemo(() => array.map(...), [array])"
+message: 'Array operations in components should use useMemo to prevent recalculation. Wrap: const result = useMemo(() => array.map(...), [array])'
 severity: warning
 
 ---
@@ -46,7 +46,7 @@ rule:
     - not:
         has:
           regex: 'useCallback\('
-message: "Event handler functions should use useCallback to prevent unnecessary re-renders. Wrap: const handler = useCallback(() => { ... }, [deps])"
+message: 'Event handler functions should use useCallback to prevent unnecessary re-renders. Wrap: const handler = useCallback(() => { ... }, [deps])'
 severity: warning
 
 ---
@@ -73,7 +73,7 @@ rule:
     - kind: call_expression
     - has:
         regex: useState<number>|useState<string>|useState<boolean>
-message: "Unnecessary useState type annotation. TypeScript can infer type from initial value. Remove type annotation: useState($INIT) instead of useState<$TYPE>($INIT)"
+message: 'Unnecessary useState type annotation. TypeScript can infer type from initial value. Remove type annotation: useState($INIT) instead of useState<$TYPE>($INIT)'
 severity: info
 
 ---
@@ -85,7 +85,7 @@ rule:
     - kind: call_expression
     - has:
         regex: 'useEffect\([^,]+,\s*\[\]\)'
-message: "useEffect with empty dependency array may be missing dependencies. Review dependencies array and add all used variables/functions. If intentional, add eslint-disable-next-line react-hooks/exhaustive-deps"
+message: 'useEffect with empty dependency array may be missing dependencies. Review dependencies array and add all used variables/functions. If intentional, add eslint-disable-next-line react-hooks/exhaustive-deps'
 severity: warning
 
 ---
@@ -102,7 +102,7 @@ rule:
     - not:
         has:
           regex: 'return\s*\(\)\s*=>\s*\{'
-message: "useEffect with subscriptions/timers/event listeners must include cleanup function. Add: return () => { cleanup code }"
+message: 'useEffect with subscriptions/timers/event listeners must include cleanup function. Add: return () => { cleanup code }'
 severity: error
 
 ---
@@ -121,6 +121,5 @@ rule:
     - not:
         inside:
           regex: '<Suspense[^>]*>'
-message: "Async components with data fetching should be wrapped in Suspense for better loading UX. Add: <Suspense fallback={<Loading />}>...</Suspense>"
+message: 'Async components with data fetching should be wrapped in Suspense for better loading UX. Add: <Suspense fallback={<Loading />}>...</Suspense>'
 severity: warning
-

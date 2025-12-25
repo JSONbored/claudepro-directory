@@ -5,5 +5,4 @@
 --
 -- Description: Remove trigger_generate_embedding trigger function - embedding generation system was removed
 -- Function signature: trigger_generate_embedding() RETURNS trigger
-
-DROP FUNCTION IF EXISTS public.trigger_generate_embedding();
+DROP FUNCTION IF EXISTS public.trigger_generate_embedding ();

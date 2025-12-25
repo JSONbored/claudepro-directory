@@ -9,5 +9,8 @@
 --
 -- Function signature: format_date_long(input_date timestamp with time zone)
 -- Related: format_relative_date RPC was removed (was the only caller)
-
-DROP FUNCTION IF EXISTS public.format_date_long(timestamp with time zone);
+DROP FUNCTION IF EXISTS public.format_date_long (
+  timestamp
+  with
+    time zone
+);

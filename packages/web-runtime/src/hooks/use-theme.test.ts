@@ -155,7 +155,7 @@ describe('useTheme', () => {
     // and returns 'dark' in SSR. This test verifies the hook doesn't crash in SSR scenarios.
     // Since jsdom doesn't perfectly simulate SSR, we verify the hook's SSR-safe behavior
     // by checking that it handles missing window/document gracefully.
-    
+
     // The hook should return a valid theme value even in SSR
     // The actual SSR behavior is tested by the implementation's checks
     const { result } = renderHook(() => useTheme());
@@ -167,7 +167,7 @@ describe('useTheme', () => {
 
   it('should handle matchMedia error gracefully', () => {
     document.documentElement.removeAttribute('data-theme');
-    
+
     // Mock matchMedia to throw during initialization
     // The hook should catch this and return 'light'
     const originalMatchMedia = window.matchMedia;

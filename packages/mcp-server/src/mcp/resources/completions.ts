@@ -43,7 +43,9 @@ export async function getCategoryCompletions(
   } catch (error) {
     logger.error('Failed to get category completions', error, { value });
     // Fallback to static list if database query fails
-    return CategorySchema.options.filter((cat) => cat.toLowerCase().startsWith(value.toLowerCase()));
+    return CategorySchema.options.filter((cat) =>
+      cat.toLowerCase().startsWith(value.toLowerCase())
+    );
   }
 }
 

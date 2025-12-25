@@ -103,9 +103,7 @@ describe('useUnifiedSearch', () => {
 
     // Check that tag was added
     expect(result.current.filters.tags).toContain('ai');
-    expect(onFiltersChange).toHaveBeenCalledWith(
-      expect.objectContaining({ tags: ['ai'] })
-    );
+    expect(onFiltersChange).toHaveBeenCalledWith(expect.objectContaining({ tags: ['ai'] }));
 
     // Second toggle - remove tag (functional update should see current state)
     act(() => {
@@ -204,7 +202,7 @@ describe('useUnifiedSearch', () => {
 
   it('should persist sort preference when filters change', () => {
     const mockSetSavedSort = jest.fn();
-    
+
     // Get the mock and override for this test
     const { useLocalStorage } = jest.requireMock('./use-local-storage.ts');
     (useLocalStorage as jest.Mock).mockImplementation((key: string, options: any) => {
@@ -226,9 +224,9 @@ describe('useUnifiedSearch', () => {
     });
 
     expect(mockSetSavedSort).toHaveBeenCalledWith('popular');
-    
+
     // Reset mock implementation after test
-    (useLocalStorage as jest.Mock).mockImplementation((key: string, options: any) => 
+    (useLocalStorage as jest.Mock).mockImplementation((key: string, options: any) =>
       createMockUseLocalStorage(key, options)
     );
   });

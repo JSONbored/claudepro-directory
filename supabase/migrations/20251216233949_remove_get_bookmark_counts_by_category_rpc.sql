@@ -6,5 +6,4 @@
 -- Description: Remove get_bookmark_counts_by_category RPC function
 -- This function is unused in the codebase.
 -- Function signature: get_bookmark_counts_by_category(content_category)
-
-DROP FUNCTION IF EXISTS public.get_bookmark_counts_by_category(content_category);
+DROP FUNCTION IF EXISTS public.get_bookmark_counts_by_category (content_category);

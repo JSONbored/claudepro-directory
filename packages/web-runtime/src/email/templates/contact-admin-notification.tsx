@@ -91,16 +91,12 @@ export function ContactAdminNotificationEmail({
     >
       <Section style={contentSectionStyle}>
         <div style={headerRowStyle}>
-          <Text style={titleStyle}>
-            {categoryEmoji} New Contact Submission
-          </Text>
+          <Text style={titleStyle}>{categoryEmoji} New Contact Submission</Text>
           <EmailBadge variant="secondary" size="sm">
             {CATEGORY_LABELS[category]}
           </EmailBadge>
         </div>
-        <Text style={subtitleStyle}>
-          Submitted via interactive terminal on {submittedDate}
-        </Text>
+        <Text style={subtitleStyle}>Submitted via interactive terminal on {submittedDate}</Text>
 
         <EmailCard variant="default" style={detailsCardStyle}>
           <div style={detailRowStyle}>
@@ -119,7 +115,13 @@ export function ContactAdminNotificationEmail({
           </div>
           <div style={detailRowStyle}>
             <Text style={detailLabelStyle}>Submission ID:</Text>
-            <Text style={{ ...detailValueStyle, fontFamily: 'monospace', fontSize: typography.fontSize.sm }}>
+            <Text
+              style={{
+                ...detailValueStyle,
+                fontFamily: 'monospace',
+                fontSize: typography.fontSize.sm,
+              }}
+            >
               {submissionId}
             </Text>
           </div>
@@ -140,9 +142,9 @@ export function ContactAdminNotificationEmail({
         </div>
       </Section>
 
-      <EmailFooterNote lines={[
-        { type: 'text', text: 'This is an automated notification from the contact form.' },
-      ]} />
+      <EmailFooterNote
+        lines={[{ type: 'text', text: 'This is an automated notification from the contact form.' }]}
+      />
     </BaseLayout>
   );
 }
@@ -254,4 +256,3 @@ const replyCtaStyle: React.CSSProperties = {
   textDecoration: 'none',
   fontSize: typography.fontSize.base,
 };
-

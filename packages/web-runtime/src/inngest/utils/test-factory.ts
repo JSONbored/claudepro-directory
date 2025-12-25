@@ -9,11 +9,7 @@
 
 import { InngestTestEngine } from '@inngest/test';
 import type { InngestFunction } from 'inngest';
-import {
-  setupInngestTestMocks,
-  resetInngestTestMocks,
-  type InngestTestMocks,
-} from './test-mocks';
+import { setupInngestTestMocks, resetInngestTestMocks, type InngestTestMocks } from './test-mocks';
 
 /**
  * Configuration for creating an Inngest test factory
@@ -80,21 +76,29 @@ export class InngestTestFactory {
   /**
    * Create a mock event for event-triggered functions
    */
-  createEvent(eventName: string, data: Record<string, unknown>): Array<{ name: string; data: Record<string, unknown> }> {
+  createEvent(
+    eventName: string,
+    data: Record<string, unknown>
+  ): Array<{ name: string; data: Record<string, unknown> }> {
     return [{ name: eventName, data }];
   }
 
   /**
    * Create mock events for batch processing
    */
-  createEvents(events: Array<{ name: string; data: Record<string, unknown> }>): Array<{ name: string; data: Record<string, unknown> }> {
+  createEvents(
+    events: Array<{ name: string; data: Record<string, unknown> }>
+  ): Array<{ name: string; data: Record<string, unknown> }> {
     return events;
   }
 
   /**
    * Create a mock step handler for step.sleep, step.waitForEvent, etc.
    */
-  createStepMock(stepId: string, handler: () => unknown | Promise<unknown>): {
+  createStepMock(
+    stepId: string,
+    handler: () => unknown | Promise<unknown>
+  ): {
     id: string;
     handler: () => unknown | Promise<unknown>;
   } {
@@ -123,9 +127,6 @@ export class InngestTestFactory {
 /**
  * Helper function to create a test factory with common defaults
  */
-export function createInngestTestFactory(
-  config: InngestTestFactoryConfig
-): InngestTestFactory {
+export function createInngestTestFactory(config: InngestTestFactoryConfig): InngestTestFactory {
   return new InngestTestFactory(config);
 }
-

@@ -57,10 +57,7 @@ export function ContactUserConfirmationEmail({
   const utm = EMAIL_UTM_TEMPLATES.CONTACT_USER_CONFIRMATION;
 
   return (
-    <BaseLayout
-      preview={`Thanks for reaching out, ${name}!`}
-      utm={utm}
-    >
+    <BaseLayout preview={`Thanks for reaching out, ${name}!`} utm={utm}>
       <Section style={contentSectionStyle}>
         <Text style={titleStyle}>Thanks for reaching out, {name}!</Text>
 
@@ -70,8 +67,8 @@ export function ContactUserConfirmationEmail({
               We've received your{' '}
               <EmailBadge variant="secondary" size="sm">
                 {CATEGORY_LABELS[category]}
-              </EmailBadge>
-              {' '}message and will get back to you as soon as possible.
+              </EmailBadge>{' '}
+              message and will get back to you as soon as possible.
             </Text>
           </div>
         </EmailCard>
@@ -133,4 +130,3 @@ const responseTimeStyle: React.CSSProperties = {
   textAlign: 'center',
   fontStyle: 'italic',
 };
-

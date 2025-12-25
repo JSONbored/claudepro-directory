@@ -185,7 +185,7 @@ function CaseStudyVariant(props: CaseStudyProps) {
         </div>
 
         <div>
-          <h4 className="mb-2 font-semibold text-success">Results</h4>
+          <h4 className="text-success mb-2 font-semibold">Results</h4>
           <ul className="text-muted-foreground list-disc space-y-1 pl-4">
             {results.map((result) => (
               <li key={result}>{result}</li>
@@ -377,7 +377,7 @@ function TLDRVariant(props: TLDRSummaryProps) {
             <ul className="space-y-1">
               {keyPoints.map((point) => (
                 <li key={point} className="flex items-start gap-1 text-sm">
-                  <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                  <CheckCircle className="text-success mt-0.5 h-4 w-4 shrink-0" />
                   <span>{point}</span>
                 </li>
               ))}

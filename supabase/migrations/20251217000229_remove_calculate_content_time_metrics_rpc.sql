@@ -5,5 +5,4 @@
 --
 -- Description: Remove calculate_content_time_metrics RPC function - Not found in codebase, only in generated types
 -- Function signature: calculate_content_time_metrics()
-
-DROP FUNCTION IF EXISTS public.calculate_content_time_metrics();
+DROP FUNCTION IF EXISTS public.calculate_content_time_metrics ();

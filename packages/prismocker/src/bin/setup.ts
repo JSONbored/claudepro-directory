@@ -40,7 +40,7 @@ function parseOptions(args: string[]): SetupOptions {
   let mockPath = './__mocks__/@prisma/client.ts';
   let framework: 'jest' | 'vitest' | 'auto' = 'auto';
   let skipExamples = false;
-  
+
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === '--schema' && i + 1 < args.length) {
@@ -59,7 +59,7 @@ function parseOptions(args: string[]): SetupOptions {
       skipExamples = true;
     }
   }
-  
+
   return { schemaPath, mockPath, framework, skipExamples };
 }
 
@@ -68,26 +68,26 @@ function parseOptions(args: string[]): SetupOptions {
  */
 async function detectFramework(cwd: string): Promise<'jest' | 'vitest' | null> {
   const packageJsonPath = join(cwd, 'package.json');
-  
+
   if (!existsSync(packageJsonPath)) {
     return null;
   }
-  
+
   try {
     const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'));
     const deps = {
       ...packageJson.dependencies,
       ...packageJson.devDependencies,
     };
-    
+
     if (deps.jest || deps['@jest/globals'] || packageJson.scripts?.test?.includes('jest')) {
       return 'jest';
     }
-    
+
     if (deps.vitest || packageJson.scripts?.test?.includes('vitest')) {
       return 'vitest';
     }
-    
+
     return null;
   } catch {
     return null;
@@ -98,17 +98,18 @@ async function detectFramework(cwd: string): Promise<'jest' | 'vitest' | null> {
  * Find test setup file
  */
 function findSetupFile(cwd: string, framework: 'jest' | 'vitest'): string | null {
-  const possibleFiles = framework === 'jest'
-    ? ['jest.setup.ts', 'jest.setup.js', 'setupTests.ts', 'setupTests.js']
-    : ['vitest.setup.ts', 'vitest.setup.js', 'setup.ts', 'setup.js'];
-  
+  const possibleFiles =
+    framework === 'jest'
+      ? ['jest.setup.ts', 'jest.setup.js', 'setupTests.ts', 'setupTests.js']
+      : ['vitest.setup.ts', 'vitest.setup.js', 'setup.ts', 'setup.js'];
+
   for (const file of possibleFiles) {
     const path = join(cwd, file);
     if (existsSync(path)) {
       return path;
     }
   }
-  
+
   return null;
 }
 
@@ -278,15 +279,15 @@ async function updateSetupFile(
 ): Promise<boolean> {
   try {
     const content = await readFile(setupFilePath, 'utf-8');
-    
+
     // Check if Prismocker is already configured
     if (content.includes('prismocker') || content.includes('Prismocker')) {
       return false; // Already configured
     }
-    
+
     let newContent = content;
     const mockPath = './__mocks__/@prisma/client';
-    
+
     if (framework === 'vitest') {
       // Add Vitest mock registration
       const vitestMock = `
@@ -302,7 +303,7 @@ vi.mock('@prisma/client', async () => {
   return mockModule;
 });
 `;
-      
+
       // Add at the end of the file
       newContent = content.trim() + '\n' + vitestMock;
     } else {
@@ -317,11 +318,11 @@ vi.mock('@prisma/client', async () => {
 // when any code imports from '@prisma/client'
 // No explicit jest.mock() needed - Jest handles it automatically
 `;
-      
+
       // Add at the end of the file
       newContent = content.trim() + '\n' + jestComment;
     }
-    
+
     await writeFile(setupFilePath, newContent, 'utf-8');
     return true;
   } catch (error: any) {
@@ -333,21 +334,19 @@ vi.mock('@prisma/client', async () => {
 /**
  * Create example test file
  */
-async function createExampleTest(
-  cwd: string,
-  framework: 'jest' | 'vitest'
-): Promise<void> {
+async function createExampleTest(cwd: string, framework: 'jest' | 'vitest'): Promise<void> {
   const examplePath = join(cwd, 'prismocker-example.test.ts');
-  
+
   if (existsSync(examplePath)) {
     console.log(`⚠️  Example test file already exists: ${examplePath}`);
     return;
   }
-  
-  const imports = framework === 'jest'
-    ? `import { describe, it, expect, beforeEach } from '@jest/globals';`
-    : `import { describe, it, expect, beforeEach } from 'vitest';`;
-  
+
+  const imports =
+    framework === 'jest'
+      ? `import { describe, it, expect, beforeEach } from '@jest/globals';`
+      : `import { describe, it, expect, beforeEach } from 'vitest';`;
+
   const exampleContent = `${imports}
 import { PrismaClient } from '@prisma/client';
 import { resetAndSeed } from 'prismocker/test-utils';
@@ -413,7 +412,7 @@ describe('Prismocker Example', () => {
   });
 });
 `;
-  
+
   await writeFile(examplePath, exampleContent, 'utf-8');
   console.log(`✅ Created example test file: ${examplePath}`);
 }
@@ -495,11 +494,14 @@ enums in your Prisma schema.
 /**
  * Verify Prismocker setup
  */
-async function verifySetup(cwd: string, options: { schemaPath: string; mockPath: string }): Promise<boolean> {
+async function verifySetup(
+  cwd: string,
+  options: { schemaPath: string; mockPath: string }
+): Promise<boolean> {
   console.log('🔍 Verifying Prismocker setup...\n');
-  
+
   let allGood = true;
-  
+
   // Check mock file
   const mockExists = existsSync(resolve(cwd, options.mockPath));
   if (mockExists) {
@@ -508,7 +510,7 @@ async function verifySetup(cwd: string, options: { schemaPath: string; mockPath:
     console.log(`❌ Mock file missing: ${options.mockPath}`);
     allGood = false;
   }
-  
+
   // Check schema file
   const schemaExists = existsSync(resolve(cwd, options.schemaPath));
   if (schemaExists) {
@@ -517,14 +519,15 @@ async function verifySetup(cwd: string, options: { schemaPath: string; mockPath:
     console.log(`❌ Schema file missing: ${options.schemaPath}`);
     allGood = false;
   }
-  
+
   // Check setup file
   const framework = await detectFramework(cwd);
   if (framework) {
     const setupFile = findSetupFile(cwd, framework);
     if (setupFile) {
       const content = await readFile(setupFile, 'utf-8');
-      const hasMock = content.includes('__mocks__/@prisma/client') || content.includes('prismocker');
+      const hasMock =
+        content.includes('__mocks__/@prisma/client') || content.includes('prismocker');
       if (hasMock) {
         console.log(`✅ Setup file configured: ${setupFile}`);
       } else {
@@ -542,20 +545,22 @@ async function verifySetup(cwd: string, options: { schemaPath: string; mockPath:
   } else {
     console.log(`⚠️  Could not detect testing framework`);
   }
-  
+
   return allGood;
 }
 
 /**
  * Fix Prismocker setup issues
  */
-async function fixSetup(cwd: string, options: { schemaPath: string; mockPath: string; framework: 'jest' | 'vitest' | 'auto' }): Promise<void> {
+async function fixSetup(
+  cwd: string,
+  options: { schemaPath: string; mockPath: string; framework: 'jest' | 'vitest' | 'auto' }
+): Promise<void> {
   console.log('🔧 Fixing Prismocker setup...\n');
-  
-  const detectedFramework = options.framework === 'auto' 
-    ? await detectFramework(cwd) || 'jest'
-    : options.framework;
-  
+
+  const detectedFramework =
+    options.framework === 'auto' ? (await detectFramework(cwd)) || 'jest' : options.framework;
+
   // Create mock file if missing
   const mockExists = existsSync(resolve(cwd, options.mockPath));
   if (!mockExists) {
@@ -568,7 +573,7 @@ async function fixSetup(cwd: string, options: { schemaPath: string; mockPath: st
   } else {
     console.log(`✅ Mock file already exists: ${options.mockPath}`);
   }
-  
+
   // Update setup file
   const setupFile = findSetupFile(cwd, detectedFramework);
   if (setupFile) {
@@ -582,33 +587,47 @@ async function fixSetup(cwd: string, options: { schemaPath: string; mockPath: st
   } else if (detectedFramework === 'vitest') {
     console.log('⚠️  No setup file found. You may need to manually register the mock.');
   }
-  
+
   // Generate enums
   console.log('🔢 Generating enum stubs...');
   try {
     const { spawn } = await import('node:child_process');
     await new Promise<void>((resolve) => {
-      const child = spawn('npx', ['prismocker', 'generate-enums', '--schema', options.schemaPath, '--mock', options.mockPath], {
-        cwd,
-        stdio: 'inherit',
-        shell: true,
-      });
+      const child = spawn(
+        'npx',
+        [
+          'prismocker',
+          'generate-enums',
+          '--schema',
+          options.schemaPath,
+          '--mock',
+          options.mockPath,
+        ],
+        {
+          cwd,
+          stdio: 'inherit',
+          shell: true,
+        }
+      );
       child.on('close', () => resolve());
     });
     console.log('✅ Generated enum stubs');
   } catch (error: any) {
     console.log(`⚠️  Could not generate enums: ${error.message}`);
   }
-  
+
   console.log('\n✨ Fix complete!');
 }
 
 /**
  * Rollback Prismocker setup
  */
-async function rollbackSetup(cwd: string, options: { mockPath: string; removeSetup: boolean }): Promise<void> {
+async function rollbackSetup(
+  cwd: string,
+  options: { mockPath: string; removeSetup: boolean }
+): Promise<void> {
   console.log('🔄 Rolling back Prismocker setup...\n');
-  
+
   const mockFile = resolve(cwd, options.mockPath);
   if (existsSync(mockFile)) {
     await import('node:fs/promises').then(({ unlink }) => unlink(mockFile));
@@ -616,7 +635,7 @@ async function rollbackSetup(cwd: string, options: { mockPath: string; removeSet
   } else {
     console.log(`ℹ️  Mock file not found: ${options.mockPath}`);
   }
-  
+
   if (options.removeSetup) {
     const framework = await detectFramework(cwd);
     if (framework) {
@@ -627,16 +646,16 @@ async function rollbackSetup(cwd: string, options: { mockPath: string; removeSet
       }
     }
   }
-  
+
   console.log('\n✨ Rollback complete!');
 }
 
 async function main() {
   const args = process.argv.slice(2);
-  
+
   // Check for command (fix, verify, rollback)
   const command = args[0];
-  
+
   if (command === 'verify') {
     const options = parseOptions(args.slice(1));
     const cwd = process.cwd();
@@ -647,7 +666,7 @@ async function main() {
     process.exit(allGood ? 0 : 1);
     return;
   }
-  
+
   if (command === 'fix') {
     const options = parseOptions(args.slice(1));
     const cwd = process.cwd();
@@ -658,7 +677,7 @@ async function main() {
     });
     return;
   }
-  
+
   if (command === 'rollback') {
     const options = parseOptions(args.slice(1));
     const cwd = process.cwd();
@@ -668,52 +687,51 @@ async function main() {
     });
     return;
   }
-  
+
   // Default: setup command
   const options = parseOptions(args);
-  
+
   // Handle --only-mock and --only-enums flags
   const onlyMock = args.includes('--only-mock');
   const onlyEnums = args.includes('--only-enums');
-  
+
   if (onlyMock && onlyEnums) {
     console.error('❌ Error: Cannot use --only-mock and --only-enums together');
     process.exit(1);
   }
-  
+
   const schemaPath = options.schemaPath;
   const mockPath = options.mockPath;
   const framework = options.framework;
   const skipExamples = args.includes('--skip-examples');
-  
+
   if (args.includes('--help') || args.includes('-h')) {
     showHelp();
     process.exit(0);
   }
-  
+
   const cwd = process.cwd();
   const resolvedSchemaPath = resolve(cwd, schemaPath);
   const resolvedMockPath = resolve(cwd, mockPath);
-  
+
   console.log('🚀 Prismocker Auto-Setup\n');
-  
+
   // Handle --only-mock flag
   if (onlyMock) {
     console.log('📝 Creating mock file only...');
     const mockDir = dirname(resolvedMockPath);
     await mkdir(mockDir, { recursive: true });
-    
-    const detectedFramework = framework === 'auto' 
-      ? await detectFramework(cwd) || 'jest'
-      : framework;
-    
+
+    const detectedFramework =
+      framework === 'auto' ? (await detectFramework(cwd)) || 'jest' : framework;
+
     const mockContent = generateMockFileContent(detectedFramework);
     await writeFile(resolvedMockPath, mockContent, 'utf-8');
     console.log(`✅ Created mock file: ${mockPath}`);
     console.log('\n✨ Mock file creation complete!');
     return;
   }
-  
+
   // Handle --only-enums flag
   if (onlyEnums) {
     console.log('🔢 Generating enum stubs only...');
@@ -721,15 +739,19 @@ async function main() {
       console.error(`❌ Error: Schema file not found: ${resolvedSchemaPath}`);
       process.exit(1);
     }
-    
+
     try {
       const { spawn } = await import('node:child_process');
       await new Promise<void>((resolve) => {
-        const child = spawn('npx', ['prismocker', 'generate-enums', '--schema', schemaPath, '--mock', mockPath], {
-          cwd,
-          stdio: 'inherit',
-          shell: true,
-        });
+        const child = spawn(
+          'npx',
+          ['prismocker', 'generate-enums', '--schema', schemaPath, '--mock', mockPath],
+          {
+            cwd,
+            stdio: 'inherit',
+            shell: true,
+          }
+        );
         child.on('close', () => resolve());
       });
       console.log('✅ Generated enum stubs');
@@ -740,7 +762,7 @@ async function main() {
     console.log('\n✨ Enum generation complete!');
     return;
   }
-  
+
   // Full setup (default behavior)
   // Step 1: Detect framework
   let detectedFramework: 'jest' | 'vitest';
@@ -758,7 +780,7 @@ async function main() {
     detectedFramework = framework;
     console.log(`✅ Using framework: ${detectedFramework}`);
   }
-  
+
   // Step 2: Check Prisma schema
   console.log('\n📋 Checking Prisma schema...');
   if (!existsSync(resolvedSchemaPath)) {
@@ -767,16 +789,16 @@ async function main() {
     process.exit(1);
   }
   console.log(`✅ Found schema: ${schemaPath}`);
-  
+
   // Step 3: Create mock file
   console.log('\n📝 Creating mock file...');
   const mockDir = dirname(resolvedMockPath);
   await mkdir(mockDir, { recursive: true });
-  
+
   const mockContent = generateMockFileContent(detectedFramework);
   await writeFile(resolvedMockPath, mockContent, 'utf-8');
   console.log(`✅ Created mock file: ${mockPath}`);
-  
+
   // Step 4: Update setup file
   console.log('\n⚙️  Updating test setup...');
   const setupFile = findSetupFile(cwd, detectedFramework);
@@ -799,28 +821,34 @@ async function main() {
       console.log(`   });`);
       console.log(`   \`\`\``);
     } else {
-      console.log(`   Jest automatically uses __mocks__ directory, so no manual registration needed.`);
+      console.log(
+        `   Jest automatically uses __mocks__ directory, so no manual registration needed.`
+      );
     }
   }
-  
+
   // Step 5: Generate enum stubs
   console.log('\n🔢 Generating enum stubs...');
   try {
     // Import and run generate-enums
     const { spawn } = await import('node:child_process');
-    
+
     const result = await new Promise<{ code: number }>((resolve) => {
-      const child = spawn('npx', ['prismocker', 'generate-enums', '--schema', schemaPath, '--mock', mockPath], {
-        cwd,
-        stdio: 'inherit',
-        shell: true,
-      });
-      
+      const child = spawn(
+        'npx',
+        ['prismocker', 'generate-enums', '--schema', schemaPath, '--mock', mockPath],
+        {
+          cwd,
+          stdio: 'inherit',
+          shell: true,
+        }
+      );
+
       child.on('close', (code) => {
         resolve({ code: code || 0 });
       });
     });
-    
+
     if (result.code === 0) {
       console.log('✅ Generated enum stubs');
     } else {
@@ -830,13 +858,13 @@ async function main() {
     console.log(`⚠️  Could not auto-generate enums: ${error.message}`);
     console.log(`   Run 'npx prismocker generate-enums' manually after setup`);
   }
-  
+
   // Step 6: Create example test
   if (!skipExamples) {
     console.log('\n📚 Creating example test...');
     await createExampleTest(cwd, detectedFramework);
   }
-  
+
   // Summary
   console.log('\n✨ Setup complete!\n');
   console.log('Next steps:');
@@ -857,4 +885,3 @@ main().catch((error) => {
   console.error('❌ Setup failed:', error);
   process.exit(1);
 });
-

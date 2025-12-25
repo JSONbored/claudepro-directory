@@ -10,5 +10,4 @@
 --
 -- Function signature: get_user_complete_data(p_user_id uuid, p_activity_limit integer, p_activity_offset integer, p_activity_type text)
 -- Related: AccountService.getUserCompleteData now calls individual Prisma-based service methods
-
-DROP FUNCTION IF EXISTS public.get_user_complete_data(uuid, integer, integer, text);
+DROP FUNCTION IF EXISTS public.get_user_complete_data (uuid, integer, integer, text);

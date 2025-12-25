@@ -26,5 +26,4 @@
 -- Related Changes:
 -- - packages/data-layer/src/services/misc.ts: Converted getActiveAnnouncement() to use Prisma
 -- - packages/web-runtime/src/data/announcements.ts: Updated to use Prisma model types
-
-DROP FUNCTION IF EXISTS public.get_active_announcement(timestamptz);
+DROP FUNCTION IF EXISTS public.get_active_announcement (timestamptz);

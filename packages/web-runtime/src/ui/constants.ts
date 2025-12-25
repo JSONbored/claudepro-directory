@@ -65,10 +65,10 @@ export type SubmissionStatusType = submission_status;
 
 /**
  * Changelog Badge Color Map
- * 
+ *
  * Tailwind utility classes for each changelog category badge.
  * Uses theme color variables for consistent styling across light/dark modes.
- * 
+ *
  * @see changelog_category - Type from Prisma enum
  */
 export const CHANGELOG_BADGE_COLOR_MAP: Record<changelog_category, string> = {

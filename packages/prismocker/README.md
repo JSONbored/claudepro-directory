@@ -9,59 +9,59 @@ A type-safe, in-memory Prisma Client mock for testing. Works perfectly with pnpm
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Installation](#installation)
-- [Auto-Setup (Recommended)](#auto-setup-recommended)
-- [Quick Start](#quick-start)
-  - [Basic Usage](#basic-usage)
-  - [Jest Integration](#jest-integration)
-  - [Vitest Integration](#vitest-integration)
-- [API Reference](#api-reference)
-  - [Factory Functions](#factory-functions)
-  - [Type-Safe Helpers](#type-safe-helpers)
-  - [Configuration Options](#configuration-options)
-- [Usage Examples](#usage-examples)
-  - [Service Layer Testing](#service-layer-testing)
-  - [API Route Testing](#api-route-testing)
-  - [Complex Query Testing](#complex-query-testing)
-  - [Relation Testing](#relation-testing)
-  - [Transaction Testing](#transaction-testing)
-  - [Zod Validation Testing](#zod-validation-testing)
-- [Advanced Features](#advanced-features)
-  - [Prisma Ecosystem Compatibility](#prisma-ecosystem-compatibility)
-  - [Type Safety](#type-safety)
-  - [Test Utilities](#test-utilities)
-  - [Query Logging](#query-logging)
-- [How It Works](#how-it-works)
-  - [In-Memory Storage](#in-memory-storage)
-  - [Query Engine](#query-engine)
-  - [Type System](#type-system)
-- [Example Files](#example-files)
-- [Caveats & Considerations](#caveats--considerations)
-- [Troubleshooting](#troubleshooting)
-- [Migration Guide](#migration-guide)
-- [CLI Commands](#cli-commands)
-- [Contributing](#contributing)
+* [Overview](#overview)
+* [Installation](#installation)
+* [Auto-Setup (Recommended)](#auto-setup-recommended)
+* [Quick Start](#quick-start)
+  * [Basic Usage](#basic-usage)
+  * [Jest Integration](#jest-integration)
+  * [Vitest Integration](#vitest-integration)
+* [API Reference](#api-reference)
+  * [Factory Functions](#factory-functions)
+  * [Type-Safe Helpers](#type-safe-helpers)
+  * [Configuration Options](#configuration-options)
+* [Usage Examples](#usage-examples)
+  * [Service Layer Testing](#service-layer-testing)
+  * [API Route Testing](#api-route-testing)
+  * [Complex Query Testing](#complex-query-testing)
+  * [Relation Testing](#relation-testing)
+  * [Transaction Testing](#transaction-testing)
+  * [Zod Validation Testing](#zod-validation-testing)
+* [Advanced Features](#advanced-features)
+  * [Prisma Ecosystem Compatibility](#prisma-ecosystem-compatibility)
+  * [Type Safety](#type-safety)
+  * [Test Utilities](#test-utilities)
+  * [Query Logging](#query-logging)
+* [How It Works](#how-it-works)
+  * [In-Memory Storage](#in-memory-storage)
+  * [Query Engine](#query-engine)
+  * [Type System](#type-system)
+* [Example Files](#example-files)
+* [Caveats & Considerations](#caveats--considerations)
+* [Troubleshooting](#troubleshooting)
+* [Migration Guide](#migration-guide)
+* [CLI Commands](#cli-commands)
+* [Contributing](#contributing)
 
 ## Overview
 
 Prismocker provides a complete, type-safe mock for Prisma Client that:
 
-- ✅ **Works with pnpm** - Solves module resolution issues that plague other Prisma mocks
-- ✅ **Type-safe** - Uses Prisma's generated types, eliminates `as any` assertions
-- ✅ **Full Prisma API** - Supports all Prisma operations (findMany, create, update, delete, count, aggregate, groupBy, etc.)
-- ✅ **Full Relation Support** - Complete `include`/`select` support with relation filters (`some`, `every`, `none`)
-- ✅ **Transaction Rollback** - Automatic rollback on errors with state snapshotting
-- ✅ **Middleware Support** - Full `$use()` middleware support for intercepting and modifying operations
-- ✅ **Event Listeners** - `$on()` event listener support for query events and lifecycle hooks
-- ✅ **Lifecycle Methods** - `$connect()`, `$disconnect()`, and `$metrics()` API compatibility
-- ✅ **Enhanced Error Messages** - Comprehensive, actionable errors with debugging hints
-- ✅ **Prisma Ecosystem Compatible** - Works with generated Zod schemas, PrismaJson types, and Prisma extensions
-- ✅ **Fast & Isolated** - In-memory storage with automatic indexing for performance, perfect for unit tests
-- ✅ **Performance Optimized** - Automatic index management for primary keys, foreign keys, and custom fields
-- ✅ **Zero Dependencies** - Only requires `@prisma/client` as peer dependency
-- ✅ **Environment Agnostic** - Works with any Prisma generator setup, not tied to specific environments
-- ✅ **Standalone Package** - Can be extracted to separate repo for OSS distribution
+* ✅ **Works with pnpm** - Solves module resolution issues that plague other Prisma mocks
+* ✅ **Type-safe** - Uses Prisma's generated types, eliminates `as any` assertions
+* ✅ **Full Prisma API** - Supports all Prisma operations (findMany, create, update, delete, count, aggregate, groupBy, etc.)
+* ✅ **Full Relation Support** - Complete `include`/`select` support with relation filters (`some`, `every`, `none`)
+* ✅ **Transaction Rollback** - Automatic rollback on errors with state snapshotting
+* ✅ **Middleware Support** - Full `$use()` middleware support for intercepting and modifying operations
+* ✅ **Event Listeners** - `$on()` event listener support for query events and lifecycle hooks
+* ✅ **Lifecycle Methods** - `$connect()`, `$disconnect()`, and `$metrics()` API compatibility
+* ✅ **Enhanced Error Messages** - Comprehensive, actionable errors with debugging hints
+* ✅ **Prisma Ecosystem Compatible** - Works with generated Zod schemas, PrismaJson types, and Prisma extensions
+* ✅ **Fast & Isolated** - In-memory storage with automatic indexing for performance, perfect for unit tests
+* ✅ **Performance Optimized** - Automatic index management for primary keys, foreign keys, and custom fields
+* ✅ **Zero Dependencies** - Only requires `@prisma/client` as peer dependency
+* ✅ **Environment Agnostic** - Works with any Prisma generator setup, not tied to specific environments
+* ✅ **Standalone Package** - Can be extracted to separate repo for OSS distribution
 
 ## Installation
 
@@ -75,8 +75,8 @@ yarn add -D prisma
 
 **Peer Dependencies:**
 
-- `@prisma/client` (^7.0.0 or higher)
-- `zod` (optional, for Zod validation support)
+* `@prisma/client` (^7.0.0 or higher)
+* `zod` (optional, for Zod validation support)
 
 ## Auto-Setup (Recommended)
 
@@ -125,17 +125,17 @@ const prisma = createPrismocker<PrismaClient>();
 const companies = await prisma.companies.findMany();
 // companies is typed as Company[] (from your Prisma schema)
 
-const company = await prisma.companies.findUnique({ 
-  where: { id: 'company-1' } 
+const company = await prisma.companies.findUnique({
+  where: { id: 'company-1' },
 });
 // company is typed as Company | null
 
-await prisma.companies.create({ 
-  data: { 
-    name: 'Company 1', 
-    owner_id: 'user-1', 
-    slug: 'company-1' 
-  } 
+await prisma.companies.create({
+  data: {
+    name: 'Company 1',
+    owner_id: 'user-1',
+    slug: 'company-1',
+  },
 });
 // ✅ Full type checking - TypeScript will error if fields don't match schema
 
@@ -146,10 +146,11 @@ const data = prisma.getData('companies');
 ```
 
 **Key Benefits:**
-- ✅ **Full Type Safety** - All model access is typed using Prisma's generated types
-- ✅ **No Type Assertions** - No need for `as any` or `as unknown` assertions
-- ✅ **IntelliSense Support** - Full autocomplete and type checking in your IDE
-- ✅ **Type Preservation** - `ExtractModels<T>` preserves all model types through Proxy
+
+* ✅ **Full Type Safety** - All model access is typed using Prisma's generated types
+* ✅ **No Type Assertions** - No need for `as any` or `as unknown` assertions
+* ✅ **IntelliSense Support** - Full autocomplete and type checking in your IDE
+* ✅ **Type Preservation** - `ExtractModels<T>` preserves all model types through Proxy
 
 </details>
 
@@ -309,25 +310,26 @@ const prisma = createPrismocker<PrismaClient>({
 
 **Type Parameters:**
 
-- `T` - PrismaClient type (must extend `PrismaClient`, defaults to `PrismaClient`)
+* `T` - PrismaClient type (must extend `PrismaClient`, defaults to `PrismaClient`)
 
 **Options:**
 
-- `logQueries?: boolean` - Enable query logging (default: `false`)
-- `logger?: (message: string, data?: any) => void` - Custom logger (default: `console.log`)
-- `validateWithZod?: boolean` - Enable Zod validation for create/update (default: `false`)
-- `zodSchemasPath?: string` - Path to generated Zod schemas (default: `'@prisma/zod'`)
-- `zodSchemaLoader?: (modelName: string, operation: string) => Promise<any> | any | undefined` - Custom schema loader
+* `logQueries?: boolean` - Enable query logging (default: `false`)
+* `logger?: (message: string, data?: any) => void` - Custom logger (default: `console.log`)
+* `validateWithZod?: boolean` - Enable Zod validation for create/update (default: `false`)
+* `zodSchemasPath?: string` - Path to generated Zod schemas (default: `'@prisma/zod'`)
+* `zodSchemaLoader?: (modelName: string, operation: string) => Promise<any> | any | undefined` - Custom schema loader
 
 **Returns:** `ExtractModels<T>` - PrismockerClient instance with full type preservation
 
 **Type Safety:**
 
 The returned instance is typed as `ExtractModels<T>`, which:
-- ✅ Preserves all model types from `PrismaClient` (e.g., `prisma.companies` is fully typed)
-- ✅ Preserves all Prisma methods (`$queryRaw`, `$transaction`, etc.)
-- ✅ Adds Prismocker-specific methods (`reset`, `setData`, `getData`, etc.)
-- ✅ Eliminates the need for `as any` assertions for models in your schema
+
+* ✅ Preserves all model types from `PrismaClient` (e.g., `prisma.companies` is fully typed)
+* ✅ Preserves all Prisma methods (`$queryRaw`, `$transaction`, etc.)
+* ✅ Adds Prismocker-specific methods (`reset`, `setData`, `getData`, etc.)
+* ✅ Eliminates the need for `as any` assertions for models in your schema
 
 **Example:**
 
@@ -397,10 +399,10 @@ beforeEach(() => {
 
 **Available Helpers:**
 
-- `isPrismockerClient(prisma: PrismaClient): boolean` - Type guard for PrismockerClient
-- `createMockQueryRawUnsafe(prisma: PrismaClient): MockQueryRawUnsafe` - Type-safe mock for `$queryRawUnsafe`
-- `createMockQueryRaw(prisma: PrismaClient): MockQueryRaw` - Type-safe mock for `$queryRaw`
-- `createMockTransaction(prisma: PrismaClient): MockTransaction` - Type-safe mock for `$transaction`
+* `isPrismockerClient(prisma: PrismaClient): boolean` - Type guard for PrismockerClient
+* `createMockQueryRawUnsafe(prisma: PrismaClient): MockQueryRawUnsafe` - Type-safe mock for `$queryRawUnsafe`
+* `createMockQueryRaw(prisma: PrismaClient): MockQueryRaw` - Type-safe mock for `$queryRaw`
+* `createMockTransaction(prisma: PrismaClient): MockTransaction` - Type-safe mock for `$transaction`
 
 </details>
 
@@ -450,11 +452,11 @@ it('should handle complex state', async () => {
 
 **Available Utilities:**
 
-- `createTestPrisma(): PrismaClient` - Create test PrismaClient instance
-- `resetAndSeed(prisma: PrismaClient, data: Record<string, any[]>): void` - Reset and seed data
-- `createTestDataFactory<T>(defaults: Partial<T>): (overrides?: Partial<T>) => T` - Create data factory
-- `snapshotPrismocker(prisma: PrismaClient, modelNames?: string[]): Record<string, any[]>` - Snapshot current state
-- `restorePrismocker(prisma: PrismaClient, snapshot: Record<string, any[]>): void` - Restore from snapshot
+* `createTestPrisma(): PrismaClient` - Create test PrismaClient instance
+* `resetAndSeed(prisma: PrismaClient, data: Record<string, any[]>): void` - Reset and seed data
+* `createTestDataFactory<T>(defaults: Partial<T>): (overrides?: Partial<T>) => T` - Create data factory
+* `snapshotPrismocker(prisma: PrismaClient, modelNames?: string[]): Record<string, any[]>` - Snapshot current state
+* `restorePrismocker(prisma: PrismaClient, snapshot: Record<string, any[]>): void` - Restore from snapshot
 
 </details>
 
@@ -491,12 +493,12 @@ const companies = await prisma.companies.findMany();
 ### Type Helpers
 
 ```typescript
-import { 
-  ExtractModels, 
-  ModelName, 
+import {
+  ExtractModels,
+  ModelName,
   ModelType,
-  setDataTyped, 
-  getDataTyped 
+  setDataTyped,
+  getDataTyped,
 } from 'prisma/prisma-types';
 import type { PrismaClient } from '@prisma/client';
 
@@ -514,7 +516,7 @@ type CompanyModel = ModelType<PrismaClient, 'companies'>;
 
 // ✅ Type-safe setData with model type inference
 setDataTyped(prisma, 'companies', [
-  { id: '1', name: 'Company 1', owner_id: 'user-1', slug: 'company-1' }
+  { id: '1', name: 'Company 1', owner_id: 'user-1', slug: 'company-1' },
 ]);
 
 // ✅ Type-safe getData
@@ -524,11 +526,11 @@ const companies = getDataTyped(prisma, 'companies');
 
 **Available Type Helpers:**
 
-- `ExtractModels<T>` - **Core type utility** that preserves all model types from `PrismaClient`
-- `ModelName<T>` - Extract model name type from `Prisma.ModelName`
-- `ModelType<TClient, TModel>` - Extract model delegate type from `PrismaClient`
-- `setDataTyped<TClient>(prisma: TClient, model: string, data: any[]): void` - Type-safe data seeding
-- `getDataTyped<TClient>(prisma: TClient, model: string): any[]` - Type-safe data retrieval
+* `ExtractModels<T>` - **Core type utility** that preserves all model types from `PrismaClient`
+* `ModelName<T>` - Extract model name type from `Prisma.ModelName`
+* `ModelType<TClient, TModel>` - Extract model delegate type from `PrismaClient`
+* `setDataTyped<TClient>(prisma: TClient, model: string, data: any[]): void` - Type-safe data seeding
+* `getDataTyped<TClient>(prisma: TClient, model: string): any[]` - Type-safe data retrieval
 
 **Note:** `setDataTyped` and `getDataTyped` accept `string` for model names to support dynamic models. For models in your schema, you can use direct model access without these helpers:
 
@@ -917,21 +919,21 @@ describe('Aggregations', () => {
 
 **Supported Aggregation Operations:**
 
-- ✅ `_count` - Count records
-- ✅ `_sum` - Sum numeric fields
-- ✅ `_avg` - Average numeric fields
-- ✅ `_min` - Minimum value (numeric or date)
-- ✅ `_max` - Maximum value (numeric or date)
-- ✅ `_stddev` - Standard deviation (statistical)
-- ✅ `_variance` - Variance (statistical)
-- ✅ `_countDistinct` - Count distinct values
+* ✅ `_count` - Count records
+* ✅ `_sum` - Sum numeric fields
+* ✅ `_avg` - Average numeric fields
+* ✅ `_min` - Minimum value (numeric or date)
+* ✅ `_max` - Maximum value (numeric or date)
+* ✅ `_stddev` - Standard deviation (statistical)
+* ✅ `_variance` - Variance (statistical)
+* ✅ `_countDistinct` - Count distinct values
 
 **Edge Cases:**
 
-- Single value: `_stddev` and `_variance` return `0`
-- No values: `_stddev` and `_variance` return `null`, `_countDistinct` returns `0`
-- All operations support `where` clause filtering
-- Non-numeric values are automatically filtered out for numeric operations
+* Single value: `_stddev` and `_variance` return `0`
+* No values: `_stddev` and `_variance` return `null`, `_countDistinct` returns `0`
+* All operations support `where` clause filtering
+* Non-numeric values are automatically filtered out for numeric operations
 
 </details>
 
@@ -1015,17 +1017,17 @@ it('should throw error when not found', async () => {
 
 **Key Features:**
 
-- ✅ Throws descriptive error when record not found
-- ✅ Enhanced error messages with context and suggestions
-- ✅ Supports `include` and `select` (same as `findUnique`/`findFirst`)
-- ✅ Works with all where clause operators
-- ✅ Perfect for testing error scenarios
+* ✅ Throws descriptive error when record not found
+* ✅ Enhanced error messages with context and suggestions
+* ✅ Supports `include` and `select` (same as `findUnique`/`findFirst`)
+* ✅ Works with all where clause operators
+* ✅ Perfect for testing error scenarios
 
 **When to Use:**
 
-- Testing error handling when records don't exist
-- Ensuring code fails fast when required records are missing
-- Matching Prisma's real behavior in production
+* Testing error handling when records don't exist
+* Ensuring code fails fast when required records are missing
+* Matching Prisma's real behavior in production
 
 </details>
 
@@ -1052,9 +1054,7 @@ describe('Relations', () => {
     // ✅ Type-safe reset and seeding
     if (isPrismockerClient(prisma)) {
       prisma.reset(); // ✅ No type assertion needed
-      prisma.setData('companies', [
-        { id: 'company-1', name: 'Company 1', owner_id: 'user-1' },
-      ]); // ✅ Fully typed
+      prisma.setData('companies', [{ id: 'company-1', name: 'Company 1', owner_id: 'user-1' }]); // ✅ Fully typed
       prisma.setData('jobs', [
         { id: 'job-1', company_id: 'company-1', title: 'Job 1', status: 'published' },
         { id: 'job-2', company_id: 'company-1', title: 'Job 2', status: 'draft' },
@@ -1194,12 +1194,12 @@ it('should load one-to-one relations', async () => {
 
 **Key Features:**
 
-- ✅ Full `include` support (loads all fields + relations)
-- ✅ Full `select` support (selective field loading)
-- ✅ Nested `include`/`select` in relations
-- ✅ Relation filters: `some`, `every`, `none`
-- ✅ One-to-many and one-to-one relations
-- ✅ Automatic foreign key inference
+* ✅ Full `include` support (loads all fields + relations)
+* ✅ Full `select` support (selective field loading)
+* ✅ Nested `include`/`select` in relations
+* ✅ Relation filters: `some`, `every`, `none`
+* ✅ One-to-many and one-to-one relations
+* ✅ Automatic foreign key inference
 
 </details>
 
@@ -1373,12 +1373,12 @@ it('should rollback updates and deletes in transaction', async () => {
 
 **Key Features:**
 
-- ✅ Automatic state snapshotting before transaction
-- ✅ Automatic rollback on any error
-- ✅ All-or-nothing atomicity
-- ✅ Supports all operations (create, update, delete)
-- ✅ State restoration preserves data integrity
-- ✅ Works with nested operations and complex scenarios
+* ✅ Automatic state snapshotting before transaction
+* ✅ Automatic rollback on any error
+* ✅ All-or-nothing atomicity
+* ✅ Supports all operations (create, update, delete)
+* ✅ State restoration preserves data integrity
+* ✅ Works with nested operations and complex scenarios
 
 </details>
 
@@ -1518,8 +1518,9 @@ await prisma.$disconnect();
 ```
 
 **Event Emission:**
-- `$connect()` emits a `connect` event
-- `$disconnect()` emits a `disconnect` event
+
+* `$connect()` emits a `connect` event
+* `$disconnect()` emits a `disconnect` event
 
 ### Middleware Support ($use)
 
@@ -1538,11 +1539,12 @@ await prisma.companies.create({ data: { name: 'Test' } }); // Logs: "Executing c
 ```
 
 **Middleware Features:**
-- ✅ Executes before all operations (findMany, create, update, delete, etc.)
-- ✅ Can modify operation parameters
-- ✅ Can intercept and return custom results
-- ✅ Supports multiple middleware (executed in registration order)
-- ✅ Works with all Prisma operations
+
+* ✅ Executes before all operations (findMany, create, update, delete, etc.)
+* ✅ Can modify operation parameters
+* ✅ Can intercept and return custom results
+* ✅ Supports multiple middleware (executed in registration order)
+* ✅ Works with all Prisma operations
 
 **Example: Logging Middleware**
 
@@ -1599,14 +1601,16 @@ await prisma.companies.findMany(); // Both listeners fire
 ```
 
 **Supported Event Types:**
-- ✅ `query` - Emitted for all database operations
-- ✅ `connect` - Emitted when `$connect()` is called
-- ✅ `disconnect` - Emitted when `$disconnect()` is called
-- ✅ `info` - For informational messages (not emitted by default)
-- ✅ `warn` - For warnings (not emitted by default)
-- ✅ `error` - For errors (not emitted by default)
+
+* ✅ `query` - Emitted for all database operations
+* ✅ `connect` - Emitted when `$connect()` is called
+* ✅ `disconnect` - Emitted when `$disconnect()` is called
+* ✅ `info` - For informational messages (not emitted by default)
+* ✅ `warn` - For warnings (not emitted by default)
+* ✅ `error` - For errors (not emitted by default)
 
 **Event Data Structure:**
+
 ```typescript
 prisma.$on('query', (event) => {
   // event.model - Model name (e.g., 'companies')
@@ -1629,6 +1633,7 @@ console.log(metrics.histograms); // Query duration histograms
 ```
 
 **Metrics Structure:**
+
 ```typescript
 {
   counters: [
@@ -1676,10 +1681,11 @@ console.log(metrics.queryStats); // Detailed statistics available
 ```
 
 **Use Cases:**
-- ✅ Testing metrics collection in your application
-- ✅ Verifying query performance in tests
-- ✅ Monitoring query patterns during testing
-- ✅ Integration with monitoring/observability tools
+
+* ✅ Testing metrics collection in your application
+* ✅ Verifying query performance in tests
+* ✅ Monitoring query patterns during testing
+* ✅ Integration with monitoring/observability tools
 
 </details>
 
@@ -1705,17 +1711,17 @@ const companies = await prisma.companies.findMany();
 // companies is typed as Company[] (from your Prisma schema)
 
 // ✅ All Prisma operations are fully typed
-const company = await prisma.companies.findUnique({ 
-  where: { id: 'company-1' } 
+const company = await prisma.companies.findUnique({
+  where: { id: 'company-1' },
 });
 // company is typed as Company | null
 
-await prisma.companies.create({ 
-  data: { 
-    name: 'Company 1', 
-    owner_id: 'user-1', 
-    slug: 'company-1' 
-  } 
+await prisma.companies.create({
+  data: {
+    name: 'Company 1',
+    owner_id: 'user-1',
+    slug: 'company-1',
+  },
 });
 // ✅ TypeScript will error if fields don't match your schema
 
@@ -1781,8 +1787,8 @@ await prisma.$transaction(async (tx) => {
   // ✅ tx is typed as ExtractModels<PrismaClient>
   // ✅ All model access is fully typed
   const companies = await tx.companies.findMany();
-  await tx.companies.create({ 
-    data: { name: 'New Company', owner_id: 'user-1', slug: 'new-company' } 
+  await tx.companies.create({
+    data: { name: 'New Company', owner_id: 'user-1', slug: 'new-company' },
   });
   // ✅ Full type checking - TypeScript will error if fields don't match
 });
@@ -1872,9 +1878,9 @@ beforeEach(() => {
 
 Prismocker includes an automatic index manager that optimizes query performance by maintaining indexes for:
 
-- **Primary keys** (`id` fields) - For fast `findUnique` lookups
-- **Foreign keys** (fields ending in `_id`) - For fast relation loading
-- **All fields** - Automatically indexed for fast filtering
+* **Primary keys** (`id` fields) - For fast `findUnique` lookups
+* **Foreign keys** (fields ending in `_id`) - For fast relation loading
+* **All fields** - Automatically indexed for fast filtering
 
 **Automatic Indexing:**
 
@@ -1905,9 +1911,9 @@ const prisma = createPrismocker<PrismaClient>({
 
 **Performance Benefits:**
 
-- **findUnique** with indexed fields: O(1) lookup instead of O(n) scan
-- **Relation loading**: Fast foreign key lookups
-- **Large datasets**: Significant performance improvement with 100+ records
+* **findUnique** with indexed fields: O(1) lookup instead of O(n) scan
+* **Relation loading**: Fast foreign key lookups
+* **Large datasets**: Significant performance improvement with 100+ records
 
 **Note:** Indexes are automatically maintained when data changes (create, update, delete, setData). No manual index management required.
 
@@ -1944,17 +1950,18 @@ await prisma.companies.create({ data: { name: 'New Company', ... } });
 **Cache Invalidation:**
 
 The cache is automatically invalidated when:
-- Records are created (`create`, `createMany`)
-- Records are updated (`update`, `updateMany`)
-- Records are deleted (`delete`, `deleteMany`)
-- Data is set via `setData()`
-- Client is reset via `reset()`
+
+* Records are created (`create`, `createMany`)
+* Records are updated (`update`, `updateMany`)
+* Records are deleted (`delete`, `deleteMany`)
+* Data is set via `setData()`
+* Client is reset via `reset()`
 
 **Configuration:**
 
-- `enableQueryCache`: Enable/disable query caching (default: `false`)
-- `queryCacheMaxSize`: Maximum number of cache entries (default: `100`)
-- `queryCacheTTL`: Time to live in milliseconds (default: `0` = no expiration)
+* `enableQueryCache`: Enable/disable query caching (default: `false`)
+* `queryCacheMaxSize`: Maximum number of cache entries (default: `100`)
+* `queryCacheTTL`: Time to live in milliseconds (default: `0` = no expiration)
 
 </details>
 
@@ -1998,15 +2005,15 @@ const jobs2 = company2.jobs; // Loads data
 
 **Benefits:**
 
-- **Memory Efficiency**: Relations are only loaded when accessed
-- **Performance**: Faster initial queries (no eager loading overhead)
-- **Flexibility**: Access relations conditionally in your code
+* **Memory Efficiency**: Relations are only loaded when accessed
+* **Performance**: Faster initial queries (no eager loading overhead)
+* **Flexibility**: Access relations conditionally in your code
 
 **When to Use:**
 
-- Large datasets with many relations
-- Queries that may not always access all relations
-- Memory-constrained test environments
+* Large datasets with many relations
+* Queries that may not always access all relations
+* Memory-constrained test environments
 
 </details>
 
@@ -2047,7 +2054,9 @@ prisma.enableDebugMode();
 
 // Now all queries are logged and tracked
 await prisma.companies.findMany();
-await prisma.companies.create({ data: { name: 'Company 1', owner_id: 'user-1', slug: 'company-1' } });
+await prisma.companies.create({
+  data: { name: 'Company 1', owner_id: 'user-1', slug: 'company-1' },
+});
 ```
 
 ### Get Query Statistics
@@ -2058,7 +2067,9 @@ Track all queries executed and analyze performance:
 // Execute some queries
 await prisma.companies.findMany();
 await prisma.companies.findUnique({ where: { id: 'company-1' } });
-await prisma.companies.create({ data: { name: 'Company 2', owner_id: 'user-2', slug: 'company-2' } });
+await prisma.companies.create({
+  data: { name: 'Company 2', owner_id: 'user-2', slug: 'company-2' },
+});
 
 // Get statistics
 const stats = prisma.getQueryStats();
@@ -2105,8 +2116,8 @@ await prisma.jobs.create({
 // Visualize state
 const visualization = prisma.visualizeState({
   maxRecordsPerModel: 5, // Show up to 5 records per model
-  includeIndexes: true,  // Include index statistics
-  includeCache: true,     // Include cache statistics
+  includeIndexes: true, // Include index statistics
+  includeCache: true, // Include cache statistics
 });
 
 console.log(visualization);
@@ -2151,18 +2162,18 @@ console.log(visualization);
 
 **Benefits:**
 
-- ✅ **Quick debugging** - See all data at a glance
-- ✅ **Performance analysis** - Track query counts and durations
-- ✅ **State inspection** - Understand what data exists in stores
-- ✅ **Index visibility** - See which fields are indexed
-- ✅ **Cache monitoring** - Track cache hit/miss rates
+* ✅ **Quick debugging** - See all data at a glance
+* ✅ **Performance analysis** - Track query counts and durations
+* ✅ **State inspection** - Understand what data exists in stores
+* ✅ **Index visibility** - See which fields are indexed
+* ✅ **Cache monitoring** - Track cache hit/miss rates
 
 **Use Cases:**
 
-- Debugging test failures (see what data exists)
-- Performance profiling (identify slow queries)
-- Understanding test state (verify data setup)
-- Cache analysis (optimize cache configuration)
+* Debugging test failures (see what data exists)
+* Performance profiling (identify slow queries)
+* Understanding test state (verify data setup)
+* Cache analysis (optimize cache configuration)
 
 </details>
 
@@ -2175,10 +2186,10 @@ Prismocker provides comprehensive, actionable error messages with debugging hint
 
 All Prismocker errors include:
 
-- ✅ **Context** - What operation failed and why
-- ✅ **Suggestions** - How to fix the issue
-- ✅ **Debugging hints** - Sample data, where clauses, record counts
-- ✅ **Examples** - Code examples showing correct usage
+* ✅ **Context** - What operation failed and why
+* ✅ **Suggestions** - How to fix the issue
+* ✅ **Debugging hints** - Sample data, where clauses, record counts
+* ✅ **Examples** - Code examples showing correct usage
 
 ### Example Error Messages
 
@@ -2268,10 +2279,10 @@ Example:
 
 ### Benefits
 
-- **Faster debugging** - Errors tell you exactly what's wrong
-- **Actionable suggestions** - Know how to fix issues immediately
-- **Better test quality** - Catch data setup issues early
-- **Reduced frustration** - Clear, helpful error messages
+* **Faster debugging** - Errors tell you exactly what's wrong
+* **Actionable suggestions** - Know how to fix issues immediately
+* **Better test quality** - Catch data setup issues early
+* **Reduced frustration** - Clear, helpful error messages
 
 </details>
 
@@ -2282,10 +2293,10 @@ Example:
 
 Prismocker uses `Map<string, any[]>` to store data in memory:
 
-- Each model has its own store (e.g., `stores.get('companies')`)
-- Data is stored as plain JavaScript objects
-- No database connection required
-- Fast and isolated for unit tests
+* Each model has its own store (e.g., `stores.get('companies')`)
+* Data is stored as plain JavaScript objects
+* No database connection required
+* Fast and isolated for unit tests
 
 </details>
 
@@ -2294,22 +2305,22 @@ Prismocker uses `Map<string, any[]>` to store data in memory:
 
 Prismocker includes a query engine that:
 
-- Filters records based on Prisma `where` clauses
-- Sorts records based on `orderBy` clauses
-- Supports complex logical operators (`AND`, `OR`, `NOT`)
-- Handles comparison operators (`equals`, `lt`, `gt`, `contains`, etc.)
-- Supports advanced operators (`search`, `array_contains`, `path`, `isSet`)
+* Filters records based on Prisma `where` clauses
+* Sorts records based on `orderBy` clauses
+* Supports complex logical operators (`AND`, `OR`, `NOT`)
+* Handles comparison operators (`equals`, `lt`, `gt`, `contains`, etc.)
+* Supports advanced operators (`search`, `array_contains`, `path`, `isSet`)
 
 **Supported Where Clause Operators:**
 
-- **Basic:** `equals`, `not`, `in`, `notIn`
-- **Comparison:** `lt`, `lte`, `gt`, `gte`
-- **String:** `contains`, `startsWith`, `endsWith`, `search` (full-text search)
-- **Array:** `array_contains`, `has` (PostgreSQL alias)
-- **JSON:** `path` (nested JSON field querying)
-- **Nullability:** `isSet` (check if field is set)
-- **Relations:** `some`, `every`, `none` (relation filters)
-- **Logical:** `AND`, `OR`, `NOT`
+* **Basic:** `equals`, `not`, `in`, `notIn`
+* **Comparison:** `lt`, `lte`, `gt`, `gte`
+* **String:** `contains`, `startsWith`, `endsWith`, `search` (full-text search)
+* **Array:** `array_contains`, `has` (PostgreSQL alias)
+* **JSON:** `path` (nested JSON field querying)
+* **Nullability:** `isSet` (check if field is set)
+* **Relations:** `some`, `every`, `none` (relation filters)
+* **Logical:** `AND`, `OR`, `NOT`
 
 </details>
 
@@ -2449,12 +2460,12 @@ createPrismocker<PrismaClient>()
 
 ### Key Features
 
-- ✅ **Uses Prisma's Generated Types** - Leverages types from `@prisma/client`
-- ✅ **Module Augmentation** - Extends `PrismaClient` with Prismocker methods
-- ✅ **Type Guards** - `isPrismockerClient()` for runtime type narrowing
-- ✅ **Full IntelliSense** - Complete autocomplete and type checking in IDEs
-- ✅ **No Type Assertions** - Eliminates need for `as any` for models in schema
-- ✅ **Transaction Type Safety** - Transaction callbacks receive fully typed clients
+* ✅ **Uses Prisma's Generated Types** - Leverages types from `@prisma/client`
+* ✅ **Module Augmentation** - Extends `PrismaClient` with Prismocker methods
+* ✅ **Type Guards** - `isPrismockerClient()` for runtime type narrowing
+* ✅ **Full IntelliSense** - Complete autocomplete and type checking in IDEs
+* ✅ **No Type Assertions** - Eliminates need for `as any` for models in schema
+* ✅ **Transaction Type Safety** - Transaction callbacks receive fully typed clients
 
 ### Example: Full Type Safety
 
@@ -2468,17 +2479,17 @@ const prisma = createPrismocker<PrismaClient>();
 const companies = await prisma.companies.findMany();
 // Type: Company[]
 
-const company = await prisma.companies.findUnique({ 
-  where: { id: 'company-1' } 
+const company = await prisma.companies.findUnique({
+  where: { id: 'company-1' },
 });
 // Type: Company | null
 
-await prisma.companies.create({ 
-  data: { 
-    name: 'Company 1', 
-    owner_id: 'user-1', 
-    slug: 'company-1' 
-  } 
+await prisma.companies.create({
+  data: {
+    name: 'Company 1',
+    owner_id: 'user-1',
+    slug: 'company-1',
+  },
 });
 // ✅ TypeScript validates all fields match schema
 
@@ -2499,17 +2510,17 @@ The Prismocker package includes comprehensive examples demonstrating its power:
 
 Real-world service layer testing with Prismocker. Demonstrates:
 
-- Service class testing
-- Complex query testing
-- Data seeding patterns
-- Type-safe test utilities
+* Service class testing
+* Complex query testing
+* Data seeding patterns
+* Type-safe test utilities
 
 **Features Demonstrated:**
 
-- ✅ Service layer isolation
-- ✅ Complex Prisma queries
-- ✅ Type-safe data seeding
-- ✅ Test data factories
+* ✅ Service layer isolation
+* ✅ Complex Prisma queries
+* ✅ Type-safe data seeding
+* ✅ Test data factories
 
 </details>
 
@@ -2518,17 +2529,17 @@ Real-world service layer testing with Prismocker. Demonstrates:
 
 Next.js API route testing with Prismocker. Demonstrates:
 
-- API route handler testing
-- Request/response testing
-- Error handling
-- Authentication testing
+* API route handler testing
+* Request/response testing
+* Error handling
+* Authentication testing
 
 **Features Demonstrated:**
 
-- ✅ API route testing
-- ✅ Request validation
-- ✅ Error responses
-- ✅ Status code testing
+* ✅ API route testing
+* ✅ Request validation
+* ✅ Error responses
+* ✅ Status code testing
 
 </details>
 
@@ -2537,20 +2548,20 @@ Next.js API route testing with Prismocker. Demonstrates:
 
 Complex testing scenarios demonstrating Prismocker's capabilities:
 
-- Multi-model relationships
-- Complex where clauses
-- Aggregations and grouping
-- Transaction testing
-- Edge case handling
-- Performance testing patterns
+* Multi-model relationships
+* Complex where clauses
+* Aggregations and grouping
+* Transaction testing
+* Edge case handling
+* Performance testing patterns
 
 **Features Demonstrated:**
 
-- ✅ Complex query patterns
-- ✅ Advanced aggregations
-- ✅ Transaction rollback
-- ✅ Edge case coverage
-- ✅ Performance optimization
+* ✅ Complex query patterns
+* ✅ Advanced aggregations
+* ✅ Transaction rollback
+* ✅ Edge case coverage
+* ✅ Performance optimization
 
 </details>
 
@@ -2559,24 +2570,24 @@ Complex testing scenarios demonstrating Prismocker's capabilities:
 
 Comprehensive Zod validation integration example. Demonstrates:
 
-- Generated Zod schema validation
-- Type-safe data creation with Zod
-- Error handling for invalid data
-- Integration with Prisma Client Extensions
-- Custom validation logic
+* Generated Zod schema validation
+* Type-safe data creation with Zod
+* Error handling for invalid data
+* Integration with Prisma Client Extensions
+* Custom validation logic
 
 **Features Demonstrated:**
 
-- ✅ Zod schema validation
-- ✅ Type-safe data operations
-- ✅ Error handling patterns
-- ✅ Prisma extensions integration
-- ✅ Complex validation scenarios
+* ✅ Zod schema validation
+* ✅ Type-safe data operations
+* ✅ Error handling patterns
+* ✅ Prisma extensions integration
+* ✅ Complex validation scenarios
 
 **Prerequisites:**
 
-- `prisma-zod-generator` configured
-- Generated Zod schemas available
+* `prisma-zod-generator` configured
+* Generated Zod schemas available
 
 </details>
 
@@ -2585,24 +2596,24 @@ Comprehensive Zod validation integration example. Demonstrates:
 
 PrismaJson types integration example. Demonstrates:
 
-- PrismaJson type definitions
-- Strongly-typed JSON fields
-- JSON field validation
-- Nested JSON structures
-- Type-safe JSON queries
+* PrismaJson type definitions
+* Strongly-typed JSON fields
+* JSON field validation
+* Nested JSON structures
+* Type-safe JSON queries
 
 **Features Demonstrated:**
 
-- ✅ PrismaJson type safety
-- ✅ Strongly-typed JSON fields
-- ✅ Nested JSON structures
-- ✅ JSON field queries
-- ✅ Type preservation
+* ✅ PrismaJson type safety
+* ✅ Strongly-typed JSON fields
+* ✅ Nested JSON structures
+* ✅ JSON field queries
+* ✅ Type preservation
 
 **Prerequisites:**
 
-- `prisma-json-types-generator` configured
-- Generated PrismaJson types available
+* `prisma-json-types-generator` configured
+* Generated PrismaJson types available
 
 </details>
 
@@ -2611,37 +2622,38 @@ PrismaJson types integration example. Demonstrates:
 
 Opinionated testing patterns that provide direct benefit. Demonstrates:
 
-- Type-safe test utilities
-- Data factory patterns
-- Test isolation best practices
-- Error scenario testing
-- Performance testing patterns
-- Edge case coverage
-- Real-world testing scenarios
+* Type-safe test utilities
+* Data factory patterns
+* Test isolation best practices
+* Error scenario testing
+* Performance testing patterns
+* Edge case coverage
+* Real-world testing scenarios
 
 **Features Demonstrated:**
 
-- ✅ Type-safe helpers usage
-- ✅ Data factory patterns
-- ✅ Error scenario testing
-- ✅ Edge case coverage
-- ✅ Performance testing
-- ✅ Comprehensive relation testing
-- ✅ Transaction testing patterns
+* ✅ Type-safe helpers usage
+* ✅ Data factory patterns
+* ✅ Error scenario testing
+* ✅ Edge case coverage
+* ✅ Performance testing
+* ✅ Comprehensive relation testing
+* ✅ Transaction testing patterns
 
 **Why Opinionated?**
 
 These patterns enforce best practices that have proven effective in real-world applications, making tests more maintainable and catching bugs early.
-- Transaction testing
-- Zod validation integration
+
+* Transaction testing
+* Zod validation integration
 
 **Features Demonstrated:**
 
-- ✅ Complex relations
-- ✅ Advanced queries
-- ✅ Aggregations
-- ✅ Transactions
-- ✅ Ecosystem compatibility
+* ✅ Complex relations
+* ✅ Advanced queries
+* ✅ Aggregations
+* ✅ Transactions
+* ✅ Ecosystem compatibility
 
 </details>
 
@@ -2652,17 +2664,17 @@ These patterns enforce best practices that have proven effective in real-world a
 
 **Current Support:**
 
-- ✅ Full `include` support (loads all fields + relations)
-- ✅ Full `select` support (selective field loading)
-- ✅ Nested `include`/`select` in relations
-- ✅ Relation filters: `some`, `every`, `none`
-- ✅ Foreign key inference (tries common patterns)
-- ✅ One-to-many and one-to-one relations
+* ✅ Full `include` support (loads all fields + relations)
+* ✅ Full `select` support (selective field loading)
+* ✅ Nested `include`/`select` in relations
+* ✅ Relation filters: `some`, `every`, `none`
+* ✅ Foreign key inference (tries common patterns)
+* ✅ One-to-many and one-to-one relations
 
 **Limitations:**
 
-- Many-to-many relations require explicit junction table data
-- Complex nested relations may require manual setup for edge cases
+* Many-to-many relations require explicit junction table data
+* Complex nested relations may require manual setup for edge cases
 
 **Workaround:** For complex many-to-many relations, manually seed junction table data in your test setup.
 
@@ -2673,17 +2685,17 @@ These patterns enforce best practices that have proven effective in real-world a
 
 **Current Support:**
 
-- ✅ Transaction callbacks execute normally
-- ✅ All operations within transaction complete
-- ✅ **Automatic rollback on errors** - All changes are rolled back if any error occurs
-- ✅ **State snapshotting** - Complete state is captured before transaction
-- ✅ **Atomicity** - All-or-nothing behavior (all changes commit or all rollback)
+* ✅ Transaction callbacks execute normally
+* ✅ All operations within transaction complete
+* ✅ **Automatic rollback on errors** - All changes are rolled back if any error occurs
+* ✅ **State snapshotting** - Complete state is captured before transaction
+* ✅ **Atomicity** - All-or-nothing behavior (all changes commit or all rollback)
 
 **Limitations:**
 
-- No isolation level simulation (all transactions see the same state)
-- No nested transaction support
-- No transaction timeout simulation
+* No isolation level simulation (all transactions see the same state)
+* No nested transaction support
+* No transaction timeout simulation
 
 **Note:** Prismocker provides realistic transaction behavior with automatic rollback, making it perfect for testing error scenarios and ensuring data consistency.
 
@@ -2696,10 +2708,10 @@ Prismocker provides enhanced support for `$queryRaw`, `$queryRawUnsafe`, `$execu
 
 **Current Support:**
 
-- ✅ **Configurable Executor**: Provide a custom function to handle raw SQL queries.
-- ✅ **Basic SQL Parsing**: Enable simple `SELECT`, `INSERT`, `UPDATE`, and `DELETE` statement parsing and execution against in-memory data.
-- ✅ **Parameter Handling**: Correctly handles `$1`, `$2` style parameters in raw queries.
-- ✅ **Template String Support**: Works with `$queryRaw` and `$executeRaw` template literal syntax.
+* ✅ **Configurable Executor**: Provide a custom function to handle raw SQL queries.
+* ✅ **Basic SQL Parsing**: Enable simple `SELECT`, `INSERT`, `UPDATE`, and `DELETE` statement parsing and execution against in-memory data.
+* ✅ **Parameter Handling**: Correctly handles `$1`, `$2` style parameters in raw queries.
+* ✅ **Template String Support**: Works with `$queryRaw` and `$executeRaw` template literal syntax.
 
 **Configuration Options:**
 
@@ -2756,13 +2768,18 @@ const result = await prisma.$queryRawUnsafe('SELECT * FROM users WHERE name = $1
 // Template literal syntax
 const userId = 'user-1';
 const newName = 'John';
-const affectedRows = await prisma.$executeRaw`UPDATE users SET name = ${newName} WHERE id = ${userId}`;
+const affectedRows =
+  await prisma.$executeRaw`UPDATE users SET name = ${newName} WHERE id = ${userId}`;
 // If enableSqlParsing is true, this will attempt to parse and execute
 // If executeRawExecutor is provided, it will be used
 // Otherwise, returns 0 by default
 
 // Plain string syntax
-const affectedRows = await prisma.$executeRawUnsafe('UPDATE users SET name = $1 WHERE id = $2', 'John', 'user-1');
+const affectedRows = await prisma.$executeRawUnsafe(
+  'UPDATE users SET name = $1 WHERE id = $2',
+  'John',
+  'user-1'
+);
 // Similar execution logic as $executeRaw
 ```
 
@@ -2906,10 +2923,10 @@ const prisma = createPrismocker<PrismaClient>();
 
 **Benefits:**
 
-- ✅ Works with pnpm (no module resolution issues)
-- ✅ Type-safe (no `as any` assertions needed)
-- ✅ Faster (no schema parsing overhead)
-- ✅ Prisma ecosystem compatible
+* ✅ Works with pnpm (no module resolution issues)
+* ✅ Type-safe (no `as any` assertions needed)
+* ✅ Faster (no schema parsing overhead)
+* ✅ Prisma ecosystem compatible
 
 </details>
 
@@ -2941,10 +2958,10 @@ export const PrismaClient = createPrismocker<PrismaClient>();
 
 **Benefits:**
 
-- ✅ Less boilerplate
-- ✅ Real Prisma API behavior
-- ✅ Type-safe
-- ✅ Easier to maintain
+* ✅ Less boilerplate
+* ✅ Real Prisma API behavior
+* ✅ Type-safe
+* ✅ Easier to maintain
 
 </details>
 
@@ -2956,12 +2973,12 @@ Automatically sets up Prismocker in your project. See [Auto-Setup](#auto-setup-r
 
 **Options:**
 
-- `--schema <path>` - Path to Prisma schema file (default: `./prisma/schema.prisma`)
-- `--mock <path>` - Path to mock file (default: `./__mocks__/@prisma/client.ts`)
-- `--framework <name>` - Testing framework: `jest` or `vitest` (auto-detected if not specified)
-- `--skip-examples` - Skip creating example test files
-- `--only-mock` - Only create mock file (skip enum generation and setup file updates)
-- `--only-enums` - Only generate enum stubs (skip mock file and setup file updates)
+* `--schema <path>` - Path to Prisma schema file (default: `./prisma/schema.prisma`)
+* `--mock <path>` - Path to mock file (default: `./__mocks__/@prisma/client.ts`)
+* `--framework <name>` - Testing framework: `jest` or `vitest` (auto-detected if not specified)
+* `--skip-examples` - Skip creating example test files
+* `--only-mock` - Only create mock file (skip enum generation and setup file updates)
+* `--only-enums` - Only generate enum stubs (skip mock file and setup file updates)
 
 **Examples:**
 
@@ -2990,9 +3007,9 @@ npx prisma verify --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/cli
 
 **Checks:**
 
-- ✅ Mock file exists
-- ✅ Schema file exists
-- ✅ Setup file is configured correctly
+* ✅ Mock file exists
+* ✅ Schema file exists
+* ✅ Setup file is configured correctly
 
 **Exit Code:** Returns `0` if all checks pass, `1` if any issues are found.
 
@@ -3010,9 +3027,9 @@ npx prisma fix --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client
 
 **Actions:**
 
-- Creates missing mock file
-- Updates setup file configuration
-- Generates enum stubs
+* Creates missing mock file
+* Updates setup file configuration
+* Generates enum stubs
 
 ### `npx prisma rollback`
 
@@ -3028,7 +3045,7 @@ npx prisma rollback --remove-setup
 
 **Options:**
 
-- `--remove-setup` - Also prompts to remove setup file references (manual removal required)
+* `--remove-setup` - Also prompts to remove setup file references (manual removal required)
 
 ### `npx prisma generate-enums`
 
@@ -3044,9 +3061,9 @@ npx prisma generate-enums --schema ./prisma/schema.prisma --mock ./__mocks__/@pr
 
 **When to run:**
 
-- After adding new enums to your Prisma schema
-- After modifying enum values in your Prisma schema
-- After running `prisma generate` (consider adding to postgenerate hook)
+* After adding new enums to your Prisma schema
+* After modifying enum values in your Prisma schema
+* After running `prisma generate` (consider adding to postgenerate hook)
 
 ## Contributing
 
@@ -3054,8 +3071,8 @@ This package is designed to be standalone and extractable. Contributions welcome
 
 **Areas for Contribution:**
 
-- Comprehensive JSDoc documentation
-- Additional test utilities
+* Comprehensive JSDoc documentation
+* Additional test utilities
 
 ## Why Prismocker?
 
@@ -3070,11 +3087,11 @@ Prismocker was created to solve real problems in Prisma testing:
 
 **Perfect For:**
 
-- ✅ Unit testing Prisma-based services
-- ✅ API route testing
-- ✅ Complex query testing
-- ✅ Integration testing (without database)
-- ✅ CI/CD pipelines (fast, no database setup)
+* ✅ Unit testing Prisma-based services
+* ✅ API route testing
+* ✅ Complex query testing
+* ✅ Integration testing (without database)
+* ✅ CI/CD pipelines (fast, no database setup)
 
 ## License
 
@@ -3086,6 +3103,6 @@ JSONbored
 
 ## Related Projects
 
-- [Prisma](https://www.prisma.io/) - The ORM being mocked
-- [prisma-zod-generator](https://github.com/omar-dulaimi/prisma-zod-generator) - Zod schema generator for Prisma
-- [prisma-json-types-generator](https://github.com/olivierwilkinson/prisma-json-types-generator) - JSON type generator for Prisma
+* [Prisma](https://www.prisma.io/) - The ORM being mocked
+* [prisma-zod-generator](https://github.com/omar-dulaimi/prisma-zod-generator) - Zod schema generator for Prisma
+* [prisma-json-types-generator](https://github.com/olivierwilkinson/prisma-json-types-generator) - JSON type generator for Prisma

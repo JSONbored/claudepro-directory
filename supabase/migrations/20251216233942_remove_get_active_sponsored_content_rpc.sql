@@ -6,5 +6,4 @@
 -- Description: Remove get_active_sponsored_content RPC function
 -- This function is unused in the codebase.
 -- Function signature: get_active_sponsored_content(content_category, integer)
-
-DROP FUNCTION IF EXISTS public.get_active_sponsored_content(content_category, integer);
+DROP FUNCTION IF EXISTS public.get_active_sponsored_content (content_category, integer);

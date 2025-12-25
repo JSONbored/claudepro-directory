@@ -410,4 +410,3 @@ describe('PrismaJson Types Integration', () => {
     });
   });
 });
-

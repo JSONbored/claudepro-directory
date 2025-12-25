@@ -55,10 +55,7 @@ export function AccountSidebarNav({ navigation }: AccountSidebarNavProps) {
               />
               <span>{item.name}</span>
               {active && (
-                <span
-                  className="ml-auto h-1.5 w-1.5 rounded-full bg-accent"
-                  aria-hidden="true"
-                />
+                <span className="bg-accent ml-auto h-1.5 w-1.5 rounded-full" aria-hidden="true" />
               )}
             </Button>
           </Link>
@@ -67,4 +64,3 @@ export function AccountSidebarNav({ navigation }: AccountSidebarNavProps) {
     </nav>
   );
 }
-

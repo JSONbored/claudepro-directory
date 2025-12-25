@@ -24,7 +24,7 @@ function generateETag(content: string): string {
   let hash = 0;
   for (let i = 0; i < content.length; i++) {
     const char = content.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
   return `"${Math.abs(hash).toString(16)}"`;
@@ -126,7 +126,14 @@ export async function fetchResourceFromApi(
   retryConfig: RetryConfig = DEFAULT_RETRY_CONFIG,
   kvCache?: KvResourceCache | null,
   requestHeaders?: Headers
-): Promise<{ text: string; mimeType: string; etag?: string; cachedAt?: string; cacheHeaders?: Record<string, string>; fromCache?: boolean }> {
+): Promise<{
+  text: string;
+  mimeType: string;
+  etag?: string;
+  cachedAt?: string;
+  cacheHeaders?: Record<string, string>;
+  fromCache?: boolean;
+}> {
   // Check KV cache first (if available)
   if (kvCache?.isAvailable()) {
     try {
@@ -162,7 +169,10 @@ export async function fetchResourceFromApi(
       }
     } catch (error) {
       // Cache error - log but continue with API fetch (graceful degradation)
-      logger.warn('KV cache error, falling back to API', { uri, error: error instanceof Error ? error.message : String(error) });
+      logger.warn('KV cache error, falling back to API', {
+        uri,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
   let lastError: Error | null = null;
@@ -245,7 +255,10 @@ export async function fetchResourceFromApi(
             logger.info('Resource cached in KV', { uri });
           } catch (error) {
             // Cache write error - log but don't fail (graceful degradation)
-            logger.warn('KV cache write error', { uri, error: error instanceof Error ? error.message : String(error) });
+            logger.warn('KV cache write error', {
+              uri,
+              error: error instanceof Error ? error.message : String(error),
+            });
           }
         }
 
@@ -326,9 +339,7 @@ export async function fetchResourceFromApi(
         attempts: attempt + 1,
         ...context,
       });
-      throw new Error(
-        `Failed to fetch content from API: ${lastError.message} (URL: ${url})`
-      );
+      throw new Error(`Failed to fetch content from API: ${lastError.message} (URL: ${url})`);
     }
   }
 
@@ -345,11 +356,7 @@ export async function fetchResourceFromApi(
  * @returns Parsed URI components
  * @throws Error if URI is invalid
  */
-export function parseResourceUri(
-  uri: string,
-  pattern: RegExp,
-  expectedFormat: string
-): string[] {
+export function parseResourceUri(uri: string, pattern: RegExp, expectedFormat: string): string[] {
   const sanitizedUri = sanitizeString(uri);
   const match = sanitizedUri.match(pattern);
 
@@ -394,10 +401,7 @@ export function validateContentCategory(category: string): content_category {
  * @returns API format string
  * @throws Error if format is unsupported
  */
-export function mapFormatToApiFormat(
-  format: string,
-  formatMap: Record<string, string>
-): string {
+export function mapFormatToApiFormat(format: string, formatMap: Record<string, string>): string {
   const sanitized = sanitizeString(format);
   const apiFormat = formatMap[sanitized];
 

@@ -5,5 +5,4 @@
 --
 -- Description: Remove handle_webhook_contact_created RPC function - No codebase usage found
 -- Function signature: handle_webhook_contact_created(p_webhook_id uuid, p_event_data jsonb)
-
-DROP FUNCTION IF EXISTS public.handle_webhook_contact_created(uuid, jsonb);
+DROP FUNCTION IF EXISTS public.handle_webhook_contact_created (uuid, jsonb);

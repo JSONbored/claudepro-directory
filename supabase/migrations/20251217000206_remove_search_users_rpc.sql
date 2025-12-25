@@ -5,5 +5,4 @@
 --
 -- Description: Remove search_users RPC function - Not found in codebase, only in generated types
 -- Function signature: search_users(search_query text, result_limit integer DEFAULT 20)
-
-DROP FUNCTION IF EXISTS public.search_users(text, integer);
+DROP FUNCTION IF EXISTS public.search_users (text, integer);

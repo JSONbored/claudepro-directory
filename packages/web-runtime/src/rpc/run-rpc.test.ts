@@ -147,7 +147,7 @@ describe('createRunRpc', () => {
     it('should include RPC name and args in error context', async () => {
       const { logActionFailure } = await import('../errors.ts');
       const dbError = new Error('Database error');
-      
+
       // Reset and set up mock for this specific test
       mockQueryRawUnsafe.mockClear();
       mockQueryRawUnsafe.mockRejectedValue(dbError);
@@ -279,7 +279,7 @@ describe('createRunRpc', () => {
 
       // Verify results are the same (indicating cache was used)
       expect(result1).toEqual(result2);
-      
+
       // Verify $queryRawUnsafe was only called once (cached on second call)
       expect(secondCallCount).toBe(firstCallCount);
     });

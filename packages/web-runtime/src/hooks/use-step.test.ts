@@ -7,7 +7,6 @@ import { useStep } from './use-step';
 import type { UseStepActions } from './use-step';
 
 describe('useStep', () => {
-
   it('should initialize with step 1', () => {
     const { result } = renderHook(() => useStep(5));
 

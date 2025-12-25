@@ -23,7 +23,7 @@ rule:
     - not:
         has:
           pattern: await params
-message: "Next.js 16 params are async. Always await params before accessing properties. Example: const { slug } = await params; instead of params.slug. This ensures proper async handling."
+message: 'Next.js 16 params are async. Always await params before accessing properties. Example: const { slug } = await params; instead of params.slug. This ensures proper async handling.'
 severity: error
 
 ---
@@ -40,7 +40,7 @@ rule:
     - not:
         has:
           pattern: const $RESOLVED = await params
-message: "Next.js 16 requires await for async params. Use: const resolvedParams = await params"
+message: 'Next.js 16 requires await for async params. Use: const resolvedParams = await params'
 severity: error
 
 ---
@@ -59,7 +59,7 @@ rule:
     - not:
         has:
           pattern: await searchParams
-message: "Next.js 16 searchParams are async. Always await searchParams before accessing properties. Example: const { q } = await searchParams; instead of searchParams.q."
+message: 'Next.js 16 searchParams are async. Always await searchParams before accessing properties. Example: const { q } = await searchParams; instead of searchParams.q.'
 severity: error
 
 ---
@@ -76,7 +76,7 @@ rule:
     - not:
         has:
           pattern: const $RESOLVED = await searchParams
-message: "Next.js 16 requires await for async searchParams. Use: const resolvedSearchParams = await searchParams"
+message: 'Next.js 16 requires await for async searchParams. Use: const resolvedSearchParams = await searchParams'
 severity: error
 
 ---
@@ -108,7 +108,7 @@ rule:
     - not:
         has:
           pattern: const $RESOLVED = await params
-message: "Next.js 16 metadata functions require await for async params. Use: const resolvedParams = await params"
+message: 'Next.js 16 metadata functions require await for async params. Use: const resolvedParams = await params'
 severity: error
 
 ---
@@ -127,7 +127,7 @@ rule:
     - not:
         has:
           regex: params:\s*Promise<
-message: "Next.js 16 metadata functions must accept Promise params. Change: params: Type to params: Promise<Type>"
+message: 'Next.js 16 metadata functions must accept Promise params. Change: params: Type to params: Promise<Type>'
 severity: error
 
 ---
@@ -194,7 +194,7 @@ rule:
         inside:
           has:
             regex: '<Suspense'
-message: "Async components with data fetching should be wrapped in Suspense boundaries for proper loading states. Add <Suspense fallback={<Loading />}> around async component, or create loading.tsx file."
+message: 'Async components with data fetching should be wrapped in Suspense boundaries for proper loading states. Add <Suspense fallback={<Loading />}> around async component, or create loading.tsx file.'
 severity: warning
 
 ---
@@ -210,7 +210,7 @@ rule:
         regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: 'await\s+\w+\([^)]*\)'
-message: "Routes with data fetching should have error.tsx file for error boundaries. Create error.tsx in same directory with error boundary component. This prevents full app crashes on errors."
+message: 'Routes with data fetching should have error.tsx file for error boundaries. Create error.tsx in same directory with error boundary component. This prevents full app crashes on errors.'
 severity: warning
 
 ---
@@ -226,5 +226,5 @@ rule:
         regex: 'export default async function \w+\([^)]*\)\s*\{'
     - has:
         regex: 'await\s+\w+\([^)]*\)'
-message: "Async pages should have corresponding loading.tsx file for proper loading states. Create loading.tsx in same directory with page-specific skeleton component. This improves UX during data fetching."
+message: 'Async pages should have corresponding loading.tsx file for proper loading states. Create loading.tsx in same directory with page-specific skeleton component. This improves UX during data fetching.'
 severity: warning

@@ -1,0 +1,65 @@
+---
+# CI Pipeline for mcp-server Package
+#
+# **Purpose:**
+# Runs continuous integration checks (type-check, build, test) for the
+# mcp-server package on every pull request and push to main branch.
+# Only triggers when files in the packages/mcp-server/ directory change,
+# optimizing CI resource usage.
+#
+# **What It Does:**
+# 1. Triggers on PRs and pushes to main (only when mcp-server files change)
+# 2. Uses reusable composite action for consistent CI steps
+# 3. Runs type-check to catch TypeScript errors
+# 4. Builds the package to verify compilation
+# 5. Runs tests to verify functionality
+#
+# **Optimizations:**
+# - Path-based triggering: Only runs when mcp-server files change
+# - Concurrency control: Cancels in-progress runs when new commits pushed
+# - Shallow clone: Uses fetch-depth: 1 for faster checkout
+# - Reusable action: Uses composite action to reduce duplication
+#
+# **Integration:**
+# This workflow is part of the package's standalone release automation.
+# It ensures the package is healthy before releases and provides early
+# feedback on PRs.
+#
+# **Related Workflows:**
+# - release.yml: Handles npm publishing and GitHub releases
+# - Root CI workflows: Handle monorepo-wide checks
+#
+# @see {@link ../../../../.github/actions/package-ci/action.yml | Package CI}
+# @see {@link ../release.yml | Release Workflow}
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/mcp-server/**'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/mcp-server/**'
+
+# Cancel in-progress runs when new commits pushed (saves resources)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Run package CI
+        uses: ./.github/actions/package-ci
+        with:
+          package-path: packages/mcp-server
+          node-version: '20'
+          pnpm-version: '10'
+          fetch-depth: '1'
+          skip-checkout: false

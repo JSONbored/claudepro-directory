@@ -1,10 +1,7 @@
 import type { ChangelogEntry } from '@heyclaude/web-runtime/types/changelog';
 import { ArrowRight, Calendar } from '@heyclaude/web-runtime/icons';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import {
-  formatChangelogDateShort,
-  getRelativeTime,
-} from '@heyclaude/web-runtime/utils/changelog';
+import { formatChangelogDateShort, getRelativeTime } from '@heyclaude/web-runtime/utils/changelog';
 import { getNonEmptyCategories } from '@heyclaude/web-runtime/types/changelog';
 import Image from 'next/image';
 import Link from 'next/link';

@@ -9,7 +9,11 @@
 import type { DownloadMcpServerPackageInput } from '../../lib/types.js';
 import { McpErrorCode, createErrorResponse } from '../../lib/errors';
 import { sanitizeString, isValidSlug } from '../../lib/utils';
-import { getStorageDownloadUrl, getStorageFileName, parseRootUri } from '../../lib/storage-utils.js';
+import {
+  getStorageDownloadUrl,
+  getStorageFileName,
+  parseRootUri,
+} from '../../lib/storage-utils.js';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import type { ToolContext } from '../../types/runtime.js';
 
@@ -61,7 +65,8 @@ export async function handleDownloadMcpServerPackage(
   if (!rootUri && context.elicit) {
     const elicited = await context.elicit({
       type: 'string',
-      description: 'Enter the target directory path for the MCP server package (e.g., file:///Users/username/.claude/mcp). Leave empty to get download URL only.',
+      description:
+        'Enter the target directory path for the MCP server package (e.g., file:///Users/username/.claude/mcp). Leave empty to get download URL only.',
     });
     if (typeof elicited === 'string' && elicited) {
       rootUri = sanitizeString(elicited);
@@ -100,7 +105,7 @@ export async function handleDownloadMcpServerPackage(
     // Build response text
     const responseText: string[] = [];
     responseText.push(`## MCP Server Package Download: ${slug}\n`);
-    
+
     if (filePath) {
       responseText.push(`✅ **Downloaded to:** \`${filePath}\``);
       responseText.push(`\nThe MCP server .mcpb package has been downloaded to your filesystem.`);
@@ -111,7 +116,9 @@ export async function handleDownloadMcpServerPackage(
       responseText.push(`\nTo download this MCP server package:`);
       responseText.push(`1. Visit the download URL above`);
       responseText.push(`2. Save the .mcpb file to your desired location`);
-      responseText.push(`\n**Note:** To enable automatic filesystem downloads, provide a \`rootUri\` parameter (e.g., \`file:///Users/username/.claude/mcp\`).`);
+      responseText.push(
+        `\n**Note:** To enable automatic filesystem downloads, provide a \`rootUri\` parameter (e.g., \`file:///Users/username/.claude/mcp\`).`
+      );
     }
 
     responseText.push(`\n**File Name:** ${fileName}`);
@@ -152,4 +159,3 @@ export async function handleDownloadMcpServerPackage(
     throw normalized;
   }
 }
-

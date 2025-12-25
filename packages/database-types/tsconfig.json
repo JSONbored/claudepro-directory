@@ -13,11 +13,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": [
-    "src/**/*",
-    "src/prisma-json-types.ts",
-    "src/prisma/index.ts"
-  ],
+  "include": ["src/**/*", "src/prisma-json-types.ts", "src/prisma/index.ts"],
   "exclude": [
     "dist",
     "node_modules",

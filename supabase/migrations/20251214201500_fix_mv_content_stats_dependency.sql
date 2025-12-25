@@ -9,11 +9,11 @@
 --
 -- Since content_unified doesn't exist in production either, the parent migration is likely
 -- outdated. We'll create content_unified as a view that the migration can use.
-
 -- Create content_unified view if it doesn't exist
 -- This view unifies content from the content table (since content_unified was likely removed/replaced)
-CREATE OR REPLACE VIEW public.content_unified AS
-SELECT 
+CREATE
+OR REPLACE VIEW public.content_unified AS
+SELECT
   c.id,
   c.category,
   c.slug,
@@ -34,11 +34,11 @@ SELECT
   c.features,
   c.use_cases,
   c.metadata
-FROM public.content c;
+FROM
+  public.content c;
 
 -- Add comment explaining the view
-COMMENT ON VIEW public.content_unified IS 
-  'Unified view of content from the content table. Created to satisfy mv_content_stats dependency.';
+COMMENT ON VIEW public.content_unified IS 'Unified view of content from the content table. Created to satisfy mv_content_stats dependency.';
 
 -- Now mv_content_stats can be created by the parent migration
 -- The parent migration 20251030044243_recreate_mv_content_stats.sql will succeed

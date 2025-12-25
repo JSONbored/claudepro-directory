@@ -1,6 +1,9 @@
+---
 # Composite Action: Setup repository with pnpm and Node.js
-# Optimizations: skip-checkout option (avoids double checkout), install-deps option
-# Uses actions/checkout@v6 for improved performance and sparse checkout support
+# Optimizations: skip-checkout option (avoids double checkout),
+# install-deps option
+# Uses actions/checkout@v6 for improved performance and sparse
+# checkout support
 name: 'Setup'
 description: 'Setup repository with pnpm and Node.js (optimized with caching)'
 
@@ -38,24 +41,19 @@ runs:
       uses: actions/checkout@v6
       with:
         fetch-depth: ${{ inputs.fetch-depth }}
-      
+
     - name: Setup pnpm
       if: inputs.install-deps == 'true'
       uses: pnpm/action-setup@v4
       with:
         version: ${{ inputs.pnpm-version }}
-          
+
     - name: Setup Node.js
       if: inputs.install-deps == 'true'
       uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node-version }}
         cache: 'pnpm'
-
-    - name: Setup Deno
-      uses: denoland/setup-deno@v2
-      with:
-        deno-version: v2.2.0
 
     - name: Install dependencies
       if: inputs.install-deps == 'true'

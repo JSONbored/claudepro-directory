@@ -64,7 +64,7 @@ function normalizeValue(value: null | string | undefined): string | undefined {
 
 /**
  * Check if Infisical cache is available (via global interface)
- * 
+ *
  * The Infisical cache is registered on globalThis by server-only code.
  * This allows env.ts to check the cache without importing server-only modules,
  * which prevents Turbopack from analyzing server-only imports in client components.
@@ -98,7 +98,7 @@ function readEnv(name: string): string | undefined {
   // Uses global interface to avoid importing server-only modules
   if (!name.startsWith('NEXT_PUBLIC_')) {
     const infisicalCache = getInfisicalCache();
-    
+
     // If cache is available and initialized, check it synchronously
     if (infisicalCache && infisicalCache.isInitialized()) {
       const infisicalValue = infisicalCache.getSecret(name);

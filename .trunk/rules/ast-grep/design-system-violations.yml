@@ -14,7 +14,7 @@ rule:
         regex: '@heyclaude/web-runtime/design-system'
     - has:
         regex: '(marginBottom|marginTop|stack|cluster|muted|iconSize|radius|hoverBg|padding|paddingX|paddingY|spaceY|spaceX)'
-message: "Semantic design system utilities (marginBottom.*, stack.*, cluster.*, etc.) do not exist. Use Direct Tailwind classes instead (mb-4, flex flex-col gap-4, text-muted-foreground). The design system is defined in @theme block in globals.css. See .cursor/rules/design-system.mdc"
+message: 'Semantic design system utilities (marginBottom.*, stack.*, cluster.*, etc.) do not exist. Use Direct Tailwind classes instead (mb-4, flex flex-col gap-4, text-muted-foreground). The design system is defined in @theme block in globals.css. See .cursor/rules/design-system.mdc'
 severity: error
 
 ---
@@ -28,7 +28,7 @@ rule:
         regex: '(DIMENSIONS|ANIMATION_CONSTANTS|UI_CLASSES)'
     - has:
         regex: '@heyclaude/web-runtime/(ui|design-system)'
-message: "Old DIMENSIONS/ANIMATION_CONSTANTS/UI_CLASSES constants are deprecated. Use Direct Tailwind classes instead. Design tokens are defined in @theme block in globals.css. See .cursor/rules/design-system.mdc"
+message: 'Old DIMENSIONS/ANIMATION_CONSTANTS/UI_CLASSES constants are deprecated. Use Direct Tailwind classes instead. Design tokens are defined in @theme block in globals.css. See .cursor/rules/design-system.mdc'
 severity: error
 
 ---
@@ -45,7 +45,7 @@ rule:
         inside:
           has:
             pattern: '// Dynamic|// Calculated|// Animation'
-message: "Avoid inline styles. Use Tailwind classes instead. Inline styles are only acceptable for dynamic values (colors, dimensions calculated at runtime). For static styling, use Tailwind classes from @theme block."
+message: 'Avoid inline styles. Use Tailwind classes instead. Inline styles are only acceptable for dynamic values (colors, dimensions calculated at runtime). For static styling, use Tailwind classes from @theme block.'
 severity: warning
 
 ---
@@ -57,7 +57,7 @@ rule:
     - pattern: 'className={$CLASSES}'
     - has:
         regex: '(bg-\[#|text-\[#|border-\[#|bg-\[rgb|text-\[rgb|border-\[rgb)'
-message: "Hardcoded color values in className should use Tailwind color utilities from @theme block. Use semantic color names (bg-primary, text-muted-foreground, border-border) instead of hardcoded hex/rgb values. Define custom colors in @theme block if needed."
+message: 'Hardcoded color values in className should use Tailwind color utilities from @theme block. Use semantic color names (bg-primary, text-muted-foreground, border-border) instead of hardcoded hex/rgb values. Define custom colors in @theme block if needed.'
 severity: warning
 
 ---
@@ -69,7 +69,7 @@ rule:
     - pattern: 'className={$CLASSES}'
     - has:
         regex: '(mb-\[|mt-\[|p-\[|gap-\[|space-\[|w-\[|h-\[|min-w-\[|min-h-\[|max-w-\[|max-h-\[)'
-message: "Hardcoded spacing values should use Tailwind spacing scale from @theme block. Use standard spacing utilities (mb-4, p-6, gap-4) instead of arbitrary values. If custom spacing is needed, add it to @theme block in globals.css."
+message: 'Hardcoded spacing values should use Tailwind spacing scale from @theme block. Use standard spacing utilities (mb-4, p-6, gap-4) instead of arbitrary values. If custom spacing is needed, add it to @theme block in globals.css.'
 severity: warning
 
 ---
@@ -86,7 +86,7 @@ rule:
     - not:
         has:
           regex: '(marginBottom|stack|cluster|muted|iconSize|radius|hoverBg|padding|spaceY)'
-message: "Design system package only exports animation constants (SPRING, DURATION, etc.) and gradients. All styling utilities should use Direct Tailwind classes. This import is valid for animation constants only."
+message: 'Design system package only exports animation constants (SPRING, DURATION, etc.) and gradients. All styling utilities should use Direct Tailwind classes. This import is valid for animation constants only.'
 severity: info
 
 ---
@@ -105,7 +105,7 @@ rule:
         inside:
           has:
             pattern: '// Acceptable|// Framer Motion|// Animation|// Shiki|// Library requirement'
-message: "CSS variables in className should use Tailwind utilities from @theme block. Use semantic color names (text-success, bg-info-bg, border-warning-border) instead of CSS variables. Define custom colors in @theme block if needed. Acceptable exceptions: Framer Motion animations, Shiki code highlighting, library requirements."
+message: 'CSS variables in className should use Tailwind utilities from @theme block. Use semantic color names (text-success, bg-info-bg, border-warning-border) instead of CSS variables. Define custom colors in @theme block if needed. Acceptable exceptions: Framer Motion animations, Shiki code highlighting, library requirements.'
 severity: error
 
 ---
@@ -124,7 +124,7 @@ rule:
         inside:
           has:
             pattern: '// Acceptable|// Framer Motion|// Animation|// Shiki|// Library requirement'
-message: "CSS variables in className template literals should use Tailwind utilities from @theme block. Use semantic color names (text-success, bg-info-bg, border-warning-border) instead of CSS variables."
+message: 'CSS variables in className template literals should use Tailwind utilities from @theme block. Use semantic color names (text-success, bg-info-bg, border-warning-border) instead of CSS variables.'
 severity: error
 
 # Note: Direct Tailwind class usage (mb-4, flex flex-col gap-4, etc.) is CORRECT and should NOT be flagged

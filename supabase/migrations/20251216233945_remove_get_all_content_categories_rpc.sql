@@ -5,5 +5,4 @@
 --
 -- Description: Remove get_all_content_categories RPC function
 -- This function is unused in the codebase.
-
-DROP FUNCTION IF EXISTS public.get_all_content_categories();
+DROP FUNCTION IF EXISTS public.get_all_content_categories ();

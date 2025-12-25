@@ -17,11 +17,7 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { createPrismocker } from '../src/index.js';
 import type { PrismaClient } from '@prisma/client';
-import {
-  createTestPrisma,
-  resetAndSeed,
-  createTestDataFactory,
-} from '../src/test-utils.js';
+import { createTestPrisma, resetAndSeed, createTestDataFactory } from '../src/test-utils.js';
 
 /**
  * Example service class that uses Prisma
@@ -82,10 +78,7 @@ class CompaniesService {
   async searchCompanies(query: string, limit: number = 10) {
     return (this.prisma as any).companies.findMany({
       where: {
-        OR: [
-          { name: { contains: query } },
-          { description: { contains: query } },
-        ],
+        OR: [{ name: { contains: query } }, { description: { contains: query } }],
       },
       take: limit,
       orderBy: { name: 'asc' },
@@ -267,9 +260,7 @@ describe('CompaniesService', () => {
     });
 
     it('should throw error for non-existent company', async () => {
-      await expect(
-        service.updateCompany('non-existent', { name: 'New Name' })
-      ).rejects.toThrow();
+      await expect(service.updateCompany('non-existent', { name: 'New Name' })).rejects.toThrow();
     });
   });
 
@@ -374,4 +365,3 @@ describe('CompaniesService', () => {
     });
   });
 });
-

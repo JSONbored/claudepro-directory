@@ -58,7 +58,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {
@@ -395,7 +395,10 @@ describe('collection-items', () => {
       // Call action - now returns SafeActionResult structure
       const result = await reorderCollectionItems({
         collection_id: collectionId,
-        items: [{ id: 'item-1', order: 1 }, { id: 'item-2', order: 2 }],
+        items: [
+          { id: 'item-1', order: 1 },
+          { id: 'item-2', order: 2 },
+        ],
       });
 
       // Verify SafeActionResult structure
@@ -412,7 +415,10 @@ describe('collection-items', () => {
         expect.stringContaining('reorder_collection_items'),
         collectionId, // p_collection_id
         'test-user-id', // p_user_id (from ctx.userId in authedAction middleware)
-        [{ id: 'item-1', order: 1 }, { id: 'item-2', order: 2 }] // p_items
+        [
+          { id: 'item-1', order: 1 },
+          { id: 'item-2', order: 2 },
+        ] // p_items
       );
 
       // Verify result data structure (wrapped in SafeActionResult.data)

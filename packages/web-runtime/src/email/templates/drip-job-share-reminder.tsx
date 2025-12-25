@@ -60,15 +60,13 @@ export function JobShareReminderEmail({
   const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(jobUrl)}&text=${encodeURIComponent(`We're hiring! ${jobTitle}`)}`;
 
   return (
-    <BaseLayout
-      preview={`📣 Boost visibility for "${jobTitle}" - share your posting`}
-      utm={utm}
-    >
+    <BaseLayout preview={`📣 Boost visibility for "${jobTitle}" - share your posting`} utm={utm}>
       <Section style={contentSectionStyle}>
         <Text style={titleStyle}>📣 Boost Your Job Visibility</Text>
         <Text style={greetingStyle}>Hi {name},</Text>
         <Text style={paragraphStyle}>
-          Your job posting <strong>"{jobTitle}"</strong> is live, but sharing it can significantly increase applications!
+          Your job posting <strong>"{jobTitle}"</strong> is live, but sharing it can significantly
+          increase applications!
         </Text>
 
         <EmailCard variant="default" style={statCardStyle}>
@@ -206,4 +204,3 @@ const primaryCtaStyle: React.CSSProperties = {
   textDecoration: 'none',
   fontSize: typography.fontSize.base,
 };
-

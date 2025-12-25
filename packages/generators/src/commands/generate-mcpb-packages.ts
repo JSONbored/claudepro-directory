@@ -584,7 +584,6 @@ async function packMcpbBundle(tempDir: string, outputPath: string): Promise<void
   }
 }
 
-
 /**
  * Uploads a generated .mcpb package to Supabase Storage.
  *
@@ -634,4 +633,3 @@ async function uploadToStorage(
 
   return publicUrl;
 }
-

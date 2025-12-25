@@ -162,12 +162,9 @@ describe('content-highlights', () => {
     });
 
     it('should return empty set for topN <= 0', () => {
-      const items: DisplayableContent[] = [
-        { slug: 'item-1' } as DisplayableContent,
-      ];
+      const items: DisplayableContent[] = [{ slug: 'item-1' } as DisplayableContent];
       expect(getTrendingSlugs(items, 0).size).toBe(0);
       expect(getTrendingSlugs(items, -1).size).toBe(0);
     });
   });
 });
-

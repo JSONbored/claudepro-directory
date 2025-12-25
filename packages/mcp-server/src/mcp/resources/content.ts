@@ -20,13 +20,13 @@ import {
  * Format mapping for content resources
  */
 const CONTENT_FORMAT_MAP: Record<string, string> = {
-  'llms': 'llms',
+  llms: 'llms',
   'llms-txt': 'llms',
-  'markdown': 'markdown',
-  'md': 'markdown',
-  'json': 'json',
-  'download': 'storage-metadata',
-  'storage': 'storage-metadata',
+  markdown: 'markdown',
+  md: 'markdown',
+  json: 'json',
+  download: 'storage-metadata',
+  storage: 'storage-metadata',
 };
 
 /**
@@ -52,7 +52,15 @@ export async function handleContentResource(
   logger: RuntimeLogger,
   kvCache?: KvResourceCache | null,
   requestHeaders?: Headers
-): Promise<{ uri: string; mimeType: string; text: string; etag?: string; cachedAt?: string; cacheHeaders?: Record<string, string>; fromCache?: boolean }> {
+): Promise<{
+  uri: string;
+  mimeType: string;
+  text: string;
+  etag?: string;
+  cachedAt?: string;
+  cacheHeaders?: Record<string, string>;
+  fromCache?: boolean;
+}> {
   // Parse URI: claudepro://content/{category}/{slug}/{format}
   const parts = parseResourceUri(
     uri,
@@ -98,10 +106,18 @@ export async function handleContentResource(
 
   // Create resource response with cache metadata
   const response = createResourceResponse(uri, result.text, result.mimeType);
-  const responseWithCache: { uri: string; mimeType: string; text: string; etag?: string; cachedAt?: string; cacheHeaders?: Record<string, string>; fromCache?: boolean } = {
+  const responseWithCache: {
+    uri: string;
+    mimeType: string;
+    text: string;
+    etag?: string;
+    cachedAt?: string;
+    cacheHeaders?: Record<string, string>;
+    fromCache?: boolean;
+  } = {
     ...response,
   };
-  
+
   // Add cache metadata only if present
   if (result.etag !== undefined) {
     responseWithCache.etag = result.etag;
@@ -115,6 +131,6 @@ export async function handleContentResource(
   if (result.fromCache !== undefined) {
     responseWithCache.fromCache = result.fromCache;
   }
-  
+
   return responseWithCache;
 }

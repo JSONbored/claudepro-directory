@@ -167,7 +167,17 @@ describe('handleSupabaseContentChanged', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; eventType: string; category: string; contentId: string; slug: string; webhookId: string; action: string } };
+    })) as {
+      result: {
+        success: boolean;
+        eventType: string;
+        category: string;
+        contentId: string;
+        slug: string;
+        webhookId: string;
+        action: string;
+      };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -334,7 +344,16 @@ describe('handleSupabaseContentChanged', () => {
           },
         },
       ],
-    })) as { result: { success: boolean; eventType: string; category: string; contentId: string; action: string; reason: string } };
+    })) as {
+      result: {
+        success: boolean;
+        eventType: string;
+        category: string;
+        contentId: string;
+        action: string;
+        reason: string;
+      };
+    };
 
     expect(result).toEqual({
       success: true,
@@ -601,4 +620,3 @@ describe('handleSupabaseContentChanged', () => {
     }
   });
 });
-

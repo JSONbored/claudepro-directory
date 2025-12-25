@@ -25,9 +25,13 @@ if (typeof globalThis.module === 'undefined') {
 // Using type assertion because we're providing a minimal polyfill that throws,
 // not the full Node.js Require function
 if (typeof globalThis.require === 'undefined') {
-  (globalThis as unknown as { require: (id: string) => never }).require = function require(id: string) {
+  (globalThis as unknown as { require: (id: string) => never }).require = function require(
+    id: string
+  ) {
     // This is a minimal polyfill - actual require resolution is handled by wrangler
-    throw new Error(`require('${id}') is not supported in Cloudflare Workers. Use ES modules instead.`);
+    throw new Error(
+      `require('${id}') is not supported in Cloudflare Workers. Use ES modules instead.`
+    );
   };
 }
 
@@ -40,4 +44,3 @@ if (typeof (globalThis as { __dirname?: string }).__dirname === 'undefined') {
 if (typeof (globalThis as { __filename?: string }).__filename === 'undefined') {
   (globalThis as { __filename: string }).__filename = '/worker.js';
 }
-

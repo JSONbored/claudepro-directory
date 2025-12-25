@@ -167,4 +167,3 @@ const footerNoteStyle: React.CSSProperties = {
   textAlign: 'center',
   margin: 0,
 };
-

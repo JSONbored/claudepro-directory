@@ -1,7 +1,7 @@
 # HeyClaude MCP Server - Cloudflare Workers
 
-**Version:** 1.1.0  
-**Protocol:** MCP 2025-11-25  
+**Version:** 1.1.0\
+**Protocol:** MCP 2025-11-25\
 **Endpoint:** `https://mcp.claudepro.directory/mcp`
 
 ---
@@ -28,6 +28,7 @@ HeyClaude MCP Server provides Model Context Protocol (MCP) access to the Claude 
 ## Features
 
 ### Tools (20)
+
 1. `listCategories` - List all content categories
 2. `searchContent` - Search directory content
 3. `getContentDetail` - Get content by slug and category
@@ -50,6 +51,7 @@ HeyClaude MCP Server provides Model Context Protocol (MCP) access to the Claude 
 20. `subscribeNewsletter` - Subscribe to newsletter
 
 ### Resources (3)
+
 1. `claudepro://content/{category}/{slug}` - Content resource
 2. `claudepro://category/{category}` - Category resource
 3. `claudepro://sitewide` - Sitewide resource
@@ -59,6 +61,7 @@ HeyClaude MCP Server provides Model Context Protocol (MCP) access to the Claude 
 ## Development
 
 ### Prerequisites
+
 - Node.js 22+
 - pnpm 10+
 - Cloudflare account with Workers access
@@ -139,6 +142,7 @@ The MCP endpoint requires OAuth 2.1 authentication:
 ## Rate Limiting
 
 Rate limiting is enforced via Cloudflare Rate Limiting binding:
+
 - **Limit:** 100 requests per minute per user
 - **Namespace:** Configured in `wrangler.jsonc`
 - **Response:** 429 with `Retry-After` header when limit exceeded
@@ -175,10 +179,12 @@ apps/workers/heyclaude-mcp/
 ## Migration Notes
 
 This Worker replaces the previous Supabase Edge Function implementation:
+
 - **Old:** `apps/edge/supabase/functions/heyclaude-mcp/` (Deno)
 - **New:** `apps/workers/heyclaude-mcp/` (Cloudflare Workers)
 
 **Key Changes:**
+
 - Replaced `mcp-lite` with `@modelcontextprotocol/sdk` + `createMcpHandler`
 - Replaced Deno runtime with Cloudflare Workers runtime
 - Replaced in-memory rate limiting with Cloudflare Rate Limiting binding

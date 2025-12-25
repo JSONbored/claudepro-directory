@@ -116,11 +116,10 @@ describe('useEventListener', () => {
 
     renderHook(() => useEventListener('resize', handler, undefined, { capture: true, once: true }));
 
-    expect(addEventListenerSpy).toHaveBeenCalledWith(
-      'resize',
-      expect.any(Function),
-      { capture: true, once: true }
-    );
+    expect(addEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function), {
+      capture: true,
+      once: true,
+    });
   });
 
   it('should handle boolean options (capture)', () => {
@@ -206,16 +205,24 @@ describe('useEventListener', () => {
     const handler = jest.fn();
     const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
 
-    const { rerender } = renderHook(({ options }) => useEventListener('resize', handler, undefined, options), {
-      initialProps: { options: { capture: true } },
-    });
+    const { rerender } = renderHook(
+      ({ options }) => useEventListener('resize', handler, undefined, options),
+      {
+        initialProps: { options: { capture: true } },
+      }
+    );
 
-    expect(addEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function), { capture: true });
+    expect(addEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function), {
+      capture: true,
+    });
 
     rerender({ options: { capture: false, once: true } });
 
     // Should remove old listener and add new one with new options
-    expect(addEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function), { capture: false, once: true });
+    expect(addEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function), {
+      capture: false,
+      once: true,
+    });
   });
 
   it('should handle document events', () => {

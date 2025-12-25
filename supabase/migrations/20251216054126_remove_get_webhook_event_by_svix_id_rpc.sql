@@ -12,5 +12,4 @@
 -- Related Changes:
 -- - packages/data-layer/src/services/misc.ts: Converted getWebhookEventBySvixId() to use Prisma
 -- - packages/web-runtime/src/flux/handlers/webhook.ts: Updated to handle new return type
-
-DROP FUNCTION IF EXISTS public.get_webhook_event_by_svix_id(text, public.webhook_source);
+DROP FUNCTION IF EXISTS public.get_webhook_event_by_svix_id (text, public.webhook_source);

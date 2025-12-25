@@ -5,5 +5,4 @@
 --
 -- Description: Remove suggest_vacuum_commands RPC function - Not found in codebase, only in generated types
 -- Function signature: suggest_vacuum_commands(p_min_bloat_ratio numeric DEFAULT 30.0)
-
-DROP FUNCTION IF EXISTS public.suggest_vacuum_commands(numeric);
+DROP FUNCTION IF EXISTS public.suggest_vacuum_commands (numeric);

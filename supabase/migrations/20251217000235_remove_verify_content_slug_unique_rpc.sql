@@ -5,5 +5,4 @@
 --
 -- Description: Remove verify_content_slug_unique RPC function - Only defined, not called
 -- Function signature: verify_content_slug_unique(p_slug text, p_category content_category)
-
-DROP FUNCTION IF EXISTS public.verify_content_slug_unique(text, public.content_category);
+DROP FUNCTION IF EXISTS public.verify_content_slug_unique (text, public.content_category);

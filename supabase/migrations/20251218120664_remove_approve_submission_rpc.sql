@@ -17,5 +17,4 @@
 -- Note: reject_submission RPC might still be used (verify separately)
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.approve_submission(uuid);
+DROP FUNCTION IF EXISTS public.approve_submission (uuid);

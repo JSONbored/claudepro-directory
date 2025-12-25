@@ -128,7 +128,7 @@ export function SearchFilters({
   return (
     <motion.section
       className={cn(
-        'border-border/50 space-y-4 rounded-lg border bg-background/60 p-4 shadow-xl backdrop-blur-xl md:space-y-6 md:p-6',
+        'border-border/50 bg-background/60 space-y-4 rounded-lg border p-4 shadow-xl backdrop-blur-xl md:space-y-6 md:p-6',
         className
       )}
       initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}

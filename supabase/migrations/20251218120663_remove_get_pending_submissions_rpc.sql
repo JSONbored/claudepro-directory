@@ -17,5 +17,4 @@
 -- - Not found in apps/web/src/app/ (no page usage)
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.get_pending_submissions(integer, integer, text);
+DROP FUNCTION IF EXISTS public.get_pending_submissions (integer, integer, text);

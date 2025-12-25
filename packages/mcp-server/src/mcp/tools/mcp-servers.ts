@@ -192,7 +192,9 @@ export async function handleGetMcpServers(
           idx: number
         ) => {
           const toolsList =
-            server.tools.length > 0 ? server.tools.map((t) => t.name).join(', ') : 'No tools listed';
+            server.tools.length > 0
+              ? server.tools.map((t) => t.name).join(', ')
+              : 'No tools listed';
 
           const downloadInfo = server.mcpbUrl
             ? `\n   Download: ${server.mcpbUrl}`

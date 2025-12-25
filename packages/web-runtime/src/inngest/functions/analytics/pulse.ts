@@ -77,7 +77,6 @@ export const processPulseQueue = createInngestFunction(
   },
   { cron: '0 * * * *' }, // Every hour (optimized from 30 minutes)
   async ({ step, logContext }) => {
-
     // Step 1: Read messages from queue
     const messages = await step.run('read-queue', async (): Promise<PulseQueueMessage[]> => {
       try {
@@ -169,13 +168,21 @@ export const processPulseQueue = createInngestFunction(
             });
 
             // Prepare search query inputs for batch RPC
-            const searchQueryInputs: SearchQueryInput[] = searchQueries.map((q: ReturnType<typeof searchEvents[0] extends PulseQueueMessage ? typeof searchEvents[0] : never>['message']) => ({
-              query: q.query,
-              filters: q.filters,
-              result_count: q.result_count,
-              user_id: q.user_id,
-              session_id: q.session_id,
-            }));
+            const searchQueryInputs: SearchQueryInput[] = searchQueries.map(
+              (
+                q: ReturnType<
+                  (typeof searchEvents)[0] extends PulseQueueMessage
+                    ? (typeof searchEvents)[0]
+                    : never
+                >['message']
+              ) => ({
+                query: q.query,
+                filters: q.filters,
+                result_count: q.result_count,
+                user_id: q.user_id,
+                session_id: q.session_id,
+              })
+            );
 
             const service = await getService('search');
             const result = await service.batchInsertSearchQueries({

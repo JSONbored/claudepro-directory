@@ -141,7 +141,9 @@ describe('changelog data functions', () => {
         },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       const result = await getChangelogOverview({
         limit: 50,
@@ -163,7 +165,9 @@ describe('changelog data functions', () => {
 
     it('should return empty overview on error', async () => {
       // When RPC fails, createDataFunction's onError handler should return empty overview
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(new Error('Database error'));
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(
+        new Error('Database error')
+      );
 
       const result = await getChangelogOverview({
         limit: 50,
@@ -205,7 +209,9 @@ describe('changelog data functions', () => {
         },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       const args = {
         limit: 50,
@@ -250,7 +256,9 @@ describe('changelog data functions', () => {
         },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       await getChangelogOverview({
         category: 'features',
@@ -290,7 +298,9 @@ describe('changelog data functions', () => {
         },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getChangelogEntryBySlug('test-slug');
 
@@ -341,7 +351,9 @@ describe('changelog data functions', () => {
         },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       // First call
       const cacheBefore = getRequestCache().getStats().size;
@@ -414,7 +426,9 @@ describe('changelog data functions', () => {
         },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockOverview] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockOverview,
+      ] as any);
 
       const result = await getChangelog();
 
@@ -430,7 +444,9 @@ describe('changelog data functions', () => {
     it('should return empty data when overview is null', async () => {
       // When RPC fails, getChangelogOverview returns empty overview, not null
       // But we test the case where it could theoretically be null
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(new Error('Database error'));
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(
+        new Error('Database error')
+      );
 
       const result = await getChangelog();
 

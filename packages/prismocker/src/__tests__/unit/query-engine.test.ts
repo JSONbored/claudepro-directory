@@ -133,7 +133,10 @@ describe('QueryEngine Unit Tests', () => {
     it('should support search operator (case-insensitive)', () => {
       const result = queryEngine.filter(records, { email: { search: 'example' } });
       expect(result).toHaveLength(2);
-      expect(result.map((r) => r.email).sort()).toEqual(['alice@example.com', 'charlie@example.org']);
+      expect(result.map((r) => r.email).sort()).toEqual([
+        'alice@example.com',
+        'charlie@example.org',
+      ]);
     });
   });
 
@@ -203,7 +206,7 @@ describe('QueryEngine Unit Tests', () => {
       expect(result[0].id).toBe('1');
     });
 
-    it('should return false for path operator when path doesn\'t exist', () => {
+    it("should return false for path operator when path doesn't exist", () => {
       const result = queryEngine.filter(records, {
         metadata: {
           path: ['nonexistent', 'field'],
@@ -286,10 +289,7 @@ describe('QueryEngine Unit Tests', () => {
 
     it('should support nested logical operators', () => {
       const result = queryEngine.filter(records, {
-        AND: [
-          { OR: [{ age: { lt: 30 } }, { age: { gt: 30 } }] },
-          { NOT: { status: 'inactive' } },
-        ],
+        AND: [{ OR: [{ age: { lt: 30 } }, { age: { gt: 30 } }] }, { NOT: { status: 'inactive' } }],
       });
       // Age < 30 OR > 30: ['1', '2', '4'] (excludes '3' which is exactly 30)
       // AND status='active': ['1'] (only '1' is active and matches age condition)
@@ -307,7 +307,10 @@ describe('QueryEngine Unit Tests', () => {
       const relationLoader = (record: any, relationName: string) => {
         if (relationName === 'posts') {
           if (record.id === '1') {
-            return [{ id: 'post-1', published: true }, { id: 'post-2', published: false }];
+            return [
+              { id: 'post-1', published: true },
+              { id: 'post-2', published: false },
+            ];
           }
           return [{ id: 'post-3', published: false }];
         }
@@ -330,7 +333,10 @@ describe('QueryEngine Unit Tests', () => {
       const relationLoader = (record: any, relationName: string) => {
         if (relationName === 'posts') {
           if (record.id === '1') {
-            return [{ id: 'post-1', published: true }, { id: 'post-2', published: true }];
+            return [
+              { id: 'post-1', published: true },
+              { id: 'post-2', published: true },
+            ];
           }
           return [{ id: 'post-3', published: false }];
         }
@@ -489,4 +495,3 @@ describe('QueryEngine Unit Tests', () => {
     });
   });
 });
-

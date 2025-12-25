@@ -19,7 +19,10 @@ jest.mock('next/cache', () => ({
 
 // Import real cache utilities for proper cache testing
 // Note: Deep relative imports are acceptable for test utilities to avoid circular dependencies
-import { clearRequestCache, getRequestCache } from '../../../../data-layer/src/utils/request-cache.ts';
+import {
+  clearRequestCache,
+  getRequestCache,
+} from '../../../../data-layer/src/utils/request-cache.ts';
 
 // Mock RPC error logging utility (if needed)
 // Note: Deep relative import needed for jest.mock() to work correctly
@@ -158,7 +161,13 @@ describe('content/index', () => {
       if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
         (prismocker as any).setData('content', [
           createContentData({ id: '1', slug: 'agent-1', title: 'Agent 1', category: 'agents' }),
-          createContentData({ id: '2', slug: 'agent-2', title: 'Agent 2', category: 'agents', slugNullable: null }),
+          createContentData({
+            id: '2',
+            slug: 'agent-2',
+            title: 'Agent 2',
+            category: 'agents',
+            slugNullable: null,
+          }),
           createContentData({ id: '3', slug: 'agent-3', title: 'Agent 3', category: 'agents' }),
         ]);
         (prismocker as any).setData('sponsored_content', []);
@@ -182,7 +191,12 @@ describe('content/index', () => {
       // Seed content table with duplicate slugs in different categories
       if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
         (prismocker as any).setData('content', [
-          createContentData({ id: '1', slug: 'duplicate-slug', title: 'Agent', category: 'agents' }),
+          createContentData({
+            id: '1',
+            slug: 'duplicate-slug',
+            title: 'Agent',
+            category: 'agents',
+          }),
           createContentData({ id: '2', slug: 'duplicate-slug', title: 'MCP', category: 'mcp' }),
         ]);
         (prismocker as any).setData('sponsored_content', []);
@@ -197,7 +211,11 @@ describe('content/index', () => {
       // The Map.set() will overwrite, so the last category's item will be in the result
       // This is acceptable since slugs should be unique per category in practice
       expect(result.size).toBe(1);
-      expect(result.get('duplicate-slug')).toMatchObject({ id: '2', slug: 'duplicate-slug', category: 'mcp' }); // Last one wins
+      expect(result.get('duplicate-slug')).toMatchObject({
+        id: '2',
+        slug: 'duplicate-slug',
+        category: 'mcp',
+      }); // Last one wins
     });
 
     it('should return empty map on service error', async () => {
@@ -211,9 +229,7 @@ describe('content/index', () => {
       }
 
       // When content is not found, result should be empty (not an error)
-      const result = await getContentBatchBySlugs([
-        { category: 'agents', slug: 'non-existent' },
-      ]);
+      const result = await getContentBatchBySlugs([{ category: 'agents', slug: 'non-existent' }]);
 
       expect(result.size).toBe(0);
       // Error should be logged (only if all categories fail)
@@ -228,9 +244,7 @@ describe('content/index', () => {
         (prismocker as any).setData('sponsored_content', []);
       }
 
-      const result = await getContentBatchBySlugs([
-        { category: 'agents', slug: 'agent-1' },
-      ]);
+      const result = await getContentBatchBySlugs([{ category: 'agents', slug: 'agent-1' }]);
 
       expect(result.size).toBe(0);
     });
@@ -254,7 +268,7 @@ describe('content/index', () => {
       // Should preserve successful results even if some categories return empty
       expect(result.size).toBe(1);
       expect(result.get('agent-1')).toBeDefined();
-      
+
       // Error should be logged as warning (not error, since we have partial success)
       // The logger.warn() is called directly on the logger
       const { logger } = await import('../../logger.ts');
@@ -273,9 +287,7 @@ describe('content/index', () => {
         (prismocker as any).setData('sponsored_content', []);
       }
 
-      const result = await getContentBatchBySlugs([
-        { category: 'agents', slug: 'agent-1' },
-      ]);
+      const result = await getContentBatchBySlugs([{ category: 'agents', slug: 'agent-1' }]);
 
       // Items without slug should be skipped
       expect(result.size).toBe(1);
@@ -290,9 +302,17 @@ describe('content/index', () => {
 
       // Seed content table with 100 items
       if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
-        (prismocker as any).setData('content', largeBatch.map((item, i) =>
-          createContentData({ id: String(i), slug: item.slug, title: `Agent ${i}`, category: 'agents' })
-        ));
+        (prismocker as any).setData(
+          'content',
+          largeBatch.map((item, i) =>
+            createContentData({
+              id: String(i),
+              slug: item.slug,
+              title: `Agent ${i}`,
+              category: 'agents',
+            })
+          )
+        );
         (prismocker as any).setData('sponsored_content', []);
       }
 

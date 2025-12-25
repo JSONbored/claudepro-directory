@@ -11,14 +11,12 @@
     "type-safe",
     "pnpm"
   ],
-  "license": "MIT",
-  "author": "JSONbored",
   "repository": {
     "type": "git",
     "url": "https://github.com/JSONbored/prismocker"
   },
-  "main": "./dist/index.cjs",
-  "types": "./dist/index.d.ts",
+  "license": "MIT",
+  "author": "JSONbored",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -51,6 +49,8 @@
       "require": "./dist/bin/generate-enums.js"
     }
   },
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
   "bin": {
     "prismocker": "./dist/bin/generate-enums.js",
     "prismocker-generate-enums": "./dist/bin/generate-enums.js",
@@ -65,20 +65,12 @@
     "build": "rm -rf dist && tsup && pnpm build:types",
     "build:types": "tsc --declaration --outDir dist && cp src/types-augmentation.d.ts dist/types-augmentation.d.ts",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
-    "type-check": "tsc --noEmit",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
     "lint": "eslint src --ext .ts",
-    "prepublishOnly": "pnpm build"
-  },
-  "peerDependencies": {
-    "@prisma/client": "^7.0.0"
-  },
-  "peerDependenciesMeta": {
-    "zod": {
-      "optional": true
-    }
+    "prepublishOnly": "pnpm build",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "type-check": "tsc --noEmit"
   },
   "devDependencies": {
     "@jest/globals": "^30.2.0",
@@ -89,6 +81,14 @@
     "ts-jest": "^29.4.6",
     "tsup": "^8.5.1",
     "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@prisma/client": "^7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=18.0.0"

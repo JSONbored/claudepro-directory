@@ -31,11 +31,13 @@ export function parseSimpleEnv(env: RuntimeEnv): {
     supabase: {
       url: typeof env['SUPABASE_URL'] === 'string' ? env['SUPABASE_URL'] : undefined,
       anonKey: typeof env['SUPABASE_ANON_KEY'] === 'string' ? env['SUPABASE_ANON_KEY'] : undefined,
-      serviceRoleKey: typeof env['SUPABASE_SERVICE_ROLE_KEY'] === 'string' ? env['SUPABASE_SERVICE_ROLE_KEY'] : undefined,
+      serviceRoleKey:
+        typeof env['SUPABASE_SERVICE_ROLE_KEY'] === 'string'
+          ? env['SUPABASE_SERVICE_ROLE_KEY']
+          : undefined,
     },
     app: {
       url: typeof env['APP_URL'] === 'string' ? env['APP_URL'] : undefined,
     },
   };
 }
-

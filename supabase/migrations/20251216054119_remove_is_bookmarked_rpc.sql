@@ -11,5 +11,4 @@
 --
 -- Related Changes:
 -- - packages/data-layer/src/services/account.ts: Converted isBookmarked() to use Prisma
-
-DROP FUNCTION IF EXISTS public.is_bookmarked(uuid, public.content_category, text);
+DROP FUNCTION IF EXISTS public.is_bookmarked (uuid, public.content_category, text);

@@ -389,4 +389,3 @@ describe('submitIndexNow', () => {
     expect(mockFetchWithRetryAndTimeout).toHaveBeenCalled();
   });
 });
-

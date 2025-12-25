@@ -5,5 +5,4 @@
 --
 -- Description: Remove backfill_changelog_seo_fields RPC function
 -- This was a one-time backfill utility that is no longer needed.
-
-DROP FUNCTION IF EXISTS public.backfill_changelog_seo_fields();
+DROP FUNCTION IF EXISTS public.backfill_changelog_seo_fields ();

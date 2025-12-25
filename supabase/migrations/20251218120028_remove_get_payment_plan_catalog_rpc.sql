@@ -8,5 +8,4 @@
 --
 -- Function signature: get_payment_plan_catalog()
 -- Related: JobsService.getPaymentPlanCatalog uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_payment_plan_catalog();
+DROP FUNCTION IF EXISTS public.get_payment_plan_catalog ();

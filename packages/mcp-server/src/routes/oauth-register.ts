@@ -40,4 +40,3 @@ export async function handleOAuthRegister(
 
   return handleOAuthRegisterShared(request, env, adapter);
 }
-

@@ -137,8 +137,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'application/json',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -147,8 +151,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -169,7 +177,8 @@ describe('GET /api/content/sitewide', () => {
   let prismocker: PrismaClient;
 
   // Mock data for RPC calls
-  const mockSitewideLlmsTxt = '# Sitewide Content\n\n## Skills\n- Example Skill 1\n- Example Skill 2';
+  const mockSitewideLlmsTxt =
+    '# Sitewide Content\n\n## Skills\n- Example Skill 1\n- Example Skill 2';
   const mockSitewideContentList = [
     { id: '1', title: 'Item 1', category: 'skills' },
     { id: '2', title: 'Item 2', category: 'agents' },
@@ -201,7 +210,9 @@ describe('GET /api/content/sitewide', () => {
 
   it('should return LLMs format by default', async () => {
     // Mock RPC call for getSitewideLlmsTxt
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockSitewideLlmsTxt]);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+      mockSitewideLlmsTxt,
+    ]);
 
     const request = createMockRequest({
       method: 'GET',
@@ -226,7 +237,9 @@ describe('GET /api/content/sitewide', () => {
 
   it('should return LLMs format with format=llms-txt', async () => {
     // Mock RPC call for getSitewideLlmsTxt
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockSitewideLlmsTxt]);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+      mockSitewideLlmsTxt,
+    ]);
 
     const request = createMockRequest({
       method: 'GET',
@@ -246,7 +259,9 @@ describe('GET /api/content/sitewide', () => {
 
   it('should return LLMs format with format=llms', async () => {
     // Mock RPC call for getSitewideLlmsTxt
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockSitewideLlmsTxt]);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+      mockSitewideLlmsTxt,
+    ]);
 
     const request = createMockRequest({
       method: 'GET',
@@ -266,7 +281,9 @@ describe('GET /api/content/sitewide', () => {
 
   it('should return JSON format with format=json', async () => {
     // Mock RPC call for getSitewideContentList
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockSitewideContentList);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(
+      mockSitewideContentList
+    );
 
     const request = createMockRequest({
       method: 'GET',
@@ -295,7 +312,9 @@ describe('GET /api/content/sitewide', () => {
 
   it('should return README format with format=readme', async () => {
     // Mock RPC call for getSitewideReadme
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockSitewideReadme]);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+      mockSitewideReadme,
+    ]);
 
     const request = createMockRequest({
       method: 'GET',
@@ -309,9 +328,7 @@ describe('GET /api/content/sitewide', () => {
     expect(response.headers.get('Content-Type')).toContain('application/json');
     expect(response.headers.get('x-generated-by')).toBe('prisma.rpc.generate_readme_data');
     // Verify RPC was called
-    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
-      'SELECT * FROM generate_readme_data()'
-    );
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith('SELECT * FROM generate_readme_data()');
     // Verify response structure
     if (typeof body === 'object' && body !== null) {
       expect(body).toHaveProperty('categories');
@@ -354,7 +371,9 @@ describe('GET /api/content/sitewide', () => {
 
   it('should handle service errors gracefully', async () => {
     // Mock RPC call to throw error
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(new Error('Database error'));
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(
+      new Error('Database error')
+    );
 
     const request = createMockRequest({
       method: 'GET',
@@ -383,7 +402,9 @@ describe('GET /api/content/sitewide', () => {
     clearRequestCache();
 
     // Mock RPC call for getSitewideLlmsTxt
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockSitewideLlmsTxt]);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+      mockSitewideLlmsTxt,
+    ]);
 
     // First call - should populate cache
     const cacheBefore = getRequestCache().getStats().size;

@@ -183,7 +183,6 @@ export const sendJobLifecycleEmail = createInngestFunction(
   },
   { event: 'email/job-lifecycle' },
   async ({ event, step, logContext }) => {
-
     const { action, employerEmail, jobId, payload, jobTitle, company } = event.data;
 
     logger.info({ ...logContext, action, jobId }, 'Job lifecycle email request received');

@@ -7,6 +7,6 @@
 -- Function signatures: 
 --   get_content_with_analytics(p_category content_category DEFAULT NULL::content_category, p_limit integer DEFAULT 100)
 --   get_content_with_analytics(p_category content_category, p_slug text)
+DROP FUNCTION IF EXISTS public.get_content_with_analytics (public.content_category, integer);
 
-DROP FUNCTION IF EXISTS public.get_content_with_analytics(public.content_category, integer);
-DROP FUNCTION IF EXISTS public.get_content_with_analytics(public.content_category, text);
+DROP FUNCTION IF EXISTS public.get_content_with_analytics (public.content_category, text);

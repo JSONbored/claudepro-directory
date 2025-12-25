@@ -3,29 +3,6 @@
   "version": "1.1.0",
   "private": true,
   "type": "module",
-  "bin": {
-    "heyclaude-generate-service-worker": "./src/bin/generate-service-worker.ts",
-    "heyclaude-generate-packages": "./src/bin/generate-packages.ts",
-    "heyclaude-generate-skills": "./src/bin/generate-skills.ts",
-    "heyclaude-generate-mcpb": "./src/bin/generate-mcpb.ts",
-    "heyclaude-generate-readme": "./src/bin/generate-readme.ts",
-    "heyclaude-generate-openapi": "./src/bin/generate-openapi.ts",
-    "heyclaude-generate-mcp-openapi": "./src/bin/generate-mcp-openapi.ts",
-    "heyclaude-cache": "./src/bin/cache.ts",
-    "heyclaude-sync-db": "./src/bin/sync-db.ts",
-    "heyclaude-lint-unused": "./src/bin/lint-unused.ts",
-    "heyclaude-webhooks-replay": "./src/bin/replay-webhook.ts",
-    "heyclaude-changelog": "./src/bin/changelog.ts",
-    "heyclaude-analyze-dependencies": "./src/bin/analyze-dependencies.ts",
-    "heyclaude-mcp-login": "./src/bin/mcp-login.ts",
-    "heyclaude-bump-version": "./src/bin/bump-version.ts",
-    "heyclaude-analyze-commits": "./src/bin/analyze-commits.ts",
-    "heyclaude-extract-changelog-entry": "./src/bin/extract-changelog-entry.ts",
-    "heyclaude-migrate-theme": "./src/bin/migrate-theme.ts",
-    "heyclaude-consolidate-variables": "./src/bin/consolidate-variables.ts",
-    "heyclaude-apply-variable-consolidation": "./src/bin/apply-variable-consolidation.ts",
-    "heyclaude-knip-design-system": "./src/bin/knip-design-system.ts"
-  },
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -38,11 +15,36 @@
     "./toolkit/mcp-token": "./src/toolkit/mcp-token.ts",
     "./commands/*": "./src/commands/*.ts"
   },
+  "bin": {
+    "heyclaude-analyze-commits": "./src/bin/analyze-commits.ts",
+    "heyclaude-analyze-dependencies": "./src/bin/analyze-dependencies.ts",
+    "heyclaude-apply-variable-consolidation": "./src/bin/apply-variable-consolidation.ts",
+    "heyclaude-bump-version": "./src/bin/bump-version.ts",
+    "heyclaude-bump-version-package": "./src/bin/bump-version-package.ts",
+    "heyclaude-cache": "./src/bin/cache.ts",
+    "heyclaude-changelog": "./src/bin/changelog.ts",
+    "heyclaude-changelog-package": "./src/bin/changelog-package.ts",
+    "heyclaude-consolidate-variables": "./src/bin/consolidate-variables.ts",
+    "heyclaude-extract-changelog-entry": "./src/bin/extract-changelog-entry.ts",
+    "heyclaude-generate-mcp-openapi": "./src/bin/generate-mcp-openapi.ts",
+    "heyclaude-generate-mcpb": "./src/bin/generate-mcpb.ts",
+    "heyclaude-generate-openapi": "./src/bin/generate-openapi.ts",
+    "heyclaude-generate-packages": "./src/bin/generate-packages.ts",
+    "heyclaude-generate-readme": "./src/bin/generate-readme.ts",
+    "heyclaude-generate-service-worker": "./src/bin/generate-service-worker.ts",
+    "heyclaude-generate-skills": "./src/bin/generate-skills.ts",
+    "heyclaude-knip-design-system": "./src/bin/knip-design-system.ts",
+    "heyclaude-lint-unused": "./src/bin/lint-unused.ts",
+    "heyclaude-mcp-login": "./src/bin/mcp-login.ts",
+    "heyclaude-migrate-theme": "./src/bin/migrate-theme.ts",
+    "heyclaude-sync-db": "./src/bin/sync-db.ts",
+    "heyclaude-webhooks-replay": "./src/bin/replay-webhook.ts"
+  },
   "scripts": {
     "build": "tsc -b",
-    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist",
     "lint": "eslint --config eslint.config.mjs src --ignore-pattern '**/*.generated.ts' --ignore-pattern '**/*.test.ts' --ignore-pattern '**/*.spec.ts'",
-    "clean": "rm -rf dist"
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@heyclaude/data-layer": "workspace:*",

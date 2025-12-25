@@ -8,9 +8,9 @@ This application follows a "Hollow Core" architecture. `apps/web` is designed to
 
 ### Guiding Principles
 
-1.  **No Business Logic**: All business logic, data fetching, state management, and complex utilities should reside in `packages/web-runtime` or `packages/shared-runtime`.
-2.  **Routing Only**: The primary responsibility of `apps/web` is to define the URL structure (Next.js App Router) and wire up components to data.
-3.  **Visuals & Layout**: Page layouts and page-specific visual compositions belong here, but reusable UI components should live in the design system or `web-runtime/ui`.
+1. **No Business Logic**: All business logic, data fetching, state management, and complex utilities should reside in `packages/web-runtime` or `packages/shared-runtime`.
+2. **Routing Only**: The primary responsibility of `apps/web` is to define the URL structure (Next.js App Router) and wire up components to data.
+3. **Visuals & Layout**: Page layouts and page-specific visual compositions belong here, but reusable UI components should live in the design system or `web-runtime/ui`.
 
 ## Usage
 

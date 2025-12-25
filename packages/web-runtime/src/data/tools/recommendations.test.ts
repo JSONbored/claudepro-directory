@@ -2,7 +2,10 @@ import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { getConfigRecommendations, type RecommendationInput } from './recommendations';
 import { prisma } from '@heyclaude/data-layer/prisma/client';
 import type { PrismaClient } from '@prisma/client';
-import { clearRequestCache, getRequestCache } from '../../../../data-layer/src/utils/request-cache.ts';
+import {
+  clearRequestCache,
+  getRequestCache,
+} from '../../../../data-layer/src/utils/request-cache.ts';
 
 // Mock server-only
 jest.mock('server-only', () => ({}));

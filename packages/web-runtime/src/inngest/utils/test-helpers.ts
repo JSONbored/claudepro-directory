@@ -31,7 +31,7 @@ const EVENT_FUNCTION_REGISTRY = new Map<string, InngestFunction<any, any, any>>(
  * @example
  * ```typescript
  * import { sendContactEmails } from '../inngest/functions/email/contact';
- * 
+ *
  * beforeEach(() => {
  *   registerInngestFunction('email/contact', sendContactEmails);
  * });
@@ -51,7 +51,7 @@ export function registerInngestFunction(eventName: string, fn: InngestFunction<a
  * ```typescript
  * import { sendContactEmails } from '../inngest/functions/email/contact';
  * import { sendWelcomeEmail } from '../inngest/functions/email/welcome';
- * 
+ *
  * beforeEach(() => {
  *   registerInngestFunctions([
  *     { eventName: 'email/contact', fn: sendContactEmails },
@@ -91,24 +91,24 @@ export function registerInngestFunctions(
  * ```typescript
  * import { sendContactEmails } from '../inngest/functions/email/contact';
  * import { createInngestIntegrationSpy } from '../inngest/utils/test-helpers';
- * 
+ *
  * beforeEach(async () => {
  *   // Register the function that handles events from this action
  *   registerInngestFunction('email/contact', sendContactEmails);
- *   
+ *
  *   // Create integration spy (intercepts send() and executes functions)
  *   const { inngest } = await import('../inngest/client.ts');
  *   inngestSendSpy = createInngestIntegrationSpy(inngest);
  * });
- * 
+ *
  * it('should send contact email event', async () => {
  *   await submitContactForm({ ... });
- *   
+ *
  *   // Verify event was sent (and function was executed)
  *   expectInngestEvent(inngestSendSpy, 'email/contact', {
  *     submissionId: 'sub-123',
  *   });
- *   
+ *
  *   // Verify function executed (check mocks from Inngest function)
  *   expect(mockSendEmail).toHaveBeenCalled();
  * });
@@ -119,14 +119,14 @@ export function createInngestIntegrationSpy(inngest: Inngest) {
   const spy = jest.spyOn(inngest, 'send').mockImplementation(async (event) => {
     // Find the function that handles this event
     const fn = EVENT_FUNCTION_REGISTRY.get(event.name);
-    
+
     if (fn) {
       // Execute the function using InngestTestEngine (same as Inngest function tests)
       // This creates a fresh test engine for each event (prevents state caching)
       const testEngine = new InngestTestEngine({
         function: fn,
       });
-      
+
       try {
         // Execute the function with the event data
         // This will use the same mocks as the Inngest function tests
@@ -176,14 +176,14 @@ export function createInngestIntegrationSpy(inngest: Inngest) {
             },
           ],
         });
-        
+
         if (error) {
           // Function execution failed - return error (Inngest would retry)
           // Ensure error is an Error object for proper propagation
           const errorToThrow = error instanceof Error ? error : new Error(String(error));
           throw errorToThrow;
         }
-        
+
         // Function executed successfully - return success (mimics Inngest API response)
         // The actual function result is available via testEngine, but we return
         // a success response to match what Inngest API would return
@@ -202,7 +202,7 @@ export function createInngestIntegrationSpy(inngest: Inngest) {
       return { ids: [`event-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`] };
     }
   });
-  
+
   return spy;
 }
 

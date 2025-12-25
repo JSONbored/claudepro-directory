@@ -16,5 +16,4 @@
 -- Related Changes:
 -- - packages/data-layer/src/services/newsletter.ts: Converted getSubscriptionById() to use Prisma
 -- - Return type: Promise<newsletter_subscriptionsModel | null>
-
-DROP FUNCTION IF EXISTS public.get_newsletter_subscription_by_id(uuid);
+DROP FUNCTION IF EXISTS public.get_newsletter_subscription_by_id (uuid);

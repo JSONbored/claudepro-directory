@@ -20,7 +20,10 @@ jest.mock('next/cache', () => ({
 // Import real cache utilities for proper cache testing
 // Note: Deep relative imports are acceptable for test utilities to avoid circular dependencies
 // Path: packages/web-runtime/src/data/seo -> packages/data-layer/src/utils = ../../../../data-layer/src/utils
-import { clearRequestCache, getRequestCache } from '../../../../data-layer/src/utils/request-cache.ts';
+import {
+  clearRequestCache,
+  getRequestCache,
+} from '../../../../data-layer/src/utils/request-cache.ts';
 
 // Mock env - need to mock this for shouldSkipRpcCall() tests
 jest.mock('@heyclaude/shared-runtime/schemas/env', () => ({
@@ -84,7 +87,9 @@ describe('seo client data functions', () => {
       };
 
       // Mock $queryRawUnsafe - callRpc will unwrap single-element arrays for composite types
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getSEOMetadata('/test-route');
 
@@ -110,7 +115,9 @@ describe('seo client data functions', () => {
         schemas: [{ '@type': 'WebSite', '@context': 'https://schema.org' }],
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getSEOMetadata('/test-route', { includeSchemas: true });
 
@@ -142,7 +149,9 @@ describe('seo client data functions', () => {
         schemas: [],
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getSEOMetadata('/test-route');
 
@@ -161,7 +170,9 @@ describe('seo client data functions', () => {
         schemas: [],
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getSEOMetadata('/test-route');
 
@@ -183,7 +194,9 @@ describe('seo client data functions', () => {
         schemas: [],
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const cache = getRequestCache();
       const cacheBefore = cache.getStats().size;
@@ -221,7 +234,9 @@ describe('seo client data functions', () => {
         schemas: [{ '@type': 'WebSite', '@context': 'https://schema.org' }],
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getSEOMetadataWithSchemas('/test-route');
 
@@ -246,7 +261,9 @@ describe('seo client data functions', () => {
       };
 
       // Mock to return unwrapped metadata (simulating edge case)
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       // getSEOMetadataWithSchemas calls getSEOMetadata with includeSchemas: true
       // which should return wrapped structure, so this should not be null

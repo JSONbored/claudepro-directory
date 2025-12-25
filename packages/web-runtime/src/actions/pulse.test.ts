@@ -102,7 +102,11 @@ jest.mock('../supabase/pgmq-client.ts', () => ({
 }));
 
 // Import test queue utilities for use in tests (after jest.mock())
-import { resetTestPgmqQueue, getTestPgmqQueue, createTestPgmqQueue } from '../supabase/pgmq-client.test';
+import {
+  resetTestPgmqQueue,
+  getTestPgmqQueue,
+  createTestPgmqQueue,
+} from '../supabase/pgmq-client.test';
 
 // DO NOT mock enqueuePulseEventServer - use REAL implementation
 // It will call pgmqSend (mocked to use test queue)
@@ -118,13 +122,13 @@ function setupTestQueue() {
   const testQueue = getTestPgmqQueue() || createTestPgmqQueue();
   const { createPgmqMocks } = require('../supabase/pgmq-client.test');
   const mocks = createPgmqMocks(testQueue);
-  
+
   // Connect mocks to test queue
   mockPgmqSend.mockImplementation(mocks.pgmqSend);
   mockPgmqRead.mockImplementation(mocks.pgmqRead);
   mockPgmqDelete.mockImplementation(mocks.pgmqDelete);
   mockPgmqDeleteBatch.mockImplementation(mocks.pgmqDeleteBatch);
-  
+
   return testQueue;
 }
 
@@ -183,7 +187,7 @@ describe('trackInteractionAction', () => {
       expect(result.data).toBeUndefined(); // Action returns void
       expect(result.serverError).toBeUndefined();
       expect(result.fieldErrors).toBeUndefined();
-      
+
       // Verify event was enqueued to test queue
       const queue = getTestPgmqQueue();
       expect(queue).not.toBeNull();
@@ -313,7 +317,7 @@ describe('trackNewsletterEventAction', () => {
       expect(result.data).toBeUndefined();
       expect(result.serverError).toBeUndefined();
       expect(result.fieldErrors).toBeUndefined();
-      
+
       // Verify event was enqueued to test queue
       const queue = getTestPgmqQueue();
       expect(queue).not.toBeNull();
@@ -405,7 +409,7 @@ describe('trackTerminalCommandAction', () => {
       expect(result.data).toBeUndefined();
       expect(result.serverError).toBeUndefined();
       expect(result.fieldErrors).toBeUndefined();
-      
+
       // Verify event was enqueued to test queue
       const queue = getTestPgmqQueue();
       expect(queue).not.toBeNull();
@@ -532,7 +536,7 @@ describe('trackTerminalFormSubmissionAction', () => {
       expect(result.data).toBeUndefined();
       expect(result.serverError).toBeUndefined();
       expect(result.fieldErrors).toBeUndefined();
-      
+
       // Verify event was enqueued to test queue
       const queue = getTestPgmqQueue();
       expect(queue).not.toBeNull();

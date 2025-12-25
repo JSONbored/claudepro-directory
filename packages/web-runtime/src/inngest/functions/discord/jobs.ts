@@ -116,7 +116,6 @@ export const processDiscordJobsQueue = createInngestFunction(
   },
   { cron: '*/30 * * * *' }, // Every 30 minutes
   async ({ step, logContext }) => {
-
     const discordWebhookUrl = env.DISCORD_JOBS_WEBHOOK_URL;
 
     if (!discordWebhookUrl) {

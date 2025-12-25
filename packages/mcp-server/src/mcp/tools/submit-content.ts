@@ -301,29 +301,35 @@ export async function handleSubmitContent(
       instructions.push(
         'To submit content to Claude Pro Directory, I need to collect some information.\n'
       );
-      
+
       if (missingFields.length > 0) {
         instructions.push('### Missing Required Information\n');
         instructions.push(`I still need the following information to proceed:\n`);
         for (const field of missingFields) {
           switch (field) {
             case 'submission_type':
-              instructions.push(`- **Submission Type** (required): Choose from: agents, mcp, rules, commands, hooks, statuslines, or skills`);
+              instructions.push(
+                `- **Submission Type** (required): Choose from: agents, mcp, rules, commands, hooks, statuslines, or skills`
+              );
               break;
             case 'name':
               instructions.push(`- **Name** (required): The title of your content`);
               break;
             case 'description':
-              instructions.push(`- **Description** (required): A brief description of your content`);
+              instructions.push(
+                `- **Description** (required): A brief description of your content`
+              );
               break;
             case 'author':
               instructions.push(`- **Author** (required): Your name or handle`);
               break;
           }
         }
-        instructions.push(`\n**Please provide the missing information above, and I'll continue with your submission.**\n`);
+        instructions.push(
+          `\n**Please provide the missing information above, and I'll continue with your submission.**\n`
+        );
       }
-      
+
       instructions.push('### Required Information\n');
       instructions.push(
         '- **Submission Type**: agents, mcp, rules, commands, hooks, statuslines, or skills'
@@ -375,7 +381,11 @@ export async function handleSubmitContent(
         appUrl: APP_URL,
         webFormUrl: `${APP_URL}/submit`,
         nextSteps: hasMinimumData
-          ? ['Visit the submission URL', 'Sign in to your account', 'Review and submit your content']
+          ? [
+              'Visit the submission URL',
+              'Sign in to your account',
+              'Review and submit your content',
+            ]
           : [
               'Provide submission type',
               'Provide name and description',

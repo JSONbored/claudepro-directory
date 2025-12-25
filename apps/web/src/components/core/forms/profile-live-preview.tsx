@@ -40,7 +40,7 @@ export function ProfileLivePreview({ profile, slug }: ProfileLivePreviewProps) {
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <p className="font-medium text-sm">Live Preview</p>
+        <p className="text-sm font-medium">Live Preview</p>
         <p className="text-muted-foreground text-xs">How your profile will appear to others</p>
       </CardHeader>
       <CardContent>
@@ -48,13 +48,7 @@ export function ProfileLivePreview({ profile, slug }: ProfileLivePreviewProps) {
           {/* Hero Image */}
           {heroUrl ? (
             <div className="relative h-24 w-full overflow-hidden rounded-lg sm:h-32">
-              <Image
-                src={heroUrl}
-                alt="Hero preview"
-                fill
-                className="object-cover"
-                unoptimized
-              />
+              <Image src={heroUrl} alt="Hero preview" fill className="object-cover" unoptimized />
             </div>
           ) : (
             <div className="bg-muted h-24 w-full rounded-lg sm:h-32" />
@@ -64,7 +58,7 @@ export function ProfileLivePreview({ profile, slug }: ProfileLivePreviewProps) {
           <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-start sm:gap-4">
             {/* Avatar */}
             {avatarUrl ? (
-              <div className="relative h-16 w-16 shrink-0 -mt-8 overflow-hidden rounded-full ring-4 ring-background sm:h-20 sm:w-20 sm:-mt-10">
+              <div className="ring-background relative -mt-8 h-16 w-16 shrink-0 overflow-hidden rounded-full ring-4 sm:-mt-10 sm:h-20 sm:w-20">
                 <Image
                   src={avatarUrl}
                   alt={`${displayName}'s avatar`}
@@ -74,27 +68,27 @@ export function ProfileLivePreview({ profile, slug }: ProfileLivePreviewProps) {
                 />
               </div>
             ) : (
-              <div className="bg-muted -mt-8 flex h-16 w-16 shrink-0 items-center justify-center rounded-full ring-4 ring-background sm:h-20 sm:w-20 sm:-mt-10">
-                <span className="text-xl font-semibold text-muted-foreground sm:text-2xl">
+              <div className="bg-muted ring-background -mt-8 flex h-16 w-16 shrink-0 items-center justify-center rounded-full ring-4 sm:-mt-10 sm:h-20 sm:w-20">
+                <span className="text-muted-foreground text-xl font-semibold sm:text-2xl">
                   {displayName.charAt(0).toUpperCase()}
                 </span>
               </div>
             )}
 
             {/* Profile Info */}
-            <div className="flex-1 min-w-0 pt-0 sm:pt-2">
+            <div className="min-w-0 flex-1 pt-0 sm:pt-2">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-                <h3 className="font-semibold text-base sm:text-lg truncate">{displayName}</h3>
+                <h3 className="truncate text-base font-semibold sm:text-lg">{displayName}</h3>
                 {slug && (
                   <Link
                     href={`/u/${slug}`}
-                    className="text-muted-foreground text-xs sm:text-sm hover:text-accent transition-colors truncate"
+                    className="text-muted-foreground hover:text-accent truncate text-xs transition-colors sm:text-sm"
                   >
                     @{username}
                   </Link>
                 )}
               </div>
-              {work && <p className="text-muted-foreground text-xs sm:text-sm truncate">{work}</p>}
+              {work && <p className="text-muted-foreground truncate text-xs sm:text-sm">{work}</p>}
             </div>
           </div>
 
@@ -111,7 +105,7 @@ export function ProfileLivePreview({ profile, slug }: ProfileLivePreviewProps) {
                   href={website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-accent text-sm hover:underline inline-flex items-center gap-1"
+                  className="text-accent inline-flex items-center gap-1 text-sm hover:underline"
                 >
                   <ExternalLink className="h-3 w-3" />
                   Website
@@ -122,10 +116,9 @@ export function ProfileLivePreview({ profile, slug }: ProfileLivePreviewProps) {
                   href={socialXLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-accent text-sm hover:underline inline-flex items-center gap-1"
+                  className="text-accent inline-flex items-center gap-1 text-sm hover:underline"
                 >
-                  <ExternalLink className="h-3 w-3" />
-                  X / Twitter
+                  <ExternalLink className="h-3 w-3" />X / Twitter
                 </a>
               )}
             </div>
@@ -152,4 +145,3 @@ export function ProfileLivePreview({ profile, slug }: ProfileLivePreviewProps) {
     </Card>
   );
 }
-

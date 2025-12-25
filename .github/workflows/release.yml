@@ -33,7 +33,7 @@ name: Create Release
 on:
   push:
     tags:
-      - 'v*.*.*'  # Matches v1.2.3 format
+      - 'v*.*.*' # Matches v1.2.3 format
   # Manual trigger for easier manual releases (alternative to tag push)
   workflow_dispatch:
     inputs:
@@ -46,18 +46,18 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Required to create releases and tags
-    
+      contents: write # Required to create releases and tags
+
     steps:
       # Checkout first to make composite action files available
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # fetch-depth: 0 needed for changelog generation (requires git history)
-          token: ${{ secrets.GITHUB_TOKEN }}  # Required for tag creation in workflow_dispatch
+          token: ${{ secrets.GITHUB_TOKEN }} # Required for tag creation in workflow_dispatch
       - uses: ./.github/actions/setup
         with:
           skip-checkout: true # Already checked out above
-      
+
       - name: Extract version from tag or input
         id: tag_version
         run: |
@@ -72,7 +72,7 @@ jobs:
             # Tag push: extract from ref
             echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Verify changelog command exists
         run: |
           if ! grep -q '"changelog:generate"' package.json; then
@@ -80,7 +80,7 @@ jobs:
             exit 1
           fi
           echo "✅ changelog:generate command verified in package.json"
-      
+
       - name: Generate changelog for release
         id: changelog
         run: |
@@ -91,8 +91,8 @@ jobs:
             exit 0
           }
           echo "CHANGELOG_GENERATED=true" >> $GITHUB_OUTPUT
-        continue-on-error: true  # Don't fail workflow if changelog generation fails (auto-generated notes are fallback)
-      
+        continue-on-error: true # Don't fail workflow if changelog generation fails (auto-generated notes are fallback)
+
       - name: Verify CHANGELOG.md exists and prepare release body
         id: release_body
         run: |
@@ -112,8 +112,8 @@ jobs:
               echo "BODY_PATH=" >> $GITHUB_OUTPUT
             fi
           fi
-        continue-on-error: true  # Don't fail if CHANGELOG.md is missing (auto-generated notes are fallback)
-      
+        continue-on-error: true # Don't fail if CHANGELOG.md is missing (auto-generated notes are fallback)
+
       - name: Create tag (if workflow_dispatch)
         if: github.event_name == 'workflow_dispatch'
         run: |
@@ -121,7 +121,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a "v${{ steps.tag_version.outputs.VERSION }}" -m "Release v${{ steps.tag_version.outputs.VERSION }}"
           git push origin "v${{ steps.tag_version.outputs.VERSION }}"
-      
+
       - name: Create GitHub Release (with CHANGELOG.md)
         if: steps.release_body.outputs.BODY_PATH != ''
         uses: softprops/action-gh-release@v2
@@ -131,8 +131,8 @@ jobs:
           body_path: ${{ steps.release_body.outputs.BODY_PATH }}
           draft: false
           prerelease: false
-          generate_release_notes: true  # Also generate notes (will be merged with body_path content)
-      
+          generate_release_notes: true # Also generate notes (will be merged with body_path content)
+
       - name: Create GitHub Release (without CHANGELOG.md)
         if: steps.release_body.outputs.BODY_PATH == ''
         uses: softprops/action-gh-release@v2
@@ -142,4 +142,4 @@ jobs:
           # body_path omitted - will use generate_release_notes as primary source
           draft: false
           prerelease: false
-          generate_release_notes: true  # Primary source when CHANGELOG.md is missing or generation failed
+          generate_release_notes: true # Primary source when CHANGELOG.md is missing or generation failed

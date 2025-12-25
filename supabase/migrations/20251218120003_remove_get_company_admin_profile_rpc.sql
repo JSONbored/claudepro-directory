@@ -8,5 +8,4 @@
 --
 -- Function signature: get_company_admin_profile(p_company_id uuid)
 -- Related: CompaniesService.getCompanyAdminProfile uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_company_admin_profile(uuid);
+DROP FUNCTION IF EXISTS public.get_company_admin_profile (uuid);

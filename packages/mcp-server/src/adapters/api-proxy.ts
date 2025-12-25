@@ -152,7 +152,9 @@ export async function convertApiResponseToToolOutput(
 ): Promise<unknown> {
   // toolName parameter reserved for future tool-specific response transformations
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    const error = (await response.json().catch(() => ({ error: 'Unknown error' }))) as {
+      error?: string;
+    };
     throw new Error(`API request failed: ${error.error || response.statusText}`);
   }
 
@@ -192,4 +194,3 @@ export async function executeToolViaApi(
   // Convert response to tool output
   return convertApiResponseToToolOutput(toolName, response);
 }
-

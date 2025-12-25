@@ -203,7 +203,13 @@ function findOldConstantUsage(): DeprecatedUsage[] {
             }
           }
 
-          if (foundConstants.length > 0) {
+          // Whitelist: OG route files use DIMENSIONS for image generation (legitimate use case)
+          const isOGRoute =
+            relPath.includes('/api/og/route.tsx') ||
+            relPath.includes('/seo/og.ts') ||
+            relPath.includes('/seo/generator.ts');
+
+          if (foundConstants.length > 0 && !isOGRoute) {
             usages.push({
               file: relPath,
               type: 'old-constant',

@@ -18,5 +18,4 @@
 -- Note: toggle_content_vote RPC is still used and should NOT be removed
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.get_user_content_vote(text, public.content_category, uuid, text);
+DROP FUNCTION IF EXISTS public.get_user_content_vote (text, public.content_category, uuid, text);

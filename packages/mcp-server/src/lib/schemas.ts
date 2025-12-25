@@ -15,7 +15,7 @@
 // Import zod-openapi for TypeScript type augmentation (enables .meta() OpenAPI support)
 import 'zod-openapi';
 import { z } from 'zod';
-import { CategorySchema } from './types.js';
+import { CategorySchema } from './types.ts';
 
 // =============================================================================
 // Common Patterns
@@ -30,30 +30,17 @@ import { CategorySchema } from './types.js';
  * ```
  */
 export const mcpPaginationSchema = z.object({
-  page: z
-    .number()
-    .int()
-    .min(1)
-    .default(1)
-    .describe('Page number for pagination')
-    .meta({
-      description: 'Page number for pagination',
-      example: 1,
-      minimum: 1,
-    }),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(50)
-    .default(20)
-    .describe('Items per page (max 50)')
-    .meta({
-      description: 'Items per page (max 50)',
-      example: 20,
-      minimum: 1,
-      maximum: 50,
-    }),
+  page: z.number().int().min(1).default(1).describe('Page number for pagination').meta({
+    description: 'Page number for pagination',
+    example: 1,
+    minimum: 1,
+  }),
+  limit: z.number().int().min(1).max(50).default(20).describe('Items per page (max 50)').meta({
+    description: 'Items per page (max 50)',
+    example: 20,
+    minimum: 1,
+    maximum: 50,
+  }),
 });
 
 /**
@@ -96,14 +83,10 @@ export const mcpTagsFilterSchema = z
  * const schema = z.object({ slug: mcpSlugSchema });
  * ```
  */
-export const mcpSlugSchema = z
-  .string()
-  .min(1)
-  .describe('Content slug identifier')
-  .meta({
-    description: 'Content slug identifier',
-    example: 'ai-agent-framework',
-  });
+export const mcpSlugSchema = z.string().min(1).describe('Content slug identifier').meta({
+  description: 'Content slug identifier',
+  example: 'ai-agent-framework',
+});
 
 /**
  * MCP search query schema
@@ -113,14 +96,10 @@ export const mcpSlugSchema = z
  * const schema = z.object({ query: mcpSearchQuerySchema });
  * ```
  */
-export const mcpSearchQuerySchema = z
-  .string()
-  .optional()
-  .describe('Search query string')
-  .meta({
-    description: 'Search query string',
-    example: 'ai agents',
-  });
+export const mcpSearchQuerySchema = z.string().optional().describe('Search query string').meta({
+  description: 'Search query string',
+  example: 'ai agents',
+});
 
 /**
  * MCP limit schema (for tools that only need limit, not page)
@@ -169,16 +148,11 @@ export const mcpPlatformSchema = z
  * const schema = z.object({ github_url: mcpUrlSchema });
  * ```
  */
-export const mcpUrlSchema = z
-  .string()
-  .url()
-  .optional()
-  .describe('Optional URL field')
-  .meta({
-    description: 'Optional URL field',
-    example: 'https://github.com/johndoe/example',
-    format: 'uri',
-  });
+export const mcpUrlSchema = z.string().url().optional().describe('Optional URL field').meta({
+  description: 'Optional URL field',
+  example: 'https://github.com/johndoe/example',
+  format: 'uri',
+});
 
 /**
  * MCP email schema
@@ -188,15 +162,11 @@ export const mcpUrlSchema = z
  * const schema = z.object({ email: mcpEmailSchema });
  * ```
  */
-export const mcpEmailSchema = z
-  .string()
-  .email()
-  .describe('Email address')
-  .meta({
-    description: 'Email address',
-    example: 'user@example.com',
-    format: 'email',
-  });
+export const mcpEmailSchema = z.string().email().describe('Email address').meta({
+  description: 'Email address',
+  example: 'user@example.com',
+  format: 'email',
+});
 
 /**
  * MCP date-time schema (ISO 8601)
@@ -206,15 +176,11 @@ export const mcpEmailSchema = z
  * const schema = z.object({ dateAdded: mcpDateTimeSchema });
  * ```
  */
-export const mcpDateTimeSchema = z
-  .string()
-  .datetime()
-  .describe('ISO 8601 date-time string')
-  .meta({
-    description: 'ISO 8601 date-time string',
-    example: '2024-01-15T10:30:00Z',
-    format: 'date-time',
-  });
+export const mcpDateTimeSchema = z.string().datetime().describe('ISO 8601 date-time string').meta({
+  description: 'ISO 8601 date-time string',
+  example: '2024-01-15T10:30:00Z',
+  format: 'date-time',
+});
 
 /**
  * MCP content item schema (base schema for content items in lists)
@@ -260,12 +226,10 @@ export const mcpPaginationResponseSchema = z.object({
  * const schema = z.object({ usageHints: mcpUsageHintsSchema });
  * ```
  */
-export const mcpUsageHintsSchema = z
-  .array(z.string())
-  .meta({
-    description: 'Usage hints for the AI agent',
-    example: ['Use getContentDetail to get full content', 'Filter by category for better results'],
-  });
+export const mcpUsageHintsSchema = z.array(z.string()).meta({
+  description: 'Usage hints for the AI agent',
+  example: ['Use getContentDetail to get full content', 'Filter by category for better results'],
+});
 
 /**
  * MCP related tools schema
@@ -275,12 +239,10 @@ export const mcpUsageHintsSchema = z
  * const schema = z.object({ relatedTools: mcpRelatedToolsSchema });
  * ```
  */
-export const mcpRelatedToolsSchema = z
-  .array(z.string())
-  .meta({
-    description: 'Related tools that might be useful',
-    example: ['getContentDetail', 'getRelatedContent'],
-  });
+export const mcpRelatedToolsSchema = z.array(z.string()).meta({
+  description: 'Related tools that might be useful',
+  example: ['getContentDetail', 'getRelatedContent'],
+});
 
 // =============================================================================
 // Schema Composition Utilities
@@ -364,4 +326,3 @@ export function createContentListResponseSchema(
 
   return baseSchema;
 }
-

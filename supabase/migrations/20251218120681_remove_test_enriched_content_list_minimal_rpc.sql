@@ -18,5 +18,4 @@
 -- Note: Test functions should not be in production database
 --
 -- Safe to remove: No codebase references found, appears to be test-only
-
-DROP FUNCTION IF EXISTS public.test_enriched_content_list_minimal(public.content_category);
+DROP FUNCTION IF EXISTS public.test_enriched_content_list_minimal (public.content_category);

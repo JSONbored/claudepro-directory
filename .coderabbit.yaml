@@ -112,7 +112,7 @@ reviews:
                      - Unsanitized user input in HTML
                      - Dangerous eval() or Function() usage
                      - SQL/NoSQL injection risks
-                  
+
       - mode: error
         name: Client/Server Boundary Validation
         instructions: |-
@@ -260,7 +260,7 @@ code_generation:
       - path: packages/data-layer/src/services/**/*.ts
         instructions: '          Use vitest for testing framework.           Mock SupabaseClient using vi.mock().           Test RPC error handling, input validation, and return types.           Use @heyclaude/database-types for type assertions.           Test edge cases: empty results, null values, database errors.           Follow the pattern from packages/edge-runtime/src/utils/integrations/resend.test.ts for mocking structure.           Co-locate tests: content.ts → content.test.ts (same directory).           NEVER create test files, summary files, report files, or any files in the repository root directory.           All test files must be co-located with their source files in the same directory.'
       - path: packages/web-runtime/src/actions/**/*.ts
-        instructions: '          Use vitest for testing framework.           Test Zod schema validation (invalid inputs should fail).           Mock authentication context (authedAction vs optionalAuthAction).           Test rate limiting behavior.           Mock data layer services (don''t call real RPCs).           Test error handling and logging.           Verify action metadata is correct.           Mock next/headers and next/cache (already set up in vitest.setup.ts).           Co-locate tests: content.ts → content.test.ts (same directory).           NEVER create test files, summary files, report files, or any files in the repository root directory.           All test files must be co-located with their source files in the same directory.'
+        instructions: "          Use vitest for testing framework.           Test Zod schema validation (invalid inputs should fail).           Mock authentication context (authedAction vs optionalAuthAction).           Test rate limiting behavior.           Mock data layer services (don't call real RPCs).           Test error handling and logging.           Verify action metadata is correct.           Mock next/headers and next/cache (already set up in vitest.setup.ts).           Co-locate tests: content.ts → content.test.ts (same directory).           NEVER create test files, summary files, report files, or any files in the repository root directory.           All test files must be co-located with their source files in the same directory."
       - path: packages/web-runtime/src/rpc/**/*.ts
         instructions: '          Use vitest for testing framework.           Mock SupabaseClient and test error scenarios.           Verify error normalization and logging context.           Test timeout handling if applicable.           Co-locate tests: run-rpc.ts → run-rpc.test.ts (same directory).'
       - path: packages/web-runtime/src/cache/**/*.ts
@@ -270,7 +270,7 @@ code_generation:
       - path: packages/web-runtime/src/data/**/*.ts
         instructions: '          Use vitest for testing framework.           Mock SupabaseClient and data layer services.           Test caching behavior (fetchCached wrapper).           Test error handling and fallback values.           Test input validation and type safety.           Co-locate tests: content.ts → content.test.ts (same directory).           NEVER create test files, summary files, report files, or any files in the repository root directory.           All test files must be co-located with their source files in the same directory.'
       - path: packages/generators/src/commands/**/*.ts
-        instructions: '          Use vitest for testing framework.           Test command-line argument parsing.           Mock file system operations (vi.mock(''fs'')).           Test error handling and user feedback.           Mock external API calls and database operations.           Co-locate tests: mcp-login.ts → mcp-login.test.ts (same directory).'
+        instructions: "          Use vitest for testing framework.           Test command-line argument parsing.           Mock file system operations (vi.mock('fs')).           Test error handling and user feedback.           Mock external API calls and database operations.           Co-locate tests: mcp-login.ts → mcp-login.test.ts (same directory)."
       - path: packages/edge-runtime/src/**/*.ts
         instructions: '          Use vitest for testing framework.           Test Deno-compatible code (no Node.js-specific APIs).           Mock Supabase and external services.           Test error handling and logging.           Follow existing test patterns from packages/edge-runtime/src/utils/integrations/resend.test.ts.           Co-locate tests: resend.ts → resend.test.ts (same directory).'
       - path: packages/shared-runtime/src/**/*.ts

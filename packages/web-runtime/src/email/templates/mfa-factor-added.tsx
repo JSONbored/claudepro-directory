@@ -114,9 +114,7 @@ export function MFAFactorAddedEmail({
 
       <EmailCard>
         <Section style={cardContentSection}>
-          <Text style={introTextStyle}>
-            Hello,
-          </Text>
+          <Text style={introTextStyle}>Hello,</Text>
 
           <Text style={bodyTextStyle}>
             A new two-factor authentication method was successfully added to your account:
@@ -155,12 +153,8 @@ export function MFAFactorAddedEmail({
               <li style={securityListItemStyle}>
                 Change your password if you suspect unauthorized access
               </li>
-              <li style={securityListItemStyle}>
-                Review your recent account activity
-              </li>
-              <li style={securityListItemStyle}>
-                Contact support if you need assistance
-              </li>
+              <li style={securityListItemStyle}>Review your recent account activity</li>
+              <li style={securityListItemStyle}>Contact support if you need assistance</li>
             </ul>
           </Section>
 
@@ -282,4 +276,3 @@ const securityListItemStyle: React.CSSProperties = {
   marginBottom: spacing.sm,
   lineHeight: typography.lineHeight.relaxed,
 };
-

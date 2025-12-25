@@ -86,11 +86,7 @@ describe('account data functions', () => {
   };
 
   // Helper function to seed user data for getUserCompleteData tests
-  function seedUserData(overrides?: {
-    user?: any;
-    jobs?: any[];
-    bookmarks?: any[];
-  }) {
+  function seedUserData(overrides?: { user?: any; jobs?: any[]; bookmarks?: any[] }) {
     const mockUserData = {
       id: 'user-123',
       bookmark_count: 0,
@@ -231,11 +227,11 @@ describe('account data functions', () => {
       // For this test, we'll test error handling by ensuring getUserCompleteData handles errors gracefully
       // The actual error handling is tested in the service layer tests
       // Here we just verify the function returns null on error
-      
+
       // Set up auth but don't seed data - service methods will return empty/null results
       // This test verifies that getUserCompleteData handles service errors gracefully
       const result = await getUserCompleteData('user-123');
-      
+
       // Without seeded data, service methods return empty results, but getUserCompleteData
       // should still return a result object (not null) unless there's an actual error
       // This test is more of an integration test - actual error handling is tested in service tests
@@ -421,33 +417,35 @@ describe('account data functions', () => {
     it('should return dashboard bundle with all components', async () => {
       // Import real getHomepageCategoryIds to verify correct category IDs are used
       const { getHomepageCategoryIds } = await import('./config/category/index.ts');
-      
+
       seedUserData({
         user: { bookmark_count: 5, name: 'Test User', display_name: 'Test User' },
       });
 
       // Mock RPC result for getHomepageOptimized (called by getHomepageData → ContentService)
       // getHomepageData calls ContentService.getHomepageOptimized which calls RPC get_homepage_optimized
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([{
-        featured: [],
-        categories: [
-          {
-            category: 'agents',
-            items: [],
-          },
-          {
-            category: 'mcp',
-            items: [],
-          },
-        ],
-      }]);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        {
+          featured: [],
+          categories: [
+            {
+              category: 'agents',
+              items: [],
+            },
+            {
+              category: 'mcp',
+              items: [],
+            },
+          ],
+        },
+      ]);
 
       const result = await getAccountDashboardBundle('user-123');
 
       expect(result.dashboard).toBeDefined();
       expect(result.library).toBeDefined();
       expect(result.homepage).toBeDefined();
-      
+
       // Verify getHomepageOptimized RPC was called with correct category IDs and limit
       // (getHomepageData uses real getHomepageCategoryIds if not provided)
       // callRpc calls $queryRawUnsafe with: SQL query, ...argValues
@@ -464,15 +462,17 @@ describe('account data functions', () => {
       seedUserData();
 
       // Mock RPC result for getHomepageOptimized
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([{
-        featured: [],
-        categories: [
-          {
-            category: 'custom',
-            items: [],
-          },
-        ],
-      }]);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        {
+          featured: [],
+          categories: [
+            {
+              category: 'custom',
+              items: [],
+            },
+          ],
+        },
+      ]);
 
       const result = await getAccountDashboardBundle('user-123', ['custom']);
 
@@ -494,10 +494,12 @@ describe('account data functions', () => {
       seedUserData();
 
       // Mock RPC result for getHomepageOptimized
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([{
-        featured: [],
-        categories: [],
-      }]);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        {
+          featured: [],
+          categories: [],
+        },
+      ]);
 
       const result = await getAccountDashboardBundle('user-123');
 

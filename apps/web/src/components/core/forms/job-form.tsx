@@ -345,9 +345,9 @@ export function JobForm({
         description: getFormDataStringRequired(formData, 'description'),
         salary: salary || undefined,
         remote: getFormDataBoolean(formData, 'remote'),
-        type: (jobType as unknown) as job_type | null | undefined,
-        workplace: ((workplace || undefined) as unknown) as workplace_type | null | undefined,
-        experience: ((experience || undefined) as unknown) as experience_level | null | undefined,
+        type: jobType as unknown as job_type | null | undefined,
+        workplace: (workplace || undefined) as unknown as workplace_type | null | undefined,
+        experience: (experience || undefined) as unknown as experience_level | null | undefined,
         category: category,
         tags,
         requirements,
@@ -736,7 +736,7 @@ export function JobForm({
             confirmation.
           </p>
 
-          <div className="card-base mt-4 border-primary/30 bg-primary/5 p-4">
+          <div className="card-base border-primary/30 bg-primary/5 mt-4 p-4">
             <div className="flex items-start gap-3">
               <Checkbox
                 id={featuredCheckboxId}
@@ -748,14 +748,12 @@ export function JobForm({
                   htmlFor={featuredCheckboxId}
                   className="flex cursor-pointer items-center gap-2 text-sm font-semibold"
                 >
-                  <Star className="h-4 w-4 text-primary" />
+                  <Star className="text-primary h-4 w-4" />
                   Make this a Featured Listing
                 </Label>
                 <p className="text-muted-foreground mt-1 text-xs">{featuredUpsellDescription}</p>
                 {featuredUpgradeLabel ? (
-                  <p className="text-sm-medium mt-2 text-primary">
-                    {featuredUpgradeLabel}
-                  </p>
+                  <p className="text-sm-medium text-primary mt-2">{featuredUpgradeLabel}</p>
                 ) : null}
               </div>
             </div>

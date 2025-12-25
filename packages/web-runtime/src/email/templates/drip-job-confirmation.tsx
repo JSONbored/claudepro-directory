@@ -44,7 +44,7 @@ export interface JobConfirmationDripEmailProps {
 
 const NEXT_STEPS = [
   'Share on LinkedIn, Twitter, and relevant communities',
-  'Add to your company\'s careers page',
+  "Add to your company's careers page",
   'Consider upgrading to Featured for 3x more views',
 ] as const;
 
@@ -62,15 +62,13 @@ export function JobConfirmationDripEmail({
   const jobUrl = `${baseUrl}/jobs/${jobSlug}`;
 
   return (
-    <BaseLayout
-      preview={`✅ Your Job is Live! - ${jobTitle}`}
-      utm={utm}
-    >
+    <BaseLayout preview={`✅ Your Job is Live! - ${jobTitle}`} utm={utm}>
       <Section style={contentSectionStyle}>
         <Text style={titleStyle}>✅ Your Job is Live!</Text>
         <Text style={greetingStyle}>Hi {name},</Text>
         <Text style={paragraphStyle}>
-          Great news! Your job posting <strong>"{jobTitle}"</strong> is now live on Claude Pro Directory.
+          Great news! Your job posting <strong>"{jobTitle}"</strong> is now live on Claude Pro
+          Directory.
         </Text>
 
         <EmailCard variant="default" style={nextStepsCardStyle}>
@@ -97,9 +95,7 @@ export function JobConfirmationDripEmail({
           </Link>
         </div>
 
-        <Text style={helpTextStyle}>
-          Questions? Just reply to this email.
-        </Text>
+        <Text style={helpTextStyle}>Questions? Just reply to this email.</Text>
       </Section>
 
       <EmailFooterNote lines={buildSubscriptionFooter('weeklyDigest', { email })} />
@@ -188,4 +184,3 @@ const helpTextStyle: React.CSSProperties = {
   margin: `${spacing.lg} 0 0`,
   textAlign: 'center',
 };
-

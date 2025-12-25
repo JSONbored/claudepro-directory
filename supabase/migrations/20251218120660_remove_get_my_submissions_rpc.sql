@@ -16,5 +16,4 @@
 -- - Not found in apps/web/src/app/ (no page usage)
 --
 -- Safe to remove: No codebase references found
-
-DROP FUNCTION IF EXISTS public.get_my_submissions(integer, integer);
+DROP FUNCTION IF EXISTS public.get_my_submissions (integer, integer);

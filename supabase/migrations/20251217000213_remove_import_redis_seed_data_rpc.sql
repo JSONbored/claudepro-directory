@@ -5,5 +5,4 @@
 --
 -- Description: Remove import_redis_seed_data RPC function - Not found in codebase, only in generated types
 -- Function signature: import_redis_seed_data(redis_data jsonb)
-
-DROP FUNCTION IF EXISTS public.import_redis_seed_data(jsonb);
+DROP FUNCTION IF EXISTS public.import_redis_seed_data (jsonb);

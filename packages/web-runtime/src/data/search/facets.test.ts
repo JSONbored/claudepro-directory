@@ -24,7 +24,10 @@ jest.mock('next/cache', () => ({
 // Import real cache utilities for proper cache testing
 // Note: Deep relative imports are acceptable for test utilities to avoid circular dependencies
 // Path: packages/web-runtime/src/data/search -> packages/data-layer/src/utils = ../../../../data-layer/src/utils
-import { clearRequestCache, getRequestCache } from '../../../../data-layer/src/utils/request-cache.ts';
+import {
+  clearRequestCache,
+  getRequestCache,
+} from '../../../../data-layer/src/utils/request-cache.ts';
 
 // Don't mock service-factory - use real implementation
 // Services will use Prismocker via __mocks__/@prisma/client.ts
@@ -41,7 +44,10 @@ function createTrendingSearch(overrides: {
 }): any {
   return {
     search_query: overrides.search_query,
-    search_count: typeof overrides.search_count === 'bigint' ? overrides.search_count : BigInt(overrides.search_count),
+    search_count:
+      typeof overrides.search_count === 'bigint'
+        ? overrides.search_count
+        : BigInt(overrides.search_count),
   };
 }
 
@@ -95,7 +101,9 @@ describe('search/facets', () => {
       ];
 
       // Mock $queryRawUnsafe to return RPC result
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockRpcResult as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(
+        mockRpcResult as any
+      );
 
       const result = await getSearchFacets();
 
@@ -150,7 +158,9 @@ describe('search/facets', () => {
       ];
 
       // Mock $queryRawUnsafe - callRpc will return the array directly (doesn't unwrap arrays of objects)
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockRpcResult as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(
+        mockRpcResult as any
+      );
 
       const result = await getSearchFacets();
 
@@ -172,7 +182,9 @@ describe('search/facets', () => {
         },
       ];
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockRpcResult as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(
+        mockRpcResult as any
+      );
 
       const result = await getSearchFacets();
 
@@ -196,7 +208,9 @@ describe('search/facets', () => {
         },
       ];
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockRpcResult as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(
+        mockRpcResult as any
+      );
 
       const cache = getRequestCache();
       const cacheBefore = cache.getStats().size;

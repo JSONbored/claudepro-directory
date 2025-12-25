@@ -94,4 +94,3 @@ export const DEFAULT_SERVER_ERROR_MESSAGE = 'Something went wrong';
 // Note: The real safe-action.ts will call .use() on these, so we need to export
 // the base clients that can be chained
 export { authedAction, optionalAuthAction, rateLimitedAction };
-

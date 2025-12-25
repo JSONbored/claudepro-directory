@@ -90,7 +90,10 @@ export function createNodeServer(config: NodeServerConfig = {}): NodeServer {
       // Handle CORS
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Mcp-Session-Id, MCP-Protocol-Version');
+      res.setHeader(
+        'Access-Control-Allow-Headers',
+        'Content-Type, Authorization, Mcp-Session-Id, MCP-Protocol-Version'
+      );
 
       // Handle OPTIONS (CORS preflight)
       if (req.method === 'OPTIONS') {
@@ -204,4 +207,3 @@ export function createNodeServer(config: NodeServerConfig = {}): NodeServer {
     },
   };
 }
-

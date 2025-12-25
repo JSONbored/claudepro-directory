@@ -234,14 +234,14 @@ export const getContent = actionClient
 
 ## Configuration Options
 
-| Option             | Type     | Default                             | Description                                                  |
-| ------------------ | -------- | ----------------------------------- | ------------------------------------------------------------ |
-| `output`           | string   | `./generated/prisma/postgres-types` | Output directory for generated files                         |
-| `schema`           | string   | `"public"`                          | PostgreSQL schema to introspect                              |
-| `generateTypes`    | boolean  | `true`                              | Generate TypeScript types                                    |
-| `generateZod`      | boolean  | `true`                              | Generate Zod schemas                                         |
-| `includeFunctions` | string[] | `undefined`                         | Include only functions matching patterns (e.g., `["get_*"]`) |
-| `excludeFunctions` | string[] | `undefined`                         | Exclude functions matching patterns (e.g., `["internal_*"]`) |
+| Option             | Type      | Default                             | Description                                                  |
+| ------------------ | --------- | ----------------------------------- | ------------------------------------------------------------ |
+| `output`           | string    | `./generated/prisma/postgres-types` | Output directory for generated files                         |
+| `schema`           | string    | `"public"`                          | PostgreSQL schema to introspect                              |
+| `generateTypes`    | boolean   | `true`                              | Generate TypeScript types                                    |
+| `generateZod`      | boolean   | `true`                              | Generate Zod schemas                                         |
+| `includeFunctions` | string\[] | `undefined`                         | Include only functions matching patterns (e.g., `["get_*"]`) |
+| `excludeFunctions` | string\[] | `undefined`                         | Exclude functions matching patterns (e.g., `["internal_*"]`) |
 
 ## Troubleshooting
 
@@ -289,12 +289,12 @@ The generator leverages existing utilities from the generators toolkit:
 
 ## Future Enhancements
 
-- [ ] Support for multiple schemas
-- [ ] Incremental generation (only regenerate changed types)
-- [ ] Type guards generation
-- [ ] Validation helpers
-- [ ] API documentation generation
-- [ ] Custom type mappings via config
+- \[ ] Support for multiple schemas
+- \[ ] Incremental generation (only regenerate changed types)
+- \[ ] Type guards generation
+- \[ ] Validation helpers
+- \[ ] API documentation generation
+- \[ ] Custom type mappings via config
 
 ## License
 

@@ -33,5 +33,4 @@
 -- - packages/data-layer/src/services/quiz.ts: Converted getQuizConfiguration() to use Prisma
 -- - Uses Prisma include for nested options (better than ARRAY_AGG)
 -- - Return type: Promise<GetQuizConfigurationReturns> (local type matching RPC structure)
-
-DROP FUNCTION IF EXISTS public.get_quiz_configuration();
+DROP FUNCTION IF EXISTS public.get_quiz_configuration ();

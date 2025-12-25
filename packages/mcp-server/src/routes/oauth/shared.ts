@@ -51,18 +51,15 @@ export function jsonError(
   status: 400 | 500 = 400,
   allowedMethods: 'GET, OPTIONS' | 'POST, OPTIONS' = 'POST, OPTIONS'
 ): Response {
-  return new Response(
-    JSON.stringify({ error, error_description: description }),
-    {
-      status,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': allowedMethods,
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
-    }
-  );
+  return new Response(JSON.stringify({ error, error_description: description }), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': allowedMethods,
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
 }
 
 /**
@@ -99,7 +96,11 @@ export async function handleOAuthTokenShared(
 
     // Validate required parameters
     if (!grantType || grantType !== 'authorization_code') {
-      return jsonError('unsupported_grant_type', 'Only authorization_code grant type is supported', 400);
+      return jsonError(
+        'unsupported_grant_type',
+        'Only authorization_code grant type is supported',
+        400
+      );
     }
 
     if (!code || !redirectUri || !clientId || !codeVerifier) {
@@ -109,7 +110,11 @@ export async function handleOAuthTokenShared(
         clientId: !!clientId,
         codeVerifier: !!codeVerifier,
       });
-      return jsonError('invalid_request', 'Missing required parameters: code, redirect_uri, client_id, code_verifier', 400);
+      return jsonError(
+        'invalid_request',
+        'Missing required parameters: code, redirect_uri, client_id, code_verifier',
+        400
+      );
     }
 
     // Build Supabase Auth token endpoint URL
@@ -148,8 +153,8 @@ export async function handleOAuthTokenShared(
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         // Forward any additional headers from Supabase
         ...Object.fromEntries(
-          Array.from(tokenResponse.headers.entries()).filter(([key]) =>
-            !['content-encoding', 'transfer-encoding'].includes(key.toLowerCase())
+          Array.from(tokenResponse.headers.entries()).filter(
+            ([key]) => !['content-encoding', 'transfer-encoding'].includes(key.toLowerCase())
           )
         ),
       },
@@ -195,7 +200,11 @@ export async function handleOAuthAuthorizeShared(
 
     // Validate required parameters
     if (!(clientId && responseType && redirectUri)) {
-      log.warn('Missing required OAuth parameters', { clientId: !!clientId, responseType, redirectUri: !!redirectUri });
+      log.warn('Missing required OAuth parameters', {
+        clientId: !!clientId,
+        responseType,
+        redirectUri: !!redirectUri,
+      });
       return jsonError('invalid_request', 'Missing required OAuth parameters', 400, 'GET, OPTIONS');
     }
 
@@ -227,7 +236,12 @@ export async function handleOAuthAuthorizeShared(
     }
 
     if (codeChallengeMethod !== 'S256') {
-      return jsonError('invalid_request', 'Only S256 code challenge method is supported', 400, 'GET, OPTIONS');
+      return jsonError(
+        'invalid_request',
+        'Only S256 code challenge method is supported',
+        400,
+        'GET, OPTIONS'
+      );
     }
 
     // Build Supabase Auth OAuth 2.1 authorization URL
@@ -249,14 +263,7 @@ export async function handleOAuthAuthorizeShared(
     // Supabase Auth also validates, but we add an extra layer
     if (scope) {
       const requestedScopes = scope.split(' ').filter((s) => s.length > 0);
-      const supportedScopes = [
-        'openid',
-        'email',
-        'profile',
-        'phone',
-        'mcp:tools',
-        'mcp:resources',
-      ];
+      const supportedScopes = ['openid', 'email', 'profile', 'phone', 'mcp:tools', 'mcp:resources'];
 
       // Check if all requested scopes are supported
       const invalidScopes = requestedScopes.filter((s) => !supportedScopes.includes(s));
@@ -279,7 +286,9 @@ export async function handleOAuthAuthorizeShared(
     supabaseAuthUrlObj.searchParams.set('code_challenge', sanitizeString(codeChallenge));
     supabaseAuthUrlObj.searchParams.set('code_challenge_method', codeChallengeMethod);
 
-    log.info('Redirecting to Supabase Auth OAuth 2.1', { supabaseAuthUrl: supabaseAuthUrlObj.toString() });
+    log.info('Redirecting to Supabase Auth OAuth 2.1', {
+      supabaseAuthUrl: supabaseAuthUrlObj.toString(),
+    });
 
     // Redirect to Supabase Auth with all parameters including resource
     return Response.redirect(supabaseAuthUrlObj.toString(), 302);
@@ -347,9 +356,9 @@ export async function handleOAuthRevokeShared(
 
     log.info('Forwarding token revocation to Supabase Auth', { revokeUrl });
 
-    const revokeResponse = await fetch(revokeRequest);
-
     // RFC 7009: Always return 200, even if token doesn't exist
+    // We don't need to check the response - just forward the request
+    await fetch(revokeRequest);
     // This prevents token enumeration attacks
     return new Response(null, {
       status: 200,
@@ -447,8 +456,8 @@ export async function handleOAuthIntrospectShared(
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         // Forward any additional headers from Supabase
         ...Object.fromEntries(
-          Array.from(introspectResponse.headers.entries()).filter(([key]) =>
-            !['content-encoding', 'transfer-encoding'].includes(key.toLowerCase())
+          Array.from(introspectResponse.headers.entries()).filter(
+            ([key]) => !['content-encoding', 'transfer-encoding'].includes(key.toLowerCase())
           )
         ),
       },
@@ -488,25 +497,44 @@ export async function handleOAuthRegisterShared(
     }
 
     // Parse request body (JSON for DCR per RFC 7591)
-    const registrationData = await request.json();
+    const registrationData = (await request.json()) as {
+      redirect_uris?: unknown;
+      [key: string]: unknown;
+    };
 
     // Validate required fields per RFC 7591
-    if (!registrationData.redirect_uris || !Array.isArray(registrationData.redirect_uris) || registrationData.redirect_uris.length === 0) {
+    if (
+      !registrationData.redirect_uris ||
+      !Array.isArray(registrationData.redirect_uris) ||
+      registrationData.redirect_uris.length === 0
+    ) {
       return jsonError('invalid_client_metadata', 'Missing or invalid redirect_uris', 400);
     }
 
     // Validate each redirect_uri is a valid URL format
     for (const redirectUri of registrationData.redirect_uris) {
       if (typeof redirectUri !== 'string') {
-        return jsonError('invalid_client_metadata', 'redirect_uris must be an array of strings', 400);
+        return jsonError(
+          'invalid_client_metadata',
+          'redirect_uris must be an array of strings',
+          400
+        );
       }
       try {
         const redirectUrl = new URL(redirectUri);
         if (!['http:', 'https:'].includes(redirectUrl.protocol)) {
-          return jsonError('invalid_client_metadata', 'Invalid redirect_uri protocol (must be http or https)', 400);
+          return jsonError(
+            'invalid_client_metadata',
+            'Invalid redirect_uri protocol (must be http or https)',
+            400
+          );
         }
       } catch {
-        return jsonError('invalid_client_metadata', `Invalid redirect_uri format: ${redirectUri}`, 400);
+        return jsonError(
+          'invalid_client_metadata',
+          `Invalid redirect_uri format: ${redirectUri}`,
+          400
+        );
       }
     }
 
@@ -541,8 +569,8 @@ export async function handleOAuthRegisterShared(
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         // Forward any additional headers from Supabase
         ...Object.fromEntries(
-          Array.from(registerResponse.headers.entries()).filter(([key]) =>
-            !['content-encoding', 'transfer-encoding'].includes(key.toLowerCase())
+          Array.from(registerResponse.headers.entries()).filter(
+            ([key]) => !['content-encoding', 'transfer-encoding'].includes(key.toLowerCase())
           )
         ),
       },
@@ -553,4 +581,3 @@ export async function handleOAuthRegisterShared(
     return jsonError('server_error', 'Internal server error', 500);
   }
 }
-

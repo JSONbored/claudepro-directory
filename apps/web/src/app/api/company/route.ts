@@ -25,7 +25,9 @@ import {
   errorResponseSchema,
 } from '@heyclaude/web-runtime/api/response-schemas';
 import {
-  createCachedApiRoute, createOptionsHandler as createApiOptionsHandler, type RouteHandlerContext,
+  createCachedApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/api/route-factory';
 import { slugSchema } from '@heyclaude/web-runtime/api/schemas';
 import { getVersionedRoute } from '@heyclaude/web-runtime/api/versioning';
@@ -122,7 +124,10 @@ export const GET = createCachedApiRoute({
     ctx: RouteHandlerContext<{ slug: string }>
   ) => {
     const { logger } = ctx;
-    const profile = result as null | undefined | { company: unknown | null; [key: string]: unknown };
+    const profile = result as
+      | null
+      | undefined
+      | { company: unknown | null; [key: string]: unknown };
 
     // Check if profile exists or if company is null
     // getCompanyProfile returns { company: null, active_jobs: null, stats: null } when not found

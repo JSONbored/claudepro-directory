@@ -37,17 +37,17 @@ function calculateCompletion(profile: ProfileCompletionProgressProps['profile'])
     { key: 'work', label: 'Work', value: profile.work },
     { key: 'website', label: 'Website', value: profile.website },
     { key: 'social_x_link', label: 'Social Link', value: profile.social_x_link },
-    { key: 'interests', label: 'Interests', value: profile.interests?.length ? 'filled' : undefined },
+    {
+      key: 'interests',
+      label: 'Interests',
+      value: profile.interests?.length ? 'filled' : undefined,
+    },
     { key: 'avatarUrl', label: 'Avatar', value: profile.avatarUrl },
     { key: 'heroUrl', label: 'Hero Image', value: profile.heroUrl },
   ];
 
-  const completedFields = fields
-    .filter((field) => field.value)
-    .map((field) => field.label);
-  const missingFields = fields
-    .filter((field) => !field.value)
-    .map((field) => field.label);
+  const completedFields = fields.filter((field) => field.value).map((field) => field.label);
+  const missingFields = fields.filter((field) => !field.value).map((field) => field.label);
 
   const percentage = Math.round((completedFields.length / fields.length) * 100);
 
@@ -61,7 +61,7 @@ export function ProfileCompletionProgress({ profile }: ProfileCompletionProgress
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <p className="font-medium text-sm">Profile Completion</p>
+          <p className="text-sm font-medium">Profile Completion</p>
           <p className="text-muted-foreground text-xs">{percentage}% complete</p>
         </div>
         <div className="text-2xl font-bold">{percentage}%</div>
@@ -74,22 +74,22 @@ export function ProfileCompletionProgress({ profile }: ProfileCompletionProgress
       </div>
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div>
-          <p className="font-medium mb-1 text-muted-foreground">Completed</p>
+          <p className="text-muted-foreground mb-1 font-medium">Completed</p>
           <div className="space-y-1">
             {completedFields.map((field) => (
               <div key={field} className="flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3 text-success" />
+                <CheckCircle2 className="text-success h-3 w-3" />
                 <span className="text-muted-foreground">{field}</span>
               </div>
             ))}
           </div>
         </div>
         <div>
-          <p className="font-medium mb-1 text-muted-foreground">Missing</p>
+          <p className="text-muted-foreground mb-1 font-medium">Missing</p>
           <div className="space-y-1">
             {missingFields.map((field) => (
               <div key={field} className="flex items-center gap-1">
-                <Circle className="h-3 w-3 text-muted-foreground" />
+                <Circle className="text-muted-foreground h-3 w-3" />
                 <span className="text-muted-foreground">{field}</span>
               </div>
             ))}
@@ -99,4 +99,3 @@ export function ProfileCompletionProgress({ profile }: ProfileCompletionProgress
     </div>
   );
 }
-

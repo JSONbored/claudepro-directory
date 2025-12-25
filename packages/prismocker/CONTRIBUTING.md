@@ -6,18 +6,20 @@ Thank you for your interest in contributing to `prismocker`! This document provi
 
 ### Prerequisites
 
-- Node.js 18+ 
-- pnpm 10+ (or npm/yarn)
+* Node.js 18+
+* pnpm 10+ (or npm/yarn)
 
 ### Setup Steps
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/JSONbored/prismocker.git
    cd prismocker
    ```
 
 2. **Install dependencies:**
+
    ```bash
    pnpm install
    ```
@@ -65,10 +67,10 @@ pnpm type-check
 
 ## Code Style
 
-- **TypeScript:** Use strict mode, proper types (no `any` unless absolutely necessary)
-- **Formatting:** Code should be formatted consistently (Prettier recommended)
-- **Naming:** Use clear, descriptive names
-- **Comments:** Add JSDoc comments for public APIs
+* **TypeScript:** Use strict mode, proper types (no `any` unless absolutely necessary)
+* **Formatting:** Code should be formatted consistently (Prettier recommended)
+* **Naming:** Use clear, descriptive names
+* **Comments:** Add JSDoc comments for public APIs
 
 ## Commit Messages
 
@@ -83,15 +85,17 @@ chore: update dependencies
 ```
 
 **Types:**
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `test`: Test additions/changes
-- `chore`: Maintenance tasks (dependencies, tooling, etc.)
+
+* `feat`: New feature
+* `fix`: Bug fix
+* `docs`: Documentation changes
+* `test`: Test additions/changes
+* `chore`: Maintenance tasks (dependencies, tooling, etc.)
 
 ## Pull Request Process
 
 1. **Create a branch:**
+
    ```bash
    git checkout -b feat/my-feature
    # or
@@ -99,11 +103,12 @@ chore: update dependencies
    ```
 
 2. **Make your changes:**
-   - Write code
-   - Add/update tests
-   - Update documentation if needed
+   * Write code
+   * Add/update tests
+   * Update documentation if needed
 
 3. **Verify your changes:**
+
    ```bash
    pnpm type-check
    pnpm build
@@ -111,6 +116,7 @@ chore: update dependencies
    ```
 
 4. **Commit your changes:**
+
    ```bash
    git add .
    git commit -m "feat: add my new feature"
@@ -124,16 +130,16 @@ chore: update dependencies
 
 ## Testing Requirements
 
-- **All new features must include tests**
-- **All bug fixes must include regression tests**
-- **Tests should be comprehensive and cover edge cases**
-- **All tests must pass before PR is merged**
+* **All new features must include tests**
+* **All bug fixes must include regression tests**
+* **Tests should be comprehensive and cover edge cases**
+* **All tests must pass before PR is merged**
 
 ## Documentation
 
-- **Update README.md** if adding new features or changing API
-- **Add examples** if introducing new patterns
-- **Update CHANGELOG.md** for user-facing changes
+* **Update README.md** if adding new features or changing API
+* **Add examples** if introducing new patterns
+* **Update CHANGELOG.md** for user-facing changes
 
 ## Questions?
 
@@ -142,4 +148,3 @@ Feel free to open an issue for questions or discussions!
 ## Code of Conduct
 
 Be respectful, inclusive, and constructive. We're all here to build something great together.
-

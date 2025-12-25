@@ -227,7 +227,9 @@ export function createInngestFunction<TReturn = unknown>(
   if (onFailureHeartbeat) {
     functionConfig['onFailure'] = async ({ event, error }: { event: unknown; error: unknown }) => {
       // Extract event data for context
-      const eventRecord = event as { data?: { type?: string; action?: string; eventType?: string } } | undefined;
+      const eventRecord = event as
+        | { data?: { type?: string; action?: string; eventType?: string } }
+        | undefined;
       const eventData = eventRecord?.data;
       const context: { functionName?: string; eventType?: string; error?: string } = {
         functionName: name,
@@ -279,7 +281,10 @@ export function createInngestFunction<TReturn = unknown>(
 
       // Log function start (if enabled)
       if (enableStartLogging) {
-        logger.info({ ...logContext, eventId: eventBase.id, eventName: eventBase.name }, `${name} started`);
+        logger.info(
+          { ...logContext, eventId: eventBase.id, eventName: eventBase.name },
+          `${name} started`
+        );
       }
 
       try {
@@ -303,7 +308,12 @@ export function createInngestFunction<TReturn = unknown>(
           );
 
           // Send cron success heartbeat if configured and trigger is cron
-          if (cronSuccessHeartbeat && typeof trigger === 'object' && trigger !== null && 'cron' in trigger) {
+          if (
+            cronSuccessHeartbeat &&
+            typeof trigger === 'object' &&
+            trigger !== null &&
+            'cron' in trigger
+          ) {
             sendCronSuccessHeartbeat(cronSuccessHeartbeat, {
               functionName: name,
               result,

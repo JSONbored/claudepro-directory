@@ -63,10 +63,7 @@ export function getNumberEnv(env: RuntimeEnv, key: string, fallback?: number): n
 export function requireEnvVar(env: RuntimeEnv, key: string, message?: string): string {
   const value = getEnvVar(env, key);
   if (!value) {
-    throw new Error(
-      message ?? `Environment variable ${key} is required`
-    );
+    throw new Error(message ?? `Environment variable ${key} is required`);
   }
   return value;
 }
-

@@ -93,7 +93,6 @@ export const processChangelogNotifyQueue = createInngestFunction(
   },
   { cron: '*/30 * * * *' }, // Every 30 minutes
   async ({ step, logContext }) => {
-
     // Step 1: Read messages from queue
     const messages = await step.run(
       'read-queue',
@@ -281,7 +280,10 @@ export const processChangelogNotifyQueue = createInngestFunction(
                   'Changelog emails sent to subscribers'
                 );
               } else {
-                logger.info({ ...logContext, slug: job.slug }, 'No subscribers to notify via email');
+                logger.info(
+                  { ...logContext, slug: job.slug },
+                  'No subscribers to notify via email'
+                );
               }
             } catch (emailError) {
               const normalized = normalizeError(emailError, 'Changelog email send failed');

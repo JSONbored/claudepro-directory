@@ -10,12 +10,10 @@ plugins:
       ref: v1.7.4
       uri: https://github.com/trunk-io/plugins
     # Custom plugins for knip, madge, ts-prune, ast-grep
-    # TODO: After committing .trunk/plugins/custom/ to GitHub, update the URI below to:
-    # uri: https://github.com/YOUR_USERNAME/YOUR_REPO (or the actual GitHub URL)
-    # For now using local path - will work once committed to GitHub
+    # Plugin is in the same repository at .trunk/plugins/custom/
+    # Using 'local' field to reference plugin from local path (uses current branch automatically)
     - id: custom
-      ref: main
-      uri: file://.trunk/plugins/custom
+      local: .trunk/plugins/custom
 # Many linters and tools depend on runtimes - configure them here. (https://docs.trunk.io/runtimes)
 runtimes:
   enabled:
@@ -51,10 +49,406 @@ lint:
     - taplo@0.10.0
     - trufflehog@3.92.4
     - yamllint@1.37.1
+    # Custom plugins from .trunk/plugins/custom/
+    - knip
+    - madge
+    - ts-prune
+    - ast-grep
+    - jest
+    - playwright
+    - depcheck
+    - skott
+    - source-map-explorer
+    - lighthouse
+    - knip-design-system
 actions:
   disabled:
     - trunk-announce
-    - trunk-check-pre-push
-    - trunk-fmt-pre-commit
+    # Enable Trunk's built-in hooks for linting/formatting (replaces lefthook)
+    # - trunk-check-pre-push  # Enable for pre-push linting checks
+    # - trunk-fmt-pre-commit  # Enable for pre-commit formatting
   enabled:
     - trunk-upgrade-available
+    # Custom actions for automatic type checking and generation
+    - type-check-on-change
+    - prisma-generate-on-change
+    - openapi-generate-on-change
+    - generate-service-worker-on-change
+    - generate-readme-on-change
+    - sync-db-on-schema-change
+    # Blocking pre-commit hooks (migrated from lefthook)
+    # Only type-check and secrets-scan are blocking (user requirement)
+    - infisical-secrets-scan-pre-commit
+    - type-check-pre-commit
+    # Blocking pre-push hooks (migrated from lefthook)
+    # Only type-check and secrets-scan are blocking (user requirement)
+    - infisical-secrets-scan-pre-push
+    - type-check-pre-push
+    # Non-blocking pre-commit hooks (migrated from lefthook)
+    # These provide warnings but don't block commits
+    - large-files-pre-commit
+    # Non-blocking validation hooks (migrated from lefthook)
+    # These validate but don't block (user preference: only type-check and secrets-scan block)
+    - prisma-validate-pre-commit
+    - db-types-validate-pre-commit
+    - generated-files-validate-pre-commit
+    - openapi-validate-pre-commit
+    # Post-merge/post-checkout hooks (migrated from lefthook)
+    # Auto-install dependencies and sync database types
+    - deps-install-post-merge
+    - db-types-sync-post-merge
+    - deps-check-post-checkout
+  definitions:
+    # TypeScript type checking - runs automatically when TypeScript files change
+    # Fails if type errors exist (blocks commits naturally)
+    - id: type-check-on-change
+      triggers:
+        - files: ['**/*.{ts,tsx}']
+      run: pnpm type-check:build
+      runtime: node
+
+    # Prisma generate - runs automatically when Prisma schema changes
+    # Auto-generates Prisma types when schema.prisma changes
+    - id: prisma-generate-on-change
+      triggers:
+        - files: ['prisma/schema.prisma']
+      run: pnpm prisma:generate:exec
+      runtime: node
+
+    # OpenAPI generation - runs automatically when OpenAPI-related files change
+    # Covers all 3 OpenAPI generation commands:
+    # 1. generate:openapi - Main OpenAPI spec from Next.js API routes
+    # 2. generate:api-client - API client from OpenAPI spec
+    # 3. build:mcpb - MCPB packages (includes MCP OpenAPI generation)
+    - id: openapi-generate-on-change
+      triggers:
+        - files:
+            - '**/*openapi*.{yaml,yml,json}'
+            - 'packages/generators/src/commands/generate-openapi.ts'
+            - 'packages/generators/src/commands/generate-mcp-openapi.ts'
+            - 'packages/generators/src/commands/generate-api-client.ts'
+            - 'packages/generators/src/commands/generate-mcpb-packages.ts'
+            - 'apps/web/src/app/api/**/route.ts' # API route changes trigger OpenAPI regen
+      run: infisical run --env=dev -- pnpm generate:openapi && infisical run --env=dev -- pnpm generate:api-client && infisical run --env=dev -- pnpm build:mcpb
+      runtime: node
+
+    # Service worker generation - runs automatically when category/security config changes
+    # Auto-regenerates service worker when categories or security config changes
+    - id: generate-service-worker-on-change
+      triggers:
+        - files:
+            - 'packages/web-runtime/src/data/config/category.ts'
+            - 'packages/shared-runtime/src/schemas/env.ts'
+            - 'package.json'
+      run: pnpm generate:service-worker:exec
+      runtime: node
+
+    # README generation - runs automatically when schema or template changes
+    # Auto-updates README when database schema or README template changes
+    - id: generate-readme-on-change
+      triggers:
+        - files:
+            - 'prisma/schema.prisma'
+            - 'packages/generators/src/utils/readme-builder.ts'
+            - 'packages/generators/src/commands/generate-readme.ts'
+      run: infisical run --env=dev -- pnpm generate:readme:exec
+      runtime: node
+
+    # Database sync - runs automatically when schema or migrations change
+    # Auto-syncs database when schema.prisma or migrations change
+    - id: sync-db-on-schema-change
+      triggers:
+        - files:
+            - 'prisma/schema.prisma'
+            - 'supabase/migrations/**/*.sql'
+      run: infisical run --env=dev -- pnpm sync:db:exec
+      runtime: node
+
+    # ============================================================================
+    # BLOCKING PRE-COMMIT HOOKS (migrated from lefthook)
+    # These block commits if they fail (security + correctness)
+    # ============================================================================
+
+    # Infisical secrets scan - pre-commit (BLOCKING)
+    # Scans staged files for secrets using Infisical
+    # Blocks commits if secrets are detected (security critical)
+    - id: infisical-secrets-scan-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+      run: |
+        if ! command -v infisical >/dev/null 2>&1; then
+          echo "⚠️  Infisical CLI not found - secrets scanning skipped"
+          exit 0
+        fi
+        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || echo "")
+        if [ -z "$STAGED_FILES" ]; then
+          exit 0
+        fi
+        if perl -e 'alarm 30; exec @ARGV' infisical scan git-changes --staged --silent --redact >/dev/null 2>&1; then
+          echo "✅ Secrets scan passed"
+          exit 0
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "⏱️  Secrets scan timed out (>30s) - proceeding"
+            exit 0
+          else
+            echo "❌ SECURITY ALERT: Secrets detected in staged files!"
+            echo "   💡 Remove secrets and use Infisical env vars instead"
+            echo "   🔍 Run: infisical scan git-changes --staged --verbose"
+            exit 1
+          fi
+        fi
+
+    # Type check - pre-commit (BLOCKING)
+    # Runs type-check:build on staged TS files
+    # Blocks commits if type errors exist (catches errors early)
+    - id: type-check-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+      run: |
+        STAGED_TS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx)$' || echo "")
+        if [ -z "$STAGED_TS" ]; then
+          exit 0
+        fi
+        pnpm type-check:build
+
+    # ============================================================================
+    # NON-BLOCKING PRE-COMMIT HOOKS (migrated from lefthook)
+    # These provide warnings but don't block commits
+    # ============================================================================
+
+    # Large files check - pre-commit (NON-BLOCKING, informational)
+    # Checks staged files for size
+    # Warns about large files but doesn't block (user preference: only type-check and secrets-scan block)
+    - id: large-files-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+      run: |
+        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || echo "")
+        if [ -z "$STAGED_FILES" ]; then
+          exit 0
+        fi
+        LARGE_FILES=""
+        for file in $STAGED_FILES; do
+          if [ ! -f "$file" ]; then
+            continue
+          fi
+          SIZE=$(stat -f "%z" "$file" 2>/dev/null || stat -c "%s" "$file" 2>/dev/null || echo "0")
+          if [ "$SIZE" -gt 10485760 ]; then
+            SIZE_MB=$((SIZE / 1048576))
+            LARGE_FILES="$LARGE_FILES\n   ⚠️  $file (${SIZE_MB}MB)"
+          fi
+        done
+        if [ -n "$LARGE_FILES" ]; then
+          echo "⚠️  Large files detected (>10MB):"
+          echo -e "$LARGE_FILES"
+          echo "   💡 Consider using Git LFS for large binary files"
+        fi
+        exit 0  # Non-blocking
+
+    # ============================================================================
+    # BLOCKING PRE-PUSH HOOKS (migrated from lefthook)
+    # These block pushes if they fail (security + correctness)
+    # ============================================================================
+
+    # Infisical secrets scan - pre-push (BLOCKING)
+    # Scans all uncommitted changes for secrets using Infisical
+    # Blocks pushes if secrets are detected (security critical)
+    - id: infisical-secrets-scan-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+      run: |
+        if ! command -v infisical >/dev/null 2>&1; then
+          echo "⚠️  Infisical CLI not found - secrets scanning skipped"
+          echo "   💡 CI/CD will still scan with TruffleHog"
+          exit 0
+        fi
+        if perl -e 'alarm 60; exec @ARGV' infisical scan git-changes --silent --redact 2>&1; then
+          echo "✅ Secrets scan passed"
+          exit 0
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "⏱️  Secrets scan timed out (>60s) - proceeding"
+            exit 0
+          else
+            echo "❌ SECURITY ALERT: Secrets detected in uncommitted changes!"
+            echo "   💡 Remove secrets and use Infisical env vars instead"
+            echo "   🔍 Run: infisical scan git-changes --verbose"
+            exit 1
+          fi
+        fi
+
+    # Type check - pre-push (BLOCKING)
+    # Runs type-check:build before push
+    # Blocks pushes if type errors exist (catches errors before push)
+    - id: type-check-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+      run: pnpm type-check:build
+
+    # ============================================================================
+    # NON-BLOCKING VALIDATION HOOKS (migrated from lefthook)
+    # These validate but don't block (user preference: only type-check and secrets-scan block)
+    # ============================================================================
+
+    # Prisma schema validation - pre-commit (NON-BLOCKING)
+    # Validates Prisma schema syntax and formatting
+    # Provides warnings but doesn't block commits
+    - id: prisma-validate-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+        - files: ['prisma/schema.prisma']
+      run: |
+        if [ ! -f "prisma/schema.prisma" ]; then
+          exit 0
+        fi
+        if [ -z "$DIRECT_URL" ] && [ -z "$POSTGRES_PRISMA_URL" ]; then
+          echo "⚠️  DIRECT_URL/POSTGRES_PRISMA_URL not available - skipping Prisma validation"
+          echo "   💡 Run: infisical run --env=dev -- pnpm prisma validate"
+          exit 0
+        fi
+        if ! pnpm prisma validate 2>&1; then
+          echo "⚠️  Prisma schema validation failed (non-blocking)"
+          echo "   💡 Fix with: pnpm prisma validate"
+          exit 0  # Non-blocking
+        fi
+        echo "✅ Prisma schema is valid"
+        exit 0
+
+    # Database types validation - pre-commit (NON-BLOCKING)
+    # Checks if Prisma types need regeneration
+    # Provides warnings but doesn't block commits
+    - id: db-types-validate-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+        - files: ['prisma/schema.prisma']
+      run: |
+        if [ ! -f "prisma/schema.prisma" ] || [ ! -d "packages/database-types/src/prisma" ]; then
+          exit 0
+        fi
+        SCHEMA_TIME=$(stat -f "%m" prisma/schema.prisma 2>/dev/null || stat -c "%Y" prisma/schema.prisma 2>/dev/null)
+        TYPES_TIME=$(stat -f "%m" packages/database-types/src/prisma/index.ts 2>/dev/null || stat -c "%Y" packages/database-types/src/prisma/index.ts 2>/dev/null)
+        if [ -z "$SCHEMA_TIME" ] || [ -z "$TYPES_TIME" ]; then
+          exit 0
+        fi
+        if [ "$SCHEMA_TIME" -gt "$TYPES_TIME" ]; then
+          echo "⚠️  Database types are out of sync with schema (non-blocking)"
+          echo "   💡 Regenerate with: pnpm prisma:generate:exec"
+          exit 0  # Non-blocking
+        fi
+        exit 0
+
+    # Generated files validation - pre-commit (NON-BLOCKING)
+    # Checks if generated files are up-to-date
+    # Provides warnings but doesn't block commits (auto-regeneration handles this)
+    - id: generated-files-validate-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+        - files: ['prisma/schema.prisma', 'openapi.json', 'package.json']
+      run: |
+        WARNINGS=0
+        # Check service worker
+        if [ -f "apps/web/public/service-worker.js" ]; then
+          CHANGED_SW_SOURCES=$(git diff --cached --name-only | grep -E "(minify-service-worker|generate-service-worker|category-config)" || echo "")
+          if [ -n "$CHANGED_SW_SOURCES" ]; then
+            SW_TIME=$(stat -f "%m" apps/web/public/service-worker.js 2>/dev/null || stat -c "%Y" apps/web/public/service-worker.js 2>/dev/null)
+            SW_SOURCE_TIME=$(stat -f "%m" packages/generators/src/bin/minify-service-worker.ts 2>/dev/null || stat -c "%Y" packages/generators/src/bin/minify-service-worker.ts 2>/dev/null)
+            if [ -n "$SW_TIME" ] && [ -n "$SW_SOURCE_TIME" ] && [ "$SW_SOURCE_TIME" -gt "$SW_TIME" ]; then
+              echo "💡 service-worker.js will be auto-regenerated if needed"
+              WARNINGS=$((WARNINGS + 1))
+            fi
+          fi
+        fi
+        # Check API client
+        if [ -f "packages/database-types/src/api-client/client.generated.ts" ]; then
+          CHANGED_API=$(git diff --cached --name-only | grep -E "(openapi\.json|apps/web/src/app/api.*route\.ts$)" || echo "")
+          if [ -n "$CHANGED_API" ]; then
+            API_TIME=$(stat -f "%m" packages/database-types/src/api-client/client.generated.ts 2>/dev/null || stat -c "%Y" packages/database-types/src/api-client/client.generated.ts 2>/dev/null)
+            OPENAPI_TIME=$(stat -f "%m" openapi.json 2>/dev/null || stat -c "%Y" openapi.json 2>/dev/null)
+            if [ -n "$API_TIME" ] && [ -n "$OPENAPI_TIME" ] && [ "$OPENAPI_TIME" -gt "$API_TIME" ]; then
+              echo "💡 API client will be auto-regenerated if needed"
+              WARNINGS=$((WARNINGS + 1))
+            fi
+          fi
+        fi
+        if [ $WARNINGS -eq 0 ]; then
+          echo "✅ Generated files are up-to-date"
+        fi
+        exit 0  # Non-blocking
+
+    # OpenAPI schema validation - pre-commit (NON-BLOCKING)
+    # Validates OpenAPI schema syntax
+    # Provides warnings but doesn't block commits
+    - id: openapi-validate-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+        - files: ['openapi.json']
+      run: |
+        if [ ! -f "openapi.json" ]; then
+          exit 0
+        fi
+        if ! command -v jq >/dev/null 2>&1; then
+          echo "⚠️  jq not found - skipping OpenAPI validation"
+          exit 0
+        fi
+        if ! jq empty openapi.json 2>/dev/null; then
+          echo "⚠️  openapi.json is not valid JSON (non-blocking)"
+          echo "   💡 Fix with: jq . openapi.json"
+          exit 0  # Non-blocking
+        fi
+        if ! jq -e '.openapi' openapi.json >/dev/null 2>&1 || ! jq -e '.info' openapi.json >/dev/null 2>&1 || ! jq -e '.paths' openapi.json >/dev/null 2>&1; then
+          echo "⚠️  openapi.json missing required fields (non-blocking)"
+          exit 0  # Non-blocking
+        fi
+        echo "✅ OpenAPI schema is valid"
+        exit 0
+
+    # ============================================================================
+    # POST-MERGE/POST-CHECKOUT HOOKS (migrated from lefthook)
+    # Auto-install dependencies and sync database types
+    # ============================================================================
+
+    # Dependencies install - post-merge (NON-BLOCKING)
+    # Auto-installs dependencies when package.json or pnpm-lock.yaml changes
+    - id: deps-install-post-merge
+      triggers:
+        - git_hooks: [post-merge]
+        - files: ['package.json', 'pnpm-lock.yaml']
+      run: |
+        if git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD | grep -qE "(package\.json|pnpm-lock\.yaml)"; then
+          echo "📦 Dependencies changed. Installing updates..."
+          pnpm install
+        fi
+        exit 0
+
+    # Database types sync - post-merge (NON-BLOCKING)
+    # Auto-syncs database types when Prisma schema changes
+    - id: db-types-sync-post-merge
+      triggers:
+        - git_hooks: [post-merge]
+        - files: ['prisma/schema.prisma']
+      run: |
+        if git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD | grep -qE "prisma/schema\.prisma"; then
+          echo "🔄 Prisma schema changed. Syncing database types..."
+          pnpm prisma:generate:exec 2>&1 | tail -10
+          echo "   ✅ Database types synced"
+        fi
+        exit 0
+
+    # Dependencies check - post-checkout (NON-BLOCKING)
+    # Checks if dependencies need installation after checkout
+    - id: deps-check-post-checkout
+      triggers:
+        - git_hooks: [post-checkout]
+        - files: ['package.json', 'pnpm-lock.yaml']
+      run: |
+        if git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD | grep -qE "(package\.json|pnpm-lock\.yaml)"; then
+          echo "📦 Dependencies may have changed after checkout. Checking..."
+          echo "   Installing dependencies..."
+          pnpm install
+        else
+          echo "   ✅ No dependency changes detected"
+        fi
+        exit 0

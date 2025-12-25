@@ -8,10 +8,10 @@ The Data Layer is built around the **Service Pattern**. Each domain (Content, Us
 
 ### Key Principles
 
-1.  **Runtime Compatible**: Code works in Node.js (Next.js) and Cloudflare Workers. Services use Supabase client which is compatible with both runtimes.
-2.  **RPC-First**: All complex queries should be encapsulated in PostgreSQL functions (RPCs) and called via `supabase.rpc()`. This keeps the application layer thin and performant.
-3.  **Type Safety**: All services must return strictly typed data derived from `@heyclaude/database-types`.
-4.  **No State**: Services are instantiated per request with a `SupabaseClient`. They do not hold state.
+1. **Runtime Compatible**: Code works in Node.js (Next.js) and Cloudflare Workers. Services use Supabase client which is compatible with both runtimes.
+2. **RPC-First**: All complex queries should be encapsulated in PostgreSQL functions (RPCs) and called via `supabase.rpc()`. This keeps the application layer thin and performant.
+3. **Type Safety**: All services must return strictly typed data derived from `@heyclaude/database-types`.
+4. **No State**: Services are instantiated per request with a `SupabaseClient`. They do not hold state.
 
 ## Usage
 
@@ -45,8 +45,8 @@ import { createSupabaseClient } from '@heyclaude/cloudflare-runtime';
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const supabase = createSupabaseClient(env);
-  const service = new ContentService(supabase);
-  const posts = await service.getLatestPosts();
+    const service = new ContentService(supabase);
+    const posts = await service.getLatestPosts();
 
     return Response.json(posts);
   },
@@ -55,10 +55,10 @@ export default {
 
 ## Adding a New Service
 
-1.  Create a new file in `src/services/` (e.g., `src/services/my-feature.ts`).
-2.  Define a class `MyFeatureService` with a constructor accepting `SupabaseClient<Database>`.
-3.  Implement methods that call `this.supabase.rpc(...)`.
-4.  Export the service from `src/index.ts`.
+1. Create a new file in `src/services/` (e.g., `src/services/my-feature.ts`).
+2. Define a class `MyFeatureService` with a constructor accepting `SupabaseClient<Database>`.
+3. Implement methods that call `this.supabase.rpc(...)`.
+4. Export the service from `src/index.ts`.
 
 ## Testing
 

@@ -168,7 +168,9 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getFilteredJobs({});
 
@@ -177,7 +179,7 @@ describe('jobs', () => {
       expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('filter_jobs'),
         expect.anything(), // p_limit value
-        expect.anything(), // p_offset value
+        expect.anything() // p_offset value
       );
       expect(result).toMatchObject({
         hits: [],
@@ -191,7 +193,9 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getFilteredJobs({
         category: 'all',
@@ -213,7 +217,9 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getFilteredJobs({ searchQuery: 'developer' });
 
@@ -221,7 +227,7 @@ describe('jobs', () => {
       // callRpc builds query: SELECT * FROM filter_jobs(p_search_query => $1)
       expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('filter_jobs'),
-        expect.anything(), // p_search_query value
+        expect.anything() // p_search_query value
       );
       expect(result).toMatchObject({
         hits: [],
@@ -235,7 +241,9 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getFilteredJobs({ category: 'engineering' });
 
@@ -243,7 +251,7 @@ describe('jobs', () => {
       // callRpc builds query: SELECT * FROM filter_jobs(p_category => $1)
       expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
         expect.stringContaining('filter_jobs'),
-        expect.anything(), // p_category value
+        expect.anything() // p_category value
       );
       expect(result).toMatchObject({
         hits: [],
@@ -252,7 +260,9 @@ describe('jobs', () => {
     });
 
     it('should return null on error', async () => {
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(new Error('Service error'));
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(
+        new Error('Service error')
+      );
 
       const result = await getFilteredJobs({});
 
@@ -265,7 +275,9 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getFilteredJobs({ limit: undefined });
 
@@ -283,7 +295,9 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       const result = await getFilteredJobs({ offset: undefined });
 
@@ -303,19 +317,23 @@ describe('jobs', () => {
         pagination: { total: 0, limit: 30, offset: 0 },
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockRpcResult,
+      ] as any);
 
       // First call - should hit database and populate cache
       const result1 = await getFilteredJobs({});
-      const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+      const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls
+        .length;
 
       // Second call - should hit cache (no database call)
       const result2 = await getFilteredJobs({});
-      const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls.length;
+      const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls
+        .length;
 
       // Verify results are the same (indicating cache was used)
       expect(result1).toEqual(result2);
-      
+
       // Verify $queryRawUnsafe was only called once (cached on second call)
       expect(secondCallCount).toBe(firstCallCount);
       expect(secondCallCount).toBe(1);

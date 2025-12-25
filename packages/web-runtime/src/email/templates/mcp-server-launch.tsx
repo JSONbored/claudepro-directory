@@ -77,14 +77,19 @@ export function McpServerLaunchEmail({ launchDate }: McpServerLaunchEmailProps) 
   const mcpDocsUrl = `${baseUrl}/mcp`;
   const utm = EMAIL_UTM_TEMPLATES.MCP_SERVER_LAUNCH;
 
-  const formattedDate = launchDate || new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const formattedDate =
+    launchDate ||
+    new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
 
   return (
-    <BaseLayout preview="🚀 Announcing HeyClaude MCP Server - Programmatic access to Claude Pro Directory" utm={utm}>
+    <BaseLayout
+      preview="🚀 Announcing HeyClaude MCP Server - Programmatic access to Claude Pro Directory"
+      utm={utm}
+    >
       <Section style={heroSection}>
         <EmailBadge variant="primary" style={badgeStyle}>
           🚀 New Launch
@@ -93,11 +98,12 @@ export function McpServerLaunchEmail({ launchDate }: McpServerLaunchEmailProps) 
         <Text style={heroSubtitleStyle}>
           Programmatic access to Claude Pro Directory through the Model Context Protocol
         </Text>
-        {launchDate && (
-          <Text style={launchDateStyle}>Launched on {formattedDate}</Text>
-        )}
+        {launchDate && <Text style={launchDateStyle}>Launched on {formattedDate}</Text>}
         <div style={heroActionRow}>
-          <Link href={buildEmailCtaUrl(mcpDocsUrl, utm, { content: 'hero_primary_cta' })} style={primaryCtaStyle}>
+          <Link
+            href={buildEmailCtaUrl(mcpDocsUrl, utm, { content: 'hero_primary_cta' })}
+            style={primaryCtaStyle}
+          >
             View Documentation
           </Link>
           <Link
@@ -146,12 +152,12 @@ export function McpServerLaunchEmail({ launchDate }: McpServerLaunchEmailProps) 
 
       <Section style={useCasesSection}>
         <Text style={sectionTitleStyle}>Use Cases</Text>
-        <Text style={sectionDescriptionStyle}>
-          The HeyClaude MCP Server enables AI agents to:
-        </Text>
+        <Text style={sectionDescriptionStyle}>The HeyClaude MCP Server enables AI agents to:</Text>
         <ul style={useCasesListStyle}>
           <li style={useCaseItemStyle}>
-            <Text style={useCaseTextStyle}>🔍 Search and discover Claude content programmatically</Text>
+            <Text style={useCaseTextStyle}>
+              🔍 Search and discover Claude content programmatically
+            </Text>
           </li>
           <li style={useCaseItemStyle}>
             <Text style={useCaseTextStyle}>📥 Download content formatted for your platform</Text>
@@ -163,7 +169,9 @@ export function McpServerLaunchEmail({ launchDate }: McpServerLaunchEmailProps) 
             <Text style={useCaseTextStyle}>📊 Get category configurations and metadata</Text>
           </li>
           <li style={useCaseItemStyle}>
-            <Text style={useCaseTextStyle}>🤝 Submit new content and interact with the directory</Text>
+            <Text style={useCaseTextStyle}>
+              🤝 Submit new content and interact with the directory
+            </Text>
           </li>
         </ul>
       </Section>
@@ -171,7 +179,8 @@ export function McpServerLaunchEmail({ launchDate }: McpServerLaunchEmailProps) 
       <Section style={ctaSection}>
         <Text style={ctaTitleStyle}>Ready to integrate?</Text>
         <Text style={ctaDescriptionStyle}>
-          Start using the HeyClaude MCP Server today and give your AI agents access to thousands of Claude resources.
+          Start using the HeyClaude MCP Server today and give your AI agents access to thousands of
+          Claude resources.
         </Text>
         <div style={ctaButtonRow}>
           <Link
@@ -191,8 +200,14 @@ export function McpServerLaunchEmail({ launchDate }: McpServerLaunchEmailProps) 
 
       <EmailFooterNote
         lines={[
-          { type: 'text', text: 'You are receiving this email because you are subscribed to Claude Pro Directory updates.' },
-          { type: 'text', text: 'To manage your email preferences, please visit your account settings.' },
+          {
+            type: 'text',
+            text: 'You are receiving this email because you are subscribed to Claude Pro Directory updates.',
+          },
+          {
+            type: 'text',
+            text: 'To manage your email preferences, please visit your account settings.',
+          },
         ]}
       />
     </BaseLayout>
@@ -422,4 +437,3 @@ const ctaButtonRow: React.CSSProperties = {
   justifyContent: 'center',
   flexWrap: 'wrap',
 };
-

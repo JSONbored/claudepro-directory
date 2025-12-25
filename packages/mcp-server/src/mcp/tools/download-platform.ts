@@ -114,7 +114,12 @@ export async function handleDownloadContentForPlatform(
       });
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to fetch content');
-      logger.error('Database query failed', {error: normalized, tool: 'downloadContentForPlatform', category, slug,});
+      logger.error('Database query failed', {
+        error: normalized,
+        tool: 'downloadContentForPlatform',
+        category,
+        slug,
+      });
       throw normalized;
     }
 
@@ -173,7 +178,13 @@ export async function handleDownloadContentForPlatform(
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to format content for platform');
-      logger.error('Failed to format content', {error: normalized, tool: 'downloadContentForPlatform', platform, category, slug,});
+      logger.error('Failed to format content', {
+        error: normalized,
+        tool: 'downloadContentForPlatform',
+        platform,
+        category,
+        slug,
+      });
       throw normalized;
     }
 
@@ -191,7 +202,13 @@ export async function handleDownloadContentForPlatform(
     // Build response with formatted content and instructions
     const responseText = `${formattedContent}\n\n${installationInstructions}`;
 
-    logger.info('downloadContentForPlatform completed successfully', {tool: 'downloadContentForPlatform', duration_ms: Date.now() - startTime, platform, category, slug,});
+    logger.info('downloadContentForPlatform completed successfully', {
+      tool: 'downloadContentForPlatform',
+      duration_ms: Date.now() - startTime,
+      platform,
+      category,
+      slug,
+    });
 
     return {
       content: [
@@ -208,12 +225,20 @@ export async function handleDownloadContentForPlatform(
         category: contentItem.category,
         slug: contentItem.slug,
         title: contentItem.title,
-        installationInstructions: installationInstructions.split('\n').filter((line) => line.trim()),
+        installationInstructions: installationInstructions
+          .split('\n')
+          .filter((line) => line.trim()),
       },
     };
   } catch (error) {
     const normalized = normalizeError(error, 'downloadContentForPlatform tool failed');
-    logger.error('downloadContentForPlatform tool error', {error: normalized, tool: 'downloadContentForPlatform', platform, category, slug});
+    logger.error('downloadContentForPlatform tool error', {
+      error: normalized,
+      tool: 'downloadContentForPlatform',
+      platform,
+      category,
+      slug,
+    });
     throw normalized;
   }
 }

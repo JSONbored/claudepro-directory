@@ -59,7 +59,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {
@@ -118,7 +118,7 @@ describe('changePassword', () => {
 
     // 2. Clear all mocks (but don't reset implementations - tests will override)
     jest.clearAllMocks();
-    
+
     // 3. Reset mock call history
     mockSignInWithPassword.mockClear();
     mockUpdateUser.mockClear();
@@ -323,12 +323,12 @@ describe('signOutSession', () => {
 
     // 2. Clear all mocks (but don't reset implementations - tests will override)
     jest.clearAllMocks();
-    
+
     // 3. Reset mock call history
     mockGetSession.mockClear();
     mockSignOut.mockClear();
     mockRevalidatePath.mockClear();
-    
+
     // Reset default implementation
     mockGetSession.mockResolvedValue({
       data: { session: null },
@@ -399,7 +399,10 @@ describe('signOutSession', () => {
 
       // Verify SafeActionResult structure
       // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
-      const safeResult = result as SafeActionResult<{ success: boolean; signedOutCurrent: boolean }>;
+      const safeResult = result as SafeActionResult<{
+        success: boolean;
+        signedOutCurrent: boolean;
+      }>;
       expect(safeResult.data).toBeDefined();
       expect(safeResult.data?.success).toBe(true);
       expect(safeResult.data?.signedOutCurrent).toBe(true);
@@ -554,7 +557,10 @@ describe('signOutSession', () => {
 
       // Verify SafeActionResult structure
       // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
-      const safeResult = result as SafeActionResult<{ success: boolean; signedOutCurrent: boolean }>;
+      const safeResult = result as SafeActionResult<{
+        success: boolean;
+        signedOutCurrent: boolean;
+      }>;
       expect(safeResult.data).toBeDefined();
 
       // Verify cache invalidation

@@ -39,7 +39,6 @@ export const sendContactEmails = createInngestFunction(
   },
   { event: 'email/contact' },
   async ({ event, step, logContext }: InngestHandlerContext) => {
-
     const { submissionId, name, email, category, message } = event.data;
 
     // Validate category
@@ -189,4 +188,3 @@ export const sendContactEmails = createInngestFunction(
     };
   }
 );
-

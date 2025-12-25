@@ -211,4 +211,3 @@ const linkStyle: React.CSSProperties = {
   color: brandColors.primary,
   textDecoration: 'underline',
 };
-

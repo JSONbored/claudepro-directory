@@ -80,7 +80,8 @@ jest.mock('@heyclaude/web-runtime/server', () => ({
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
   },
   buildCacheHeaders: jest.fn((preset) => ({
-    'Cache-Control': preset === 'config' ? 'public, s-maxage=86400, stale-while-revalidate=172800' : 'public',
+    'Cache-Control':
+      preset === 'config' ? 'public, s-maxage=86400, stale-while-revalidate=172800' : 'public',
   })),
   jsonResponse: jest.fn((data, status, corsHeaders, additionalHeaders) => {
     return new Response(JSON.stringify(data), {

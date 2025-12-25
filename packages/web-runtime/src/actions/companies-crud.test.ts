@@ -59,7 +59,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {
@@ -277,7 +277,10 @@ describe('companies-crud', () => {
         expect(mockRevalidatePath).toHaveBeenCalledWith('/account/companies');
         expect(mockRevalidatePath).toHaveBeenCalledWith('/companies');
         expect(mockRevalidateTag).toHaveBeenCalledWith('company-test-company', 'default');
-        expect(mockRevalidateTag).toHaveBeenCalledWith('company-id-123e4567-e89b-12d3-a456-426614174000', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith(
+          'company-id-123e4567-e89b-12d3-a456-426614174000',
+          'default'
+        );
         expect(mockRevalidateTag).toHaveBeenCalledWith('companies', 'default');
       });
     });
@@ -385,7 +388,10 @@ describe('companies-crud', () => {
         expect(mockRevalidatePath).toHaveBeenCalledWith('/companies/test-company');
         expect(mockRevalidatePath).toHaveBeenCalledWith('/companies');
         expect(mockRevalidateTag).toHaveBeenCalledWith('company-test-company', 'default');
-        expect(mockRevalidateTag).toHaveBeenCalledWith('company-id-123e4567-e89b-12d3-a456-426614174000', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith(
+          'company-id-123e4567-e89b-12d3-a456-426614174000',
+          'default'
+        );
         expect(mockRevalidateTag).toHaveBeenCalledWith('companies', 'default');
       });
     });
@@ -407,7 +413,7 @@ describe('companies-crud', () => {
         expect(safeResult.fieldErrors).toBeDefined();
         expect(safeResult.data).toBeUndefined();
         expect(safeResult.serverError).toBeUndefined();
-        
+
         // Verify field errors for missing required field
         expect(safeResult.fieldErrors?.company_id).toBeDefined();
       });
@@ -470,8 +476,14 @@ describe('companies-crud', () => {
         // Verify cache invalidation
         expect(mockRevalidatePath).toHaveBeenCalledWith('/companies');
         expect(mockRevalidatePath).toHaveBeenCalledWith('/account/companies');
-        expect(mockRevalidateTag).toHaveBeenCalledWith('company-123e4567-e89b-12d3-a456-426614174000', 'default');
-        expect(mockRevalidateTag).toHaveBeenCalledWith('company-id-123e4567-e89b-12d3-a456-426614174000', 'default');
+        expect(mockRevalidateTag).toHaveBeenCalledWith(
+          'company-123e4567-e89b-12d3-a456-426614174000',
+          'default'
+        );
+        expect(mockRevalidateTag).toHaveBeenCalledWith(
+          'company-id-123e4567-e89b-12d3-a456-426614174000',
+          'default'
+        );
         expect(mockRevalidateTag).toHaveBeenCalledWith('companies', 'default');
       });
     });

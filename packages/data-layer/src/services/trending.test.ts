@@ -117,7 +117,6 @@ describe('TrendingService', () => {
       });
 
       expect(result).toStrictEqual([]);
-
     });
 
     it('handles category filtering', async () => {

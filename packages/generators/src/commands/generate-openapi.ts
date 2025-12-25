@@ -24,12 +24,7 @@ import { existsSync, writeFileSync, unlinkSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { glob } from 'glob';
-import {
-  Project,
-  Node,
-  ObjectLiteralExpression,
-  PropertyAssignment,
-} from 'ts-morph';
+import { Project, Node, ObjectLiteralExpression, PropertyAssignment } from 'ts-morph';
 import { createDocument } from 'zod-openapi';
 import { z } from 'zod';
 import jiti from 'jiti';
@@ -459,7 +454,7 @@ function extractOpenAPIMetadata(
  */
 /**
  * Extract auth requirements from config object
- * 
+ *
  * NOTE: requireAuth and optionalAuth have been removed from route-factory.
  * Routes should use authedAction server actions for authentication instead.
  * This function is kept for backwards compatibility but always returns empty object.
@@ -1110,36 +1105,39 @@ async function evaluateSchemas(
                                 reExportDeclaration &&
                                 Node.isVariableDeclaration(reExportDeclaration)
                               ) {
-                                const reExportVarDecl = reExportDeclaration as import('ts-morph').VariableDeclaration;
+                                const reExportVarDecl =
+                                  reExportDeclaration as import('ts-morph').VariableDeclaration;
                                 const reExportInitializer = reExportVarDecl.getInitializer();
                                 if (reExportInitializer) {
                                   // Extract imports from the re-exported file FIRST (before schema)
                                   // Check if schema uses imported enums that need to be inlined
                                   const reExportUsedIds = new Set<string>();
-                                  reExportInitializer.forEachDescendant((node: import('ts-morph').Node) => {
-                                    if (Node.isIdentifier(node)) {
-                                      const idName = node.getText();
-                                      if (
-                                        ![
-                                          'z',
-                                          'string',
-                                          'pipe',
-                                          'custom',
-                                          'Object',
-                                          'values',
-                                          'as',
-                                          'readonly',
-                                          'includes',
-                                          'message',
-                                          'Invalid',
-                                          'typeof',
-                                          'keyof',
-                                        ].includes(idName)
-                                      ) {
-                                        reExportUsedIds.add(idName);
+                                  reExportInitializer.forEachDescendant(
+                                    (node: import('ts-morph').Node) => {
+                                      if (Node.isIdentifier(node)) {
+                                        const idName = node.getText();
+                                        if (
+                                          ![
+                                            'z',
+                                            'string',
+                                            'pipe',
+                                            'custom',
+                                            'Object',
+                                            'values',
+                                            'as',
+                                            'readonly',
+                                            'includes',
+                                            'message',
+                                            'Invalid',
+                                            'typeof',
+                                            'keyof',
+                                          ].includes(idName)
+                                        ) {
+                                          reExportUsedIds.add(idName);
+                                        }
                                       }
                                     }
-                                  });
+                                  );
 
                                   // Extract enum dependencies FIRST (before the schema that uses them)
                                   for (const imp of reExportSourceFile.getImportDeclarations()) {
@@ -1509,7 +1507,8 @@ async function evaluateSchemas(
                               }
                             }
                           } else if (depDeclaration && Node.isVariableDeclaration(depDeclaration)) {
-                            const depVarDecl = depDeclaration as import('ts-morph').VariableDeclaration;
+                            const depVarDecl =
+                              depDeclaration as import('ts-morph').VariableDeclaration;
                             const depInitializer = depVarDecl.getInitializer();
                             if (depInitializer) {
                               const depCode = depInitializer.getText();
@@ -1634,36 +1633,39 @@ async function evaluateSchemas(
                                 reExportDeclaration &&
                                 Node.isVariableDeclaration(reExportDeclaration)
                               ) {
-                                const reExportVarDecl = reExportDeclaration as import('ts-morph').VariableDeclaration;
+                                const reExportVarDecl =
+                                  reExportDeclaration as import('ts-morph').VariableDeclaration;
                                 const reExportInitializer = reExportVarDecl.getInitializer();
                                 if (reExportInitializer) {
                                   // Extract imports from the re-exported file FIRST (before schema)
                                   // Check if schema uses imported enums that need to be inlined
                                   const reExportUsedIds = new Set<string>();
-                                  reExportInitializer.forEachDescendant((node: import('ts-morph').Node) => {
-                                    if (Node.isIdentifier(node)) {
-                                      const idName = node.getText();
-                                      if (
-                                        ![
-                                          'z',
-                                          'string',
-                                          'pipe',
-                                          'custom',
-                                          'Object',
-                                          'values',
-                                          'as',
-                                          'readonly',
-                                          'includes',
-                                          'message',
-                                          'Invalid',
-                                          'typeof',
-                                          'keyof',
-                                        ].includes(idName)
-                                      ) {
-                                        reExportUsedIds.add(idName);
+                                  reExportInitializer.forEachDescendant(
+                                    (node: import('ts-morph').Node) => {
+                                      if (Node.isIdentifier(node)) {
+                                        const idName = node.getText();
+                                        if (
+                                          ![
+                                            'z',
+                                            'string',
+                                            'pipe',
+                                            'custom',
+                                            'Object',
+                                            'values',
+                                            'as',
+                                            'readonly',
+                                            'includes',
+                                            'message',
+                                            'Invalid',
+                                            'typeof',
+                                            'keyof',
+                                          ].includes(idName)
+                                        ) {
+                                          reExportUsedIds.add(idName);
+                                        }
                                       }
                                     }
-                                  });
+                                  );
 
                                   // Extract enum dependencies FIRST (before the schema that uses them)
                                   for (const imp of reExportSourceFile.getImportDeclarations()) {

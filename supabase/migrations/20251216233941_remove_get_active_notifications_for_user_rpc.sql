@@ -6,5 +6,4 @@
 -- Description: Remove get_active_notifications_for_user RPC function
 -- Migrated to Prisma: MiscService.getActiveNotifications()
 -- Function signature: get_active_notifications_for_user(uuid)
-
-DROP FUNCTION IF EXISTS public.get_active_notifications_for_user(uuid);
+DROP FUNCTION IF EXISTS public.get_active_notifications_for_user (uuid);

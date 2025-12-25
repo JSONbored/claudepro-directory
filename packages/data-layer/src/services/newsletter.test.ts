@@ -49,7 +49,9 @@ describe('NewsletterService', () => {
         p_copy_slug: 'test-agent',
       };
 
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockData] as any);
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+        mockData,
+      ] as any);
 
       const result = await newsletterService.subscribeNewsletter(args);
 
@@ -103,7 +105,7 @@ describe('NewsletterService', () => {
       const result = await newsletterService.getNewsletterSubscriberCount();
 
       expect(result).toBe(42);
-      
+
       // Clean up spy
       jest.restoreAllMocks();
     });
@@ -119,7 +121,7 @@ describe('NewsletterService', () => {
 
       const result = await newsletterService.getNewsletterSubscriberCount();
       expect(result).toBe(0);
-      
+
       // Clean up spy
       jest.restoreAllMocks();
     });
@@ -144,7 +146,7 @@ describe('NewsletterService', () => {
 
       // Verify results are the same (indicating cache was used)
       expect(result1).toBe(result2);
-      
+
       // Verify cache was populated (cache size should increase after first call)
       // Note: If cache size is 0, it means withSmartCache is not caching Prisma queries
       // This is acceptable - the test verifies results match, which is the important part
@@ -157,9 +159,27 @@ describe('NewsletterService', () => {
   describe('getActiveSubscribers', () => {
     it('should return array of active subscriber emails', async () => {
       const mockSubscribers = [
-        { email: 'user1@example.com', status: 'active', confirmed: true, unsubscribed_at: null, subscribed_at: new Date('2024-01-03') },
-        { email: 'user2@example.com', status: 'active', confirmed: true, unsubscribed_at: null, subscribed_at: new Date('2024-01-02') },
-        { email: 'user3@example.com', status: 'active', confirmed: true, unsubscribed_at: null, subscribed_at: new Date('2024-01-01') },
+        {
+          email: 'user1@example.com',
+          status: 'active',
+          confirmed: true,
+          unsubscribed_at: null,
+          subscribed_at: new Date('2024-01-03'),
+        },
+        {
+          email: 'user2@example.com',
+          status: 'active',
+          confirmed: true,
+          unsubscribed_at: null,
+          subscribed_at: new Date('2024-01-02'),
+        },
+        {
+          email: 'user3@example.com',
+          status: 'active',
+          confirmed: true,
+          unsubscribed_at: null,
+          subscribed_at: new Date('2024-01-01'),
+        },
       ];
 
       // Use Prismocker's setData to seed test data
@@ -175,7 +195,13 @@ describe('NewsletterService', () => {
 
     it('should cache results on duplicate calls (caching test)', async () => {
       const mockSubscribers = [
-        { email: 'user1@example.com', status: 'active', confirmed: true, unsubscribed_at: null, subscribed_at: new Date('2024-01-01') },
+        {
+          email: 'user1@example.com',
+          status: 'active',
+          confirmed: true,
+          unsubscribed_at: null,
+          subscribed_at: new Date('2024-01-01'),
+        },
       ];
 
       // Use Prismocker's setData to seed test data
@@ -195,7 +221,7 @@ describe('NewsletterService', () => {
 
       // Verify results are the same (indicating cache was used)
       expect(result1).toEqual(result2);
-      
+
       // Verify cache was populated (cache size should increase after first call)
       // Note: If cache size is 0, it means withSmartCache is not caching Prisma queries
       // This is acceptable - the test verifies results match, which is the important part
@@ -344,7 +370,7 @@ describe('NewsletterService', () => {
         operation: 'NewsletterService.updateLastEmailSentAt',
         args: { email: 'test@example.com' },
       });
-      
+
       // Clean up spy
       jest.restoreAllMocks();
     });
@@ -478,7 +504,9 @@ describe('NewsletterService', () => {
 
   describe('edge cases', () => {
     it('should handle database timeout', async () => {
-      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(new Error('Query timeout'));
+      (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockRejectedValue(
+        new Error('Query timeout')
+      );
 
       await expect(
         newsletterService.subscribeNewsletter({ p_email: 'test@example.com' })

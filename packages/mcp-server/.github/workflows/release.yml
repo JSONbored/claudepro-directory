@@ -1,0 +1,92 @@
+---
+# Release Pipeline for mcp-server Package
+#
+# **Purpose:**
+# Automatically publishes the mcp-server package to npm and creates a
+# GitHub release when a namespaced version tag is pushed. Handles the
+# complete release workflow: build, test, version verification,
+# changelog generation, npm publish, and GitHub release.
+#
+# **What It Does:**
+# 1. Triggers on namespaced tags: `mcp-server-v*.*.*`
+#    (e.g., `mcp-server-v1.0.0`)
+# 2. Builds the package
+# 3. Runs tests to verify package health
+# 4. Extracts version from tag and verifies it matches package.json
+# 5. Automatically generates changelog using git-cliff (if enabled)
+# 6. Publishes package to npm
+# 7. Creates GitHub Release with changelog notes
+#
+# **Namespaced Tags:**
+# Uses namespaced tags to prevent conflicts in monorepos:
+# - Format: `mcp-server-v{version}` (e.g., `mcp-server-v1.0.0`)
+# - Allows multiple packages to have independent versioning
+# - Extracts version by removing `mcp-server-v` prefix
+#
+# **Automatic Changelog Generation:**
+# When `auto-generate-changelog` is enabled (default):
+# - Generates changelog using `heyclaude-changelog-package` script
+# - Filters commits to only those affecting `packages/mcp-server/`
+# - Uses git-cliff with shared configuration
+# - Writes to `packages/mcp-server/CHANGELOG.md`
+# - Falls back gracefully if generation fails
+#
+# **Release Workflow:**
+# 1. Developer bumps version: `pnpm bump:mcp-server:minor`
+# 2. Developer commits: `git commit -m "chore(mcp-server): bump version"`
+# 3. Developer creates tag: `git tag mcp-server-vX.Y.Z`
+# 4. Developer pushes: `git push origin main --tags`
+# 5. This workflow automatically:
+#    - Builds and tests the package
+#    - Generates changelog (if needed)
+#    - Publishes to npm
+#    - Creates GitHub Release
+#
+# **Permissions:**
+# - `contents: write` - Required to create GitHub releases
+# - `id-token: write` - Required for npm publish (if using OIDC)
+#
+# **Secrets:**
+# - `NPM_TOKEN` - NPM authentication token (required for publishing)
+# - `GITHUB_TOKEN` - Automatically provided by GitHub Actions
+#
+# **Integration:**
+# This workflow is part of the package's standalone release automation.
+# It works independently of other packages, allowing mcp-server to have
+# its own release cycle.
+#
+# **Related Workflows:**
+# - ci.yml: Handles CI checks on PRs and pushes
+# - Root release workflows: Handle monorepo-wide releases
+#
+# @see ../../../../.github/actions/package-release/action.yml
+# @see ../ci.yml
+# @see ../../../../packages/generators/src/commands/changelog-package.ts
+# @see ../../../../packages/generators/src/commands/bump-version-package.ts
+name: Release
+
+on:
+  push:
+    tags:
+      # Triggers on namespaced version tags (e.g., mcp-server-v1.0.0)
+      - 'mcp-server-v*.*.*'
+
+jobs:
+  release:
+    name: Publish to npm and create GitHub release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: write # Required to create GitHub releases
+      id-token: write # Required for npm publish (if using OIDC)
+
+    steps:
+      - name: Run package release
+        uses: ./.github/actions/package-release
+        with:
+          package-path: packages/mcp-server
+          package-name: mcp-server
+          node-version: '20'
+          pnpm-version: '10'
+          auto-generate-changelog: true

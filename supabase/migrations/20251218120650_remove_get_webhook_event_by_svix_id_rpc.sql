@@ -19,5 +19,4 @@
 --
 -- Related Changes:
 -- - packages/data-layer/src/services/misc.ts: Converted getWebhookEventBySvixId() to use Prisma
-
-DROP FUNCTION IF EXISTS public.get_webhook_event_by_svix_id(text, text);
+DROP FUNCTION IF EXISTS public.get_webhook_event_by_svix_id (text, text);

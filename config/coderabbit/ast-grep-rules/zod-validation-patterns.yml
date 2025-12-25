@@ -20,7 +20,7 @@ rule:
     - not:
         has:
           regex: querySchema|bodySchema|z\.object|z\.string|createApiRoute
-message: "API routes must validate inputs with Zod schemas. Use createApiRoute() factory with querySchema/bodySchema, or manually validate with z.object().parse(). Never trust user input."
+message: 'API routes must validate inputs with Zod schemas. Use createApiRoute() factory with querySchema/bodySchema, or manually validate with z.object().parse(). Never trust user input.'
 severity: error
 
 ---
@@ -54,7 +54,7 @@ rule:
     - not:
         has:
           regex: '\.min\(|\.max\(|\.email\(|\.url\(|\.uuid\('
-message: "Zod string schemas should include constraints (.min(), .max(), .email(), .url(), .uuid()) for validation. Unconstrained strings accept any input, including empty strings and malicious input."
+message: 'Zod string schemas should include constraints (.min(), .max(), .email(), .url(), .uuid()) for validation. Unconstrained strings accept any input, including empty strings and malicious input.'
 severity: warning
 
 ---
@@ -93,7 +93,7 @@ rule:
         inside:
           has:
             regex: 'try.*catch|safeParse'
-message: "Zod .parse() throws on validation errors. Use .safeParse() for better error handling, or wrap .parse() in try/catch. Example: const result = schema.safeParse(input); if (!result.success) { return error; }"
+message: 'Zod .parse() throws on validation errors. Use .safeParse() for better error handling, or wrap .parse() in try/catch. Example: const result = schema.safeParse(input); if (!result.success) { return error; }'
 severity: warning
 
 ---
@@ -108,7 +108,7 @@ rule:
     - not:
         has:
           pattern: '\.trim\('
-message: "Zod string schemas should include .trim() to remove leading/trailing whitespace. This prevents issues with user input containing accidental spaces. Example: z.string().trim().min(1);"
+message: 'Zod string schemas should include .trim() to remove leading/trailing whitespace. This prevents issues with user input containing accidental spaces. Example: z.string().trim().min(1);'
 severity: warning
 
 ---
@@ -127,5 +127,5 @@ rule:
     - not:
         has:
           regex: 'z\.coerce\.number'
-message: "Query parameters are strings by default. Use z.coerce.number() or z.coerce.boolean() to convert query params to correct types. Example: limit: z.coerce.number().int().min(1).max(100);"
+message: 'Query parameters are strings by default. Use z.coerce.number() or z.coerce.boolean() to convert query params to correct types. Example: limit: z.coerce.number().int().min(1).max(100);'
 severity: warning

@@ -1,8 +1,4 @@
-import type {
-  config_format,
-  primary_action_type,
-  content_category,
-} from '@prisma/client';
+import type { config_format, primary_action_type, content_category } from '@prisma/client';
 import type { LucideIcon } from 'lucide-react';
 
 export type SectionId =

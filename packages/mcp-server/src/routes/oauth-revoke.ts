@@ -40,4 +40,3 @@ export async function handleOAuthRevoke(
 
   return handleOAuthRevokeShared(request, env, adapter);
 }
-

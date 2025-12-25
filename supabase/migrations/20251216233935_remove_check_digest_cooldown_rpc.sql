@@ -5,5 +5,4 @@
 --
 -- Description: Remove check_digest_cooldown RPC function
 -- Digest email function now uses MiscService.getAppSetting() instead of this RPC.
-
-DROP FUNCTION IF EXISTS public.check_digest_cooldown();
+DROP FUNCTION IF EXISTS public.check_digest_cooldown ();

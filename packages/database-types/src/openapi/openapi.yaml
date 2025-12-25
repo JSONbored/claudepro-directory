@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Prisma API
-  description: ""
+  description: ''
   version: 1.0.0
 paths: {}
 components:
@@ -22,7 +22,7 @@ components:
           type: string
         payload:
           type: object
-          description: "[AuditLogPayload]"
+          description: '[AuditLogPayload]'
         created_at:
           type: string
           format: date-time
@@ -48,7 +48,7 @@ components:
         auth_code:
           type: string
         code_challenge_method:
-          $ref: "#/components/schemas/code_challenge_method"
+          $ref: '#/components/schemas/code_challenge_method'
         code_challenge:
           type: string
         provider_type:
@@ -71,7 +71,7 @@ components:
         saml_relay_states:
           type: array
           items:
-            $ref: "#/components/schemas/saml_relay_states"
+            $ref: '#/components/schemas/saml_relay_states'
       required:
         - id
         - auth_code
@@ -96,7 +96,7 @@ components:
           type: string
         identity_data:
           type: object
-          description: "[IdentityData]"
+          description: '[IdentityData]'
         provider:
           type: string
         last_sign_in_at:
@@ -113,7 +113,7 @@ components:
         id:
           type: string
         users:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
       required:
         - provider_id
         - user_id
@@ -168,7 +168,7 @@ components:
         id:
           type: string
         sessions:
-          $ref: "#/components/schemas/sessions"
+          $ref: '#/components/schemas/sessions'
       required:
         - session_id
         - created_at
@@ -202,9 +202,9 @@ components:
           type: string
         web_authn_session_data:
           type: object
-          description: "[WebAuthnSessionData]"
+          description: '[WebAuthnSessionData]'
         mfa_factors:
-          $ref: "#/components/schemas/mfa_factors"
+          $ref: '#/components/schemas/mfa_factors'
       required:
         - id
         - factor_id
@@ -228,9 +228,9 @@ components:
         friendly_name:
           type: string
         factor_type:
-          $ref: "#/components/schemas/factor_type"
+          $ref: '#/components/schemas/factor_type'
         status:
-          $ref: "#/components/schemas/factor_status"
+          $ref: '#/components/schemas/factor_status'
         created_at:
           type: string
           format: date-time
@@ -246,18 +246,18 @@ components:
           format: date-time
         web_authn_credential:
           type: object
-          description: "[WebAuthnCredential]"
+          description: '[WebAuthnCredential]'
         web_authn_aaguid:
           type: string
         last_webauthn_challenge_data:
           type: object
-          description: "[WebAuthnSessionData]"
+          description: '[WebAuthnSessionData]'
         mfa_challenges:
           type: array
           items:
-            $ref: "#/components/schemas/mfa_challenges"
+            $ref: '#/components/schemas/mfa_challenges'
         users:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
       required:
         - id
         - user_id
@@ -291,11 +291,11 @@ components:
         code_challenge:
           type: string
         code_challenge_method:
-          $ref: "#/components/schemas/code_challenge_method"
+          $ref: '#/components/schemas/code_challenge_method'
         response_type:
-          $ref: "#/components/schemas/oauth_response_type"
+          $ref: '#/components/schemas/oauth_response_type'
         status:
-          $ref: "#/components/schemas/oauth_authorization_status"
+          $ref: '#/components/schemas/oauth_authorization_status'
         authorization_code:
           type: string
         created_at:
@@ -310,9 +310,9 @@ components:
         nonce:
           type: string
         oauth_clients:
-          $ref: "#/components/schemas/oauth_clients"
+          $ref: '#/components/schemas/oauth_clients'
         users:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
       required:
         - id
         - authorization_id
@@ -326,9 +326,9 @@ components:
         - oauth_clients
     oauth_client_states:
       type: object
-      description: "This model or at least one of its fields has comments in the
+      description: 'This model or at least one of its fields has comments in the
         database, and requires an additional setup for migrations: Read more:
-        https://pris.ly/d/database-comments"
+        https://pris.ly/d/database-comments'
       properties:
         id:
           type: string
@@ -353,7 +353,7 @@ components:
         client_secret_hash:
           type: string
         registration_type:
-          $ref: "#/components/schemas/oauth_registration_type"
+          $ref: '#/components/schemas/oauth_registration_type'
         redirect_uris:
           type: string
         grant_types:
@@ -374,19 +374,19 @@ components:
           type: string
           format: date-time
         client_type:
-          $ref: "#/components/schemas/oauth_client_type"
+          $ref: '#/components/schemas/oauth_client_type'
         oauth_authorizations:
           type: array
           items:
-            $ref: "#/components/schemas/oauth_authorizations"
+            $ref: '#/components/schemas/oauth_authorizations'
         oauth_consents:
           type: array
           items:
-            $ref: "#/components/schemas/oauth_consents"
+            $ref: '#/components/schemas/oauth_consents'
         sessions:
           type: array
           items:
-            $ref: "#/components/schemas/sessions"
+            $ref: '#/components/schemas/sessions'
       required:
         - id
         - registration_type
@@ -418,9 +418,9 @@ components:
           type: string
           format: date-time
         oauth_clients:
-          $ref: "#/components/schemas/oauth_clients"
+          $ref: '#/components/schemas/oauth_clients'
         users:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
       required:
         - id
         - user_id
@@ -443,7 +443,7 @@ components:
         user_id:
           type: string
         token_type:
-          $ref: "#/components/schemas/one_time_token_type"
+          $ref: '#/components/schemas/one_time_token_type'
         token_hash:
           type: string
         relates_to:
@@ -455,7 +455,7 @@ components:
           type: string
           format: date-time
         users:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
       required:
         - id
         - user_id
@@ -497,7 +497,7 @@ components:
         session_id:
           type: string
         sessions:
-          $ref: "#/components/schemas/sessions"
+          $ref: '#/components/schemas/sessions'
       required:
         - id
     saml_providers:
@@ -525,7 +525,7 @@ components:
           type: string
         attribute_mapping:
           type: object
-          description: "[AttributeMapping]"
+          description: '[AttributeMapping]'
         created_at:
           type: string
           format: date-time
@@ -535,7 +535,7 @@ components:
         name_id_format:
           type: string
         sso_providers:
-          $ref: "#/components/schemas/sso_providers"
+          $ref: '#/components/schemas/sso_providers'
       required:
         - id
         - sso_provider_id
@@ -574,9 +574,9 @@ components:
         flow_state_id:
           type: string
         flow_state:
-          $ref: "#/components/schemas/flow_state"
+          $ref: '#/components/schemas/flow_state'
         sso_providers:
-          $ref: "#/components/schemas/sso_providers"
+          $ref: '#/components/schemas/sso_providers'
       required:
         - id
         - sso_provider_id
@@ -622,7 +622,7 @@ components:
         factor_id:
           type: string
         aal:
-          $ref: "#/components/schemas/aal_level"
+          $ref: '#/components/schemas/aal_level'
         not_after:
           type: string
           format: date-time
@@ -647,15 +647,15 @@ components:
         mfa_amr_claims:
           type: array
           items:
-            $ref: "#/components/schemas/mfa_amr_claims"
+            $ref: '#/components/schemas/mfa_amr_claims'
         refresh_tokens:
           type: array
           items:
-            $ref: "#/components/schemas/refresh_tokens"
+            $ref: '#/components/schemas/refresh_tokens'
         oauth_clients:
-          $ref: "#/components/schemas/oauth_clients"
+          $ref: '#/components/schemas/oauth_clients'
         users:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
       required:
         - id
         - user_id
@@ -692,7 +692,7 @@ components:
           type: string
           format: date-time
         sso_providers:
-          $ref: "#/components/schemas/sso_providers"
+          $ref: '#/components/schemas/sso_providers'
       required:
         - id
         - sso_provider_id
@@ -730,15 +730,15 @@ components:
         saml_providers:
           type: array
           items:
-            $ref: "#/components/schemas/saml_providers"
+            $ref: '#/components/schemas/saml_providers'
         saml_relay_states:
           type: array
           items:
-            $ref: "#/components/schemas/saml_relay_states"
+            $ref: '#/components/schemas/saml_relay_states'
         sso_domains:
           type: array
           items:
-            $ref: "#/components/schemas/sso_domains"
+            $ref: '#/components/schemas/sso_domains'
       required:
         - id
         - saml_providers
@@ -801,10 +801,10 @@ components:
           format: date-time
         raw_app_meta_data:
           type: object
-          description: "[RawAppMetaData]"
+          description: '[RawAppMetaData]'
         raw_user_meta_data:
           type: object
-          description: "[RawUserMetaData]"
+          description: '[RawUserMetaData]'
         is_super_admin:
           type: boolean
         created_at:
@@ -851,61 +851,61 @@ components:
         identities:
           type: array
           items:
-            $ref: "#/components/schemas/identities"
+            $ref: '#/components/schemas/identities'
         mfa_factors:
           type: array
           items:
-            $ref: "#/components/schemas/mfa_factors"
+            $ref: '#/components/schemas/mfa_factors'
         oauth_authorizations:
           type: array
           items:
-            $ref: "#/components/schemas/oauth_authorizations"
+            $ref: '#/components/schemas/oauth_authorizations'
         oauth_consents:
           type: array
           items:
-            $ref: "#/components/schemas/oauth_consents"
+            $ref: '#/components/schemas/oauth_consents'
         one_time_tokens:
           type: array
           items:
-            $ref: "#/components/schemas/one_time_tokens"
+            $ref: '#/components/schemas/one_time_tokens'
         sessions:
           type: array
           items:
-            $ref: "#/components/schemas/sessions"
+            $ref: '#/components/schemas/sessions'
         announcement_dismissals:
           type: array
           items:
-            $ref: "#/components/schemas/announcement_dismissals"
+            $ref: '#/components/schemas/announcement_dismissals'
         contact_submissions_contact_submissions_responded_byTousers:
           type: array
           items:
-            $ref: "#/components/schemas/contact_submissions"
+            $ref: '#/components/schemas/contact_submissions'
         contact_submissions_contact_submissions_user_idTousers:
           type: array
           items:
-            $ref: "#/components/schemas/contact_submissions"
+            $ref: '#/components/schemas/contact_submissions'
         content_submissions_content_submissions_moderated_byTousers:
           type: array
           items:
-            $ref: "#/components/schemas/content_submissions"
+            $ref: '#/components/schemas/content_submissions'
         content_submissions_content_submissions_submitter_idTousers:
           type: array
           items:
-            $ref: "#/components/schemas/content_submissions"
+            $ref: '#/components/schemas/content_submissions'
         content_votes:
           type: array
           items:
-            $ref: "#/components/schemas/content_votes"
+            $ref: '#/components/schemas/content_votes'
         notification_dismissals:
           type: array
           items:
-            $ref: "#/components/schemas/notification_dismissals"
+            $ref: '#/components/schemas/notification_dismissals'
         search_queries:
           type: array
           items:
-            $ref: "#/components/schemas/search_queries"
+            $ref: '#/components/schemas/search_queries'
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
       required:
         - id
         - is_sso_user
@@ -948,9 +948,9 @@ components:
           type: string
           format: date-time
         announcements:
-          $ref: "#/components/schemas/announcements"
+          $ref: '#/components/schemas/announcements'
         users:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
       required:
         - user_id
         - announcement_id
@@ -975,15 +975,15 @@ components:
         id:
           type: string
         variant:
-          $ref: "#/components/schemas/announcement_variant"
+          $ref: '#/components/schemas/announcement_variant'
         tag:
-          $ref: "#/components/schemas/announcement_tag"
+          $ref: '#/components/schemas/announcement_tag'
         title:
           type: string
         href:
           type: string
         icon:
-          $ref: "#/components/schemas/announcement_icon"
+          $ref: '#/components/schemas/announcement_icon'
         start_date:
           type: string
           format: date-time
@@ -991,7 +991,7 @@ components:
           type: string
           format: date-time
         priority:
-          $ref: "#/components/schemas/announcement_priority"
+          $ref: '#/components/schemas/announcement_priority'
         dismissible:
           type: boolean
         active:
@@ -1005,7 +1005,7 @@ components:
         announcement_dismissals:
           type: array
           items:
-            $ref: "#/components/schemas/announcement_dismissals"
+            $ref: '#/components/schemas/announcement_dismissals'
       required:
         - id
         - variant
@@ -1030,21 +1030,21 @@ components:
           type: string
         setting_value:
           type: object
-          description: "[AppSettingValue]"
+          description: '[AppSettingValue]'
         setting_type:
-          $ref: "#/components/schemas/setting_type"
+          $ref: '#/components/schemas/setting_type'
         enabled:
           type: boolean
         description:
           type: string
         category:
-          $ref: "#/components/schemas/app_setting_category"
+          $ref: '#/components/schemas/app_setting_category'
         version:
           type: integer
           format: int32
         previous_value:
           type: object
-          description: "[AppSettingValue]"
+          description: '[AppSettingValue]'
         created_at:
           type: string
           format: date-time
@@ -1052,7 +1052,7 @@ components:
           type: string
           format: date-time
         environment:
-          $ref: "#/components/schemas/environment"
+          $ref: '#/components/schemas/environment'
       required:
         - setting_key
         - setting_value
@@ -1077,7 +1077,7 @@ components:
         user_id:
           type: string
         content_type:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
         content_slug:
           type: string
         notes:
@@ -1089,7 +1089,7 @@ components:
           type: string
           format: date-time
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
       required:
         - id
         - user_id
@@ -1122,7 +1122,7 @@ components:
         description:
           type: string
         icon_name:
-          $ref: "#/components/schemas/category_icon"
+          $ref: '#/components/schemas/category_icon'
         color_scheme:
           type: string
         show_on_homepage:
@@ -1133,14 +1133,14 @@ components:
           type: string
         sections:
           type: object
-          description: "[CategorySections]"
+          description: '[CategorySections]'
         primary_action_type:
-          $ref: "#/components/schemas/primary_action_type"
+          $ref: '#/components/schemas/primary_action_type'
         primary_action_label:
           type: string
         primary_action_config:
           type: object
-          description: "[PrimaryActionConfig]"
+          description: '[PrimaryActionConfig]'
         search_placeholder:
           type: string
         empty_state_message:
@@ -1152,7 +1152,7 @@ components:
         display_config:
           type: boolean
         config_format:
-          $ref: "#/components/schemas/config_format"
+          $ref: '#/components/schemas/config_format'
         created_at:
           type: string
           format: date-time
@@ -1161,24 +1161,24 @@ components:
           format: date-time
         validation_config:
           type: object
-          description: "[ValidationConfig]"
+          description: '[ValidationConfig]'
         generation_config:
           type: object
-          description: "[GenerationConfig]"
+          description: '[GenerationConfig]'
         schema_name:
           type: string
         api_schema:
           type: object
-          description: "[ApiSchema]"
+          description: '[ApiSchema]'
         metadata_fields:
           type: array
           items:
             type: string
         badges:
           type: object
-          description: "[CategoryBadges]"
+          description: '[CategoryBadges]'
         category:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
       required:
         - title
         - plural_title
@@ -1225,7 +1225,7 @@ components:
           type: string
         changes:
           type: object
-          description: "[ChangelogChanges]"
+          description: '[ChangelogChanges]'
         content:
           type: string
         raw_content:
@@ -1260,7 +1260,7 @@ components:
           type: boolean
         json_ld:
           type: object
-          description: "[JsonLd]"
+          description: '[JsonLd]'
         git_commit_sha:
           type: string
         commit_count:
@@ -1272,9 +1272,9 @@ components:
             type: string
         metadata:
           type: object
-          description: "[ChangelogMetadata]"
+          description: '[ChangelogMetadata]'
         source:
-          $ref: "#/components/schemas/changelog_source"
+          $ref: '#/components/schemas/changelog_source'
         seo_title:
           type: string
         seo_description:
@@ -1313,7 +1313,7 @@ components:
         user_id:
           type: string
         content_type:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
         content_slug:
           type: string
         order:
@@ -1331,9 +1331,9 @@ components:
           type: string
           format: date-time
         user_collections:
-          $ref: "#/components/schemas/user_collections"
+          $ref: '#/components/schemas/user_collections'
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
       required:
         - id
         - collection_id
@@ -1378,7 +1378,7 @@ components:
         description:
           type: string
         size:
-          $ref: "#/components/schemas/company_size"
+          $ref: '#/components/schemas/company_size'
         industry:
           type: string
         using_cursor_since:
@@ -1394,17 +1394,17 @@ components:
           format: date-time
         json_ld:
           type: object
-          description: "[JsonLd]"
+          description: '[JsonLd]'
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
         jobs:
           type: array
           items:
-            $ref: "#/components/schemas/jobs"
+            $ref: '#/components/schemas/jobs'
         user_mcps:
           type: array
           items:
-            $ref: "#/components/schemas/user_mcps"
+            $ref: '#/components/schemas/user_mcps'
       required:
         - id
         - slug
@@ -1432,9 +1432,9 @@ components:
         description:
           type: string
         category:
-          $ref: "#/components/schemas/contact_command_category"
+          $ref: '#/components/schemas/contact_command_category'
         icon_name:
-          $ref: "#/components/schemas/contact_command_icon"
+          $ref: '#/components/schemas/contact_command_icon'
         display_order:
           type: integer
           format: int32
@@ -1443,18 +1443,18 @@ components:
         is_active:
           type: boolean
         action_type:
-          $ref: "#/components/schemas/contact_action_type"
+          $ref: '#/components/schemas/contact_action_type'
         action_value:
           type: string
         confetti_variant:
-          $ref: "#/components/schemas/confetti_variant"
+          $ref: '#/components/schemas/confetti_variant'
         aliases:
           type: array
           items:
             type: string
         metadata:
           type: object
-          description: "[ContactCommandMetadata]"
+          description: '[ContactCommandMetadata]'
         created_at:
           type: string
           format: date-time
@@ -1488,18 +1488,18 @@ components:
         email:
           type: string
         category:
-          $ref: "#/components/schemas/contact_category"
+          $ref: '#/components/schemas/contact_category'
         message:
           type: string
         status:
-          $ref: "#/components/schemas/submission_status"
+          $ref: '#/components/schemas/submission_status'
         user_id:
           type: string
         session_id:
           type: string
         metadata:
           type: object
-          description: "[Metadata]"
+          description: '[Metadata]'
         response_sent_at:
           type: string
           format: date-time
@@ -1512,9 +1512,9 @@ components:
           type: string
           format: date-time
         users_contact_submissions_responded_byTousers:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
         users_contact_submissions_user_idTousers:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
       required:
         - id
         - name
@@ -1569,7 +1569,7 @@ components:
         content:
           type: string
         source:
-          $ref: "#/components/schemas/content_source"
+          $ref: '#/components/schemas/content_source'
         documentation_url:
           type: string
         features:
@@ -1582,10 +1582,10 @@ components:
             type: string
         examples:
           type: object
-          description: "[ContentExamples]"
+          description: '[ContentExamples]'
         metadata:
           type: object
-          description: "[ContentMetadata]"
+          description: '[ContentMetadata]'
         git_hash:
           type: string
         synced_at:
@@ -1620,7 +1620,7 @@ components:
           type: boolean
         json_ld:
           type: object
-          description: "[JsonLd]"
+          description: '[JsonLd]'
         view_count:
           type: integer
           format: int32
@@ -1652,7 +1652,7 @@ components:
           type: string
           format: date-time
         category:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
         og_image:
           type: string
         use_count:
@@ -1667,13 +1667,13 @@ components:
         author_user_id:
           type: string
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
         content_time_metrics:
-          $ref: "#/components/schemas/content_time_metrics"
+          $ref: '#/components/schemas/content_time_metrics'
         content_votes:
           type: array
           items:
-            $ref: "#/components/schemas/content_votes"
+            $ref: '#/components/schemas/content_votes'
       required:
         - id
         - slug
@@ -1710,11 +1710,11 @@ components:
         id:
           type: string
         category:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
         slug:
           type: string
         generated_by:
-          $ref: "#/components/schemas/generation_source"
+          $ref: '#/components/schemas/generation_source'
         generation_trigger:
           type: string
         generation_model:
@@ -1732,7 +1732,7 @@ components:
           type: string
         discovery_metadata:
           type: object
-          description: "[DiscoveryMetadata]"
+          description: '[DiscoveryMetadata]'
         generated_at:
           type: string
           format: date-time
@@ -1772,14 +1772,14 @@ components:
           format: double
         similarity_factors:
           type: object
-          description: "[SimilarityFactors]"
+          description: '[SimilarityFactors]'
         calculated_at:
           type: string
           format: date-time
         content_a_type:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
         content_b_type:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
       required:
         - id
         - content_a_slug
@@ -1806,15 +1806,15 @@ components:
         id:
           type: string
         submission_type:
-          $ref: "#/components/schemas/submission_type"
+          $ref: '#/components/schemas/submission_type'
         status:
-          $ref: "#/components/schemas/submission_status"
+          $ref: '#/components/schemas/submission_status'
         name:
           type: string
         description:
           type: string
         category:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
         author:
           type: string
         author_profile_url:
@@ -1827,7 +1827,7 @@ components:
             type: string
         content_data:
           type: object
-          description: "[ContentSubmissionData]"
+          description: '[ContentSubmissionData]'
         moderator_notes:
           type: string
         moderated_at:
@@ -1862,9 +1862,9 @@ components:
         approved_slug:
           type: string
         users_content_submissions_moderated_byTousers:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
         users_content_submissions_submitter_idTousers:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
       required:
         - id
         - submission_type
@@ -1894,14 +1894,14 @@ components:
         id:
           type: string
         category:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
         name:
           type: string
         description:
           type: string
         template_data:
           type: object
-          description: "[TemplateData]"
+          description: '[TemplateData]'
         display_order:
           type: integer
           format: int32
@@ -1972,7 +1972,7 @@ components:
           type: string
           format: date-time
         content:
-          $ref: "#/components/schemas/content"
+          $ref: '#/components/schemas/content'
       required:
         - content_id
         - views_7d
@@ -2002,7 +2002,7 @@ components:
         content_slug:
           type: string
         content_type:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
         user_id:
           type: string
         session_id:
@@ -2011,9 +2011,9 @@ components:
           type: string
           format: date-time
         users:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
         content:
-          $ref: "#/components/schemas/content"
+          $ref: '#/components/schemas/content'
       required:
         - id
         - content_slug
@@ -2033,7 +2033,7 @@ components:
         email:
           type: string
         reason:
-          $ref: "#/components/schemas/email_blocklist_reason"
+          $ref: '#/components/schemas/email_blocklist_reason'
         created_at:
           type: string
           format: date-time
@@ -2120,7 +2120,7 @@ components:
           type: string
           format: date-time
         newsletter_subscriptions:
-          $ref: "#/components/schemas/newsletter_subscriptions"
+          $ref: '#/components/schemas/newsletter_subscriptions'
       required:
         - id
         - email
@@ -2142,7 +2142,7 @@ components:
         id:
           type: string
         sequence_id:
-          $ref: "#/components/schemas/email_sequence_id"
+          $ref: '#/components/schemas/email_sequence_id'
         email:
           type: string
         step:
@@ -2187,7 +2187,7 @@ components:
         id:
           type: string
         sequence_id:
-          $ref: "#/components/schemas/email_sequence_id"
+          $ref: '#/components/schemas/email_sequence_id'
         email:
           type: string
         current_step:
@@ -2203,7 +2203,7 @@ components:
           type: string
           format: date-time
         status:
-          $ref: "#/components/schemas/email_sequence_status"
+          $ref: '#/components/schemas/email_sequence_status'
         created_at:
           type: string
           format: date-time
@@ -2242,9 +2242,9 @@ components:
           type: string
           format: date-time
         users_followers_follower_idTousers:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
         users_followers_following_idTousers:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
       required:
         - id
         - follower_id
@@ -2280,7 +2280,7 @@ components:
         field_label:
           type: string
         field_type:
-          $ref: "#/components/schemas/form_field_type"
+          $ref: '#/components/schemas/form_field_type'
         required:
           type: boolean
         placeholder:
@@ -2290,14 +2290,14 @@ components:
         default_value:
           type: string
         grid_column:
-          $ref: "#/components/schemas/form_grid_column"
+          $ref: '#/components/schemas/form_grid_column'
         icon_name:
-          $ref: "#/components/schemas/form_field_icon"
+          $ref: '#/components/schemas/form_field_icon'
         icon_position:
-          $ref: "#/components/schemas/form_icon_position"
+          $ref: '#/components/schemas/form_icon_position'
         config:
           type: object
-          description: "[FormFieldConfig]"
+          description: '[FormFieldConfig]'
         enabled:
           type: boolean
         created_at:
@@ -2335,7 +2335,7 @@ components:
         job_name:
           type: string
         status:
-          $ref: "#/components/schemas/job_run_status"
+          $ref: '#/components/schemas/job_run_status'
         message:
           type: string
         created_at:
@@ -2368,12 +2368,12 @@ components:
           type: boolean
         details:
           type: object
-          description: "[AuditLogDetails]"
+          description: '[AuditLogDetails]'
         created_at:
           type: string
           format: date-time
         jobs:
-          $ref: "#/components/schemas/jobs"
+          $ref: '#/components/schemas/jobs'
       required:
         - id
         - job_id
@@ -2413,13 +2413,13 @@ components:
         remote:
           type: boolean
         type:
-          $ref: "#/components/schemas/job_type"
+          $ref: '#/components/schemas/job_type'
         workplace:
-          $ref: "#/components/schemas/workplace_type"
+          $ref: '#/components/schemas/workplace_type'
         experience:
-          $ref: "#/components/schemas/experience_level"
+          $ref: '#/components/schemas/experience_level'
         category:
-          $ref: "#/components/schemas/job_category"
+          $ref: '#/components/schemas/job_category'
         tags:
           type: array
           items:
@@ -2439,7 +2439,7 @@ components:
         company_logo:
           type: string
         plan:
-          $ref: "#/components/schemas/job_plan"
+          $ref: '#/components/schemas/job_plan'
         active:
           type: boolean
         posted_at:
@@ -2470,35 +2470,35 @@ components:
         slug:
           type: string
         status:
-          $ref: "#/components/schemas/job_status"
+          $ref: '#/components/schemas/job_status'
         locked_price:
           type: number
           format: double
         tier:
-          $ref: "#/components/schemas/job_tier"
+          $ref: '#/components/schemas/job_tier'
         is_placeholder:
           type: boolean
         json_ld:
           type: object
-          description: "[JsonLd]"
+          description: '[JsonLd]'
         discord_message_id:
           type: string
         job_subscription_audit_log:
           type: array
           items:
-            $ref: "#/components/schemas/job_subscription_audit_log"
+            $ref: '#/components/schemas/job_subscription_audit_log'
         companies:
-          $ref: "#/components/schemas/companies"
+          $ref: '#/components/schemas/companies'
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
         payments:
           type: array
           items:
-            $ref: "#/components/schemas/payments"
+            $ref: '#/components/schemas/payments'
         subscriptions:
           type: array
           items:
-            $ref: "#/components/schemas/subscriptions"
+            $ref: '#/components/schemas/subscriptions'
       required:
         - id
         - title
@@ -2566,9 +2566,9 @@ components:
         - updated_at
     mfa_failed_verification_attempts:
       type: object
-      description: "This model or at least one of its fields has comments in the
+      description: 'This model or at least one of its fields has comments in the
         database, and requires an additional setup for migrations: Read more:
-        https://pris.ly/d/database-comments"
+        https://pris.ly/d/database-comments'
       properties:
         user_id:
           type: string
@@ -2601,13 +2601,13 @@ components:
         referrer:
           type: string
         copy_type:
-          $ref: "#/components/schemas/copy_type"
+          $ref: '#/components/schemas/copy_type'
         copy_category:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
         copy_slug:
           type: string
         status:
-          $ref: "#/components/schemas/newsletter_subscription_status"
+          $ref: '#/components/schemas/newsletter_subscription_status'
         confirmed:
           type: boolean
         confirmation_token:
@@ -2637,7 +2637,7 @@ components:
           type: string
           format: date-time
         source:
-          $ref: "#/components/schemas/newsletter_source"
+          $ref: '#/components/schemas/newsletter_source'
         resend_contact_id:
           type: string
         last_sync_at:
@@ -2649,7 +2649,7 @@ components:
           type: integer
           format: int32
         primary_interest:
-          $ref: "#/components/schemas/newsletter_interest"
+          $ref: '#/components/schemas/newsletter_interest'
         categories_visited:
           type: array
           items:
@@ -2661,17 +2661,17 @@ components:
           type: string
           format: date-time
         preferred_email_frequency:
-          $ref: "#/components/schemas/email_frequency"
+          $ref: '#/components/schemas/email_frequency'
         resend_topics:
           type: array
           items:
             type: string
         sync_status:
-          $ref: "#/components/schemas/newsletter_sync_status"
+          $ref: '#/components/schemas/newsletter_sync_status'
         email_engagement_summary:
           type: array
           items:
-            $ref: "#/components/schemas/email_engagement_summary"
+            $ref: '#/components/schemas/email_engagement_summary'
       required:
         - id
         - email
@@ -2706,9 +2706,9 @@ components:
           type: string
           format: date-time
         notifications:
-          $ref: "#/components/schemas/notifications"
+          $ref: '#/components/schemas/notifications'
         users:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
       required:
         - user_id
         - notification_id
@@ -2733,9 +2733,9 @@ components:
         id:
           type: string
         type:
-          $ref: "#/components/schemas/notification_type"
+          $ref: '#/components/schemas/notification_type'
         priority:
-          $ref: "#/components/schemas/notification_priority"
+          $ref: '#/components/schemas/notification_priority'
         active:
           type: boolean
         expires_at:
@@ -2762,7 +2762,7 @@ components:
         notification_dismissals:
           type: array
           items:
-            $ref: "#/components/schemas/notification_dismissals"
+            $ref: '#/components/schemas/notification_dismissals'
       required:
         - id
         - type
@@ -2775,9 +2775,9 @@ components:
         - notification_dismissals
     password_failed_verification_attempts:
       type: object
-      description: "This model or at least one of its fields has comments in the
+      description: 'This model or at least one of its fields has comments in the
         database, and requires an additional setup for migrations: Read more:
-        https://pris.ly/d/database-comments"
+        https://pris.ly/d/database-comments'
       properties:
         user_id:
           type: string
@@ -2798,11 +2798,11 @@ components:
         more info.
       properties:
         plan:
-          $ref: "#/components/schemas/job_plan"
+          $ref: '#/components/schemas/job_plan'
         tier:
-          $ref: "#/components/schemas/job_tier"
+          $ref: '#/components/schemas/job_tier'
         product_type:
-          $ref: "#/components/schemas/payment_product_type"
+          $ref: '#/components/schemas/payment_product_type'
         price_cents:
           type: integer
           format: int32
@@ -2818,7 +2818,7 @@ components:
           type: string
         benefits:
           type: object
-          description: "[PaymentPlanBenefits]"
+          description: '[PaymentPlanBenefits]'
         created_at:
           type: string
           format: date-time
@@ -2863,16 +2863,16 @@ components:
         currency:
           type: string
         status:
-          $ref: "#/components/schemas/payment_transaction_status"
+          $ref: '#/components/schemas/payment_transaction_status'
         product_type:
-          $ref: "#/components/schemas/payment_product_type"
+          $ref: '#/components/schemas/payment_product_type'
         product_id:
           type: string
         plan:
-          $ref: "#/components/schemas/job_plan"
+          $ref: '#/components/schemas/job_plan'
         metadata:
           type: object
-          description: "[Metadata]"
+          description: '[Metadata]'
         paid_at:
           type: string
           format: date-time
@@ -2883,9 +2883,9 @@ components:
           type: string
           format: date-time
         jobs:
-          $ref: "#/components/schemas/jobs"
+          $ref: '#/components/schemas/jobs'
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
       required:
         - id
         - user_id
@@ -2929,7 +2929,7 @@ components:
           type: string
           format: date-time
         quiz_questions:
-          $ref: "#/components/schemas/quiz_questions"
+          $ref: '#/components/schemas/quiz_questions'
       required:
         - id
         - question_id
@@ -2971,7 +2971,7 @@ components:
         quiz_options:
           type: array
           items:
-            $ref: "#/components/schemas/quiz_options"
+            $ref: '#/components/schemas/quiz_options'
       required:
         - id
         - question_id
@@ -3015,9 +3015,9 @@ components:
           type: string
           format: date-time
         review_ratings:
-          $ref: "#/components/schemas/review_ratings"
+          $ref: '#/components/schemas/review_ratings'
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
       required:
         - id
         - review_id
@@ -3044,7 +3044,7 @@ components:
         user_id:
           type: string
         content_type:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
         content_slug:
           type: string
         rating:
@@ -3064,9 +3064,9 @@ components:
         review_helpful_votes:
           type: array
           items:
-            $ref: "#/components/schemas/review_helpful_votes"
+            $ref: '#/components/schemas/review_helpful_votes'
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
       required:
         - id
         - user_id
@@ -3094,7 +3094,7 @@ components:
           type: string
         metadata:
           type: object
-          description: "[Metadata]"
+          description: '[Metadata]'
         generated_at:
           type: string
           format: date-time
@@ -3122,7 +3122,7 @@ components:
           type: string
         metadata:
           type: object
-          description: "[Metadata]"
+          description: '[Metadata]'
         updated_at:
           type: string
           format: date-time
@@ -3162,7 +3162,7 @@ components:
         normalized_query:
           type: string
         users:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
       required:
         - id
         - query
@@ -3178,7 +3178,7 @@ components:
         user_id:
           type: string
         content_type:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
         content_id:
           type: string
         active:
@@ -3205,9 +3205,9 @@ components:
           type: string
           format: date-time
         tier:
-          $ref: "#/components/schemas/sponsorship_tier"
+          $ref: '#/components/schemas/sponsorship_tier'
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
       required:
         - id
         - user_id
@@ -3241,9 +3241,9 @@ components:
         description:
           type: string
         icon_name:
-          $ref: "#/components/schemas/static_route_icon"
+          $ref: '#/components/schemas/static_route_icon'
         group_name:
-          $ref: "#/components/schemas/route_group"
+          $ref: '#/components/schemas/route_group'
         sort_order:
           type: integer
           format: int32
@@ -3265,7 +3265,7 @@ components:
           type: boolean
         json_ld:
           type: object
-          description: "[JsonLd]"
+          description: '[JsonLd]'
         seo_title:
           type: string
         seo_description:
@@ -3344,7 +3344,7 @@ components:
         generate_item_list:
           type: boolean
         category:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
       required:
         - category_display_name
         - default_keywords
@@ -3376,9 +3376,9 @@ components:
         polar_product_id:
           type: string
         plan_name:
-          $ref: "#/components/schemas/job_tier"
+          $ref: '#/components/schemas/job_tier'
         status:
-          $ref: "#/components/schemas/subscription_status"
+          $ref: '#/components/schemas/subscription_status'
         current_period_start:
           type: string
           format: date-time
@@ -3388,7 +3388,7 @@ components:
         cancel_at_period_end:
           type: boolean
         product_type:
-          $ref: "#/components/schemas/payment_product_type"
+          $ref: '#/components/schemas/payment_product_type'
         product_id:
           type: string
         created_at:
@@ -3401,9 +3401,9 @@ components:
           type: string
           format: date-time
         jobs:
-          $ref: "#/components/schemas/jobs"
+          $ref: '#/components/schemas/jobs'
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
       required:
         - id
         - user_id
@@ -3441,7 +3441,7 @@ components:
           type: string
           format: date-time
         tier:
-          $ref: "#/components/schemas/user_tier"
+          $ref: '#/components/schemas/user_tier'
       required:
         - label
         - css_classes
@@ -3492,9 +3492,9 @@ components:
         collection_items:
           type: array
           items:
-            $ref: "#/components/schemas/collection_items"
+            $ref: '#/components/schemas/collection_items'
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
       required:
         - id
         - user_id
@@ -3519,7 +3519,7 @@ components:
         user_id:
           type: string
         content_type:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
         slug:
           type: string
         name:
@@ -3551,7 +3551,7 @@ components:
           type: string
           format: date-time
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
       required:
         - id
         - user_id
@@ -3579,21 +3579,21 @@ components:
         user_id:
           type: string
         content_type:
-          $ref: "#/components/schemas/content_category"
+          $ref: '#/components/schemas/content_category'
         content_slug:
           type: string
         session_id:
           type: string
         metadata:
           type: object
-          description: "[Metadata]"
+          description: '[Metadata]'
         created_at:
           type: string
           format: date-time
         interaction_type:
-          $ref: "#/components/schemas/interaction_type"
+          $ref: '#/components/schemas/interaction_type'
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
       required:
         - id
         - created_at
@@ -3642,9 +3642,9 @@ components:
           type: string
           format: date-time
         companies:
-          $ref: "#/components/schemas/companies"
+          $ref: '#/components/schemas/companies'
         users:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
       required:
         - id
         - user_id
@@ -3687,9 +3687,9 @@ components:
           type: string
           format: date-time
         users_user_similarities_user_a_idTousers:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
         users_user_similarities_user_b_idTousers:
-          $ref: "#/components/schemas/public_users"
+          $ref: '#/components/schemas/public_users'
       required:
         - id
         - user_a_id
@@ -3771,11 +3771,11 @@ components:
           type: boolean
         json_ld:
           type: object
-          description: "[JsonLd]"
+          description: '[JsonLd]'
         tier:
-          $ref: "#/components/schemas/user_tier"
+          $ref: '#/components/schemas/user_tier'
         role:
-          $ref: "#/components/schemas/user_role"
+          $ref: '#/components/schemas/user_role'
         post_count:
           type: integer
           format: int32
@@ -3790,77 +3790,77 @@ components:
         bookmarks:
           type: array
           items:
-            $ref: "#/components/schemas/bookmarks"
+            $ref: '#/components/schemas/bookmarks'
         collection_items:
           type: array
           items:
-            $ref: "#/components/schemas/collection_items"
+            $ref: '#/components/schemas/collection_items'
         companies:
           type: array
           items:
-            $ref: "#/components/schemas/companies"
+            $ref: '#/components/schemas/companies'
         content:
           type: array
           items:
-            $ref: "#/components/schemas/content"
+            $ref: '#/components/schemas/content'
         followers_followers_follower_idTousers:
           type: array
           items:
-            $ref: "#/components/schemas/followers"
+            $ref: '#/components/schemas/followers'
         followers_followers_following_idTousers:
           type: array
           items:
-            $ref: "#/components/schemas/followers"
+            $ref: '#/components/schemas/followers'
         jobs:
           type: array
           items:
-            $ref: "#/components/schemas/jobs"
+            $ref: '#/components/schemas/jobs'
         payments:
           type: array
           items:
-            $ref: "#/components/schemas/payments"
+            $ref: '#/components/schemas/payments'
         review_helpful_votes:
           type: array
           items:
-            $ref: "#/components/schemas/review_helpful_votes"
+            $ref: '#/components/schemas/review_helpful_votes'
         review_ratings:
           type: array
           items:
-            $ref: "#/components/schemas/review_ratings"
+            $ref: '#/components/schemas/review_ratings'
         sponsored_content:
           type: array
           items:
-            $ref: "#/components/schemas/sponsored_content"
+            $ref: '#/components/schemas/sponsored_content'
         subscriptions:
           type: array
           items:
-            $ref: "#/components/schemas/subscriptions"
+            $ref: '#/components/schemas/subscriptions'
         user_collections:
           type: array
           items:
-            $ref: "#/components/schemas/user_collections"
+            $ref: '#/components/schemas/user_collections'
         user_content:
           type: array
           items:
-            $ref: "#/components/schemas/user_content"
+            $ref: '#/components/schemas/user_content'
         user_interactions:
           type: array
           items:
-            $ref: "#/components/schemas/user_interactions"
+            $ref: '#/components/schemas/user_interactions'
         user_mcps:
           type: array
           items:
-            $ref: "#/components/schemas/user_mcps"
+            $ref: '#/components/schemas/user_mcps'
         user_similarities_user_similarities_user_a_idTousers:
           type: array
           items:
-            $ref: "#/components/schemas/user_similarities"
+            $ref: '#/components/schemas/user_similarities'
         user_similarities_user_similarities_user_b_idTousers:
           type: array
           items:
-            $ref: "#/components/schemas/user_similarities"
+            $ref: '#/components/schemas/user_similarities'
         users:
-          $ref: "#/components/schemas/auth_users"
+          $ref: '#/components/schemas/auth_users'
       required:
         - id
         - interests
@@ -3904,12 +3904,12 @@ components:
           type: integer
           format: int32
         status:
-          $ref: "#/components/schemas/webhook_delivery_status"
+          $ref: '#/components/schemas/webhook_delivery_status'
         error:
           type: string
         metadata:
           type: object
-          description: "[Metadata]"
+          description: '[Metadata]'
         started_at:
           type: string
           format: date-time
@@ -3923,7 +3923,7 @@ components:
           type: string
           format: date-time
         webhook_events:
-          $ref: "#/components/schemas/webhook_events"
+          $ref: '#/components/schemas/webhook_events'
       required:
         - id
         - webhook_event_id
@@ -3948,13 +3948,13 @@ components:
         id:
           type: string
         type:
-          $ref: "#/components/schemas/webhook_event_type"
+          $ref: '#/components/schemas/webhook_event_type'
         created_at:
           type: string
           format: date-time
         data:
           type: object
-          description: "[Data]"
+          description: '[Data]'
         processed:
           type: boolean
         processed_at:
@@ -3974,9 +3974,9 @@ components:
         svix_id:
           type: string
         source:
-          $ref: "#/components/schemas/webhook_source"
+          $ref: '#/components/schemas/webhook_source'
         direction:
-          $ref: "#/components/schemas/webhook_direction"
+          $ref: '#/components/schemas/webhook_direction'
         related_id:
           type: string
         http_status_code:
@@ -3995,7 +3995,7 @@ components:
         webhook_event_runs:
           type: array
           items:
-            $ref: "#/components/schemas/webhook_event_runs"
+            $ref: '#/components/schemas/webhook_event_runs'
       required:
         - id
         - type

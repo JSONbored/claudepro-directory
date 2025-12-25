@@ -61,8 +61,7 @@ export function getEmailSafetyConfig(): EmailSafetyConfig {
   const isProduction = nodeEnv === 'production' || deploymentEnv === 'production';
 
   // Check for dev email override
-  const allowDevEmails =
-    env.ALLOW_DEV_EMAILS === 'true' || env.ALLOW_DEV_EMAILS === '1';
+  const allowDevEmails = env.ALLOW_DEV_EMAILS === 'true' || env.ALLOW_DEV_EMAILS === '1';
 
   // Parse whitelisted emails (comma-separated)
   const whitelistedEmails = (env.DEV_EMAIL_WHITELIST || '')

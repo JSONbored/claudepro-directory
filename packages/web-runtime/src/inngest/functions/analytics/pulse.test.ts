@@ -15,7 +15,10 @@ import type { PrismaClient } from '@prisma/client';
 
 // Import real cache utilities for proper cache testing
 // Deep relative imports are acceptable for test utilities to avoid circular dependencies
-import { clearRequestCache, getRequestCache } from '../../../../../data-layer/src/utils/request-cache.ts';
+import {
+  clearRequestCache,
+  getRequestCache,
+} from '../../../../../data-layer/src/utils/request-cache.ts';
 
 // Mock RPC error logging utility
 jest.mock('../../../../../data-layer/src/utils/rpc-error-logging.ts', () => ({
@@ -87,26 +90,25 @@ jest.mock('../../utils/monitoring', () => ({
 }));
 
 // Get mocks for use in tests
-const {
-  __mockPgmqRead: mockPgmqRead,
-  __mockPgmqDelete: mockPgmqDelete,
-} = jest.requireMock('../../../supabase/pgmq-client') as {
+const { __mockPgmqRead: mockPgmqRead, __mockPgmqDelete: mockPgmqDelete } = jest.requireMock(
+  '../../../supabase/pgmq-client'
+) as {
   __mockPgmqRead: ReturnType<typeof jest.fn>;
   __mockPgmqDelete: ReturnType<typeof jest.fn>;
 };
 // Don't need mockGetService - using real getService with Prismocker
-const {
-  __mockLogger: mockLogger,
-  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
-} = jest.requireMock('../../../logging/server') as {
-  __mockLogger: {
-    info: ReturnType<typeof jest.fn>;
-    warn: ReturnType<typeof jest.fn>;
-    error: ReturnType<typeof jest.fn>;
+const { __mockLogger: mockLogger, __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId } =
+  jest.requireMock('../../../logging/server') as {
+    __mockLogger: {
+      info: ReturnType<typeof jest.fn>;
+      warn: ReturnType<typeof jest.fn>;
+      error: ReturnType<typeof jest.fn>;
+    };
+    __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
   };
-  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-};
-const { __mockNormalizeError: mockNormalizeError } = jest.requireMock('@heyclaude/shared-runtime') as {
+const { __mockNormalizeError: mockNormalizeError } = jest.requireMock(
+  '@heyclaude/shared-runtime'
+) as {
   __mockNormalizeError: ReturnType<typeof jest.fn>;
 };
 
@@ -199,7 +201,9 @@ describe('processPulseQueue', () => {
     // Mock RPC return value for batch_insert_search_queries
     // callRpc unwraps single-element arrays for composite types (objects)
     const mockRpcResult = { inserted_count: 1, failed_count: 0 };
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+      mockRpcResult,
+    ] as any);
 
     const { result } = (await t.execute({
       events: [
@@ -260,7 +264,9 @@ describe('processPulseQueue', () => {
     // Mock RPC return value for batch_insert_user_interactions
     // callRpc unwraps single-element arrays for composite types (objects)
     const mockRpcResult = { inserted_count: 1, errors: [] };
-    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([mockRpcResult] as any);
+    (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue([
+      mockRpcResult,
+    ] as any);
 
     const { result } = (await t.execute({
       events: [
@@ -719,4 +725,3 @@ describe('processPulseQueue', () => {
     expect(result.interactionEvents).toHaveLength(1);
   });
 });
-

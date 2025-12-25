@@ -1,227 +1,8 @@
 {
   "name": "@heyclaude/mcp-server",
   "version": "1.0.0",
-  "description": "HeyClaude MCP Server - Model Context Protocol server for Claude Pro Directory",
-  "type": "module",
   "private": false,
-  "_versioning": {
-    "note": "Version management documentation is in README.md. This package follows SemVer. Starting version: 1.0.0. Version bumps via GitHub Actions workflows (.github/workflows/auto-release.yml and release.yml). NPM publishing is manual - see README.md for details."
-  },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "exports": {
-    ".": {
-      "development": "./src/index.ts",
-      "types": "./dist/index.d.ts",
-      "default": "./src/index.ts"
-    },
-    "./server": {
-      "development": "./src/server/node-server.ts",
-      "types": "./dist/server/node-server.d.ts",
-      "default": "./src/server/node-server.ts"
-    },
-    "./cli": {
-      "development": "./src/cli.ts",
-      "types": "./dist/cli.d.ts",
-      "default": "./src/cli.ts"
-    },
-    "./adapters": {
-      "development": "./src/adapters/api-proxy.ts",
-      "types": "./dist/adapters/api-proxy.d.ts",
-      "default": "./src/adapters/api-proxy.ts"
-    },
-    "./adapters/cloudflare-worker": {
-      "development": "./src/adapters/cloudflare-worker.ts",
-      "types": "./dist/adapters/cloudflare-worker.d.ts",
-      "default": "./src/adapters/cloudflare-worker.ts"
-    },
-    "./tools/categories": {
-      "development": "./src/mcp/tools/categories.ts",
-      "types": "./dist/mcp/tools/categories.d.ts",
-      "default": "./src/mcp/tools/categories.ts"
-    },
-    "./tools/detail": {
-      "development": "./src/mcp/tools/detail.ts",
-      "types": "./dist/mcp/tools/detail.d.ts",
-      "default": "./src/mcp/tools/detail.ts"
-    },
-    "./tools/featured": {
-      "development": "./src/mcp/tools/featured.ts",
-      "types": "./dist/mcp/tools/featured.d.ts",
-      "default": "./src/mcp/tools/featured.ts"
-    },
-    "./tools/popular": {
-      "development": "./src/mcp/tools/popular.ts",
-      "types": "./dist/mcp/tools/popular.d.ts",
-      "default": "./src/mcp/tools/popular.ts"
-    },
-    "./tools/recent": {
-      "development": "./src/mcp/tools/recent.ts",
-      "types": "./dist/mcp/tools/recent.d.ts",
-      "default": "./src/mcp/tools/recent.ts"
-    },
-    "./tools/search": {
-      "development": "./src/mcp/tools/search.ts",
-      "types": "./dist/mcp/tools/search.d.ts",
-      "default": "./src/mcp/tools/search.ts"
-    },
-    "./tools/trending": {
-      "development": "./src/mcp/tools/trending.ts",
-      "types": "./dist/mcp/tools/trending.d.ts",
-      "default": "./src/mcp/tools/trending.ts"
-    },
-    "./tools": {
-      "development": "./src/mcp/tools/index.ts",
-      "types": "./dist/mcp/tools/index.d.ts",
-      "default": "./src/mcp/tools/index.ts"
-    },
-    "./types/runtime": {
-      "development": "./src/types/runtime.ts",
-      "types": "./dist/types/runtime.d.ts",
-      "default": "./src/types/runtime.ts"
-    },
-    "./lib/env-config": {
-      "development": "./src/lib/env-config.ts",
-      "types": "./dist/lib/env-config.d.ts",
-      "default": "./src/lib/env-config.ts"
-    },
-    "./lib/env-utils": {
-      "development": "./src/lib/env-utils.ts",
-      "types": "./dist/lib/env-utils.d.ts",
-      "default": "./src/lib/env-utils.ts"
-    },
-    "./lib/errors": {
-      "development": "./src/lib/errors.ts",
-      "types": "./dist/lib/errors.d.ts",
-      "default": "./src/lib/errors.ts"
-    },
-    "./lib/logger-utils": {
-      "development": "./src/lib/logger-utils.ts",
-      "types": "./dist/lib/logger-utils.d.ts",
-      "default": "./src/lib/logger-utils.ts"
-    },
-    "./lib/platform-formatters": {
-      "development": "./src/lib/platform-formatters.ts",
-      "types": "./dist/lib/platform-formatters.d.ts",
-      "default": "./src/lib/platform-formatters.ts"
-    },
-    "./lib/schemas": {
-      "development": "./src/lib/schemas.ts",
-      "types": "./dist/lib/schemas.d.ts",
-      "default": "./src/lib/schemas.ts"
-    },
-    "./lib/storage-utils": {
-      "development": "./src/lib/storage-utils.ts",
-      "types": "./dist/lib/storage-utils.d.ts",
-      "default": "./src/lib/storage-utils.ts"
-    },
-    "./lib/usage-hints": {
-      "development": "./src/lib/usage-hints.ts",
-      "types": "./dist/lib/usage-hints.d.ts",
-      "default": "./src/lib/usage-hints.ts"
-    },
-    "./lib/utils": {
-      "development": "./src/lib/utils.ts",
-      "types": "./dist/lib/utils.d.ts",
-      "default": "./src/lib/utils.ts"
-    },
-    "./middleware/rate-limit": {
-      "development": "./src/middleware/rate-limit.ts",
-      "types": "./dist/middleware/rate-limit.d.ts",
-      "default": "./src/middleware/rate-limit.ts"
-    },
-    "./middleware/request-deduplication": {
-      "development": "./src/middleware/request-deduplication.ts",
-      "types": "./dist/middleware/request-deduplication.d.ts",
-      "default": "./src/middleware/request-deduplication.ts"
-    },
-    "./cache/cache-headers": {
-      "development": "./src/cache/cache-headers.ts",
-      "types": "./dist/cache/cache-headers.d.ts",
-      "default": "./src/cache/cache-headers.ts"
-    },
-    "./cache/kv-cache": {
-      "development": "./src/cache/kv-cache.ts",
-      "types": "./dist/cache/kv-cache.d.ts",
-      "default": "./src/cache/kv-cache.ts"
-    },
-    "./observability/metrics": {
-      "development": "./src/observability/metrics.ts",
-      "types": "./dist/observability/metrics.d.ts",
-      "default": "./src/observability/metrics.ts"
-    },
-    "./routes/health": {
-      "development": "./src/routes/health.ts",
-      "types": "./dist/routes/health.d.ts",
-      "default": "./src/routes/health.ts"
-    },
-    "./routes/oauth-authorize": {
-      "development": "./src/routes/oauth-authorize.ts",
-      "types": "./dist/routes/oauth-authorize.d.ts",
-      "default": "./src/routes/oauth-authorize.ts"
-    },
-    "./routes/oauth-metadata": {
-      "development": "./src/routes/oauth-metadata.ts",
-      "types": "./dist/routes/oauth-metadata.d.ts",
-      "default": "./src/routes/oauth-metadata.ts"
-    },
-    "./routes/oauth-token": {
-      "development": "./src/routes/oauth-token.ts",
-      "types": "./dist/routes/oauth-token.d.ts",
-      "default": "./src/routes/oauth-token.ts"
-    },
-    "./routes/oauth/shared": {
-      "development": "./src/routes/oauth/shared.ts",
-      "types": "./dist/routes/oauth/shared.d.ts",
-      "default": "./src/routes/oauth/shared.ts"
-    },
-    "./routes/openapi": {
-      "development": "./src/routes/openapi.ts",
-      "types": "./dist/routes/openapi.d.ts",
-      "default": "./src/routes/openapi.ts"
-    },
-    "./mcp/server": {
-      "development": "./src/mcp/server.ts",
-      "types": "./dist/mcp/server.d.ts",
-      "default": "./src/mcp/server.ts"
-    },
-    "./mcp/resources": {
-      "development": "./src/mcp/resources/index.ts",
-      "types": "./dist/mcp/resources/index.d.ts",
-      "default": "./src/mcp/resources/index.ts"
-    },
-    "./mcp/prompts": {
-      "development": "./src/mcp/prompts/index.ts",
-      "types": "./dist/mcp/prompts/index.d.ts",
-      "default": "./src/mcp/prompts/index.ts"
-    }
-  },
-  "bin": {
-    "heyclaude-mcp": "./src/cli.ts"
-  },
-  "files": [
-    "src/**/*",
-    "bin/**/*",
-    "README.md",
-    "LICENSE"
-  ],
-  "scripts": {
-    "build": "tsc",
-    "type-check": "tsc --noEmit",
-    "lint": "eslint . --config ../../config/tools/eslint.config.mjs"
-  },
-  "dependencies": {
-    "@heyclaude/data-layer": "workspace:*",
-    "@heyclaude/database-types": "workspace:*",
-    "@heyclaude/shared-runtime": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.25.1",
-    "zod": "^4.2.1"
-  },
-  "devDependencies": {
-    "@heyclaude/cloudflare-runtime": "workspace:*",
-    "@types/node": "^25.0.3",
-    "typescript": "5.9.3"
-  },
+  "description": "HeyClaude MCP Server - Model Context Protocol server for Claude Pro Directory",
   "keywords": [
     "mcp",
     "model-context-protocol",
@@ -233,18 +14,245 @@
     "anthropic",
     "claude-desktop"
   ],
-  "author": "JSONbored",
-  "license": "MIT",
+  "homepage": "https://github.com/JSONbored/claudepro-directory#readme",
+  "bugs": {
+    "url": "https://github.com/JSONbored/claudepro-directory/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/JSONbored/claudepro-directory",
     "directory": "packages/mcp-server"
   },
-  "homepage": "https://github.com/JSONbored/claudepro-directory#readme",
-  "bugs": {
-    "url": "https://github.com/JSONbored/claudepro-directory/issues"
+  "license": "MIT",
+  "author": "JSONbored",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server/node-server.d.ts",
+      "development": "./src/server/node-server.ts",
+      "default": "./dist/server/node-server.js"
+    },
+    "./cli": {
+      "types": "./dist/cli.d.ts",
+      "development": "./src/cli.ts",
+      "default": "./dist/cli.js"
+    },
+    "./adapters": {
+      "types": "./dist/adapters/api-proxy.d.ts",
+      "development": "./src/adapters/api-proxy.ts",
+      "default": "./dist/adapters/api-proxy.js"
+    },
+    "./adapters/cloudflare-worker": {
+      "types": "./dist/adapters/cloudflare-worker.d.ts",
+      "development": "./src/adapters/cloudflare-worker.ts",
+      "default": "./dist/adapters/cloudflare-worker.js"
+    },
+    "./tools/categories": {
+      "types": "./dist/mcp/tools/categories.d.ts",
+      "development": "./src/mcp/tools/categories.ts",
+      "default": "./dist/mcp/tools/categories.js"
+    },
+    "./tools/detail": {
+      "types": "./dist/mcp/tools/detail.d.ts",
+      "development": "./src/mcp/tools/detail.ts",
+      "default": "./dist/mcp/tools/detail.js"
+    },
+    "./tools/featured": {
+      "types": "./dist/mcp/tools/featured.d.ts",
+      "development": "./src/mcp/tools/featured.ts",
+      "default": "./dist/mcp/tools/featured.js"
+    },
+    "./tools/popular": {
+      "types": "./dist/mcp/tools/popular.d.ts",
+      "development": "./src/mcp/tools/popular.ts",
+      "default": "./dist/mcp/tools/popular.js"
+    },
+    "./tools/recent": {
+      "types": "./dist/mcp/tools/recent.d.ts",
+      "development": "./src/mcp/tools/recent.ts",
+      "default": "./dist/mcp/tools/recent.js"
+    },
+    "./tools/search": {
+      "types": "./dist/mcp/tools/search.d.ts",
+      "development": "./src/mcp/tools/search.ts",
+      "default": "./dist/mcp/tools/search.js"
+    },
+    "./tools/trending": {
+      "types": "./dist/mcp/tools/trending.d.ts",
+      "development": "./src/mcp/tools/trending.ts",
+      "default": "./dist/mcp/tools/trending.js"
+    },
+    "./tools": {
+      "types": "./dist/mcp/tools/index.d.ts",
+      "development": "./src/mcp/tools/index.ts",
+      "default": "./dist/mcp/tools/index.js"
+    },
+    "./types/runtime": {
+      "types": "./dist/types/runtime.d.ts",
+      "development": "./src/types/runtime.ts",
+      "default": "./dist/types/runtime.js"
+    },
+    "./lib/env-config": {
+      "types": "./dist/lib/env-config.d.ts",
+      "development": "./src/lib/env-config.ts",
+      "default": "./dist/lib/env-config.js"
+    },
+    "./lib/env-utils": {
+      "types": "./dist/lib/env-utils.d.ts",
+      "development": "./src/lib/env-utils.ts",
+      "default": "./dist/lib/env-utils.js"
+    },
+    "./lib/errors": {
+      "types": "./dist/lib/errors.d.ts",
+      "development": "./src/lib/errors.ts",
+      "default": "./dist/lib/errors.js"
+    },
+    "./lib/logger-utils": {
+      "types": "./dist/lib/logger-utils.d.ts",
+      "development": "./src/lib/logger-utils.ts",
+      "default": "./dist/lib/logger-utils.js"
+    },
+    "./lib/platform-formatters": {
+      "types": "./dist/lib/platform-formatters.d.ts",
+      "development": "./src/lib/platform-formatters.ts",
+      "default": "./dist/lib/platform-formatters.js"
+    },
+    "./lib/schemas": {
+      "types": "./dist/lib/schemas.d.ts",
+      "development": "./src/lib/schemas.ts",
+      "default": "./dist/lib/schemas.js"
+    },
+    "./lib/storage-utils": {
+      "types": "./dist/lib/storage-utils.d.ts",
+      "development": "./src/lib/storage-utils.ts",
+      "default": "./dist/lib/storage-utils.js"
+    },
+    "./lib/usage-hints": {
+      "types": "./dist/lib/usage-hints.d.ts",
+      "development": "./src/lib/usage-hints.ts",
+      "default": "./dist/lib/usage-hints.js"
+    },
+    "./lib/utils": {
+      "types": "./dist/lib/utils.d.ts",
+      "development": "./src/lib/utils.ts",
+      "default": "./dist/lib/utils.js"
+    },
+    "./middleware/rate-limit": {
+      "types": "./dist/middleware/rate-limit.d.ts",
+      "development": "./src/middleware/rate-limit.ts",
+      "default": "./dist/middleware/rate-limit.js"
+    },
+    "./middleware/request-deduplication": {
+      "types": "./dist/middleware/request-deduplication.d.ts",
+      "development": "./src/middleware/request-deduplication.ts",
+      "default": "./dist/middleware/request-deduplication.js"
+    },
+    "./cache/cache-headers": {
+      "types": "./dist/cache/cache-headers.d.ts",
+      "development": "./src/cache/cache-headers.ts",
+      "default": "./dist/cache/cache-headers.js"
+    },
+    "./cache/kv-cache": {
+      "types": "./dist/cache/kv-cache.d.ts",
+      "development": "./src/cache/kv-cache.ts",
+      "default": "./dist/cache/kv-cache.js"
+    },
+    "./observability/metrics": {
+      "types": "./dist/observability/metrics.d.ts",
+      "development": "./src/observability/metrics.ts",
+      "default": "./dist/observability/metrics.js"
+    },
+    "./routes/health": {
+      "types": "./dist/routes/health.d.ts",
+      "development": "./src/routes/health.ts",
+      "default": "./dist/routes/health.js"
+    },
+    "./routes/oauth-authorize": {
+      "types": "./dist/routes/oauth-authorize.d.ts",
+      "development": "./src/routes/oauth-authorize.ts",
+      "default": "./dist/routes/oauth-authorize.js"
+    },
+    "./routes/oauth-metadata": {
+      "types": "./dist/routes/oauth-metadata.d.ts",
+      "development": "./src/routes/oauth-metadata.ts",
+      "default": "./dist/routes/oauth-metadata.js"
+    },
+    "./routes/oauth-token": {
+      "types": "./dist/routes/oauth-token.d.ts",
+      "development": "./src/routes/oauth-token.ts",
+      "default": "./dist/routes/oauth-token.js"
+    },
+    "./routes/oauth/shared": {
+      "types": "./dist/routes/oauth/shared.d.ts",
+      "development": "./src/routes/oauth/shared.ts",
+      "default": "./dist/routes/oauth/shared.js"
+    },
+    "./routes/openapi": {
+      "types": "./dist/routes/openapi.d.ts",
+      "development": "./src/routes/openapi.ts",
+      "default": "./dist/routes/openapi.js"
+    },
+    "./mcp/server": {
+      "types": "./dist/mcp/server.d.ts",
+      "development": "./src/mcp/server.ts",
+      "default": "./dist/mcp/server.js"
+    },
+    "./mcp/resources": {
+      "types": "./dist/mcp/resources/index.d.ts",
+      "development": "./src/mcp/resources/index.ts",
+      "default": "./dist/mcp/resources/index.js"
+    },
+    "./mcp/prompts": {
+      "types": "./dist/mcp/prompts/index.d.ts",
+      "development": "./src/mcp/prompts/index.ts",
+      "default": "./dist/mcp/prompts/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "heyclaude-mcp": "./dist/cli.js"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsup && pnpm build:types",
+    "build:types": "tsc --project tsconfig.types.json || true",
+    "lint": "eslint . --config ../../config/tools/eslint.config.mjs",
+    "prepublishOnly": "pnpm build",
+    "test": "jest --config ../../.trunk/configs/jest.config.cjs --testPathPatterns=packages/mcp-server/src",
+    "test:coverage": "jest --config ../../.trunk/configs/jest.config.cjs --testPathPatterns=packages/mcp-server/src --coverage",
+    "test:watch": "jest --config ../../.trunk/configs/jest.config.cjs --testPathPatterns=packages/mcp-server/src --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.1",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@heyclaude/cloudflare-runtime": "workspace:*",
+    "@heyclaude/data-layer": "workspace:*",
+    "@heyclaude/database-types": "workspace:*",
+    "@heyclaude/shared-runtime": "workspace:*",
+    "@types/node": "^25.0.3",
+    "tsup": "^8.5.1",
+    "typescript": "5.9.3"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "_bundledDependencies": {
+    "note": "The following dependencies are bundled into the dist/ output and are not required as npm dependencies: @heyclaude/data-layer, @heyclaude/database-types, @heyclaude/shared-runtime"
+  },
+  "_versioning": {
+    "note": "Version management documentation is in README.md. This package follows SemVer. Starting version: 1.0.0. Version bumps via GitHub Actions workflows (.github/workflows/auto-release.yml and release.yml). NPM publishing is manual - see README.md for details."
   }
 }

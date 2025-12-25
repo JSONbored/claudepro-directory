@@ -191,7 +191,11 @@ export function UserMenu({ className }: UserMenuProps) {
           </motion.div>
         </NavigationHoverCardTrigger>
 
-        <NavigationHoverCardContent align="end" className="w-[calc(100vw-2rem)] max-w-72 p-4 sm:w-72" sideOffset={8}>
+        <NavigationHoverCardContent
+          align="end"
+          className="w-[calc(100vw-2rem)] max-w-72 p-4 sm:w-72"
+          sideOffset={8}
+        >
           {/* User Header with Avatar */}
           <div className={cn('flex items-center gap-2', 'mb-4', 'pb-4', 'border-border border-b')}>
             <Avatar className="h-12 w-12">
@@ -213,7 +217,9 @@ export function UserMenu({ className }: UserMenuProps) {
 
           {/* Dashboard Link */}
           <motion.div
-            whileHover={shouldReduceMotion ? {} : { backgroundColor: 'var(--color-primary-hover-bg)' }}
+            whileHover={
+              shouldReduceMotion ? {} : { backgroundColor: 'var(--color-primary-hover-bg)' }
+            }
             transition={MICROINTERACTIONS.colorTransition.default}
             className="mb-2"
           >

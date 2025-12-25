@@ -39,6 +39,7 @@ Your project uses:
    - **Keyboard Shortcuts**: See [Zed keybindings documentation](https://zed.dev/docs/keybindings) for platform-specific shortcuts
 
 2. **Hover Diagnostics**: Hover over code to see type information and errors
+
 3. **Inline Errors**: Red squiggles show TypeScript errors directly in the editor
 
 ### Full Workspace Analysis

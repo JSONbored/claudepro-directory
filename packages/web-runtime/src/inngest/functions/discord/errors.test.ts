@@ -78,25 +78,24 @@ jest.mock('../../utils/monitoring', () => ({
 }));
 
 // Get mocks for use in tests
-const {
-  __mockPgmqRead: mockPgmqRead,
-  __mockPgmqDelete: mockPgmqDelete,
-} = jest.requireMock('../../../supabase/pgmq-client') as {
+const { __mockPgmqRead: mockPgmqRead, __mockPgmqDelete: mockPgmqDelete } = jest.requireMock(
+  '../../../supabase/pgmq-client'
+) as {
   __mockPgmqRead: ReturnType<typeof jest.fn>;
   __mockPgmqDelete: ReturnType<typeof jest.fn>;
 };
-const {
-  __mockLogger: mockLogger,
-  __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId,
-} = jest.requireMock('../../../logging/server') as {
-  __mockLogger: {
-    info: ReturnType<typeof jest.fn>;
-    warn: ReturnType<typeof jest.fn>;
-    error: ReturnType<typeof jest.fn>;
+const { __mockLogger: mockLogger, __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId } =
+  jest.requireMock('../../../logging/server') as {
+    __mockLogger: {
+      info: ReturnType<typeof jest.fn>;
+      warn: ReturnType<typeof jest.fn>;
+      error: ReturnType<typeof jest.fn>;
+    };
+    __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
   };
-  __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-};
-const { __mockNormalizeError: mockNormalizeError } = jest.requireMock('@heyclaude/shared-runtime') as {
+const { __mockNormalizeError: mockNormalizeError } = jest.requireMock(
+  '@heyclaude/shared-runtime'
+) as {
   __mockNormalizeError: ReturnType<typeof jest.fn>;
 };
 const envMock = jest.requireMock('@heyclaude/shared-runtime/schemas/env') as {
@@ -468,7 +467,7 @@ describe('processDiscordErrorsQueue', () => {
       // Inngest test engine may not capture errors from steps that fail early
       // Check error property (standard format)
       const error = (executeResult as { error?: Error | { message: string } })?.error;
-      
+
       // If error is not captured, at least verify the function attempted to get the webhook URL
       // (The error is thrown in the get-webhook-url step, so we can't easily verify it via logger)
       if (!error) {
@@ -478,7 +477,7 @@ describe('processDiscordErrorsQueue', () => {
         // Since we can't easily verify step failures, we'll just verify the function ran
         return;
       }
-      
+
       // Handle both Error instances and error objects
       let errorMessage: string;
       if (error instanceof Error) {
@@ -488,7 +487,7 @@ describe('processDiscordErrorsQueue', () => {
       } else {
         errorMessage = String(error);
       }
-      
+
       expect(errorMessage).toBe('DISCORD_ERROR_WEBHOOK_URL not configured');
     } finally {
       // Restore original URL
@@ -532,12 +531,12 @@ describe('processDiscordErrorsQueue', () => {
 
     // Verify fetch was called
     expect(mockFetch).toHaveBeenCalled();
-    
+
     // Verify error message was sanitized
     const fetchCalls = mockFetch.mock.calls;
     expect(fetchCalls.length).toBeGreaterThan(0);
-    
-    const fetchCall = fetchCalls.find(call => {
+
+    const fetchCall = fetchCalls.find((call) => {
       try {
         const body = JSON.parse(call[1]?.body as string);
         return body.embeds && body.embeds.length > 0;
@@ -545,7 +544,7 @@ describe('processDiscordErrorsQueue', () => {
         return false;
       }
     });
-    
+
     expect(fetchCall).toBeDefined();
     const body = JSON.parse(fetchCall![1]?.body as string);
     // The description wraps the error message in triple backticks for code block formatting: ```\n${errorMessage}\n```
@@ -595,12 +594,12 @@ describe('processDiscordErrorsQueue', () => {
 
     // Verify fetch was called
     expect(mockFetch).toHaveBeenCalled();
-    
+
     // Verify error message was truncated
     const fetchCalls = mockFetch.mock.calls;
     expect(fetchCalls.length).toBeGreaterThan(0);
-    
-    const fetchCall = fetchCalls.find(call => {
+
+    const fetchCall = fetchCalls.find((call) => {
       try {
         const body = JSON.parse(call[1]?.body as string);
         return body.embeds && body.embeds.length > 0;
@@ -608,7 +607,7 @@ describe('processDiscordErrorsQueue', () => {
         return false;
       }
     });
-    
+
     expect(fetchCall).toBeDefined();
     const body = JSON.parse(fetchCall![1]?.body as string);
     expect(body.embeds[0].description.length).toBeLessThanOrEqual(1000 + 10); // +10 for code block wrapper
@@ -639,4 +638,3 @@ describe('processDiscordErrorsQueue', () => {
     });
   });
 });
-

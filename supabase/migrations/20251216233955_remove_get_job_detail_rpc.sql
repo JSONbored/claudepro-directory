@@ -6,5 +6,4 @@
 -- Description: Remove get_job_detail RPC function
 -- Migrated to Prisma: JobsService.getJobBySlug()
 -- Function signature: get_job_detail(text)
-
-DROP FUNCTION IF EXISTS public.get_job_detail(text);
+DROP FUNCTION IF EXISTS public.get_job_detail (text);

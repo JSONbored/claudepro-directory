@@ -136,9 +136,9 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
       const created_at: string =
         contributor.created_at instanceof Date
           ? contributor.created_at.toISOString()
-          : (typeof contributor.created_at === 'string'
+          : typeof contributor.created_at === 'string'
             ? contributor.created_at
-            : '');
+            : '';
 
       return {
         bio: contributor.bio,

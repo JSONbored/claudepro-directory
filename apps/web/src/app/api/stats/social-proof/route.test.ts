@@ -90,8 +90,12 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
       status: typeof status === 'number' ? status : 200,
       headers: {
         'Content-Type': 'application/json',
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
-        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null ? (additionalHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
+        ...(typeof additionalHeaders === 'object' && additionalHeaders !== null
+          ? (additionalHeaders as Record<string, string>)
+          : {}),
       },
     });
   }),
@@ -99,7 +103,9 @@ jest.mock('@heyclaude/web-runtime/server/api-helpers', () => ({
     return new NextResponse(null, {
       status: 204,
       headers: {
-        ...(typeof corsHeaders === 'object' && corsHeaders !== null ? (corsHeaders as Record<string, string>) : {}),
+        ...(typeof corsHeaders === 'object' && corsHeaders !== null
+          ? (corsHeaders as Record<string, string>)
+          : {}),
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
       },
     });
@@ -162,13 +168,16 @@ describe('GET /api/stats/social-proof', () => {
       ]);
 
       // Seed content for total count (1000 total)
-      (prismocker as any).setData('content', Array.from({ length: 1000 }, (_, i) => ({
-        id: `content-${i}`,
-        slug: `content-${i}`,
-        title: `Content ${i}`,
-        category: 'agents',
-        created_at: new Date(now.getTime() - i * 24 * 60 * 60 * 1000),
-      })));
+      (prismocker as any).setData(
+        'content',
+        Array.from({ length: 1000 }, (_, i) => ({
+          id: `content-${i}`,
+          slug: `content-${i}`,
+          title: `Content ${i}`,
+          category: 'agents',
+          created_at: new Date(now.getTime() - i * 24 * 60 * 60 * 1000),
+        }))
+      );
     }
   });
 
@@ -180,7 +189,7 @@ describe('GET /api/stats/social-proof', () => {
     });
 
     const response = await GET(request);
-    const body = await getResponseBody(response) as {
+    const body = (await getResponseBody(response)) as {
       success?: boolean;
       stats?: {
         contributors?: { count?: number; names?: string[] };
@@ -217,7 +226,7 @@ describe('GET /api/stats/social-proof', () => {
     });
 
     const response = await GET(request);
-    const body = await getResponseBody(response) as {
+    const body = (await getResponseBody(response)) as {
       success?: boolean;
       stats?: {
         contributors?: { count?: number; names?: string[] };
@@ -234,8 +243,12 @@ describe('GET /api/stats/social-proof', () => {
     expect(body.stats?.contributors).toHaveProperty('names');
     expect(Array.isArray(body.stats?.contributors?.names)).toBe(true);
     expect(typeof body.stats?.submissions).toBe('number');
-    expect(typeof body.stats?.successRate === 'number' || body.stats?.successRate === null).toBe(true);
-    expect(typeof body.stats?.totalUsers === 'number' || body.stats?.totalUsers === null).toBe(true);
+    expect(typeof body.stats?.successRate === 'number' || body.stats?.successRate === null).toBe(
+      true
+    );
+    expect(typeof body.stats?.totalUsers === 'number' || body.stats?.totalUsers === null).toBe(
+      true
+    );
   });
 
   it('should include ETag and Last-Modified headers', async () => {
@@ -273,7 +286,7 @@ describe('GET /api/stats/social-proof', () => {
     });
 
     const response = await GET(request);
-    const body = await getResponseBody(response) as {
+    const body = (await getResponseBody(response)) as {
       success?: boolean;
       stats?: {
         contributors?: { count?: number; names?: string[] };
@@ -331,7 +344,7 @@ describe('GET /api/stats/social-proof', () => {
     });
 
     const response = await GET(request);
-    const body = await getResponseBody(response) as {
+    const body = (await getResponseBody(response)) as {
       success?: boolean;
       stats?: {
         contributors?: { count?: number; names?: string[] };
@@ -377,7 +390,7 @@ describe('GET /api/stats/social-proof', () => {
     });
 
     const response = await GET(request);
-    const body = await getResponseBody(response) as {
+    const body = (await getResponseBody(response)) as {
       success?: boolean;
       stats?: {
         contributors?: { count?: number; names?: string[] };
@@ -426,7 +439,7 @@ describe('GET /api/stats/social-proof', () => {
     });
 
     const response = await GET(request);
-    const body = await getResponseBody(response) as {
+    const body = (await getResponseBody(response)) as {
       success?: boolean;
       stats?: {
         contributors?: { count?: number; names?: string[] };
@@ -485,7 +498,9 @@ describe('GET /api/stats/social-proof', () => {
   it('should handle service errors gracefully', async () => {
     // Mock Prisma queries to throw error
     const originalCount = prismocker.content_submissions.count;
-    prismocker.content_submissions.count = jest.fn().mockRejectedValue(new Error('Database error')) as unknown as typeof originalCount;
+    prismocker.content_submissions.count = jest
+      .fn()
+      .mockRejectedValue(new Error('Database error')) as unknown as typeof originalCount;
 
     const request = createMockRequest({
       method: 'GET',
@@ -494,7 +509,7 @@ describe('GET /api/stats/social-proof', () => {
     });
 
     const response = await GET(request);
-    const body = await getResponseBody(response) as { error?: string };
+    const body = (await getResponseBody(response)) as { error?: string };
 
     expectStatus(response, 500);
     expect(body).toHaveProperty('error');
@@ -519,7 +534,7 @@ describe('GET /api/stats/social-proof', () => {
     });
 
     const response = await GET(request);
-    const body = await getResponseBody(response) as { error?: string };
+    const body = (await getResponseBody(response)) as { error?: string };
 
     expectStatus(response, 405);
     expect(body).toHaveProperty('error');

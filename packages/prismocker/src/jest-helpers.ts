@@ -96,9 +96,7 @@ export type MockQueryRawUnsafe = jest.MockedFunction<
  * prisma.$queryRawUnsafe = mockQuery;
  * ```
  */
-export function createMockQueryRawUnsafe(
-  _prisma?: PrismaClient
-): MockQueryRawUnsafe {
+export function createMockQueryRawUnsafe(_prisma?: PrismaClient): MockQueryRawUnsafe {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return jest.fn() as any as MockQueryRawUnsafe;
 }
@@ -175,4 +173,3 @@ export function createMockTransaction(_prisma?: PrismaClient): MockTransaction {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return jest.fn() as any as MockTransaction;
 }
-

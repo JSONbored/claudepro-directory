@@ -9,5 +9,4 @@
 --
 -- Function signature: refresh_metadata_templates_cache()
 -- Related: Trigger uses refresh_metadata_templates_cache_on_change() instead
-
-DROP FUNCTION IF EXISTS public.refresh_metadata_templates_cache();
+DROP FUNCTION IF EXISTS public.refresh_metadata_templates_cache ();

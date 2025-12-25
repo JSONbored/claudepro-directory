@@ -64,14 +64,7 @@ export interface EmailMetricsProps {
 /**
  * Single EmailMetrics Component
  */
-export function EmailMetrics({
-  value,
-  label,
-  prefix,
-  suffix,
-  icon,
-  style,
-}: EmailMetricsProps) {
+export function EmailMetrics({ value, label, prefix, suffix, icon, style }: EmailMetricsProps) {
   const containerStyle: React.CSSProperties = {
     padding: spacing.md,
     borderRadius: borderRadius.md,
@@ -130,11 +123,7 @@ export interface EmailMetricsGridProps {
  * EmailMetricsGrid Component
  * Grid layout for multiple metrics
  */
-export function EmailMetricsGrid({
-  children,
-  columns = 3,
-  style,
-}: EmailMetricsGridProps) {
+export function EmailMetricsGrid({ children, columns = 3, style }: EmailMetricsGridProps) {
   const gridStyle: React.CSSProperties = {
     display: 'grid',
     gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
@@ -146,4 +135,3 @@ export function EmailMetricsGrid({
 
   return <Section style={gridStyle}>{children}</Section>;
 }
-

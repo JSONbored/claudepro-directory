@@ -134,8 +134,8 @@ export async function AccountSidebar({
   const imageSrc = userImageMetadata || profile?.image || null;
 
   return (
-    <Card className="h-fit p-4 md:p-6 md:col-span-1 shadow-sm">
-      <div className="mb-4 md:mb-6 flex items-center gap-2 md:gap-3 border-b border-border/50 pb-3 md:pb-4">
+    <Card className="h-fit p-4 shadow-sm md:col-span-1 md:p-6">
+      <div className="border-border/50 mb-4 flex items-center gap-2 border-b pb-3 md:mb-6 md:gap-3 md:pb-4">
         {imageSrc ? (
           <div className="relative">
             <Image
@@ -143,23 +143,23 @@ export async function AccountSidebar({
               alt={`${profile?.name ?? userNameMetadata ?? 'User'}'s avatar`}
               width={48}
               height={48}
-              className="h-12 w-12 rounded-full object-cover ring-2 ring-border/50 transition-all hover:ring-accent/50"
+              className="ring-border/50 hover:ring-accent/50 h-12 w-12 rounded-full object-cover ring-2 transition-all"
               unoptimized
               priority
             />
           </div>
         ) : (
-          <div className="bg-accent/10 flex h-12 w-12 items-center justify-center rounded-full ring-2 ring-border/50">
-            <UserIcon className="h-6 w-6 text-accent" />
+          <div className="bg-accent/10 ring-border/50 flex h-12 w-12 items-center justify-center rounded-full ring-2">
+            <UserIcon className="text-accent h-6 w-6" />
           </div>
         )}
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm truncate">{profile?.name ?? userNameMetadata}</p>
-          <p className="text-muted-foreground text-xs truncate">{user.email ?? ''}</p>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold">{profile?.name ?? userNameMetadata}</p>
+          <p className="text-muted-foreground truncate text-xs">{user.email ?? ''}</p>
           {profile?.slug ? (
             <Link
               href={`/u/${profile.slug}`}
-              className="text-accent text-xs hover:underline transition-colors inline-block mt-0.5"
+              className="text-accent mt-0.5 inline-block text-xs transition-colors hover:underline"
             >
               View Profile →
             </Link>

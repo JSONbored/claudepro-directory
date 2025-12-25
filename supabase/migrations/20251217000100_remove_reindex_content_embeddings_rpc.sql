@@ -5,5 +5,4 @@
 --
 -- Description: Remove reindex_content_embeddings RPC function - embedding generation system was removed
 -- Function signature: reindex_content_embeddings() RETURNS text
-
-DROP FUNCTION IF EXISTS public.reindex_content_embeddings();
+DROP FUNCTION IF EXISTS public.reindex_content_embeddings ();

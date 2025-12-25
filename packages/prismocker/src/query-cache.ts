@@ -47,11 +47,7 @@ export class QueryCache {
    *
    * @internal This method is used internally to generate cache keys
    */
-  private generateCacheKey(
-    modelName: string,
-    operation: string,
-    args?: any
-  ): string {
+  private generateCacheKey(modelName: string, operation: string, args?: any): string {
     // Create a deterministic key from the query parameters
     // We stringify the args, but we need to handle circular references and ensure consistent ordering
     const keyParts = [modelName, operation];
@@ -139,9 +135,7 @@ export class QueryCache {
     }
 
     if (this.options.logQueries) {
-      this.options.logger?.(
-        `[Prismocker QueryCache] Cache hit for ${modelName}.${operation}`
-      );
+      this.options.logger?.(`[Prismocker QueryCache] Cache hit for ${modelName}.${operation}`);
     }
 
     // Return a deep copy to prevent mutation of cached data
@@ -183,9 +177,7 @@ export class QueryCache {
     });
 
     if (this.options.logQueries) {
-      this.options.logger?.(
-        `[Prismocker QueryCache] Cached result for ${modelName}.${operation}`
-      );
+      this.options.logger?.(`[Prismocker QueryCache] Cached result for ${modelName}.${operation}`);
     }
   }
 
@@ -308,4 +300,3 @@ export class QueryCache {
     };
   }
 }
-

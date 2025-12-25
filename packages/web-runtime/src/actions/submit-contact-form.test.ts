@@ -123,7 +123,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {
@@ -401,7 +401,10 @@ describe('submitContactForm', () => {
 
       // Verify cache invalidation
       expect(mockRevalidatePath).toHaveBeenCalledWith('/admin/contact-submissions');
-      expect(mockRevalidateTag).toHaveBeenCalledWith('contact-submission-123e4567-e89b-12d3-a456-426614174000', 'default');
+      expect(mockRevalidateTag).toHaveBeenCalledWith(
+        'contact-submission-123e4567-e89b-12d3-a456-426614174000',
+        'default'
+      );
       expect(mockRevalidateTag).toHaveBeenCalledWith('contact', 'default');
       expect(mockRevalidateTag).toHaveBeenCalledWith('submissions', 'default');
     });
@@ -520,7 +523,7 @@ describe('submitContactForm', () => {
         },
       ];
       (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mockResolvedValue(mockResult);
-      
+
       // Mock Inngest function execution to fail (simulating function error)
       // We'll make the function fail by making sendEmail fail
       const hookError = new Error('Email send failed');

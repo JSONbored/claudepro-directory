@@ -5,5 +5,4 @@
 --
 -- Description: Remove check_vacuum_needed RPC function
 -- This database maintenance function is unused in the codebase.
-
-DROP FUNCTION IF EXISTS public.check_vacuum_needed();
+DROP FUNCTION IF EXISTS public.check_vacuum_needed ();

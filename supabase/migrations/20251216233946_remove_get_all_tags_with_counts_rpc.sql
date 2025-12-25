@@ -6,5 +6,4 @@
 -- Description: Remove get_all_tags_with_counts RPC function
 -- This function is unused in the codebase.
 -- Function signature: get_all_tags_with_counts(integer, integer)
-
-DROP FUNCTION IF EXISTS public.get_all_tags_with_counts(integer, integer);
+DROP FUNCTION IF EXISTS public.get_all_tags_with_counts (integer, integer);

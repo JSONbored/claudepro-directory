@@ -65,7 +65,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {
@@ -139,7 +139,6 @@ describe('toggleJobStatus', () => {
     // No manual auth mocks needed!
   });
 
-
   describe('input validation', () => {
     it('should return fieldErrors for invalid UUID job_id', async () => {
       const { toggleJobStatus } = await import('./toggle-job-status.ts');
@@ -156,7 +155,7 @@ describe('toggleJobStatus', () => {
       expect(safeResult.fieldErrors).toBeDefined();
       expect(safeResult.data).toBeUndefined();
       expect(safeResult.serverError).toBeUndefined();
-      
+
       // Verify field errors for invalid UUID
       expect(safeResult.fieldErrors?.job_id).toBeDefined();
     });

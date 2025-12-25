@@ -41,7 +41,7 @@ export const uploadUserImage = authedAction
 
       const supabaseAdmin = await createSupabaseAdminClient();
       const bucket = imageType === 'avatar' ? 'user-avatars' : 'user-heroes';
-      
+
       const uploadResult = await uploadImageToStorage({
         bucket,
         data: buffer,
@@ -64,9 +64,10 @@ export const uploadUserImage = authedAction
       }
 
       // Update database with new image URL
-      const updateData = imageType === 'avatar' 
-        ? { image: uploadResult.publicUrl }
-        : { hero: uploadResult.publicUrl };
+      const updateData =
+        imageType === 'avatar'
+          ? { image: uploadResult.publicUrl }
+          : { hero: uploadResult.publicUrl };
 
       await prisma.public_users.update({
         where: { id: ctx.userId },
@@ -133,9 +134,7 @@ export const deleteUserImage = authedAction
       }
 
       // Update database to remove image URL
-      const updateData = imageType === 'avatar' 
-        ? { image: null }
-        : { hero: null };
+      const updateData = imageType === 'avatar' ? { image: null } : { hero: null };
 
       await prisma.public_users.update({
         where: { id: ctx.userId },
@@ -170,4 +169,3 @@ export const deleteUserImage = authedAction
       });
     }
   });
-

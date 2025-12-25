@@ -8,5 +8,4 @@
 --
 -- Function signature: get_featured_jobs()
 -- Related: JobsService.getFeaturedJobs uses Prisma queries instead
-
-DROP FUNCTION IF EXISTS public.get_featured_jobs();
+DROP FUNCTION IF EXISTS public.get_featured_jobs ();

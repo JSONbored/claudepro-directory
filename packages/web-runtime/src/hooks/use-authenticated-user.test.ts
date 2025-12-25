@@ -203,12 +203,12 @@ describe('useAuthenticatedUser', () => {
     const refreshed = await result.current.refreshUser();
 
     expect(refreshed).toEqual(refreshedUser);
-    
+
     // Wait for state update to be applied
     await waitFor(() => {
       expect(result.current.user).toEqual(refreshedUser);
     });
-    
+
     expect(mockGetUser).toHaveBeenCalledTimes(2);
   });
 

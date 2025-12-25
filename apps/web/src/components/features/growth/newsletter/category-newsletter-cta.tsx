@@ -38,11 +38,7 @@ export interface CategoryNewsletterCTAProps {
  * Renders a category-specific newsletter CTA optimized for category list pages.
  * Uses contextual messaging based on the category to increase relevance and conversion.
  */
-export function CategoryNewsletterCTA({
-  category,
-  source,
-  className,
-}: CategoryNewsletterCTAProps) {
+export function CategoryNewsletterCTA({ category, source, className }: CategoryNewsletterCTAProps) {
   // Category-specific messaging
   const categoryMessages: Record<
     string,
@@ -102,8 +98,7 @@ export function CategoryNewsletterCTA({
     },
     changelog: {
       headline: 'Stay updated on Claude Pro Directory',
-      description:
-        'Get notified when we release new features, improvements, and platform updates.',
+      description: 'Get notified when we release new features, improvements, and platform updates.',
       ctaText: 'Subscribe to updates',
     },
     collections: {
@@ -137,4 +132,3 @@ export function CategoryNewsletterCTA({
     </div>
   );
 }
-

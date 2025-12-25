@@ -18,7 +18,10 @@
  * - No MDX dependencies
  */
 
-import { changelog_category as ChangelogCategory, type changelog_category } from '@heyclaude/web-runtime/types/client-safe-enums';
+import {
+  changelog_category as ChangelogCategory,
+  type changelog_category,
+} from '@heyclaude/web-runtime/types/client-safe-enums';
 import type { ChangelogEntry } from '@heyclaude/web-runtime/types/changelog';
 import { parseChangelogChanges } from '@heyclaude/web-runtime/data/changelog.shared';
 import { formatDate } from '@heyclaude/web-runtime/data/utils';

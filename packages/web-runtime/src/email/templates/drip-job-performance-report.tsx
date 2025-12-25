@@ -70,10 +70,7 @@ export function JobPerformanceReportEmail({
   const showUpgradeTip = viewCount < 50;
 
   return (
-    <BaseLayout
-      preview={`📊 Your job posting stats: ${viewCount} views`}
-      utm={utm}
-    >
+    <BaseLayout preview={`📊 Your job posting stats: ${viewCount} views`} utm={utm}>
       <Section style={contentSectionStyle}>
         <Text style={titleStyle}>📊 Your Job Posting Performance</Text>
         <Text style={greetingStyle}>Hi {name},</Text>
@@ -82,16 +79,8 @@ export function JobPerformanceReportEmail({
         </Text>
 
         <div style={metricsContainerStyle}>
-          <EmailMetrics
-            value={viewCount.toString()}
-            label="Views"
-            style={metricStyle}
-          />
-          <EmailMetrics
-            value={clickCount.toString()}
-            label="Clicks"
-            style={metricStyle}
-          />
+          <EmailMetrics value={viewCount.toString()} label="Views" style={metricStyle} />
+          <EmailMetrics value={clickCount.toString()} label="Clicks" style={metricStyle} />
         </div>
 
         {showUpgradeTip && (
@@ -192,4 +181,3 @@ const primaryCtaStyle: React.CSSProperties = {
   textDecoration: 'none',
   fontSize: typography.fontSize.base,
 };
-

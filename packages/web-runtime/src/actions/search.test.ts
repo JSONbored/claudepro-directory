@@ -64,7 +64,7 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
     VERCEL: undefined,
     VITEST: undefined,
   };
-  
+
   return {
     env: new Proxy(envMock, {
       get: (target, prop: string) => {
@@ -97,7 +97,10 @@ describe('getPopularSearches', () => {
   }): any {
     return {
       search_query: overrides.search_query,
-      search_count: typeof overrides.search_count === 'bigint' ? overrides.search_count : BigInt(overrides.search_count),
+      search_count:
+        typeof overrides.search_count === 'bigint'
+          ? overrides.search_count
+          : BigInt(overrides.search_count),
       last_searched: new Date('2024-01-01'),
       unique_users: BigInt(50),
     };
@@ -140,7 +143,7 @@ describe('getPopularSearches', () => {
       expect(safeResult.fieldErrors).toBeDefined();
       expect(safeResult.data).toBeUndefined();
       expect(safeResult.serverError).toBeUndefined();
-      
+
       // Verify field errors for invalid limit
       expect(safeResult.fieldErrors?.limit).toBeDefined();
     });
@@ -159,7 +162,7 @@ describe('getPopularSearches', () => {
       expect(safeResult.fieldErrors).toBeDefined();
       expect(safeResult.data).toBeUndefined();
       expect(safeResult.serverError).toBeUndefined();
-      
+
       // Verify field errors for invalid limit
       expect(safeResult.fieldErrors?.limit).toBeDefined();
     });

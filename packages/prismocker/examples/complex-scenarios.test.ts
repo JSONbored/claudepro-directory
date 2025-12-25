@@ -118,10 +118,7 @@ describe('Complex Scenarios', () => {
       // NOTE: Adapt field names to your schema
       const jobs = await (prisma as any).jobs.findMany({
         where: {
-          AND: [
-            { view_count: { gte: 75 } },
-            { company_id: 'company-1' },
-          ],
+          AND: [{ view_count: { gte: 75 } }, { company_id: 'company-1' }],
         },
       });
 
@@ -133,10 +130,7 @@ describe('Complex Scenarios', () => {
     it('should handle OR conditions', async () => {
       const jobs = await (prisma as any).jobs.findMany({
         where: {
-          OR: [
-            { company_id: 'company-1' },
-            { company_id: 'company-2' },
-          ],
+          OR: [{ company_id: 'company-1' }, { company_id: 'company-2' }],
         },
       });
 
@@ -162,10 +156,7 @@ describe('Complex Scenarios', () => {
         where: {
           AND: [
             {
-              OR: [
-                { view_count: { gte: 100 } },
-                { company_id: 'company-2' },
-              ],
+              OR: [{ view_count: { gte: 100 } }, { company_id: 'company-2' }],
             },
           ],
           NOT: {
@@ -259,10 +250,7 @@ describe('Complex Scenarios', () => {
 
     it('should sort by multiple fields', async () => {
       const jobs = await (prisma as any).jobs.findMany({
-        orderBy: [
-          { company_id: 'asc' },
-          { view_count: 'desc' },
-        ],
+        orderBy: [{ company_id: 'asc' }, { view_count: 'desc' }],
       });
 
       // Sorted by company_id first, then view_count
@@ -628,17 +616,11 @@ describe('Complex Scenarios', () => {
           AND: [
             { view_count: { gte: 50 } },
             {
-              OR: [
-                { company_id: 'company-1' },
-                { company_id: 'company-2' },
-              ],
+              OR: [{ company_id: 'company-1' }, { company_id: 'company-2' }],
             },
           ],
         },
-        orderBy: [
-          { view_count: 'desc' },
-          { created_at: 'desc' },
-        ],
+        orderBy: [{ view_count: 'desc' }, { created_at: 'desc' }],
         take: 5,
       });
 
@@ -647,4 +629,3 @@ describe('Complex Scenarios', () => {
     });
   });
 });
-

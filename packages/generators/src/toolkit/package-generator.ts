@@ -287,4 +287,3 @@ function getItemSlug<TItem>(item: TItem): string {
   }
   throw new Error('Item must have a slug property');
 }
-
