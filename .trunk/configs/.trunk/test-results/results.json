@@ -1,0 +1,121 @@
+{
+  "config": {
+    "configFile": "/Users/shadowbook/Resilio Sync/shadowbook-pro/development/claudepro-directory/.trunk/configs/playwright.config.ts",
+    "rootDir": "/Users/shadowbook/Resilio Sync/shadowbook-pro/development/claudepro-directory/apps/web/src/app",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": "/Users/shadowbook/Resilio Sync/shadowbook-pro/development/claudepro-directory/config/tests/playwright-global-setup.ts",
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": ".trunk/test-results/html-report",
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": ".trunk/test-results/results.json"
+        }
+      ],
+      [
+        "list",
+        null
+      ],
+      [
+        "junit",
+        {
+          "outputFile": ".trunk/test-results/playwright/junit.xml",
+          "includeProjectInTestName": true
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/shadowbook/Resilio Sync/shadowbook-pro/development/claudepro-directory/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/shadowbook/Resilio Sync/shadowbook-pro/development/claudepro-directory/apps/web/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.{ts,tsx}"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/shadowbook/Resilio Sync/shadowbook-pro/development/claudepro-directory/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/Users/shadowbook/Resilio Sync/shadowbook-pro/development/claudepro-directory/apps/web/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.{ts,tsx}"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/shadowbook/Resilio Sync/shadowbook-pro/development/claudepro-directory/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/Users/shadowbook/Resilio Sync/shadowbook-pro/development/claudepro-directory/apps/web/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.{ts,tsx}"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.57.0",
+    "workers": 6,
+    "webServer": {
+      "command": "pnpm --filter web dev",
+      "cwd": "/Users/shadowbook/Resilio Sync/shadowbook-pro/development/claudepro-directory",
+      "url": "http://localhost:3000",
+      "reuseExistingServer": true,
+      "timeout": 120000,
+      "stdout": "pipe",
+      "stderr": "pipe"
+    }
+  },
+  "suites": [],
+  "errors": [
+    {
+      "message": "Error: Timed out waiting 120000ms from config.webServer.",
+      "stack": "Error: Timed out waiting 120000ms from config.webServer."
+    }
+  ],
+  "stats": {
+    "startTime": "2025-12-25T04:44:25.323Z",
+    "duration": 120438.36899999999,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

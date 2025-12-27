@@ -161,7 +161,7 @@ async function main() {
  * It exports PrismockerClient as PrismaClient and includes enum stubs.
  */
 
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 // Create PrismockerClient instance

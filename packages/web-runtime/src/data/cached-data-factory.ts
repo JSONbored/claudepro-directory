@@ -494,7 +494,7 @@ async function executeDataFunction(
     // The runtime check below (typeof serviceMethod !== 'function') ensures safety.
     // Use 'unknown' first to avoid unsafe type assertions, then narrow with runtime check
     const serviceRecord = service;
-    const serviceMethods = serviceRecord as Record<
+    const serviceMethods = serviceRecord as unknown as Record<
       string,
       (...args: unknown[]) => Promise<unknown>
     >;

@@ -7,7 +7,7 @@
     "build": "tsc",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
-    "lint": "eslint . --config ../../../config/tools/eslint.config.mjs",
+    "lint": "eslint . --config ../../../.trunk/configs/eslint.config.mjs",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -22,7 +22,7 @@
     "@opentelemetry/exporter-trace-otlp-http": "^0.208.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251221.0",
+    "@cloudflare/workers-types": "^4.20251225.0",
     "typescript": "5.9.3",
     "wrangler": "^4.56.0"
   }

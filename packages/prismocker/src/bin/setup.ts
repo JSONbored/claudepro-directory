@@ -137,7 +137,7 @@ function generateMockFileContent(framework: 'jest' | 'vitest'): string {
 
 // Import from installed prismocker package
 // Using CommonJS for Jest compatibility (Jest doesn't fully support ESM in mocks)
-const { createPrismocker } = require('prismocker');
+const { createPrismocker } = require('@jsonbored/prismocker');
 
 // Create Prisma.Decimal fallback class
 // NOTE: We do NOT try to require the real @prisma/client/runtime/library here
@@ -220,7 +220,7 @@ module.exports = {
  * TypeScript types still come from the real @prisma/client module for type checking.
  */
 
-import { createPrismocker } from 'prismocker';
+import { createPrismocker } from '@jsonbored/prismocker';
 import type { PrismaClient } from '@prisma/client';
 
 // Create PrismaClient instance

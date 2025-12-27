@@ -369,7 +369,7 @@ export function setupJobPostingDripCampaignMocks(
   return {
     mockSendEmail,
     mockRenderEmailTemplate,
-    mockGetService,
+    ...(mockGetService !== undefined && { mockGetService }),
     mockLogger,
     mockCreateWebAppContextWithId,
     mockNormalizeError,

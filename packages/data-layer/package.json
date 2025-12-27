@@ -35,7 +35,7 @@
   },
   "scripts": {
     "build": "tsc --build",
-    "lint": "eslint . --config ../../config/tools/eslint.config.mjs",
+    "lint": "eslint . --config ../../.trunk/configs/eslint.config.mjs",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

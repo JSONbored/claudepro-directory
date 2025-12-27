@@ -90,6 +90,16 @@ jest.mock('next/cache', () => ({
   revalidateTag: (...args: any[]) => mockRevalidateTag(...args),
 }));
 
+/**
+ * Companies CRUD Actions Test Suite
+ *
+ * Tests createCompany, updateCompany, and deleteCompany actions → RPC → database flow.
+ * Uses Prismocker for in-memory database, safemocker for auth context, and verifies cache invalidation.
+ *
+ * @group Companies
+ * @group Actions
+ * @group Integration
+ */
 describe('companies-crud', () => {
   let prismocker: PrismaClient;
 
@@ -111,7 +121,7 @@ describe('companies-crud', () => {
     // 5. Set up $queryRawUnsafe for RPC testing (if needed)
     // Use Prismocker's Proxy set handler to override $queryRawUnsafe
     // This is what runRpc → BasePrismaService.callRpc → prisma.$queryRawUnsafe calls
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
+    (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([]);
 
     // Note: safemocker automatically provides auth context:
     // - ctx.userId = 'test-user-id'

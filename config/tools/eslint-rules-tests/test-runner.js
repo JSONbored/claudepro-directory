@@ -25,7 +25,7 @@ const __dirname = dirname(__filename);
 const testDir = __dirname; // Test files are in the same directory as test-runner.js
 
 const eslint = new ESLint({
-  overrideConfigFile: join(__dirname, '..', 'eslint.config.mjs'),
+  overrideConfigFile: join(__dirname, '../../.trunk/configs/eslint.config.mjs'),
 });
 
 async function testRule(ruleName, testFiles) {
@@ -79,7 +79,7 @@ async function testAutofix(ruleName, violationFile, expectedFile) {
 
     // Run ESLint with --fix
     const eslintWithFix = new ESLint({
-      overrideConfigFile: join(__dirname, '..', 'eslint.config.mjs'),
+      overrideConfigFile: join(__dirname, '../../.trunk/configs/eslint.config.mjs'),
       fix: true,
     });
 

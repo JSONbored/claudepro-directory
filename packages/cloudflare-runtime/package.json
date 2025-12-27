@@ -45,7 +45,7 @@
   },
   "scripts": {
     "build": "tsc --build",
-    "lint": "eslint . --config ../../config/tools/eslint.config.mjs",
+    "lint": "eslint . --config ../../.trunk/configs/eslint.config.mjs",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -60,7 +60,7 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251221.0",
+    "@cloudflare/workers-types": "^4.20251225.0",
     "@types/pg": "^8.16.0",
     "typescript": "5.9.3"
   }

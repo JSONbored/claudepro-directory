@@ -1,5 +1,6 @@
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { JobsService } from './jobs.ts';
+import { CompaniesService } from './companies.ts';
 import { prisma } from '../prisma/client.ts';
 import type { PrismaClient } from '@prisma/client';
 import { clearRequestCache } from '../utils/request-cache.ts';
@@ -906,6 +907,301 @@ describe('JobsService', () => {
 
       // Should return only 5 jobs (respecting limit)
       expect(result).toHaveLength(5);
+    });
+  });
+
+  describe('Integration: JobsService + CompaniesService', () => {
+    let companiesService: CompaniesService;
+
+    beforeEach(() => {
+      // Create CompaniesService instance for integration tests
+      companiesService = new CompaniesService(prismocker);
+    });
+
+    it('should allow CompaniesService to get company profile with jobs from JobsService', async () => {
+      // Seed company data
+      const mockCompany = {
+        id: 'company-integration-1',
+        owner_id: 'user-1',
+        slug: 'test-company',
+        name: 'Test Company',
+        logo: null,
+        website: null,
+        description: 'Test company description',
+        size: 'small' as const,
+        industry: null,
+        using_cursor_since: null,
+        featured: false,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      // Seed job data with company_id
+      const mockJobs = [
+        {
+          id: 'job-integration-1',
+          user_id: 'user-1',
+          company_id: 'company-integration-1',
+          title: 'Senior Developer',
+          company: 'Test Company',
+          description: 'Job description',
+          location: 'Remote',
+          salary: '$100k',
+          remote: true,
+          type: 'full-time' as const,
+          workplace: 'remote' as const,
+          experience: 'senior' as const,
+          category: 'engineering' as const,
+          tags: ['typescript', 'react'],
+          requirements: [],
+          benefits: [],
+          link: 'https://example.com/job',
+          contact_email: null,
+          company_logo: null,
+          plan: 'one-time' as const,
+          active: true,
+          posted_at: new Date(),
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+          featured: false,
+          order: 0,
+          view_count: 10,
+          click_count: 5,
+          created_at: new Date(),
+          updated_at: new Date(),
+          admin_notes: null,
+          slug: 'senior-developer',
+          status: 'active' as const,
+          tier: 'standard' as const,
+          payment_amount: null,
+          payment_status: null,
+        },
+      ];
+
+      if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+        (prismocker as any).setData('companies', [mockCompany]);
+        (prismocker as any).setData('jobs', mockJobs);
+      }
+
+      // CompaniesService.getCompanyProfile queries jobs by company_id
+      const companyProfile = await companiesService.getCompanyProfile({
+        p_slug: 'test-company',
+      });
+
+      // Verify company profile includes jobs
+      expect(companyProfile.company).toBeDefined();
+      expect(companyProfile.company?.slug).toBe('test-company');
+      expect(companyProfile.active_jobs).toBeDefined();
+      expect(companyProfile.active_jobs).toHaveLength(1);
+      expect(companyProfile.active_jobs?.[0].title).toBe('Senior Developer');
+      expect(companyProfile.stats).toBeDefined();
+      expect(companyProfile.stats?.total_jobs).toBe(1);
+      expect(companyProfile.stats?.active_jobs).toBe(1);
+    });
+
+    it('should allow JobsService to get jobs and CompaniesService to validate company exists', async () => {
+      // Seed company data
+      const mockCompany = {
+        id: 'company-validation-1',
+        owner_id: 'user-1',
+        slug: 'validation-company',
+        name: 'Validation Company',
+        logo: null,
+        website: null,
+        description: null,
+        size: 'medium' as const,
+        industry: null,
+        using_cursor_since: null,
+        featured: false,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      // Seed job data with company_id
+      const mockJobs = [
+        {
+          id: 'job-validation-1',
+          user_id: 'user-1',
+          company_id: 'company-validation-1',
+          title: 'Frontend Developer',
+          company: 'Validation Company',
+          description: 'Job description',
+          location: null,
+          salary: null,
+          remote: false,
+          type: 'full-time' as const,
+          workplace: null,
+          experience: null,
+          category: 'engineering' as const,
+          tags: [],
+          requirements: [],
+          benefits: [],
+          link: 'https://example.com/job',
+          contact_email: null,
+          company_logo: null,
+          plan: 'one-time' as const,
+          active: true,
+          posted_at: new Date(),
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          featured: false,
+          order: 0,
+          view_count: 0,
+          click_count: 0,
+          created_at: new Date(),
+          updated_at: new Date(),
+          admin_notes: null,
+          slug: 'frontend-developer',
+          status: 'active' as const,
+          tier: 'standard' as const,
+          payment_amount: null,
+          payment_status: null,
+        },
+      ];
+
+      if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+        (prismocker as any).setData('companies', [mockCompany]);
+        (prismocker as any).setData('jobs', mockJobs);
+      }
+
+      // JobsService: Get jobs
+      const jobs = await service.getJobs();
+
+      // CompaniesService: Get company profile (validates company exists)
+      const companyProfile = await companiesService.getCompanyProfile({
+        p_slug: 'validation-company',
+      });
+
+      // Verify both services work together
+      expect(jobs).toHaveLength(1);
+      expect(jobs[0].company).toBe('Validation Company');
+      expect(companyProfile.company).toBeDefined();
+      expect(companyProfile.company?.id).toBe('company-validation-1');
+      expect(companyProfile.active_jobs).toHaveLength(1);
+    });
+
+    it('should update company stats when jobs are added', async () => {
+      // Seed company data
+      const mockCompany = {
+        id: 'company-stats-1',
+        owner_id: 'user-1',
+        slug: 'stats-company',
+        name: 'Stats Company',
+        logo: null,
+        website: null,
+        description: null,
+        size: 'large' as const,
+        industry: null,
+        using_cursor_since: null,
+        featured: false,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      // Seed initial job
+      const initialJobs = [
+        {
+          id: 'job-stats-1',
+          user_id: 'user-1',
+          company_id: 'company-stats-1',
+          title: 'Job 1',
+          company: 'Stats Company',
+          description: 'Description',
+          location: null,
+          salary: null,
+          remote: false,
+          type: 'full-time' as const,
+          workplace: null,
+          experience: null,
+          category: 'engineering' as const,
+          tags: [],
+          requirements: [],
+          benefits: [],
+          link: 'https://example.com/job',
+          contact_email: null,
+          company_logo: null,
+          plan: 'one-time' as const,
+          active: true,
+          posted_at: new Date(),
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          featured: false,
+          order: 0,
+          view_count: 0,
+          click_count: 0,
+          created_at: new Date(),
+          updated_at: new Date(),
+          admin_notes: null,
+          slug: 'job-1',
+          status: 'active' as const,
+          tier: 'standard' as const,
+          payment_amount: null,
+          payment_status: null,
+        },
+      ];
+
+      if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+        (prismocker as any).setData('companies', [mockCompany]);
+        (prismocker as any).setData('jobs', initialJobs);
+      }
+
+      // Seed both jobs from the start (simulating jobs being added)
+      const allJobs = [
+        ...initialJobs,
+        {
+          id: 'job-stats-2',
+          user_id: 'user-1',
+          company_id: 'company-stats-1',
+          title: 'Job 2',
+          company: 'Stats Company',
+          description: 'Description',
+          location: null,
+          salary: null,
+          remote: true,
+          type: 'full-time' as const,
+          workplace: null,
+          experience: null,
+          category: 'design' as const,
+          tags: [],
+          requirements: [],
+          benefits: [],
+          link: 'https://example.com/job2',
+          contact_email: null,
+          company_logo: null,
+          plan: 'one-time' as const,
+          active: true,
+          posted_at: new Date(),
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          featured: false,
+          order: 0,
+          view_count: 0,
+          click_count: 0,
+          created_at: new Date(),
+          updated_at: new Date(),
+          admin_notes: null,
+          slug: 'job-2',
+          status: 'active' as const,
+          tier: 'featured' as const,
+          payment_amount: null,
+          payment_status: null,
+        },
+      ];
+
+      // Update jobs data with both jobs
+      if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+        (prismocker as any).setData('jobs', allJobs);
+      }
+
+      // Clear cache to ensure fresh query
+      clearRequestCache();
+
+      // Get company profile stats with both jobs
+      const companyProfile = await companiesService.getCompanyProfile({
+        p_slug: 'stats-company',
+      });
+
+      // Verify stats reflect both jobs
+      expect(companyProfile.stats?.total_jobs).toBe(2);
+      expect(companyProfile.stats?.active_jobs).toBe(2);
+      expect(companyProfile.stats?.featured_jobs).toBe(1); // One job has tier: 'featured'
+      expect(companyProfile.stats?.remote_jobs).toBe(1); // One job has remote: true
     });
   });
 });

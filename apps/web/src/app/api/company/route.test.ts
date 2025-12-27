@@ -1,12 +1,12 @@
 /**
  * Company API Route Integration Tests
  *
- * Tests the /api/company route handler using real implementations:
- * - Real service factory (no mocking of data-layer services)
- * - Prismocker for database RPC calls
- * - Real request cache implementation
- * - Cache behavior testing
- * - All production features tested
+ * Tests GET /api/company route → CompaniesService → database flow.
+ * Uses Prismocker for in-memory database, real service factory, and getRequestCache() for cache verification.
+ *
+ * @group API
+ * @group Company
+ * @group Integration
  */
 
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';

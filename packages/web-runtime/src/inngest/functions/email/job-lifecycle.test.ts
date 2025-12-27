@@ -7,7 +7,7 @@
  * @module web-runtime/inngest/functions/email/job-lifecycle.test
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { sendJobLifecycleEmail } from './job-lifecycle';
 
@@ -110,6 +110,20 @@ describe('sendJobLifecycleEmail', () => {
 
     // Set up mocks using shared setup function (eliminates duplication)
     mocks = setupJobLifecycleEmailMocks('sendJobLifecycleEmail', '/inngest/email/job-lifecycle');
+  });
+
+  /**
+   * Cleanup after each test to prevent open handles
+   */
+  afterEach(async () => {
+    // Clear all timers
+    jest.clearAllTimers();
+
+    // Ensure all pending promises are resolved
+    await new Promise((resolve) => setImmediate(resolve));
+
+    // Clear the test engine reference to allow garbage collection
+    (t as any) = null;
   });
 
   /**

@@ -131,7 +131,7 @@
       "apps/**/eslint.config.*",
       "packages/**/.eslintrc.*",
       "packages/**/eslint.config.*",
-      "config/tools/eslint.config.mjs",
+      ".trunk/configs/eslint.config.mjs",
       ".trunk/plugins/eslint-plugin-architectural-rules.js"
     ]
   }

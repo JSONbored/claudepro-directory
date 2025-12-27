@@ -1,0 +1,48 @@
+---
+# Trunk Code Quality - Full Check (Scheduled)
+# Runs weekly to check all files and track codebase health trends
+name: Trunk Code Quality (Full Check)
+
+on:
+  schedule:
+    # Run at 4 PM UTC weekly on Sundays (cron uses UTC time)
+    - cron: '0 16 * * 0'
+  # Allow manual triggering
+  workflow_dispatch:
+
+# Cancel in-progress runs when new commits pushed (saves resources)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Required for Turbo remote cache
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+jobs:
+  trunk-check-all:
+    name: Trunk Code Quality (All Files)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - uses: ./.github/actions/setup
+        with:
+          skip-checkout: true
+      # Cache Trunk tools and linters for faster CI runs
+      - name: Cache Trunk
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trunk
+          key: trunk-${{ runner.os }}-${{ hashFiles('.trunk/trunk.yaml') }}
+          restore-keys: |
+            trunk-${{ runner.os }}-
+      - name: Trunk Code Quality (All Files)
+        uses: trunk-io/trunk-action@v1
+        with:
+          check-mode: all
+          post-annotations: false  # Don't post annotations for scheduled runs
+

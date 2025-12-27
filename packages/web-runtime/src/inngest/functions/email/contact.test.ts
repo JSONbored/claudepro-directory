@@ -7,7 +7,7 @@
  * @module web-runtime/inngest/functions/email/contact.test
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 
 // Mock Resend integration, logging, and shared-runtime
@@ -169,6 +169,20 @@ describe('sendContactEmails', () => {
 
     // Set up mocks using shared setup function (eliminates duplication)
     mocks = setupContactEmailMocks('sendContactEmails', '/inngest/email/contact');
+  });
+
+  /**
+   * Cleanup after each test to prevent open handles
+   */
+  afterEach(async () => {
+    // Clear all timers
+    jest.clearAllTimers();
+
+    // Ensure all pending promises are resolved
+    await new Promise((resolve) => setImmediate(resolve));
+
+    // Clear the test engine reference to allow garbage collection
+    (t as any) = null;
   });
 
   /**

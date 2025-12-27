@@ -1,22 +1,26 @@
 /**
- * Trending Metrics Calculation Inngest Function Tests
+ * Trending Metrics Calculation Inngest Function Integration Tests
  *
- * Tests the calculateTrendingMetrics function using @inngest/test.
- * This tests the function logic, not the route handler.
+ * Tests calculateTrendingMetrics function → TrendingService → database flow.
+ * Uses InngestTestEngine, Prismocker for in-memory database, and real service factory.
  *
- * @module web-runtime/inngest/functions/trending/calculate-metrics.test
+ * @group Inngest
+ * @group Trending
+ * @group Integration
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { calculateTrendingMetrics } from './calculate-metrics';
 
-// Mock service factory, logging, shared-runtime, and monitoring
+// Mock service-factory to return REAL services (not mocked services) for integration testing
+// This allows us to test the complete flow: Inngest function → TrendingService → database
 jest.mock('../../../data/service-factory', () => {
-  const mockGetService = jest.fn();
+  // Import real service factory to return real services
+  const actual = jest.requireActual('../../../data/service-factory');
   return {
-    getService: mockGetService,
-    __mockGetService: mockGetService,
+    ...actual,
+    getService: actual.getService, // Use real getService which returns real services
   };
 });
 
@@ -64,6 +68,11 @@ jest.mock('../../utils/monitoring', () => ({
   sendApiEndpointHeartbeat: jest.fn(),
 }));
 
+// Import Prismocker for database integration testing
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+import { clearRequestCache } from '@heyclaude/data-layer/utils/request-cache';
+
 // Import function AFTER mocks are set up
 describe('calculateTrendingMetrics', () => {
   /**
@@ -72,9 +81,13 @@ describe('calculateTrendingMetrics', () => {
   let t: InngestTestEngine;
 
   /**
+   * Prismocker instance for database integration testing
+   */
+  let prismocker: PrismaClient;
+
+  /**
    * Mock functions - accessed via jest.requireMock
    */
-  let mockGetService: ReturnType<typeof jest.fn>;
   let mockLogger: {
     info: ReturnType<typeof jest.fn>;
     warn: ReturnType<typeof jest.fn>;
@@ -82,18 +95,23 @@ describe('calculateTrendingMetrics', () => {
   };
   let mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
   let mockNormalizeError: ReturnType<typeof jest.fn>;
-  let mockTrendingService: {
-    refreshTrendingMetricsView: ReturnType<typeof jest.fn>;
-  };
 
   /**
    * Setup before each test
    */
   beforeEach(() => {
+    // Clear request cache before each test (REQUIRED for test isolation)
+    clearRequestCache();
+
+    // Get Prismocker instance (automatically PrismockerClient via global mock)
+    prismocker = prisma;
+
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
     // Get mocked functions via jest.requireMock
-    const serviceFactoryMock = jest.requireMock('../../../data/service-factory') as {
-      __mockGetService: ReturnType<typeof jest.fn>;
-    };
     const loggingMock = jest.requireMock('../../../logging/server') as {
       __mockLogger: {
         info: ReturnType<typeof jest.fn>;
@@ -106,10 +124,13 @@ describe('calculateTrendingMetrics', () => {
       __mockNormalizeError: ReturnType<typeof jest.fn>;
     };
 
-    mockGetService = serviceFactoryMock.__mockGetService;
     mockLogger = loggingMock.__mockLogger;
     mockCreateWebAppContextWithId = loggingMock.__mockCreateWebAppContextWithId;
     mockNormalizeError = sharedRuntimeMock.__mockNormalizeError;
+
+    // Set up $queryRawUnsafe for RPC testing (refreshTrendingMetricsView uses callRpc → $queryRawUnsafe)
+    // Use Prismocker's Proxy set handler to override $queryRawUnsafe
+    (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([]);
 
     // Create fresh test engine instance for each test
     t = new InngestTestEngine({
@@ -119,7 +140,6 @@ describe('calculateTrendingMetrics', () => {
     // Reset all mocks to ensure clean state
     jest.clearAllMocks();
     jest.resetAllMocks();
-    mockGetService.mockReset();
 
     // Restore mock implementations after reset
     mockCreateWebAppContextWithId.mockReturnValue({
@@ -134,13 +154,20 @@ describe('calculateTrendingMetrics', () => {
       }
       return new Error(fallbackMessage || String(error || 'Unknown error'));
     });
+  });
 
-    // Set up mock TrendingService
-    mockTrendingService = {
-      refreshTrendingMetricsView: jest.fn().mockResolvedValue(undefined),
-    };
+  /**
+   * Cleanup after each test to prevent open handles
+   */
+  afterEach(async () => {
+    // Clear all timers
+    jest.clearAllTimers();
 
-    mockGetService.mockResolvedValue(mockTrendingService as never);
+    // Ensure all pending promises are resolved
+    await new Promise((resolve) => setImmediate(resolve));
+
+    // Clear the test engine reference to allow garbage collection
+    (t as any) = null;
   });
 
   /**
@@ -161,7 +188,10 @@ describe('calculateTrendingMetrics', () => {
     expect(result.updated).toBe(0);
     expect(result.created).toBe(0);
 
-    expect(mockTrendingService.refreshTrendingMetricsView).toHaveBeenCalled();
+    // Verify RPC was called (real TrendingService.refreshTrendingMetricsView uses callRpc → $queryRawUnsafe)
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('refresh_trending_metrics_view')
+    );
 
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.anything(),
@@ -183,9 +213,10 @@ describe('calculateTrendingMetrics', () => {
    * Tests that materialized view refresh failures are handled and function throws.
    */
   it('should handle materialized view refresh failure', async () => {
-    mockTrendingService.refreshTrendingMetricsView.mockRejectedValue(
-      new Error('Database connection failed')
-    );
+    // Simulate RPC failure by making $queryRawUnsafe throw an error
+    (prismocker as any).$queryRawUnsafe = jest
+      .fn<() => Promise<any[]>>()
+      .mockRejectedValue(new Error('Database connection failed'));
 
     const { error } = (await t.execute({
       events: [

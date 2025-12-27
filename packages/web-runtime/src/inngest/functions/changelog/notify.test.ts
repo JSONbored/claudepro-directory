@@ -1,16 +1,22 @@
 /**
- * Changelog Notify Inngest Function Tests
+ * Changelog Notify Inngest Function Integration Tests
  *
- * Tests the processChangelogNotifyQueue function using @inngest/test.
- * This tests the function logic, not the route handler.
+ * Tests processChangelogNotifyQueue function → MiscService/NewsletterService → database flow.
+ * Uses InngestTestEngine, Prismocker for in-memory database, and real service factory.
+ *
+ * @group Inngest
+ * @group Changelog
+ * @group Integration
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { revalidateTag } from 'next/cache';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+import { clearRequestCache } from '@heyclaude/data-layer/utils/request-cache';
 
-// Mock next/cache, supabase/pgmq-client, data/service-factory, logging/server, shared-runtime, monitoring
-// Define mocks directly in jest.mock() factory functions to avoid hoisting issues
+// Mock PGMQ client (external dependency)
 jest.mock('../../../supabase/pgmq-client', () => {
   const mockPgmqRead = jest.fn();
   const mockPgmqDelete = jest.fn();
@@ -22,11 +28,13 @@ jest.mock('../../../supabase/pgmq-client', () => {
   };
 });
 
+// Use real service factory (return actual services)
 jest.mock('../../../data/service-factory', () => {
-  const mockGetService = jest.fn();
+  // Import real service factory to return real services
+  const actual = jest.requireActual('../../../data/service-factory');
   return {
-    getService: mockGetService,
-    __mockGetService: mockGetService,
+    ...actual,
+    getService: actual.getService, // Use real getService which returns real services
   };
 });
 
@@ -120,14 +128,7 @@ jest.mock('../../../integrations/resend', () => {
 const { __mockPgmqRead: mockPgmqRead, __mockPgmqDelete: mockPgmqDelete } = jest.requireMock(
   '../../../supabase/pgmq-client'
 );
-const { __mockGetService: mockGetService } = jest.requireMock('../../../data/service-factory');
 const { __mockRevalidateTag: mockRevalidateTag } = jest.requireMock('next/cache');
-const { __mockLogger: mockLogger, __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId } =
-  jest.requireMock('../../../logging/server');
-const { __mockNormalizeError: mockNormalizeError, __mockGetEnvVar: mockGetEnvVar } =
-  jest.requireMock('@heyclaude/shared-runtime');
-const { __mockSendCronSuccessHeartbeat: mockSendCronSuccessHeartbeat } =
-  jest.requireMock('../../utils/monitoring');
 const mockFetch = jest.fn();
 
 // Mock global fetch for Discord webhook
@@ -137,28 +138,51 @@ global.fetch = mockFetch;
 import { processChangelogNotifyQueue } from './notify';
 
 describe('processChangelogNotifyQueue', () => {
-  // Create a fresh test engine for each test to avoid state caching issues
   let t: InngestTestEngine;
+  let prismocker: PrismaClient;
 
   beforeEach(() => {
     // Create fresh test engine instance for each test
-    // This prevents step result memoization between tests
     t = new InngestTestEngine({
       function: processChangelogNotifyQueue,
     });
 
+    // Initialize Prismocker and clear cache for a clean test state
+    prismocker = prisma as unknown as PrismaClient;
+    clearRequestCache();
+
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
+    // Clear all mocks
     jest.clearAllMocks();
     jest.resetAllMocks();
-    // Reset mocks to ensure clean state
+
+    // Reset PGMQ mocks
     mockPgmqRead.mockReset();
     mockPgmqDelete.mockReset();
-    mockGetService.mockReset();
     mockRevalidateTag.mockReset();
     mockFetch.mockReset();
     mockFetch.mockResolvedValue({
       ok: true,
       status: 200,
     } as Response);
+  });
+
+  /**
+   * Cleanup after each test to prevent open handles
+   */
+  afterEach(async () => {
+    // Clear all timers
+    jest.clearAllTimers();
+
+    // Ensure all pending promises are resolved
+    await new Promise((resolve) => setImmediate(resolve));
+
+    // Clear the test engine reference to allow garbage collection
+    (t as any) = null;
   });
 
   it('should return processed: 0 when queue is empty', async () => {
@@ -173,6 +197,11 @@ describe('processChangelogNotifyQueue', () => {
   });
 
   it('should process changelog notifications successfully', async () => {
+    // Seed Prismocker with newsletter subscriptions (empty for this test)
+    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+      (prismocker as any).setData('newsletter_subscriptions', []);
+    }
+
     const mockJob = {
       entryId: 'test-entry-id',
       slug: '1-2-0-2025-12-07',
@@ -204,24 +233,8 @@ describe('processChangelogNotifyQueue', () => {
     };
 
     // Mock queue read - this will be called inside the step
-    // IMPORTANT: Reset mock before each test to ensure clean state
-    mockPgmqRead.mockReset();
     mockPgmqRead.mockResolvedValue([mockMessage] as never);
     mockPgmqDelete.mockResolvedValue(undefined);
-
-    // Mock services
-    const mockMiscService = {
-      upsertNotification: jest.fn().mockResolvedValue(undefined),
-    };
-    const mockNewsletterService = {
-      getActiveSubscribers: jest.fn().mockResolvedValue([]), // No subscribers for this test
-    };
-    mockGetService.mockReset();
-    mockGetService.mockImplementation((serviceName: string) => {
-      if (serviceName === 'misc') return Promise.resolve(mockMiscService);
-      if (serviceName === 'newsletter') return Promise.resolve(mockNewsletterService);
-      throw new Error(`Unknown service: ${serviceName}`);
-    });
 
     // Mock Discord webhook
     mockFetch.mockResolvedValue({
@@ -230,7 +243,6 @@ describe('processChangelogNotifyQueue', () => {
     } as Response);
 
     // Execute function - InngestTestEngine will run the actual function code
-    // The mocks above will be used when the function executes
     // For cron functions, execute() without arguments triggers the cron
     const { result } = await t.execute();
 
@@ -239,12 +251,29 @@ describe('processChangelogNotifyQueue', () => {
       notified: 1,
     });
     expect(mockPgmqRead).toHaveBeenCalled();
-    expect(mockMiscService.upsertNotification).toHaveBeenCalled();
+
+    // Verify notification was created/upserted in Prismocker
+    const notification = await prismocker.notifications.findUnique({
+      where: { id: 'test-entry-id' },
+    });
+    expect(notification).toBeDefined();
+    expect(notification?.title).toBe('Test Release');
+    expect(notification?.message).toBe('Test summary');
+    expect(notification?.type).toBe('announcement');
+    expect(notification?.priority).toBe('high');
+    expect(notification?.action_label).toBe('Read release notes');
+    expect(notification?.action_href).toBe('/changelog/1-2-0-2025-12-07');
+
     expect(mockRevalidateTag).toHaveBeenCalledWith('changelog', 'max');
     expect(mockRevalidateTag).toHaveBeenCalledWith('changelog-1-2-0-2025-12-07', 'max');
   });
 
   it('should handle Discord webhook failures gracefully', async () => {
+    // Seed Prismocker with newsletter subscriptions (empty for this test)
+    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+      (prismocker as any).setData('newsletter_subscriptions', []);
+    }
+
     const mockJob = {
       entryId: 'test-entry-id',
       slug: '1-2-0-2025-12-07',
@@ -263,27 +292,11 @@ describe('processChangelogNotifyQueue', () => {
       message: mockJob,
     };
 
-    // Reset mocks to ensure clean state
-    mockPgmqRead.mockReset();
+    // Mock queue read
     mockPgmqRead.mockResolvedValue([mockMessage] as never);
     mockPgmqDelete.mockResolvedValue(undefined);
 
-    // Mock services
-    const mockMiscService = {
-      upsertNotification: jest.fn().mockResolvedValue(undefined),
-    };
-    const mockNewsletterService = {
-      getActiveSubscribers: jest.fn().mockResolvedValue([]),
-    };
-    mockGetService.mockReset();
-    mockGetService.mockImplementation((serviceName: string) => {
-      if (serviceName === 'misc') return Promise.resolve(mockMiscService);
-      if (serviceName === 'newsletter') return Promise.resolve(mockNewsletterService);
-      throw new Error(`Unknown service: ${serviceName}`);
-    });
-
     // Mock Discord webhook failure
-    mockFetch.mockReset();
     mockFetch.mockResolvedValue({
       ok: false,
       status: 500,
@@ -296,10 +309,21 @@ describe('processChangelogNotifyQueue', () => {
       processed: 1,
       notified: 1, // Still notified because notification was inserted
     });
-    expect(mockMiscService.upsertNotification).toHaveBeenCalled();
+
+    // Verify notification was still created/upserted in Prismocker (even though Discord failed)
+    const notification = await prismocker.notifications.findUnique({
+      where: { id: 'test-entry-id' },
+    });
+    expect(notification).toBeDefined();
+    expect(notification?.title).toBe('Test Release');
   });
 
   it('should filter invalid messages from queue', async () => {
+    // Seed Prismocker with newsletter subscriptions (empty for this test)
+    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+      (prismocker as any).setData('newsletter_subscriptions', []);
+    }
+
     const validMessage = {
       msg_id: BigInt(1),
       read_ct: 0,
@@ -327,29 +351,12 @@ describe('processChangelogNotifyQueue', () => {
       },
     };
 
-    // Reset mocks to ensure clean state
-    mockPgmqRead.mockReset();
     // Mock queue to return both valid and invalid messages
     // The function will filter out invalid ones
     mockPgmqRead.mockResolvedValue([validMessage, invalidMessage] as never);
     mockPgmqDelete.mockResolvedValue(undefined);
 
-    // Mock services for valid message processing
-    const mockMiscService = {
-      upsertNotification: jest.fn().mockResolvedValue(undefined),
-    };
-    const mockNewsletterService = {
-      getActiveSubscribers: jest.fn().mockResolvedValue([]),
-    };
-    mockGetService.mockReset();
-    mockGetService.mockImplementation((serviceName: string) => {
-      if (serviceName === 'misc') return Promise.resolve(mockMiscService);
-      if (serviceName === 'newsletter') return Promise.resolve(mockNewsletterService);
-      throw new Error(`Unknown service: ${serviceName}`);
-    });
-
     // Mock Discord webhook
-    mockFetch.mockReset();
     mockFetch.mockResolvedValue({
       ok: true,
       status: 200,
@@ -360,6 +367,18 @@ describe('processChangelogNotifyQueue', () => {
     // Should only process valid message (invalid one is filtered out)
     expect(result.processed).toBe(1); // Only valid message processed
     expect(result.notified).toBe(1);
-    expect(mockMiscService.upsertNotification).toHaveBeenCalledTimes(1); // Only called for valid message
+
+    // Verify only valid notification was created in Prismocker
+    const notification = await prismocker.notifications.findUnique({
+      where: { id: 'valid-id' },
+    });
+    expect(notification).toBeDefined();
+    expect(notification?.title).toBe('Valid');
+
+    // Verify invalid notification was not created
+    const invalidNotifications = await prismocker.notifications.findMany({
+      where: { title: 'Invalid' },
+    });
+    expect(invalidNotifications.length).toBe(0);
   });
 });

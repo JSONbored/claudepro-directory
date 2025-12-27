@@ -1,12 +1,12 @@
 /**
  * Sitewide Content API Route Integration Tests
  *
- * Tests the /api/content/sitewide route handler using real implementations:
- * - Real service factory (no mocking of data-layer services)
- * - Prismocker for database queries (uses RPC calls via $queryRawUnsafe)
- * - Real request cache implementation
- * - Cache behavior testing
- * - All production features tested (llms, llms-txt, json, readme formats)
+ * Tests GET /api/content/sitewide route → ContentService → database flow.
+ * Uses Prismocker for in-memory database, real service factory, and getRequestCache() for cache verification.
+ *
+ * @group API
+ * @group Content
+ * @group Integration
  */
 
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
@@ -205,7 +205,7 @@ describe('GET /api/content/sitewide', () => {
 
     // Set up $queryRawUnsafe for RPC testing (all ContentService methods use RPC)
     // Use Prismocker's Proxy set handler to override $queryRawUnsafe
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
+    (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([]);
   });
 
   it('should return LLMs format by default', async () => {

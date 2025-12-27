@@ -24,7 +24,6 @@ const actionMetadataSchema = z.object({
 // Create complete action clients with all middleware
 const {
   actionClient: baseActionClient,
-  loggedAction,
   rateLimitedAction,
   authedAction,
   optionalAuthAction,
@@ -40,7 +39,7 @@ const {
 });
 
 // Add initial middleware that adds userAgent and startTime (matching real safe-action.ts)
-baseActionClient.use(async ({ next, ctx = {} }) => {
+baseActionClient.use(async ({ next }) => {
   return next({
     ctx: {
       userAgent: 'test-user-agent',
@@ -72,7 +71,7 @@ export function createSafeActionClient(config?: {
   ).actionClient;
 
   // Add initial middleware
-  client.use(async ({ next, ctx = {} }) => {
+  client.use(async ({ next }) => {
     return next({
       ctx: {
         userAgent: 'test-user-agent',

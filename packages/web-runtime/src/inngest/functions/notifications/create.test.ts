@@ -1,22 +1,28 @@
 /**
- * Notifications Create Inngest Function Tests
+ * Notifications Create Inngest Function Integration Tests
  *
- * Tests the createNotification and broadcastNotification functions using @inngest/test.
- * This tests the function logic, not the route handler.
+ * Tests createNotification and broadcastNotification functions → MiscService → database flow.
+ * Uses InngestTestEngine, Prismocker for in-memory database, and real service factory.
  *
- * @module web-runtime/inngest/functions/notifications/create.test
+ * @group Inngest
+ * @group Notifications
+ * @group Integration
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { createNotification, broadcastNotification } from './create';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+import { clearRequestCache } from '@heyclaude/data-layer/utils/request-cache';
 
-// Mock service factory, logging, and monitoring
+// Use real service factory (return actual services)
 jest.mock('../../../data/service-factory', () => {
-  const mockGetService = jest.fn();
+  // Import real service factory to return real services
+  const actual = jest.requireActual('../../../data/service-factory');
   return {
-    getService: mockGetService,
-    __mockGetService: mockGetService,
+    ...actual,
+    getService: actual.getService, // Use real getService which returns real services
   };
 });
 
@@ -51,77 +57,42 @@ jest.mock('../../utils/monitoring', () => ({
   sendApiEndpointHeartbeat: jest.fn(),
 }));
 
-// Import function AFTER mocks are set up
 describe('createNotification', () => {
-  /**
-   * Test engine instance - created fresh for each test to avoid state caching
-   */
   let t: InngestTestEngine;
+  let prismocker: PrismaClient;
 
-  /**
-   * Mock functions - accessed via jest.requireMock
-   */
-  let mockGetService: ReturnType<typeof jest.fn>;
-  let mockLogger: {
-    info: ReturnType<typeof jest.fn>;
-    warn: ReturnType<typeof jest.fn>;
-    error: ReturnType<typeof jest.fn>;
-  };
-  let mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-  let mockMiscService: {
-    insertNotification: ReturnType<typeof jest.fn>;
-  };
-
-  /**
-   * Setup before each test
-   */
   beforeEach(() => {
-    // Get mocked functions via jest.requireMock
-    const serviceFactoryMock = jest.requireMock('../../../data/service-factory') as {
-      __mockGetService: ReturnType<typeof jest.fn>;
-    };
-    const loggingMock = jest.requireMock('../../../logging/server') as {
-      __mockLogger: {
-        info: ReturnType<typeof jest.fn>;
-        warn: ReturnType<typeof jest.fn>;
-        error: ReturnType<typeof jest.fn>;
-      };
-      __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-    };
-
-    mockGetService = serviceFactoryMock.__mockGetService;
-    mockLogger = loggingMock.__mockLogger;
-    mockCreateWebAppContextWithId = loggingMock.__mockCreateWebAppContextWithId;
-
     // Create fresh test engine instance for each test
     t = new InngestTestEngine({
       function: createNotification,
     });
 
-    // Reset all mocks to ensure clean state
+    // Initialize Prismocker and clear cache for a clean test state
+    prismocker = prisma as unknown as PrismaClient;
+    clearRequestCache();
+
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
+    // Clear all mocks
     jest.clearAllMocks();
     jest.resetAllMocks();
-    mockGetService.mockReset();
+  });
 
-    // Restore mock implementations after reset
-    mockCreateWebAppContextWithId.mockReturnValue({
-      requestId: 'test-request-id',
-      operation: 'createNotification',
-      route: '/inngest/notifications/create',
-    });
+  /**
+   * Cleanup after each test to prevent open handles
+   */
+  afterEach(async () => {
+    // Clear all timers
+    jest.clearAllTimers();
 
-    // Set up mock MiscService
-    mockMiscService = {
-      insertNotification: jest.fn().mockResolvedValue({
-        id: 'notification-123',
-        title: 'Test Title',
-        message: 'Test Message',
-        type: 'announcement',
-        priority: 'medium',
-      }),
-    };
+    // Ensure all pending promises are resolved
+    await new Promise((resolve) => setImmediate(resolve));
 
-    mockGetService.mockResolvedValue(mockMiscService as never);
+    // Clear the test engine reference to allow garbage collection
+    (t as any) = null;
   });
 
   /**
@@ -148,26 +119,19 @@ describe('createNotification', () => {
     })) as { result: { success: boolean; notificationId: string } };
 
     expect(result.success).toBe(true);
-    expect(result.notificationId).toBe('notification-123');
+    expect(result.notificationId).toBe('custom-id-123');
 
-    expect(mockMiscService.insertNotification).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'custom-id-123',
-        title: 'Test Title',
-        message: 'Test Message',
-        type: 'announcement',
-        priority: 'high',
-        action_label: 'Learn More',
-        action_href: 'https://example.com',
-      })
-    );
-
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.objectContaining({
-        notificationId: 'notification-123',
-      }),
-      'Notification created successfully'
-    );
+    // Verify notification was created in Prismocker
+    const notification = await prismocker.notifications.findUnique({
+      where: { id: 'custom-id-123' },
+    });
+    expect(notification).toBeDefined();
+    expect(notification?.title).toBe('Test Title');
+    expect(notification?.message).toBe('Test Message');
+    expect(notification?.type).toBe('announcement');
+    expect(notification?.priority).toBe('high');
+    expect(notification?.action_label).toBe('Learn More');
+    expect(notification?.action_href).toBe('https://example.com');
   });
 
   /**
@@ -189,16 +153,17 @@ describe('createNotification', () => {
     })) as { result: { success: boolean; notificationId: string } };
 
     expect(result.success).toBe(true);
-    expect(result.notificationId).toBe('notification-123');
+    expect(result.notificationId).toBeDefined();
 
-    expect(mockMiscService.insertNotification).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'Test Title',
-        message: 'Test Message',
-        type: 'announcement', // Default
-        priority: 'medium', // Default
-      })
-    );
+    // Verify notification was created in Prismocker with defaults
+    const notification = await prismocker.notifications.findUnique({
+      where: { id: result.notificationId },
+    });
+    expect(notification).toBeDefined();
+    expect(notification?.title).toBe('Test Title');
+    expect(notification?.message).toBe('Test Message');
+    expect(notification?.type).toBe('announcement'); // Default
+    expect(notification?.priority).toBe('medium'); // Default
   });
 
   /**
@@ -218,24 +183,11 @@ describe('createNotification', () => {
       ],
     });
 
-    // Verify that logger.warn was called (confirms validation ran)
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.anything(),
-      'Invalid notification: missing title'
-    );
-
-    // Inngest test engine may not capture synchronous errors before step.run
     // Check error property (standard format)
     const error = (executeResult as { error?: Error | { message: string } })?.error;
 
-    // If error is not captured, at least verify the validation logic ran via logger
-    if (!error) {
-      // Validation ran (logger.warn was called), but error wasn't captured by test engine
-      // This is acceptable - the validation is working, just not testable via error property
-      // for synchronous errors before step.run
-      expect(mockLogger.warn).toHaveBeenCalled();
-      return;
-    }
+    // Error should be captured
+    expect(error).toBeDefined();
 
     // Handle both Error instances and error objects
     let errorMessage: string;
@@ -248,6 +200,10 @@ describe('createNotification', () => {
     }
 
     expect(errorMessage).toBe('Invalid notification: title is required');
+
+    // Verify no notification was created
+    const allNotifications = await prismocker.notifications.findMany();
+    expect(allNotifications.length).toBe(0);
   });
 
   /**
@@ -267,24 +223,11 @@ describe('createNotification', () => {
       ],
     });
 
-    // Verify that logger.warn was called (confirms validation ran)
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.anything(),
-      'Invalid notification: missing message'
-    );
-
-    // Inngest test engine may not capture synchronous errors before step.run
     // Check error property (standard format)
     const error = (executeResult as { error?: Error | { message: string } })?.error;
 
-    // If error is not captured, at least verify the validation logic ran via logger
-    if (!error) {
-      // Validation ran (logger.warn was called), but error wasn't captured by test engine
-      // This is acceptable - the validation is working, just not testable via error property
-      // for synchronous errors before step.run
-      expect(mockLogger.warn).toHaveBeenCalled();
-      return;
-    }
+    // Error should be captured
+    expect(error).toBeDefined();
 
     // Handle both Error instances and error objects
     let errorMessage: string;
@@ -297,6 +240,10 @@ describe('createNotification', () => {
     }
 
     expect(errorMessage).toBe('Invalid notification: message is required');
+
+    // Verify no notification was created
+    const allNotifications = await prismocker.notifications.findMany();
+    expect(allNotifications.length).toBe(0);
   });
 
   /**
@@ -318,26 +265,11 @@ describe('createNotification', () => {
       ],
     });
 
-    // Verify that logger.warn was called (confirms validation ran)
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        action_href: 'javascript:alert("xss")',
-      }),
-      'Invalid action_href: only http/https allowed'
-    );
-
-    // Inngest test engine may not capture synchronous errors before step.run
     // Check error property (standard format)
     const error = (executeResult as { error?: Error | { message: string } })?.error;
 
-    // If error is not captured, at least verify the validation logic ran via logger
-    if (!error) {
-      // Validation ran (logger.warn was called), but error wasn't captured by test engine
-      // This is acceptable - the validation is working, just not testable via error property
-      // for synchronous errors before step.run
-      expect(mockLogger.warn).toHaveBeenCalled();
-      return;
-    }
+    // Error should be captured
+    expect(error).toBeDefined();
 
     // Handle both Error instances and error objects
     let errorMessage: string;
@@ -350,6 +282,10 @@ describe('createNotification', () => {
     }
 
     expect(errorMessage).toBe('Invalid action_href: only http and https URLs are allowed');
+
+    // Verify no notification was created
+    const allNotifications = await prismocker.notifications.findMany();
+    expect(allNotifications.length).toBe(0);
   });
 
   /**
@@ -371,26 +307,11 @@ describe('createNotification', () => {
       ],
     });
 
-    // Verify that logger.warn was called (confirms validation ran)
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        action_href: 'not-a-url',
-      }),
-      'Invalid action_href: invalid URL format'
-    );
-
-    // Inngest test engine may not capture synchronous errors before step.run
     // Check error property (standard format)
     const error = (executeResult as { error?: Error | { message: string } })?.error;
 
-    // If error is not captured, at least verify the validation logic ran via logger
-    if (!error) {
-      // Validation ran (logger.warn was called), but error wasn't captured by test engine
-      // This is acceptable - the validation is working, just not testable via error property
-      // for synchronous errors before step.run
-      expect(mockLogger.warn).toHaveBeenCalled();
-      return;
-    }
+    // Error should be captured
+    expect(error).toBeDefined();
 
     // Handle both Error instances and error objects
     let errorMessage: string;
@@ -404,12 +325,9 @@ describe('createNotification', () => {
 
     expect(errorMessage).toBe('Invalid action_href: must be a valid URL');
 
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        action_href: 'not-a-url',
-      }),
-      'Invalid action_href: invalid URL format'
-    );
+    // Verify no notification was created
+    const allNotifications = await prismocker.notifications.findMany();
+    expect(allNotifications.length).toBe(0);
   });
 
   /**
@@ -418,34 +336,30 @@ describe('createNotification', () => {
    * Tests that UUID is generated when id is not provided.
    */
   it('should generate UUID when id is not provided', async () => {
-    // Mock crypto.randomUUID
-    const mockUuid = 'generated-uuid-123';
-    const originalRandomUUID = global.crypto.randomUUID;
-    global.crypto.randomUUID = jest.fn(() => mockUuid) as typeof global.crypto.randomUUID;
-
-    try {
-      const { result } = (await t.execute({
-        events: [
-          {
-            name: 'notification/create',
-            data: {
-              title: 'Test Title',
-              message: 'Test Message',
-            },
+    const { result } = (await t.execute({
+      events: [
+        {
+          name: 'notification/create',
+          data: {
+            title: 'Test Title',
+            message: 'Test Message',
           },
-        ],
-      })) as { result: { success: boolean; notificationId: string } };
+        },
+      ],
+    })) as { result: { success: boolean; notificationId: string } };
 
-      expect(result.success).toBe(true);
-      expect(mockMiscService.insertNotification).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: mockUuid,
-        })
-      );
-    } finally {
-      // Restore original
-      global.crypto.randomUUID = originalRandomUUID;
-    }
+    expect(result.success).toBe(true);
+    expect(result.notificationId).toBeDefined();
+    // UUID format: 8-4-4-4-12 hex characters
+    expect(result.notificationId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+
+    // Verify notification was created with generated UUID
+    const notification = await prismocker.notifications.findUnique({
+      where: { id: result.notificationId },
+    });
+    expect(notification).toBeDefined();
+    expect(notification?.title).toBe('Test Title');
+    expect(notification?.message).toBe('Test Message');
   });
 
   /**
@@ -466,81 +380,54 @@ describe('createNotification', () => {
       ],
     })) as { result: { id: string } };
 
-    expect(result.id).toBe('notification-123');
-    expect(mockMiscService.insertNotification).toHaveBeenCalled();
+    expect(result.id).toBeDefined();
+
+    // Verify notification was created in Prismocker
+    const notification = await prismocker.notifications.findUnique({
+      where: { id: result.id },
+    });
+    expect(notification).toBeDefined();
+    expect(notification?.title).toBe('Test Title');
+    expect(notification?.message).toBe('Test Message');
   });
 });
 
 describe('broadcastNotification', () => {
-  /**
-   * Test engine instance - created fresh for each test to avoid state caching
-   */
   let t: InngestTestEngine;
+  let prismocker: PrismaClient;
 
-  /**
-   * Mock functions - accessed via jest.requireMock
-   */
-  let mockGetService: ReturnType<typeof jest.fn>;
-  let mockLogger: {
-    info: ReturnType<typeof jest.fn>;
-    warn: ReturnType<typeof jest.fn>;
-    error: ReturnType<typeof jest.fn>;
-  };
-  let mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-  let mockMiscService: {
-    insertNotification: ReturnType<typeof jest.fn>;
-  };
-
-  /**
-   * Setup before each test
-   */
   beforeEach(() => {
-    // Get mocked functions via jest.requireMock
-    const serviceFactoryMock = jest.requireMock('../../../data/service-factory') as {
-      __mockGetService: ReturnType<typeof jest.fn>;
-    };
-    const loggingMock = jest.requireMock('../../../logging/server') as {
-      __mockLogger: {
-        info: ReturnType<typeof jest.fn>;
-        warn: ReturnType<typeof jest.fn>;
-        error: ReturnType<typeof jest.fn>;
-      };
-      __mockCreateWebAppContextWithId: ReturnType<typeof jest.fn>;
-    };
-
-    mockGetService = serviceFactoryMock.__mockGetService;
-    mockLogger = loggingMock.__mockLogger;
-    mockCreateWebAppContextWithId = loggingMock.__mockCreateWebAppContextWithId;
-
     // Create fresh test engine instance for each test
     t = new InngestTestEngine({
       function: broadcastNotification,
     });
 
-    // Reset all mocks to ensure clean state
+    // Initialize Prismocker and clear cache for a clean test state
+    prismocker = prisma as unknown as PrismaClient;
+    clearRequestCache();
+
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
+    // Clear all mocks
     jest.clearAllMocks();
     jest.resetAllMocks();
-    mockGetService.mockReset();
+  });
 
-    // Restore mock implementations after reset
-    mockCreateWebAppContextWithId.mockReturnValue({
-      requestId: 'test-request-id',
-      operation: 'broadcastNotification',
-      route: '/inngest/notifications/broadcast',
-    });
+  /**
+   * Cleanup after each test to prevent open handles
+   */
+  afterEach(async () => {
+    // Clear all timers
+    jest.clearAllTimers();
 
-    // Set up mock MiscService
-    mockMiscService = {
-      insertNotification: jest.fn().mockResolvedValue({
-        id: 'notification-456',
-        title: 'Broadcast Title',
-        message: 'Broadcast Message',
-        type: 'announcement',
-        priority: 'high',
-      }),
-    };
+    // Ensure all pending promises are resolved
+    await new Promise((resolve) => setImmediate(resolve));
 
-    mockGetService.mockResolvedValue(mockMiscService as never);
+    // Clear the test engine reference to allow garbage collection
+    (t as any) = null;
   });
 
   /**
@@ -563,24 +450,18 @@ describe('broadcastNotification', () => {
     })) as { result: { success: boolean; notificationId: string; broadcast: boolean } };
 
     expect(result.success).toBe(true);
-    expect(result.notificationId).toBe('notification-456');
+    expect(result.notificationId).toBeDefined();
     expect(result.broadcast).toBe(true);
 
-    expect(mockMiscService.insertNotification).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'Broadcast Title',
-        message: 'Broadcast Message',
-        type: 'announcement',
-        priority: 'high', // Default for broadcast
-      })
-    );
-
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.objectContaining({
-        notificationId: 'notification-456',
-      }),
-      'Broadcast notification created'
-    );
+    // Verify notification was created in Prismocker with high priority (default for broadcast)
+    const notification = await prismocker.notifications.findUnique({
+      where: { id: result.notificationId },
+    });
+    expect(notification).toBeDefined();
+    expect(notification?.title).toBe('Broadcast Title');
+    expect(notification?.message).toBe('Broadcast Message');
+    expect(notification?.type).toBe('announcement');
+    expect(notification?.priority).toBe('high'); // Default for broadcast
   });
 
   /**
@@ -600,24 +481,11 @@ describe('broadcastNotification', () => {
       ],
     });
 
-    // Verify that logger.warn was called (confirms validation ran)
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.anything(),
-      'Invalid broadcast notification: missing title'
-    );
-
-    // Inngest test engine may not capture synchronous errors before step.run
     // Check error property (standard format)
     const error = (executeResult as { error?: Error | { message: string } })?.error;
 
-    // If error is not captured, at least verify the validation logic ran via logger
-    if (!error) {
-      // Validation ran (logger.warn was called), but error wasn't captured by test engine
-      // This is acceptable - the validation is working, just not testable via error property
-      // for synchronous errors before step.run
-      expect(mockLogger.warn).toHaveBeenCalled();
-      return;
-    }
+    // Error should be captured
+    expect(error).toBeDefined();
 
     // Handle both Error instances and error objects
     let errorMessage: string;
@@ -630,6 +498,10 @@ describe('broadcastNotification', () => {
     }
 
     expect(errorMessage).toBe('Invalid notification: title is required');
+
+    // Verify no notification was created
+    const allNotifications = await prismocker.notifications.findMany();
+    expect(allNotifications.length).toBe(0);
   });
 
   /**
@@ -649,24 +521,11 @@ describe('broadcastNotification', () => {
       ],
     });
 
-    // Verify that logger.warn was called (confirms validation ran)
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.anything(),
-      'Invalid broadcast notification: missing message'
-    );
-
-    // Inngest test engine may not capture synchronous errors before step.run
     // Check error property (standard format)
     const error = (executeResult as { error?: Error | { message: string } })?.error;
 
-    // If error is not captured, at least verify the validation logic ran via logger
-    if (!error) {
-      // Validation ran (logger.warn was called), but error wasn't captured by test engine
-      // This is acceptable - the validation is working, just not testable via error property
-      // for synchronous errors before step.run
-      expect(mockLogger.warn).toHaveBeenCalled();
-      return;
-    }
+    // Error should be captured
+    expect(error).toBeDefined();
 
     // Handle both Error instances and error objects
     let errorMessage: string;
@@ -679,5 +538,9 @@ describe('broadcastNotification', () => {
     }
 
     expect(errorMessage).toBe('Invalid notification: message is required');
+
+    // Verify no notification was created
+    const allNotifications = await prismocker.notifications.findMany();
+    expect(allNotifications.length).toBe(0);
   });
 });

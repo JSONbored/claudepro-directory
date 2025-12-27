@@ -259,7 +259,7 @@ export const Prisma = {
 };
 
 // Export Prisma enum stubs (auto-generated - see Enum Support section)
-// Run: npx prisma generate-enums
+// Run: npx @jsonbored/prismocker generate-enums
 export { job_status, job_type /* ... other enums */ } from './enums';
 ```
 
@@ -1544,7 +1544,7 @@ await prisma.content.create({
 
 ### Prisma Extensions
 
-Prismocker supports Prisma Client extensions:
+Prismocker fully supports Prisma Client extensions via `$extends()`:
 
 ```typescript
 import { createPrismocker } from '@jsonbored/prismocker';
@@ -1552,12 +1552,65 @@ import type { PrismaClient } from '@prisma/client';
 
 const basePrisma = createPrismocker<PrismaClient>();
 
-// Extensions work transparently (if your codebase uses $extends)
-// Prismocker's $extends() method returns the same instance
+// Client extensions (add methods to client)
 const extended = basePrisma.$extends({
-  // Your extensions here
+  client: {
+    customMethod: () => 'custom-value',
+  },
 });
+
+// Model extensions (add methods to models)
+const extendedWithModels = basePrisma.$extends({
+  model: {
+    companies: {
+      async findActive() {
+        return basePrisma.companies.findMany({ where: { featured: true } });
+      },
+    },
+  },
+});
+
+// Query extensions (modify query behavior)
+const extendedWithQuery = basePrisma.$extends({
+  model: {
+    companies: {
+      query: {
+        findMany: async (args, originalMethod) => {
+          // Modify args or call originalMethod
+          return originalMethod({ ...args, where: { ...args.where, active: true } });
+        },
+      },
+    },
+  },
+});
+
+// Result extensions (modify result behavior)
+const extendedWithResult = basePrisma.$extends({
+  model: {
+    companies: {
+      result: {
+        findMany: (result) => {
+          // Transform result
+          return result.map((company) => ({ ...company, transformed: true }));
+        },
+      },
+    },
+  },
+});
+
+// Chaining extensions
+const chained = basePrisma
+  .$extends({ client: { method1: () => 'value1' } })
+  .$extends({ client: { method2: () => 'value2' } });
 ```
+
+**Extension Features:**
+- ✅ Client extensions (add methods to client)
+- ✅ Model extensions (add methods to models)
+- ✅ Query extensions (modify query behavior)
+- ✅ Result extensions (modify result behavior)
+- ✅ Extension chaining (multiple `$extends()` calls)
+- ✅ Full compatibility with Prisma's extension API
 
 </details>
 
@@ -1606,6 +1659,7 @@ await prisma.companies.create({ data: { name: 'Test' } }); // Logs: "Executing c
 * ✅ Can intercept and return custom results
 * ✅ Supports multiple middleware (executed in registration order)
 * ✅ Works with all Prisma operations
+* ✅ Correctly sets `runInTransaction: true` when operations run inside transactions
 
 **Example: Logging Middleware**
 
@@ -3054,16 +3108,16 @@ npx @jsonbored/prismocker setup --only-mock
 npx @jsonbored/prismocker setup --only-enums
 ```
 
-### `npx prisma verify`
+### `npx @jsonbored/prismocker verify`
 
 Verifies that Prismocker is properly set up in your project.
 
 ```bash
 # Verify setup
-npx prisma verify
+npx @jsonbored/prismocker verify
 
 # Custom paths
-npx prisma verify --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
+npx @jsonbored/prismocker verify --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
 ```
 
 **Checks:**
@@ -3074,16 +3128,16 @@ npx prisma verify --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/cli
 
 **Exit Code:** Returns `0` if all checks pass, `1` if any issues are found.
 
-### `npx prisma fix`
+### `npx @jsonbored/prismocker fix`
 
 Automatically fixes Prismocker setup issues.
 
 ```bash
 # Fix setup issues
-npx prisma fix
+npx @jsonbored/prismocker fix
 
 # Custom paths
-npx prisma fix --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
+npx @jsonbored/prismocker fix --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
 ```
 
 **Actions:**
@@ -3092,32 +3146,32 @@ npx prisma fix --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client
 * Updates setup file configuration
 * Generates enum stubs
 
-### `npx prisma rollback`
+### `npx @jsonbored/prismocker rollback`
 
 Removes Prismocker setup from your project.
 
 ```bash
 # Remove mock file only
-npx prisma rollback
+npx @jsonbored/prismocker rollback
 
 # Remove mock file and setup file references
-npx prisma rollback --remove-setup
+npx @jsonbored/prismocker rollback --remove-setup
 ```
 
 **Options:**
 
 * `--remove-setup` - Also prompts to remove setup file references (manual removal required)
 
-### `npx prisma generate-enums`
+### `npx @jsonbored/prismocker generate-enums`
 
 Generates enum stubs from your Prisma schema for use in mock files.
 
 ```bash
 # Basic usage (uses defaults)
-npx prisma generate-enums
+npx @jsonbored/prismocker generate-enums
 
 # Custom paths
-npx prisma generate-enums --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
+npx @jsonbored/prismocker generate-enums --schema ./prisma/schema.prisma --mock ./__mocks__/@prisma/client.ts
 ```
 
 **When to run:**

@@ -363,7 +363,7 @@ describe('Prismocker Integration Tests', () => {
       const middlewareCalls: string[] = [];
       prisma.$use(async (params, next) => {
         middlewareCalls.push(params.action);
-        return next(params);
+        return next();
       });
 
       await prisma.companies.findMany();
@@ -380,13 +380,85 @@ describe('Prismocker Integration Tests', () => {
         if (params.action === 'create' && params.model === 'companies') {
           params.args.data.name = params.args.data.name.toUpperCase();
         }
-        return next(params);
+        return next();
       });
 
       const company = await prisma.companies.create({
         data: { id: 'comp-1', name: 'company 1', owner_id: 'owner-1', slug: 'company-1' },
       });
       expect(company.name).toBe('COMPANY 1');
+    });
+
+    it('should validate middleware is a function', () => {
+      // @ts-expect-error - Testing invalid input
+      expect(() => prisma.$use('not a function')).toThrow(
+        'Prismocker: $use() middleware must be a function'
+      );
+    });
+
+    it('should execute middleware in registration order', async () => {
+      const executionOrder: string[] = [];
+
+      prisma.$use(async (params, next) => {
+        executionOrder.push('first');
+        return next();
+      });
+
+      prisma.$use(async (params, next) => {
+        executionOrder.push('second');
+        return next();
+      });
+
+      prisma.$use(async (params, next) => {
+        executionOrder.push('third');
+        return next();
+      });
+
+      await prisma.companies.findMany();
+
+      expect(executionOrder).toEqual(['first', 'second', 'third']);
+    });
+
+    it('should pass correct params structure to middleware', async () => {
+      let receivedParams: any = null;
+
+      prisma.$use(async (params, next) => {
+        receivedParams = params;
+        return next();
+      });
+
+      await prisma.companies.findMany({ where: { name: 'Test' } });
+
+      expect(receivedParams).toBeDefined();
+      expect(receivedParams.model).toBe('companies');
+      expect(receivedParams.action).toBe('findMany');
+      expect(receivedParams.args).toBeDefined();
+      expect(receivedParams.runInTransaction).toBe(false);
+    });
+
+    it('should pass runInTransaction: true to middleware when inside transaction', async () => {
+      let receivedParams: any = null;
+
+      prisma.$use(async (params, next) => {
+        receivedParams = params;
+        return next();
+      });
+
+      // Seed data first
+      if (isPrismockerClient(prisma)) {
+        setDataTyped(prisma, 'companies', [
+          { id: 'comp-1', name: 'Company 1', owner_id: 'owner-1', slug: 'company-1' },
+        ]);
+      }
+
+      await prisma.$transaction(async (tx) => {
+        await tx.companies.findMany();
+      });
+
+      expect(receivedParams).toBeDefined();
+      expect(receivedParams.model).toBe('companies');
+      expect(receivedParams.action).toBe('findMany');
+      expect(receivedParams.runInTransaction).toBe(true);
     });
   });
 
@@ -405,21 +477,164 @@ describe('Prismocker Integration Tests', () => {
       expect(events.length).toBeGreaterThan(0);
       expect(events.some((e) => e.action === 'findMany')).toBe(true);
       expect(events.some((e) => e.action === 'create')).toBe(true);
+      expect(events[0]).toHaveProperty('timestamp');
+    });
+
+    it('should emit error events for failed operations', async () => {
+      const errorEvents: any[] = [];
+      prisma.$on('error', (event) => {
+        errorEvents.push(event);
+      });
+
+      // Disconnect to cause an error
+      await prisma.$disconnect();
+
+      try {
+        await prisma.companies.findMany();
+      } catch (error) {
+        // Expected error
+      }
+
+      // Reconnect for other tests
+      await prisma.$connect();
+
+      expect(errorEvents.length).toBeGreaterThan(0);
+      expect(errorEvents[0]).toHaveProperty('error');
+      expect(errorEvents[0]).toHaveProperty('model');
+      expect(errorEvents[0]).toHaveProperty('action');
+      expect(errorEvents[0]).toHaveProperty('timestamp');
+    });
+
+    it('should validate event type', () => {
+      // @ts-expect-error - Testing invalid input
+      expect(() => prisma.$on('invalid-event' as any, () => {})).toThrow(
+        'Prismocker: $on() event must be one of:'
+      );
+    });
+
+    it('should validate callback is a function', () => {
+      // @ts-expect-error - Testing invalid input
+      expect(() => prisma.$on('query', 'not a function' as any)).toThrow(
+        'Prismocker: $on() callback must be a function'
+      );
+    });
+
+    it('should support multiple listeners for the same event', async () => {
+      const events1: any[] = [];
+      const events2: any[] = [];
+
+      prisma.$on('query', (event) => {
+        events1.push(event);
+      });
+
+      prisma.$on('query', (event) => {
+        events2.push(event);
+      });
+
+      await prisma.companies.findMany();
+
+      expect(events1.length).toBeGreaterThan(0);
+      expect(events2.length).toBeGreaterThan(0);
+      expect(events1.length).toBe(events2.length);
+    });
+
+    it('should support all event types', async () => {
+      const queryEvents: any[] = [];
+      const infoEvents: any[] = [];
+      const warnEvents: any[] = [];
+      const errorEvents: any[] = [];
+      const connectEvents: any[] = [];
+      const disconnectEvents: any[] = [];
+
+      prisma.$on('query', (e) => queryEvents.push(e));
+      prisma.$on('info', (e) => infoEvents.push(e));
+      prisma.$on('warn', (e) => warnEvents.push(e));
+      prisma.$on('error', (e) => errorEvents.push(e));
+      prisma.$on('connect', (e) => connectEvents.push(e));
+      prisma.$on('disconnect', (e) => disconnectEvents.push(e));
+
+      // Trigger query event
+      await prisma.companies.findMany();
+
+      // Trigger connect/disconnect events
+      await prisma.$disconnect();
+      await prisma.$connect();
+
+      // Verify all event types are supported
+      expect(queryEvents.length).toBeGreaterThan(0);
+      expect(connectEvents.length).toBeGreaterThan(0);
+      expect(disconnectEvents.length).toBeGreaterThan(0);
     });
   });
 
   describe('Lifecycle Methods', () => {
-    it('should support $connect() (no-op for in-memory)', async () => {
-      // $connect() should not throw and should complete immediately
+    it('should support $connect() with state tracking', async () => {
+      // $connect() should not throw and should complete
       await expect(prisma.$connect()).resolves.toBeUndefined();
+
+      // Calling $connect() when already connected should return immediately
+      const startTime = Date.now();
+      await prisma.$connect();
+      const duration = Date.now() - startTime;
+      // Should return immediately (very fast)
+      expect(duration).toBeLessThan(10);
     });
 
-    it('should support $disconnect() (no-op for in-memory)', async () => {
-      // $disconnect() should not throw and should complete immediately
+    it('should support $disconnect() with state tracking', async () => {
+      // Ensure connected first
+      await prisma.$connect();
+
+      // $disconnect() should not throw and should complete
       await expect(prisma.$disconnect()).resolves.toBeUndefined();
+
+      // Calling $disconnect() when already disconnected should return immediately
+      const startTime = Date.now();
+      await prisma.$disconnect();
+      const duration = Date.now() - startTime;
+      // Should return immediately (very fast)
+      expect(duration).toBeLessThan(10);
     });
 
-    it('should support $metrics() API', async () => {
+    it('should prevent operations when disconnected', async () => {
+      // Disconnect the client
+      await prisma.$disconnect();
+
+      // Operations should fail when disconnected
+      await expect(prisma.companies.findMany()).rejects.toThrow(
+        'Prismocker: Client is disconnected. Call $connect() before executing operations.'
+      );
+
+      // Reconnect
+      await prisma.$connect();
+
+      // Operations should work after reconnecting
+      await expect(prisma.companies.findMany()).resolves.toBeDefined();
+    });
+
+    it('should emit connect and disconnect events', async () => {
+      const connectEvents: any[] = [];
+      const disconnectEvents: any[] = [];
+
+      prisma.$on('connect', (event) => {
+        connectEvents.push(event);
+      });
+
+      prisma.$on('disconnect', (event) => {
+        disconnectEvents.push(event);
+      });
+
+      // Connect should emit event
+      await prisma.$connect();
+      expect(connectEvents.length).toBeGreaterThan(0);
+      expect(connectEvents[0]).toHaveProperty('timestamp');
+
+      // Disconnect should emit event
+      await prisma.$disconnect();
+      expect(disconnectEvents.length).toBeGreaterThan(0);
+      expect(disconnectEvents[0]).toHaveProperty('timestamp');
+    });
+
+    it('should support $metrics() API with real-time metrics', async () => {
       // Create a new prisma instance with logQueries enabled to track query stats
       const metricsPrisma = createPrismocker<PrismaClient>({
         logQueries: true, // Enable query logging to track stats
@@ -439,11 +654,15 @@ describe('Prismocker Integration Tests', () => {
       // Get metrics
       const metrics = await metricsPrisma.$metrics();
 
-      // Verify metrics structure
+      // Verify metrics structure matches Prisma v7.1.0+ API exactly
       expect(metrics).toBeDefined();
       expect(metrics.counters).toBeDefined();
       expect(Array.isArray(metrics.counters)).toBe(true);
       expect(metrics.counters.length).toBeGreaterThan(0);
+      expect(metrics.gauges).toBeDefined();
+      expect(Array.isArray(metrics.gauges)).toBe(true);
+      expect(metrics.histograms).toBeDefined();
+      expect(Array.isArray(metrics.histograms)).toBe(true);
 
       // Verify query count counter exists
       const queryCounter = metrics.counters.find(
@@ -451,6 +670,33 @@ describe('Prismocker Integration Tests', () => {
       );
       expect(queryCounter).toBeDefined();
       expect(queryCounter.value).toBeGreaterThanOrEqual(2); // At least 2 queries performed
+      expect(queryCounter.labels).toBeDefined();
+
+      // Verify active queries gauge
+      const activeQueriesGauge = metrics.gauges.find(
+        (g: any) => g.key === 'prisma_client_queries_active'
+      );
+      expect(activeQueriesGauge).toBeDefined();
+      expect(typeof activeQueriesGauge.value).toBe('number');
+      expect(activeQueriesGauge.labels).toBeDefined();
+
+      // Verify connection state gauge
+      const connectionGauge = metrics.gauges.find(
+        (g: any) => g.key === 'prisma_client_connections_open'
+      );
+      expect(connectionGauge).toBeDefined();
+      expect(connectionGauge.value).toBe(1); // Should be connected
+      expect(connectionGauge.labels).toBeDefined();
+
+      // Verify histogram structure if queries have durations
+      if (metrics.histograms.length > 0) {
+        const histogram = metrics.histograms[0];
+        expect(histogram.key).toBe('prisma_client_queries_duration_histogram_ms');
+        expect(Array.isArray(histogram.value)).toBe(true);
+        expect(Array.isArray(histogram.buckets)).toBe(true);
+        expect(histogram.buckets).toEqual([1, 5, 10, 50, 100, 500, 1000, 5000]);
+        expect(histogram.labels).toBeDefined();
+      }
     });
   });
 
@@ -538,6 +784,131 @@ describe('Prismocker Integration Tests', () => {
       const allCompanies = await prisma.companies.findMany();
       expect(allCompanies).toHaveLength(1);
       expect(allCompanies[0].name).toBe('Updated Company');
+    });
+  });
+
+  describe('Client Extensions ($extends)', () => {
+    it('should support client extensions', () => {
+      const extended = prisma.$extends({
+        client: {
+          customMethod: () => 'custom-value',
+        },
+      });
+
+      expect((extended as any).customMethod).toBeDefined();
+      expect(typeof (extended as any).customMethod).toBe('function');
+      expect((extended as any).customMethod()).toBe('custom-value');
+    });
+
+    it('should support model extensions', async () => {
+      if (isPrismockerClient(prisma)) {
+        setDataTyped(prisma, 'companies', [
+          { id: 'comp-1', name: 'Company 1', owner_id: 'owner-1', slug: 'company-1' },
+        ]);
+      }
+
+      const extended = prisma.$extends({
+        model: {
+          companies: {
+            async findActive() {
+              return prisma.companies.findMany({ where: { featured: true } });
+            },
+          },
+        },
+      });
+
+      const activeCompanies = await (extended as any).companies.findActive();
+      expect(Array.isArray(activeCompanies)).toBe(true);
+    });
+
+    it('should support chaining extensions', () => {
+      const extended1 = prisma.$extends({
+        client: {
+          method1: () => 'value1',
+        },
+      });
+
+      const extended2 = extended1.$extends({
+        client: {
+          method2: () => 'value2',
+        },
+      });
+
+      expect((extended2 as any).method1).toBeDefined();
+      expect((extended2 as any).method2).toBeDefined();
+      expect((extended2 as any).method1()).toBe('value1');
+      expect((extended2 as any).method2()).toBe('value2');
+    });
+
+    it('should preserve base client functionality with extensions', async () => {
+      if (isPrismockerClient(prisma)) {
+        setDataTyped(prisma, 'companies', [
+          { id: 'comp-1', name: 'Company 1', owner_id: 'owner-1', slug: 'company-1' },
+        ]);
+      }
+
+      const extended = prisma.$extends({
+        client: {
+          customMethod: () => 'custom',
+        },
+      });
+
+      // Base functionality should still work
+      const companies = await (extended as any).companies.findMany();
+      expect(companies).toHaveLength(1);
+      expect(companies[0].name).toBe('Company 1');
+
+      // Extension should work
+      expect((extended as any).customMethod()).toBe('custom');
+    });
+
+    it('should support query extensions', async () => {
+      if (isPrismockerClient(prisma)) {
+        setDataTyped(prisma, 'companies', [
+          { id: 'comp-1', name: 'Company 1', owner_id: 'owner-1', slug: 'company-1' },
+        ]);
+      }
+
+      const extended = prisma.$extends({
+        model: {
+          companies: {
+            query: {
+              findMany: async (args: any[], originalMethod: any) => {
+                // Modify args to add a filter
+                return originalMethod({ where: { name: { contains: 'Company' } } });
+              },
+            },
+          },
+        },
+      });
+
+      const companies = await (extended as any).companies.findMany();
+      expect(Array.isArray(companies)).toBe(true);
+    });
+
+    it('should support result extensions', async () => {
+      if (isPrismockerClient(prisma)) {
+        setDataTyped(prisma, 'companies', [
+          { id: 'comp-1', name: 'Company 1', owner_id: 'owner-1', slug: 'company-1' },
+        ]);
+      }
+
+      const extended = prisma.$extends({
+        model: {
+          companies: {
+            result: {
+              findMany: (result: any[]) => {
+                // Transform result
+                return result.map((company) => ({ ...company, transformed: true }));
+              },
+            },
+          },
+        },
+      });
+
+      const companies = await (extended as any).companies.findMany();
+      expect(companies).toHaveLength(1);
+      expect(companies[0].transformed).toBe(true);
     });
   });
 });

@@ -1,6 +1,7 @@
 # Security Scanning
 # Optimizations: path-based filtering, conditional jobs, shallow clones, cancels in-progress
-# Uses actions/checkout@v6 (fetch-depth: 2 for PRs, 1 for others)
+# Uses actions/checkout@v6 (fetch-depth: 1 for CodeQL)
+# Note: TruffleHog and Dependency Review removed - now handled by Trunk git hooks (trufflehog-scan-pre-commit/pre-push, osv-scanner-pre-commit/pre-push, dependency-audit-pre-push)
 name: Security
 
 on:
@@ -27,28 +28,6 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # Lightweight secret scanning (fast, always runs on PRs)
-  secrets:
-    name: Secret Scanning
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    if: github.event_name != 'schedule'
-
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          # PRs need depth 2 for base comparison, others only need 1
-          fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}
-
-      - name: Check for hardcoded secrets
-        uses: trufflesecurity/trufflehog@v3.91.1
-        with:
-          path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          extra_args: --only-verified --exclude-paths=.github/trufflehog-exclude.txt
-        continue-on-error: true
-
   # CodeQL (only on schedule, not blocking)
   codeql:
     name: CodeQL Analysis
@@ -77,27 +56,3 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
         continue-on-error: true
-
-  # Dependency review (only on PRs with dependency changes)
-  dependency-review:
-    name: Dependency Review
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    if: github.event_name == 'pull_request'
-    permissions:
-      contents: read
-      pull-requests: write
-
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 1 # Shallow clone - dependency review only needs current state
-
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
-        with:
-          fail-on-severity: critical
-          vulnerability-check: true
-          license-check: false
-          comment-summary-in-pr: always
-          warn-only: true

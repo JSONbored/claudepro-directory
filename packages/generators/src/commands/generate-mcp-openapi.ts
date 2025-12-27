@@ -35,7 +35,6 @@ import {
   setProjectRoot,
   evaluateSchemaFromFile,
   generateExampleFromZodSchema,
-  createJitiInstance,
 } from '../toolkit/zod-schema-evaluation.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -651,7 +650,8 @@ async function evaluateSchemas(
               });
 
               if (schemaDeclaration && Node.isVariableDeclaration(schemaDeclaration)) {
-                const initializer = schemaDeclaration.getInitializer();
+                const variableDecl = schemaDeclaration as import('ts-morph').VariableDeclaration;
+                const initializer = variableDecl.getInitializer();
                 if (initializer) {
                   const schemaCode = initializer.getText();
 

@@ -27,7 +27,10 @@ export default defineConfig({
   },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  // CRITICAL: Disable retries for Trunk Flaky Tests integration
+  // Retries interfere with flaky test detection accuracy
+  // Trunk needs to see actual test failures to detect flakiness patterns
+  retries: 0,
   // Optimize workers: Use sharding for better CI performance, auto for local
   // Sharding splits tests across workers more efficiently than simple worker count
   // For CI: Use 2 workers (better resource utilization)

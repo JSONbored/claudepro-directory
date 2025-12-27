@@ -8,7 +8,7 @@
  * file system operations, etc.) where strict type checking is less useful.
  */
 
-import sharedConfig from '../../config/tools/eslint.config.mjs';
+import sharedConfig from '../../.trunk/configs/eslint.config.mjs';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [

@@ -6,7 +6,7 @@
  * - Internal imports (relative imports within the same package are correct)
  */
 
-import sharedConfig from '../../config/tools/eslint.config.mjs';
+import sharedConfig from '../../.trunk/configs/eslint.config.mjs';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [

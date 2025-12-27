@@ -19,7 +19,7 @@ jest.mock('next/cache', () => ({
 // The prisma singleton from data-layer will automatically use PrismockerClient
 
 // Import real cache utilities for proper cache testing
-import { clearRequestCache } from '../../../data-layer/src/utils/request-cache.ts';
+import { clearRequestCache, getRequestCache } from '../../../data-layer/src/utils/request-cache.ts';
 
 // Mock RPC error logging utility
 jest.mock('../../../data-layer/src/utils/rpc-error-logging.ts', () => ({
@@ -69,6 +69,16 @@ jest.mock('@heyclaude/shared-runtime', () => ({
 // Don't mock service-factory - use real implementation
 // Services will use Prismocker via __mocks__/@prisma/client.ts
 
+/**
+ * Jobs Data Functions Test Suite
+ *
+ * Tests getFilteredJobs data function → SearchService → database flow.
+ * Uses Prismocker for in-memory database and getRequestCache() for cache verification.
+ *
+ * @group Jobs
+ * @group DataFunctions
+ * @group Integration
+ */
 describe('jobs', () => {
   let prismocker: PrismaClient;
 
@@ -85,7 +95,7 @@ describe('jobs', () => {
     }
 
     // Use Prismocker's Proxy set handler to override $queryRawUnsafe for RPC calls
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
+    (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([]);
 
     jest.clearAllMocks();
   });
@@ -309,9 +319,10 @@ describe('jobs', () => {
       });
     });
 
+    /**
+     * Cache test: Verifies request-scoped caching using getRequestCache().getStats().size.
+     */
     it('should cache results on duplicate calls (caching test)', async () => {
-      // getFilteredJobs uses createDataFunction which uses withSmartCache
-      // Services use withSmartCache which caches RPC calls
       const mockRpcResult: FilterJobsReturns = {
         hits: [],
         pagination: { total: 0, limit: 30, offset: 0 },
@@ -321,22 +332,21 @@ describe('jobs', () => {
         mockRpcResult,
       ] as any);
 
-      // First call - should hit database and populate cache
+      // First call - should populate cache
+      const cacheBefore = getRequestCache().getStats().size;
       const result1 = await getFilteredJobs({});
-      const firstCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls
-        .length;
+      const cacheAfterFirst = getRequestCache().getStats().size;
 
-      // Second call - should hit cache (no database call)
+      // Second call - should use cache
       const result2 = await getFilteredJobs({});
-      const secondCallCount = (prismocker.$queryRawUnsafe as ReturnType<typeof jest.fn>).mock.calls
-        .length;
+      const cacheAfterSecond = getRequestCache().getStats().size;
 
-      // Verify results are the same (indicating cache was used)
+      // Verify results are the same
       expect(result1).toEqual(result2);
 
-      // Verify $queryRawUnsafe was only called once (cached on second call)
-      expect(secondCallCount).toBe(firstCallCount);
-      expect(secondCallCount).toBe(1);
+      // Verify cache size increased after first call, stayed same after second
+      expect(cacheAfterFirst).toBeGreaterThan(cacheBefore);
+      expect(cacheAfterSecond).toBe(cacheAfterFirst);
     });
 
     it('should cache filtered results separately from unfiltered results', async () => {

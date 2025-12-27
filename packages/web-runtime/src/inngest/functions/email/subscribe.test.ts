@@ -1,13 +1,20 @@
 /**
- * Newsletter Subscribe Inngest Function Tests
+ * Newsletter Subscribe Inngest Function Integration Tests
  *
- * Tests the subscribeNewsletter function using @inngest/test.
- * This tests the function logic, not the route handler.
+ * Tests subscribeNewsletter function → NewsletterService → database flow.
+ * Uses InngestTestEngine, Prismocker for in-memory database, and real service factory.
+ *
+ * @group Inngest
+ * @group Email
+ * @group Integration
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { subscribeNewsletter } from './subscribe';
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+import { clearRequestCache } from '@heyclaude/data-layer/utils/request-cache';
 
 // Mock dependencies - define mocks directly in jest.mock() factory functions
 jest.mock('../../../integrations/resend', () => {
@@ -39,10 +46,11 @@ jest.mock('next/cache', () => {
 });
 
 jest.mock('../../../data/service-factory', () => {
-  const mockGetService = jest.fn();
+  // Import real service factory to return real services
+  const actual = jest.requireActual('../../../data/service-factory');
   return {
-    getService: mockGetService,
-    __mockGetService: mockGetService,
+    ...actual,
+    getService: actual.getService, // Use real getService which returns real services
   };
 });
 
@@ -123,9 +131,6 @@ const {
 const { __mockRevalidateTag: mockRevalidateTag } = jest.requireMock('next/cache') as {
   __mockRevalidateTag: ReturnType<typeof jest.fn>;
 };
-const { __mockGetService: mockGetService } = jest.requireMock('../../../data/service-factory') as {
-  __mockGetService: ReturnType<typeof jest.fn>;
-};
 const { __mockLogger: mockLogger, __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId } =
   jest.requireMock('../../../logging/server') as {
     __mockLogger: {
@@ -151,6 +156,7 @@ describe('subscribeNewsletter', () => {
    * Test engine instance - created fresh for each test to avoid state caching
    */
   let t: InngestTestEngine;
+  let prismocker: PrismaClient;
 
   beforeEach(() => {
     // Create fresh test engine instance for each test
@@ -159,10 +165,21 @@ describe('subscribeNewsletter', () => {
       function: subscribeNewsletter,
     });
 
+    // Initialize Prismocker and clear cache for a clean test state
+    prismocker = prisma as unknown as PrismaClient;
+    clearRequestCache();
+
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
+    // Set up $queryRawUnsafe for RPC testing (subscribeNewsletter uses NewsletterService.subscribeNewsletter → RPC)
+    (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([]);
+
     // Reset all mocks to ensure clean state
     jest.clearAllMocks();
     jest.resetAllMocks();
-    mockGetService.mockReset();
     mockSyncContactToResend.mockReset();
     mockBuildContactProperties.mockReset();
     mockResolveNewsletterInterest.mockReset();
@@ -203,21 +220,49 @@ describe('subscribeNewsletter', () => {
     }));
   });
 
+  /**
+   * Cleanup after each test to prevent open handles
+   */
+  afterEach(async () => {
+    // Clear all timers
+    jest.clearAllTimers();
+
+    // Ensure all pending promises are resolved
+    await new Promise((resolve) => setImmediate(resolve));
+
+    // Clear the test engine reference to allow garbage collection
+    (t as any) = null;
+  });
+
   it('should subscribe user successfully', async () => {
-    const mockService = {
-      subscribeNewsletter: jest.fn().mockResolvedValue({
+    // Mock $queryRawUnsafe for subscribeNewsletter RPC call
+    (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([
+      {
         success: true,
         subscription_id: 'sub-id',
         was_resubscribed: false,
-      }),
-      getSubscriptionById: jest.fn().mockResolvedValue({
-        id: 'sub-id',
-        email: 'test@example.com',
-        source: 'homepage',
-      }),
-    };
+      },
+    ]);
 
-    mockGetService.mockResolvedValue(mockService as never);
+    // Seed Prismocker with subscription data for getSubscriptionById (uses direct Prisma query)
+    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+      (prismocker as any).setData('newsletter_subscriptions', [
+        {
+          id: 'sub-id',
+          email: 'test@example.com',
+          source: 'homepage',
+          status: 'active',
+          confirmed: true,
+          unsubscribed_at: null,
+          categories_visited: [],
+          engagement_score: 0,
+          primary_interest: null,
+          subscribed_at: new Date(),
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ]);
+    }
 
     // Execute function - InngestTestEngine will run the actual function code
     // The mocks above will be used when the function executes
@@ -235,7 +280,10 @@ describe('subscribeNewsletter', () => {
 
     expect(result).toHaveProperty('success', true);
     expect(result).toHaveProperty('subscriptionId', 'sub-id');
-    expect(mockService.subscribeNewsletter).toHaveBeenCalled();
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('subscribe_newsletter'),
+      expect.anything()
+    );
     expect(mockSendEmail).toHaveBeenCalled();
     expect(mockEnrollInOnboardingSequence).toHaveBeenCalled();
     expect(mockRevalidateTag).toHaveBeenCalledWith('newsletter', 'default');
@@ -279,20 +327,34 @@ describe('subscribeNewsletter', () => {
   });
 
   it('should handle Resend sync failure gracefully', async () => {
-    const mockService = {
-      subscribeNewsletter: jest.fn().mockResolvedValue({
+    // Mock $queryRawUnsafe for subscribeNewsletter RPC call
+    (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([
+      {
         success: true,
         subscription_id: 'sub-id',
         was_resubscribed: false,
-      }),
-      getSubscriptionById: jest.fn().mockResolvedValue({
-        id: 'sub-id',
-        email: 'test@example.com',
-        source: 'homepage',
-      }),
-    };
+      },
+    ]);
 
-    mockGetService.mockResolvedValue(mockService as never);
+    // Seed Prismocker with subscription data for getSubscriptionById (uses direct Prisma query)
+    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+      (prismocker as any).setData('newsletter_subscriptions', [
+        {
+          id: 'sub-id',
+          email: 'test@example.com',
+          source: 'homepage',
+          status: 'active',
+          confirmed: true,
+          unsubscribed_at: null,
+          categories_visited: [],
+          engagement_score: 0,
+          primary_interest: null,
+          subscribed_at: new Date(),
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ]);
+    }
 
     // Mock Resend sync failure - function will catch and continue
     mockSyncContactToResend.mockRejectedValue(new Error('Resend API error'));
@@ -312,6 +374,9 @@ describe('subscribeNewsletter', () => {
 
     // Should still succeed even if Resend sync fails
     expect(result).toHaveProperty('success', true);
-    expect(mockService.subscribeNewsletter).toHaveBeenCalled();
+    expect(prismocker.$queryRawUnsafe).toHaveBeenCalledWith(
+      expect.stringContaining('subscribe_newsletter'),
+      expect.anything()
+    );
   });
 });

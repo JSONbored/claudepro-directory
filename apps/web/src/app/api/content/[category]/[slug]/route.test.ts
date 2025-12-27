@@ -1,7 +1,12 @@
 /**
- * Unit Tests for Content Detail Export API Route
+ * Content Detail Export API Route Integration Tests
  *
- * Tests the /api/content/[category]/[slug] endpoint which returns individual content in multiple formats.
+ * Tests GET /api/content/[category]/[slug] route → ContentService → database flow.
+ * Uses Prismocker for in-memory database, real service factory, and getRequestCache() for cache verification.
+ *
+ * @group API
+ * @group Content
+ * @group Integration
  */
 
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';

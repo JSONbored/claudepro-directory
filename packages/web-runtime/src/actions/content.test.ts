@@ -92,6 +92,16 @@ jest.mock('@heyclaude/shared-runtime/schemas/env', () => {
 // DO NOT mock data functions - use real data functions which use Prismocker
 // This allows us to test the real RPC flow end-to-end
 
+/**
+ * Content Actions Test Suite
+ *
+ * Tests getReviewsWithStats and fetchPaginatedContent actions → data functions → services → database flow.
+ * Uses Prismocker for in-memory database, safemocker for auth context, and getRequestCache() for cache verification.
+ *
+ * @group Content
+ * @group Actions
+ * @group Integration
+ */
 describe('getReviewsWithStats', () => {
   let prismocker: PrismaClient;
   const testUserId = '123e4567-e89b-12d3-a456-426614174001'; // Valid UUID for testing
@@ -113,7 +123,7 @@ describe('getReviewsWithStats', () => {
 
     // 5. Set up $queryRawUnsafe for RPC testing (getReviewsWithStats uses RPC via getReviewsWithStatsData)
     // Use Prismocker's Proxy set handler to override $queryRawUnsafe
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
+    (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([]);
 
     // Note: safemocker automatically provides context for optionalAuthAction:
     // - ctx.userId = 'test-user-id' (or null if unauthenticated)

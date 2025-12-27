@@ -43,7 +43,7 @@ export async function getContentDescriptionCopy(): Promise<string> {
   });
 
   try {
-    const count = await getContentCount();
+    const count = await getContentCount(undefined);
     return `Open-source directory of ${count}+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.`;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
@@ -77,7 +77,7 @@ export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {
   });
 
   try {
-    const configurationCount = (await getContentCount()) ?? 0;
+    const configurationCount = (await getContentCount(undefined)) ?? 0;
     const visitorStats = await getVisitorStats();
     return {
       configurationCount,

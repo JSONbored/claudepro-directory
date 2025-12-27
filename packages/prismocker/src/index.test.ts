@@ -1189,7 +1189,8 @@ describe('Prismocker', () => {
 
       await prisma.$connect();
       expect(connectEvents.length).toBe(1);
-      expect(connectEvents[0]).toEqual({});
+      expect(connectEvents[0]).toHaveProperty('timestamp');
+      expect(typeof connectEvents[0].timestamp).toBe('number');
     });
 
     it('should emit disconnect event when $disconnect() is called', async () => {
@@ -1200,7 +1201,8 @@ describe('Prismocker', () => {
 
       await prisma.$disconnect();
       expect(disconnectEvents.length).toBe(1);
-      expect(disconnectEvents[0]).toEqual({});
+      expect(disconnectEvents[0]).toHaveProperty('timestamp');
+      expect(typeof disconnectEvents[0].timestamp).toBe('number');
     });
   });
 

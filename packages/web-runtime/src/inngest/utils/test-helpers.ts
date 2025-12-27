@@ -11,6 +11,7 @@
  * @module web-runtime/inngest/utils/test-helpers
  */
 
+import { expect, jest } from '@jest/globals';
 import type { Inngest } from 'inngest';
 import { InngestTestEngine } from '@inngest/test';
 import type { InngestFunction } from 'inngest';

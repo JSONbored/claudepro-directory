@@ -1,13 +1,15 @@
 /**
- * Analytics Pulse Inngest Function Tests
+ * Analytics Pulse Inngest Function Integration Tests
  *
- * Tests the processPulseQueue function using @inngest/test.
- * This tests the function logic, not the route handler.
+ * Tests processPulseQueue function → PGMQ → database flow.
+ * Uses InngestTestEngine, Prismocker for in-memory database, and test PGMQ queue.
  *
- * @module web-runtime/inngest/functions/analytics/pulse.test
+ * @group Inngest
+ * @group Analytics
+ * @group Integration
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { processPulseQueue } from './pulse';
 import { prisma } from '@heyclaude/data-layer/prisma/client';
@@ -166,6 +168,20 @@ describe('processPulseQueue', () => {
     t = new InngestTestEngine({
       function: processPulseQueue,
     });
+  });
+
+  /**
+   * Cleanup after each test to prevent open handles
+   */
+  afterEach(async () => {
+    // Clear all timers
+    jest.clearAllTimers();
+
+    // Ensure all pending promises are resolved
+    await new Promise((resolve) => setImmediate(resolve));
+
+    // Clear the test engine reference to allow garbage collection
+    (t as any) = null;
   });
 
   /**

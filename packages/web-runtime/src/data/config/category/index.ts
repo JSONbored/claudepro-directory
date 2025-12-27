@@ -1,6 +1,5 @@
 import {
   type CategoryStatsConfig,
-  type TabConfig,
   type UnifiedCategoryConfig,
 } from '../../../types/category.ts';
 import { type content_category } from '../../../types/client-safe-enums.ts';

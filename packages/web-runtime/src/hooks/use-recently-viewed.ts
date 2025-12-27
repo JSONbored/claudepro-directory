@@ -141,7 +141,8 @@ const useRecentlyViewedStore = create<RecentlyViewedState>((set) => ({
 }));
 
 // Export store for testing (allows resetting state between tests)
-if (typeof jest !== 'undefined') {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+if (typeof (globalThis as any).jest !== 'undefined') {
   (useRecentlyViewedStore as any).__testReset = () => {
     useRecentlyViewedStore.setState({ items: [], isLoaded: false });
   };

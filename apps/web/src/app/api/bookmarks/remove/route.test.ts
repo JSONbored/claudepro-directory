@@ -1,8 +1,12 @@
 /**
- * Unit Tests for Remove Bookmark API Route
+ * Remove Bookmark API Route Integration Tests
  *
- * Tests the /api/bookmarks/remove endpoint which removes a bookmark for the authenticated user.
- * Uses real removeBookmark action and Prismocker for database mocking.
+ * Tests POST /api/bookmarks/remove route → removeBookmark action → RPC → database flow.
+ * Uses Prismocker for in-memory database, safemocker for auth context, and getRequestCache() for cache verification.
+ *
+ * @group API
+ * @group Bookmarks
+ * @group Integration
  */
 
 import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
@@ -242,9 +246,8 @@ describe('POST /api/bookmarks/remove', () => {
     jest.clearAllMocks();
 
     // 6. Set up $queryRawUnsafe for RPC testing (removeBookmark uses runRpc → BasePrismaService.callRpc → $queryRawUnsafe)
-    // Assign jest.fn() directly to $queryRawUnsafe (Prismocker's Proxy set handler)
-    const mockQueryRawUnsafe = jest.fn().mockResolvedValue([mockBookmarkResult]);
-    (prismocker.$queryRawUnsafe as unknown as typeof mockQueryRawUnsafe) = mockQueryRawUnsafe;
+    // Use Prismocker's Proxy set handler to override $queryRawUnsafe
+    (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([mockBookmarkResult]);
 
     // 7. Reset revalidate mocks
     mockRevalidatePath.mockClear();

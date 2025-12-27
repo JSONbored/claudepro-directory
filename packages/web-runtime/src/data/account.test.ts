@@ -77,6 +77,17 @@ jest.mock('../supabase/server.ts', () => ({
 // Don't mock service-factory - use real implementation
 // Services will use Prismocker via __mocks__/@prisma/client.ts
 
+/**
+ * Account Data Functions Test Suite
+ *
+ * Tests getUserCompleteData, getAccountDashboardBundle, and related account data functions
+ * → AccountService → database flow. Uses Prismocker for in-memory database and
+ * getRequestCache() for cache verification.
+ *
+ * @group Account
+ * @group DataFunctions
+ * @group Integration
+ */
 describe('account data functions', () => {
   let prismocker: PrismaClient;
   let mockGetAuthenticatedUserFromClient: jest.MockedFunction<any>;
@@ -137,7 +148,7 @@ describe('account data functions', () => {
     // Set up $queryRawUnsafe for RPC testing (if needed)
     // Use Prismocker's Proxy set handler to override $queryRawUnsafe
     // This is what runRpc → BasePrismaService.callRpc → prisma.$queryRawUnsafe calls
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
+    (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([]);
 
     // Setup auth mock - getUserCompleteData uses getAuthenticatedUserFromClient
     const { getAuthenticatedUserFromClient } = await import('../auth/get-authenticated-user.ts');

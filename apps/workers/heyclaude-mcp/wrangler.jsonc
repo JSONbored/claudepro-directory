@@ -87,6 +87,9 @@
       "hyperdrive": [
         {
           "binding": "HYPERDRIVE",
+          // TODO: Replace with actual production Hyperdrive config ID
+          // Get from Cloudflare Dashboard > Workers & Pages > Hyperdrive
+          // or create new Hyperdrive config pointing to production Supabase PostgreSQL
           "id": "YOUR_HYPERDRIVE_PRODUCTION_CONFIG_ID",
         },
       ],

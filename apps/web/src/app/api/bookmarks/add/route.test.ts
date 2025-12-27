@@ -1,8 +1,12 @@
 /**
- * Unit Tests for Add Bookmark API Route
+ * Add Bookmark API Route Integration Tests
  *
- * Tests the /api/bookmarks/add endpoint which adds a bookmark for the authenticated user.
- * Uses real addBookmark action and Prismocker for database mocking.
+ * Tests POST /api/bookmarks/add route → addBookmark action → RPC → database flow.
+ * Uses Prismocker for in-memory database, safemocker for auth context, and getRequestCache() for cache verification.
+ *
+ * @group API
+ * @group Bookmarks
+ * @group Integration
  */
 
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
@@ -242,11 +246,8 @@ describe('POST /api/bookmarks/add', () => {
     jest.clearAllMocks();
 
     // Set up $queryRawUnsafe for RPC testing (addBookmark uses runRpc → BasePrismaService.callRpc → $queryRawUnsafe)
-    // Assign jest.fn() directly to $queryRawUnsafe (Prismocker's Proxy set handler)
-    const mockQueryRawUnsafe = jest
-      .fn<() => Promise<(typeof mockBookmarkResult)[]>>()
-      .mockResolvedValue([mockBookmarkResult]);
-    (prismocker.$queryRawUnsafe as unknown as typeof mockQueryRawUnsafe) = mockQueryRawUnsafe;
+    // Use Prismocker's Proxy set handler to override $queryRawUnsafe
+    (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([mockBookmarkResult]);
 
     // Reset revalidate mocks
     mockRevalidatePath.mockClear();

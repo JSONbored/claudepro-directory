@@ -1,12 +1,12 @@
 /**
  * Paginated Content API Route Integration Tests
  *
- * Tests the /api/content/paginated route handler using real implementations:
- * - Real service factory (no mocking of data-layer services)
- * - Prismocker for database queries (uses v_content_list_slim view)
- * - Real request cache implementation
- * - Cache behavior testing
- * - All production features tested
+ * Tests GET /api/content/paginated route → ContentService → database flow.
+ * Uses Prismocker for in-memory database, real service factory, and getRequestCache() for cache verification.
+ *
+ * @group API
+ * @group Content
+ * @group Integration
  */
 
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';

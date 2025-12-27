@@ -37,20 +37,16 @@ import {
 // Don't mock normalizeError - use real implementation
 // Don't mock createDataFunction - use real implementation with Prismocker
 
-// Helper function to create v_trending_searches view data for seeding
-function createTrendingSearch(overrides: {
-  search_query: string;
-  search_count: number | bigint;
-}): any {
-  return {
-    search_query: overrides.search_query,
-    search_count:
-      typeof overrides.search_count === 'bigint'
-        ? overrides.search_count
-        : BigInt(overrides.search_count),
-  };
-}
-
+/**
+ * Search Facets Data Functions Test Suite
+ *
+ * Tests getSearchFacets and getPopularSearches data functions → SearchService → database flow.
+ * Uses Prismocker for in-memory database and getRequestCache() for cache verification.
+ *
+ * @group Search
+ * @group DataFunctions
+ * @group Integration
+ */
 describe('search/facets', () => {
   let prismocker: PrismaClient;
 
@@ -72,7 +68,7 @@ describe('search/facets', () => {
 
     // 5. Set up $queryRawUnsafe for getSearchFacets (uses RPC via callRpc)
     // getSearchFacets uses SearchService.getSearchFacets which uses callRpc('get_search_facets')
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
+    (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([]);
   });
 
   describe('getSearchFacets', () => {

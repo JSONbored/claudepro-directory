@@ -89,6 +89,16 @@ jest.mock('next/cache', () => ({
   revalidateTag: (...args: any[]) => mockRevalidateTag(...args),
 }));
 
+/**
+ * Reviews CRUD Actions Test Suite
+ *
+ * Tests createReview, updateReview, and deleteReview actions → RPC → database flow.
+ * Uses Prismocker for in-memory database, safemocker for auth context, and verifies cache invalidation.
+ *
+ * @group Reviews
+ * @group Actions
+ * @group Integration
+ */
 describe('reviews-crud', () => {
   let prismocker: PrismaClient;
 
@@ -110,7 +120,7 @@ describe('reviews-crud', () => {
 
     // 5. Set up $queryRawUnsafe for RPC testing (if needed)
     // Use Prismocker's Proxy set handler to override $queryRawUnsafe
-    prismocker.$queryRawUnsafe = jest.fn().mockResolvedValue([]);
+    (prismocker as any).$queryRawUnsafe = jest.fn<() => Promise<any[]>>().mockResolvedValue([]);
   });
 
   describe('createReview', () => {
@@ -124,9 +134,11 @@ describe('reviews-crud', () => {
         });
 
         // Verify SafeActionResult structure
-        expect(result.fieldErrors).toBeDefined();
-        expect(result.data).toBeUndefined();
-        expect(result.serverError).toBeUndefined();
+        // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+        const safeResult = result as SafeActionResult<never>;
+        expect(safeResult.fieldErrors).toBeDefined();
+        expect(safeResult.data).toBeUndefined();
+        expect(safeResult.serverError).toBeUndefined();
       });
 
       it('should accept valid input', async () => {
@@ -301,9 +313,11 @@ describe('reviews-crud', () => {
         });
 
         // Verify SafeActionResult structure
-        expect(result.fieldErrors).toBeDefined();
-        expect(result.data).toBeUndefined();
-        expect(result.serverError).toBeUndefined();
+        // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+        const safeResult = result as SafeActionResult<never>;
+        expect(safeResult.fieldErrors).toBeDefined();
+        expect(safeResult.data).toBeUndefined();
+        expect(safeResult.serverError).toBeUndefined();
       });
 
       it('should accept valid input', async () => {
@@ -473,9 +487,11 @@ describe('reviews-crud', () => {
         });
 
         // Verify SafeActionResult structure
-        expect(result.fieldErrors).toBeDefined();
-        expect(result.data).toBeUndefined();
-        expect(result.serverError).toBeUndefined();
+        // Type assertion needed because TypeScript infers type from next-safe-action, not safemocker mock
+        const safeResult = result as SafeActionResult<never>;
+        expect(safeResult.fieldErrors).toBeDefined();
+        expect(safeResult.data).toBeUndefined();
+        expect(safeResult.serverError).toBeUndefined();
       });
 
       it('should accept valid input', async () => {

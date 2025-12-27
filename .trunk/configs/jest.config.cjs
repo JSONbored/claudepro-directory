@@ -39,7 +39,9 @@ module.exports = {
   
   // Setup files run before all tests
   // Path is relative to rootDir (project root)
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  // Since rootDir is '../..' (project root), and jest.setup.ts is in .trunk/configs/,
+  // we use the path relative to project root
+  setupFilesAfterEnv: ['<rootDir>/.trunk/configs/jest.setup.ts'],
   
   // Module name mapper for TypeScript path aliases
   moduleNameMapper: {

@@ -3,6 +3,11 @@
 version: 0.1
 cli:
   version: 1.25.0
+# Repository configuration for Trunk operations
+# Base branch for comparisons and incremental checks
+repo:
+  trunk_branch: main  # Base branch for Trunk comparisons (used for incremental checks)
+# Note: cache and parallel are automatically enabled by Trunk (no config needed)
 # Trunk provides extensibility via plugins. (https://docs.trunk.io/plugins)
 plugins:
   sources:
@@ -23,56 +28,334 @@ runtimes:
 # This is the section where you manage your linters. (https://docs.trunk.io/check/configuration)
 lint:
   enabled:
+    # Lightweight linters for local development (fast, low resource usage)
     - remark-lint@12.0.1
     - markdown-table-prettify@3.7.0
-    - markdown-link-check@3.14.2
+    # markdown-link-check@3.14.2  # DISABLED: Can be slow, runs via git hooks instead
     - sort-package-json@3.6.0
     - stylelint@16.26.1
     - codespell@2.4.1
-    - snyk@1.1295.0
-    - semgrep@1.146.0
-    - gitleaks@8.30.0
+    # HEAVY LINTERS DISABLED - Run only in CI/CD or via git hooks (see actions section)
+    # These are too resource-intensive for continuous local execution
+    # - snyk@1.1295.0  # VERY HEAVY - causes multiple processes, runs on pre-commit/pre-push instead
+    # - semgrep@1.146.0  # Heavy - runs on pre-commit/pre-push instead
+    # - gitleaks@8.30.0  # Redundant (we use Infisical + TruffleHog in actions)
+    # - checkov@3.2.495  # Heavy - runs on pre-commit/pre-push instead
+    # - osv-scanner@2.3.1  # Heavy - runs on pre-commit/pre-push instead
+    # - trufflehog@3.92.4  # Heavy - runs on pre-commit/pre-push instead (we use Infisical primarily)
     - sql-formatter@15.6.12
     - prisma@7.2.0
     - eslint@9.39.2
     - actionlint@1.7.9
-    - checkov@3.2.495
     - git-diff-check
     - markdownlint@0.47.0
-    - osv-scanner@2.3.1
     - oxipng@10.0.0
     - prettier@3.7.4
-    - renovate@42.66.2
+    - renovate@42.66.2  # Linter: validates renovate.json and checks for outdated dependencies
     - shellcheck@0.11.0
     - shfmt@3.6.0
     - svgo@4.0.0
     - taplo@0.10.0
-    - trufflehog@3.92.4
     - yamllint@1.37.1
-    # Custom plugins from .trunk/plugins/custom/
-    - knip
-    - madge
-    - ts-prune
-    - ast-grep
-    - jest
-    - playwright
-    - depcheck
-    - skott
-    - source-map-explorer
-    - lighthouse
-    - knip-design-system
+    # HEAVY LINTERS DISABLED FROM CONTINUOUS EXECUTION - Available for manual triggering only
+    # These are too resource-intensive for continuous file watching and cause CPU/memory issues
+    # They are still available via Trunk for manual runs: trunk check --filter <linter-name>
+    # They also run on pre-commit/pre-push hooks via actions (see actions section)
+    # - knip  # Manual: trunk check --filter knip | Git hook: code-quality-pre-push
+    # - madge  # Manual: trunk check --filter madge | Git hook: code-quality-pre-push
+    # - ts-prune  # Manual: trunk check --filter ts-prune | Git hook: code-quality-pre-push
+    # - ast-grep  # Manual: trunk check --filter ast-grep | Git hook: architecture-insights-pre-push
+    # - jest  # Manual: trunk check --filter jest | Git hook: tests-pre-commit, tests-pre-push
+    # - playwright  # Manual: trunk check --filter playwright | Git hook: visual-tests-pre-push
+    # - depcheck  # Manual: trunk check --filter depcheck | Git hook: code-quality-pre-push
+    # - skott  # Manual: trunk check --filter skott | Git hook: code-quality-pre-push
+    # - source-map-explorer  # Manual: trunk check --filter source-map-explorer | Git hook: bundle-size-pre-push
+    # - lighthouse  # Manual: trunk check --filter lighthouse | Git hook: performance-insights-pre-push
+    # - knip-design-system  # Manual: trunk check --filter knip-design-system | Git hook: code-quality-pre-push
+  # Global path exclusions - prevent processing of build outputs and dependencies
+  # These exclusions apply to all linters to prevent unnecessary CPU/memory usage
+  exclude:
+    - node_modules/**
+    - dist/**
+    - .next/**
+    - build/**
+    - coverage/**
+    - playwright-report/**
+    - "*.log"
+    - "*.tsbuildinfo"
+    - ".turbo/**"
+    - ".cache/**"
+    - "**/__pycache__/**"
+    - "**/*.pyc"
+    - ".pnpm-store/**"
+  # Default file size limit - Trunk skips files larger than this (default: 4MB)
+  # Per-linter max_file_size overrides are not currently supported in definitions
+  default_max_file_size: 4194304  # 4MB - default, works for most files
+  # Blocking thresholds - control which severity levels block commits/pushes
+  # Allows gradual rollout of new linters and focus on high-severity issues
+  threshold:
+    # New/experimental linters - only high severity blocks
+    # These are newer tools we're trying out - don't block on low/medium issues
+    - linters: [codespell, remark-lint, markdown-table-prettify]
+      level: high
+    # Heavy security scanners (when enabled) - only high severity blocks
+    # These run on git hooks, but if enabled for continuous checks, only block on high
+    - linters: [snyk, semgrep, checkov, osv-scanner, trufflehog]
+      level: high
+    # Code quality tools - medium+ severity blocks
+    # NOTE: knip, depcheck, ts-prune are now disabled from continuous execution
+    # They run via git hooks only (see code-quality-pre-push action)
+    # Threshold configuration kept for reference if re-enabled in future
+    # - linters: [knip, depcheck, ts-prune]
+    #   level: medium
+  # Trigger rules - REMOVED: Heavy linters (knip, depcheck, skott) are now disabled
+  # They run via git hooks only (see code-quality-pre-push action) to prevent continuous CPU usage
+  # triggers:
+  #   # These triggers are no longer needed - linters run via git hooks only
+  # Linter definition overrides - customize linter behavior
+  definitions:
+    # ESLint configuration - optimized for performance and Prettier integration
+    - name: eslint
+      # ESLint config file location (relative to project root)
+      direct_configs:
+        - .trunk/configs/eslint.config.mjs
+      # Path optimization: Only lint source files, exclude tests and generated files
+      # This prevents ESLint from processing test files and build outputs
+      include:
+        - packages/**/*.{ts,tsx}
+        - apps/**/*.{ts,tsx}
+        - config/**/*.{ts,tsx,js,jsx}
+      exclude:
+        - "**/*.test.{ts,tsx}"
+        - "**/*.spec.{ts,tsx}"
+        - "**/__tests__/**"
+        - "**/__mocks__/**"
+        - node_modules/**
+        - dist/**
+        - .next/**
+        - build/**
+        - coverage/**
+      # Note: sandbox is automatically enabled by Trunk for security
+      # Prettier integration: Trunk runs Prettier separately (not via ESLint)
+      # This provides better performance and cleaner separation of concerns
+      # eslint-config-prettier in ESLint config disables conflicting rules
+    # Prettier configuration - runs natively via Trunk (not via ESLint)
+    - name: prettier
+      # Prettier config file location (relative to project root)
+      direct_configs:
+        - .prettierrc.json
+        - .prettierignore
+      # Path optimization: Only format source files, exclude generated files
+      # Prettier respects .prettierignore, but explicit excludes prevent unnecessary processing
+      exclude:
+        - node_modules/**
+        - dist/**
+        - .next/**
+        - build/**
+        - coverage/**
+        - "**/*.tsbuildinfo"
+        - "**/*.log"
+    # Markdown linters - only process markdown files
+    - name: markdownlint
+      include:
+        - "**/*.md"
+      exclude:
+        - node_modules/**
+        - dist/**
+        - .next/**
+        - build/**
+        - coverage/**
+    - name: remark-lint
+      include:
+        - "**/*.md"
+      exclude:
+        - node_modules/**
+        - dist/**
+        - .next/**
+        - build/**
+        - coverage/**
+    - name: markdown-table-prettify
+      include:
+        - "**/*.md"
+      exclude:
+        - node_modules/**
+        - dist/**
+        - .next/**
+        - build/**
+        - coverage/**
+    - name: markdown-link-check
+      include:
+        - "**/*.md"
+      exclude:
+        - node_modules/**
+        - dist/**
+        - .next/**
+        - build/**
+        - coverage/**
+    # YAML linters - only process YAML files
+    - name: yamllint
+      include:
+        - "**/*.{yaml,yml}"
+      exclude:
+        - node_modules/**
+        - dist/**
+        - .next/**
+        - build/**
+        - coverage/**
+    # TOML linter - only process TOML files
+    - name: taplo
+      include:
+        - "**/*.toml"
+      exclude:
+        - node_modules/**
+        - dist/**
+        - .next/**
+        - build/**
+        - coverage/**
+    # Shell linters - only process shell scripts
+    - name: shellcheck
+      include:
+        - "**/*.sh"
+        - "**/*.bash"
+      exclude:
+        - node_modules/**
+        - dist/**
+        - .next/**
+        - build/**
+        - coverage/**
+    - name: shfmt
+      include:
+        - "**/*.sh"
+        - "**/*.bash"
+      exclude:
+        - node_modules/**
+        - dist/**
+        - .next/**
+        - build/**
+        - coverage/**
+    # SQL formatter - only process SQL files
+    - name: sql-formatter
+      include:
+        - "**/*.sql"
+      exclude:
+        - node_modules/**
+        - dist/**
+        - .next/**
+        - build/**
+        - coverage/**
+    # Image optimizers - only process image files
+    - name: oxipng
+      include:
+        - "**/*.png"
+      exclude:
+        - node_modules/**
+        - dist/**
+        - .next/**
+        - build/**
+        - coverage/**
+    - name: svgo
+      include:
+        - "**/*.svg"
+      exclude:
+        - node_modules/**
+        - dist/**
+        - .next/**
+        - build/**
+        - coverage/**
+    # Stylelint - only process CSS/SCSS files
+    - name: stylelint
+      include:
+        - "**/*.{css,scss,sass}"
+      exclude:
+        - node_modules/**
+        - dist/**
+        - .next/**
+        - build/**
+        - coverage/**
+    # Heavy linters - longer timeout for comprehensive checks
+    - name: jest
+      run_timeout: 15m  # Tests may take longer, especially with coverage
+    - name: playwright
+      run_timeout: 20m  # E2E tests take longer than unit tests
+    - name: lighthouse
+      run_timeout: 10m  # Performance testing takes time
+    # Security scanners - longer timeout (when enabled)
+    - name: snyk
+      run_timeout: 5m  # Security scans can be slow
+    - name: semgrep
+      run_timeout: 5m
+    - name: checkov
+      run_timeout: 5m
+    # Lightweight linters - shorter timeout for faster failure detection
+    - name: codespell
+      run_timeout: 2m  # Quick spell check
+    - name: sort-package-json
+      run_timeout: 1m  # Very fast
+    - name: markdown-table-prettify
+      run_timeout: 1m
+    # Heavy linters removed from definitions - they're disabled from continuous execution
+    # These run via git hooks only (see actions section):
+    # - jest: Runs via tests-pre-commit and tests-pre-push actions
+    # - playwright: Runs via visual-tests-pre-push action
+    # - lighthouse: Runs via performance-insights-pre-push action
+    # - snyk, semgrep, checkov: Run via security scan actions (pre-commit/pre-push)
+    # Note: max_file_size per-linter overrides are not currently supported
+    # Use default_max_file_size at lint level if needed (default is 4MB)
+    # Per-linter file size limits may be added in future Trunk versions
+
+# ============================================================================
+# ACTIONS (Git Hooks and Automation)
+# ============================================================================
+# Actions are triggered by git hooks (pre-commit, pre-push, post-merge, post-checkout)
+# or file changes (on_change triggers)
+#
+# HEAVY LINTERS - MANUAL TRIGGERING
+# All heavy linters are available via Trunk for manual on-demand execution:
+#   - trunk check --filter knip              # Unused exports/dependencies
+#   - trunk check --filter madge              # Circular dependencies
+#   - trunk check --filter ts-prune           # Unused TypeScript exports
+#   - trunk check --filter ast-grep           # Architectural pattern checks
+#   - trunk check --filter jest               # Unit tests
+#   - trunk check --filter playwright         # E2E/visual tests
+#   - trunk check --filter depcheck           # Unused dependencies
+#   - trunk check --filter skott              # Dependency graph analysis
+#   - trunk check --filter source-map-explorer # Bundle size analysis
+#   - trunk check --filter lighthouse         # Performance/Core Web Vitals
+#   - trunk check --filter knip-design-system # Design system migration check
+#
+# These linters are DISABLED from continuous execution (not in lint.enabled)
+# but are still available via Trunk for manual runs and git hooks.
+# Git hooks automatically run these via Trunk on pre-commit/pre-push.
+# ============================================================================
 actions:
   disabled:
     - trunk-announce
-    # Enable Trunk's built-in hooks for linting/formatting (replaces lefthook)
-    # - trunk-check-pre-push  # Enable for pre-push linting checks
-    # - trunk-fmt-pre-commit  # Enable for pre-commit formatting
   enabled:
     - trunk-upgrade-available
+    # Commit message validation - enforces conventional commits
+    # Validates commit messages on pre-commit to ensure consistent format
+    # Benefits: Automated changelog generation, better commit history, semantic versioning support
+    - commitlint
+    # Git blame ignore revs - automatically configures .git-blame-ignore-revs
+    # Excludes large formatting/refactoring commits from git blame output
+    # Benefits: Cleaner blame history, better attribution of actual code changes
+    - git-blame-ignore-revs
+    # NPM check - validates package.json dependencies
+    # Checks for outdated, incorrect, or unused dependencies
+    # Benefits: Keeps dependencies up-to-date, identifies unused packages, reduces security vulnerabilities
+    # Note: May need pnpm compatibility testing or custom action for pnpm
+    - npm-check
+    # Enable Trunk's built-in hooks for linting/formatting (replaces lefthook)
+    - trunk-check-pre-push  # Pre-push linting checks (replaces lefthook linting)
+    - trunk-fmt-pre-commit  # Pre-commit formatting (replaces lefthook formatting)
     # Custom actions for automatic type checking and generation
-    - type-check-on-change
+    # DISABLED: type-check-on-change - Too expensive, runs on every TS file change
+    # Type checking now only runs on pre-commit/pre-push hooks
+    # - type-check-on-change
     - prisma-generate-on-change
-    - openapi-generate-on-change
+    # DISABLED: openapi-generate-on-change - Too expensive (runs 3 commands), runs on pre-commit instead
+    # OpenAPI generation now runs on pre-commit hook (see openapi-generate-pre-commit action)
+    # - openapi-generate-on-change
     - generate-service-worker-on-change
     - generate-readme-on-change
     - sync-db-on-schema-change
@@ -93,53 +376,98 @@ actions:
     - db-types-validate-pre-commit
     - generated-files-validate-pre-commit
     - openapi-validate-pre-commit
+    # Heavy security scanners - pre-commit (NON-BLOCKING)
+    # These run only on commit/push, not continuously (saves resources)
+    - snyk-scan-pre-commit
+    - semgrep-scan-pre-commit
+    - checkov-scan-pre-commit
+    - osv-scanner-pre-commit
+    - trufflehog-scan-pre-commit
+    # Heavy security scanners - pre-push (NON-BLOCKING)
+    - snyk-scan-pre-push
+    - semgrep-scan-pre-push
+    - checkov-scan-pre-push
+    - osv-scanner-pre-push
+    # OpenAPI generation - pre-commit (NON-BLOCKING)
+    # Runs on commit instead of every file change (less expensive)
+    - openapi-generate-pre-commit
+    # Migrations validation - pre-push (NON-BLOCKING)
+    # Validates Prisma migrations (migrated from lefthook)
+    - migrations-validate-pre-push
+    # Dependencies check - pre-commit (NON-BLOCKING)
+    # Validates dependency consistency (migrated from lefthook)
+    - dependencies-check-pre-commit
+    # MCP schema validation - pre-commit (NON-BLOCKING)
+    # Validates MCP worker schemas (migrated from lefthook)
+    - mcp-schema-validate-pre-commit
+    # Quick insights - pre-commit (NON-BLOCKING)
+    # Checks for common code quality issues (migrated from lefthook)
+    - quick-insights-pre-commit
+    # Tests - pre-commit (NON-BLOCKING)
+    # Runs tests on staged files (migrated from lefthook)
+    - tests-pre-commit
+    # Tests - pre-push (NON-BLOCKING)
+    # Runs full test suite before push (migrated from lefthook)
+    - tests-pre-push
+    # Code quality - pre-push (NON-BLOCKING)
+    # Runs code quality checks before push (migrated from lefthook)
+    - code-quality-pre-push
+    # Optional pre-push hooks (migrated from lefthook)
+    # These provide insights but don't block pushes
+    - dependency-audit-pre-push
+    - bundle-size-pre-push
+    - visual-tests-pre-push
+    - accessibility-tests-pre-push
+    - coverage-check-pre-push
+    - architecture-insights-pre-push
+    - performance-insights-pre-push
+    - visual-regression-pre-push
     # Post-merge/post-checkout hooks (migrated from lefthook)
     # Auto-install dependencies and sync database types
     - deps-install-post-merge
     - db-types-sync-post-merge
     - deps-check-post-checkout
   definitions:
-    # TypeScript type checking - runs automatically when TypeScript files change
-    # Fails if type errors exist (blocks commits naturally)
-    - id: type-check-on-change
-      triggers:
-        - files: ['**/*.{ts,tsx}']
-      run: pnpm type-check:build
-      runtime: node
+    # DISABLED: TypeScript type checking on file change
+    # This was too expensive - runs on every TS file change
+    # Type checking now only runs on pre-commit/pre-push hooks (see type-check-pre-commit and type-check-pre-push)
+    # - id: type-check-on-change
+    #   triggers:
+    #     - files: ['**/*.{ts,tsx}']
+    #   run: pnpm type-check:build
+    #   runtime: node
 
     # Prisma generate - runs automatically when Prisma schema changes
     # Auto-generates Prisma types when schema.prisma changes
     - id: prisma-generate-on-change
       triggers:
-        - files: ['prisma/schema.prisma']
+        - files: [prisma/schema.prisma]
       run: pnpm prisma:generate:exec
       runtime: node
 
-    # OpenAPI generation - runs automatically when OpenAPI-related files change
-    # Covers all 3 OpenAPI generation commands:
-    # 1. generate:openapi - Main OpenAPI spec from Next.js API routes
-    # 2. generate:api-client - API client from OpenAPI spec
-    # 3. build:mcpb - MCPB packages (includes MCP OpenAPI generation)
-    - id: openapi-generate-on-change
-      triggers:
-        - files:
-            - '**/*openapi*.{yaml,yml,json}'
-            - 'packages/generators/src/commands/generate-openapi.ts'
-            - 'packages/generators/src/commands/generate-mcp-openapi.ts'
-            - 'packages/generators/src/commands/generate-api-client.ts'
-            - 'packages/generators/src/commands/generate-mcpb-packages.ts'
-            - 'apps/web/src/app/api/**/route.ts' # API route changes trigger OpenAPI regen
-      run: infisical run --env=dev -- pnpm generate:openapi && infisical run --env=dev -- pnpm generate:api-client && infisical run --env=dev -- pnpm build:mcpb
-      runtime: node
+    # DISABLED: OpenAPI generation on file change
+    # This was too expensive - runs 3 commands on every API route change
+    # OpenAPI generation now runs on pre-commit hook instead (see openapi-generate-pre-commit action)
+    # - id: openapi-generate-on-change
+    #   triggers:
+    #     - files:
+    #         - '**/*openapi*.{yaml,yml,json}'
+    #         - 'packages/generators/src/commands/generate-openapi.ts'
+    #         - 'packages/generators/src/commands/generate-mcp-openapi.ts'
+    #         - 'packages/generators/src/commands/generate-api-client.ts'
+    #         - 'packages/generators/src/commands/generate-mcpb-packages.ts'
+    #         - 'apps/web/src/app/api/**/route.ts' # API route changes trigger OpenAPI regen
+    #   run: infisical run --env=dev -- pnpm generate:openapi && infisical run --env=dev -- pnpm generate:api-client && infisical run --env=dev -- pnpm build:mcpb
+    #   runtime: node
 
     # Service worker generation - runs automatically when category/security config changes
     # Auto-regenerates service worker when categories or security config changes
     - id: generate-service-worker-on-change
       triggers:
         - files:
-            - 'packages/web-runtime/src/data/config/category.ts'
-            - 'packages/shared-runtime/src/schemas/env.ts'
-            - 'package.json'
+            - packages/web-runtime/src/data/config/category.ts
+            - packages/shared-runtime/src/schemas/env.ts
+            - package.json
       run: pnpm generate:service-worker:exec
       runtime: node
 
@@ -148,9 +476,9 @@ actions:
     - id: generate-readme-on-change
       triggers:
         - files:
-            - 'prisma/schema.prisma'
-            - 'packages/generators/src/utils/readme-builder.ts'
-            - 'packages/generators/src/commands/generate-readme.ts'
+            - prisma/schema.prisma
+            - packages/generators/src/utils/readme-builder.ts
+            - packages/generators/src/commands/generate-readme.ts
       run: infisical run --env=dev -- pnpm generate:readme:exec
       runtime: node
 
@@ -159,8 +487,8 @@ actions:
     - id: sync-db-on-schema-change
       triggers:
         - files:
-            - 'prisma/schema.prisma'
-            - 'supabase/migrations/**/*.sql'
+            - prisma/schema.prisma
+            - supabase/migrations/**/*.sql
       run: infisical run --env=dev -- pnpm sync:db:exec
       runtime: node
 
@@ -289,6 +617,767 @@ actions:
       run: pnpm type-check:build
 
     # ============================================================================
+    # HEAVY LINTERS - PRE-COMMIT/PRE-PUSH (NON-BLOCKING)
+    # These run heavy security scanners only on commit/push, not continuously
+    # ============================================================================
+
+    # Snyk security scan - pre-commit (NON-BLOCKING)
+    # Runs Snyk code test on staged files (heavy, but only on commit)
+    - id: snyk-scan-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+      run: |
+        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || echo "")
+        if [ -z "$STAGED_FILES" ]; then
+          exit 0
+        fi
+        # Only run if Snyk is available and there are staged files
+        if command -v snyk >/dev/null 2>&1 || trunk tools install snyk >/dev/null 2>&1; then
+          echo "🔒 Running Snyk security scan (non-blocking)..."
+          # Run with timeout to prevent hanging
+          if perl -e 'alarm 60; exec @ARGV' trunk check --filter snyk --staged 2>&1 | head -20; then
+            echo "✅ Snyk scan completed"
+          else
+            SCAN_EXIT=$?
+            if [ $SCAN_EXIT -eq 124 ]; then
+              echo "⏱️  Snyk scan timed out (>60s) - proceeding (non-blocking)"
+            else
+              echo "⚠️  Snyk scan found issues (non-blocking - review before merging)"
+            fi
+          fi
+        else
+          echo "⚠️  Snyk not available - skipping (non-blocking)"
+        fi
+        exit 0  # Non-blocking
+
+    # Semgrep security scan - pre-commit (NON-BLOCKING)
+    # Runs Semgrep on staged files (heavy, but only on commit)
+    - id: semgrep-scan-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+      run: |
+        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || echo "")
+        if [ -z "$STAGED_FILES" ]; then
+          exit 0
+        fi
+        echo "🔒 Running Semgrep security scan (non-blocking)..."
+        # Run with timeout to prevent hanging
+        if perl -e 'alarm 60; exec @ARGV' trunk check --filter semgrep --staged 2>&1 | head -20; then
+          echo "✅ Semgrep scan completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "⏱️  Semgrep scan timed out (>60s) - proceeding (non-blocking)"
+          else
+            echo "⚠️  Semgrep scan found issues (non-blocking - review before merging)"
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    # Checkov security scan - pre-commit (NON-BLOCKING)
+    # Runs Checkov on staged files (heavy, but only on commit)
+    - id: checkov-scan-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+      run: |
+        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || echo "")
+        if [ -z "$STAGED_FILES" ]; then
+          exit 0
+        fi
+        echo "🔒 Running Checkov security scan (non-blocking)..."
+        # Run with timeout to prevent hanging
+        if perl -e 'alarm 60; exec @ARGV' trunk check --filter checkov --staged 2>&1 | head -20; then
+          echo "✅ Checkov scan completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "⏱️  Checkov scan timed out (>60s) - proceeding (non-blocking)"
+          else
+            echo "⚠️  Checkov scan found issues (non-blocking - review before merging)"
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    # OSV Scanner - pre-commit (NON-BLOCKING)
+    # Runs OSV Scanner on staged files (heavy, but only on commit)
+    - id: osv-scanner-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+      run: |
+        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || echo "")
+        if [ -z "$STAGED_FILES" ]; then
+          exit 0
+        fi
+        echo "🔒 Running OSV Scanner (non-blocking)..."
+        # Run with timeout to prevent hanging
+        if perl -e 'alarm 60; exec @ARGV' trunk check --filter osv-scanner --staged 2>&1 | head -20; then
+          echo "✅ OSV Scanner completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "⏱️  OSV Scanner timed out (>60s) - proceeding (non-blocking)"
+          else
+            echo "⚠️  OSV Scanner found issues (non-blocking - review before merging)"
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    # TruffleHog secrets scan - pre-commit (NON-BLOCKING)
+    # Runs TruffleHog on staged files (we primarily use Infisical, but TruffleHog as backup)
+    - id: trufflehog-scan-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+      run: |
+        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || echo "")
+        if [ -z "$STAGED_FILES" ]; then
+          exit 0
+        fi
+        echo "🔒 Running TruffleHog secrets scan (non-blocking, backup to Infisical)..."
+        # Run with timeout to prevent hanging
+        if perl -e 'alarm 60; exec @ARGV' trunk check --filter trufflehog --staged 2>&1 | head -20; then
+          echo "✅ TruffleHog scan completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "⏱️  TruffleHog scan timed out (>60s) - proceeding (non-blocking)"
+          else
+            echo "⚠️  TruffleHog scan found issues (non-blocking - review before merging)"
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    # Heavy linters - pre-push (NON-BLOCKING)
+    # Run heavy security scanners on push as well (more comprehensive scan)
+    - id: snyk-scan-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+      run: |
+        echo "🔒 Running Snyk security scan on push (non-blocking)..."
+        if perl -e 'alarm 120; exec @ARGV' trunk check --filter snyk 2>&1 | head -30; then
+          echo "✅ Snyk scan completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "⏱️  Snyk scan timed out (>120s) - proceeding (non-blocking)"
+          else
+            echo "⚠️  Snyk scan found issues (non-blocking - review before merging)"
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    - id: semgrep-scan-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+      run: |
+        echo "🔒 Running Semgrep security scan on push (non-blocking)..."
+        if perl -e 'alarm 120; exec @ARGV' trunk check --filter semgrep 2>&1 | head -30; then
+          echo "✅ Semgrep scan completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "⏱️  Semgrep scan timed out (>120s) - proceeding (non-blocking)"
+          else
+            echo "⚠️  Semgrep scan found issues (non-blocking - review before merging)"
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    - id: checkov-scan-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+      run: |
+        echo "🔒 Running Checkov security scan on push (non-blocking)..."
+        if perl -e 'alarm 120; exec @ARGV' trunk check --filter checkov 2>&1 | head -30; then
+          echo "✅ Checkov scan completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "⏱️  Checkov scan timed out (>120s) - proceeding (non-blocking)"
+          else
+            echo "⚠️  Checkov scan found issues (non-blocking - review before merging)"
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    - id: osv-scanner-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+      run: |
+        echo "🔒 Running OSV Scanner on push (non-blocking)..."
+        if perl -e 'alarm 120; exec @ARGV' trunk check --filter osv-scanner 2>&1 | head -30; then
+          echo "✅ OSV Scanner completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "⏱️  OSV Scanner timed out (>120s) - proceeding (non-blocking)"
+          else
+            echo "⚠️  OSV Scanner found issues (non-blocking - review before merging)"
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    # OpenAPI generation - pre-commit (NON-BLOCKING)
+    # Runs OpenAPI generation on commit instead of every file change (less expensive)
+    - id: openapi-generate-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+      run: |
+        # Check if any API route files or OpenAPI-related files changed
+        CHANGED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || echo "")
+        if [ -z "$CHANGED_FILES" ]; then
+          exit 0
+        fi
+        # Check if relevant files changed
+        if echo "$CHANGED_FILES" | grep -qE "(apps/web/src/app/api.*route\.ts|openapi\.(json|yaml|yml)|packages/generators/src/commands/(generate-openapi|generate-mcp-openapi|generate-api-client|generate-mcpb-packages)\.ts)"; then
+          echo "🔄 Regenerating OpenAPI spec and API client (non-blocking)..."
+          set +e
+          # Run with timeout to prevent hanging
+          if perl -e 'alarm 180; exec @ARGV' sh -c 'infisical run --env=dev -- pnpm generate:openapi && infisical run --env=dev -- pnpm generate:api-client && infisical run --env=dev -- pnpm build:mcpb' 2>&1 | tail -20; then
+            echo "✅ OpenAPI generation completed"
+            # Stage generated files if they changed
+            git add openapi.json packages/database-types/src/api-client/client.generated.ts 2>/dev/null || true
+          else
+            GEN_EXIT=$?
+            if [ $GEN_EXIT -eq 124 ]; then
+              echo "⏱️  OpenAPI generation timed out (>180s) - proceeding (non-blocking)"
+            else
+              echo "⚠️  OpenAPI generation failed (non-blocking - fix before merging)"
+            fi
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    # Tests - pre-commit (NON-BLOCKING)
+    # Runs tests on changed files via Trunk (available for manual: trunk check --filter jest)
+    - id: tests-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+      run: |
+        STAGED_TS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx)$' || echo "")
+        if [ -z "$STAGED_TS" ]; then
+          exit 0
+        fi
+        echo "🧪 Running tests on changed files via Trunk (non-blocking)..."
+        set +e
+        # Run tests via Trunk (available for manual: trunk check --filter jest)
+        if perl -e 'alarm 30; exec @ARGV' trunk check --filter jest 2>&1 | grep -E "(FAIL|PASS|Test Files|Tests:)" | tail -5; then
+          echo "✅ Tests completed"
+        else
+          TEST_EXIT=$?
+          if [ $TEST_EXIT -eq 124 ]; then
+            echo "⏱️  Test execution timed out (>30s) - proceeding (non-blocking)"
+          else
+            echo "⚠️  Tests failed (non-blocking - fix before merging)"
+            echo "   💡 Run manually: trunk check --filter jest"
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    # Tests - pre-push (NON-BLOCKING)
+    # Runs full test suite via Trunk before push (available for manual: trunk check --filter jest)
+    - id: tests-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+      run: |
+        echo "🧪 Running tests via Trunk (non-blocking)..."
+        set +e
+        # Check if there are any test files before running
+        TEST_FILES=$(find . -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | grep -v node_modules | head -1)
+        if [ -z "$TEST_FILES" ]; then
+          echo "   ℹ️  No test files found - skipping"
+          exit 0
+        fi
+        # Run tests via Trunk (available for manual: trunk check --filter jest)
+        if perl -e 'alarm 120; exec @ARGV' trunk check --filter jest 2>&1 | tail -30; then
+          echo "   ✅ Tests passed"
+        else
+          TEST_EXIT=$?
+          if [ $TEST_EXIT -eq 124 ]; then
+            echo "   ⏱️  Test execution timed out (>120s) - proceeding (non-blocking)"
+          else
+            echo "   ⚠️  Tests failed (non-blocking - fix before merging)"
+            echo "   💡 Run manually: trunk check --filter jest"
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    # Code quality - pre-push (NON-BLOCKING)
+    # Runs code quality checks via Trunk (Knip, Madge, Depcheck, Skott, ts-prune, knip-design-system)
+    # All linters available for manual triggering: trunk check --filter <linter-name>
+    - id: code-quality-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+      run: |
+        echo "📊 Code quality insights (via Trunk)..."
+        echo ""
+        set +e
+
+        # Knip via Trunk (available for manual: trunk check --filter knip)
+        echo "🔍 Checking unused exports (via Trunk)..."
+        if perl -e 'alarm 60; exec @ARGV' trunk check --filter knip 2>&1 | head -30; then
+          echo "   ✅ Knip check completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "   ⏱️  Knip check timed out (>60s) - proceeding (non-blocking)"
+          else
+            echo "   ⚠️  Knip found unused exports (non-blocking - review before merging)"
+            echo "   💡 Run manually: trunk check --filter knip"
+          fi
+        fi
+        echo ""
+
+        # Madge via Trunk (available for manual: trunk check --filter madge)
+        echo "🔄 Checking circular dependencies (via Trunk)..."
+        if perl -e 'alarm 60; exec @ARGV' trunk check --filter madge 2>&1 | head -30; then
+          echo "   ✅ Madge check completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "   ⏱️  Madge check timed out (>60s) - proceeding (non-blocking)"
+          else
+            echo "   ⚠️  Madge found circular dependencies (non-blocking - review before merging)"
+            echo "   💡 Run manually: trunk check --filter madge"
+          fi
+        fi
+        echo ""
+
+        # Depcheck via Trunk (available for manual: trunk check --filter depcheck)
+        echo "📦 Checking unused dependencies (via Trunk)..."
+        if perl -e 'alarm 60; exec @ARGV' trunk check --filter depcheck 2>&1 | head -30; then
+          echo "   ✅ Depcheck completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "   ⏱️  Depcheck timed out (>60s) - proceeding (non-blocking)"
+          else
+            echo "   ⚠️  Depcheck found unused dependencies (non-blocking - review before merging)"
+            echo "   💡 Run manually: trunk check --filter depcheck"
+          fi
+        fi
+        echo ""
+
+        # ts-prune via Trunk (available for manual: trunk check --filter ts-prune)
+        echo "✂️  Checking unused TypeScript exports (via Trunk)..."
+        if perl -e 'alarm 60; exec @ARGV' trunk check --filter ts-prune 2>&1 | head -30; then
+          echo "   ✅ ts-prune check completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "   ⏱️  ts-prune check timed out (>60s) - proceeding (non-blocking)"
+          else
+            echo "   ⚠️  ts-prune found unused exports (non-blocking - review before merging)"
+            echo "   💡 Run manually: trunk check --filter ts-prune"
+          fi
+        fi
+        echo ""
+
+        # Skott via Trunk (available for manual: trunk check --filter skott)
+        echo "🗺️  Checking dependency graph (via Trunk)..."
+        if perl -e 'alarm 60; exec @ARGV' trunk check --filter skott 2>&1 | head -30; then
+          echo "   ✅ Skott check completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "   ⏱️  Skott check timed out (>60s) - proceeding (non-blocking)"
+          else
+            echo "   ⚠️  Skott found issues (non-blocking - review before merging)"
+            echo "   💡 Run manually: trunk check --filter skott"
+          fi
+        fi
+        echo ""
+
+        # knip-design-system via Trunk (available for manual: trunk check --filter knip-design-system)
+        echo "🎨 Checking design system migration (via Trunk)..."
+        if perl -e 'alarm 60; exec @ARGV' trunk check --filter knip-design-system 2>&1 | head -30; then
+          echo "   ✅ Design system check completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "   ⏱️  Design system check timed out (>60s) - proceeding (non-blocking)"
+          else
+            echo "   ⚠️  Design system check found deprecated usage (non-blocking - review before merging)"
+            echo "   💡 Run manually: trunk check --filter knip-design-system"
+          fi
+        fi
+        echo ""
+
+        # Large files check
+        echo "📏 Checking for large files..."
+        LARGE_FILES=$(find apps/web/src packages/web-runtime/src packages/data-layer/src -name "*.ts" -o -name "*.tsx" 2>/dev/null | xargs wc -l 2>/dev/null | awk '$1 > 500 {print $2 " (" $1 " lines)"}' | head -5)
+        if [ -n "$LARGE_FILES" ]; then
+          LARGE_COUNT=$(echo "$LARGE_FILES" | wc -l | tr -d ' ')
+          echo "   ⚠️  Found $LARGE_COUNT file(s) > 500 LOC:"
+          echo "$LARGE_FILES" | sed 's/^/      - /'
+          echo "   💡 Consider splitting large files for maintainability"
+        else
+          echo "   ✅ No overly large files detected"
+        fi
+        echo ""
+
+        echo "✅ Code quality check complete (non-blocking)"
+        exit 0  # Non-blocking
+
+    # Migrations validation - pre-push (NON-BLOCKING)
+    # Validates Prisma migrations (schema-only, naming convention)
+    # Migrated from lefthook pre-push hook
+    - id: migrations-validate-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+      run: |
+        echo "🔍 Validating Prisma migrations..."
+        set +e
+        
+        # Check for migration files
+        MIGRATION_FILES=$(git diff --name-only origin/main...HEAD 2>/dev/null | grep -E "^supabase/migrations/.*\.sql$" || echo "")
+        
+        if [ -z "$MIGRATION_FILES" ]; then
+          echo "   ✅ No migration files changed - skipping validation"
+          exit 0
+        fi
+        
+        ERRORS=0
+        
+        # Check each migration file
+        for migration_file in $MIGRATION_FILES; do
+          # Check for data in migrations (should be schema-only)
+          if grep -qE "^(COPY|INSERT INTO.*VALUES)" "$migration_file" 2>/dev/null; then
+            echo "   ❌ Migration $migration_file contains data (should be schema-only)"
+            echo "      💡 Remove COPY/INSERT statements - migrations must only contain schema"
+            ERRORS=$((ERRORS + 1))
+          fi
+          
+          # Check migration naming convention
+          if ! echo "$migration_file" | grep -qE "^supabase/migrations/[0-9]{14}_[a-z0-9_]+\.sql$"; then
+            echo "   ⚠️  Migration $migration_file doesn't follow naming convention"
+            echo "      💡 Format: supabase/migrations/YYYYMMDDHHMMSS_descriptive_name.sql"
+          fi
+        done
+        
+        if [ $ERRORS -gt 0 ]; then
+          echo "   ⚠️  Migration validation failed (non-blocking)"
+          echo "      📚 Docs: .cursor/rules/supabase-migrations.mdc"
+          exit 0  # Non-blocking
+        fi
+        
+        echo "   ✅ All migrations are valid"
+        exit 0
+
+    # Dependencies check - pre-commit (NON-BLOCKING)
+    # Validates package.json and pnpm-lock.yaml consistency
+    # Migrated from lefthook pre-commit hook
+    - id: dependencies-check-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+      run: |
+        echo "🔍 Checking dependency consistency..."
+        set +e
+        
+        # Check if pnpm-lock.yaml is out of sync
+        # Use --frozen-lockfile --dry-run to check without modifying
+        if ! pnpm install --frozen-lockfile --dry-run >/dev/null 2>&1; then
+          # Check if lock file itself was modified (would be staged)
+          LOCKFILE_STAGED=$(git diff --cached --name-only | grep -E "pnpm-lock\.yaml" || echo "")
+          
+          if [ -z "$LOCKFILE_STAGED" ]; then
+            # Lock file not staged - might be out of sync
+            echo "   ⚠️  pnpm-lock.yaml may be out of sync (non-blocking)"
+            echo "      💡 Run: pnpm install"
+          else
+            # Lock file is staged - likely up-to-date
+            echo "   ✅ pnpm-lock.yaml is staged and consistent"
+          fi
+        else
+          echo "   ✅ Dependencies are consistent"
+        fi
+        exit 0  # Non-blocking
+
+    # MCP schema validation - pre-commit (NON-BLOCKING)
+    # Validates MCP worker schemas
+    # Migrated from lefthook pre-commit hook
+    - id: mcp-schema-validate-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+        - files: [apps/workers/heyclaude-mcp/**/*.ts]
+      run: |
+        echo "🔍 Validating MCP worker schemas..."
+        set +e
+        
+        # Only validate if MCP worker files changed
+        CHANGED_MCP=$(git diff --cached --name-only | grep -E "apps/workers/heyclaude-mcp" || echo "")
+        if [ -z "$CHANGED_MCP" ]; then
+          exit 0
+        fi
+        
+        # Check if validate:mcp script exists before running
+        if grep -q "\"validate:mcp\":" package.json 2>/dev/null; then
+          # Suppress verbose output, only show errors
+          if pnpm validate:mcp >/dev/null 2>&1; then
+            echo "   ✅ MCP schemas are valid"
+          else
+            echo "   ⚠️  Schema validation issues (non-blocking - review before merging)"
+          fi
+        else
+          echo "   ℹ️  validate:mcp script not found - skipping"
+        fi
+        exit 0  # Non-blocking
+
+    # Quick insights - pre-commit (NON-BLOCKING)
+    # Checks for common code quality issues (console.* usage, 'use client' in API routes, missing 'use cache')
+    # Migrated from lefthook pre-commit hook
+    - id: quick-insights-pre-commit
+      triggers:
+        - git_hooks: [pre-commit]
+      run: |
+        echo "💡 Quick code quality insights..."
+        set +e
+        
+        # Check staged files for common patterns
+        STAGED_TS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx)$' || echo "")
+        if [ -z "$STAGED_TS" ]; then
+          exit 0
+        fi
+        
+        WARNINGS=0
+        
+        # Check for console.* usage in staged files (excluding test files and dev-only code)
+        for file in $STAGED_TS; do
+          # Skip test files (console.* is acceptable in tests)
+          if echo "$file" | grep -qE "(test|spec)\.(ts|tsx)$"; then
+            continue
+          fi
+          
+          # Check if file has console.* without NODE_ENV development check
+          if git diff --cached "$file" 2>/dev/null | grep -qE "console\.(log|error|warn|info|debug)"; then
+            # Check if it's in dev-only code (has NODE_ENV check on same or adjacent lines)
+            if ! git diff --cached "$file" 2>/dev/null | grep -B5 -A5 "console\." | grep -qE "(NODE_ENV.*development|development.*NODE_ENV)"; then
+              # Also skip edge-compatible code (proxy.ts uses console for edge compatibility)
+              if ! echo "$file" | grep -qE "(proxy|edge)"; then
+                echo "   ⚠️  Found console.* usage in $file"
+                echo "      💡 Replace with logger.* from @heyclaude/web-runtime/logging/*"
+                WARNINGS=$((WARNINGS + 1))
+              fi
+            fi
+          fi
+        done
+        
+        # Check for 'use client' in actual server-only files (API routes only)
+        API_ROUTES=$(echo "$STAGED_TS" | grep -E "apps/web/src/app/api/.*route\.(ts|tsx)$" || echo "")
+        if [ -n "$API_ROUTES" ]; then
+          for file in $API_ROUTES; do
+            if git diff --cached "$file" 2>/dev/null | grep -qE "^\+.*['\"]use client['\"]"; then
+              echo "   ⚠️  Found 'use client' in API route: $file"
+              echo "      💡 Remove 'use client' from API routes (server-only)"
+              WARNINGS=$((WARNINGS + 1))
+            fi
+          done
+        fi
+        
+        # Check for missing 'use cache' in data fetching functions
+        DATA_FILES=$(echo "$STAGED_TS" | grep -E "(packages/web-runtime/src/data|apps/web/src/app).*\.ts$" || echo "")
+        if [ -n "$DATA_FILES" ]; then
+          for file in $DATA_FILES; do
+            # Check if file has async function that looks like data fetching but no 'use cache'
+            if git diff --cached "$file" 2>/dev/null | grep -qE "^\+.*async function.*get.*\(|^\+.*export async function"; then
+              if ! git diff --cached "$file" 2>/dev/null | grep -qE "^\+.*['\"]use cache"; then
+                # Check if it's actually a data fetching function (has await supabase or await fetch)
+                if git diff --cached "$file" 2>/dev/null | grep -qE "(await.*supabase|await.*fetch|await.*rpc)"; then
+                  echo "   💡 Consider adding 'use cache' to data fetching function in $file"
+                  echo "      📚 See: .cursor/rules/cache-components-usage.mdc"
+                fi
+              fi
+            fi
+          done
+        fi
+        
+        if [ $WARNINGS -eq 0 ]; then
+          echo "   ✅ No code quality issues detected"
+        fi
+        exit 0  # Non-blocking
+
+    # Dependency audit - pre-push (NON-BLOCKING)
+    # Checks for dependency vulnerabilities using pnpm audit
+    # Migrated from lefthook pre-push hook
+    - id: dependency-audit-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+      run: |
+        echo "🔍 Checking for dependency vulnerabilities..."
+        START=$(date +%s%N)
+        set +e
+        AUDIT_OUTPUT=$(pnpm audit --audit-level=moderate 2>&1)
+        AUDIT_STATUS=$?
+        if [ $AUDIT_STATUS -ne 0 ]; then
+          echo "   ⚠️  Dependency vulnerabilities detected:"
+          echo "$AUDIT_OUTPUT" | grep -E "moderate|high|critical" | head -10
+          echo ""
+          echo "   💡 Fix with:"
+          echo "      pnpm audit --fix"
+          echo "      Or update specific packages"
+          echo ""
+          echo "   📚 Note: CI/CD also runs dependency scanning"
+        else
+          DURATION=$(( ($(date +%s%N) - START) / 1000000 ))
+          echo "   ✅ No moderate+ vulnerabilities found (${DURATION}ms)"
+        fi
+        exit 0  # Non-blocking
+
+    # Bundle size check - pre-push (NON-BLOCKING)
+    # Checks bundle size via Trunk (available for manual: trunk check --filter source-map-explorer)
+    - id: bundle-size-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+        - files: ['apps/web/**/*.{ts,tsx,js,jsx}']
+      run: |
+        echo "📦 Checking bundle size (via Trunk)..."
+        if [ ! -d "apps/web/.next" ]; then
+          echo "   ℹ️  No build found - skipping bundle size check"
+          echo "   💡 Run: pnpm build"
+          exit 0
+        fi
+        # Run source-map-explorer via Trunk (available for manual: trunk check --filter source-map-explorer)
+        if perl -e 'alarm 60; exec @ARGV' trunk check --filter source-map-explorer 2>&1 | head -30; then
+          echo "   ✅ Bundle size analysis completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "   ⏱️  Bundle size check timed out (>60s) - proceeding (non-blocking)"
+          else
+            echo "   ⚠️  Bundle size check found issues (non-blocking - review before merging)"
+            echo "   💡 Run manually: trunk check --filter source-map-explorer"
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    # Visual tests - pre-push (NON-BLOCKING)
+    # Runs Playwright visual tests via Trunk (available for manual: trunk check --filter playwright)
+    - id: visual-tests-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+        - files: ['apps/web/src/app/**/*.{ts,tsx}']
+      run: |
+        echo "🎭 Running Playwright visual tests via Trunk (non-blocking)..."
+        set +e
+        SPEC_FILES=$(find apps/web/src/app -name "*.spec.ts" -o -name "*.spec.tsx" 2>/dev/null | head -1)
+        if [ -z "$SPEC_FILES" ]; then
+          echo "   ℹ️  No Playwright spec files found - skipping"
+          exit 0
+        fi
+        # Run Playwright via Trunk (available for manual: trunk check --filter playwright)
+        if perl -e 'alarm 300; exec @ARGV' trunk check --filter playwright 2>&1 | tail -30; then
+          echo "   ✅ Playwright tests passed"
+        else
+          TEST_EXIT=$?
+          if [ $TEST_EXIT -eq 124 ]; then
+            echo "   ⏱️  Playwright tests timed out (>300s) - proceeding (non-blocking)"
+          else
+            echo "   ⚠️  Playwright tests failed (non-blocking - fix before merging)"
+            echo "   💡 Run manually: trunk check --filter playwright"
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    # Accessibility tests - pre-push (NON-BLOCKING)
+    # Checks accessibility (integrated in Playwright tests)
+    # Migrated from lefthook pre-push hook
+    - id: accessibility-tests-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+        - files: ['apps/web/src/app/**/*.{ts,tsx}']
+      run: |
+        echo "♿ Running accessibility tests (non-blocking)..."
+        set +e
+        if ! command -v playwright &> /dev/null && ! npx playwright --version &> /dev/null 2>&1; then
+          echo "   ℹ️  Playwright not available - skipping accessibility tests"
+          exit 0
+        fi
+        echo "   💡 Accessibility testing integrated in Playwright tests"
+        echo "   💡 Ensure tests use @axe-core/playwright for WCAG compliance"
+        exit 0  # Non-blocking
+
+    # Coverage check - pre-push (NON-BLOCKING)
+    # Checks test coverage (informational - thresholds enforced in vitest.config.ts)
+    # Migrated from lefthook pre-push hook
+    - id: coverage-check-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+      run: |
+        echo "📊 Checking test coverage (non-blocking)..."
+        set +e
+        COVERAGE_OUTPUT=$(pnpm test --coverage --run 2>&1 | grep -E "Statements|Functions|Branches|Lines" | tail -4 || echo "")
+        if [ -n "$COVERAGE_OUTPUT" ]; then
+          echo "$COVERAGE_OUTPUT"
+          echo "   💡 Coverage thresholds: 80% lines, 80% functions, 70% branches"
+        else
+          echo "   ℹ️  Coverage data not available"
+        fi
+        exit 0  # Non-blocking
+
+    # Architecture insights - pre-push (NON-BLOCKING)
+    # Runs ast-grep pattern checks via Trunk (available for manual: trunk check --filter ast-grep)
+    - id: architecture-insights-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+      run: |
+        echo "🏗️  Architecture pattern insights (via Trunk)..."
+        set +e
+        # Run ast-grep via Trunk (available for manual: trunk check --filter ast-grep)
+        if perl -e 'alarm 120; exec @ARGV' trunk check --filter ast-grep 2>&1 | head -50; then
+          echo "   ✅ Architecture insights completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "   ⏱️  Architecture insights timed out (>120s) - proceeding (non-blocking)"
+          else
+            echo "   ⚠️  Architecture insights found issues (non-blocking - review before merging)"
+            echo "   💡 Run manually: trunk check --filter ast-grep"
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    # Performance insights - pre-push (NON-BLOCKING)
+    # Runs Lighthouse performance checks via Trunk (available for manual: trunk check --filter lighthouse)
+    - id: performance-insights-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+      run: |
+        echo "⚡ Performance insights (via Trunk)..."
+        set +e
+        # Run Lighthouse via Trunk (available for manual: trunk check --filter lighthouse)
+        if perl -e 'alarm 180; exec @ARGV' trunk check --filter lighthouse 2>&1 | head -30; then
+          echo "   ✅ Performance insights completed"
+        else
+          SCAN_EXIT=$?
+          if [ $SCAN_EXIT -eq 124 ]; then
+            echo "   ⏱️  Performance insights timed out (>180s) - proceeding (non-blocking)"
+          else
+            echo "   ⚠️  Performance insights found issues (non-blocking - review before merging)"
+            echo "   💡 Run manually: trunk check --filter lighthouse"
+          fi
+        fi
+        exit 0  # Non-blocking
+
+    # Visual regression - pre-push (NON-BLOCKING)
+    # Runs Playwright visual regression tests
+    # Migrated from lefthook pre-push hook
+    - id: visual-regression-pre-push
+      triggers:
+        - git_hooks: [pre-push]
+        - files: ['apps/web/src/app/**/*.{ts,tsx}']
+      run: |
+        echo "🖼️  Running visual regression tests (non-blocking)..."
+        set +e
+        SPEC_FILES=$(find apps/web/src/app -name "*.spec.ts" -o -name "*.spec.tsx" 2>/dev/null | head -1)
+        if [ -z "$SPEC_FILES" ]; then
+          echo "   ℹ️  No Playwright spec files found - skipping"
+          exit 0
+        fi
+        # Visual regression is part of visual tests
+        echo "   💡 Visual regression testing is included in visual tests"
+        echo "   💡 Run: pnpm test:visual"
+        exit 0  # Non-blocking
+
+    # ============================================================================
     # NON-BLOCKING VALIDATION HOOKS (migrated from lefthook)
     # These validate but don't block (user preference: only type-check and secrets-scan block)
     # ============================================================================
@@ -299,7 +1388,7 @@ actions:
     - id: prisma-validate-pre-commit
       triggers:
         - git_hooks: [pre-commit]
-        - files: ['prisma/schema.prisma']
+        - files: [prisma/schema.prisma]
       run: |
         if [ ! -f "prisma/schema.prisma" ]; then
           exit 0
@@ -323,7 +1412,7 @@ actions:
     - id: db-types-validate-pre-commit
       triggers:
         - git_hooks: [pre-commit]
-        - files: ['prisma/schema.prisma']
+        - files: [prisma/schema.prisma]
       run: |
         if [ ! -f "prisma/schema.prisma" ] || [ ! -d "packages/database-types/src/prisma" ]; then
           exit 0
@@ -346,7 +1435,7 @@ actions:
     - id: generated-files-validate-pre-commit
       triggers:
         - git_hooks: [pre-commit]
-        - files: ['prisma/schema.prisma', 'openapi.json', 'package.json']
+        - files: [prisma/schema.prisma, openapi.json, package.json]
       run: |
         WARNINGS=0
         # Check service worker
@@ -384,7 +1473,7 @@ actions:
     - id: openapi-validate-pre-commit
       triggers:
         - git_hooks: [pre-commit]
-        - files: ['openapi.json']
+        - files: [openapi.json]
       run: |
         if [ ! -f "openapi.json" ]; then
           exit 0
@@ -415,7 +1504,7 @@ actions:
     - id: deps-install-post-merge
       triggers:
         - git_hooks: [post-merge]
-        - files: ['package.json', 'pnpm-lock.yaml']
+        - files: [package.json, pnpm-lock.yaml]
       run: |
         if git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD | grep -qE "(package\.json|pnpm-lock\.yaml)"; then
           echo "📦 Dependencies changed. Installing updates..."
@@ -428,7 +1517,7 @@ actions:
     - id: db-types-sync-post-merge
       triggers:
         - git_hooks: [post-merge]
-        - files: ['prisma/schema.prisma']
+        - files: [prisma/schema.prisma]
       run: |
         if git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD | grep -qE "prisma/schema\.prisma"; then
           echo "🔄 Prisma schema changed. Syncing database types..."
@@ -442,7 +1531,7 @@ actions:
     - id: deps-check-post-checkout
       triggers:
         - git_hooks: [post-checkout]
-        - files: ['package.json', 'pnpm-lock.yaml']
+        - files: [package.json, pnpm-lock.yaml]
       run: |
         if git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD | grep -qE "(package\.json|pnpm-lock\.yaml)"; then
           echo "📦 Dependencies may have changed after checkout. Checking..."

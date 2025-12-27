@@ -22,7 +22,7 @@ import { useAuthenticatedUser } from './use-authenticated-user';
 export function useUserProfileImage(): string | null {
   const { user, isAuthenticated } = useAuthenticatedUser({ context: 'useUserProfileImage' });
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
   const fetchedUserIdRef = useRef<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 

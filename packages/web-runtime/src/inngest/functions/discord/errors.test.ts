@@ -1,27 +1,30 @@
 /**
- * Discord Errors Inngest Function Tests
+ * Discord Errors Inngest Function Integration Tests
  *
- * Tests the processDiscordErrorsQueue function using @inngest/test.
- * This tests the function logic, not the route handler.
+ * Tests processDiscordErrorsQueue function → PGMQ → Discord webhook flow.
+ * Uses InngestTestEngine, test PGMQ queue, and real pgmq-client functions.
  *
- * @module web-runtime/inngest/functions/discord/errors.test
+ * @group Inngest
+ * @group Discord
+ * @group Integration
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { processDiscordErrorsQueue } from './errors';
 
-// Mock supabase/pgmq-client, logging, shared-runtime, environment, and monitoring
+// Use test queue for PGMQ operations
+// Mock pgmq-client to use test queue
+// This allows Inngest functions to read events that were enqueued by other tests
 jest.mock('../../../supabase/pgmq-client', () => {
-  const mockPgmqRead = jest.fn();
-  const mockPgmqDelete = jest.fn();
-  return {
-    pgmqRead: mockPgmqRead,
-    pgmqDelete: mockPgmqDelete,
-    __mockPgmqRead: mockPgmqRead,
-    __mockPgmqDelete: mockPgmqDelete,
-  };
+  // Import test queue utilities inside jest.mock() factory to avoid hoisting issues
+  const { createTestPgmqQueue, createPgmqMocks } = require('../../../supabase/pgmq-client.test');
+  const testQueue = createTestPgmqQueue();
+  return createPgmqMocks(testQueue);
 });
+
+// Import test queue utilities for use in tests (after jest.mock())
+import { resetTestPgmqQueue, getTestPgmqQueue } from '../../../supabase/pgmq-client.test';
 
 jest.mock('../../../logging/server', () => {
   const mockLogger = {
@@ -101,10 +104,10 @@ const { __mockNormalizeError: mockNormalizeError } = jest.requireMock(
 const envMock = jest.requireMock('@heyclaude/shared-runtime/schemas/env') as {
   env: Record<string, string | undefined>;
 };
-const mockFetch = jest.fn();
+const mockFetch = jest.fn<typeof fetch>();
 
 // Mock global fetch for Discord webhook
-global.fetch = mockFetch;
+global.fetch = mockFetch as typeof fetch;
 
 // Import function AFTER mocks are set up
 describe('processDiscordErrorsQueue', () => {
@@ -117,6 +120,9 @@ describe('processDiscordErrorsQueue', () => {
    * Setup before each test
    */
   beforeEach(() => {
+    // Clear test queue before each test (REQUIRED for test isolation)
+    resetTestPgmqQueue();
+
     // Create fresh test engine instance for each test
     t = new InngestTestEngine({
       function: processDiscordErrorsQueue,
@@ -124,8 +130,6 @@ describe('processDiscordErrorsQueue', () => {
 
     jest.clearAllMocks();
     jest.resetAllMocks();
-    mockPgmqRead.mockReset();
-    mockPgmqDelete.mockReset();
     mockFetch.mockReset();
     mockCreateWebAppContextWithId.mockReturnValue({
       requestId: 'test-request-id',
@@ -161,16 +165,10 @@ describe('processDiscordErrorsQueue', () => {
       created_at: new Date().toISOString(),
     };
 
-    const mockMessage = {
-      msg_id: BigInt(1),
-      read_ct: 0,
-      enqueued_at: new Date(),
-      vt: new Date(),
-      message: mockErrorPayload,
-    };
-
-    mockPgmqRead.mockResolvedValue([mockMessage] as never);
-    mockPgmqDelete.mockResolvedValue(undefined);
+    // Enqueue message to test queue (integration test - uses real test queue)
+    const testQueue = getTestPgmqQueue();
+    expect(testQueue).not.toBeNull();
+    await testQueue!.send('discord_errors', mockErrorPayload);
 
     const { result } = (await t.execute({
       events: [
@@ -185,11 +183,6 @@ describe('processDiscordErrorsQueue', () => {
     expect(result.success).toBe(1);
     expect(result.failed).toBe(0);
 
-    expect(mockPgmqRead).toHaveBeenCalledWith('discord_errors', {
-      vt: 120,
-      qty: 10,
-    });
-
     expect(mockFetch).toHaveBeenCalledWith(
       'https://discord.com/api/webhooks/errors',
       expect.objectContaining({
@@ -199,7 +192,9 @@ describe('processDiscordErrorsQueue', () => {
       })
     );
 
-    expect(mockPgmqDelete).toHaveBeenCalledWith('discord_errors', BigInt(1));
+    // Verify message was deleted from queue (integration test - uses real test queue)
+    const messagesAfter = await testQueue!.read('discord_errors');
+    expect(messagesAfter).toBeNull(); // Queue should be empty after processing
 
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -216,7 +211,7 @@ describe('processDiscordErrorsQueue', () => {
    * Tests that empty queue returns processed: 0.
    */
   it('should return processed: 0 when queue is empty', async () => {
-    mockPgmqRead.mockResolvedValue([]);
+    // Don't enqueue any messages - queue should be empty
 
     const { result } = (await t.execute({
       events: [
@@ -228,9 +223,7 @@ describe('processDiscordErrorsQueue', () => {
     })) as { result: { processed: number } };
 
     expect(result.processed).toBe(0);
-    expect(mockPgmqRead).toHaveBeenCalled();
     expect(mockFetch).not.toHaveBeenCalled();
-    expect(mockPgmqDelete).not.toHaveBeenCalled();
   });
 
   /**
@@ -255,24 +248,11 @@ describe('processDiscordErrorsQueue', () => {
       created_at: new Date().toISOString(),
     };
 
-    const mockMessage1 = {
-      msg_id: BigInt(1),
-      read_ct: 0,
-      enqueued_at: new Date(),
-      vt: new Date(),
-      message: mockErrorPayload1,
-    };
-
-    const mockMessage2 = {
-      msg_id: BigInt(2),
-      read_ct: 0,
-      enqueued_at: new Date(),
-      vt: new Date(),
-      message: mockErrorPayload2,
-    };
-
-    mockPgmqRead.mockResolvedValue([mockMessage1, mockMessage2] as never);
-    mockPgmqDelete.mockResolvedValue(undefined);
+    // Enqueue messages to test queue (integration test - uses real test queue)
+    const testQueue = getTestPgmqQueue();
+    expect(testQueue).not.toBeNull();
+    await testQueue!.send('discord_errors', mockErrorPayload1);
+    await testQueue!.send('discord_errors', mockErrorPayload2);
 
     const { result } = (await t.execute({
       events: [
@@ -288,7 +268,9 @@ describe('processDiscordErrorsQueue', () => {
     expect(result.failed).toBe(0);
 
     expect(mockFetch).toHaveBeenCalledTimes(2);
-    expect(mockPgmqDelete).toHaveBeenCalledTimes(2);
+    // Verify messages were deleted from queue (integration test - uses real test queue)
+    const messagesAfter = await testQueue!.read('discord_errors');
+    expect(messagesAfter).toBeNull(); // Queue should be empty after processing
   });
 
   /**
@@ -305,16 +287,17 @@ describe('processDiscordErrorsQueue', () => {
       created_at: new Date().toISOString(),
     };
 
-    const mockMessage = {
-      msg_id: BigInt(1),
-      read_ct: 6, // Exceeds MAX_RETRY_COUNT (5)
-      enqueued_at: new Date(),
-      vt: new Date(),
-      message: mockErrorPayload,
-    };
+    // Enqueue message to test queue (integration test - uses real test queue)
+    const testQueue = getTestPgmqQueue();
+    expect(testQueue).not.toBeNull();
+    await testQueue!.send('discord_errors', mockErrorPayload);
 
-    mockPgmqRead.mockResolvedValue([mockMessage] as never);
-    mockPgmqDelete.mockResolvedValue(undefined);
+    // Manually set read_ct to 6 (exceeds MAX_RETRY_COUNT of 5) to simulate max retries
+    // The test queue stores messages internally, so we need to manipulate it
+    const allMessages = testQueue!.getAllMessages('discord_errors');
+    if (allMessages.length > 0) {
+      allMessages[0]!.read_ct = 6; // Exceeds MAX_RETRY_COUNT (5)
+    }
 
     const { result } = (await t.execute({
       events: [
@@ -328,7 +311,9 @@ describe('processDiscordErrorsQueue', () => {
     expect(result.processed).toBe(1);
     expect(result.failed).toBe(1);
 
-    expect(mockPgmqDelete).toHaveBeenCalledWith('discord_errors', BigInt(1));
+    // Verify message was deleted from queue (integration test - uses real test queue)
+    const messagesAfter = await testQueue!.read('discord_errors');
+    expect(messagesAfter).toBeNull(); // Queue should be empty after processing
     expect(mockFetch).not.toHaveBeenCalled(); // Should not send to Discord
 
     expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -354,15 +339,11 @@ describe('processDiscordErrorsQueue', () => {
       created_at: new Date().toISOString(),
     };
 
-    const mockMessage = {
-      msg_id: BigInt(1),
-      read_ct: 0,
-      enqueued_at: new Date(),
-      vt: new Date(),
-      message: mockErrorPayload,
-    };
+    // Enqueue message to test queue (integration test - uses real test queue)
+    const testQueue = getTestPgmqQueue();
+    expect(testQueue).not.toBeNull();
+    await testQueue!.send('discord_errors', mockErrorPayload);
 
-    mockPgmqRead.mockResolvedValue([mockMessage] as never);
     mockFetch.mockResolvedValue({
       ok: false,
       status: 400,
@@ -391,7 +372,9 @@ describe('processDiscordErrorsQueue', () => {
     );
 
     // Message should not be deleted on failure (will retry)
-    expect(mockPgmqDelete).not.toHaveBeenCalled();
+    // Verify message is still in queue (integration test - uses real test queue)
+    const messagesAfter = await testQueue!.read('discord_errors');
+    expect(messagesAfter).not.toBeNull(); // Queue should still have the message
   });
 
   /**
@@ -408,15 +391,10 @@ describe('processDiscordErrorsQueue', () => {
       created_at: new Date().toISOString(),
     };
 
-    const mockMessage = {
-      msg_id: BigInt(1),
-      read_ct: 0,
-      enqueued_at: new Date(),
-      vt: new Date(),
-      message: mockErrorPayload,
-    };
-
-    mockPgmqRead.mockResolvedValue([mockMessage] as never);
+    // Enqueue message to test queue (integration test - uses real test queue)
+    const testQueue = getTestPgmqQueue();
+    expect(testQueue).not.toBeNull();
+    await testQueue!.send('discord_errors', mockErrorPayload);
 
     const abortError = new Error('Discord webhook request timed out');
     abortError.name = 'AbortError';
@@ -442,6 +420,11 @@ describe('processDiscordErrorsQueue', () => {
       }),
       'Discord error notification failed'
     );
+
+    // Message should not be deleted on failure (will retry)
+    // Verify message is still in queue (integration test - uses real test queue)
+    const messagesAfter = await testQueue!.read('discord_errors');
+    expect(messagesAfter).not.toBeNull(); // Queue should still have the message
   });
 
   /**
@@ -472,7 +455,6 @@ describe('processDiscordErrorsQueue', () => {
       // (The error is thrown in the get-webhook-url step, so we can't easily verify it via logger)
       if (!error) {
         // The function should have attempted to read the queue first
-        expect(mockPgmqRead).toHaveBeenCalled();
         // Then it would fail in get-webhook-url step
         // Since we can't easily verify step failures, we'll just verify the function ran
         return;
@@ -509,16 +491,10 @@ describe('processDiscordErrorsQueue', () => {
       created_at: new Date().toISOString(),
     };
 
-    const mockMessage = {
-      msg_id: BigInt(1),
-      read_ct: 0,
-      enqueued_at: new Date(),
-      vt: new Date(),
-      message: mockErrorPayload,
-    };
-
-    mockPgmqRead.mockResolvedValue([mockMessage] as never);
-    mockPgmqDelete.mockResolvedValue(undefined);
+    // Enqueue message to test queue (integration test - uses real test queue)
+    const testQueue = getTestPgmqQueue();
+    expect(testQueue).not.toBeNull();
+    await testQueue!.send('discord_errors', mockErrorPayload);
 
     await t.execute({
       events: [
@@ -538,15 +514,17 @@ describe('processDiscordErrorsQueue', () => {
 
     const fetchCall = fetchCalls.find((call) => {
       try {
-        const body = JSON.parse(call[1]?.body as string);
-        return body.embeds && body.embeds.length > 0;
+        const init = call[1] as RequestInit | undefined;
+        const body = init?.body ? JSON.parse(init.body as string) : null;
+        return body && body.embeds && body.embeds.length > 0;
       } catch {
         return false;
       }
     });
 
     expect(fetchCall).toBeDefined();
-    const body = JSON.parse(fetchCall![1]?.body as string);
+    const init = fetchCall![1] as RequestInit | undefined;
+    const body = JSON.parse((init?.body as string) || '{}');
     // The description wraps the error message in triple backticks for code block formatting: ```\n${errorMessage}\n```
     // The error message content itself should have triple backticks replaced with triple single quotes
     const description = body.embeds[0].description;
@@ -572,16 +550,10 @@ describe('processDiscordErrorsQueue', () => {
       created_at: new Date().toISOString(),
     };
 
-    const mockMessage = {
-      msg_id: BigInt(1),
-      read_ct: 0,
-      enqueued_at: new Date(),
-      vt: new Date(),
-      message: mockErrorPayload,
-    };
-
-    mockPgmqRead.mockResolvedValue([mockMessage] as never);
-    mockPgmqDelete.mockResolvedValue(undefined);
+    // Enqueue message to test queue (integration test - uses real test queue)
+    const testQueue = getTestPgmqQueue();
+    expect(testQueue).not.toBeNull();
+    await testQueue!.send('discord_errors', mockErrorPayload);
 
     await t.execute({
       events: [
@@ -601,15 +573,17 @@ describe('processDiscordErrorsQueue', () => {
 
     const fetchCall = fetchCalls.find((call) => {
       try {
-        const body = JSON.parse(call[1]?.body as string);
-        return body.embeds && body.embeds.length > 0;
+        const init = call[1] as RequestInit | undefined;
+        const body = init?.body ? JSON.parse(init.body as string) : null;
+        return body && body.embeds && body.embeds.length > 0;
       } catch {
         return false;
       }
     });
 
     expect(fetchCall).toBeDefined();
-    const body = JSON.parse(fetchCall![1]?.body as string);
+    const init = fetchCall![1] as RequestInit | undefined;
+    const body = JSON.parse((init?.body as string) || '{}');
     expect(body.embeds[0].description.length).toBeLessThanOrEqual(1000 + 10); // +10 for code block wrapper
     expect(body.embeds[0].description).toContain('...');
   });
@@ -620,7 +594,7 @@ describe('processDiscordErrorsQueue', () => {
    * Tests the read-queue step individually.
    */
   it('should execute read-queue step correctly', async () => {
-    mockPgmqRead.mockResolvedValue([]);
+    // Don't enqueue any messages - queue should be empty
 
     const { result } = (await t.executeStep('read-queue', {
       events: [
@@ -632,9 +606,5 @@ describe('processDiscordErrorsQueue', () => {
     })) as { result: unknown[] };
 
     expect(result).toEqual([]);
-    expect(mockPgmqRead).toHaveBeenCalledWith('discord_errors', {
-      vt: 120,
-      qty: 10,
-    });
   });
 });

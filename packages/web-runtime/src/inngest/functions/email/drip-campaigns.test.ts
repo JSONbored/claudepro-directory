@@ -1,10 +1,12 @@
 /**
- * Dynamic Drip Campaign Inngest Function Tests
+ * Dynamic Drip Campaign Inngest Function Integration Tests
  *
- * Tests the newsletterDripCampaign and jobPostingDripCampaign functions using @inngest/test.
- * This tests the function logic, not the route handler.
+ * Tests newsletterDripCampaign and jobPostingDripCampaign functions → NewsletterService → database flow.
+ * Uses InngestTestEngine, Prismocker for in-memory database, and real service factory.
  *
- * @module web-runtime/inngest/functions/email/drip-campaigns.test
+ * @group Inngest
+ * @group Email
+ * @group Integration
  */
 
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
@@ -33,11 +35,14 @@ jest.mock('../../../integrations/resend', () => {
   };
 });
 
+// Mock service-factory to return REAL services (not mocked services) for integration testing
+// This allows us to test the complete flow: Inngest function → NewsletterService → database
 jest.mock('../../../data/service-factory', () => {
-  const mockGetService = jest.fn();
+  // Import real service factory to return real services
+  const actual = jest.requireActual('../../../data/service-factory');
   return {
-    getService: mockGetService,
-    __mockGetService: mockGetService,
+    ...actual,
+    getService: actual.getService, // Use real getService which returns real services
   };
 });
 
@@ -94,10 +99,10 @@ jest.mock('../../utils/monitoring', () => ({
   sendApiEndpointHeartbeat: jest.fn(),
 }));
 
-// Get mocks for use in tests
-const { __mockGetService: mockGetService } = jest.requireMock('../../../data/service-factory') as {
-  __mockGetService: ReturnType<typeof jest.fn>;
-};
+// Import Prismocker for database integration testing
+import { prisma } from '@heyclaude/data-layer/prisma/client';
+import type { PrismaClient } from '@prisma/client';
+import { clearRequestCache } from '@heyclaude/data-layer/utils/request-cache';
 const { __mockLogger: mockLogger, __mockCreateWebAppContextWithId: mockCreateWebAppContextWithId } =
   jest.requireMock('../../../logging/server') as {
     __mockLogger: {
@@ -129,16 +134,25 @@ describe('newsletterDripCampaign', () => {
   let t: InngestTestEngine;
 
   /**
-   * Mock services
+   * Prismocker instance for database integration testing
    */
-  let mockNewsletterService: {
-    getSubscriptionStatusByEmail: ReturnType<typeof jest.fn>;
-  };
+  let prismocker: PrismaClient;
 
   /**
    * Setup before each test
    */
   beforeEach(() => {
+    // Clear request cache before each test (REQUIRED for test isolation)
+    clearRequestCache();
+
+    // Get Prismocker instance (automatically PrismockerClient via __mocks__/@prisma/client.ts)
+    prismocker = prisma;
+
+    // Reset Prismocker data before each test
+    if ('reset' in prismocker && typeof prismocker.reset === 'function') {
+      prismocker.reset();
+    }
+
     // Create fresh test engine instance for each test
     t = new InngestTestEngine({
       function: newsletterDripCampaign,
@@ -146,7 +160,6 @@ describe('newsletterDripCampaign', () => {
 
     jest.clearAllMocks();
     jest.resetAllMocks();
-    mockGetService.mockReset();
     mockSendEmail.mockReset();
     mockRenderEmailTemplate.mockReset();
     mockCreateWebAppContextWithId.mockReturnValue({
@@ -168,16 +181,6 @@ describe('newsletterDripCampaign', () => {
       error: null,
     });
     mockRenderEmailTemplate.mockResolvedValue('<html>Test Email</html>');
-
-    // Set up mock NewsletterService
-    mockNewsletterService = {
-      // @ts-expect-error - TypeScript incorrectly infers 'never' for jest.fn() in mock setup
-      getSubscriptionStatusByEmail: jest.fn().mockResolvedValue({
-        status: 'subscribed',
-      }),
-    };
-
-    (mockGetService as any).mockResolvedValue(mockNewsletterService);
   });
 
   /**
@@ -310,9 +313,19 @@ describe('newsletterDripCampaign', () => {
    * Tests that digest preview is sent if user is still subscribed.
    */
   it('should send digest preview if user is still subscribed', async () => {
-    mockNewsletterService.getSubscriptionStatusByEmail.mockResolvedValue({
-      status: 'subscribed',
-    });
+    // Seed Prismocker with subscription data (real NewsletterService will query this)
+    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+      (prismocker as any).setData('newsletter_subscriptions', [
+        {
+          id: 'sub-123',
+          email: 'test@example.com',
+          status: 'active',
+          confirmed: true,
+          unsubscribed_at: null,
+          subscribed_at: new Date('2024-01-01'),
+        },
+      ]);
+    }
 
     const { result } = (await t.execute({
       events: [
@@ -359,9 +372,19 @@ describe('newsletterDripCampaign', () => {
    * Tests that digest preview is skipped if user is unsubscribed.
    */
   it('should skip digest preview if user is unsubscribed', async () => {
-    mockNewsletterService.getSubscriptionStatusByEmail.mockResolvedValue({
-      status: 'unsubscribed',
-    });
+    // Seed Prismocker with unsubscribed subscription (real NewsletterService will query this)
+    if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
+      (prismocker as any).setData('newsletter_subscriptions', [
+        {
+          id: 'sub-123',
+          email: 'test@example.com',
+          status: 'unsubscribed',
+          confirmed: true,
+          unsubscribed_at: new Date('2024-01-02'),
+          subscribed_at: new Date('2024-01-01'),
+        },
+      ]);
+    }
 
     const { result } = (await t.execute({
       events: [

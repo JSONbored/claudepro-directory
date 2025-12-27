@@ -319,7 +319,7 @@ export function createLogger(
       // Debug: Log that pino-pretty stream is active (only once)
       // Use module-level variable instead of globalThis for better compatibility
       // Skip logging in test environment to avoid console noise
-      if (!hasLoggedPinoPretty && process.env.NODE_ENV !== 'test') {
+      if (!hasLoggedPinoPretty && process.env['NODE_ENV'] !== 'test') {
         // eslint-disable-next-line no-console -- Debug logging for development
         console.log('[Logger] Development mode: Using pino-pretty stream (colored)');
         hasLoggedPinoPretty = true;

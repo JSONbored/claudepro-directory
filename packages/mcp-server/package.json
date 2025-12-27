@@ -26,6 +26,9 @@
   "license": "MIT",
   "author": "JSONbored",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -226,7 +229,7 @@
   "scripts": {
     "build": "rm -rf dist && tsup && pnpm build:types",
     "build:types": "tsc --project tsconfig.types.json || true",
-    "lint": "eslint . --config ../../config/tools/eslint.config.mjs",
+    "lint": "eslint . --config ../../.trunk/configs/eslint.config.mjs",
     "prepublishOnly": "pnpm build",
     "test": "jest --config ../../.trunk/configs/jest.config.cjs --testPathPatterns=packages/mcp-server/src",
     "test:coverage": "jest --config ../../.trunk/configs/jest.config.cjs --testPathPatterns=packages/mcp-server/src --coverage",

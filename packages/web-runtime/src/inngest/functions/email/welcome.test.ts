@@ -1,13 +1,15 @@
 /**
- * Welcome Email Inngest Function Tests
+ * Welcome Email Inngest Function Integration Tests
  *
- * Tests the sendWelcomeEmail function using @inngest/test.
- * This tests the function logic, not the route handler.
+ * Tests sendWelcomeEmail function → Resend email service flow.
+ * Uses InngestTestEngine for function testing. No database interaction (email-only function).
  *
- * @module web-runtime/inngest/functions/email/welcome.test
+ * @group Inngest
+ * @group Email
+ * @group Integration
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { InngestTestEngine } from '@inngest/test';
 import { sendWelcomeEmail } from './welcome';
 
@@ -148,6 +150,20 @@ describe('sendWelcomeEmail', () => {
       }
       return new Error(fallbackMessage || String(error || 'Unknown error'));
     });
+  });
+
+  /**
+   * Cleanup after each test to prevent open handles
+   */
+  afterEach(async () => {
+    // Clear all timers
+    jest.clearAllTimers();
+
+    // Ensure all pending promises are resolved
+    await new Promise((resolve) => setImmediate(resolve));
+
+    // Clear the test engine reference to allow garbage collection
+    (t as any) = null;
   });
 
   /**

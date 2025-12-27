@@ -11,6 +11,9 @@ on:
     branches: [main]
   push:
     branches: [main]
+  schedule:
+    # Run full code quality check at 4 PM UTC daily (cron uses UTC time)
+    - cron: '0 16 * * *'
 
 # Cancel in-progress runs when new commits pushed (saves resources)
 concurrency:
@@ -76,6 +79,14 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           skip-checkout: true
+      # Cache Trunk tools and linters for faster CI runs
+      - name: Cache Trunk
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trunk
+          key: trunk-${{ runner.os }}-${{ hashFiles('.trunk/trunk.yaml') }}
+          restore-keys: |
+            trunk-${{ runner.os }}-
       - name: Type check
         run: pnpm type-check
         env:
@@ -100,6 +111,14 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           skip-checkout: true # Already checked out above
+      # Cache Trunk tools and linters for faster CI runs
+      - name: Cache Trunk
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trunk
+          key: trunk-${{ runner.os }}-${{ hashFiles('.trunk/trunk.yaml') }}
+          restore-keys: |
+            trunk-${{ runner.os }}-
       - name: Build
         run: pnpm build
         env:
@@ -109,3 +128,83 @@ jobs:
             ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           TURBO_TOKEN: ${{ env.TURBO_TOKEN }}
           TURBO_TEAM: ${{ env.TURBO_TEAM }}
+
+  test:
+    name: Test
+    needs: changes
+    if: >-
+      (needs.changes.outputs.packages == 'true' ||
+       needs.changes.outputs.web == 'true' ||
+       needs.changes.outputs.generators == 'true') &&
+      needs.changes.outputs.mcp-server != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # Checkout first to make composite action files available
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - uses: ./.github/actions/setup
+        with:
+          skip-checkout: true # Already checked out above
+      # Cache Trunk tools and linters for faster CI runs
+      - name: Cache Trunk
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trunk
+          key: trunk-${{ runner.os }}-${{ hashFiles('.trunk/trunk.yaml') }}
+          restore-keys: |
+            trunk-${{ runner.os }}-
+      - name: Run tests
+        run: pnpm test:all
+        env:
+          TURBO_TOKEN: ${{ env.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ env.TURBO_TEAM }}
+      # Upload test results to Trunk Flaky Tests
+      # This step runs even if tests fail (if: always()) to capture flaky test data
+      - name: Upload test results to Trunk Flaky Tests
+        if: always() # Upload even if tests fail
+        continue-on-error: true # Don't fail CI if upload fails
+        uses: trunk-io/analytics-uploader@v1
+        with:
+          junit-paths: '.trunk/test-results/**/*.xml'
+          org-slug: ${{ secrets.TRUNK_ORG_SLUG }}
+          token: ${{ secrets.TRUNK_API_TOKEN }}
+      # Clean up stale test result files after upload
+      # Prevents stale files from being included in future test runs
+      - name: Clean up test result files
+        if: always()
+        run: |
+          rm -rf .trunk/test-results/jest/*.xml
+          rm -rf .trunk/test-results/playwright/*.xml
+          echo "✅ Test result files cleaned up"
+
+  trunk-check:
+    name: Trunk Code Quality
+    needs: changes
+    if: >-
+      (needs.changes.outputs.packages == 'true' ||
+       needs.changes.outputs.web == 'true' ||
+       needs.changes.outputs.generators == 'true') &&
+      needs.changes.outputs.mcp-server != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - uses: ./.github/actions/setup
+        with:
+          skip-checkout: true
+      # Cache Trunk tools and linters for faster CI runs
+      - name: Cache Trunk
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trunk
+          key: trunk-${{ runner.os }}-${{ hashFiles('.trunk/trunk.yaml') }}
+          restore-keys: |
+            trunk-${{ runner.os }}-
+      - name: Trunk Code Quality
+        uses: trunk-io/trunk-action@v1
+        with:
+          post-annotations: true

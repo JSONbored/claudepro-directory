@@ -419,7 +419,7 @@ export const getUserIdentities = authedAction
 export const getUserProfileImage = authedAction
   .inputSchema(z.void())
   .metadata({ actionName: 'getUserProfileImage', category: 'user' })
-  .action(async ({ ctx }) => {
+  .action(async ({ ctx }: { ctx: { userId: string; userEmail?: string; authToken?: string } }) => {
     const { prisma } = await import('@heyclaude/data-layer/prisma/client');
 
     // Fetch only the image field from database

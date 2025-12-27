@@ -38,6 +38,16 @@ jest.mock('../../../../data-layer/src/utils/rpc-error-logging.ts', () => ({
 // ERROR logs for validation failures are expected and correct behavior
 // Don't mock normalizeError - use real implementation
 
+/**
+ * Content Paginated Data Function Test Suite
+ *
+ * Tests getPaginatedContent data function → ContentService.getContentPaginatedSlim → Prisma → database flow.
+ * Uses Prismocker for in-memory database and getRequestCache() for cache verification.
+ *
+ * @group ContentPaginated
+ * @group DataFunctions
+ * @group Integration
+ */
 // Helper function to create v_content_list_slim view data for seeding
 function createViewItem(overrides: {
   id: string;
@@ -99,6 +109,10 @@ describe('content/paginated', () => {
       expect(typeof getPaginatedContent).toBe('function');
     });
 
+    /**
+     * Integration test: Verifies full flow from data function → service → Prisma → database.
+     * Tests category normalization and proper data transformation.
+     */
     it('should call service with normalized category', async () => {
       // getContentPaginatedSlim uses direct Prisma calls (v_content_list_slim.findMany)
       // Seed view using Prismocker
@@ -282,6 +296,9 @@ describe('content/paginated', () => {
       expect(result?.items.length).toBe(2);
     });
 
+    /**
+     * Cache test: Verifies request-scoped caching using getRequestCache().getStats().size.
+     */
     it('should cache results on duplicate calls (caching test)', async () => {
       // getContentPaginatedSlim uses withSmartCache, so cache testing is important
       if ('setData' in prismocker && typeof (prismocker as any).setData === 'function') {
