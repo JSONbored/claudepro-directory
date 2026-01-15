@@ -227,7 +227,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
-    "devalue": "^5.5.0",
+    "devalue": "^5.6.2",
     "dompurify": "^3.3.0",
     "html2canvas-pro": "^1.5.13",
     "inngest": "^3.46.0",
