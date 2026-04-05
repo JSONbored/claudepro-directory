@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: General discussion
+    url: https://github.com/JSONbored/claudepro-directory/discussions
+    about: Use GitHub Discussions for broader ideas, feedback, or questions.

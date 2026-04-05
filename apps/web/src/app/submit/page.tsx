@@ -1,0 +1,42 @@
+import { SubmitForm } from "@/components/submit-form";
+
+export default function SubmitPage() {
+  return (
+    <div className="border-b border-border/80">
+      <section className="container-shell grid min-h-[calc(100vh-8rem)] gap-12 py-16 lg:grid-cols-[1fr_620px] lg:items-center">
+        <div className="space-y-6">
+          <span className="eyebrow">Submit</span>
+          <div className="space-y-4">
+            <h1 className="section-title text-balance">Submit a tool or resource.</h1>
+            <p className="max-w-xl text-base leading-8 text-muted-foreground">
+              Share an agent, MCP server, skill pack, rule set, guide, hook, command,
+              or workflow with the HeyClaude community.
+            </p>
+            <p className="max-w-xl text-sm leading-7 text-muted-foreground">
+              This first version stays intentionally lightweight. Fill out the form and
+              we will open a prefilled GitHub issue using the proper submission template.
+            </p>
+          </div>
+
+          <div className="submit-orb-wrap" aria-hidden="true">
+            <div className="submit-orb" />
+          </div>
+        </div>
+
+        <div className="space-y-5">
+          <div className="space-y-2 text-center lg:text-left">
+            <h2 className="text-4xl font-semibold tracking-tight text-foreground">
+              Submit to HeyClaude
+            </h2>
+            <p className="text-sm leading-7 text-muted-foreground">
+              GitHub is the backend here. The form below opens a clean submission issue
+              so maintainers can review and import it without email back-and-forth.
+            </p>
+          </div>
+
+          <SubmitForm />
+        </div>
+      </section>
+    </div>
+  );
+}

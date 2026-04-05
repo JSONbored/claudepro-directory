@@ -1,0 +1,39 @@
+{
+  "name": "web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "predev": "node ../../scripts/build-content-index.mjs",
+    "prebuild": "node ../../scripts/build-content-index.mjs",
+    "pretype-check": "node ../../scripts/build-content-index.mjs && next typegen",
+    "prepreview": "node ../../scripts/build-content-index.mjs",
+    "dev": "next dev",
+    "build": "next build",
+    "type-check": "tsc --noEmit",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "geist": "^1.7.0",
+    "gray-matter": "^4.0.3",
+    "lucide-react": "^0.542.0",
+    "marked": "^17.0.0",
+    "next": "16.2.2",
+    "radix-ui": "^1.4.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "^1.18.0",
+    "@tailwindcss/postcss": "^4.1.12",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "tailwindcss": "^4.1.12",
+    "typescript": "6.0.2",
+    "wrangler": "4.80.0"
+  }
+}

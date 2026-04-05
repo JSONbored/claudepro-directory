@@ -1,0 +1,61 @@
+export const siteConfig = {
+  name: "HeyClaude",
+  shortName: "heyclaude",
+  description:
+    "A community-built directory for Claude agents, MCP servers, skills, rules, commands, hooks, guides, collections, and jobs.",
+  url: "https://heyclau.de",
+  githubUrl: "https://github.com/JSONbored/claudepro-directory",
+  nav: [
+    { href: "/browse", label: "Browse" },
+    { href: "/jobs", label: "Jobs" },
+    { href: "/about", label: "About" },
+    { href: "/submit", label: "Submit" }
+  ],
+  categoryOrder: [
+    "agents",
+    "mcp",
+    "skills",
+    "rules",
+    "commands",
+    "hooks",
+    "guides",
+    "collections",
+    "statuslines"
+  ]
+} as const;
+
+export const categoryLabels: Record<string, string> = {
+  agents: "Agents",
+  mcp: "MCP Servers",
+  skills: "Skills",
+  rules: "Rules",
+  commands: "Commands",
+  hooks: "Hooks",
+  guides: "Guides",
+  collections: "Collections",
+  statuslines: "Statuslines"
+};
+
+export const categoryDescriptions: Record<string, string> = {
+  agents: "Specialized Claude agents and expert roles.",
+  mcp: "Model Context Protocol servers and integrations.",
+  skills: "Installable skill packs and reusable capabilities.",
+  rules: "Prompt guardrails, project rules, and operating constraints.",
+  commands: "Slash commands and reusable command prompts.",
+  hooks: "Claude Code hook configs and automation helpers.",
+  guides: "Long-form guides and practical walkthroughs.",
+  collections: "Curated bundles of related assets.",
+  statuslines: "Statusline scripts and workflow telemetry."
+};
+
+export const categoryAccentClasses: Record<string, string> = {
+  agents: "text-chart-1 border-border bg-secondary/30",
+  mcp: "text-chart-2 border-border bg-secondary/30",
+  skills: "text-chart-5 border-border bg-secondary/30",
+  rules: "text-destructive border-border bg-secondary/30",
+  commands: "text-primary border-border bg-secondary/30",
+  hooks: "text-chart-4 border-border bg-secondary/30",
+  guides: "text-chart-2 border-border bg-secondary/30",
+  collections: "text-chart-3 border-border bg-secondary/30",
+  statuslines: "text-chart-4 border-border bg-secondary/30"
+};
