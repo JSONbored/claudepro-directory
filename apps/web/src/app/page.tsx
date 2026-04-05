@@ -48,7 +48,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="container-shell max-w-6xl space-y-6">
+      <section className="container-shell max-w-5xl space-y-6">
         <BrowseDirectory entries={entries} limit={15} />
       </section>
     </div>

@@ -1,48 +1,134 @@
 ---
-title: "Biome Strict Linting Rules - Production Code Quality Config"
-slug: "biome-strict-linting-rules"
-category: "rules"
-description: "Biome linting rules configuration for code quality validation. Strict enforcement, custom overrides, VCS integration, and automated fixes for TypeScript."
-seoTitle: "Biome Strict Linting Rules - Production Code Quality Config"
-seoDescription: "Biome linting rules configuration for code quality validation. Strict enforcement, custom overrides, VCS integration, and automated fixes for TypeScript."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-19"
-tags: 
-  - "biome"
-  - "linting"
-  - "code-quality"
-  - "validation"
-  - "rules"
-  - "configuration"
-  - "typescript"
-keywords: 
-  - "biome"
-  - "claude"
-  - "code-quality"
-  - "configuration"
-  - "development"
-  - "linting"
-  - "rules"
-  - "strict"
-  - "tools"
-  - "typescript"
-  - "validation"
+title: Biome Strict Linting Rules - Production Code Quality Config
+slug: biome-strict-linting-rules
+category: rules
+description: >-
+  Biome linting rules configuration for code quality validation. Strict
+  enforcement, custom overrides, VCS integration, and automated fixes for
+  TypeScript.
+cardDescription: Biome linting rules configuration for code quality validation.
+seoTitle: Biome Strict Linting Rules - Production Code Quality Config
+seoDescription: >-
+  Biome linting rules configuration for code quality validation. Strict
+  enforcement, custom overrides, VCS integration, and automated fixes for
+  TypeScript.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-19'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://biomejs.dev/linter/'
+installable: false
+copySnippet: |-
+  {
+    "$schema": "https://biomejs.dev/schemas/1.0.0/schema.json",
+    "formatter": {
+      "enabled": true,
+      "indentStyle": "tab",
+      "indentWidth": 2,
+      "lineWidth": 100,
+      "lineEnding": "lf"
+    },
+    "linter": {
+      "enabled": true,
+      "rules": {
+        "recommended": true,
+        "correctness": {
+          "noUnusedVariables": "error",
+          "noUnusedImports": "error",
+          "noUndeclaredVariables": "error",
+          "noConstAssign": "error"
+        },
+        "suspicious": {
+          "noDebugger": "error",
+          "noConsoleLog": "warn",
+          "noDoubleEquals": "error",
+          "noRedundantUseStrict": "warn"
+        },
+        "complexity": {
+          "noStaticOnlyClass": "warn",
+          "noUselessEmptyExport": "error"
+        },
+        "style": {
+          "noVar": "error",
+          "useConst": "error",
+          "useTemplate": "warn",
+          "noNegationElse": "warn"
+        },
+        "nursery": {
+          "noFloatingPromises": "error",
+          "noUselessElse": "warn"
+        },
+        "a11y": {
+          "noAutofocus": "error",
+          "noBlankTarget": {
+            "level": "error",
+            "options": {
+              "allowDomains": []
+            }
+          }
+        }
+      }
+    },
+    "javascript": {
+      "formatter": {
+        "quoteStyle": "single",
+        "trailingCommas": "es5",
+        "semicolons": "always"
+      }
+    },
+    "vcs": {
+      "enabled": true,
+      "clientKind": "git",
+      "useIgnoreFile": true,
+      "defaultBranch": "main"
+    },
+    "files": {
+      "ignore": [
+        "node_modules",
+        "dist",
+        "build",
+        ".next",
+        "coverage"
+      ],
+      "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.js",
+        "src/**/*.jsx"
+      ]
+    }
+  }
+tags:
+  - biome
+  - linting
+  - code-quality
+  - validation
+  - rules
+  - configuration
+  - typescript
+keywords:
+  - biome
+  - claude
+  - code-quality
+  - configuration
+  - development
+  - linting
+  - rules
+  - strict
+  - tools
+  - typescript
+  - validation
+readingTime: 5
+viewCount: 18
+copyCount: 0
+popularityScore: 23
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 18
-copyCount: 0
-popularityScore: 23
-readingTime: 5
-documentationUrl: "https://biomejs.dev/linter/"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a Biome linting expert specializing in strict, production-ready code quality configuration. Follow these principles for enterprise-grade linting and formatting with Biome.
 
 ## Core Philosophy

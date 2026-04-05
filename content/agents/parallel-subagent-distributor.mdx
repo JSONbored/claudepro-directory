@@ -1,47 +1,75 @@
 ---
-title: "Parallel Subagent Distributor - Agents"
-slug: "parallel-subagent-distributor"
-category: "agents"
-description: "Parallel subagent workload distribution specialist coordinating concurrent Claude Code subagents for massive speedups using native parallel execution capabilities."
-seoTitle: "Parallel Subagent Distributor - Agents"
-seoDescription: "Parallel subagent workload distribution specialist coordinating concurrent Claude Code subagents for massive speedups using native parallel execution capabil..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-25"
-tags: 
-  - "parallel-processing"
-  - "concurrent-subagents"
-  - "workload-distribution"
-  - "performance"
-  - "git-worktrees"
-keywords: 
-  - "agents"
-  - "claude"
-  - "concurrent-subagents"
-  - "development"
-  - "distributor"
-  - "git-worktrees"
-  - "parallel"
-  - "parallel-processing"
-  - "performance"
-  - "subagent"
-  - "tools"
-  - "workload-distribution"
+title: Parallel Subagent Distributor - Agents
+slug: parallel-subagent-distributor
+category: agents
+description: >-
+  Parallel subagent workload distribution specialist coordinating concurrent
+  Claude Code subagents for massive speedups using native parallel execution
+  capabilities.
+cardDescription: >-
+  Parallel subagent workload distribution specialist coordinating concurrent
+  Claude Code subagents for massive speedups using native parall...
+seoTitle: Parallel Subagent Distributor - Agents
+seoDescription: >-
+  Parallel subagent workload distribution specialist coordinating concurrent
+  Claude Code subagents for massive speedups using native parallel execution
+  capabil...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-25'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://docs.claude.com/en/docs/claude-code/sub-agents'
+installable: false
+copySnippet: |-
+  // Distribute linting across 100 files
+  const files = glob('src/**/*.ts'); // 100 TypeScript files
+
+  // Sequential (slow): 10 minutes
+  for (const file of files) {
+    await lintFile(file);
+  }
+
+  // Parallel (fast): 1 minute with 10 subagents
+  const chunks = chunkArray(files, 10); // 10 files per subagent
+  await Promise.all(
+    chunks.map(chunk => 
+      Task({
+        subagent_type: 'general-purpose',
+        prompt: `Fix linting in: ${chunk.join(', ')}`,
+        description: 'Lint file batch'
+      })
+    )
+  );
+tags:
+  - parallel-processing
+  - concurrent-subagents
+  - workload-distribution
+  - performance
+  - git-worktrees
+keywords:
+  - agents
+  - claude
+  - concurrent-subagents
+  - development
+  - distributor
+  - git-worktrees
+  - parallel
+  - parallel-processing
+  - performance
+  - subagent
+  - tools
+  - workload-distribution
+readingTime: 3
+viewCount: 23
+copyCount: 1
+popularityScore: 28
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 23
-copyCount: 1
-popularityScore: 28
-readingTime: 3
-documentationUrl: "https://docs.claude.com/en/docs/claude-code/sub-agents"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a parallel subagent workload distributor, coordinating multiple Claude Code subagents executing concurrently for massive performance gains.
 
 ## Parallel Subagents Overview

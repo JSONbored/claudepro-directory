@@ -1,44 +1,85 @@
 ---
-title: "Go Golang Expert - CLAUDE.md Rules for Claude Code"
-slug: "go-golang-expert"
-category: "rules"
-description: "Transform Claude into a Go language expert with deep knowledge of concurrency, performance optimization, and idiomatic Go"
-seoTitle: "Go Golang Expert - CLAUDE.md Rules for Claude Code"
-seoDescription: "Transform Claude into a Go language expert with deep knowledge of concurrency, performance optimization, and idiomatic Go Discover tools for AI development."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-09-16"
-tags: 
-  - "golang"
-  - "go"
-  - "concurrency"
-  - "backend"
-  - "microservices"
-keywords: 
-  - "backend"
-  - "claude"
-  - "concurrency"
-  - "development"
-  - "expert"
-  - "golang"
-  - "microservices"
-  - "rules"
-  - "tools"
+title: Go Golang Expert - CLAUDE.md Rules for Claude Code
+slug: go-golang-expert
+category: rules
+description: >-
+  Transform Claude into a Go language expert with deep knowledge of concurrency,
+  performance optimization, and idiomatic Go
+cardDescription: >-
+  Transform Claude into a Go language expert with deep knowledge of concurrency,
+  performance optimization, and idiomatic Go
+seoTitle: Go Golang Expert - CLAUDE.md Rules for Claude Code
+seoDescription: >-
+  Transform Claude into a Go language expert with deep knowledge of concurrency,
+  performance optimization, and idiomatic Go Discover tools for AI development.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-16'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://go.dev/doc/'
+installable: false
+copySnippet: |-
+  // Fan-out/Fan-in pattern
+  func fanOut(in <-chan int, workers int) []<-chan int {
+      outs := make([]<-chan int, workers)
+      for i := 0; i < workers; i++ {
+          out := make(chan int)
+          outs[i] = out
+          go func() {
+              for n := range in {
+                  out <- process(n)
+              }
+              close(out)
+          }()
+      }
+      return outs
+  }
+
+  func fanIn(channels ...<-chan int) <-chan int {
+      out := make(chan int)
+      var wg sync.WaitGroup
+      for _, ch := range channels {
+          wg.Add(1)
+          go func(c <-chan int) {
+              for n := range c {
+                  out <- n
+              }
+              wg.Done()
+          }(ch)
+      }
+      go func() {
+          wg.Wait()
+          close(out)
+      }()
+      return out
+  }
+tags:
+  - golang
+  - go
+  - concurrency
+  - backend
+  - microservices
+keywords:
+  - backend
+  - claude
+  - concurrency
+  - development
+  - expert
+  - golang
+  - microservices
+  - rules
+  - tools
+readingTime: 4
+viewCount: 133
+copyCount: 0
+popularityScore: 138
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 133
-copyCount: 0
-popularityScore: 138
-readingTime: 4
-documentationUrl: "https://go.dev/doc/"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a Go expert with deep understanding of the language's design philosophy, concurrency model, and ecosystem.
 
 ## Core Go Expertise

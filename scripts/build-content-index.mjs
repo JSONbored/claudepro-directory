@@ -4,6 +4,13 @@ import { fileURLToPath } from "node:url";
 
 import matter from "gray-matter";
 import { marked } from "marked";
+import {
+  extractCodeBlocks,
+  extractHeadings,
+  headingId,
+  inferStructuredFields,
+  normalizeBody
+} from "./content-schema.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
@@ -11,6 +18,7 @@ const contentRoot = path.join(repoRoot, "content");
 const generatedDir = path.join(repoRoot, "apps/web/src/generated");
 const outputFile = path.join(generatedDir, "content-index.json");
 const downloadsDir = path.join(repoRoot, "apps/web/public/downloads/skills");
+const defaultRepoUrl = "https://github.com/JSONbored/claudepro-directory";
 
 const categories = fs
   .readdirSync(contentRoot, { withFileTypes: true })
@@ -22,34 +30,6 @@ marked.setOptions({
   breaks: false
 });
 
-function headingId(text) {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-");
-}
-
-function extractCodeBlocks(body) {
-  const matches = [...body.matchAll(/```([\w-]*)\n([\s\S]*?)```/g)];
-  return matches.map((match) => ({
-    language: match[1] || "text",
-    code: match[2].trim()
-  }));
-}
-
-function extractHeadings(body) {
-  return body
-    .split("\n")
-    .map((line) => line.match(/^(##+)\s+(.*)$/))
-    .filter(Boolean)
-    .map((match) => ({
-      depth: match[1].length,
-      text: match[2].trim(),
-      id: headingId(match[2].trim())
-    }));
-}
-
 const renderer = new marked.Renderer();
 renderer.heading = ({ tokens, depth }) => {
   const text = tokens.map((token) => token.raw).join("").trim();
@@ -60,6 +40,51 @@ renderer.heading = ({ tokens, depth }) => {
 function buildGitHubUrl(filePath) {
   const relative = path.relative(repoRoot, filePath).replaceAll(path.sep, "/");
   return `https://github.com/JSONbored/claudepro-directory/blob/main/${relative}`;
+}
+
+function parseGitHubRepo(repoUrl) {
+  if (!repoUrl) return null;
+
+  try {
+    const url = new URL(repoUrl);
+    if (url.hostname !== "github.com") return null;
+
+    const parts = url.pathname.split("/").filter(Boolean);
+    if (parts.length < 2) return null;
+
+    const owner = parts[0];
+    const repo = parts[1].replace(/\.git$/, "");
+
+    return { owner, repo, key: `${owner}/${repo}`, url: `https://github.com/${owner}/${repo}` };
+  } catch {
+    return null;
+  }
+}
+
+async function fetchGitHubRepoStats(repo) {
+  const headers = {
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28"
+  };
+
+  if (process.env.GITHUB_TOKEN) {
+    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  }
+
+  const response = await fetch(`https://api.github.com/repos/${repo.owner}/${repo.repo}`, {
+    headers
+  });
+
+  if (!response.ok) {
+    throw new Error(`GitHub API ${response.status} for ${repo.key}`);
+  }
+
+  const data = await response.json();
+  return {
+    stars: typeof data.stargazers_count === "number" ? data.stargazers_count : undefined,
+    forks: typeof data.forks_count === "number" ? data.forks_count : undefined,
+    updatedAt: typeof data.updated_at === "string" ? data.updated_at : undefined
+  };
 }
 
 function normalizeDownloadUrl(downloadUrl) {
@@ -82,64 +107,107 @@ for (const fileName of fs.readdirSync(path.join(contentRoot, "skills"))) {
   );
 }
 
-const entries = [];
+async function main() {
+  const entries = [];
+  const repoStats = new Map();
+  const reposToFetch = new Map();
 
-for (const category of categories) {
-  const categoryDir = path.join(contentRoot, category);
-  const files = fs
-    .readdirSync(categoryDir)
-    .filter((fileName) => fileName.endsWith(".mdx"))
-    .sort();
+  for (const category of categories) {
+    const categoryDir = path.join(contentRoot, category);
+    const files = fs
+      .readdirSync(categoryDir)
+      .filter((fileName) => fileName.endsWith(".mdx"))
+      .sort();
 
-  for (const fileName of files) {
-    const filePath = path.join(categoryDir, fileName);
-    const source = fs.readFileSync(filePath, "utf8");
-    const { data, content } = matter(source);
-    const body = content.trim();
-    const headings = extractHeadings(body);
-    const codeBlocks = extractCodeBlocks(body);
+    for (const fileName of files) {
+      const filePath = path.join(categoryDir, fileName);
+      const source = fs.readFileSync(filePath, "utf8");
+      const { data, content } = matter(source);
+      const body = normalizeBody(content, category);
+      const headings = extractHeadings(body);
+      const codeBlocks = extractCodeBlocks(body);
+      const inferred = inferStructuredFields(data, body, category);
+      const repoUrl = data.repoUrl ? String(data.repoUrl) : defaultRepoUrl;
+      const githubRepo = parseGitHubRepo(repoUrl);
 
-    entries.push({
-      category,
-      slug: String(data.slug ?? fileName.replace(/\.mdx$/, "")),
-      title: String(data.title ?? fileName.replace(/\.mdx$/, "")),
-      description: String(data.description ?? ""),
-      seoTitle: data.seoTitle ? String(data.seoTitle) : undefined,
-      seoDescription: data.seoDescription ? String(data.seoDescription) : undefined,
-      author: data.author ? String(data.author) : undefined,
-      authorProfileUrl: data.authorProfileUrl
-        ? String(data.authorProfileUrl)
-        : undefined,
-      dateAdded: data.dateAdded ? String(data.dateAdded) : undefined,
-      tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
-      keywords: Array.isArray(data.keywords) ? data.keywords.map(String) : [],
-      readingTime:
-        typeof data.readingTime === "number" ? data.readingTime : undefined,
-      viewCount: typeof data.viewCount === "number" ? data.viewCount : undefined,
-      copyCount: typeof data.copyCount === "number" ? data.copyCount : undefined,
-      popularityScore:
-        typeof data.popularityScore === "number" ? data.popularityScore : undefined,
-      documentationUrl: data.documentationUrl
-        ? String(data.documentationUrl)
-        : undefined,
-      downloadUrl: normalizeDownloadUrl(
-        data.downloadUrl ? String(data.downloadUrl) : ""
-      ),
-      body,
-      html: marked.parse(body, { renderer }),
-      headings,
-      codeBlocks,
-      filePath: path.relative(repoRoot, filePath).replaceAll(path.sep, "/"),
-      githubUrl: buildGitHubUrl(filePath)
-    });
+      if (githubRepo) {
+        reposToFetch.set(githubRepo.key, githubRepo);
+      }
+
+      entries.push({
+        category,
+        slug: String(data.slug ?? fileName.replace(/\.mdx$/, "")),
+        title: String(data.title ?? fileName.replace(/\.mdx$/, "")),
+        description: String(data.description ?? ""),
+        seoTitle: data.seoTitle ? String(data.seoTitle) : undefined,
+        seoDescription: data.seoDescription ? String(data.seoDescription) : undefined,
+        author: data.author ? String(data.author) : undefined,
+        authorProfileUrl: data.authorProfileUrl
+          ? String(data.authorProfileUrl)
+          : undefined,
+        dateAdded: data.dateAdded ? String(data.dateAdded) : undefined,
+        tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
+        keywords: Array.isArray(data.keywords) ? data.keywords.map(String) : [],
+        readingTime:
+          typeof data.readingTime === "number" ? data.readingTime : undefined,
+        viewCount: typeof data.viewCount === "number" ? data.viewCount : undefined,
+        copyCount: typeof data.copyCount === "number" ? data.copyCount : undefined,
+        popularityScore:
+          typeof data.popularityScore === "number" ? data.popularityScore : undefined,
+        documentationUrl: data.documentationUrl
+          ? String(data.documentationUrl)
+          : undefined,
+        cardDescription: inferred.cardDescription || undefined,
+        installable: inferred.installable,
+        installCommand: inferred.installCommand || undefined,
+        usageSnippet: inferred.usageSnippet || undefined,
+        copySnippet: inferred.copySnippet || undefined,
+        scriptLanguage: inferred.scriptLanguage || undefined,
+        scriptBody: inferred.scriptBody || undefined,
+        downloadUrl: normalizeDownloadUrl(
+          data.downloadUrl ? String(data.downloadUrl) : ""
+        ),
+        body,
+        html: marked.parse(body, { renderer }),
+        headings,
+        codeBlocks,
+        filePath: path.relative(repoRoot, filePath).replaceAll(path.sep, "/"),
+        githubUrl: buildGitHubUrl(filePath),
+        repoUrl: githubRepo?.url
+      });
+    }
   }
+
+  await Promise.all(
+    [...reposToFetch.values()].map(async (repo) => {
+      try {
+        repoStats.set(repo.key, await fetchGitHubRepoStats(repo));
+      } catch (error) {
+        console.warn(`Could not fetch GitHub stats for ${repo.key}: ${error.message}`);
+      }
+    })
+  );
+
+  for (const entry of entries) {
+    const githubRepo = parseGitHubRepo(entry.repoUrl);
+    if (!githubRepo) continue;
+
+    const stats = repoStats.get(githubRepo.key);
+    if (!stats) continue;
+
+    entry.githubStars = stats.stars;
+    entry.githubForks = stats.forks;
+    entry.repoUpdatedAt = stats.updatedAt;
+  }
+
+  entries.sort((left, right) => {
+    const popularity = (right.popularityScore ?? 0) - (left.popularityScore ?? 0);
+    if (popularity !== 0) return popularity;
+    return left.title.localeCompare(right.title);
+  });
+
+  fs.writeFileSync(outputFile, `${JSON.stringify(entries, null, 2)}\n`);
+  console.log(`Wrote ${entries.length} entries to ${path.relative(repoRoot, outputFile)}`);
 }
 
-entries.sort((left, right) => {
-  const popularity = (right.popularityScore ?? 0) - (left.popularityScore ?? 0);
-  if (popularity !== 0) return popularity;
-  return left.title.localeCompare(right.title);
-});
-
-fs.writeFileSync(outputFile, `${JSON.stringify(entries, null, 2)}\n`);
-console.log(`Wrote ${entries.length} entries to ${path.relative(repoRoot, outputFile)}`);
+await main();

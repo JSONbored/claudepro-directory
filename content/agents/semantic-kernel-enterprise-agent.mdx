@@ -1,49 +1,223 @@
 ---
-title: "Semantic Kernel Enterprise Agent - Agents"
-slug: "semantic-kernel-enterprise-agent"
-category: "agents"
-description: "Microsoft Semantic Kernel enterprise agent specialist for building Azure-native AI applications with multi-language SDK support, plugin governance, and enterprise-grade deployment"
-seoTitle: "Semantic Kernel Enterprise Agent - Agents"
-seoDescription: "Microsoft Semantic Kernel enterprise agent specialist for building Azure-native AI applications with multi-language SDK support, plugin governance, and enter..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-16"
-tags: 
-  - "semantic-kernel"
-  - "microsoft"
-  - "azure"
-  - "enterprise"
-  - "dotnet"
-  - "python"
-keywords: 
-  - "agent"
-  - "agents"
-  - "azure"
-  - "claude"
-  - "development"
-  - "dotnet"
-  - "enterprise"
-  - "kernel"
-  - "microsoft"
-  - "python"
-  - "semantic"
-  - "semantic-kernel"
-  - "tools"
+title: Semantic Kernel Enterprise Agent - Agents
+slug: semantic-kernel-enterprise-agent
+category: agents
+description: >-
+  Microsoft Semantic Kernel enterprise agent specialist for building
+  Azure-native AI applications with multi-language SDK support, plugin
+  governance, and enterprise-grade deployment
+cardDescription: >-
+  Microsoft Semantic Kernel enterprise agent specialist for building
+  Azure-native AI applications with multi-language SDK support, plugin g...
+seoTitle: Semantic Kernel Enterprise Agent - Agents
+seoDescription: >-
+  Microsoft Semantic Kernel enterprise agent specialist for building
+  Azure-native AI applications with multi-language SDK support, plugin
+  governance, and enter...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-16'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+installable: false
+copySnippet: |-
+  // Program.cs - Enterprise Semantic Kernel Application
+  using Microsoft.SemanticKernel;
+  using Microsoft.SemanticKernel.ChatCompletion;
+  using Microsoft.SemanticKernel.Connectors.OpenAI;
+  using Azure.Identity;
+  using Azure.Security.KeyVault.Secrets;
+
+  public class EnterpriseAIApplication
+  {
+      private readonly Kernel _kernel;
+      private readonly SecretClient _secretClient;
+      
+      public EnterpriseAIApplication()
+      {
+          // Initialize Azure Key Vault for secure credential management
+          var keyVaultUrl = new Uri("https://your-keyvault.vault.azure.net/");
+          _secretClient = new SecretClient(keyVaultUrl, new DefaultAzureCredential());
+          
+          // Build Semantic Kernel with Azure OpenAI
+          var builder = Kernel.CreateBuilder();
+          
+          // Add Azure OpenAI Chat Completion
+          var apiKey = _secretClient.GetSecret("AzureOpenAI-ApiKey").Value.Value;
+          builder.AddAzureOpenAIChatCompletion(
+              deploymentName: "gpt-4",
+              endpoint: "https://your-resource.openai.azure.com/",
+              apiKey: apiKey
+          );
+          
+          // Add plugins
+          builder.Plugins.AddFromType<EmailPlugin>("EmailPlugin");
+          builder.Plugins.AddFromType<DatabasePlugin>("DatabasePlugin");
+          builder.Plugins.AddFromType<DocumentPlugin>("DocumentPlugin");
+          
+          // Add logging and telemetry
+          builder.Services.AddLogging(config =>
+          {
+              config.AddConsole();
+              config.AddApplicationInsights();
+          });
+          
+          _kernel = builder.Build();
+      }
+      
+      public async Task<string> ExecuteWorkflowAsync(string userRequest)
+      {
+          var chatService = _kernel.GetRequiredService<IChatCompletionService>();
+          var chatHistory = new ChatHistory();
+          
+          // System prompt with enterprise context
+          chatHistory.AddSystemMessage(@"
+              You are an enterprise AI assistant with access to:
+              - Email system for notifications
+              - Database for data queries
+              - Document management for file operations
+              
+              Follow company policies:
+              - Never expose sensitive data
+              - Log all actions for audit
+              - Require approval for critical operations
+          ");
+          
+          chatHistory.AddUserMessage(userRequest);
+          
+          // Execute with automatic function calling
+          var settings = new OpenAIPromptExecutionSettings
+          {
+              ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+          };
+          
+          var result = await chatService.GetChatMessageContentAsync(
+              chatHistory,
+              executionSettings: settings,
+              kernel: _kernel
+          );
+          
+          return result.Content;
+      }
+  }
+
+  // Enterprise Plugin with Governance
+  public class EmailPlugin
+  {
+      private readonly IEmailService _emailService;
+      private readonly IAuditLogger _auditLogger;
+      
+      public EmailPlugin(IEmailService emailService, IAuditLogger auditLogger)
+      {
+          _emailService = emailService;
+          _auditLogger = auditLogger;
+      }
+      
+      [KernelFunction("send_email")]
+      [Description("Send an email to specified recipient")]
+      public async Task<string> SendEmailAsync(
+          [Description("Recipient email address")] string to,
+          [Description("Email subject")] string subject,
+          [Description("Email body")] string body)
+      {
+          // Validate recipient against allowed domains
+          if (!IsAllowedDomain(to))
+          {
+              await _auditLogger.LogSecurityEventAsync(
+                  "Attempted to send email to unauthorized domain",
+                  new { To = to, Subject = subject }
+              );
+              
+              return "Error: Recipient domain not authorized";
+          }
+          
+          // Log for audit trail
+          await _auditLogger.LogActionAsync(
+              "EmailSent",
+              new { To = to, Subject = subject, Timestamp = DateTime.UtcNow }
+          );
+          
+          // Send email
+          await _emailService.SendAsync(to, subject, body);
+          
+          return $"Email sent successfully to {to}";
+      }
+      
+      private bool IsAllowedDomain(string email)
+      {
+          var allowedDomains = new[] { "company.com", "partner.com" };
+          var domain = email.Split('@').LastOrDefault();
+          return allowedDomains.Contains(domain);
+      }
+  }
+
+  // Database Plugin with Row-Level Security
+  public class DatabasePlugin
+  {
+      private readonly IDbConnection _connection;
+      private readonly IUserContext _userContext;
+      
+      [KernelFunction("query_customers")]
+      [Description("Query customer data with proper access controls")]
+      public async Task<string> QueryCustomersAsync(
+          [Description("SQL WHERE clause")] string whereClause)
+      {
+          // Apply row-level security based on user context
+          var userId = _userContext.GetCurrentUserId();
+          var userPermissions = await GetUserPermissions(userId);
+          
+          if (!userPermissions.CanAccessCustomerData)
+          {
+              return "Error: Insufficient permissions to access customer data";
+          }
+          
+          // Build secure query with parameterization
+          var query = $@"
+              SELECT CustomerID, Name, Email, Region
+              FROM Customers
+              WHERE TenantID = @TenantId
+              AND {whereClause}
+          ";
+          
+          var results = await _connection.QueryAsync(query, new 
+          { 
+              TenantId = userPermissions.TenantId 
+          });
+          
+          return JsonSerializer.Serialize(results);
+      }
+  }
+tags:
+  - semantic-kernel
+  - microsoft
+  - azure
+  - enterprise
+  - dotnet
+  - python
+keywords:
+  - agent
+  - agents
+  - azure
+  - claude
+  - development
+  - dotnet
+  - enterprise
+  - kernel
+  - microsoft
+  - python
+  - semantic
+  - semantic-kernel
+  - tools
+readingTime: 7
+viewCount: 3
+copyCount: 0
+popularityScore: 8
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 3
-copyCount: 0
-popularityScore: 8
-readingTime: 7
-documentationUrl: ""
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a Microsoft Semantic Kernel enterprise agent specialist focused on building production-ready AI applications with Azure integration, multi-language support, and enterprise governance. You combine Semantic Kernel's lightweight SDK with Azure AI services for scalable, secure, enterprise-grade AI solutions.
 
 ## C# Semantic Kernel Setup

@@ -1,46 +1,188 @@
 ---
-title: "Performance Optimizer Agent - Agents"
-slug: "performance-optimizer-agent"
-category: "agents"
-description: "Expert in application performance optimization, profiling, and system tuning across frontend, backend, and infrastructure"
-seoTitle: "Performance Optimizer Agent - Agents"
-seoDescription: "Expert in application performance optimization, profiling, and system tuning across frontend, backend, and infrastructure Discover tools for AI development."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-09-16"
-tags: 
-  - "performance"
-  - "optimization"
-  - "profiling"
-  - "monitoring"
-  - "scalability"
-keywords: 
-  - "agent"
-  - "agents"
-  - "claude"
-  - "development"
-  - "monitoring"
-  - "optimization"
-  - "optimizer"
-  - "performance"
-  - "profiling"
-  - "scalability"
-  - "tools"
+title: Performance Optimizer Agent - Agents
+slug: performance-optimizer-agent
+category: agents
+description: >-
+  Expert in application performance optimization, profiling, and system tuning
+  across frontend, backend, and infrastructure
+cardDescription: >-
+  Expert in application performance optimization, profiling, and system tuning
+  across frontend, backend, and infrastructure
+seoTitle: Performance Optimizer Agent - Agents
+seoDescription: >-
+  Expert in application performance optimization, profiling, and system tuning
+  across frontend, backend, and infrastructure Discover tools for AI
+  development.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-16'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://web.dev/performance/'
+installable: false
+copySnippet: |-
+  // Largest Contentful Paint (LCP) optimization
+  class LCPOptimizer {
+      static optimizeImages() {
+          // Lazy loading with Intersection Observer
+          const images = document.querySelectorAll('img[data-src]');
+          const imageObserver = new IntersectionObserver((entries, observer) => {
+              entries.forEach(entry => {
+                  if (entry.isIntersecting) {
+                      const img = entry.target;
+                      img.src = img.dataset.src;
+                      img.classList.remove('lazy');
+                      observer.unobserve(img);
+                  }
+              });
+          });
+          
+          images.forEach(img => imageObserver.observe(img));
+      }
+      
+      static preloadCriticalResources() {
+          // Preload critical fonts
+          const criticalFonts = [
+              '/fonts/inter-var.woff2',
+              '/fonts/source-code-pro.woff2'
+          ];
+          
+          criticalFonts.forEach(font => {
+              const link = document.createElement('link');
+              link.rel = 'preload';
+              link.href = font;
+              link.as = 'font';
+              link.type = 'font/woff2';
+              link.crossOrigin = 'anonymous';
+              document.head.appendChild(link);
+          });
+      }
+      
+      static optimizeCriticalPath() {
+          // Inline critical CSS
+          const criticalCSS = `
+              .hero { display: flex; min-height: 100vh; }
+              .nav { position: fixed; top: 0; width: 100%; }
+          `;
+          
+          const style = document.createElement('style');
+          style.textContent = criticalCSS;
+          document.head.appendChild(style);
+          
+          // Defer non-critical CSS
+          const nonCriticalCSS = document.createElement('link');
+          nonCriticalCSS.rel = 'preload';
+          nonCriticalCSS.href = '/css/non-critical.css';
+          nonCriticalCSS.as = 'style';
+          nonCriticalCSS.onload = function() {
+              this.rel = 'stylesheet';
+          };
+          document.head.appendChild(nonCriticalCSS);
+      }
+  }
+
+  // First Input Delay (FID) optimization
+  class FIDOptimizer {
+      static deferNonEssentialJS() {
+          // Use requestIdleCallback for non-critical work
+          const deferredTasks = [];
+          
+          function runDeferredTasks(deadline) {
+              while (deadline.timeRemaining() > 0 && deferredTasks.length > 0) {
+                  const task = deferredTasks.shift();
+                  task();
+              }
+              
+              if (deferredTasks.length > 0) {
+                  requestIdleCallback(runDeferredTasks);
+              }
+          }
+          
+          window.addDeferredTask = function(task) {
+              deferredTasks.push(task);
+              if (deferredTasks.length === 1) {
+                  requestIdleCallback(runDeferredTasks);
+              }
+          };
+      }
+      
+      static optimizeEventHandlers() {
+          // Debounced scroll handler
+          let scrollTimeout;
+          function handleScroll() {
+              if (scrollTimeout) return;
+              
+              scrollTimeout = setTimeout(() => {
+                  // Scroll handling logic
+                  updateScrollPosition();
+                  scrollTimeout = null;
+              }, 16); // ~60fps
+          }
+          
+          // Passive event listeners
+          document.addEventListener('scroll', handleScroll, { passive: true });
+          document.addEventListener('touchstart', handleTouch, { passive: true });
+      }
+  }
+
+  // Bundle optimization
+  const webpackOptimizations = {
+      optimization: {
+          splitChunks: {
+              chunks: 'all',
+              cacheGroups: {
+                  vendor: {
+                      test: /[\\/]node_modules[\\/]/,
+                      name: 'vendors',
+                      chunks: 'all',
+                  },
+                  common: {
+                      minChunks: 2,
+                      chunks: 'all',
+                      enforce: true
+                  }
+              }
+          },
+          usedExports: true,
+          sideEffects: false
+      },
+      plugins: [
+          new CompressionPlugin({
+              algorithm: 'gzip',
+              test: /\.(js|css|html|svg)$/,
+              threshold: 8192,
+              minRatio: 0.8
+          })
+      ]
+  };
+tags:
+  - performance
+  - optimization
+  - profiling
+  - monitoring
+  - scalability
+keywords:
+  - agent
+  - agents
+  - claude
+  - development
+  - monitoring
+  - optimization
+  - optimizer
+  - performance
+  - profiling
+  - scalability
+  - tools
+readingTime: 8
+viewCount: 118
+copyCount: 9
+popularityScore: 123
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 118
-copyCount: 9
-popularityScore: 123
-readingTime: 8
-documentationUrl: "https://web.dev/performance/"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a performance optimization expert specializing in identifying bottlenecks and implementing solutions across the entire application stack.
 
 ## Performance Optimization Expertise:

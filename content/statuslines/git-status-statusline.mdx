@@ -1,48 +1,169 @@
 ---
-title: "Git Status Statusline - Statuslines"
-slug: "git-status-statusline"
-category: "statuslines"
-description: "Git-focused statusline showing branch, dirty status, ahead/behind indicators, and stash count alongside Claude session info"
-seoTitle: "Git Status Statusline - Statuslines"
-seoDescription: "Git-focused statusline showing branch, dirty status, ahead/behind indicators, and stash count alongside Claude session info Discover tools for AI development."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-01"
-tags: 
-  - "git"
-  - "version-control"
-  - "developer"
-  - "bash"
-  - "powerline"
-  - "status-indicators"
-keywords: 
-  - "bash"
-  - "claude"
-  - "developer"
-  - "development"
-  - "git"
-  - "powerline"
-  - "status"
-  - "status-indicators"
-  - "statusline"
-  - "statuslines"
-  - "tools"
-  - "version-control"
+title: Git Status Statusline - Statuslines
+slug: git-status-statusline
+category: statuslines
+description: >-
+  Git-focused statusline showing branch, dirty status, ahead/behind indicators,
+  and stash count alongside Claude session info
+cardDescription: >-
+  Git-focused statusline showing branch, dirty status, ahead/behind indicators,
+  and stash count alongside Claude session info
+seoTitle: Git Status Statusline - Statuslines
+seoDescription: >-
+  Git-focused statusline showing branch, dirty status, ahead/behind indicators,
+  and stash count alongside Claude session info Discover tools for AI
+  development.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-01'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://git-scm.com/docs/git-status'
+installable: true
+copySnippet: |-
+  #!/usr/bin/env bash
+
+  # Git-Focused Statusline for Claude Code
+  # Emphasizes git status with visual indicators
+
+  # Read JSON from stdin
+  read -r input
+
+  # Extract Claude session data
+  model=$(echo "$input" | jq -r '.model // "unknown"' | sed 's/claude-//')
+  tokens=$(echo "$input" | jq -r '.session.totalTokens // 0')
+  workdir=$(echo "$input" | jq -r '.workspace.path // "."')
+
+  # Get git information from workspace
+  cd "$workdir" 2>/dev/null || cd .
+
+  if git rev-parse --git-dir > /dev/null 2>&1; then
+    # Get branch name
+    branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
+    
+    # Check if working directory is clean
+    if [ -z "$(git status --porcelain)" ]; then
+      status_icon="✓"
+      status_color="\033[32m"  # Green
+    else
+      status_icon="✗"
+      status_color="\033[33m"  # Yellow
+    fi
+    
+    # Check ahead/behind status
+    ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null)
+    if [ -n "$ahead_behind" ]; then
+      ahead=$(echo "$ahead_behind" | cut -f1)
+      behind=$(echo "$ahead_behind" | cut -f2)
+      if [ "$ahead" -gt 0 ]; then
+        tracking="↑$ahead"
+      fi
+      if [ "$behind" -gt 0 ]; then
+        tracking="${tracking}↓$behind"
+      fi
+    fi
+    
+    # Check stash count
+    stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$stash_count" -gt 0 ]; then
+      stash_info=" ⚑$stash_count"
+    fi
+    
+    git_info=" ${status_color}${branch}${tracking}${stash_info} ${status_icon}\033[0m"
+  else
+    git_info=""
+  fi
+
+  # Build statusline
+  echo -e "\033[36m${model}\033[0m │ \033[35m${tokens}\033[0m${git_info}"
+scriptLanguage: bash
+tags:
+  - git
+  - version-control
+  - developer
+  - bash
+  - powerline
+  - status-indicators
+keywords:
+  - bash
+  - claude
+  - developer
+  - development
+  - git
+  - powerline
+  - status
+  - status-indicators
+  - statusline
+  - statuslines
+  - tools
+  - version-control
+readingTime: 2
+viewCount: 93
+copyCount: 2
+popularityScore: 98
 difficultyScore: 3
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 93
-copyCount: 2
-popularityScore: 98
-readingTime: 2
-documentationUrl: "https://git-scm.com/docs/git-status"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
----
+scriptBody: |-
+  #!/usr/bin/env bash
 
+  # Git-Focused Statusline for Claude Code
+  # Emphasizes git status with visual indicators
+
+  # Read JSON from stdin
+  read -r input
+
+  # Extract Claude session data
+  model=$(echo "$input" | jq -r '.model // "unknown"' | sed 's/claude-//')
+  tokens=$(echo "$input" | jq -r '.session.totalTokens // 0')
+  workdir=$(echo "$input" | jq -r '.workspace.path // "."')
+
+  # Get git information from workspace
+  cd "$workdir" 2>/dev/null || cd .
+
+  if git rev-parse --git-dir > /dev/null 2>&1; then
+    # Get branch name
+    branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
+    
+    # Check if working directory is clean
+    if [ -z "$(git status --porcelain)" ]; then
+      status_icon="✓"
+      status_color="\033[32m"  # Green
+    else
+      status_icon="✗"
+      status_color="\033[33m"  # Yellow
+    fi
+    
+    # Check ahead/behind status
+    ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null)
+    if [ -n "$ahead_behind" ]; then
+      ahead=$(echo "$ahead_behind" | cut -f1)
+      behind=$(echo "$ahead_behind" | cut -f2)
+      if [ "$ahead" -gt 0 ]; then
+        tracking="↑$ahead"
+      fi
+      if [ "$behind" -gt 0 ]; then
+        tracking="${tracking}↓$behind"
+      fi
+    fi
+    
+    # Check stash count
+    stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$stash_count" -gt 0 ]; then
+      stash_info=" ⚑$stash_count"
+    fi
+    
+    git_info=" ${status_color}${branch}${tracking}${stash_info} ${status_icon}\033[0m"
+  else
+    git_info=""
+  fi
+
+  # Build statusline
+  echo -e "\033[36m${model}\033[0m │ \033[35m${tokens}\033[0m${git_info}"
+---
+```bash
 #!/usr/bin/env bash
 
 # Git-Focused Statusline for Claude Code
@@ -98,3 +219,4 @@ fi
 
 # Build statusline
 echo -e "\033[36m${model}\033[0m │ \033[35m${tokens}\033[0m${git_info}"
+```

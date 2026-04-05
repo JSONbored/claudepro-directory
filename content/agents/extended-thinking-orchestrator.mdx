@@ -1,47 +1,167 @@
 ---
-title: "Extended Thinking Orchestrator - Agents"
-slug: "extended-thinking-orchestrator"
-category: "agents"
-description: "Orchestrate Extended Thinking modes with adaptive budget allocation. Manages 'think', 'think hard', and 'ultrathink' levels for complexity-driven deep reasoning workflows."
-seoTitle: "Extended Thinking Orchestrator - Agents"
-seoDescription: "Orchestrate Extended Thinking modes with adaptive budget allocation. Manages 'think', 'think hard', and 'ultrathink' levels for complexity-driven deep reason..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-25"
-tags: 
-  - "extended-thinking"
-  - "deep-reasoning"
-  - "thinking-budget"
-  - "ultrathink"
-  - "complexity"
-keywords: 
-  - "agents"
-  - "claude"
-  - "complexity"
-  - "deep-reasoning"
-  - "development"
-  - "extended"
-  - "extended-thinking"
-  - "orchestrator"
-  - "thinking"
-  - "thinking-budget"
-  - "tools"
-  - "ultrathink"
+title: Extended Thinking Orchestrator - Agents
+slug: extended-thinking-orchestrator
+category: agents
+description: >-
+  Orchestrate Extended Thinking modes with adaptive budget allocation. Manages
+  'think', 'think hard', and 'ultrathink' levels for complexity-driven deep
+  reasoning workflows.
+cardDescription: Orchestrate Extended Thinking modes with adaptive budget allocation.
+seoTitle: Extended Thinking Orchestrator - Agents
+seoDescription: >-
+  Orchestrate Extended Thinking modes with adaptive budget allocation. Manages
+  'think', 'think hard', and 'ultrathink' levels for complexity-driven deep
+  reason...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-25'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+installable: false
+copySnippet: |-
+  // Extended Thinking mode definitions
+  interface ThinkingMode {
+    level: 'think' | 'think-hard' | 'ultrathink';
+    budgetRange: [number, number]; // [min, max] thinking tokens
+    typicalDuration: string;
+    costMultiplier: number; // vs standard inference
+    idealUseCases: string[];
+  }
+
+  const THINKING_MODES: Record<string, ThinkingMode> = {
+    think: {
+      level: 'think',
+      budgetRange: [1000, 5000],
+      typicalDuration: '5-15 seconds',
+      costMultiplier: 1.5,
+      idealUseCases: [
+        'Simple algorithmic problems',
+        'Straightforward code reviews',
+        'Basic architecture questions',
+        'Standard debugging tasks'
+      ]
+    },
+    'think-hard': {
+      level: 'think-hard',
+      budgetRange: [5000, 20000],
+      typicalDuration: '15-60 seconds',
+      costMultiplier: 2.5,
+      idealUseCases: [
+        'Complex refactoring decisions',
+        'Multi-step mathematical proofs',
+        'Security vulnerability analysis',
+        'Performance optimization planning'
+      ]
+    },
+    ultrathink: {
+      level: 'ultrathink',
+      budgetRange: [20000, 100000],
+      typicalDuration: '1-5 minutes',
+      costMultiplier: 5.0,
+      idealUseCases: [
+        'Novel algorithm design',
+        'System architecture from scratch',
+        'Research paper synthesis',
+        'Exhaustive edge case enumeration'
+      ]
+    }
+  };
+
+  // Complexity detection for mode selection
+  class ComplexityAnalyzer {
+    analyzeTaskComplexity(task: {
+      description: string;
+      codeContext?: string;
+      domainKnowledge?: string;
+    }): {
+      score: number; // 1-10 complexity scale
+      factors: string[];
+      recommendedMode: 'think' | 'think-hard' | 'ultrathink';
+    } {
+      let complexityScore = 1;
+      const factors: string[] = [];
+      
+      // Factor 1: Problem space size
+      const problemSpaceIndicators = [
+        'all possible', 'exhaustive', 'enumerate', 'comprehensive'
+      ];
+      if (problemSpaceIndicators.some(ind => task.description.toLowerCase().includes(ind))) {
+        complexityScore += 3;
+        factors.push('Large problem space requiring exhaustive exploration');
+      }
+      
+      // Factor 2: Multi-step reasoning
+      const stepIndicators = /step \d+|first.*then.*finally|multi-stage/i;
+      if (stepIndicators.test(task.description)) {
+        complexityScore += 2;
+        factors.push('Multi-step reasoning required');
+      }
+      
+      // Factor 3: Domain expertise required
+      const expertiseIndicators = [
+        'security', 'cryptography', 'concurrency', 'distributed systems',
+        'formal verification', 'algorithm design'
+      ];
+      if (expertiseIndicators.some(domain => task.description.toLowerCase().includes(domain))) {
+        complexityScore += 2;
+        factors.push('Specialized domain knowledge required');
+      }
+      
+      // Factor 4: Code context size
+      if (task.codeContext && task.codeContext.length > 10000) {
+        complexityScore += 1;
+        factors.push('Large codebase context');
+      }
+      
+      // Factor 5: Uncertainty/ambiguity
+      const uncertaintyIndicators = ['unknown', 'unclear', 'ambiguous', 'investigate'];
+      if (uncertaintyIndicators.some(ind => task.description.toLowerCase().includes(ind))) {
+        complexityScore += 1;
+        factors.push('High uncertainty requiring exploratory reasoning');
+      }
+      
+      // Map complexity to mode
+      let recommendedMode: 'think' | 'think-hard' | 'ultrathink';
+      if (complexityScore <= 3) {
+        recommendedMode = 'think';
+      } else if (complexityScore <= 7) {
+        recommendedMode = 'think-hard';
+      } else {
+        recommendedMode = 'ultrathink';
+      }
+      
+      return { score: complexityScore, factors, recommendedMode };
+    }
+  }
+tags:
+  - extended-thinking
+  - deep-reasoning
+  - thinking-budget
+  - ultrathink
+  - complexity
+keywords:
+  - agents
+  - claude
+  - complexity
+  - deep-reasoning
+  - development
+  - extended
+  - extended-thinking
+  - orchestrator
+  - thinking
+  - thinking-budget
+  - tools
+  - ultrathink
+readingTime: 8
+viewCount: 16
+copyCount: 0
+popularityScore: 21
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 16
-copyCount: 0
-popularityScore: 21
-readingTime: 8
-documentationUrl: ""
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are an Extended Thinking Orchestrator specializing in adaptive budget allocation across Claude's 'think', 'think hard', and 'ultrathink' modes for complexity-driven deep reasoning.
 
 ## Core Expertise:

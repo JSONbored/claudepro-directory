@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronUp, Copy, ExternalLink, Github } from "lucide-react";
+import { Check, ChevronUp, Copy, Github } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { ContentEntry } from "@/lib/content";
@@ -21,6 +21,9 @@ function compactCount(value: number) {
 }
 
 function getPreviewLine(entry: ContentEntry) {
+  if (entry.installCommand) return entry.installCommand.slice(0, 96);
+  if (entry.usageSnippet) return entry.usageSnippet.slice(0, 96);
+  if (entry.copySnippet) return entry.copySnippet.split("\n")[0]?.trim().slice(0, 96);
   const firstCodeBlock = entry.codeBlocks?.[0]?.code?.split("\n")?.[0]?.trim();
 
   if (firstCodeBlock) return firstCodeBlock.slice(0, 96);
@@ -31,11 +34,24 @@ function getPreviewLine(entry: ContentEntry) {
 }
 
 function getCopyText(entry: ContentEntry) {
+  if (entry.copySnippet) return entry.copySnippet;
+  if (entry.installCommand) return entry.installCommand;
+  if (entry.usageSnippet) return entry.usageSnippet;
   const firstCodeBlock = entry.codeBlocks?.[0]?.code?.trim();
   if (firstCodeBlock) return firstCodeBlock;
   if (entry.documentationUrl) return entry.documentationUrl;
   if (entry.githubUrl) return entry.githubUrl;
   return `${entry.title}\nhttps://heyclau.de/${entry.category}/${entry.slug}`;
+}
+
+function getCardDescription(entry: ContentEntry) {
+  const normalized = entry.description.replace(/\s+/g, " ").trim();
+  if (normalized.length <= 220) return normalized;
+
+  const sentence = normalized.match(/^(.{0,220}[.!?])\s/);
+  if (sentence?.[1]) return sentence[1];
+
+  return `${normalized.slice(0, 217).trimEnd()}...`;
 }
 
 export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
@@ -46,6 +62,8 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
   const baseVotes = entry.popularityScore ?? entry.viewCount ?? 0;
   const displayedVotes = useMemo(() => baseVotes + (hasVoted ? 1 : 0), [baseVotes, hasVoted]);
   const previewLine = useMemo(() => getPreviewLine(entry), [entry]);
+  const cardDescription = useMemo(() => getCardDescription(entry), [entry]);
+  const repoHref = entry.repoUrl || entry.githubUrl;
 
   useEffect(() => {
     const stored = window.localStorage.getItem(storageKey);
@@ -70,8 +88,9 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
   };
 
   return (
-    <article className="directory-stack-card">
+    <article className="directory-stack-card group">
       <div className="directory-vote-rail">
+        <div className="directory-vote-tile" />
         <button
           type="button"
           aria-pressed={hasVoted}
@@ -88,53 +107,56 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
         </div>
       </div>
 
-      <div className="min-w-0 flex-1 space-y-4">
+      <div className="flex min-w-0 flex-1 flex-col gap-3.5">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex min-w-0 gap-4">
-            <div className="directory-icon-tile">
-              {(categoryLabels[entry.category] ?? entry.category).slice(0, 2).toUpperCase()}
+          <div className="min-w-0 space-y-2">
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/${entry.category}/${entry.slug}`}
+                className="directory-title block font-semibold tracking-tight text-foreground transition group-hover:text-primary"
+              >
+                {entry.title}
+              </Link>
+              <Check className="size-4 shrink-0 text-primary" />
             </div>
-            <div className="min-w-0 space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={cn(
-                    "inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.14em]",
-                    categoryAccentClasses[entry.category]
-                  )}
-                >
-                  {categoryLabels[entry.category] ?? entry.category}
-                </span>
-                {entry.author ? (
-                  <span className="text-sm text-muted-foreground">
-                    by {entry.author}
-                    {entry.dateAdded ? ` · ${entry.dateAdded}` : ""}
-                  </span>
-                ) : null}
-              </div>
 
-              <div className="space-y-2">
-                <Link
-                  href={`/${entry.category}/${entry.slug}`}
-                  className="block text-[1.75rem] font-semibold tracking-tight text-foreground transition hover:text-primary"
-                >
-                  {entry.title}
-                </Link>
-                <p className="max-w-3xl text-[15px] leading-7 text-muted-foreground">
-                  {entry.description}
-                </p>
-              </div>
+            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <span
+                className={cn(
+                  "inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-medium",
+                  categoryAccentClasses[entry.category]
+                )}
+              >
+                {categoryLabels[entry.category] ?? entry.category}
+              </span>
+              {entry.author ? <span>by {entry.author}</span> : null}
+              {entry.dateAdded ? <span>· {entry.dateAdded}</span> : null}
             </div>
           </div>
 
-          <div className="hidden shrink-0 items-center gap-1.5 text-sm text-muted-foreground md:flex">
-            <Github className="size-4" />
-            <span>{compactCount(entry.viewCount ?? entry.popularityScore ?? 0)}</span>
-          </div>
+          {repoHref ? (
+            <a
+              href={repoHref}
+              target="_blank"
+              rel="noreferrer"
+              className="directory-github-stat"
+              aria-label="Open repository on GitHub"
+            >
+              <Github className="size-4" />
+              {typeof entry.githubStars === "number" ? (
+                <span>{compactCount(entry.githubStars)}</span>
+              ) : null}
+            </a>
+          ) : null}
         </div>
+
+        <p className="directory-description max-w-3xl text-[14px] leading-7 text-muted-foreground">
+          {cardDescription}
+        </p>
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="directory-code-bar">
-            <span className="truncate text-[13px] text-primary">{previewLine}</span>
+            <span className="directory-code-text text-[13px] text-primary">{previewLine}</span>
           </div>
           <Button
             type="button"
@@ -148,43 +170,12 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
           </Button>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2">
-            {entry.tags.slice(0, 4).map((tag) => (
-              <span key={tag} className="directory-tag">
-                #{tag}
-              </span>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {entry.documentationUrl ? (
-              <a
-                href={entry.documentationUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="directory-link-chip"
-              >
-                Docs
-                <ExternalLink className="size-3.5" />
-              </a>
-            ) : null}
-            {entry.githubUrl ? (
-              <a
-                href={entry.githubUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="directory-link-chip"
-              >
-                GitHub
-                <Github className="size-3.5" />
-              </a>
-            ) : null}
-            <Link href={`/${entry.category}/${entry.slug}`} className="directory-link-chip">
-              Open
-              <ExternalLink className="size-3.5" />
-            </Link>
-          </div>
+        <div className="mt-auto flex flex-wrap gap-2">
+          {entry.tags.slice(0, 4).map((tag) => (
+            <span key={tag} className="directory-tag">
+              #{tag}
+            </span>
+          ))}
         </div>
       </div>
     </article>

@@ -1,45 +1,71 @@
 ---
-title: "GraphQL Federation Specialist for Claude"
-slug: "graphql-federation-specialist"
-category: "rules"
-description: "Expert in GraphQL Federation architecture for microservices, specializing in Apollo Federation, schema composition, and distributed graph patterns"
-seoTitle: "GraphQL Federation Specialist for Claude"
-seoDescription: "Expert in GraphQL Federation architecture for microservices, specializing in Apollo Federation, schema composition, and distributed graph patterns Discover t..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-16"
-tags: 
-  - "graphql"
-  - "federation"
-  - "microservices"
-  - "apollo"
-  - "schema"
-keywords: 
-  - "apollo"
-  - "claude"
-  - "development"
-  - "federation"
-  - "graphql"
-  - "microservices"
-  - "rules"
-  - "schema"
-  - "specialist"
-  - "tools"
+title: GraphQL Federation Specialist for Claude
+slug: graphql-federation-specialist
+category: rules
+description: >-
+  Expert in GraphQL Federation architecture for microservices, specializing in
+  Apollo Federation, schema composition, and distributed graph patterns
+cardDescription: >-
+  Expert in GraphQL Federation architecture for microservices, specializing in
+  Apollo Federation, schema composition, and distributed graph...
+seoTitle: GraphQL Federation Specialist for Claude
+seoDescription: >-
+  Expert in GraphQL Federation architecture for microservices, specializing in
+  Apollo Federation, schema composition, and distributed graph patterns Discover
+  t...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-16'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://www.apollographql.com/docs/federation/'
+installable: false
+copySnippet: |-
+  # Users subgraph
+  type User @key(fields: "id") {
+    id: ID!
+    email: String!
+    name: String!
+  }
+
+  # Posts subgraph - extends User
+  extend type User @key(fields: "id") {
+    id: ID! @external
+    posts: [Post!]!
+  }
+
+  type Post {
+    id: ID!
+    title: String!
+    authorId: ID!
+  }
+tags:
+  - graphql
+  - federation
+  - microservices
+  - apollo
+  - schema
+keywords:
+  - apollo
+  - claude
+  - development
+  - federation
+  - graphql
+  - microservices
+  - rules
+  - schema
+  - specialist
+  - tools
+readingTime: 6
+viewCount: 10
+copyCount: 0
+popularityScore: 15
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 10
-copyCount: 0
-popularityScore: 15
-readingTime: 6
-documentationUrl: "https://www.apollographql.com/docs/federation/"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a GraphQL Federation expert specializing in building scalable federated graph architectures that unite multiple microservices into a unified API. Follow these principles:
 
 ## Federation Core Concepts

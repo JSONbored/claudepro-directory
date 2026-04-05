@@ -1,43 +1,155 @@
 ---
-title: "Webpack Bundle Analyzer - Hooks"
-slug: "webpack-bundle-analyzer"
-category: "hooks"
-description: "Analyzes webpack bundle size when webpack config or entry files are modified. This PostToolUse hook provides interactive bundle size visualization and analysis including bundle visualization (interactive bundle size visualization with treemap visualization, bundle size analysis with size analysis, bundle composition analysis with composition analysis, bundle visualization reporting with visualization status), visualization management (visualization configuration with visualization settings, visualization customization with custom visualization, visualization monitoring with visualization tracking, visualization updates with visualization updates), visualization optimization (visualization performance optimization with performance improvement, visualization accuracy optimization with accuracy improvement, visualization completeness optimization with completeness improvement, visualization analytics with visualization statistics), and visualization reporting (bundle visualization reporting with visualization status, bundle size reporting with size status, bundle composition reporting with composition status, visualization analytics with visualization statistics), automatic bundle analysis on configuration changes including automatic analysis (automatic bundle analysis on configuration changes with change detection, configuration change detection with change identification, bundle analysis automation with automatic analysis, analysis reporting with analysis status), analysis management (analysis configuration with analysis settings, analysis customization with custom analysis, analysis monitoring with analysis tracking, analysis updates with analysis updates), analysis optimization (analysis performance optimization with performance improvement, analysis accuracy optimization with accuracy improvement, analysis efficiency optimization with efficiency improvement, analysis analytics with analysis statistics), and analysis reporting (automatic analysis reporting with analysis status, configuration change reporting with change status, bundle analysis automation reporting with automation status, analysis analytics with analysis statistics), support for multiple build tools (Webpack, Vite, Rollup) including build tool support (multiple build tool support with tool detection, Webpack/Vite/Rollup support with tool validation, build tool integration with tool integration, build tool reporting with tool status), support management (support configuration with support settings, support customization with custom support, support monitoring with support tracking, support updates with support updates), support optimization (support performance optimization with performance improvement, support accuracy optimization with accuracy improvement, support completeness optimization with completeness improvement, support analytics with support statistics), and support reporting (build tool support reporting with support status, Webpack/Vite/Rollup reporting with tool status, build tool integration reporting with integration status, support analytics with support statistics), performance optimization recommendations including optimization recommendations (performance optimization recommendations with recommendation generation, bundle optimization analysis with optimization analysis, performance suggestions with suggestion generation, optimization reporting with optimization status), recommendation management (recommendation configuration with recommendation settings, recommendation customization with custom recommendations, recommendation monitoring with recommendation tracking, recommendation updates with recommendation updates), recommendation optimization (recommendation performance optimization with performance improvement, recommendation accuracy optimization with accuracy improvement, recommendation completeness optimization with completeness improvement, recommendation analytics with recommendation statistics), and recommendation reporting (optimization recommendations reporting with recommendation status, bundle optimization reporting with optimization status, performance suggestions reporting with suggestion status, recommendation analytics with recommendation statistics), dependency size tracking and optimization including dependency tracking (dependency size tracking with size monitoring, dependency analysis with dependency analysis, dependency optimization with optimization tracking, dependency reporting with dependency status), tracking management (tracking configuration with tracking settings, tracking customization with custom tracking, tracking monitoring with tracking monitoring, tracking updates with tracking updates), tracking optimization (tracking performance optimization with performance improvement, tracking accuracy optimization with accuracy improvement, tracking completeness optimization with completeness improvement, tracking analytics with tracking statistics), and tracking reporting (dependency tracking reporting with tracking status, dependency analysis reporting with analysis status, dependency optimization reporting with optimization status, tracking analytics with tracking statistics), tree-shaking effectiveness analysis including tree-shaking analysis (tree-shaking effectiveness analysis with effectiveness checking, unused code detection with code detection, tree-shaking optimization with optimization checking, tree-shaking reporting with tree-shaking status), analysis management (analysis configuration with analysis settings, analysis customization with custom analysis, analysis monitoring with analysis tracking, analysis updates with analysis updates), analysis optimization (analysis performance optimization with performance improvement, analysis accuracy optimization with accuracy improvement, analysis completeness optimization with completeness improvement, analysis analytics with analysis statistics), and analysis reporting (tree-shaking analysis reporting with analysis status, unused code reporting with code status, tree-shaking optimization reporting with optimization status, analysis analytics with analysis statistics), bundle splitting and code splitting analysis including splitting analysis (bundle splitting analysis with splitting checking, code splitting analysis with code splitting checking, splitting optimization with optimization checking, splitting reporting with splitting status), analysis management (analysis configuration with analysis settings, analysis customization with custom analysis, analysis monitoring with analysis tracking, analysis updates with analysis updates), analysis optimization (analysis performance optimization with performance improvement, analysis accuracy optimization with accuracy improvement, analysis completeness optimization with completeness improvement, analysis analytics with analysis statistics), and analysis reporting (bundle splitting reporting with splitting status, code splitting reporting with code splitting status, splitting optimization reporting with optimization status, analysis analytics with analysis statistics), and development workflow integration including continuous bundle analysis (automatic bundle analysis on configuration changes, immediate bundle size feedback on build changes, automatic optimization recommendations on bundle changes, seamless bundle analysis integration with development workflow), workflow automation (automated bundle analysis without manual intervention, bundle analysis automation with automatic analysis, bundle optimization automation with automatic optimization), and workflow optimization (bundle analysis tracking with analysis monitoring, bundle optimization tracking with optimization monitoring, bundle performance maintenance with performance checks). The hook automatically detects build systems, analyzes bundle sizes, provides interactive visualizations, generates optimization recommendations, tracks dependency sizes, analyzes tree-shaking effectiveness, analyzes bundle splitting, and integrates seamlessly with development workflow."
-seoTitle: "Webpack Bundle Analyzer - Hooks"
-seoDescription: "Analyzes webpack bundle size when webpack config or entry files are modified. This PostToolUse hook provides interactive bundle size visualization and analys..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-09-19"
-tags: 
-  - "webpack"
-  - "bundle"
-  - "performance"
-  - "optimization"
-  - "analysis"
-keywords: 
-  - "analysis"
-  - "analyzer"
-  - "bundle"
-  - "claude"
-  - "development"
-  - "hooks"
-  - "optimization"
-  - "performance"
-  - "tools"
-  - "webpack"
+title: Webpack Bundle Analyzer - Hooks
+slug: webpack-bundle-analyzer
+category: hooks
+description: >-
+  Analyzes webpack bundle size when webpack config or entry files are modified.
+  This PostToolUse hook provides interactive bundle size visualization and
+  analysis including bundle visualization (interactive bundle size visualization
+  with treemap visualization, bundle size analysis with size analysis, bundle
+  composition analysis with composition analysis, bundle visualization reporting
+  with visualization status), visualization management (visualization
+  configuration with visualization settings, visualization customization with
+  custom visualization, visualization monitoring with visualization tracking,
+  visualization updates with visualization updates), visualization optimization
+  (visualization performance optimization with performance improvement,
+  visualization accuracy optimization with accuracy improvement, visualization
+  completeness optimization with completeness improvement, visualization
+  analytics with visualization statistics), and visualization reporting (bundle
+  visualization reporting with visualization status, bundle size reporting with
+  size status, bundle composition reporting with composition status,
+  visualization analytics with visualization statistics), automatic bundle
+  analysis on configuration changes including automatic analysis (automatic
+  bundle analysis on configuration changes with change detection, configuration
+  change detection with change identification, bundle analysis automation with
+  automatic analysis, analysis reporting with analysis status), analysis
+  management (analysis configuration with analysis settings, analysis
+  customization with custom analysis, analysis monitoring with analysis
+  tracking, analysis updates with analysis updates), analysis optimization
+  (analysis performance optimization with performance improvement, analysis
+  accuracy optimization with accuracy improvement, analysis efficiency
+  optimization with efficiency improvement, analysis analytics with analysis
+  statistics), and analysis reporting (automatic analysis reporting with
+  analysis status, configuration change reporting with change status, bundle
+  analysis automation reporting with automation status, analysis analytics with
+  analysis statistics), support for multiple build tools (Webpack, Vite, Rollup)
+  including build tool support (multiple build tool support with tool detection,
+  Webpack/Vite/Rollup support with tool validation, build tool integration with
+  tool integration, build tool reporting with tool status), support management
+  (support configuration with support settings, support customization with
+  custom support, support monitoring with support tracking, support updates with
+  support updates), support optimization (support performance optimization with
+  performance improvement, support accuracy optimization with accuracy
+  improvement, support completeness optimization with completeness improvement,
+  support analytics with support statistics), and support reporting (build tool
+  support reporting with support status, Webpack/Vite/Rollup reporting with tool
+  status, build tool integration reporting with integration status, support
+  analytics with support statistics), performance optimization recommendations
+  including optimization recommendations (performance optimization
+  recommendations with recommendation generation, bundle optimization analysis
+  with optimization analysis, performance suggestions with suggestion
+  generation, optimization reporting with optimization status), recommendation
+  management (recommendation configuration with recommendation settings,
+  recommendation customization with custom recommendations, recommendation
+  monitoring with recommendation tracking, recommendation updates with
+  recommendation updates), recommendation optimization (recommendation
+  performance optimization with performance improvement, recommendation accuracy
+  optimization with accuracy improvement, recommendation completeness
+  optimization with completeness improvement, recommendation analytics with
+  recommendation statistics), and recommendation reporting (optimization
+  recommendations reporting with recommendation status, bundle optimization
+  reporting with optimization status, performance suggestions reporting with
+  suggestion status, recommendation analytics with recommendation statistics),
+  dependency size tracking and optimization including dependency tracking
+  (dependency size tracking with size monitoring, dependency analysis with
+  dependency analysis, dependency optimization with optimization tracking,
+  dependency reporting with dependency status), tracking management (tracking
+  configuration with tracking settings, tracking customization with custom
+  tracking, tracking monitoring with tracking monitoring, tracking updates with
+  tracking updates), tracking optimization (tracking performance optimization
+  with performance improvement, tracking accuracy optimization with accuracy
+  improvement, tracking completeness optimization with completeness improvement,
+  tracking analytics with tracking statistics), and tracking reporting
+  (dependency tracking reporting with tracking status, dependency analysis
+  reporting with analysis status, dependency optimization reporting with
+  optimization status, tracking analytics with tracking statistics),
+  tree-shaking effectiveness analysis including tree-shaking analysis
+  (tree-shaking effectiveness analysis with effectiveness checking, unused code
+  detection with code detection, tree-shaking optimization with optimization
+  checking, tree-shaking reporting with tree-shaking status), analysis
+  management (analysis configuration with analysis settings, analysis
+  customization with custom analysis, analysis monitoring with analysis
+  tracking, analysis updates with analysis updates), analysis optimization
+  (analysis performance optimization with performance improvement, analysis
+  accuracy optimization with accuracy improvement, analysis completeness
+  optimization with completeness improvement, analysis analytics with analysis
+  statistics), and analysis reporting (tree-shaking analysis reporting with
+  analysis status, unused code reporting with code status, tree-shaking
+  optimization reporting with optimization status, analysis analytics with
+  analysis statistics), bundle splitting and code splitting analysis including
+  splitting analysis (bundle splitting analysis with splitting checking, code
+  splitting analysis with code splitting checking, splitting optimization with
+  optimization checking, splitting reporting with splitting status), analysis
+  management (analysis configuration with analysis settings, analysis
+  customization with custom analysis, analysis monitoring with analysis
+  tracking, analysis updates with analysis updates), analysis optimization
+  (analysis performance optimization with performance improvement, analysis
+  accuracy optimization with accuracy improvement, analysis completeness
+  optimization with completeness improvement, analysis analytics with analysis
+  statistics), and analysis reporting (bundle splitting reporting with splitting
+  status, code splitting reporting with code splitting status, splitting
+  optimization reporting with optimization status, analysis analytics with
+  analysis statistics), and development workflow integration including
+  continuous bundle analysis (automatic bundle analysis on configuration
+  changes, immediate bundle size feedback on build changes, automatic
+  optimization recommendations on bundle changes, seamless bundle analysis
+  integration with development workflow), workflow automation (automated bundle
+  analysis without manual intervention, bundle analysis automation with
+  automatic analysis, bundle optimization automation with automatic
+  optimization), and workflow optimization (bundle analysis tracking with
+  analysis monitoring, bundle optimization tracking with optimization
+  monitoring, bundle performance maintenance with performance checks). The hook
+  automatically detects build systems, analyzes bundle sizes, provides
+  interactive visualizations, generates optimization recommendations, tracks
+  dependency sizes, analyzes tree-shaking effectiveness, analyzes bundle
+  splitting, and integrates seamlessly with development workflow.
+cardDescription: Analyzes webpack bundle size when webpack config or entry files are modified.
+seoTitle: Webpack Bundle Analyzer - Hooks
+seoDescription: >-
+  Analyzes webpack bundle size when webpack config or entry files are modified.
+  This PostToolUse hook provides interactive bundle size visualization and
+  analys...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-19'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+installable: true
+tags:
+  - webpack
+  - bundle
+  - performance
+  - optimization
+  - analysis
+keywords:
+  - analysis
+  - analyzer
+  - bundle
+  - claude
+  - development
+  - hooks
+  - optimization
+  - performance
+  - tools
+  - webpack
+readingTime: 5
+viewCount: 4
+copyCount: 0
+popularityScore: 9
 difficultyScore: 0
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 4
-copyCount: 0
-popularityScore: 9
-readingTime: 5
-documentationUrl: ""
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
 
-*(No content)*

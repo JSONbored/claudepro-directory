@@ -1,47 +1,143 @@
 ---
-title: "Plugin Ecosystem Architect - Agents"
-slug: "plugin-ecosystem-architect"
-category: "agents"
-description: "Design and publish Claude Code plugins for the October 2025 marketplace launch. Handles plugin bundling, custom tool integration, and marketplace distribution workflows."
-seoTitle: "Plugin Ecosystem Architect - Agents"
-seoDescription: "Design and publish Claude Code plugins for the October 2025 marketplace launch. Handles plugin bundling, custom tool integration, and marketplace distributio..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-25"
-tags: 
-  - "plugins"
-  - "marketplace"
-  - "extensibility"
-  - "customization"
-  - "bundles"
-keywords: 
-  - "agents"
-  - "architect"
-  - "bundles"
-  - "claude"
-  - "customization"
-  - "development"
-  - "ecosystem"
-  - "extensibility"
-  - "marketplace"
-  - "plugin"
-  - "plugins"
-  - "tools"
+title: Plugin Ecosystem Architect - Agents
+slug: plugin-ecosystem-architect
+category: agents
+description: >-
+  Design and publish Claude Code plugins for the October 2025 marketplace
+  launch. Handles plugin bundling, custom tool integration, and marketplace
+  distribution workflows.
+cardDescription: >-
+  Design and publish Claude Code plugins for the October 2025 marketplace
+  launch.
+seoTitle: Plugin Ecosystem Architect - Agents
+seoDescription: >-
+  Design and publish Claude Code plugins for the October 2025 marketplace
+  launch. Handles plugin bundling, custom tool integration, and marketplace
+  distributio...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-25'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+installable: false
+copySnippet: |-
+  // Plugin manifest schema
+  interface ClaudePluginManifest {
+    name: string;
+    version: string; // Semantic versioning: major.minor.patch
+    description: string; // Max 160 chars for marketplace display
+    author: {
+      name: string;
+      email?: string;
+      url?: string;
+    };
+    license: string; // MIT, Apache-2.0, GPL-3.0, proprietary
+    repository?: string; // GitHub repo URL
+    
+    // Plugin capabilities
+    provides: {
+      commands?: CommandDefinition[];
+      agents?: AgentDefinition[];
+      mcpServers?: MCPServerDefinition[];
+      rules?: RuleDefinition[];
+      hooks?: HookDefinition[];
+      statuslines?: StatuslineDefinition[];
+    };
+    
+    // Dependencies and requirements
+    dependencies?: Record<string, string>; // npm-style dependencies
+    peerDependencies?: Record<string, string>;
+    claudeCodeVersion?: string; // Minimum Claude Code version required
+    
+    // Marketplace metadata
+    tags?: string[]; // Max 10 tags, 30 chars each
+    category: 'productivity' | 'development' | 'data' | 'integration' | 'ai' | 'other';
+    homepage?: string;
+    bugs?: string;
+  }
+
+  // Plugin scaffolding template
+  class PluginScaffolder {
+    async createPlugin(options: {
+      name: string;
+      type: 'command' | 'agent' | 'bundle';
+      author: string;
+    }) {
+      const manifest: ClaudePluginManifest = {
+        name: options.name,
+        version: '0.1.0',
+        description: '',
+        author: { name: options.author },
+        license: 'MIT',
+        provides: this.getDefaultProvides(options.type),
+        tags: [],
+        category: 'development'
+      };
+      
+      // Create plugin directory structure
+      const structure = {
+        'plugin.json': JSON.stringify(manifest, null, 2),
+        'README.md': this.generateReadme(manifest),
+        'CHANGELOG.md': this.generateChangelog(manifest),
+        'LICENSE': this.getLicenseTemplate(manifest.license),
+        'src/': {
+          'index.ts': this.getEntryTemplate(options.type),
+          'config.ts': this.getConfigTemplate()
+        },
+        'tests/': {
+          'plugin.test.ts': this.getTestTemplate()
+        },
+        '.github/workflows/': {
+          'publish.yml': this.getCITemplate()
+        }
+      };
+      
+      await this.writeStructure(structure);
+      return { manifest, structure };
+    }
+    
+    getDefaultProvides(type: string) {
+      switch (type) {
+        case 'command':
+          return { commands: [{ name: 'example', description: '' }] };
+        case 'agent':
+          return { agents: [{ slug: 'example-agent', category: 'agents' }] };
+        case 'bundle':
+          return { commands: [], agents: [], rules: [] };
+        default:
+          return {};
+      }
+    }
+  }
+tags:
+  - plugins
+  - marketplace
+  - extensibility
+  - customization
+  - bundles
+keywords:
+  - agents
+  - architect
+  - bundles
+  - claude
+  - customization
+  - development
+  - ecosystem
+  - extensibility
+  - marketplace
+  - plugin
+  - plugins
+  - tools
+readingTime: 8
+viewCount: 5
+copyCount: 0
+popularityScore: 10
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 5
-copyCount: 0
-popularityScore: 10
-readingTime: 8
-documentationUrl: ""
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a Plugin Ecosystem Architect specializing in Claude Code plugin development, bundling, and marketplace distribution for the October 2025 plugin marketplace launch.
 
 ## Core Expertise:

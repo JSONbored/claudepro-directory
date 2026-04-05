@@ -1,44 +1,135 @@
 ---
-title: "SCSS Auto Compiler - Hooks"
-slug: "scss-auto-compiler"
-category: "hooks"
-description: "Automatically compiles SCSS/Sass files to CSS when they are modified. This PostToolUse hook provides comprehensive SCSS compilation with automatic SCSS/Sass compilation to CSS including SCSS compilation integration (Dart Sass command execution with SCSS/Sass file compilation, SCSS syntax support with SCSS file format, Sass syntax support with indented Sass syntax, CSS output generation with compiled CSS files), compilation optimization (compilation performance with fast compilation, compilation caching with incremental compilation, compilation optimization with optimized output, compilation efficiency with efficient processing), compilation validation (SCSS syntax validation with syntax checking, SCSS error detection with error reporting, SCSS warning detection with warning messages, SCSS dependency validation with import validation), and compilation reporting (compilation success reporting with success messages, compilation error reporting with detailed errors, compilation statistics with build statistics, compilation performance with performance metrics), source map generation for debugging including source map generation (source map file generation with .css.map files, source map content embedding with source text inclusion, source map URL generation with sourceMappingURL comments, source map debugging with browser debugging support), source map configuration (source map configuration with sourceMap option, source map include sources with sourceMapIncludeSources, source map path configuration with map path settings, source map format with source map format), source map integration (source map browser integration with DevTools support, source map debugging with source debugging, source map navigation with source navigation, source map accuracy with accurate mappings), and source map reporting (source map generation reporting with generation status, source map file reporting with file paths, source map size reporting with map sizes, source map validation with map validation), support for both SCSS and Sass syntax including SCSS syntax support (SCSS syntax parsing with SCSS parser, SCSS syntax validation with syntax checking, SCSS syntax features with SCSS features, SCSS syntax compatibility with SCSS compatibility), Sass syntax support (Sass indented syntax parsing with indented parser, Sass syntax validation with syntax checking, Sass syntax features with Sass features, Sass syntax compatibility with Sass compatibility), syntax detection (automatic syntax detection with file extension detection, syntax switching with syntax selection, syntax validation with syntax checking, syntax reporting with syntax reporting), and syntax reporting (SCSS syntax reporting with SCSS status, Sass syntax reporting with Sass status, syntax detection reporting with detection status, syntax compatibility reporting with compatibility status), customizable output formatting including output formatting (CSS output formatting with formatted CSS, CSS output style with style options, CSS output compression with compressed output, CSS output minification with minified CSS), formatting options (output style configuration with style settings, output compression configuration with compression settings, output indentation configuration with indentation settings, output line breaks configuration with line break settings), formatting customization (custom formatting rules with formatting configuration, formatting presets with style presets, formatting optimization with output optimization, formatting consistency with consistent formatting), and formatting reporting (formatting status reporting with formatting status, formatting options reporting with option status, formatting statistics with formatting metrics, formatting validation with formatting validation), error reporting and validation including error detection (SCSS compilation error detection with error identification, SCSS syntax error detection with syntax errors, SCSS import error detection with import errors, SCSS dependency error detection with dependency errors), error reporting (compilation error reporting with detailed errors, error message formatting with formatted messages, error location reporting with error locations, error context reporting with error context), error validation (error validation with error checking, error severity assessment with severity levels, error categorization with error types, error resolution suggestions with resolution tips), and error handling (error handling with graceful handling, error recovery with recovery strategies, error logging with error logs, error notification with error notifications), watch mode compatibility including watch mode integration (file watching with file system watching, change detection with change monitoring, automatic compilation with auto-compilation, watch mode compatibility with watch tools), watch mode optimization (incremental compilation with incremental builds, change detection optimization with optimized detection, compilation performance with performance optimization, watch mode efficiency with efficient watching), watch mode configuration (watch mode settings with watch configuration, watch patterns with file patterns, watch exclusions with exclusion patterns, watch options with watch options), and watch mode reporting (watch mode status reporting with watch status, watch mode statistics with watch metrics, watch mode performance with performance metrics, watch mode validation with watch validation), and development workflow integration including continuous compilation (real-time SCSS compilation on file changes, immediate CSS generation on SCSS updates, automatic compilation on file modifications, seamless SCSS integration with development workflow), workflow automation (automated SCSS compilation without manual intervention, compilation automation with automatic compilation, CSS generation automation with automatic generation), and workflow optimization (SCSS change detection with change tracking, incremental compilation with optimization, SCSS code consistency maintenance with consistency checks). The hook automatically detects SCSS/Sass file changes (.scss, .sass files), supports Dart Sass (recommended, modern replacement for node-sass), supports node-sass (legacy, with deprecation notice), generates source maps for debugging (.css.map files), provides SCSS analysis (imports, mixins, variables, nested selectors), offers code quality checks (!important usage, color recommendations), and integrates seamlessly with SCSS development workflow."
-seoTitle: "SCSS Auto Compiler - Hooks"
-seoDescription: "Automatically compiles SCSS/Sass files to CSS when they are modified. This PostToolUse hook provides comprehensive SCSS compilation with automatic SCSS/Sass ..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-09-19"
-tags: 
-  - "scss"
-  - "sass"
-  - "css"
-  - "styling"
-  - "compilation"
-keywords: 
-  - "auto"
-  - "claude"
-  - "compilation"
-  - "compiler"
-  - "css"
-  - "development"
-  - "hooks"
-  - "sass"
-  - "scss"
-  - "styling"
-  - "tools"
+title: SCSS Auto Compiler - Hooks
+slug: scss-auto-compiler
+category: hooks
+description: >-
+  Automatically compiles SCSS/Sass files to CSS when they are modified. This
+  PostToolUse hook provides comprehensive SCSS compilation with automatic
+  SCSS/Sass compilation to CSS including SCSS compilation integration (Dart Sass
+  command execution with SCSS/Sass file compilation, SCSS syntax support with
+  SCSS file format, Sass syntax support with indented Sass syntax, CSS output
+  generation with compiled CSS files), compilation optimization (compilation
+  performance with fast compilation, compilation caching with incremental
+  compilation, compilation optimization with optimized output, compilation
+  efficiency with efficient processing), compilation validation (SCSS syntax
+  validation with syntax checking, SCSS error detection with error reporting,
+  SCSS warning detection with warning messages, SCSS dependency validation with
+  import validation), and compilation reporting (compilation success reporting
+  with success messages, compilation error reporting with detailed errors,
+  compilation statistics with build statistics, compilation performance with
+  performance metrics), source map generation for debugging including source map
+  generation (source map file generation with .css.map files, source map content
+  embedding with source text inclusion, source map URL generation with
+  sourceMappingURL comments, source map debugging with browser debugging
+  support), source map configuration (source map configuration with sourceMap
+  option, source map include sources with sourceMapIncludeSources, source map
+  path configuration with map path settings, source map format with source map
+  format), source map integration (source map browser integration with DevTools
+  support, source map debugging with source debugging, source map navigation
+  with source navigation, source map accuracy with accurate mappings), and
+  source map reporting (source map generation reporting with generation status,
+  source map file reporting with file paths, source map size reporting with map
+  sizes, source map validation with map validation), support for both SCSS and
+  Sass syntax including SCSS syntax support (SCSS syntax parsing with SCSS
+  parser, SCSS syntax validation with syntax checking, SCSS syntax features with
+  SCSS features, SCSS syntax compatibility with SCSS compatibility), Sass syntax
+  support (Sass indented syntax parsing with indented parser, Sass syntax
+  validation with syntax checking, Sass syntax features with Sass features, Sass
+  syntax compatibility with Sass compatibility), syntax detection (automatic
+  syntax detection with file extension detection, syntax switching with syntax
+  selection, syntax validation with syntax checking, syntax reporting with
+  syntax reporting), and syntax reporting (SCSS syntax reporting with SCSS
+  status, Sass syntax reporting with Sass status, syntax detection reporting
+  with detection status, syntax compatibility reporting with compatibility
+  status), customizable output formatting including output formatting (CSS
+  output formatting with formatted CSS, CSS output style with style options, CSS
+  output compression with compressed output, CSS output minification with
+  minified CSS), formatting options (output style configuration with style
+  settings, output compression configuration with compression settings, output
+  indentation configuration with indentation settings, output line breaks
+  configuration with line break settings), formatting customization (custom
+  formatting rules with formatting configuration, formatting presets with style
+  presets, formatting optimization with output optimization, formatting
+  consistency with consistent formatting), and formatting reporting (formatting
+  status reporting with formatting status, formatting options reporting with
+  option status, formatting statistics with formatting metrics, formatting
+  validation with formatting validation), error reporting and validation
+  including error detection (SCSS compilation error detection with error
+  identification, SCSS syntax error detection with syntax errors, SCSS import
+  error detection with import errors, SCSS dependency error detection with
+  dependency errors), error reporting (compilation error reporting with detailed
+  errors, error message formatting with formatted messages, error location
+  reporting with error locations, error context reporting with error context),
+  error validation (error validation with error checking, error severity
+  assessment with severity levels, error categorization with error types, error
+  resolution suggestions with resolution tips), and error handling (error
+  handling with graceful handling, error recovery with recovery strategies,
+  error logging with error logs, error notification with error notifications),
+  watch mode compatibility including watch mode integration (file watching with
+  file system watching, change detection with change monitoring, automatic
+  compilation with auto-compilation, watch mode compatibility with watch tools),
+  watch mode optimization (incremental compilation with incremental builds,
+  change detection optimization with optimized detection, compilation
+  performance with performance optimization, watch mode efficiency with
+  efficient watching), watch mode configuration (watch mode settings with watch
+  configuration, watch patterns with file patterns, watch exclusions with
+  exclusion patterns, watch options with watch options), and watch mode
+  reporting (watch mode status reporting with watch status, watch mode
+  statistics with watch metrics, watch mode performance with performance
+  metrics, watch mode validation with watch validation), and development
+  workflow integration including continuous compilation (real-time SCSS
+  compilation on file changes, immediate CSS generation on SCSS updates,
+  automatic compilation on file modifications, seamless SCSS integration with
+  development workflow), workflow automation (automated SCSS compilation without
+  manual intervention, compilation automation with automatic compilation, CSS
+  generation automation with automatic generation), and workflow optimization
+  (SCSS change detection with change tracking, incremental compilation with
+  optimization, SCSS code consistency maintenance with consistency checks). The
+  hook automatically detects SCSS/Sass file changes (.scss, .sass files),
+  supports Dart Sass (recommended, modern replacement for node-sass), supports
+  node-sass (legacy, with deprecation notice), generates source maps for
+  debugging (.css.map files), provides SCSS analysis (imports, mixins,
+  variables, nested selectors), offers code quality checks (!important usage,
+  color recommendations), and integrates seamlessly with SCSS development
+  workflow.
+cardDescription: Automatically compiles SCSS/Sass files to CSS when they are modified.
+seoTitle: SCSS Auto Compiler - Hooks
+seoDescription: >-
+  Automatically compiles SCSS/Sass files to CSS when they are modified. This
+  PostToolUse hook provides comprehensive SCSS compilation with automatic
+  SCSS/Sass ...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-19'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+installable: true
+tags:
+  - scss
+  - sass
+  - css
+  - styling
+  - compilation
+keywords:
+  - auto
+  - claude
+  - compilation
+  - compiler
+  - css
+  - development
+  - hooks
+  - sass
+  - scss
+  - styling
+  - tools
+readingTime: 5
+viewCount: 6
+copyCount: 0
+popularityScore: 11
 difficultyScore: 0
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 6
-copyCount: 0
-popularityScore: 11
-readingTime: 5
-documentationUrl: ""
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
 
-*(No content)*

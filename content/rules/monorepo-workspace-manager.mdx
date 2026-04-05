@@ -1,47 +1,86 @@
 ---
-title: "Monorepo Workspace Manager - CLAUDE.md Rules for Claude Code"
-slug: "monorepo-workspace-manager"
-category: "rules"
-description: "Monorepo workspace management expert with Turborepo, pnpm workspaces, Nx integration, package coordination, and cross-package dependency optimization for scalable multi-package repositories."
-seoTitle: "Monorepo Workspace Manager - CLAUDE.md Rules for Claude Code"
-seoDescription: "Monorepo workspace management expert with Turborepo, pnpm workspaces, Nx integration, package coordination, and cross-package dependency optimization for sca..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-25"
-tags: 
-  - "monorepo"
-  - "turborepo"
-  - "pnpm-workspaces"
-  - "nx"
-  - "multi-package"
-  - "workspace-management"
-keywords: 
-  - "claude"
-  - "development"
-  - "manager"
-  - "monorepo"
-  - "multi-package"
-  - "pnpm-workspaces"
-  - "rules"
-  - "tools"
-  - "turborepo"
-  - "workspace"
-  - "workspace-management"
+title: Monorepo Workspace Manager - CLAUDE.md Rules for Claude Code
+slug: monorepo-workspace-manager
+category: rules
+description: >-
+  Monorepo workspace management expert with Turborepo, pnpm workspaces, Nx
+  integration, package coordination, and cross-package dependency optimization
+  for scalable multi-package repositories.
+cardDescription: >-
+  Monorepo workspace management expert with Turborepo, pnpm workspaces, Nx
+  integration, package coordination, and cross-package dependency...
+seoTitle: Monorepo Workspace Manager - CLAUDE.md Rules for Claude Code
+seoDescription: >-
+  Monorepo workspace management expert with Turborepo, pnpm workspaces, Nx
+  integration, package coordination, and cross-package dependency optimization
+  for sca...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-25'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://turbo.build/repo/docs'
+installable: false
+copySnippet: |-
+  {
+    "$schema": "https://turborepo.com/schema.json",
+    "globalDependencies": [".env", "tsconfig.json"],
+    "tasks": {
+      "build": {
+        "dependsOn": ["^build"],
+        "outputs": ["dist/**", ".next/**", "build/**"],
+        "env": ["NODE_ENV"]
+      },
+      "test": {
+        "dependsOn": ["build"],
+        "cache": false
+      },
+      "lint": {
+        "outputs": [],
+        "cache": true
+      },
+      "dev": {
+        "cache": false,
+        "persistent": true
+      },
+      "type-check": {
+        "dependsOn": ["^build"],
+        "outputs": []
+      }
+    },
+    "remoteCache": {
+      "enabled": true
+    }
+  }
+tags:
+  - monorepo
+  - turborepo
+  - pnpm-workspaces
+  - nx
+  - multi-package
+  - workspace-management
+keywords:
+  - claude
+  - development
+  - manager
+  - monorepo
+  - multi-package
+  - pnpm-workspaces
+  - rules
+  - tools
+  - turborepo
+  - workspace
+  - workspace-management
+readingTime: 5
+viewCount: 8
+copyCount: 0
+popularityScore: 13
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 8
-copyCount: 0
-popularityScore: 13
-readingTime: 5
-documentationUrl: "https://turbo.build/repo/docs"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a monorepo workspace management expert specializing in Turborepo, pnpm workspaces, Nx, and multi-package repository architecture. Follow these principles for scalable, maintainable monorepo development.
 
 ## Core Monorepo Principles

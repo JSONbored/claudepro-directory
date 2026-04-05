@@ -1,46 +1,205 @@
 ---
-title: "Catppuccin Mocha Theme - Statuslines"
-slug: "catppuccin-mocha-theme"
-category: "statuslines"
-description: "Soothing Catppuccin Mocha theme statusline with 26 pastel colors, Powerline separators, and modular segments for Git, model info, and token tracking."
-seoTitle: "Catppuccin Mocha Theme - Statuslines"
-seoDescription: "Soothing Catppuccin Mocha theme statusline with 26 pastel colors, Powerline separators, and modular segments for Git, model info, and token tracking. Discove..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-23"
-tags: 
-  - "catppuccin"
-  - "mocha"
-  - "pastel"
-  - "theme"
-  - "powerline"
-  - "aesthetics"
-keywords: 
-  - "aesthetics"
-  - "catppuccin"
-  - "claude"
-  - "development"
-  - "mocha"
-  - "pastel"
-  - "powerline"
-  - "statuslines"
-  - "theme"
-  - "tools"
+title: Catppuccin Mocha Theme - Statuslines
+slug: catppuccin-mocha-theme
+category: statuslines
+description: >-
+  Soothing Catppuccin Mocha theme statusline with 26 pastel colors, Powerline
+  separators, and modular segments for Git, model info, and token tracking.
+cardDescription: >-
+  Soothing Catppuccin Mocha theme statusline with 26 pastel colors, Powerline
+  separators, and modular segments for Git, model info, and tok...
+seoTitle: Catppuccin Mocha Theme - Statuslines
+seoDescription: >-
+  Soothing Catppuccin Mocha theme statusline with 26 pastel colors, Powerline
+  separators, and modular segments for Git, model info, and token tracking.
+  Discove...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-23'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://github.com/catppuccin/catppuccin'
+installable: true
+copySnippet: |-
+  #!/usr/bin/env bash
+
+  # Catppuccin Mocha Theme Statusline for Claude Code
+  # Official Catppuccin Mocha color palette (26 colors)
+  # https://github.com/catppuccin/catppuccin
+
+  # Read JSON from stdin
+  read -r input
+
+  # Extract values
+  model=$(echo "$input" | jq -r '.model // "unknown"')
+  dir=$(echo "$input" | jq -r '.workspace.path // "~"' | sed "s|$HOME|~|")
+  tokens=$(echo "$input" | jq -r '.session.totalTokens // 0')
+  git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+
+  # Catppuccin Mocha Palette (256-color approximations)
+  # Base colors
+  BASE="\033[48;5;235m"      # #1e1e2e
+  MANTLE="\033[48;5;234m"    # #181825
+  CRUST="\033[48;5;233m"     # #11111b
+
+  # Text colors
+  TEXT="\033[38;5;205m"      # #cdd6f4
+  SUBTEXT1="\033[38;5;189m" # #bac2de
+  SUBTEXT0="\033[38;5;146m" # #a6adc8
+
+  # Accent colors
+  LAVENDER="\033[48;5;183m"  # #b4befe
+  BLUE="\033[48;5;117m"      # #89b4fa
+  SAPPHIRE="\033[48;5;116m" # #74c7ec
+  SKY="\033[48;5;153m"       # #89dceb
+  TEAL="\033[48;5;152m"      # #94e2d5
+  GREEN="\033[48;5;151m"     # #a6e3a1
+  YELLOW="\033[48;5;229m"    # #f9e2af
+  PEACH="\033[48;5;216m"     # #fab387
+  MARRON="\033[48;5;217m"    # #eba0ac
+  RED="\033[48;5;210m"       # #f38ba8
+  MAUVE="\033[48;5;183m"     # #cba6f7
+  PINK="\033[48;5;218m"      # #f5c2e7
+  FLAMINGO="\033[48;5;217m" # #f2cdcd
+  ROSEWATER="\033[48;5;224m"# #f5e0dc
+
+  # Foreground versions
+  LAVENDER_FG="\033[38;5;183m"
+  BLUE_FG="\033[38;5;117m"
+  SAPPHIRE_FG="\033[38;5;116m"
+  TEAL_FG="\033[38;5;152m"
+  PEACH_FG="\033[38;5;216m"
+
+  RESET="\033[0m"
+  SEP="\ue0b0"  # Powerline separator
+
+  # Build statusline
+  statusline=""
+
+  # Model segment (Lavender)
+  statusline+="${LAVENDER}${RESET}${TEXT} ${model} ${RESET}"
+  statusline+="${LAVENDER_FG}${SEP}${RESET}"
+
+  # Directory segment (Blue)
+  statusline+=" ${BLUE}${RESET}${TEXT}  ${dir} ${RESET}"
+  statusline+="${BLUE_FG}${SEP}${RESET}"
+
+  # Git branch segment (Teal) - only if in git repo
+  if [ -n "$git_branch" ]; then
+    statusline+=" ${TEAL}${RESET}${TEXT}  ${git_branch} ${RESET}"
+    statusline+="${TEAL_FG}${SEP}${RESET}"
+  fi
+
+  # Token count segment (Peach)
+  statusline+=" ${PEACH}${RESET}${TEXT}  ${tokens} ${RESET}"
+  statusline+="${PEACH_FG}${SEP}${RESET}"
+
+  echo -e "$statusline"
+scriptLanguage: bash
+tags:
+  - catppuccin
+  - mocha
+  - pastel
+  - theme
+  - powerline
+  - aesthetics
+keywords:
+  - aesthetics
+  - catppuccin
+  - claude
+  - development
+  - mocha
+  - pastel
+  - powerline
+  - statuslines
+  - theme
+  - tools
+readingTime: 2
+viewCount: 0
+copyCount: 0
+popularityScore: 5
 difficultyScore: 4
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 0
-copyCount: 0
-popularityScore: 5
-readingTime: 2
-documentationUrl: "https://github.com/catppuccin/catppuccin"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
----
+scriptBody: |-
+  #!/usr/bin/env bash
 
+  # Catppuccin Mocha Theme Statusline for Claude Code
+  # Official Catppuccin Mocha color palette (26 colors)
+  # https://github.com/catppuccin/catppuccin
+
+  # Read JSON from stdin
+  read -r input
+
+  # Extract values
+  model=$(echo "$input" | jq -r '.model // "unknown"')
+  dir=$(echo "$input" | jq -r '.workspace.path // "~"' | sed "s|$HOME|~|")
+  tokens=$(echo "$input" | jq -r '.session.totalTokens // 0')
+  git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+
+  # Catppuccin Mocha Palette (256-color approximations)
+  # Base colors
+  BASE="\033[48;5;235m"      # #1e1e2e
+  MANTLE="\033[48;5;234m"    # #181825
+  CRUST="\033[48;5;233m"     # #11111b
+
+  # Text colors
+  TEXT="\033[38;5;205m"      # #cdd6f4
+  SUBTEXT1="\033[38;5;189m" # #bac2de
+  SUBTEXT0="\033[38;5;146m" # #a6adc8
+
+  # Accent colors
+  LAVENDER="\033[48;5;183m"  # #b4befe
+  BLUE="\033[48;5;117m"      # #89b4fa
+  SAPPHIRE="\033[48;5;116m" # #74c7ec
+  SKY="\033[48;5;153m"       # #89dceb
+  TEAL="\033[48;5;152m"      # #94e2d5
+  GREEN="\033[48;5;151m"     # #a6e3a1
+  YELLOW="\033[48;5;229m"    # #f9e2af
+  PEACH="\033[48;5;216m"     # #fab387
+  MARRON="\033[48;5;217m"    # #eba0ac
+  RED="\033[48;5;210m"       # #f38ba8
+  MAUVE="\033[48;5;183m"     # #cba6f7
+  PINK="\033[48;5;218m"      # #f5c2e7
+  FLAMINGO="\033[48;5;217m" # #f2cdcd
+  ROSEWATER="\033[48;5;224m"# #f5e0dc
+
+  # Foreground versions
+  LAVENDER_FG="\033[38;5;183m"
+  BLUE_FG="\033[38;5;117m"
+  SAPPHIRE_FG="\033[38;5;116m"
+  TEAL_FG="\033[38;5;152m"
+  PEACH_FG="\033[38;5;216m"
+
+  RESET="\033[0m"
+  SEP="\ue0b0"  # Powerline separator
+
+  # Build statusline
+  statusline=""
+
+  # Model segment (Lavender)
+  statusline+="${LAVENDER}${RESET}${TEXT} ${model} ${RESET}"
+  statusline+="${LAVENDER_FG}${SEP}${RESET}"
+
+  # Directory segment (Blue)
+  statusline+=" ${BLUE}${RESET}${TEXT}  ${dir} ${RESET}"
+  statusline+="${BLUE_FG}${SEP}${RESET}"
+
+  # Git branch segment (Teal) - only if in git repo
+  if [ -n "$git_branch" ]; then
+    statusline+=" ${TEAL}${RESET}${TEXT}  ${git_branch} ${RESET}"
+    statusline+="${TEAL_FG}${SEP}${RESET}"
+  fi
+
+  # Token count segment (Peach)
+  statusline+=" ${PEACH}${RESET}${TEXT}  ${tokens} ${RESET}"
+  statusline+="${PEACH_FG}${SEP}${RESET}"
+
+  echo -e "$statusline"
+---
+```bash
 #!/usr/bin/env bash
 
 # Catppuccin Mocha Theme Statusline for Claude Code
@@ -115,3 +274,4 @@ statusline+=" ${PEACH}${RESET}${TEXT}  ${tokens} ${RESET}"
 statusline+="${PEACH_FG}${SEP}${RESET}"
 
 echo -e "$statusline"
+```

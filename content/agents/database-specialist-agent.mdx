@@ -1,46 +1,100 @@
 ---
-title: "Database Specialist Agent - Agents"
-slug: "database-specialist-agent"
-category: "agents"
-description: "Expert database architect and optimizer specializing in SQL, NoSQL, performance tuning, and data modeling"
-seoTitle: "Database Specialist Agent - Agents"
-seoDescription: "Expert database architect and optimizer specializing in SQL, NoSQL, performance tuning, and data modeling Discover tools for AI development."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-09-16"
-tags: 
-  - "database"
-  - "sql"
-  - "optimization"
-  - "architecture"
-  - "data-modeling"
-keywords: 
-  - "agent"
-  - "agents"
-  - "architecture"
-  - "claude"
-  - "data-modeling"
-  - "database"
-  - "development"
-  - "optimization"
-  - "specialist"
-  - "sql"
-  - "tools"
+title: Database Specialist Agent - Agents
+slug: database-specialist-agent
+category: agents
+description: >-
+  Expert database architect and optimizer specializing in SQL, NoSQL,
+  performance tuning, and data modeling
+cardDescription: >-
+  Expert database architect and optimizer specializing in SQL, NoSQL,
+  performance tuning, and data modeling
+seoTitle: Database Specialist Agent - Agents
+seoDescription: >-
+  Expert database architect and optimizer specializing in SQL, NoSQL,
+  performance tuning, and data modeling Discover tools for AI development.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-16'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://www.postgresql.org/docs/'
+installable: false
+copySnippet: |-
+  -- Example: E-commerce database schema
+  CREATE TABLE users (
+      id SERIAL PRIMARY KEY,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      first_name VARCHAR(100),
+      last_name VARCHAR(100),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE products (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      description TEXT,
+      price DECIMAL(10,2) NOT NULL CHECK (price >= 0),
+      stock_quantity INTEGER DEFAULT 0 CHECK (stock_quantity >= 0),
+      category_id INTEGER REFERENCES categories(id),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE orders (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      total_amount DECIMAL(10,2) NOT NULL,
+      status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'shipped', 'delivered', 'cancelled')),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE order_items (
+      id SERIAL PRIMARY KEY,
+      order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+      product_id INTEGER NOT NULL REFERENCES products(id),
+      quantity INTEGER NOT NULL CHECK (quantity > 0),
+      unit_price DECIMAL(10,2) NOT NULL,
+      UNIQUE(order_id, product_id)
+  );
+
+  -- Indexes for performance
+  CREATE INDEX idx_users_email ON users(email);
+  CREATE INDEX idx_products_category ON products(category_id);
+  CREATE INDEX idx_orders_user_status ON orders(user_id, status);
+  CREATE INDEX idx_orders_created_at ON orders(created_at);
+  CREATE INDEX idx_order_items_order_id ON order_items(order_id);
+  CREATE INDEX idx_order_items_product_id ON order_items(product_id);
+tags:
+  - database
+  - sql
+  - optimization
+  - architecture
+  - data-modeling
+keywords:
+  - agent
+  - agents
+  - architecture
+  - claude
+  - data-modeling
+  - database
+  - development
+  - optimization
+  - specialist
+  - sql
+  - tools
+readingTime: 7
+viewCount: 100
+copyCount: 9
+popularityScore: 105
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 100
-copyCount: 9
-popularityScore: 105
-readingTime: 7
-documentationUrl: "https://www.postgresql.org/docs/"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a database specialist with deep expertise in database design, optimization, and management across multiple database systems.
 
 ## Core Competencies:

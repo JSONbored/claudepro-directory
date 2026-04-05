@@ -213,37 +213,70 @@
 }
 
 .directory-stack-card {
-  @apply flex gap-5 rounded-2xl border border-border/90 bg-card/92 p-5 shadow-sm backdrop-blur;
-  min-height: 13.75rem;
+  @apply flex gap-4 rounded-2xl border border-border/80 bg-card/94 px-5 py-4 shadow-sm backdrop-blur transition duration-200 ease-out;
+  min-height: 11.75rem;
+}
+
+.directory-stack-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--primary) 18%, var(--border));
+  box-shadow:
+    0 18px 28px hsl(0 0% 0% / 0.16),
+    0 1px 0 hsl(0 0% 100% / 0.03) inset;
 }
 
 .directory-vote-rail {
-  @apply flex w-[4.75rem] shrink-0 flex-col items-center justify-between rounded-xl border border-border/80 bg-background/70 px-2 py-3;
+  @apply flex w-[3.9rem] shrink-0 flex-col items-center justify-between rounded-xl border border-border/80 bg-background/80 px-2 py-3;
+}
+
+.directory-vote-tile {
+  @apply h-16 w-full rounded-lg border border-border/80 bg-background;
 }
 
 .vote-button {
-  @apply inline-flex size-9 items-center justify-center rounded-lg border border-transparent bg-transparent text-muted-foreground transition hover:border-border hover:bg-accent hover:text-foreground;
+  @apply inline-flex size-8 items-center justify-center rounded-lg border border-transparent bg-transparent text-muted-foreground transition hover:border-border hover:bg-accent hover:text-foreground;
 }
 
 .vote-button-active {
   @apply border-border bg-primary text-primary-foreground;
 }
 
-.directory-icon-tile {
-  @apply inline-flex size-14 shrink-0 items-center justify-center rounded-xl border border-border/80 bg-background text-sm font-medium uppercase tracking-[0.18em] text-primary;
-}
-
 .directory-code-bar {
-  @apply flex min-w-0 flex-1 items-center rounded-lg border border-border/70 bg-background px-4 py-2.5;
+  @apply flex min-w-0 flex-1 items-center rounded-lg border border-border/70 bg-background px-4 py-2;
   box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.02);
 }
 
-.directory-tag {
-  @apply inline-flex items-center rounded-md border border-border/80 bg-background px-2 py-1 text-[12px] text-muted-foreground;
+.directory-title {
+  font-size: 1rem;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.directory-link-chip {
-  @apply inline-flex items-center gap-1.5 rounded-md border border-border/80 bg-background px-3 py-2 text-xs font-medium text-foreground transition hover:bg-accent;
+.directory-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: calc(1.75rem * 2);
+}
+
+.directory-code-text {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.directory-tag {
+  @apply inline-flex items-center rounded-md border border-border/70 bg-background px-2 py-0.5 text-[11px] text-muted-foreground;
+}
+
+.directory-github-stat {
+  @apply hidden shrink-0 items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground md:inline-flex;
 }
 
 .submit-form-card {
@@ -333,4 +366,8 @@
 
 .prose-entry blockquote {
   @apply border-l-2 border-primary pl-4 text-muted-foreground;
+}
+
+.detail-code-block {
+  @apply m-0 overflow-x-auto bg-background px-5 py-5 text-sm leading-7 text-foreground;
 }

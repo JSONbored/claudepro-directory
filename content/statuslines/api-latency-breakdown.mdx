@@ -1,47 +1,263 @@
 ---
-title: "API Latency Breakdown - Statuslines"
-slug: "api-latency-breakdown"
-category: "statuslines"
-description: "API latency breakdown monitor showing network time vs processing time split, p95 latency tracking, and performance bottleneck detection for Claude Code sessions."
-seoTitle: "API Latency Breakdown - Statuslines"
-seoDescription: "API latency breakdown monitor showing network time vs processing time split, p95 latency tracking, and performance bottleneck detection for Claude Code sessi..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-25"
-tags: 
-  - "api-latency"
-  - "performance"
-  - "monitoring"
-  - "bottleneck"
-  - "network"
-keywords: 
-  - "api"
-  - "api-latency"
-  - "bottleneck"
-  - "breakdown"
-  - "claude"
-  - "development"
-  - "latency"
-  - "monitoring"
-  - "network"
-  - "performance"
-  - "statuslines"
-  - "tools"
+title: API Latency Breakdown - Statuslines
+slug: api-latency-breakdown
+category: statuslines
+description: >-
+  API latency breakdown monitor showing network time vs processing time split,
+  p95 latency tracking, and performance bottleneck detection for Claude Code
+  sessions.
+cardDescription: >-
+  API latency breakdown monitor showing network time vs processing time split,
+  p95 latency tracking, and performance bottleneck detection f...
+seoTitle: API Latency Breakdown - Statuslines
+seoDescription: >-
+  API latency breakdown monitor showing network time vs processing time split,
+  p95 latency tracking, and performance bottleneck detection for Claude Code
+  sessi...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-25'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://docs.claude.com/en/docs/claude-code/statusline'
+installable: true
+copySnippet: >-
+  #!/usr/bin/env bash
+
+
+  # API Latency Breakdown Monitor for Claude Code
+
+  # Shows network/waiting time vs actual API processing time
+
+
+  # Read JSON from stdin
+
+  read -r input
+
+
+  # Extract values
+
+  total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+
+  api_duration_ms=$(echo "$input" | jq -r '.cost.total_api_duration_ms // 0')
+
+
+  # Calculate network/waiting time (total - API)
+
+  network_time=$((total_duration_ms - api_duration_ms))
+
+
+  # Avoid negative values
+
+  if [ $network_time -lt 0 ]; then
+    network_time=0
+  fi
+
+
+  # Convert to seconds for display
+
+  api_seconds=$(echo "scale=2; $api_duration_ms / 1000" | bc)
+
+  network_seconds=$(echo "scale=2; $network_time / 1000" | bc)
+
+  total_seconds=$(echo "scale=2; $total_duration_ms / 1000" | bc)
+
+
+  # Calculate percentage split
+
+  if [ $total_duration_ms -gt 0 ]; then
+    api_percentage=$(( (api_duration_ms * 100) / total_duration_ms ))
+    network_percentage=$(( 100 - api_percentage ))
+  else
+    api_percentage=0
+    network_percentage=0
+  fi
+
+
+  # Performance assessment (network time should be minimal)
+
+  if [ $network_time -lt 1000 ]; then  # < 1 second network time
+    PERF_COLOR="\033[38;5;46m"   # Green: Excellent
+    PERF_STATUS="✓ FAST"
+  elif [ $network_time -lt 5000 ]; then  # < 5 seconds
+    PERF_COLOR="\033[38;5;226m"  # Yellow: Moderate
+    PERF_STATUS="⚠ SLOW"
+  else
+    PERF_COLOR="\033[38;5;196m"  # Red: Poor performance
+    PERF_STATUS="✗ BOTTLENECK"
+  fi
+
+
+  RESET="\033[0m"
+
+
+  # Build ratio bar (API vs Network)
+
+  API_BAR="\033[48;5;75m"    # Blue background for API time
+
+  NET_BAR="\033[48;5;214m"   # Orange background for network time
+
+
+  # Create 20-char bar showing split
+
+  api_chars=$((api_percentage / 5))  # Each char = 5%
+
+  net_chars=$((network_percentage / 5))
+
+
+  if [ $api_chars -gt 0 ]; then
+    api_bar=$(printf "${API_BAR} %.0s" $(seq 1 $api_chars))${RESET}
+  else
+    api_bar=""
+  fi
+
+
+  if [ $net_chars -gt 0 ]; then
+    net_bar=$(printf "${NET_BAR} %.0s" $(seq 1 $net_chars))${RESET}
+  else
+    net_bar=""
+  fi
+
+
+  # Output statusline
+
+  echo -e "${PERF_COLOR}${PERF_STATUS}${RESET} | API: ${api_seconds}s
+  (${api_percentage}%) | Network: ${network_seconds}s (${network_percentage}%) |
+  ${api_bar}${net_bar}"
+scriptLanguage: bash
+tags:
+  - api-latency
+  - performance
+  - monitoring
+  - bottleneck
+  - network
+keywords:
+  - api
+  - api-latency
+  - bottleneck
+  - breakdown
+  - claude
+  - development
+  - latency
+  - monitoring
+  - network
+  - performance
+  - statuslines
+  - tools
+readingTime: 2
+viewCount: 0
+copyCount: 0
+popularityScore: 5
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 0
-copyCount: 0
-popularityScore: 5
-readingTime: 2
-documentationUrl: "https://docs.claude.com/en/docs/claude-code/statusline"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
----
+scriptBody: >-
+  #!/usr/bin/env bash
 
+
+  # API Latency Breakdown Monitor for Claude Code
+
+  # Shows network/waiting time vs actual API processing time
+
+
+  # Read JSON from stdin
+
+  read -r input
+
+
+  # Extract values
+
+  total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+
+  api_duration_ms=$(echo "$input" | jq -r '.cost.total_api_duration_ms // 0')
+
+
+  # Calculate network/waiting time (total - API)
+
+  network_time=$((total_duration_ms - api_duration_ms))
+
+
+  # Avoid negative values
+
+  if [ $network_time -lt 0 ]; then
+    network_time=0
+  fi
+
+
+  # Convert to seconds for display
+
+  api_seconds=$(echo "scale=2; $api_duration_ms / 1000" | bc)
+
+  network_seconds=$(echo "scale=2; $network_time / 1000" | bc)
+
+  total_seconds=$(echo "scale=2; $total_duration_ms / 1000" | bc)
+
+
+  # Calculate percentage split
+
+  if [ $total_duration_ms -gt 0 ]; then
+    api_percentage=$(( (api_duration_ms * 100) / total_duration_ms ))
+    network_percentage=$(( 100 - api_percentage ))
+  else
+    api_percentage=0
+    network_percentage=0
+  fi
+
+
+  # Performance assessment (network time should be minimal)
+
+  if [ $network_time -lt 1000 ]; then  # < 1 second network time
+    PERF_COLOR="\033[38;5;46m"   # Green: Excellent
+    PERF_STATUS="✓ FAST"
+  elif [ $network_time -lt 5000 ]; then  # < 5 seconds
+    PERF_COLOR="\033[38;5;226m"  # Yellow: Moderate
+    PERF_STATUS="⚠ SLOW"
+  else
+    PERF_COLOR="\033[38;5;196m"  # Red: Poor performance
+    PERF_STATUS="✗ BOTTLENECK"
+  fi
+
+
+  RESET="\033[0m"
+
+
+  # Build ratio bar (API vs Network)
+
+  API_BAR="\033[48;5;75m"    # Blue background for API time
+
+  NET_BAR="\033[48;5;214m"   # Orange background for network time
+
+
+  # Create 20-char bar showing split
+
+  api_chars=$((api_percentage / 5))  # Each char = 5%
+
+  net_chars=$((network_percentage / 5))
+
+
+  if [ $api_chars -gt 0 ]; then
+    api_bar=$(printf "${API_BAR} %.0s" $(seq 1 $api_chars))${RESET}
+  else
+    api_bar=""
+  fi
+
+
+  if [ $net_chars -gt 0 ]; then
+    net_bar=$(printf "${NET_BAR} %.0s" $(seq 1 $net_chars))${RESET}
+  else
+    net_bar=""
+  fi
+
+
+  # Output statusline
+
+  echo -e "${PERF_COLOR}${PERF_STATUS}${RESET} | API: ${api_seconds}s
+  (${api_percentage}%) | Network: ${network_seconds}s (${network_percentage}%) |
+  ${api_bar}${net_bar}"
+---
+```bash
 #!/usr/bin/env bash
 
 # API Latency Breakdown Monitor for Claude Code
@@ -112,3 +328,4 @@ fi
 
 # Output statusline
 echo -e "${PERF_COLOR}${PERF_STATUS}${RESET} | API: ${api_seconds}s (${api_percentage}%) | Network: ${network_seconds}s (${network_percentage}%) | ${api_bar}${net_bar}"
+```

@@ -1,44 +1,105 @@
 ---
-title: "Performance Benchmark Report - Hooks"
-slug: "performance-benchmark-report"
-category: "hooks"
-description: "Runs performance benchmarks and generates comparison report when session ends. This Stop hook provides comprehensive performance benchmarking with multi-language performance benchmarking for Node.js, Python, Go, and Rust including Node.js performance benchmarks (npm benchmark scripts, bundle size analysis, build performance, test suite performance), Python performance benchmarks (pytest-benchmark, timeit benchmarks, memory profiling with psutil), Go performance benchmarks (go test -bench, build performance, benchmark memory analysis), Rust performance benchmarks (cargo bench, build performance, test performance), and project type detection (package.json, requirements.txt, go.mod, Cargo.toml), Lighthouse web performance auditing with detailed Core Web Vitals including Lighthouse integration (automated Lighthouse audits, JSON output generation, headless Chrome execution), Core Web Vitals measurement (Largest Contentful Paint LCP, First Input Delay FID, Cumulative Layout Shift CLS, First Contentful Paint FCP, Time to Interactive TTI), performance scoring (Performance score 0-100, accessibility score, best practices score, SEO score), and web performance recommendations (optimization suggestions, resource hints, caching strategies), bundle size analysis and optimization recommendations including bundle size measurement (webpack-bundle-analyzer, vite-bundle-visualizer, rollup-plugin-visualizer), bundle size tracking (historical bundle size comparison, size regression detection), optimization recommendations (code splitting suggestions, tree shaking recommendations, lazy loading suggestions), and bundle size reporting (detailed bundle breakdown, chunk analysis, dependency size analysis), database query performance monitoring and analysis including database connection testing (PostgreSQL connection test, MySQL connection test, connection latency measurement), query performance analysis (query execution time, slow query detection, query optimization suggestions), and database performance metrics (connection pool metrics, transaction metrics, query cache metrics), load testing integration with Artillery, k6, and Apache Bench including Artillery integration (HTTP load testing, WebSocket load testing, scenario-based testing), k6 integration (JavaScript-based load testing, performance metrics collection, threshold-based testing), Apache Bench integration (simple HTTP load testing, concurrent request testing, request rate measurement), and load test reporting (response time statistics, throughput metrics, error rate analysis), historical benchmark tracking with trend analysis including benchmark history storage (JSON report storage, timestamp-based organization, session-based tracking), trend analysis (performance regression detection, improvement tracking, statistical analysis), comparison reporting (previous run comparison, percentage change calculation, performance trend visualization), and historical data management (report retention policies, report cleanup, data aggregation), performance regression detection and alerting including regression detection (threshold-based detection, statistical significance testing, baseline comparison), alerting mechanisms (console alerts, file-based alerts, integration-ready alerts), regression reporting (detailed regression reports, affected benchmarks, severity classification), and regression prevention (CI/CD integration, automated blocking, performance gates), and custom benchmark suite execution and reporting including custom benchmark configuration (benchmark script detection, custom timeout configuration, benchmark filtering), benchmark execution (timed benchmark execution, timeout protection, error handling), benchmark reporting (structured JSON reports, human-readable summaries, benchmark statistics), and benchmark customization (project-specific benchmarks, language-specific benchmarks, framework-specific benchmarks). The hook automatically detects project types (Node.js, Python, Go, Rust, PHP, Ruby, Java), identifies available benchmark tools (npm scripts, pytest-benchmark, go test, cargo bench, Lighthouse, hyperfine, ab), runs appropriate benchmarks based on project type, generates comprehensive performance reports with historical comparison, and provides performance optimization recommendations."
-seoTitle: "Performance Benchmark Report - Hooks"
-seoDescription: "Runs performance benchmarks and generates comparison report when session ends. This Stop hook provides comprehensive performance benchmarking with multi-lang..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-09-19"
-tags: 
-  - "performance"
-  - "benchmarking"
-  - "stop-hook"
-  - "testing"
-  - "metrics"
-keywords: 
-  - "benchmark"
-  - "benchmarking"
-  - "claude"
-  - "development"
-  - "hooks"
-  - "metrics"
-  - "performance"
-  - "report"
-  - "stop-hook"
-  - "testing"
-  - "tools"
+title: Performance Benchmark Report - Hooks
+slug: performance-benchmark-report
+category: hooks
+description: >-
+  Runs performance benchmarks and generates comparison report when session ends.
+  This Stop hook provides comprehensive performance benchmarking with
+  multi-language performance benchmarking for Node.js, Python, Go, and Rust
+  including Node.js performance benchmarks (npm benchmark scripts, bundle size
+  analysis, build performance, test suite performance), Python performance
+  benchmarks (pytest-benchmark, timeit benchmarks, memory profiling with
+  psutil), Go performance benchmarks (go test -bench, build performance,
+  benchmark memory analysis), Rust performance benchmarks (cargo bench, build
+  performance, test performance), and project type detection (package.json,
+  requirements.txt, go.mod, Cargo.toml), Lighthouse web performance auditing
+  with detailed Core Web Vitals including Lighthouse integration (automated
+  Lighthouse audits, JSON output generation, headless Chrome execution), Core
+  Web Vitals measurement (Largest Contentful Paint LCP, First Input Delay FID,
+  Cumulative Layout Shift CLS, First Contentful Paint FCP, Time to Interactive
+  TTI), performance scoring (Performance score 0-100, accessibility score, best
+  practices score, SEO score), and web performance recommendations (optimization
+  suggestions, resource hints, caching strategies), bundle size analysis and
+  optimization recommendations including bundle size measurement
+  (webpack-bundle-analyzer, vite-bundle-visualizer, rollup-plugin-visualizer),
+  bundle size tracking (historical bundle size comparison, size regression
+  detection), optimization recommendations (code splitting suggestions, tree
+  shaking recommendations, lazy loading suggestions), and bundle size reporting
+  (detailed bundle breakdown, chunk analysis, dependency size analysis),
+  database query performance monitoring and analysis including database
+  connection testing (PostgreSQL connection test, MySQL connection test,
+  connection latency measurement), query performance analysis (query execution
+  time, slow query detection, query optimization suggestions), and database
+  performance metrics (connection pool metrics, transaction metrics, query cache
+  metrics), load testing integration with Artillery, k6, and Apache Bench
+  including Artillery integration (HTTP load testing, WebSocket load testing,
+  scenario-based testing), k6 integration (JavaScript-based load testing,
+  performance metrics collection, threshold-based testing), Apache Bench
+  integration (simple HTTP load testing, concurrent request testing, request
+  rate measurement), and load test reporting (response time statistics,
+  throughput metrics, error rate analysis), historical benchmark tracking with
+  trend analysis including benchmark history storage (JSON report storage,
+  timestamp-based organization, session-based tracking), trend analysis
+  (performance regression detection, improvement tracking, statistical
+  analysis), comparison reporting (previous run comparison, percentage change
+  calculation, performance trend visualization), and historical data management
+  (report retention policies, report cleanup, data aggregation), performance
+  regression detection and alerting including regression detection
+  (threshold-based detection, statistical significance testing, baseline
+  comparison), alerting mechanisms (console alerts, file-based alerts,
+  integration-ready alerts), regression reporting (detailed regression reports,
+  affected benchmarks, severity classification), and regression prevention
+  (CI/CD integration, automated blocking, performance gates), and custom
+  benchmark suite execution and reporting including custom benchmark
+  configuration (benchmark script detection, custom timeout configuration,
+  benchmark filtering), benchmark execution (timed benchmark execution, timeout
+  protection, error handling), benchmark reporting (structured JSON reports,
+  human-readable summaries, benchmark statistics), and benchmark customization
+  (project-specific benchmarks, language-specific benchmarks, framework-specific
+  benchmarks). The hook automatically detects project types (Node.js, Python,
+  Go, Rust, PHP, Ruby, Java), identifies available benchmark tools (npm scripts,
+  pytest-benchmark, go test, cargo bench, Lighthouse, hyperfine, ab), runs
+  appropriate benchmarks based on project type, generates comprehensive
+  performance reports with historical comparison, and provides performance
+  optimization recommendations.
+cardDescription: Runs performance benchmarks and generates comparison report when session ends.
+seoTitle: Performance Benchmark Report - Hooks
+seoDescription: >-
+  Runs performance benchmarks and generates comparison report when session ends.
+  This Stop hook provides comprehensive performance benchmarking with
+  multi-lang...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-19'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+installable: true
+tags:
+  - performance
+  - benchmarking
+  - stop-hook
+  - testing
+  - metrics
+keywords:
+  - benchmark
+  - benchmarking
+  - claude
+  - development
+  - hooks
+  - metrics
+  - performance
+  - report
+  - stop-hook
+  - testing
+  - tools
+readingTime: 3
+viewCount: 25
+copyCount: 0
+popularityScore: 30
 difficultyScore: 0
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 25
-copyCount: 0
-popularityScore: 30
-readingTime: 3
-documentationUrl: ""
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
 
-*(No content)*

@@ -1,50 +1,114 @@
 ---
-title: "Mobile App Dev Expert - CLAUDE.md Rules for Claude Code"
-slug: "mobile-app-development-expert"
-category: "rules"
-description: "Expert in iOS, Android, and cross-platform mobile development with React Native, Flutter, and native frameworks"
-seoTitle: "Mobile App Dev Expert - CLAUDE.md Rules for Claude Code"
-seoDescription: "Expert in iOS, Android, and cross-platform mobile development with React Native, Flutter, and native frameworks Discover tools for AI development."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-09-16"
-tags: 
-  - "mobile"
-  - "ios"
-  - "android"
-  - "react-native"
-  - "flutter"
-  - "swift"
-  - "kotlin"
-keywords: 
-  - "android"
-  - "app"
-  - "claude"
-  - "development"
-  - "expert"
-  - "flutter"
-  - "ios"
-  - "kotlin"
-  - "mobile"
-  - "react-native"
-  - "rules"
-  - "swift"
-  - "tools"
+title: Mobile App Dev Expert - CLAUDE.md Rules for Claude Code
+slug: mobile-app-development-expert
+category: rules
+description: >-
+  Expert in iOS, Android, and cross-platform mobile development with React
+  Native, Flutter, and native frameworks
+cardDescription: >-
+  Expert in iOS, Android, and cross-platform mobile development with React
+  Native, Flutter, and native frameworks
+seoTitle: Mobile App Dev Expert - CLAUDE.md Rules for Claude Code
+seoDescription: >-
+  Expert in iOS, Android, and cross-platform mobile development with React
+  Native, Flutter, and native frameworks Discover tools for AI development.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-16'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://developer.apple.com/documentation/'
+installable: false
+copySnippet: |-
+  import SwiftUI
+  import Combine
+
+  @MainActor
+  class UserViewModel: ObservableObject {
+      @Published var users: [User] = []
+      @Published var isLoading = false
+      @Published var error: Error?
+      
+      private var cancellables = Set<AnyCancellable>()
+      private let service: UserService
+      
+      init(service: UserService = .shared) {
+          self.service = service
+      }
+      
+      func loadUsers() async {
+          isLoading = true
+          defer { isLoading = false }
+          
+          do {
+              users = try await service.fetchUsers()
+          } catch {
+              self.error = error
+          }
+      }
+  }
+
+  struct UserListView: View {
+      @StateObject private var viewModel = UserViewModel()
+      @Environment(\.colorScheme) var colorScheme
+      
+      var body: some View {
+          NavigationStack {
+              List(viewModel.users) { user in
+                  NavigationLink(value: user) {
+                      UserRow(user: user)
+                  }
+              }
+              .navigationTitle("Users")
+              .navigationDestination(for: User.self) { user in
+                  UserDetailView(user: user)
+              }
+              .refreshable {
+                  await viewModel.loadUsers()
+              }
+              .overlay {
+                  if viewModel.isLoading {
+                      ProgressView()
+                  }
+              }
+          }
+          .task {
+              await viewModel.loadUsers()
+          }
+      }
+  }
+tags:
+  - mobile
+  - ios
+  - android
+  - react-native
+  - flutter
+  - swift
+  - kotlin
+keywords:
+  - android
+  - app
+  - claude
+  - development
+  - expert
+  - flutter
+  - ios
+  - kotlin
+  - mobile
+  - react-native
+  - rules
+  - swift
+  - tools
+readingTime: 5
+viewCount: 98
+copyCount: 1
+popularityScore: 103
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 98
-copyCount: 1
-popularityScore: 103
-readingTime: 5
-documentationUrl: "https://developer.apple.com/documentation/"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a mobile development expert with comprehensive knowledge of native and cross-platform frameworks.
 
 ## iOS Development (Swift/SwiftUI)

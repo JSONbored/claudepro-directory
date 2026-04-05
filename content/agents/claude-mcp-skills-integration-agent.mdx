@@ -1,47 +1,74 @@
 ---
-title: "Claude MCP Skills Integration Agent - Claude Code Agents"
-slug: "claude-mcp-skills-integration-agent"
-category: "agents"
-description: "MCP Skills integration specialist for remote server configuration, tool permissions, multi-MCP orchestration, and Claude Desktop ecosystem workflows."
-seoTitle: "Claude MCP Skills Integration Agent - Claude Code Agents"
-seoDescription: "MCP Skills integration specialist for remote server configuration, tool permissions, multi-MCP orchestration, and Claude Desktop ecosystem workflows. Discove..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-23"
-tags: 
-  - "mcp"
-  - "skills"
-  - "integration"
-  - "remote-servers"
-  - "tool-permissions"
-  - "orchestration"
-keywords: 
-  - "agent"
-  - "agents"
-  - "claude"
-  - "development"
-  - "integration"
-  - "mcp"
-  - "orchestration"
-  - "remote-servers"
-  - "skills"
-  - "tool-permissions"
-  - "tools"
+title: Claude MCP Skills Integration Agent - Claude Code Agents
+slug: claude-mcp-skills-integration-agent
+category: agents
+description: >-
+  MCP Skills integration specialist for remote server configuration, tool
+  permissions, multi-MCP orchestration, and Claude Desktop ecosystem workflows.
+cardDescription: >-
+  MCP Skills integration specialist for remote server configuration, tool
+  permissions, multi-MCP orchestration, and Claude Desktop ecosyste...
+seoTitle: Claude MCP Skills Integration Agent - Claude Code Agents
+seoDescription: >-
+  MCP Skills integration specialist for remote server configuration, tool
+  permissions, multi-MCP orchestration, and Claude Desktop ecosystem workflows.
+  Discove...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-23'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://modelcontextprotocol.io/introduction'
+installable: false
+copySnippet: |-
+  {
+    "mcpServers": {
+      "filesystem": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/username/projects"]
+      },
+      "github": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-github"],
+        "env": {
+          "GITHUB_TOKEN": "ghp_your_token_here"
+        }
+      },
+      "postgres": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost/mydb"]
+      }
+    }
+  }
+tags:
+  - mcp
+  - skills
+  - integration
+  - remote-servers
+  - tool-permissions
+  - orchestration
+keywords:
+  - agent
+  - agents
+  - claude
+  - development
+  - integration
+  - mcp
+  - orchestration
+  - remote-servers
+  - skills
+  - tool-permissions
+  - tools
+readingTime: 6
+viewCount: 24
+copyCount: 0
+popularityScore: 29
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 24
-copyCount: 0
-popularityScore: 29
-readingTime: 6
-documentationUrl: "https://modelcontextprotocol.io/introduction"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are an MCP Skills integration specialist, designed to help users configure, manage, and orchestrate MCP (Model Context Protocol) servers within Claude Code and Claude Desktop.
 
 ## Understanding MCP and Claude Skills

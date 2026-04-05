@@ -1,45 +1,126 @@
 ---
-title: "Terraform Infrastructure Architect for Claude"
-slug: "terraform-infrastructure-architect"
-category: "rules"
-description: "Expert in Terraform infrastructure as code with AI-assisted generation, modular patterns, state management, and multi-cloud deployments"
-seoTitle: "Terraform Infrastructure Architect for Claude"
-seoDescription: "Expert in Terraform infrastructure as code with AI-assisted generation, modular patterns, state management, and multi-cloud deployments Discover tools for AI..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-16"
-tags: 
-  - "terraform"
-  - "iac"
-  - "infrastructure"
-  - "cloud"
-  - "devops"
-keywords: 
-  - "architect"
-  - "claude"
-  - "cloud"
-  - "development"
-  - "devops"
-  - "iac"
-  - "infrastructure"
-  - "rules"
-  - "terraform"
-  - "tools"
+title: Terraform Infrastructure Architect for Claude
+slug: terraform-infrastructure-architect
+category: rules
+description: >-
+  Expert in Terraform infrastructure as code with AI-assisted generation,
+  modular patterns, state management, and multi-cloud deployments
+cardDescription: >-
+  Expert in Terraform infrastructure as code with AI-assisted generation,
+  modular patterns, state management, and multi-cloud deployments
+seoTitle: Terraform Infrastructure Architect for Claude
+seoDescription: >-
+  Expert in Terraform infrastructure as code with AI-assisted generation,
+  modular patterns, state management, and multi-cloud deployments Discover tools
+  for AI...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-16'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://www.terraform.io/docs'
+installable: false
+copySnippet: |-
+  # modules/vpc/main.tf
+  resource "aws_vpc" "main" {
+    cidr_block           = var.cidr_block
+    enable_dns_hostnames = true
+    enable_dns_support   = true
+    
+    tags = merge(
+      var.tags,
+      {
+        Name = var.name
+      }
+    )
+  }
+
+  resource "aws_subnet" "public" {
+    count = length(var.public_subnet_cidrs)
+    
+    vpc_id            = aws_vpc.main.id
+    cidr_block        = var.public_subnet_cidrs[count.index]
+    availability_zone = var.azs[count.index]
+    
+    map_public_ip_on_launch = true
+    
+    tags = merge(
+      var.tags,
+      {
+        Name = "${var.name}-public-${var.azs[count.index]}"
+        Tier = "Public"
+      }
+    )
+  }
+
+  # modules/vpc/variables.tf
+  variable "name" {
+    description = "Name of the VPC"
+    type        = string
+  }
+
+  variable "cidr_block" {
+    description = "CIDR block for VPC"
+    type        = string
+    validation {
+      condition     = can(cidrhost(var.cidr_block, 0))
+      error_message = "Must be valid IPv4 CIDR."
+    }
+  }
+
+  variable "public_subnet_cidrs" {
+    description = "CIDR blocks for public subnets"
+    type        = list(string)
+  }
+
+  variable "azs" {
+    description = "Availability zones"
+    type        = list(string)
+  }
+
+  variable "tags" {
+    description = "Tags to apply to resources"
+    type        = map(string)
+    default     = {}
+  }
+
+  # modules/vpc/outputs.tf
+  output "vpc_id" {
+    description = "ID of the VPC"
+    value       = aws_vpc.main.id
+  }
+
+  output "public_subnet_ids" {
+    description = "IDs of public subnets"
+    value       = aws_subnet.public[*].id
+  }
+tags:
+  - terraform
+  - iac
+  - infrastructure
+  - cloud
+  - devops
+keywords:
+  - architect
+  - claude
+  - cloud
+  - development
+  - devops
+  - iac
+  - infrastructure
+  - rules
+  - terraform
+  - tools
+readingTime: 6
+viewCount: 24
+copyCount: 0
+popularityScore: 29
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 24
-copyCount: 0
-popularityScore: 29
-readingTime: 6
-documentationUrl: "https://www.terraform.io/docs"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a Terraform infrastructure architect specializing in scalable, maintainable infrastructure as code with modern patterns, AI-assisted workflows, and multi-cloud deployments. Follow these principles:
 
 ## Module Design

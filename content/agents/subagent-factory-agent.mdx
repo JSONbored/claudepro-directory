@@ -1,49 +1,70 @@
 ---
-title: "Subagent Factory Agent - Agents"
-slug: "subagent-factory-agent"
-category: "agents"
-description: "Subagent architecture specialist creating specialized agents for delegation, parallel execution, and modular task decomposition in Claude Code workflows."
-seoTitle: "Subagent Factory Agent - Agents"
-seoDescription: "Subagent architecture specialist creating specialized agents for delegation, parallel execution, and modular task decomposition in Claude Code workflows."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-23"
-tags: 
-  - "subagents"
-  - "delegation"
-  - "parallel-execution"
-  - "task-decomposition"
-  - "architecture"
-  - "specialized-agents"
-keywords: 
-  - "agent"
-  - "agents"
-  - "architecture"
-  - "claude"
-  - "delegation"
-  - "development"
-  - "factory"
-  - "parallel-execution"
-  - "specialized-agents"
-  - "subagent"
-  - "subagents"
-  - "task-decomposition"
-  - "tools"
+title: Subagent Factory Agent - Agents
+slug: subagent-factory-agent
+category: agents
+description: >-
+  Subagent architecture specialist creating specialized agents for delegation,
+  parallel execution, and modular task decomposition in Claude Code workflows.
+cardDescription: >-
+  Subagent architecture specialist creating specialized agents for delegation,
+  parallel execution, and modular task decomposition in Claude...
+seoTitle: Subagent Factory Agent - Agents
+seoDescription: >-
+  Subagent architecture specialist creating specialized agents for delegation,
+  parallel execution, and modular task decomposition in Claude Code workflows.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-23'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://docs.claude.com/en/docs/claude-code/sub-agents'
+installable: false
+copySnippet: |-
+  // Main Claude conversation
+  User: "Research 5 authentication libraries and compare them."
+
+  Main Claude: "I'll launch 5 parallel research subagents."
+
+  // Launches 5 subagents simultaneously
+  Task({ subagent_type: 'Explore', prompt: 'Research NextAuth.js' });
+  Task({ subagent_type: 'Explore', prompt: 'Research Better-Auth' });
+  Task({ subagent_type: 'Explore', prompt: 'Research Auth.js' });
+  Task({ subagent_type: 'Explore', prompt: 'Research Clerk' });
+  Task({ subagent_type: 'Explore', prompt: 'Research Supabase Auth' });
+
+  // Each subagent works independently
+  // Main Claude aggregates results when all complete
+tags:
+  - subagents
+  - delegation
+  - parallel-execution
+  - task-decomposition
+  - architecture
+  - specialized-agents
+keywords:
+  - agent
+  - agents
+  - architecture
+  - claude
+  - delegation
+  - development
+  - factory
+  - parallel-execution
+  - specialized-agents
+  - subagent
+  - subagents
+  - task-decomposition
+  - tools
+readingTime: 10
+viewCount: 21
+copyCount: 2
+popularityScore: 26
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 21
-copyCount: 2
-popularityScore: 26
-readingTime: 10
-documentationUrl: "https://docs.claude.com/en/docs/claude-code/sub-agents"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a subagent architecture specialist, designed to help users create and orchestrate specialized Claude Code subagents for complex, multi-faceted tasks.
 
 ## Understanding Subagents

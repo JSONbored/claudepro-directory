@@ -1,48 +1,102 @@
 ---
-title: "Life Sciences Research Specialist - Agents"
-slug: "life-sciences-research-specialist"
-category: "agents"
-description: "Automate biomedical research workflows with Claude for Life Sciences. Reduces research validation and literature analysis from days to minutes for scientific teams."
-seoTitle: "Life Sciences Research Specialist - Agents"
-seoDescription: "Automate biomedical research workflows with Claude for Life Sciences. Reduces research validation and literature analysis from days to minutes for scientific..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-25"
-tags: 
-  - "life-sciences"
-  - "research-automation"
-  - "biomedical"
-  - "scientific-analysis"
-  - "literature-review"
-keywords: 
-  - "agents"
-  - "biomedical"
-  - "claude"
-  - "development"
-  - "life"
-  - "life-sciences"
-  - "literature-review"
-  - "research"
-  - "research-automation"
-  - "sciences"
-  - "scientific-analysis"
-  - "specialist"
-  - "tools"
+title: Life Sciences Research Specialist - Agents
+slug: life-sciences-research-specialist
+category: agents
+description: >-
+  Automate biomedical research workflows with Claude for Life Sciences. Reduces
+  research validation and literature analysis from days to minutes for
+  scientific teams.
+cardDescription: Automate biomedical research workflows with Claude for Life Sciences.
+seoTitle: Life Sciences Research Specialist - Agents
+seoDescription: >-
+  Automate biomedical research workflows with Claude for Life Sciences. Reduces
+  research validation and literature analysis from days to minutes for
+  scientific...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-25'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+installable: false
+copySnippet: |-
+  # Scientific literature analysis workflow
+  class LiteratureAnalyzer:
+      def __init__(self, claude_client):
+          self.client = claude_client
+          self.research_db = []
+      
+      async def analyze_papers(self, query, max_papers=50):
+          """
+          Analyze scientific papers with Claude for Life Sciences
+          Reduces manual review time from 40+ hours to minutes
+          """
+          papers = await self.search_pubmed(query, limit=max_papers)
+          
+          results = []
+          for paper in papers:
+              analysis = await self.client.analyze({
+                  'title': paper['title'],
+                  'abstract': paper['abstract'],
+                  'methodology': paper.get('methods', ''),
+                  'results': paper.get('results', ''),
+                  'task': 'research_validation'
+              })
+              
+              results.append({
+                  'pmid': paper['pmid'],
+                  'relevance_score': analysis['relevance'],
+                  'key_findings': analysis['findings'],
+                  'methodology_quality': analysis['quality_score'],
+                  'citation_recommendation': analysis['should_cite']
+              })
+          
+          return self.synthesize_evidence(results)
+      
+      def synthesize_evidence(self, analyzed_papers):
+          """
+          Meta-analysis of multiple papers
+          Identifies consensus findings and research gaps
+          """
+          high_quality = [p for p in analyzed_papers 
+                         if p['methodology_quality'] > 8.0]
+          
+          return {
+              'total_papers': len(analyzed_papers),
+              'high_quality_count': len(high_quality),
+              'consensus_findings': self.extract_consensus(high_quality),
+              'conflicting_results': self.identify_conflicts(high_quality),
+              'research_gaps': self.find_gaps(analyzed_papers)
+          }
+tags:
+  - life-sciences
+  - research-automation
+  - biomedical
+  - scientific-analysis
+  - literature-review
+keywords:
+  - agents
+  - biomedical
+  - claude
+  - development
+  - life
+  - life-sciences
+  - literature-review
+  - research
+  - research-automation
+  - sciences
+  - scientific-analysis
+  - specialist
+  - tools
+readingTime: 5
+viewCount: 5
+copyCount: 0
+popularityScore: 10
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 5
-copyCount: 0
-popularityScore: 10
-readingTime: 5
-documentationUrl: ""
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a Life Sciences Research Specialist agent powered by Claude for Life Sciences, designed to automate biomedical research workflows and reduce analysis time from days to minutes.
 
 ## Core Expertise:

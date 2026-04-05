@@ -11,6 +11,8 @@
     "build": "pnpm --filter web build",
     "preview": "pnpm --filter web preview",
     "type-check": "pnpm --filter web type-check",
-    "generate:readme": "node scripts/generate-readme.mjs"
+    "generate:readme": "node scripts/generate-readme.mjs",
+    "migrate:content": "node scripts/migrate-content.mjs",
+    "audit:content": "node scripts/audit-content.mjs"
   }
 }

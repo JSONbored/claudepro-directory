@@ -1,48 +1,87 @@
 ---
-title: "Go Golang Language Expert - CLAUDE.md Rules for Claude Code"
-slug: "golang-expert"
-category: "rules"
-description: "Transform Claude into a Go ecosystem expert specializing in tooling, library development, CLI applications, and Go build system mastery"
-seoTitle: "Go Golang Language Expert - CLAUDE.md Rules for Claude Code"
-seoDescription: "Transform Claude into a Go ecosystem expert specializing in tooling, library development, CLI applications, and Go build system mastery Discover tools for AI..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-09-16"
-tags: 
-  - "golang"
-  - "go"
-  - "tooling"
-  - "cli"
-  - "libraries"
-  - "modules"
-  - "build-tools"
-keywords: 
-  - "build-tools"
-  - "claude"
-  - "cli"
-  - "development"
-  - "expert"
-  - "golang"
-  - "libraries"
-  - "modules"
-  - "rules"
-  - "tooling"
-  - "tools"
+title: Go Golang Language Expert - CLAUDE.md Rules for Claude Code
+slug: golang-expert
+category: rules
+description: >-
+  Transform Claude into a Go ecosystem expert specializing in tooling, library
+  development, CLI applications, and Go build system mastery
+cardDescription: >-
+  Transform Claude into a Go ecosystem expert specializing in tooling, library
+  development, CLI applications, and Go build system mastery
+seoTitle: Go Golang Language Expert - CLAUDE.md Rules for Claude Code
+seoDescription: >-
+  Transform Claude into a Go ecosystem expert specializing in tooling, library
+  development, CLI applications, and Go build system mastery Discover tools for
+  AI...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-16'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://go.dev/doc/'
+installable: false
+copySnippet: |-
+  package main
+
+  import (
+      "fmt"
+      "github.com/spf13/cobra"
+  )
+
+  var rootCmd = &cobra.Command{
+      Use:   "mycli",
+      Short: "A brief description",
+      Long:  "A longer description",
+  }
+
+  var versionCmd = &cobra.Command{
+      Use:   "version",
+      Short: "Print version",
+      Run: func(cmd *cobra.Command, args []string) {
+          fmt.Println("v1.0.0")
+      },
+  }
+
+  func init() {
+      rootCmd.AddCommand(versionCmd)
+  }
+
+  func main() {
+      if err := rootCmd.Execute(); err != nil {
+          fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+          os.Exit(1)
+      }
+  }
+tags:
+  - golang
+  - go
+  - tooling
+  - cli
+  - libraries
+  - modules
+  - build-tools
+keywords:
+  - build-tools
+  - claude
+  - cli
+  - development
+  - expert
+  - golang
+  - libraries
+  - modules
+  - rules
+  - tooling
+  - tools
+readingTime: 4
+viewCount: 3
+copyCount: 0
+popularityScore: 8
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 3
-copyCount: 0
-popularityScore: 8
-readingTime: 4
-documentationUrl: "https://go.dev/doc/"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a Go ecosystem expert specializing in tooling, library development, CLI applications, and the Go build system. Your expertise focuses on the Go development environment, build tools, and creating reusable libraries and command-line tools.
 
 ## Go Ecosystem & Tooling

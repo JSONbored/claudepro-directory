@@ -1,44 +1,61 @@
 ---
-title: "Cloud Backup On Session Stop - Hooks"
-slug: "cloud-backup-on-session-stop"
-category: "hooks"
-description: "Automatically backs up changed files to cloud storage when Claude Code session ends using AWS S3, Google Cloud Storage, or rclone for universal cloud provider support. This hook runs on session stop and intelligently identifies modified files using git diff, creates timestamped backup archives, and uploads them to configured cloud storage providers. Features include automatic cloud backup when Claude session ends, support for multiple cloud providers (AWS S3, Google Cloud Storage, rclone for 40+ providers), intelligent file selection using git diff to track only changed files, timestamped backup archives with ISO 8601 format, fallback to rclone for universal cloud support, and environment variable configuration for security. The hook implements best practices including incremental backups, compression for efficient storage, error handling with graceful fallbacks, and secure credential management using environment variables."
-seoTitle: "Cloud Backup On Session Stop - Hooks"
-seoDescription: "Automatically backs up changed files to cloud storage when Claude Code session ends using AWS S3, Google Cloud Storage, or rclone for universal cloud provide..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-09-19"
-tags: 
-  - "backup"
-  - "cloud"
-  - "stop-hook"
-  - "aws"
-  - "safety"
-keywords: 
-  - "aws"
-  - "backup"
-  - "claude"
-  - "cloud"
-  - "development"
-  - "hooks"
-  - "safety"
-  - "session"
-  - "stop"
-  - "stop-hook"
-  - "tools"
+title: Cloud Backup On Session Stop - Hooks
+slug: cloud-backup-on-session-stop
+category: hooks
+description: >-
+  Automatically backs up changed files to cloud storage when Claude Code session
+  ends using AWS S3, Google Cloud Storage, or rclone for universal cloud
+  provider support. This hook runs on session stop and intelligently identifies
+  modified files using git diff, creates timestamped backup archives, and
+  uploads them to configured cloud storage providers. Features include automatic
+  cloud backup when Claude session ends, support for multiple cloud providers
+  (AWS S3, Google Cloud Storage, rclone for 40+ providers), intelligent file
+  selection using git diff to track only changed files, timestamped backup
+  archives with ISO 8601 format, fallback to rclone for universal cloud support,
+  and environment variable configuration for security. The hook implements best
+  practices including incremental backups, compression for efficient storage,
+  error handling with graceful fallbacks, and secure credential management using
+  environment variables.
+cardDescription: >-
+  Automatically backs up changed files to cloud storage when Claude Code session
+  ends using AWS S3, Google Cloud Storage, or rclone for uni...
+seoTitle: Cloud Backup On Session Stop - Hooks
+seoDescription: >-
+  Automatically backs up changed files to cloud storage when Claude Code session
+  ends using AWS S3, Google Cloud Storage, or rclone for universal cloud
+  provide...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-19'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+installable: true
+tags:
+  - backup
+  - cloud
+  - stop-hook
+  - aws
+  - safety
+keywords:
+  - aws
+  - backup
+  - claude
+  - cloud
+  - development
+  - hooks
+  - safety
+  - session
+  - stop
+  - stop-hook
+  - tools
+readingTime: 1
+viewCount: 16
+copyCount: 0
+popularityScore: 21
 difficultyScore: 0
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 16
-copyCount: 0
-popularityScore: 21
-readingTime: 1
-documentationUrl: ""
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
 
-*(No content)*

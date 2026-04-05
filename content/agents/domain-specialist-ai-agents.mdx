@@ -1,46 +1,104 @@
 ---
-title: "Domain Specialist AI Agents - Agents"
-slug: "domain-specialist-ai-agents"
-category: "agents"
-description: "Industry-specific AI agents for healthcare, legal, and financial domains with specialized knowledge, compliance automation, and regulatory requirements"
-seoTitle: "Domain Specialist AI Agents - Agents"
-seoDescription: "Industry-specific AI agents for healthcare, legal, and financial domains with specialized knowledge, compliance automation, and regulatory requirements"
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-16"
-tags: 
-  - "healthcare"
-  - "legal"
-  - "finance"
-  - "compliance"
-  - "domain-specific"
-keywords: 
-  - "agents"
-  - "claude"
-  - "compliance"
-  - "development"
-  - "domain"
-  - "domain-specific"
-  - "finance"
-  - "healthcare"
-  - "legal"
-  - "specialist"
-  - "tools"
+title: Domain Specialist AI Agents - Agents
+slug: domain-specialist-ai-agents
+category: agents
+description: >-
+  Industry-specific AI agents for healthcare, legal, and financial domains with
+  specialized knowledge, compliance automation, and regulatory requirements
+cardDescription: >-
+  Industry-specific AI agents for healthcare, legal, and financial domains with
+  specialized knowledge, compliance automation, and regulator...
+seoTitle: Domain Specialist AI Agents - Agents
+seoDescription: >-
+  Industry-specific AI agents for healthcare, legal, and financial domains with
+  specialized knowledge, compliance automation, and regulatory requirements
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-16'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+installable: false
+copySnippet: >-
+  from typing import Dict, List
+
+  from datetime import datetime
+
+  import hashlib
+
+
+  class HealthcareAgent:
+      def __init__(self):
+          self.phi_encryption_key = self._load_encryption_key()
+          self.audit_logger = AuditLogger()
+      
+      async def generate_clinical_note(self, patient_id: str, encounter_data: Dict) -> str:
+          # Verify HIPAA authorization
+          if not await self._verify_hipaa_authorization(patient_id):
+              await self.audit_logger.log_unauthorized_access(patient_id)
+              raise PermissionError("Unauthorized access to PHI")
+          
+          # Generate SOAP note
+          soap_note = f"""
+  Subjective: {encounter_data['chief_complaint']}
+
+  Objective: Vitals - BP: {encounter_data['vitals']['bp']}, HR:
+  {encounter_data['vitals']['hr']}
+
+  Assessment: {await self._generate_assessment(encounter_data)}
+
+  Plan: {await self._generate_treatment_plan(encounter_data)}
+          """
+          
+          # Encrypt PHI
+          encrypted_note = self._encrypt_phi(soap_note)
+          
+          # Audit log
+          await self.audit_logger.log_phi_access(
+              user_id=encounter_data['provider_id'],
+              patient_id=patient_id,
+              action='clinical_note_generated'
+          )
+          
+          return encrypted_note
+      
+      async def medical_coding_assistant(self, clinical_note: str) -> Dict:
+          # Extract ICD-10 and CPT codes
+          icd_codes = await self._extract_icd10_codes(clinical_note)
+          cpt_codes = await self._extract_cpt_codes(clinical_note)
+          
+          return {
+              'icd10_codes': icd_codes,
+              'cpt_codes': cpt_codes,
+              'billing_compliance': await self._validate_coding_compliance(icd_codes, cpt_codes)
+          }
+tags:
+  - healthcare
+  - legal
+  - finance
+  - compliance
+  - domain-specific
+keywords:
+  - agents
+  - claude
+  - compliance
+  - development
+  - domain
+  - domain-specific
+  - finance
+  - healthcare
+  - legal
+  - specialist
+  - tools
+readingTime: 2
+viewCount: 28
+copyCount: 0
+popularityScore: 33
 difficultyScore: 67
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 28
-copyCount: 0
-popularityScore: 33
-readingTime: 2
-documentationUrl: ""
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
 You are a domain-specialist AI agent architect building industry-specific agents for healthcare, legal, and financial sectors. You implement specialized knowledge, regulatory compliance, secure data handling, and domain expert validation workflows for mission-critical applications.
 
 ## Healthcare AI Agents

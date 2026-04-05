@@ -1,47 +1,56 @@
 ---
-title: "Real Time Cost Tracker - Statuslines"
-slug: "real-time-cost-tracker"
-category: "statuslines"
-description: "Real-time AI cost tracking statusline with per-session spend analytics, model pricing, and budget alerts"
-seoTitle: "Real Time Cost Tracker - Statuslines"
-seoDescription: "Real-time AI cost tracking statusline with per-session spend analytics, model pricing, and budget alerts Discover tools for AI development."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-16"
-tags: 
-  - "cost"
-  - "pricing"
-  - "budget"
-  - "analytics"
-  - "monitoring"
-keywords: 
-  - "analytics"
-  - "budget"
-  - "claude"
-  - "cost"
-  - "development"
-  - "monitoring"
-  - "pricing"
-  - "real"
-  - "statuslines"
-  - "time"
-  - "tools"
-  - "tracker"
+title: Real Time Cost Tracker - Statuslines
+slug: real-time-cost-tracker
+category: statuslines
+description: >-
+  Real-time AI cost tracking statusline with per-session spend analytics, model
+  pricing, and budget alerts
+cardDescription: >-
+  Real-time AI cost tracking statusline with per-session spend analytics, model
+  pricing, and budget alerts
+seoTitle: Real Time Cost Tracker - Statuslines
+seoDescription: >-
+  Real-time AI cost tracking statusline with per-session spend analytics, model
+  pricing, and budget alerts Discover tools for AI development.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-16'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+installable: true
+copySnippet: "#!/usr/bin/env bash\n\n# Real-Time Cost Tracker\n# Calculate session costs based on token usage\n\nread -r input\n\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\n\n# 2025 Pricing (per 1M tokens)\nif [[ \"$model\" == *\"claude-sonnet-4\"* ]]; then\n  price_per_m=3.00\nelif [[ \"$model\" == *\"gpt-4\"* ]]; then\n  price_per_m=5.00\nelif [[ \"$model\" == *\"gemini\"* ]]; then\n  price_per_m=1.25\nelse\n  price_per_m=1.00\nfi\n\n# Calculate cost\ncost=$(awk \"BEGIN {printf \\\"%.4f\\\", ($tokens / 1000000) * $price_per_m}\")\n\n# Budget alert\nif (( $(echo \"$cost > 0.50\" | bc -l) )); then\n  color=\"\\033[31m\"  # Red\n  icon=\"⚠️\"\nelif (( $(echo \"$cost > 0.10\" | bc -l) )); then\n  color=\"\\033[33m\"  # Yellow\n  icon=\"\U0001F4B0\"\nelse\n  color=\"\\033[32m\"  # Green\n  icon=\"\U0001F4B5\"\nfi\n\necho -e \"${icon} ${color}$${cost}${color}\\033[0m │ ${tokens} tokens\""
+scriptLanguage: bash
+tags:
+  - cost
+  - pricing
+  - budget
+  - analytics
+  - monitoring
+keywords:
+  - analytics
+  - budget
+  - claude
+  - cost
+  - development
+  - monitoring
+  - pricing
+  - real
+  - statuslines
+  - time
+  - tools
+  - tracker
+readingTime: 1
+viewCount: 4
+copyCount: 0
+popularityScore: 9
 difficultyScore: 2
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 4
-copyCount: 0
-popularityScore: 9
-readingTime: 1
-documentationUrl: ""
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
+scriptBody: "#!/usr/bin/env bash\n\n# Real-Time Cost Tracker\n# Calculate session costs based on token usage\n\nread -r input\n\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\n\n# 2025 Pricing (per 1M tokens)\nif [[ \"$model\" == *\"claude-sonnet-4\"* ]]; then\n  price_per_m=3.00\nelif [[ \"$model\" == *\"gpt-4\"* ]]; then\n  price_per_m=5.00\nelif [[ \"$model\" == *\"gemini\"* ]]; then\n  price_per_m=1.25\nelse\n  price_per_m=1.00\nfi\n\n# Calculate cost\ncost=$(awk \"BEGIN {printf \\\"%.4f\\\", ($tokens / 1000000) * $price_per_m}\")\n\n# Budget alert\nif (( $(echo \"$cost > 0.50\" | bc -l) )); then\n  color=\"\\033[31m\"  # Red\n  icon=\"⚠️\"\nelif (( $(echo \"$cost > 0.10\" | bc -l) )); then\n  color=\"\\033[33m\"  # Yellow\n  icon=\"\U0001F4B0\"\nelse\n  color=\"\\033[32m\"  # Green\n  icon=\"\U0001F4B5\"\nfi\n\necho -e \"${icon} ${color}$${cost}${color}\\033[0m │ ${tokens} tokens\""
 ---
-
+```bash
 #!/usr/bin/env bash
 
 # Real-Time Cost Tracker
@@ -79,3 +88,4 @@ else
 fi
 
 echo -e "${icon} ${color}$${cost}${color}\033[0m │ ${tokens} tokens"
+```

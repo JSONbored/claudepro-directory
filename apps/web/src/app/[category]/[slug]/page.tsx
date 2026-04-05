@@ -33,6 +33,10 @@ export default async function DetailPage({ params }: DetailPageProps) {
   const related = (await getEntriesByCategory(category))
     .filter((item) => item.slug !== slug)
     .slice(0, 4);
+  const hasBody = Boolean(entry.body?.trim());
+  const primaryCodeBlock = entry.codeBlocks?.[0];
+  const metadataOnly = !hasBody;
+  const sourceLabel = entry.filePath?.replace(/^content\//, "");
 
   return (
     <div className="container-shell grid gap-10 py-12 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -55,10 +59,34 @@ export default async function DetailPage({ params }: DetailPageProps) {
           </div>
         </div>
 
-        <div
-          className="prose-entry"
-          dangerouslySetInnerHTML={{ __html: entry.html }}
-        />
+        {primaryCodeBlock ? (
+          <section className="surface-panel overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border/80 px-5 py-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Primary file</p>
+                <p className="mt-1 text-sm text-foreground">{primaryCodeBlock.language || "text"}</p>
+              </div>
+            </div>
+            <pre className="detail-code-block">
+              <code>{primaryCodeBlock.code}</code>
+            </pre>
+          </section>
+        ) : null}
+
+        {metadataOnly ? (
+          <section className="surface-panel p-6">
+            <p className="text-sm leading-7 text-muted-foreground">
+              This entry currently only has structured metadata in the repository. The
+              source file is linked in the sidebar, but there is no long-form body
+              content to render yet.
+            </p>
+          </section>
+        ) : primaryCodeBlock && entry.codeBlocks.length === 1 && !entry.headings.length ? null : (
+          <div
+            className="prose-entry"
+            dangerouslySetInnerHTML={{ __html: entry.html }}
+          />
+        )}
       </article>
 
       <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
@@ -68,6 +96,12 @@ export default async function DetailPage({ params }: DetailPageProps) {
             <a href={entry.githubUrl} target="_blank" rel="noreferrer" className="block rounded-xl border border-border bg-background px-4 py-3">
               GitHub source
             </a>
+            {sourceLabel ? (
+              <div className="rounded-xl border border-border bg-background px-4 py-3 text-muted-foreground">
+                <p className="text-[11px] uppercase tracking-[0.16em]">Path</p>
+                <p className="mt-1 break-all text-sm text-foreground">{sourceLabel}</p>
+              </div>
+            ) : null}
             {entry.documentationUrl ? (
               <a href={entry.documentationUrl} target="_blank" rel="noreferrer" className="block rounded-xl border border-border bg-background px-4 py-3">
                 Documentation
@@ -77,6 +111,26 @@ export default async function DetailPage({ params }: DetailPageProps) {
               <a href={entry.downloadUrl} className="block rounded-xl border border-border bg-background px-4 py-3">
                 Download package
               </a>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="surface-panel p-5">
+          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Details</p>
+          <div className="mt-4 space-y-3 text-sm text-muted-foreground">
+            <div className="rounded-xl border border-border bg-background px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.16em]">Author</p>
+              <p className="mt-1 text-foreground">{entry.author ?? "JSONbored"}</p>
+            </div>
+            <div className="rounded-xl border border-border bg-background px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.16em]">Category</p>
+              <p className="mt-1 text-foreground">{categoryLabels[entry.category] ?? entry.category}</p>
+            </div>
+            {entry.dateAdded ? (
+              <div className="rounded-xl border border-border bg-background px-4 py-3">
+                <p className="text-[11px] uppercase tracking-[0.16em]">Added</p>
+                <p className="mt-1 text-foreground">{entry.dateAdded}</p>
+              </div>
             ) : null}
           </div>
         </div>

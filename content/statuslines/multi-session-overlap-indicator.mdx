@@ -1,48 +1,298 @@
 ---
-title: "Multi Session Overlap Indicator - Statuslines"
-slug: "multi-session-overlap-indicator"
-category: "statuslines"
-description: "Claude Code multi-session overlap detector showing concurrent active sessions with visual indicators, session count, and workspace collision warnings for budget management."
-seoTitle: "Multi Session Overlap Indicator - Statuslines"
-seoDescription: "Claude Code multi-session overlap detector showing concurrent active sessions with visual indicators, session count, and workspace collision warnings for bud..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-25"
-tags: 
-  - "multi-session"
-  - "parallel-sessions"
-  - "overlap-detection"
-  - "workspace-tracking"
-  - "session-management"
-keywords: 
-  - "claude"
-  - "development"
-  - "indicator"
-  - "multi"
-  - "multi-session"
-  - "overlap"
-  - "overlap-detection"
-  - "parallel-sessions"
-  - "session"
-  - "session-management"
-  - "statuslines"
-  - "tools"
-  - "workspace-tracking"
+title: Multi Session Overlap Indicator - Statuslines
+slug: multi-session-overlap-indicator
+category: statuslines
+description: >-
+  Claude Code multi-session overlap detector showing concurrent active sessions
+  with visual indicators, session count, and workspace collision warnings for
+  budget management.
+cardDescription: >-
+  Claude Code multi-session overlap detector showing concurrent active sessions
+  with visual indicators, session count, and workspace collis...
+seoTitle: Multi Session Overlap Indicator - Statuslines
+seoDescription: >-
+  Claude Code multi-session overlap detector showing concurrent active sessions
+  with visual indicators, session count, and workspace collision warnings for
+  bud...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-25'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://docs.claude.com/en/docs/claude-code/statusline'
+installable: true
+copySnippet: >-
+  #!/usr/bin/env bash
+
+
+  # Multi-Session Overlap Indicator for Claude Code
+
+  # Detects concurrent Claude sessions running in parallel
+
+
+  # Read JSON from stdin
+
+  read -r input
+
+
+  # Extract current session info
+
+  session_id=$(echo "$input" | jq -r '.session_id // "unknown"')
+
+  current_workspace=$(echo "$input" | jq -r '.workspace.current_dir // ""')
+
+
+  # Session tracking directory (stores active session metadata)
+
+  SESSION_DIR="${HOME}/.claude-code-sessions"
+
+  mkdir -p "$SESSION_DIR"
+
+
+  # Current session file
+
+  SESSION_FILE="${SESSION_DIR}/${session_id}.active"
+
+
+  # Write current session timestamp and workspace
+
+  echo "$(date +%s)|${current_workspace}" > "$SESSION_FILE"
+
+
+  # Cleanup stale sessions (older than 10 minutes = 600 seconds)
+
+  CURRENT_TIME=$(date +%s)
+
+  for session_file in "$SESSION_DIR"/*.active; do
+    if [ -f "$session_file" ]; then
+      session_timestamp=$(cut -d'|' -f1 < "$session_file")
+      age=$((CURRENT_TIME - session_timestamp))
+      if [ $age -gt 600 ]; then
+        rm -f "$session_file"
+      fi
+    fi
+  done
+
+
+  # Count active sessions
+
+  active_sessions=$(find "$SESSION_DIR" -name '*.active' -type f | wc -l | tr -d
+  ' ')
+
+
+  # Check for workspace collisions (multiple sessions in same workspace)
+
+  workspace_collision=false
+
+  if [ -n "$current_workspace" ]; then
+    collision_count=$(grep -l "|${current_workspace}$" "$SESSION_DIR"/*.active 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$collision_count" -gt 1 ]; then
+      workspace_collision=true
+    fi
+  fi
+
+
+  # Color coding based on session count
+
+  if [ $active_sessions -eq 1 ]; then
+    SESSION_COLOR="\033[38;5;46m"   # Green: Single session
+    SESSION_ICON="●"
+    SESSION_STATUS="SOLO"
+  elif [ $active_sessions -le 3 ]; then
+    SESSION_COLOR="\033[38;5;226m"  # Yellow: 2-3 sessions (moderate overlap)
+    SESSION_ICON="●●"
+    SESSION_STATUS="MULTI"
+  else
+    SESSION_COLOR="\033[38;5;196m"  # Red: 4+ sessions (high overlap, budget concern)
+    SESSION_ICON="●●●"
+    SESSION_STATUS="OVERLAP!"
+  fi
+
+
+  # Workspace collision warning
+
+  if [ "$workspace_collision" = true ]; then
+    COLLISION_WARNING="\033[38;5;208m⚠ WORKSPACE COLLISION\033[0m"
+  else
+    COLLISION_WARNING=""
+  fi
+
+
+  RESET="\033[0m"
+
+
+  # Build session list visualization
+
+  if [ $active_sessions -gt 1 ]; then
+    session_list=""
+    for i in $(seq 1 $active_sessions); do
+      session_list="${session_list}●"
+    done
+    visual="[${session_list}]"
+  else
+    visual=""
+  fi
+
+
+  # Output statusline
+
+  if [ -n "$COLLISION_WARNING" ]; then
+    echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual} | ${COLLISION_WARNING}"
+  else
+    echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual}"
+  fi
+scriptLanguage: bash
+tags:
+  - multi-session
+  - parallel-sessions
+  - overlap-detection
+  - workspace-tracking
+  - session-management
+keywords:
+  - claude
+  - development
+  - indicator
+  - multi
+  - multi-session
+  - overlap
+  - overlap-detection
+  - parallel-sessions
+  - session
+  - session-management
+  - statuslines
+  - tools
+  - workspace-tracking
+readingTime: 2
+viewCount: 0
+copyCount: 0
+popularityScore: 5
 difficultyScore: 6
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 0
-copyCount: 0
-popularityScore: 5
-readingTime: 2
-documentationUrl: "https://docs.claude.com/en/docs/claude-code/statusline"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
----
+scriptBody: >-
+  #!/usr/bin/env bash
 
+
+  # Multi-Session Overlap Indicator for Claude Code
+
+  # Detects concurrent Claude sessions running in parallel
+
+
+  # Read JSON from stdin
+
+  read -r input
+
+
+  # Extract current session info
+
+  session_id=$(echo "$input" | jq -r '.session_id // "unknown"')
+
+  current_workspace=$(echo "$input" | jq -r '.workspace.current_dir // ""')
+
+
+  # Session tracking directory (stores active session metadata)
+
+  SESSION_DIR="${HOME}/.claude-code-sessions"
+
+  mkdir -p "$SESSION_DIR"
+
+
+  # Current session file
+
+  SESSION_FILE="${SESSION_DIR}/${session_id}.active"
+
+
+  # Write current session timestamp and workspace
+
+  echo "$(date +%s)|${current_workspace}" > "$SESSION_FILE"
+
+
+  # Cleanup stale sessions (older than 10 minutes = 600 seconds)
+
+  CURRENT_TIME=$(date +%s)
+
+  for session_file in "$SESSION_DIR"/*.active; do
+    if [ -f "$session_file" ]; then
+      session_timestamp=$(cut -d'|' -f1 < "$session_file")
+      age=$((CURRENT_TIME - session_timestamp))
+      if [ $age -gt 600 ]; then
+        rm -f "$session_file"
+      fi
+    fi
+  done
+
+
+  # Count active sessions
+
+  active_sessions=$(find "$SESSION_DIR" -name '*.active' -type f | wc -l | tr -d
+  ' ')
+
+
+  # Check for workspace collisions (multiple sessions in same workspace)
+
+  workspace_collision=false
+
+  if [ -n "$current_workspace" ]; then
+    collision_count=$(grep -l "|${current_workspace}$" "$SESSION_DIR"/*.active 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$collision_count" -gt 1 ]; then
+      workspace_collision=true
+    fi
+  fi
+
+
+  # Color coding based on session count
+
+  if [ $active_sessions -eq 1 ]; then
+    SESSION_COLOR="\033[38;5;46m"   # Green: Single session
+    SESSION_ICON="●"
+    SESSION_STATUS="SOLO"
+  elif [ $active_sessions -le 3 ]; then
+    SESSION_COLOR="\033[38;5;226m"  # Yellow: 2-3 sessions (moderate overlap)
+    SESSION_ICON="●●"
+    SESSION_STATUS="MULTI"
+  else
+    SESSION_COLOR="\033[38;5;196m"  # Red: 4+ sessions (high overlap, budget concern)
+    SESSION_ICON="●●●"
+    SESSION_STATUS="OVERLAP!"
+  fi
+
+
+  # Workspace collision warning
+
+  if [ "$workspace_collision" = true ]; then
+    COLLISION_WARNING="\033[38;5;208m⚠ WORKSPACE COLLISION\033[0m"
+  else
+    COLLISION_WARNING=""
+  fi
+
+
+  RESET="\033[0m"
+
+
+  # Build session list visualization
+
+  if [ $active_sessions -gt 1 ]; then
+    session_list=""
+    for i in $(seq 1 $active_sessions); do
+      session_list="${session_list}●"
+    done
+    visual="[${session_list}]"
+  else
+    visual=""
+  fi
+
+
+  # Output statusline
+
+  if [ -n "$COLLISION_WARNING" ]; then
+    echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual} | ${COLLISION_WARNING}"
+  else
+    echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual}"
+  fi
+---
+```bash
 #!/usr/bin/env bash
 
 # Multi-Session Overlap Indicator for Claude Code
@@ -130,3 +380,4 @@ if [ -n "$COLLISION_WARNING" ]; then
 else
   echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual}"
 fi
+```

@@ -1,47 +1,56 @@
 ---
-title: "Python Rich Statusline - Statuslines"
-slug: "python-rich-statusline"
-category: "statuslines"
-description: "Feature-rich statusline using Python's Rich library for beautiful formatting, progress bars, and real-time token cost tracking"
-seoTitle: "Python Rich Statusline - Statuslines"
-seoDescription: "Feature-rich statusline using Python's Rich library for beautiful formatting, progress bars, and real-time token cost tracking Discover tools for AI developm..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-10-01"
-tags: 
-  - "python"
-  - "rich"
-  - "advanced"
-  - "cost-tracking"
-  - "progress"
-  - "colorful"
-keywords: 
-  - "advanced"
-  - "claude"
-  - "colorful"
-  - "cost-tracking"
-  - "development"
-  - "progress"
-  - "python"
-  - "rich"
-  - "statusline"
-  - "statuslines"
-  - "tools"
+title: Python Rich Statusline - Statuslines
+slug: python-rich-statusline
+category: statuslines
+description: >-
+  Feature-rich statusline using Python's Rich library for beautiful formatting,
+  progress bars, and real-time token cost tracking
+cardDescription: >-
+  Feature-rich statusline using Python's Rich library for beautiful formatting,
+  progress bars, and real-time token cost tracking
+seoTitle: Python Rich Statusline - Statuslines
+seoDescription: >-
+  Feature-rich statusline using Python's Rich library for beautiful formatting,
+  progress bars, and real-time token cost tracking Discover tools for AI
+  developm...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-01'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://rich.readthedocs.io/'
+installable: true
+copySnippet: "#!/usr/bin/env python3\n\nimport sys\nimport json\nfrom rich.console import Console\nfrom rich.text import Text\n\nconsole = Console()\n\n# Read JSON from stdin\ntry:\n    data = json.load(sys.stdin)\nexcept json.JSONDecodeError:\n    console.print(\"[red]Error: Invalid JSON input[/red]\")\n    sys.exit(1)\n\n# Extract session data\nmodel = data.get('model', 'unknown')\nworkspace = data.get('workspace', {}).get('path', '~').replace(f\"{os.path.expanduser('~')}\", '~')\ntokens = data.get('session', {}).get('totalTokens', 0)\ncost = data.get('session', {}).get('estimatedCost', 0.0)\ngit_branch = data.get('git', {}).get('branch', None)\n\n# Build status components\nstatus = Text()\n\n# Model indicator with emoji\nstatus.append(\"\U0001F916 \", style=\"bold\")\nstatus.append(f\"{model}\", style=\"bold cyan\")\nstatus.append(\" │ \", style=\"dim\")\n\n# Directory\nstatus.append(\"\U0001F4C1 \", style=\"bold\")\nstatus.append(f\"{workspace}\", style=\"yellow\")\n\n# Git branch if available\nif git_branch:\n    status.append(\" │ \", style=\"dim\")\n    status.append(\" \", style=\"bold\")\n    status.append(f\"{git_branch}\", style=\"magenta\")\n\n# Token usage\nstatus.append(\" │ \", style=\"dim\")\nstatus.append(\"\U0001F3AF \", style=\"bold\")\nstatus.append(f\"{tokens:,}\", style=\"green\" if tokens < 100000 else \"yellow\")\n\n# Cost with dynamic coloring\nif cost > 0:\n    status.append(\" │ \", style=\"dim\")\n    status.append(\"\U0001F4B0 \", style=\"bold\")\n    cost_color = \"green\" if cost < 0.10 else \"yellow\" if cost < 1.0 else \"red\"\n    status.append(f\"${cost:.3f}\", style=cost_color)\n\nconsole.print(status)"
+tags:
+  - python
+  - rich
+  - advanced
+  - cost-tracking
+  - progress
+  - colorful
+keywords:
+  - advanced
+  - claude
+  - colorful
+  - cost-tracking
+  - development
+  - progress
+  - python
+  - rich
+  - statusline
+  - statuslines
+  - tools
+readingTime: 1
+viewCount: 52
+copyCount: 0
+popularityScore: 57
 difficultyScore: 3
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 52
-copyCount: 0
-popularityScore: 57
-readingTime: 1
-documentationUrl: "https://rich.readthedocs.io/"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
+```bash
 #!/usr/bin/env python3
 
 import sys
@@ -96,3 +105,4 @@ if cost > 0:
     status.append(f"${cost:.3f}", style=cost_color)
 
 console.print(status)
+```
