@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { SnippetCard } from "@/components/snippet-card";
 import { getAllEntries, getEntriesByCategory, getEntry } from "@/lib/content";
 import { categoryLabels } from "@/lib/site";
 
@@ -37,6 +38,17 @@ export default async function DetailPage({ params }: DetailPageProps) {
   const primaryCodeBlock = entry.codeBlocks?.[0];
   const metadataOnly = !hasBody;
   const sourceLabel = entry.filePath?.replace(/^content\//, "");
+  const primarySnippet =
+    entry.installCommand || entry.commandSyntax || entry.usageSnippet || entry.copySnippet;
+  const snippetTitle = entry.installCommand
+    ? "Install command"
+    : entry.commandSyntax
+      ? "Command syntax"
+      : entry.usageSnippet
+        ? "Usage"
+        : entry.copySnippet
+          ? "Copyable asset"
+          : null;
 
   return (
     <div className="container-shell grid gap-10 py-12 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -59,18 +71,29 @@ export default async function DetailPage({ params }: DetailPageProps) {
           </div>
         </div>
 
-        {primaryCodeBlock ? (
-          <section className="surface-panel overflow-hidden">
-            <div className="flex items-center justify-between border-b border-border/80 px-5 py-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Primary file</p>
-                <p className="mt-1 text-sm text-foreground">{primaryCodeBlock.language || "text"}</p>
-              </div>
-            </div>
-            <pre className="detail-code-block">
-              <code>{primaryCodeBlock.code}</code>
-            </pre>
-          </section>
+        {primarySnippet && snippetTitle ? (
+          <SnippetCard
+            eyebrow="Quick use"
+            title={snippetTitle}
+            code={primarySnippet}
+            language={entry.scriptLanguage || primaryCodeBlock?.language || "text"}
+          />
+        ) : null}
+
+        {entry.scriptBody ? (
+          <SnippetCard
+            eyebrow="Source asset"
+            title={entry.scriptLanguage || "script"}
+            code={entry.scriptBody}
+            language={entry.scriptLanguage || "text"}
+          />
+        ) : primaryCodeBlock ? (
+          <SnippetCard
+            eyebrow="Source asset"
+            title={primaryCodeBlock.language || "text"}
+            code={primaryCodeBlock.code}
+            language={primaryCodeBlock.language || "text"}
+          />
         ) : null}
 
         {metadataOnly ? (
@@ -81,7 +104,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
               content to render yet.
             </p>
           </section>
-        ) : primaryCodeBlock && entry.codeBlocks.length === 1 && !entry.headings.length ? null : (
+        ) : (entry.scriptBody || (primaryCodeBlock && entry.codeBlocks.length === 1 && !entry.headings.length)) ? null : (
           <div
             className="prose-entry"
             dangerouslySetInnerHTML={{ __html: entry.html }}
@@ -107,6 +130,11 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 Documentation
               </a>
             ) : null}
+            {entry.repoUrl ? (
+              <a href={entry.repoUrl} target="_blank" rel="noreferrer" className="block rounded-xl border border-border bg-background px-4 py-3">
+                Repository
+              </a>
+            ) : null}
             {entry.downloadUrl ? (
               <a href={entry.downloadUrl} className="block rounded-xl border border-border bg-background px-4 py-3">
                 Download package
@@ -130,6 +158,12 @@ export default async function DetailPage({ params }: DetailPageProps) {
               <div className="rounded-xl border border-border bg-background px-4 py-3">
                 <p className="text-[11px] uppercase tracking-[0.16em]">Added</p>
                 <p className="mt-1 text-foreground">{entry.dateAdded}</p>
+              </div>
+            ) : null}
+            {entry.argumentHint ? (
+              <div className="rounded-xl border border-border bg-background px-4 py-3">
+                <p className="text-[11px] uppercase tracking-[0.16em]">Arguments</p>
+                <p className="mt-1 text-foreground">{entry.argumentHint}</p>
               </div>
             ) : null}
           </div>

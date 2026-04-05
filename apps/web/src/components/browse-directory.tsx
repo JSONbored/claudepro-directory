@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 import { DirectoryEntryCard } from "@/components/directory-entry-card";
 import { SearchBar } from "@/components/search-bar";
@@ -21,6 +21,8 @@ export function BrowseDirectory({
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState("all");
   const [sortMode, setSortMode] = useState("popular");
+  const [visibleCount, setVisibleCount] = useState(limit ?? entries.length);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const deferredQuery = useDeferredValue(query);
   const normalizedQuery = deferredQuery.trim().toLowerCase();
 
@@ -53,8 +55,34 @@ export function BrowseDirectory({
       return (right.popularityScore ?? 0) - (left.popularityScore ?? 0);
     });
 
-    return typeof limit === "number" ? sorted.slice(0, limit) : sorted;
+    return sorted;
   }, [category, entries, limit, normalizedQuery, sortMode]);
+
+  useEffect(() => {
+    setVisibleCount(limit ?? filteredEntries.length);
+  }, [category, deferredQuery, filteredEntries.length, limit, sortMode]);
+
+  useEffect(() => {
+    if (!limit) return;
+    const target = loadMoreRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting) return;
+        setVisibleCount((current) => Math.min(current + limit, filteredEntries.length));
+      },
+      { rootMargin: "400px 0px" }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [filteredEntries.length, limit]);
+
+  const displayedEntries = useMemo(() => {
+    if (!limit) return filteredEntries;
+    return filteredEntries.slice(0, visibleCount);
+  }, [filteredEntries, limit, visibleCount]);
 
   return (
     <div className="space-y-5">
@@ -95,13 +123,19 @@ export function BrowseDirectory({
       </div>
 
       <div className="space-y-4">
-        {filteredEntries.map((entry) => (
+        {displayedEntries.map((entry) => (
           <DirectoryEntryCard key={`${entry.category}-${entry.slug}`} entry={entry} />
         ))}
 
         {filteredEntries.length === 0 ? (
           <div className="surface-panel p-8 text-sm text-muted-foreground">
             No entries matched that search.
+          </div>
+        ) : null}
+
+        {limit && displayedEntries.length < filteredEntries.length ? (
+          <div ref={loadMoreRef} className="py-4 text-center text-sm text-muted-foreground">
+            Loading more entries...
           </div>
         ) : null}
       </div>

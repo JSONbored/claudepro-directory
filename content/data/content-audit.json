@@ -590,10 +590,7 @@
     "slug": "git-smart-commit",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -761,9 +758,7 @@
     "slug": "zod-audit",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",

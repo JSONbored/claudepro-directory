@@ -1,50 +1,57 @@
 ---
-title: "Git Smart Commit for Claude Code"
-slug: "git-smart-commit"
-category: "commands"
-description: "Intelligently analyzes changes and creates well-formatted git commits with conventional commit messages"
-seoTitle: "Git Smart Commit for Claude Code"
-seoDescription: "Intelligently analyzes changes and creates well-formatted git commits with conventional commit messages Discover tools for AI development."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-09-15"
-tags: 
-  - "git"
-  - "commit"
-  - "version-control"
-  - "conventional-commits"
-keywords: 
-  - "claude"
-  - "commands"
-  - "commit"
-  - "conventional-commits"
-  - "development"
-  - "git"
-  - "smart"
-  - "tools"
-  - "version-control"
+title: Git Smart Commit for Claude Code
+slug: git-smart-commit
+category: commands
+description: >-
+  Intelligently analyzes changes and creates well-formatted git commits with
+  conventional commit messages
+cardDescription: Analyze staged changes and generate a clean conventional commit message.
+seoTitle: Git Smart Commit for Claude Code
+seoDescription: >-
+  Intelligently analyzes changes and creates well-formatted git commits with
+  conventional commit messages Discover tools for AI development.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-15'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://www.conventionalcommits.org/'
+installable: true
+usageSnippet: /git-smart-commit feat "add structured content schema"
+copySnippet: /git-smart-commit feat "add structured content schema"
+tags:
+  - git
+  - commit
+  - version-control
+  - conventional-commits
+keywords:
+  - claude
+  - commands
+  - commit
+  - conventional-commits
+  - development
+  - git
+  - smart
+  - tools
+  - version-control
+readingTime: 2
+viewCount: 218
+copyCount: 26
+popularityScore: 223
+commandSyntax: '/git-smart-commit [type] [message]'
+allowedTools:
+  - 'Bash(git add:*)'
+  - 'Bash(git status:*)'
+  - 'Bash(git diff:*)'
+  - 'Bash(git commit:*)'
+argumentHint: '[type] [message]'
+model: claude-3-5-sonnet-20241022
 difficultyScore: 24
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 218
-copyCount: 26
-popularityScore: 223
-readingTime: 2
-documentationUrl: "https://www.conventionalcommits.org/"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
----
-allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git diff:*), Bash(git commit:*)
-argument-hint: [type] [message]
-description: Create a smart git commit
-model: claude-3-5-sonnet-20241022
----
-
 ## Context
 
 - Current git status: !`git status --short`
@@ -92,6 +99,19 @@ Analyze the changes and create a git commit following these guidelines:
 
 If arguments provided: Use $1 as type and $2 as message.
 Otherwise: Analyze changes and suggest appropriate commit.
+
+## Command Metadata
+
+```yaml
+allowed-tools:
+  - Bash(git add:*)
+  - Bash(git status:*)
+  - Bash(git diff:*)
+  - Bash(git commit:*)
+argument-hint: [type] [message]
+description: Create a smart git commit
+model: claude-3-5-sonnet-20241022
+```
 
 ## Steps
 

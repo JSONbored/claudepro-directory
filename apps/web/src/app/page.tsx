@@ -20,22 +20,22 @@ export default async function HomePage() {
               A GitHub-native directory for Claude Code setups, MCP integrations,
               prompts, hooks, reusable skills, and practical guides.
             </p>
-            <div className="mx-auto flex max-w-md justify-center gap-8 text-center">
-              <div>
-                <div className="text-2xl font-semibold tracking-tight text-primary">{totalEntries}+</div>
-                <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Entries</div>
-              </div>
-              <div>
-                <div className="text-2xl font-semibold tracking-tight text-chart-2">{categories.length}</div>
-                <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Categories</div>
-              </div>
-              <div>
-                <div className="text-2xl font-semibold tracking-tight text-foreground">
-                  {categories.find((item) => item.category === "skills")?.count ?? 0}
-                </div>
-                <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Skill Packs</div>
-              </div>
+          <div className="mx-auto flex max-w-md justify-center gap-8 text-center">
+            <div>
+              <div className="hero-stat-number">{totalEntries}+</div>
+              <div className="hero-stat-label">Entries</div>
             </div>
+            <div>
+              <div className="hero-stat-number">{categories.length}</div>
+              <div className="hero-stat-label">Categories</div>
+            </div>
+            <div>
+              <div className="hero-stat-number">
+                {categories.find((item) => item.category === "skills")?.count ?? 0}
+              </div>
+              <div className="hero-stat-label">Skill Packs</div>
+            </div>
+          </div>
             <div className="flex flex-wrap justify-center gap-3">
               <Link href="/browse" className="rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground">
                 Browse

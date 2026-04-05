@@ -1,62 +1,76 @@
 ---
-title: "/zod-audit - Zod Auditor Command for Claude Code"
-slug: "zod-audit"
-category: "commands"
-description: "Production codebase auditor specialized in Zod schema validation coverage, security vulnerability detection, and dead code elimination"
-seoTitle: "/zod-audit - Zod Auditor Command for Claude Code"
-seoDescription: "Production codebase auditor specialized in Zod schema validation coverage, security vulnerability detection, and dead code elimination Discover tools for AI ..."
-author: "JSONbored"
-authorProfileUrl: "https://github.com/JSONbored"
-dateAdded: "2025-09-26"
-tags: 
-  - "zod"
-  - "validation"
-  - "security-audit"
-  - "typescript"
-  - "dead-code"
-  - "duplication"
-  - "schema-validation"
-  - "open-source"
-  - "production"
-  - "technical-debt"
-keywords: 
-  - "audit"
-  - "claude"
-  - "commands"
-  - "dead-code"
-  - "development"
-  - "duplication"
-  - "open-source"
-  - "production"
-  - "schema-validation"
-  - "security-audit"
-  - "technical-debt"
-  - "tools"
-  - "typescript"
-  - "validation"
-  - "zod"
+title: /zod-audit - Zod Auditor Command for Claude Code
+slug: zod-audit
+category: commands
+description: >-
+  Production codebase auditor specialized in Zod schema validation coverage,
+  security vulnerability detection, and dead code elimination
+cardDescription: 'Audit a codebase for Zod coverage, security gaps, dead code, and duplication.'
+seoTitle: /zod-audit - Zod Auditor Command for Claude Code
+seoDescription: >-
+  Production codebase auditor specialized in Zod schema validation coverage,
+  security vulnerability detection, and dead code elimination Discover tools for
+  AI ...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-26'
+repoUrl: 'https://github.com/JSONbored/claudepro-directory'
+documentationUrl: 'https://owasp.org/www-project-top-ten/'
+installable: true
+usageSnippet: /zod-audit security apps/web
+copySnippet: /zod-audit security apps/web
+tags:
+  - zod
+  - validation
+  - security-audit
+  - typescript
+  - dead-code
+  - duplication
+  - schema-validation
+  - open-source
+  - production
+  - technical-debt
+keywords:
+  - audit
+  - claude
+  - commands
+  - dead-code
+  - development
+  - duplication
+  - open-source
+  - production
+  - schema-validation
+  - security-audit
+  - technical-debt
+  - tools
+  - typescript
+  - validation
+  - zod
+readingTime: 3
+viewCount: 29
+copyCount: 0
+popularityScore: 34
+commandSyntax: '/zod-audit [audit-type=full|security|duplication|validation|zod] [path]'
+allowedTools:
+  - 'Bash(find:*)'
+  - 'Bash(grep:*)'
+  - 'Bash(rg:*)'
+  - 'Bash(ls:*)'
+  - Read
+  - Write
+  - Edit
+  - Grep
+  - Glob
+  - Task
+argumentHint: '[audit-type=full|security|duplication|validation|zod] [path]'
+model: claude-3-5-sonnet-20241022
 difficultyScore: 65
 hasTroubleshooting: true
 hasPrerequisites: false
 hasBreakingChanges: false
-viewCount: 29
-copyCount: 0
-popularityScore: 34
-readingTime: 3
-documentationUrl: "https://owasp.org/www-project-top-ten/"
-downloadUrl: ""
-ogImage: ""
 robotsIndex: true
 robotsFollow: true
 ---
-
----
-allowed-tools: Bash(find:*), Bash(grep:*), Bash(rg:*), Bash(ls:*), Read, Write, Edit, Grep, Glob, Task
-argument-hint: [audit-type=full|security|duplication|validation|zod] [path]
-description: Audits codebase for Zod validation coverage, security gaps, and code quality issues
-model: claude-3-5-sonnet-20241022
----
-
 ## Context
 
 - Current directory: !`pwd`
@@ -68,6 +82,25 @@ model: claude-3-5-sonnet-20241022
 
 Audit Type: ${1:-full}
 Target Path: ${2:-.}
+
+## Command Metadata
+
+```yaml
+allowed-tools:
+  - Bash(find:*)
+  - Bash(grep:*)
+  - Bash(rg:*)
+  - Bash(ls:*)
+  - Read
+  - Write
+  - Edit
+  - Grep
+  - Glob
+  - Task
+argument-hint: [audit-type=full|security|duplication|validation|zod] [path]
+description: Audits codebase for Zod validation coverage, security gaps, and code quality issues
+model: claude-3-5-sonnet-20241022
+```
 
 ## Your Task
 

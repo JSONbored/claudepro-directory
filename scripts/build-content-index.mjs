@@ -162,6 +162,11 @@ async function main() {
         installCommand: inferred.installCommand || undefined,
         usageSnippet: inferred.usageSnippet || undefined,
         copySnippet: inferred.copySnippet || undefined,
+        commandSyntax: data.commandSyntax ? String(data.commandSyntax) : undefined,
+        argumentHint: data.argumentHint ? String(data.argumentHint) : undefined,
+        allowedTools: Array.isArray(data.allowedTools)
+          ? data.allowedTools.map(String)
+          : undefined,
         scriptLanguage: inferred.scriptLanguage || undefined,
         scriptBody: inferred.scriptBody || undefined,
         downloadUrl: normalizeDownloadUrl(
