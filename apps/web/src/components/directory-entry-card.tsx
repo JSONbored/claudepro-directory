@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Check, ChevronUp, Copy, Github } from "lucide-react";
+import { ArrowUpRight, Check, ChevronUp, Copy, FileCode2, FileText, Github } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { ContentEntry } from "@/lib/content";
@@ -22,14 +22,24 @@ function compactCount(value: number) {
 
 function getPreviewLine(entry: ContentEntry) {
   if (entry.installCommand) return entry.installCommand.slice(0, 96);
+  if (entry.commandSyntax) return entry.commandSyntax.slice(0, 96);
   if (entry.usageSnippet) return entry.usageSnippet.slice(0, 96);
+  if (entry.category === "hooks" && entry.trigger) {
+    return `Claude Code hook: ${entry.trigger}`;
+  }
+  if (entry.category === "agents" || entry.category === "rules") {
+    return "See GitHub for prompt and usage";
+  }
+  if (entry.category === "hooks" && !entry.scriptBody) {
+    return "Open source file for hook details";
+  }
   if (entry.copySnippet) return entry.copySnippet.split("\n")[0]?.trim().slice(0, 96);
   const firstCodeBlock = entry.codeBlocks?.[0]?.code?.split("\n")?.[0]?.trim();
 
   if (firstCodeBlock) return firstCodeBlock.slice(0, 96);
-  if (entry.documentationUrl) return "Open docs for instructions";
+  if (entry.documentationUrl) return "See docs for setup";
   if (entry.downloadUrl) return "Download the package";
-  if (entry.githubUrl) return "Open source file on GitHub";
+  if (entry.githubUrl) return "See GitHub for instructions";
   return "Open this entry on HeyClaude";
 }
 
@@ -45,13 +55,28 @@ function getCopyText(entry: ContentEntry) {
 }
 
 function getCardDescription(entry: ContentEntry) {
-  const normalized = entry.description.replace(/\s+/g, " ").trim();
+  const normalized = (entry.cardDescription || entry.description).replace(/\s+/g, " ").trim();
   if (normalized.length <= 220) return normalized;
 
   const sentence = normalized.match(/^(.{0,220}[.!?])\s/);
   if (sentence?.[1]) return sentence[1];
 
   return `${normalized.slice(0, 217).trimEnd()}...`;
+}
+
+function formatRelativeDate(date?: string) {
+  if (!date) return null;
+  const published = new Date(date);
+  if (Number.isNaN(published.getTime())) return date;
+
+  const diffDays = Math.max(
+    1,
+    Math.round((Date.now() - published.getTime()) / (1000 * 60 * 60 * 24))
+  );
+
+  if (diffDays < 30) return `${diffDays}d ago`;
+  if (diffDays < 365) return `${Math.round(diffDays / 30)}mo ago`;
+  return `${Math.round(diffDays / 365)}y ago`;
 }
 
 export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
@@ -64,6 +89,7 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
   const previewLine = useMemo(() => getPreviewLine(entry), [entry]);
   const cardDescription = useMemo(() => getCardDescription(entry), [entry]);
   const repoHref = entry.repoUrl || entry.githubUrl;
+  const relativeDate = useMemo(() => formatRelativeDate(entry.dateAdded), [entry.dateAdded]);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(storageKey);
@@ -130,7 +156,7 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
                 {categoryLabels[entry.category] ?? entry.category}
               </span>
               {entry.author ? <span>by {entry.author}</span> : null}
-              {entry.dateAdded ? <span>· {entry.dateAdded}</span> : null}
+              {relativeDate ? <span>· {relativeDate}</span> : null}
             </div>
           </div>
 
@@ -170,12 +196,57 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
           </Button>
         </div>
 
-        <div className="mt-auto flex flex-wrap gap-2">
-          {entry.tags.slice(0, 4).map((tag) => (
-            <span key={tag} className="directory-tag">
-              #{tag}
-            </span>
-          ))}
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-2">
+            {entry.tags.slice(0, 4).map((tag) => (
+              <span key={tag} className="directory-tag">
+                #{tag}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {entry.documentationUrl ? (
+              <a
+                href={entry.documentationUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="directory-link-chip"
+                aria-label="Open documentation"
+              >
+                <FileText className="size-3.5" />
+                Docs
+              </a>
+            ) : null}
+            {repoHref ? (
+              <a
+                href={repoHref}
+                target="_blank"
+                rel="noreferrer"
+                className="directory-link-chip"
+                aria-label="Open repository"
+              >
+                <Github className="size-3.5" />
+                GitHub
+              </a>
+            ) : null}
+            {entry.githubUrl && entry.githubUrl !== repoHref ? (
+              <a
+                href={entry.githubUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="directory-link-chip"
+                aria-label="Open source content file"
+              >
+                <FileCode2 className="size-3.5" />
+                Source
+              </a>
+            ) : null}
+            <Link href={`/${entry.category}/${entry.slug}`} className="directory-link-chip">
+              <ArrowUpRight className="size-3.5" />
+              Open
+            </Link>
+          </div>
         </div>
       </div>
     </article>

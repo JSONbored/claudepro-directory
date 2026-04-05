@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Blocks, FolderKanban, Package2 } from "lucide-react";
 
 import { BrowseDirectory } from "@/components/browse-directory";
 import { getAllEntries, getCategorySummaries } from "@/lib/content";
@@ -6,6 +7,7 @@ import { getAllEntries, getCategorySummaries } from "@/lib/content";
 export default async function HomePage() {
   const [entries, categories] = await Promise.all([getAllEntries(), getCategorySummaries()]);
   const totalEntries = categories.reduce((sum, category) => sum + category.count, 0);
+  const skillPacks = categories.find((item) => item.category === "skills")?.count ?? 0;
 
   return (
     <div className="space-y-16 pb-24">
@@ -20,22 +22,29 @@ export default async function HomePage() {
               A GitHub-native directory for Claude Code setups, MCP integrations,
               prompts, hooks, reusable skills, and practical guides.
             </p>
-          <div className="mx-auto flex max-w-md justify-center gap-8 text-center">
-            <div>
-              <div className="hero-stat-number">{totalEntries}+</div>
-              <div className="hero-stat-label">Entries</div>
-            </div>
-            <div>
-              <div className="hero-stat-number">{categories.length}</div>
-              <div className="hero-stat-label">Categories</div>
-            </div>
-            <div>
-              <div className="hero-stat-number">
-                {categories.find((item) => item.category === "skills")?.count ?? 0}
+            <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-3 text-left">
+              <div className="hero-count-pill">
+                <Blocks className="size-4 text-primary" />
+                <div>
+                  <div className="hero-stat-number">{totalEntries.toLocaleString()}+</div>
+                  <div className="hero-stat-label">Entries</div>
+                </div>
               </div>
-              <div className="hero-stat-label">Skill Packs</div>
+              <div className="hero-count-pill">
+                <FolderKanban className="size-4 text-primary" />
+                <div>
+                  <div className="hero-stat-number">{categories.length}</div>
+                  <div className="hero-stat-label">Categories</div>
+                </div>
+              </div>
+              <div className="hero-count-pill">
+                <Package2 className="size-4 text-primary" />
+                <div>
+                  <div className="hero-stat-number">{skillPacks}</div>
+                  <div className="hero-stat-label">Skill Packs</div>
+                </div>
+              </div>
             </div>
-          </div>
             <div className="flex flex-wrap justify-center gap-3">
               <Link href="/browse" className="rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground">
                 Browse
@@ -48,7 +57,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="container-shell max-w-5xl space-y-6">
+      <section className="container-shell max-w-[54rem] space-y-6">
         <BrowseDirectory entries={entries} limit={15} />
       </section>
     </div>

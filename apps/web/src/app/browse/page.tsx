@@ -10,7 +10,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const params = searchParams ? await searchParams : undefined;
 
   return (
-    <div className="container-shell max-w-5xl space-y-8 py-12">
+    <div className="container-shell max-w-[54rem] space-y-8 py-12">
       <div className="space-y-4 border-b border-border/80 pb-8">
         <span className="eyebrow">Browse</span>
         <h1 className="section-title">Browse the full directory.</h1>

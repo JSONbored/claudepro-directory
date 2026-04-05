@@ -180,11 +180,15 @@
 }
 
 .hero-stat-number {
-  @apply text-2xl font-semibold tracking-tight text-primary;
+  @apply text-xl font-semibold tracking-tight text-primary;
 }
 
 .hero-stat-label {
   @apply text-xs uppercase tracking-[0.18em] text-muted-foreground;
+}
+
+.hero-count-pill {
+  @apply inline-flex items-center gap-3 rounded-full border border-border/80 bg-card/88 px-4 py-3 shadow-sm backdrop-blur;
 }
 
 .display-title {
@@ -223,7 +227,7 @@
 
 .directory-stack-card {
   @apply flex gap-4 rounded-2xl border border-border/80 bg-card/94 px-5 py-4 shadow-sm backdrop-blur transition duration-200 ease-out;
-  min-height: 11.75rem;
+  min-height: 10.35rem;
 }
 
 .directory-stack-card:hover {
@@ -235,7 +239,7 @@
 }
 
 .directory-vote-rail {
-  @apply flex w-[3.9rem] shrink-0 flex-col items-center justify-between rounded-xl border border-border/80 bg-background/80 px-2 py-3;
+  @apply flex w-[3.75rem] shrink-0 flex-col items-center justify-between rounded-xl border border-border/80 bg-background/80 px-2 py-3;
 }
 
 .directory-vote-tile {
@@ -256,7 +260,7 @@
 }
 
 .directory-title {
-  font-size: 1rem;
+  font-size: 1.02rem;
   line-height: 1.2;
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -269,7 +273,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: calc(1.75rem * 2);
+  min-height: calc(1.6rem * 2);
 }
 
 .directory-code-text {
@@ -281,11 +285,29 @@
 }
 
 .directory-tag {
-  @apply inline-flex items-center rounded-md border border-border/70 bg-background px-2 py-0.5 text-[11px] text-muted-foreground;
+  @apply inline-flex items-center rounded-md border border-border/70 bg-background px-2 py-0.5 text-[10px] text-muted-foreground;
 }
 
 .directory-github-stat {
-  @apply hidden shrink-0 items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground md:inline-flex;
+  @apply hidden shrink-0 items-center gap-1.5 whitespace-nowrap text-sm text-muted-foreground transition hover:text-foreground md:inline-flex;
+}
+
+.directory-link-chip {
+  @apply inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs text-muted-foreground transition hover:border-primary/30 hover:text-foreground;
+}
+
+.detail-code-block-collapsed {
+  max-height: 24rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.detail-code-block-collapsed::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 5rem;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--card) 96%, black 4%));
 }
 
 .submit-form-card {

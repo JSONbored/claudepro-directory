@@ -78,6 +78,46 @@ export function extractHeadings(body) {
     }));
 }
 
+export function stripCodeBlocks(markdown) {
+  return String(markdown || "")
+    .replace(/```[\w-]*\n[\s\S]*?```/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+export function extractSections(body) {
+  const lines = String(body || "").split("\n");
+  const sections = [];
+  let current = { title: "Overview", markdown: "" };
+
+  const pushCurrent = () => {
+    const markdown = current.markdown.trim();
+    if (!markdown) return;
+    sections.push({
+      title: current.title,
+      id: headingId(current.title),
+      markdown
+    });
+  };
+
+  for (const line of lines) {
+    const headingMatch = line.match(/^##\s+(.*)$/);
+    if (headingMatch) {
+      pushCurrent();
+      current = {
+        title: headingMatch[1].trim(),
+        markdown: ""
+      };
+      continue;
+    }
+
+    current.markdown += `${line}\n`;
+  }
+
+  pushCurrent();
+  return sections;
+}
+
 export function inferLanguageFromCategory(category) {
   if (category === "statuslines" || category === "hooks") return "bash";
   if (category === "commands") return "text";
@@ -124,12 +164,38 @@ export function normalizeBody(body, category) {
 }
 
 export function inferRepoUrl(data = {}) {
+  if (data.repoUrl && String(data.repoUrl).trim() !== DEFAULT_REPO_URL) {
+    return String(data.repoUrl);
+  }
+
+  if (
+    data.documentationUrl &&
+    /^https:\/\/github\.com\/[^/]+\/[^/]+\/?$/i.test(String(data.documentationUrl).trim())
+  ) {
+    return String(data.documentationUrl).trim();
+  }
+
   return data.repoUrl ? String(data.repoUrl) : DEFAULT_REPO_URL;
+}
+
+export function inferHookTrigger(text = "") {
+  const triggers = [
+    "PreToolUse",
+    "PostToolUse",
+    "UserPromptSubmit",
+    "Notification",
+    "Stop",
+    "SubagentStop",
+    "SessionStart"
+  ];
+
+  return triggers.find((trigger) => text.includes(trigger)) || "";
 }
 
 export function inferStructuredFields(data, body, category) {
   const codeBlocks = extractCodeBlocks(body);
   const firstCodeBlock = codeBlocks[0];
+  const combinedText = `${data.description ?? ""}\n${body}`;
 
   const installCommand =
     data.installCommand
@@ -183,7 +249,15 @@ export function inferStructuredFields(data, body, category) {
     installCommand,
     installable,
     scriptLanguage,
-    scriptBody
+    scriptBody,
+    trigger:
+      category === "hooks"
+        ? data.trigger
+          ? String(data.trigger)
+          : inferHookTrigger(combinedText)
+        : data.trigger
+          ? String(data.trigger)
+          : ""
   };
 }
 
@@ -192,6 +266,29 @@ export function validateEntry(category, data, inferred = {}) {
   const merged = { ...data, ...inferred };
   const missingRequired = [];
   const missingRecommended = [];
+  const recommendedFields = [...(schema?.recommended ?? [])];
+
+  if (category === "agents" && merged.copySnippet) {
+    const index = recommendedFields.indexOf("usageSnippet");
+    if (index >= 0) recommendedFields.splice(index, 1);
+  }
+
+  if (category === "collections") {
+    const usageIndex = recommendedFields.indexOf("usageSnippet");
+    if (usageIndex >= 0) recommendedFields.splice(usageIndex, 1);
+  }
+
+  if (category === "hooks" && !merged.copySnippet && !merged.scriptBody) {
+    const usageIndex = recommendedFields.indexOf("usageSnippet");
+    if (usageIndex >= 0) recommendedFields.splice(usageIndex, 1);
+    const copyIndex = recommendedFields.indexOf("copySnippet");
+    if (copyIndex >= 0) recommendedFields.splice(copyIndex, 1);
+  }
+
+  if ((category === "mcp" || category === "skills") && !merged.installable) {
+    const installIndex = recommendedFields.indexOf("installCommand");
+    if (installIndex >= 0) recommendedFields.splice(installIndex, 1);
+  }
 
   for (const field of schema?.required ?? []) {
     if (
@@ -203,7 +300,7 @@ export function validateEntry(category, data, inferred = {}) {
     }
   }
 
-  for (const field of schema?.recommended ?? []) {
+  for (const field of recommendedFields) {
     if (
       merged[field] === undefined ||
       merged[field] === null ||
@@ -236,6 +333,7 @@ export function orderFrontmatter(data) {
     "usageSnippet",
     "copySnippet",
     "scriptLanguage",
+    "trigger",
     "tags",
     "keywords",
     "readingTime",

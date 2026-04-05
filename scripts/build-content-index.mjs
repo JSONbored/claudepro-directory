@@ -7,9 +7,11 @@ import { marked } from "marked";
 import {
   extractCodeBlocks,
   extractHeadings,
+  extractSections,
   headingId,
   inferStructuredFields,
-  normalizeBody
+  normalizeBody,
+  stripCodeBlocks
 } from "./content-schema.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -126,8 +128,9 @@ async function main() {
       const body = normalizeBody(content, category);
       const headings = extractHeadings(body);
       const codeBlocks = extractCodeBlocks(body);
+      const sections = extractSections(body);
       const inferred = inferStructuredFields(data, body, category);
-      const repoUrl = data.repoUrl ? String(data.repoUrl) : defaultRepoUrl;
+      const repoUrl = inferred.repoUrl ? String(inferred.repoUrl) : defaultRepoUrl;
       const githubRepo = parseGitHubRepo(repoUrl);
 
       if (githubRepo) {
@@ -169,11 +172,19 @@ async function main() {
           : undefined,
         scriptLanguage: inferred.scriptLanguage || undefined,
         scriptBody: inferred.scriptBody || undefined,
+        trigger: inferred.trigger || undefined,
         downloadUrl: normalizeDownloadUrl(
           data.downloadUrl ? String(data.downloadUrl) : ""
         ),
         body,
         html: marked.parse(body, { renderer }),
+        sections: sections.map((section) => ({
+          title: section.title,
+          id: section.id,
+          html: marked.parse(section.markdown, { renderer }),
+          proseHtml: marked.parse(stripCodeBlocks(section.markdown), { renderer }),
+          codeBlocks: extractCodeBlocks(section.markdown)
+        })),
         headings,
         codeBlocks,
         filePath: path.relative(repoRoot, filePath).replaceAll(path.sep, "/"),

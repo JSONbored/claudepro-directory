@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ContentSections } from "@/components/content-sections";
 import { SnippetCard } from "@/components/snippet-card";
 import { getAllEntries, getEntriesByCategory, getEntry } from "@/lib/content";
 import { categoryLabels } from "@/lib/site";
@@ -38,6 +39,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
   const primaryCodeBlock = entry.codeBlocks?.[0];
   const metadataOnly = !hasBody;
   const sourceLabel = entry.filePath?.replace(/^content\//, "");
+  const sectionItems = Array.isArray(entry.sections) ? entry.sections : [];
   const primarySnippet =
     entry.installCommand || entry.commandSyntax || entry.usageSnippet || entry.copySnippet;
   const snippetTitle = entry.installCommand
@@ -49,6 +51,20 @@ export default async function DetailPage({ params }: DetailPageProps) {
         : entry.copySnippet
           ? "Copyable asset"
           : null;
+  const omittedCode = [
+    primarySnippet,
+    entry.scriptBody,
+    primaryCodeBlock?.code
+  ]
+    .filter(Boolean)
+    .map((value) => String(value).trim());
+  const topFacts: Array<{ label: string; value: string }> = [
+    entry.author ? { label: "Author", value: entry.author } : null,
+    entry.dateAdded ? { label: "Added", value: entry.dateAdded } : null,
+    entry.trigger ? { label: "Trigger", value: entry.trigger } : null,
+    entry.argumentHint ? { label: "Arguments", value: entry.argumentHint } : null,
+    entry.scriptLanguage ? { label: "Format", value: entry.scriptLanguage } : null
+  ].filter((fact): fact is { label: string; value: string } => Boolean(fact));
 
   return (
     <div className="container-shell grid gap-10 py-12 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -69,6 +85,18 @@ export default async function DetailPage({ params }: DetailPageProps) {
               </span>
             ))}
           </div>
+          {topFacts.length ? (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {topFacts.map((fact) => (
+                <div key={fact.label} className="rounded-2xl border border-border/80 bg-card/80 px-4 py-3">
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                    {fact.label}
+                  </p>
+                  <p className="mt-1 text-sm text-foreground">{fact.value}</p>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         {primarySnippet && snippetTitle ? (
@@ -96,7 +124,9 @@ export default async function DetailPage({ params }: DetailPageProps) {
           />
         ) : null}
 
-        {metadataOnly ? (
+        {sectionItems.length ? (
+          <ContentSections sections={sectionItems} omitCode={omittedCode} />
+        ) : metadataOnly ? (
           <section className="surface-panel p-6">
             <p className="text-sm leading-7 text-muted-foreground">
               This entry currently only has structured metadata in the repository. The
@@ -166,6 +196,18 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 <p className="mt-1 text-foreground">{entry.argumentHint}</p>
               </div>
             ) : null}
+            {entry.trigger ? (
+              <div className="rounded-xl border border-border bg-background px-4 py-3">
+                <p className="text-[11px] uppercase tracking-[0.16em]">Hook trigger</p>
+                <p className="mt-1 text-foreground">{entry.trigger}</p>
+              </div>
+            ) : null}
+            {entry.githubStars ? (
+              <div className="rounded-xl border border-border bg-background px-4 py-3">
+                <p className="text-[11px] uppercase tracking-[0.16em]">GitHub stars</p>
+                <p className="mt-1 text-foreground">{entry.githubStars.toLocaleString()}</p>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -180,6 +222,23 @@ export default async function DetailPage({ params }: DetailPageProps) {
             ))}
           </div>
         </div>
+
+        {sectionItems.length ? (
+          <div className="surface-panel p-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">On this page</p>
+            <div className="mt-4 space-y-3">
+              {sectionItems.map((section) => (
+                <a
+                  key={section.id}
+                  href={`#${section.id}`}
+                  className="block text-sm text-muted-foreground transition hover:text-foreground"
+                >
+                  {section.title}
+                </a>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </aside>
     </div>
   );

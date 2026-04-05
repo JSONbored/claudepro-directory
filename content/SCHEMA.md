@@ -27,12 +27,13 @@ Use these when applicable:
 - `usageSnippet`
 - `copySnippet`
 - `scriptLanguage`
+- `trigger`
 
 ## Category notes
 
 - `mcp`: prefer `installCommand`, `usageSnippet`
 - `skills`: prefer `installCommand`, `usageSnippet`
-- `hooks`: prefer `usageSnippet`, `copySnippet`
+- `hooks`: prefer `trigger`, `usageSnippet`, `copySnippet`
 - `statuslines`: prefer `scriptLanguage`, `copySnippet`
 - `commands`: prefer `usageSnippet`, `copySnippet`
 - `agents` and `rules`: prefer `copySnippet`
