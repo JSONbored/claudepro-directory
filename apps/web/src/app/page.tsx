@@ -8,6 +8,7 @@ export default async function HomePage() {
   const [entries, categories] = await Promise.all([getAllEntries(), getCategorySummaries()]);
   const totalEntries = categories.reduce((sum, category) => sum + category.count, 0);
   const skillPacks = categories.find((item) => item.category === "skills")?.count ?? 0;
+  const featuredCategories = categories.slice(0, 6);
 
   return (
     <div className="space-y-16 pb-24">
@@ -44,6 +45,18 @@ export default async function HomePage() {
                   <div className="hero-stat-label">Skill Packs</div>
                 </div>
               </div>
+            </div>
+            <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-2">
+              {featuredCategories.map((category) => (
+                <Link
+                  key={category.category}
+                  href={`/${category.category}`}
+                  className="hero-category-link"
+                >
+                  {category.label}
+                  <span className="ml-2 text-primary">{category.count}</span>
+                </Link>
+              ))}
             </div>
             <div className="flex flex-wrap justify-center gap-3">
               <Link href="/browse" className="rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground">

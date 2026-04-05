@@ -19,6 +19,28 @@ authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-02'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: false
+usageSnippet: Start with `api-builder-agent` → `docs` → `generate-tests`
+copySnippet: Start with `api-builder-agent` → `docs` → `generate-tests`
+items:
+  - slug: api-builder-agent
+    category: agents
+  - slug: docs
+    category: commands
+  - slug: generate-tests
+    category: commands
+  - slug: debug
+    category: commands
+installationOrder:
+  - api-builder-agent
+  - docs
+  - generate-tests
+  - debug
+estimatedSetupTime: 20 minutes
+difficulty: beginner
+prerequisites:
+  - Node.js 18 or higher
+  - Basic understanding of REST API concepts
+  - Code editor with Claude integration
 tags:
   - api
   - backend
@@ -49,4 +71,78 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+Complete toolkit for building and documenting RESTful APIs with automated testing and documentation generation. Perfect for backend developers starting new API projects.
 
+## Features
+
+- Complete API development workflow
+- Automated documentation generation
+- Built-in testing and debugging tools
+- REST API design best practices
+
+## Use Cases
+
+- Building new REST APIs from scratch
+- Standardizing API development across teams
+- Learning API development best practices
+- Rapid prototyping of API endpoints
+
+## TL;DR
+
+A comprehensive collection of Claude AI tools, prompts, and workflows designed for API development. This starter kit provides ready-to-use resources for building, testing, and deploying REST APIs, GraphQL endpoints, and microservices with Claude Code assistance.
+
+- 25+ curated API development prompts and workflows
+- RESTful API and GraphQL templates optimized for Claude
+- Authentication, validation, and error handling patterns
+- Testing strategies and deployment automation guides
+
+Accelerate your API development workflow with this curated collection of Claude-optimized resources. Whether building REST APIs, GraphQL services, or microservices, this starter kit provides proven patterns and prompts to help you ship faster with higher quality.
+
+## Collection Overview
+
+**Collection Type:** Development Resources\n**Focus Area:** API Development & Microservices\n**Skill Level:** Intermediate to Advanced\n**Time Saving:** 40-60% reduction in API development time\n**Resource Count:** 25+ prompts, templates, and workflows
+
+## What's Included
+
+## Collection Contents
+
+Essential resources for rapid API development
+
+- **API Architecture Templates** (Templates): REST, GraphQL, and gRPC service templates with best practices built in. Includes request/response patterns and error handling.
+- **Authentication & Authorization** (Security): JWT, OAuth 2.0, and API key authentication patterns. Secure-by-default implementations with Claude assistance.
+- **Testing Workflows** (Testing): Unit tests, integration tests, and API contract testing strategies. Claude-generated test suites and mocking patterns.
+- **OpenAPI & Documentation** (Documentation): Automated API documentation generation, OpenAPI schemas, and interactive API explorers with Claude Code.
+
+## Quick Start
+
+Browse the collection to find the resources most relevant to your API development needs. Each item includes detailed usage instructions and can be customized for your specific requirements.
+
+## Prerequisites
+
+- Node.js 18 or higher
+- Basic understanding of REST API concepts
+- Code editor with Claude integration
+
+## Recommended Order
+
+1. `api-builder-agent`
+2. `docs`
+3. `generate-tests`
+4. `debug`
+
+## Troubleshooting
+### API Builder agent conflicts with existing test framework
+
+Install items in the specified order: api-builder-agent first, then docs, generate-tests, debug. Run npm ls to verify no peer dependency conflicts between generated code and test framework.
+### Documentation generation fails after installing debug command
+
+Ensure all items share compatible Node.js versions. Check package.json engines field across agent and commands. Reinstall docs command after verifying Node 18+ is active.
+### Missing test dependencies when using generate-tests command
+
+Install testing framework before collection setup. Run npm install jest @types/jest or your preferred test runner. Then reinstall generate-tests command to detect framework.
+### Installation order not followed causing endpoint conflicts
+
+Uninstall all collection items using Claude Code settings. Reinstall strictly following installationOrder array: api-builder-agent, docs, generate-tests, debug. Restart Claude after each.
+### Debug command cannot trace requests from API Builder agent
+
+Enable request logging in API Builder agent settings first. Install debug command last to allow proper hook integration. Verify both items are enabled in Claude Code preferences.

@@ -102,6 +102,16 @@ function formatRelativeDate(date?: string) {
   return `${Math.round(diffDays / 365)}y ago`;
 }
 
+function getMonogram(entry: ContentEntry) {
+  const label = categoryLabels[entry.category] ?? entry.category;
+  return label
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
 export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
   const storageKey = `heyclaude-vote:${entry.category}:${entry.slug}`;
   const [hasVoted, setHasVoted] = useState(false);
@@ -139,7 +149,14 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
   return (
     <article className="directory-stack-card group">
       <div className="directory-vote-rail">
-        <div className="directory-vote-tile" />
+        <div
+          className={cn(
+            "directory-vote-tile text-[11px] font-medium uppercase tracking-[0.18em]",
+            categoryAccentClasses[entry.category]
+          )}
+        >
+          {getMonogram(entry)}
+        </div>
         <button
           type="button"
           aria-pressed={hasVoted}
@@ -166,7 +183,7 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
               >
                 {entry.title}
               </Link>
-              <Check className="size-4 shrink-0 text-primary" />
+              <Check className="size-4 shrink-0 text-primary/90" />
             </div>
 
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
@@ -199,7 +216,7 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
           ) : null}
         </div>
 
-        <p className="directory-description max-w-3xl text-[14px] leading-7 text-muted-foreground">
+        <p className="directory-description max-w-3xl text-[13px] leading-6 text-muted-foreground">
           {cardDescription}
         </p>
 

@@ -174,6 +174,22 @@ async function main() {
         scriptLanguage: inferred.scriptLanguage || undefined,
         scriptBody: inferred.scriptBody || undefined,
         trigger: inferred.trigger || undefined,
+        items: Array.isArray(data.items)
+          ? data.items.map((item) => ({
+              slug: String(item.slug),
+              category: String(item.category)
+            }))
+          : undefined,
+        installationOrder: Array.isArray(data.installationOrder)
+          ? data.installationOrder.map(String)
+          : undefined,
+        estimatedSetupTime: data.estimatedSetupTime
+          ? String(data.estimatedSetupTime)
+          : undefined,
+        difficulty: data.difficulty ? String(data.difficulty) : undefined,
+        prerequisites: Array.isArray(data.prerequisites)
+          ? data.prerequisites.map(String)
+          : undefined,
         downloadUrl: normalizeDownloadUrl(
           data.downloadUrl ? String(data.downloadUrl) : ""
         ),
@@ -191,6 +207,10 @@ async function main() {
         filePath: path.relative(repoRoot, filePath).replaceAll(path.sep, "/"),
         githubUrl: buildGitHubUrl(filePath),
         repoUrl: githubRepo?.url
+          ?? undefined,
+        githubStars: undefined,
+        githubForks: undefined,
+        repoUpdatedAt: undefined
       });
     }
   }

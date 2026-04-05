@@ -7,7 +7,7 @@ export const CATEGORY_SCHEMAS = {
   },
   collections: {
     required: ["title", "slug", "description", "cardDescription", "repoUrl"],
-    recommended: ["usageSnippet", "items"]
+    recommended: ["items", "copySnippet"]
   },
   commands: {
     required: ["title", "slug", "description", "cardDescription", "repoUrl"],
@@ -337,6 +337,11 @@ export function orderFrontmatter(data) {
     "scriptLanguage",
     "scriptBody",
     "trigger",
+    "items",
+    "installationOrder",
+    "estimatedSetupTime",
+    "difficulty",
+    "prerequisites",
     "tags",
     "keywords",
     "readingTime",

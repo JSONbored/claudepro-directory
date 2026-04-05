@@ -84,9 +84,23 @@ export default async function DetailPage({ params }: DetailPageProps) {
 
   if (!entry) notFound();
 
+  const allEntries = await getAllEntries();
   const related = (await getEntriesByCategory(category))
     .filter((item) => item.slug !== slug)
     .slice(0, 4);
+  const collectionItems =
+    entry.category === "collections" && Array.isArray(entry.items)
+      ? entry.items
+          .map((item) => ({
+            ...item,
+            target:
+              allEntries.find(
+                (candidate) =>
+                  candidate.category === item.category && candidate.slug === item.slug
+              ) ?? null
+          }))
+          .filter((item) => item.target)
+      : [];
   const hasBody = Boolean(entry.body?.trim());
   const primaryCodeBlock = entry.codeBlocks?.[0];
   const metadataOnly = !hasBody;
@@ -125,7 +139,9 @@ export default async function DetailPage({ params }: DetailPageProps) {
     entry.dateAdded ? { label: "Added", value: entry.dateAdded } : null,
     entry.trigger ? { label: "Trigger", value: entry.trigger } : null,
     entry.argumentHint ? { label: "Arguments", value: entry.argumentHint } : null,
-    entry.scriptLanguage ? { label: "Format", value: entry.scriptLanguage } : null
+    entry.scriptLanguage ? { label: "Format", value: entry.scriptLanguage } : null,
+    entry.estimatedSetupTime ? { label: "Setup time", value: entry.estimatedSetupTime } : null,
+    entry.difficulty ? { label: "Difficulty", value: entry.difficulty } : null
   ].filter((fact): fact is { label: string; value: string } => Boolean(fact));
 
   return (
@@ -224,6 +240,38 @@ export default async function DetailPage({ params }: DetailPageProps) {
             dangerouslySetInnerHTML={{ __html: entry.html }}
           />
         )}
+
+        {collectionItems.length ? (
+          <section className="surface-panel p-6">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              Included items
+            </p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">
+              Explore this collection
+            </h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {collectionItems.map((item) => (
+                <Link
+                  key={`${item.category}:${item.slug}`}
+                  href={`/${item.category}/${item.slug}`}
+                  className="rounded-2xl border border-border bg-background px-4 py-3 transition hover:border-primary/70"
+                >
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                    {categoryLabels[item.category] ?? item.category}
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-foreground">
+                    {item.target?.title}
+                  </p>
+                  {item.target?.cardDescription ? (
+                    <p className="mt-1 text-xs leading-6 text-muted-foreground">
+                      {item.target.cardDescription}
+                    </p>
+                  ) : null}
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </article>
 
       <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">

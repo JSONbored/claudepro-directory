@@ -327,91 +327,73 @@
     "category": "collections",
     "filePath": "content/collections/api-development-starter-kit.mdx",
     "slug": "api-development-starter-kit",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "items"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "collections",
     "filePath": "content/collections/aws-cloud-infrastructure-bundle.mdx",
     "slug": "aws-cloud-infrastructure-bundle",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "items"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "collections",
     "filePath": "content/collections/backend-development-suite.mdx",
     "slug": "backend-development-suite",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "items"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "collections",
     "filePath": "content/collections/code-quality-toolkit.mdx",
     "slug": "code-quality-toolkit",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "items"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "collections",
     "filePath": "content/collections/content-creation-workflow.mdx",
     "slug": "content-creation-workflow",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "items"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "collections",
     "filePath": "content/collections/data-engineering-suite.mdx",
     "slug": "data-engineering-suite",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "items"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "collections",
     "filePath": "content/collections/debugging-troubleshooting-system.mdx",
     "slug": "debugging-troubleshooting-system",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "items"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "collections",
     "filePath": "content/collections/developer-productivity-booster.mdx",
     "slug": "developer-productivity-booster",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "items"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "collections",
     "filePath": "content/collections/production-readiness-toolkit.mdx",
     "slug": "production-readiness-toolkit",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "items"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",

@@ -20,6 +20,39 @@ authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-02'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: false
+usageSnippet: >-
+  Start with `production-codebase-auditor` → `code-review-expert` →
+  `code-complexity-alert-monitor`
+copySnippet: >-
+  Start with `production-codebase-auditor` → `code-review-expert` →
+  `code-complexity-alert-monitor`
+items:
+  - slug: production-codebase-auditor
+    category: rules
+  - slug: code-review-expert
+    category: rules
+  - slug: code-complexity-alert-monitor
+    category: hooks
+  - slug: auto-save-backup
+    category: hooks
+  - slug: code-reviewer-agent
+    category: agents
+  - slug: generate-tests
+    category: commands
+installationOrder:
+  - production-codebase-auditor
+  - code-review-expert
+  - code-complexity-alert-monitor
+  - auto-save-backup
+  - code-reviewer-agent
+  - generate-tests
+estimatedSetupTime: 45 minutes
+difficulty: advanced
+prerequisites:
+  - Existing codebase with CI/CD pipeline
+  - Understanding of production deployment processes
+  - Team buy-in for code quality standards
+  - Access to version control system
 tags:
   - production
   - code-quality
@@ -51,4 +84,84 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+Comprehensive system for ensuring code quality, security, and compliance before production deployment. Includes automated code reviews, complexity monitoring, backup strategies, and production-grade rules for professional development teams.
 
+## Features
+
+- Automated code review and complexity monitoring
+- Production-grade codebase auditing
+- Automatic backup and safety hooks
+- Security and compliance checking
+
+## Use Cases
+
+- Preparing code for production deployment
+- Implementing team code quality standards
+- Preventing production bugs and security issues
+- Enterprise-grade development workflows
+
+## TL;DR
+
+A comprehensive production readiness checklist with deployment workflows, monitoring setup, security hardening, and incident response playbooks. Ship confidently with battle-tested patterns.
+
+- Production deployment checklists and automation
+- Monitoring, alerting, and observability stack
+- Security hardening and compliance verification
+- Incident response and disaster recovery plans
+
+Ensure your applications are production-ready with this collection of deployment workflows, monitoring configurations, security checklists, and operational runbooks powered by Claude.
+
+## Collection Overview
+
+**Collection Type:** Operations & DevOps
+**Focus Area:** Production Deployment
+**Skill Level:** Intermediate to Advanced
+**Time Saving:** 50-70% reduction in deployment preparation time
+
+## What's Included
+
+## Collection Contents
+
+Everything needed for production deployment
+
+- **Release Automation** (Deployment): CI/CD pipelines, blue-green deployments, and rollback strategies with Claude-assisted testing.
+- **Observability** (Monitoring): Prometheus, Grafana, and APM configurations with custom dashboards and alert rules.
+- **Hardening Checklist** (Security): OWASP top 10 mitigations, dependency scanning, secrets management, and security audits.
+- **Response Playbooks** (Incident): On-call runbooks, incident response procedures, and disaster recovery with Claude assistance.
+
+## Quick Start
+
+Work through the production readiness checklist systematically. Start with security and monitoring, then add deployment automation and incident response procedures.
+
+## Prerequisites
+
+- Existing codebase with CI/CD pipeline
+- Understanding of production deployment processes
+- Team buy-in for code quality standards
+- Access to version control system
+
+## Recommended Order
+
+1. `production-codebase-auditor`
+2. `code-review-expert`
+3. `code-complexity-alert-monitor`
+4. `auto-save-backup`
+5. `code-reviewer-agent`
+6. `generate-tests`
+
+## Troubleshooting
+### Code complexity monitor triggers false alerts constantly
+
+Configure thresholds in hook settings: cyclomatic_complexity: 15, cognitive_complexity: 20. Add exceptions for generated code in .complexityignore file.
+### Auto-save backup conflicts with Git version control system
+
+Set backup directory outside Git repo in hook config: backup_path: '../backups'. Add backup_path to .gitignore. Schedule cleanup for backups older than 7 days.
+### Code reviewer agent and production auditor rules disagree
+
+Production auditor takes precedence for deployment decisions. Use reviewer agent for development phase. Configure agent to defer to auditor rules.
+### Generate-tests command fails: missing test framework setup
+
+Install test dependencies: npm install -D jest @types/jest ts-jest. Initialize config: npx jest --init. Ensure package.json has test script defined.
+### Collection slows down Claude responses significantly
+
+Disable hooks during development: set enabled: false for complexity monitor and backup. Re-enable before commits. Use agent/rules only for reviews.

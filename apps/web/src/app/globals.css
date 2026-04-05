@@ -235,7 +235,7 @@
 
 .directory-stack-card {
   @apply flex gap-4 rounded-2xl border border-border/80 bg-card/94 px-5 py-4 shadow-sm backdrop-blur transition duration-200 ease-out;
-  min-height: 10.35rem;
+  min-height: 9.8rem;
 }
 
 .directory-stack-card:hover {
@@ -244,11 +244,11 @@
 }
 
 .directory-vote-rail {
-  @apply flex w-[3.75rem] shrink-0 flex-col items-center justify-between rounded-xl border border-border/80 bg-background/80 px-2 py-3;
+  @apply flex w-[3.8rem] shrink-0 flex-col items-center justify-between rounded-xl border border-border/80 bg-background/80 px-2 py-3;
 }
 
 .directory-vote-tile {
-  @apply h-16 w-full rounded-lg border border-border/80 bg-background;
+  @apply flex h-10 w-full items-center justify-center rounded-lg border border-border/80 bg-background text-center;
 }
 
 .vote-button {
@@ -265,7 +265,7 @@
 }
 
 .directory-title {
-  font-size: 1.02rem;
+  font-size: 1rem;
   line-height: 1.2;
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -278,7 +278,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: calc(1.6rem * 2);
+  min-height: calc(1.5rem * 2);
 }
 
 .directory-code-text {
@@ -295,6 +295,7 @@
 
 .directory-github-stat {
   @apply hidden shrink-0 items-center gap-1.5 whitespace-nowrap text-sm text-muted-foreground transition hover:text-foreground md:inline-flex;
+  line-height: 1;
 }
 
 .directory-link-chip {
@@ -317,6 +318,10 @@
 
 .submit-form-card {
   @apply space-y-5 rounded-[1.75rem] border border-border/90 bg-card/96 p-8 shadow-lg backdrop-blur;
+}
+
+.hero-category-link {
+  @apply inline-flex items-center rounded-full border border-border/80 bg-card/78 px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-muted-foreground transition hover:border-primary/50 hover:text-foreground;
 }
 
 .submit-label {
