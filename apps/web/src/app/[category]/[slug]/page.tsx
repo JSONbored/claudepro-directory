@@ -87,7 +87,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
   const allEntries = await getAllEntries();
   const related = (await getEntriesByCategory(category))
     .filter((item) => item.slug !== slug)
-    .slice(0, 4);
+    .slice(0, 3);
   const collectionItems =
     entry.category === "collections" && Array.isArray(entry.items)
       ? entry.items
@@ -352,7 +352,11 @@ export default async function DetailPage({ params }: DetailPageProps) {
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Related</p>
           <div className="mt-4 space-y-4">
             {related.map((item) => (
-              <Link key={item.slug} href={`/${item.category}/${item.slug}`} className="block">
+              <Link
+                key={item.slug}
+                href={`/${item.category}/${item.slug}`}
+                className="block rounded-xl border border-border bg-background px-4 py-3 transition hover:border-primary/40"
+              >
                 <p className="detail-related-title text-sm font-medium tracking-tight">{item.title}</p>
                 <p className="detail-related-description mt-1 text-xs text-muted-foreground">
                   {item.cardDescription || item.description}

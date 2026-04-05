@@ -7,9 +7,9 @@ import { siteConfig } from "@/lib/site";
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-background/88 backdrop-blur">
-      <div className="container-shell flex h-16 items-center justify-between gap-6">
+      <div className="container-shell flex h-15 items-center justify-between gap-6">
         <BrandWordmark />
-        <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
+        <nav className="hidden items-center gap-3 text-sm text-muted-foreground md:flex">
           {siteConfig.nav.map((item) => (
             <Link
               key={item.href}
@@ -24,7 +24,7 @@ export function SiteHeader() {
           <ThemeToggle />
           <Link
             href="/submit"
-            className="inline-flex items-center rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground"
+            className="inline-flex items-center rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground"
           >
             Submit
           </Link>

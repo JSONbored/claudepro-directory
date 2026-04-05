@@ -188,15 +188,19 @@
 }
 
 .hero-stat-number {
-  @apply text-xl font-semibold tracking-tight text-primary;
+  @apply text-[1.9rem] font-semibold tracking-tight text-primary;
 }
 
 .hero-stat-label {
   @apply text-xs uppercase tracking-[0.18em] text-muted-foreground;
 }
 
-.hero-count-pill {
-  @apply inline-flex items-center gap-3 rounded-full border border-border/80 bg-card/88 px-4 py-3 shadow-sm backdrop-blur;
+.hero-stats-grid {
+  @apply mx-auto flex max-w-[36rem] items-start justify-center gap-10 pt-2;
+}
+
+.hero-stat-block {
+  @apply min-w-[7rem] text-center;
 }
 
 .display-title {
@@ -322,10 +326,6 @@
 
 .submit-form-card {
   @apply space-y-5 rounded-[1.75rem] border border-border/90 bg-card/96 p-8 shadow-lg backdrop-blur;
-}
-
-.hero-category-link {
-  @apply inline-flex items-center rounded-full border border-border/80 bg-card/78 px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-muted-foreground transition hover:border-primary/50 hover:text-foreground;
 }
 
 .submit-label {

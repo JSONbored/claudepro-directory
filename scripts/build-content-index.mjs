@@ -78,6 +78,15 @@ async function fetchGitHubRepoStats(repo) {
   });
 
   if (!response.ok) {
+    const fallback = await fetchShieldsStars(repo);
+    if (fallback !== null) {
+      return {
+        stars: fallback,
+        forks: undefined,
+        updatedAt: undefined
+      };
+    }
+
     throw new Error(`GitHub API ${response.status} for ${repo.key}`);
   }
 
@@ -87,6 +96,22 @@ async function fetchGitHubRepoStats(repo) {
     forks: typeof data.forks_count === "number" ? data.forks_count : undefined,
     updatedAt: typeof data.updated_at === "string" ? data.updated_at : undefined
   };
+}
+
+async function fetchShieldsStars(repo) {
+  try {
+    const response = await fetch(
+      `https://img.shields.io/github/stars/${repo.owner}/${repo.repo}.json`
+    );
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    const value = Number.parseFloat(String(data.value || data.message || "").replace(/[^\d.]/g, ""));
+
+    return Number.isFinite(value) ? Math.round(value) : null;
+  } catch {
+    return null;
+  }
 }
 
 function normalizeDownloadUrl(downloadUrl) {
