@@ -20,20 +20,43 @@ function compactCount(value: number) {
   return String(value);
 }
 
+function firstUsefulLine(value?: string | null) {
+  if (!value) return "";
+
+  const candidates = value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => !line.startsWith("```"))
+    .filter((line) => !line.startsWith("#"))
+    .filter((line) => !line.startsWith("//"))
+    .filter((line) => !line.startsWith("/*"))
+    .filter((line) => !line.startsWith("*"))
+    .filter((line) => !line.startsWith("<!--"));
+
+  return candidates[0] ?? "";
+}
+
 function getPreviewLine(entry: ContentEntry) {
   if (entry.installCommand) return entry.installCommand.slice(0, 96);
   if (entry.commandSyntax) return entry.commandSyntax.slice(0, 96);
-  if (entry.usageSnippet) return entry.usageSnippet.slice(0, 96);
+  if (entry.usageSnippet) {
+    const line = firstUsefulLine(entry.usageSnippet) || entry.usageSnippet;
+    return line.slice(0, 96);
+  }
   if (entry.category === "hooks" && entry.trigger) {
     return `Claude Code hook: ${entry.trigger}`;
   }
+  if (entry.copySnippet) {
+    const line = firstUsefulLine(entry.copySnippet);
+    if (line) return line.slice(0, 96);
+  }
   if (entry.category === "agents" || entry.category === "rules") {
-    return "See GitHub for prompt and usage";
+    return "Copy the prompt and use it in Claude Code";
   }
   if (entry.category === "hooks" && !entry.scriptBody) {
     return "Open source file for hook details";
   }
-  if (entry.copySnippet) return entry.copySnippet.split("\n")[0]?.trim().slice(0, 96);
   const firstCodeBlock = entry.codeBlocks?.[0]?.code?.split("\n")?.[0]?.trim();
 
   if (firstCodeBlock) return firstCodeBlock.slice(0, 96);
