@@ -20,126 +20,23 @@ dateAdded: '2025-10-25'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://docs.claude.com/en/docs/claude-code/statusline'
 installable: true
-copySnippet: >-
-  #!/usr/bin/env bash
-
-
-  # Multi-Session Overlap Indicator for Claude Code
-
-  # Detects concurrent Claude sessions running in parallel
-
-
-  # Read JSON from stdin
-
-  read -r input
-
-
-  # Extract current session info
-
-  session_id=$(echo "$input" | jq -r '.session_id // "unknown"')
-
-  current_workspace=$(echo "$input" | jq -r '.workspace.current_dir // ""')
-
-
-  # Session tracking directory (stores active session metadata)
-
-  SESSION_DIR="${HOME}/.claude-code-sessions"
-
-  mkdir -p "$SESSION_DIR"
-
-
-  # Current session file
-
-  SESSION_FILE="${SESSION_DIR}/${session_id}.active"
-
-
-  # Write current session timestamp and workspace
-
-  echo "$(date +%s)|${current_workspace}" > "$SESSION_FILE"
-
-
-  # Cleanup stale sessions (older than 10 minutes = 600 seconds)
-
-  CURRENT_TIME=$(date +%s)
-
-  for session_file in "$SESSION_DIR"/*.active; do
-    if [ -f "$session_file" ]; then
-      session_timestamp=$(cut -d'|' -f1 < "$session_file")
-      age=$((CURRENT_TIME - session_timestamp))
-      if [ $age -gt 600 ]; then
-        rm -f "$session_file"
-      fi
-    fi
-  done
-
-
-  # Count active sessions
-
-  active_sessions=$(find "$SESSION_DIR" -name '*.active' -type f | wc -l | tr -d
-  ' ')
-
-
-  # Check for workspace collisions (multiple sessions in same workspace)
-
-  workspace_collision=false
-
-  if [ -n "$current_workspace" ]; then
-    collision_count=$(grep -l "|${current_workspace}$" "$SESSION_DIR"/*.active 2>/dev/null | wc -l | tr -d ' ')
-    if [ "$collision_count" -gt 1 ]; then
-      workspace_collision=true
-    fi
-  fi
-
-
-  # Color coding based on session count
-
-  if [ $active_sessions -eq 1 ]; then
-    SESSION_COLOR="\033[38;5;46m"   # Green: Single session
-    SESSION_ICON="●"
-    SESSION_STATUS="SOLO"
-  elif [ $active_sessions -le 3 ]; then
-    SESSION_COLOR="\033[38;5;226m"  # Yellow: 2-3 sessions (moderate overlap)
-    SESSION_ICON="●●"
-    SESSION_STATUS="MULTI"
-  else
-    SESSION_COLOR="\033[38;5;196m"  # Red: 4+ sessions (high overlap, budget concern)
-    SESSION_ICON="●●●"
-    SESSION_STATUS="OVERLAP!"
-  fi
-
-
-  # Workspace collision warning
-
-  if [ "$workspace_collision" = true ]; then
-    COLLISION_WARNING="\033[38;5;208m⚠ WORKSPACE COLLISION\033[0m"
-  else
-    COLLISION_WARNING=""
-  fi
-
-
-  RESET="\033[0m"
-
-
-  # Build session list visualization
-
-  if [ $active_sessions -gt 1 ]; then
-    session_list=""
-    for i in $(seq 1 $active_sessions); do
-      session_list="${session_list}●"
-    done
-    visual="[${session_list}]"
-  else
-    visual=""
-  fi
-
-
-  # Output statusline
-
-  if [ -n "$COLLISION_WARNING" ]; then
-    echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual} | ${COLLISION_WARNING}"
-  else
-    echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual}"
-  fi
+usageSnippet: '●● MULTI: 2 active [●●] | ⚠ WORKSPACE COLLISION'
+copySnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-session-overlap-indicator.sh",
+      "refreshInterval": 2000
+    }
+  }
+configSnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-session-overlap-indicator.sh",
+      "refreshInterval": 2000
+    }
+  }
 scriptLanguage: bash
 scriptBody: >-
   #!/usr/bin/env bash
@@ -261,6 +158,21 @@ scriptBody: >-
   else
     echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual}"
   fi
+prerequisites:
+  - Claude Code CLI installed and configured
+  - >-
+    Bash shell available (bash 4.0+ recommended for pattern matching, arithmetic
+    operations, and file operations)
+  - >-
+    jq command-line JSON processor (jq 1.6+ recommended for safe extraction with
+    // defaults)
+  - date command with epoch timestamp support (date +%s for Unix timestamps)
+  - >-
+    Terminal with ANSI color code support (256-color mode recommended for
+    color-coded alerts)
+  - >-
+    Write access to home directory (~/.claude-code-sessions) for persistent
+    session tracking files
 tags:
   - multi-session
   - parallel-sessions
@@ -292,69 +204,104 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Features
+
+- Real-time detection of concurrent Claude Code sessions running in parallel
+- Session count tracking with visual indicators (●● for multiple sessions)
+- Workspace collision detection (multiple sessions in same directory)
+- Automatic stale session cleanup (sessions inactive >10 minutes)
+- Color-coded alerts (green solo, yellow 2-3 sessions, red 4+ sessions)
+- Visual session list showing all active sessions as dots
+- Budget awareness through overlap warnings (multiple 5-hour windows)
+- Persistent session tracking via ~/.claude-code-sessions directory
+
+## Use Cases
+
+- Managing multiple overlapping 5-hour billing windows
+- Preventing accidental parallel sessions that double costs
+- Detecting workspace collisions when working in same directory
+- Budget management for accounts with usage limits
+- Team coordination when multiple developers share workspace
+- Identifying forgotten background sessions still running
+
+## Requirements
+
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for pattern matching, arithmetic operations, and file operations)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- date command with epoch timestamp support (date +%s for Unix timestamps)
+- Terminal with ANSI color code support (256-color mode recommended for color-coded alerts)
+- Write access to home directory (~/.claude-code-sessions) for persistent session tracking files
+
+## Configuration
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-session-overlap-indicator.sh",
+    "refreshInterval": 2000
+  }
+}
+```
+
+## Examples
+### Enhanced Multi-Session Overlap Indicator with Session Details
+Extended version showing session IDs and workspace paths for debugging
 ```bash
 #!/usr/bin/env bash
 
-# Multi-Session Overlap Indicator for Claude Code
-# Detects concurrent Claude sessions running in parallel
+# Enhanced Multi-Session Overlap Indicator with Session Details
 
-# Read JSON from stdin
 read -r input
 
-# Extract current session info
 session_id=$(echo "$input" | jq -r '.session_id // "unknown"')
-current_workspace=$(echo "$input" | jq -r '.workspace.current_dir // ""')
+current_workspace=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""')
 
-# Session tracking directory (stores active session metadata)
 SESSION_DIR="${HOME}/.claude-code-sessions"
 mkdir -p "$SESSION_DIR"
 
-# Current session file
 SESSION_FILE="${SESSION_DIR}/${session_id}.active"
 
-# Write current session timestamp and workspace
-echo "$(date +%s)|${current_workspace}" > "$SESSION_FILE"
+echo "$(date +%s)|${current_workspace}|${session_id}" > "$SESSION_FILE"
 
-# Cleanup stale sessions (older than 10 minutes = 600 seconds)
 CURRENT_TIME=$(date +%s)
 for session_file in "$SESSION_DIR"/*.active; do
   if [ -f "$session_file" ]; then
-    session_timestamp=$(cut -d'|' -f1 < "$session_file")
-    age=$((CURRENT_TIME - session_timestamp))
-    if [ $age -gt 600 ]; then
-      rm -f "$session_file"
+    session_timestamp=$(cut -d'|' -f1 < "$session_file" 2>/dev/null || echo "0")
+    if [ -n "$session_timestamp" ] && [ "$session_timestamp" != "0" ]; then
+      age=$((CURRENT_TIME - session_timestamp))
+      if [ $age -gt 600 ]; then
+        rm -f "$session_file"
+      fi
     fi
   fi
 done
 
-# Count active sessions
-active_sessions=$(find "$SESSION_DIR" -name '*.active' -type f | wc -l | tr -d ' ')
+active_sessions=$(find "$SESSION_DIR" -name '*.active' -type f 2>/dev/null | wc -l | tr -d ' ')
 
-# Check for workspace collisions (multiple sessions in same workspace)
 workspace_collision=false
 if [ -n "$current_workspace" ]; then
-  collision_count=$(grep -l "|${current_workspace}$" "$SESSION_DIR"/*.active 2>/dev/null | wc -l | tr -d ' ')
+  collision_count=$(grep -l "|${current_workspace}|" "$SESSION_DIR"/*.active 2>/dev/null | wc -l | tr -d ' ')
   if [ "$collision_count" -gt 1 ]; then
     workspace_collision=true
   fi
 fi
 
-# Color coding based on session count
 if [ $active_sessions -eq 1 ]; then
-  SESSION_COLOR="\033[38;5;46m"   # Green: Single session
+  SESSION_COLOR="\033[38;5;46m"
   SESSION_ICON="●"
   SESSION_STATUS="SOLO"
 elif [ $active_sessions -le 3 ]; then
-  SESSION_COLOR="\033[38;5;226m"  # Yellow: 2-3 sessions (moderate overlap)
+  SESSION_COLOR="\033[38;5;226m"
   SESSION_ICON="●●"
   SESSION_STATUS="MULTI"
 else
-  SESSION_COLOR="\033[38;5;196m"  # Red: 4+ sessions (high overlap, budget concern)
+  SESSION_COLOR="\033[38;5;196m"
   SESSION_ICON="●●●"
   SESSION_STATUS="OVERLAP!"
 fi
 
-# Workspace collision warning
 if [ "$workspace_collision" = true ]; then
   COLLISION_WARNING="\033[38;5;208m⚠ WORKSPACE COLLISION\033[0m"
 else
@@ -363,7 +310,100 @@ fi
 
 RESET="\033[0m"
 
-# Build session list visualization
+if [ $active_sessions -gt 1 ]; then
+  session_list=""
+  for i in $(seq 1 $active_sessions); do
+    session_list="${session_list}●"
+  done
+  visual="[${session_list}]"
+  
+  # Show session IDs (first 8 chars)
+  session_ids=""
+  for session_file in "$SESSION_DIR"/*.active; do
+    if [ -f "$session_file" ]; then
+      sid=$(basename "$session_file" .active)
+      session_ids="${session_ids}${sid:0:8} "
+    fi
+  done
+  session_ids=$(echo "$session_ids" | sed 's/ $//')
+  visual="${visual} (${session_ids})"
+else
+  visual=""
+fi
+
+if [ -n "$COLLISION_WARNING" ]; then
+  echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual} | ${COLLISION_WARNING}"
+else
+  echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual}"
+fi
+```
+### Multi-Session Overlap Indicator with Custom Stale Threshold
+Version with configurable stale session timeout via environment variable
+```bash
+#!/usr/bin/env bash
+
+# Multi-Session Overlap Indicator with Custom Stale Threshold
+
+read -r input
+
+session_id=$(echo "$input" | jq -r '.session_id // "unknown"')
+current_workspace=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""')
+
+# Custom stale threshold (default 10 minutes = 600 seconds)
+STALE_THRESHOLD=${SESSION_STALE_THRESHOLD:-600}
+
+SESSION_DIR="${HOME}/.claude-code-sessions"
+mkdir -p "$SESSION_DIR"
+
+SESSION_FILE="${SESSION_DIR}/${session_id}.active"
+
+echo "$(date +%s)|${current_workspace}" > "$SESSION_FILE"
+
+CURRENT_TIME=$(date +%s)
+for session_file in "$SESSION_DIR"/*.active; do
+  if [ -f "$session_file" ]; then
+    session_timestamp=$(cut -d'|' -f1 < "$session_file" 2>/dev/null || echo "0")
+    if [ -n "$session_timestamp" ] && [ "$session_timestamp" != "0" ]; then
+      age=$((CURRENT_TIME - session_timestamp))
+      if [ $age -gt $STALE_THRESHOLD ]; then
+        rm -f "$session_file"
+      fi
+    fi
+  fi
+done
+
+active_sessions=$(find "$SESSION_DIR" -name '*.active' -type f 2>/dev/null | wc -l | tr -d ' ')
+
+workspace_collision=false
+if [ -n "$current_workspace" ]; then
+  collision_count=$(grep -l "|${current_workspace}$" "$SESSION_DIR"/*.active 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$collision_count" -gt 1 ]; then
+    workspace_collision=true
+  fi
+fi
+
+if [ $active_sessions -eq 1 ]; then
+  SESSION_COLOR="\033[38;5;46m"
+  SESSION_ICON="●"
+  SESSION_STATUS="SOLO"
+elif [ $active_sessions -le 3 ]; then
+  SESSION_COLOR="\033[38;5;226m"
+  SESSION_ICON="●●"
+  SESSION_STATUS="MULTI"
+else
+  SESSION_COLOR="\033[38;5;196m"
+  SESSION_ICON="●●●"
+  SESSION_STATUS="OVERLAP!"
+fi
+
+if [ "$workspace_collision" = true ]; then
+  COLLISION_WARNING="\033[38;5;208m⚠ WORKSPACE COLLISION\033[0m"
+else
+  COLLISION_WARNING=""
+fi
+
+RESET="\033[0m"
+
 if [ $active_sessions -gt 1 ]; then
   session_list=""
   for i in $(seq 1 $active_sessions); do
@@ -374,10 +414,185 @@ else
   visual=""
 fi
 
-# Output statusline
 if [ -n "$COLLISION_WARNING" ]; then
   echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual} | ${COLLISION_WARNING}"
 else
   echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual}"
 fi
 ```
+### Multi-Session Overlap Indicator Installation Example
+Complete setup script with session directory creation and Unicode character testing
+```bash
+#!/bin/bash
+# Installation script for Multi-Session Overlap Indicator
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Test date command (required for timestamps)
+if date +%s &> /dev/null; then
+    echo "Date command working: $(date +%s)"
+else
+    echo "Warning: date command may not support +%s format"
+fi
+
+# Test Unicode bullet character
+if echo -e '●' &> /dev/null; then
+    echo "Unicode bullet character supported: ●"
+else
+    echo "Warning: Unicode bullet character may not display correctly"
+    echo "Terminal may need UTF-8 encoding"
+fi
+
+# Test warning emoji
+if echo -e '⚠' &> /dev/null; then
+    echo "Warning emoji supported: ⚠"
+else
+    echo "Warning: Warning emoji may not display correctly"
+fi
+
+# Create session tracking directory
+mkdir -p ~/.claude-code-sessions
+
+echo "Session tracking directory created: ~/.claude-code-sessions"
+
+# Test write permissions
+if touch ~/.claude-code-sessions/test && rm ~/.claude-code-sessions/test; then
+    echo "Write permissions verified"
+else
+    echo "Warning: Cannot write to ~/.claude-code-sessions"
+    echo "Check permissions: ls -la ~/.claude-code-sessions"
+fi
+
+# Create statuslines directory
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/multi-session-overlap-indicator.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Multi-Session Overlap Indicator for Claude Code
+# Detects concurrent Claude sessions running in parallel
+
+read -r input
+
+session_id=$(echo "$input" | jq -r '.session_id // "unknown"')
+current_workspace=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""')
+
+SESSION_DIR="${HOME}/.claude-code-sessions"
+mkdir -p "$SESSION_DIR"
+
+SESSION_FILE="${SESSION_DIR}/${session_id}.active"
+
+echo "$(date +%s)|${current_workspace}" > "$SESSION_FILE"
+
+CURRENT_TIME=$(date +%s)
+for session_file in "$SESSION_DIR"/*.active; do
+  if [ -f "$session_file" ]; then
+    session_timestamp=$(cut -d'|' -f1 < "$session_file" 2>/dev/null || echo "0")
+    if [ -n "$session_timestamp" ] && [ "$session_timestamp" != "0" ]; then
+      age=$((CURRENT_TIME - session_timestamp))
+      if [ $age -gt 600 ]; then
+        rm -f "$session_file"
+      fi
+    fi
+  fi
+done
+
+active_sessions=$(find "$SESSION_DIR" -name '*.active' -type f 2>/dev/null | wc -l | tr -d ' ')
+
+workspace_collision=false
+if [ -n "$current_workspace" ]; then
+  collision_count=$(grep -l "|${current_workspace}$" "$SESSION_DIR"/*.active 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$collision_count" -gt 1 ]; then
+    workspace_collision=true
+  fi
+fi
+
+if [ $active_sessions -eq 1 ]; then
+  SESSION_COLOR="\033[38;5;46m"
+  SESSION_ICON="●"
+  SESSION_STATUS="SOLO"
+elif [ $active_sessions -le 3 ]; then
+  SESSION_COLOR="\033[38;5;226m"
+  SESSION_ICON="●●"
+  SESSION_STATUS="MULTI"
+else
+  SESSION_COLOR="\033[38;5;196m"
+  SESSION_ICON="●●●"
+  SESSION_STATUS="OVERLAP!"
+fi
+
+if [ "$workspace_collision" = true ]; then
+  COLLISION_WARNING="\033[38;5;208m⚠ WORKSPACE COLLISION\033[0m"
+else
+  COLLISION_WARNING=""
+fi
+
+RESET="\033[0m"
+
+if [ $active_sessions -gt 1 ]; then
+  session_list=""
+  for i in $(seq 1 $active_sessions); do
+    session_list="${session_list}●"
+  done
+  visual="[${session_list}]"
+else
+  visual=""
+fi
+
+if [ -n "$COLLISION_WARNING" ]; then
+  echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual} | ${COLLISION_WARNING}"
+else
+  echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual}"
+fi
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/multi-session-overlap-indicator.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-session-overlap-indicator.sh","refreshInterval":2000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-session-overlap-indicator.sh","refreshInterval":2000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Multi-Session Overlap Indicator installed successfully!"
+echo "Note: Session files stored in ~/.claude-code-sessions/"
+echo "View active sessions: ls -la ~/.claude-code-sessions/*.active"
+```
+
+## Troubleshooting
+### Session count always showing 1 despite multiple Claude Code instances running
+
+Verify session_id field exists in JSON: echo '$input' | jq .session_id. Check ~/.claude-code-sessions directory is writable: ls -la ~/.claude-code-sessions. Ensure each Claude Code instance has unique session_id. If all sessions share same ID (bug), script cannot distinguish them. Verify session files are created: ls -la ~/.claude-code-sessions/*.active (should show multiple files). Check file permissions: chmod 755 ~/.claude-code-sessions.
+### Workspace collision warning appearing incorrectly
+
+Check workspace.current_dir field: echo '$input' | jq .workspace.current_dir. Script uses exact path matching - symlinks and relative paths may cause false positives. Verify sessions are actually in different directories with pwd. Collision is EXPECTED if multiple sessions genuinely share same workspace. Check path format: Script matches exact paths, so /home/user/project and /home/user/project/ are different. Normalize paths if needed.
+### Stale sessions not being cleaned up automatically
+
+Cleanup runs every statusline update (default 2s refresh). Threshold is 600 seconds (10 minutes) of inactivity. Check session files: ls -la ~/.claude-code-sessions/*.active. Verify date command works: date +%s (should return Unix timestamp). Check file format: cat ~/.claude-code-sessions/*.active (should show timestamp|workspace). Manually cleanup: rm ~/.claude-code-sessions/*.active. Verify timestamp parsing: cut -d'|' -f1 < file.active (should return number).
+### Permission denied when creating session tracking directory
+
+Script creates ~/.claude-code-sessions on first run. Ensure HOME environment variable is set: echo $HOME. Check write permissions: mkdir -p ~/.claude-code-sessions. If permission denied, change location in script: SESSION_DIR="/tmp/claude-sessions-$(whoami)". Verify directory creation: mkdir -p ~/.claude-code-sessions && touch ~/.claude-code-sessions/test && rm ~/.claude-code-sessions/test. Check disk space: df -h ~.
+### Visual session list not displaying dots correctly
+
+Ensure terminal supports Unicode bullet character (●). Test with: echo -e '●●●'. If unsupported, replace with ASCII: SESSION_ICON='*' and visual characters. Check terminal encoding is UTF-8: echo $LANG (should show UTF-8). Set encoding: export LANG=en_US.UTF-8. Verify Unicode support: locale charmap (should be UTF-8). Alternative: Use ASCII characters like [***] instead of [●●●].
+### Session count showing incorrect number or negative values
+
+Verify find command works: find ~/.claude-code-sessions -name '*.active' -type f (should list active session files). Check wc command: find ... | wc -l (should return number). Verify tr command: echo ' 5 ' | tr -d ' ' (should return 5). Check for stale files: Script cleans up files older than 10 minutes, but may miss files if date command fails. Verify arithmetic: active_sessions=$((find_count)) (should be positive integer).
+### Warning emoji (⚠) not displaying correctly
+
+Verify terminal supports Unicode warning emoji: echo -e '⚠'. If not supported, replace with ASCII: COLLISION_WARNING="[!] WORKSPACE COLLISION". Check terminal encoding: locale charmap (should be UTF-8). Set encoding: export LANG=en_US.UTF-8. Test emoji: echo -e '⚠ ⚠ ⚠' (should display warning symbols). Alternative: Use text warning: "WARNING: WORKSPACE COLLISION".
+### Session files accumulating and not being deleted
+
+Check cleanup logic: Script removes files older than 600 seconds (10 minutes). Verify date command: date +%s (should return current timestamp). Check timestamp extraction: cut -d'|' -f1 < file.active (should return timestamp). Verify age calculation: age=$((CURRENT_TIME - session_timestamp)) (should be positive). Check file permissions: ls -la ~/.claude-code-sessions/*.active (should be writable). Manually test cleanup: Delete old files manually: find ~/.claude-code-sessions -name '*.active' -mmin +10 -delete.

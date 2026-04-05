@@ -13,6 +13,37 @@ dateAdded: '2025-09-18'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://help.zapier.com/hc/en-us/articles/36265392843917'
 installable: true
+installCommand: claude mcp add --transport http zapier YOUR_GENERATED_URL && claude mcp list
+usageSnippet: claude mcp add --transport http zapier YOUR_GENERATED_URL && claude mcp list
+copySnippet: |-
+  {
+    "zapier": {
+      "url": "https://mcp.zapier.com/YOUR_GENERATED_URL",
+      "transport": "http"
+    }
+  }
+configSnippet: |-
+  {
+    "zapier": {
+      "url": "https://mcp.zapier.com/YOUR_GENERATED_URL",
+      "transport": "http"
+    }
+  }
+estimatedSetupTime: 1 minute
+difficulty: beginner
+prerequisites:
+  - Zapier account (free or paid plan)
+  - Personal authentication token (generated at mcp.zapier.com)
+  - 'Network access to mcp.zapier.com (HTTPS required, HTTP transport)'
+  - Understanding of Zapier Zaps/workflows (automation concepts)
+  - Zapier Dashboard access (for token management and Zap configuration)
+  - Claude Desktop 0.7.0+ or Claude Code with MCP support
+  - >-
+    Understanding of Zapier API rate limits (1000 req/min, 10000 req/hour,
+    100000 req/day)
+  - 'Understanding of task limits (daily/monthly quotas, plan-specific limits)'
+  - 'Understanding of Zap throttling (burst thresholds, delay steps)'
+  - 'Optional: Zapier plan upgrade (for higher task limits and features)'
 tags:
   - automation
   - zapier
@@ -42,4 +73,148 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Content
+
 Access thousands of app integrations through Zapier's no-code automation platform. Trigger Zaps programmatically, access data from connected apps, read and write cross-application data, monitor Zap execution status, execute custom actions across apps, manage Zap configurations, view Zap History, and process webhooks—all through natural language commands. Supports personal authentication tokens, Zap-level permission controls, task usage monitoring, and comprehensive workflow automation across nearly 8,000 apps.
+
+## Features
+
+- Trigger Zaps (workflows) programmatically (on-demand execution)
+- Access data from connected apps (cross-app data retrieval)
+- Read and write cross-application data (data synchronization)
+- Monitor Zap execution status (real-time task tracking)
+- Execute custom actions across apps (multi-step automation)
+- Manage Zap configurations and connections (workflow management)
+- View Zap History and task details (monitoring and debugging)
+- Process webhooks and events (real-time event handling)
+- Advanced Zapier workflow automation and integration management with Zap execution, trigger configuration, and multi-app data transformation
+- Batch operations support for efficient bulk Zap operations, workflow management, and integration processing with automatic rate limit handling and retry logic
+- Real-time workflow synchronization capabilities with webhook integration support for monitoring Zapier events and triggering automated workflows
+
+## Use Cases
+
+- Trigger multi-step workflows across apps (end-to-end automation)
+- Connect disparate systems without code (no-code integration)
+- Automate repetitive tasks (task automation)
+- Sync data between applications (data synchronization)
+- Process webhooks and events (event-driven automation)
+- Monitor Zap performance and task execution (operational monitoring)
+- Manage integrations across thousands of apps (unified automation)
+- Debug and troubleshoot failed Zaps (error resolution)
+- Build automated integration workflows that sync external systems with Zapier for real-time data processing and business process automation
+
+## Installation
+
+### Claude Code
+
+1. Run: claude mcp add --transport http zapier YOUR_GENERATED_URL
+2. Verify installation: claude mcp list
+3. Test connection: claude mcp status zapier
+4. Authenticate with your Zapier account (personal token)
+5. Grant required permissions (Zap access, task execution)
+
+### Claude Desktop
+
+1. Visit mcp.zapier.com
+2. Sign in to your Zapier account
+3. Generate your personal MCP endpoint
+4. Copy the provided URL and add to Claude Desktop configuration
+5. Authenticate with your Zapier account (personal token)
+6. Grant required permissions (Zap access, task execution)
+7. Verify connection in Claude Desktop
+
+## Requirements
+
+- Zapier account (free or paid plan)
+- Personal authentication token (generated at mcp.zapier.com)
+- Network access to mcp.zapier.com (HTTPS required, HTTP transport)
+- Understanding of Zapier Zaps/workflows (automation concepts)
+- Zapier Dashboard access (for token management and Zap configuration)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of Zapier API rate limits (1000 req/min, 10000 req/hour, 100000 req/day)
+- Understanding of task limits (daily/monthly quotas, plan-specific limits)
+- Understanding of Zap throttling (burst thresholds, delay steps)
+- Optional: Zapier plan upgrade (for higher task limits and features)
+
+## Configuration
+
+```json
+{
+  "zapier": {
+    "url": "https://mcp.zapier.com/YOUR_GENERATED_URL",
+    "transport": "http"
+  }
+}
+```
+
+## Examples
+### Trigger the new customer onboarding Zap
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Trigger the new customer onboarding Zap"
+```
+### Send Slack notification when deal closes
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Send Slack notification when deal closes"
+```
+### Add form submission to Google Sheets
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Add form submission to Google Sheets"
+```
+### Create Trello card from email
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Create Trello card from email"
+```
+### Trigger Zap
+Trigger a Zapier Zap with input data
+```typescript
+// Trigger Zapier Zap
+const result = await zapier.zaps.trigger({
+  zap_id: "zap-id",
+  data: {
+    field: "value"
+  }
+});
+```
+
+## Security
+
+- Personal authentication tokens required for secure API access
+- Zap-level permission controls (granular access management)
+- Monitor task usage limits (Dashboard > Usage tracking)
+- Test Zaps before enabling (sandbox testing)
+- API token security (store tokens securely, never commit to git)
+- Zapier API keys and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- Zapier OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh
+- Zapier Zap, task, and account IDs may expose integration architecture and business process information - ensure Zapier resource identifiers are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Zapier MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Zapier webhook configurations and payloads may contain sensitive workflow data and business information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### Task limit exceeded or Zap throttled without clear error
+
+Check Dashboard > Usage for daily/monthly task quotas (plan-specific limits). Each action counts as one task. Zaps throttled if exceeding plan limits or burst thresholds. Add Delay after Queue step to manage rate (spread out task execution). Upgrade plan for higher limits (Free: 100 tasks/month, Starter: 750 tasks/month, Professional: 2000 tasks/month, Team: 50000 tasks/month, Company: custom). Monitor task usage in Dashboard > Usage. Use Zap History to identify high-frequency Zaps. Implement delays between steps using Delay action. Consider batching tasks to reduce task count.
+### API rate limit errors from connected apps
+
+Check app-specific API usage limits in Zap History (inspect failed tasks, error codes). Zapier API rate limits: 1000 requests/minute, 10000/hour, 100000/day. Check response headers: X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset. Batch tasks where possible (combine operations). Implement delays between steps using Delay action (spread out API calls). Upgrade app plan if hitting external service limits (third-party app rate limits). Use webhooks instead of polling triggers (reduce API calls). Monitor Zap History for rate limit errors (429 status codes). Wait for rate limit reset before retrying.
+### Zap fails with authentication or connection errors
+
+Use Zap History to inspect failed tasks and error codes (detailed error messages). Reauthenticate accounts if credentials expired (Dashboard > My Apps > Reconnect). Check app connection status in My Apps (verify connections are active). Verify OAuth redirect URLs correct (check app settings, redirect URI configuration). Test connection with sample trigger (use Test trigger button in Zap editor). Check personal authentication token not expired (regenerate at mcp.zapier.com if needed). Verify token has required permissions (Zap-level permission controls). Review error messages in Zap History for specific authentication issues (OAuth errors, token expiration, scope issues).
+### Data formatting or missing field errors in multi-step Zaps
+
+Check payloads in Zap History for missing/malformed data (inspect Data tab for each step). Use Formatter to transform data between steps (format dates, numbers, text). Verify required fields mapped correctly (check field mappings in Zap editor). Test each step individually (use Test step button). Enable detailed logging for debugging (Zap History > Task Details). Use Lookup Tables for data transformation (reference data mapping). Check data types match expected format (string vs number, date format). Review Zap History Data tab step-by-step to identify where data is lost or transformed incorrectly. Use Code by Zapier for complex transformations if Formatter insufficient.
+### Zapier MCP server authentication errors with API keys
+
+Verify API key is valid and not expired. Check API key permissions match required operations. Ensure API key format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+### Zapier rate limit errors when processing multiple Zap requests
+
+Implement exponential backoff retry logic with jitter. Use Zapier API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed Zap data. Zapier allows 1,000 requests per hour per API key.
+### Zapier Zap or task access denied errors
+
+Verify API key has access to the Zap or task. Check Zap permissions and account membership. Ensure API key has required permissions for target operations.
+### Zapier MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify Zapier API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

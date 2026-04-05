@@ -26,13 +26,30 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://ajv.js.org/'
 downloadUrl: /downloads/skills/json-schema-validation-transformation.zip
 installable: true
+installCommand: npm i ajv
+usageSnippet: npm i ajv
 copySnippet: |-
-  "Create a validation script that:
-  1. Loads this OpenAPI spec
-  2. Extracts the POST /users request schema
-  3. Validates this payload against it
-  4. Returns detailed error messages for invalid fields
-  5. Suggests corrections"
+  import Ajv from "ajv";
+  const ajv = new Ajv({ allErrors: true, strict: true });
+  const validate = ajv.compile({
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+    additionalProperties: false
+  });
+  console.log(validate({ id: "abc" })); // true
+  console.log(validate({})); // false, see validate.errors
+prerequisites:
+  - Node.js 18+
+  - ajv or zod
+  - TypeScript 4.5+ (for Zod)
+  - 'json-schema-to-typescript (optional, for type generation)'
+  - >-
+    File system read/write access for JSON schema files, data files, and
+    generated TypeScript type definitions
+  - >-
+    JSON Schema specification knowledge or reference documentation for creating
+    valid schemas (draft-07, 2019-09, or 2020-12)
 tags:
   - json
   - schema
@@ -62,8 +79,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# JSON Schema Validation & Transformation Skill
-
 ## What This Skill Enables
 
 Claude can validate JSON data against schemas, transform data between formats, migrate between schema versions, and generate TypeScript types from JSON schemas using tools like Ajv, Zod, and json-schema-to-typescript.
@@ -230,3 +245,23 @@ Claude will:
 - [Zod](https://zod.dev/) - TypeScript-first schema validation
 - [Understanding JSON Schema](https://json-schema.org/understanding-json-schema/) - Comprehensive guide
 - [JSON Schema Tools](https://json-schema.org/implementations.html) - Validators and generators
+
+## Features
+
+- Strict validation with detailed error reporting and JSON path references
+- Schema-aware migration between schema versions with change detection
+- Format and $ref handling with custom schema loaders
+- CLI-friendly usage with batch processing support
+- TypeScript type generation from JSON schemas (json-schema-to-typescript)
+- Custom validation functions and conditional schemas (if/then/else)
+- Data transformation pipelines with type coercion and normalization
+- Multiple JSON Schema draft support (draft-07, 2019-09, 2020-12)
+
+## Use Cases
+
+- API payload validation against OpenAPI specifications
+- Configuration file validation and migration between versions
+- Data pipeline guards with schema enforcement
+- TypeScript type generation from JSON schemas
+- Data normalization and cleaning with schema validation
+- Batch transformation of JSON documents between formats

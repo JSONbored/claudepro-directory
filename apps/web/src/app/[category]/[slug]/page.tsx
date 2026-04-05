@@ -143,6 +143,11 @@ export default async function DetailPage({ params }: DetailPageProps) {
     entry.estimatedSetupTime ? { label: "Setup time", value: entry.estimatedSetupTime } : null,
     entry.difficulty ? { label: "Difficulty", value: entry.difficulty } : null
   ].filter((fact): fact is { label: string; value: string } => Boolean(fact));
+  const githubStars = Number(
+    "githubStars" in entry && typeof entry.githubStars === "number"
+      ? entry.githubStars
+      : 0
+  );
 
   return (
     <div className="container-shell grid gap-10 py-12 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -334,10 +339,10 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 <p className="mt-1 text-foreground">{entry.trigger}</p>
               </div>
             ) : null}
-            {entry.githubStars ? (
+            {githubStars > 0 ? (
               <div className="rounded-xl border border-border bg-background px-4 py-3">
                 <p className="text-[11px] uppercase tracking-[0.16em]">GitHub stars</p>
-                <p className="mt-1 text-foreground">{entry.githubStars.toLocaleString()}</p>
+                <p className="mt-1 text-foreground">{githubStars.toLocaleString()}</p>
               </div>
             ) : null}
           </div>

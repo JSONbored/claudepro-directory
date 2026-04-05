@@ -23,7 +23,7 @@ export const CATEGORY_SCHEMAS = {
   },
   mcp: {
     required: ["title", "slug", "description", "cardDescription", "repoUrl"],
-    recommended: ["installCommand", "usageSnippet", "copySnippet"]
+    recommended: ["installCommand", "usageSnippet", "copySnippet", "configSnippet"]
   },
   rules: {
     required: ["title", "slug", "description", "cardDescription", "repoUrl"],
@@ -31,11 +31,11 @@ export const CATEGORY_SCHEMAS = {
   },
   skills: {
     required: ["title", "slug", "description", "cardDescription", "repoUrl"],
-    recommended: ["installCommand", "usageSnippet", "copySnippet"]
+    recommended: ["installCommand", "usageSnippet", "copySnippet", "downloadUrl"]
   },
   statuslines: {
     required: ["title", "slug", "description", "cardDescription", "repoUrl"],
-    recommended: ["scriptLanguage", "usageSnippet", "copySnippet"]
+    recommended: ["scriptLanguage", "usageSnippet", "copySnippet", "configSnippet", "scriptBody"]
   }
 };
 
@@ -83,6 +83,30 @@ export function stripCodeBlocks(markdown) {
     .replace(/```[\w-]*\n[\s\S]*?```/g, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+}
+
+function extractLeadParagraph(markdown) {
+  const prose = stripCodeBlocks(markdown)
+    .replace(/^#.*$/gm, "")
+    .replace(/\r\n/g, "\n")
+    .trim();
+
+  if (!prose) return "";
+
+  const blocks = prose
+    .split(/\n\s*\n/)
+    .map((block) => block.replace(/\n+/g, " ").trim())
+    .filter(Boolean);
+
+  return blocks[0] || "";
+}
+
+function extractUsageCodeBlock(markdown) {
+  const usageMatch = String(markdown || "").match(
+    /##\s+Usage[\s\S]*?```[\w-]*\n([\s\S]*?)```/i
+  );
+
+  return usageMatch?.[1]?.trim() || "";
 }
 
 export function extractSections(body) {
@@ -196,24 +220,44 @@ export function inferStructuredFields(data, body, category) {
   const codeBlocks = extractCodeBlocks(body);
   const firstCodeBlock = codeBlocks[0];
   const combinedText = `${data.description ?? ""}\n${body}`;
+  const leadParagraph = extractLeadParagraph(body);
+  const usageCodeBlock = extractUsageCodeBlock(body);
+  const commandFromTitle = String(data.title || "").match(/^(\/[^\s]+)/)?.[1] || "";
 
   const installCommand =
     data.installCommand
       ? String(data.installCommand)
+      : category === "commands" && usageCodeBlock
+        ? usageCodeBlock.split("\n")[0].trim()
       : firstCodeBlock && firstCodeBlock.code.split("\n").length === 1
         ? firstCodeBlock.code.trim()
+        : "";
+
+  const commandSyntax =
+    data.commandSyntax
+      ? String(data.commandSyntax)
+      : category === "commands"
+        ? usageCodeBlock || commandFromTitle
         : "";
 
   const usageSnippet =
     data.usageSnippet
       ? String(data.usageSnippet)
-      : data.commandSyntax
-        ? String(data.commandSyntax)
+      : commandSyntax
+        ? commandSyntax
+        : category === "guides"
+          ? leadParagraph
+          : category === "agents" || category === "rules"
+            ? leadParagraph
+            : category === "skills" && leadParagraph
+              ? leadParagraph
         : installCommand || "";
 
   const copySnippet =
     data.copySnippet
       ? String(data.copySnippet)
+      : category === "agents" || category === "rules"
+        ? String(body || "").trim()
       : firstCodeBlock?.code?.trim() || usageSnippet || "";
 
   const scriptLanguage =
@@ -247,6 +291,7 @@ export function inferStructuredFields(data, body, category) {
     usageSnippet,
     copySnippet,
     configSnippet: data.configSnippet ? String(data.configSnippet) : "",
+    commandSyntax,
     installCommand,
     installable,
     scriptLanguage,
@@ -287,6 +332,11 @@ export function validateEntry(category, data, inferred = {}) {
   }
 
   if ((category === "mcp" || category === "skills") && !merged.installable) {
+    const installIndex = recommendedFields.indexOf("installCommand");
+    if (installIndex >= 0) recommendedFields.splice(installIndex, 1);
+  }
+
+  if (category === "skills" && merged.downloadUrl && !merged.installCommand) {
     const installIndex = recommendedFields.indexOf("installCommand");
     if (installIndex >= 0) recommendedFields.splice(installIndex, 1);
   }

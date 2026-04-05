@@ -13,6 +13,47 @@ dateAdded: '2025-09-18'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://huggingface.co/settings/mcp'
 installable: true
+installCommand: claude mcp list && claude mcp status hugging-face
+usageSnippet: claude mcp list && claude mcp status hugging-face
+copySnippet: |-
+  {
+    "huggingface": {
+      "url": "https://huggingface.co/mcp",
+      "transport": "http"
+    }
+  }
+configSnippet: |-
+  {
+    "huggingface": {
+      "url": "https://huggingface.co/mcp",
+      "transport": "http"
+    }
+  }
+estimatedSetupTime: 2 minutes
+difficulty: beginner
+prerequisites:
+  - 'Hugging Face account (sign up at https://huggingface.co/join if needed)'
+  - >-
+    Hugging Face Access Token (HF_TOKEN) - get from Settings > Access Tokens
+    (required for private/gated models and higher rate limits)
+  - 'HTTP transport support (remote MCP server at https://huggingface.co/mcp)'
+  - Internet connection (remote Hugging Face API access required)
+  - >-
+    Understanding of Hugging Face API rate limits (5-minute windows, three
+    buckets: read, write, inference - check Billing page for status)
+  - >-
+    Understanding of model access types (public models accessible without auth,
+    private/gated models require token and terms acceptance)
+  - >-
+    Understanding of Inference API vs Inference Endpoints (serverless API for
+    testing, dedicated endpoints for production)
+  - Claude Desktop 0.7.0+ or Claude Code with MCP support
+  - >-
+    Understanding of ML/AI concepts (models, datasets, inference, tokenization,
+    transformers)
+  - >-
+    Understanding of model licenses and usage restrictions (check model card for
+    license terms)
 tags:
   - ai
   - hugging-face
@@ -43,4 +84,148 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Content
+
 Unlock the power of the Hugging Face ecosystem by connecting Claude to the Hugging Face Hub. Discover and access thousands of AI models, browse datasets, run inference through the Inference API, interact with Gradio demos, and manage your ML workflows—all through natural language commands with seamless authentication and rate limit management.
+
+## Features
+
+- Access model information, metrics, and metadata from Hugging Face Hub
+- Browse and search datasets with filtering and pagination
+- Run Gradio AI applications and interactive demos
+- Query model performance data and benchmark results
+- Access Spaces and deploy model demos
+- Use Inference API for serverless model inference
+- Download models and datasets programmatically
+- Manage repositories and model versions
+- Advanced Hugging Face model and dataset management with inference API integration, model deployment, and community collaboration features
+- Batch operations support for efficient bulk model operations, dataset processing, and inference requests with automatic rate limit handling and retry logic
+- Real-time model synchronization capabilities with webhook integration support for monitoring model updates and triggering automated workflows
+
+## Use Cases
+
+- Find suitable AI models for specific tasks (NLP, vision, audio)
+- Access dataset information and metadata for training workflows
+- Run model inference through Gradio demos or Inference API
+- Compare model performance metrics and benchmark results
+- Search research papers and documentation on the Hub
+- Download models and datasets for local use
+- Deploy and manage model Spaces for demos
+- Access private or gated models with proper authentication
+- Build automated ML workflows that sync external systems with Hugging Face for real-time model inference and dataset management
+
+## Installation
+
+### Claude Code
+
+1. Get your Hugging Face Access Token from Settings > Access Tokens (optional but recommended for higher limits)
+2. claude mcp add --transport http huggingface https://huggingface.co/mcp
+3. Add HF_TOKEN to your environment or configuration if using private/gated models
+4. Verify installation: claude mcp list
+5. Test connection: claude mcp status hugging-face
+
+### Claude Desktop
+
+1. Get your Hugging Face Access Token from Settings > Access Tokens (optional but recommended for higher limits)
+2. Open your Claude Desktop configuration file (see configPath below)
+3. Add the Hugging Face server configuration with HTTP transport pointing to https://huggingface.co/mcp
+4. Add HF_TOKEN to environment variables in configuration if using private/gated models
+5. Restart Claude Desktop
+6. Authenticate with your Hugging Face account when prompted (if required)
+
+## Requirements
+
+- Hugging Face account (sign up at https://huggingface.co/join if needed)
+- Hugging Face Access Token (HF_TOKEN) - get from Settings > Access Tokens (required for private/gated models and higher rate limits)
+- HTTP transport support (remote MCP server at https://huggingface.co/mcp)
+- Internet connection (remote Hugging Face API access required)
+- Understanding of Hugging Face API rate limits (5-minute windows, three buckets: read, write, inference - check Billing page for status)
+- Understanding of model access types (public models accessible without auth, private/gated models require token and terms acceptance)
+- Understanding of Inference API vs Inference Endpoints (serverless API for testing, dedicated endpoints for production)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of ML/AI concepts (models, datasets, inference, tokenization, transformers)
+- Understanding of model licenses and usage restrictions (check model card for license terms)
+
+## Configuration
+
+```json
+{
+  "huggingface": {
+    "url": "https://huggingface.co/mcp",
+    "transport": "http"
+  }
+}
+```
+
+## Examples
+### Find the best text generation model
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Find the best text generation model"
+```
+### Access the IMDB dataset
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Access the IMDB dataset"
+```
+### Run the stable diffusion demo
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Run the stable diffusion demo"
+```
+### Compare BERT model variants
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Compare BERT model variants"
+```
+### Run Model Inference
+Run inference on a Hugging Face model with custom parameters
+```typescript
+// Run Hugging Face model inference
+const result = await huggingface.inference({
+  model: "bert-base-uncased",
+  inputs: "Hello, world!",
+  parameters: {
+    return_all_scores: true
+  }
+});
+```
+
+## Security
+
+- Access Token authentication (HF_TOKEN) for secure access to private/gated models
+- Monitor API usage limits (three rate limit buckets: read, write, inference)
+- Respect model licenses and usage restrictions (check model card for terms)
+- Check compute resource limits (free tier vs PRO/Enterprise)
+- Use Inference Endpoints for production workloads requiring dedicated resources
+- Hugging Face API tokens and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- Hugging Face OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh
+- Hugging Face model IDs and dataset identifiers may expose ML infrastructure and research information - ensure Hugging Face resource identifiers are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Hugging Face MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Hugging Face webhook configurations and payloads may contain sensitive model data and inference results - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### Rate limit reached: log in or use your apiToken error
+
+Pass HF_TOKEN in requests to authenticate. Get token from Hugging Face Settings > Access Tokens. Add Authorization: Bearer YOUR_TOKEN header to all API requests to avoid free tier limits. Free tier has lower limits than authenticated users.
+### Persistent rate limiting despite no recent usage
+
+Rate limits are per 5-minute windows across all request types. Hugging Face uses three rate limit buckets: read operations, write operations, and inference operations. Check your Billing page for current rate limit status across all three buckets. Wait for 5-minute window reset or upgrade to PRO/Enterprise for higher limits.
+### Inference API returns authentication errors
+
+Serverless Inference API requires authentication for most models. Add your HF_TOKEN to requests. For heavy usage or production workloads, switch to Inference Endpoints which provides dedicated resources, higher limits, and better performance.
+### Cannot access models or datasets - permission error
+
+Verify your account has access to requested model or dataset. For gated models, accept terms on model page first. Check model visibility settings (public vs private). Ensure you're authenticated with correct token and token has appropriate permissions.
+### Hugging Face MCP server authentication errors with API tokens
+
+Verify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+### Hugging Face rate limit errors when processing multiple inference requests
+
+Implement exponential backoff retry logic with jitter. Use Hugging Face API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed model metadata. Check Hugging Face documentation for specific rate limits.
+### Hugging Face model or dataset access denied errors
+
+Verify API token has access to the model or dataset. Check model permissions and account membership. Ensure token has required permissions for target operations.
+### Hugging Face MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify Hugging Face API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

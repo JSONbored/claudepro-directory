@@ -17,6 +17,41 @@ dateAdded: '2025-09-18'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://docs.stripe.com/mcp'
 installable: true
+installCommand: >-
+  claude mcp add --transport http stripe https://mcp.stripe.com && claude mcp
+  list
+usageSnippet: >-
+  claude mcp add --transport http stripe https://mcp.stripe.com && claude mcp
+  list
+copySnippet: |-
+  {
+    "stripe": {
+      "url": "https://mcp.stripe.com",
+      "transport": "http"
+    }
+  }
+configSnippet: |-
+  {
+    "stripe": {
+      "url": "https://mcp.stripe.com",
+      "transport": "http"
+    }
+  }
+estimatedSetupTime: 1 minute
+difficulty: beginner
+prerequisites:
+  - Stripe account (free or paid plan)
+  - Stripe API key authentication (for mcp.stripe.com MCP connection)
+  - 'Stripe secret API key (sk_test_ for test mode, sk_live_ for live mode)'
+  - 'Network access to mcp.stripe.com (HTTPS required, HTTP transport)'
+  - >-
+    Understanding of Stripe payment concepts (payments, subscriptions, invoices,
+    customers)
+  - Stripe Dashboard access (for API key management and webhook configuration)
+  - Claude Desktop 0.7.0+ or Claude Code with MCP support
+  - Understanding of test mode vs live mode (completely separate object sets)
+  - 'Understanding of Stripe rate limits (100 req/sec live, 25 req/sec test)'
+  - 'Optional: Webhook endpoint setup (for real-time event processing)'
 tags:
   - payments
   - stripe
@@ -46,4 +81,202 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Content
+
 Integrate Stripe payment capabilities directly into Claude for payment processing and financial operations. Process payments and refunds, manage subscriptions and billing cycles, handle invoices, track customer payment methods, monitor transaction history, generate revenue analytics, and process webhook events—all through natural language commands. Supports API key authentication, PCI-compliant payment processing, and both test and live mode environments.
+
+## Features
+
+- Process payments and refunds programmatically (secure payment processing)
+- Manage customer subscriptions and billing cycles (subscription lifecycle management)
+- View transaction history and payment analytics (financial reporting)
+- Handle billing operations and invoice generation (automated billing)
+- Monitor payment metrics and revenue data (business intelligence)
+- Manage customer payment methods and cards (payment method administration)
+- Handle webhook events and real-time notifications (event-driven architecture)
+- Process failed payments and retry logic (payment recovery)
+- Advanced Stripe payment and subscription management with customer billing, invoice generation, and financial reporting
+- Batch operations support for efficient bulk payment operations, subscription management, and financial processing with automatic rate limit handling and retry logic
+- Real-time payment synchronization capabilities with webhook integration support for monitoring Stripe events and triggering automated workflows
+
+## Use Cases
+
+- Process customer refunds quickly (refund management)
+- Update subscription plans for customers (subscription administration)
+- Generate billing reports and analytics (financial reporting)
+- Analyze payment trends and patterns (business intelligence)
+- Handle failed payments and retry logic (payment recovery)
+- Manage customer payment methods and cards (payment method administration)
+- Process webhook events and real-time notifications (event processing)
+- Monitor revenue metrics and payment health (financial monitoring)
+- Build automated payment processing workflows that sync external systems with Stripe for real-time transaction management and subscription billing
+
+## Installation
+
+### Claude Code
+
+1. Run: claude mcp add --transport http stripe https://mcp.stripe.com
+2. Verify installation: claude mcp list
+3. Test connection: claude mcp status stripe
+4. Configure your Stripe API key (sk_test_ for test mode, sk_live_ for live mode)
+5. Authenticate with your Stripe account
+
+### Claude Desktop
+
+1. Open Claude Desktop configuration file (see configPath below)
+2. Add the Stripe server configuration with HTTP transport and URL
+3. Restart Claude Desktop
+4. Configure your Stripe API key (sk_test_ for test mode, sk_live_ for live mode)
+5. Authenticate with your Stripe account
+6. Verify connection in Claude Desktop
+
+## Requirements
+
+- Stripe account (free or paid plan)
+- Stripe API key authentication (for mcp.stripe.com MCP connection)
+- Stripe secret API key (sk_test_ for test mode, sk_live_ for live mode)
+- Network access to mcp.stripe.com (HTTPS required, HTTP transport)
+- Understanding of Stripe payment concepts (payments, subscriptions, invoices, customers)
+- Stripe Dashboard access (for API key management and webhook configuration)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of test mode vs live mode (completely separate object sets)
+- Understanding of Stripe rate limits (100 req/sec live, 25 req/sec test)
+- Optional: Webhook endpoint setup (for real-time event processing)
+
+## Configuration
+
+```json
+{
+  "stripe": {
+    "url": "https://mcp.stripe.com",
+    "transport": "http"
+  }
+}
+```
+
+## Examples
+### Processing Refunds
+Process full or partial refunds for payments. Include reasons and metadata for tracking. Stripe automatically handles failed payment recovery.
+```javascript
+// Full refund for a payment
+"Refund payment pi_1234567890 completely"
+
+// Partial refund with reason
+"Issue a $25 partial refund for payment pi_1234567890 with reason: customer_request"
+
+// Refund with metadata
+"Refund payment pi_1234567890 and add metadata: support_ticket=TICKET-123"
+```
+### Subscription Management
+Manage customer subscriptions including upgrades, downgrades, and cancellations. Control billing cycles and proration settings.
+```javascript
+// List active subscriptions
+"Show all active subscriptions for customer cus_abc123"
+
+// Update subscription plan
+"Upgrade customer cus_abc123 from price_basic to price_premium starting next billing cycle"
+
+// Cancel subscription
+"Cancel subscription sub_xyz at period end"
+```
+### Revenue and Analytics
+Generate revenue reports, analyze payment trends, and identify failed transactions. Essential for financial reporting and business intelligence.
+```javascript
+// Monthly revenue report
+"Show total revenue and transaction count for September 2024"
+
+// Revenue by product
+"Break down revenue by product for the last quarter"
+
+// Failed payment analysis
+"List all failed payments in the last 30 days with reasons"
+```
+### Customer and Invoice Management
+Manage invoices, send payment reminders, and track customer payment history. Automate billing workflows for B2B customers.
+```javascript
+// Create invoice
+"Create an invoice for customer cus_abc123 with items:
+- price_item1 x 2
+- price_item2 x 1
+Due in 14 days"
+
+// Send invoice reminder
+"Send payment reminder for invoice in_xyz to customer"
+
+// View customer payment history
+"Show all payments for customer cus_abc123 in the last 6 months"
+```
+### Payment Method Management
+Manage customer payment methods including cards, bank accounts, and wallets. Update default methods and clean up expired entries.
+```javascript
+// List customer payment methods
+"Show all payment methods for customer cus_abc123"
+
+// Set default payment method
+"Set payment method pm_xyz as default for customer cus_abc123"
+
+// Remove expired cards
+"List and remove all expired payment methods"
+```
+### Webhook and Event Handling
+Monitor webhook events, retry failed deliveries, and track integration health. Essential for maintaining reliable payment processing.
+```javascript
+// List recent events
+"Show recent webhook events for type payment_intent.succeeded"
+
+// Retry failed webhooks
+"Retry failed webhook deliveries from the last 24 hours"
+
+// Monitor webhook health
+"Show webhook endpoint health status and delivery success rate"
+```
+### Create Payment Intent
+Create a new Stripe payment intent with amount and currency
+```typescript
+// Create Stripe payment intent
+const paymentIntent = await stripe.paymentIntents.create({
+  amount: 2000,
+  currency: "usd",
+  payment_method_types: ["card"],
+  metadata: { order_id: "order_123" }
+});
+```
+
+## Security
+
+- API key authentication for secure access (sk_test_ for test, sk_live_ for production)
+- Test in Stripe test mode before production (safe testing environment)
+- Log all payment operations for audit trail (compliance and debugging)
+- Follow PCI compliance guidelines (secure payment handling)
+- Use restricted API keys for granular permissions (limit scope when possible)
+- Stripe API keys and secret keys must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- Stripe secret keys should be scoped with minimal required permissions following the principle of least privilege - regularly audit API key permissions and remove unused keys
+- Stripe payment, customer, and charge IDs may expose financial data and customer information - ensure Stripe resource identifiers are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Stripe MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Stripe webhook configurations and payloads may contain sensitive payment data and customer information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### Rate limit exceeded - 429 Too Many Requests error
+
+Stripe rate limits: 100 requests per second in live mode, 25 requests per second in test mode. Default endpoint limit is 25 req/sec (can be increased by Stripe). Check `RateLimit-Remaining` header in responses to monitor remaining capacity. Check `Stripe-Rate-Limited-Reason` header to identify which limit was exceeded. Implement exponential backoff with randomized jitter for retries (wait time increases with each retry). Use webhooks instead of polling to reduce API calls. Batch operations where possible. Stripe SDKs automatically retry 429s for lock timeouts. Contact Stripe Support if you see rising rate limit errors.
+### Test mode vs live mode object mismatch
+
+Stripe test mode and live mode use completely separate object sets. Test mode objects (created with `sk_test_` keys) cannot be accessed with live mode keys (`sk_live_`), and vice versa. Verify API key matches intended environment: `sk_test_` for test mode, `sk_live_` for production. Check Stripe Dashboard mode toggle matches your code environment. Ensure you're using the correct key for the environment you're testing in. Objects created in test mode will not appear in live mode and vice versa.
+### Webhook delivery failures or retry exhaustion
+
+Stripe webhook retry behavior: Live mode retries for up to 3 days with exponential backoff. Test mode retries 3 times over a few hours. Ensure webhook endpoint returns HTTP 200 status quickly (within reasonable time). Check webhook signing secret matches (`whsec_` prefix). Verify endpoint secret from Dashboard matches code (or CLI secret if testing locally with `stripe listen`). Review endpoint logs for errors. Ensure endpoint is publicly accessible (HTTPS required). Test webhook signature verification using official Stripe libraries. Roll endpoint secrets periodically for security.
+### Authentication failed or API key invalid
+
+Verify API key starts with correct prefix: `sk_test_` for test mode, `sk_live_` for live mode. Check key not revoked in Stripe Dashboard (API Keys section). Ensure correct publishable/secret key pair (publishable keys start with `pk_`, secret keys with `sk_`). Re-generate keys if compromised. Use restricted API keys for granular permissions (limit scope to specific operations). Note: Live mode secret keys can only be revealed once—store securely. All API requests must use HTTPS (plain HTTP fails). Never expose secret keys in client-side code or public repositories.
+### Stripe MCP server authentication errors with API keys
+
+Verify API key is valid and not expired. Check API key matches the correct environment (test vs live). Ensure API key format is correct (sk_test_ or sk_live_ prefix). For restricted keys, verify key permissions match required operations.
+### Stripe rate limit errors when processing multiple payment requests
+
+Implement exponential backoff retry logic with jitter. Use Stripe API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed customer data. Stripe allows 100 requests per second per API key.
+### Stripe payment or customer access denied errors
+
+Verify API key has access to the payment or customer. Check account permissions and API key restrictions. Ensure API key has required permissions for target operations.
+### Stripe MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify Stripe API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

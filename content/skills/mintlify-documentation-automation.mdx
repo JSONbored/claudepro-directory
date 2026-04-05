@@ -26,16 +26,61 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://mintlify.com/docs'
 downloadUrl: /downloads/skills/mintlify-documentation-automation.zip
 installable: true
+installCommand: npm install -g mintlify
+usageSnippet: npm install -g mintlify
 copySnippet: |-
-  "Generate full Mintlify API documentation:
-  1. Parse src/api/*.ts files for all exported functions
-  2. Create API reference pages with proper Mintlify components
-  3. Include TypeScript type definitions
-  4. Add code examples in TypeScript, JavaScript, Python, and cURL
-  5. Document all error codes and responses
-  6. Set up authentication guide with OAuth 2.0 flow
-  7. Configure API playground with authentication
-  8. Add rate limiting documentation"
+  ---
+  title: Get User
+  description: Retrieve a user by their unique identifier
+  api: GET /api/users/{userId}
+  ---
+
+  # Get User
+
+  Retrieves a user by their unique identifier.
+
+  ## Path Parameters
+
+  <ParamField path="userId" type="string" required>
+    The user's unique identifier
+  </ParamField>
+
+  ## Response
+
+  <ResponseField name="id" type="string" required>
+    Unique user identifier
+  </ResponseField>
+
+  <ResponseField name="email" type="string" required>
+    User's email address
+  </ResponseField>
+
+  ## Code Examples
+
+  <CodeGroup>
+
+  ```typescript TypeScript SDK
+  import { getUser } from '@yourapp/sdk';
+  const user = await getUser('user_123');
+  ```
+
+  ```python Python
+  import requests
+  response = requests.get('https://api.yourapp.com/users/user_123')
+  ```
+
+  </CodeGroup>
+prerequisites:
+  - Node.js 18+
+  - 'Mintlify CLI: npm install -g mintlify'
+  - Codebase with JSDoc or TypeScript types
+  - 'OpenAPI specification (optional, for API reference)'
+  - >-
+    Mintlify account and API access (free tier available) for documentation site
+    hosting and deployment
+  - >-
+    File system read/write access for Mintlify configuration files (mint.json),
+    documentation source files, and generated documentation outputs
 tags:
   - mintlify
   - documentation
@@ -63,8 +108,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# Mintlify AI Documentation Automation Skill
-
 ## What This Skill Enables
 
 Claude can generate comprehensive, production-ready documentation using Mintlify - the modern documentation platform that has become the standard for developer-facing docs in 2025. This skill enables automatic API reference generation from code, interactive MDX components, multi-version documentation, and AI-powered content creation from JSDoc/TypeScript types.
@@ -231,3 +274,23 @@ Claude will create:
 - [OpenAPI Integration](https://mintlify.com/docs/api-playground/openapi)
 - [Custom Components](https://mintlify.com/docs/components/custom)
 - [Versioning Guide](https://mintlify.com/docs/settings/versioning)
+
+## Features
+
+- Auto-generate docs from TypeScript/JSDoc with parameter and return type extraction
+- OpenAPI to interactive API reference with authentication and playground
+- Interactive MDX components (Tabs, Accordion, CodeGroup, Steps, Cards, ParamField, ResponseField)
+- Multi-version documentation support with version switcher
+- Built-in search and analytics integration (PostHog, Google Analytics)
+- API playground with authentication and code examples in multiple languages
+- Dark mode support with customizable themes and branding
+- Automated deployment with Vercel integration and CI/CD workflows
+
+## Use Cases
+
+- API reference documentation from code with interactive playground
+- SDK and library documentation with installation guides and examples
+- Product documentation with guides, tutorials, and quickstarts
+- Component library documentation with prop tables and interactive examples
+- Multi-version API documentation with migration guides
+- Internal knowledge base with search and analytics

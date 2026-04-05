@@ -23,15 +23,48 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://developers.cloudflare.com/workers-ai/'
 downloadUrl: /downloads/skills/cloudflare-workers-ai-edge.zip
 installable: true
+installCommand: npm install -g wrangler
+usageSnippet: npm install -g wrangler
 copySnippet: |-
-  "Create a complete AI-powered application on Cloudflare:
-  1. Workers AI for text generation (Llama-2)
-  2. D1 database for storing conversations
-  3. R2 for file uploads and generated content
-  4. KV for session management and caching
-  5. Pages for frontend deployment
-  6. Queue for background job processing
-  Include TypeScript types and deployment scripts."
+  export interface Env {
+    AI: any;
+  }
+
+  export default {
+    async fetch(request: Request, env: Env): Promise<Response> {
+      if (request.method !== 'POST') {
+        return new Response('Method not allowed', { status: 405 });
+      }
+
+      const { messages } = await request.json<{ messages: any[] }>();
+
+      const response = await env.AI.run('@cf/meta/llama-2-7b-chat-int8', {
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          ...messages,
+        ],
+        stream: true,
+      });
+
+      return new Response(response, {
+        headers: {
+          'content-type': 'text/event-stream',
+          'cache-control': 'no-cache',
+        },
+      });
+    },
+  };
+prerequisites:
+  - Cloudflare account
+  - Wrangler CLI 3.0+
+  - Node.js 18+
+  - '@cloudflare/workers-types'
+  - >-
+    Cloudflare account with Workers AI enabled (available on Free and Paid
+    plans)
+  - >-
+    Wrangler CLI authentication configured (wrangler login) for deployment
+    access
 tags:
   - cloudflare
   - edge-computing
@@ -60,6 +93,10 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share. Access 50+ open-source AI models (Llama-2, Whisper, Stable Diffusion) with pay-per-use pricing. Includes 10,000 free Neurons per day, integrated D1/R2/KV storage, and deployment to 275+ cities worldwide.
+
+## Content
+
 # Cloudflare Workers AI Edge Functions Skill
 
 ## What This Skill Enables
@@ -222,3 +259,23 @@ Include TypeScript types and deployment scripts."
 - [Workers Platform Architecture](https://blog.cloudflare.com/cloud-computing-without-containers/)
 - [Edge Computing Best Practices](https://developers.cloudflare.com/workers/learning/how-workers-works/)
 - [Durable Objects Guide](https://developers.cloudflare.com/durable-objects/)
+
+## Features
+
+- Sub-5ms cold starts with V8 isolates
+- 20+ AI models: Llama-2, Whisper, Stable Diffusion
+- Deploy to 275+ cities globally
+- Integrated with D1, R2, KV, Queues
+- 50+ open-source AI models in catalog
+- Pay-per-use pricing with 10,000 free Neurons/day
+- Integrated with D1, R2, KV, Queues, Durable Objects
+- Real-time streaming responses with Server-Sent Events (SSE) support for AI model outputs, enabling progressive response delivery and improved user experience for long-running AI operations
+
+## Use Cases
+
+- Edge AI inference with minimal latency
+- Serverless APIs with global distribution
+- Real-time content moderation and analysis
+- Content moderation APIs with real-time classification
+- Multi-language translation services with edge caching
+- AI-powered image generation and processing pipelines

@@ -25,11 +25,28 @@ documentationUrl: 'https://tesseract-ocr.github.io/'
 downloadUrl: /downloads/skills/image-ocr-table-extraction.zip
 installable: true
 copySnippet: |-
-  "Process all invoice images I upload and:
-  1. Extract: invoice #, date, vendor, total
-  2. Create a master spreadsheet with all invoices
-  3. Flag any invoices where OCR confidence is low
-  4. Export as invoices_data.csv"
+  import cv2
+  import pytesseract
+  from PIL import Image
+
+  # Preprocess image for better OCR
+  img = cv2.imread('scan.png', cv2.IMREAD_GRAYSCALE)
+  img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+  img = cv2.medianBlur(img, 3)
+
+  text = pytesseract.image_to_string(img, lang='eng')
+  print(text[:300])
+prerequisites:
+  - Python 3.11+
+  - opencv-python
+  - pytesseract
+  - Tesseract OCR binary with language data
+  - >-
+    Image file access permissions - read access to input image files and write
+    access for OCR output files
+  - >-
+    System libraries: Tesseract OCR binary installed system-wide (not just
+    Python package) with language data packs for target languages
 tags:
   - ocr
   - image
@@ -60,6 +77,10 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR (100+ languages), table structure detection, confidence scoring, orientation correction, and exports to CSV, JSON, and structured formats. Includes advanced image preprocessing pipelines for noise reduction, binarization, deskewing, and contrast enhancement to maximize OCR accuracy.
+
+## Content
+
 # Image OCR & Table Extraction Skill
 
 ## What This Skill Enables
@@ -247,3 +268,23 @@ Format as vCard or CSV for import to contacts."
 - [OpenCV for Image Processing](https://opencv.org/) - Image preprocessing techniques
 - [Table Detection Methods](https://nanonets.com/blog/table-extraction-deep-learning/) - How table extraction works
 - [Claude Vision Capabilities](https://www.anthropic.com/news/claude-3-family) - Claude's image understanding
+
+## Features
+
+- OpenCV preprocessing recipes (thresholding, noise reduction, deskewing)
+- Pytesseract OCR with 100+ language packs
+- Table structure detection and extraction
+- Export tables to CSV/JSON/DataFrame formats
+- Confidence-aware extraction with quality scoring
+- Multi-language OCR support with auto-detection
+- Bounding box detection and text region identification
+- Orientation and script detection (OSD)
+
+## Use Cases
+
+- Digitize receipts and invoices for expense tracking
+- Extract tables from scanned documents and PDFs
+- Create searchable archives from image-based documents
+- Process business cards and contact information
+- Extract form data from filled documents
+- Convert printed documents to editable text formats

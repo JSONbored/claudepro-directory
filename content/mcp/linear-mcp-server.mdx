@@ -13,6 +13,43 @@ dateAdded: '2025-09-18'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://linear.app/docs/mcp'
 installable: true
+installCommand: claude mcp list && claude mcp status linear
+usageSnippet: claude mcp list && claude mcp status linear
+copySnippet: |-
+  {
+    "linear": {
+      "url": "https://mcp.linear.app/sse",
+      "transport": "sse"
+    }
+  }
+configSnippet: |-
+  {
+    "linear": {
+      "url": "https://mcp.linear.app/sse",
+      "transport": "sse"
+    }
+  }
+estimatedSetupTime: 2 minutes
+difficulty: beginner
+prerequisites:
+  - 'Linear workspace account (Member or Admin role required, not Guest)'
+  - >-
+    OAuth credentials or Personal API Key (generate from Linear Security &
+    access settings)
+  - 'SSE transport support (remote MCP server at https://mcp.linear.app/sse)'
+  - Internet connection (remote Linear API access required)
+  - >-
+    Understanding of Linear API rate limits (API Key: 1,500 req/hour, 250K
+    complexity/hour; OAuth: 1,200 req/hour, 200K complexity/hour)
+  - >-
+    Understanding of GraphQL query complexity limits (maximum 10,000 points per
+    query)
+  - Understanding of Linear workspace permissions and team access settings
+  - Claude Desktop 0.7.0+ or Claude Code with MCP support
+  - >-
+    Understanding of project management concepts (issues, projects, cycles,
+    teams, workflows)
+  - 'Optional: Webhook setup for real-time updates instead of polling'
 tags:
   - project-management
   - linear
@@ -42,4 +79,147 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Content
+
 Streamline your project management and issue tracking by connecting Claude to Linear. Create and update issues, manage projects and cycles, track team velocity, query with advanced GraphQL filters, automate workflows, and receive real-time updates via webhooks—all through natural language commands. Leverage Linear's powerful API with rate limit monitoring and complexity-aware queries.
+
+## Features
+
+- Create and update issues with full metadata (title, description, labels, assignees, status)
+- Manage projects and cycles programmatically (create, update, track progress)
+- Track team velocity and progress metrics (sprint reports, burndown charts)
+- Query and filter issues with advanced GraphQL search (custom filters, pagination)
+- Update issue status and assignments in bulk operations
+- Manage teams and workspace settings (team creation, member management)
+- Webhook integration for real-time updates (avoid polling, receive instant notifications)
+- Advanced GraphQL queries with custom filtering and sorting (complex queries up to 10,000 points)
+- Advanced Linear issue and project management with team collaboration features, sprint planning, and workflow automation
+- Batch operations support for efficient bulk issue operations, project management, and team coordination with automatic rate limit handling and retry logic
+- Real-time project synchronization capabilities with webhook integration support for monitoring Linear events and triggering automated workflows
+
+## Use Cases
+
+- Create issues from bug reports or feature requests with automatic metadata population
+- Update issue status in bulk operations across multiple issues
+- Generate sprint reports and velocity metrics with custom aggregations
+- Track project progress across teams with real-time updates
+- Automate issue triage and assignment based on rules and filters
+- Query and filter issues using advanced GraphQL queries for project analysis
+- Sync Linear data with external systems via webhooks and API integration
+- Manage team workflows and workspace settings programmatically
+- Build automated project management workflows that sync external systems with Linear for real-time issue tracking and team collaboration
+
+## Installation
+
+### Claude Code
+
+1. claude mcp add --transport sse linear https://mcp.linear.app/sse
+2. Authenticate through OAuth when prompted (or use Personal API Key)
+3. Verify installation: claude mcp list
+4. Test connection: claude mcp status linear
+5. Verify access: Ask Claude to list your issues
+
+### Claude Desktop
+
+1. Open Claude Desktop configuration file (see configPath below)
+2. Add the Linear server configuration with SSE transport pointing to https://mcp.linear.app/sse
+3. Restart Claude Desktop
+4. Authenticate through OAuth when prompted (or configure Personal API Key)
+5. Verify access: Ask Claude to list your issues
+
+## Requirements
+
+- Linear workspace account (Member or Admin role required, not Guest)
+- OAuth credentials or Personal API Key (generate from Linear Security & access settings)
+- SSE transport support (remote MCP server at https://mcp.linear.app/sse)
+- Internet connection (remote Linear API access required)
+- Understanding of Linear API rate limits (API Key: 1,500 req/hour, 250K complexity/hour; OAuth: 1,200 req/hour, 200K complexity/hour)
+- Understanding of GraphQL query complexity limits (maximum 10,000 points per query)
+- Understanding of Linear workspace permissions and team access settings
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of project management concepts (issues, projects, cycles, teams, workflows)
+- Optional: Webhook setup for real-time updates instead of polling
+
+## Configuration
+
+```json
+{
+  "linear": {
+    "url": "https://mcp.linear.app/sse",
+    "transport": "sse"
+  }
+}
+```
+
+## Examples
+### Create a new bug issue for the login problem
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Create a new bug issue for the login problem"
+```
+### Show me all issues assigned to me
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Show me all issues assigned to me"
+```
+### Update issue LIN-123 to 'In Progress'
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Update issue LIN-123 to 'In Progress'"
+```
+### List all issues in the current sprint
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "List all issues in the current sprint"
+```
+### Create Issue with Labels
+Create a new Linear issue with priority and labels
+```typescript
+// Create Linear issue with labels
+const issue = await linear.issues.create({
+  teamId: "team-id",
+  title: "Fix authentication bug",
+  description: "Issue description",
+  priority: 1,
+  labelIds: ["label-id-1", "label-id-2"]
+});
+```
+
+## Security
+
+- OAuth tokens are managed securely by Linear (access tokens expire after 24 hours, refresh tokens available)
+- Permissions follow Linear workspace settings (Member or Admin role required)
+- Tokens auto-refresh as needed (for OAuth apps created after Oct 1, 2025)
+- All actions are audited in Linear (workspace activity logs)
+- Monitor rate limit headers (X-RateLimit-Requests-Remaining, X-RateLimit-Complexity-Remaining) to avoid service disruption
+- Linear API keys and personal access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- Linear OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh
+- Linear issue, project, and team IDs may expose organizational structure and development patterns - ensure Linear resource identifiers are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Linear MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Linear webhook configurations and payloads may contain sensitive issue data and project information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### OAuth access token expired - 401 Unauthorized error
+
+Access tokens expire after 24 hours. Re-authenticate to get new token with refresh token enabled (default for OAuth apps created after Oct 1, 2025). Token refreshes automatically in compliant clients. Check token expiration in response headers. For Personal API Key authentication, keys don't expire but can be revoked in Security & access settings.
+### Rate limit exceeded - RATELIMITED error code returned
+
+API key auth: 1,500 requests/hour, 250K complexity points/hour. OAuth app: 1,200 requests/hour, 200K complexity points/hour. Unauthenticated: 60 req/hour, 10K complexity/hour. Monitor X-RateLimit-Requests-Remaining and X-RateLimit-Complexity-Remaining headers. Implement exponential backoff. Use webhooks instead of polling for real-time updates. Order queries by `updated` timestamp to fetch recent changes first. Contact Linear support for temporary limit increase if needed.
+### GraphQL query complexity limit exceeded - 10,000 points
+
+Single query cannot exceed 10,000 complexity points. Reduce query depth or split into multiple smaller queries. Remove unnecessary nested fields. Use filtering to narrow data scope. Check query complexity in Linear docs. Monitor X-Complexity header in responses. Paginate large result sets to reduce complexity per query.
+### Insufficient workspace permissions for operation
+
+Verify your Linear account has Member or Admin role (not Guest). Check workspace settings for user permissions. Contact workspace admin to upgrade role if needed. Verify team access permissions for specific teams. Some operations require Admin role (e.g., workspace settings, team management).
+### Linear MCP server authentication errors with API keys
+
+Verify API key is valid and not expired. Check API key permissions match required operations. Ensure API key format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+### Linear rate limit errors when making multiple API calls
+
+Implement exponential backoff retry logic with jitter. Use Linear API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed issue data. Linear allows 10,000 requests per hour per API key.
+### Linear issue or project access denied errors
+
+Verify API key has access to the issue or project. Check team permissions and workspace membership. Ensure API key has required scopes for target operations.
+### Linear MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify Linear API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

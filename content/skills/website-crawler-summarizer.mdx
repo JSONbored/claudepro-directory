@@ -29,12 +29,24 @@ documentationUrl: 'https://github.com/mozilla/readability'
 downloadUrl: /downloads/skills/website-crawler-summarizer.zip
 installable: true
 copySnippet: |-
-  "Analyze competitor website:
-  1. Crawl main site (max 20 pages)
-  2. Extract: services, pricing mentions, features
-  3. Identify key messaging themes
-  4. Create structured comparison report
-  Focus on product/service pages."
+  import { JSDOM } from 'jsdom';
+  import { Readability } from '@mozilla/readability';
+  import fetch from 'node-fetch';
+
+  const html = await (await fetch('https://example.com')).text();
+  const doc = new JSDOM(html, { url: 'https://example.com' });
+  const article = new Readability(doc.window.document).parse();
+  console.log(article.title);
+  console.log(article.textContent);
+prerequisites:
+  - Node.js 18+ or Python 3.11+
+  - Playwright or Puppeteer (for JavaScript rendering)
+  - readability or newspaper3k (for content extraction)
+  - BeautifulSoup or Cheerio (for HTML parsing)
+  - Network access to target websites for crawling and fetching web content
+  - >-
+    HTML parsing library (Cheerio for Node.js, BeautifulSoup for Python) for
+    extracting and processing web page content
 tags:
   - crawler
   - scraping
@@ -64,8 +76,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# Website Crawler & Summarizer Skill
-
 ## What This Skill Enables
 
 Claude can crawl websites, extract content from web pages, clean HTML to readable text, respect robots.txt, and generate structured summaries or documentation from web content. Perfect for research, competitive analysis, and content aggregation.
@@ -301,3 +311,23 @@ Output as structured Markdown."
 - [Scrapy Tutorial](https://docs.scrapy.org/en/latest/intro/tutorial.html) - Advanced crawling
 - [Playwright](https://playwright.dev/) - Browser automation
 - [Mozilla Readability](https://github.com/mozilla/readability) - Content extraction
+
+## Features
+
+- Robots-aware crawling with automatic robots.txt parsing and compliance checking
+- Boilerplate removal using readability algorithms (Mozilla Readability, newspaper3k) to extract main content
+- Language detection and content normalization for multi-language websites
+- JSON/MD/CSV export with structured metadata and customizable output formats
+- Dynamic content rendering with Playwright/Puppeteer for JavaScript-heavy SPAs
+- Content deduplication and change detection for monitoring and archival workflows
+- Sitemap-based crawling with URL pattern filtering and lastmod date filtering
+- Rate limiting and polite crawling with configurable delays and concurrency limits
+
+## Use Cases
+
+- Competitive intel packs with structured analysis of competitor websites and services
+- Documentation mirrors for offline access and local documentation sites
+- Research briefs with aggregated content from multiple sources and citation extraction
+- Content monitoring and change detection for tracking website updates over time
+- Data aggregation from multiple sources with structured export for analysis
+- SEO analysis and content auditing with sitemap crawling and content extraction

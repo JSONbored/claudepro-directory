@@ -13,6 +13,47 @@ dateAdded: '2025-09-18'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://developers.hubspot.com/mcp'
 installable: true
+installCommand: claude mcp list && claude mcp status hubspot
+usageSnippet: claude mcp list && claude mcp status hubspot
+copySnippet: |-
+  {
+    "hubspot": {
+      "url": "https://mcp.hubspot.com/anthropic",
+      "transport": "http"
+    }
+  }
+configSnippet: |-
+  {
+    "hubspot": {
+      "url": "https://mcp.hubspot.com/anthropic",
+      "transport": "http"
+    }
+  }
+estimatedSetupTime: 2 minutes
+difficulty: beginner
+prerequisites:
+  - 'HubSpot account (sign up at https://www.hubspot.com if needed)'
+  - >-
+    OAuth authentication support (required for secure access to HubSpot CRM
+    data)
+  - >-
+    HTTP transport support (remote MCP server at
+    https://mcp.hubspot.com/anthropic)
+  - Internet connection (remote HubSpot API access required)
+  - >-
+    Understanding of HubSpot API rate limits (110 requests per 10 seconds for
+    OAuth apps, 4 requests per second for Search API)
+  - >-
+    Understanding of OAuth scopes (contacts access for contacts, content access
+    for deals)
+  - 'Understanding of CRM concepts (contacts, companies, deals, pipeline stages)'
+  - Claude Desktop 0.7.0+ or Claude Code with MCP support
+  - >-
+    Understanding of data privacy regulations (GDPR, CCPA compliance when
+    handling customer data)
+  - >-
+    Understanding of error rate management (keep error rate below 5% for
+    marketplace compliance)
 tags:
   - crm
   - hubspot
@@ -42,4 +83,142 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Content
+
 Seamlessly connect Claude to your HubSpot CRM to manage contacts, companies, and deals through natural language commands. Create and update CRM records, search customer data, track sales pipeline progress, and generate comprehensive reports—all while maintaining proper data privacy and compliance standards.
+
+## Features
+
+- Fetch and update contact records
+- Manage companies and deals pipeline
+- Create and update CRM records
+- Search CRM data with filters
+- Generate sales and marketing reports
+- Advanced HubSpot CRM and marketing automation with contact management, deal tracking, and campaign analytics
+- Batch operations support for efficient bulk contact operations, deal management, and marketing automation with automatic rate limit handling and retry logic
+- Real-time CRM synchronization capabilities with webhook integration support for monitoring HubSpot events and triggering automated workflows
+
+## Use Cases
+
+- Update contact information in bulk
+- Create new deals in the pipeline
+- Track sales pipeline progress
+- Generate customer reports and insights
+- Manage marketing lists and segments
+- Build automated CRM workflows that sync external systems with HubSpot for real-time customer relationship management and marketing automation
+
+## Installation
+
+### Claude Code
+
+1. claude mcp add --transport http hubspot https://mcp.hubspot.com/anthropic
+2. Authenticate with your HubSpot account when prompted (OAuth flow)
+3. Verify installation: claude mcp list
+4. Test connection: claude mcp status hubspot
+
+### Claude Desktop
+
+1. Open your Claude Desktop configuration file (see configPath below)
+2. Add the HubSpot server configuration with HTTP transport pointing to https://mcp.hubspot.com/anthropic
+3. Restart Claude Desktop
+4. Authenticate with your HubSpot account when prompted (OAuth flow will open in browser)
+
+## Requirements
+
+- HubSpot account (sign up at https://www.hubspot.com if needed)
+- OAuth authentication support (required for secure access to HubSpot CRM data)
+- HTTP transport support (remote MCP server at https://mcp.hubspot.com/anthropic)
+- Internet connection (remote HubSpot API access required)
+- Understanding of HubSpot API rate limits (110 requests per 10 seconds for OAuth apps, 4 requests per second for Search API)
+- Understanding of OAuth scopes (contacts access for contacts, content access for deals)
+- Understanding of CRM concepts (contacts, companies, deals, pipeline stages)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of data privacy regulations (GDPR, CCPA compliance when handling customer data)
+- Understanding of error rate management (keep error rate below 5% for marketplace compliance)
+
+## Configuration
+
+```json
+{
+  "hubspot": {
+    "url": "https://mcp.hubspot.com/anthropic",
+    "transport": "http"
+  }
+}
+```
+
+## Examples
+### Create a new contact for John Doe
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Create a new contact for John Doe"
+```
+### Update deal stage to closed-won
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Update deal stage to closed-won"
+```
+### Find all contacts from Microsoft
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Find all contacts from Microsoft"
+```
+### Generate pipeline report
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Generate pipeline report"
+```
+### Create Contact with Properties
+Create a new HubSpot contact with email and custom properties
+```typescript
+// Create HubSpot contact with custom properties
+const contact = await hubspot.contacts.create({
+  properties: {
+    email: "contact@example.com",
+    firstname: "John",
+    lastname: "Doe",
+    company: "Example Corp"
+  }
+});
+```
+
+## Security
+
+- OAuth authentication for secure access
+- Respect data privacy regulations
+- Monitor API usage and limits
+- Regular data audits recommended
+- HubSpot API keys and private app access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- HubSpot OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh
+- HubSpot contact, deal, and company IDs may expose customer data and business information - ensure HubSpot resource identifiers are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for HubSpot MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- HubSpot webhook configurations and payloads may contain sensitive customer data and business information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### HTTP 429 error: rate limit exceeded on API calls
+
+OAuth apps limited to 110 requests per 10 seconds per account. Wait for rate limit window to reset. Implement throttling with max 11 requests/second to stay within burst limit.
+### Search API hitting rate limit with only few requests
+
+Search endpoints limited to 4 requests per second per token. Add 250ms delays between search operations. Consider caching search results to reduce API calls.
+### HTTP 401 unauthorized - OAuth token invalid
+
+Check access token expiration (look at expires_in parameter). Re-authenticate to get new OAuth token. Verify token has correct scopes for HubSpot API access (contacts, deals, etc).
+### HTTP 403 forbidden when accessing CRM objects
+
+Verify OAuth token has required scopes. Contacts access needed for contacts, content access for deals. Check account permissions in HubSpot settings and re-authenticate with correct scopes.
+### Error rate exceeds 5% causing marketplace issues
+
+Reduce failed requests by implementing proper error handling. Validate input before API calls. Check API responses and fix 4xx errors in your code to lower error rate below 5%.
+### HubSpot MCP server authentication errors with API keys
+
+Verify API key is valid and not expired. Check API key permissions match required operations. Ensure API key format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+### HubSpot rate limit errors when processing multiple requests
+
+Implement exponential backoff retry logic with jitter. Use HubSpot API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed contact data. HubSpot allows 100 requests per 10 seconds per API key.
+### HubSpot contact or deal access denied errors
+
+Verify API key has access to the contact or deal. Check account permissions and user role. Ensure API key has required scopes (contacts, deals, companies) for target operations.
+### HubSpot MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify HubSpot API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

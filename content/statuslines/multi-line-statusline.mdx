@@ -18,103 +18,25 @@ authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-01'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: true
-copySnippet: >-
-  #!/usr/bin/env bash
-
-
-  # Multi-Line Statusline for Claude Code
-
-  # Displays comprehensive session info across two lines
-
-
-  # Read JSON from stdin
-
-  read -r input
-
-
-  # Extract all available data
-
-  model=$(echo "$input" | jq -r '.model // "unknown"')
-
-  dir=$(echo "$input" | jq -r '.workspace.path // "~"' | sed "s|$HOME|~|")
-
-  tokens=$(echo "$input" | jq -r '.session.totalTokens // 0')
-
-  cost=$(echo "$input" | jq -r '.session.estimatedCost // 0' | awk '{printf
-  "%.3f", $0}')
-
-  memory=$(echo "$input" | jq -r '.system.memoryUsage // 0' | awk '{printf
-  "%.1f", $0/1024/1024}')
-
-
-  # Get git info if in repo
-
-  workdir=$(echo "$input" | jq -r '.workspace.path // "."')
-
-  cd "$workdir" 2>/dev/null || cd .
-
-
-  if git rev-parse --git-dir > /dev/null 2>&1; then
-    branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
-    if [ -z "$(git status --porcelain)" ]; then
-      git_status="\033[32m ✓\033[0m"
-    else
-      git_status="\033[33m ✗\033[0m"
-    fi
-    git_display=" ${branch}${git_status}"
-  else
-    git_display=""
-  fi
-
-
-  # Box drawing and separators
-
-  SEP="\ue0b0"
-
-  VSEP="│"
-
-  TOP_LEFT="┌"
-
-  BOT_LEFT="└"
-
-
-  # Color scheme
-
-  RESET="\033[0m"
-
-  MODEL_C="\033[38;5;111m"  # Blue
-
-  DIR_C="\033[38;5;214m"    # Orange
-
-  TOKEN_C="\033[38;5;76m"   # Green
-
-  COST_C="\033[38;5;220m"   # Yellow
-
-  MEM_C="\033[38;5;139m"    # Purple
-
-
-  # Build top line: Model | Directory | Git
-
-  top_line="${TOP_LEFT}${RESET} ${MODEL_C}${model}${RESET} ${VSEP}
-  ${DIR_C}${dir}${RESET}${git_display}"
-
-
-  # Build bottom line: Tokens | Cost | Memory
-
-  bottom_line="${BOT_LEFT}${RESET} ${TOKEN_C} ${tokens:,} tokens${RESET} ${VSEP}
-  ${COST_C}\$${cost}${RESET}"
-
-
-  if [ "$memory" != "0.0" ]; then
-    bottom_line="${bottom_line} ${VSEP} ${MEM_C}${memory} MB${RESET}"
-  fi
-
-
-  # Output both lines
-
-  echo -e "$top_line"
-
-  echo -e "$bottom_line"
+usageSnippet: |-
+  ┌ claude-sonnet-4.5 │ ~/projects/app  main ✓
+  └  12,345 tokens │ $0.234 │ 156.3 MB
+copySnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-line-statusline.sh",
+      "refreshInterval": 1000
+    }
+  }
+configSnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-line-statusline.sh",
+      "refreshInterval": 1000
+    }
+  }
 scriptLanguage: bash
 scriptBody: >-
   #!/usr/bin/env bash
@@ -213,6 +135,21 @@ scriptBody: >-
   echo -e "$top_line"
 
   echo -e "$bottom_line"
+prerequisites:
+  - Claude Code CLI installed and configured
+  - >-
+    Bash shell available (bash 4.0+ recommended for string manipulation and
+    conditional logic)
+  - >-
+    jq command-line JSON processor (jq 1.6+ recommended for safe extraction with
+    // defaults)
+  - >-
+    Terminal with UTF-8 encoding support (required for box drawing characters:
+    ┌│└)
+  - >-
+    Terminal with ANSI color code support (256-color mode recommended for
+    color-coded sections)
+  - 'Git command (optional, for git branch and status display)'
 tags:
   - multi-line
   - comprehensive
@@ -245,29 +182,87 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Features
+
+- Two-line display for comprehensive information
+- Top line: Model, directory, git status
+- Bottom line: Tokens, cost, session time, memory usage
+- Powerline separators and section dividers
+- Color-coded sections for easy scanning
+- Box drawing characters for visual structure
+- Optional memory usage monitoring
+- Collapsible display mode for single-line view
+
+## Use Cases
+
+- Power users needing comprehensive session visibility
+- Development sessions with complex context switching
+- Monitoring resource usage during heavy workloads
+- Teams requiring detailed audit trails
+- Presentations or pair programming demonstrations
+- System administrators tracking multiple metrics simultaneously
+
+## Requirements
+
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for string manipulation and conditional logic)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- Terminal with UTF-8 encoding support (required for box drawing characters: ┌│└)
+- Terminal with ANSI color code support (256-color mode recommended for color-coded sections)
+- Git command (optional, for git branch and status display)
+
+## Configuration
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-line-statusline.sh",
+    "refreshInterval": 1000
+  }
+}
+```
+
+## Examples
+### Enhanced Multi-Line Statusline with Session Duration
+Extended version with session duration tracking and enhanced formatting
 ```bash
 #!/usr/bin/env bash
 
-# Multi-Line Statusline for Claude Code
-# Displays comprehensive session info across two lines
+# Enhanced Multi-Line Statusline with Session Duration
 
-# Read JSON from stdin
 read -r input
 
-# Extract all available data
-model=$(echo "$input" | jq -r '.model // "unknown"')
-dir=$(echo "$input" | jq -r '.workspace.path // "~"' | sed "s|$HOME|~|")
-tokens=$(echo "$input" | jq -r '.session.totalTokens // 0')
-cost=$(echo "$input" | jq -r '.session.estimatedCost // 0' | awk '{printf "%.3f", $0}')
-memory=$(echo "$input" | jq -r '.system.memoryUsage // 0' | awk '{printf "%.1f", $0/1024/1024}')
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"')
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // "~"' | sed "s|$HOME|~|")
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0' | awk '{printf "%.3f", $0}')
+duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
 
-# Get git info if in repo
-workdir=$(echo "$input" | jq -r '.workspace.path // "."')
+# Convert duration to human-readable format
+if [ $duration_ms -gt 0 ]; then
+  duration_sec=$((duration_ms / 1000))
+  if [ $duration_sec -lt 60 ]; then
+    duration_display="${duration_sec}s"
+  elif [ $duration_sec -lt 3600 ]; then
+    duration_min=$((duration_sec / 60))
+    duration_sec_remain=$((duration_sec % 60))
+    duration_display="${duration_min}m ${duration_sec_remain}s"
+  else
+    duration_hour=$((duration_sec / 3600))
+    duration_min=$((duration_sec % 3600 / 60))
+    duration_display="${duration_hour}h ${duration_min}m"
+  fi
+else
+  duration_display="0s"
+fi
+
+workdir=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // "."')
 cd "$workdir" 2>/dev/null || cd .
 
 if git rev-parse --git-dir > /dev/null 2>&1; then
   branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
-  if [ -z "$(git status --porcelain)" ]; then
+  if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
     git_status="\033[32m ✓\033[0m"
   else
     git_status="\033[33m ✗\033[0m"
@@ -277,31 +272,235 @@ else
   git_display=""
 fi
 
-# Box drawing and separators
-SEP="\ue0b0"
 VSEP="│"
 TOP_LEFT="┌"
 BOT_LEFT="└"
 
-# Color scheme
 RESET="\033[0m"
-MODEL_C="\033[38;5;111m"  # Blue
-DIR_C="\033[38;5;214m"    # Orange
-TOKEN_C="\033[38;5;76m"   # Green
-COST_C="\033[38;5;220m"   # Yellow
-MEM_C="\033[38;5;139m"    # Purple
+MODEL_C="\033[38;5;111m"
+DIR_C="\033[38;5;214m"
+TOKEN_C="\033[38;5;76m"
+COST_C="\033[38;5;220m"
+DURATION_C="\033[38;5;141m"
 
-# Build top line: Model | Directory | Git
-top_line="${TOP_LEFT}${RESET} ${MODEL_C}${model}${RESET} ${VSEP} ${DIR_C}${dir}${RESET}${git_display}"
-
-# Build bottom line: Tokens | Cost | Memory
-bottom_line="${BOT_LEFT}${RESET} ${TOKEN_C} ${tokens:,} tokens${RESET} ${VSEP} ${COST_C}\$${cost}${RESET}"
-
-if [ "$memory" != "0.0" ]; then
-  bottom_line="${bottom_line} ${VSEP} ${MEM_C}${memory} MB${RESET}"
+if command -v printf > /dev/null 2>&1; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+else
+  tokens_formatted="$tokens"
 fi
 
-# Output both lines
+top_line="${TOP_LEFT}${RESET} ${MODEL_C}${model}${RESET} ${VSEP} ${DIR_C}${dir}${RESET}${git_display}"
+
+bottom_line="${BOT_LEFT}${RESET} ${TOKEN_C}${tokens_formatted} tokens${RESET} ${VSEP} ${COST_C}$${cost}${RESET} ${VSEP} ${DURATION_C}${duration_display}${RESET}"
+
 echo -e "$top_line"
 echo -e "$bottom_line"
 ```
+### Multi-Line Statusline with Custom Layout
+Version with customizable line order and optional sections
+```bash
+#!/usr/bin/env bash
+
+# Multi-Line Statusline with Custom Layout
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"')
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // "~"' | sed "s|$HOME|~|")
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0' | awk '{printf "%.3f", $0}')
+lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
+
+workdir=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // "."')
+cd "$workdir" 2>/dev/null || cd .
+
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
+  if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+    git_status="\033[32m ✓\033[0m"
+  else
+    git_status="\033[33m ✗\033[0m"
+  fi
+  git_display=" ${branch}${git_status}"
+else
+  git_display=""
+fi
+
+VSEP="│"
+TOP_LEFT="┌"
+BOT_LEFT="└"
+
+RESET="\033[0m"
+MODEL_C="\033[38;5;111m"
+DIR_C="\033[38;5;214m"
+TOKEN_C="\033[38;5;76m"
+COST_C="\033[38;5;220m"
+LINES_C="\033[38;5;196m"
+
+if command -v printf > /dev/null 2>&1; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+  lines_added_formatted=$(printf "%'d" $lines_added 2>/dev/null || echo "$lines_added")
+  lines_removed_formatted=$(printf "%'d" $lines_removed 2>/dev/null || echo "$lines_removed")
+else
+  tokens_formatted="$tokens"
+  lines_added_formatted="$lines_added"
+  lines_removed_formatted="$lines_removed"
+fi
+
+# Top line: Model | Directory | Git
+top_line="${TOP_LEFT}${RESET} ${MODEL_C}${model}${RESET} ${VSEP} ${DIR_C}${dir}${RESET}${git_display}"
+
+# Bottom line: Tokens | Cost | Lines (+/-)
+if [ $lines_added -gt 0 ] || [ $lines_removed -gt 0 ]; then
+  lines_display="+${lines_added_formatted}/-${lines_removed_formatted}"
+  bottom_line="${BOT_LEFT}${RESET} ${TOKEN_C}${tokens_formatted} tokens${RESET} ${VSEP} ${COST_C}$${cost}${RESET} ${VSEP} ${LINES_C}${lines_display}${RESET}"
+else
+  bottom_line="${BOT_LEFT}${RESET} ${TOKEN_C}${tokens_formatted} tokens${RESET} ${VSEP} ${COST_C}$${cost}${RESET}"
+fi
+
+echo -e "$top_line"
+echo -e "$bottom_line"
+```
+### Multi-Line Statusline Installation Example
+Complete setup script with UTF-8 encoding verification and box drawing character testing
+```bash
+#!/bin/bash
+# Installation script for Multi-Line Statusline
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Verify UTF-8 encoding
+if locale charmap 2>/dev/null | grep -q UTF-8; then
+    echo "UTF-8 encoding verified"
+else
+    echo "Warning: UTF-8 encoding may not be enabled"
+    echo "Set with: export LANG=en_US.UTF-8"
+fi
+
+# Test box drawing characters
+if echo -e '┌│└' &> /dev/null; then
+    echo "Box drawing characters supported: ┌│└"
+else
+    echo "Warning: Box drawing characters may not display correctly"
+    echo "Terminal may need UTF-8 encoding"
+fi
+
+# Test git command (optional)
+if command -v git &> /dev/null; then
+    echo "Git command available"
+else
+    echo "Warning: Git command not found - git status will not be displayed"
+fi
+
+# Create statuslines directory
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/multi-line-statusline.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Multi-Line Statusline for Claude Code
+# Displays comprehensive session info across two lines
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"')
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // "~"' | sed "s|$HOME|~|")
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0' | awk '{printf "%.3f", $0}')
+memory=$(echo "$input" | jq -r '.system.memoryUsage // 0' | awk '{printf "%.1f", $0/1024/1024}' 2>/dev/null || echo "0.0")
+
+workdir=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // "."')
+cd "$workdir" 2>/dev/null || cd .
+
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
+  if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+    git_status="\033[32m ✓\033[0m"
+  else
+    git_status="\033[33m ✗\033[0m"
+  fi
+  git_display=" ${branch}${git_status}"
+else
+  git_display=""
+fi
+
+VSEP="│"
+TOP_LEFT="┌"
+BOT_LEFT="└"
+
+RESET="\033[0m"
+MODEL_C="\033[38;5;111m"
+DIR_C="\033[38;5;214m"
+TOKEN_C="\033[38;5;76m"
+COST_C="\033[38;5;220m"
+MEM_C="\033[38;5;139m"
+
+if command -v printf > /dev/null 2>&1; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+else
+  tokens_formatted="$tokens"
+fi
+
+top_line="${TOP_LEFT}${RESET} ${MODEL_C}${model}${RESET} ${VSEP} ${DIR_C}${dir}${RESET}${git_display}"
+
+bottom_line="${BOT_LEFT}${RESET} ${TOKEN_C}${tokens_formatted} tokens${RESET} ${VSEP} ${COST_C}$${cost}${RESET}"
+
+if [ "$memory" != "0.0" ] && [ "$memory" != "" ]; then
+  bottom_line="${bottom_line} ${VSEP} ${MEM_C}${memory} MB${RESET}"
+fi
+
+echo -e "$top_line"
+echo -e "$bottom_line"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/multi-line-statusline.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-line-statusline.sh","refreshInterval":1000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-line-statusline.sh","refreshInterval":1000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Multi-Line Statusline installed successfully!"
+echo "Note: Ensure terminal supports UTF-8 encoding for box drawing characters"
+echo "Test with: echo -e '┌│└'"
+```
+
+## Troubleshooting
+### Box drawing characters showing as garbage or question marks
+
+Ensure terminal has UTF-8 encoding enabled. Set: export LANG=en_US.UTF-8. Test with: echo -e '┌│└'. Verify encoding: locale charmap (should be UTF-8). If not supported, modify script to use ASCII alternatives: TOP_LEFT='+', VSEP='|', BOT_LEFT='+'.
+### Second line overwriting first line or display corruption
+
+Terminal may not support multi-line statuslines properly. Check Claude Code configuration for multi-line support or use single-line statusline instead. Verify terminal supports ANSI escape sequences: echo -e '\033[0m'. Test multi-line output: echo -e 'Line 1\nLine 2'. If issues persist, consider single-line statusline format.
+### Memory usage always showing 0.0 MB
+
+Memory monitoring may not be available in your Claude Code version. This field is optional - statusline works without it. Check if system.memoryUsage field exists: echo '$input' | jq .system.memoryUsage. If null, memory display is automatically hidden. Verify memory calculation: awk '{printf "%.1f", $0/1024/1024}' (converts bytes to MB).
+### Lines not aligned or wrapped incorrectly
+
+Terminal window may be too narrow. Resize to at least 80 characters wide or simplify displayed information. Check terminal width: tput cols (should be >= 80). Consider reducing information displayed or using shorter directory paths. Test with: echo -e '┌ Model │ Directory\n└ Tokens │ Cost'.
+### Git status not displaying or showing incorrect branch
+
+Verify git command is available: command -v git. Check if in git repository: git rev-parse --git-dir (should return .git path). Verify branch detection: git symbolic-ref --short HEAD. Check git status: git status --porcelain (empty = clean, non-empty = dirty). Ensure workdir is correct: echo '$input' | jq .workspace.current_dir.
+### Token count or cost showing as 0 or incorrect values
+
+Check JSON field names: echo '$input' | jq .cost.total_lines_added (tokens), echo '$input' | jq .cost.total_cost_usd (cost). Verify jq extraction: echo '$input' | jq -r '.cost.total_cost_usd // 0'. Check awk formatting: echo '0.01234' | awk '{printf "%.3f", $0}' (should return 0.012). Verify thousands separator: printf "%'d" 12345 (should return 12,345).
+### Colors not displaying or showing as escape codes
+
+Verify terminal supports ANSI colors: echo -e '\033[38;5;111mTest\033[0m' (should show colored text). Check 256-color mode: tput colors (should be >= 256). Test color codes: echo -e '\033[38;5;111mBlue\033[0m' (should show blue text). If not supported, remove color codes or use basic 8-color ANSI codes.
+### Directory path too long or not displaying correctly
+
+Check directory extraction: echo '$input' | jq .workspace.current_dir. Verify HOME replacement: sed "s|$HOME|~|" (replaces /home/user with ~). Test path shortening: dirname=$(basename "$dir") (shows only directory name). Consider truncating long paths: echo "${dir:0:30}..." (limits to 30 characters).

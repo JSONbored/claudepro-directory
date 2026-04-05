@@ -27,16 +27,37 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://supabase.com/docs'
 downloadUrl: /downloads/skills/supabase-realtime-database.zip
 installable: true
+installCommand: npm install @supabase/supabase-js
+usageSnippet: npm install @supabase/supabase-js
 copySnippet: |-
-  "Build a SaaS backend with Supabase:
-  1. Authentication with email, Google, GitHub OAuth
-  2. Organizations and team member management
-  3. Role-based access control (owner, admin, member)
-  4. Real-time activity feed
-  5. File uploads to Storage with access control
-  6. Billing integration with Stripe webhooks
-  7. Edge Functions for business logic
-  8. pgvector for AI-powered search"
+  import { createClient } from '@supabase/supabase-js';
+  import { Database } from './types/supabase';
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+  export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+
+  export const createAuthenticatedClient = (accessToken: string) => {
+    return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    });
+  };
+prerequisites:
+  - Supabase account (free tier available)
+  - '@supabase/supabase-js ^2.38.0'
+  - Node.js 18+
+  - Supabase CLI for local development
+  - >-
+    Supabase project with Realtime enabled in project settings (Dashboard >
+    Project Settings > API > Realtime)
+  - >-
+    Network access to Supabase API endpoints and WebSocket connections for
+    real-time subscriptions
 tags:
   - supabase
   - postgres
@@ -65,6 +86,10 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ developers. Create complete backend systems using Supabase - the open-source Firebase alternative with PostgreSQL database, real-time subscriptions via WebSockets (postgres_changes, broadcast, presence), built-in authentication with multiple providers, file storage with access control, and Edge Functions with Deno for custom business logic. Includes automatic REST and GraphQL APIs, Row Level Security (RLS) policies, TypeScript type generation, connection pooling, and pgvector for AI embeddings and similarity search.
+
+## Content
+
 # Supabase Realtime Database Builder Skill
 
 ## What This Skill Enables
@@ -240,3 +265,23 @@ Claude will:
 - [Edge Functions Guide](https://supabase.com/docs/guides/functions)
 - [pgvector Extension](https://supabase.com/docs/guides/ai/vector-columns)
 - [Database Migrations](https://supabase.com/docs/guides/cli/local-development)
+
+## Features
+
+- PostgreSQL with automatic REST and GraphQL APIs via PostgREST and pg_graphql
+- Real-time subscriptions with WebSockets (postgres_changes, broadcast, presence)
+- Built-in authentication and authorization with email, OAuth, phone, passwordless, SSO
+- pgvector for AI embeddings and similarity search with HNSW and IVFFlat indexes
+- Edge Functions with Deno for globally distributed TypeScript serverless functions
+- Storage buckets with access control, CDN, image transformations, and resumable uploads
+- Row Level Security (RLS) policies for granular data access control
+- TypeScript type generation from database schema with supabase gen types
+
+## Use Cases
+
+- Full-stack web applications with real-time collaboration
+- Real-time collaborative tools with presence tracking and broadcast messaging
+- AI-powered semantic search with pgvector embeddings
+- SaaS backends with multi-tenant data isolation using RLS
+- Social media platforms with real-time notifications and activity feeds
+- IoT data collection systems with time-series data and real-time streaming

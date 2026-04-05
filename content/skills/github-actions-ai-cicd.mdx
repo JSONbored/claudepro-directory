@@ -25,15 +25,190 @@ documentationUrl: 'https://docs.github.com/en/actions'
 downloadUrl: /downloads/skills/github-actions-ai-cicd.zip
 installable: true
 copySnippet: |-
-  "Create a production-grade GitHub Actions pipeline for Next.js 15:
-  1. Install dependencies with pnpm caching
-  2. Run TypeScript type checking in parallel with linting
-  3. Run Vitest unit tests with coverage (fail if < 80%)
-  4. Run Playwright E2E tests on Chrome and Firefox
-  5. Build Next.js app and verify no build errors
-  6. Deploy to Vercel preview on PR, production on main
-  7. Run Lighthouse CI and comment scores on PR
-  8. Send Slack notification on success/failure"
+  name: CI/CD Pipeline
+
+  on:
+    push:
+      branches: [main, develop]
+    pull_request:
+      branches: [main, develop]
+
+  concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+  jobs:
+    install:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        
+        - uses: pnpm/action-setup@v2
+          with:
+            version: 8
+        
+        - uses: actions/setup-node@v4
+          with:
+            node-version: 20
+            cache: 'pnpm'
+        
+        - name: Install dependencies
+          run: pnpm install --frozen-lockfile
+        
+        - name: Cache node_modules
+          uses: actions/cache@v4
+          with:
+            path: node_modules
+            key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+    lint:
+      needs: install
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: pnpm/action-setup@v2
+        - uses: actions/setup-node@v4
+          with:
+            node-version: 20
+            cache: 'pnpm'
+        
+        - name: Restore dependencies
+          uses: actions/cache@v4
+          with:
+            path: node_modules
+            key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
+        
+        - name: Run ESLint
+          run: pnpm lint
+
+    typecheck:
+      needs: install
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: pnpm/action-setup@v2
+        - uses: actions/setup-node@v4
+          with:
+            node-version: 20
+            cache: 'pnpm'
+        
+        - name: Restore dependencies
+          uses: actions/cache@v4
+          with:
+            path: node_modules
+            key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
+        
+        - name: Run TypeScript
+          run: pnpm type-check
+
+    test:
+      needs: install
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: pnpm/action-setup@v2
+        - uses: actions/setup-node@v4
+          with:
+            node-version: 20
+            cache: 'pnpm'
+        
+        - name: Restore dependencies
+          uses: actions/cache@v4
+          with:
+            path: node_modules
+            key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
+        
+        - name: Run unit tests
+          run: pnpm test:unit --coverage
+        
+        - name: Upload coverage
+          uses: codecov/codecov-action@v4
+          with:
+            token: ${{ secrets.CODECOV_TOKEN }}
+
+    e2e:
+      needs: install
+      runs-on: ubuntu-latest
+      strategy:
+        matrix:
+          browser: [chromium, firefox]
+      steps:
+        - uses: actions/checkout@v4
+        - uses: pnpm/action-setup@v2
+        - uses: actions/setup-node@v4
+          with:
+            node-version: 20
+            cache: 'pnpm'
+        
+        - name: Restore dependencies
+          uses: actions/cache@v4
+          with:
+            path: node_modules
+            key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
+        
+        - name: Install Playwright Browsers
+          run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+        
+        - name: Run E2E tests
+          run: pnpm test:e2e --project=${{ matrix.browser }}
+        
+        - name: Upload test results
+          if: failure()
+          uses: actions/upload-artifact@v4
+          with:
+            name: playwright-report-${{ matrix.browser }}
+            path: playwright-report/
+
+    deploy:
+      needs: [lint, typecheck, test, e2e]
+      if: github.ref == 'refs/heads/main'
+      runs-on: ubuntu-latest
+      environment:
+        name: production
+        url: https://yourapp.com
+      steps:
+        - uses: actions/checkout@v4
+        
+        - name: Deploy to Vercel
+          uses: amondnet/vercel-action@v25
+          with:
+            vercel-token: ${{ secrets.VERCEL_TOKEN }}
+            vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+            vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+            vercel-args: '--prod'
+        
+        - name: Notify Slack
+          uses: slackapi/slack-github-action@v1
+          with:
+            payload: |
+              {
+                "text": "Deployment to production successful!",
+                "blocks": [
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "✅ *Deployment Successful*\nCommit: ${{ github.sha }}\nAuthor: ${{ github.actor }}"
+                    }
+                  }
+                ]
+              }
+          env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+prerequisites:
+  - GitHub repository with Actions enabled
+  - 'Test suite (Vitest, Jest, Playwright)'
+  - 'Deployment target (Vercel, AWS, GCP, etc.)'
+  - >-
+    GitHub account with repository access and Actions enabled (free tier
+    includes 2,000 minutes/month)
+  - >-
+    Workflow YAML files stored in .github/workflows/ directory with proper YAML
+    syntax and GitHub Actions workflow schema
+  - >-
+    Secrets configured in GitHub repository settings (Settings > Secrets and
+    variables > Actions) for deployment credentials, API keys, and service
+    tokens
 tags:
   - github-actions
   - ci-cd
@@ -64,8 +239,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# GitHub Actions AI-Powered CI/CD Automation Skill
-
 ## What This Skill Enables
 
 Claude can design, generate, and optimize GitHub Actions workflows for comprehensive CI/CD pipelines. This skill enables automated testing, intelligent deployment strategies, security scanning, performance monitoring, and infrastructure provisioning - all triggered by GitHub events with AI-optimized configurations.
@@ -224,3 +397,23 @@ Claude will set up:
 - [Workflow Syntax Reference](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions)
 - [Security Hardening Guide](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions)
 - [Reusable Workflows](https://docs.github.com/en/actions/learn-github-actions/reusing-workflows)
+
+## Features
+
+- Complete CI/CD pipeline generation
+- Multi-environment deployment strategies
+- Security scanning integration (CodeQL, Trivy, Dependabot)
+- Performance testing with Lighthouse CI
+- Matrix builds across platforms
+- Smart caching and parallelization
+- Reusable workflows and workflow composition for DRY automation
+- Workflow status reporting and notifications with Slack/Discord integration, deployment status badges, and comprehensive workflow analytics for monitoring CI/CD health
+
+## Use Cases
+
+- Automated testing and deployment pipelines
+- Security vulnerability scanning
+- Performance regression detection
+- Multi-environment infrastructure deployment
+- Infrastructure as Code (IaC) deployment with Terraform/CloudFormation
+- Automated dependency updates and security patching with Dependabot

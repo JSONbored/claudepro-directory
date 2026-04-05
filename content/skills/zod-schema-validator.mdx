@@ -29,23 +29,58 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://zod.dev/'
 downloadUrl: /downloads/skills/zod-schema-validator.zip
 installable: true
-copySnippet: >-
-  "Create complete Zod validation for checkout flow:
+installCommand: npm install zod
+usageSnippet: npm install zod
+copySnippet: |-
+  import { z } from 'zod';
 
-  1. Customer info: email, phone, billing address
+  const passwordSchema = z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[0-9]/, 'Password must contain a number')
+    .regex(/[^a-zA-Z0-9]/, 'Password must contain a special character');
 
-  2. Shipping: address with validation (can't be PO box), preferred delivery
-  date
+  const userRegistrationSchema = z.object({
+    email: z.string().email('Invalid email address'),
+    password: passwordSchema,
+    confirmPassword: z.string(),
+    age: z.number().int().min(18, 'Must be 18 or older').max(100),
+    phone: z.string().regex(/^\\+?[1-9]\\d{1,14}$/).optional(),
+    acceptTerms: z.literal(true, {
+      errorMap: () => ({ message: 'You must accept the terms' }),
+    }),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
-  3. Payment: discriminated union for credit card, PayPal, crypto
+  type UserRegistration = z.infer<typeof userRegistrationSchema>;
 
-  4. Items: array of products with quantity (min 1, max 10), size, color
+  // Usage with safeParse for error handling
+  const result = userRegistrationSchema.safeParse({
+    email: 'user@example.com',
+    password: 'SecureP@ss1',
+    confirmPassword: 'SecureP@ss1',
+    age: 25,
+    acceptTerms: true,
+  });
 
-  5. Promo code: optional, alphanumeric, validate against API
-
-  6. Total must match cart calculation
-
-  7. Accept terms and conditions (required)"
+  if (!result.success) {
+    console.error(result.error.format());
+  } else {
+    console.log('Valid user:', result.data);
+  }
+prerequisites:
+  - TypeScript 5.0+ (5.5+ recommended)
+  - zod ^3.22.0
+  - Node.js 18+ or modern browser
+  - Basic TypeScript knowledge
+  - >-
+    TypeScript 4.5+ (recommended 5.0+) for full type inference and compile-time
+    type safety with Zod schemas
+  - >-
+    Runtime environment: Node.js 18+ for server-side validation or modern
+    browser with ES2020+ support for client-side validation
 tags:
   - zod
   - validation
@@ -74,6 +109,10 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference. Zod is a TypeScript-first schema validation library that provides runtime validation matching compile-time types, enabling you to validate untrusted data (API inputs, user forms, external integrations) while maintaining end-to-end type safety. With zero dependencies, 8kb minified bundle size, and automatic type inference, Zod eliminates the gap between static types and runtime reality. Features include composable schemas with .extend() and .merge(), custom validation with .refine() and async support, discriminated unions for efficient type narrowing, transforms for data coercion, and seamless integration with React Hook Form, tRPC, and Express.
+
+## Content
+
 # Zod Schema Validator Skill
 
 ## What This Skill Enables
@@ -244,3 +283,23 @@ Claude will:
 - [tRPC + Zod Guide](https://trpc.io/docs/server/validators)
 - [Zod to JSON Schema](https://github.com/StefanTerdell/zod-to-json-schema)
 - [Zod Error Formatting](https://zod.dev/ERROR_HANDLING)
+
+## Features
+
+- TypeScript-first with automatic type inference using z.infer<typeof schema> for end-to-end type safety
+- Zero dependencies with 8kb minified bundle size for minimal overhead in production applications
+- Composable schemas with .extend() and .merge() for reusable validation patterns and schema composition
+- Custom validation with .refine() and .superRefine() for complex business logic and cross-field validation
+- Async validation support with .parseAsync() and .safeParseAsync() for database checks and external API calls
+- Discriminated unions with z.discriminatedUnion() for efficient type narrowing and better error messages
+- Data transformation with .transform() for coercion, normalization, and type conversion before validation
+- Error handling with .safeParse() returning discriminated union results without throwing exceptions
+
+## Use Cases
+
+- API request/response validation with type-safe parsing and error handling for REST and GraphQL endpoints
+- Form validation with error messages integrated with React Hook Form, Formik, and native HTML forms
+- Database input sanitization and validation before INSERT/UPDATE operations with Prisma integration
+- Configuration validation for environment variables and application settings with type safety
+- Data pipeline validation for ETL processes, CSV parsing, and data transformation workflows
+- Type-safe API client generation from OpenAPI specifications with Zod schema validation

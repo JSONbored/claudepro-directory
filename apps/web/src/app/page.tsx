@@ -11,10 +11,10 @@ export default async function HomePage() {
   const featuredCategories = categories.slice(0, 6);
 
   return (
-    <div className="space-y-16 pb-24">
+    <div className="pb-24">
       <section className="border-b border-border/80">
-        <div className="container-shell py-16 text-center sm:py-24">
-          <div className="mx-auto max-w-4xl space-y-6">
+        <div className="container-shell py-14 text-center sm:py-18">
+          <div className="mx-auto max-w-4xl space-y-5">
             <span className="eyebrow">Community directory for Claude</span>
             <h1 className="display-title text-balance">
               Discover the best Claude tools, skills, MCP servers, and workflows.
@@ -67,11 +67,10 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
+          <div className="mx-auto mt-12 max-w-[52rem] text-left">
+            <BrowseDirectory entries={entries} limit={15} />
+          </div>
         </div>
-      </section>
-
-      <section className="container-shell max-w-[54rem] space-y-6">
-        <BrowseDirectory entries={entries} limit={15} />
       </section>
     </div>
   );

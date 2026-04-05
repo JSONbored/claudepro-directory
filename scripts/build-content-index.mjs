@@ -166,7 +166,9 @@ async function main() {
         usageSnippet: inferred.usageSnippet || undefined,
         copySnippet: inferred.copySnippet || undefined,
         configSnippet: inferred.configSnippet || undefined,
-        commandSyntax: data.commandSyntax ? String(data.commandSyntax) : undefined,
+        commandSyntax:
+          inferred.commandSyntax ||
+          (data.commandSyntax ? String(data.commandSyntax) : undefined),
         argumentHint: data.argumentHint ? String(data.argumentHint) : undefined,
         allowedTools: Array.isArray(data.allowedTools)
           ? data.allowedTools.map(String)
@@ -206,11 +208,10 @@ async function main() {
         codeBlocks,
         filePath: path.relative(repoRoot, filePath).replaceAll(path.sep, "/"),
         githubUrl: buildGitHubUrl(filePath),
-        repoUrl: githubRepo?.url
-          ?? undefined,
-        githubStars: undefined,
-        githubForks: undefined,
-        repoUpdatedAt: undefined
+        repoUrl: githubRepo?.url ?? null,
+        githubStars: null,
+        githubForks: null,
+        repoUpdatedAt: null
       });
     }
   }
@@ -232,9 +233,9 @@ async function main() {
     const stats = repoStats.get(githubRepo.key);
     if (!stats) continue;
 
-    entry.githubStars = stats.stars;
-    entry.githubForks = stats.forks;
-    entry.repoUpdatedAt = stats.updatedAt;
+    entry.githubStars = stats.stars ?? null;
+    entry.githubForks = stats.forks ?? null;
+    entry.repoUpdatedAt = stats.updatedAt ?? null;
   }
 
   entries.sort((left, right) => {

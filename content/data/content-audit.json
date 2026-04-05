@@ -117,10 +117,7 @@
     "slug": "database-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "agents",
@@ -144,10 +141,7 @@
     "slug": "devops-sre-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "agents",
@@ -283,10 +277,7 @@
     "slug": "technical-documentation-writer-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "agents",
@@ -310,10 +301,7 @@
     "slug": "ui-ux-design-expert-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "agents",
@@ -401,9 +389,7 @@
     "slug": "autogen-workflow",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -411,9 +397,7 @@
     "slug": "checkpoint-manager",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -421,9 +405,7 @@
     "slug": "claudemd-builder",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -431,9 +413,7 @@
     "slug": "context-analyzer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -441,9 +421,7 @@
     "slug": "cursor-rules",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -451,11 +429,7 @@
     "slug": "debug",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -463,9 +437,7 @@
     "slug": "docs",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -473,9 +445,7 @@
     "slug": "explain",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -483,9 +453,7 @@
     "slug": "generate-tests",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -501,9 +469,7 @@
     "slug": "hooks-generator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -511,9 +477,7 @@
     "slug": "mcp-setup",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -521,9 +485,7 @@
     "slug": "mintlify-docs",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -531,9 +493,7 @@
     "slug": "optimize",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -541,9 +501,7 @@
     "slug": "plan-mode",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -551,9 +509,7 @@
     "slug": "refactor-code",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -561,9 +517,7 @@
     "slug": "refactor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -571,9 +525,7 @@
     "slug": "review",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -581,9 +533,7 @@
     "slug": "security-audit",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -591,9 +541,7 @@
     "slug": "security",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -601,9 +549,7 @@
     "slug": "skills-installer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -611,9 +557,7 @@
     "slug": "slash-command-gen",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -621,9 +565,7 @@
     "slug": "subagent-create",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -631,9 +573,7 @@
     "slug": "tdd-workflow",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -641,9 +581,7 @@
     "slug": "test-advanced",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -651,9 +589,7 @@
     "slug": "v0-generate",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "commandSyntax"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "commands",
@@ -669,9 +605,7 @@
     "slug": "build-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -679,9 +613,7 @@
     "slug": "business-process-automation",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -689,9 +621,7 @@
     "slug": "chatgpt-migration-guide",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -699,9 +629,7 @@
     "slug": "claude-4-extended-thinking-tutorial",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -709,9 +637,7 @@
     "slug": "claude-agent-development-framework",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -719,9 +645,7 @@
     "slug": "claude-mcp-server-setup-guide",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -729,9 +653,7 @@
     "slug": "claude-rate-limits-fix",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -739,9 +661,7 @@
     "slug": "claude-vs-codewhisperer-gemini",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -749,9 +669,7 @@
     "slug": "claude-vs-copilot-python",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -759,9 +677,7 @@
     "slug": "claude-vs-cursor-codeium",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -769,9 +685,7 @@
     "slug": "financial-services-guide",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -779,9 +693,7 @@
     "slug": "fix-environment-variables",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -789,9 +701,7 @@
     "slug": "fix-installation-errors",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -799,9 +709,7 @@
     "slug": "fix-mcp-connection-errors",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -809,9 +717,7 @@
     "slug": "fix-memory-leak-performance",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -819,9 +725,7 @@
     "slug": "healthcare-hipaa-guide",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -829,9 +733,7 @@
     "slug": "migration-workflow-guide",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -839,9 +741,7 @@
     "slug": "multi-directory-setup",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "guides",
@@ -849,9 +749,7 @@
     "slug": "wsl-setup-guide",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "hooks",
@@ -1387,11 +1285,7 @@
     "slug": "airtable-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1399,11 +1293,7 @@
     "slug": "asana-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1411,11 +1301,7 @@
     "slug": "aws-services-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1423,11 +1309,7 @@
     "slug": "box-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1435,11 +1317,7 @@
     "slug": "canva-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1447,11 +1325,7 @@
     "slug": "clickup-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1459,11 +1333,7 @@
     "slug": "cloudflare-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1471,11 +1341,7 @@
     "slug": "cloudinary-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1483,11 +1349,7 @@
     "slug": "daloopa-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1495,11 +1357,7 @@
     "slug": "desktop-mcp-setup",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1507,11 +1365,7 @@
     "slug": "discord-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1519,11 +1373,7 @@
     "slug": "docker-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1531,11 +1381,7 @@
     "slug": "figma-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1543,11 +1389,7 @@
     "slug": "filesystem-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1555,11 +1397,7 @@
     "slug": "fireflies-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1567,11 +1405,7 @@
     "slug": "git-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1579,11 +1413,7 @@
     "slug": "github-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1591,11 +1421,7 @@
     "slug": "heyclaude-mcp",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1603,11 +1429,7 @@
     "slug": "hubspot-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1615,11 +1437,7 @@
     "slug": "hugging-face-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1627,11 +1445,7 @@
     "slug": "intercom-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1639,11 +1453,7 @@
     "slug": "invideo-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1651,11 +1461,7 @@
     "slug": "jam-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1663,11 +1469,7 @@
     "slug": "jira-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1675,11 +1477,7 @@
     "slug": "kubernetes-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1687,11 +1485,7 @@
     "slug": "linear-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1699,11 +1493,7 @@
     "slug": "monday-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1711,11 +1501,7 @@
     "slug": "netlify-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1723,11 +1509,7 @@
     "slug": "notion-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1735,11 +1517,7 @@
     "slug": "paypal-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1747,11 +1525,7 @@
     "slug": "plaid-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1759,11 +1533,7 @@
     "slug": "postgresql-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1771,11 +1541,7 @@
     "slug": "reddit-mcp-buddy",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1783,11 +1549,7 @@
     "slug": "redis-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1795,11 +1557,7 @@
     "slug": "sentry-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1807,11 +1565,7 @@
     "slug": "socket-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1819,11 +1573,7 @@
     "slug": "square-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1831,11 +1581,7 @@
     "slug": "stripe-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1843,11 +1589,7 @@
     "slug": "stytch-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1855,11 +1597,7 @@
     "slug": "vercel-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1867,11 +1605,7 @@
     "slug": "workato-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "mcp",
@@ -1879,11 +1613,7 @@
     "slug": "zapier-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "rules",
@@ -1899,9 +1629,7 @@
     "slug": "api-design-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "rules",
@@ -1933,9 +1661,7 @@
     "slug": "code-review-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "rules",
@@ -2007,9 +1733,7 @@
     "slug": "production-codebase-auditor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "rules",
@@ -2017,9 +1741,7 @@
     "slug": "python-data-science-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "rules",
@@ -2027,9 +1749,7 @@
     "slug": "python-data-science",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "rules",
@@ -2045,9 +1765,7 @@
     "slug": "react-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "rules",
@@ -2055,9 +1773,7 @@
     "slug": "react-next-js-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "rules",
@@ -2073,9 +1789,7 @@
     "slug": "security-auditor-penetration-tester",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "rules",
@@ -2083,9 +1797,7 @@
     "slug": "security-auditor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "copySnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "rules",
@@ -2141,10 +1853,7 @@
     "slug": "audio-transcription-summarization",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2152,10 +1861,7 @@
     "slug": "bun-runtime-modern-javascript",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2163,10 +1869,7 @@
     "slug": "cli-data-viz-quickstart",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2174,10 +1877,7 @@
     "slug": "cloudflare-workers-ai-edge",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2185,10 +1885,7 @@
     "slug": "csv-excel-data-wrangler",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2196,10 +1893,7 @@
     "slug": "cursor-windsurf-ai-ide-setup",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2207,10 +1901,7 @@
     "slug": "docx-report-generator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2218,10 +1909,7 @@
     "slug": "fastapi-python-backend",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2229,10 +1917,7 @@
     "slug": "github-actions-ai-cicd",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2240,10 +1925,7 @@
     "slug": "image-ocr-table-extraction",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2251,10 +1933,7 @@
     "slug": "json-schema-validation-transformation",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2262,10 +1941,7 @@
     "slug": "log-parsing-incident-timeline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2273,10 +1949,7 @@
     "slug": "markdown-knowledge-base-composer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2284,10 +1957,7 @@
     "slug": "mintlify-documentation-automation",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2295,10 +1965,7 @@
     "slug": "playwright-e2e-testing",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2306,10 +1973,7 @@
     "slug": "postgresql-query-optimization",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2317,10 +1981,7 @@
     "slug": "rest-api-client-harness",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2328,10 +1989,7 @@
     "slug": "supabase-realtime-database",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2339,10 +1997,7 @@
     "slug": "svelte-sveltekit-fullstack",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2350,10 +2005,7 @@
     "slug": "trpc-type-safe-api",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2361,10 +2013,7 @@
     "slug": "v0-rapid-prototyping",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2372,10 +2021,7 @@
     "slug": "vite-build-optimization",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2383,10 +2029,7 @@
     "slug": "webassembly-module-development",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2394,10 +2037,7 @@
     "slug": "website-crawler-summarizer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2405,10 +2045,7 @@
     "slug": "windsurf-collaborative-development",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "skills",
@@ -2416,10 +2053,7 @@
     "slug": "zod-schema-validator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "installCommand",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2427,9 +2061,7 @@
     "slug": "accessibility-first-statusline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2437,9 +2069,7 @@
     "slug": "ai-model-performance-dashboard",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2447,9 +2077,7 @@
     "slug": "api-latency-breakdown",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2457,9 +2085,7 @@
     "slug": "block-timer-tracker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2467,9 +2093,7 @@
     "slug": "burn-rate-monitor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2477,9 +2101,7 @@
     "slug": "cache-efficiency-monitor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2487,9 +2109,7 @@
     "slug": "catppuccin-mocha-theme",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2497,9 +2117,7 @@
     "slug": "daily-usage-percentage-tracker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2507,9 +2125,7 @@
     "slug": "docker-health-statusline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2517,9 +2133,7 @@
     "slug": "five-hour-window-tracker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2527,9 +2141,7 @@
     "slug": "git-status-statusline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2537,9 +2149,7 @@
     "slug": "lines-per-minute-tracker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2547,9 +2157,7 @@
     "slug": "mcp-server-status-monitor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2557,9 +2165,7 @@
     "slug": "minimal-powerline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2567,9 +2173,7 @@
     "slug": "model-switch-history-tracker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2577,9 +2181,7 @@
     "slug": "multi-line-statusline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2587,9 +2189,7 @@
     "slug": "multi-provider-token-counter",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2597,9 +2197,7 @@
     "slug": "multi-session-overlap-indicator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2607,9 +2205,7 @@
     "slug": "oh-my-zsh-robbyrussell",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2617,10 +2213,7 @@
     "slug": "python-rich-statusline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "scriptLanguage",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2628,9 +2221,7 @@
     "slug": "real-time-cost-tracker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2638,9 +2229,7 @@
     "slug": "session-health-score",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2648,9 +2237,7 @@
     "slug": "session-timer-statusline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2658,10 +2245,7 @@
     "slug": "simple-text-statusline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "scriptLanguage",
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2669,9 +2253,7 @@
     "slug": "starship-powerline-theme",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "statuslines",
@@ -2679,8 +2261,6 @@
     "slug": "workspace-project-depth-indicator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "usageSnippet"
-    ]
+    "missingRecommended": []
   }
 ]

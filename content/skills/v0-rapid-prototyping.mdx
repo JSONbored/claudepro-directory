@@ -16,7 +16,7 @@ description: >-
   seconds with production-ready code.
 cardDescription: >-
   Build production-ready React components and full pages in minutes using V0.dev
-  AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integration.
+  AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integrat...
 seoTitle: V0 Rapid UI Prototyping Workflow Skill
 seoDescription: >-
   Build production-ready React components and full pages in minutes using V0.dev
@@ -29,15 +29,94 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://v0.dev/docs'
 downloadUrl: /downloads/skills/v0-rapid-prototyping.zip
 installable: true
-copySnippet: |-
-  "Create a complete product details page with:
-  1. Image gallery with thumbnails (Client Component)
-  2. Product info section (title, price, description)
-  3. Add to cart button with quantity selector
-  4. Reviews section with star ratings
-  5. Related products carousel
-  6. Mobile-responsive layout with good UX
-  7. Loading states and error handling"
+installCommand: npx shadcn-ui@latest init
+usageSnippet: npx shadcn-ui@latest init
+copySnippet: >-
+  'use client';
+
+
+  import { useState } from 'react';
+
+  import { Check } from 'lucide-react';
+
+  import { Button } from '@/components/ui/button';
+
+  import { Card, CardContent, CardFooter, CardHeader, CardTitle } from
+  '@/components/ui/card';
+
+  import { Switch } from '@/components/ui/switch';
+
+
+  interface PricingTier {
+    name: string;
+    price: { monthly: number; annual: number };
+    features: string[];
+    cta: string;
+    popular?: boolean;
+  }
+
+
+  const tiers: PricingTier[] = [
+    { name: 'Basic', price: { monthly: 9, annual: 90 }, features: ['5 projects', '1GB storage'], cta: 'Get Started' },
+    { name: 'Pro', price: { monthly: 29, annual: 290 }, features: ['Unlimited projects', '10GB storage'], cta: 'Start Free Trial', popular: true },
+  ];
+
+
+  export function PricingTable() {
+    const [isAnnual, setIsAnnual] = useState(false);
+    return (
+      <div className="py-12">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold">Simple, transparent pricing</h2>
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <span>Monthly</span>
+              <Switch checked={isAnnual} onCheckedChange={setIsAnnual} />
+              <span>Annual</span>
+            </div>
+          </div>
+          <div className="mt-12 grid gap-8 lg:grid-cols-3">
+            {tiers.map((tier) => (
+              <Card key={tier.name} className={tier.popular ? 'border-primary shadow-lg' : ''}>
+                <CardHeader>
+                  <CardTitle>{tier.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-4xl font-bold">
+                    ${isAnnual ? tier.price.annual / 12 : tier.price.monthly}
+                  </div>
+                  <ul className="space-y-3">
+                    {tier.features.map((feature) => (
+                      <li key={feature} className="flex items-center gap-2">
+                        <Check className="h-5 w-5 text-primary" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full" variant={tier.popular ? 'default' : 'outline'}>
+                    {tier.cta}
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+prerequisites:
+  - Next.js 15+
+  - React 19+
+  - TailwindCSS v4.1+
+  - shadcn/ui components installed
+  - >-
+    V0.dev account and API access (free tier available) for generating React
+    components from natural language descriptions
+  - >-
+    React 18+ or Next.js 13+ project setup for integrating generated components
+    into existing applications
 tags:
   - v0
   - prototyping
@@ -65,8 +144,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# V0 Rapid UI Prototyping Workflow Skill
-
 ## What This Skill Enables
 
 Claude can generate production-ready React components and complete page layouts using V0.dev patterns - Vercel's breakthrough AI UI generator that has transformed frontend development in 2025. This skill enables instant component creation with shadcn/ui integration, TailwindCSS v4 styling, full TypeScript support, and seamless Next.js 15 App Router compatibility.
@@ -228,3 +305,23 @@ Claude will:
 - [TailwindCSS v4 Guide](https://tailwindcss.com/docs)
 - [Next.js 15 App Router](https://nextjs.org/docs/app)
 - [React 19 Documentation](https://react.dev/)
+
+## Features
+
+- Instant React component generation with V0 patterns and AI-powered code generation
+- shadcn/ui integration with full type safety and component library compatibility
+- TailwindCSS v4 styling with CSS variables and modern utility classes
+- Responsive mobile-first layouts with proper breakpoints and touch-friendly interactions
+- framer-motion animations with GPU-accelerated transitions for performance
+- WCAG 2.2 Level AA accessibility with semantic HTML, ARIA labels, and keyboard navigation
+- Server/Client component distinction for optimal Next.js 15 App Router performance
+- TypeScript support with explicit prop interfaces and JSDoc comments
+
+## Use Cases
+
+- Rapid prototyping of UI designs with instant component generation
+- Building production-ready components with shadcn/ui and TailwindCSS
+- Creating landing pages and marketing sites with hero sections and CTAs
+- Dashboard and admin panel development with data visualization
+- Form generation with validation using react-hook-form and Zod
+- Component library creation with reusable UI primitives and Storybook-ready code

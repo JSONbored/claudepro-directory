@@ -20,9 +20,34 @@ dateAdded: '2025-10-23'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://epoch.ai/data-insights/context-windows'
 installable: true
-copySnippet: "#!/usr/bin/env bash\n\n# AI Model Performance Dashboard for Claude Code\n# Displays: Occupancy % | Truncation | TTFT | Tokens/min | Model Limits\n\n# Read JSON from stdin\nread -r input\n\n# Extract values\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\nprompt_tokens=$(echo \"$input\" | jq -r '.session.promptTokens // 0')\ncompletion_tokens=$(echo \"$input\" | jq -r '.session.completionTokens // 0')\ntotal_tokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\n\n# Model context limits (2025 verified)\ncase \"$model\" in\n  *\"claude-sonnet-4\"*|*\"claude-4\"*)\n    context_limit=1000000\n    model_display=\"Claude Sonnet 4\"\n    ;;\n  *\"claude-3.5\"*|*\"claude-sonnet-3.5\"*)\n    context_limit=200000\n    model_display=\"Claude 3.5 Sonnet\"\n    ;;\n  *\"gpt-4.1\"*|*\"gpt-4-turbo\"*)\n    context_limit=1000000\n    model_display=\"GPT-4.1 Turbo\"\n    ;;\n  *\"gpt-4o\"*)\n    context_limit=128000\n    model_display=\"GPT-4o\"\n    ;;\n  *\"gemini-1.5-pro\"*)\n    context_limit=2000000\n    model_display=\"Gemini 1.5 Pro\"\n    ;;\n  *\"gemini-2\"*)\n    context_limit=1000000\n    model_display=\"Gemini 2.x\"\n    ;;\n  *\"grok-3\"*)\n    context_limit=1000000\n    model_display=\"Grok 3\"\n    ;;\n  *\"grok-4\"*)\n    context_limit=256000\n    model_display=\"Grok 4\"\n    ;;\n  *\"llama-4\"*)\n    context_limit=10000000\n    model_display=\"Llama 4 Scout\"\n    ;;\n  *)\n    context_limit=100000\n    model_display=\"$model\"\n    ;;\nesac\n\n# Calculate occupancy percentage\nif [ $context_limit -gt 0 ]; then\n  occupancy=$((prompt_tokens * 100 / context_limit))\nelse\n  occupancy=0\nfi\n\n# Occupancy color coding\nif [ $occupancy -lt 50 ]; then\n  OCC_COLOR=\"\\033[38;5;46m\"   # Green: < 50%\nelif [ $occupancy -lt 80 ]; then\n  OCC_COLOR=\"\\033[38;5;226m\"  # Yellow: 50-80%\nelse\n  OCC_COLOR=\"\\033[38;5;196m\"  # Red: > 80%\nfi\n\n# Truncation warning (models fail before advertised limits)\nreliable_limit=$((context_limit * 65 / 100))  # 65% of claimed limit\nif [ $prompt_tokens -gt $reliable_limit ]; then\n  truncation=\"⚠ TRUNCATION RISK\"\n  TRUNC_COLOR=\"\\033[38;5;196m\"\nelse\n  truncation=\"✓ Safe\"\n  TRUNC_COLOR=\"\\033[38;5;46m\"\nfi\n\n# Calculate tokens per minute\nif [ -n \"$session_start\" ]; then\n  current_time=$(date +%s)\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$session_start\" +%s 2>/dev/null || echo \"$current_time\")\n  elapsed_seconds=$((current_time - start_epoch))\n  if [ $elapsed_seconds -gt 0 ]; then\n    tokens_per_min=$((total_tokens * 60 / elapsed_seconds))\n  else\n    tokens_per_min=0\n  fi\nelse\n  tokens_per_min=0\nfi\n\n# Format numbers with commas\nformatNumber() {\n  printf \"%'d\" \"$1\" 2>/dev/null || echo \"$1\"\n}\n\n# TTFT simulation (Time to First Token - would need actual timing)\n# For demo purposes, estimate based on tokens\nif [ $prompt_tokens -gt 50000 ]; then\n  ttft=\"~2.5s\"\n  TTFT_COLOR=\"\\033[38;5;226m\"\nelif [ $prompt_tokens -gt 10000 ]; then\n  ttft=\"~1.2s\"\n  TTFT_COLOR=\"\\033[38;5;46m\"\nelse\n  ttft=\"~0.8s\"\n  TTFT_COLOR=\"\\033[38;5;46m\"\nfi\n\nRESET=\"\\033[0m\"\nBOLD=\"\\033[1m\"\n\n# Build dashboard (multi-line for comprehensive view)\necho -e \"${BOLD}\U0001F4CA ${model_display}${RESET}\"\necho -e \"${OCC_COLOR}Occupancy: ${occupancy}%${RESET} ($(formatNumber $prompt_tokens)/$(formatNumber $context_limit) tokens) | ${TRUNC_COLOR}${truncation}${RESET}\"\necho -e \"${TTFT_COLOR}TTFT: ${ttft}${RESET} | Rate: ${tokens_per_min} tok/min | Total: $(formatNumber $total_tokens)\""
+usageSnippet: "\U0001F4CA Claude Sonnet 4\nOccupancy: 42% (420,000/1,000,000 tokens) | ✓ Safe\nTTFT: ~1.2s | Rate: 1,245 tok/min | Total: 520,000"
+copySnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/ai-model-performance-dashboard.sh"
+    }
+  }
+configSnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/ai-model-performance-dashboard.sh"
+    }
+  }
 scriptLanguage: bash
 scriptBody: "#!/usr/bin/env bash\n\n# AI Model Performance Dashboard for Claude Code\n# Displays: Occupancy % | Truncation | TTFT | Tokens/min | Model Limits\n\n# Read JSON from stdin\nread -r input\n\n# Extract values\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\nprompt_tokens=$(echo \"$input\" | jq -r '.session.promptTokens // 0')\ncompletion_tokens=$(echo \"$input\" | jq -r '.session.completionTokens // 0')\ntotal_tokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\n\n# Model context limits (2025 verified)\ncase \"$model\" in\n  *\"claude-sonnet-4\"*|*\"claude-4\"*)\n    context_limit=1000000\n    model_display=\"Claude Sonnet 4\"\n    ;;\n  *\"claude-3.5\"*|*\"claude-sonnet-3.5\"*)\n    context_limit=200000\n    model_display=\"Claude 3.5 Sonnet\"\n    ;;\n  *\"gpt-4.1\"*|*\"gpt-4-turbo\"*)\n    context_limit=1000000\n    model_display=\"GPT-4.1 Turbo\"\n    ;;\n  *\"gpt-4o\"*)\n    context_limit=128000\n    model_display=\"GPT-4o\"\n    ;;\n  *\"gemini-1.5-pro\"*)\n    context_limit=2000000\n    model_display=\"Gemini 1.5 Pro\"\n    ;;\n  *\"gemini-2\"*)\n    context_limit=1000000\n    model_display=\"Gemini 2.x\"\n    ;;\n  *\"grok-3\"*)\n    context_limit=1000000\n    model_display=\"Grok 3\"\n    ;;\n  *\"grok-4\"*)\n    context_limit=256000\n    model_display=\"Grok 4\"\n    ;;\n  *\"llama-4\"*)\n    context_limit=10000000\n    model_display=\"Llama 4 Scout\"\n    ;;\n  *)\n    context_limit=100000\n    model_display=\"$model\"\n    ;;\nesac\n\n# Calculate occupancy percentage\nif [ $context_limit -gt 0 ]; then\n  occupancy=$((prompt_tokens * 100 / context_limit))\nelse\n  occupancy=0\nfi\n\n# Occupancy color coding\nif [ $occupancy -lt 50 ]; then\n  OCC_COLOR=\"\\033[38;5;46m\"   # Green: < 50%\nelif [ $occupancy -lt 80 ]; then\n  OCC_COLOR=\"\\033[38;5;226m\"  # Yellow: 50-80%\nelse\n  OCC_COLOR=\"\\033[38;5;196m\"  # Red: > 80%\nfi\n\n# Truncation warning (models fail before advertised limits)\nreliable_limit=$((context_limit * 65 / 100))  # 65% of claimed limit\nif [ $prompt_tokens -gt $reliable_limit ]; then\n  truncation=\"⚠ TRUNCATION RISK\"\n  TRUNC_COLOR=\"\\033[38;5;196m\"\nelse\n  truncation=\"✓ Safe\"\n  TRUNC_COLOR=\"\\033[38;5;46m\"\nfi\n\n# Calculate tokens per minute\nif [ -n \"$session_start\" ]; then\n  current_time=$(date +%s)\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$session_start\" +%s 2>/dev/null || echo \"$current_time\")\n  elapsed_seconds=$((current_time - start_epoch))\n  if [ $elapsed_seconds -gt 0 ]; then\n    tokens_per_min=$((total_tokens * 60 / elapsed_seconds))\n  else\n    tokens_per_min=0\n  fi\nelse\n  tokens_per_min=0\nfi\n\n# Format numbers with commas\nformatNumber() {\n  printf \"%'d\" \"$1\" 2>/dev/null || echo \"$1\"\n}\n\n# TTFT simulation (Time to First Token - would need actual timing)\n# For demo purposes, estimate based on tokens\nif [ $prompt_tokens -gt 50000 ]; then\n  ttft=\"~2.5s\"\n  TTFT_COLOR=\"\\033[38;5;226m\"\nelif [ $prompt_tokens -gt 10000 ]; then\n  ttft=\"~1.2s\"\n  TTFT_COLOR=\"\\033[38;5;46m\"\nelse\n  ttft=\"~0.8s\"\n  TTFT_COLOR=\"\\033[38;5;46m\"\nfi\n\nRESET=\"\\033[0m\"\nBOLD=\"\\033[1m\"\n\n# Build dashboard (multi-line for comprehensive view)\necho -e \"${BOLD}\U0001F4CA ${model_display}${RESET}\"\necho -e \"${OCC_COLOR}Occupancy: ${occupancy}%${RESET} ($(formatNumber $prompt_tokens)/$(formatNumber $context_limit) tokens) | ${TRUNC_COLOR}${truncation}${RESET}\"\necho -e \"${TTFT_COLOR}TTFT: ${ttft}${RESET} | Rate: ${tokens_per_min} tok/min | Total: $(formatNumber $total_tokens)\""
+prerequisites:
+  - Claude Code CLI installed and configured
+  - Bash shell available (bash 4.0+ recommended for arithmetic operations)
+  - >-
+    jq command-line JSON processor (jq 1.6+ recommended for safe extraction with
+    // defaults)
+  - 'date command with epoch conversion support (macOS: -j flag, Linux: -d flag)'
+  - >-
+    Terminal with ANSI color code support (256-color mode recommended for
+    traffic light colors)
+  - 'Write access to /tmp directory (optional, for caching performance metrics)'
 tags:
   - dashboard
   - performance
@@ -55,84 +80,88 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Features
+
+- Multi-provider model support (Claude, GPT, Gemini, Grok, Llama)
+- Context occupancy percentage with color-coded warnings
+- Truncation risk alerts based on real-world model reliability limits (65%)
+- Time to First Token (TTFT) estimation for latency monitoring
+- Tokens per minute rate calculation for throughput tracking
+- Formatted number display with thousands separators
+- 2025 verified context limits for all major models
+- Multi-line dashboard for comprehensive metrics at a glance
+
+## Use Cases
+
+- Production workflows requiring performance monitoring
+- Multi-model comparison and optimization
+- Preventing context truncation in long conversations
+- Tracking token consumption rates for cost management
+- Identifying latency issues before they impact workflow
+- SLA monitoring for enterprise AI deployments
+- Performance regression detection across model versions
+
+## Requirements
+
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for arithmetic operations)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- date command with epoch conversion support (macOS: -j flag, Linux: -d flag)
+- Terminal with ANSI color code support (256-color mode recommended for traffic light colors)
+- Write access to /tmp directory (optional, for caching performance metrics)
+
+## Configuration
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/ai-model-performance-dashboard.sh"
+  }
+}
+```
+
+## Examples
+### Enhanced Performance Dashboard with Cost Tracking
+Extended version with cost per token and total cost metrics
 ```bash
 #!/usr/bin/env bash
 
-# AI Model Performance Dashboard for Claude Code
-# Displays: Occupancy % | Truncation | TTFT | Tokens/min | Model Limits
+# Enhanced AI Model Performance Dashboard with Cost Tracking
 
-# Read JSON from stdin
-read -r input
+input=$(cat)
 
-# Extract values
-model=$(echo "$input" | jq -r '.model // "unknown"')
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"')
 prompt_tokens=$(echo "$input" | jq -r '.session.promptTokens // 0')
-completion_tokens=$(echo "$input" | jq -r '.session.completionTokens // 0')
 total_tokens=$(echo "$input" | jq -r '.session.totalTokens // 0')
+cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
 session_start=$(echo "$input" | jq -r '.session.startTime // ""')
 
-# Model context limits (2025 verified)
+# Model context limits and pricing (2025)
 case "$model" in
-  *"claude-sonnet-4"*|*"claude-4"*)
+  *"claude-sonnet-4"*|*"claude-opus-4"*)
     context_limit=1000000
     model_display="Claude Sonnet 4"
-    ;;
-  *"claude-3.5"*|*"claude-sonnet-3.5"*)
-    context_limit=200000
-    model_display="Claude 3.5 Sonnet"
+    cost_per_1k_input=0.003
+    cost_per_1k_output=0.015
     ;;
   *"gpt-4.1"*|*"gpt-4-turbo"*)
     context_limit=1000000
     model_display="GPT-4.1 Turbo"
-    ;;
-  *"gpt-4o"*)
-    context_limit=128000
-    model_display="GPT-4o"
-    ;;
-  *"gemini-1.5-pro"*)
-    context_limit=2000000
-    model_display="Gemini 1.5 Pro"
-    ;;
-  *"gemini-2"*)
-    context_limit=1000000
-    model_display="Gemini 2.x"
-    ;;
-  *"grok-3"*)
-    context_limit=1000000
-    model_display="Grok 3"
-    ;;
-  *"grok-4"*)
-    context_limit=256000
-    model_display="Grok 4"
-    ;;
-  *"llama-4"*)
-    context_limit=10000000
-    model_display="Llama 4 Scout"
+    cost_per_1k_input=0.01
+    cost_per_1k_output=0.03
     ;;
   *)
     context_limit=100000
     model_display="$model"
+    cost_per_1k_input=0.001
+    cost_per_1k_output=0.002
     ;;
 esac
 
-# Calculate occupancy percentage
-if [ $context_limit -gt 0 ]; then
-  occupancy=$((prompt_tokens * 100 / context_limit))
-else
-  occupancy=0
-fi
+occupancy=$((prompt_tokens * 100 / context_limit))
+reliable_limit=$((context_limit * 65 / 100))
 
-# Occupancy color coding
-if [ $occupancy -lt 50 ]; then
-  OCC_COLOR="\033[38;5;46m"   # Green: < 50%
-elif [ $occupancy -lt 80 ]; then
-  OCC_COLOR="\033[38;5;226m"  # Yellow: 50-80%
-else
-  OCC_COLOR="\033[38;5;196m"  # Red: > 80%
-fi
-
-# Truncation warning (models fail before advertised limits)
-reliable_limit=$((context_limit * 65 / 100))  # 65% of claimed limit
 if [ $prompt_tokens -gt $reliable_limit ]; then
   truncation="⚠ TRUNCATION RISK"
   TRUNC_COLOR="\033[38;5;196m"
@@ -141,43 +170,146 @@ else
   TRUNC_COLOR="\033[38;5;46m"
 fi
 
-# Calculate tokens per minute
+if [ $occupancy -lt 50 ]; then
+  OCC_COLOR="\033[38;5;46m"
+elif [ $occupancy -lt 80 ]; then
+  OCC_COLOR="\033[38;5;226m"
+else
+  OCC_COLOR="\033[38;5;196m"
+fi
+
+# Calculate tokens/min
 if [ -n "$session_start" ]; then
   current_time=$(date +%s)
-  start_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$session_start" +%s 2>/dev/null || echo "$current_time")
+  start_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$session_start" +%s 2>/dev/null || date -d "$session_start" +%s 2>/dev/null || echo "$current_time")
   elapsed_seconds=$((current_time - start_epoch))
-  if [ $elapsed_seconds -gt 0 ]; then
-    tokens_per_min=$((total_tokens * 60 / elapsed_seconds))
-  else
-    tokens_per_min=0
-  fi
+  tokens_per_min=$((elapsed_seconds > 0 ? total_tokens * 60 / elapsed_seconds : 0))
 else
   tokens_per_min=0
 fi
 
-# Format numbers with commas
-formatNumber() {
-  printf "%'d" "$1" 2>/dev/null || echo "$1"
-}
-
-# TTFT simulation (Time to First Token - would need actual timing)
-# For demo purposes, estimate based on tokens
-if [ $prompt_tokens -gt 50000 ]; then
-  ttft="~2.5s"
-  TTFT_COLOR="\033[38;5;226m"
-elif [ $prompt_tokens -gt 10000 ]; then
-  ttft="~1.2s"
-  TTFT_COLOR="\033[38;5;46m"
-else
-  ttft="~0.8s"
-  TTFT_COLOR="\033[38;5;46m"
-fi
+formatNumber() { printf "%'d" "$1" 2>/dev/null || echo "$1"; }
 
 RESET="\033[0m"
 BOLD="\033[1m"
 
-# Build dashboard (multi-line for comprehensive view)
 echo -e "${BOLD}📊 ${model_display}${RESET}"
-echo -e "${OCC_COLOR}Occupancy: ${occupancy}%${RESET} ($(formatNumber $prompt_tokens)/$(formatNumber $context_limit) tokens) | ${TRUNC_COLOR}${truncation}${RESET}"
-echo -e "${TTFT_COLOR}TTFT: ${ttft}${RESET} | Rate: ${tokens_per_min} tok/min | Total: $(formatNumber $total_tokens)"
+echo -e "${OCC_COLOR}Occupancy: ${occupancy}%${RESET} ($(formatNumber $prompt_tokens)/$(formatNumber $context_limit)) | ${TRUNC_COLOR}${truncation}${RESET}"
+echo -e "Rate: $(formatNumber $tokens_per_min) tok/min | Cost: $${cost} | Total: $(formatNumber $total_tokens)"
 ```
+### Performance Dashboard with Custom Reliable Limit
+Configurable truncation threshold for different risk tolerances
+```bash
+#!/usr/bin/env bash
+
+# AI Model Performance Dashboard with Custom Reliable Limit
+# Configure via RELIABLE_LIMIT_PERCENT environment variable (default 65%)
+
+input=$(cat)
+
+RELIABLE_LIMIT_PERCENT=${RELIABLE_LIMIT_PERCENT:-65}
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"')
+prompt_tokens=$(echo "$input" | jq -r '.session.promptTokens // 0')
+total_tokens=$(echo "$input" | jq -r '.session.totalTokens // 0')
+
+# Model context limits
+case "$model" in
+  *"claude-sonnet-4"*|*"claude-opus-4"*)
+    context_limit=1000000
+    model_display="Claude Sonnet 4"
+    ;;
+  *"gpt-4.1"*|*"gpt-4-turbo"*)
+    context_limit=1000000
+    model_display="GPT-4.1 Turbo"
+    ;;
+  *"gemini-1.5-pro"*)
+    context_limit=2000000
+    model_display="Gemini 1.5 Pro"
+    ;;
+  *)
+    context_limit=100000
+    model_display="$model"
+    ;;
+esac
+
+occupancy=$((prompt_tokens * 100 / context_limit))
+reliable_limit=$((context_limit * RELIABLE_LIMIT_PERCENT / 100))
+
+if [ $prompt_tokens -gt $reliable_limit ]; then
+  truncation="⚠ TRUNCATION RISK"
+  TRUNC_COLOR="\033[38;5;196m"
+else
+  truncation="✓ Safe"
+  TRUNC_COLOR="\033[38;5;46m"
+fi
+
+if [ $occupancy -lt 50 ]; then
+  OCC_COLOR="\033[38;5;46m"
+elif [ $occupancy -lt 80 ]; then
+  OCC_COLOR="\033[38;5;226m"
+else
+  OCC_COLOR="\033[38;5;196m"
+fi
+
+formatNumber() { printf "%'d" "$1" 2>/dev/null || echo "$1"; }
+
+RESET="\033[0m"
+BOLD="\033[1m"
+
+echo -e "${BOLD}📊 ${model_display}${RESET}"
+echo -e "${OCC_COLOR}Occupancy: ${occupancy}%${RESET} ($(formatNumber $prompt_tokens)/$(formatNumber $context_limit)) | ${TRUNC_COLOR}${truncation}${RESET} (limit: ${RELIABLE_LIMIT_PERCENT}%)"
+echo -e "Total: $(formatNumber $total_tokens) tokens"
+```
+### Performance Dashboard Installation Example
+Complete setup script with model limit updates
+```bash
+#!/bin/bash
+# Installation script for AI Model Performance Dashboard
+
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/ai-model-performance-dashboard.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+# [Script content from first example]
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/ai-model-performance-dashboard.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+  echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/ai-model-performance-dashboard.sh"}}' > .claude/settings.json
+else
+  jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/ai-model-performance-dashboard.sh"}' .claude/settings.json > .claude/settings.json.tmp
+  mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "AI Model Performance Dashboard installed successfully!"
+echo "Note: Update model context limits in script as new models are released."
+```
+
+## Troubleshooting
+### Occupancy percentage always showing 0% or incorrect values
+
+Verify session.promptTokens exists in JSON: jq .session.promptTokens. Check context_limit set correctly for model. Test calculation: echo $((100000 * 100 / 1000000)) (should be 10). Ensure integer division working. Verify prompt_tokens is numeric: echo "$prompt_tokens" | grep -E '^[0-9]+$'.
+### Model not recognized, showing default context_limit 100000
+
+Check model string extraction: jq -r '.model.id // .model.display_name'. Verify case statement matches model name pattern. Test model matching: echo "$model" | grep -i 'claude-sonnet-4'. Add custom model: Add case for *"your-model"*) context_limit=X ;; before default case. Check model name format in Claude Code JSON output.
+### Tokens per minute showing 0 or extremely high numbers
+
+Verify session.startTime format: jq -r '.session.startTime'. Check date parsing works: macOS (date -j -f '%Y-%m-%dT%H:%M:%SZ' '2025-10-23T10:00:00Z' +%s) or Linux (date -d '2025-10-23T10:00:00Z' +%s). Ensure elapsed_seconds > 0. Check timezone handling. Verify session_start is not empty.
+### Number formatting with commas not working (showing raw numbers)
+
+Check printf thousands separator support: printf "%'d" 1000000. If unsupported, formatNumber falls back to raw echo. Enable locale: export LC_NUMERIC=en_US.UTF-8. Test: locale | grep LC_NUMERIC. Verify printf supports ' flag (POSIX extension). Use alternative: sed 's/\([0-9]\{1,3\}\)$/\1/' for basic formatting.
+### Truncation warning appearing too early or too late
+
+Adjust reliable_limit calculation (currently 65% of context_limit). Research shows models fail 30-35% before claimed limits. Increase for conservative: reliable_limit=$((context_limit * 50 / 100)). Decrease for aggressive: reliable_limit=$((context_limit * 75 / 100)). Set via environment variable: export RELIABLE_LIMIT_PERCENT=70. Test with known token counts.
+### TTFT (Time to First Token) estimation always shows same value
+
+TTFT is estimated based on prompt_tokens, not actual measured latency. For accurate TTFT, integrate with Claude Code API response timing. Current estimation: <10k tokens (~0.8s), 10k-50k (~1.2s), >50k (~2.5s). Consider adding actual timing measurement if Claude Code exposes response start time in JSON.
+### Color codes not displaying correctly in terminal
+
+Verify terminal supports 256-color mode: echo $TERM (should include '256color' or 'xterm-256color'). Check ANSI code format: Use \033[38;5;Xm for 256-color mode. Test colors: echo -e '\033[38;5;46mGreen\033[0m'. Verify echo -e flag is used. Check terminal emulator color support settings.
+### Multi-line dashboard not displaying correctly (showing as single line)
+
+Verify echo -e flag is used for escape sequence interpretation. Check terminal supports multi-line statuslines (Claude Code feature). Test: echo -e "Line 1\nLine 2". Some terminals may collapse multi-line output. Consider single-line format if multi-line not supported.

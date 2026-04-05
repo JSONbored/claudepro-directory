@@ -23,13 +23,26 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://matplotlib.org/'
 downloadUrl: /downloads/skills/cli-data-viz-quickstart.zip
 installable: true
+installCommand: npm i vega vega-lite
+usageSnippet: npm i vega vega-lite
 copySnippet: |-
-  "Create a sales dashboard from this data:
-  1. Line chart: monthly revenue trend
-  2. Bar chart: top 10 products by sales
-  3. Pie chart: sales by region
-  4. Table: key metrics summary
-  Use a professional color scheme and save as sales_dashboard.png"
+  import pandas as pd
+  import matplotlib.pyplot as plt
+
+  df = pd.read_csv('data.csv')
+  df.groupby('category')['value'].sum().plot(kind='bar')
+  plt.tight_layout(); plt.savefig('chart.png', dpi=200)
+prerequisites:
+  - Python 3.11+ or Node.js 18+
+  - matplotlib/seaborn or vega/vega-lite
+  - 'Data file in supported format (CSV, JSON, Excel)'
+  - Code Interpreter enabled (for Python path)
+  - >-
+    Node.js 18+ or Python 3.8+ runtime environment for executing visualization
+    scripts
+  - >-
+    Terminal with ANSI color support and Unicode character rendering for proper
+    chart display
 tags:
   - visualization
   - charts
@@ -59,8 +72,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# CLI Data Visualization Quickstart Skill
-
 ## What This Skill Enables
 
 Claude can create charts and visualizations from your data (CSV, JSON, Excel) using matplotlib, seaborn, plotly, or other visualization libraries. Generate publication-ready charts, dashboards, and data visualizations with custom styling.
@@ -255,3 +266,23 @@ Show monthly data as area chart"
 - [Plotly Documentation](https://plotly.com/python/) - Interactive charts
 - [Data Viz Best Practices](https://www.data-to-viz.com/) - Choosing the right chart
 - [Color Brewer](https://colorbrewer2.org/) - Color scheme picker
+
+## Features
+
+- CLI-first workflows
+- Common chart templates (bar/line/scatter)
+- Headless export
+- Reproducible configurations
+- Multiple export formats (PNG, SVG, PDF, HTML)
+- Statistical visualization support (histograms, box plots, heatmaps)
+- Custom styling and branding options
+- Interactive terminal charts and graphs with real-time data updates, animated visualizations, and keyboard navigation for exploring data in terminal environments
+
+## Use Cases
+
+- Exploratory analysis
+- Executive snapshots
+- CI artifact generation
+- Automated report generation in CI/CD pipelines
+- Data exploration and analysis workflows
+- Presentation-ready visualizations with custom branding

@@ -18,9 +18,42 @@ authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-01'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: true
-copySnippet: "#!/usr/bin/env bash\n\n# Session Timer Statusline for Claude Code\n# Tracks session duration and productivity metrics\n\n# Read JSON from stdin\nread -r input\n\n# Extract session data\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"' | sed 's/claude-//')\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\ncost=$(echo \"$input\" | jq -r '.session.estimatedCost // 0' | awk '{printf \"%.3f\", $0}')\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\n\n# Calculate session duration\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%S\" \"${session_start%.*}\" \"+%s\" 2>/dev/null || echo \"0\")\n  current_epoch=$(date +%s)\n  duration=$((current_epoch - start_epoch))\n  \n  # Format duration as HH:MM:SS\n  hours=$((duration / 3600))\n  minutes=$(((duration % 3600) / 60))\n  seconds=$((duration % 60))\n  formatted_time=$(printf \"%02d:%02d:%02d\" $hours $minutes $seconds)\n  \n  # Calculate tokens per minute\n  if [ $duration -gt 0 ]; then\n    tokens_per_min=$((tokens * 60 / duration))\n    \n    # Productivity rating\n    if [ $tokens_per_min -gt 500 ]; then\n      prod_color=\"\\033[32m\"  # Green - high productivity\n      prod_indicator=\"\U0001F525\"\n    elif [ $tokens_per_min -gt 200 ]; then\n      prod_color=\"\\033[33m\"  # Yellow - medium productivity\n      prod_indicator=\"⚡\"\n    else\n      prod_color=\"\\033[36m\"  # Cyan - normal\n      prod_indicator=\"\U0001F4AD\"\n    fi\n  else\n    tokens_per_min=0\n    prod_color=\"\\033[36m\"\n    prod_indicator=\"\U0001F4AD\"\n  fi\n  \n  # Calculate cost per hour\n  if [ $duration -gt 0 ]; then\n    cost_per_hour=$(echo \"$cost * 3600 / $duration\" | bc -l | awk '{printf \"%.2f\", $0}')\n  else\n    cost_per_hour=\"0.00\"\n  fi\nelse\n  formatted_time=\"00:00:00\"\n  tokens_per_min=0\n  cost_per_hour=\"0.00\"\n  prod_indicator=\"\U0001F4AD\"\nfi\n\n# Build statusline\necho -e \"\\033[35m⏱  ${formatted_time}\\033[0m │ \\033[36m${model}\\033[0m │ ${prod_color}${prod_indicator} ${tokens_per_min}/min\\033[0m │ \\033[33m\\$${cost_per_hour}/hr\\033[0m\""
+usageSnippet: "⏱  01:23:45 │ sonnet-4.5 │ \U0001F525 524/min │ $1.23/hr"
+copySnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/session-timer-statusline.sh",
+      "refreshInterval": 1000
+    }
+  }
+configSnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/session-timer-statusline.sh",
+      "refreshInterval": 1000
+    }
+  }
 scriptLanguage: bash
 scriptBody: "#!/usr/bin/env bash\n\n# Session Timer Statusline for Claude Code\n# Tracks session duration and productivity metrics\n\n# Read JSON from stdin\nread -r input\n\n# Extract session data\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"' | sed 's/claude-//')\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\ncost=$(echo \"$input\" | jq -r '.session.estimatedCost // 0' | awk '{printf \"%.3f\", $0}')\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\n\n# Calculate session duration\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%S\" \"${session_start%.*}\" \"+%s\" 2>/dev/null || echo \"0\")\n  current_epoch=$(date +%s)\n  duration=$((current_epoch - start_epoch))\n  \n  # Format duration as HH:MM:SS\n  hours=$((duration / 3600))\n  minutes=$(((duration % 3600) / 60))\n  seconds=$((duration % 60))\n  formatted_time=$(printf \"%02d:%02d:%02d\" $hours $minutes $seconds)\n  \n  # Calculate tokens per minute\n  if [ $duration -gt 0 ]; then\n    tokens_per_min=$((tokens * 60 / duration))\n    \n    # Productivity rating\n    if [ $tokens_per_min -gt 500 ]; then\n      prod_color=\"\\033[32m\"  # Green - high productivity\n      prod_indicator=\"\U0001F525\"\n    elif [ $tokens_per_min -gt 200 ]; then\n      prod_color=\"\\033[33m\"  # Yellow - medium productivity\n      prod_indicator=\"⚡\"\n    else\n      prod_color=\"\\033[36m\"  # Cyan - normal\n      prod_indicator=\"\U0001F4AD\"\n    fi\n  else\n    tokens_per_min=0\n    prod_color=\"\\033[36m\"\n    prod_indicator=\"\U0001F4AD\"\n  fi\n  \n  # Calculate cost per hour\n  if [ $duration -gt 0 ]; then\n    cost_per_hour=$(echo \"$cost * 3600 / $duration\" | bc -l | awk '{printf \"%.2f\", $0}')\n  else\n    cost_per_hour=\"0.00\"\n  fi\nelse\n  formatted_time=\"00:00:00\"\n  tokens_per_min=0\n  cost_per_hour=\"0.00\"\n  prod_indicator=\"\U0001F4AD\"\nfi\n\n# Build statusline\necho -e \"\\033[35m⏱  ${formatted_time}\\033[0m │ \\033[36m${model}\\033[0m │ ${prod_color}${prod_indicator} ${tokens_per_min}/min\\033[0m │ \\033[33m\\$${cost_per_hour}/hr\\033[0m\""
+prerequisites:
+  - Claude Code CLI installed and configured
+  - >-
+    Bash shell available (bash 4.0+ recommended for pattern matching, arithmetic
+    operations, and string manipulation)
+  - >-
+    jq command-line JSON processor (jq 1.6+ recommended for safe extraction with
+    // defaults)
+  - >-
+    date command with epoch support (macOS: date -j, Linux: date -d) for
+    timestamp parsing
+  - >-
+    bc calculator (optional, for cost per hour calculation - script uses awk as
+    fallback)
+  - >-
+    Terminal with ANSI color code support (256-color mode recommended for
+    color-coded productivity indicators)
 tags:
   - timer
   - productivity
@@ -52,67 +85,481 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Features
+
+- Elapsed session time in HH:MM:SS format
+- Real-time tokens per minute calculation
+- Cost per hour estimation
+- Session start time display
+- Productivity metrics (tokens/min indicator)
+- Color-coded efficiency ratings
+- Persistent timing across statusline refreshes
+- Pomodoro technique integration with break reminders
+
+## Use Cases
+
+- Track billable hours for client work
+- Monitor session productivity and efficiency
+- Budget management for API cost control
+- Time-boxed development sessions (Pomodoro technique)
+- Performance benchmarking across different models
+- Team time tracking for collaborative development sessions
+
+## Requirements
+
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for pattern matching, arithmetic operations, and string manipulation)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- date command with epoch support (macOS: date -j, Linux: date -d) for timestamp parsing
+- bc calculator (optional, for cost per hour calculation - script uses awk as fallback)
+- Terminal with ANSI color code support (256-color mode recommended for color-coded productivity indicators)
+
+## Configuration
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/session-timer-statusline.sh",
+    "refreshInterval": 1000
+  }
+}
+```
+
+## Examples
+### Enhanced Session Timer with Start Time Display
+Extended version showing session start time and elapsed duration
 ```bash
 #!/usr/bin/env bash
 
-# Session Timer Statusline for Claude Code
-# Tracks session duration and productivity metrics
+# Enhanced Session Timer with Start Time Display
 
-# Read JSON from stdin
+export LC_NUMERIC=C
+
 read -r input
 
-# Extract session data
-model=$(echo "$input" | jq -r '.model // "unknown"' | sed 's/claude-//')
-tokens=$(echo "$input" | jq -r '.session.totalTokens // 0')
-cost=$(echo "$input" | jq -r '.session.estimatedCost // 0' | awk '{printf "%.3f", $0}')
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"' | sed 's/claude-//')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // .session.totalTokens // 0')
+cost=$(echo "$input" | jq -r '.cost.total_cost_usd // .session.estimatedCost // 0')
 session_start=$(echo "$input" | jq -r '.session.startTime // ""')
+
+# Detect OS for date command
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  DATE_CMD="date -j"
+  DATE_FORMAT="-f"
+else
+  DATE_CMD="date"
+  DATE_FORMAT="-d"
+fi
 
 # Calculate session duration
 if [ -n "$session_start" ]; then
-  start_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${session_start%.*}" "+%s" 2>/dev/null || echo "0")
-  current_epoch=$(date +%s)
-  duration=$((current_epoch - start_epoch))
+  start_clean=$(echo "$session_start" | sed 's/\.\{0,1\}[0-9]\{0,3\}Z\{0,1\}$//' | sed 's/T/ /')
   
-  # Format duration as HH:MM:SS
-  hours=$((duration / 3600))
-  minutes=$(((duration % 3600) / 60))
-  seconds=$((duration % 60))
-  formatted_time=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
-  
-  # Calculate tokens per minute
-  if [ $duration -gt 0 ]; then
-    tokens_per_min=$((tokens * 60 / duration))
-    
-    # Productivity rating
-    if [ $tokens_per_min -gt 500 ]; then
-      prod_color="\033[32m"  # Green - high productivity
-      prod_indicator="🔥"
-    elif [ $tokens_per_min -gt 200 ]; then
-      prod_color="\033[33m"  # Yellow - medium productivity
-      prod_indicator="⚡"
-    else
-      prod_color="\033[36m"  # Cyan - normal
-      prod_indicator="💭"
-    fi
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    start_epoch=$(date -j -f "%Y-%m-%d %H:%M:%S" "$start_clean" "+%s" 2>/dev/null || echo "0")
+    start_formatted=$(date -j -f "%Y-%m-%d %H:%M:%S" "$start_clean" "+%H:%M" 2>/dev/null || echo "")
   else
-    tokens_per_min=0
-    prod_color="\033[36m"
-    prod_indicator="💭"
+    start_epoch=$(date -d "$start_clean" "+%s" 2>/dev/null || echo "0")
+    start_formatted=$(date -d "$start_clean" "+%H:%M" 2>/dev/null || echo "")
   fi
   
-  # Calculate cost per hour
-  if [ $duration -gt 0 ]; then
-    cost_per_hour=$(echo "$cost * 3600 / $duration" | bc -l | awk '{printf "%.2f", $0}')
+  current_epoch=$(date +%s 2>/dev/null || echo "0")
+  
+  if [ "$start_epoch" != "0" ] && [ "$current_epoch" != "0" ]; then
+    duration=$((current_epoch - start_epoch))
+    
+    if [ $duration -lt 0 ]; then
+      duration=0
+    fi
+    
+    hours=$((duration / 3600))
+    minutes=$(((duration % 3600) / 60))
+    seconds=$((duration % 60))
+    formatted_time=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
+    
+    if [ $duration -gt 0 ]; then
+      tokens_per_min=$((tokens * 60 / duration))
+      
+      if [ $tokens_per_min -gt 500 ]; then
+        prod_color="\033[32m"
+        prod_indicator="🔥"
+      elif [ $tokens_per_min -gt 200 ]; then
+        prod_color="\033[33m"
+        prod_indicator="⚡"
+      else
+        prod_color="\033[36m"
+        prod_indicator="💭"
+      fi
+    else
+      tokens_per_min=0
+      prod_color="\033[36m"
+      prod_indicator="💭"
+    fi
+    
+    if command -v bc > /dev/null 2>&1 && [ $duration -gt 0 ]; then
+      cost_per_hour=$(echo "scale=2; $cost * 3600 / $duration" | bc -l 2>/dev/null || echo "0.00")
+    elif command -v awk > /dev/null 2>&1 && [ $duration -gt 0 ]; then
+      cost_per_hour=$(awk "BEGIN {printf \"%.2f\", $cost * 3600 / $duration}" 2>/dev/null || echo "0.00")
+    else
+      cost_per_hour="0.00"
+    fi
   else
+    formatted_time="00:00:00"
+    tokens_per_min=0
     cost_per_hour="0.00"
+    prod_indicator="💭"
+    prod_color="\033[36m"
+    start_formatted=""
   fi
 else
   formatted_time="00:00:00"
   tokens_per_min=0
   cost_per_hour="0.00"
   prod_indicator="💭"
+  prod_color="\033[36m"
+  start_formatted=""
 fi
 
-# Build statusline
-echo -e "\033[35m⏱  ${formatted_time}\033[0m │ \033[36m${model}\033[0m │ ${prod_color}${prod_indicator} ${tokens_per_min}/min\033[0m │ \033[33m\$${cost_per_hour}/hr\033[0m"
+RESET="\033[0m"
+
+# Build statusline with start time
+if [ -n "$start_formatted" ]; then
+  echo -e "\033[35m⏱  ${formatted_time}${RESET} (start: ${start_formatted}) │ \033[36m${model}${RESET} │ ${prod_color}${prod_indicator} ${tokens_per_min}/min${RESET} │ \033[33m\$${cost_per_hour}/hr${RESET}"
+else
+  echo -e "\033[35m⏱  ${formatted_time}${RESET} │ \033[36m${model}${RESET} │ ${prod_color}${prod_indicator} ${tokens_per_min}/min${RESET} │ \033[33m\$${cost_per_hour}/hr${RESET}"
+fi
 ```
+### Session Timer with Pomodoro Alerts
+Version with Pomodoro technique support (25-minute work intervals)
+```bash
+#!/usr/bin/env bash
+
+# Session Timer with Pomodoro Alerts
+
+export LC_NUMERIC=C
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"' | sed 's/claude-//')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // .session.totalTokens // 0')
+cost=$(echo "$input" | jq -r '.cost.total_cost_usd // .session.estimatedCost // 0')
+session_start=$(echo "$input" | jq -r '.session.startTime // ""')
+
+# Pomodoro interval (25 minutes = 1500 seconds)
+POMODORO_INTERVAL=${POMODORO_INTERVAL:-1500}
+
+# Detect OS for date command
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  DATE_CMD="date -j"
+else
+  DATE_CMD="date"
+fi
+
+# Calculate session duration
+if [ -n "$session_start" ]; then
+  start_clean=$(echo "$session_start" | sed 's/\.\{0,1\}[0-9]\{0,3\}Z\{0,1\}$//' | sed 's/T/ /')
+  
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    start_epoch=$(date -j -f "%Y-%m-%d %H:%M:%S" "$start_clean" "+%s" 2>/dev/null || echo "0")
+  else
+    start_epoch=$(date -d "$start_clean" "+%s" 2>/dev/null || echo "0")
+  fi
+  
+  current_epoch=$(date +%s 2>/dev/null || echo "0")
+  
+  if [ "$start_epoch" != "0" ] && [ "$current_epoch" != "0" ]; then
+    duration=$((current_epoch - start_epoch))
+    
+    if [ $duration -lt 0 ]; then
+      duration=0
+    fi
+    
+    # Check Pomodoro interval
+    pomodoro_count=$((duration / POMODORO_INTERVAL))
+    pomodoro_remaining=$((POMODORO_INTERVAL - (duration % POMODORO_INTERVAL)))
+    
+    hours=$((duration / 3600))
+    minutes=$(((duration % 3600) / 60))
+    seconds=$((duration % 60))
+    formatted_time=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
+    
+    if [ $duration -gt 0 ]; then
+      tokens_per_min=$((tokens * 60 / duration))
+      
+      if [ $tokens_per_min -gt 500 ]; then
+        prod_color="\033[32m"
+        prod_indicator="🔥"
+      elif [ $tokens_per_min -gt 200 ]; then
+        prod_color="\033[33m"
+        prod_indicator="⚡"
+      else
+        prod_color="\033[36m"
+        prod_indicator="💭"
+      fi
+    else
+      tokens_per_min=0
+      prod_color="\033[36m"
+      prod_indicator="💭"
+    fi
+    
+    if command -v bc > /dev/null 2>&1 && [ $duration -gt 0 ]; then
+      cost_per_hour=$(echo "scale=2; $cost * 3600 / $duration" | bc -l 2>/dev/null || echo "0.00")
+    elif command -v awk > /dev/null 2>&1 && [ $duration -gt 0 ]; then
+      cost_per_hour=$(awk "BEGIN {printf \"%.2f\", $cost * 3600 / $duration}" 2>/dev/null || echo "0.00")
+    else
+      cost_per_hour="0.00"
+    fi
+    
+    # Pomodoro alert
+    if [ $pomodoro_remaining -le 60 ] && [ $pomodoro_remaining -gt 0 ]; then
+      pomodoro_alert="🍅 ${pomodoro_remaining}s"
+      pomodoro_color="\033[33m"
+    elif [ $pomodoro_count -gt 0 ]; then
+      pomodoro_alert="🍅 +${pomodoro_count}"
+      pomodoro_color="\033[32m"
+    else
+      pomodoro_alert=""
+      pomodoro_color=""
+    fi
+  else
+    formatted_time="00:00:00"
+    tokens_per_min=0
+    cost_per_hour="0.00"
+    prod_indicator="💭"
+    prod_color="\033[36m"
+    pomodoro_alert=""
+    pomodoro_color=""
+  fi
+else
+  formatted_time="00:00:00"
+  tokens_per_min=0
+  cost_per_hour="0.00"
+  prod_indicator="💭"
+  prod_color="\033[36m"
+  pomodoro_alert=""
+  pomodoro_color=""
+fi
+
+RESET="\033[0m"
+
+# Build statusline with Pomodoro alert
+if [ -n "$pomodoro_alert" ]; then
+  echo -e "\033[35m⏱  ${formatted_time}${RESET} │ ${pomodoro_color}${pomodoro_alert}${RESET} │ \033[36m${model}${RESET} │ ${prod_color}${prod_indicator} ${tokens_per_min}/min${RESET} │ \033[33m\$${cost_per_hour}/hr${RESET}"
+else
+  echo -e "\033[35m⏱  ${formatted_time}${RESET} │ \033[36m${model}${RESET} │ ${prod_color}${prod_indicator} ${tokens_per_min}/min${RESET} │ \033[33m\$${cost_per_hour}/hr${RESET}"
+fi
+```
+### Session Timer Installation Example
+Complete setup script with OS detection and date command verification
+```bash
+#!/bin/bash
+# Installation script for Session Timer Statusline
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Check for bc (optional, for cost calculations)
+if ! command -v bc &> /dev/null; then
+    echo "Installing bc calculator (optional, for cost calculations)..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install bc
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y bc || sudo yum install -y bc
+    else
+        echo "Note: bc is optional - script will use awk as fallback"
+    fi
+fi
+
+# Check for awk (usually pre-installed)
+if ! command -v awk &> /dev/null; then
+    echo "Warning: awk command not found - cost calculations may not work"
+    echo "Install awk: macOS (pre-installed), Linux (sudo apt-get install gawk or sudo yum install gawk)"
+else
+    echo "awk command available"
+fi
+
+# Test date command for OS compatibility
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    if date -j -f "%Y-%m-%d %H:%M:%S" "2024-01-01 12:00:00" "+%s" &> /dev/null; then
+        echo "macOS date command working: $(date -j -f '%Y-%m-%d %H:%M:%S' '2024-01-01 12:00:00' '+%s')"
+    else
+        echo "Warning: macOS date command test failed"
+    fi
+else
+    if date -d "2024-01-01 12:00:00" "+%s" &> /dev/null; then
+        echo "Linux date command working: $(date -d '2024-01-01 12:00:00' '+%s')"
+    else
+        echo "Warning: Linux date command test failed"
+    fi
+fi
+
+# Test bc calculator (if available)
+if command -v bc &> /dev/null; then
+    if echo "scale=2; 0.05 * 3600 / 1800" | bc -l 2>/dev/null | grep -q "0.10"; then
+        echo "bc calculator working: $(echo 'scale=2; 0.05 * 3600 / 1800' | bc -l)"
+    else
+        echo "Warning: bc calculator test failed"
+    fi
+fi
+
+# Test awk for cost calculation
+if command -v awk > /dev/null 2>&1; then
+    test_cost=$(awk "BEGIN {printf \"%.2f\", 0.05 * 3600 / 1800}" 2>/dev/null)
+    if [ "$test_cost" = "0.10" ]; then
+        echo "awk cost calculation working: $test_cost"
+    else
+        echo "Warning: awk cost calculation test failed"
+    fi
+fi
+
+# Test emoji support
+if echo -e '⏱ 🔥 ⚡ 💭 🍅' &> /dev/null; then
+    echo "Emoji characters supported: ⏱ 🔥 ⚡ 💭 🍅"
+else
+    echo "Warning: Emoji characters may not display correctly"
+fi
+
+# Create statuslines directory
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/session-timer-statusline.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Session Timer Statusline for Claude Code
+# Tracks session duration and productivity metrics
+
+export LC_NUMERIC=C
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"' | sed 's/claude-//')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // .session.totalTokens // 0')
+cost=$(echo "$input" | jq -r '.cost.total_cost_usd // .session.estimatedCost // 0')
+session_start=$(echo "$input" | jq -r '.session.startTime // ""')
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  DATE_CMD="date -j"
+else
+  DATE_CMD="date"
+fi
+
+if [ -n "$session_start" ]; then
+  start_clean=$(echo "$session_start" | sed 's/\.\{0,1\}[0-9]\{0,3\}Z\{0,1\}$//' | sed 's/T/ /')
+  
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    start_epoch=$(date -j -f "%Y-%m-%d %H:%M:%S" "$start_clean" "+%s" 2>/dev/null || echo "0")
+  else
+    start_epoch=$(date -d "$start_clean" "+%s" 2>/dev/null || echo "0")
+  fi
+  
+  current_epoch=$(date +%s 2>/dev/null || echo "0")
+  
+  if [ "$start_epoch" != "0" ] && [ "$current_epoch" != "0" ]; then
+    duration=$((current_epoch - start_epoch))
+    
+    if [ $duration -lt 0 ]; then
+      duration=0
+    fi
+    
+    hours=$((duration / 3600))
+    minutes=$(((duration % 3600) / 60))
+    seconds=$((duration % 60))
+    formatted_time=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
+    
+    if [ $duration -gt 0 ]; then
+      tokens_per_min=$((tokens * 60 / duration))
+      
+      if [ $tokens_per_min -gt 500 ]; then
+        prod_color="\033[32m"
+        prod_indicator="🔥"
+      elif [ $tokens_per_min -gt 200 ]; then
+        prod_color="\033[33m"
+        prod_indicator="⚡"
+      else
+        prod_color="\033[36m"
+        prod_indicator="💭"
+      fi
+    else
+      tokens_per_min=0
+      prod_color="\033[36m"
+      prod_indicator="💭"
+    fi
+    
+    if command -v bc > /dev/null 2>&1 && [ $duration -gt 0 ]; then
+      cost_per_hour=$(echo "scale=2; $cost * 3600 / $duration" | bc -l 2>/dev/null || echo "0.00")
+    elif command -v awk > /dev/null 2>&1 && [ $duration -gt 0 ]; then
+      cost_per_hour=$(awk "BEGIN {printf \"%.2f\", $cost * 3600 / $duration}" 2>/dev/null || echo "0.00")
+    else
+      cost_per_hour="0.00"
+    fi
+  else
+    formatted_time="00:00:00"
+    tokens_per_min=0
+    cost_per_hour="0.00"
+    prod_indicator="💭"
+    prod_color="\033[36m"
+  fi
+else
+  formatted_time="00:00:00"
+  tokens_per_min=0
+  cost_per_hour="0.00"
+  prod_indicator="💭"
+  prod_color="\033[36m"
+fi
+
+RESET="\033[0m"
+
+echo -e "\033[35m⏱  ${formatted_time}${RESET} │ \033[36m${model}${RESET} │ ${prod_color}${prod_indicator} ${tokens_per_min}/min${RESET} │ \033[33m\$${cost_per_hour}/hr${RESET}"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/session-timer-statusline.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/session-timer-statusline.sh","refreshInterval":1000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/session-timer-statusline.sh","refreshInterval":1000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Session Timer Statusline installed successfully!"
+echo "Note: Ensure LC_NUMERIC=C is set for correct decimal formatting"
+echo "Note: Script detects OS automatically (macOS uses 'date -j', Linux uses 'date -d')"
+echo "Test timer: Verify session.startTime is provided by Claude Code in JSON input"
+```
+
+## Troubleshooting
+### Timer showing 00:00:00 or not incrementing
+
+Ensure Claude Code is providing session.startTime in JSON. Check with: echo '$input' | jq '.session.startTime'. May require Claude Code update. Verify date command works: macOS (date -j -f '%Y-%m-%d %H:%M:%S' '2024-01-01 12:00:00' '+%s'), Linux (date -d '2024-01-01 12:00:00' '+%s'). Test timestamp parsing: start_clean=$(echo '$session_start' | sed 's/\.\{0,1\}[0-9]\{0,3\}Z\{0,1\}$//' | sed 's/T/ /'). Check epoch calculation: current_epoch=$(date +%s) (should return current Unix timestamp).
+### date command error: illegal time format
+
+macOS uses 'date -j -f', Linux uses 'date -d'. Script detects OS automatically using OSTYPE. For macOS: date -j -f '%Y-%m-%d %H:%M:%S' '2024-01-01 12:00:00' '+%s'. For Linux: date -d '2024-01-01 12:00:00' '+%s'. Verify OS detection: echo $OSTYPE (should be 'darwin*' for macOS, 'linux-gnu*' for Linux). Check timestamp format: session.startTime should be ISO 8601 (e.g., '2024-01-01T12:00:00' or '2024-01-01T12:00:00.123Z'). Script cleans timestamp: removes milliseconds and 'Z' suffix, replaces 'T' with space.
+### bc: command not found
+
+Install bc calculator: macOS (brew install bc), Linux (sudo apt-get install bc or sudo yum install bc). Verify installation: command -v bc (should return path). Test bc: echo 'scale=2; 0.05 * 3600 / 1800' | bc -l (should return 0.10). Script has awk fallback: If bc unavailable, script uses awk for cost per hour calculation. Verify awk: command -v awk (should return path). Check both: Script tries bc first, then awk as fallback. Both methods should produce same result.
+### Tokens per minute showing unrealistic values
+
+This is normal at session start. Metric stabilizes after 2-3 minutes of usage. Very high values indicate batch processing. Calculation: tokens_per_min = tokens * 60 / duration. If duration is very small (< 60 seconds), tokens_per_min can be very high. Wait for session to run longer (2-3 minutes) for accurate rate. Check tokens value: echo '$input' | jq '.cost.total_lines_added' (should return number). Check duration: echo $duration (should be seconds since session start). Verify calculation: tokens_per_min=$((tokens * 60 / duration)).
+### Cost per hour showing 0.00 or incorrect value
+
+Check cost value: echo '$input' | jq '.cost.total_cost_usd' (should return decimal like 0.05). If zero, check alternative field: echo '$input' | jq '.session.estimatedCost'. Verify duration is greater than 0: echo $duration (should be > 0). Check calculation: cost_per_hour = cost * 3600 / duration. Test with bc: echo 'scale=2; 0.05 * 3600 / 1800' | bc -l (should return 0.10). Test with awk: awk 'BEGIN {printf "%.2f", 0.05 * 3600 / 1800}' (should return 0.10). If both fail, check that bc or awk is installed.
+### Productivity indicators not changing colors
+
+Verify tokens_per_min calculation: echo $tokens_per_min (should be number). Check thresholds: > 500 (🔥 green), > 200 (⚡ yellow), else (💭 cyan). Test comparison: if [ 600 -gt 500 ]; then echo "High productivity"; fi (should output). Verify color codes: Green (\033[32m), Yellow (\033[33m), Cyan (\033[36m). Test color: echo -e '\033[32mGreen\033[0m' (should display green text). Check RESET code: echo -e '\033[0m' (should reset colors). If colors not working, terminal may not support ANSI colors.
+### Negative duration or timer counting backwards
+
+Check epoch calculation: start_epoch and current_epoch should be valid Unix timestamps. Verify: date +%s (should return current timestamp). Check timestamp parsing: start_clean should be valid date string. Test: if [[ "$OSTYPE" == "darwin"* ]]; then date -j -f '%Y-%m-%d %H:%M:%S' '2024-01-01 12:00:00' '+%s'; else date -d '2024-01-01 12:00:00' '+%s'; fi. Script has protection: if [ $duration -lt 0 ]; then duration=0; fi. If still negative, check system clock: date (should show correct time). Verify session.startTime is not in future: Compare with current time.
+### Model name showing as 'unknown' or incorrect
+
+Check model extraction: echo '$input' | jq '.model.id' (should return model ID like 'claude-opus-4-1'). Check alternative: echo '$input' | jq '.model.display_name' (should return display name like 'Opus'). Script uses: model=$(echo '$input' | jq -r '.model.id // .model.display_name // "unknown"'). Verify sed replacement: echo 'claude-opus-4-1' | sed 's/claude-//' (should return 'opus-4-1'). If model is 'unknown', check JSON structure: echo '$input' | jq .model (should show model object with id or display_name).

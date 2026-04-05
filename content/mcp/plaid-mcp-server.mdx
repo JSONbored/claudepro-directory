@@ -17,6 +17,46 @@ dateAdded: '2025-09-18'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://plaid.com/blog/plaid-mcp-ai-assistant-claude/'
 installable: true
+installCommand: claude mcp list && claude mcp status plaid
+usageSnippet: claude mcp list && claude mcp status plaid
+copySnippet: |-
+  {
+    "plaid": {
+      "url": "https://api.dashboard.plaid.com/mcp/sse",
+      "transport": "sse"
+    }
+  }
+configSnippet: |-
+  {
+    "plaid": {
+      "url": "https://api.dashboard.plaid.com/mcp/sse",
+      "transport": "sse"
+    }
+  }
+estimatedSetupTime: 2 minutes
+difficulty: beginner
+prerequisites:
+  - Plaid account (create account on Plaid Dashboard to get API credentials)
+  - API credentials (client_id and secret from Plaid Dashboard)
+  - >-
+    SSE or HTTP transport support (remote MCP server at
+    https://api.dashboard.plaid.com/mcp/sse or
+    https://api.dashboard.plaid.com/mcp)
+  - Internet connection (remote Plaid API access required)
+  - >-
+    Understanding of Plaid API rate limits (per endpoint, not published but
+    enforced)
+  - >-
+    Understanding of Plaid Item lifecycle (Items can expire, require
+    re-authentication)
+  - >-
+    Understanding of Plaid webhook verification (JWT verification with
+    Plaid-Verification header)
+  - Claude Desktop 0.7.0+ or Claude Code with MCP support
+  - >-
+    Understanding of financial data concepts (banking, transactions, account
+    linking, ACH)
+  - 'Understanding of Plaid products (Auth, Transactions, Identity, Assets, etc.)'
 tags:
   - banking
   - plaid
@@ -46,4 +86,149 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Content
+
 Streamline your banking data integration and financial services by connecting Claude to Plaid. Link financial accounts securely, access transaction data and history, verify account ownership, retrieve balances, troubleshoot integration issues, manage Item lifecycle, process webhook events, and access identity/asset data—all through natural language commands. Leverage Plaid's powerful API with sandbox testing, webhook verification, and comprehensive financial data access.
+
+## Features
+
+- Link financial accounts securely (Plaid Link integration)
+- Access transaction data and history (comprehensive transaction information)
+- Verify account ownership (Auth product for ACH transfers)
+- Retrieve balance information (real-time account balances)
+- Troubleshoot integration issues (debugging and error analysis)
+- Manage Item lifecycle (handle expirations and re-authentication)
+- Process webhook events (real-time notifications for Item changes)
+- Access identity and asset data (Identity and Assets products)
+- Advanced Plaid financial data and transaction management with bank account integration, identity verification, and payment processing
+- Batch operations support for efficient bulk transaction operations, account management, and financial reporting with automatic rate limit handling and retry logic
+- Real-time financial synchronization capabilities with webhook integration support for monitoring Plaid events and triggering automated workflows
+
+## Use Cases
+
+- Debug account linking issues (troubleshoot Plaid Link integration)
+- Analyze transaction categorization (transaction data analysis)
+- Verify webhook configurations (webhook setup and verification)
+- Test API integrations (sandbox testing and validation)
+- Monitor API usage patterns (rate limit monitoring and optimization)
+- Handle Item expirations (manage PENDING_DISCONNECT/PENDING_EXPIRATION webhooks)
+- Verify account ownership (Auth product for ACH transfer verification)
+- Access identity verification data (Identity product for KYC workflows)
+- Build automated financial management workflows that sync external systems with Plaid for real-time banking data and transaction processing
+
+## Installation
+
+### Claude Code
+
+1. Create Plaid account on Plaid Dashboard (https://dashboard.plaid.com/)
+2. Navigate to Team Settings > Keys to get your client_id and secret
+3. Copy your API credentials (client_id and secret)
+4. claude mcp add --transport sse plaid https://api.dashboard.plaid.com/mcp/sse
+5. Authenticate with your Plaid API credentials when prompted
+6. Verify installation: claude mcp list
+7. Test connection: claude mcp status plaid
+
+### Claude Desktop
+
+1. Create Plaid account on Plaid Dashboard (https://dashboard.plaid.com/)
+2. Navigate to Team Settings > Keys to get your client_id and secret
+3. Copy your API credentials (client_id and secret)
+4. Open Claude Desktop configuration file (see configPath below)
+5. Add the Plaid server configuration with SSE or HTTP transport pointing to https://api.dashboard.plaid.com/mcp/sse
+6. Add API credentials (client_id and secret) to environment variables or configuration
+7. Restart Claude Desktop
+8. Authenticate with Plaid Dashboard when prompted
+
+## Requirements
+
+- Plaid account (create account on Plaid Dashboard to get API credentials)
+- API credentials (client_id and secret from Plaid Dashboard)
+- SSE or HTTP transport support (remote MCP server at https://api.dashboard.plaid.com/mcp/sse or https://api.dashboard.plaid.com/mcp)
+- Internet connection (remote Plaid API access required)
+- Understanding of Plaid API rate limits (per endpoint, not published but enforced)
+- Understanding of Plaid Item lifecycle (Items can expire, require re-authentication)
+- Understanding of Plaid webhook verification (JWT verification with Plaid-Verification header)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of financial data concepts (banking, transactions, account linking, ACH)
+- Understanding of Plaid products (Auth, Transactions, Identity, Assets, etc.)
+
+## Configuration
+
+```json
+{
+  "plaid": {
+    "url": "https://api.dashboard.plaid.com/mcp/sse",
+    "transport": "sse"
+  }
+}
+```
+
+## Examples
+### Debug why account linking is failing
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Debug why account linking is failing"
+```
+### Show recent API errors
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Show recent API errors"
+```
+### Verify webhook configuration
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Verify webhook configuration"
+```
+### Check transaction categorization accuracy
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Check transaction categorization accuracy"
+```
+### Get Account Balance
+Retrieve account balance from Plaid using access token
+```typescript
+// Get Plaid account balance
+const accounts = await plaid.accounts.get({
+  access_token: "access-token"
+});
+const balance = accounts.accounts[0].balances.current;
+```
+
+## Security
+
+- API key authentication required (client_id and secret from Plaid Dashboard)
+- Use development/sandbox environment for testing (separate credentials)
+- Protect sensitive financial data (banking information, transactions)
+- Follow compliance requirements (financial data regulations)
+- Verify webhook signatures (JWT verification with Plaid-Verification header)
+- Plaid API keys and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- Plaid access tokens should be scoped with minimal required permissions following the principle of least privilege - regularly audit token permissions and remove unused scopes
+- Plaid account, transaction, and item IDs may expose financial data and banking information - ensure Plaid resource identifiers are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Plaid MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Plaid webhook configurations and payloads may contain sensitive financial data and transaction information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### Rate limit exceeded errors during API requests
+
+Plaid enforces rate limits per endpoint (not published publicly). Check error_code and error_type in response body. Use request_id for support inquiries. Implement exponential backoff for retry logic. Monitor rate limit headers if available. Reduce request frequency and batch operations when possible. Contact Plaid support with request_id if legitimate traffic is blocked.
+### Item authentication failed or expired access token
+
+Listen for PENDING_DISCONNECT webhook (US/CA) or PENDING_EXPIRATION (UK/EU). Send users through Plaid Link update mode before Items expire. Re-authenticate via Plaid Link. Check error_type for specific issue (ITEM_LOGIN_REQUIRED, INVALID_CREDENTIALS, etc.). Items automatically transition to ITEM_LOGIN_REQUIRED after 30 days in Sandbox. Use /sandbox/item/reset_login to test error states.
+### Webhook verification fails or not receiving webhooks
+
+Verify webhook signature using Plaid's JWT verification guide (Plaid-Verification header). Check webhook URL is publicly accessible with valid SSL certificate. Test endpoint returns 200 status. Enable webhook logging in Dashboard. Review firewall/security group rules (Plaid sends from specific IP addresses). Retrieve verification key via /webhook_verification_key/get endpoint. Ensure webhook URL matches configuration in /link/token/create or Dashboard.
+### Development vs production environment mismatch
+
+Use separate API keys (client_id and secret) for sandbox and production. Verify environment in Dashboard matches code. Check client_id and secret match environment (sandbox.plaid.com vs production.plaid.com). Test in sandbox before going live with production credentials. Items cannot be moved between environments. Request Production API access via Dashboard if needed.
+### Plaid MCP server authentication errors with API keys
+
+Verify API keys (Client ID and Secret) are valid and match the correct environment (sandbox vs production). Check API key format is correct. For access tokens, verify token is valid and not expired. Regenerate access tokens if needed.
+### Plaid rate limit errors when processing multiple requests
+
+Implement exponential backoff retry logic with jitter. Use Plaid API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed account data. Plaid allows 500 requests per minute per API key.
+### Plaid account or transaction access denied errors
+
+Verify access token has access to the account. Check item status and account permissions. Ensure access token has required products (transactions, auth, identity) for target operations.
+### Plaid MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify Plaid API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

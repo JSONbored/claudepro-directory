@@ -13,6 +13,47 @@ dateAdded: '2025-09-18'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://www.canva.dev/docs/connect/canva-mcp-server-setup/'
 installable: true
+installCommand: claude mcp list && claude mcp status canva
+usageSnippet: claude mcp list && claude mcp status canva
+copySnippet: |-
+  {
+    "canva": {
+      "url": "https://mcp.canva.com/mcp",
+      "transport": "http"
+    }
+  }
+configSnippet: |-
+  {
+    "canva": {
+      "url": "https://mcp.canva.com/mcp",
+      "transport": "http"
+    }
+  }
+estimatedSetupTime: 2 minutes
+difficulty: beginner
+prerequisites:
+  - >-
+    Canva account (Canva Pro subscription recommended for full API access and
+    team features)
+  - >-
+    OAuth 2.0 authentication configured via Canva Developer Console
+    (https://www.canva.dev/)
+  - HTTP transport support in MCP client (required for Canva MCP server)
+  - >-
+    Internet connection for accessing Canva API (https://api.canva.com
+    endpoints)
+  - Claude Desktop 0.7.0+ or Claude Code with MCP support
+  - >-
+    Rate limit awareness: Design Export API (10 requests per 10 seconds), Native
+    Element API (20 requests per 10 seconds)
+  - 'Understanding of Canva design structure, templates, pages, and brand kits'
+  - >-
+    Appropriate team permissions for design operations (read, write, create,
+    export as needed)
+  - >-
+    Canva Developer Console access for managing OAuth applications and access
+    tokens
+  - 'OAuth scopes: design read/write access required for design operations'
 tags:
   - design
   - canva
@@ -42,4 +83,136 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Content
+
 Create and manage Canva designs through Claude for automated design generation.
+
+## Features
+
+- Browse design templates and assets
+- Generate new designs programmatically
+- Summarize design content and elements
+- Autofill design elements with data
+- Manage brand kits and style guides
+- Advanced Canva design creation and management with template library access, brand kit integration, and collaborative design workflows
+- Batch operations support for efficient bulk design creation, updates, and asset management with automatic rate limit handling and retry logic
+- Real-time design synchronization capabilities with webhook integration support for monitoring design changes and triggering automated workflows
+
+## Use Cases
+
+- Generate social media graphics at scale
+- Create presentation slides automatically
+- Design marketing materials consistently
+- Produce brand assets variations
+- Maintain brand consistency across designs
+- Build automated design generation workflows that create branded content from templates for marketing campaigns and social media
+
+## Installation
+
+### Claude Code
+
+1. claude mcp add --transport http canva https://mcp.canva.com/mcp
+2. Verify installation: claude mcp list
+3. Test connection: claude mcp status canva
+
+### Claude Desktop
+
+1. Open Claude Desktop configuration file
+2. Add the Canva server configuration with HTTP transport
+3. Restart Claude Desktop
+4. Authenticate with your Canva account
+
+## Requirements
+
+- Canva account (Canva Pro subscription recommended for full API access and team features)
+- OAuth 2.0 authentication configured via Canva Developer Console (https://www.canva.dev/)
+- HTTP transport support in MCP client (required for Canva MCP server)
+- Internet connection for accessing Canva API (https://api.canva.com endpoints)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Rate limit awareness: Design Export API (10 requests per 10 seconds), Native Element API (20 requests per 10 seconds)
+- Understanding of Canva design structure, templates, pages, and brand kits
+- Appropriate team permissions for design operations (read, write, create, export as needed)
+- Canva Developer Console access for managing OAuth applications and access tokens
+- OAuth scopes: design read/write access required for design operations
+
+## Configuration
+
+```json
+{
+  "canva": {
+    "url": "https://mcp.canva.com/mcp",
+    "transport": "http"
+  }
+}
+```
+
+## Examples
+### Create an Instagram post about our product launch
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Create an Instagram post about our product launch"
+```
+### Generate a presentation slide template
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Generate a presentation slide template"
+```
+### Export all logo variations
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Export all logo variations"
+```
+### Update brand colors in templates
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Update brand colors in templates"
+```
+### Create Design from Template
+Create a new Canva design from a template with brand kit integration
+```typescript
+// Create Canva design from template
+const design = await canva.designs.create({
+  templateId: "template-id",
+  brandKitId: "brand-kit-id",
+  title: "New Marketing Campaign",
+  elements: [{ type: "text", content: "Hello World" }]
+});
+```
+
+## Security
+
+- OAuth authentication for account access
+- Respect brand guidelines and permissions
+- Manage team permissions appropriately
+- Regular asset backups recommended
+- Canva API tokens and OAuth access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- Canva OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh
+- Canva design IDs and brand kit IDs may expose organizational design assets and brand information - ensure Canva resource IDs are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Canva MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Canva webhook configurations and payloads may contain sensitive design metadata and asset information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### Rate limit error when exporting designs
+
+Design Export API allows 10 requests per 10 seconds. Wait for time window to reset before retrying. Implement request queuing with 1-second delays between exports to stay within limits.
+### Authentication fails with 401 signature verification error
+
+Verify your OAuth 2.0 implementation ensures tokens refresh correctly. Check that access token hasn't expired and regenerate from Canva Developer Console if needed.
+### Cannot add elements to design - hitting rate limit
+
+Native Element API allows 20 requests per 10 seconds. Batch element additions where possible and add 500ms delays between individual add operations to avoid throttling.
+### Designs not accessible or permission denied errors
+
+Verify your Canva Pro subscription is active and your account has proper team permissions. Check OAuth scope includes design read/write access and re-authenticate if necessary.
+### Canva MCP server authentication errors with OAuth tokens
+
+Verify OAuth token is valid and not expired. Check token scopes match required permissions. Ensure token format is correct (Bearer token in Authorization header). Implement automatic token refresh logic for long-running operations.
+### Canva design creation or update failures
+
+Check design size limits and template availability. Verify brand kit permissions allow design creation. Ensure network connectivity is stable. For large designs, use chunked upload API with resumable upload support.
+### Canva MCP server rate limiting or throttling errors
+
+Implement exponential backoff retry logic with jitter. Use Canva API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed design metadata. Request rate limit increases from Canva support if needed.
+### Canva MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify Canva API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

@@ -22,13 +22,27 @@ repoUrl: 'https://github.com/openai/whisper'
 documentationUrl: 'https://github.com/openai/whisper'
 downloadUrl: /downloads/skills/audio-transcription-summarization.zip
 installable: true
+installCommand: pip install openai-whisper
+usageSnippet: pip install openai-whisper
 copySnippet: |-
-  "Transcribe this meeting and create:
-  1. Attendee list (if mentioned)
-  2. Key discussion topics with timestamps
-  3. Decisions made
-  4. Action items with owners
-  5. Next steps"
+  # Convert to mono 16kHz WAV
+  ffmpeg -i input.mp3 -ar 16000 -ac 1 input.wav
+
+  # Python whisper (pip install -U openai-whisper)
+  whisper input.wav --model small --language en --output_format txt
+prerequisites:
+  - ffmpeg
+  - Python 3.11+ or whisper.cpp
+  - openai-whisper (pip) or whisper.cpp binary
+  - >-
+    Sufficient disk space for model downloads (Whisper models range from 39MB
+    small to 1.5GB large model)
+  - >-
+    Audio file access permissions - read access to input audio files and write
+    access for transcription output files
+  - >-
+    System resources: Minimum 4GB RAM for small model, 8GB+ recommended for
+    medium/large models, GPU optional but recommended for faster processing
 tags:
   - audio
   - transcription
@@ -56,8 +70,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# Audio Transcription & Summarization Skill
-
 ## What This Skill Enables
 
 Claude can transcribe audio files (MP3, WAV, M4A, etc.) and generate structured summaries with timestamps, action items, and speaker identification. This skill leverages Whisper AI and ffmpeg through Claude's Code Interpreter to process audio locally.
@@ -175,3 +187,23 @@ Format as Q&A with:
 - [ffmpeg Audio Processing](https://ffmpeg.org/ffmpeg-filters.html#Audio-Filters) - Audio format conversion details
 - [Claude Code Interpreter](https://www.anthropic.com/news/code-interpreter) - How Claude executes code
 - [Simon Willison's Analysis](https://simonwillison.net/2025/Oct/10/claude-skills/) - Deep dive into Claude's skills
+
+## Features
+
+- Local processing via Whisper
+- Format conversion with ffmpeg
+- Timestamped notes and action items
+- Optional speaker labels
+- Multilingual support (99 languages with auto-detection)
+- Word-level timestamp accuracy
+- Multiple output formats (TXT, VTT, SRT, JSON)
+- Real-time streaming transcription support with live audio processing, continuous transcription updates, and low-latency transcription for live events or meetings
+
+## Use Cases
+
+- Summarize meetings and podcasts
+- Generate action items
+- Create searchable transcripts
+- Generate meeting minutes with action items
+- Create accessible transcripts for video content
+- Extract insights from podcast episodes

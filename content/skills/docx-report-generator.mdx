@@ -24,13 +24,23 @@ documentationUrl: 'https://docxtpl.readthedocs.io/'
 downloadUrl: /downloads/skills/docx-report-generator.zip
 installable: true
 copySnippet: |-
-  "Create a meeting minutes template with:
-  1. Header: Date, Time, Location, Attendees
-  2. Agenda items section
-  3. Discussion notes table (Topic | Discussion | Decision)
-  4. Action items table (Task | Owner | Due Date | Status)
-  5. Next meeting section
-  Use professional formatting with the 'Office' built-in style."
+  from docxtpl import DocxTemplate
+
+  doc = DocxTemplate('template.docx')
+  context = { 'client': 'Acme', 'items': [{'name': 'Widget', 'price': 9.99}] }
+  doc.render(context)
+  doc.save('invoice.docx')
+prerequisites:
+  - Python 3.11+
+  - docxtpl
+  - docx2pdf or libreoffice for PDF
+  - >-
+    File system read/write access for template files and generated DOCX
+    documents
+  - Python environment with pip for installing python-docx and docxtpl packages
+  - >-
+    Optional: LibreOffice or docx2pdf for PDF conversion (requires system
+    installation of LibreOffice for cross-platform PDF export)
 tags:
   - docx
   - reports
@@ -58,8 +68,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# DOCX Report Generator Skill
-
 ## What This Skill Enables
 
 Claude can create, edit, and format Microsoft Word documents (.docx) programmatically. Generate professional reports, proposals, documentation, and formatted documents with tables, charts, headers, and custom styling.
@@ -243,3 +251,23 @@ Save as resume.docx"
 - [Word Document Structure](https://python-docx.readthedocs.io/en/latest/user/documents.html) - Understanding .docx internals
 - [Office Open XML Spec](https://en.wikipedia.org/wiki/Office_Open_XML) - DOCX file format details
 - [Simon Willison's DOCX Analysis](https://simonwillison.net/2025/Oct/10/claude-skills/) - Claude's DOCX capabilities
+
+## Features
+
+- Template placeholders and loops
+- Image and table insertion
+- Page layout control
+- Optional PDF export pipeline
+- Jinja2 template engine for dynamic content insertion
+- Rich text formatting with inline styles and formatting
+- Batch document generation from data sources
+- Header and footer customization with page numbers, dynamic content insertion, different first page headers, and section-based header/footer variations
+
+## Use Cases
+
+- Invoices and statements
+- Client reports
+- Batch document generation
+- Automated invoice and billing statement generation
+- Personalized client reports and proposals
+- Technical documentation with code examples and diagrams

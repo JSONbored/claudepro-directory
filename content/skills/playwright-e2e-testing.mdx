@@ -27,14 +27,42 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://playwright.dev/'
 downloadUrl: /downloads/skills/playwright-e2e-testing.zip
 installable: true
+installCommand: npx playwright install --with-deps
+usageSnippet: npx playwright install --with-deps
 copySnippet: |-
-  "Set up a production-ready Playwright test suite for my Next.js app with:
-  1. Authentication flow tests with session storage
-  2. Visual regression testing with screenshot comparison
-  3. API mocking for external services
-  4. CI/CD integration with GitHub Actions
-  5. HTML report with trace viewer
-  6. Parallel execution across 4 workers"
+  import { test, expect } from '@playwright/test';
+
+  test.describe('Dashboard Tests', () => {
+    test.beforeEach(async ({ page }) => {
+      // Login before each test
+      await page.goto('http://localhost:3000/login');
+      await page.getByLabel('Email').fill('user@example.com');
+      await page.getByLabel('Password').fill('password123');
+      await page.getByRole('button', { name: 'Sign In' }).click();
+      await page.waitForURL('**/dashboard');
+    });
+
+    test('displays welcome message', async ({ page }) => {
+      const heading = page.getByRole('heading', { name: /welcome/i });
+      await expect(heading).toBeVisible();
+    });
+
+    test('loads user profile data', async ({ page }) => {
+      await page.getByRole('link', { name: 'Profile' }).click();
+      await expect(page.getByText('user@example.com')).toBeVisible();
+    });
+  });
+prerequisites:
+  - Node.js 18+
+  - Playwright 1.40+
+  - '@playwright/test package'
+  - 'Browser binaries (Chromium, Firefox, WebKit)'
+  - >-
+    Browser binaries installed via Playwright (npx playwright install) for
+    target browsers (Chromium, Firefox, WebKit)
+  - >-
+    Test application or website accessible for testing (local development
+    server, staging environment, or production URL)
 tags:
   - testing
   - playwright
@@ -61,8 +89,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# Playwright E2E Testing Automation Skill
-
 ## What This Skill Enables
 
 Claude can write, execute, and maintain end-to-end tests using Playwright, the modern browser automation framework that has overtaken Cypress in npm downloads as of 2025. This skill enables cross-browser testing (Chrome, Firefox, Safari/WebKit), AI-powered test generation with GitHub Copilot integration, and official MCP (Model Context Protocol) support for structured DOM interactions.
@@ -209,3 +235,23 @@ Fail tests if any metric exceeds Web Vitals thresholds."
 - [Playwright vs Cypress 2025 Comparison](https://playwright.dev/docs/why-playwright)
 - [AI-Powered Testing with Playwright](https://playwright.dev/docs/codegen)
 - [Playwright Test Best Practices](https://playwright.dev/docs/best-practices)
+
+## Features
+
+- Cross-browser testing: Chrome, Firefox, Safari (WebKit) with single API
+- AI-powered test generation with GitHub Copilot and codegen
+- MCP support for accessibility-driven interactions (getByRole, getByLabel, getByText)
+- Native parallel execution and test sharding for CI/CD
+- Visual regression testing with screenshot comparison and pixel diff
+- API testing and contract validation with request context
+- Network request interception and mocking for offline testing
+- Trace viewer with screenshots, snapshots, and sources for debugging
+
+## Use Cases
+
+- End-to-end testing for web applications with cross-browser coverage
+- Visual regression testing with screenshot comparison and pixel diff
+- API testing and contract validation with request context
+- Mobile web testing with device emulation (iPhone, Pixel, etc.)
+- Performance testing with Web Vitals metrics (FCP, LCP, TTI, TBT)
+- Accessibility testing with screen reader automation and ARIA validation

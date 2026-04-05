@@ -17,6 +17,47 @@ dateAdded: '2025-09-18'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://jam.dev/docs/debug-a-jam/mcp'
 installable: true
+installCommand: claude mcp list && claude mcp status jam
+usageSnippet: claude mcp list && claude mcp status jam
+copySnippet: |-
+  {
+    "jam": {
+      "url": "https://mcp.jam.dev/mcp",
+      "transport": "http"
+    }
+  }
+configSnippet: |-
+  {
+    "jam": {
+      "url": "https://mcp.jam.dev/mcp",
+      "transport": "http"
+    }
+  }
+estimatedSetupTime: 2 minutes
+difficulty: beginner
+prerequisites:
+  - 'Jam account (sign up at https://jam.dev if needed)'
+  - >-
+    Jam API token (Bearer token format: jam_sk_live_xxx) - get from Jam account
+    settings or Developer Hub
+  - >-
+    Jam browser extension (optional but recommended for capturing bugs with full
+    technical context)
+  - 'HTTP transport support (remote MCP server at https://mcp.jam.dev/mcp)'
+  - Internet connection (remote Jam API access required)
+  - >-
+    Understanding of Jam API rate limits (HTTP 429 errors - implement
+    exponential backoff when rate limited)
+  - >-
+    Understanding of workspace permissions and team member roles (viewer or
+    higher permissions required for accessing recordings)
+  - >-
+    Understanding of Jam capture settings (console logs, network requests,
+    screenshots, DOM snapshots - configurable per recording)
+  - Claude Desktop 0.7.0+ or Claude Code with MCP support
+  - >-
+    Understanding of debugging concepts (console logs, network requests, stack
+    traces, reproduction steps, browser details)
 tags:
   - debugging
   - jam
@@ -46,4 +87,148 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Content
+
 Accelerate your debugging workflow by connecting Claude to Jam's bug recording platform. Access video recordings, console logs, network requests, and stack traces—all automatically captured when users report issues. Debug faster with complete technical context, analyze error patterns across recordings, and generate detailed bug reports through natural language commands.
+
+## Features
+
+- Access bug video recordings with full playback capabilities
+- View console logs and errors with timestamps and stack traces
+- Analyze network requests and responses with headers and payloads
+- Review error messages and stack traces with source mapping
+- Track user interaction sequences and reproduction steps
+- Access DOM snapshots and browser environment details
+- Filter and search recordings by date, status, or attributes
+- Create recording links programmatically for user bug reporting
+- Advanced Jam feedback and bug reporting with screenshot capture, session replay, and developer workflow integration
+- Batch operations support for efficient bulk feedback processing, issue management, and team collaboration with automatic rate limit handling and retry logic
+- Real-time feedback synchronization capabilities with webhook integration support for monitoring Jam events and triggering automated workflows
+
+## Use Cases
+
+- Debug production issues with full technical context and video recordings
+- Analyze error patterns across multiple recordings to identify root causes
+- Review bug reproduction steps with visual and technical evidence
+- Inspect network failures and timeouts with request/response details
+- Generate detailed bug reports with automatically captured technical data
+- Track user-reported issues with complete browser and console context
+- Investigate JavaScript errors with stack traces and source mapping
+- Automate bug triage and analysis workflows with API integration
+- Build automated feedback management workflows that sync external systems with Jam for real-time bug tracking and developer collaboration
+
+## Installation
+
+### Claude Code
+
+1. Get your Jam API token from account settings (format: jam_sk_live_xxx)
+2. claude mcp add --transport http jam https://mcp.jam.dev/mcp
+3. Add JAM_API_TOKEN to your environment or configuration
+4. Verify installation: claude mcp list
+5. Test connection: claude mcp status jam
+
+### Claude Desktop
+
+1. Get your Jam API token from account settings (format: jam_sk_live_xxx)
+2. Open your Claude Desktop configuration file (see configPath below)
+3. Add the Jam server configuration with HTTP transport pointing to https://mcp.jam.dev/mcp
+4. Add JAM_API_TOKEN to environment variables in configuration
+5. Restart Claude Desktop
+6. Authenticate with your Jam account when prompted (if required)
+
+## Requirements
+
+- Jam account (sign up at https://jam.dev if needed)
+- Jam API token (Bearer token format: jam_sk_live_xxx) - get from Jam account settings or Developer Hub
+- Jam browser extension (optional but recommended for capturing bugs with full technical context)
+- HTTP transport support (remote MCP server at https://mcp.jam.dev/mcp)
+- Internet connection (remote Jam API access required)
+- Understanding of Jam API rate limits (HTTP 429 errors - implement exponential backoff when rate limited)
+- Understanding of workspace permissions and team member roles (viewer or higher permissions required for accessing recordings)
+- Understanding of Jam capture settings (console logs, network requests, screenshots, DOM snapshots - configurable per recording)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of debugging concepts (console logs, network requests, stack traces, reproduction steps, browser details)
+
+## Configuration
+
+```json
+{
+  "jam": {
+    "url": "https://mcp.jam.dev/mcp",
+    "transport": "http"
+  }
+}
+```
+
+## Examples
+### Show the console errors from bug JAM-123
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Show the console errors from bug JAM-123"
+```
+### Analyze the network requests in the checkout issue
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Analyze the network requests in the checkout issue"
+```
+### Get reproduction steps for the login bug
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Get reproduction steps for the login bug"
+```
+### Find all JavaScript errors from today
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Find all JavaScript errors from today"
+```
+### Create Feedback with Screenshot
+Create a new Jam feedback item with screenshot and metadata
+```typescript
+// Create Jam feedback with screenshot
+const feedback = await jam.feedback.create({
+  title: "Bug: Login button not working",
+  description: "The login button does not respond when clicked",
+  screenshot: "data:image/png;base64,...",
+  url: "https://example.com/login",
+  tags: ["bug", "critical"]
+});
+```
+
+## Security
+
+- API token authentication (Bearer token) for secure account access
+- Sanitize sensitive data in recordings (passwords, tokens, PII)
+- Control recording access permissions via workspace roles
+- Regular cleanup of old recordings for compliance and storage management
+- Monitor API usage to avoid rate limit issues
+- Jam API keys and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- Jam OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh
+- Jam feedback IDs and session identifiers may expose user feedback and application issues - ensure Jam resource identifiers are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Jam MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Jam webhook configurations and payloads may contain sensitive feedback data and screenshot information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### HTTP 429 rate limit exceeded error
+
+Implement exponential backoff with increasing delays between retries (e.g., 1s, 2s, 4s, 8s). Monitor rate limit headers in API responses if available. Distribute requests over time rather than burst operations to stay within limits. Consider caching Jam data locally to reduce API calls.
+### Cannot access bug recordings or debug data
+
+Verify workspace permissions grant access to recordings. Check your account role has viewer or higher permissions. Ensure recording ID (Jam ID) is correct and recording hasn't been deleted or archived. Verify API token has not expired and has appropriate scopes for the requested operations.
+### Console logs or network data incomplete
+
+Verify Jam browser extension was active and enabled during bug recording. Check browser privacy settings don't block sensitive data capture. Ensure user had browser console open when error occurred for complete console logs. Verify capture settings (captureConsole, captureNetwork) were enabled when creating the recording link or Jam.
+### Video playback fails or shows blank screen
+
+Check browser supports video format and codecs used by Jam recordings. Verify recording completed successfully and wasn't interrupted during capture. Clear browser cache and retry playback. Check network connectivity for streaming video content. Contact Jam support if corruption suspected or playback consistently fails.
+### Jam MCP server authentication errors with API keys
+
+Verify API key is valid and not expired. Check API key permissions match required operations. Ensure API key format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+### Jam rate limit errors when processing multiple feedback requests
+
+Implement exponential backoff retry logic with jitter. Use Jam API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed feedback data. Check Jam documentation for specific rate limits.
+### Jam feedback or session access denied errors
+
+Verify API key has access to the feedback or session. Check account permissions and workspace membership. Ensure API key has required permissions for target operations.
+### Jam MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify Jam API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

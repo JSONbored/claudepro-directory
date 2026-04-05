@@ -29,16 +29,60 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://vitejs.dev/'
 downloadUrl: /downloads/skills/vite-build-optimization.zip
 installable: true
+installCommand: npm create vite@latest my-app
+usageSnippet: npm create vite@latest my-app
 copySnippet: |-
-  "Optimize Vite build for React app with 50+ routes:
-  1. Implement route-based code splitting with React.lazy()
-  2. Split vendor chunks: react/react-dom, UI library, utilities
-  3. Configure dynamic imports for modals, charts, editors
-  4. Add preload hints for critical chunks
-  5. Enable CSS code splitting per route
-  6. Configure build.rollupOptions for optimal chunking
-  7. Add bundle analyzer and aim for <200KB initial load
-  8. Set up Lighthouse CI to track performance"
+  import { defineConfig } from 'vite';
+  import react from '@vitejs/plugin-react';
+  import { visualizer } from 'rollup-plugin-visualizer';
+
+  export default defineConfig({
+    plugins: [
+      react(),
+      visualizer({ open: true, filename: 'dist/stats.html' }),
+    ],
+    build: {
+      target: 'es2020',
+      sourcemap: 'hidden',
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('node_modules/@mui') || id.includes('node_modules/@emotion')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('node_modules/lodash') || id.includes('node_modules/date-fns')) {
+              return 'vendor-utils';
+            }
+          },
+        },
+      },
+      cssCodeSplit: true,
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true,
+          drop_debugger: true,
+        },
+      },
+    },
+    optimizeDeps: {
+      include: ['react', 'react-dom'],
+    },
+  });
+prerequisites:
+  - Node.js 18+ (20+ recommended)
+  - vite ^5.0.0
+  - npm/pnpm/yarn package manager
+  - Basic understanding of JavaScript modules
+  - >-
+    Node.js 18+ runtime environment for running Vite build processes and
+    development server
+  - >-
+    Project source code with Vite configuration (vite.config.js/ts) for build
+    optimization customization
 tags:
   - vite
   - build-tools
@@ -69,8 +113,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# Vite Build Optimization Specialist Skill
-
 ## What This Skill Enables
 
 Claude can optimize your Vite build configuration for production-ready performance with instant Hot Module Replacement (HMR), intelligent code splitting, and tree-shaking. Vite leverages native ES modules during development and Rollup for optimized production builds, delivering the fastest developer experience while generating highly optimized bundles. From configuring build options to debugging bundle size, Claude handles the complexity of modern frontend tooling.
@@ -240,3 +282,23 @@ Claude will:
 - [Vite Plugin Collection](https://github.com/vitejs/awesome-vite)
 - [ViteConf 2024 Talks](https://viteconf.org/2024/replay)
 - [Vite Performance Guide](https://vitejs.dev/guide/performance.html)
+
+## Features
+
+- Instant Hot Module Replacement (HMR) with native ESM for sub-second updates during development
+- Rollup-powered production builds with advanced tree-shaking and dead code elimination
+- Intelligent code splitting with manual chunks, dynamic imports, and route-based splitting
+- Plugin ecosystem for React, Vue, Svelte, TypeScript, PWA, and more with Fast Refresh support
+- Zero-config CSS code splitting and optimization with PostCSS integration
+- Dependency pre-bundling with esbuild for faster dev server startup
+- Multi-page application support with separate entry points and shared chunks
+- Library mode with ESM and UMD output formats for component library distribution
+
+## Use Cases
+
+- Optimizing large React/Vue apps with 50+ routes using route-based code splitting
+- Building component libraries with ESM/UMD output formats and TypeScript declarations
+- Configuring PWAs with offline support using vite-plugin-pwa and Workbox
+- Multi-page application setup with separate bundles and shared dependencies
+- Monorepo build configuration with shared configs and workspace-aware HMR
+- Production bundle optimization with bundle analysis and size reduction strategies

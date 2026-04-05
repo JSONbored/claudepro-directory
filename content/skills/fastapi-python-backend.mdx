@@ -23,16 +23,75 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://fastapi.tiangolo.com/'
 downloadUrl: /downloads/skills/fastapi-python-backend.zip
 installable: true
+installCommand: 'pip install fastapi uvicorn[standard] pydantic sqlalchemy'
+usageSnippet: 'pip install fastapi uvicorn[standard] pydantic sqlalchemy'
 copySnippet: |-
-  "Build FastAPI e-commerce backend:
-  1. Products: CRUD with search, filtering, pagination
-  2. Cart: session-based with Redis, add/remove items, calculate totals
-  3. Orders: create order, payment processing, order history
-  4. Auth: JWT-based customer accounts with OAuth2
-  5. Admin: protected endpoints for inventory management
-  6. Webhooks: Stripe payment notifications
-  7. Database: PostgreSQL with async SQLAlchemy
-  8. Background tasks: order confirmation emails"
+  from fastapi import FastAPI, HTTPException
+  from pydantic import BaseModel, Field
+  from typing import List
+
+  app = FastAPI(title="Blog API", version="1.0.0")
+
+  # Pydantic models
+  class PostCreate(BaseModel):
+      title: str = Field(..., min_length=1, max_length=200)
+      content: str = Field(..., min_length=1)
+      published: bool = False
+
+  class Post(PostCreate):
+      id: int
+      
+      class Config:
+          from_attributes = True
+
+  # In-memory storage (use database in production)
+  posts_db: List[Post] = []
+  post_id_counter = 1
+
+  @app.get("/posts", response_model=List[Post], tags=["posts"])
+  async def list_posts():
+      """Get all blog posts"""
+      return posts_db
+
+  @app.post("/posts", response_model=Post, status_code=201, tags=["posts"])
+  async def create_post(post: PostCreate):
+      """Create a new blog post"""
+      global post_id_counter
+      new_post = Post(id=post_id_counter, **post.dict())
+      posts_db.append(new_post)
+      post_id_counter += 1
+      return new_post
+
+  @app.get("/posts/{post_id}", response_model=Post, tags=["posts"])
+  async def get_post(post_id: int):
+      """Get a single post by ID"""
+      for post in posts_db:
+          if post.id == post_id:
+              return post
+      raise HTTPException(status_code=404, detail="Post not found")
+
+  @app.delete("/posts/{post_id}", status_code=204, tags=["posts"])
+  async def delete_post(post_id: int):
+      """Delete a post by ID"""
+      for i, post in enumerate(posts_db):
+          if post.id == post_id:
+              posts_db.pop(i)
+              return
+      raise HTTPException(status_code=404, detail="Post not found")
+
+  # Run with: uvicorn main:app --reload
+  # Docs at: http://localhost:8000/docs
+prerequisites:
+  - Python 3.9+
+  - fastapi ^0.104.0
+  - 'uvicorn[standard] ^0.24.0'
+  - pydantic ^2.0.0
+  - >-
+    ASGI server (uvicorn, hypercorn, or daphne) for running FastAPI applications
+    in production
+  - >-
+    Database driver for async operations (asyncpg for PostgreSQL, aiomysql for
+    MySQL, or motor for MongoDB) when using database integration
 tags:
   - fastapi
   - python
@@ -62,8 +121,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# FastAPI Python Backend Expert Skill
-
 ## What This Skill Enables
 
 Claude can build production-ready REST APIs using FastAPI, Python's fastest web framework with automatic OpenAPI documentation and async support. FastAPI combines Python 3.9+ type hints with Pydantic validation for type-safe APIs that rival Node.js performance. With automatic interactive docs, dependency injection, and async/await, FastAPI eliminates boilerplate while maintaining enterprise-grade reliability.
@@ -233,3 +290,23 @@ Claude will:
 - [SQLAlchemy Async Tutorial](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html)
 - [FastAPI Full Stack Template](https://github.com/fastapi/full-stack-fastapi-template)
 - [FastAPI Best Practices](https://github.com/zhanymkanov/fastapi-best-practices)
+
+## Features
+
+- Automatic OpenAPI/Swagger documentation generation
+- Native async/await support for high concurrency
+- Pydantic integration for request/response validation
+- Dependency injection system for clean architecture
+- Type-safe APIs with automatic request/response validation
+- WebSocket support for real-time bidirectional communication
+- Built-in testing utilities with TestClient for API testing
+- Background task processing with BackgroundTasks for async operations, task queue integration, and long-running job management without blocking request responses
+
+## Use Cases
+
+- REST API backends with automatic documentation
+- Microservices with async database operations
+- Real-time APIs with WebSocket support
+- High-performance microservices with async database operations
+- API-first applications with automatic OpenAPI documentation
+- Real-time applications with WebSocket and Server-Sent Events

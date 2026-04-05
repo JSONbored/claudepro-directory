@@ -229,7 +229,7 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
             variant="outline"
             size="sm"
             onClick={handleCopy}
-            className="h-9 rounded-lg border-border bg-background px-3 text-xs"
+            className="h-8 rounded-lg border-border bg-background px-3 text-[11px]"
           >
             <Copy className="mr-1.5 size-3.5" />
             {copied ? "Copied" : "Copy"}
@@ -251,11 +251,11 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
                 href={entry.documentationUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="directory-link-chip"
+                className="directory-icon-chip"
                 aria-label="Open documentation"
+                title="Open documentation"
               >
                 <FileText className="size-3.5" />
-                Docs
               </a>
             ) : null}
             {repoHref ? (
@@ -263,11 +263,11 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
                 href={repoHref}
                 target="_blank"
                 rel="noreferrer"
-                className="directory-link-chip"
+                className="directory-icon-chip"
                 aria-label="Open repository"
+                title="Open repository"
               >
                 <Github className="size-3.5" />
-                GitHub
               </a>
             ) : null}
             {entry.githubUrl && entry.githubUrl !== repoHref ? (
@@ -275,11 +275,11 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
                 href={entry.githubUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="directory-link-chip"
+                className="directory-icon-chip"
                 aria-label="Open source content file"
+                title="Open source content file"
               >
                 <FileCode2 className="size-3.5" />
-                Source
               </a>
             ) : null}
             <Link href={`/${entry.category}/${entry.slug}`} className="directory-link-chip">

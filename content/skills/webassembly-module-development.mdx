@@ -30,14 +30,59 @@ documentationUrl: 'https://webassembly.org/'
 downloadUrl: /downloads/skills/webassembly-module-development.zip
 installable: true
 copySnippet: |-
-  "Create a WebAssembly module for my React app that:
-  1. Parses and validates 10MB JSON files instantly
-  2. Performs complex data aggregations
-  3. Exports results to CSV format
-  4. Includes TypeScript types
-  5. Loads asynchronously without blocking UI
-  6. Caches compiled module in IndexedDB
-  7. Falls back to JavaScript if WASM not supported"
+  use wasm_bindgen::prelude::*;
+
+  #[wasm_bindgen]
+  pub fn fibonacci(n: u32) -> u64 {
+      match n {
+          0 => 0,
+          1 => 1,
+          _ => {
+              let mut a = 0u64;
+              let mut b = 1u64;
+              for _ in 2..=n {
+                  let temp = a + b;
+                  a = b;
+                  b = temp;
+              }
+              b
+          }
+      }
+  }
+
+  #[wasm_bindgen]
+  pub struct Calculator {
+      cache: Vec<u64>,
+  }
+
+  #[wasm_bindgen]
+  impl Calculator {
+      #[wasm_bindgen(constructor)]
+      pub fn new() -> Calculator {
+          Calculator { cache: vec![0, 1] }
+      }
+
+      pub fn nth(&mut self, n: usize) -> u64 {
+          while self.cache.len() <= n {
+              let len = self.cache.len();
+              let next = self.cache[len - 1] + self.cache[len - 2];
+              self.cache.push(next);
+          }
+          self.cache[n]
+      }
+  }
+prerequisites:
+  - Rust 1.70+ and wasm-pack (recommended)
+  - wasm-bindgen 0.2.87+
+  - WASI SDK 20+ (for WASI modules)
+  - Node.js 18+ for JavaScript integration
+  - >-
+    Emscripten SDK or Rust toolchain (wasm-pack) or AssemblyScript compiler for
+    compiling source code to WebAssembly
+  - >-
+    Modern browser with WebAssembly support (Chrome 57+, Firefox 52+, Safari
+    11+, Edge 16+) or Node.js 8+ with WASI support for running WebAssembly
+    modules
 tags:
   - webassembly
   - wasm
@@ -66,6 +111,10 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads. WebAssembly (WASM) runs at near-native speeds across web browsers, serverless platforms, and edge computing environments. With WASI 0.3 bringing native async support and WebAssembly 2.0 complete as of March 2025, WASM has transitioned from experimental to production-ready for AI workloads, cloud-native applications, and high-performance web apps. Features include Rust/C++/Go compilation to WASM, wasm-bindgen for JavaScript integration, WASI for system calls, Component Model for interoperability, binary size optimization, SIMD support for performance, and multi-runtime compatibility (browser, Node.js, serverless).
+
+## Content
+
 # WebAssembly Module Development Skill
 
 ## What This Skill Enables
@@ -233,3 +282,23 @@ Claude will:
 - [WASI 0.3 Specification](https://github.com/WebAssembly/WASI/blob/main/preview2/README.md)
 - [WebAssembly Component Model](https://github.com/WebAssembly/component-model)
 - [AssemblyScript Language](https://www.assemblyscript.org/)
+
+## Features
+
+- Near-native performance in browser and serverless environments with optimized WASM binaries
+- Multi-language support: Rust (recommended), C++, Go, AssemblyScript with comprehensive tooling
+- WASI 0.3 with native async support and preview2 modules for system call integration
+- Component Model for interoperability and modular WebAssembly applications
+- wasm-bindgen for seamless JavaScript integration with TypeScript definitions generation
+- Binary size optimization with wasm-opt, LTO, and code size reduction techniques
+- SIMD support for 4-8x performance improvements in compute-intensive tasks
+- Multi-runtime compatibility: browser, Node.js, Wasmtime, Wasmer, WasmEdge, and serverless platforms
+
+## Use Cases
+
+- High-performance web applications with compute-intensive operations (image processing, data parsing)
+- AI model inference in browser with ONNX runtime and neural network execution
+- Serverless functions with portable code using WASI and Fermyon Spin
+- Edge computing workloads with low-latency requirements and resource constraints
+- Database query engines and data processing pipelines in browser environments
+- Video codecs and multimedia processing with real-time performance requirements

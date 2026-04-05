@@ -29,15 +29,76 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://trpc.io/docs/'
 downloadUrl: /downloads/skills/trpc-type-safe-api.zip
 installable: true
+installCommand: npm install @trpc/server @trpc/client @trpc/react-query zod
+usageSnippet: npm install @trpc/server @trpc/client @trpc/react-query zod
 copySnippet: |-
-  "Build a type-safe e-commerce API with tRPC:
-  1. Product catalog with filtering and search
-  2. Shopping cart management
-  3. Order processing with Stripe
-  4. User authentication with NextAuth
-  5. Admin dashboard procedures
-  6. Real-time inventory updates
-  7. Include Zod validation and Prisma integration"
+  import { initTRPC, TRPCError } from '@trpc/server';
+  import { z } from 'zod';
+  import { db } from './db';
+
+  // Context creation
+  export const createContext = async ({ req }: { req: Request }) => {
+    const token = req.headers.get('authorization')?.replace('Bearer ', '');
+    const user = token ? await verifyToken(token) : null;
+    
+    return {
+      db,
+      user,
+    };
+  };
+
+  type Context = Awaited<ReturnType<typeof createContext>>;
+
+  const t = initTRPC.context<Context>().create();
+
+  // Middleware
+  const isAuthed = t.middleware(({ ctx, next }) => {
+    if (!ctx.user) {
+      throw new TRPCError({ code: 'UNAUTHORIZED' });
+    }
+    return next({
+      ctx: {
+        user: ctx.user,
+      },
+    });
+  });
+
+  // Procedures
+  export const publicProcedure = t.procedure;
+  export const protectedProcedure = t.procedure.use(isAuthed);
+
+  // Router
+  export const appRouter = t.router({
+    users: t.router({
+      list: publicProcedure.query(async ({ ctx }) => {
+        return ctx.db.user.findMany();
+      }),
+      
+      create: protectedProcedure
+        .input(
+          z.object({
+            name: z.string().min(3),
+            email: z.string().email(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          return ctx.db.user.create({
+            data: input,
+          });
+        }),
+    }),
+  });
+
+  export type AppRouter = typeof appRouter;
+prerequisites:
+  - Node.js 18+
+  - TypeScript 5.0+
+  - '@trpc/server ^10.0.0'
+  - '@trpc/client ^10.0.0'
+  - '@trpc/react-query ^10.0.0'
+  - >-
+    TypeScript 5.0+ for full type inference and end-to-end type safety between
+    client and server
 tags:
   - trpc
   - typescript
@@ -68,8 +129,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# tRPC Type-Safe API Builder Skill
-
 ## What This Skill Enables
 
 Claude can build fully type-safe APIs using tRPC (TypeScript Remote Procedure Call), part of the T3 Stack explosion in 2025. tRPC provides end-to-end type safety without code generation, schema stitching, or serialization layers - delivering a lighter, more intuitive developer experience than REST or GraphQL. With zero dependencies, tiny client-side footprint, and automatic type inference, tRPC makes full-stack TypeScript development actually enjoyable.
@@ -237,3 +296,23 @@ Claude will:
 - [tRPC with Next.js 15 Guide](https://trpc.io/docs/nextjs)
 - [React Query Integration](https://trpc.io/docs/react-query)
 - [tRPC Awesome List](https://github.com/trpc/trpc/blob/main/www/docs/awesome-trpc.md)
+
+## Features
+
+- End-to-end type safety without code generation - TypeScript types flow from server to client automatically
+- Zero runtime dependencies and tiny bundle size - minimal overhead compared to GraphQL or REST
+- Automatic React Query hooks generation with @trpc/react-query for seamless data fetching
+- WebSocket subscriptions support for real-time updates with observable pattern
+- Middleware system for authentication, logging, rate limiting, and custom logic
+- Zod integration for runtime input validation matching TypeScript types
+- Batching support for multiple queries in single HTTP request for performance
+- Adapters for Express, Next.js, Fastify, and standalone servers with flexible deployment
+
+## Use Cases
+
+- Full-stack TypeScript applications with shared types between client and server
+- Real-time collaborative apps with WebSocket subscriptions and live updates
+- Type-safe microservices communication with end-to-end type inference
+- T3 Stack applications (Next.js, tRPC, Prisma, NextAuth, Tailwind)
+- Monorepo architectures with shared type definitions across packages
+- API-first development with automatic client generation and type safety

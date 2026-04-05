@@ -28,14 +28,32 @@ documentationUrl: 'https://www.postgresql.org/docs/current/performance-tips.html
 downloadUrl: /downloads/skills/postgresql-query-optimization.zip
 installable: true
 copySnippet: |-
-  "Perform a comprehensive PostgreSQL performance audit:
-  1. Identify top 10 slowest queries from pg_stat_statements
-  2. Analyze EXPLAIN plans for each
-  3. Detect missing indexes with pg_stat_user_tables
-  4. Find bloated tables needing VACUUM FULL
-  5. Review configuration parameters
-  6. Check for long-running transactions blocking others
-  7. Provide prioritized optimization action plan"
+  -- Run with EXPLAIN ANALYZE to get actual execution times
+  EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
+  SELECT p.name, c.name as category, p.price
+  FROM products p
+  JOIN categories c ON p.category_id = c.id
+  WHERE p.price BETWEEN 100 AND 500
+    AND c.name = 'Electronics'
+  ORDER BY p.created_at DESC
+  LIMIT 20;
+
+  -- Check if indexes are being used
+  SELECT schemaname, tablename, indexname, idx_scan, idx_tup_read, idx_tup_fetch
+  FROM pg_stat_user_indexes
+  WHERE schemaname = 'public'
+  ORDER BY idx_scan ASC;
+prerequisites:
+  - PostgreSQL 14+ (16+ recommended)
+  - pg_stat_statements extension
+  - EXPLAIN access permissions
+  - psql or database client
+  - >-
+    PostgreSQL database access with appropriate permissions (SELECT, EXPLAIN,
+    ANALYZE) for query analysis and optimization
+  - >-
+    PostgreSQL version 12+ (recommended 14+) for advanced query optimization
+    features, EXPLAIN ANALYZE, and modern index types
 tags:
   - postgresql
   - database
@@ -64,6 +82,10 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and execution plan analysis. Interpret EXPLAIN ANALYZE plans, identify bottlenecks (sequential scans, nested loops, hash joins), design optimal indexes (B-tree, GIN, BRIN, composite, partial), rewrite queries for better performance, and tune database configuration parameters. Includes pg_stat_statements integration for slow query identification, parallel query execution optimization, JIT compilation tuning, advanced partitioning strategies, and vacuum/autovacuum configuration for high-write workloads.
+
+## Content
+
 # PostgreSQL Query Optimization Skill
 
 ## What This Skill Enables
@@ -233,3 +255,23 @@ Claude will:
 - [PGTune Configuration Calculator](https://pgtune.leopard.in.ua/)
 - [pgAdmin Query Tool](https://www.pgadmin.org/)
 - [pg_stat_statements Extension](https://www.postgresql.org/docs/current/pgstatstatements.html)
+
+## Features
+
+- EXPLAIN plan analysis and visualization with ANALYZE, BUFFERS, VERBOSE options
+- Automatic index recommendation (B-tree, GIN, BRIN, composite, partial, covering indexes)
+- Workload-specific tuning (OLTP vs OLAP configurations)
+- Query rewriting for performance (JOIN optimization, subquery elimination, CTEs, window functions)
+- pg_stat_statements integration for slow query identification and monitoring
+- Parallel query execution optimization with worker configuration
+- JIT compilation tuning for complex analytical queries
+- Advanced partitioning strategies (range, list, hash, composite partitioning)
+
+## Use Cases
+
+- Optimize slow database queries with EXPLAIN plan analysis
+- Design indexing strategies for high-traffic applications
+- Tune PostgreSQL configuration for specific workloads (OLTP/OLAP)
+- Identify and fix N+1 query problems in ORM-generated queries
+- Optimize time-series data queries with BRIN indexes and partitioning
+- Performance audit and monitoring with pg_stat_statements

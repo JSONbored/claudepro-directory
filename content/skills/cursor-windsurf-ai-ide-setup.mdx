@@ -24,15 +24,64 @@ documentationUrl: 'https://cursor.sh/docs'
 downloadUrl: /downloads/skills/cursor-windsurf-ai-ide-setup.zip
 installable: true
 copySnippet: |-
-  "Configure Cursor for React refactoring workflow:
-  1. Set up .cursorrules with React 19 patterns
-  2. Enable TypeScript strict mode validation
-  3. Configure agent mode for component splits
-  4. Add rules for shadcn/ui usage
-  5. Set up automatic prop-types to TS conversion
-  6. Configure test generation with Vitest
-  7. Enable preview for all agent changes
-  8. Add rollback shortcuts"
+  # Project: Next.js 15 SaaS Application
+
+  ## Tech Stack
+  - Next.js 15.0+ (App Router, Server Actions)
+  - React 19.0+
+  - TypeScript 5.5+ (strict mode)
+  - Tailwind CSS 4.0+
+  - shadcn/ui components
+  - Zod for validation
+  - Prisma with PostgreSQL
+
+  ## Coding Conventions
+  - Use named exports (no default exports except pages)
+  - Prefix server actions with 'action'
+  - All async functions must have error handling
+  - Use Zod schemas for all form inputs
+  - Components in PascalCase, files in kebab-case
+  - Max function length: 50 lines
+  - All props must have TypeScript interfaces
+
+  ## Patterns to Follow
+  - Server Actions for mutations (no API routes)
+  - React Server Components by default
+  - Client components only when needed ('use client')
+  - Parallel data fetching with Promise.all
+  - Error boundaries for all async components
+  - Loading states with Suspense
+  - Form validation with Zod + React Hook Form
+
+  ## Patterns to Avoid
+  - Don't use 'any' type (use 'unknown' if needed)
+  - Don't fetch in client components (use server)
+  - Don't bypass TypeScript with @ts-ignore
+  - Don't create custom hooks without jsdoc
+  - Don't use inline styles (use Tailwind)
+
+  ## Testing
+  - Unit tests with Vitest
+  - E2E tests with Playwright
+  - Minimum 80% coverage
+  - Test file naming: *.test.ts
+
+  ## Performance
+  - Dynamic imports for heavy components
+  - Image optimization with next/image
+  - Font optimization with next/font
+  - Metadata API for SEO
+prerequisites:
+  - Cursor IDE or Windsurf IDE
+  - OpenAI API key or Anthropic API key
+  - macOS/Windows/Linux
+  - >-
+    Cursor or Windsurf IDE installed (latest version recommended for best AI
+    features)
+  - Active internet connection for AI model access and extension marketplace
+  - >-
+    Sufficient system resources: minimum 8GB RAM, 2GB free disk space for
+    workspace indexing and AI model caching
 tags:
   - cursor
   - windsurf
@@ -63,8 +112,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# Cursor/Windsurf AI IDE Setup & Optimization Skill
-
 ## What This Skill Enables
 
 Claude can help you configure and optimize Cursor or Windsurf AI code editors for maximum productivity. Both editors provide AI-powered code completion, multi-file editing, and intelligent refactoring. Cursor excels with its Agent mode and Composer features, while Windsurf emphasizes collaborative flows and Cascade AI. From initial setup to advanced workflows, Claude handles IDE configuration and optimization.
@@ -234,3 +281,23 @@ Claude will:
 - [Cursor Forum](https://forum.cursor.sh/)
 - [AI Coding Best Practices](https://cursor.sh/blog/agent-mode)
 - [Windsurf Cascade Guide](https://codeium.com/blog/windsurf-editor)
+
+## Features
+
+- AI-powered multi-file editing with agent modes
+- Inline code completion with context awareness
+- Chat interface for code explanations and refactoring
+- Composer/Cascade for large-scale code changes
+- Custom rules files (.cursorrules, .windsurfrules) for project-specific guidance
+- Context-aware codebase indexing and retrieval
+- Multi-file refactoring with preview and rollback
+- Performance optimization and resource management with workspace indexing configuration, memory usage tuning, and extension management for optimal IDE responsiveness
+
+## Use Cases
+
+- Configuring AI IDE for specific tech stacks
+- Setting up multi-file refactoring workflows
+- Optimizing token usage and API costs
+- Legacy code migration and modernization
+- Automated test generation and coverage improvement
+- Code review and security scanning workflows

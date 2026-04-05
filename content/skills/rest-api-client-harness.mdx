@@ -27,12 +27,35 @@ documentationUrl: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview'
 downloadUrl: /downloads/skills/rest-api-client-harness.zip
 installable: true
 copySnippet: |-
-  "Test this API endpoint:
-  1. Make GET request to /api/products
-  2. Check status code and headers
-  3. Validate JSON response schema
-  4. Show sample of first 3 records
-  5. Report if any fields are null/missing"
+  import { setTimeout as delay } from 'node:timers/promises';
+  import { fetch } from 'undici';
+
+  async function fetchAll(url, token) {
+    let next = url;
+    const items = [];
+    while (next) {
+      const res = await fetch(next, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) {
+        if (res.status >= 500) { await delay(1000); continue; }
+        throw new Error(`HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      items.push(...data.items);
+      next = data.next;
+    }
+    return items;
+  }
+prerequisites:
+  - Node.js 18+
+  - undici or axios HTTP client library
+  - API credentials (if required)
+  - Network access for API requests
+  - >-
+    Network access to target API endpoints for making HTTP requests and testing
+    API functionality
+  - >-
+    API documentation or OpenAPI/Swagger specification (optional but
+    recommended) for automatic client generation and type safety
 tags:
   - rest
   - http
@@ -62,8 +85,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# REST API Client Harness Skill
-
 ## What This Skill Enables
 
 Claude can interact with REST APIs: make requests, handle authentication (API keys, OAuth, JWT), paginate through results, handle rate limits with retries, and process responses. Build API integration scripts, test endpoints, and extract data from web services.
@@ -304,3 +325,23 @@ for attempt in range(max_retries):
 - [REST API Best Practices](https://restfulapi.net/) - API design principles
 - [Postman Learning](https://learning.postman.com/) - API testing tutorials
 - [Python Requests](https://requests.readthedocs.io/) - Popular HTTP library
+
+## Features
+
+- Token management patterns (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth)
+- Pagination utilities (cursor-based, offset-based, page-based pagination)
+- Retry with exponential backoff and jitter for rate limits and transient errors
+- Typed responses (TypeScript) with request/response type safety
+- Rate limiting with Retry-After header support and request throttling
+- Error handling for HTTP status codes, network timeouts, and validation errors
+- Response parsing (JSON, XML, HTML, binary data) with streaming support
+- Batch operations with concurrent request management and progress tracking
+
+## Use Cases
+
+- ETL from third-party APIs with data transformation and validation
+- Backfills and migrations with pagination and error recovery
+- Monitoring scripts with health checks and uptime tracking
+- API testing and exploration with schema validation
+- Webhook testing and validation with payload verification
+- Data synchronization between multiple APIs with conflict resolution

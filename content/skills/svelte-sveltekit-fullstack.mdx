@@ -29,16 +29,36 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://kit.svelte.dev/'
 downloadUrl: /downloads/skills/svelte-sveltekit-fullstack.zip
 installable: true
+installCommand: npm create svelte@latest my-app
+usageSnippet: npm create svelte@latest my-app
 copySnippet: |-
-  "Build SvelteKit e-commerce with:
-  1. Product catalog: +page.svelte with load function, search/filter
-  2. Product detail: dynamic [slug]/+page.svelte route
-  3. Cart: writable store with localStorage persistence
-  4. Checkout: form actions with Stripe integration
-  5. Auth: hooks for JWT validation, protected routes
-  6. Admin: +layout.server.ts for role-based access
-  7. Database: Prisma with PostgreSQL
-  8. Images: static adapter with CDN"
+  <script>
+    let count = 0;
+    
+    // Reactive statement - automatically re-runs when count changes
+    $: doubled = count * 2;
+    $: console.log(`Count is now ${count}`);
+    
+    function increment() {
+      count += 1;
+    }
+  </script>
+
+  <div>
+    <button on:click={increment}>Count: {count}</button>
+    <p>Doubled: {doubled}</p>
+  </div>
+prerequisites:
+  - Node.js 18+ (20+ recommended)
+  - '@sveltejs/kit ^2.0.0'
+  - svelte ^4.0.0
+  - vite ^5.0.0
+  - >-
+    Node.js 18+ runtime environment for running SvelteKit development server and
+    build processes
+  - >-
+    Package manager (npm, pnpm, yarn, or bun) for installing SvelteKit
+    dependencies and managing project packages
 tags:
   - svelte
   - sveltekit
@@ -70,8 +90,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# Svelte/SvelteKit Full-Stack Developer Skill
-
 ## What This Skill Enables
 
 Claude can build reactive web applications using Svelte's compile-time approach and SvelteKit's full-stack framework. Svelte compiles components to vanilla JavaScript at build time, resulting in minimal runtime overhead and exceptional performance. SvelteKit adds file-based routing, server-side rendering, API routes, and adapters for any platform. From simple components to production apps with authentication and databases, Claude handles the Svelte ecosystem end-to-end.
@@ -241,3 +259,23 @@ Claude will:
 - [SvelteKit Examples](https://github.com/sveltejs/kit/tree/master/examples)
 - [Svelte Society Recipes](https://sveltesociety.dev/recipes)
 - [Svelte REPL](https://svelte.dev/repl)
+
+## Features
+
+- Compile-time optimization with zero runtime overhead - Svelte compiles to vanilla JavaScript
+- Reactive programming with $: syntax for auto-updates and $state/$derived runes in Svelte 5
+- SvelteKit file-based routing with SSR, SSG, and hybrid rendering modes
+- Form actions with progressive enhancement (works without JavaScript)
+- Server load functions (+page.server.ts) for data fetching and authentication
+- Svelte stores (writable, readable, derived) for global state management
+- TypeScript support with automatic type generation from routes
+- Adapters for deployment to Vercel, Netlify, Node.js, Cloudflare Workers, and more
+
+## Use Cases
+
+- Building reactive dashboards with minimal JavaScript and real-time updates
+- Full-stack apps with authentication, databases (Prisma, Drizzle), and API routes
+- Static sites with Markdown content processing and SSG
+- E-commerce stores with cart management, checkout flows, and payment integration
+- SaaS dashboards with multi-tenant data isolation and role-based access
+- Real-time collaborative tools with WebSocket connections and presence tracking

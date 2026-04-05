@@ -13,6 +13,47 @@ dateAdded: '2025-09-18'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://stytch.com/docs/workspace-management/stytch-mcp'
 installable: true
+installCommand: >-
+  claude mcp add --transport http stytch http://mcp.stytch.dev/mcp && claude mcp
+  list
+usageSnippet: >-
+  claude mcp add --transport http stytch http://mcp.stytch.dev/mcp && claude mcp
+  list
+copySnippet: |-
+  {
+    "stytch": {
+      "url": "http://mcp.stytch.dev/mcp",
+      "transport": "http"
+    }
+  }
+configSnippet: |-
+  {
+    "stytch": {
+      "url": "http://mcp.stytch.dev/mcp",
+      "transport": "http"
+    }
+  }
+estimatedSetupTime: 1 minute
+difficulty: beginner
+prerequisites:
+  - Stytch account (free or paid plan)
+  - Stytch API key authentication (for mcp.stytch.dev MCP connection)
+  - Stytch project_id and secret from Dashboard (test or live environment)
+  - 'Network access to mcp.stytch.dev (HTTP transport, not HTTPS)'
+  - >-
+    Understanding of Stytch authentication concepts (magic links, OAuth, MFA,
+    sessions)
+  - >-
+    Stytch Dashboard access (for API key management and redirect URL
+    configuration)
+  - Claude Desktop 0.7.0+ or Claude Code with MCP support
+  - >-
+    Understanding of test vs live environments (multiple test, single live per
+    project)
+  - >-
+    Understanding of Stytch rate limits (per endpoint, per user/email/phone, 60
+    SMS OTP/hour in test)
+  - 'Optional: Redirect URL configuration (for OAuth and magic link flows)'
 tags:
   - authentication
   - stytch
@@ -42,4 +83,145 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Content
+
 Manage Stytch authentication configurations and workspace settings for identity management. Configure authentication methods (magic links, OAuth, passwords, biometrics), manage redirect URLs and callbacks, customize email templates and branding, update security settings (MFA, sessions, policies), monitor authentication events and metrics, manage user sessions, configure B2B authentication (SSO, organizations), and set up fraud detection—all through natural language commands. Supports Basic authentication, test and live environments, and comprehensive identity management.
+
+## Features
+
+- Configure authentication methods and flows (magic links, OAuth, passwords, biometrics)
+- Manage redirect URLs and callbacks (OAuth and magic link redirects)
+- Customize email templates and branding (user-facing communications)
+- Update workspace security settings (MFA, session management, policies)
+- Monitor authentication events and metrics (analytics and security monitoring)
+- Manage user sessions and tokens (session lifecycle management)
+- Configure B2B authentication (SSO, organization management, RBAC)
+- Set up fraud detection and risk policies (security and compliance)
+- Advanced Stytch authentication and user management with passwordless authentication, session management, and multi-factor authentication
+- Batch operations support for efficient bulk user operations, authentication management, and session processing with automatic rate limit handling and retry logic
+- Real-time authentication synchronization capabilities with webhook integration support for monitoring Stytch events and triggering automated workflows
+
+## Use Cases
+
+- Configure authentication flows (magic links, OAuth, passwordless)
+- Update email templates for notifications (branding and user experience)
+- Manage redirect URLs for OAuth (callback URL configuration)
+- Set security policies and rules (MFA, session duration, access controls)
+- Test authentication methods (development and QA workflows)
+- Monitor authentication metrics and events (analytics and security)
+- Configure B2B SSO and organization management (enterprise authentication)
+- Manage user sessions and access tokens (session administration)
+- Build automated authentication workflows that sync external systems with Stytch for real-time user management and security operations
+
+## Installation
+
+### Claude Code
+
+1. Run: claude mcp add --transport http stytch http://mcp.stytch.dev/mcp
+2. Verify installation: claude mcp list
+3. Test connection: claude mcp status stytch
+4. Configure your Stytch project_id and secret (from Dashboard API Keys section)
+5. Authenticate with your Stytch account
+
+### Claude Desktop
+
+1. Open Claude Desktop configuration file (see configPath below)
+2. Add the Stytch server configuration with HTTP transport and URL
+3. Restart Claude Desktop
+4. Configure your Stytch project_id and secret (from Dashboard API Keys section)
+5. Authenticate with your Stytch account
+6. Verify connection in Claude Desktop
+
+## Requirements
+
+- Stytch account (free or paid plan)
+- Stytch API key authentication (for mcp.stytch.dev MCP connection)
+- Stytch project_id and secret from Dashboard (test or live environment)
+- Network access to mcp.stytch.dev (HTTP transport, not HTTPS)
+- Understanding of Stytch authentication concepts (magic links, OAuth, MFA, sessions)
+- Stytch Dashboard access (for API key management and redirect URL configuration)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of test vs live environments (multiple test, single live per project)
+- Understanding of Stytch rate limits (per endpoint, per user/email/phone, 60 SMS OTP/hour in test)
+- Optional: Redirect URL configuration (for OAuth and magic link flows)
+
+## Configuration
+
+```json
+{
+  "stytch": {
+    "url": "http://mcp.stytch.dev/mcp",
+    "transport": "http"
+  }
+}
+```
+
+## Examples
+### Add new redirect URL for production
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Add new redirect URL for production"
+```
+### Update password reset email template
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Update password reset email template"
+```
+### Configure MFA settings
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Configure MFA settings"
+```
+### Show authentication metrics for this week
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Show authentication metrics for this week"
+```
+### Authenticate User
+Authenticate a user using Stytch magic link with session duration
+```typescript
+// Authenticate user with Stytch
+const session = await stytch.magicLinks.authenticate({
+  token: "magic-link-token",
+  session_duration_minutes: 60
+});
+```
+
+## Security
+
+- Basic authentication for secure access (project_id and secret from Dashboard)
+- Test in Stytch test environment before production (safe testing environment)
+- Regular security audits (monitor authentication patterns and access)
+- Monitor failed authentication attempts (fraud detection and security)
+- API key security (never expose secrets in client-side code or public repositories)
+- Stytch API keys and secret keys must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- Stytch secret keys should be scoped with minimal required permissions following the principle of least privilege - regularly audit API key permissions and remove unused keys
+- Stytch user, session, and organization IDs may expose user data and authentication information - ensure Stytch resource identifiers are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Stytch MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Stytch webhook configurations and payloads may contain sensitive user data and authentication information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### Rate limit exceeded - 429 error returned
+
+Stytch enforces rate limits per endpoint and per user/email/phone number separately. Test environment example: 60 SMS OTP codes per hour per project. Check error response for `Retry-After` header to know when to retry. Implement exponential backoff for retries (wait time increases with each retry). Review Stytch rate limits documentation for specific endpoint limits. Check Event logs in Stytch Dashboard to investigate context around 429 errors. Contact Stytch support (support@stytch.com) for rate limit increases or if receiving unexpected 429 errors during legitimate user flows. Monitor for suspicious user activity that may trigger per-user rate limits.
+### Invalid redirect URL or scheme error
+
+Redirect URLs must be configured in Stytch Dashboard under redirect_urls section. Production requires `https://` scheme (never `http://` except for localhost loopback). Development can use `http://localhost` for local testing. Verify URL exact match (case-sensitive, must match exactly). Check no duplicate redirect URLs configured. Ensure URL is added to correct project environment (test vs live). For OAuth flows, URL must match one of the configured redirect URLs exactly. Common error: `no_match_for_provided_oauth_url` indicates URL not in Dashboard configuration.
+### Misconfigured client or redirect URL not allowed
+
+Ensure client has valid redirect_urls configured in Stytch Dashboard. Public clients require proper scheme: `https://` for production, `http://localhost` only for localhost loopback. Localhost restrictions apply to certain client types. Verify client ID matches project (check project_id in client configuration). Check redirect URL types match intended use (LOGIN, SIGNUP, INVITE, DISCOVERY for B2B). Ensure default redirect URLs are set if not providing URL in request. Review client configuration in Dashboard for any restrictions.
+### Authentication failed or project access denied
+
+Verify API keys match environment: test environment credentials for test API calls, live credentials for production. Check project_id and secret from Stytch Dashboard (API Keys section). Ensure user has project access permissions in Dashboard. Re-generate API keys if compromised. Review project security settings in Dashboard. Verify Basic authentication format: `Basic <base64-encoded-project_id:secret>`. Check that credentials are for correct environment (multiple test environments available, single live environment). Ensure API keys are not revoked or expired.
+### Stytch MCP server authentication errors with API keys
+
+Verify API keys (Project ID and Secret) are valid and not expired. Check API keys match the correct environment (test vs live). Ensure API key format is correct. For webhook verification, verify webhook signing secret matches.
+### Stytch rate limit errors when processing multiple authentication requests
+
+Implement exponential backoff retry logic with jitter. Use Stytch API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed user data. Stytch allows 100 requests per second per project.
+### Stytch user or session access denied errors
+
+Verify API keys have access to the user or session. Check project permissions and organization membership. Ensure API keys have required permissions for target operations.
+### Stytch MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify Stytch API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

@@ -234,8 +234,8 @@
 }
 
 .directory-stack-card {
-  @apply flex gap-4 rounded-2xl border border-border/80 bg-card/94 px-5 py-4 shadow-sm backdrop-blur transition duration-200 ease-out;
-  min-height: 9.8rem;
+  @apply flex gap-4 rounded-[1.35rem] border border-border/80 bg-card/96 px-4 py-4 shadow-sm backdrop-blur transition duration-200 ease-out;
+  min-height: 9.1rem;
 }
 
 .directory-stack-card:hover {
@@ -244,11 +244,11 @@
 }
 
 .directory-vote-rail {
-  @apply flex w-[3.8rem] shrink-0 flex-col items-center justify-between rounded-xl border border-border/80 bg-background/80 px-2 py-3;
+  @apply flex w-[3.45rem] shrink-0 flex-col items-center justify-between rounded-[1rem] border border-border/80 bg-background/88 px-2 py-2.5;
 }
 
 .directory-vote-tile {
-  @apply flex h-10 w-full items-center justify-center rounded-lg border border-border/80 bg-background text-center;
+  @apply flex h-9 w-full items-center justify-center rounded-lg border border-border/80 bg-background text-center;
 }
 
 .vote-button {
@@ -260,12 +260,12 @@
 }
 
 .directory-code-bar {
-  @apply flex min-w-0 flex-1 items-center rounded-lg border border-border/70 bg-background px-4 py-2;
+  @apply flex min-w-0 flex-1 items-center rounded-lg border border-border/70 bg-background px-3.5 py-2;
   box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.02);
 }
 
 .directory-title {
-  font-size: 1rem;
+  font-size: 1.06rem;
   line-height: 1.2;
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -278,7 +278,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: calc(1.5rem * 2);
+  min-height: calc(1.45rem * 2);
 }
 
 .directory-code-text {
@@ -300,6 +300,10 @@
 
 .directory-link-chip {
   @apply inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs text-muted-foreground transition hover:border-primary/30 hover:text-foreground;
+}
+
+.directory-icon-chip {
+  @apply inline-flex size-8 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition hover:border-primary/30 hover:text-foreground;
 }
 
 .detail-code-block-collapsed {

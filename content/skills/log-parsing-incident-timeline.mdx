@@ -26,13 +26,24 @@ repoUrl: 'https://github.com/BurntSushi/ripgrep'
 documentationUrl: 'https://github.com/BurntSushi/ripgrep'
 downloadUrl: /downloads/skills/log-parsing-incident-timeline.zip
 installable: true
-copySnippet: |-
-  "Analyze logs from the incident:
-  1. Extract all errors between 14:00-15:00
-  2. Identify first error that occurred
-  3. Show cascade of subsequent errors
-  4. Correlate with deployment timestamp
-  5. Create incident report with timeline"
+copySnippet: >-
+  # Filter 5xx errors from nginx and sort by time
+
+  rg -n ' 5\d\d ' access.log | awk '{print $4, $5, $9, $7}' | sort >
+  timeline.txt
+
+  head -n 5 timeline.txt
+prerequisites:
+  - ripgrep (rg)
+  - 'jq (optional, for JSON parsing)'
+  - bash or Python 3.11+
+  - 'pandas (optional, for advanced analysis)'
+  - >-
+    Log file access permissions - read access to log files in various formats
+    (text, JSON, syslog, etc.) and write access for parsed output files
+  - >-
+    Regular expression knowledge or pattern matching tools (grep, awk, sed) for
+    parsing structured and unstructured log formats
 tags:
   - logs
   - observability
@@ -63,8 +74,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# Log Parsing & Incident Timeline Skill
-
 ## What This Skill Enables
 
 Claude can parse application logs, server logs, and system logs to extract errors, create incident timelines, identify patterns, and correlate events across distributed systems. Transform raw log data into actionable insights.
@@ -251,3 +260,23 @@ For request ID xyz789, show complete flow across all services."
 - [ripgrep Guide](https://github.com/BurntSushi/ripgrep) - Fast log searching
 - [Log Parsing Patterns](https://logz.io/blog/logstash-grok/) - Common log patterns
 - [Distributed Tracing](https://opentelemetry.io/docs/concepts/observability-primer/#distributed-traces) - Request correlation
+
+## Features
+
+- ripgrep-based fast filtering and pattern matching with regex support
+- Session and request correlation across distributed systems
+- Timeline generation with chronological event ordering
+- PII and secret redaction for compliance and security
+- Multi-format log parsing (Apache/Nginx, JSON, syslog, Docker, CloudWatch)
+- Timestamp parsing and normalization across time zones
+- Error aggregation and pattern detection with anomaly hints
+- Performance analysis with percentile calculations (p50, p95, p99)
+
+## Use Cases
+
+- Post-incident analysis with timeline reconstruction
+- Live debugging and real-time log monitoring
+- Compliance reporting with audit trail generation
+- Security audit and threat detection from access logs
+- Performance analysis and bottleneck identification
+- Multi-service request tracing and correlation

@@ -23,13 +23,44 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://pandas.pydata.org/'
 downloadUrl: /downloads/skills/csv-excel-data-wrangler.zip
 installable: true
-copySnippet: |-
-  "Clean this customer export:
-  1. Remove duplicate emails (keep most recent)
-  2. Standardize phone numbers to (XXX) XXX-XXXX format
-  3. Fill missing company names with 'Unknown'
-  4. Split full_name into first_name and last_name
-  5. Export as customers_clean.xlsx"
+installCommand: pip install pandas openpyxl
+usageSnippet: pip install pandas openpyxl
+copySnippet: >-
+  import pandas as pd
+
+
+  customers = pd.read_csv('customers.csv', dtype=str)
+
+  orders = pd.read_excel('orders.xlsx')
+
+
+  # Normalize and dedupe
+
+  customers['email'] = customers['email'].str.strip().str.lower()
+
+  customers = customers.drop_duplicates(subset=['email'])
+
+
+  # Join and summarize
+
+  df = orders.merge(customers, on='customer_id', how='left')
+
+  sales_by_region = df.groupby('region',
+  dropna=False)['total'].sum().reset_index()
+
+
+  sales_by_region.to_excel('sales_by_region.xlsx', index=False)
+prerequisites:
+  - Python 3.11+
+  - pandas
+  - openpyxl
+  - pyarrow (optional for Parquet)
+  - >-
+    File system read/write access for input CSV/Excel files and output processed
+    files
+  - >-
+    Sufficient memory for data processing (minimum 2GB RAM recommended for large
+    files, use chunked processing for files >100MB)
 tags:
   - csv
   - xlsx
@@ -60,8 +91,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# CSV & Excel Data Wrangler Skill
-
 ## What This Skill Enables
 
 Claude can clean, transform, analyze, and merge CSV and Excel files with pandas. Upload messy spreadsheets and get production-ready data pipelines, statistical summaries, and formatted exports.
@@ -213,3 +242,23 @@ Claude will:
 - [Excel to Pandas Mapping](https://pandas.pydata.org/docs/getting_started/comparison/comparison_with_spreadsheets.html) - Translate Excel operations
 - [Data Cleaning Best Practices](https://github.com/Quartz/bad-data-guide) - Common data issues and solutions
 - [Claude Code Interpreter Guide](https://www.anthropic.com/news/code-interpreter) - How Claude processes data
+
+## Features
+
+- Import/export with explicit schema control
+- Deduplicate and null-safe transformations
+- Join/merge/pivot with predictable results
+- Encoding-aware IO with UTF-8/UTF-8-SIG handling
+- Parquet round-trips for performance
+- Memory-efficient processing for large files (chunksize, Parquet)
+- Data validation and quality checks (outlier detection, referential integrity)
+- Multi-file consolidation and batch processing
+
+## Use Cases
+
+- Clean messy CRM exports
+- Join sales and marketing datasets
+- Generate analyst-ready summary tables
+- Data migration and format conversion workflows
+- ETL pipelines for business intelligence
+- Automated data quality reporting and validation

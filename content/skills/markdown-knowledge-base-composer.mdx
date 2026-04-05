@@ -26,14 +26,41 @@ repoUrl: 'https://github.com/remarkjs/remark'
 documentationUrl: 'https://github.com/remarkjs/remark'
 downloadUrl: /downloads/skills/markdown-knowledge-base-composer.zip
 installable: true
+installCommand: npm i remark unified
+usageSnippet: npm i remark unified
 copySnippet: |-
-  "Create documentation site:
-  1. Parse all .md files in docs/
-  2. Generate sidebar navigation
-  3. Create search index
-  4. Add syntax highlighting for code blocks
-  5. Export as static HTML site
-  Use clean, professional styling."
+  import { readFileSync, readdirSync } from 'node:fs';
+  import { join } from 'node:path';
+  import { unified } from 'unified';
+  import remarkParse from 'remark-parse';
+  import remarkStringify from 'remark-stringify';
+  import remarkToc from 'remark-toc';
+  import remarkSlug from 'remark-slug';
+
+  const dir = './notes';
+  const files = readdirSync(dir).filter(f => f.endsWith('.md'));
+
+  for (const file of files) {
+    const input = readFileSync(join(dir, file), 'utf8');
+    const tree = unified()
+      .use(remarkParse)
+      .use(remarkSlug)
+      .use(remarkToc, { tight: true })
+      .use(remarkStringify)
+      .processSync(input);
+    console.log(String(tree));
+  }
+prerequisites:
+  - Node.js 18+
+  - remark / unified
+  - Playwright (optional for PDF export)
+  - pandoc (optional for DOCX/EPUB export)
+  - >-
+    File system read/write access for Markdown source files, generated
+    HTML/PDF/DOCX/EPUB outputs, and image assets referenced in Markdown
+  - >-
+    Markdown syntax knowledge or reference documentation for creating valid
+    Markdown files (CommonMark or GitHub Flavored Markdown specification)
 tags:
   - markdown
   - docs
@@ -62,8 +89,6 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
-# Markdown Knowledge Base Composer Skill
-
 ## What This Skill Enables
 
 Claude can organize, process, and transform Markdown documentation into cohesive knowledge bases. Generate table of contents, fix broken links, convert formats, create static sites, and export to PDF or HTML.
@@ -268,3 +293,23 @@ Maintain consistent styling across all formats."
 - [Pandoc](https://pandoc.org/) - Universal document converter
 - [MkDocs](https://www.mkdocs.org/) - Documentation site generator
 - [VitePress](https://vitepress.dev/) - Modern documentation framework
+
+## Features
+
+- Heading normalization and slug consistency with anchor link generation
+- TOC generation across directories with hierarchical structure
+- Cross-link rewriting and validation with broken link detection
+- Export to static HTML/PDF/DOCX/EPUB with consistent styling
+- Frontmatter parsing and processing (YAML, TOML)
+- GitHub Flavored Markdown (GFM) support (tables, task lists, strikethrough)
+- Code syntax highlighting preservation across formats
+- Multi-file aggregation and consolidation with structure preservation
+
+## Use Cases
+
+- Assemble product handbooks from scattered documentation
+- Publish internal notes as searchable knowledge base
+- Create client-facing knowledge packs with professional formatting
+- Generate documentation sites with navigation and search
+- Consolidate project documentation into single comprehensive guide
+- Export documentation in multiple formats for different audiences
