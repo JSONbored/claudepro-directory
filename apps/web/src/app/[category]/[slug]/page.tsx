@@ -26,6 +26,58 @@ export async function generateMetadata({ params }: DetailPageProps): Promise<Met
   };
 }
 
+function getMetadataFallback(entry: Awaited<ReturnType<typeof getEntry>>) {
+  if (!entry) return null;
+
+  if (entry.category === "hooks") {
+    return {
+      title: "How to use this hook",
+      points: [
+        entry.trigger
+          ? `Register it under the \`${entry.trigger}\` hook event in your Claude Code configuration.`
+          : "Register it in your Claude Code hooks configuration.",
+        entry.documentationUrl
+          ? "Use the documentation link in the sidebar to confirm the event shape and required config."
+          : "Open the source file in GitHub to copy the exact implementation and adapt it to your project.",
+        "Keep the source file in your repo and test it locally before relying on it in production workflows."
+      ]
+    };
+  }
+
+  if (entry.category === "collections") {
+    return {
+      title: "How to use this collection",
+      points: [
+        "Open the source file to review the assets included in the collection.",
+        "Pick the individual entries you want to use and add them to your Claude workflow one by one.",
+        "Collections need richer item metadata next, but the GitHub source still gives you the current canonical list."
+      ]
+    };
+  }
+
+  if (entry.documentationUrl || entry.repoUrl) {
+    return {
+      title: "How to use this entry",
+      points: [
+        entry.documentationUrl
+          ? "Start with the documentation link in the sidebar for setup and usage details."
+          : "Open the repository in the sidebar for setup details.",
+        "Use the source link to inspect the exact file this directory entry was built from.",
+        "Copy the relevant snippet or config into your local Claude setup and test it before wider use."
+      ]
+    };
+  }
+
+  return {
+    title: "How to use this entry",
+    points: [
+      "Open the GitHub source file in the sidebar.",
+      "Copy the content you need into your project or Claude configuration.",
+      "Test it locally and adapt it to your workflow before relying on it."
+    ]
+  };
+}
+
 export default async function DetailPage({ params }: DetailPageProps) {
   const { category, slug } = await params;
   const entry = await getEntry(category, slug);
@@ -40,6 +92,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
   const metadataOnly = !hasBody;
   const sourceLabel = entry.filePath?.replace(/^content\//, "");
   const sectionItems = Array.isArray(entry.sections) ? entry.sections : [];
+  const metadataFallback = getMetadataFallback(entry);
   const primarySnippet =
     entry.installCommand || entry.commandSyntax || entry.usageSnippet || entry.copySnippet;
   const snippetTitle = entry.installCommand
@@ -53,11 +106,20 @@ export default async function DetailPage({ params }: DetailPageProps) {
           : null;
   const omittedCode = [
     primarySnippet,
+    entry.configSnippet,
     entry.scriptBody,
     primaryCodeBlock?.code
   ]
     .filter(Boolean)
     .map((value) => String(value).trim());
+  const visibleSections = sectionItems.filter((section) => {
+    const hasProse = section.proseHtml.replace(/<[^>]+>/g, "").trim().length > 0;
+    const hasCode = section.codeBlocks.some(
+      (block) => !omittedCode.includes(block.code.trim())
+    );
+
+    return hasProse || hasCode;
+  });
   const topFacts: Array<{ label: string; value: string }> = [
     entry.author ? { label: "Author", value: entry.author } : null,
     entry.dateAdded ? { label: "Added", value: entry.dateAdded } : null,
@@ -108,6 +170,15 @@ export default async function DetailPage({ params }: DetailPageProps) {
           />
         ) : null}
 
+        {entry.configSnippet ? (
+          <SnippetCard
+            eyebrow="Claude config"
+            title=".claude/settings.json"
+            code={entry.configSnippet}
+            language="json"
+          />
+        ) : null}
+
         {entry.scriptBody ? (
           <SnippetCard
             eyebrow="Source asset"
@@ -124,15 +195,28 @@ export default async function DetailPage({ params }: DetailPageProps) {
           />
         ) : null}
 
-        {sectionItems.length ? (
-          <ContentSections sections={sectionItems} omitCode={omittedCode} />
+        {visibleSections.length ? (
+          <ContentSections sections={visibleSections} omitCode={omittedCode} />
         ) : metadataOnly ? (
           <section className="surface-panel p-6">
-            <p className="text-sm leading-7 text-muted-foreground">
-              This entry currently only has structured metadata in the repository. The
-              source file is linked in the sidebar, but there is no long-form body
-              content to render yet.
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              Metadata only
             </p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">
+              {metadataFallback?.title ?? "How to use this entry"}
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-muted-foreground">
+              This entry does not include long-form body content yet, so the source file and docs links in the sidebar are the current source of truth.
+            </p>
+            {metadataFallback?.points?.length ? (
+              <ul className="mt-4 space-y-3 text-sm leading-7 text-muted-foreground">
+                {metadataFallback.points.map((point) => (
+                  <li key={point} className="rounded-xl border border-border bg-background px-4 py-3">
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </section>
         ) : (entry.scriptBody || (primaryCodeBlock && entry.codeBlocks.length === 1 && !entry.headings.length)) ? null : (
           <div
@@ -216,18 +300,20 @@ export default async function DetailPage({ params }: DetailPageProps) {
           <div className="mt-4 space-y-4">
             {related.map((item) => (
               <Link key={item.slug} href={`/${item.category}/${item.slug}`} className="block">
-                <p className="text-sm font-medium tracking-tight">{item.title}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{item.description}</p>
+                <p className="detail-related-title text-sm font-medium tracking-tight">{item.title}</p>
+                <p className="detail-related-description mt-1 text-xs text-muted-foreground">
+                  {item.cardDescription || item.description}
+                </p>
               </Link>
             ))}
           </div>
         </div>
 
-        {sectionItems.length ? (
+        {visibleSections.length ? (
           <div className="surface-panel p-5">
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">On this page</p>
             <div className="mt-4 space-y-3">
-              {sectionItems.map((section) => (
+              {visibleSections.map((section) => (
                 <a
                   key={section.id}
                   href={`#${section.id}`}

@@ -165,6 +165,7 @@ async function main() {
         installCommand: inferred.installCommand || undefined,
         usageSnippet: inferred.usageSnippet || undefined,
         copySnippet: inferred.copySnippet || undefined,
+        configSnippet: inferred.configSnippet || undefined,
         commandSyntax: data.commandSyntax ? String(data.commandSyntax) : undefined,
         argumentHint: data.argumentHint ? String(data.argumentHint) : undefined,
         allowedTools: Array.isArray(data.allowedTools)

@@ -875,97 +875,79 @@
     "category": "hooks",
     "filePath": "content/hooks/accessibility-checker.mdx",
     "slug": "accessibility-checker",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "trigger"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "hooks",
     "filePath": "content/hooks/api-endpoint-documentation-generator.mdx",
     "slug": "api-endpoint-documentation-generator",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "trigger"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "hooks",
     "filePath": "content/hooks/auto-code-formatter-hook.mdx",
     "slug": "auto-code-formatter-hook",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "trigger"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "hooks",
     "filePath": "content/hooks/auto-save-backup.mdx",
     "slug": "auto-save-backup",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "trigger"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "hooks",
     "filePath": "content/hooks/aws-cloudformation-validator.mdx",
     "slug": "aws-cloudformation-validator",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "trigger"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "hooks",
     "filePath": "content/hooks/cloud-backup-on-session-stop.mdx",
     "slug": "cloud-backup-on-session-stop",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "trigger"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "hooks",
     "filePath": "content/hooks/code-complexity-alert-monitor.mdx",
     "slug": "code-complexity-alert-monitor",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "trigger"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "hooks",
     "filePath": "content/hooks/code-test-runner-hook.mdx",
     "slug": "code-test-runner-hook",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "trigger"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "hooks",
     "filePath": "content/hooks/css-unused-selector-detector.mdx",
     "slug": "css-unused-selector-detector",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "trigger"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "hooks",
     "filePath": "content/hooks/database-connection-cleanup.mdx",
     "slug": "database-connection-cleanup",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -973,7 +955,7 @@
     "category": "hooks",
     "filePath": "content/hooks/database-migration-runner.mdx",
     "slug": "database-migration-runner",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -981,7 +963,7 @@
     "category": "hooks",
     "filePath": "content/hooks/database-query-performance-logger.mdx",
     "slug": "database-query-performance-logger",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -989,17 +971,15 @@
     "category": "hooks",
     "filePath": "content/hooks/dead-code-eliminator.mdx",
     "slug": "dead-code-eliminator",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": [
-      "trigger"
-    ]
+    "missingRecommended": []
   },
   {
     "category": "hooks",
     "filePath": "content/hooks/dependency-security-audit-on-stop.mdx",
     "slug": "dependency-security-audit-on-stop",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1007,7 +987,7 @@
     "category": "hooks",
     "filePath": "content/hooks/dependency-security-scanner.mdx",
     "slug": "dependency-security-scanner",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1015,7 +995,7 @@
     "category": "hooks",
     "filePath": "content/hooks/dependency-update-checker.mdx",
     "slug": "dependency-update-checker",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1023,7 +1003,7 @@
     "category": "hooks",
     "filePath": "content/hooks/discord-activity-notifier.mdx",
     "slug": "discord-activity-notifier",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1031,7 +1011,7 @@
     "category": "hooks",
     "filePath": "content/hooks/docker-container-auto-rebuild.mdx",
     "slug": "docker-container-auto-rebuild",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1039,7 +1019,7 @@
     "category": "hooks",
     "filePath": "content/hooks/docker-image-security-scanner.mdx",
     "slug": "docker-image-security-scanner",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1047,7 +1027,7 @@
     "category": "hooks",
     "filePath": "content/hooks/documentation-auto-generator-on-stop.mdx",
     "slug": "documentation-auto-generator-on-stop",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1055,7 +1035,7 @@
     "category": "hooks",
     "filePath": "content/hooks/documentation-coverage-checker.mdx",
     "slug": "documentation-coverage-checker",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1063,7 +1043,7 @@
     "category": "hooks",
     "filePath": "content/hooks/documentation-generator.mdx",
     "slug": "documentation-generator",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1071,7 +1051,7 @@
     "category": "hooks",
     "filePath": "content/hooks/environment-cleanup-handler.mdx",
     "slug": "environment-cleanup-handler",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1079,7 +1059,7 @@
     "category": "hooks",
     "filePath": "content/hooks/environment-variable-validator.mdx",
     "slug": "environment-variable-validator",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1087,7 +1067,7 @@
     "category": "hooks",
     "filePath": "content/hooks/error-rate-monitor.mdx",
     "slug": "error-rate-monitor",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1095,7 +1075,7 @@
     "category": "hooks",
     "filePath": "content/hooks/file-size-warning-monitor.mdx",
     "slug": "file-size-warning-monitor",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1103,7 +1083,7 @@
     "category": "hooks",
     "filePath": "content/hooks/final-bundle-size-reporter.mdx",
     "slug": "final-bundle-size-reporter",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1111,7 +1091,7 @@
     "category": "hooks",
     "filePath": "content/hooks/git-auto-commit-on-stop.mdx",
     "slug": "git-auto-commit-on-stop",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1119,7 +1099,7 @@
     "category": "hooks",
     "filePath": "content/hooks/git-branch-protection.mdx",
     "slug": "git-branch-protection",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1127,7 +1107,7 @@
     "category": "hooks",
     "filePath": "content/hooks/git-pre-commit-validator.mdx",
     "slug": "git-pre-commit-validator",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1135,7 +1115,7 @@
     "category": "hooks",
     "filePath": "content/hooks/github-actions-workflow-validator.mdx",
     "slug": "github-actions-workflow-validator",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1143,7 +1123,7 @@
     "category": "hooks",
     "filePath": "content/hooks/go-module-tidy.mdx",
     "slug": "go-module-tidy",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1151,7 +1131,7 @@
     "category": "hooks",
     "filePath": "content/hooks/graphql-schema-validator.mdx",
     "slug": "graphql-schema-validator",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1159,7 +1139,7 @@
     "category": "hooks",
     "filePath": "content/hooks/i18n-translation-validator.mdx",
     "slug": "i18n-translation-validator",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1167,7 +1147,7 @@
     "category": "hooks",
     "filePath": "content/hooks/jest-snapshot-auto-updater.mdx",
     "slug": "jest-snapshot-auto-updater",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1175,7 +1155,7 @@
     "category": "hooks",
     "filePath": "content/hooks/json-schema-validator.mdx",
     "slug": "json-schema-validator",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1183,7 +1163,7 @@
     "category": "hooks",
     "filePath": "content/hooks/kubernetes-manifest-validator.mdx",
     "slug": "kubernetes-manifest-validator",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1191,7 +1171,7 @@
     "category": "hooks",
     "filePath": "content/hooks/markdown-link-checker.mdx",
     "slug": "markdown-link-checker",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1199,7 +1179,7 @@
     "category": "hooks",
     "filePath": "content/hooks/memory-usage-monitor.mdx",
     "slug": "memory-usage-monitor",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1207,7 +1187,7 @@
     "category": "hooks",
     "filePath": "content/hooks/nextjs-route-analyzer.mdx",
     "slug": "nextjs-route-analyzer",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1215,7 +1195,7 @@
     "category": "hooks",
     "filePath": "content/hooks/package-vulnerability-scanner.mdx",
     "slug": "package-vulnerability-scanner",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1223,7 +1203,7 @@
     "category": "hooks",
     "filePath": "content/hooks/performance-benchmark-report.mdx",
     "slug": "performance-benchmark-report",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1231,7 +1211,7 @@
     "category": "hooks",
     "filePath": "content/hooks/performance-impact-monitor.mdx",
     "slug": "performance-impact-monitor",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1239,7 +1219,7 @@
     "category": "hooks",
     "filePath": "content/hooks/performance-monitor.mdx",
     "slug": "performance-monitor",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1247,7 +1227,7 @@
     "category": "hooks",
     "filePath": "content/hooks/playwright-test-runner.mdx",
     "slug": "playwright-test-runner",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1255,7 +1235,7 @@
     "category": "hooks",
     "filePath": "content/hooks/prisma-schema-sync.mdx",
     "slug": "prisma-schema-sync",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1263,7 +1243,7 @@
     "category": "hooks",
     "filePath": "content/hooks/python-import-optimizer.mdx",
     "slug": "python-import-optimizer",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1271,7 +1251,7 @@
     "category": "hooks",
     "filePath": "content/hooks/python-linter-integration.mdx",
     "slug": "python-linter-integration",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1279,7 +1259,7 @@
     "category": "hooks",
     "filePath": "content/hooks/react-component-test-generator.mdx",
     "slug": "react-component-test-generator",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1287,7 +1267,7 @@
     "category": "hooks",
     "filePath": "content/hooks/real-time-activity-tracker.mdx",
     "slug": "real-time-activity-tracker",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1295,7 +1275,7 @@
     "category": "hooks",
     "filePath": "content/hooks/redis-cache-invalidator.mdx",
     "slug": "redis-cache-invalidator",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1303,7 +1283,7 @@
     "category": "hooks",
     "filePath": "content/hooks/rust-cargo-check.mdx",
     "slug": "rust-cargo-check",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1311,7 +1291,7 @@
     "category": "hooks",
     "filePath": "content/hooks/scss-auto-compiler.mdx",
     "slug": "scss-auto-compiler",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1319,7 +1299,7 @@
     "category": "hooks",
     "filePath": "content/hooks/security-scanner-hook.mdx",
     "slug": "security-scanner-hook",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1327,7 +1307,7 @@
     "category": "hooks",
     "filePath": "content/hooks/sensitive-data-alert-scanner.mdx",
     "slug": "sensitive-data-alert-scanner",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1335,7 +1315,7 @@
     "category": "hooks",
     "filePath": "content/hooks/session-metrics-collector.mdx",
     "slug": "session-metrics-collector",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1343,7 +1323,7 @@
     "category": "hooks",
     "filePath": "content/hooks/slack-progress-notifier.mdx",
     "slug": "slack-progress-notifier",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1351,7 +1331,7 @@
     "category": "hooks",
     "filePath": "content/hooks/svelte-component-compiler.mdx",
     "slug": "svelte-component-compiler",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1359,7 +1339,7 @@
     "category": "hooks",
     "filePath": "content/hooks/team-summary-email-generator.mdx",
     "slug": "team-summary-email-generator",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1367,7 +1347,7 @@
     "category": "hooks",
     "filePath": "content/hooks/terraform-plan-executor.mdx",
     "slug": "terraform-plan-executor",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1375,7 +1355,7 @@
     "category": "hooks",
     "filePath": "content/hooks/test-coverage-final-report.mdx",
     "slug": "test-coverage-final-report",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1383,7 +1363,7 @@
     "category": "hooks",
     "filePath": "content/hooks/test-runner-hook.mdx",
     "slug": "test-runner-hook",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1391,7 +1371,7 @@
     "category": "hooks",
     "filePath": "content/hooks/typescript-compilation-checker.mdx",
     "slug": "typescript-compilation-checker",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1399,7 +1379,7 @@
     "category": "hooks",
     "filePath": "content/hooks/vue-composition-api-linter.mdx",
     "slug": "vue-composition-api-linter",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1407,7 +1387,7 @@
     "category": "hooks",
     "filePath": "content/hooks/webpack-bundle-analyzer.mdx",
     "slug": "webpack-bundle-analyzer",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },
@@ -1415,7 +1395,7 @@
     "category": "hooks",
     "filePath": "content/hooks/workflow-completion-report.mdx",
     "slug": "workflow-completion-report",
-    "metadataOnly": true,
+    "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": []
   },

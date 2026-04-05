@@ -31,6 +31,38 @@ dateAdded: '2025-09-16'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://jsdoc.app/'
 installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/documentation-generator.sh &&
+  chmod +x .claude/hooks/documentation-generator.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/documentation-generator.sh &&
+  chmod +x .claude/hooks/documentation-generator.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "postToolUse": {
+        "script": "./.claude/hooks/documentation-generator.sh",
+        "matchers": [
+          "write",
+          "edit"
+        ]
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "postToolUse": {
+        "script": "./.claude/hooks/documentation-generator.sh",
+        "matchers": [
+          "write",
+          "edit"
+        ]
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if it's a documentation-relevant file\nif [[ \"$FILE_PATH\" == *.js ]] || [[ \"$FILE_PATH\" == *.jsx ]] || [[ \"$FILE_PATH\" == *.ts ]] || [[ \"$FILE_PATH\" == *.tsx ]] || [[ \"$FILE_PATH\" == *.py ]] || [[ \"$FILE_PATH\" == *.go ]] || [[ \"$FILE_PATH\" == *.rs ]] || [[ \"$FILE_PATH\" == *README* ]] || [[ \"$FILE_PATH\" == *.md ]]; then\n  echo \"\U0001F4DA Documentation-relevant file detected: $FILE_PATH\" >&2\n  \n  # Create docs directory if it doesn't exist\n  mkdir -p ./docs\n  \n  # JavaScript/TypeScript documentation\n  if [[ \"$FILE_PATH\" == *.js ]] || [[ \"$FILE_PATH\" == *.jsx ]] || [[ \"$FILE_PATH\" == *.ts ]] || [[ \"$FILE_PATH\" == *.tsx ]]; then\n    echo \"\U0001F7E1 JavaScript/TypeScript file - checking for documentation...\" >&2\n    \n    # Check for JSDoc comments\n    if [ -f \"$FILE_PATH\" ]; then\n      JSDOC_COMMENTS=$(grep -c '/\\*\\*' \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n      FUNCTIONS=$(grep -c '^\\s*\\(function\\|const\\s.*=>\\|class\\)' \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n      \n      echo \"\U0001F4CA Found $JSDOC_COMMENTS JSDoc comments and $FUNCTIONS functions/classes\" >&2\n      \n      if [ \"$JSDOC_COMMENTS\" -gt 0 ]; then\n        # Try generating JSDoc documentation\n        if command -v npx &> /dev/null; then\n          if npx jsdoc --version &> /dev/null 2>&1; then\n            echo \"\U0001F4DD Generating JSDoc documentation...\" >&2\n            npx jsdoc \"$FILE_PATH\" -d ./docs/jsdoc 2>/dev/null && echo \"✅ JSDoc documentation generated\" >&2\n          fi\n          \n          # Try jsdoc2md for markdown output\n          if npx jsdoc2md --version &> /dev/null 2>&1; then\n            echo \"\U0001F4DD Generating Markdown documentation...\" >&2\n            npx jsdoc2md \"$FILE_PATH\" > \"./docs/$(basename \"$FILE_PATH\" .js).md\" 2>/dev/null && echo \"✅ Markdown documentation generated\" >&2\n          fi\n        fi\n      else\n        echo \"\U0001F4A1 Consider adding JSDoc comments to improve documentation coverage\" >&2\n      fi\n      \n      # TypeScript-specific documentation\n      if [[ \"$FILE_PATH\" == *.ts ]] || [[ \"$FILE_PATH\" == *.tsx ]]; then\n        if command -v npx &> /dev/null && npx typedoc --version &> /dev/null 2>&1; then\n          echo \"\U0001F4DD Generating TypeDoc documentation...\" >&2\n          npx typedoc \"$FILE_PATH\" --out ./docs/typedoc 2>/dev/null && echo \"✅ TypeDoc documentation generated\" >&2\n        else\n          echo \"\U0001F4A1 Install TypeDoc for comprehensive TypeScript documentation: npm install -g typedoc\" >&2\n        fi\n      fi\n    fi\n    \n  # Python documentation\n  elif [[ \"$FILE_PATH\" == *.py ]]; then\n    echo \"\U0001F40D Python file - checking for documentation...\" >&2\n    \n    if [ -f \"$FILE_PATH\" ]; then\n      DOCSTRINGS=$(grep -c '\"\"\"\\|'\\''\\''\\'''' \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n      FUNCTIONS=$(grep -c '^def\\s\\|^class\\s' \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n      \n      echo \"\U0001F4CA Found $DOCSTRINGS docstrings and $FUNCTIONS functions/classes\" >&2\n      \n      # Try generating Python documentation\n      if command -v pdoc &> /dev/null; then\n        echo \"\U0001F4DD Generating pdoc documentation...\" >&2\n        pdoc \"$FILE_PATH\" --html --output-dir ./docs/python 2>/dev/null && echo \"✅ Python documentation generated\" >&2\n      elif command -v python &> /dev/null; then\n        if python -c \"import pydoc\" 2>/dev/null; then\n          echo \"\U0001F4DD Generating pydoc documentation...\" >&2\n          python -m pydoc -w \"$FILE_PATH\" 2>/dev/null && echo \"✅ Python documentation generated\" >&2\n        fi\n      fi\n      \n      if [ \"$DOCSTRINGS\" -eq 0 ] && [ \"$FUNCTIONS\" -gt 0 ]; then\n        echo \"\U0001F4A1 Consider adding docstrings to Python functions and classes\" >&2\n      fi\n    fi\n    \n  # Go documentation\n  elif [[ \"$FILE_PATH\" == *.go ]]; then\n    echo \"\U0001F439 Go file - checking for documentation...\" >&2\n    \n    if [ -f \"$FILE_PATH\" ] && command -v go &> /dev/null; then\n      COMMENTS=$(grep -c '^//\\s' \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n      echo \"\U0001F4CA Found $COMMENTS documentation comments\" >&2\n      \n      echo \"\U0001F4DD Generating Go documentation...\" >&2\n      go doc \"$FILE_PATH\" > \"./docs/$(basename \"$FILE_PATH\" .go).txt\" 2>/dev/null && echo \"✅ Go documentation generated\" >&2\n    fi\n    \n  # Rust documentation\n  elif [[ \"$FILE_PATH\" == *.rs ]]; then\n    echo \"\U0001F980 Rust file - checking for documentation...\" >&2\n    \n    if [ -f \"$FILE_PATH\" ] && command -v cargo &> /dev/null; then\n      DOC_COMMENTS=$(grep -c '^///\\|^//!' \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n      echo \"\U0001F4CA Found $DOC_COMMENTS documentation comments\" >&2\n      \n      if [ \"$DOC_COMMENTS\" -gt 0 ]; then\n        echo \"\U0001F4DD Generating Rust documentation...\" >&2\n        cargo doc --no-deps --target-dir ./docs/rust 2>/dev/null && echo \"✅ Rust documentation generated\" >&2\n      else\n        echo \"\U0001F4A1 Consider adding /// documentation comments to Rust code\" >&2\n      fi\n    fi\n    \n  # README and markdown documentation\n  elif [[ \"$FILE_PATH\" == *README* ]] || [[ \"$FILE_PATH\" == *.md ]]; then\n    echo \"\U0001F4DD Markdown file - analyzing documentation structure...\" >&2\n    \n    if [ -f \"$FILE_PATH\" ]; then\n      HEADERS=$(grep -c '^#' \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n      CODE_BLOCKS=$(grep -c '^```' \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n      LINKS=$(grep -c '\\[.*\\](.*)' \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n      \n      echo \"\U0001F4CA Document structure: $HEADERS headers, $CODE_BLOCKS code blocks, $LINKS links\" >&2\n      \n      # Check for common README sections\n      if [[ \"$FILE_PATH\" == *README* ]]; then\n        echo \"\U0001F4CB Checking README completeness...\" >&2\n        \n        REQUIRED_SECTIONS=(\"Installation\" \"Usage\" \"API\" \"Contributing\" \"License\")\n        MISSING_SECTIONS=()\n        \n        for section in \"${REQUIRED_SECTIONS[@]}\"; do\n          if ! grep -qi \"^#.*$section\" \"$FILE_PATH\"; then\n            MISSING_SECTIONS+=(\"$section\")\n          fi\n        done\n        \n        if [ ${#MISSING_SECTIONS[@]} -eq 0 ]; then\n          echo \"✅ README contains all recommended sections\" >&2\n        else\n          echo \"\U0001F4A1 Consider adding these sections: ${MISSING_SECTIONS[*]}\" >&2\n        fi\n        \n        # Check for project metadata\n        if [ -f \"package.json\" ]; then\n          PROJECT_NAME=$(jq -r '.name // \"unknown\"' package.json 2>/dev/null)\n          PROJECT_DESC=$(jq -r '.description // \"\"' package.json 2>/dev/null)\n          \n          if ! grep -q \"$PROJECT_NAME\" \"$FILE_PATH\"; then\n            echo \"\U0001F4A1 Consider mentioning project name '$PROJECT_NAME' in README\" >&2\n          fi\n        fi\n      fi\n      \n      # Check for broken links (basic check)\n      if [ \"$LINKS\" -gt 0 ]; then\n        echo \"\U0001F517 Found $LINKS links - consider running a link checker\" >&2\n      fi\n    fi\n  fi\n  \n  # General documentation quality tips\n  echo \"\" >&2\n  echo \"\U0001F4CB Documentation Best Practices:\" >&2\n  echo \"   • Add clear function/method descriptions\" >&2\n  echo \"   • Include parameter types and return values\" >&2\n  echo \"   • Provide usage examples in documentation\" >&2\n  echo \"   • Keep README updated with latest changes\" >&2\n  \nelse\n  echo \"File $FILE_PATH is not relevant for documentation generation, skipping\" >&2\nfi\n\nexit 0"
 trigger: PostToolUse
 tags:
   - documentation
@@ -60,4 +92,372 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Features
 
+- Real-time documentation generation from code comments with automatic detection of JSDoc 4.0.0+, TSDoc, Python docstrings, Go comments, and Rust documentation comments when code files are modified
+- Multi-language support (JavaScript, TypeScript, Python, Go, Rust) with appropriate documentation generators including JSDoc 4.0.0+, TypeDoc 0.26.0+, pdoc 14.0+, Go doc, and Cargo doc
+- API documentation extraction from JSDoc, docstrings, and comments with automatic API endpoint detection and OpenAPI/Swagger documentation generation
+- README.md analysis and improvement suggestions with completeness checking, required section validation, and project metadata integration
+- Documentation quality and completeness checking with coverage metrics, missing section detection, and documentation best practices validation
+- Integration with popular documentation tools including jsdoc2md for markdown output, TypeDoc for TypeScript, pdoc for Python, and language-specific documentation generators
+- Automatic documentation format detection with intelligent selection of appropriate documentation generator based on file type and project structure
+- Incremental documentation generation with file-level processing to optimize performance and reduce generation time for large codebases
+
+## Use Cases
+
+- Real-time documentation updates during development providing automatic documentation generation when code files are modified, keeping documentation synchronized with code changes
+- API documentation maintenance and generation ensuring API documentation stays current with code changes and automatically extracting API documentation from code comments
+- Code quality improvement through documentation analysis providing documentation quality metrics and suggestions for improving documentation completeness
+- Multi-language project documentation consistency maintaining consistent documentation standards across multiple programming languages in the same project
+- README and project documentation enhancement providing automatic README analysis and suggestions for improving project documentation completeness
+- Development workflow integration seamlessly integrating documentation generation into development workflows without manual intervention or separate documentation steps
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/documentation-generator.sh
+3. Make executable: chmod +x .claude/hooks/documentation-generator.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Documentation generator: JSDoc 4.0.0+ (JavaScript), TypeDoc 0.26.0+ (TypeScript), pdoc 14.0+ (Python), Go doc (Go), Cargo doc (Rust), jsdoc2md (optional, for markdown output)
+- jq JSON processor for parsing hook input and package.json (optional but recommended)
+- Runtime environment: Node.js 18+ and npm/yarn/pnpm (for JSDoc/TypeDoc/jsdoc2md) or Python 3.8+ and pip (for pdoc) or Go toolchain (for Go doc) or Rust toolchain (for Cargo doc) depending on project language
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/documentation-generator.sh",
+      "matchers": [
+        "write",
+        "edit"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if it's a documentation-relevant file
+if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH" == *.py ]] || [[ "$FILE_PATH" == *.go ]] || [[ "$FILE_PATH" == *.rs ]] || [[ "$FILE_PATH" == *README* ]] || [[ "$FILE_PATH" == *.md ]]; then
+  echo "📚 Documentation-relevant file detected: $FILE_PATH" >&2
+  
+  # Create docs directory if it doesn't exist
+  mkdir -p ./docs
+  
+  # JavaScript/TypeScript documentation
+  if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]]; then
+    echo "🟡 JavaScript/TypeScript file - checking for documentation..." >&2
+    
+    # Check for JSDoc comments
+    if [ -f "$FILE_PATH" ]; then
+      JSDOC_COMMENTS=$(grep -c '/\*\*' "$FILE_PATH" 2>/dev/null || echo "0")
+      FUNCTIONS=$(grep -c '^\s*\(function\|const\s.*=>\|class\)' "$FILE_PATH" 2>/dev/null || echo "0")
+      
+      echo "📊 Found $JSDOC_COMMENTS JSDoc comments and $FUNCTIONS functions/classes" >&2
+      
+      if [ "$JSDOC_COMMENTS" -gt 0 ]; then
+        # Try generating JSDoc documentation
+        if command -v npx &> /dev/null; then
+          if npx jsdoc --version &> /dev/null 2>&1; then
+            echo "📝 Generating JSDoc documentation..." >&2
+            npx jsdoc "$FILE_PATH" -d ./docs/jsdoc 2>/dev/null && echo "✅ JSDoc documentation generated" >&2
+          fi
+          
+          # Try jsdoc2md for markdown output
+          if npx jsdoc2md --version &> /dev/null 2>&1; then
+            echo "📝 Generating Markdown documentation..." >&2
+            npx jsdoc2md "$FILE_PATH" > "./docs/$(basename "$FILE_PATH" .js).md" 2>/dev/null && echo "✅ Markdown documentation generated" >&2
+          fi
+        fi
+      else
+        echo "💡 Consider adding JSDoc comments to improve documentation coverage" >&2
+      fi
+      
+      # TypeScript-specific documentation
+      if [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]]; then
+        if command -v npx &> /dev/null && npx typedoc --version &> /dev/null 2>&1; then
+          echo "📝 Generating TypeDoc documentation..." >&2
+          npx typedoc "$FILE_PATH" --out ./docs/typedoc 2>/dev/null && echo "✅ TypeDoc documentation generated" >&2
+        else
+          echo "💡 Install TypeDoc for comprehensive TypeScript documentation: npm install -g typedoc" >&2
+        fi
+      fi
+    fi
+    
+  # Python documentation
+  elif [[ "$FILE_PATH" == *.py ]]; then
+    echo "🐍 Python file - checking for documentation..." >&2
+    
+    if [ -f "$FILE_PATH" ]; then
+      DOCSTRINGS=$(grep -c '"""\|'\''\''\'''' "$FILE_PATH" 2>/dev/null || echo "0")
+      FUNCTIONS=$(grep -c '^def\s\|^class\s' "$FILE_PATH" 2>/dev/null || echo "0")
+      
+      echo "📊 Found $DOCSTRINGS docstrings and $FUNCTIONS functions/classes" >&2
+      
+      # Try generating Python documentation
+      if command -v pdoc &> /dev/null; then
+        echo "📝 Generating pdoc documentation..." >&2
+        pdoc "$FILE_PATH" --html --output-dir ./docs/python 2>/dev/null && echo "✅ Python documentation generated" >&2
+      elif command -v python &> /dev/null; then
+        if python -c "import pydoc" 2>/dev/null; then
+          echo "📝 Generating pydoc documentation..." >&2
+          python -m pydoc -w "$FILE_PATH" 2>/dev/null && echo "✅ Python documentation generated" >&2
+        fi
+      fi
+      
+      if [ "$DOCSTRINGS" -eq 0 ] && [ "$FUNCTIONS" -gt 0 ]; then
+        echo "💡 Consider adding docstrings to Python functions and classes" >&2
+      fi
+    fi
+    
+  # Go documentation
+  elif [[ "$FILE_PATH" == *.go ]]; then
+    echo "🐹 Go file - checking for documentation..." >&2
+    
+    if [ -f "$FILE_PATH" ] && command -v go &> /dev/null; then
+      COMMENTS=$(grep -c '^//\s' "$FILE_PATH" 2>/dev/null || echo "0")
+      echo "📊 Found $COMMENTS documentation comments" >&2
+      
+      echo "📝 Generating Go documentation..." >&2
+      go doc "$FILE_PATH" > "./docs/$(basename "$FILE_PATH" .go).txt" 2>/dev/null && echo "✅ Go documentation generated" >&2
+    fi
+    
+  # Rust documentation
+  elif [[ "$FILE_PATH" == *.rs ]]; then
+    echo "🦀 Rust file - checking for documentation..." >&2
+    
+    if [ -f "$FILE_PATH" ] && command -v cargo &> /dev/null; then
+      DOC_COMMENTS=$(grep -c '^///\|^//!' "$FILE_PATH" 2>/dev/null || echo "0")
+      echo "📊 Found $DOC_COMMENTS documentation comments" >&2
+      
+      if [ "$DOC_COMMENTS" -gt 0 ]; then
+        echo "📝 Generating Rust documentation..." >&2
+        cargo doc --no-deps --target-dir ./docs/rust 2>/dev/null && echo "✅ Rust documentation generated" >&2
+      else
+        echo "💡 Consider adding /// documentation comments to Rust code" >&2
+      fi
+    fi
+    
+  # README and markdown documentation
+  elif [[ "$FILE_PATH" == *README* ]] || [[ "$FILE_PATH" == *.md ]]; then
+    echo "📝 Markdown file - analyzing documentation structure..." >&2
+    
+    if [ -f "$FILE_PATH" ]; then
+      HEADERS=$(grep -c '^#' "$FILE_PATH" 2>/dev/null || echo "0")
+      CODE_BLOCKS=$(grep -c '^```' "$FILE_PATH" 2>/dev/null || echo "0")
+      LINKS=$(grep -c '\[.*\](.*)' "$FILE_PATH" 2>/dev/null || echo "0")
+      
+      echo "📊 Document structure: $HEADERS headers, $CODE_BLOCKS code blocks, $LINKS links" >&2
+      
+      # Check for common README sections
+      if [[ "$FILE_PATH" == *README* ]]; then
+        echo "📋 Checking README completeness..." >&2
+        
+        REQUIRED_SECTIONS=("Installation" "Usage" "API" "Contributing" "License")
+        MISSING_SECTIONS=()
+        
+        for section in "${REQUIRED_SECTIONS[@]}"; do
+          if ! grep -qi "^#.*$section" "$FILE_PATH"; then
+            MISSING_SECTIONS+=("$section")
+          fi
+        done
+        
+        if [ ${#MISSING_SECTIONS[@]} -eq 0 ]; then
+          echo "✅ README contains all recommended sections" >&2
+        else
+          echo "💡 Consider adding these sections: ${MISSING_SECTIONS[*]}" >&2
+        fi
+        
+        # Check for project metadata
+        if [ -f "package.json" ]; then
+          PROJECT_NAME=$(jq -r '.name // "unknown"' package.json 2>/dev/null)
+          PROJECT_DESC=$(jq -r '.description // ""' package.json 2>/dev/null)
+          
+          if ! grep -q "$PROJECT_NAME" "$FILE_PATH"; then
+            echo "💡 Consider mentioning project name '$PROJECT_NAME' in README" >&2
+          fi
+        fi
+      fi
+      
+      # Check for broken links (basic check)
+      if [ "$LINKS" -gt 0 ]; then
+        echo "🔗 Found $LINKS links - consider running a link checker" >&2
+      fi
+    fi
+  fi
+  
+  # General documentation quality tips
+  echo "" >&2
+  echo "📋 Documentation Best Practices:" >&2
+  echo "   • Add clear function/method descriptions" >&2
+  echo "   • Include parameter types and return values" >&2
+  echo "   • Provide usage examples in documentation" >&2
+  echo "   • Keep README updated with latest changes" >&2
+  
+else
+  echo "File $FILE_PATH is not relevant for documentation generation, skipping" >&2
+fi
+
+exit 0
+```
+
+## Examples
+### Documentation Generator Hook Script
+
+Complete hook script that performs automatic documentation generation when code files are modified
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.ts ]]; then
+  echo "JavaScript/TypeScript file detected: $FILE_PATH" >&2
+  mkdir -p ./docs
+  if command -v npx &> /dev/null && npx jsdoc --version &> /dev/null 2>&1; then
+    echo "Generating JSDoc documentation..." >&2
+    npx jsdoc "$FILE_PATH" -d ./docs/jsdoc 2>/dev/null && echo "JSDoc documentation generated" >&2
+  fi
+  if [[ "$FILE_PATH" == *.ts ]]; then
+    if command -v npx &> /dev/null && npx typedoc --version &> /dev/null 2>&1; then
+      echo "Generating TypeDoc documentation..." >&2
+      npx typedoc "$FILE_PATH" --out ./docs/typedoc 2>/dev/null && echo "TypeDoc documentation generated" >&2
+    fi
+  fi
+fi
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable documentation generation
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/documentation-generator.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+### Markdown Documentation Generation with jsdoc2md
+
+Enhanced hook script using jsdoc2md for markdown output from JSDoc comments
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.ts ]]; then
+  if command -v npx &> /dev/null; then
+    if npx jsdoc2md --version &> /dev/null 2>&1; then
+      echo "Generating Markdown documentation..." >&2
+      npx jsdoc2md "$FILE_PATH" > "./docs/$(basename "$FILE_PATH" .js).md" 2>/dev/null && echo "Markdown documentation generated" >&2
+    fi
+  fi
+fi
+exit 0
+```
+### Python Documentation Generation with pdoc
+
+Enhanced hook script using pdoc 14.0+ for Python documentation generation
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.py ]]; then
+  if command -v pdoc &> /dev/null; then
+    echo "Generating pdoc documentation..." >&2
+    pdoc "$FILE_PATH" --html --output-dir ./docs/python 2>/dev/null && echo "Python documentation generated" >&2
+  elif command -v python &> /dev/null; then
+    if python -c "import pdoc" 2>/dev/null; then
+      echo "Generating pdoc documentation..." >&2
+      python -m pdoc --html --output-dir ./docs/python "$FILE_PATH" 2>/dev/null && echo "Python documentation generated" >&2
+    fi
+  fi
+fi
+exit 0
+```
+### README Completeness Analysis
+
+Enhanced hook script for README completeness checking with required section validation
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *README* ]]; then
+  echo "Analyzing README completeness..." >&2
+  REQUIRED_SECTIONS=("Installation" "Usage" "API" "Contributing" "License")
+  MISSING_SECTIONS=()
+  for section in "${REQUIRED_SECTIONS[@]}"; do
+    if ! grep -qi "^#.*$section" "$FILE_PATH"; then
+      MISSING_SECTIONS+=("$section")
+    fi
+  done
+  if [ ${#MISSING_SECTIONS[@]} -eq 0 ]; then
+    echo "README contains all recommended sections" >&2
+  else
+    echo "Consider adding these sections: ${MISSING_SECTIONS[*]}" >&2
+  fi
+fi
+exit 0
+```
+
+## Troubleshooting
+### Hook runs on every file edit causing slow workflows
+
+Refine matchers to specific extensions: ['write:*.js', 'write:*.ts', 'edit:*.md', 'edit:README*']. Use postToolUse with targeted matchers instead of wildcard to reduce unnecessary executions. Consider using file size thresholds to skip small files. Add conditional logic to skip test files.
+### JSDoc generation fails with 'npx jsdoc not found' error
+
+Check jsdoc availability before running: npx jsdoc --version &> /dev/null before generation. Add npm install -g jsdoc to project setup or include in package.json devDependencies. Verify JSDoc version is 4.0.0+ for latest features. Use local installation: npm install --save-dev jsdoc.
+### Documentation tools timeout on large codebases
+
+Add timeout limits to each tool execution: timeout 60s npx jsdoc. Process individual files instead of entire directories. Consider incremental documentation generation for changed files only. Use file-level processing to optimize performance. Set resource limits for documentation generation.
+### TypeDoc fails with module resolution errors in TypeScript
+
+Ensure tsconfig.json exists with proper module settings. Run TypeDoc from project root: npx typedoc --tsconfig ./tsconfig.json. Check for conflicting TypeScript versions between project and TypeDoc. Verify TypeDoc version is 0.26.0+ for latest features. Use explicit entry points: npx typedoc --entryPoints src/index.ts.
+### Python pdoc generation creates no output for modules
+
+Verify module has __init__.py if package. Use absolute imports and check PYTHONPATH. Run pdoc with explicit module paths: pdoc --html --output-dir ./docs mymodule rather than file paths. Verify pdoc version is 14.0+ for latest features. Check module structure and imports.
+### jsdoc2md generates empty markdown files
+
+Verify JSDoc comments are properly formatted with /** */ style. Check jsdoc2md configuration and template settings. Ensure source files contain valid JSDoc comments. Use verbose mode: jsdoc2md --verbose to debug generation issues. Verify file paths and permissions.
+### Go doc generation fails with package import errors
+
+Run go doc from project root with proper module context. Verify go.mod exists and module is properly configured. Use go doc with package path: go doc ./path/to/package. Check Go version compatibility. Ensure all dependencies are installed: go mod download.
+### Cargo doc generation takes too long for large Rust projects
+
+Use cargo doc --no-deps to skip dependency documentation. Process only changed files instead of entire project. Set documentation generation timeout limits. Use incremental compilation: cargo doc --target-dir ./docs/rust. Consider running documentation generation in CI/CD instead of real-time.

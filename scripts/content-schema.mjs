@@ -19,7 +19,7 @@ export const CATEGORY_SCHEMAS = {
   },
   hooks: {
     required: ["title", "slug", "description", "cardDescription", "repoUrl"],
-    recommended: ["trigger", "usageSnippet", "copySnippet"]
+    recommended: ["trigger", "usageSnippet", "copySnippet", "configSnippet", "scriptBody"]
   },
   mcp: {
     required: ["title", "slug", "description", "cardDescription", "repoUrl"],
@@ -246,6 +246,7 @@ export function inferStructuredFields(data, body, category) {
     repoUrl: inferRepoUrl(data),
     usageSnippet,
     copySnippet,
+    configSnippet: data.configSnippet ? String(data.configSnippet) : "",
     installCommand,
     installable,
     scriptLanguage,
@@ -332,7 +333,9 @@ export function orderFrontmatter(data) {
     "installCommand",
     "usageSnippet",
     "copySnippet",
+    "configSnippet",
     "scriptLanguage",
+    "scriptBody",
     "trigger",
     "tags",
     "keywords",

@@ -28,6 +28,30 @@ authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-09-19'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/environment-cleanup-handler.sh
+  && chmod +x .claude/hooks/environment-cleanup-handler.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/environment-cleanup-handler.sh
+  && chmod +x .claude/hooks/environment-cleanup-handler.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "stop": {
+        "script": "./.claude/hooks/environment-cleanup-handler.sh"
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "stop": {
+        "script": "./.claude/hooks/environment-cleanup-handler.sh"
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/usr/bin/env bash\n\necho \"\U0001F9F9 Starting environment cleanup...\" >&2\n\n# Initialize cleanup counters\nFILES_REMOVED=0\nSPACE_FREED=0\nERRORS=0\n\n# Function to safely remove files and count them\nsafe_remove() {\n  local pattern=\"$1\"\n  local description=\"$2\"\n  \n  echo \"\U0001F4C1 Cleaning $description...\" >&2\n  \n  if [ \"$pattern\" = \"__pycache__\" ]; then\n    # Special handling for __pycache__ directories\n    FOUND=$(find . -type d -name \"__pycache__\" 2>/dev/null | wc -l | xargs)\n    if [ \"$FOUND\" -gt 0 ]; then\n      find . -type d -name \"__pycache__\" -exec rm -rf {} + 2>/dev/null && echo \"  ✅ Removed $FOUND __pycache__ directories\" >&2\n      FILES_REMOVED=$((FILES_REMOVED + FOUND))\n    else\n      echo \"  ℹ️ No __pycache__ directories found\" >&2\n    fi\n  else\n    # Handle file patterns\n    FOUND=$(find . -name \"$pattern\" 2>/dev/null | wc -l | xargs)\n    if [ \"$FOUND\" -gt 0 ]; then\n      find . -name \"$pattern\" -delete 2>/dev/null && echo \"  ✅ Removed $FOUND $description files\" >&2\n      FILES_REMOVED=$((FILES_REMOVED + FOUND))\n    else\n      echo \"  ℹ️ No $description files found\" >&2\n    fi\n  fi\n}\n\n# Clean temporary files\nsafe_remove \"*.tmp\" \"temporary\"\nsafe_remove \"*.log\" \"log\"\nsafe_remove \"*.bak\" \"backup\"\nsafe_remove \"*~\" \"editor backup\"\n\n# Clean system-specific files\ncase \"$(uname)\" in\n  Darwin)\n    safe_remove \".DS_Store\" \"macOS metadata\"\n    safe_remove \"._*\" \"macOS resource fork\"\n    ;;\n  CYGWIN*|MINGW*|MSYS*)\n    safe_remove \"Thumbs.db\" \"Windows thumbnail cache\"\n    safe_remove \"Desktop.ini\" \"Windows desktop config\"\n    ;;\n  Linux)\n    safe_remove \".directory\" \"KDE directory config\"\n    ;;\nesac\n\n# Clean Python cache files\necho \"\U0001F40D Cleaning Python artifacts...\" >&2\nsafe_remove \"*.pyc\" \"Python bytecode\"\nsafe_remove \"*.pyo\" \"Python optimized bytecode\"\nsafe_remove \"__pycache__\" \"Python cache directories\"\n\n# Clean Node.js related files\nif [ -f \"package.json\" ]; then\n  echo \"\U0001F7E2 Node.js project detected - cleaning caches...\" >&2\n  \n  # Clean npm cache\n  if command -v npm &> /dev/null; then\n    echo \"  \U0001F5D1️ Verifying npm cache...\" >&2\n    if npm cache verify 2>/dev/null; then\n      echo \"  ✅ npm cache verified and cleaned\" >&2\n    else\n      echo \"  ⚠️ npm cache verification failed\" >&2\n      ERRORS=$((ERRORS + 1))\n    fi\n  fi\n  \n  # Clean node_modules/.cache if it exists\n  if [ -d \"node_modules/.cache\" ]; then\n    CACHE_SIZE=$(du -sh node_modules/.cache 2>/dev/null | cut -f1 || echo \"unknown\")\n    rm -rf node_modules/.cache 2>/dev/null && echo \"  ✅ Removed node_modules/.cache ($CACHE_SIZE)\" >&2\n  fi\nfi\n\n# Clean build artifacts\necho \"\U0001F527 Cleaning build artifacts...\" >&2\nsafe_remove \"*.o\" \"object files\"\nsafe_remove \"*.obj\" \"Windows object files\"\nsafe_remove \"*.so\" \"shared object files\"\nsafe_remove \"*.dll\" \"Windows library files\"\nsafe_remove \"*.dylib\" \"macOS dynamic libraries\"\n\n# Clean IDE and editor files\necho \"\U0001F4BB Cleaning IDE artifacts...\" >&2\nsafe_remove \".vscode/settings.json.bak\" \"VS Code backup settings\"\nif [ -d \".vscode\" ]; then\n  find .vscode -name \"*.log\" -delete 2>/dev/null || true\nfi\n\n# Clean test artifacts\necho \"\U0001F9EA Cleaning test artifacts...\" >&2\nsafe_remove \"coverage.xml\" \"coverage report\"\nsafe_remove \".coverage\" \"Python coverage data\"\nif [ -d \"coverage\" ]; then\n  rm -rf coverage 2>/dev/null && echo \"  ✅ Removed coverage directory\" >&2\nfi\nif [ -d \".nyc_output\" ]; then\n  rm -rf .nyc_output 2>/dev/null && echo \"  ✅ Removed .nyc_output directory\" >&2\nfi\n\n# Clean Docker artifacts if Docker is available\nif command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then\n  echo \"\U0001F433 Docker detected - cleaning unused resources...\" >&2\n  \n  # Clean dangling images\n  DANGLING_IMAGES=$(docker images -f \"dangling=true\" -q 2>/dev/null | wc -l | xargs)\n  if [ \"$DANGLING_IMAGES\" -gt 0 ]; then\n    docker image prune -f &> /dev/null && echo \"  ✅ Removed $DANGLING_IMAGES dangling Docker images\" >&2\n  else\n    echo \"  ℹ️ No dangling Docker images found\" >&2\n  fi\nfi\n\n# Calculate disk space if possible\necho \"\U0001F4BE Calculating disk space usage...\" >&2\nif command -v du &> /dev/null; then\n  # Check cache directories\n  for cache_dir in ~/.npm ~/.cache ~/.cargo/registry; do\n    if [ -d \"$cache_dir\" ]; then\n      CACHE_SIZE=$(du -sh \"$cache_dir\" 2>/dev/null | cut -f1 || echo \"unknown\")\n      echo \"  \U0001F4CA $cache_dir: $CACHE_SIZE\" >&2\n    fi\n  done\nfi\n\n# Report cleanup summary\necho \"\" >&2\necho \"\U0001F4CB Cleanup Summary:\" >&2\necho \"  \U0001F5D1️ Files/directories removed: $FILES_REMOVED\" >&2\necho \"  ⚠️ Errors encountered: $ERRORS\" >&2\n\nif [ \"$ERRORS\" -eq 0 ]; then\n  echo \"✅ Environment cleanup completed successfully\" >&2\nelse\n  echo \"⚠️ Environment cleanup completed with $ERRORS errors\" >&2\nfi\n\necho \"\" >&2\necho \"\U0001F4A1 Cleanup Tips:\" >&2\necho \"   • Run 'docker system prune' for more aggressive Docker cleanup\" >&2\necho \"   • Use 'npm cache clean --force' for complete npm cache reset\" >&2\necho \"   • Consider 'pip cache purge' for Python package cache cleanup\" >&2\n\nexit 0"
 trigger: Stop
 tags:
   - cleanup
@@ -58,4 +82,329 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Features
 
+- Automatic temporary file cleanup (*.tmp, *.log, .DS_Store, Thumbs.db) with cross-platform support for macOS, Linux, and Windows with platform-specific file pattern detection
+- NPM cache verification and cleanup with npm 10.x+ support including npm cache verify and node_modules/.cache directory cleanup for Node.js projects
+- Python bytecode and __pycache__ directory removal with Python 3.12+ support including *.pyc, *.pyo files and __pycache__ directories with recursive cleanup
+- Development build artifacts cleanup including object files (*.o, *.obj), shared libraries (*.so, *.dll, *.dylib), and build output directories
+- Disk space usage reporting and optimization with detailed cache size reporting for ~/.npm, ~/.cache, ~/.cargo/registry directories
+- Multi-platform support (macOS, Linux, Windows) with platform-specific cleanup rules for .DS_Store (macOS), Thumbs.db (Windows), and .directory (KDE/Linux)
+- Safe cleanup with error handling and logging including file removal counters, error tracking, and comprehensive cleanup summary reporting
+- Docker resource cleanup with Docker Engine 24.0+ support including dangling image removal, container cleanup, and Docker system optimization
+
+## Use Cases
+
+- Automated development environment maintenance providing automatic cleanup of temporary files, caches, and build artifacts when development sessions end
+- Post-session cleanup for CI/CD pipelines ensuring clean build environments by removing temporary files and caches after CI/CD job completion
+- Disk space optimization and management automatically freeing disk space by removing unnecessary cache files and temporary artifacts
+- Multi-language project artifact cleanup supporting Node.js, Python, Go, Rust, and Docker projects with language-specific cleanup rules
+- Docker container development environment cleanup removing dangling Docker images and optimizing Docker disk usage for containerized development
+- Development workflow optimization maintaining clean development environments and reducing disk space usage for improved development performance
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/environment-cleanup-handler.sh
+3. Make executable: chmod +x .claude/hooks/environment-cleanup-handler.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Docker Engine 24.0+ (optional, for Docker cleanup)
+- npm 10.x+ (optional, for npm cache cleanup)
+- Python 3.12+ (optional, for Python cache cleanup)
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/environment-cleanup-handler.sh"
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/usr/bin/env bash
+
+echo "🧹 Starting environment cleanup..." >&2
+
+# Initialize cleanup counters
+FILES_REMOVED=0
+SPACE_FREED=0
+ERRORS=0
+
+# Function to safely remove files and count them
+safe_remove() {
+  local pattern="$1"
+  local description="$2"
+  
+  echo "📁 Cleaning $description..." >&2
+  
+  if [ "$pattern" = "__pycache__" ]; then
+    # Special handling for __pycache__ directories
+    FOUND=$(find . -type d -name "__pycache__" 2>/dev/null | wc -l | xargs)
+    if [ "$FOUND" -gt 0 ]; then
+      find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null && echo "  ✅ Removed $FOUND __pycache__ directories" >&2
+      FILES_REMOVED=$((FILES_REMOVED + FOUND))
+    else
+      echo "  ℹ️ No __pycache__ directories found" >&2
+    fi
+  else
+    # Handle file patterns
+    FOUND=$(find . -name "$pattern" 2>/dev/null | wc -l | xargs)
+    if [ "$FOUND" -gt 0 ]; then
+      find . -name "$pattern" -delete 2>/dev/null && echo "  ✅ Removed $FOUND $description files" >&2
+      FILES_REMOVED=$((FILES_REMOVED + FOUND))
+    else
+      echo "  ℹ️ No $description files found" >&2
+    fi
+  fi
+}
+
+# Clean temporary files
+safe_remove "*.tmp" "temporary"
+safe_remove "*.log" "log"
+safe_remove "*.bak" "backup"
+safe_remove "*~" "editor backup"
+
+# Clean system-specific files
+case "$(uname)" in
+  Darwin)
+    safe_remove ".DS_Store" "macOS metadata"
+    safe_remove "._*" "macOS resource fork"
+    ;;
+  CYGWIN*|MINGW*|MSYS*)
+    safe_remove "Thumbs.db" "Windows thumbnail cache"
+    safe_remove "Desktop.ini" "Windows desktop config"
+    ;;
+  Linux)
+    safe_remove ".directory" "KDE directory config"
+    ;;
+esac
+
+# Clean Python cache files
+echo "🐍 Cleaning Python artifacts..." >&2
+safe_remove "*.pyc" "Python bytecode"
+safe_remove "*.pyo" "Python optimized bytecode"
+safe_remove "__pycache__" "Python cache directories"
+
+# Clean Node.js related files
+if [ -f "package.json" ]; then
+  echo "🟢 Node.js project detected - cleaning caches..." >&2
+  
+  # Clean npm cache
+  if command -v npm &> /dev/null; then
+    echo "  🗑️ Verifying npm cache..." >&2
+    if npm cache verify 2>/dev/null; then
+      echo "  ✅ npm cache verified and cleaned" >&2
+    else
+      echo "  ⚠️ npm cache verification failed" >&2
+      ERRORS=$((ERRORS + 1))
+    fi
+  fi
+  
+  # Clean node_modules/.cache if it exists
+  if [ -d "node_modules/.cache" ]; then
+    CACHE_SIZE=$(du -sh node_modules/.cache 2>/dev/null | cut -f1 || echo "unknown")
+    rm -rf node_modules/.cache 2>/dev/null && echo "  ✅ Removed node_modules/.cache ($CACHE_SIZE)" >&2
+  fi
+fi
+
+# Clean build artifacts
+echo "🔧 Cleaning build artifacts..." >&2
+safe_remove "*.o" "object files"
+safe_remove "*.obj" "Windows object files"
+safe_remove "*.so" "shared object files"
+safe_remove "*.dll" "Windows library files"
+safe_remove "*.dylib" "macOS dynamic libraries"
+
+# Clean IDE and editor files
+echo "💻 Cleaning IDE artifacts..." >&2
+safe_remove ".vscode/settings.json.bak" "VS Code backup settings"
+if [ -d ".vscode" ]; then
+  find .vscode -name "*.log" -delete 2>/dev/null || true
+fi
+
+# Clean test artifacts
+echo "🧪 Cleaning test artifacts..." >&2
+safe_remove "coverage.xml" "coverage report"
+safe_remove ".coverage" "Python coverage data"
+if [ -d "coverage" ]; then
+  rm -rf coverage 2>/dev/null && echo "  ✅ Removed coverage directory" >&2
+fi
+if [ -d ".nyc_output" ]; then
+  rm -rf .nyc_output 2>/dev/null && echo "  ✅ Removed .nyc_output directory" >&2
+fi
+
+# Clean Docker artifacts if Docker is available
+if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
+  echo "🐳 Docker detected - cleaning unused resources..." >&2
+  
+  # Clean dangling images
+  DANGLING_IMAGES=$(docker images -f "dangling=true" -q 2>/dev/null | wc -l | xargs)
+  if [ "$DANGLING_IMAGES" -gt 0 ]; then
+    docker image prune -f &> /dev/null && echo "  ✅ Removed $DANGLING_IMAGES dangling Docker images" >&2
+  else
+    echo "  ℹ️ No dangling Docker images found" >&2
+  fi
+fi
+
+# Calculate disk space if possible
+echo "💾 Calculating disk space usage..." >&2
+if command -v du &> /dev/null; then
+  # Check cache directories
+  for cache_dir in ~/.npm ~/.cache ~/.cargo/registry; do
+    if [ -d "$cache_dir" ]; then
+      CACHE_SIZE=$(du -sh "$cache_dir" 2>/dev/null | cut -f1 || echo "unknown")
+      echo "  📊 $cache_dir: $CACHE_SIZE" >&2
+    fi
+  done
+fi
+
+# Report cleanup summary
+echo "" >&2
+echo "📋 Cleanup Summary:" >&2
+echo "  🗑️ Files/directories removed: $FILES_REMOVED" >&2
+echo "  ⚠️ Errors encountered: $ERRORS" >&2
+
+if [ "$ERRORS" -eq 0 ]; then
+  echo "✅ Environment cleanup completed successfully" >&2
+else
+  echo "⚠️ Environment cleanup completed with $ERRORS errors" >&2
+fi
+
+echo "" >&2
+echo "💡 Cleanup Tips:" >&2
+echo "   • Run 'docker system prune' for more aggressive Docker cleanup" >&2
+echo "   • Use 'npm cache clean --force' for complete npm cache reset" >&2
+echo "   • Consider 'pip cache purge' for Python package cache cleanup" >&2
+
+exit 0
+```
+
+## Examples
+### Environment Cleanup Handler Hook Script
+
+Complete hook script that performs environment cleanup when session ends
+
+```bash
+#!/usr/bin/env bash
+echo "Starting environment cleanup..." >&2
+FILES_REMOVED=0
+safe_remove() {
+  local pattern="$1"
+  local description="$2"
+  FOUND=$(find . -name "$pattern" 2>/dev/null | wc -l | xargs)
+  if [ "$FOUND" -gt 0 ]; then
+    find . -name "$pattern" -delete 2>/dev/null && echo "Removed $FOUND $description files" >&2
+    FILES_REMOVED=$((FILES_REMOVED + FOUND))
+  fi
+}
+safe_remove "*.tmp" "temporary"
+safe_remove "*.log" "log"
+safe_remove "__pycache__" "Python cache"
+if [ -f "package.json" ]; then
+  if command -v npm &> /dev/null; then
+    npm cache verify 2>/dev/null && echo "npm cache verified" >&2
+  fi
+fi
+echo "Cleanup completed: $FILES_REMOVED files removed" >&2
+exit 0
+```
+### Docker Resource Cleanup
+
+Enhanced hook script for Docker resource cleanup with Docker Engine 24.0+ support
+
+```bash
+#!/usr/bin/env bash
+if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
+  echo "Cleaning Docker resources..." >&2
+  DANGLING_IMAGES=$(docker images -f "dangling=true" -q 2>/dev/null | wc -l | xargs)
+  if [ "$DANGLING_IMAGES" -gt 0 ]; then
+    docker image prune -f &> /dev/null && echo "Removed $DANGLING_IMAGES dangling Docker images" >&2
+  fi
+  docker system prune -f --volumes &> /dev/null && echo "Docker system cleanup completed" >&2
+fi
+exit 0
+```
+### NPM Cache Cleanup with Timeout Protection
+
+Enhanced hook script for NPM cache cleanup with timeout protection and npm 10.x+ support
+
+```bash
+#!/usr/bin/env bash
+if [ -f "package.json" ]; then
+  if command -v npm &> /dev/null; then
+    echo "Cleaning npm cache..." >&2
+    timeout 10s npm cache verify 2>/dev/null || npm cache verify --offline 2>/dev/null
+    if [ -d "node_modules/.cache" ]; then
+      CACHE_SIZE=$(du -sh node_modules/.cache 2>/dev/null | cut -f1 || echo "unknown")
+      rm -rf node_modules/.cache 2>/dev/null && echo "Removed node_modules/.cache ($CACHE_SIZE)" >&2
+    fi
+  fi
+fi
+exit 0
+```
+### Cross-Platform System File Cleanup
+
+Enhanced hook script for cross-platform system file cleanup with platform-specific rules
+
+```bash
+#!/usr/bin/env bash
+case "$(uname)" in
+  Darwin)
+    find . -name ".DS_Store" -delete 2>/dev/null && echo "Removed macOS .DS_Store files" >&2
+    find . -name "._*" -delete 2>/dev/null && echo "Removed macOS resource fork files" >&2
+    ;;
+  CYGWIN*|MINGW*|MSYS*)
+    find . -name "Thumbs.db" -delete 2>/dev/null && echo "Removed Windows Thumbs.db files" >&2
+    find . -name "Desktop.ini" -delete 2>/dev/null && echo "Removed Windows Desktop.ini files" >&2
+    ;;
+  Linux)
+    find . -name ".directory" -delete 2>/dev/null && echo "Removed KDE .directory files" >&2
+    ;;
+esac
+exit 0
+```
+
+## Troubleshooting
+### Stop hook doesn't execute when Claude terminates unexpectedly
+
+Stop hooks only run on graceful shutdown. For crash scenarios, use OS-level cleanup via trap signals or systemd service cleanup. Add trap 'cleanup_function' EXIT SIGTERM SIGINT to shell sessions for broader coverage. Consider using systemd or launchd for persistent cleanup services.
+### Docker cleanup fails with permission denied on daemon socket
+
+Script checks 'docker info' but may lack permissions. Ensure user in docker group: sudo usermod -aG docker $USER or skip docker cleanup gracefully: docker image prune -f 2>/dev/null || echo 'Skipping docker cleanup'. Verify Docker Engine 24.0+ is installed and daemon is running: docker info.
+### NPM cache verify hangs indefinitely blocking hook completion
+
+Network issues can stall npm operations. Add timeout: timeout 10s npm cache verify or use npm cache verify --offline to avoid network calls. Set NPM_CONFIG_CACHE to control cache directory location. Verify npm version is 10.x+ for latest features. Use npm cache clean --force for complete cache reset.
+### Find commands fail with 'too many arguments' on large directories
+
+Large directory trees exceed ARG_MAX limits. Replace find ... -delete with: find . -name '*.tmp' -print0 | xargs -0 rm -f to handle arguments in batches safely using null delimiter for paths with spaces. Use find with -exec rm {} + for better performance. Consider processing files in smaller batches.
+### Du command for cache size calculation hangs on network mounts
+
+Script checks ~/.npm and other user dirs which may be on slow filesystems. Add timeout: timeout 5s du -sh "$cache_dir" or skip network paths: df "$cache_dir" | grep -q nfs && continue to avoid stalling. Use df -h for faster disk usage reporting. Consider skipping network-mounted cache directories.
+### Python __pycache__ cleanup removes files from active virtual environments
+
+Hook may remove __pycache__ from active virtual environments. Exclude virtual environment directories: find . -name '__pycache__' -not -path '*/venv/*' -not -path '*/.venv/*' -delete. Verify Python version is 3.12+ for latest cache behavior. Use --exclude patterns to preserve virtual environment caches.
+### Cleanup removes important temporary files needed by other processes
+
+Use file age checks to only remove old temporary files: find . -name '*.tmp' -mtime +7 -delete. Add exclusion patterns for important temporary files. Verify file patterns match only safe-to-delete files. Consider using file locking checks before deletion.
+### Disk space reporting shows incorrect sizes on different file systems
+
+Use portable disk space commands: du -sh for directory sizes, df -h for filesystem usage. Handle different file system types (ext4, APFS, NTFS) with appropriate commands. Verify disk space reporting works on target file system. Use fallback methods for disk space calculation.

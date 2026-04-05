@@ -404,6 +404,21 @@
   @apply border-l-2 border-primary pl-4 text-muted-foreground;
 }
 
+.detail-related-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.detail-related-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.55;
+}
+
 .detail-code-block {
   @apply m-0 overflow-x-auto bg-background px-5 py-5 text-sm leading-7 text-foreground;
 }

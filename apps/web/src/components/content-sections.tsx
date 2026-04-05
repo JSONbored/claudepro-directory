@@ -25,6 +25,10 @@ export function ContentSections({ sections, omitCode = [] }: ContentSectionsProp
         );
         const hasProse = section.proseHtml.replace(/<[^>]+>/g, "").trim().length > 0;
 
+        if (!hasProse && renderedCode.length === 0) {
+          return null;
+        }
+
         return (
           <section key={section.id} id={section.id} className="space-y-4 scroll-mt-28">
             {hasProse ? (

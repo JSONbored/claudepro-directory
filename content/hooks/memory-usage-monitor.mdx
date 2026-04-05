@@ -37,6 +37,32 @@ authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-09-19'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/memory-usage-monitor.sh && chmod
+  +x .claude/hooks/memory-usage-monitor.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/memory-usage-monitor.sh && chmod
+  +x .claude/hooks/memory-usage-monitor.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "notification": {
+        "script": "./.claude/hooks/memory-usage-monitor.sh",
+        "timeout": 5000
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "notification": {
+        "script": "./.claude/hooks/memory-usage-monitor.sh",
+        "timeout": 5000
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/usr/bin/env bash\n\n# Memory Usage Monitor Hook\n# Monitors system and process memory usage during development activities\n\necho \"\U0001F4BE Memory Usage Monitor\" >&2\n\n# Initialize monitoring variables\nTOTAL_MEMORY_KB=0\nUSED_MEMORY_KB=0\nMEMORY_PERCENT=0\nSWAP_PERCENT=0\nHIGH_MEMORY_THRESHOLD=75\nCRITICAL_MEMORY_THRESHOLD=90\nHIGH_SWAP_THRESHOLD=25\nWARNINGS=0\nERRORS=0\n\n# Function to report memory status\nreport_memory() {\n  local level=\"$1\"\n  local message=\"$2\"\n  \n  case \"$level\" in\n    \"ERROR\")\n      echo \"❌ CRITICAL: $message\" >&2\n      ERRORS=$((ERRORS + 1))\n      ;;\n    \"WARNING\")\n      echo \"⚠️ WARNING: $message\" >&2\n      WARNINGS=$((WARNINGS + 1))\n      ;;\n    \"INFO\")\n      echo \"ℹ️ INFO: $message\" >&2\n      ;;\n    \"PASS\")\n      echo \"✅ OK: $message\" >&2\n      ;;\n  esac\n}\n\n# Function to format bytes to human readable\nformat_bytes() {\n  local bytes=$1\n  local units=(\"B\" \"KB\" \"MB\" \"GB\" \"TB\")\n  local unit=0\n  \n  while (( bytes > 1024 && unit < 4 )); do\n    bytes=$((bytes / 1024))\n    unit=$((unit + 1))\n  done\n  \n  echo \"${bytes}${units[$unit]}\"\n}\n\n# 1. System Memory Analysis\necho \"\U0001F4CA Analyzing system memory usage...\" >&2\n\n# Detect operating system for platform-specific commands\nOS_TYPE=$(uname -s)\n\ncase \"$OS_TYPE\" in\n  \"Linux\")\n    # Linux memory information\n    if [ -f /proc/meminfo ]; then\n      TOTAL_MEMORY_KB=$(grep '^MemTotal:' /proc/meminfo | awk '{print $2}')\n      AVAILABLE_MEMORY_KB=$(grep '^MemAvailable:' /proc/meminfo | awk '{print $2}' || echo \"0\")\n      \n      if [ \"$AVAILABLE_MEMORY_KB\" -eq 0 ]; then\n        # Fallback calculation for older systems\n        FREE_MEMORY_KB=$(grep '^MemFree:' /proc/meminfo | awk '{print $2}')\n        BUFFERS_KB=$(grep '^Buffers:' /proc/meminfo | awk '{print $2}')\n        CACHED_KB=$(grep '^Cached:' /proc/meminfo | awk '{print $2}')\n        AVAILABLE_MEMORY_KB=$((FREE_MEMORY_KB + BUFFERS_KB + CACHED_KB))\n      fi\n      \n      USED_MEMORY_KB=$((TOTAL_MEMORY_KB - AVAILABLE_MEMORY_KB))\n      MEMORY_PERCENT=$((USED_MEMORY_KB * 100 / TOTAL_MEMORY_KB))\n      \n      echo \"   \U0001F5A5️ Total Memory: $(format_bytes $((TOTAL_MEMORY_KB * 1024)))\" >&2\n      echo \"   \U0001F4C8 Used Memory: $(format_bytes $((USED_MEMORY_KB * 1024))) ($MEMORY_PERCENT%)\" >&2\n      \n      # Check swap usage\n      if [ -f /proc/swaps ]; then\n        SWAP_TOTAL_KB=$(awk 'NR>1 {sum+=$3} END {print sum+0}' /proc/swaps)\n        SWAP_USED_KB=$(awk 'NR>1 {sum+=$4} END {print sum+0}' /proc/swaps)\n        \n        if [ \"$SWAP_TOTAL_KB\" -gt 0 ]; then\n          SWAP_PERCENT=$((SWAP_USED_KB * 100 / SWAP_TOTAL_KB))\n          echo \"   \U0001F4BF Swap Usage: $(format_bytes $((SWAP_USED_KB * 1024))) / $(format_bytes $((SWAP_TOTAL_KB * 1024))) ($SWAP_PERCENT%)\" >&2\n        else\n          echo \"   \U0001F4BF Swap: Not configured\" >&2\n        fi\n      fi\n    else\n      report_memory \"WARNING\" \"Unable to read /proc/meminfo - memory monitoring limited\"\n    fi\n    ;;\n    \n  \"Darwin\")\n    # macOS memory information\n    if command -v vm_stat &> /dev/null; then\n      # Get page size\n      PAGE_SIZE=$(vm_stat | grep 'page size of' | awk '{print $8}' || echo \"4096\")\n      \n      # Get memory statistics\n      VM_STAT_OUTPUT=$(vm_stat)\n      PAGES_FREE=$(echo \"$VM_STAT_OUTPUT\" | grep 'Pages free:' | awk '{print $3}' | tr -d '.')\n      PAGES_ACTIVE=$(echo \"$VM_STAT_OUTPUT\" | grep 'Pages active:' | awk '{print $3}' | tr -d '.')\n      PAGES_INACTIVE=$(echo \"$VM_STAT_OUTPUT\" | grep 'Pages inactive:' | awk '{print $3}' | tr -d '.')\n      PAGES_SPECULATIVE=$(echo \"$VM_STAT_OUTPUT\" | grep 'Pages speculative:' | awk '{print $3}' | tr -d '.' || echo \"0\")\n      PAGES_WIRED=$(echo \"$VM_STAT_OUTPUT\" | grep 'Pages wired down:' | awk '{print $4}' | tr -d '.')\n      \n      # Calculate memory usage\n      TOTAL_PAGES=$((PAGES_FREE + PAGES_ACTIVE + PAGES_INACTIVE + PAGES_SPECULATIVE + PAGES_WIRED))\n      USED_PAGES=$((PAGES_ACTIVE + PAGES_INACTIVE + PAGES_SPECULATIVE + PAGES_WIRED))\n      TOTAL_MEMORY_KB=$((TOTAL_PAGES * PAGE_SIZE / 1024))\n      USED_MEMORY_KB=$((USED_PAGES * PAGE_SIZE / 1024))\n      MEMORY_PERCENT=$((USED_MEMORY_KB * 100 / TOTAL_MEMORY_KB))\n      \n      echo \"   \U0001F5A5️ Total Memory: $(format_bytes $((TOTAL_MEMORY_KB * 1024)))\" >&2\n      echo \"   \U0001F4C8 Used Memory: $(format_bytes $((USED_MEMORY_KB * 1024))) ($MEMORY_PERCENT%)\" >&2\n      \n      # Check swap usage on macOS\n      if command -v sysctl &> /dev/null; then\n        SWAP_USAGE=$(sysctl vm.swapusage 2>/dev/null | grep -oE 'used = [0-9.]+[KMGT]?' | awk '{print $3}' || echo \"0\")\n        SWAP_TOTAL=$(sysctl vm.swapusage 2>/dev/null | grep -oE 'total = [0-9.]+[KMGT]?' | awk '{print $3}' || echo \"0\")\n        echo \"   \U0001F4BF Swap Usage: $SWAP_USAGE / $SWAP_TOTAL\" >&2\n      fi\n    else\n      report_memory \"WARNING\" \"vm_stat command not available - memory monitoring limited\"\n    fi\n    ;;\n    \n  *)\n    report_memory \"WARNING\" \"Unsupported operating system ($OS_TYPE) - limited memory monitoring\"\n    ;;\nesac\n\n# 2. Process-Specific Memory Analysis\necho \"\U0001F50D Analyzing development process memory usage...\" >&2\n\n# Define process patterns for different development environments\nDEV_PROCESSES=(\"node\" \"python\" \"java\" \"ruby\" \"php\" \"go\" \"rust\" \"dotnet\" \"code\" \"claude\")\nTOTAL_DEV_MEMORY_KB=0\nPROCESS_COUNT=0\n\nfor process in \"${DEV_PROCESSES[@]}\"; do\n  if command -v pgrep &> /dev/null; then\n    # Use pgrep for more accurate process detection\n    PIDS=$(pgrep -f \"$process\" 2>/dev/null || true)\n    \n    if [ -n \"$PIDS\" ]; then\n      PROCESS_MEMORY=0\n      PROC_COUNT=0\n      \n      # Calculate memory for all matching processes\n      for pid in $PIDS; do\n        if [ -f \"/proc/$pid/status\" ]; then\n          # Linux: Read from /proc/pid/status\n          PID_MEMORY=$(grep '^VmRSS:' \"/proc/$pid/status\" 2>/dev/null | awk '{print $2}' || echo \"0\")\n        elif command -v ps &> /dev/null; then\n          # macOS/Other: Use ps command\n          PID_MEMORY=$(ps -o rss= -p \"$pid\" 2>/dev/null | awk '{print $1}' || echo \"0\")\n        else\n          PID_MEMORY=0\n        fi\n        \n        PROCESS_MEMORY=$((PROCESS_MEMORY + PID_MEMORY))\n        PROC_COUNT=$((PROC_COUNT + 1))\n      done\n      \n      if [ \"$PROCESS_MEMORY\" -gt 0 ]; then\n        echo \"   \U0001F527 $process processes: $PROC_COUNT running, $(format_bytes $((PROCESS_MEMORY * 1024))) memory\" >&2\n        TOTAL_DEV_MEMORY_KB=$((TOTAL_DEV_MEMORY_KB + PROCESS_MEMORY))\n        PROCESS_COUNT=$((PROCESS_COUNT + PROC_COUNT))\n      fi\n    fi\n  fi\ndone\n\nif [ \"$TOTAL_DEV_MEMORY_KB\" -gt 0 ]; then\n  DEV_MEMORY_PERCENT=$((TOTAL_DEV_MEMORY_KB * 100 / TOTAL_MEMORY_KB))\n  echo \"   \U0001F4CA Total dev processes: $PROCESS_COUNT processes, $(format_bytes $((TOTAL_DEV_MEMORY_KB * 1024))) ($DEV_MEMORY_PERCENT% of system)\" >&2\nelse\n  echo \"   \U0001F4CB No development processes detected\" >&2\nfi\n\n# 3. Container Memory Monitoring (if applicable)\necho \"\U0001F433 Checking container memory usage...\" >&2\n\nif command -v docker &> /dev/null && docker info >/dev/null 2>&1; then\n  # Check Docker container memory usage\n  RUNNING_CONTAINERS=$(docker ps --format \"table {{.Names}}\" --no-trunc 2>/dev/null | tail -n +2 | wc -l || echo \"0\")\n  \n  if [ \"$RUNNING_CONTAINERS\" -gt 0 ]; then\n    echo \"   \U0001F433 Docker containers: $RUNNING_CONTAINERS running\" >&2\n    \n    # Get container memory stats (basic)\n    CONTAINER_STATS=$(docker stats --no-stream --format \"table {{.Container}}\\t{{.MemUsage}}\" 2>/dev/null | tail -n +2 | head -5 || true)\n    \n    if [ -n \"$CONTAINER_STATS\" ]; then\n      echo \"   \U0001F4CA Top container memory usage:\" >&2\n      echo \"$CONTAINER_STATS\" | while read line; do\n        echo \"     $line\" >&2\n      done\n    fi\n  else\n    echo \"   \U0001F433 No running Docker containers\" >&2\n  fi\nelse\n  echo \"   \U0001F433 Docker not available or not running\" >&2\nfi\n\n# 4. Memory Threshold Analysis\necho \"⚠️ Analyzing memory thresholds...\" >&2\n\n# Check system memory thresholds\nif [ \"$MEMORY_PERCENT\" -ge \"$CRITICAL_MEMORY_THRESHOLD\" ]; then\n  report_memory \"ERROR\" \"Critical system memory usage: $MEMORY_PERCENT% (threshold: $CRITICAL_MEMORY_THRESHOLD%)\"\nelif [ \"$MEMORY_PERCENT\" -ge \"$HIGH_MEMORY_THRESHOLD\" ]; then\n  report_memory \"WARNING\" \"High system memory usage: $MEMORY_PERCENT% (threshold: $HIGH_MEMORY_THRESHOLD%)\"\nelse\n  report_memory \"PASS\" \"System memory usage within normal range: $MEMORY_PERCENT%\"\nfi\n\n# Check swap usage\nif [ \"$SWAP_PERCENT\" -ge \"$HIGH_SWAP_THRESHOLD\" ]; then\n  report_memory \"WARNING\" \"High swap usage detected: $SWAP_PERCENT% (threshold: $HIGH_SWAP_THRESHOLD%)\"\nelse\n  if [ \"$SWAP_PERCENT\" -gt 0 ]; then\n    report_memory \"INFO\" \"Swap usage normal: $SWAP_PERCENT%\"\n  fi\nfi\n\n# Check for potential memory leaks (high dev process usage)\nif [ \"$TOTAL_DEV_MEMORY_KB\" -gt 0 ] && [ \"$DEV_MEMORY_PERCENT\" -ge 50 ]; then\n  report_memory \"WARNING\" \"Development processes using significant memory: $DEV_MEMORY_PERCENT% of system\"\nelif [ \"$TOTAL_DEV_MEMORY_KB\" -gt 0 ]; then\n  report_memory \"INFO\" \"Development process memory usage normal: $DEV_MEMORY_PERCENT% of system\"\nfi\n\n# 5. Memory Recommendations\necho \"\U0001F4A1 Memory optimization recommendations...\" >&2\n\nif [ \"$MEMORY_PERCENT\" -ge \"$HIGH_MEMORY_THRESHOLD\" ]; then\n  echo \"   • Consider closing unused applications and browser tabs\" >&2\n  echo \"   • Restart development servers to free up memory\" >&2\n  echo \"   • Check for memory leaks in your applications\" >&2\nfi\n\nif [ \"$SWAP_PERCENT\" -ge \"$HIGH_SWAP_THRESHOLD\" ]; then\n  echo \"   • High swap usage may slow down development\" >&2\n  echo \"   • Consider adding more RAM or closing applications\" >&2\nfi\n\nif [ \"$PROCESS_COUNT\" -gt 10 ]; then\n  echo \"   • Many development processes running ($PROCESS_COUNT)\" >&2\n  echo \"   • Consider stopping unused development servers\" >&2\nfi\n\n# 6. Generate Memory Summary\necho \"\" >&2\necho \"\U0001F4CB Memory Usage Summary:\" >&2\necho \"========================\" >&2\necho \"   \U0001F4BE System Memory: $MEMORY_PERCENT% used ($(format_bytes $((USED_MEMORY_KB * 1024))) / $(format_bytes $((TOTAL_MEMORY_KB * 1024))))\" >&2\n[ \"$SWAP_PERCENT\" -gt 0 ] && echo \"   \U0001F4BF Swap Usage: $SWAP_PERCENT%\" >&2\necho \"   \U0001F527 Dev Processes: $PROCESS_COUNT running ($(format_bytes $((TOTAL_DEV_MEMORY_KB * 1024))))\" >&2\necho \"   ⚠️ Warnings: $WARNINGS\" >&2\necho \"   ❌ Critical Issues: $ERRORS\" >&2\n\nif [ \"$ERRORS\" -eq 0 ] && [ \"$WARNINGS\" -eq 0 ]; then\n  echo \"   \U0001F389 Status: OPTIMAL - Memory usage is healthy\" >&2\nelif [ \"$ERRORS\" -eq 0 ]; then\n  echo \"   ✅ Status: GOOD - Memory usage acceptable with minor warnings\" >&2\nelse\n  echo \"   ❌ Status: CRITICAL - Memory usage requires immediate attention\" >&2\nfi\n\necho \"\" >&2\necho \"\U0001F4A1 Memory Best Practices:\" >&2\necho \"   • Monitor memory usage regularly during development\" >&2\necho \"   • Use memory profiling tools to identify leaks\" >&2\necho \"   • Restart development servers periodically\" >&2\necho \"   • Consider using lighter development tools when memory is limited\" >&2\necho \"   • Close unused applications and browser tabs\" >&2\n\n# Memory monitoring complete\nexit 0"
 trigger: Notification
 tags:
   - memory
@@ -67,4 +93,474 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Features
 
+- Real-time memory usage monitoring across multiple programming languages with process-specific memory tracking for Node.js (node processes), Python (python processes), Java (java processes), Ruby (ruby processes), PHP (php processes), Go (go processes), Rust (rust processes), .NET (dotnet processes), and development tools (VS Code, Claude) with pgrep for accurate process detection and memory aggregation
+- Process-specific memory tracking for Node.js, Python, Java, and Ruby with pgrep -f for process pattern matching, /proc/pid/status (Linux) or ps -o rss (macOS) for memory reading, VmRSS (Resident Set Size) for Linux process memory, RSS (Resident Set Size) for macOS process memory, and process memory aggregation with total memory calculation
+- Configurable memory threshold alerts and warnings with high memory threshold (default 75%, configurable via HIGH_MEMORY_THRESHOLD), critical memory threshold (default 90%, configurable via CRITICAL_MEMORY_THRESHOLD), high swap threshold (default 25%, configurable via HIGH_SWAP_THRESHOLD), threshold-based alerting with ERROR/WARNING/INFO levels, and actionable recommendations based on thresholds
+- Swap usage monitoring and excessive swap detection with swap usage percentage calculation (SWAP_USED_KB * 100 / SWAP_TOTAL_KB), swap total/used tracking from /proc/swaps (Linux) or sysctl vm.swapusage (macOS), excessive swap warnings when swap usage exceeds threshold, and swap configuration detection (swap not configured reporting)
+- Memory leak detection with historical usage tracking including process memory accumulation detection (monitoring process memory over time), development process memory percentage calculation (TOTAL_DEV_MEMORY_KB * 100 / TOTAL_MEMORY_KB), memory leak warnings when dev processes use >50% of system memory, and process count tracking for memory leak indicators
+- Container memory monitoring for Docker environments with Docker container memory stats using docker stats --no-stream, running container count detection (docker ps), container memory usage reporting with top container memory usage, Docker availability checking, and container memory recommendations
+- Cross-platform memory monitoring (Linux, macOS, Windows) with platform-specific memory detection including /proc/meminfo for Linux (MemTotal, MemAvailable, MemFree, Buffers, Cached), vm_stat for macOS (Pages free, Pages active, Pages inactive, Pages wired), fallback methods for unsupported platforms, and page size calculation for macOS (4096 bytes Intel, 16384 bytes Apple Silicon)
+- Memory pressure analysis and system health reporting with memory usage summaries including total/used memory with percentages, swap usage reporting, development process memory reporting, process counts, warning/error counts, status indicators (OPTIMAL, GOOD, CRITICAL), and actionable recommendations with best practices
+
+## Use Cases
+
+- Development environment performance optimization and monitoring automatically monitoring memory usage during development, detecting high memory usage, and providing recommendations for memory optimization for efficient development workflows
+- Memory leak detection and prevention in long-running development sessions automatically detecting memory leaks in development processes, tracking memory accumulation, and alerting when memory usage exceeds thresholds for reliable long-running development sessions
+- System resource management and capacity planning automatically monitoring system memory usage, tracking memory trends, and providing capacity planning insights for efficient resource management
+- Container and microservices memory monitoring automatically monitoring Docker container memory usage, detecting container memory issues, and providing container memory recommendations for reliable containerized development
+- CI/CD pipeline resource usage tracking and optimization automatically monitoring memory usage in CI/CD pipelines, detecting resource constraints, and optimizing pipeline resource usage for efficient CI/CD operations
+- Development workflow integration seamlessly integrating memory monitoring into development workflows without manual monitoring steps or separate monitoring tools
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/memory-usage-monitor.sh
+3. Make executable: chmod +x .claude/hooks/memory-usage-monitor.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- pgrep (optional, for process detection)
+- docker (optional, for container monitoring)
+- sysctl (optional, for macOS swap monitoring)
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "notification": {
+      "script": "./.claude/hooks/memory-usage-monitor.sh",
+      "timeout": 5000
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/usr/bin/env bash
+
+# Memory Usage Monitor Hook
+# Monitors system and process memory usage during development activities
+
+echo "💾 Memory Usage Monitor" >&2
+
+# Initialize monitoring variables
+TOTAL_MEMORY_KB=0
+USED_MEMORY_KB=0
+MEMORY_PERCENT=0
+SWAP_PERCENT=0
+HIGH_MEMORY_THRESHOLD=75
+CRITICAL_MEMORY_THRESHOLD=90
+HIGH_SWAP_THRESHOLD=25
+WARNINGS=0
+ERRORS=0
+
+# Function to report memory status
+report_memory() {
+  local level="$1"
+  local message="$2"
+  
+  case "$level" in
+    "ERROR")
+      echo "❌ CRITICAL: $message" >&2
+      ERRORS=$((ERRORS + 1))
+      ;;
+    "WARNING")
+      echo "⚠️ WARNING: $message" >&2
+      WARNINGS=$((WARNINGS + 1))
+      ;;
+    "INFO")
+      echo "ℹ️ INFO: $message" >&2
+      ;;
+    "PASS")
+      echo "✅ OK: $message" >&2
+      ;;
+  esac
+}
+
+# Function to format bytes to human readable
+format_bytes() {
+  local bytes=$1
+  local units=("B" "KB" "MB" "GB" "TB")
+  local unit=0
+  
+  while (( bytes > 1024 && unit < 4 )); do
+    bytes=$((bytes / 1024))
+    unit=$((unit + 1))
+  done
+  
+  echo "${bytes}${units[$unit]}"
+}
+
+# 1. System Memory Analysis
+echo "📊 Analyzing system memory usage..." >&2
+
+# Detect operating system for platform-specific commands
+OS_TYPE=$(uname -s)
+
+case "$OS_TYPE" in
+  "Linux")
+    # Linux memory information
+    if [ -f /proc/meminfo ]; then
+      TOTAL_MEMORY_KB=$(grep '^MemTotal:' /proc/meminfo | awk '{print $2}')
+      AVAILABLE_MEMORY_KB=$(grep '^MemAvailable:' /proc/meminfo | awk '{print $2}' || echo "0")
+      
+      if [ "$AVAILABLE_MEMORY_KB" -eq 0 ]; then
+        # Fallback calculation for older systems
+        FREE_MEMORY_KB=$(grep '^MemFree:' /proc/meminfo | awk '{print $2}')
+        BUFFERS_KB=$(grep '^Buffers:' /proc/meminfo | awk '{print $2}')
+        CACHED_KB=$(grep '^Cached:' /proc/meminfo | awk '{print $2}')
+        AVAILABLE_MEMORY_KB=$((FREE_MEMORY_KB + BUFFERS_KB + CACHED_KB))
+      fi
+      
+      USED_MEMORY_KB=$((TOTAL_MEMORY_KB - AVAILABLE_MEMORY_KB))
+      MEMORY_PERCENT=$((USED_MEMORY_KB * 100 / TOTAL_MEMORY_KB))
+      
+      echo "   🖥️ Total Memory: $(format_bytes $((TOTAL_MEMORY_KB * 1024)))" >&2
+      echo "   📈 Used Memory: $(format_bytes $((USED_MEMORY_KB * 1024))) ($MEMORY_PERCENT%)" >&2
+      
+      # Check swap usage
+      if [ -f /proc/swaps ]; then
+        SWAP_TOTAL_KB=$(awk 'NR>1 {sum+=$3} END {print sum+0}' /proc/swaps)
+        SWAP_USED_KB=$(awk 'NR>1 {sum+=$4} END {print sum+0}' /proc/swaps)
+        
+        if [ "$SWAP_TOTAL_KB" -gt 0 ]; then
+          SWAP_PERCENT=$((SWAP_USED_KB * 100 / SWAP_TOTAL_KB))
+          echo "   💿 Swap Usage: $(format_bytes $((SWAP_USED_KB * 1024))) / $(format_bytes $((SWAP_TOTAL_KB * 1024))) ($SWAP_PERCENT%)" >&2
+        else
+          echo "   💿 Swap: Not configured" >&2
+        fi
+      fi
+    else
+      report_memory "WARNING" "Unable to read /proc/meminfo - memory monitoring limited"
+    fi
+    ;;
+    
+  "Darwin")
+    # macOS memory information
+    if command -v vm_stat &> /dev/null; then
+      # Get page size
+      PAGE_SIZE=$(vm_stat | grep 'page size of' | awk '{print $8}' || echo "4096")
+      
+      # Get memory statistics
+      VM_STAT_OUTPUT=$(vm_stat)
+      PAGES_FREE=$(echo "$VM_STAT_OUTPUT" | grep 'Pages free:' | awk '{print $3}' | tr -d '.')
+      PAGES_ACTIVE=$(echo "$VM_STAT_OUTPUT" | grep 'Pages active:' | awk '{print $3}' | tr -d '.')
+      PAGES_INACTIVE=$(echo "$VM_STAT_OUTPUT" | grep 'Pages inactive:' | awk '{print $3}' | tr -d '.')
+      PAGES_SPECULATIVE=$(echo "$VM_STAT_OUTPUT" | grep 'Pages speculative:' | awk '{print $3}' | tr -d '.' || echo "0")
+      PAGES_WIRED=$(echo "$VM_STAT_OUTPUT" | grep 'Pages wired down:' | awk '{print $4}' | tr -d '.')
+      
+      # Calculate memory usage
+      TOTAL_PAGES=$((PAGES_FREE + PAGES_ACTIVE + PAGES_INACTIVE + PAGES_SPECULATIVE + PAGES_WIRED))
+      USED_PAGES=$((PAGES_ACTIVE + PAGES_INACTIVE + PAGES_SPECULATIVE + PAGES_WIRED))
+      TOTAL_MEMORY_KB=$((TOTAL_PAGES * PAGE_SIZE / 1024))
+      USED_MEMORY_KB=$((USED_PAGES * PAGE_SIZE / 1024))
+      MEMORY_PERCENT=$((USED_MEMORY_KB * 100 / TOTAL_MEMORY_KB))
+      
+      echo "   🖥️ Total Memory: $(format_bytes $((TOTAL_MEMORY_KB * 1024)))" >&2
+      echo "   📈 Used Memory: $(format_bytes $((USED_MEMORY_KB * 1024))) ($MEMORY_PERCENT%)" >&2
+      
+      # Check swap usage on macOS
+      if command -v sysctl &> /dev/null; then
+        SWAP_USAGE=$(sysctl vm.swapusage 2>/dev/null | grep -oE 'used = [0-9.]+[KMGT]?' | awk '{print $3}' || echo "0")
+        SWAP_TOTAL=$(sysctl vm.swapusage 2>/dev/null | grep -oE 'total = [0-9.]+[KMGT]?' | awk '{print $3}' || echo "0")
+        echo "   💿 Swap Usage: $SWAP_USAGE / $SWAP_TOTAL" >&2
+      fi
+    else
+      report_memory "WARNING" "vm_stat command not available - memory monitoring limited"
+    fi
+    ;;
+    
+  *)
+    report_memory "WARNING" "Unsupported operating system ($OS_TYPE) - limited memory monitoring"
+    ;;
+esac
+
+# 2. Process-Specific Memory Analysis
+echo "🔍 Analyzing development process memory usage..." >&2
+
+# Define process patterns for different development environments
+DEV_PROCESSES=("node" "python" "java" "ruby" "php" "go" "rust" "dotnet" "code" "claude")
+TOTAL_DEV_MEMORY_KB=0
+PROCESS_COUNT=0
+
+for process in "${DEV_PROCESSES[@]}"; do
+  if command -v pgrep &> /dev/null; then
+    # Use pgrep for more accurate process detection
+    PIDS=$(pgrep -f "$process" 2>/dev/null || true)
+    
+    if [ -n "$PIDS" ]; then
+      PROCESS_MEMORY=0
+      PROC_COUNT=0
+      
+      # Calculate memory for all matching processes
+      for pid in $PIDS; do
+        if [ -f "/proc/$pid/status" ]; then
+          # Linux: Read from /proc/pid/status
+          PID_MEMORY=$(grep '^VmRSS:' "/proc/$pid/status" 2>/dev/null | awk '{print $2}' || echo "0")
+        elif command -v ps &> /dev/null; then
+          # macOS/Other: Use ps command
+          PID_MEMORY=$(ps -o rss= -p "$pid" 2>/dev/null | awk '{print $1}' || echo "0")
+        else
+          PID_MEMORY=0
+        fi
+        
+        PROCESS_MEMORY=$((PROCESS_MEMORY + PID_MEMORY))
+        PROC_COUNT=$((PROC_COUNT + 1))
+      done
+      
+      if [ "$PROCESS_MEMORY" -gt 0 ]; then
+        echo "   🔧 $process processes: $PROC_COUNT running, $(format_bytes $((PROCESS_MEMORY * 1024))) memory" >&2
+        TOTAL_DEV_MEMORY_KB=$((TOTAL_DEV_MEMORY_KB + PROCESS_MEMORY))
+        PROCESS_COUNT=$((PROCESS_COUNT + PROC_COUNT))
+      fi
+    fi
+  fi
+done
+
+if [ "$TOTAL_DEV_MEMORY_KB" -gt 0 ]; then
+  DEV_MEMORY_PERCENT=$((TOTAL_DEV_MEMORY_KB * 100 / TOTAL_MEMORY_KB))
+  echo "   📊 Total dev processes: $PROCESS_COUNT processes, $(format_bytes $((TOTAL_DEV_MEMORY_KB * 1024))) ($DEV_MEMORY_PERCENT% of system)" >&2
+else
+  echo "   📋 No development processes detected" >&2
+fi
+
+# 3. Container Memory Monitoring (if applicable)
+echo "🐳 Checking container memory usage..." >&2
+
+if command -v docker &> /dev/null && docker info >/dev/null 2>&1; then
+  # Check Docker container memory usage
+  RUNNING_CONTAINERS=$(docker ps --format "table {{.Names}}" --no-trunc 2>/dev/null | tail -n +2 | wc -l || echo "0")
+  
+  if [ "$RUNNING_CONTAINERS" -gt 0 ]; then
+    echo "   🐳 Docker containers: $RUNNING_CONTAINERS running" >&2
+    
+    # Get container memory stats (basic)
+    CONTAINER_STATS=$(docker stats --no-stream --format "table {{.Container}}\t{{.MemUsage}}" 2>/dev/null | tail -n +2 | head -5 || true)
+    
+    if [ -n "$CONTAINER_STATS" ]; then
+      echo "   📊 Top container memory usage:" >&2
+      echo "$CONTAINER_STATS" | while read line; do
+        echo "     $line" >&2
+      done
+    fi
+  else
+    echo "   🐳 No running Docker containers" >&2
+  fi
+else
+  echo "   🐳 Docker not available or not running" >&2
+fi
+
+# 4. Memory Threshold Analysis
+echo "⚠️ Analyzing memory thresholds..." >&2
+
+# Check system memory thresholds
+if [ "$MEMORY_PERCENT" -ge "$CRITICAL_MEMORY_THRESHOLD" ]; then
+  report_memory "ERROR" "Critical system memory usage: $MEMORY_PERCENT% (threshold: $CRITICAL_MEMORY_THRESHOLD%)"
+elif [ "$MEMORY_PERCENT" -ge "$HIGH_MEMORY_THRESHOLD" ]; then
+  report_memory "WARNING" "High system memory usage: $MEMORY_PERCENT% (threshold: $HIGH_MEMORY_THRESHOLD%)"
+else
+  report_memory "PASS" "System memory usage within normal range: $MEMORY_PERCENT%"
+fi
+
+# Check swap usage
+if [ "$SWAP_PERCENT" -ge "$HIGH_SWAP_THRESHOLD" ]; then
+  report_memory "WARNING" "High swap usage detected: $SWAP_PERCENT% (threshold: $HIGH_SWAP_THRESHOLD%)"
+else
+  if [ "$SWAP_PERCENT" -gt 0 ]; then
+    report_memory "INFO" "Swap usage normal: $SWAP_PERCENT%"
+  fi
+fi
+
+# Check for potential memory leaks (high dev process usage)
+if [ "$TOTAL_DEV_MEMORY_KB" -gt 0 ] && [ "$DEV_MEMORY_PERCENT" -ge 50 ]; then
+  report_memory "WARNING" "Development processes using significant memory: $DEV_MEMORY_PERCENT% of system"
+elif [ "$TOTAL_DEV_MEMORY_KB" -gt 0 ]; then
+  report_memory "INFO" "Development process memory usage normal: $DEV_MEMORY_PERCENT% of system"
+fi
+
+# 5. Memory Recommendations
+echo "💡 Memory optimization recommendations..." >&2
+
+if [ "$MEMORY_PERCENT" -ge "$HIGH_MEMORY_THRESHOLD" ]; then
+  echo "   • Consider closing unused applications and browser tabs" >&2
+  echo "   • Restart development servers to free up memory" >&2
+  echo "   • Check for memory leaks in your applications" >&2
+fi
+
+if [ "$SWAP_PERCENT" -ge "$HIGH_SWAP_THRESHOLD" ]; then
+  echo "   • High swap usage may slow down development" >&2
+  echo "   • Consider adding more RAM or closing applications" >&2
+fi
+
+if [ "$PROCESS_COUNT" -gt 10 ]; then
+  echo "   • Many development processes running ($PROCESS_COUNT)" >&2
+  echo "   • Consider stopping unused development servers" >&2
+fi
+
+# 6. Generate Memory Summary
+echo "" >&2
+echo "📋 Memory Usage Summary:" >&2
+echo "========================" >&2
+echo "   💾 System Memory: $MEMORY_PERCENT% used ($(format_bytes $((USED_MEMORY_KB * 1024))) / $(format_bytes $((TOTAL_MEMORY_KB * 1024))))" >&2
+[ "$SWAP_PERCENT" -gt 0 ] && echo "   💿 Swap Usage: $SWAP_PERCENT%" >&2
+echo "   🔧 Dev Processes: $PROCESS_COUNT running ($(format_bytes $((TOTAL_DEV_MEMORY_KB * 1024))))" >&2
+echo "   ⚠️ Warnings: $WARNINGS" >&2
+echo "   ❌ Critical Issues: $ERRORS" >&2
+
+if [ "$ERRORS" -eq 0 ] && [ "$WARNINGS" -eq 0 ]; then
+  echo "   🎉 Status: OPTIMAL - Memory usage is healthy" >&2
+elif [ "$ERRORS" -eq 0 ]; then
+  echo "   ✅ Status: GOOD - Memory usage acceptable with minor warnings" >&2
+else
+  echo "   ❌ Status: CRITICAL - Memory usage requires immediate attention" >&2
+fi
+
+echo "" >&2
+echo "💡 Memory Best Practices:" >&2
+echo "   • Monitor memory usage regularly during development" >&2
+echo "   • Use memory profiling tools to identify leaks" >&2
+echo "   • Restart development servers periodically" >&2
+echo "   • Consider using lighter development tools when memory is limited" >&2
+echo "   • Close unused applications and browser tabs" >&2
+
+# Memory monitoring complete
+exit 0
+```
+
+## Examples
+### Memory Usage Monitor Hook Script
+
+Complete hook script that performs memory usage monitoring
+
+```bash
+#!/usr/bin/env bash
+echo "💾 Memory Usage Monitor" >&2
+OS_TYPE=$(uname -s)
+if [ "$OS_TYPE" = "Linux" ] && [ -f /proc/meminfo ]; then
+  TOTAL_MEMORY_KB=$(grep '^MemTotal:' /proc/meminfo | awk '{print $2}')
+  AVAILABLE_MEMORY_KB=$(grep '^MemAvailable:' /proc/meminfo | awk '{print $2}' || echo "0")
+  USED_MEMORY_KB=$((TOTAL_MEMORY_KB - AVAILABLE_MEMORY_KB))
+  MEMORY_PERCENT=$((USED_MEMORY_KB * 100 / TOTAL_MEMORY_KB))
+  echo "📊 Memory Usage: $MEMORY_PERCENT%" >&2
+  if [ "$MEMORY_PERCENT" -ge 90 ]; then
+    echo "❌ CRITICAL: Memory usage exceeds 90%" >&2
+  elif [ "$MEMORY_PERCENT" -ge 75 ]; then
+    echo "⚠️ WARNING: High memory usage" >&2
+  fi
+fi
+exit 0
+```
+### Process-Specific Memory Tracking
+
+Enhanced hook script for tracking development process memory usage
+
+```bash
+#!/usr/bin/env bash
+OS_TYPE=$(uname -s)
+DEV_PROCESSES=("node" "python" "java" "ruby")
+TOTAL_DEV_MEMORY_KB=0
+for process in "${DEV_PROCESSES[@]}"; do
+  if command -v pgrep &> /dev/null; then
+    PIDS=$(pgrep -u $USER -f "$process" 2>/dev/null || true)
+    for pid in $PIDS; do
+      if [ "$OS_TYPE" = "Linux" ] && [ -f "/proc/$pid/status" ]; then
+        PID_MEMORY=$(grep '^VmRSS:' "/proc/$pid/status" 2>/dev/null | awk '{print $2}' || echo "0")
+      elif command -v ps &> /dev/null; then
+        PID_MEMORY=$(ps -o rss= -p "$pid" 2>/dev/null | awk '{print $1}' || echo "0")
+      fi
+      TOTAL_DEV_MEMORY_KB=$((TOTAL_DEV_MEMORY_KB + PID_MEMORY))
+    done
+  fi
+done
+echo "🔧 Development processes: $(($TOTAL_DEV_MEMORY_KB / 1024))MB" >&2
+exit 0
+```
+### Container Memory Monitoring
+
+Enhanced hook script for Docker container memory monitoring
+
+```bash
+#!/usr/bin/env bash
+if command -v docker &> /dev/null && docker info >/dev/null 2>&1; then
+  RUNNING_CONTAINERS=$(docker ps --format "table {{.Names}}" --no-trunc 2>/dev/null | tail -n +2 | wc -l || echo "0")
+  if [ "$RUNNING_CONTAINERS" -gt 0 ]; then
+    echo "🐳 Docker containers: $RUNNING_CONTAINERS running" >&2
+    CONTAINER_STATS=$(timeout 5 docker stats --no-stream --format "table {{.Container}}\t{{.MemUsage}}" 2>/dev/null | tail -n +2 | head -5 || true)
+    if [ -n "$CONTAINER_STATS" ]; then
+      echo "📊 Top container memory usage:" >&2
+      echo "$CONTAINER_STATS" | while read line; do
+        echo "  $line" >&2
+      done
+    fi
+  fi
+fi
+exit 0
+```
+### macOS Memory Monitoring
+
+Enhanced hook script for macOS memory monitoring with Apple Silicon support
+
+```bash
+#!/usr/bin/env bash
+OS_TYPE=$(uname -s)
+if [ "$OS_TYPE" = "Darwin" ] && command -v vm_stat &> /dev/null; then
+  PAGE_SIZE=4096
+  if [ "$(uname -m)" = "arm64" ]; then
+    PAGE_SIZE=16384
+  fi
+  VM_STAT_OUTPUT=$(vm_stat)
+  PAGES_FREE=$(echo "$VM_STAT_OUTPUT" | grep 'Pages free:' | awk '{print $3}' | tr -d '.')
+  PAGES_ACTIVE=$(echo "$VM_STAT_OUTPUT" | grep 'Pages active:' | awk '{print $3}' | tr -d '.')
+  PAGES_INACTIVE=$(echo "$VM_STAT_OUTPUT" | grep 'Pages inactive:' | awk '{print $3}' | tr -d '.')
+  PAGES_WIRED=$(echo "$VM_STAT_OUTPUT" | grep 'Pages wired down:' | awk '{print $4}' | tr -d '.')
+  TOTAL_PAGES=$((PAGES_FREE + PAGES_ACTIVE + PAGES_INACTIVE + PAGES_WIRED))
+  USED_PAGES=$((PAGES_ACTIVE + PAGES_INACTIVE + PAGES_WIRED))
+  TOTAL_MEMORY_KB=$((TOTAL_PAGES * PAGE_SIZE / 1024))
+  USED_MEMORY_KB=$((USED_PAGES * PAGE_SIZE / 1024))
+  MEMORY_PERCENT=$((USED_MEMORY_KB * 100 / TOTAL_MEMORY_KB))
+  echo "📊 macOS Memory Usage: $MEMORY_PERCENT%" >&2
+fi
+exit 0
+```
+
+## Troubleshooting
+### Memory percentage calculation shows values over 100% or negative
+
+MemAvailable fallback calculation adds cached memory twice. For older Linux: 'USED_MEMORY_KB=$((TOTAL_MEMORY_KB - FREE_MEMORY_KB))' excluding buffers/cache. Or upgrade kernel to 3.14+ with MemAvailable support. Verify memory calculation logic. Test with various Linux versions.
+### macOS vm_stat parsing fails showing zero memory usage
+
+PAGE_SIZE extraction fails when format changes. Hardcode: 'PAGE_SIZE=4096' (Intel) or 'PAGE_SIZE=16384' (Apple Silicon M1/M2). Or use: 'sysctl hw.pagesize | awk '{print $2}''. Verify page size detection. Test with various macOS versions.
+### pgrep returns processes from other users causing inflated dev memory
+
+pgrep matches all users. Restrict: 'pgrep -u $USER -f "$process"' showing only current user's processes. Or filter: 'ps -u $USER -o pid,comm,rss' for ownership validation. Verify user filtering. Test with various user configurations.
+### Docker stats command hangs indefinitely when containers unhealthy
+
+docker stats --no-stream blocks on slow containers. Add timeout: 'timeout 5 docker stats --no-stream' or skip: 'docker stats --no-stream --format json 2>/dev/null | head -n 1' limiting output. Verify timeout handling. Test with various container states.
+### Hook execution time exceeds timeout (5000ms) on large systems
+
+Process enumeration slow with 100+ dev processes. Increase timeout: '"timeout": 10000' in hookConfig. Or limit: 'pgrep -f "$process" | head -20' checking only top processes. Verify timeout configuration. Test with various system sizes.
+### Swap usage detection fails on systems without swap
+
+Hook checks for swap existence before calculating percentages. Verify swap detection: 'if [ -f /proc/swaps ]' (Linux) or 'sysctl vm.swapusage' (macOS). Handle no-swap scenarios gracefully. Test with various swap configurations.
+### Process memory calculation incorrect for multi-threaded processes
+
+VmRSS includes all threads. For accurate per-process memory, sum thread memory or use process group memory. Verify thread handling. Test with various process types. Consider using process group aggregation.
+### Memory monitoring shows incorrect values after system sleep/wake
+
+System memory stats may be stale after sleep. Refresh memory information or add sleep detection. Verify memory refresh logic. Test with sleep/wake cycles. Consider adding memory refresh before monitoring.

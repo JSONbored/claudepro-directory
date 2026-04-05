@@ -31,6 +31,105 @@ dateAdded: '2025-09-19'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://prettier.io/docs/en/'
 installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/auto-code-formatter-hook.sh &&
+  chmod +x .claude/hooks/auto-code-formatter-hook.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/auto-code-formatter-hook.sh &&
+  chmod +x .claude/hooks/auto-code-formatter-hook.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "postToolUse": {
+        "script": "./.claude/hooks/auto-code-formatter-hook.sh",
+        "matchers": [
+          "write",
+          "edit",
+          "multiedit"
+        ]
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "postToolUse": {
+        "script": "./.claude/hooks/auto-code-formatter-hook.sh",
+        "matchers": [
+          "write",
+          "edit",
+          "multiedit"
+        ]
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: >-
+  #!/usr/bin/env bash
+
+
+  # Read the tool input from stdin
+
+  INPUT=$(cat)
+
+  TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+
+  FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path
+  // ""')
+
+
+  if [ -z "$FILE_PATH" ]; then
+    exit 0
+  fi
+
+
+  # Get file extension
+
+  EXT="${FILE_PATH##*.}"
+
+
+  # Format based on file type
+
+  case "$EXT" in
+    js|jsx|ts|tsx|json|md|mdx|css|scss|html|vue|yaml|yml)
+      # JavaScript/TypeScript/Web files - use Prettier
+      if command -v prettier &> /dev/null; then
+        prettier --write "$FILE_PATH" 2>/dev/null
+        echo "✅ Formatted $FILE_PATH with Prettier" >&2
+      fi
+      ;;
+    
+    py)
+      # Python files - use Black
+      if command -v black &> /dev/null; then
+        black "$FILE_PATH" 2>/dev/null
+        echo "✅ Formatted $FILE_PATH with Black" >&2
+      elif command -v ruff &> /dev/null; then
+        ruff format "$FILE_PATH" 2>/dev/null
+        echo "✅ Formatted $FILE_PATH with Ruff" >&2
+      fi
+      ;;
+    
+    go)
+      # Go files - use gofmt
+      if command -v gofmt &> /dev/null; then
+        gofmt -w "$FILE_PATH" 2>/dev/null
+        echo "✅ Formatted $FILE_PATH with gofmt" >&2
+      fi
+      ;;
+    
+    rs)
+      # Rust files - use rustfmt
+      if command -v rustfmt &> /dev/null; then
+        rustfmt "$FILE_PATH" 2>/dev/null
+        echo "✅ Formatted $FILE_PATH with rustfmt" >&2
+      fi
+      ;;
+  esac
+
+
+  exit 0
+trigger: PostToolUse
 tags:
   - formatting
   - prettier
@@ -62,4 +161,262 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Features
 
+- Supports multiple formatters including Prettier 3.6.2+ (JavaScript/TypeScript/Web), Black or Ruff (Python), gofmt (Go), rustfmt (Rust)
+- Language-specific formatting rules with automatic file type detection and appropriate formatter selection
+- Runs automatically after file modifications via PostToolUse hook with support for Write, Edit, and Multiedit operations
+- Preserves file permissions and structure while applying formatting changes in-place
+- Silent operation with optional feedback using stderr redirection for user notifications
+- Configurable timeout and error handling to prevent hanging on large files or slow formatters
+- Modern high-performance formatter support including Ruff (10-100x faster than Black) with Black-compatible formatting
+- Automatic formatter detection with fallback options (Black → Ruff for Python) ensuring formatting works in all environments
+
+## Use Cases
+
+- Maintain consistent code style across team projects with automatic formatting on every file modification
+- Automatically fix formatting issues after AI code generation ensuring all code follows project standards
+- Enforce project coding standards without manual intervention reducing code review time and friction
+- Support multiple programming languages in the same project with unified formatting workflow
+- Reduce code review friction by handling formatting automatically allowing reviewers to focus on logic and architecture
+- CI/CD pipeline integration for pre-commit formatting validation ensuring all committed code is properly formatted
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/auto-code-formatter-hook.sh
+3. Make executable: chmod +x .claude/hooks/auto-code-formatter-hook.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- jq installed (for JSON parsing)
+- Formatter tools: Prettier ^3.6.0 (npm i -D prettier), Ruff ^0.8.0 or Black ^24.0.0 (pip install ruff/black), gofmt (built into Go), rustfmt (built into Rust toolchain)
+- Language-specific runtime: Node.js (for Prettier), Python 3.8+ (for Ruff/Black), Go toolchain (for gofmt), Rust toolchain (for rustfmt)
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/auto-code-formatter-hook.sh",
+      "matchers": [
+        "write",
+        "edit",
+        "multiedit"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Get file extension
+EXT="${FILE_PATH##*.}"
+
+# Format based on file type
+case "$EXT" in
+  js|jsx|ts|tsx|json|md|mdx|css|scss|html|vue|yaml|yml)
+    # JavaScript/TypeScript/Web files - use Prettier
+    if command -v prettier &> /dev/null; then
+      prettier --write "$FILE_PATH" 2>/dev/null
+      echo "✅ Formatted $FILE_PATH with Prettier" >&2
+    fi
+    ;;
+  
+  py)
+    # Python files - use Black
+    if command -v black &> /dev/null; then
+      black "$FILE_PATH" 2>/dev/null
+      echo "✅ Formatted $FILE_PATH with Black" >&2
+    elif command -v ruff &> /dev/null; then
+      ruff format "$FILE_PATH" 2>/dev/null
+      echo "✅ Formatted $FILE_PATH with Ruff" >&2
+    fi
+    ;;
+  
+  go)
+    # Go files - use gofmt
+    if command -v gofmt &> /dev/null; then
+      gofmt -w "$FILE_PATH" 2>/dev/null
+      echo "✅ Formatted $FILE_PATH with gofmt" >&2
+    fi
+    ;;
+  
+  rs)
+    # Rust files - use rustfmt
+    if command -v rustfmt &> /dev/null; then
+      rustfmt "$FILE_PATH" 2>/dev/null
+      echo "✅ Formatted $FILE_PATH with rustfmt" >&2
+    fi
+    ;;
+esac
+
+exit 0
+```
+
+## Examples
+### Auto Code Formatter Hook Script
+
+Complete hook script that automatically formats code files using Prettier, Ruff/Black, gofmt, or rustfmt based on file extension
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path // .tool_input.path // \"\"")
+if [ -z "$FILE_PATH" ]; then exit 0; fi
+EXT="${FILE_PATH##*.}"
+case "$EXT" in
+  js|jsx|ts|tsx|json|md|css|scss|html|vue|yaml|yml)
+    if command -v prettier &> /dev/null; then
+      prettier --write "$FILE_PATH" 2>/dev/null
+      echo "Formatted $FILE_PATH with Prettier" >&2
+    fi
+    ;;
+  py)
+    if command -v ruff &> /dev/null; then
+      ruff format "$FILE_PATH" 2>/dev/null
+      echo "Formatted $FILE_PATH with Ruff" >&2
+    elif command -v black &> /dev/null; then
+      black "$FILE_PATH" 2>/dev/null
+      echo "Formatted $FILE_PATH with Black" >&2
+    fi
+    ;;
+  go)
+    if command -v gofmt &> /dev/null; then
+      gofmt -w "$FILE_PATH" 2>/dev/null
+      echo "Formatted $FILE_PATH with gofmt" >&2
+    fi
+    ;;
+  rs)
+    if command -v rustfmt &> /dev/null; then
+      rustfmt "$FILE_PATH" 2>/dev/null
+      echo "Formatted $FILE_PATH with rustfmt" >&2
+    fi
+    ;;
+esac
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable automatic code formatting on file writes, edits, and multiedits
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|Multiedit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/auto-code-formatter-hook.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+### Prettier with Config File Fallback
+
+Enhanced hook script that uses Prettier with explicit config file and fallback to default settings
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path")
+if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.ts ]]; then
+  if command -v prettier &> /dev/null; then
+    prettier --write --config .prettierrc "$FILE_PATH" 2>/dev/null || \
+      prettier --write "$FILE_PATH" 2>/dev/null
+    echo "Formatted with Prettier" >&2
+  fi
+fi
+exit 0
+```
+### Python Formatter with Timeout and Ruff Priority
+
+Python formatting hook that prioritizes Ruff (faster) over Black with timeout protection for large files
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path")
+if [[ "$FILE_PATH" == *.py ]]; then
+  if command -v ruff &> /dev/null; then
+    timeout 30s ruff format "$FILE_PATH" 2>/dev/null
+    echo "Formatted with Ruff" >&2
+  elif command -v black &> /dev/null; then
+    timeout 30s black "$FILE_PATH" 2>/dev/null
+    echo "Formatted with Black" >&2
+  fi
+fi
+exit 0
+```
+### Multiedit Support for Multiple Files
+
+Hook script that handles Multiedit operations by formatting all files in the edits array
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+if echo "$INPUT" | jq -e ".tool_input.edits" &> /dev/null; then
+  echo "$INPUT" | jq -r ".tool_input.edits[].file_path" | while read -r FILE_PATH; do
+    if [[ "${FILE_PATH##*.}" == "js" ]]; then
+      prettier --write "$FILE_PATH" 2>/dev/null
+    fi
+  done
+fi
+exit 0
+```
+
+## Troubleshooting
+### Formatter runs but changes get overwritten immediately
+
+Check for competing hooks or watchers. Verify PostToolUse timing - runs after file write completes. Add debouncing if multiple formatters conflict. Review hook execution order. Check if editor auto-format is enabled and conflicts with hook.
+### Prettier config ignored and default settings applied
+
+Verify .prettierrc exists in project root or ancestor directories. Check config search path: prettier --find-config-path file.js. Set explicit config: prettier --config path/to/.prettierrc. Verify .prettierignore doesn't exclude the file.
+### Hook matches multiedit but only formats first file
+
+Check if FILE_PATH is array in multiedit context. Parse all paths: jq -r '.tool_input.edits[].file_path'. Loop through each file for formatting. Verify jq parsing handles arrays correctly.
+### Formatter executable found but exits with permission denied
+
+Verify formatter binary permissions: ls -la $(which prettier). Install locally: npm i -D prettier. Use npx to ensure correct binary: npx prettier --write file. Check node_modules/.bin is in PATH.
+### Silent failures with no feedback on format errors
+
+Remove 2>/dev/null to expose stderr. Capture exit codes: prettier --write file || echo "Failed: $?" >&2. Add --loglevel debug for verbose output. Check formatter version compatibility.
+### Ruff format command not found but Black works
+
+Install Ruff: pip install ruff or uv add ruff. Verify Ruff version supports format command: ruff --version (requires 0.1.0+). Check PATH includes Python bin directory. Use python -m ruff format as alternative.
+### Prettier 3.6+ formatting differs from previous versions
+
+Prettier 3.6+ includes breaking changes. Review Prettier changelog for version-specific changes. Update .prettierrc config for new defaults. Test formatting with --check flag before applying: prettier --check file.js.
+### Formatting takes too long on large files causing timeouts
+
+Add timeout wrapper: timeout 30s prettier --write file.js. Implement file size check before formatting: [ $(stat -f%z file.js) -lt 1000000 ]. Consider excluding large files in .prettierignore. Use formatter-specific performance options.

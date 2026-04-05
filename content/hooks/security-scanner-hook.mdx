@@ -113,6 +113,40 @@ dateAdded: '2025-09-16'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://owasp.org/www-project-top-ten/'
 installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/security-scanner-hook.sh &&
+  chmod +x .claude/hooks/security-scanner-hook.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/security-scanner-hook.sh &&
+  chmod +x .claude/hooks/security-scanner-hook.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "postToolUse": {
+        "script": "./.claude/hooks/security-scanner-hook.sh",
+        "matchers": [
+          "write",
+          "edit",
+          "multiedit"
+        ]
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "postToolUse": {
+        "script": "./.claude/hooks/security-scanner-hook.sh",
+        "matchers": [
+          "write",
+          "edit",
+          "multiedit"
+        ]
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\necho \"\U0001F512 Running security scans on $FILE_PATH...\"\n\n# Secrets detection\necho \"Scanning for secrets...\"\nif command -v truffleHog &> /dev/null; then\n  truffleHog --regex --entropy=False \"$FILE_PATH\" 2>/dev/null\n  if [ $? -ne 0 ]; then\n    echo \"⚠️ Potential secrets detected in $FILE_PATH\" >&2\n  fi\nfi\n\n# Static analysis with Semgrep\nif command -v semgrep &> /dev/null; then\n  echo \"Running static security analysis...\"\n  semgrep --config=auto \"$FILE_PATH\" 2>/dev/null\n  if [ $? -eq 0 ]; then\n    echo \"✅ No security issues found with Semgrep\" >&2\n  else\n    echo \"⚠️ Security issues detected with Semgrep\" >&2\n  fi\nfi\n\n# Language-specific security checks\nEXT=\"${FILE_PATH##*.}\"\ncase \"$EXT\" in\n  js|jsx|ts|tsx)\n    # Node.js security audit\n    if [ -f \"package.json\" ] && command -v npm &> /dev/null; then\n      echo \"Running npm audit...\"\n      npm audit --audit-level=moderate 2>/dev/null || echo \"⚠️ Vulnerabilities found in dependencies\" >&2\n    fi\n    ;;\n  py)\n    # Python security checks\n    if command -v bandit &> /dev/null; then\n      echo \"Running Bandit security scan...\"\n      bandit \"$FILE_PATH\" 2>/dev/null || echo \"⚠️ Security issues detected with Bandit\" >&2\n    fi\n    ;;\n  go)\n    # Go security checks\n    if command -v gosec &> /dev/null; then\n      echo \"Running gosec security scan...\"\n      gosec \"$FILE_PATH\" 2>/dev/null || echo \"⚠️ Security issues detected with gosec\" >&2\n    fi\n    ;;\nesac\n\necho \"✅ Security scan completed for $FILE_PATH\" >&2\nexit 0"
 trigger: PostToolUse
 tags:
   - security
@@ -143,4 +177,260 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+## Features
 
+- Comprehensive security vulnerability scanning including security scanning integration (automated security scanning on file changes, multi-tool security scanning with multiple SAST tools, security vulnerability detection with vulnerability identification, security issue reporting with detailed reports), security scanning optimization (scanning performance with fast scanning, scanning caching with incremental scanning, scanning efficiency with efficient processing, scanning accuracy with accurate detection), security scanning validation (security issue validation with issue verification, security severity assessment with severity levels, security categorization with vulnerability types, security resolution suggestions with remediation tips), and security scanning reporting (security scan reporting with scan results, security vulnerability reporting with vulnerability details, security statistics with scan metrics, security compliance reporting with compliance status)
+- Static code analysis with multiple SAST tools including SAST integration (Semgrep static analysis with comprehensive rule sets, Bandit Python security scanning with Python-specific checks, gosec Go security scanning with Go-specific checks, language-specific security analysis with multi-language support), SAST configuration (SAST rule configuration with custom rules, SAST severity configuration with severity levels, SAST output configuration with output formats, SAST integration configuration with CI/CD integration), SAST analysis (code pattern analysis with pattern matching, vulnerability pattern detection with vulnerability patterns, security best practices enforcement with best practices, security code review with automated review), and SAST reporting (SAST finding reporting with detailed findings, SAST severity reporting with severity levels, SAST recommendation reporting with recommendations, SAST statistics with analysis metrics)
+- Dependency vulnerability detection including dependency scanning (npm audit dependency scanning with Node.js dependencies, Python dependency scanning with pip-audit/safety, Go dependency scanning with govulncheck, dependency vulnerability detection with vulnerability identification), dependency management (dependency version checking with version validation, dependency update recommendations with update suggestions, dependency conflict detection with conflict resolution, dependency security assessment with security assessment), dependency security (dependency vulnerability tracking with vulnerability tracking, dependency supply chain security with supply chain validation, dependency license checking with license validation, dependency update automation with automated updates), and dependency reporting (dependency vulnerability reporting with vulnerability details, dependency update reporting with update recommendations, dependency security reporting with security status, dependency statistics with dependency metrics)
+- Secrets and credential scanning including secrets detection (TruffleHog secrets detection with comprehensive secret scanning, credential pattern detection with credential patterns, API key detection with API key patterns, password detection with password patterns), secrets validation (secret validation with verification, false positive reduction with filtering, secret classification with classification, secret severity assessment with severity levels), secrets management (secret exclusion configuration with exclusion patterns, secret ignore file configuration with ignore files, secret scanning optimization with optimization, secret scanning performance with performance tuning), and secrets reporting (secrets detection reporting with detection results, secrets location reporting with file locations, secrets severity reporting with severity levels, secrets remediation reporting with remediation suggestions)
+- Container security analysis including container scanning (container image scanning with image analysis, container vulnerability detection with vulnerability scanning, container configuration analysis with configuration checking, container security assessment with security assessment), container security (container base image security with base image validation, container dependency security with dependency scanning, container runtime security with runtime checks, container compliance checking with compliance validation), container reporting (container vulnerability reporting with vulnerability details, container security reporting with security status, container compliance reporting with compliance status, container statistics with container metrics)
+- OWASP Top 10 compliance checking including OWASP compliance (OWASP Top 10 vulnerability detection with comprehensive checking, OWASP compliance validation with compliance verification, OWASP risk assessment with risk analysis, OWASP security standards enforcement with standards enforcement), OWASP reporting (OWASP compliance reporting with compliance status, OWASP vulnerability reporting with vulnerability details, OWASP risk reporting with risk assessment, OWASP statistics with compliance metrics)
+- Automated remediation suggestions including remediation analysis (security issue remediation analysis with issue analysis, remediation suggestion generation with automated suggestions, remediation priority assessment with priority levels, remediation impact analysis with impact assessment), remediation automation (automated fix suggestions with fix recommendations, remediation code generation with code suggestions, remediation testing with test validation, remediation deployment with deployment automation), and remediation reporting (remediation suggestion reporting with suggestions, remediation priority reporting with priorities, remediation impact reporting with impact analysis, remediation statistics with remediation metrics)
+- Integration with CI/CD pipelines including CI/CD integration (GitHub Actions integration with workflow automation, GitLab CI integration with pipeline automation, Jenkins integration with build automation, CI/CD security automation with automated security), pipeline optimization (security scan optimization with scan performance, pipeline efficiency with efficient pipelines, security check caching with result caching, pipeline reporting with comprehensive reports), and pipeline reporting (CI/CD security reporting with security status, pipeline security metrics with performance metrics, security compliance reporting with compliance status, pipeline statistics with pipeline metrics)
+
+## Use Cases
+
+- Automated security testing in CI/CD pipelines automatically running security scans on code changes, detecting vulnerabilities early, and preventing security issues from reaching production
+- Pre-commit security validation automatically scanning code before commits, detecting security issues early, and preventing vulnerable code from being committed
+- Continuous security monitoring during development automatically monitoring code changes for security issues, providing real-time security feedback, and maintaining security awareness
+- OWASP compliance checking automatically checking code against OWASP Top 10 vulnerabilities, ensuring compliance with security standards, and maintaining security best practices
+- Dependency vulnerability tracking automatically scanning dependencies for vulnerabilities, tracking dependency security status, and recommending dependency updates
+- Development workflow integration seamlessly integrating security scanning into development workflows without manual security checks or vulnerability scanning
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/security-scanner-hook.sh
+3. Make executable: chmod +x .claude/hooks/security-scanner-hook.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- TruffleHog installed (pip install truffleHog or brew install trufflehog, optional)
+- Semgrep installed (pip install semgrep or brew install semgrep, optional)
+- Bandit installed (pip install bandit, optional, for Python)
+- gosec installed (go install github.com/securego/gosec/v2/cmd/gosec@latest, optional, for Go)
+- npm installed (for npm audit, optional, for Node.js)
+- jq (optional, for JSON parsing)
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/security-scanner-hook.sh",
+      "matchers": [
+        "write",
+        "edit",
+        "multiedit"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+echo "🔒 Running security scans on $FILE_PATH..."
+
+# Secrets detection
+echo "Scanning for secrets..."
+if command -v truffleHog &> /dev/null; then
+  truffleHog --regex --entropy=False "$FILE_PATH" 2>/dev/null
+  if [ $? -ne 0 ]; then
+    echo "⚠️ Potential secrets detected in $FILE_PATH" >&2
+  fi
+fi
+
+# Static analysis with Semgrep
+if command -v semgrep &> /dev/null; then
+  echo "Running static security analysis..."
+  semgrep --config=auto "$FILE_PATH" 2>/dev/null
+  if [ $? -eq 0 ]; then
+    echo "✅ No security issues found with Semgrep" >&2
+  else
+    echo "⚠️ Security issues detected with Semgrep" >&2
+  fi
+fi
+
+# Language-specific security checks
+EXT="${FILE_PATH##*.}"
+case "$EXT" in
+  js|jsx|ts|tsx)
+    # Node.js security audit
+    if [ -f "package.json" ] && command -v npm &> /dev/null; then
+      echo "Running npm audit..."
+      npm audit --audit-level=moderate 2>/dev/null || echo "⚠️ Vulnerabilities found in dependencies" >&2
+    fi
+    ;;
+  py)
+    # Python security checks
+    if command -v bandit &> /dev/null; then
+      echo "Running Bandit security scan..."
+      bandit "$FILE_PATH" 2>/dev/null || echo "⚠️ Security issues detected with Bandit" >&2
+    fi
+    ;;
+  go)
+    # Go security checks
+    if command -v gosec &> /dev/null; then
+      echo "Running gosec security scan..."
+      gosec "$FILE_PATH" 2>/dev/null || echo "⚠️ Security issues detected with gosec" >&2
+    fi
+    ;;
+esac
+
+echo "✅ Security scan completed for $FILE_PATH" >&2
+exit 0
+```
+
+## Examples
+### Security Scanner Hook Script
+
+Complete hook script that runs security scans on file changes
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+echo "🔒 Running security scans on $FILE_PATH..."
+if command -v truffleHog &> /dev/null; then
+  truffleHog filesystem "$FILE_PATH" --results=verified,unknown --fail 2>/dev/null || echo "⚠️ Potential secrets detected" >&2
+fi
+if command -v semgrep &> /dev/null; then
+  semgrep --config=auto "$FILE_PATH" 2>/dev/null || echo "⚠️ Security issues detected" >&2
+fi
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable security scanning
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/security-scanner-hook.sh",
+      "matchers": ["write", "edit", "multiedit"]
+    }
+  }
+}
+```
+### Language-Specific Security Scanning
+
+Enhanced hook script with language-specific security scanners (npm audit, Bandit, gosec)
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+EXT="${FILE_PATH##*.}"
+case "$EXT" in
+  js|jsx|ts|tsx)
+    if [ -f "package.json" ] && command -v npm &> /dev/null; then
+      npm audit --audit-level=moderate --production 2>/dev/null || echo "⚠️ Vulnerabilities found" >&2
+    fi
+    ;;
+  py)
+    if command -v bandit &> /dev/null; then
+      bandit "$FILE_PATH" -ll --skip B404 2>/dev/null || echo "⚠️ Security issues detected" >&2
+    fi
+    ;;
+  go)
+    if command -v gosec &> /dev/null; then
+      gosec "$FILE_PATH" 2>/dev/null || echo "⚠️ Security issues detected" >&2
+    fi
+    ;;
+esac
+exit 0
+```
+### Secrets Scanning with Exclusion Patterns
+
+Enhanced hook script with TruffleHog secrets scanning and exclusion patterns for test files
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$(basename "$FILE_PATH")" == _* ]] || [[ "$FILE_PATH" == *test* ]] || [[ "$FILE_PATH" == *fixture* ]]; then
+  echo "ℹ️ Skipping test/fixture file: $FILE_PATH"
+  exit 0
+fi
+if command -v truffleHog &> /dev/null; then
+  truffleHog filesystem "$FILE_PATH" --exclude test/ --exclude fixtures/ --results=verified 2>/dev/null || echo "⚠️ Secrets detected" >&2
+fi
+exit 0
+```
+### Security Scanner Configuration Example
+
+Example security scanner configuration for customizing scan behavior
+
+```json
+{
+  "security": {
+    "trufflehog": {
+      "exclude": ["test/**", "**/fixtures/*", "*.test.*"],
+      "results": ["verified", "unknown"]
+    },
+    "semgrep": {
+      "config": "auto",
+      "severity": ["ERROR", "WARNING"]
+    },
+    "npm_audit": {
+      "audit_level": "moderate",
+      "production_only": true
+    }
+  }
+}
+```
+
+## Troubleshooting
+### truffleHog reports false positives on test data and mock credentials
+
+Entropy detection flags dummy data. Create .trufflehogignore: add patterns like 'test/**' or '**/fixtures/*'. Or use --exclude: 'truffleHog --exclude test/ --regex' filtering paths. Verify exclusion patterns. Test with various test file configurations.
+### Semgrep download/install hangs during first hook execution
+
+Hook waits for semgrep auto-install timing out. Pre-install: 'pip install semgrep' or 'brew install semgrep'. Add timeout: 'timeout 30 semgrep --config=auto' preventing indefinite hangs. Verify Semgrep installation. Test with various installation methods.
+### npm audit returns non-zero exit code failing hook on dev dependencies
+
+Audit treats dev warnings as errors. Filter severity: 'npm audit --audit-level=high --production' ignoring dev deps. Or suppress exit: 'npm audit || echo "Vulnerabilities logged"'. Verify audit level. Test with various dependency configurations.
+### Bandit scans entire project instead of modified FILE_PATH
+
+Command targets single file but imports scan. Add --skip-imports: 'bandit "$FILE_PATH" -ll --skip B404' focusing on direct code. Or scope: 'bandit -r $(dirname "$FILE_PATH")' directory-level. Verify Bandit configuration. Test with various file scopes.
+### Security scans add 30+ seconds to every file save operation
+
+Sequential scans without caching. Run async: append '&' to each scan, wait at end. Or cache: 'if [ "$(stat -c %Y "$FILE_PATH")" -lt 60 ]; then exit; fi' skipping recent scans. Verify scan caching. Test with various caching strategies.
+### gosec reports too many false positives or low-severity issues
+
+Configure gosec with severity filters: 'gosec -severity high -confidence high "$FILE_PATH"'. Use --exclude-dirs for test directories. Adjust severity levels based on project needs. Verify gosec configuration. Test with various severity configurations.
+### TruffleHog misses secrets in binary files or archives
+
+TruffleHog primarily scans text files. Use --include-binary for binary file scanning. For archives, extract first or use specialized tools. Verify file type detection. Test with various file types.
+### Semgrep rules conflict with project coding standards
+
+Configure Semgrep with custom rules or disable specific rules: 'semgrep --config=auto --disable-rule=rule-id "$FILE_PATH"'. Create .semgrep.yml for project-specific rules. Verify rule configuration. Test with various rule sets.
