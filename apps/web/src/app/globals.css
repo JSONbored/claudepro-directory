@@ -196,7 +196,7 @@
 }
 
 .hero-stats-grid {
-  @apply mx-auto flex max-w-[36rem] items-start justify-center gap-10 pt-2;
+  @apply mx-auto flex max-w-[36rem] items-start justify-center gap-10 pt-3 pb-4;
 }
 
 .hero-stat-block {
@@ -229,8 +229,20 @@
   @apply w-full;
 }
 
+.directory-select-wrap {
+  @apply relative min-w-[10.5rem] shrink-0;
+}
+
 .directory-select {
-  @apply min-w-[10rem];
+  @apply block min-w-[10.5rem] appearance-none pr-10;
+}
+
+.directory-select-icon-wrap {
+  @apply pointer-events-none absolute inset-y-0 right-3 flex items-center;
+}
+
+.directory-select-icon {
+  @apply size-4 text-muted-foreground/80;
 }
 
 .directory-card {

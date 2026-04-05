@@ -1,6 +1,7 @@
 "use client";
 
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 import { DirectoryEntryCard } from "@/components/directory-entry-card";
 import { SearchBar } from "@/components/search-bar";
@@ -85,36 +86,46 @@ export function BrowseDirectory({
   }, [filteredEntries, limit, visibleCount]);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <SearchBar
           value={query}
           onChange={setQuery}
           placeholder="Search tools, agents, skills, authors..."
         />
-        <select
-          aria-label="Category"
-          value={category}
-          onChange={(event) => setCategory(event.target.value)}
-          className="directory-select"
-        >
-          <option value="all">All Categories</option>
-          {siteConfig.categoryOrder.map((item) => (
-            <option key={item} value={item}>
-              {categoryLabels[item]}
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label="Sort"
-          value={sortMode}
-          onChange={(event) => setSortMode(event.target.value)}
-          className="directory-select"
-        >
-          <option value="popular">Most Popular</option>
-          <option value="newest">Newest</option>
-          <option value="title">A-Z</option>
-        </select>
+        <div className="directory-select-wrap">
+          <select
+            aria-label="Category"
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+            className="directory-select"
+          >
+            <option value="all">All Categories</option>
+            {siteConfig.categoryOrder.map((item) => (
+              <option key={item} value={item}>
+                {categoryLabels[item]}
+              </option>
+            ))}
+          </select>
+          <span className="directory-select-icon-wrap">
+            <ChevronDown className="directory-select-icon" />
+          </span>
+        </div>
+        <div className="directory-select-wrap">
+          <select
+            aria-label="Sort"
+            value={sortMode}
+            onChange={(event) => setSortMode(event.target.value)}
+            className="directory-select"
+          >
+            <option value="popular">Most Popular</option>
+            <option value="newest">Newest</option>
+            <option value="title">A-Z</option>
+          </select>
+          <span className="directory-select-icon-wrap">
+            <ChevronDown className="directory-select-icon" />
+          </span>
+        </div>
       </div>
 
       <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground">
