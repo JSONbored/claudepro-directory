@@ -1,370 +1,298 @@
-/**
- * Dynamic detail pages for all content categories
- * Optimized: Uses getContentDetailCore() to split core content (blocking) from analytics/related (deferred)
- * for Partial Prerendering (PPR) - enables faster LCP by prioritizing critical content
- *
- * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
- */
-import { Constants, type Database } from '@heyclaude/database-types';
-import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
-import { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import {
-  generatePageMetadata,
-  getCategoryConfig,
-  getContentAnalytics,
-  getContentDetailCore,
-  getRelatedContent,
-} from '@heyclaude/web-runtime/server';
-import { type Metadata } from 'next';
-import { notFound } from 'next/navigation';
+  ArrowUpRight,
+  Clock3,
+  Copy,
+  Download,
+  Eye,
+  FileCode2,
+  FileText,
+  Layers3,
+  Link2
+} from "lucide-react";
 
-import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
-import { UnifiedDetailPage } from '@/src/components/content/detail-page/content-detail-view';
-import { ReadProgress } from '@/src/components/content/read-progress';
-import { Pulse } from '@/src/components/core/infra/pulse';
-import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
+import { getAllEntries, getEntriesByCategory, getEntry } from "@/lib/content";
+import { categoryLabels, categoryUsageGuides } from "@/lib/site";
 
-export const revalidate = 7200;
-export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
+type DetailPageProps = {
+  params: Promise<{
+    category: string;
+    slug: string;
+  }>;
+};
 
-/**
- * Produce a list of static route params ({ category, slug }) for a subset of popular content to pre-render at build time.
- *
- * This selects up to MAX_ITEMS_PER_CATEGORY items per homepage category and returns their { category, slug } pairs. Pages not included in the returned list are served on-demand via Next.js dynamic params and ISR (revalidate = 7200).
- *
- * @returns An array of objects each containing `category` and `slug` for use as static params
- *
- * @see getHomepageCategoryIds
- * @see getContentByCategory
- * @see dynamicParams
- * @see revalidate
- */
 export async function generateStaticParams() {
-  // Dynamic imports only for data modules (category/content)
-  const { getHomepageCategoryIds } = await import('@heyclaude/web-runtime/data/config/category');
-  const { getContentByCategory } = await import('@heyclaude/web-runtime/data/content');
-  const { logger, generateRequestId, normalizeError } =
-    await import('@heyclaude/web-runtime/logging/server');
-
-  const categories = getHomepageCategoryIds;
-  const parameters: Array<{ category: string; slug: string }> = [];
-
-  // Limit to top 20 items per category to optimize build time
-  // Increased from 10 to 20 after database query optimizations (80% faster queries)
-  // ISR with dynamicParams=true handles remaining pages on-demand with 2hr revalidation
-  const MAX_ITEMS_PER_CATEGORY = 30;
-
-  // Process all categories in parallel
-  // OPTIMIZATION: Skip validation - rely on dynamicParams=true for on-demand rendering
-  // This saves ~8-10s on every build. Invalid slugs will be handled on-demand via ISR.
-  const categoryResults = await Promise.allSettled(
-    categories.map(async (category) => {
-      try {
-        const items = await getContentByCategory(category);
-        const topItems = items.slice(0, MAX_ITEMS_PER_CATEGORY);
-
-        // Return all items with slugs - no validation needed
-        // dynamicParams=true will handle invalid slugs on-demand
-        const categoryParameters = topItems
-          .filter((item): item is typeof item & { slug: string } => Boolean(item.slug))
-          .map((item) => ({ category, slug: item.slug }));
-
-        return { category, params: categoryParameters };
-      } catch (error) {
-        // Log error but continue with other categories
-        const requestId = generateRequestId();
-        const operation = 'generateStaticParams';
-        const route = `/${category}`;
-        const module = 'apps/web/src/app/[category]/[slug]/page';
-        const reqLogger = logger.child({
-          requestId,
-          operation,
-          route,
-          module,
-        });
-        const normalized = normalizeError(
-          error,
-          'Failed to load content for category in generateStaticParams'
-        );
-        reqLogger.error('generateStaticParams: failed to load content for category', normalized, {
-          category,
-          section: 'static-params-generation',
-        });
-        return { category, params: [] };
-      }
-    })
-  );
-
-  // Collect all parameters from all categories
-  for (const result of categoryResults) {
-    if (result.status === 'fulfilled') {
-      parameters.push(...result.value.params);
-    }
-  }
-
-  return parameters;
+  const entries = await getAllEntries();
+  return entries.map((entry) => ({
+    category: entry.category,
+    slug: entry.slug
+  }));
 }
 
-// Map route categories (plural) to RecentlyViewedCategory (singular)
-// Use Constants.public.Enums.content_category to avoid hardcoded enum values
-const CONTENT_CATEGORY_ENUMS = Constants.public.Enums.content_category;
-const CATEGORY_TO_RECENTLY_VIEWED: Record<string, RecentlyViewedCategory> = {
-  [CONTENT_CATEGORY_ENUMS[0]]: 'agent', // agents
-  [CONTENT_CATEGORY_ENUMS[3]]: 'command', // commands
-  [CONTENT_CATEGORY_ENUMS[4]]: 'hook', // hooks
-  [CONTENT_CATEGORY_ENUMS[1]]: 'mcp', // mcp
-  [CONTENT_CATEGORY_ENUMS[2]]: 'rule', // rules
-  [CONTENT_CATEGORY_ENUMS[5]]: 'statusline', // statuslines
-  [CONTENT_CATEGORY_ENUMS[6]]: 'skill', // skills
-  [CONTENT_CATEGORY_ENUMS[9]]: 'job', // jobs
-  job: 'job', // Alias for consistency
-} as const;
-
-// Stable constant for collections category (replaces brittle array index access)
-const COLLECTION_CATEGORY = 'collections' as const;
-
-/**
- * Map a category key to its RecentlyViewedCategory equivalent.
- *
- * @param category - The category key to map (for example, "articles" or "collections")
- * @returns The corresponding `RecentlyViewedCategory`, or `null` if the category has no mapping
- *
- * @see CATEGORY_TO_RECENTLY_VIEWED
- * @see RecentlyViewedCategory
- */
-function mapCategoryToRecentlyViewed(category: string): null | RecentlyViewedCategory {
-  return CATEGORY_TO_RECENTLY_VIEWED[category] ?? null;
-}
-
-/**
- * Produce page metadata for a detail route based on the route params and category configuration.
- *
- * @param params - Promise resolving to an object with `category` and `slug` route parameters.
- * @returns A Metadata object for the detail page. If `category` is invalid, returns the default metadata for `/:category/:slug`.
- *
- * @see generatePageMetadata
- * @see getCategoryConfig
- * @see isValidCategory
- */
 export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ category: string; slug: string }>;
-}): Promise<Metadata> {
+  params
+}: DetailPageProps): Promise<Metadata> {
   const { category, slug } = await params;
+  const entry = await getEntry(category, slug);
 
-  // Validate category at compile time
-  if (!isValidCategory(category)) {
-    return generatePageMetadata('/:category/:slug', {
-      params: { category, slug },
-    });
+  if (!entry) {
+    return {};
   }
 
-  const config = getCategoryConfig(category);
-
-  return generatePageMetadata('/:category/:slug', {
-    params: { category, slug },
-    categoryConfig: config ?? undefined,
-    category,
-    slug,
-  });
+  return {
+    title: entry.seoTitle ?? entry.title,
+    description: entry.seoDescription ?? entry.description
+  };
 }
 
-/**
- * Render the content detail page for a given category and slug.
- *
- * Validates the category and category configuration, fetches the core content (blocking for LCP), initiates analytics and related-item fetches for Suspense, and conditionally includes recently-viewed tracking and a collection-specific section. Triggers a 404 via `notFound()` when the category, category config, or core content is missing.
- *
- * @param params - A promise that resolves to an object with `category` and `slug` route parameters
- * @returns A React element representing the content detail page for the requested category and slug
- *
- * @see getContentDetailCore
- * @see getContentAnalytics
- * @see getRelatedContent
- * @see UnifiedDetailPage
- * @see RecentlyViewedTracker
- * @see CollectionDetailView
- */
-export default async function DetailPage({
-  params,
-}: {
-  params: Promise<{ category: string; slug: string }>;
-}) {
+export default async function DetailPage({ params }: DetailPageProps) {
   const { category, slug } = await params;
+  const entry = await getEntry(category, slug);
 
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
-  const operation = 'DetailPage';
-  const route = `/${category}/${slug}`;
-  const module = 'apps/web/src/app/[category]/[slug]/page';
-
-  // Create request-scoped child logger to avoid race conditions
-  const reqLogger = logger.child({
-    requestId,
-    operation,
-    route,
-    module,
-  });
-
-  // Section: Category Validation
-  if (!isValidCategory(category)) {
-    reqLogger.warn('Invalid category in detail page', {
-      section: 'category-validation',
-    });
+  if (!entry) {
     notFound();
   }
 
-  const config = getCategoryConfig(category);
-  if (!config) {
-    const normalized = normalizeError(
-      new Error('Category config is null'),
-      'DetailPage: missing category config'
-    );
-    reqLogger.error('DetailPage: missing category config', normalized, {
-      section: 'category-validation',
-    });
-    notFound();
-  }
+  const related = (await getEntriesByCategory(category))
+    .filter((item) => item.slug !== slug)
+    .slice(0, 4);
+  const usageGuide = categoryUsageGuides[entry.category];
+  const showPrimaryCode =
+    !!entry.primaryCodeBlock &&
+    entry.primaryCodeBlock.code.trim().length > 0;
+  const showBody =
+    !entry.isMetadataOnly &&
+    !(entry.category === "statuslines" && showPrimaryCode);
+  const showContentNote = entry.isMetadataOnly;
 
-  // Section: Core Content Fetch
-  // Optimized for PPR: Split core content (critical) from analytics/related (deferred)
-  // 1. Fetch Core Content (Blocking - for LCP)
-  const coreData = await getContentDetailCore({ category, slug });
+  const stats = [
+    entry.readingTime
+      ? { label: "Read time", value: `${entry.readingTime} min`, icon: Clock3 }
+      : null,
+    typeof entry.viewCount === "number"
+      ? { label: "Views", value: String(entry.viewCount), icon: Eye }
+      : null,
+    typeof entry.copyCount === "number"
+      ? { label: "Copies", value: String(entry.copyCount), icon: Copy }
+      : null
+  ].filter(Boolean) as Array<{
+    label: string;
+    value: string;
+    icon: typeof Clock3;
+  }>;
 
-  if (!coreData) {
-    // Content may not exist (deleted, never existed, or invalid slug)
-    // This is expected behavior during build-time static generation when generateStaticParams
-    // generates paths for content that may have been removed from the database
-    // During build, missing content is expected - only log at debug level
-    // During runtime, log at warn level to catch real issues (except in production where it's also expected)
-    const suppressMissingContentWarning =
-      env.NEXT_PHASE === 'phase-production-build' || env.VERCEL_ENV === 'production';
-
-    if (suppressMissingContentWarning) {
-      reqLogger.debug('DetailPage: content not found during build/production (expected)', {
-        section: 'core-content-fetch',
-        category,
-        slug,
-      });
-    } else {
-      reqLogger.warn('DetailPage: get_content_detail_core returned null - content may not exist', {
-        section: 'core-content-fetch',
-        category,
-        slug,
-      });
-    }
-    notFound();
-  }
-
-  const fullItem = coreData.content as Database['public']['Tables']['content']['Row'] | null;
-
-  // Null safety: If content doesn't exist in database, return 404
-  if (!fullItem) {
-    reqLogger.warn('Content not found in RPC response', {
-      section: 'core-content-fetch',
-      rpcFunction: 'get_content_detail_core',
-    });
-    notFound();
-  }
-
-  reqLogger.info('DetailPage: core content loaded', {
-    section: 'core-content-fetch',
-  });
-
-  // Section: Analytics & Related Fetch (Non-blocking - for Suspense)
-  // 2. Fetch Analytics & Related (Non-blocking promise - for Suspense)
-  const analyticsPromise = getContentAnalytics({ category, slug });
-
-  const viewCountPromise = analyticsPromise.then((data) => data?.view_count ?? 0);
-  const copyCountPromise = analyticsPromise.then((data) => data?.copy_count ?? 0);
-
-  const relatedItemsPromise = getRelatedContent({
-    currentPath: `/${category}/${slug}`,
-    currentCategory: category,
-    currentTags: 'tags' in fullItem ? ensureStringArray(fullItem.tags) : [],
-  }).then((result) => result.items);
-
-  // Content detail tabs - currently hardcoded to true
-  // TODO: Implement lazy-loading feature flag pattern to avoid Edge Config access during builds
-  // See: https://github.com/vercel/next.js/issues/XXX (ticket reference TBD)
-  const tabsEnabled = true;
-
-  // No transformation needed - displayTitle computed at build time
-  // This eliminates runtime overhead and follows DRY principles
-
-  // Final summary log
-  reqLogger.info('DetailPage: page render completed', {
-    section: 'page-render',
-    category,
-    slug,
-  });
-
-  // Unified rendering: All categories use UnifiedDetailPage
-  // Collections pass their specialized sections via collectionSections prop
   return (
-    <>
-      {/* Read Progress Bar - Shows reading progress at top of page */}
-      <ReadProgress />
+    <div className="container grid gap-12 py-12 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <article className="space-y-8">
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
+            <Link href={`/${entry.category}`}>
+              {categoryLabels[entry.category] ?? entry.category}
+            </Link>
+            {entry.dateAdded ? <span>{entry.dateAdded}</span> : null}
+            {entry.readingTime ? <span>{entry.readingTime} min read</span> : null}
+          </div>
+          <h1 className="section-title">{entry.title}</h1>
+          <p className="max-w-3xl text-base leading-8 text-[var(--muted)]">
+            {entry.description}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {entry.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border border-[var(--line)] px-3 py-1 text-xs uppercase tracking-[0.1em] text-[var(--muted)]"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
 
-      <Pulse variant="view" category={category} slug={slug} />
-      <Pulse variant="page-view" category={category} slug={slug} />
-      <StructuredData route={`/${category}/${slug}`} />
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(260px,320px)]">
+          <section className="panel rounded-[1.75rem] p-6">
+            <p className="text-sm uppercase tracking-[0.15em] text-[var(--muted)]">
+              How to use
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em]">
+              {usageGuide?.title ?? "Use this entry"}
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+              {usageGuide?.summary}
+            </p>
+            <ol className="mt-5 grid gap-3">
+              {usageGuide?.steps.map((step, index) => (
+                <li
+                  key={step}
+                  className="rounded-[1rem] border border-[var(--line)] bg-white/55 px-4 py-3 text-sm leading-7 text-[var(--muted)]"
+                >
+                  <span className="mr-3 inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--ink)] text-xs font-semibold text-white">
+                    {index + 1}
+                  </span>
+                  {step}
+                </li>
+              ))}
+            </ol>
+          </section>
 
-      {/* Recently Viewed Tracking - only for supported categories */}
-      {(() => {
-        const recentlyViewedCategory = mapCategoryToRecentlyViewed(category);
-        if (!recentlyViewedCategory) return null;
+          {showPrimaryCode ? (
+            <section className="panel rounded-[1.75rem] p-6">
+              <div className="flex items-center gap-2 text-sm uppercase tracking-[0.15em] text-[var(--muted)]">
+                <FileCode2 className="h-4 w-4" />
+                Quick copy
+              </div>
+              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+                {entry.category === "statuslines"
+                  ? "Copy the script into a local file, make it executable, and point Claude Code at it."
+                  : "A key snippet from this entry is surfaced here so it is easier to grab without digging through the full page."}
+              </p>
+              <pre className="asset-code mt-5 overflow-x-auto rounded-[1.25rem] bg-[#171512] p-4 text-sm text-[#f8f2e8]">
+                <code>{entry.primaryCodeBlock?.code}</code>
+              </pre>
+            </section>
+          ) : null}
+        </div>
 
-        // Extract tags safely before passing to client component
-        const itemTags = 'tags' in fullItem ? ensureStringArray(fullItem.tags).slice(0, 3) : [];
-        const tagsProp = itemTags.length > 0 ? { tags: itemTags } : {};
-
-        // Extract title safely
-        const itemTitle =
-          ('display_title' in fullItem && typeof fullItem.display_title === 'string'
-            ? fullItem.display_title
-            : undefined) ??
-          ('title' in fullItem && typeof fullItem.title === 'string'
-            ? fullItem.title
-            : undefined) ??
-          slug;
-
-        // Extract description safely - ensure it's a string
-        const itemDescription =
-          typeof fullItem.description === 'string' ? fullItem.description : '';
-
-        return (
-          <RecentlyViewedTracker
-            category={recentlyViewedCategory}
-            slug={slug}
-            title={itemTitle}
-            description={itemDescription}
-            {...tagsProp}
+        {showBody ? (
+          <div
+            className="content-prose max-w-none"
+            dangerouslySetInnerHTML={{ __html: entry.html }}
           />
-        );
-      })()}
+        ) : showContentNote ? (
+          <section className="panel rounded-[1.75rem] p-6">
+            <p className="text-sm uppercase tracking-[0.15em] text-[var(--muted)]">
+              Content note
+            </p>
+            <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+              {usageGuide?.emptyState}
+            </p>
+          </section>
+        ) : null}
+      </article>
 
-      <UnifiedDetailPage
-        item={fullItem}
-        viewCountPromise={viewCountPromise}
-        copyCountPromise={copyCountPromise}
-        relatedItemsPromise={relatedItemsPromise}
-        tabsEnabled={tabsEnabled}
-        collectionSections={
-          category === COLLECTION_CATEGORY && fullItem.category === COLLECTION_CATEGORY ? (
-            <CollectionDetailView
-              collection={
-                fullItem as Database['public']['Tables']['content']['Row'] & {
-                  category: 'collections';
-                }
-              }
-            />
-          ) : undefined
-        }
-      />
-    </>
+      <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
+        <div className="panel rounded-[1.5rem] p-5">
+          <p className="text-sm uppercase tracking-[0.15em] text-[var(--muted)]">
+            At a glance
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            {stats.map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <div
+                  key={stat.label}
+                  className="rounded-[1rem] border border-[var(--line)] bg-white/50 p-3"
+                >
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-[0.1em] text-[var(--muted)]">
+                    <Icon className="h-3.5 w-3.5" />
+                    {stat.label}
+                  </div>
+                  <p className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[var(--ink)]">
+                    {stat.value}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="panel rounded-[1.5rem] p-5">
+          <p className="text-sm uppercase tracking-[0.15em] text-[var(--muted)]">
+            Source & links
+          </p>
+          <div className="mt-4 space-y-3 text-sm leading-7 text-[var(--muted)]">
+            {entry.author ? (
+              <p>
+                Author:{" "}
+                {entry.authorProfileUrl ? (
+                  <a
+                    href={entry.authorProfileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[var(--ink)] underline decoration-[var(--line)] underline-offset-4"
+                  >
+                    {entry.author}
+                  </a>
+                ) : (
+                  <span className="text-[var(--ink)]">{entry.author}</span>
+                )}
+              </p>
+            ) : null}
+            <a
+              href={entry.githubUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-between rounded-[1rem] border border-[var(--line)] bg-white/50 px-4 py-3 text-[var(--ink)]"
+            >
+              <span>{usageGuide?.sourceLabel ?? "GitHub source"}</span>
+              <Link2 className="h-4 w-4" />
+            </a>
+            {entry.documentationUrl ? (
+              <a
+                href={entry.documentationUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between rounded-[1rem] border border-[var(--line)] bg-white/50 px-4 py-3 text-[var(--ink)]"
+              >
+                <span>Open documentation</span>
+                <FileText className="h-4 w-4" />
+              </a>
+            ) : null}
+            {entry.downloadUrl ? (
+              <a
+                href={entry.downloadUrl}
+                className="flex items-center justify-between rounded-[1rem] border border-[var(--line)] bg-white/50 px-4 py-3 text-[var(--ink)]"
+              >
+                <span>Download package</span>
+                <Download className="h-4 w-4" />
+              </a>
+            ) : null}
+            <Link
+              href={`/${entry.category}`}
+              className="flex items-center justify-between rounded-[1rem] border border-[var(--line)] bg-white/50 px-4 py-3 text-[var(--ink)]"
+            >
+              <span>More {categoryLabels[entry.category] ?? entry.category}</span>
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+
+        {entry.headings.length ? (
+          <div className="panel rounded-[1.5rem] p-5">
+            <div className="flex items-center gap-2 text-sm uppercase tracking-[0.15em] text-[var(--muted)]">
+              <Layers3 className="h-4 w-4" />
+              On this page
+            </div>
+            <div className="mt-4 space-y-2">
+              {entry.headings.map((heading) => (
+                <a
+                  key={heading.id}
+                  href={`#${heading.id}`}
+                  className="flex items-start gap-2 rounded-[1rem] border border-transparent px-3 py-2 text-sm text-[var(--muted)] transition hover:border-[var(--line)] hover:bg-white/45 hover:text-[var(--ink)]"
+                >
+                  <Link2 className="mt-1 h-3.5 w-3.5 shrink-0" />
+                  <span className={heading.depth > 2 ? "pl-4" : ""}>{heading.text}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <div className="panel rounded-[1.5rem] p-5">
+          <p className="text-sm uppercase tracking-[0.15em] text-[var(--muted)]">
+            Related
+          </p>
+          <div className="mt-4 space-y-4">
+            {related.map((item) => (
+              <Link key={item.slug} href={`/${item.category}/${item.slug}`} className="block">
+                <p className="text-sm text-[var(--muted)]">{item.category}</p>
+                <p className="font-medium tracking-[-0.02em]">{item.title}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </aside>
+    </div>
   );
 }

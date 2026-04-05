@@ -1,0 +1,125 @@
+---
+title: "Block Timer Tracker - Statuslines"
+slug: "block-timer-tracker"
+category: "statuslines"
+description: "Claude 5-hour conversation block tracker with visual countdown, expiration warnings, and color-coded indicators to prevent unexpected session terminations."
+seoTitle: "Block Timer Tracker - Statuslines"
+seoDescription: "Claude 5-hour conversation block tracker with visual countdown, expiration warnings, and color-coded indicators to prevent unexpected session terminations."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-23"
+tags: 
+  - "timer"
+  - "session-block"
+  - "countdown"
+  - "5-hour-limit"
+  - "warnings"
+  - "productivity"
+keywords: 
+  - "5-hour-limit"
+  - "block"
+  - "claude"
+  - "countdown"
+  - "development"
+  - "productivity"
+  - "session-block"
+  - "statuslines"
+  - "timer"
+  - "tools"
+  - "tracker"
+  - "warnings"
+difficultyScore: 5
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 3
+copyCount: 0
+popularityScore: 8
+readingTime: 2
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/statusline"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+#!/usr/bin/env bash
+
+# Block Timer Tracker for Claude Code
+# Monitors Claude's 5-hour conversation block limit with countdown
+
+# Read JSON from stdin
+read -r input
+
+# Extract session start time and current timestamp
+session_start=$(echo "$input" | jq -r '.session.startTime // ""')
+current_time=$(date +%s)
+
+# Calculate elapsed time in seconds
+if [ -n "$session_start" ]; then
+  start_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$session_start" +%s 2>/dev/null || echo "$current_time")
+  elapsed=$((current_time - start_epoch))
+else
+  elapsed=0
+fi
+
+# 5-hour block = 18000 seconds
+BLOCK_LIMIT=18000
+remaining=$((BLOCK_LIMIT - elapsed))
+
+# Convert to hours:minutes:seconds
+hours=$((remaining / 3600))
+minutes=$(((remaining % 3600) / 60))
+seconds=$((remaining % 60))
+
+# Calculate percentage remaining
+if [ $BLOCK_LIMIT -gt 0 ]; then
+  percent=$((remaining * 100 / BLOCK_LIMIT))
+else
+  percent=0
+fi
+
+# Color codes based on time remaining
+if [ $percent -gt 50 ]; then
+  # Green: > 2.5 hours remaining
+  COLOR="\033[38;5;46m"
+  ICON="✓"
+elif [ $percent -gt 20 ]; then
+  # Yellow: 1-2.5 hours remaining
+  COLOR="\033[38;5;226m"
+  ICON="⚠"
+elif [ $percent -gt 0 ]; then
+  # Red: < 1 hour remaining
+  COLOR="\033[38;5;196m"
+  ICON="⚠"
+else
+  # Expired
+  COLOR="\033[38;5;160m"
+  ICON="✗"
+fi
+
+RESET="\033[0m"
+
+# Progress bar (20 chars)
+bar_filled=$((percent / 5))
+bar_empty=$((20 - bar_filled))
+bar=""
+for ((i=0; i<bar_filled; i++)); do bar+="█"; done
+for ((i=0; i<bar_empty; i++)); do bar+="░"; done
+
+# Format time display
+if [ $remaining -gt 0 ]; then
+  time_display=$(printf "%dh %02dm %02ds" $hours $minutes $seconds)
+else
+  time_display="EXPIRED"
+fi
+
+# Build statusline
+echo -e "${COLOR}${ICON} Block: [${bar}] ${time_display} (${percent}%)${RESET}"
+
+# Warning messages (stderr for alerts)
+if [ $percent -le 10 ] && [ $percent -gt 0 ]; then
+  echo "⚠ WARNING: Less than 30 minutes remaining in conversation block!" >&2
+elif [ $remaining -le 0 ]; then
+  echo "✗ BLOCK EXPIRED: Start new conversation to continue." >&2
+fi

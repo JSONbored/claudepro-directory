@@ -1,0 +1,117 @@
+---
+title: "Multi Provider Token Counter - Statuslines"
+slug: "multi-provider-token-counter"
+category: "statuslines"
+description: "Multi-provider AI token counter displaying real-time context usage for Claude (1M), GPT-4.1 (1M), Gemini 2.x (1M), and Grok 3 (1M) with 2025 verified limits"
+seoTitle: "Multi Provider Token Counter - Statuslines"
+seoDescription: "Multi-provider AI token counter displaying real-time context usage for Claude (1M), GPT-4.1 (1M), Gemini 2.x (1M), and Grok 3 (1M) with 2025 verified limits"
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+tags: 
+  - "tokens"
+  - "multi-provider"
+  - "context-limits"
+  - "ai-models"
+  - "monitoring"
+keywords: 
+  - "ai-models"
+  - "claude"
+  - "context-limits"
+  - "counter"
+  - "development"
+  - "monitoring"
+  - "multi"
+  - "multi-provider"
+  - "provider"
+  - "statuslines"
+  - "token"
+  - "tokens"
+  - "tools"
+difficultyScore: 4
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 11
+copyCount: 0
+popularityScore: 16
+readingTime: 2
+documentationUrl: "https://docs.anthropic.com/claude/docs/models-overview"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+#!/usr/bin/env bash
+
+# Multi-Provider Token Counter - 2025 Context Limits
+# Supports: Claude Sonnet 4 (1M), GPT-4.1 (1M), Gemini 2.x (1M), Grok 3 (1M)
+
+read -r input
+
+# Extract model and token info
+model=$(echo "$input" | jq -r '.model // "unknown"')
+tokens=$(echo "$input" | jq -r '.session.totalTokens // 0')
+
+# Determine provider and context limit
+if [[ "$model" == *"claude"* ]]; then
+  if [[ "$model" == *"sonnet-4"* ]] || [[ "$model" == *"sonnet-3.5"* ]]; then
+    limit=1000000
+    provider="Claude"
+    icon="🔮"
+  else
+    limit=200000
+    provider="Claude"
+    icon="🔮"
+  fi
+elif [[ "$model" == *"gpt-4.1"* ]]; then
+  limit=1000000
+  provider="GPT-4.1"
+  icon="🤖"
+elif [[ "$model" == *"gpt-4o"* ]]; then
+  limit=128000
+  provider="GPT-4o"
+  icon="🤖"
+elif [[ "$model" == *"gemini"* ]]; then
+  if [[ "$model" == *"2."* ]] || [[ "$model" == *"1.5-pro"* ]]; then
+    limit=1000000
+    provider="Gemini"
+    icon="💎"
+  else
+    limit=128000
+    provider="Gemini"
+    icon="💎"
+  fi
+elif [[ "$model" == *"grok-3"* ]]; then
+  limit=1000000
+  provider="Grok"
+  icon="⚡"
+elif [[ "$model" == *"grok-4"* ]]; then
+  limit=256000
+  provider="Grok"
+  icon="⚡"
+else
+  limit=100000
+  provider="Unknown"
+  icon="❓"
+fi
+
+# Calculate usage percentage
+percentage=$(awk "BEGIN {printf \"%.1f\", ($tokens / $limit) * 100}")
+
+# Color coding based on usage
+if (( $(echo "$percentage < 50" | bc -l) )); then
+  color="\033[32m"  # Green
+elif (( $(echo "$percentage < 80" | bc -l) )); then
+  color="\033[33m"  # Yellow
+else
+  color="\033[31m"  # Red
+fi
+
+# Format token count with commas
+tokens_formatted=$(printf "%'d" $tokens)
+limit_formatted=$(printf "%'d" $limit)
+
+# Output statusline
+echo -e "${icon} ${provider} │ ${color}${tokens_formatted}${color}\033[0m/${limit_formatted} (${percentage}%)\033[0m"

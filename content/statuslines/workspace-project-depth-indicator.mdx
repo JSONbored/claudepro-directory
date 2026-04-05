@@ -1,0 +1,172 @@
+---
+title: "Workspace Project Depth Indicator - Statuslines"
+slug: "workspace-project-depth-indicator"
+category: "statuslines"
+description: "Claude Code workspace depth tracker showing monorepo navigation level, project root detection, and directory depth visualization for context awareness."
+seoTitle: "Workspace Project Depth Indicator - Statuslines"
+seoDescription: "Claude Code workspace depth tracker showing monorepo navigation level, project root detection, and directory depth visualization for context awareness."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+tags: 
+  - "workspace-depth"
+  - "monorepo-navigation"
+  - "directory-depth"
+  - "project-context"
+  - "workspace-tracking"
+keywords: 
+  - "claude"
+  - "depth"
+  - "development"
+  - "directory-depth"
+  - "indicator"
+  - "monorepo-navigation"
+  - "project"
+  - "project-context"
+  - "statuslines"
+  - "tools"
+  - "workspace"
+  - "workspace-depth"
+  - "workspace-tracking"
+difficultyScore: 8
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 8
+copyCount: 0
+popularityScore: 13
+readingTime: 3
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/statusline"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+#!/usr/bin/env bash
+
+# Workspace Project Depth Indicator for Claude Code
+# Tracks directory depth and project context
+
+# Read JSON from stdin
+read -r input
+
+# Extract workspace info
+current_dir=$(echo "$input" | jq -r '.workspace.current_dir // ""')
+
+# Handle empty workspace
+if [ -z "$current_dir" ] || [ "$current_dir" = "null" ]; then
+  echo "📂 No workspace"
+  exit 0
+fi
+
+# Calculate directory depth (count of slashes)
+# Remove leading slash to avoid off-by-one
+dir_path="${current_dir#/}"
+depth=$(echo "$dir_path" | tr -cd '/' | wc -c | tr -d ' ')
+
+# Detect project root indicators
+project_indicators=(
+  ".git"
+  "package.json"
+  "Cargo.toml"
+  "go.mod"
+  "pom.xml"
+  "build.gradle"
+  "pyproject.toml"
+  "composer.json"
+)
+
+# Check if current directory is project root
+IS_PROJECT_ROOT=false
+PROJECT_TYPE=""
+
+for indicator in "${project_indicators[@]}"; do
+  if [ -f "${current_dir}/${indicator}" ] || [ -d "${current_dir}/${indicator}" ]; then
+    IS_PROJECT_ROOT=true
+    case "$indicator" in
+      ".git") PROJECT_TYPE="git" ;;
+      "package.json") PROJECT_TYPE="node" ;;
+      "Cargo.toml") PROJECT_TYPE="rust" ;;
+      "go.mod") PROJECT_TYPE="go" ;;
+      "pom.xml"|"build.gradle") PROJECT_TYPE="java" ;;
+      "pyproject.toml") PROJECT_TYPE="python" ;;
+      "composer.json") PROJECT_TYPE="php" ;;
+    esac
+    break
+  fi
+done
+
+# Find project root by walking up directory tree
+PROJECT_ROOT="$current_dir"
+check_dir="$current_dir"
+while [ "$check_dir" != "/" ]; do
+  for indicator in "${project_indicators[@]}"; do
+    if [ -f "${check_dir}/${indicator}" ] || [ -d "${check_dir}/${indicator}" ]; then
+      PROJECT_ROOT="$check_dir"
+      break 2
+    fi
+  done
+  check_dir=$(dirname "$check_dir")
+done
+
+# Calculate depth relative to project root (0 = at root)
+if [ "$PROJECT_ROOT" != "$current_dir" ]; then
+  relative_path="${current_dir#$PROJECT_ROOT/}"
+  relative_depth=$(echo "$relative_path" | tr -cd '/' | wc -c | tr -d ' ')
+  relative_depth=$((relative_depth + 1))  # +1 because we're in a subdirectory
+else
+  relative_depth=0
+fi
+
+# Color coding based on depth
+if [ $relative_depth -eq 0 ]; then
+  DEPTH_COLOR="\033[38;5;46m"   # Green: At project root
+  DEPTH_ICON="📁"
+  DEPTH_STATUS="ROOT"
+elif [ $relative_depth -le 2 ]; then
+  DEPTH_COLOR="\033[38;5;75m"   # Blue: 1-2 levels deep (normal)
+  DEPTH_ICON="📂"
+  DEPTH_STATUS="L${relative_depth}"
+elif [ $relative_depth -le 4 ]; then
+  DEPTH_COLOR="\033[38;5;226m"  # Yellow: 3-4 levels deep (moderate)
+  DEPTH_ICON="📂"
+  DEPTH_STATUS="L${relative_depth}"
+else
+  DEPTH_COLOR="\033[38;5;208m"  # Orange: 5+ levels deep (deep nesting)
+  DEPTH_ICON="📂"
+  DEPTH_STATUS="L${relative_depth}+"
+fi
+
+# Project type indicator
+if [ "$IS_PROJECT_ROOT" = true ] && [ -n "$PROJECT_TYPE" ]; then
+  TYPE_DISPLAY="${PROJECT_TYPE}"
+else
+  TYPE_DISPLAY=""
+fi
+
+# Extract directory name for display
+dir_name=$(basename "$current_dir")
+
+# Monorepo detection (apps/, packages/, libs/ directories)
+if echo "$current_dir" | grep -qE '/(apps|packages|libs|services|modules)/'; then
+  MONOREPO_INDICATOR="[monorepo]"
+else
+  MONOREPO_INDICATOR=""
+fi
+
+# Build breadcrumb visualization (last 3 directories)
+if [ $relative_depth -gt 0 ]; then
+  breadcrumb=$(echo "$current_dir" | awk -F'/' '{for(i=NF-2;i<=NF;i++) if($i) printf "%s/", $i}' | sed 's|/$||')
+else
+  breadcrumb="$dir_name"
+fi
+
+RESET="\033[0m"
+
+# Output statusline
+if [ -n "$TYPE_DISPLAY" ]; then
+  echo -e "${DEPTH_ICON} ${DEPTH_COLOR}${DEPTH_STATUS}${RESET} ${TYPE_DISPLAY} | ${breadcrumb} ${MONOREPO_INDICATOR}"
+else
+  echo -e "${DEPTH_ICON} ${DEPTH_COLOR}${DEPTH_STATUS}${RESET} | ${breadcrumb} ${MONOREPO_INDICATOR}"
+fi

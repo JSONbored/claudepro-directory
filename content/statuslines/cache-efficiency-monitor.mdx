@@ -1,0 +1,134 @@
+---
+title: "Cache Efficiency Monitor - Statuslines"
+slug: "cache-efficiency-monitor"
+category: "statuslines"
+description: "Claude Code prompt caching efficiency monitor tracking cache hits, write efficiency, and cost savings with visual hit rate indicators and optimization recommendations."
+seoTitle: "Cache Efficiency Monitor - Statuslines"
+seoDescription: "Claude Code prompt caching efficiency monitor tracking cache hits, write efficiency, and cost savings with visual hit rate indicators and optimization recomm..."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+tags: 
+  - "prompt-caching"
+  - "cache-efficiency"
+  - "cost-savings"
+  - "hit-rate"
+  - "cache-optimization"
+keywords: 
+  - "cache"
+  - "cache-efficiency"
+  - "cache-optimization"
+  - "claude"
+  - "cost-savings"
+  - "development"
+  - "efficiency"
+  - "hit-rate"
+  - "monitor"
+  - "prompt-caching"
+  - "statuslines"
+  - "tools"
+difficultyScore: 7
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 2
+copyCount: 0
+popularityScore: 12
+readingTime: 2
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/statusline"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+#!/usr/bin/env bash
+
+# Cache Efficiency Monitor for Claude Code
+# Tracks prompt caching performance and cost savings
+
+# Read JSON from stdin
+read -r input
+
+# Extract cache metrics (if available in JSON)
+cache_read_tokens=$(echo "$input" | jq -r '.cost.cache_read_input_tokens // 0')
+cache_create_tokens=$(echo "$input" | jq -r '.cost.cache_creation_input_tokens // 0')
+regular_input_tokens=$(echo "$input" | jq -r '.cost.input_tokens // 0')
+
+# Calculate total input tokens
+total_input=$((cache_read_tokens + cache_create_tokens + regular_input_tokens))
+
+# Avoid division by zero
+if [ $total_input -eq 0 ]; then
+  total_input=1
+fi
+
+# Calculate cache hit rate (percentage of tokens read from cache)
+if [ $cache_read_tokens -gt 0 ]; then
+  cache_hit_rate=$(( (cache_read_tokens * 100) / total_input ))
+else
+  cache_hit_rate=0
+fi
+
+# Calculate write efficiency (cache creation vs regular input)
+if [ $cache_create_tokens -gt 0 ]; then
+  write_percentage=$(( (cache_create_tokens * 100) / total_input ))
+else
+  write_percentage=0
+fi
+
+# Cache efficiency scoring
+if [ $cache_hit_rate -ge 50 ]; then
+  CACHE_COLOR="\033[38;5;46m"   # Green: Excellent caching (>50% hit rate)
+  CACHE_ICON="✓"
+  CACHE_STATUS="EXCELLENT"
+elif [ $cache_hit_rate -ge 25 ]; then
+  CACHE_COLOR="\033[38;5;226m"  # Yellow: Good caching (25-50% hit rate)
+  CACHE_ICON="●"
+  CACHE_STATUS="GOOD"
+elif [ $cache_hit_rate -gt 0 ]; then
+  CACHE_COLOR="\033[38;5;208m"  # Orange: Low caching (1-25% hit rate)
+  CACHE_ICON="⚠"
+  CACHE_STATUS="LOW"
+else
+  CACHE_COLOR="\033[38;5;250m"  # Gray: No caching
+  CACHE_ICON="○"
+  CACHE_STATUS="NONE"
+fi
+
+# Estimate cost savings (cache reads cost 90% less than regular input)
+if [ $cache_read_tokens -gt 0 ]; then
+  # Savings = cache_read_tokens * 0.9 (90% discount)
+  savings_tokens=$(echo "scale=0; $cache_read_tokens * 0.9 / 1" | bc)
+  savings_display="💰 ~${savings_tokens} tok saved"
+else
+  savings_display=""
+fi
+
+# Build cache hit rate bar (20 characters wide)
+hit_bar_filled=$(( cache_hit_rate / 5 ))  # Each char = 5%
+hit_bar_empty=$(( 20 - hit_bar_filled ))
+
+if [ $hit_bar_filled -gt 0 ]; then
+  hit_bar=$(printf "█%.0s" $(seq 1 $hit_bar_filled))$(printf "░%.0s" $(seq 1 $hit_bar_empty))
+else
+  hit_bar="░░░░░░░░░░░░░░░░░░░░"
+fi
+
+# Optimization recommendation
+if [ $cache_hit_rate -eq 0 ] && [ $cache_create_tokens -eq 0 ]; then
+  RECOMMENDATION="(Enable caching?)"
+elif [ $cache_hit_rate -lt 25 ] && [ $write_percentage -gt 50 ]; then
+  RECOMMENDATION="(More reads needed)"
+else
+  RECOMMENDATION=""
+fi
+
+RESET="\033[0m"
+
+# Output statusline
+if [ -n "$savings_display" ]; then
+  echo -e "${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | ${savings_display} ${RECOMMENDATION}"
+else
+  echo -e "${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% ${RECOMMENDATION}"
+fi

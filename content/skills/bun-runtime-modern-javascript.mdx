@@ -1,0 +1,190 @@
+---
+title: "Bun JavaScript Runtime Development Skill"
+slug: "bun-runtime-modern-javascript"
+category: "skills"
+description: "Build high-performance JavaScript and TypeScript applications with Bun, the all-in-one runtime that's 3x faster than Node.js. Includes native TypeScript execution, built-in bundler, test runner, and package manager in a single binary. Drop-in Node.js compatibility with modern performance optimizations for HTTP servers, CLI tools, and build pipelines."
+seoTitle: "Bun JavaScript Runtime Development Skill"
+seoDescription: "Build high-performance JavaScript and TypeScript applications with Bun, the all-in-one runtime that's 3x faster than Node.js. Includes native TypeScript exec..."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-23"
+tags: 
+  - "bun"
+  - "runtime"
+  - "javascript"
+  - "typescript"
+  - "performance"
+keywords: 
+  - "bun"
+  - "claude"
+  - "development"
+  - "javascript"
+  - "modern"
+  - "performance"
+  - "runtime"
+  - "skills"
+  - "tools"
+  - "typescript"
+difficultyScore: 100
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 16
+copyCount: 1
+popularityScore: 26
+readingTime: 4
+documentationUrl: "https://bun.sh/docs"
+downloadUrl: "/downloads/skills/bun-runtime-modern-javascript.zip"
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+# Bun Runtime Modern JavaScript Skill
+
+## What This Skill Enables
+
+Claude can build and deploy JavaScript/TypeScript applications using Bun, the all-in-one JavaScript runtime that's 3x faster than Node.js for package installs and startup time. Bun includes a native bundler, test runner, package manager, and TypeScript transpiler in a single binary. From APIs to CLIs to build tools, Bun provides drop-in Node.js compatibility with modern performance.
+
+## Prerequisites
+
+**Required:**
+- Claude Pro subscription or Claude Code CLI
+- macOS, Linux, or WSL (Windows support in beta)
+- curl or wget for installation
+- Basic JavaScript/TypeScript knowledge
+
+**What Claude handles automatically:**
+- Writing Bun-optimized server code
+- Configuring bun:test for testing
+- Setting up Bun.serve() for HTTP servers
+- Using Bun.build() for bundling
+- Implementing file operations with Bun.file()
+- Adding WebSocket support
+- Configuring environment variables
+- Optimizing for Bun's performance characteristics
+
+## How to Use This Skill
+
+### High-Performance HTTP Server
+
+**Prompt:** "Create Bun HTTP server with: REST API routes, JSON parsing, CORS middleware, static file serving, WebSocket support, and error handling. Optimize for maximum req/sec."
+
+Claude will:
+1. Use Bun.serve() with fetch handler
+2. Implement routing with URL patterns
+3. Add CORS headers
+4. Serve static files with Bun.file()
+5. Set up WebSocket upgrade
+6. Handle errors gracefully
+7. Benchmark with wrk/autocannon
+
+### CLI Tool Development
+
+**Prompt:** "Build CLI tool with Bun for: file processing, progress bars, colored output, interactive prompts, and parallel operations. Package as standalone binary."
+
+Claude will:
+1. Parse args with Bun.argv
+2. Use chalk for colors
+3. Add ora for spinners
+4. Implement inquirer prompts
+5. Process files with Bun.file()
+6. Use Bun.spawn() for parallel
+7. Build executable with bun build
+
+### Database Operations
+
+**Prompt:** "Create Bun app with SQLite using bun:sqlite. Include: connection pooling, prepared statements, migrations, and query builder pattern."
+
+Claude will:
+1. Use bun:sqlite module
+2. Set up connection pool
+3. Create prepared statements
+4. Implement migration system
+5. Build query builder
+6. Add transaction support
+7. Handle errors and cleanup
+
+### Testing with Bun
+
+**Prompt:** "Set up Bun testing for API with: unit tests, integration tests, mocking, coverage reporting, and parallel execution."
+
+Claude will:
+1. Write tests with bun:test
+2. Use expect assertions
+3. Mock with spyOn
+4. Configure coverage
+5. Run tests in parallel
+6. Add before/after hooks
+7. Test HTTP endpoints
+
+## Tips for Best Results
+
+1. **Use Bun APIs**: Prefer `Bun.file()` over `fs`, `Bun.serve()` over http module. Bun's APIs are optimized and simpler.
+
+2. **Native TypeScript**: No need for ts-node or build step. Bun runs TypeScript natively. Use .ts extensions directly.
+
+3. **Built-in Bundler**: Use `bun build` instead of webpack/esbuild. Single-command bundling with tree-shaking.
+
+4. **Fast Package Manager**: Run `bun install` instead of npm/pnpm. Uses global cache and parallel downloads.
+
+5. **WebSocket Native**: Bun.serve() includes WebSocket upgrade. No need for ws or socket.io for simple cases.
+
+## Common Workflows
+
+### REST API Backend
+```
+"Build production REST API with Bun:
+1. HTTP server with Bun.serve() and routing
+2. JWT authentication middleware
+3. Database with bun:sqlite or Postgres
+4. Request validation with Zod
+5. Rate limiting with in-memory store
+6. File uploads with Bun.file()
+7. WebSocket for real-time updates
+8. Docker deployment with bun:alpine"
+```
+
+### Build Tool Development
+```
+"Create build tool with Bun:
+1. File watching with Bun.watch()
+2. Bundling with Bun.build()
+3. TypeScript transpilation (automatic)
+4. Minification and tree-shaking
+5. Source maps generation
+6. Plugin system for transforms
+7. Parallel file processing
+8. Cache invalidation"
+```
+
+### Microservices Infrastructure
+```
+"Build microservices with Bun:
+1. Service discovery with etcd
+2. gRPC communication
+3. Health checks endpoint
+4. Metrics collection
+5. Structured logging
+6. Graceful shutdown
+7. Docker containers
+8. Kubernetes deployment"
+```
+
+## Troubleshooting
+
+**Issue:** "Node.js package not working in Bun"
+**Solution:** Check Bun compatibility at bun.sh/docs. Most npm packages work. For native modules, ensure Bun version supports Node-API. Use --bun flag or check package.json engines field.
+
+**Issue:** "Performance not better than Node.js"
+**Solution:** Ensure using Bun APIs (Bun.serve not http). Check CPU-bound vs I/O-bound. Bun excels at I/O. Profile with bun:jsc. Verify using latest Bun version.
+
+**Issue:** "TypeScript types not working"
+**Solution:** Install @types packages with bun add -d. Check bunfig.toml has correct compilerOptions. Use bun-types for Bun APIs. Restart editor/LSP.
+
+## Learn More
+
+- [Bun Official Documentation](https://bun.sh/docs)
+- [Bun GitHub Repository](https://github.com/oven-sh/bun)
+- [Bun Discord Community](https://bun.sh/discord)
+- [Awesome Bun Resources](https://github.com/apvarun/awesome-bun)

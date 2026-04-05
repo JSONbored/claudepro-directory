@@ -1,0 +1,110 @@
+---
+title: "Accessibility First Statusline - Claude Code Statuslines"
+slug: "accessibility-first-statusline"
+category: "statuslines"
+description: "WCAG-compliant accessible statusline with screen reader announcements, high-contrast colors, semantic labels, keyboard hints, and reduced motion support."
+seoTitle: "Accessibility First Statusline - Claude Code Statuslines"
+seoDescription: "WCAG-compliant accessible statusline with screen reader announcements, high-contrast colors, semantic labels, keyboard hints, and reduced motion support."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-23"
+tags: 
+  - "accessibility"
+  - "wcag"
+  - "screen-reader"
+  - "high-contrast"
+  - "inclusive"
+  - "a11y"
+keywords: 
+  - "a11y"
+  - "accessibility"
+  - "claude"
+  - "development"
+  - "first"
+  - "high-contrast"
+  - "inclusive"
+  - "screen-reader"
+  - "statusline"
+  - "statuslines"
+  - "tools"
+  - "wcag"
+difficultyScore: 10
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 8
+copyCount: 0
+popularityScore: 13
+readingTime: 2
+documentationUrl: "https://www.w3.org/WAI/WCAG21/quickref/"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+#!/usr/bin/env bash
+
+# Accessibility-First Statusline for Claude Code
+# WCAG 2.1 AA compliant, screen reader friendly, high contrast
+
+# Read JSON from stdin
+read -r input
+
+# Extract values
+model=$(echo "$input" | jq -r '.model // "unknown"')
+dir=$(echo "$input" | jq -r '.workspace.path // "~"' | sed "s|$HOME|~|")
+tokens=$(echo "$input" | jq -r '.session.totalTokens // 0')
+
+# Check for PREFERS_REDUCED_MOTION environment variable
+if [ "$PREFERS_REDUCED_MOTION" = "1" ]; then
+  # No animations, static display
+  animation=""
+else
+  # Minimal indicator (not flashing)
+  animation="▪"
+fi
+
+# High contrast WCAG AA compliant colors
+# Contrast ratio > 4.5:1 against black background
+# Using basic ANSI colors for maximum compatibility
+WHITE_BOLD="\033[1;37m"    # Bright white (high contrast)
+CYAN_BOLD="\033[1;36m"     # Bright cyan (high contrast)
+YELLOW_BOLD="\033[1;33m"   # Bright yellow (high contrast)
+RESET="\033[0m"
+
+# Semantic labels (screen reader friendly)
+LABEL_MODEL="Model:"
+LABEL_DIR="Directory:"
+LABEL_TOKENS="Tokens:"
+
+# Build statusline with semantic structure
+statusline=""
+statusline+="${animation} "  # Activity indicator (if motion enabled)
+statusline+="${WHITE_BOLD}${LABEL_MODEL}${RESET} ${CYAN_BOLD}${model}${RESET} | "
+statusline+="${WHITE_BOLD}${LABEL_DIR}${RESET} ${CYAN_BOLD}${dir}${RESET} | "
+statusline+="${WHITE_BOLD}${LABEL_TOKENS}${RESET} ${YELLOW_BOLD}${tokens}${RESET}"
+
+# Output for visual display
+echo -e "$statusline"
+
+# Screen reader announcement (stderr for assistive tech)
+# Only announce on significant changes (every 1000 tokens)
+token_threshold=$((tokens / 1000 * 1000))
+if [ -f "/tmp/claude_statusline_last_tokens" ]; then
+  last_tokens=$(cat /tmp/claude_statusline_last_tokens)
+else
+  last_tokens=0
+fi
+
+if [ $token_threshold -ne $((last_tokens / 1000 * 1000)) ]; then
+  # Announce to screen reader (ARIA live region style)
+  echo "Status update: Using $model in directory $dir. Token count: $tokens." >&2
+  echo $tokens > /tmp/claude_statusline_last_tokens
+fi
+
+# Keyboard navigation hint (on first run)
+if [ ! -f "/tmp/claude_statusline_initialized" ]; then
+  echo "Accessibility mode enabled. Press Ctrl+C to interrupt, Tab for completion suggestions." >&2
+  touch /tmp/claude_statusline_initialized
+fi

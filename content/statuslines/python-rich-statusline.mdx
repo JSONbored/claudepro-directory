@@ -1,0 +1,98 @@
+---
+title: "Python Rich Statusline - Statuslines"
+slug: "python-rich-statusline"
+category: "statuslines"
+description: "Feature-rich statusline using Python's Rich library for beautiful formatting, progress bars, and real-time token cost tracking"
+seoTitle: "Python Rich Statusline - Statuslines"
+seoDescription: "Feature-rich statusline using Python's Rich library for beautiful formatting, progress bars, and real-time token cost tracking Discover tools for AI developm..."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-01"
+tags: 
+  - "python"
+  - "rich"
+  - "advanced"
+  - "cost-tracking"
+  - "progress"
+  - "colorful"
+keywords: 
+  - "advanced"
+  - "claude"
+  - "colorful"
+  - "cost-tracking"
+  - "development"
+  - "progress"
+  - "python"
+  - "rich"
+  - "statusline"
+  - "statuslines"
+  - "tools"
+difficultyScore: 3
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 52
+copyCount: 0
+popularityScore: 57
+readingTime: 1
+documentationUrl: "https://rich.readthedocs.io/"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+#!/usr/bin/env python3
+
+import sys
+import json
+from rich.console import Console
+from rich.text import Text
+
+console = Console()
+
+# Read JSON from stdin
+try:
+    data = json.load(sys.stdin)
+except json.JSONDecodeError:
+    console.print("[red]Error: Invalid JSON input[/red]")
+    sys.exit(1)
+
+# Extract session data
+model = data.get('model', 'unknown')
+workspace = data.get('workspace', {}).get('path', '~').replace(f"{os.path.expanduser('~')}", '~')
+tokens = data.get('session', {}).get('totalTokens', 0)
+cost = data.get('session', {}).get('estimatedCost', 0.0)
+git_branch = data.get('git', {}).get('branch', None)
+
+# Build status components
+status = Text()
+
+# Model indicator with emoji
+status.append("🤖 ", style="bold")
+status.append(f"{model}", style="bold cyan")
+status.append(" │ ", style="dim")
+
+# Directory
+status.append("📁 ", style="bold")
+status.append(f"{workspace}", style="yellow")
+
+# Git branch if available
+if git_branch:
+    status.append(" │ ", style="dim")
+    status.append(" ", style="bold")
+    status.append(f"{git_branch}", style="magenta")
+
+# Token usage
+status.append(" │ ", style="dim")
+status.append("🎯 ", style="bold")
+status.append(f"{tokens:,}", style="green" if tokens < 100000 else "yellow")
+
+# Cost with dynamic coloring
+if cost > 0:
+    status.append(" │ ", style="dim")
+    status.append("💰 ", style="bold")
+    cost_color = "green" if cost < 0.10 else "yellow" if cost < 1.0 else "red"
+    status.append(f"${cost:.3f}", style=cost_color)
+
+console.print(status)

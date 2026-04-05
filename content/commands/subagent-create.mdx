@@ -1,0 +1,489 @@
+---
+title: "Subagent Creator for Claude Code"
+slug: "subagent-create"
+category: "commands"
+description: "Create specialized Claude Code subagents with custom system prompts, scoped tool access, and independent context for parallel task execution and workflow orchestration"
+seoTitle: "Subagent Creator for Claude Code"
+seoDescription: "Create specialized Claude Code subagents with custom system prompts, scoped tool access, and independent context for parallel task execution and workflow orc..."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+tags: 
+  - "subagents"
+  - "orchestration"
+  - "parallel-execution"
+  - "specialization"
+  - "workflows"
+  - "automation"
+keywords: 
+  - "automation"
+  - "claude"
+  - "commands"
+  - "create"
+  - "development"
+  - "orchestration"
+  - "parallel-execution"
+  - "specialization"
+  - "subagent"
+  - "subagents"
+  - "tools"
+  - "workflows"
+difficultyScore: 100
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 4
+copyCount: 2
+popularityScore: 9
+readingTime: 9
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/sub-agents"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+The `/subagent-create` command builds specialized AI subagents in Claude Code with custom expertise, independent context windows, and scoped tool permissions for modular multi-agent workflows.
+
+## Features
+
+- **Custom System Prompts**: Define exact personality, expertise, and instructions per subagent
+- **Independent Context**: Each subagent has isolated context window (doesn't clutter main conversation)
+- **Scoped Tool Access**: Grant minimum required permissions per agent role
+- **Parallel Execution**: Run up to 10 subagents concurrently with intelligent queuing
+- **Automatic Delegation**: Claude intelligently selects subagents based on task context
+- **Template Library**: Pre-built subagent templates for common development roles
+- **Performance Tracking**: Monitor subagent success rates and execution times
+- **Result Aggregation**: Combine outputs from multiple subagents into unified reports
+
+## Usage
+
+```bash
+/subagent-create [role] [options]
+```
+
+### Subagent Roles (Pre-built Templates)
+
+**Development:**
+- `--code-reviewer` - Senior code reviewer and security expert
+- `--test-engineer` - Test automation specialist
+- `--debugger` - Debugging and troubleshooting expert
+- `--refactoring-specialist` - Code refactoring and optimization
+- `--documentation-writer` - Technical documentation specialist
+
+**Architecture:**
+- `--architect` - Software architect and system designer
+- `--database-expert` - Database design and optimization
+- `--security-auditor` - Security vulnerability assessment
+- `--performance-analyst` - Performance optimization expert
+
+**DevOps:**
+- `--ci-cd-engineer` - CI/CD pipeline specialist
+- `--infrastructure-specialist` - Cloud infrastructure expert
+- `--monitoring-expert` - Observability and monitoring
+
+**Research:**
+- `--researcher` - Web research and data gathering
+- `--analyst` - Data analysis and insights
+- `--technical-writer` - Content creation and synthesis
+
+### Configuration Options
+
+- `--custom` - Create custom subagent with manual configuration
+- `--tools=<list>` - Grant specific tool access (comma-separated)
+- `--all-tools` - Grant access to all available tools
+- `--read-only` - Restrict to read-only tools only
+- `--parallel=<n>` - Set max concurrent instances (default: 10)
+- `--context-size=<tokens>` - Set context window size
+
+### Management Commands
+
+- `--list` - List all configured subagents
+- `--status` - Show active subagent execution status
+- `--delete=<name>` - Remove subagent configuration
+- `--edit=<name>` - Modify existing subagent
+
+## Examples
+
+### Code Review Subagent (Pre-built Template)
+
+**Command:**
+```bash
+/subagent-create --code-reviewer
+```
+
+**Generated Configuration:**
+```json
+{
+  "name": "code-reviewer",
+  "displayName": "Senior Code Reviewer",
+  "description": "Reviews code for security, quality, and best practices",
+  "systemPrompt": "You are a senior code reviewer with 15+ years of experience.\n\nYour expertise includes:\n- Security vulnerability detection (OWASP Top 10)\n- Code quality and maintainability assessment\n- Performance optimization identification\n- Best practices enforcement\n- Architecture and design patterns\n\nReview Guidelines:\n1. Identify security vulnerabilities with severity ratings\n2. Flag code smells and anti-patterns\n3. Suggest specific improvements with examples\n4. Praise good practices when found\n5. Consider the broader architectural context\n\nProvide constructive, actionable feedback.",
+  "tools": [
+    "read_file",
+    "grep",
+    "glob",
+    "bash"
+  ],
+  "capabilities": {
+    "canWriteFiles": false,
+    "canExecuteCommands": true,
+    "canAccessNetwork": false
+  },
+  "maxConcurrent": 3,
+  "contextWindowSize": 50000
+}
+```
+
+**Usage in Workflow:**
+```bash
+User: "Review the authentication middleware for security issues"
+
+Claude: *delegates to code-reviewer subagent*
+
+Code Reviewer Subagent:
+1. Reads src/middleware/auth.ts
+2. Analyzes for vulnerabilities
+3. Checks dependencies for known CVEs
+4. Reviews error handling
+5. Returns detailed security report
+
+Claude: *presents aggregated findings to user*
+```
+
+### Test Engineering Subagent
+
+**Command:**
+```bash
+/subagent-create --test-engineer --tools=read_file,write_file,bash
+```
+
+**Configuration:**
+```json
+{
+  "name": "test-engineer",
+  "displayName": "QA Test Engineer",
+  "systemPrompt": "You are a QA engineer specializing in test automation.\n\nYour role:\n- Write comprehensive test suites (unit, integration, E2E)\n- Identify edge cases and test scenarios\n- Use Vitest, Jest, Playwright, Cypress\n- Ensure high code coverage (80%+ target)\n- Follow TDD best practices\n\nTest Philosophy:\n1. Tests should be deterministic and fast\n2. Mock external dependencies appropriately\n3. Use descriptive test names\n4. Follow AAA pattern (Arrange, Act, Assert)\n5. Test behavior, not implementation\n\nGenerate production-ready test code.",
+  "tools": ["read_file", "write_file", "bash"],
+  "capabilities": {
+    "canWriteFiles": true,
+    "canExecuteCommands": true
+  }
+}
+```
+
+**Workflow Example:**
+```bash
+User: "Create tests for the user authentication service"
+
+Test Engineer Subagent:
+1. Reads src/services/auth.service.ts
+2. Identifies testable functions
+3. Generates test file structure:
+   - Unit tests for individual methods
+   - Integration tests for auth flow
+   - Edge cases (invalid tokens, expired sessions)
+4. Writes tests/unit/auth.service.test.ts
+5. Runs tests with: pnpm test auth.service
+6. Reports coverage metrics
+```
+
+### Custom Research Subagent
+
+**Command:**
+```bash
+/subagent-create --custom
+```
+
+**Interactive Setup:**
+```
+Claude: "What should this subagent specialize in?"
+User: "API documentation research and synthesis"
+
+Claude: "What tools should it have access to?"
+User: "web search, file reading, and writing"
+
+Claude: "Generating custom subagent configuration..."
+```
+
+**Generated Configuration:**
+```json
+{
+  "name": "api-researcher",
+  "displayName": "API Documentation Researcher",
+  "systemPrompt": "You are an API documentation researcher specializing in discovering, analyzing, and synthesizing API documentation.\n\nYour capabilities:\n- Search for official API documentation\n- Analyze API endpoints, parameters, and responses\n- Identify authentication methods\n- Extract code examples\n- Synthesize findings into clear documentation\n\nDeliverables:\n1. Structured API reference documentation\n2. Authentication flow diagrams\n3. Code examples in multiple languages\n4. Common integration patterns\n5. Known limitations and best practices",
+  "tools": ["web_search", "read_file", "write_file"],
+  "capabilities": {
+    "canAccessNetwork": true,
+    "canWriteFiles": true
+  }
+}
+```
+
+### Multi-Subagent Orchestration
+
+**Command:**
+```bash
+/subagent-create --architect --code-reviewer --test-engineer --documentation-writer
+```
+
+**Workflow: Building a New Feature**
+```bash
+User: "Build a user notification system with email and push notifications"
+
+Claude Orchestration:
+
+1. Architect Subagent (parallel):
+   - Designs system architecture
+   - Defines data models
+   - Specifies API contracts
+   - Creates technical specification
+
+2. Main Claude:
+   - Implements notification service based on spec
+   - Creates database migrations
+   - Builds API endpoints
+
+3. Code Reviewer Subagent (parallel):
+   - Reviews implemented code
+   - Identifies security issues
+   - Suggests optimizations
+
+4. Test Engineer Subagent (parallel):
+   - Writes unit tests
+   - Creates integration tests
+   - Adds E2E test scenarios
+
+5. Documentation Writer Subagent (parallel):
+   - Generates API documentation
+   - Writes integration guide
+   - Creates troubleshooting section
+
+Final Deliverable:
+- Production-ready notification system
+- Comprehensive test coverage
+- Complete documentation
+- Security-reviewed code
+```
+
+### Debugging Workflow with Specialized Subagents
+
+**Command:**
+```bash
+/subagent-create --debugger --performance-analyst
+```
+
+**Scenario: Investigating Slow API Response**
+```bash
+User: "The /api/users endpoint is taking 5+ seconds to respond"
+
+Debugger Subagent:
+1. Reproduces issue with curl/test requests
+2. Analyzes server logs
+3. Traces execution with console.log additions
+4. Identifies slow database query
+5. Reports findings: "N+1 query problem in user.posts relationship"
+
+Performance Analyst Subagent (parallel):
+1. Profiles database queries
+2. Analyzes query execution plans
+3. Identifies missing indexes
+4. Benchmarks current vs optimized queries
+5. Reports: "Adding index on posts.user_id reduces query time from 4.2s to 12ms"
+
+Claude (main):
+- Synthesizes findings from both subagents
+- Implements fix: adds database index
+- Applies eager loading to prevent N+1
+- Runs benchmarks to verify 95% performance improvement
+```
+
+### Security Audit with Multiple Specialists
+
+**Command:**
+```bash
+/subagent-create --security-auditor --database-expert --code-reviewer
+```
+
+**Workflow:**
+```bash
+User: "Perform security audit of authentication system"
+
+Security Auditor Subagent:
+- Checks for SQL injection vulnerabilities
+- Tests authentication bypass attempts
+- Analyzes password hashing (bcrypt strength)
+- Verifies JWT token validation
+- Tests rate limiting effectiveness
+
+Database Expert Subagent:
+- Reviews database schema for PII exposure
+- Checks for unencrypted sensitive fields
+- Validates access control policies
+- Tests for timing attacks on queries
+
+Code Reviewer Subagent:
+- Analyzes authentication code flow
+- Identifies OWASP Top 10 vulnerabilities
+- Reviews error handling (no info leakage)
+- Validates input sanitization
+
+Aggregated Report:
+✓ Password hashing: bcrypt with cost 12 ✓
+✗ CRITICAL: JWT tokens missing expiration
+✗ HIGH: SQL query vulnerable to injection in login endpoint
+⚠ MEDIUM: Missing rate limiting on password reset
+✓ Session management secure ✓
+```
+
+## Advanced Configuration
+
+### Tool Scoping (Minimum Permissions)
+
+```json
+{
+  "name": "security-auditor",
+  "tools": [
+    "read_file",      // Can read code
+    "grep",           // Can search code
+    "bash"            // Can run security scanners
+  ],
+  "excludeTools": [
+    "write_file",     // CANNOT modify code
+    "edit_file",      // CANNOT edit files
+    "web_search"      // CANNOT access external resources
+  ]
+}
+```
+
+### Context Window Optimization
+
+```json
+{
+  "name": "documentation-writer",
+  "contextWindowSize": 100000,  // Large context for full codebase understanding
+  "summaryMode": true            // Automatically summarize after each task
+}
+```
+
+### Parallel Execution Limits
+
+```json
+{
+  "name": "test-engineer",
+  "maxConcurrent": 5,  // Run up to 5 instances in parallel
+  "queueStrategy": "fifo"  // First-in-first-out when queue full
+}
+```
+
+### Handoff Patterns
+
+```json
+{
+  "name": "architect",
+  "handoffs": ["code-reviewer", "test-engineer"],
+  "handoffConditions": {
+    "code-reviewer": "after implementation",
+    "test-engineer": "after code review passes"
+  }
+}
+```
+
+## Subagent Templates Library
+
+### Development Templates
+
+**Code Reviewer:**
+- Focus: Security, quality, best practices
+- Tools: Read-only + bash for analysis
+- Context: 50K tokens
+
+**Test Engineer:**
+- Focus: Test automation, coverage, TDD
+- Tools: Read, write, bash
+- Context: 50K tokens
+
+**Debugger:**
+- Focus: Bug reproduction, root cause analysis
+- Tools: All tools except delete
+- Context: 75K tokens
+
+**Refactoring Specialist:**
+- Focus: Code modernization, optimization
+- Tools: Read, edit, write
+- Context: 100K tokens
+
+### Architecture Templates
+
+**Software Architect:**
+- Focus: System design, scalability, patterns
+- Tools: Read, write (specs only)
+- Context: 100K tokens
+
+**Database Expert:**
+- Focus: Schema design, query optimization, migrations
+- Tools: Read, write, bash (for DB tools)
+- Context: 75K tokens
+
+**Security Auditor:**
+- Focus: Vulnerability assessment, penetration testing
+- Tools: Read, bash (security scanners)
+- Context: 50K tokens
+
+### Research Templates
+
+**Researcher:**
+- Focus: Information gathering, source verification
+- Tools: Web search, read
+- Context: 100K tokens
+
+**Analyst:**
+- Focus: Data analysis, pattern recognition, insights
+- Tools: Read, bash (data tools)
+- Context: 75K tokens
+
+**Technical Writer:**
+- Focus: Documentation, tutorials, API references
+- Tools: Read, write
+- Context: 100K tokens
+
+## Performance Metrics
+
+### Tracking Subagent Success
+
+```bash
+/subagent-create --status
+```
+
+**Output:**
+```
+Subagent Performance Report:
+
+code-reviewer:
+  Total Tasks: 45
+  Success Rate: 93%
+  Avg Execution Time: 12.3s
+  Most Common Issues Found: Security (58%), Performance (22%)
+
+test-engineer:
+  Total Tasks: 38
+  Success Rate: 89%
+  Avg Execution Time: 24.7s
+  Avg Coverage Generated: 84%
+
+debugger:
+  Total Tasks: 12
+  Success Rate: 100%
+  Avg Time to Root Cause: 3.2min
+```
+
+## Best Practices
+
+1. **Principle of Least Privilege**: Grant minimum required tools
+2. **Clear Role Definition**: Specific, well-defined expertise areas
+3. **Independent Context**: Keep subagent tasks isolated
+4. **Parallel When Possible**: Run non-dependent tasks concurrently
+5. **Monitor Performance**: Track success rates and optimize
+6. **Template First**: Use pre-built templates before custom
+7. **Aggregate Results**: Combine outputs for comprehensive reports
+8. **Version Control Config**: Store subagent configs in `.claude/agents/`

@@ -1,0 +1,110 @@
+---
+title: "Five Hour Window Tracker - Statuslines"
+slug: "five-hour-window-tracker"
+category: "statuslines"
+description: "Claude Code 5-hour rolling session window tracker with visual progress bar, time remaining countdown, and expiry warnings for usage management."
+seoTitle: "Five Hour Window Tracker - Statuslines"
+seoDescription: "Claude Code 5-hour rolling session window tracker with visual progress bar, time remaining countdown, and expiry warnings for usage management. Discover tool..."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+tags: 
+  - "5-hour-window"
+  - "session-tracking"
+  - "usage-limits"
+  - "countdown"
+  - "rolling-window"
+keywords: 
+  - "5-hour-window"
+  - "claude"
+  - "countdown"
+  - "development"
+  - "five"
+  - "hour"
+  - "rolling-window"
+  - "session-tracking"
+  - "statuslines"
+  - "tools"
+  - "tracker"
+  - "usage-limits"
+  - "window"
+difficultyScore: 4
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 6
+copyCount: 0
+popularityScore: 11
+readingTime: 2
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/statusline"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+#!/usr/bin/env bash
+
+# 5-Hour Session Window Tracker for Claude Code
+# Tracks Claude's unique 5-hour rolling session window
+
+# Read JSON from stdin
+read -r input
+
+# Extract session duration in milliseconds
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+
+# Convert to minutes and hours
+duration_minutes=$((total_duration_ms / 60000))
+duration_hours=$((duration_minutes / 60))
+remaining_minutes=$((duration_minutes % 60))
+
+# 5-hour window is 300 minutes
+WINDOW_LIMIT=300
+time_remaining=$((WINDOW_LIMIT - duration_minutes))
+
+# Calculate percentage of window used
+if [ $duration_minutes -gt 0 ]; then
+  percentage_used=$(( (duration_minutes * 100) / WINDOW_LIMIT ))
+else
+  percentage_used=0
+fi
+
+# Prevent overflow (sessions can continue beyond 5 hours in practice)
+if [ $percentage_used -gt 100 ]; then
+  percentage_used=100
+  time_remaining=0
+fi
+
+# Color coding based on window usage
+if [ $percentage_used -lt 50 ]; then
+  STATUS_COLOR="\033[38;5;46m"   # Green: < 50% used
+  STATUS_ICON="✓"
+elif [ $percentage_used -lt 80 ]; then
+  STATUS_COLOR="\033[38;5;226m"  # Yellow: 50-80% used
+  STATUS_ICON="⚠"
+else
+  STATUS_COLOR="\033[38;5;196m"  # Red: > 80% used
+  STATUS_ICON="⏰"
+fi
+
+# Build progress bar (20 characters wide)
+bar_filled=$(( percentage_used / 5 ))  # Each char = 5%
+bar_empty=$(( 20 - bar_filled ))
+bar=$(printf "█%.0s" $(seq 1 $bar_filled))$(printf "░%.0s" $(seq 1 $bar_empty))
+
+# Format time remaining
+if [ $time_remaining -gt 60 ]; then
+  remaining_hours=$((time_remaining / 60))
+  remaining_mins=$((time_remaining % 60))
+  time_display="${remaining_hours}h ${remaining_mins}m"
+elif [ $time_remaining -gt 0 ]; then
+  time_display="${time_remaining}m"
+else
+  time_display="EXPIRED"
+fi
+
+RESET="\033[0m"
+
+# Output statusline
+echo -e "${STATUS_ICON} 5H Window: ${STATUS_COLOR}${bar}${RESET} ${percentage_used}% | ${STATUS_COLOR}${time_display}${RESET} left"

@@ -1,0 +1,663 @@
+---
+title: "Slash Command Generator for Claude Code"
+slug: "slash-command-gen"
+category: "commands"
+description: "Create custom slash commands for Claude Code with templates, arguments, frontmatter metadata, and team-shared workflows stored in .claude/commands directory"
+seoTitle: "Slash Command Generator for Claude Code"
+seoDescription: "Create custom slash commands for Claude Code with templates, arguments, frontmatter metadata, and team-shared workflows stored in .claude/commands directory"
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+tags: 
+  - "slash-commands"
+  - "custom-commands"
+  - "workflow-automation"
+  - "templates"
+  - "team-collaboration"
+  - "productivity"
+keywords: 
+  - "claude"
+  - "command"
+  - "commands"
+  - "custom-commands"
+  - "development"
+  - "gen"
+  - "productivity"
+  - "slash"
+  - "slash-commands"
+  - "team-collaboration"
+  - "templates"
+  - "tools"
+  - "workflow-automation"
+difficultyScore: 100
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 8
+copyCount: 2
+popularityScore: 13
+readingTime: 8
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/slash-commands"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+The `/slash-command-gen` command creates custom slash commands stored as Markdown templates in `.claude/commands/` for reusable, team-shared workflows.
+
+## Features
+
+- **Template Library**: Pre-built command templates for common workflows
+- **Argument Support**: Use $ARGUMENTS, $1, $2, $3 for dynamic parameters
+- **Frontmatter Metadata**: Add descriptions, tags, and configuration
+- **Project Scope**: Commands in `.claude/commands/` (git-tracked)
+- **User Scope**: Commands in `~/.claude/commands/` (personal)
+- **Auto-Discovery**: Available via tab-completion after `/`
+- **Team Sharing**: Commit to git for team-wide workflows
+- **Reduced Boilerplate**: Turn repetitive prompts into single commands
+
+## Usage
+
+```bash
+/slash-command-gen [command-name] [options]
+```
+
+### Command Types
+
+- `--github-workflow` - GitHub issue/PR workflows
+- `--code-review` - Code review templates
+- `--documentation` - Documentation generation
+- `--testing` - Test generation workflows
+- `--refactoring` - Refactoring templates
+- `--debugging` - Debug workflows
+- `--custom` - Create from scratch
+
+### Scope
+
+- `--project` - Save to `.claude/commands/` (team-shared)
+- `--user` - Save to `~/.claude/commands/` (personal)
+
+### Options
+
+- `--with-args` - Include argument placeholders
+- `--template=<name>` - Use specific template
+- `--description=<text>` - Add command description
+
+## Examples
+
+### Basic Custom Command
+
+**Command:**
+```bash
+/slash-command-gen fix-issue --github-workflow --project
+```
+
+**Generated File:** `.claude/commands/fix-issue.md`
+```markdown
+---
+description: Fix GitHub issue with TDD workflow
+tags: [github, tdd, workflow]
+---
+
+Fix GitHub issue #$1 using test-driven development:
+
+1. Fetch issue details from GitHub
+2. Understand the problem and requirements
+3. Write failing tests that reproduce the issue
+4. Implement minimal fix to make tests pass
+5. Refactor for code quality
+6. Run full test suite
+7. Create PR with reference to issue #$1
+8. Request review
+
+Follow TDD best practices:
+- Write tests FIRST
+- Commit tests before implementation
+- Ensure 80%+ coverage
+```
+
+**Usage:**
+```bash
+/fix-issue 123
+
+# Expands to full prompt with issue #123
+# Claude fetches issue, writes tests, fixes, creates PR
+```
+
+### Code Review Command
+
+**Command:**
+```bash
+/slash-command-gen review-pr --code-review --with-args
+```
+
+**Generated:** `.claude/commands/review-pr.md`
+```markdown
+---
+description: Comprehensive PR review with security focus
+tags: [review, security, quality]
+---
+
+Perform comprehensive code review of PR #$1:
+
+## Security Review
+1. Check for SQL injection vulnerabilities
+2. Verify input validation on all endpoints
+3. Check authentication/authorization
+4. Review for XSS vulnerabilities
+5. Check for sensitive data exposure
+
+## Code Quality
+1. Verify TypeScript types (no `any`)
+2. Check for code duplication
+3. Review error handling
+4. Verify test coverage (80%+ required)
+5. Check adherence to CLAUDE.md standards
+
+## Performance
+1. Identify N+1 query issues
+2. Check for unnecessary re-renders
+3. Review database query efficiency
+4. Check for memory leaks
+
+## Documentation
+1. Verify JSDoc comments on public APIs
+2. Check README updates if needed
+3. Ensure CHANGELOG updated
+
+Provide:
+- ✅ Approved items
+- ⚠️  Suggestions for improvement  
+- ❌ Required changes before merge
+```
+
+**Usage:**
+```bash
+/review-pr 456
+
+# Claude performs comprehensive review of PR #456
+```
+
+### Multi-Argument Command
+
+**Command:**
+```bash
+/slash-command-gen create-feature --custom --with-args
+```
+
+**Generated:** `.claude/commands/create-feature.md`
+```markdown
+---
+description: Create new feature with full stack implementation
+tags: [feature, fullstack, tdd]
+---
+
+Create feature "$1" in module "$2" with priority $3:
+
+## Planning Phase
+1. Review existing $2 module architecture
+2. Design feature integration approach
+3. Identify affected files and dependencies
+
+## Implementation (TDD)
+1. Write comprehensive test suite for $1
+2. Implement backend:
+   - Database schema changes
+   - API endpoints
+   - Business logic
+3. Implement frontend:
+   - UI components
+   - API integration
+   - State management
+
+## Testing
+1. Unit tests (80%+ coverage)
+2. Integration tests (API + DB)
+3. E2E tests (critical paths)
+
+## Documentation
+1. Update API documentation
+2. Add usage examples
+3. Update CHANGELOG with feature: $1
+
+## Deployment
+1. Create feature flag for gradual rollout
+2. Generate migration scripts
+3. Create deployment checklist
+
+Priority: $3
+Deadline: Based on priority
+```
+
+**Usage:**
+```bash
+/create-feature "user notifications" "messaging" "high"
+
+# $1 = user notifications
+# $2 = messaging  
+# $3 = high
+```
+
+### Simple Workflow Command
+
+**Command:**
+```bash
+/slash-command-gen optimize-bundle --custom
+```
+
+**Generated:** `.claude/commands/optimize-bundle.md`
+```markdown
+---
+description: Analyze and optimize bundle size
+tags: [performance, optimization]
+---
+
+Optimize application bundle size:
+
+1. Run bundle analyzer:
+   ```bash
+   pnpm run build:analyze
+   ```
+
+2. Identify large dependencies:
+   - Check for duplicate packages
+   - Find unused dependencies
+   - Identify heavy libraries
+
+3. Optimization strategies:
+   - Implement code splitting
+   - Use dynamic imports
+   - Replace heavy libraries with lighter alternatives
+   - Remove unused code
+
+4. Apply optimizations:
+   - Update webpack/vite config
+   - Implement lazy loading
+   - Add tree-shaking hints
+
+5. Measure impact:
+   - Compare bundle sizes before/after
+   - Run Lighthouse performance audit
+   - Check Core Web Vitals
+
+Target: Reduce bundle size by 30%
+```
+
+**Usage:**
+```bash
+/optimize-bundle
+
+# Claude analyzes bundle, suggests optimizations, implements changes
+```
+
+### Documentation Command
+
+**Command:**
+```bash
+/slash-command-gen doc-api --documentation --with-args
+```
+
+**Generated:** `.claude/commands/doc-api.md`
+```markdown
+---
+description: Generate comprehensive API documentation
+tags: [documentation, api]
+---
+
+Generate comprehensive documentation for API endpoint $1:
+
+## Endpoint Analysis
+1. Read implementation: $1
+2. Extract:
+   - HTTP method and path
+   - Request parameters
+   - Request body schema
+   - Response schema
+   - Error responses
+   - Authentication requirements
+
+## Documentation Generation
+Create markdown documentation with:
+
+### Endpoint: $1
+
+**Method:** [GET/POST/PUT/DELETE]
+**Path:** [Full path]
+**Authentication:** [Required/Optional]
+
+#### Request
+\`\`\`typescript
+interface RequestBody {
+  // Schema
+}
+\`\`\`
+
+#### Response
+\`\`\`typescript
+interface ResponseBody {
+  // Schema
+}
+\`\`\`
+
+#### Example
+\`\`\`bash
+curl -X POST https://api.example.com$1 \
+  -H "Authorization: Bearer TOKEN" \
+  -d '{"example": "data"}'
+\`\`\`
+
+#### Error Codes
+- 400: Bad Request - [Details]
+- 401: Unauthorized - [Details]
+- 500: Server Error - [Details]
+
+Save to: docs/api/$1.md
+```
+
+**Usage:**
+```bash
+/doc-api /api/users/create
+
+# Generates full API documentation for endpoint
+```
+
+### $ARGUMENTS vs Positional
+
+**Using $ARGUMENTS (all arguments as string):**
+```markdown
+# .claude/commands/commit.md
+---
+description: Create conventional commit
+---
+
+Create a conventional commit with message: "$ARGUMENTS"
+
+Format: type(scope): message
+Run: git add . && git commit -m "$ARGUMENTS"
+```
+
+**Usage:**
+```bash
+/commit feat(auth): add OAuth2 support
+# $ARGUMENTS = "feat(auth): add OAuth2 support"
+```
+
+**Using Positional ($1, $2, $3):**
+```markdown
+# .claude/commands/commit-structured.md
+Create conventional commit:
+- Type: $1
+- Scope: $2  
+- Message: $3
+
+Run: git commit -m "$1($2): $3"
+```
+
+**Usage:**
+```bash
+/commit-structured feat auth "add OAuth2 support"
+# $1 = feat
+# $2 = auth
+# $3 = add OAuth2 support
+```
+
+## Advanced Patterns
+
+### Conditional Logic
+```markdown
+---
+description: Deploy to environment
+---
+
+Deploy to $1 environment:
+
+If $1 is "production":
+1. Run full test suite
+2. Require approval
+3. Create backup
+4. Deploy with zero-downtime strategy
+5. Monitor for 30 minutes
+
+If $1 is "staging":
+1. Run smoke tests
+2. Deploy immediately
+3. Notify team in Slack
+
+If $1 is "dev":
+1. Skip tests
+2. Fast deployment
+```
+
+### Chained Commands
+```markdown
+---
+description: Full feature workflow
+---
+
+Complete feature workflow for "$1":
+
+1. Create feature branch:
+   Run: git checkout -b feat/$1
+
+2. Implement with TDD:
+   Use /tdd-workflow "$1" --unit
+
+3. Create PR:
+   Use /create-pr "feat: $1"
+
+4. Deploy to staging:
+   After approval, use /deploy staging
+```
+
+### Template with Frontmatter
+```markdown
+---
+description: Security audit workflow
+tags: [security, audit, compliance]
+author: security-team
+priority: high
+requires: [sonarqube, npm-audit]
+---
+
+Run comprehensive security audit:
+
+1. Static analysis:
+   ```bash
+   npx sonarqube-scanner
+   ```
+
+2. Dependency audit:
+   ```bash
+   npm audit --audit-level=moderate
+   ```
+
+3. Code review:
+   - Check for hardcoded secrets
+   - Verify input validation
+   - Review authentication flows
+
+4. Generate report:
+   - Findings summary
+   - Severity ratings
+   - Remediation steps
+```
+
+## Team Collaboration
+
+### Project Commands (Shared)
+```bash
+# Location: .claude/commands/
+# Committed to git
+# Available to entire team
+
+.claude/
+  commands/
+    fix-issue.md
+    review-pr.md
+    deploy.md
+    create-feature.md
+```
+
+**Benefits:**
+- Consistent workflows across team
+- Onboard new developers faster
+- Standardize complex processes
+- Share tribal knowledge
+
+### User Commands (Personal)
+```bash
+# Location: ~/.claude/commands/
+# Personal workflows
+# Not shared with team
+
+~/.claude/
+  commands/
+    my-daily-standup.md
+    my-shortcuts.md
+```
+
+**Use Cases:**
+- Personal shortcuts
+- Individual preferences
+- Experimental workflows
+
+## Command Discovery
+
+### List All Commands
+```bash
+/help
+
+[Available Commands]
+Project Commands:
+  /fix-issue [number] - Fix GitHub issue with TDD
+  /review-pr [number] - Comprehensive PR review
+  /deploy [env] - Deploy to environment
+  /create-feature [name] [module] [priority] - Create feature
+
+User Commands:
+  /my-shortcuts - Personal workflow shortcuts
+```
+
+### Tab Completion
+```bash
+# Type / and press TAB
+/fix-<TAB>
+  → /fix-issue
+  
+/rev<TAB>
+  → /review-pr
+```
+
+## Best Practices
+
+### Clear Descriptions
+```markdown
+---
+# ✅ Good
+description: Fix GitHub issue with TDD workflow and PR creation
+
+# ❌ Bad  
+description: Fix stuff
+---
+```
+
+### Specific Instructions
+```markdown
+# ✅ Good
+Implement feature using:
+1. Write tests in tests/unit/
+2. Use Vitest framework
+3. 80%+ coverage required
+4. Follow AAA pattern
+
+# ❌ Bad
+Write some tests
+```
+
+### Use Tags
+```markdown
+---
+tags: [github, tdd, testing, workflow]
+---
+# Makes commands searchable and organized
+```
+
+### Document Arguments
+```markdown
+---
+description: Deploy to environment
+---
+
+Arguments:
+  $1 - Environment (dev, staging, production)
+  $2 - Version tag (optional)
+
+Example: /deploy production v1.2.3
+```
+
+## Template Library
+
+### Available Templates
+
+**GitHub Workflows:**
+- fix-issue
+- create-pr
+- review-pr
+- close-stale-issues
+
+**Code Quality:**
+- code-review
+- refactor-module
+- optimize-performance
+- fix-security-issue
+
+**Testing:**
+- generate-tests
+- run-e2e-tests
+- update-snapshots
+- coverage-report
+
+**Documentation:**
+- doc-api
+- update-readme
+- generate-changelog
+- write-tutorial
+
+**Deployment:**
+- deploy-env
+- rollback
+- health-check
+- release-notes
+
+## Command Maintenance
+
+### Update Command
+```bash
+/slash-command-gen fix-issue --update
+
+# Opens editor to modify existing command
+# Preserves frontmatter
+# Updates last-modified date
+```
+
+### Delete Command
+```bash
+/slash-command-gen fix-issue --delete
+
+⚠️  Delete command 'fix-issue'? (y/n): y
+✓ Deleted .claude/commands/fix-issue.md
+```
+
+### Validate Commands
+```bash
+/slash-command-gen --validate-all
+
+[Validation Report]
+✓ fix-issue.md - Valid
+✓ review-pr.md - Valid
+⚠ deploy.md - Missing description
+✗ old-command.md - Invalid frontmatter
+
+3 valid, 1 warning, 1 error
+```

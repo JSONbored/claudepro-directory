@@ -1,29 +1,19 @@
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
-import { type Metadata } from 'next';
+import Link from "next/link";
 
-import { NotFoundEmpty } from '@/src/components/primitives/feedback/empty-state';
-
-export async function generateMetadata(): Promise<Metadata> {
-  return generatePageMetadata('/404');
-}
-
-/**
- * Static Generation: 404 page is fully static
- * No dynamic data fetching - can be pre-rendered at build time
- */
-export const revalidate = false;
-
-/**
- * Renders the site's 404 Not Found page using the NotFoundEmpty presentation.
- *
- * @returns The React element for the 404 page.
- *
- * @see {@link "@/src/components/primitives/feedback/empty-state".NotFoundEmpty}
- */
 export default function NotFound() {
   return (
-    <div className="bg-background flex min-h-screen items-center justify-center px-4">
-      <NotFoundEmpty />
+    <div className="container flex min-h-[60svh] flex-col items-start justify-center gap-6 py-12">
+      <span className="eyebrow">404</span>
+      <h1 className="section-title max-w-2xl">
+        That page does not exist in the rebuilt directory.
+      </h1>
+      <p className="max-w-xl text-sm leading-7 text-[var(--muted)]">
+        The old site had too many routes and too much dead surface area. This one is
+        intentionally smaller and cleaner.
+      </p>
+      <Link href="/" className="link-button link-button-primary">
+        Back to homepage
+      </Link>
     </div>
   );
 }

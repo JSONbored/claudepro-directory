@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 🚀 Quick Submit (Easiest)
-    url: https://claudepro.directory/submit
-    about: Submit content directly through our web form - no GitHub account needed
+  - name: 🚀 Submit Content
+    url: https://heyclau.de/submit
+    about: Review the current submission flow and open the right GitHub issue or pull request
 
   - name: 📖 Documentation
     url: https://github.com/JSONbored/claudepro-directory/blob/main/README.md

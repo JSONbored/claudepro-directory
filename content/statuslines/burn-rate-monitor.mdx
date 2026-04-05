@@ -1,0 +1,102 @@
+---
+title: "Burn Rate Monitor - Statuslines"
+slug: "burn-rate-monitor"
+category: "statuslines"
+description: "Real-time burn rate monitor showing cost per minute, tokens per minute, and projected daily spend to prevent budget overruns during Claude Code sessions."
+seoTitle: "Burn Rate Monitor - Statuslines"
+seoDescription: "Real-time burn rate monitor showing cost per minute, tokens per minute, and projected daily spend to prevent budget overruns during Claude Code sessions."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+tags: 
+  - "burn-rate"
+  - "cost-tracking"
+  - "budget"
+  - "monitoring"
+  - "real-time"
+keywords: 
+  - "budget"
+  - "burn"
+  - "burn-rate"
+  - "claude"
+  - "cost-tracking"
+  - "development"
+  - "monitor"
+  - "monitoring"
+  - "rate"
+  - "real-time"
+  - "statuslines"
+  - "tools"
+difficultyScore: 5
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 4
+copyCount: 0
+popularityScore: 9
+readingTime: 2
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/statusline"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+#!/usr/bin/env bash
+
+# Burn Rate Monitor Statusline for Claude Code
+# Calculates real-time cost/minute and tokens/minute
+
+# Read JSON from stdin
+read -r input
+
+# Extract values
+total_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 1')
+lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
+
+# Calculate duration in minutes (avoid division by zero)
+if [ "$total_duration_ms" -gt 0 ]; then
+  duration_minutes=$(echo "scale=2; $total_duration_ms / 60000" | bc)
+else
+  duration_minutes=0.01  # Prevent division by zero
+fi
+
+# Calculate burn rate (cost per minute)
+if (( $(echo "$duration_minutes > 0" | bc -l) )); then
+  cost_per_minute=$(echo "scale=4; $total_cost / $duration_minutes" | bc)
+else
+  cost_per_minute=0
+fi
+
+# Calculate total tokens (estimate: lines * 10 tokens per line avg)
+total_tokens=$(( (lines_added + lines_removed) * 10 ))
+
+# Calculate tokens per minute
+if (( $(echo "$duration_minutes > 0" | bc -l) )); then
+  tokens_per_minute=$(echo "scale=0; $total_tokens / $duration_minutes" | bc)
+else
+  tokens_per_minute=0
+fi
+
+# Project daily spend (assuming current burn rate for 24 hours)
+if (( $(echo "$cost_per_minute > 0" | bc -l) )); then
+  daily_projection=$(echo "scale=2; $cost_per_minute * 1440" | bc)  # 1440 minutes in 24 hours
+else
+  daily_projection=0
+fi
+
+# Color coding for burn rate alerts
+if (( $(echo "$cost_per_minute > 0.10" | bc -l) )); then
+  BURN_COLOR="\033[38;5;196m"  # Red: High burn rate (>$0.10/min)
+elif (( $(echo "$cost_per_minute > 0.05" | bc -l) )); then
+  BURN_COLOR="\033[38;5;226m"  # Yellow: Medium burn rate ($0.05-$0.10/min)
+else
+  BURN_COLOR="\033[38;5;46m"   # Green: Low burn rate (<$0.05/min)
+fi
+
+RESET="\033[0m"
+
+# Format output
+echo -e "${BURN_COLOR}🔥 Burn: \$${cost_per_minute}/min${RESET} | 📊 ${tokens_per_minute} tok/min | 📅 Daily: \$${daily_projection}"

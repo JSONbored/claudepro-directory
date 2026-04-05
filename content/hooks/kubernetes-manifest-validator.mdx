@@ -1,0 +1,44 @@
+---
+title: "Kubernetes Manifest Validator - Hooks"
+slug: "kubernetes-manifest-validator"
+category: "hooks"
+description: "Validates Kubernetes YAML manifests for syntax and best practices when modified. This PostToolUse hook provides comprehensive Kubernetes manifest validation with comprehensive Kubernetes manifest validation using kubectl dry-run (--dry-run=client for validation without cluster connection, --dry-run=server for server-side validation when cluster available), multi-tool validation support (kubeval for schema validation, kube-score for best practices scoring, polaris for security and reliability checks), security policy enforcement and best practices checking including security context validation (runAsNonRoot, runAsUser), privileged container detection, host network/PID access detection, and image tag validation (latest tag warnings), resource quota and limits validation with resource limits/requests checking, CPU and memory limit validation, and resource quota compliance checking, API version compatibility and deprecation warnings with API version detection, deprecation warnings for deprecated API versions, and compatibility recommendations, network policy and RBAC configuration validation with network policy rules validation, RBAC role and rolebinding validation, and service account validation, multi-cluster context support and environment-specific validation with kubectl context detection, environment-specific validation rules, and multi-cluster manifest validation, and Helm chart and Kustomize manifest validation with Helm chart structure validation, Kustomize overlay validation, and multi-environment configuration validation. The hook automatically detects Kubernetes manifests (YAML files with apiVersion and kind), validates YAML syntax using Python yaml module, analyzes manifest structure (resource type, API version, namespace), runs kubectl dry-run validation, executes additional validation tools (kubeval, kube-score), performs resource-specific validation (Deployment, Service, ConfigMap, Secret, Ingress), checks security and best practices, and provides comprehensive validation reports with actionable recommendations."
+seoTitle: "Kubernetes Manifest Validator - Hooks"
+seoDescription: "Validates Kubernetes YAML manifests for syntax and best practices when modified. This PostToolUse hook provides comprehensive Kubernetes manifest validation ..."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
+tags: 
+  - "kubernetes"
+  - "k8s"
+  - "yaml"
+  - "validation"
+  - "devops"
+keywords: 
+  - "claude"
+  - "development"
+  - "devops"
+  - "hooks"
+  - "k8s"
+  - "kubernetes"
+  - "manifest"
+  - "tools"
+  - "validation"
+  - "validator"
+  - "yaml"
+difficultyScore: 0
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 15
+copyCount: 0
+popularityScore: 20
+readingTime: 2
+documentationUrl: ""
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+*(No content)*

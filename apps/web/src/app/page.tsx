@@ -1,213 +1,190 @@
-/** Homepage consuming homepageConfigs for runtime-tunable categories */
-
-import { type Database } from '@heyclaude/database-types';
-import { trackRPCFailure } from '@heyclaude/web-runtime/core';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import Link from "next/link";
 import {
-  generatePageMetadata,
-  getHomepageCategoryIds,
-  getHomepageData,
-} from '@heyclaude/web-runtime/server';
-import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
-import { HomePageLoading } from '@heyclaude/web-runtime/ui';
-import { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
-import { Suspense } from 'react';
+  ArrowRight,
+  BriefcaseBusiness,
+  FolderKanban,
+  Sparkles,
+  Zap
+} from "lucide-react";
 
-import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
-import { TopContributors } from '@/src/components/features/community/top-contributors';
-import { HomepageContentServer } from '@/src/components/features/home/homepage-content-server';
-import { HomepageHeroServer } from '@/src/components/features/home/homepage-hero-server';
-import { HomepageSearchFacetsServer } from '@/src/components/features/home/homepage-search-facets-server';
-import { RecentlyViewedRail } from '@/src/components/features/home/recently-viewed-rail';
+import { BrowseDirectory } from "@/components/browse-directory";
+import {
+  getAllEntries,
+  getCategorySummaries,
+  getRecentEntries
+} from "@/lib/content";
+import { featuredSurfaces, siteConfig } from "@/lib/site";
 
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
-      (module_) => ({
-        default: module_.NewsletterCTAVariant,
-      })
-    ),
-  {
-    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
-  }
-);
+export default async function HomePage() {
+  const [categories, entries, recent] = await Promise.all([
+    getCategorySummaries(),
+    getAllEntries(),
+    getRecentEntries()
+  ]);
 
-/**
- * Dynamic Rendering Required
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const revalidate = 1800;
-
-export async function generateMetadata(): Promise<Metadata> {
-  return generatePageMetadata('/');
-}
-
-interface HomePageProperties {
-  searchParams: Promise<{
-    q?: string;
-  }>;
-}
-
-/**
- * Server component that renders the homepage top contributors.
- *
- * Fetches homepage data for the homepage categories, filters out entries missing
- * required identity fields, and normalizes each contributor by ensuring `id`,
- * `slug`, and `name` are present, defaulting `tier` to `"free"` when absent,
- * and adding a `created_at` ISO timestamp. If fetching homepage data fails,
- * the failure is tracked with scope `top-contributors` and the component
- * renders with an empty contributor list.
- *
- * This component runs during server rendering and does not declare its own ISR.
- *
- * @returns A React element rendering TopContributors populated with the processed contributors.
- *
- * @see getHomepageData
- * @see getHomepageCategoryIds
- * @see trackRPCFailure
- * @see TopContributors
- */
-async function TopContributorsServer() {
-  const categoryIds = getHomepageCategoryIds;
-  const homepageResult = await getHomepageData(categoryIds).catch((error: unknown) => {
-    trackRPCFailure('get_homepage_optimized', error, {
-      section: 'top-contributors',
-      categoryIds: categoryIds.length,
-    });
-    return null;
-  });
-
-  interface TopContributor {
-    bio: null | string;
-    id: string;
-    image: null | string;
-    name: string;
-    slug: string;
-    tier: Database['public']['Enums']['user_tier'] | null;
-    work: null | string;
-  }
-
-  const topContributors = (homepageResult?.top_contributors ?? [])
-    .filter((c): c is TopContributor => {
-      return 'id' in c && 'slug' in c && 'name' in c && Boolean(c.id && c.slug && c.name);
-    })
-    .map((contributor) => ({
-      id: contributor.id,
-      slug: contributor.slug,
-      name: contributor.name,
-      image: contributor.image,
-      bio: contributor.bio,
-      work: contributor.work,
-      tier: contributor.tier ?? 'free',
-      created_at: new Date().toISOString(),
-    }));
-
-  return <TopContributors contributors={topContributors} />;
-}
-
-/**
- * Server component that renders the homepage using streaming Suspense boundaries to reduce time-to-first-byte.
- *
- * Renders the page as a set of streaming sections so the hero can appear immediately while other data loads:
- * - Hero: renders immediately and receives a best-effort member count fetched from `getHomepageData` (falls back to 0 on failure).
- * - Search facets: fetched in parallel and streamed independently.
- * - Homepage content: rendered within a Suspense boundary and streamed when its data is ready.
- * - Top contributors and newsletter CTA: lazy-loaded below the fold.
- *
- * @param searchParams - A promise resolving to the page's query parameters (awaited so search params are available before render).
- * @returns The homepage React element composed of streaming Suspense boundaries and lazy sections.
- *
- * @see HomepageHeroServer
- * @see HomepageContentServerWrapper
- * @see TopContributorsServer
- * @see getHomepageData
- * @see trackRPCFailure
- * @see revalidate
- */
-export default async function HomePage({ searchParams }: HomePageProperties) {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'HomePage',
-    route: '/',
-    module: 'apps/web/src/app',
-  });
-
-  await searchParams;
-
-  reqLogger.info('HomePage: rendering homepage');
-
-  // Fetch member count for hero (lightweight, can be done in parallel with other data)
-  // We'll use a default value for the hero and update it when content loads
-  const categoryIds = getHomepageCategoryIds;
-  const homepageResultPromise = getHomepageData(categoryIds).catch((error: unknown) => {
-    trackRPCFailure('get_homepage_optimized', error, {
-      section: 'hero',
-      categoryIds: categoryIds.length,
-      purpose: 'member-count',
-    });
-    return null;
-  });
-
-  // Get member count for hero (non-blocking, can use default if slow)
-  const homepageResult = await homepageResultPromise;
-  const memberCount = homepageResult?.member_count ?? 0;
-
-  // Fetch search facets in parallel (non-blocking, streams separately)
-  const searchFiltersPromise = HomepageSearchFacetsServer();
+  const totalEntries = categories.reduce((sum, item) => sum + item.count, 0);
+  const packagedSkills =
+    categories.find((category) => category.category === "skills")?.count ?? 0;
 
   return (
-    <div className="bg-background min-h-screen">
-      <div className="relative overflow-hidden">
-        {/* Hero section - streams immediately (no data fetching) */}
-        <HomepageHeroServer memberCount={memberCount} />
-
-        <LazySection>
-          <RecentlyViewedRail />
-        </LazySection>
-
-        {/* Homepage content - streams when ready (non-blocking) */}
-        <div className="relative">
-          <Suspense fallback={<HomePageLoading />}>
-            <HomepageContentServerWrapper searchFiltersPromise={searchFiltersPromise} />
-          </Suspense>
+    <div className="space-y-20 pb-24">
+      <section className="hero-shell border-b border-[var(--line)]">
+        <div className="container py-14 md:py-18">
+          <div className="mx-auto max-w-[58rem] space-y-8 text-center">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border border-[var(--line)] bg-[color:color-mix(in_oklab,var(--panel-strong)_94%,transparent)] text-[var(--accent)]">
+              <Sparkles className="h-7 w-7" />
+            </div>
+            <div className="space-y-5">
+              <h1 className="hero-massive mx-auto max-w-[52rem] text-balance">
+                Discover the best Claude agents, MCP servers, skills, guides, and workflows.
+              </h1>
+              <p className="hero-subcopy mx-auto max-w-[40rem]">
+                The community-built directory for Claude Code, MCP, prompts, rules,
+                and reusable workflows. Find, evaluate, and open the strongest assets fast.
+              </p>
+            </div>
+            <div className="grid gap-3 pt-4 sm:grid-cols-3">
+              <div className="stat-chip p-4 text-left">
+                <p className="text-[0.72rem] uppercase tracking-[0.18em] text-[var(--muted)]">
+                  Entries
+                </p>
+                <p className="mt-2 text-4xl font-semibold tracking-[-0.08em]">
+                  {totalEntries}
+                </p>
+              </div>
+              <div className="stat-chip p-4 text-left">
+                <p className="text-[0.72rem] uppercase tracking-[0.18em] text-[var(--muted)]">
+                  Categories
+                </p>
+                <p className="mt-2 text-4xl font-semibold tracking-[-0.08em]">
+                  {categories.length}
+                </p>
+              </div>
+              <div className="stat-chip p-4 text-left">
+                <p className="text-[0.72rem] uppercase tracking-[0.18em] text-[var(--muted)]">
+                  Skill packs
+                </p>
+                <p className="mt-2 text-4xl font-semibold tracking-[-0.08em]">
+                  {packagedSkills}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap justify-center gap-3 pt-2">
+              <Link href="/browse" className="link-button link-button-primary">
+                Browse
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="/submit" className="link-button link-button-secondary">
+                Submit
+              </Link>
+            </div>
+          </div>
         </div>
+      </section>
 
-        {/* Top contributors - lazy loaded below fold */}
-        <LazySection rootMargin="0px 0px -500px 0px">
-          <Suspense fallback={null}>
-            <TopContributorsServer />
-          </Suspense>
-        </LazySection>
+      <section className="container max-w-[68rem] space-y-6">
+        <BrowseDirectory entries={entries} limit={18} />
+      </section>
 
-        <LazySection rootMargin="0px 0px -500px 0px">
-          <NewsletterCTAVariant variant="hero" source="homepage" />
-        </LazySection>
-      </div>
+      <section className="container grid gap-8 md:grid-cols-[1fr_1fr]">
+        <div className="space-y-6">
+          <span className="eyebrow">Recently added</span>
+          <div className="panel rounded-[1.75rem] p-6">
+            <div className="space-y-5">
+              {recent.slice(0, 5).map((entry) => (
+                <Link
+                  key={`${entry.category}-${entry.slug}`}
+                  href={`/${entry.category}/${entry.slug}`}
+                  className="block border-b border-[var(--line)] pb-5 last:border-none last:pb-0"
+                >
+                  <p className="text-sm text-[var(--muted)]">
+                    {entry.category} {entry.dateAdded ? `• ${entry.dateAdded}` : ""}
+                  </p>
+                  <p className="mt-1 text-lg font-semibold tracking-[-0.03em]">
+                    {entry.title}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="space-y-6">
+          <span className="eyebrow">Explore more</span>
+          <div className="space-y-4">
+            {categories.slice(0, 4).map((category) => (
+              <Link
+                key={category.category}
+                href={`/${category.category}`}
+                className="panel block rounded-[1.5rem] p-5 transition hover:-translate-y-0.5"
+              >
+                <p className="text-lg font-semibold tracking-[-0.03em]">
+                  {category.label}
+                </p>
+                <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
+                  {category.description}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="container grid gap-4 md:grid-cols-3">
+        <Link href="/jobs" className="panel rounded-[1.5rem] p-6">
+          <BriefcaseBusiness className="h-6 w-6 text-[var(--accent)]" />
+          <p className="mt-4 text-2xl font-semibold tracking-[-0.03em]">
+            Jobs
+          </p>
+          <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+            Hiring opportunities for people working with Claude, MCP, prompts, and AI tools.
+          </p>
+        </Link>
+        <Link href="/advertise" className="panel rounded-[1.5rem] p-6">
+          <Zap className="h-6 w-6 text-[var(--signal-amber)]" />
+          <p className="mt-4 text-2xl font-semibold tracking-[-0.03em]">
+            Sponsor spots
+          </p>
+          <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+            Featured placements for relevant tools, launches, and products.
+          </p>
+        </Link>
+        <Link href="/submit" className="panel rounded-[1.5rem] p-6">
+          <FolderKanban className="h-6 w-6 text-[var(--accent)]" />
+          <p className="mt-4 text-2xl font-semibold tracking-[-0.03em]">
+            Submit your work
+          </p>
+          <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+            Share an agent, rule, hook, guide, or MCP server with the community.
+          </p>
+        </Link>
+      </section>
+
+      <section className="container">
+        <div className="grid gap-4 rounded-[2rem] border border-[var(--line)] bg-[color:color-mix(in_oklab,var(--panel-strong)_94%,transparent)] p-8 md:grid-cols-[1.2fr_0.8fr] md:items-center">
+          <div className="space-y-3">
+            <span className="eyebrow">Newsletter</span>
+            <h2 className="section-title max-w-2xl">Get the best new Claude tools and workflows in your inbox.</h2>
+            <p className="max-w-2xl text-sm leading-7 text-[var(--muted)]">
+              Resend-powered signup is coming next. The slot is here so the final
+              site architecture already has a clean home for it.
+            </p>
+          </div>
+          <div className="space-y-4">
+            {featuredSurfaces.map((surface) => (
+              <Link
+                key={surface.href}
+                href={surface.href}
+                className="block rounded-[1.25rem] border border-[var(--line)] px-5 py-4 transition hover:bg-[color:color-mix(in_oklab,var(--panel)_88%,transparent)]"
+              >
+                <p className="font-medium tracking-[-0.02em]">{surface.title}</p>
+                <p className="mt-1 text-sm leading-7 text-[var(--muted)]">
+                  {surface.description}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
-}
-
-/**
- * Resolves provided search filter options and renders HomepageContentServer with those filters.
- *
- * This server-side wrapper ensures the `searchFiltersPromise` is fulfilled before rendering the content
- * server, preventing the child component from rendering without the required search filters.
- *
- * @param props.searchFiltersPromise - A promise that resolves to the search filter options to pass to HomepageContentServer.
- *
- * @see HomepageContentServer
- * @see SearchFilterOptions
- */
-async function HomepageContentServerWrapper({
-  searchFiltersPromise,
-}: {
-  searchFiltersPromise: Promise<SearchFilterOptions>;
-}) {
-  const searchFilters = await searchFiltersPromise;
-  return <HomepageContentServer searchFilters={searchFilters} />;
 }

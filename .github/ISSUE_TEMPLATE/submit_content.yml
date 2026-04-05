@@ -8,33 +8,23 @@ body:
       value: |
         ## Submit Your Content
 
-        Thank you for contributing to the Claude Pro Directory!
+        Thank you for contributing to HeyClaude.
 
-        **Please use our submission form at [claudepro.directory/submit](https://claudepro.directory/submit)**
+        This project now treats GitHub as the submission backend.
 
-        Our database-driven submission system provides:
-        - ✅ Dynamic form validation based on content type
-        - ✅ Real-time field validation
-        - ✅ Automatic schema compliance checking
-        - ✅ Rich text editing with preview
-        - ✅ Category-specific field generation
+        Before opening the issue, review:
 
-        ### Why Use the Web Form?
+        - The current site flow at [heyclau.de/submit](https://heyclau.de/submit)
+        - Existing entries in the repository README
+        - The relevant category folder under `content/`
 
-        1. **Validation**: Fields are automatically validated against our database schema
-        2. **Guided Experience**: Only see fields relevant to your content type
-        3. **Error Prevention**: Catch issues before submission
-        4. **Faster Processing**: Database-first approach speeds up review time
+        Preferred contribution path:
 
-        ### Alternative: Manual JSON Submission
+        1. Open a pull request with the new or updated MDX file
+        2. Regenerate the README awesome list
+        3. Include any related download asset under `content/skills/` if needed
 
-        If you prefer to submit via GitHub, please:
-
-        1. Visit [/submit](https://claudepro.directory/submit) to see required fields
-        2. Download the auto-generated JSON template for your content type
-        3. Fill out the JSON following the schema
-        4. Create a new issue with the completed JSON
-        5. Our automated validation workflow will check your submission
+        If you are not ready to open a PR, use this issue template so the content can still be reviewed.
 
         ### Content Types Supported
 
@@ -69,18 +59,31 @@ body:
       required: true
 
   - type: textarea
-    id: json_data
+    id: content_summary
     attributes:
-      label: JSON Submission (Optional - prefer web form)
-      description: If submitting manually, paste your validated JSON here
+      label: Content Summary
+      description: Describe the content you want added
       placeholder: |
-        {
-          "slug": "your-content-slug",
-          "name": "Your Content Name",
-          "description": "Brief description...",
-          ...
-        }
-      render: json
+        - Title:
+        - Slug:
+        - Category:
+        - Description:
+        - Author:
+        - Source URL:
+        - Download URL (if any):
+        - Tags:
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: content_body
+    attributes:
+      label: MDX Body or Link to Draft
+      description: Paste the proposed content body or link to a gist/branch/PR
+      placeholder: |
+        Paste the MDX body here, or link to a draft branch / gist / pull request.
+      render: markdown
     validations:
       required: false
 
@@ -91,10 +94,10 @@ body:
       description: Please confirm the following
       options:
         - label: I have read the [submission guidelines](https://claudepro.directory/help)
+          required: false
+        - label: I have checked for an existing duplicate entry
           required: true
-        - label: My content follows the required schema for its type
+        - label: My submission can be represented as a file-backed MDX entry
           required: true
-        - label: I have tested my configuration/code before submitting
-          required: true
-        - label: I agree to the [terms of service](https://claudepro.directory/terms)
+        - label: I have tested my configuration, prompt, or asset before submitting
           required: true

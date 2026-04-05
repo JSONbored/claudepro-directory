@@ -1,0 +1,215 @@
+---
+title: "Vite Frontend Build Performance Optimization Skill"
+slug: "vite-build-optimization"
+category: "skills"
+description: "Optimize frontend build performance with Vite's lightning-fast HMR, code splitting, and tree-shaking. Modern build tooling that has replaced Webpack as the developer favorite. Vite leverages native ES modules during development for instant server start and Rollup for optimized production builds, delivering the fastest developer experience while generating highly optimized bundles. Features include intelligent code splitting strategies, automatic tree-shaking, CSS code splitting, source map generation, dependency pre-bundling, and plugin ecosystem for React, Vue, Svelte, and more. From configuring build options to debugging bundle size, Vite handles the complexity of modern frontend tooling with zero-config defaults and extensive customization options."
+seoTitle: "Vite Frontend Build Performance Optimization Skill"
+seoDescription: "Optimize frontend build performance with Vite's lightning-fast HMR, code splitting, and tree-shaking. Modern build tooling that has replaced Webpack as the d..."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-23"
+tags: 
+  - "vite"
+  - "build-tools"
+  - "webpack"
+  - "performance"
+  - "frontend"
+keywords: 
+  - "build"
+  - "build-tools"
+  - "claude"
+  - "development"
+  - "frontend"
+  - "optimization"
+  - "performance"
+  - "skills"
+  - "specialist"
+  - "tools"
+  - "vite"
+  - "webpack"
+difficultyScore: 100
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 5
+copyCount: 0
+popularityScore: 10
+readingTime: 6
+documentationUrl: "https://vitejs.dev/"
+downloadUrl: "/downloads/skills/vite-build-optimization.zip"
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+# Vite Build Optimization Specialist Skill
+
+## What This Skill Enables
+
+Claude can optimize your Vite build configuration for production-ready performance with instant Hot Module Replacement (HMR), intelligent code splitting, and tree-shaking. Vite leverages native ES modules during development and Rollup for optimized production builds, delivering the fastest developer experience while generating highly optimized bundles. From configuring build options to debugging bundle size, Claude handles the complexity of modern frontend tooling.
+
+## Prerequisites
+
+**Required:**
+- Claude Pro subscription or Claude Code CLI
+- Node.js 18+ (20+ recommended)
+- npm, pnpm, or yarn package manager
+- Basic understanding of JavaScript modules
+
+**What Claude handles automatically:**
+- Configuring vite.config.ts for optimal builds
+- Setting up code splitting strategies
+- Implementing lazy loading for routes/components
+- Analyzing and optimizing bundle size
+- Configuring CSS optimization and extraction
+- Setting up environment variables
+- Implementing caching strategies
+- Configuring build targets for browser support
+
+## How to Use This Skill
+
+### Production Build Optimization
+
+**Prompt:** "Optimize my Vite config for production with: code splitting by route, lazy loading for heavy components, CSS extraction, source maps, and tree-shaking. Target modern browsers (ES2020)."
+
+Claude will:
+1. Configure build.rollupOptions for chunking
+2. Set up manual chunks for vendors
+3. Enable CSS code splitting
+4. Configure source map generation
+5. Set build.target for ES2020
+6. Add tree-shaking optimizations
+7. Configure minification settings
+
+### Bundle Size Analysis
+
+**Prompt:** "My Vite bundle is 2MB. Help me analyze what's taking space and optimize. Use rollup-plugin-visualizer and suggest splitting strategies."
+
+Claude will:
+1. Install and configure bundle analyzer
+2. Generate visual bundle report
+3. Identify large dependencies
+4. Suggest dynamic imports for heavy libs
+5. Configure vendor chunk splitting
+6. Recommend lighter alternatives
+7. Set up lazy loading for routes
+
+### Multi-Page Application Setup
+
+**Prompt:** "Configure Vite for multi-page app with 3 entry points: landing page, dashboard, admin panel. Each should have separate bundles but share common dependencies."
+
+Claude will:
+1. Set up build.rollupOptions.input
+2. Create separate HTML entry points
+3. Configure shared chunk extraction
+4. Set up independent CSS bundles
+5. Implement common vendor splitting
+6. Add entry-specific optimizations
+7. Configure dev server for multi-page
+
+### Plugin Configuration & Optimization
+
+**Prompt:** "Set up Vite with React, TypeScript, PWA support, image optimization, and SVG imports. Optimize for fastest dev server startup and HMR."
+
+Claude will:
+1. Install and configure @vitejs/plugin-react
+2. Add vite-plugin-pwa with precaching
+3. Set up vite-imagetools for optimization
+4. Configure vite-plugin-svgr
+5. Enable React Fast Refresh
+6. Optimize dependencies prebundling
+7. Configure HMR boundaries
+
+## Tips for Best Results
+
+1. **Use Manual Chunks Wisely**: Split vendors by update frequency. React/Vue rarely change, but business logic does. Use `manualChunks` to separate stable from volatile code.
+
+2. **Lazy Load Heavy Libraries**: Import chart libraries, rich editors, or large UI components dynamically only when needed. Vite handles code splitting automatically.
+
+3. **Optimize Dependencies**: Use `optimizeDeps.include` for dependencies that slow down dev server startup. Pre-bundle CJS dependencies to ESM.
+
+4. **Environment Variables**: Use `import.meta.env` (not `process.env`). Prefix with `VITE_` to expose to client code. Use `.env.local` for secrets.
+
+5. **Source Maps in Production**: Use `hidden-source-map` for error tracking without exposing code. Never use `inline-source-map` in production.
+
+6. **CSS Optimization**: Enable `build.cssCodeSplit` for route-based CSS. Use PostCSS for autoprefixer and minification.
+
+## Common Workflows
+
+### Large React App Optimization
+```
+"Optimize Vite build for React app with 50+ routes:
+1. Implement route-based code splitting with React.lazy()
+2. Split vendor chunks: react/react-dom, UI library, utilities
+3. Configure dynamic imports for modals, charts, editors
+4. Add preload hints for critical chunks
+5. Enable CSS code splitting per route
+6. Configure build.rollupOptions for optimal chunking
+7. Add bundle analyzer and aim for <200KB initial load
+8. Set up Lighthouse CI to track performance"
+```
+
+### Monorepo Build Configuration
+```
+"Configure Vite in Turborepo monorepo:
+1. Shared vite.config.base.ts for common config
+2. App-specific configs extending base
+3. Shared component library with optimized exports
+4. Configure path aliases for @workspace packages
+5. Set up cache strategy for unchanged packages
+6. Optimize prebundling for internal dependencies
+7. Configure dev server proxy for backend services
+8. Add workspace-aware HMR"
+```
+
+### Progressive Web App Build
+```
+"Set up Vite PWA with offline support:
+1. Install vite-plugin-pwa with Workbox
+2. Configure service worker precaching strategy
+3. Add runtime caching for API calls
+4. Set up offline fallback page
+5. Generate web manifest with icons
+6. Configure update notification for new versions
+7. Optimize caching based on file types
+8. Add service worker update lifecycle"
+```
+
+### Library Build Configuration
+```
+"Configure Vite for component library build:
+1. Set build.lib mode with entry point
+2. Configure external dependencies (React, Vue)
+3. Generate ESM and UMD bundles
+4. Add TypeScript declaration generation
+5. Set up CSS extraction and modules
+6. Configure tree-shaking for optimal imports
+7. Add source maps for debugging
+8. Set up package.json exports field"
+```
+
+## Troubleshooting
+
+**Issue:** "Dev server slow to start with large dependencies"
+**Solution:** Add slow dependencies to `optimizeDeps.include` array. Use `server.warmup` to prebundle commonly used files. Check for circular dependencies. Consider using `optimizeDeps.esbuildOptions.target` to skip unnecessary transforms.
+
+**Issue:** "HMR not working for certain components"
+**Solution:** Check component exports are named (not default). Ensure no side effects in module scope. Add HMR boundaries with `import.meta.hot.accept()`. Verify vite-plugin-react is installed for React Fast Refresh.
+
+**Issue:** "Production bundle size larger than expected"
+**Solution:** Run bundle analyzer to identify heavy dependencies. Check for duplicate dependencies in node_modules. Use dynamic imports for heavy libs. Verify tree-shaking with `build.rollupOptions.treeshake`. Check for unintentional global imports.
+
+**Issue:** "Environment variables not accessible in client"
+**Solution:** Prefix variables with `VITE_` in .env file. Use `import.meta.env.VITE_VAR_NAME` not `process.env`. Check .env file is in project root. Restart dev server after adding new env vars.
+
+**Issue:** "Build fails with 'Cannot find module' errors"
+**Solution:** Check path aliases in vite.config.ts match tsconfig.json. Verify resolve.alias configuration. Ensure all imports use correct file extensions. Check for case-sensitive file naming issues.
+
+## Learn More
+
+- [Vite Official Documentation](https://vitejs.dev/)
+- [Vite GitHub Repository](https://github.com/vitejs/vite)
+- [Rollup Plugin Documentation](https://rollupjs.org/guide/en/#plugin-development)
+- [Vite Plugin Collection](https://github.com/vitejs/awesome-vite)
+- [ViteConf 2024 Talks](https://viteconf.org/2024/replay)
+- [Vite Performance Guide](https://vitejs.dev/guide/performance.html)

@@ -1,0 +1,209 @@
+---
+title: "WebAssembly WASM Module Development Skill"
+slug: "webassembly-module-development"
+category: "skills"
+description: "Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads. WebAssembly (WASM) runs at near-native speeds across web browsers, serverless platforms, and edge computing environments. With WASI 0.3 bringing native async support and WebAssembly 2.0 complete as of March 2025, WASM has transitioned from experimental to production-ready for AI workloads, cloud-native applications, and high-performance web apps. Features include Rust/C++/Go compilation to WASM, wasm-bindgen for JavaScript integration, WASI for system calls, Component Model for interoperability, binary size optimization, SIMD support for performance, and multi-runtime compatibility (browser, Node.js, serverless)."
+seoTitle: "WebAssembly WASM Module Development Skill"
+seoDescription: "Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads. Web..."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+tags: 
+  - "webassembly"
+  - "wasm"
+  - "rust"
+  - "performance"
+  - "wasi"
+keywords: 
+  - "claude"
+  - "development"
+  - "module"
+  - "performance"
+  - "rust"
+  - "skills"
+  - "tools"
+  - "wasi"
+  - "wasm"
+  - "webassembly"
+difficultyScore: 100
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 16
+copyCount: 0
+popularityScore: 21
+readingTime: 6
+documentationUrl: "https://webassembly.org/"
+downloadUrl: "/downloads/skills/webassembly-module-development.zip"
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+# WebAssembly Module Development Skill
+
+## What This Skill Enables
+
+Claude can build production-ready WebAssembly modules that run at near-native speeds across web browsers, serverless platforms, and edge computing environments. With WASI 0.3 bringing native async support and WebAssembly 2.0 complete as of March 2025, WASM has transitioned from experimental to production-ready for AI workloads, cloud-native applications, and high-performance web apps.
+
+## Prerequisites
+
+**Required:**
+- Claude Pro subscription or Claude Code CLI
+- Rust (recommended) or C++/Go compiler
+- Node.js 18+ for JavaScript integration
+- Basic understanding of systems programming
+
+**What Claude handles automatically:**
+- Writing Rust/C++ code optimized for WASM
+- Compiling to WebAssembly with proper optimizations
+- Generating JavaScript bindings with wasm-bindgen
+- Setting up WASI for system calls
+- Implementing Component Model for interoperability
+- Optimizing binary size and performance
+- Testing WASM modules in multiple runtimes
+
+## How to Use This Skill
+
+### Create a Basic WASM Module
+
+**Prompt:** "Build a WebAssembly module in Rust that calculates Fibonacci numbers. Include JavaScript bindings and deploy to npm."
+
+Claude will:
+1. Set up Rust project with wasm-pack
+2. Write optimized Fibonacci implementation
+3. Add wasm-bindgen annotations
+4. Compile to WASM with size optimizations
+5. Generate TypeScript definitions
+6. Create npm package configuration
+7. Include usage examples for web and Node.js
+
+### Image Processing with WASM
+
+**Prompt:** "Create a WebAssembly module that applies image filters (grayscale, blur, sharpen) to ImageData from canvas. Optimize for processing 4K images in real-time."
+
+Claude will:
+1. Write Rust image processing algorithms
+2. Use rayon for parallel processing
+3. Interface with JavaScript canvas API
+4. Implement zero-copy memory sharing
+5. Add SIMD optimizations where available
+6. Create worker thread wrapper
+7. Benchmark against pure JavaScript
+
+### AI Model Inference with WASM
+
+**Prompt:** "Build a WebAssembly module that runs ONNX neural network models in the browser. Support image classification with MobileNetV3."
+
+Claude will:
+1. Integrate wasm-bindgen with onnxruntime-web
+2. Load and cache ONNX models
+3. Implement preprocessing pipeline
+4. Run inference with WebAssembly backend
+5. Add batching for multiple inputs
+6. Optimize memory allocation
+7. Include model quantization for smaller binaries
+
+### Serverless Function with WASI
+
+**Prompt:** "Create a WebAssembly module with WASI 0.3 that processes CSV files, performs data transformations, and writes results to stdout. Deploy to Fermyon Spin."
+
+Claude will:
+1. Write Rust code using WASI SDK
+2. Implement async file I/O with WASI 0.3
+3. Add CSV parsing and transformation logic
+4. Configure for Spin serverless platform
+5. Set up component model interfaces
+6. Add error handling and logging
+7. Deploy with spin.toml configuration
+
+## Tips for Best Results
+
+1. **Choose Rust for Production**: While multiple languages compile to WASM, Rust offers the best tooling (wasm-pack, wasm-bindgen) and smallest binary sizes. Ask Claude to use Rust unless you have specific requirements.
+
+2. **Optimize Binary Size**: WASM modules should be <500KB for web deployments. Request `wasm-opt -Oz` optimization and enable LTO (Link-Time Optimization) in Cargo.toml.
+
+3. **Use Component Model**: For WASI 0.3, request Component Model implementation for better interoperability and async support.
+
+4. **Memory Management**: WebAssembly uses linear memory. Ask Claude to implement proper memory allocation strategies and avoid memory leaks with proper drop implementations.
+
+5. **JavaScript Interop**: Use wasm-bindgen for seamless JavaScript integration. Request TypeScript definitions generation for better DX.
+
+6. **SIMD When Available**: For compute-intensive tasks, ask Claude to use WebAssembly SIMD instructions for 4-8x performance improvements.
+
+## Common Workflows
+
+### High-Performance Web App Component
+```
+"Create a WebAssembly module for my React app that:
+1. Parses and validates 10MB JSON files instantly
+2. Performs complex data aggregations
+3. Exports results to CSV format
+4. Includes TypeScript types
+5. Loads asynchronously without blocking UI
+6. Caches compiled module in IndexedDB
+7. Falls back to JavaScript if WASM not supported"
+```
+
+### Cryptocurrency Mining (Educational)
+```
+"Build a WebAssembly SHA-256 hasher in Rust:
+1. Implements Bitcoin mining algorithm
+2. Uses multi-threading with Web Workers
+3. Achieves >1000 hashes per second
+4. Includes difficulty adjustment
+5. Reports progress to JavaScript
+6. Optimized with SIMD instructions"
+```
+
+### Video Codec in Browser
+```
+"Create a WebAssembly H.264 decoder:
+1. Decode video streams in real-time (30fps)
+2. Output to canvas via ImageData
+3. Support seeking and playback controls
+4. Use multi-threading for parallel decode
+5. Implement memory-efficient frame buffer
+6. Package as Web Component"
+```
+
+### Database Query Engine
+```
+"Build a WebAssembly SQLite query engine:
+1. Compile SQLite to WASM with WASI
+2. Implement virtual file system in browser
+3. Support full SQL query syntax
+4. Persist database to IndexedDB
+5. Include transaction support
+6. Expose async API to JavaScript
+7. Add query performance analytics"
+```
+
+## Troubleshooting
+
+**Issue:** WASM module binary is too large (>2MB)
+**Solution:** Enable LTO and opt-level in Cargo.toml, run wasm-opt with -Oz flag, remove unused dependencies, and consider dynamic linking for shared code.
+
+**Issue:** JavaScript can't call WASM functions
+**Solution:** Ensure wasm-bindgen attributes are present (#[wasm_bindgen]), rebuild with wasm-pack, and check that JavaScript imports the generated bindings correctly.
+
+**Issue:** Performance slower than expected
+**Solution:** Enable WASM SIMD, use multi-threading with Web Workers, avoid frequent boundary crossings between JS and WASM, and profile with Chrome DevTools Performance tab.
+
+**Issue:** Memory errors or crashes
+**Solution:** Check for buffer overflows, ensure proper memory allocation, implement Drop trait for cleanup, and use wasm-bindgen's #[wasm_bindgen(inspectable)] for debugging.
+
+**Issue:** WASI functions not available
+**Solution:** Update to WASI SDK 0.3+, configure WASI runtime (wasmtime, wasmer), and use preview2 modules. Not all WASI functions are available in browser environments.
+
+**Issue:** Cannot debug WASM code
+**Solution:** Enable source maps with wasm-pack build --dev, use Chrome DevTools WASM debugging, add console.log bindings via web_sys crate, or use wasmtime with --invoke for CLI debugging.
+
+## Learn More
+
+- [WebAssembly Official Site](https://webassembly.org/)
+- [Rust and WebAssembly Book](https://rustwasm.github.io/book/)
+- [wasm-pack Documentation](https://rustwasm.github.io/wasm-pack/)
+- [WASI 0.3 Specification](https://github.com/WebAssembly/WASI/blob/main/preview2/README.md)
+- [WebAssembly Component Model](https://github.com/WebAssembly/component-model)
+- [AssemblyScript Language](https://www.assemblyscript.org/)

@@ -1,0 +1,170 @@
+---
+title: "AI Model Performance Dashboard - Statuslines"
+slug: "ai-model-performance-dashboard"
+category: "statuslines"
+description: "Multi-provider AI performance dashboard with context occupancy tracking, truncation warnings, TTFT latency, tokens/min rate, and model comparison metrics."
+seoTitle: "AI Model Performance Dashboard - Statuslines"
+seoDescription: "Multi-provider AI performance dashboard with context occupancy tracking, truncation warnings, TTFT latency, tokens/min rate, and model comparison metrics."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-23"
+tags: 
+  - "dashboard"
+  - "performance"
+  - "multi-model"
+  - "metrics"
+  - "occupancy"
+  - "latency"
+  - "production"
+keywords: 
+  - "claude"
+  - "dashboard"
+  - "development"
+  - "latency"
+  - "metrics"
+  - "model"
+  - "multi-model"
+  - "occupancy"
+  - "performance"
+  - "production"
+  - "statuslines"
+  - "tools"
+difficultyScore: 7
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 15
+copyCount: 1
+popularityScore: 20
+readingTime: 2
+documentationUrl: "https://epoch.ai/data-insights/context-windows"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+#!/usr/bin/env bash
+
+# AI Model Performance Dashboard for Claude Code
+# Displays: Occupancy % | Truncation | TTFT | Tokens/min | Model Limits
+
+# Read JSON from stdin
+read -r input
+
+# Extract values
+model=$(echo "$input" | jq -r '.model // "unknown"')
+prompt_tokens=$(echo "$input" | jq -r '.session.promptTokens // 0')
+completion_tokens=$(echo "$input" | jq -r '.session.completionTokens // 0')
+total_tokens=$(echo "$input" | jq -r '.session.totalTokens // 0')
+session_start=$(echo "$input" | jq -r '.session.startTime // ""')
+
+# Model context limits (2025 verified)
+case "$model" in
+  *"claude-sonnet-4"*|*"claude-4"*)
+    context_limit=1000000
+    model_display="Claude Sonnet 4"
+    ;;
+  *"claude-3.5"*|*"claude-sonnet-3.5"*)
+    context_limit=200000
+    model_display="Claude 3.5 Sonnet"
+    ;;
+  *"gpt-4.1"*|*"gpt-4-turbo"*)
+    context_limit=1000000
+    model_display="GPT-4.1 Turbo"
+    ;;
+  *"gpt-4o"*)
+    context_limit=128000
+    model_display="GPT-4o"
+    ;;
+  *"gemini-1.5-pro"*)
+    context_limit=2000000
+    model_display="Gemini 1.5 Pro"
+    ;;
+  *"gemini-2"*)
+    context_limit=1000000
+    model_display="Gemini 2.x"
+    ;;
+  *"grok-3"*)
+    context_limit=1000000
+    model_display="Grok 3"
+    ;;
+  *"grok-4"*)
+    context_limit=256000
+    model_display="Grok 4"
+    ;;
+  *"llama-4"*)
+    context_limit=10000000
+    model_display="Llama 4 Scout"
+    ;;
+  *)
+    context_limit=100000
+    model_display="$model"
+    ;;
+esac
+
+# Calculate occupancy percentage
+if [ $context_limit -gt 0 ]; then
+  occupancy=$((prompt_tokens * 100 / context_limit))
+else
+  occupancy=0
+fi
+
+# Occupancy color coding
+if [ $occupancy -lt 50 ]; then
+  OCC_COLOR="\033[38;5;46m"   # Green: < 50%
+elif [ $occupancy -lt 80 ]; then
+  OCC_COLOR="\033[38;5;226m"  # Yellow: 50-80%
+else
+  OCC_COLOR="\033[38;5;196m"  # Red: > 80%
+fi
+
+# Truncation warning (models fail before advertised limits)
+reliable_limit=$((context_limit * 65 / 100))  # 65% of claimed limit
+if [ $prompt_tokens -gt $reliable_limit ]; then
+  truncation="⚠ TRUNCATION RISK"
+  TRUNC_COLOR="\033[38;5;196m"
+else
+  truncation="✓ Safe"
+  TRUNC_COLOR="\033[38;5;46m"
+fi
+
+# Calculate tokens per minute
+if [ -n "$session_start" ]; then
+  current_time=$(date +%s)
+  start_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$session_start" +%s 2>/dev/null || echo "$current_time")
+  elapsed_seconds=$((current_time - start_epoch))
+  if [ $elapsed_seconds -gt 0 ]; then
+    tokens_per_min=$((total_tokens * 60 / elapsed_seconds))
+  else
+    tokens_per_min=0
+  fi
+else
+  tokens_per_min=0
+fi
+
+# Format numbers with commas
+formatNumber() {
+  printf "%'d" "$1" 2>/dev/null || echo "$1"
+}
+
+# TTFT simulation (Time to First Token - would need actual timing)
+# For demo purposes, estimate based on tokens
+if [ $prompt_tokens -gt 50000 ]; then
+  ttft="~2.5s"
+  TTFT_COLOR="\033[38;5;226m"
+elif [ $prompt_tokens -gt 10000 ]; then
+  ttft="~1.2s"
+  TTFT_COLOR="\033[38;5;46m"
+else
+  ttft="~0.8s"
+  TTFT_COLOR="\033[38;5;46m"
+fi
+
+RESET="\033[0m"
+BOLD="\033[1m"
+
+# Build dashboard (multi-line for comprehensive view)
+echo -e "${BOLD}📊 ${model_display}${RESET}"
+echo -e "${OCC_COLOR}Occupancy: ${occupancy}%${RESET} ($(formatNumber $prompt_tokens)/$(formatNumber $context_limit) tokens) | ${TRUNC_COLOR}${truncation}${RESET}"
+echo -e "${TTFT_COLOR}TTFT: ${ttft}${RESET} | Rate: ${tokens_per_min} tok/min | Total: $(formatNumber $total_tokens)"

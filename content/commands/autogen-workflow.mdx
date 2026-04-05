@@ -1,0 +1,531 @@
+---
+title: "AutoGen Multi-Agent Workflow for Claude"
+slug: "autogen-workflow"
+category: "commands"
+description: "Orchestrate multi-agent workflows using Microsoft AutoGen v0.4 with role-based task delegation, conversation patterns, and collaborative problem solving"
+seoTitle: "AutoGen Multi-Agent Workflow for Claude"
+seoDescription: "Orchestrate multi-agent workflows using Microsoft AutoGen v0.4 with role-based task delegation, conversation patterns, and collaborative problem solving"
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+tags: 
+  - "autogen"
+  - "multi-agent"
+  - "workflow"
+  - "orchestration"
+  - "ai"
+keywords: 
+  - "autogen"
+  - "claude"
+  - "commands"
+  - "development"
+  - "multi-agent"
+  - "orchestration"
+  - "tools"
+  - "workflow"
+difficultyScore: 100
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 29
+copyCount: 0
+popularityScore: 34
+readingTime: 8
+documentationUrl: "https://microsoft.github.io/autogen/"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+The `/autogen-workflow` command creates sophisticated multi-agent workflows using Microsoft AutoGen v0.4's actor model with role-based delegation and conversation patterns.
+
+## Usage
+
+```
+/autogen-workflow [options] <workflow_description>
+```
+
+## Options
+
+### Workflow Types
+- `--research` - Research and analysis workflow
+- `--coding` - Software development workflow (default)
+- `--review` - Code review and quality assurance
+- `--debug` - Debugging and troubleshooting
+- `--planning` - Project planning and architecture
+
+### Agent Configuration
+- `--agents=<list>` - Specify agent roles (e.g., "researcher,analyst,coder")
+- `--conversation-pattern=<type>` - Conversation pattern (sequential, round-robin, hierarchical)
+- `--termination=<condition>` - Workflow termination condition
+
+### Model Selection
+- `--model=<name>` - AI model for agents (gpt-4, claude-sonnet-4, gemini-pro)
+- `--temperature=<float>` - Model temperature (0.0-1.0)
+- `--max-rounds=<int>` - Maximum conversation rounds (default: 10)
+
+### Tools & Integration
+- `--tools=<list>` - Enable specific tools (web-search, file-ops, shell)
+- `--memory` - Enable conversation memory
+- `--human-in-loop` - Require human approval for critical actions
+
+## Examples
+
+### Software Development Workflow
+
+**Command:**
+```
+/autogen-workflow --coding --agents="architect,coder,reviewer,tester" "Build a user authentication system with OAuth2 support"
+```
+
+**Generated Workflow:**
+```python
+# Generated AutoGen v0.4 workflow
+from autogen_agentchat.agents import AssistantAgent
+from autogen_agentchat.teams import RoundRobinGroupChat
+from autogen_agentchat.conditions import MaxMessageTermination, TextMentionTermination
+from autogen_ext.models import OpenAIChatCompletionClient
+
+# Configure model client
+model_client = OpenAIChatCompletionClient(
+    model="gpt-4o",
+    temperature=0.7,
+)
+
+# Define specialized agents
+architect_agent = AssistantAgent(
+    name="Architect",
+    model_client=model_client,
+    system_message="""
+    You are a software architect specializing in authentication systems.
+    Your role is to:
+    1. Design the system architecture
+    2. Define data models and API contracts
+    3. Identify security requirements
+    4. Create technical specifications
+    
+    Focus on scalability, security, and best practices.
+    """,
+    description="Designs system architecture and technical specifications",
+)
+
+coder_agent = AssistantAgent(
+    name="Coder",
+    model_client=model_client,
+    system_message="""
+    You are an expert full-stack developer.
+    Your role is to:
+    1. Implement the architecture designed by the Architect
+    2. Write production-ready, type-safe code
+    3. Follow SOLID principles and design patterns
+    4. Add comprehensive error handling
+    
+    Use TypeScript, React, and Node.js.
+    """,
+    description="Implements the technical specifications",
+)
+
+reviewer_agent = AssistantAgent(
+    name="Reviewer",
+    model_client=model_client,
+    system_message="""
+    You are a senior code reviewer and security expert.
+    Your role is to:
+    1. Review code for security vulnerabilities
+    2. Ensure code quality and maintainability
+    3. Verify adherence to best practices
+    4. Identify potential bugs and edge cases
+    
+    Be thorough and constructive in your feedback.
+    """,
+    description="Reviews code quality and security",
+)
+
+tester_agent = AssistantAgent(
+    name="Tester",
+    model_client=model_client,
+    system_message="""
+    You are a QA engineer specializing in test automation.
+    Your role is to:
+    1. Write comprehensive test suites
+    2. Create unit, integration, and E2E tests
+    3. Identify test scenarios and edge cases
+    4. Ensure high code coverage
+    
+    Use Jest, Vitest, and Playwright.
+    """,
+    description="Creates comprehensive test suites",
+)
+
+# Create team with round-robin conversation pattern
+team = RoundRobinGroupChat(
+    participants=[architect_agent, coder_agent, reviewer_agent, tester_agent],
+    max_turns=3,
+)
+
+# Define termination conditions
+termination = MaxMessageTermination(max_messages=20) | TextMentionTermination("TASK_COMPLETE")
+
+# Run workflow
+async def run_auth_workflow():
+    result = await team.run(
+        task="""
+        Build a user authentication system with OAuth2 support.
+        
+        Requirements:
+        1. Support email/password and OAuth2 (Google, GitHub)
+        2. JWT-based session management
+        3. Role-based access control (RBAC)
+        4. Rate limiting and brute force protection
+        5. PKCE flow for OAuth2
+        6. Comprehensive test coverage
+        
+        Architect: Start by designing the system architecture.
+        """,
+        termination_condition=termination,
+    )
+    
+    print("Workflow completed!")
+    print(f"Messages exchanged: {len(result.messages)}")
+    print(f"Final result: {result.messages[-1].content}")
+
+# Execute
+import asyncio
+asyncio.run(run_auth_workflow())
+```
+
+### Research and Analysis Workflow
+
+**Command:**
+```
+/autogen-workflow --research --agents="researcher,analyst,synthesizer" --tools="web-search" "Analyze the current state of edge computing in 2025"
+```
+
+**Generated Workflow:**
+```python
+from autogen_agentchat.agents import AssistantAgent
+from autogen_agentchat.teams import Swarm
+from autogen_agentchat.messages import HandoffMessage
+from autogen_ext.tools import WebSearchTool
+
+# Initialize tools
+web_search_tool = WebSearchTool()
+
+# Research agent with web search capability
+researcher_agent = AssistantAgent(
+    name="Researcher",
+    model_client=model_client,
+    tools=[web_search_tool],
+    system_message="""
+    You are a research specialist.
+    Your role is to:
+    1. Search for relevant information using web search
+    2. Gather data from multiple sources
+    3. Identify key trends and developments
+    4. Compile raw research findings
+    
+    Be thorough and cite your sources.
+    """,
+    handoffs=["Analyst"],
+)
+
+# Analyst agent
+analyst_agent = AssistantAgent(
+    name="Analyst",
+    model_client=model_client,
+    system_message="""
+    You are a data analyst and industry expert.
+    Your role is to:
+    1. Analyze research findings
+    2. Identify patterns and insights
+    3. Evaluate market trends
+    4. Provide data-driven conclusions
+    
+    Focus on quantitative and qualitative analysis.
+    """,
+    handoffs=["Synthesizer"],
+)
+
+# Synthesizer agent
+synthesizer_agent = AssistantAgent(
+    name="Synthesizer",
+    model_client=model_client,
+    system_message="""
+    You are a technical writer and synthesizer.
+    Your role is to:
+    1. Combine research and analysis into coherent report
+    2. Present findings in clear, structured format
+    3. Highlight key takeaways
+    4. Provide actionable recommendations
+    
+    Create executive summaries and detailed reports.
+    """,
+)
+
+# Create swarm with handoffs
+team = Swarm(
+    participants=[researcher_agent, analyst_agent, synthesizer_agent],
+)
+
+async def run_research_workflow():
+    result = await team.run(
+        task="""
+        Analyze the current state of edge computing in 2025.
+        
+        Focus on:
+        1. Market size and growth trends
+        2. Major players and technologies
+        3. Use cases and adoption rates
+        4. Future predictions
+        
+        Researcher: Begin by gathering data from multiple sources.
+        """,
+        termination_condition=TextMentionTermination("RESEARCH_COMPLETE"),
+    )
+    
+    return result
+```
+
+### Code Review Workflow
+
+**Command:**
+```
+/autogen-workflow --review --agents="security-auditor,performance-reviewer,style-checker" "Review authentication middleware implementation"
+```
+
+**Generated Workflow:**
+```python
+from autogen_agentchat.agents import AssistantAgent
+from autogen_agentchat.teams import SelectorGroupChat
+from autogen_ext.tools import FileReadTool, GrepTool
+
+# Tools for code analysis
+file_read_tool = FileReadTool()
+grep_tool = GrepTool()
+
+# Security auditor
+security_agent = AssistantAgent(
+    name="SecurityAuditor",
+    model_client=model_client,
+    tools=[file_read_tool, grep_tool],
+    system_message="""
+    You are a security auditor specializing in OWASP Top 10.
+    Review code for:
+    1. SQL injection vulnerabilities
+    2. XSS prevention
+    3. Authentication/authorization flaws
+    4. Sensitive data exposure
+    5. Security misconfigurations
+    
+    Provide specific recommendations for fixes.
+    """,
+)
+
+# Performance reviewer
+performance_agent = AssistantAgent(
+    name="PerformanceReviewer",
+    model_client=model_client,
+    tools=[file_read_tool],
+    system_message="""
+    You are a performance optimization expert.
+    Review code for:
+    1. Inefficient algorithms
+    2. Memory leaks
+    3. Database query optimization
+    4. Caching opportunities
+    5. Resource usage
+    
+    Suggest performance improvements.
+    """,
+)
+
+# Style checker
+style_agent = AssistantAgent(
+    name="StyleChecker",
+    model_client=model_client,
+    tools=[file_read_tool],
+    system_message="""
+    You are a code quality expert.
+    Review code for:
+    1. Adherence to style guide
+    2. Code readability
+    3. Proper error handling
+    4. Documentation completeness
+    5. Best practices
+    
+    Ensure maintainable, clean code.
+    """,
+)
+
+# Create selector-based team (each agent reviews in parallel)
+team = SelectorGroupChat(
+    participants=[security_agent, performance_agent, style_agent],
+    model_client=model_client,
+    selector_prompt="Select the agent that should review next based on the code aspect being discussed.",
+)
+
+async def run_review_workflow(file_path: str):
+    result = await team.run(
+        task=f"""
+        Review the authentication middleware at {file_path}.
+        
+        Each agent should:
+        1. Read the file
+        2. Analyze their specific area
+        3. Provide detailed findings
+        4. Suggest improvements
+        
+        Provide a comprehensive review report.
+        """,
+        termination_condition=MaxMessageTermination(max_messages=15),
+    )
+    
+    return result
+```
+
+### Debugging Workflow
+
+**Command:**
+```
+/autogen-workflow --debug --agents="debugger,root-cause-analyst,fixer" --human-in-loop "Investigate failing user login tests"
+```
+
+**Generated Workflow:**
+```python
+from autogen_agentchat.agents import AssistantAgent
+from autogen_agentchat.teams import RoundRobinGroupChat
+from autogen_ext.tools import ShellTool, FileReadTool, FileWriteTool
+
+# Tools for debugging
+shell_tool = ShellTool()
+file_read_tool = FileReadTool()
+file_write_tool = FileWriteTool()
+
+# Debugger agent
+debugger_agent = AssistantAgent(
+    name="Debugger",
+    model_client=model_client,
+    tools=[shell_tool, file_read_tool],
+    system_message="""
+    You are a debugging expert.
+    Your role is to:
+    1. Reproduce the failing tests
+    2. Analyze error messages and stack traces
+    3. Identify symptoms of the issue
+    4. Gather relevant logs and data
+    
+    Use systematic debugging techniques.
+    """,
+)
+
+# Root cause analyst
+analyst_agent = AssistantAgent(
+    name="RootCauseAnalyst",
+    model_client=model_client,
+    tools=[file_read_tool],
+    system_message="""
+    You are a root cause analysis expert.
+    Your role is to:
+    1. Analyze debugging findings
+    2. Identify the root cause of the issue
+    3. Consider all contributing factors
+    4. Explain the issue clearly
+    
+    Use the 5 Whys technique.
+    """,
+)
+
+# Fixer agent (requires human approval)
+fixer_agent = AssistantAgent(
+    name="Fixer",
+    model_client=model_client,
+    tools=[file_write_tool, shell_tool],
+    system_message="""
+    You are a senior developer who implements fixes.
+    Your role is to:
+    1. Implement the fix based on root cause analysis
+    2. Write or update tests
+    3. Verify the fix resolves the issue
+    4. Ensure no regressions
+    
+    Request human approval before making changes.
+    """,
+)
+
+team = RoundRobinGroupChat(
+    participants=[debugger_agent, analyst_agent, fixer_agent],
+    max_turns=2,
+)
+
+async def run_debug_workflow():
+    result = await team.run(
+        task="""
+        Investigate and fix the failing user login tests.
+        
+        Steps:
+        1. Debugger: Run tests and gather error information
+        2. RootCauseAnalyst: Identify the root cause
+        3. Fixer: Implement fix (wait for human approval)
+        
+        Ensure all tests pass after the fix.
+        """,
+        termination_condition=TextMentionTermination("TESTS_PASSING"),
+    )
+    
+    return result
+```
+
+## Configuration
+
+### Model Configuration
+```python
+# Custom model configuration
+from autogen_ext.models import AzureOpenAIChatCompletionClient
+
+model_client = AzureOpenAIChatCompletionClient(
+    azure_deployment="gpt-4o",
+    model="gpt-4o",
+    api_version="2024-02-15-preview",
+    temperature=0.7,
+    max_tokens=4000,
+)
+```
+
+### Team Patterns
+```python
+# Sequential pattern
+from autogen_agentchat.teams import RoundRobinGroupChat
+
+team = RoundRobinGroupChat(
+    participants=[agent1, agent2, agent3],
+    max_turns=2,  # Each agent speaks twice
+)
+
+# Swarm with handoffs
+from autogen_agentchat.teams import Swarm
+
+team = Swarm(
+    participants=[agent1, agent2, agent3],
+    # Handoffs defined in agent system messages
+)
+
+# Selector-based (dynamic)
+from autogen_agentchat.teams import SelectorGroupChat
+
+team = SelectorGroupChat(
+    participants=[agent1, agent2, agent3],
+    model_client=model_client,
+    selector_prompt="Choose the best agent for the current task.",
+)
+```
+
+## Best Practices
+
+1. **Clear Role Definition**: Each agent should have a specific, well-defined role
+2. **Termination Conditions**: Always set clear termination conditions to avoid infinite loops
+3. **Tool Access**: Only grant tools to agents that need them
+4. **Human-in-Loop**: Require approval for critical actions (deployments, deletions)
+5. **Error Handling**: Implement proper error handling and recovery mechanisms
+6. **Logging**: Enable comprehensive logging for debugging workflows
+7. **Cost Management**: Set message limits to control API costs

@@ -8,6 +8,7 @@ dist-ssr
 .next
 apps/web/.next
 out
+.open-next
 
 # Next.js TypeScript (auto-generated)
 apps/web/next-env.d.ts
@@ -40,6 +41,8 @@ lerna-debug.log*
 # Project specific
 .claude/
 .cursor/
+.zed/
+.agent/
 docs/
 
 # Migration planning (analysis only, no code changes)
@@ -71,6 +74,7 @@ apps/web/public/sitemap.xml
 .turbo/
 .temp/
 .build-cache/
+.wrangler/
 
 # Environment files
 .env*

@@ -1,0 +1,138 @@
+---
+title: "Model Switch History Tracker - Statuslines"
+slug: "model-switch-history-tracker"
+category: "statuslines"
+description: "Claude Code model switch detector tracking transitions between Opus/Sonnet/Haiku with switch count, current model indicator, and cost impact visualization."
+seoTitle: "Model Switch History Tracker - Statuslines"
+seoDescription: "Claude Code model switch detector tracking transitions between Opus/Sonnet/Haiku with switch count, current model indicator, and cost impact visualization."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+tags: 
+  - "model-switching"
+  - "opus-sonnet-haiku"
+  - "cost-optimization"
+  - "model-tracking"
+  - "switch-history"
+keywords: 
+  - "claude"
+  - "cost-optimization"
+  - "development"
+  - "history"
+  - "model"
+  - "model-switching"
+  - "model-tracking"
+  - "opus-sonnet-haiku"
+  - "statuslines"
+  - "switch"
+  - "switch-history"
+  - "tools"
+  - "tracker"
+difficultyScore: 6
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 0
+copyCount: 0
+popularityScore: 5
+readingTime: 2
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/statusline"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+#!/usr/bin/env bash
+
+# Model Switch History Tracker for Claude Code
+# Tracks transitions between Claude models (Opus, Sonnet, Haiku)
+
+# Read JSON from stdin
+read -r input
+
+# Extract current model info
+current_model=$(echo "$input" | jq -r '.model.display_name // "unknown"')
+session_id=$(echo "$input" | jq -r '.session_id // "unknown"')
+
+# Model history tracking directory
+HISTORY_DIR="${HOME}/.claude-code-model-history"
+mkdir -p "$HISTORY_DIR"
+
+# Session-specific history file
+HISTORY_FILE="${HISTORY_DIR}/${session_id}.history"
+
+# Initialize history file if doesn't exist
+if [ ! -f "$HISTORY_FILE" ]; then
+  echo "${current_model}" > "$HISTORY_FILE"
+  echo "0" >> "$HISTORY_FILE"  # Switch count
+fi
+
+# Read previous model and switch count
+previous_model=$(sed -n '1p' "$HISTORY_FILE")
+switch_count=$(sed -n '2p' "$HISTORY_FILE")
+
+# Detect model switch
+if [ "$current_model" != "$previous_model" ] && [ "$previous_model" != "" ]; then
+  # Model changed - increment switch count
+  switch_count=$((switch_count + 1))
+  
+  # Log switch event (append to history)
+  echo "$(date +%s)|${previous_model}→${current_model}" >> "$HISTORY_FILE"
+fi
+
+# Update current model and switch count (overwrite first 2 lines)
+temp_file="${HISTORY_FILE}.tmp"
+echo "${current_model}" > "$temp_file"
+echo "${switch_count}" >> "$temp_file"
+tail -n +3 "$HISTORY_FILE" >> "$temp_file" 2>/dev/null
+mv "$temp_file" "$HISTORY_FILE"
+
+# Determine model tier and color
+case "$current_model" in
+  *"Opus"*|*"opus"*)
+    MODEL_COLOR="\033[38;5;201m"  # Magenta: Opus (most expensive)
+    MODEL_ICON="💎"
+    MODEL_TIER="OPUS"
+    ;;
+  *"Sonnet"*|*"sonnet"*)
+    MODEL_COLOR="\033[38;5;75m"   # Blue: Sonnet (balanced)
+    MODEL_ICON="🎵"
+    MODEL_TIER="SONNET"
+    ;;
+  *"Haiku"*|*"haiku"*)
+    MODEL_COLOR="\033[38;5;46m"   # Green: Haiku (cheapest)
+    MODEL_ICON="🍃"
+    MODEL_TIER="HAIKU"
+    ;;
+  *)
+    MODEL_COLOR="\033[38;5;250m"  # Gray: Unknown
+    MODEL_ICON="❓"
+    MODEL_TIER="UNKNOWN"
+    ;;
+esac
+
+# Switch frequency indicator
+if [ $switch_count -eq 0 ]; then
+  SWITCH_STATUS="stable"
+  SWITCH_COLOR="\033[38;5;46m"   # Green: No switches
+elif [ $switch_count -le 3 ]; then
+  SWITCH_STATUS="${switch_count} switches"
+  SWITCH_COLOR="\033[38;5;226m"  # Yellow: 1-3 switches
+else
+  SWITCH_STATUS="${switch_count} switches!"
+  SWITCH_COLOR="\033[38;5;196m"  # Red: 4+ switches (frequent switching)
+fi
+
+# Get last 3 switches for mini-history
+last_switches=$(tail -n 3 "$HISTORY_FILE" | grep '→' | cut -d'|' -f2 | tr '\n' ' ' | sed 's/ $//')
+if [ -n "$last_switches" ]; then
+  HISTORY_DISPLAY="| ${last_switches}"
+else
+  HISTORY_DISPLAY=""
+fi
+
+RESET="\033[0m"
+
+# Output statusline
+echo -e "${MODEL_ICON} ${MODEL_COLOR}${MODEL_TIER}${RESET} | ${SWITCH_COLOR}${SWITCH_STATUS}${RESET} ${HISTORY_DISPLAY}"

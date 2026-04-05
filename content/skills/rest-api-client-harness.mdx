@@ -1,0 +1,285 @@
+---
+title: "REST API Client Harness Skill"
+slug: "rest-api-client-harness"
+category: "skills"
+description: "Explore and script against REST APIs with comprehensive authentication support (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagination utilities (cursor-based, offset-based, page-based), retry logic with exponential backoff and jitter, error handling for HTTP status codes, rate limiting with Retry-After header support, and response parsing (JSON, XML, HTML, binary). Build API integration scripts, test endpoints, extract data from web services, perform ETL operations, handle backfills and migrations, and create monitoring scripts with health checks and uptime tracking."
+seoTitle: "REST API Client Harness Skill"
+seoDescription: "Explore and script against REST APIs with comprehensive authentication support (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagination utilities (cu..."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-15"
+tags: 
+  - "rest"
+  - "http"
+  - "api"
+  - "curl"
+  - "node"
+keywords: 
+  - "api"
+  - "claude"
+  - "client"
+  - "curl"
+  - "development"
+  - "harness"
+  - "http"
+  - "node"
+  - "rest"
+  - "skills"
+  - "tools"
+difficultyScore: 100
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 22
+copyCount: 1
+popularityScore: 27
+readingTime: 6
+documentationUrl: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview"
+downloadUrl: "/downloads/skills/rest-api-client-harness.zip"
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+# REST API Client Harness Skill
+
+## What This Skill Enables
+
+Claude can interact with REST APIs: make requests, handle authentication (API keys, OAuth, JWT), paginate through results, handle rate limits with retries, and process responses. Build API integration scripts, test endpoints, and extract data from web services.
+
+## Prerequisites
+
+**Required:**
+- Claude Pro subscription
+- Code Interpreter feature enabled
+- API credentials (if required by the API)
+
+**What Claude handles:**
+- Installing HTTP libraries (requests, axios, fetch)
+- Making authenticated requests
+- Handling pagination
+- Retry logic with exponential backoff
+- Response parsing and data extraction
+- Error handling
+
+## How to Use This Skill
+
+### Simple API Request
+
+**Prompt:** "Fetch data from this REST API endpoint: https://api.example.com/users
+Use API key: [your-key]
+Show me the first 10 results."
+
+Claude will:
+1. Make GET request with auth header
+2. Parse JSON response
+3. Extract and display data
+4. Handle errors gracefully
+
+### Paginated Data Extraction
+
+**Prompt:** "Fetch all pages from this paginated API:
+URL: https://api.example.com/items
+Pagination: cursor-based (next_cursor field)
+API Key: [your-key]
+Save all results to items.json"
+
+Claude will:
+1. Make first request
+2. Loop through pages using cursor
+3. Collect all results
+4. Save to JSON file
+5. Report total count
+
+### POST Request with Data
+
+**Prompt:** "Create a new user via POST request:
+URL: https://api.example.com/users
+Payload: {name: 'John Doe', email: 'john@example.com'}
+Auth: Bearer token [your-token]
+Show me the response."
+
+Claude will:
+1. Prepare POST request
+2. Set headers (auth, content-type)
+3. Send JSON payload
+4. Parse response
+5. Display result or error
+
+### Batch Operations
+
+**Prompt:** "Upload all these records to the API:
+- Read from users.csv
+- For each row, POST to /users endpoint
+- Handle rate limits (max 10 requests/second)
+- Log successes and failures
+- Retry failures once"
+
+Claude will:
+1. Read CSV data
+2. Iterate through rows
+3. Make POST requests with rate limiting
+4. Retry on failures
+5. Generate success/failure report
+
+## Common Workflows
+
+### API Testing & Exploration
+```
+"Test this API endpoint:
+1. Make GET request to /api/products
+2. Check status code and headers
+3. Validate JSON response schema
+4. Show sample of first 3 records
+5. Report if any fields are null/missing"
+```
+
+### Data Migration
+```
+"Migrate data from API A to API B:
+1. Fetch all records from source API (paginated)
+2. Transform to target API format
+3. POST to destination API
+4. Handle rate limits (5 req/sec)
+5. Log migration progress and errors
+Save unmigrated records to errors.json"
+```
+
+### Webhook Testing
+```
+"Test this webhook:
+1. POST sample payload to webhook URL
+2. Check response status
+3. Validate response format
+4. Test with invalid payload
+5. Report all results"
+```
+
+### API Monitoring
+```
+"Monitor API health:
+1. Hit /health endpoint every minute for 10 minutes
+2. Record response time and status
+3. Alert if response time > 1 second
+4. Create uptime report
+5. Plot response times"
+```
+
+## Authentication Methods
+
+### API Key Authentication
+- Header: `X-API-Key: your-key`
+- Query parameter: `?api_key=your-key`
+- Custom header format
+
+### Bearer Token (JWT)
+- Header: `Authorization: Bearer your-token`
+- Token refresh handling
+- Expiration detection
+
+### Basic Authentication
+- Header: `Authorization: Basic base64(user:pass)`
+- Credentials encoding
+
+### OAuth 2.0
+- Client credentials flow
+- Authorization code flow
+- Token refresh logic
+
+## Advanced Features
+
+### Rate Limiting & Retries
+- Respect rate limit headers
+- Exponential backoff
+- Jitter for retry timing
+- Max retry attempts
+
+### Response Handling
+- JSON parsing
+- XML/HTML parsing
+- Binary data (images, files)
+- Streaming responses
+
+### Error Handling
+- HTTP status code detection
+- Custom error messages
+- Validation errors
+- Network timeouts
+
+### Data Transformation
+- JSON to CSV conversion
+- Field mapping and renaming
+- Data type coercion
+- Filtering and aggregation
+
+## Tips for Best Results
+
+1. **Provide API Docs**: Share API documentation link or describe endpoints
+2. **Authentication**: Be clear about auth method and provide credentials securely
+3. **Rate Limits**: Mention any known rate limits ("max 100 requests/minute")
+4. **Pagination**: Describe pagination style (cursor, offset, page-based)
+5. **Error Handling**: Specify how to handle failures ("retry 3 times then skip")
+6. **Data Volume**: Estimate how many requests ("expect 1000 records across 10 pages")
+7. **Response Format**: Mention expected format (JSON, XML, etc.)
+
+## Common Patterns
+
+### Cursor-Based Pagination
+```python
+url = "https://api.example.com/items"
+all_items = []
+cursor = None
+while True:
+    params = {"cursor": cursor} if cursor else {}
+    response = requests.get(url, params=params)
+    data = response.json()
+    all_items.extend(data["items"])
+    cursor = data.get("next_cursor")
+    if not cursor:
+        break
+```
+
+### Retry with Exponential Backoff
+```python
+import time
+max_retries = 3
+for attempt in range(max_retries):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        break
+    except requests.exceptions.RequestException:
+        if attempt < max_retries - 1:
+            wait = 2 ** attempt  # 1s, 2s, 4s
+            time.sleep(wait)
+        else:
+            raise
+```
+
+## Troubleshooting
+
+**Issue:** Authentication failing
+**Solution:** Double-check auth method and credentials. Show Claude the API docs for auth section.
+
+**Issue:** Rate limit errors (429)
+**Solution:** "Add retry logic with exponential backoff" or "Reduce concurrent requests to 5/second"
+
+**Issue:** Response parsing errors
+**Solution:** "Show me raw response first" then describe expected structure
+
+**Issue:** Pagination not working
+**Solution:** Clarify pagination method: "Use offset pagination starting at 0, increment by 100"
+
+**Issue:** Timeouts on large requests
+**Solution:** "Increase timeout to 60 seconds" or "Fetch in smaller batches"
+
+**Issue:** CORS errors (in browser context)
+**Solution:** Note: Code Interpreter runs server-side, no CORS issues
+
+## Learn More
+
+- [HTTP Methods](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods) - GET, POST, PUT, DELETE, etc.
+- [HTTP Status Codes](https://httpstatuses.com/) - Understanding response codes
+- [REST API Best Practices](https://restfulapi.net/) - API design principles
+- [Postman Learning](https://learning.postman.com/) - API testing tutorials
+- [Python Requests](https://requests.readthedocs.io/) - Popular HTTP library

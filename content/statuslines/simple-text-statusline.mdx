@@ -1,0 +1,65 @@
+---
+title: "Simple Text Statusline - Statuslines"
+slug: "simple-text-statusline"
+category: "statuslines"
+description: "Ultra-lightweight plain text statusline with no colors or special characters for maximum compatibility and minimal overhead"
+seoTitle: "Simple Text Statusline - Statuslines"
+seoDescription: "Ultra-lightweight plain text statusline with no colors or special characters for maximum compatibility and minimal overhead Discover tools for AI development."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-01"
+tags: 
+  - "simple"
+  - "plain-text"
+  - "minimal"
+  - "bash"
+  - "lightweight"
+  - "no-dependencies"
+keywords: 
+  - "bash"
+  - "claude"
+  - "development"
+  - "lightweight"
+  - "minimal"
+  - "no-dependencies"
+  - "plain-text"
+  - "simple"
+  - "statusline"
+  - "statuslines"
+  - "text"
+  - "tools"
+difficultyScore: 1
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 37
+copyCount: 0
+popularityScore: 42
+readingTime: 1
+documentationUrl: ""
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+#!/usr/bin/env bash
+
+# Simple Text Statusline for Claude Code
+# Plain text only - maximum compatibility
+
+# Read JSON from stdin
+read -r input
+
+# Extract values using bash built-ins (no jq required)
+model=$(echo "$input" | grep -o '"model":"[^"]*"' | cut -d'"' -f4)
+dir=$(echo "$input" | grep -o '"path":"[^"]*"' | cut -d'"' -f4 | sed "s|$HOME|~|")
+tokens=$(echo "$input" | grep -o '"totalTokens":[0-9]*' | cut -d':' -f2)
+
+# Default values if extraction fails
+model=${model:-"unknown"}
+dir=${dir:-"~"}
+tokens=${tokens:-"0"}
+
+# Build simple plain text status
+echo "[Model: $model] [Dir: $dir] [Tokens: $tokens]"

@@ -1,0 +1,160 @@
+---
+title: "Daily Usage Percentage Tracker - Statuslines"
+slug: "daily-usage-percentage-tracker"
+category: "statuslines"
+description: "Claude Code daily usage quota tracker showing percentage of daily limit consumed with visual progress bar, time remaining, and budget pacing indicators."
+seoTitle: "Daily Usage Percentage Tracker - Statuslines"
+seoDescription: "Claude Code daily usage quota tracker showing percentage of daily limit consumed with visual progress bar, time remaining, and budget pacing indicators."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+tags: 
+  - "daily-limit"
+  - "quota-tracking"
+  - "usage-percentage"
+  - "budget-pacing"
+  - "limit-monitoring"
+keywords: 
+  - "budget-pacing"
+  - "claude"
+  - "daily"
+  - "daily-limit"
+  - "development"
+  - "limit-monitoring"
+  - "percentage"
+  - "quota-tracking"
+  - "statuslines"
+  - "tools"
+  - "tracker"
+  - "usage"
+  - "usage-percentage"
+difficultyScore: 8
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 1
+copyCount: 0
+popularityScore: 6
+readingTime: 3
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/statusline"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+#!/usr/bin/env bash
+
+# Daily Usage Percentage Tracker for Claude Code
+# Tracks progress toward daily usage limits
+
+# Read JSON from stdin
+read -r input
+
+# Extract session cost
+session_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+
+# Daily usage tracking file (resets at midnight)
+USAGE_DIR="${HOME}/.claude-code-usage"
+mkdir -p "$USAGE_DIR"
+
+# Get current date for daily reset
+current_date=$(date +%Y-%m-%d)
+USAGE_FILE="${USAGE_DIR}/daily-${current_date}.usage"
+
+# Initialize usage file if doesn't exist
+if [ ! -f "$USAGE_FILE" ]; then
+  echo "0" > "$USAGE_FILE"
+fi
+
+# Read cumulative daily usage
+daily_usage=$(cat "$USAGE_FILE")
+
+# Update with current session cost (simple addition)
+# Note: This is per-session tracking, may need deduplication for accuracy
+updated_usage=$(echo "$daily_usage + $session_cost" | bc)
+echo "$updated_usage" > "$USAGE_FILE"
+
+# CONFIGURABLE: Set your daily budget limit (default $10/day)
+DAILY_LIMIT=10.00
+
+# Calculate percentage of daily limit used
+if (( $(echo "$DAILY_LIMIT > 0" | bc -l) )); then
+  usage_percentage=$(echo "scale=1; ($updated_usage * 100) / $DAILY_LIMIT" | bc)
+else
+  usage_percentage=0
+fi
+
+# Convert to integer for comparisons
+usage_percentage_int=$(echo "$usage_percentage / 1" | bc)
+
+# Cap percentage at 100 for display (can exceed in practice)
+if [ $usage_percentage_int -gt 100 ]; then
+  display_percentage=100
+  OVERFLOW=true
+else
+  display_percentage=$usage_percentage_int
+  OVERFLOW=false
+fi
+
+# Calculate remaining budget
+remaining=$(echo "$DAILY_LIMIT - $updated_usage" | bc)
+
+# Color coding based on usage percentage
+if [ $usage_percentage_int -lt 50 ]; then
+  USAGE_COLOR="\033[38;5;46m"   # Green: <50% used
+  USAGE_ICON="✓"
+  USAGE_STATUS="ON TRACK"
+elif [ $usage_percentage_int -lt 80 ]; then
+  USAGE_COLOR="\033[38;5;226m"  # Yellow: 50-80% used
+  USAGE_ICON="⚠"
+  USAGE_STATUS="PACING HIGH"
+elif [ $usage_percentage_int -lt 100 ]; then
+  USAGE_COLOR="\033[38;5;208m"  # Orange: 80-100% used
+  USAGE_ICON="⏰"
+  USAGE_STATUS="NEAR LIMIT"
+else
+  USAGE_COLOR="\033[38;5;196m"  # Red: >100% used (over budget)
+  USAGE_ICON="✗"
+  USAGE_STATUS="OVER BUDGET"
+fi
+
+# Build progress bar (20 characters wide)
+bar_filled=$(( display_percentage / 5 ))  # Each char = 5%
+bar_empty=$(( 20 - bar_filled ))
+
+if [ $bar_filled -gt 0 ]; then
+  bar=$(printf "█%.0s" $(seq 1 $bar_filled))$(printf "░%.0s" $(seq 1 $bar_empty))
+else
+  bar="░░░░░░░░░░░░░░░░░░░░"
+fi
+
+# Calculate hours remaining in day for pacing
+current_hour=$(date +%H)
+hours_remaining=$((24 - current_hour))
+
+# Pacing indicator (are we on track for 24-hour period?)
+expected_percentage=$(( (24 - hours_remaining) * 100 / 24 ))
+if [ $usage_percentage_int -gt $expected_percentage ] && [ $hours_remaining -gt 0 ]; then
+  PACING="📈 ahead of pace"
+elif [ $usage_percentage_int -lt $expected_percentage ] && [ $hours_remaining -gt 0 ]; then
+  PACING="📉 below pace"
+else
+  PACING=""
+fi
+
+# Format remaining budget
+if (( $(echo "$remaining > 0" | bc -l) )); then
+  remaining_display="\$${remaining} left"
+else
+  remaining_display="\$0.00 left"
+fi
+
+RESET="\033[0m"
+
+# Output statusline
+if [ "$OVERFLOW" = true ]; then
+  echo -e "${USAGE_ICON} Daily: ${USAGE_COLOR}${bar}${RESET} ${usage_percentage}% | ${USAGE_STATUS} | ${remaining_display}"
+else
+  echo -e "${USAGE_ICON} Daily: ${USAGE_COLOR}${bar}${RESET} ${usage_percentage}% | ${remaining_display} ${PACING}"
+fi

@@ -1,69 +1,20 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "./config/tsconfig.base.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "preserve",
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./apps/web/*"],
-      "@/src/*": ["./apps/web/src/*"],
-      "@heyclaude/database-types": ["./packages/database-types/dist/index"],
-      "@heyclaude/database-types/*": ["./packages/database-types/dist/*"],
-      "@heyclaude/shared-runtime": ["./packages/shared-runtime/src/index.ts"],
-      "@heyclaude/shared-runtime/*": ["./packages/shared-runtime/src/*"],
-      "@heyclaude/edge-runtime": ["./packages/edge-runtime/src/index.ts"],
-      "@heyclaude/edge-runtime/*": ["./packages/edge-runtime/src/*"],
-      "@heyclaude/edge-runtime/changelog/readme-builder": ["./packages/edge-runtime/src/changelog/readme-builder.ts"],
-      "@heyclaude/web-runtime": ["./packages/web-runtime/src/index.ts"],
-      "@heyclaude/data-layer": ["./packages/data-layer/dist/index"],
-      "@heyclaude/data-layer/*": ["./packages/data-layer/dist/*"],
-      "@heyclaude/generators": ["./packages/generators/src/index.ts"],
-      "@heyclaude/generators/*": ["./packages/generators/src/*"]
-    },
-    "noEmit": true,
-    "incremental": true,
-    "tsBuildInfoFile": ".tsbuildinfo",
-    "skipLibCheck": true,
-    "typeRoots": [
-      "./node_modules/@types",
-      "./packages/edge-runtime/src/types"
-    ],
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
-  },
-  "include": [
-    "apps/web/src/**/*.ts",
-    "apps/web/src/**/*.tsx",
-    "apps/web/src/types/**/*.d.ts",
-    "apps/web/.next/types/**/*.ts",
-    "scripts/**/*.ts",
-    "packages/web-runtime/src/**/*.ts",
-    "packages/web-runtime/src/**/*.d.ts",
-    "packages/shared-runtime/src/**/*.ts",
-    "packages/data-layer/src/**/*.ts",
-    "packages/generators/src/**/*.ts",
-    "packages/database-types/**/*.ts",
-    "packages/edge-runtime/src/types/**/*.d.ts",
-    "types/**/*.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "tests",
-    "vitest.config.ts",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "apps/edge/functions",
-    "packages/edge-runtime/src/utils/email",
-    "packages/edge-runtime/src/utils/email/**",
-    "packages/edge-runtime/src/utils/email/**/*",
-    "packages/edge-runtime/src/app.ts",
-    "packages/edge-runtime/src/utils/integrations/resend.ts",
-    "packages/edge-runtime/src/utils/webhook/auth-hook.ts",
-    "packages/edge-runtime/src/utils/email/digest-helpers.ts",
-    "packages/edge-runtime/src/utils/email/sequence-helpers.ts"
-  ]
+      "@/*": ["apps/web/src/*"]
+    }
+  }
 }

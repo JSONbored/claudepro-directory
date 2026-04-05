@@ -1,0 +1,224 @@
+---
+title: "Session Health Score - Statuslines"
+slug: "session-health-score"
+category: "statuslines"
+description: "Claude Code session health aggregator providing A-F grade based on cost efficiency, latency performance, productivity velocity, and cache utilization with actionable recommendations."
+seoTitle: "Session Health Score - Statuslines"
+seoDescription: "Claude Code session health aggregator providing A-F grade based on cost efficiency, latency performance, productivity velocity, and cache utilization with ac..."
+author: "JSONbored"
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+tags: 
+  - "health-score"
+  - "session-grade"
+  - "performance-aggregator"
+  - "quality-metrics"
+  - "optimization-recommendations"
+keywords: 
+  - "claude"
+  - "development"
+  - "health"
+  - "health-score"
+  - "optimization-recommendations"
+  - "performance-aggregator"
+  - "quality-metrics"
+  - "score"
+  - "session"
+  - "session-grade"
+  - "statuslines"
+  - "tools"
+difficultyScore: 27
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+viewCount: 2
+copyCount: 0
+popularityScore: 7
+readingTime: 4
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/statusline"
+downloadUrl: ""
+ogImage: ""
+robotsIndex: true
+robotsFollow: true
+---
+
+#!/usr/bin/env bash
+
+# Session Health Score for Claude Code
+# Aggregates multiple metrics into overall health grade (A-F)
+
+# Read JSON from stdin
+read -r input
+
+# Extract metrics
+total_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 1')
+api_duration_ms=$(echo "$input" | jq -r '.cost.total_api_duration_ms // 0')
+lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
+cache_read_tokens=$(echo "$input" | jq -r '.cost.cache_read_input_tokens // 0')
+cache_create_tokens=$(echo "$input" | jq -r '.cost.cache_creation_input_tokens // 0')
+regular_input_tokens=$(echo "$input" | jq -r '.cost.input_tokens // 0')
+
+# Convert duration to minutes
+if [ "$total_duration_ms" -gt 0 ]; then
+  duration_minutes=$(echo "scale=2; $total_duration_ms / 60000" | bc)
+else
+  duration_minutes=0.01
+fi
+
+# METRIC 1: Cost Efficiency (25 points)
+# Target: <$0.05/min = excellent, $0.05-$0.10 = good, >$0.10 = poor
+if (( $(echo "$duration_minutes > 0" | bc -l) )); then
+  cost_per_minute=$(echo "scale=4; $total_cost / $duration_minutes" | bc)
+else
+  cost_per_minute=0
+fi
+
+if (( $(echo "$cost_per_minute < 0.05" | bc -l) )); then
+  cost_score=25
+elif (( $(echo "$cost_per_minute < 0.10" | bc -l) )); then
+  cost_score=18
+elif (( $(echo "$cost_per_minute < 0.20" | bc -l) )); then
+  cost_score=12
+else
+  cost_score=5
+fi
+
+# METRIC 2: Latency Performance (25 points)
+# Target: network time <1s = excellent, 1-3s = good, >3s = poor
+network_time=$((total_duration_ms - api_duration_ms))
+network_seconds=$(echo "scale=2; $network_time / 1000" | bc)
+
+if (( $(echo "$network_seconds < 1" | bc -l) )); then
+  latency_score=25
+elif (( $(echo "$network_seconds < 3" | bc -l) )); then
+  latency_score=18
+elif (( $(echo "$network_seconds < 5" | bc -l) )); then
+  latency_score=12
+else
+  latency_score=5
+fi
+
+# METRIC 3: Productivity Velocity (25 points)
+# Target: >30 lines/min = excellent, 15-30 = good, <15 = poor
+total_changed=$((lines_added + lines_removed))
+if (( $(echo "$duration_minutes > 0" | bc -l) )); then
+  lines_per_minute=$(echo "scale=1; $total_changed / $duration_minutes" | bc)
+else
+  lines_per_minute=0
+fi
+
+if (( $(echo "$lines_per_minute > 30" | bc -l) )); then
+  productivity_score=25
+elif (( $(echo "$lines_per_minute > 15" | bc -l) )); then
+  productivity_score=18
+elif (( $(echo "$lines_per_minute > 5" | bc -l) )); then
+  productivity_score=12
+else
+  productivity_score=5
+fi
+
+# METRIC 4: Cache Utilization (25 points)
+# Target: >40% hit rate = excellent, 20-40% = good, <20% = poor
+total_input=$((cache_read_tokens + cache_create_tokens + regular_input_tokens))
+if [ $total_input -gt 0 ]; then
+  cache_hit_rate=$(( (cache_read_tokens * 100) / total_input ))
+else
+  cache_hit_rate=0
+fi
+
+if [ $cache_hit_rate -ge 40 ]; then
+  cache_score=25
+elif [ $cache_hit_rate -ge 20 ]; then
+  cache_score=18
+elif [ $cache_hit_rate -gt 0 ]; then
+  cache_score=12
+else
+  cache_score=5  # No caching detected
+fi
+
+# Calculate total health score (0-100)
+health_score=$((cost_score + latency_score + productivity_score + cache_score))
+
+# Assign letter grade
+if [ $health_score -ge 90 ]; then
+  GRADE="A"
+  GRADE_COLOR="\033[38;5;46m"   # Green
+  GRADE_ICON="🌟"
+  STATUS="EXCELLENT"
+elif [ $health_score -ge 80 ]; then
+  GRADE="B"
+  GRADE_COLOR="\033[38;5;75m"   # Blue
+  GRADE_ICON="✓"
+  STATUS="GOOD"
+elif [ $health_score -ge 70 ]; then
+  GRADE="C"
+  GRADE_COLOR="\033[38;5;226m"  # Yellow
+  GRADE_ICON="●"
+  STATUS="AVERAGE"
+elif [ $health_score -ge 60 ]; then
+  GRADE="D"
+  GRADE_COLOR="\033[38;5;208m"  # Orange
+  GRADE_ICON="⚠"
+  STATUS="BELOW AVG"
+else
+  GRADE="F"
+  GRADE_COLOR="\033[38;5;196m"  # Red
+  GRADE_ICON="✗"
+  STATUS="POOR"
+fi
+
+# Identify weakest metric for recommendation
+weakest_score=$cost_score
+weakest_metric="cost"
+
+if [ $latency_score -lt $weakest_score ]; then
+  weakest_score=$latency_score
+  weakest_metric="latency"
+fi
+
+if [ $productivity_score -lt $weakest_score ]; then
+  weakest_score=$productivity_score
+  weakest_metric="productivity"
+fi
+
+if [ $cache_score -lt $weakest_score ]; then
+  weakest_score=$cache_score
+  weakest_metric="cache"
+fi
+
+# Actionable recommendation based on weakest metric
+case "$weakest_metric" in
+  cost)
+    RECOMMENDATION="💡 Optimize: Switch to Haiku for simple tasks"
+    ;;
+  latency)
+    RECOMMENDATION="💡 Optimize: Check network connection"
+    ;;
+  productivity)
+    RECOMMENDATION="💡 Optimize: Increase automation/prompts"
+    ;;
+  cache)
+    RECOMMENDATION="💡 Optimize: Enable prompt caching"
+    ;;
+esac
+
+# Show recommendation only if grade is C or below
+if [ $health_score -lt 70 ]; then
+  SHOW_REC="$RECOMMENDATION"
+else
+  SHOW_REC=""
+fi
+
+RESET="\033[0m"
+
+# Build metric breakdown (abbreviated)
+METRICS="C:${cost_score} L:${latency_score} P:${productivity_score} K:${cache_score}"
+
+# Output statusline
+if [ -n "$SHOW_REC" ]; then
+  echo -e "${GRADE_ICON} Health: ${GRADE_COLOR}${GRADE}${RESET} (${health_score}/100) | ${METRICS} | ${SHOW_REC}"
+else
+  echo -e "${GRADE_ICON} Health: ${GRADE_COLOR}${GRADE}${RESET} (${health_score}/100) | ${STATUS} | ${METRICS}"
+fi
