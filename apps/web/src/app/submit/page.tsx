@@ -35,6 +35,12 @@ export default function SubmitPage() {
           </div>
 
           <SubmitForm />
+
+          <div className="rounded-2xl border border-border/80 bg-card/70 px-5 py-4 text-sm leading-7 text-muted-foreground">
+            If you are sharing something installable, include the real command or the
+            exact config somebody would need to use it. The goal is to keep new entries
+            useful on day one, not just listed.
+          </div>
         </div>
       </section>
     </div>

@@ -437,6 +437,14 @@
   box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.03);
 }
 
+.submit-select-trigger {
+  @apply h-12 w-full rounded-xl border-input bg-background px-4 text-left text-sm text-foreground shadow-none;
+}
+
+.submit-select-trigger:focus-visible {
+  @apply border-ring ring-2 ring-ring/30;
+}
+
 .submit-textarea {
   min-height: 9rem;
   resize: vertical;
@@ -444,6 +452,10 @@
 
 .submit-primary-button {
   @apply inline-flex w-full items-center justify-center rounded-xl bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90;
+}
+
+.submit-primary-button:disabled {
+  @apply cursor-not-allowed opacity-55;
 }
 
 .submit-orb-wrap {

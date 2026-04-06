@@ -26,6 +26,14 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
     );
   }, [jobs, normalizedQuery]);
 
+  const sortedJobs = useMemo(() => {
+    return [...filteredJobs].sort((left, right) => {
+      const leftScore = Number(Boolean(left.sponsored)) * 2 + Number(Boolean(left.featured));
+      const rightScore = Number(Boolean(right.sponsored)) * 2 + Number(Boolean(right.featured));
+      return rightScore - leftScore;
+    });
+  }, [filteredJobs]);
+
   return (
     <div className="space-y-5">
       <div className="max-w-3xl">
@@ -36,17 +44,35 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
         />
       </div>
 
-      <div className="text-sm text-muted-foreground">{filteredJobs.length} jobs found</div>
+      <div className="text-sm text-muted-foreground">{sortedJobs.length} jobs found</div>
 
       <div className="space-y-4">
-        {filteredJobs.map((job) => (
-          <article key={job.slug} className="surface-panel p-6">
+        {sortedJobs.map((job) => (
+          <article
+            key={job.slug}
+            className={
+              job.sponsored
+                ? "surface-panel border-primary/45 bg-card p-6 shadow-lg"
+                : "surface-panel p-6"
+            }
+          >
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                  <span className="inline-flex rounded-full border border-border bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground">
-                    {job.featured ? "Featured" : "Role"}
+                  <span
+                    className={
+                      job.sponsored
+                        ? "inline-flex rounded-full border border-primary/45 bg-primary/12 px-2.5 py-0.5 text-[11px] font-medium text-primary"
+                        : "inline-flex rounded-full border border-border bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground"
+                    }
+                  >
+                    {job.sponsored ? "Sponsored" : job.featured ? "Featured" : "Role"}
                   </span>
+                  {job.featured && !job.sponsored ? (
+                    <span className="inline-flex rounded-full border border-border bg-background px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                      Highlighted
+                    </span>
+                  ) : null}
                   <span>{job.company}</span>
                   <span>· {job.location}</span>
                 </div>
@@ -70,7 +96,7 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
           </article>
         ))}
 
-        {filteredJobs.length === 0 ? (
+        {sortedJobs.length === 0 ? (
           <div className="surface-panel p-8 text-sm text-muted-foreground">
             No jobs matched that search.
           </div>

@@ -2,6 +2,13 @@
 
 import { useMemo, useState } from "react";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { categoryLabels, siteConfig } from "@/lib/site";
 
 const categories = siteConfig.categoryOrder.map((category) => ({
@@ -52,13 +59,18 @@ export function SubmitForm() {
     return `${siteConfig.githubUrl}/issues/new?${params.toString()}`;
   }, [category, description, docsUrl, email, githubUrl, installCommand, tags, toolName]);
 
+  const isReady =
+    Boolean(toolName.trim()) &&
+    Boolean(email.trim()) &&
+    Boolean(description.trim()) &&
+    Boolean(category);
+
   return (
     <form
       className="submit-form-card"
       action={issueUrl}
       method="get"
       target="_blank"
-      rel="noreferrer"
     >
       <div className="space-y-1">
         <label htmlFor="tool-name" className="submit-label">
@@ -110,20 +122,18 @@ export function SubmitForm() {
         <label htmlFor="submit-category" className="submit-label">
           Category <span className="text-destructive">*</span>
         </label>
-        <select
-          id="submit-category"
-          value={category}
-          onChange={(event) => setCategory(event.target.value)}
-          className="submit-input"
-          required
-        >
-          <option value="">Select a category</option>
+        <Select value={category} onValueChange={setCategory}>
+          <SelectTrigger id="submit-category" className="submit-select-trigger">
+            <SelectValue placeholder="Select a category" />
+          </SelectTrigger>
+          <SelectContent className="directory-select-content">
           {categories.map((option) => (
-            <option key={option.value} value={option.value}>
+            <SelectItem key={option.value} value={option.value}>
               {option.label}
-            </option>
+            </SelectItem>
           ))}
-        </select>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-1">
@@ -180,7 +190,12 @@ export function SubmitForm() {
         />
       </div>
 
-      <button type="submit" className="submit-primary-button">
+      <div className="rounded-xl border border-border bg-background px-4 py-3 text-xs leading-6 text-muted-foreground">
+        This opens a prefilled GitHub issue using the repo submission template. GitHub
+        is the review queue and source of truth.
+      </div>
+
+      <button type="submit" className="submit-primary-button" disabled={!isReady}>
         Open GitHub Issue
       </button>
     </form>
