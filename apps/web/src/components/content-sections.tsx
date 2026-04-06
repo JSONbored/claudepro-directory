@@ -82,16 +82,17 @@ export function ContentSections({ sections, omitCode = [] }: ContentSectionsProp
     <div className="space-y-6">
       {sections.map((section, index) => {
         const embeddedType = getEmbeddedSectionType(section.html);
-        const renderedCode = section.codeBlocks.filter(
-          (block) => !omitCode.includes(block.code.trim())
-        );
+        const cleanHtml = stripSectionTypeComments(section.html);
         const cleanProseHtml = stripSectionTypeComments(section.proseHtml);
         const hasProse = cleanProseHtml.replace(/<[^>]+>/g, "").trim().length > 0;
         const variant = embeddedType ?? getSectionVariant(section.title);
-        const sectionSubitems =
-          cleanProseHtml.includes("<h3")
-            ? extractSectionSubitems(cleanProseHtml, section.id)
-            : [];
+        const sectionSubitems = cleanHtml.includes("<h3")
+          ? extractSectionSubitems(cleanHtml, section.id)
+          : [];
+        const renderedCode =
+          sectionSubitems.length > 0
+            ? []
+            : section.codeBlocks.filter((block) => !omitCode.includes(block.code.trim()));
         const proseHtml =
           sectionSubitems.length > 0
             ? cleanProseHtml.split(/(?=<h3\b)/)[0].trim()
