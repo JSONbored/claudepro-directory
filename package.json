@@ -148,7 +148,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/archiver": "^7.0.0",
-    "@types/node": "^24.10.1",
+    "@types/node": "^24.12.2",
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
     "archiver": "^7.0.1",
@@ -179,7 +179,7 @@
     "ts-prune": "^0.10.3",
     "tsx": "^4.21.0",
     "turbo": "^2.6.3",
-    "typescript": "5.9.3",
+    "typescript": "6.0.2",
     "typescript-eslint": "^8.48.1",
     "vercel": "^49.1.0",
     "vitest": "^4.0.15"
