@@ -71,6 +71,18 @@ function getPrimarySnippet(entry: NonNullable<Awaited<ReturnType<typeof getEntry
         code: entry.configSnippet || entry.scriptBody || entry.copySnippet || entry.usageSnippet,
         language: entry.configSnippet ? "json" : entry.scriptLanguage || "text"
       };
+    case "collections":
+      return {
+        title: "Quick start",
+        code: entry.usageSnippet || entry.copySnippet || entry.body,
+        language: "text"
+      };
+    case "guides":
+      return {
+        title: "Quick summary",
+        code: entry.usageSnippet || entry.copySnippet || entry.body,
+        language: "text"
+      };
     default:
       return {
         title: entry.copySnippet ? "Copyable asset" : "Usage",
@@ -380,6 +392,20 @@ export default async function DetailPage({ params }: DetailPageProps) {
               entry={entry}
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground transition hover:border-primary/40"
             />
+            {entry.installCommand ? (
+              <EntryCopyButton
+                text={entry.installCommand}
+                label="Copy install command"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground transition hover:border-primary/40"
+              />
+            ) : null}
+            {entry.configSnippet ? (
+              <EntryCopyButton
+                text={entry.configSnippet}
+                label="Copy Claude config"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground transition hover:border-primary/40"
+              />
+            ) : null}
             <a href={entry.githubUrl} target="_blank" rel="noreferrer" className="block rounded-xl border border-border bg-background px-4 py-3">
               GitHub source
             </a>

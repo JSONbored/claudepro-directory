@@ -7,11 +7,18 @@ import type { ContentEntry } from "@/lib/content";
 import { getCopyText } from "@/lib/entry-presentation";
 
 type EntryCopyButtonProps = {
-  entry: ContentEntry;
+  entry?: ContentEntry;
+  text?: string;
+  label?: string;
   className?: string;
 };
 
-export function EntryCopyButton({ entry, className }: EntryCopyButtonProps) {
+export function EntryCopyButton({
+  entry,
+  text,
+  label = "Copy full asset",
+  className
+}: EntryCopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -21,14 +28,16 @@ export function EntryCopyButton({ entry, className }: EntryCopyButtonProps) {
   }, [copied]);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(getCopyText(entry));
+    const value = text ?? (entry ? getCopyText(entry) : "");
+    if (!value) return;
+    await navigator.clipboard.writeText(value);
     setCopied(true);
   };
 
   return (
     <button type="button" onClick={handleCopy} className={className}>
       {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-      {copied ? "Copied" : "Copy full asset"}
+      {copied ? "Copied" : label}
     </button>
   );
 }
