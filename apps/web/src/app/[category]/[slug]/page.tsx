@@ -365,9 +365,28 @@ export default async function DetailPage({ params }: DetailPageProps) {
         ) : null}
       </article>
 
-      <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
+      <aside className="space-y-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:self-start lg:overflow-y-auto lg:pr-1">
+        {sidebarSections.length ? (
+          <div className="surface-panel p-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">On this page</p>
+            <div className="mt-4 space-y-2">
+              {sidebarSections.map((section, index) => (
+                <a key={section.id} href={`#${section.id}`} className="detail-nav-link">
+                  <span className="detail-nav-index">{index + 1}</span>
+                  <span className="min-w-0 flex-1 truncate">{section.title}</span>
+                </a>
+              ))}
+              {visibleSections.length > sidebarSections.length ? (
+                <p className="pt-2 text-xs text-muted-foreground">
+                  {visibleSections.length - sidebarSections.length} more sections in content
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
         <div className="surface-panel p-5">
-          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Quick links</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Entry overview</p>
           <div className="mt-4 space-y-3 text-sm">
             <EntryCopyButton
               entry={entry}
@@ -390,12 +409,6 @@ export default async function DetailPage({ params }: DetailPageProps) {
             <a href={entry.githubUrl} target="_blank" rel="noreferrer" className="block rounded-xl border border-border bg-background px-4 py-3">
               GitHub source
             </a>
-            {sourceLabel ? (
-              <div className="rounded-xl border border-border bg-background px-4 py-3 text-muted-foreground">
-                <p className="text-[11px] uppercase tracking-[0.16em]">Path</p>
-                <p className="mt-1 break-all text-sm text-foreground">{sourceLabel}</p>
-              </div>
-            ) : null}
             {entry.documentationUrl ? (
               <a href={entry.documentationUrl} target="_blank" rel="noreferrer" className="block rounded-xl border border-border bg-background px-4 py-3">
                 Documentation
@@ -411,42 +424,46 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 Download package
               </a>
             ) : null}
-          </div>
-        </div>
 
-        <div className="surface-panel p-5">
-          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Details</p>
-          <div className="mt-4 space-y-3 text-sm text-muted-foreground">
-            <div className="rounded-xl border border-border bg-background px-4 py-3">
-              <p className="text-[11px] uppercase tracking-[0.16em]">Author</p>
-              <p className="mt-1 text-foreground">{entry.author ?? "JSONbored"}</p>
+            <div className="grid gap-3 pt-1 text-sm text-muted-foreground">
+              <div className="rounded-xl border border-border bg-background px-4 py-3">
+                <p className="text-[11px] uppercase tracking-[0.16em]">Author</p>
+                <p className="mt-1 text-foreground">{entry.author ?? "JSONbored"}</p>
+              </div>
+              <div className="rounded-xl border border-border bg-background px-4 py-3">
+                <p className="text-[11px] uppercase tracking-[0.16em]">Category</p>
+                <p className="mt-1 text-foreground">{categoryLabels[entry.category] ?? entry.category}</p>
+              </div>
+              {entry.dateAdded ? (
+                <div className="rounded-xl border border-border bg-background px-4 py-3">
+                  <p className="text-[11px] uppercase tracking-[0.16em]">Added</p>
+                  <p className="mt-1 text-foreground">{entry.dateAdded}</p>
+                </div>
+              ) : null}
+              {entry.argumentHint ? (
+                <div className="rounded-xl border border-border bg-background px-4 py-3">
+                  <p className="text-[11px] uppercase tracking-[0.16em]">Arguments</p>
+                  <p className="mt-1 text-foreground">{entry.argumentHint}</p>
+                </div>
+              ) : null}
+              {entry.trigger ? (
+                <div className="rounded-xl border border-border bg-background px-4 py-3">
+                  <p className="text-[11px] uppercase tracking-[0.16em]">Hook trigger</p>
+                  <p className="mt-1 text-foreground">{entry.trigger}</p>
+                </div>
+              ) : null}
+              {githubStars > 0 ? (
+                <div className="rounded-xl border border-border bg-background px-4 py-3">
+                  <p className="text-[11px] uppercase tracking-[0.16em]">GitHub stars</p>
+                  <p className="mt-1 text-foreground">{githubStars.toLocaleString()}</p>
+                </div>
+              ) : null}
             </div>
-            <div className="rounded-xl border border-border bg-background px-4 py-3">
-              <p className="text-[11px] uppercase tracking-[0.16em]">Category</p>
-              <p className="mt-1 text-foreground">{categoryLabels[entry.category] ?? entry.category}</p>
-            </div>
-            {entry.dateAdded ? (
-              <div className="rounded-xl border border-border bg-background px-4 py-3">
-                <p className="text-[11px] uppercase tracking-[0.16em]">Added</p>
-                <p className="mt-1 text-foreground">{entry.dateAdded}</p>
-              </div>
-            ) : null}
-            {entry.argumentHint ? (
-              <div className="rounded-xl border border-border bg-background px-4 py-3">
-                <p className="text-[11px] uppercase tracking-[0.16em]">Arguments</p>
-                <p className="mt-1 text-foreground">{entry.argumentHint}</p>
-              </div>
-            ) : null}
-            {entry.trigger ? (
-              <div className="rounded-xl border border-border bg-background px-4 py-3">
-                <p className="text-[11px] uppercase tracking-[0.16em]">Hook trigger</p>
-                <p className="mt-1 text-foreground">{entry.trigger}</p>
-              </div>
-            ) : null}
-            {githubStars > 0 ? (
-              <div className="rounded-xl border border-border bg-background px-4 py-3">
-                <p className="text-[11px] uppercase tracking-[0.16em]">GitHub stars</p>
-                <p className="mt-1 text-foreground">{githubStars.toLocaleString()}</p>
+
+            {sourceLabel ? (
+              <div className="rounded-xl border border-border bg-background px-4 py-3 text-muted-foreground">
+                <p className="text-[11px] uppercase tracking-[0.16em]">Path</p>
+                <p className="mt-1 break-all text-sm text-foreground">{sourceLabel}</p>
               </div>
             ) : null}
           </div>
@@ -454,14 +471,17 @@ export default async function DetailPage({ params }: DetailPageProps) {
 
         <div className="surface-panel p-5">
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Related</p>
-          <div className="mt-4 space-y-4">
+          <div className="mt-4 space-y-3">
             {related.map((item) => (
               <Link
                 key={item.slug}
                 href={`/${item.category}/${item.slug}`}
-                className="block rounded-xl border border-border bg-background px-4 py-3 transition hover:border-primary/40"
+                className="detail-related-card"
               >
-                <p className="detail-related-title text-sm font-medium tracking-tight">{item.title}</p>
+                <span className="detail-related-badge">
+                  {categoryLabels[item.category] ?? item.category}
+                </span>
+                <p className="detail-related-title mt-2 text-sm font-medium tracking-tight">{item.title}</p>
                 <p className="detail-related-description mt-1 text-xs text-muted-foreground">
                   {item.cardDescription || item.description}
                 </p>
@@ -469,28 +489,6 @@ export default async function DetailPage({ params }: DetailPageProps) {
             ))}
           </div>
         </div>
-
-        {sidebarSections.length ? (
-          <div className="surface-panel p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">On this page</p>
-            <div className="mt-4 space-y-3">
-              {sidebarSections.map((section) => (
-                <a
-                  key={section.id}
-                  href={`#${section.id}`}
-                  className="block text-sm text-muted-foreground transition hover:text-foreground"
-                >
-                  {section.title}
-                </a>
-              ))}
-              {visibleSections.length > sidebarSections.length ? (
-                <p className="text-xs text-muted-foreground">
-                  {visibleSections.length - sidebarSections.length} more sections in content
-                </p>
-              ) : null}
-            </div>
-          </div>
-        ) : null}
       </aside>
     </div>
   );
