@@ -16,7 +16,7 @@ type ContentSectionsProps = {
   omitCode?: string[];
 };
 
-type TroubleshootingItem = {
+type SectionSubitem = {
   id: string;
   title: string;
   html: string;
@@ -48,11 +48,11 @@ function stripTags(value: string) {
   return value.replace(/<[^>]+>/g, "").trim();
 }
 
-function extractTroubleshootingItems(html: string, sectionId: string): TroubleshootingItem[] {
+function extractSectionSubitems(html: string, sectionId: string): SectionSubitem[] {
   if (!html.includes("<h3")) return [];
 
   const pieces = html.split(/(?=<h3\b)/);
-  const items: TroubleshootingItem[] = [];
+  const items: SectionSubitem[] = [];
 
   for (const piece of pieces) {
     if (!piece.trim().startsWith("<h3")) continue;
@@ -77,17 +77,17 @@ export function ContentSections({ sections, omitCode = [] }: ContentSectionsProp
         );
         const hasProse = section.proseHtml.replace(/<[^>]+>/g, "").trim().length > 0;
         const variant = getSectionVariant(section.title);
-        const troubleshootingItems =
-          variant === "troubleshooting"
-            ? extractTroubleshootingItems(section.proseHtml, section.id)
+        const sectionSubitems =
+          section.proseHtml.includes("<h3")
+            ? extractSectionSubitems(section.proseHtml, section.id)
             : [];
         const proseHtml =
-          troubleshootingItems.length > 0
+          sectionSubitems.length > 0
             ? section.proseHtml.split(/(?=<h3\b)/)[0].trim()
             : section.proseHtml;
         const hasProseAfterSplit = proseHtml.replace(/<[^>]+>/g, "").trim().length > 0;
 
-        if (!hasProse && renderedCode.length === 0 && troubleshootingItems.length === 0) {
+        if (!hasProse && renderedCode.length === 0 && sectionSubitems.length === 0) {
           return null;
         }
 
@@ -117,9 +117,9 @@ export function ContentSections({ sections, omitCode = [] }: ContentSectionsProp
                   />
                 ) : null}
 
-                {troubleshootingItems.length ? (
+                {sectionSubitems.length ? (
                   <div className="space-y-3">
-                    {troubleshootingItems.map((item) => (
+                    {sectionSubitems.map((item) => (
                       <details key={item.id} className="section-subcard" open>
                         <summary className="section-subcard-summary">
                           <span className="text-sm font-medium text-foreground">
