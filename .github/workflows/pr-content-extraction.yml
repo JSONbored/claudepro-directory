@@ -122,7 +122,7 @@ jobs:
 
       - name: Insert to Supabase via RPC (Database-First)
         if: steps.extract.outputs.result && fromJSON(steps.extract.outputs.result).valid
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         env:
           SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
