@@ -270,7 +270,7 @@ async function main() {
   });
 
   const payload = `${JSON.stringify(entries, null, 2)}\n`;
-  const tempOutputFile = `${outputFile}.tmp`;
+  const tempOutputFile = `${outputFile}.${process.pid}.${Date.now()}.tmp`;
   fs.writeFileSync(tempOutputFile, payload);
   fs.renameSync(tempOutputFile, outputFile);
   console.log(`Wrote ${entries.length} entries to ${path.relative(repoRoot, outputFile)}`);

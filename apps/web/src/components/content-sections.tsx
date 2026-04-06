@@ -48,6 +48,15 @@ function stripTags(value: string) {
   return value.replace(/<[^>]+>/g, "").trim();
 }
 
+function getEmbeddedSectionType(html: string) {
+  const match = html.match(/Section type:\s*([a-z_]+)/i);
+  return match?.[1]?.toLowerCase() ?? null;
+}
+
+function stripSectionTypeComments(html: string) {
+  return html.replace(/<!--\s*Section type:\s*[a-z_]+\s*-->/gi, "").trim();
+}
+
 function extractSectionSubitems(html: string, sectionId: string): SectionSubitem[] {
   if (!html.includes("<h3")) return [];
 
@@ -72,19 +81,21 @@ export function ContentSections({ sections, omitCode = [] }: ContentSectionsProp
   return (
     <div className="space-y-6">
       {sections.map((section, index) => {
+        const embeddedType = getEmbeddedSectionType(section.html);
         const renderedCode = section.codeBlocks.filter(
           (block) => !omitCode.includes(block.code.trim())
         );
-        const hasProse = section.proseHtml.replace(/<[^>]+>/g, "").trim().length > 0;
-        const variant = getSectionVariant(section.title);
+        const cleanProseHtml = stripSectionTypeComments(section.proseHtml);
+        const hasProse = cleanProseHtml.replace(/<[^>]+>/g, "").trim().length > 0;
+        const variant = embeddedType ?? getSectionVariant(section.title);
         const sectionSubitems =
-          section.proseHtml.includes("<h3")
-            ? extractSectionSubitems(section.proseHtml, section.id)
+          cleanProseHtml.includes("<h3")
+            ? extractSectionSubitems(cleanProseHtml, section.id)
             : [];
         const proseHtml =
           sectionSubitems.length > 0
-            ? section.proseHtml.split(/(?=<h3\b)/)[0].trim()
-            : section.proseHtml;
+            ? cleanProseHtml.split(/(?=<h3\b)/)[0].trim()
+            : cleanProseHtml;
         const hasProseAfterSplit = proseHtml.replace(/<[^>]+>/g, "").trim().length > 0;
 
         if (!hasProse && renderedCode.length === 0 && sectionSubitems.length === 0) {
@@ -95,7 +106,7 @@ export function ContentSections({ sections, omitCode = [] }: ContentSectionsProp
           <section key={section.id} id={section.id} className="scroll-mt-28">
             <details
               className={`section-card section-card-${variant}`}
-              open={index < 2 || variant === "warning"}
+              open={index < 2 || variant === "warning" || variant === "quick_reference"}
             >
               <summary className="section-card-summary">
                 <div>
@@ -112,7 +123,7 @@ export function ContentSections({ sections, omitCode = [] }: ContentSectionsProp
               <div className="space-y-4 border-t border-border/70 px-6 py-6">
                 {hasProseAfterSplit ? (
                   <div
-                    className="prose-entry"
+                    className={`prose-entry ${variant ? `prose-entry-${variant}` : ""}`}
                     dangerouslySetInnerHTML={{ __html: proseHtml }}
                   />
                 ) : null}

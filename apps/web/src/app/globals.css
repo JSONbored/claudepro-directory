@@ -259,6 +259,30 @@
   border-color: color-mix(in oklab, var(--accent) 36%, var(--border));
 }
 
+.section-card-quick_reference {
+  border-color: color-mix(in oklab, var(--primary) 26%, var(--border));
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--primary) 5%, var(--card)) 0%, var(--card) 100%);
+}
+
+.section-card-related_content {
+  border-color: color-mix(in oklab, var(--accent) 42%, var(--border));
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--accent) 12%, var(--card)) 0%, var(--card) 100%);
+}
+
+.section-card-expert_quote {
+  border-color: color-mix(in oklab, var(--primary) 18%, var(--border));
+}
+
+.section-card-comparison_table,
+.section-card-feature_grid,
+.section-card-code_group,
+.section-card-tabs,
+.section-card-accordion {
+  border-color: color-mix(in oklab, var(--border) 84%, var(--primary) 16%);
+}
+
 .section-subcard {
   @apply overflow-hidden rounded-2xl border border-border/80 bg-background/88;
 }
@@ -629,6 +653,24 @@
 
 .prose-entry blockquote {
   @apply rounded-2xl border border-border/80 bg-background/88 px-5 py-4;
+}
+
+.prose-entry-quick_reference ul,
+.prose-entry-quick_reference ol {
+  @apply grid gap-3 pl-0 md:grid-cols-2;
+  list-style: none;
+}
+
+.prose-entry-quick_reference li {
+  @apply rounded-2xl border border-border/80 bg-background/88 px-4 py-3;
+}
+
+.prose-entry-related_content p:last-child {
+  @apply text-sm text-muted-foreground;
+}
+
+.prose-entry-related_content a {
+  @apply text-primary underline underline-offset-4;
 }
 
 .prose-entry blockquote {
