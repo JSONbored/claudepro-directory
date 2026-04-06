@@ -40,7 +40,7 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
-          <div className="mx-auto mt-12 max-w-[52rem] text-left">
+          <div className="mx-auto mt-14 max-w-[52rem] text-left">
             <BrowseDirectory entries={entries} limit={15} />
           </div>
         </div>

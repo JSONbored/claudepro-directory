@@ -66,12 +66,61 @@ function getPreviewLine(entry: ContentEntry) {
   return "Open this entry on HeyClaude";
 }
 
+function appendLabeledBlock(lines: string[], label: string, value?: string | null) {
+  const normalized = String(value || "").trim();
+  if (!normalized) return;
+  if (lines.length) lines.push("");
+  lines.push(`${label}:`);
+  lines.push(normalized);
+}
+
 function getCopyText(entry: ContentEntry) {
+  const body = String(entry.body || "").trim();
+
+  if (entry.category === "agents" || entry.category === "rules") {
+    return body || entry.copySnippet || entry.usageSnippet || entry.description;
+  }
+
+  if (entry.category === "hooks") {
+    const lines: string[] = [];
+    appendLabeledBlock(lines, "Trigger", entry.trigger);
+    appendLabeledBlock(lines, "Install", entry.installCommand);
+    appendLabeledBlock(lines, "Claude config", entry.configSnippet);
+    appendLabeledBlock(lines, "Hook script", entry.scriptBody || entry.copySnippet);
+    if (body) appendLabeledBlock(lines, "Reference", body);
+    return lines.join("\n");
+  }
+
+  if (entry.category === "mcp") {
+    const lines: string[] = [];
+    appendLabeledBlock(lines, "Install", entry.installCommand || entry.commandSyntax);
+    appendLabeledBlock(lines, "Config", entry.configSnippet);
+    appendLabeledBlock(lines, "Usage", entry.copySnippet || entry.usageSnippet || body);
+    return lines.join("\n") || entry.documentationUrl || entry.repoUrl || entry.title;
+  }
+
+  if (entry.category === "skills" || entry.category === "statuslines") {
+    const lines: string[] = [];
+    appendLabeledBlock(lines, "Install", entry.installCommand);
+    appendLabeledBlock(lines, "Usage", entry.usageSnippet);
+    appendLabeledBlock(lines, "Asset", entry.scriptBody || entry.copySnippet || body);
+    return lines.join("\n");
+  }
+
+  if (entry.category === "commands") {
+    return entry.commandSyntax || entry.copySnippet || entry.usageSnippet || body;
+  }
+
+  if (entry.category === "collections" || entry.category === "guides") {
+    return body || entry.copySnippet || entry.usageSnippet || entry.description;
+  }
+
   if (entry.copySnippet) return entry.copySnippet;
   if (entry.installCommand) return entry.installCommand;
   if (entry.usageSnippet) return entry.usageSnippet;
   const firstCodeBlock = entry.codeBlocks?.[0]?.code?.trim();
   if (firstCodeBlock) return firstCodeBlock;
+  if (body) return body;
   if (entry.documentationUrl) return entry.documentationUrl;
   if (entry.githubUrl) return entry.githubUrl;
   return `${entry.title}\nhttps://heyclau.de/${entry.category}/${entry.slug}`;
@@ -148,10 +197,11 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
 
   return (
     <article className="directory-stack-card group">
-      <div className="directory-vote-rail">
+      <div className={cn("directory-vote-rail", hasVoted && "directory-vote-rail-active")}>
         <div
           className={cn(
             "directory-vote-tile text-[11px] font-medium uppercase tracking-[0.18em]",
+            hasVoted && "directory-vote-tile-active",
             categoryAccentClasses[entry.category]
           )}
         >
@@ -167,7 +217,12 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
           <ChevronUp className="size-4" />
         </button>
         <div className="text-center">
-          <div className="text-[18px] font-medium tracking-tight text-foreground">
+          <div
+            className={cn(
+              "text-[18px] font-medium tracking-tight text-foreground transition",
+              hasVoted && "text-primary"
+            )}
+          >
             {compactCount(displayedVotes)}
           </div>
         </div>

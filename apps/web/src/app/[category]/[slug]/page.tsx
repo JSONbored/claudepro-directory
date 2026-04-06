@@ -26,6 +26,55 @@ export async function generateMetadata({ params }: DetailPageProps): Promise<Met
   };
 }
 
+function getPrimarySnippet(entry: NonNullable<Awaited<ReturnType<typeof getEntry>>>) {
+  switch (entry.category) {
+    case "agents":
+    case "rules":
+      return {
+        title: "Copyable asset",
+        code: entry.body || entry.copySnippet || entry.usageSnippet,
+        language: "md"
+      };
+    case "hooks":
+      if (entry.configSnippet) {
+        return {
+          title: "Claude config",
+          code: entry.configSnippet,
+          language: "json"
+        };
+      }
+      return {
+        title: entry.scriptBody ? "Hook script" : "Usage",
+        code: entry.scriptBody || entry.copySnippet || entry.usageSnippet,
+        language: entry.scriptLanguage || "text"
+      };
+    case "mcp":
+    case "skills":
+    case "commands":
+      return {
+        title: entry.installCommand
+          ? "Install command"
+          : entry.commandSyntax
+            ? "Command syntax"
+            : "Usage",
+        code: entry.installCommand || entry.commandSyntax || entry.copySnippet || entry.usageSnippet,
+        language: entry.scriptLanguage || "text"
+      };
+    case "statuslines":
+      return {
+        title: entry.scriptBody ? "Source asset" : "Usage",
+        code: entry.scriptBody || entry.copySnippet || entry.usageSnippet,
+        language: entry.scriptLanguage || "text"
+      };
+    default:
+      return {
+        title: entry.copySnippet ? "Copyable asset" : "Usage",
+        code: entry.copySnippet || entry.usageSnippet || entry.body,
+        language: entry.scriptLanguage || "text"
+      };
+  }
+}
+
 function getMetadataFallback(entry: Awaited<ReturnType<typeof getEntry>>) {
   if (!entry) return null;
 
@@ -107,17 +156,9 @@ export default async function DetailPage({ params }: DetailPageProps) {
   const sourceLabel = entry.filePath?.replace(/^content\//, "");
   const sectionItems = Array.isArray(entry.sections) ? entry.sections : [];
   const metadataFallback = getMetadataFallback(entry);
-  const primarySnippet =
-    entry.installCommand || entry.commandSyntax || entry.usageSnippet || entry.copySnippet;
-  const snippetTitle = entry.installCommand
-    ? "Install command"
-    : entry.commandSyntax
-      ? "Command syntax"
-      : entry.usageSnippet
-        ? "Usage"
-        : entry.copySnippet
-          ? "Copyable asset"
-          : null;
+  const primarySnippetBlock = getPrimarySnippet(entry);
+  const primarySnippet = primarySnippetBlock.code?.trim();
+  const snippetTitle = primarySnippet ? primarySnippetBlock.title : null;
   const omittedCode = [
     primarySnippet,
     entry.configSnippet,
@@ -187,7 +228,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
             eyebrow="Quick use"
             title={snippetTitle}
             code={primarySnippet}
-            language={entry.scriptLanguage || primaryCodeBlock?.language || "text"}
+            language={primarySnippetBlock.language || primaryCodeBlock?.language || "text"}
           />
         ) : null}
 
