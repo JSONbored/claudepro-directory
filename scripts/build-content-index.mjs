@@ -269,7 +269,10 @@ async function main() {
     return left.title.localeCompare(right.title);
   });
 
-  fs.writeFileSync(outputFile, `${JSON.stringify(entries, null, 2)}\n`);
+  const payload = `${JSON.stringify(entries, null, 2)}\n`;
+  const tempOutputFile = `${outputFile}.tmp`;
+  fs.writeFileSync(tempOutputFile, payload);
+  fs.renameSync(tempOutputFile, outputFile);
   console.log(`Wrote ${entries.length} entries to ${path.relative(repoRoot, outputFile)}`);
 }
 

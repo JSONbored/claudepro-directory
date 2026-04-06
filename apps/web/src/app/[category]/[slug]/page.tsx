@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { ContentSections } from "@/components/content-sections";
 import { EntryCopyButton } from "@/components/entry-copy-button";
+import { EntryChecklistCard } from "@/components/entry-checklist-card";
 import { SnippetCard } from "@/components/snippet-card";
 import { getAllEntries, getEntriesByCategory, getEntry } from "@/lib/content";
 import { categoryLabels } from "@/lib/site";
@@ -344,43 +345,23 @@ export default async function DetailPage({ params }: DetailPageProps) {
         ) : null}
 
         {installationOrder.length ? (
-          <section className="surface-panel p-6">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-              Recommended order
-            </p>
-            <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">
-              Install and apply in this sequence
-            </h2>
-            <ol className="mt-4 space-y-3">
-              {installationOrder.map((item, index) => (
-                <li
-                  key={item}
-                  className="rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground"
-                >
-                  <span className="mr-3 text-muted-foreground">{index + 1}.</span>
-                  <span className="font-mono text-[13px]">{item}</span>
-                </li>
-              ))}
-            </ol>
-          </section>
+          <EntryChecklistCard
+            entryKey={`${entry.category}:${entry.slug}`}
+            eyebrow="Recommended order"
+            title="Install and apply in this sequence"
+            description="Work through the sequence in order and mark each step locally as you complete it."
+            items={installationOrder.map((item, index) => `${index + 1}. ${item}`)}
+          />
         ) : null}
 
         {prerequisites.length ? (
-          <section className="surface-panel p-6">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-              Prerequisites
-            </p>
-            <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">
-              Before you use this entry
-            </h2>
-            <ul className="mt-4 space-y-3 text-sm leading-7 text-muted-foreground">
-              {prerequisites.map((item) => (
-                <li key={item} className="rounded-xl border border-border bg-background px-4 py-3">
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </section>
+          <EntryChecklistCard
+            entryKey={`${entry.category}:${entry.slug}`}
+            eyebrow="Prerequisites"
+            title="Before you use this entry"
+            description="Work through the setup requirements first. Progress is stored locally in your browser so you can come back later."
+            items={prerequisites}
+          />
         ) : null}
       </article>
 

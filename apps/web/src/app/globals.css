@@ -219,6 +219,113 @@
   @apply rounded-2xl border border-border/80 bg-card/80 shadow-sm backdrop-blur;
 }
 
+.section-card {
+  @apply overflow-hidden rounded-3xl border border-border/80 bg-card/90 shadow-sm backdrop-blur;
+}
+
+.section-card summary {
+  list-style: none;
+}
+
+.section-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.section-card-summary {
+  @apply flex cursor-pointer items-center justify-between gap-4 px-6 py-5 transition;
+}
+
+.section-card-toggle {
+  @apply inline-flex shrink-0 items-center rounded-full border border-border bg-background px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground;
+}
+
+.section-card[open] .section-card-toggle {
+  @apply border-primary/40 text-primary;
+}
+
+.section-card-prerequisites {
+  border-color: color-mix(in oklab, var(--primary) 26%, var(--border));
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--primary) 7%, var(--card)) 0%, var(--card) 100%);
+}
+
+.section-card-warning {
+  border-color: color-mix(in oklab, var(--destructive) 34%, var(--border));
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--destructive) 10%, var(--card)) 0%, var(--card) 100%);
+}
+
+.section-card-troubleshooting {
+  border-color: color-mix(in oklab, var(--accent) 36%, var(--border));
+}
+
+.section-subcard {
+  @apply overflow-hidden rounded-2xl border border-border/80 bg-background/88;
+}
+
+.section-subcard summary {
+  list-style: none;
+}
+
+.section-subcard summary::-webkit-details-marker {
+  display: none;
+}
+
+.section-subcard-summary {
+  @apply flex cursor-pointer items-center justify-between gap-3 px-5 py-4;
+}
+
+.checklist-card {
+  @apply overflow-hidden rounded-3xl border bg-card/92 shadow-sm backdrop-blur;
+}
+
+.checklist-card-prerequisites {
+  border-color: color-mix(in oklab, var(--primary) 28%, var(--border));
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--primary) 7%, var(--card)) 0%, var(--card) 100%);
+}
+
+.checklist-card-warning {
+  border-color: color-mix(in oklab, var(--destructive) 36%, var(--border));
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--destructive) 12%, var(--card)) 0%, var(--card) 100%);
+}
+
+.checklist-card-summary {
+  @apply flex w-full items-start justify-between gap-4 px-5 py-5 text-left;
+}
+
+.checklist-card-icon {
+  @apply inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-primary/40 bg-primary/15 text-primary;
+}
+
+.checklist-card-warning .checklist-card-icon {
+  border-color: color-mix(in oklab, var(--destructive) 40%, var(--border));
+  background: color-mix(in oklab, var(--destructive) 18%, var(--card));
+  color: color-mix(in oklab, var(--destructive) 82%, black 18%);
+}
+
+.checklist-card-progress {
+  @apply h-full rounded-full bg-primary transition-all;
+}
+
+.checklist-item {
+  @apply flex w-full items-start gap-3 rounded-2xl border border-border/80 bg-background/88 px-4 py-3.5 text-foreground transition hover:border-primary/40;
+}
+
+.checklist-item-complete {
+  border-color: color-mix(in oklab, var(--primary) 42%, var(--border));
+  background: color-mix(in oklab, var(--primary) 10%, var(--background));
+}
+
+.checklist-item-box {
+  @apply inline-flex size-6 shrink-0 items-center justify-center rounded-md border border-border bg-card text-transparent transition;
+}
+
+.checklist-item-box-complete {
+  @apply border-primary bg-primary text-primary-foreground;
+}
+
 .eyebrow {
   @apply inline-flex items-center rounded-full border border-border bg-secondary/60 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground;
 }
@@ -518,6 +625,10 @@
 
 .prose-entry pre code {
   @apply bg-transparent p-0;
+}
+
+.prose-entry blockquote {
+  @apply rounded-2xl border border-border/80 bg-background/88 px-5 py-4;
 }
 
 .prose-entry blockquote {
