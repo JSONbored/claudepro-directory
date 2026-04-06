@@ -175,7 +175,7 @@
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "server-only": "^0.0.1",
-    "tailwindcss": "^4.1.17",
+    "tailwindcss": "^4.2.2",
     "ts-prune": "^0.10.3",
     "tsx": "^4.21.0",
     "turbo": "^2.6.3",
