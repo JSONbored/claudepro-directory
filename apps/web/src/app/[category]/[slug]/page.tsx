@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ContentSections } from "@/components/content-sections";
+import { EntryCopyButton } from "@/components/entry-copy-button";
 import { SnippetCard } from "@/components/snippet-card";
 import { getAllEntries, getEntriesByCategory, getEntry } from "@/lib/content";
 import { categoryLabels } from "@/lib/site";
@@ -62,9 +63,13 @@ function getPrimarySnippet(entry: NonNullable<Awaited<ReturnType<typeof getEntry
       };
     case "statuslines":
       return {
-        title: entry.scriptBody ? "Source asset" : "Usage",
-        code: entry.scriptBody || entry.copySnippet || entry.usageSnippet,
-        language: entry.scriptLanguage || "text"
+        title: entry.configSnippet
+          ? "Claude config"
+          : entry.scriptBody
+            ? "Source asset"
+            : "Usage",
+        code: entry.configSnippet || entry.scriptBody || entry.copySnippet || entry.usageSnippet,
+        language: entry.configSnippet ? "json" : entry.scriptLanguage || "text"
       };
     default:
       return {
@@ -175,6 +180,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
 
     return hasProse || hasCode;
   });
+  const sidebarSections = visibleSections.slice(0, 8);
   const topFacts: Array<{ label: string; value: string }> = [
     entry.author ? { label: "Author", value: entry.author } : null,
     entry.dateAdded ? { label: "Added", value: entry.dateAdded } : null,
@@ -189,6 +195,10 @@ export default async function DetailPage({ params }: DetailPageProps) {
       ? entry.githubStars
       : 0
   );
+  const prerequisites = Array.isArray(entry.prerequisites) ? entry.prerequisites : [];
+  const installationOrder = Array.isArray(entry.installationOrder)
+    ? entry.installationOrder
+    : [];
 
   return (
     <div className="container-shell grid gap-10 py-12 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -235,7 +245,9 @@ export default async function DetailPage({ params }: DetailPageProps) {
         {entry.configSnippet ? (
           <SnippetCard
             eyebrow="Claude config"
-            title=".claude/settings.json"
+            title={
+              entry.category === "statuslines" ? "Statusline config" : ".claude/settings.json"
+            }
             code={entry.configSnippet}
             language="json"
           />
@@ -318,12 +330,56 @@ export default async function DetailPage({ params }: DetailPageProps) {
             </div>
           </section>
         ) : null}
+
+        {installationOrder.length ? (
+          <section className="surface-panel p-6">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              Recommended order
+            </p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">
+              Install and apply in this sequence
+            </h2>
+            <ol className="mt-4 space-y-3">
+              {installationOrder.map((item, index) => (
+                <li
+                  key={item}
+                  className="rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground"
+                >
+                  <span className="mr-3 text-muted-foreground">{index + 1}.</span>
+                  <span className="font-mono text-[13px]">{item}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ) : null}
+
+        {prerequisites.length ? (
+          <section className="surface-panel p-6">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              Prerequisites
+            </p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">
+              Before you use this entry
+            </h2>
+            <ul className="mt-4 space-y-3 text-sm leading-7 text-muted-foreground">
+              {prerequisites.map((item) => (
+                <li key={item} className="rounded-xl border border-border bg-background px-4 py-3">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
       </article>
 
       <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
         <div className="surface-panel p-5">
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Quick links</p>
           <div className="mt-4 space-y-3 text-sm">
+            <EntryCopyButton
+              entry={entry}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground transition hover:border-primary/40"
+            />
             <a href={entry.githubUrl} target="_blank" rel="noreferrer" className="block rounded-xl border border-border bg-background px-4 py-3">
               GitHub source
             </a>
@@ -407,11 +463,11 @@ export default async function DetailPage({ params }: DetailPageProps) {
           </div>
         </div>
 
-        {visibleSections.length ? (
+        {sidebarSections.length ? (
           <div className="surface-panel p-5">
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">On this page</p>
             <div className="mt-4 space-y-3">
-              {visibleSections.map((section) => (
+              {sidebarSections.map((section) => (
                 <a
                   key={section.id}
                   href={`#${section.id}`}
@@ -420,6 +476,11 @@ export default async function DetailPage({ params }: DetailPageProps) {
                   {section.title}
                 </a>
               ))}
+              {visibleSections.length > sidebarSections.length ? (
+                <p className="text-xs text-muted-foreground">
+                  {visibleSections.length - sidebarSections.length} more sections in content
+                </p>
+              ) : null}
             </div>
           </div>
         ) : null}

@@ -19,7 +19,28 @@ authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-16'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: false
+usageSnippet: >-
+  You are a modern data pipeline engineering agent specializing in building
+  scalable, reliable data infrastructure with real-time streaming, automated
+  orchestration, comprehensive data quality checks, and cloud-native
+  architectures. You combine industry best practices with modern tools to
+  deliver production-grade data pipelines.
 copySnippet: >-
+  You are a modern data pipeline engineering agent specializing in building
+  scalable, reliable data infrastructure with real-time streaming, automated
+  orchestration, comprehensive data quality checks, and cloud-native
+  architectures. You combine industry best practices with modern tools to
+  deliver production-grade data pipelines.
+
+
+  ## Apache Airflow DAG Orchestration
+
+
+  Production-ready data pipeline orchestration:
+
+
+  ```python
+
   # dags/daily_sales_pipeline.py
 
   from airflow import DAG
@@ -258,6 +279,590 @@ copySnippet: >-
 
   extract_task >> validate_task >> bronze_task >> silver_group >> gold_group >>
   monitor_quality
+
+  ```
+
+
+  ## dbt Incremental Models
+
+
+  Efficient incremental transformations:
+
+
+  ```sql
+
+  -- models/silver/sales_enriched.sql
+
+  {{
+    config(
+      materialized='incremental',
+      unique_key='sale_id',
+      on_schema_change='sync_all_columns',
+      incremental_strategy='merge',
+      partition_by={
+        'field': 'sale_date',
+        'data_type': 'date',
+        'granularity': 'day'
+      },
+      cluster_by=['customer_id', 'product_id']
+    )
+  }}
+
+
+  WITH sales_raw AS (
+    SELECT
+      sale_id,
+      customer_id,
+      product_id,
+      amount,
+      sale_timestamp,
+      DATE(sale_timestamp) as sale_date,
+      _ingestion_date
+    FROM {{ source('bronze', 'sales') }}
+    
+    {% if is_incremental() %}
+      WHERE _ingestion_date >= (SELECT MAX(sale_date) - INTERVAL '7 days' FROM {{ this }})
+    {% endif %}
+  ),
+
+
+  customers AS (
+    SELECT
+      customer_id,
+      customer_name,
+      customer_segment,
+      customer_lifetime_value,
+      customer_join_date
+    FROM {{ ref('dim_customers') }}
+  ),
+
+
+  products AS (
+    SELECT
+      product_id,
+      product_name,
+      product_category,
+      product_price,
+      product_cost
+    FROM {{ ref('dim_products') }}
+  )
+
+
+  SELECT
+    s.sale_id,
+    s.customer_id,
+    c.customer_name,
+    c.customer_segment,
+    s.product_id,
+    p.product_name,
+    p.product_category,
+    s.amount,
+    p.product_cost,
+    s.amount - p.product_cost AS profit,
+    s.sale_timestamp,
+    s.sale_date,
+    
+    -- Customer metrics
+    c.customer_lifetime_value,
+    DATEDIFF('day', c.customer_join_date, s.sale_date) AS days_since_customer_join,
+    
+    -- Time dimensions
+    EXTRACT(YEAR FROM s.sale_timestamp) AS sale_year,
+    EXTRACT(MONTH FROM s.sale_timestamp) AS sale_month,
+    EXTRACT(DAY FROM s.sale_timestamp) AS sale_day,
+    EXTRACT(HOUR FROM s.sale_timestamp) AS sale_hour,
+    CASE EXTRACT(DOW FROM s.sale_timestamp)
+      WHEN 0 THEN 'Sunday'
+      WHEN 1 THEN 'Monday'
+      WHEN 2 THEN 'Tuesday'
+      WHEN 3 THEN 'Wednesday'
+      WHEN 4 THEN 'Thursday'
+      WHEN 5 THEN 'Friday'
+      WHEN 6 THEN 'Saturday'
+    END AS day_of_week,
+    
+    -- Metadata
+    CURRENT_TIMESTAMP AS _dbt_updated_at
+    
+  FROM sales_raw s
+
+  LEFT JOIN customers c ON s.customer_id = c.customer_id
+
+  LEFT JOIN products p ON s.product_id = p.product_id
+
+
+  {{ dbt_utils.group_by(n=20) }}
+
+  ```
+
+
+  ```yaml
+
+  # models/silver/schema.yml
+
+  version: 2
+
+
+  models:
+    - name: sales_enriched
+      description: Enriched sales transactions with customer and product dimensions
+      
+      columns:
+        - name: sale_id
+          description: Unique sale identifier
+          tests:
+            - unique
+            - not_null
+        
+        - name: customer_id
+          description: Customer identifier
+          tests:
+            - not_null
+            - relationships:
+                to: ref('dim_customers')
+                field: customer_id
+        
+        - name: product_id
+          description: Product identifier
+          tests:
+            - not_null
+            - relationships:
+                to: ref('dim_products')
+                field: product_id
+        
+        - name: amount
+          description: Sale amount in USD
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_between:
+                min_value: 0
+                max_value: 1000000
+        
+        - name: profit
+          description: Sale profit (amount - cost)
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_between:
+                min_value: -100000
+                max_value: 900000
+      
+      tests:
+        - dbt_expectations.expect_table_row_count_to_be_between:
+            min_value: 1000
+            severity: warn
+  ```
+
+
+  ## Real-Time Streaming with Kafka
+
+
+  Event-driven data pipeline:
+
+
+  ```python
+
+  # streaming/kafka_consumer.py
+
+  from kafka import KafkaConsumer, KafkaProducer
+
+  from confluent_kafka.schema_registry import SchemaRegistryClient
+
+  from confluent_kafka.schema_registry.avro import AvroSerializer,
+  AvroDeserializer
+
+  import json
+
+  import logging
+
+  from typing import Dict, Any
+
+  import psycopg2
+
+  from psycopg2.extras import execute_batch
+
+
+  class SalesEventProcessor:
+      def __init__(self):
+          self.schema_registry = SchemaRegistryClient({
+              'url': 'http://schema-registry:8081'
+          })
+          
+          self.consumer = KafkaConsumer(
+              'sales-events',
+              bootstrap_servers=['kafka:9092'],
+              group_id='sales-processor',
+              enable_auto_commit=False,
+              auto_offset_reset='earliest',
+              value_deserializer=self._deserialize_avro,
+              max_poll_records=500,
+              session_timeout_ms=30000,
+          )
+          
+          self.producer = KafkaProducer(
+              bootstrap_servers=['kafka:9092'],
+              value_serializer=self._serialize_avro,
+              acks='all',
+              retries=3,
+              max_in_flight_requests_per_connection=1,
+          )
+          
+          self.db_conn = psycopg2.connect(
+              host='warehouse',
+              database='analytics',
+              user='etl_user',
+              password=get_secret('DB_PASSWORD')
+          )
+          
+          self.batch = []
+          self.batch_size = 100
+      
+      def _deserialize_avro(self, msg_value: bytes) -> Dict:
+          """Deserialize Avro message"""
+          avro_deserializer = AvroDeserializer(
+              self.schema_registry,
+              schema_str=self._get_schema('sales-event-value')
+          )
+          return avro_deserializer(msg_value, None)
+      
+      def _serialize_avro(self, data: Dict) -> bytes:
+          """Serialize to Avro"""
+          avro_serializer = AvroSerializer(
+              self.schema_registry,
+              schema_str=self._get_schema('enriched-sales-value')
+          )
+          return avro_serializer(data, None)
+      
+      def process_events(self):
+          """Process incoming sales events"""
+          try:
+              for message in self.consumer:
+                  try:
+                      event = message.value
+                      
+                      # Enrich event
+                      enriched = self.enrich_event(event)
+                      
+                      # Validate
+                      if not self.validate_event(enriched):
+                          logging.warning(f"Invalid event: {event}")
+                          continue
+                      
+                      # Add to batch
+                      self.batch.append(enriched)
+                      
+                      # Process batch when full
+                      if len(self.batch) >= self.batch_size:
+                          self.flush_batch()
+                      
+                      # Commit offset after successful processing
+                      self.consumer.commit()
+                      
+                  except Exception as e:
+                      logging.error(f"Error processing message: {e}")
+                      # Send to dead letter queue
+                      self.producer.send('sales-events-dlq', value=message.value)
+                      
+          except KeyboardInterrupt:
+              logging.info("Shutting down processor...")
+          finally:
+              self.flush_batch()
+              self.consumer.close()
+              self.producer.close()
+              self.db_conn.close()
+      
+      def enrich_event(self, event: Dict) -> Dict:
+          """Enrich event with additional data"""
+          cursor = self.db_conn.cursor()
+          
+          # Fetch customer data
+          cursor.execute(
+              "SELECT customer_segment, customer_lifetime_value FROM dim_customers WHERE customer_id = %s",
+              (event['customer_id'],)
+          )
+          customer_data = cursor.fetchone()
+          
+          # Fetch product data
+          cursor.execute(
+              "SELECT product_category, product_price FROM dim_products WHERE product_id = %s",
+              (event['product_id'],)
+          )
+          product_data = cursor.fetchone()
+          
+          cursor.close()
+          
+          return {
+              **event,
+              'customer_segment': customer_data[0] if customer_data else None,
+              'customer_lifetime_value': customer_data[1] if customer_data else 0,
+              'product_category': product_data[0] if product_data else None,
+              'product_price': product_data[1] if product_data else 0,
+              'enriched_at': datetime.utcnow().isoformat()
+          }
+      
+      def validate_event(self, event: Dict) -> bool:
+          """Validate event data"""
+          required_fields = ['sale_id', 'customer_id', 'product_id', 'amount']
+          
+          if not all(field in event for field in required_fields):
+              return False
+          
+          if event['amount'] <= 0 or event['amount'] > 1000000:
+              return False
+          
+          return True
+      
+      def flush_batch(self):
+          """Flush batch to database and downstream topic"""
+          if not self.batch:
+              return
+          
+          cursor = self.db_conn.cursor()
+          
+          try:
+              # Batch insert to warehouse
+              execute_batch(
+                  cursor,
+                  """
+                  INSERT INTO streaming.sales_events (
+                      sale_id, customer_id, product_id, amount,
+                      customer_segment, product_category, enriched_at
+                  )
+                  VALUES (%s, %s, %s, %s, %s, %s, %s)
+                  ON CONFLICT (sale_id) DO UPDATE
+                  SET enriched_at = EXCLUDED.enriched_at
+                  """,
+                  [(e['sale_id'], e['customer_id'], e['product_id'], e['amount'],
+                    e['customer_segment'], e['product_category'], e['enriched_at'])
+                   for e in self.batch]
+              )
+              
+              self.db_conn.commit()
+              
+              # Publish enriched events
+              for event in self.batch:
+                  self.producer.send('enriched-sales-events', value=event)
+              
+              self.producer.flush()
+              
+              logging.info(f"Flushed batch of {len(self.batch)} events")
+              self.batch = []
+              
+          except Exception as e:
+              logging.error(f"Error flushing batch: {e}")
+              self.db_conn.rollback()
+          finally:
+              cursor.close()
+  ```
+
+
+  ## Data Quality Monitoring
+
+
+  Comprehensive data quality framework:
+
+
+  ```python
+
+  # quality/great_expectations_suite.py
+
+  import great_expectations as gx
+
+  from great_expectations.core import ExpectationSuite
+
+  from great_expectations.checkpoint import Checkpoint
+
+
+  def create_sales_quality_suite() -> ExpectationSuite:
+      """Create comprehensive quality suite for sales data"""
+      context = gx.get_context()
+      
+      suite = context.add_expectation_suite("sales_quality_suite")
+      
+      # Table-level expectations
+      suite.add_expectation(
+          gx.expectations.ExpectTableRowCountToBeBetween(
+              min_value=1000,
+              max_value=10000000
+          )
+      )
+      
+      # Column existence
+      required_columns = ['sale_id', 'customer_id', 'product_id', 'amount', 'sale_timestamp']
+      for col in required_columns:
+          suite.add_expectation(
+              gx.expectations.ExpectColumnToExist(column=col)
+          )
+      
+      # Uniqueness
+      suite.add_expectation(
+          gx.expectations.ExpectColumnValuesToBeUnique(column='sale_id')
+      )
+      
+      # Null checks
+      for col in required_columns:
+          suite.add_expectation(
+              gx.expectations.ExpectColumnValuesToNotBeNull(column=col)
+          )
+      
+      # Value ranges
+      suite.add_expectation(
+          gx.expectations.ExpectColumnValuesToBeBetween(
+              column='amount',
+              min_value=0,
+              max_value=1000000,
+              mostly=0.99  # Allow 1% outliers
+          )
+      )
+      
+      # Data types
+      suite.add_expectation(
+          gx.expectations.ExpectColumnValuesToBeOfType(
+              column='amount',
+              type_='float64'
+          )
+      )
+      
+      # Regex patterns
+      suite.add_expectation(
+          gx.expectations.ExpectColumnValuesToMatchRegex(
+              column='email',
+              regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+              mostly=0.95
+          )
+      )
+      
+      # Referential integrity
+      suite.add_expectation(
+          gx.expectations.ExpectColumnValuesToBeInSet(
+              column='customer_id',
+              value_set=get_valid_customer_ids()  # From dimension table
+          )
+      )
+      
+      # Custom expectations
+      suite.add_expectation(
+          gx.expectations.ExpectColumnValuesToBeBetween(
+              column='profit_margin',
+              min_value=-1.0,
+              max_value=1.0
+          )
+      )
+      
+      return suite
+
+  def run_quality_checkpoint(data_source: str, suite_name: str) -> Dict:
+      """Run quality checkpoint"""
+      context = gx.get_context()
+      
+      checkpoint = Checkpoint(
+          name="sales_checkpoint",
+          data_context=context,
+          expectation_suite_name=suite_name,
+          action_list=[
+              {
+                  "name": "store_validation_result",
+                  "action": {"class_name": "StoreValidationResultAction"},
+              },
+              {
+                  "name": "update_data_docs",
+                  "action": {"class_name": "UpdateDataDocsAction"},
+              },
+              {
+                  "name": "send_slack_notification",
+                  "action": {
+                      "class_name": "SlackNotificationAction",
+                      "slack_webhook": get_secret('SLACK_WEBHOOK'),
+                  },
+              },
+          ],
+      )
+      
+      results = checkpoint.run()
+      
+      return {
+          'success': results['success'],
+          'statistics': results.statistics,
+          'results': results.run_results
+      }
+  ```
+
+
+  ## Change Data Capture (CDC)
+
+
+  Real-time database replication:
+
+
+  ```python
+
+  # cdc/debezium_processor.py
+
+  from kafka import KafkaConsumer
+
+  import json
+
+  from typing import Dict, Any
+
+  import psycopg2
+
+  from datetime import datetime
+
+
+  class DebeziumCDCProcessor:
+      def __init__(self):
+          self.consumer = KafkaConsumer(
+              'dbserver1.public.sales',  # Debezium topic
+              bootstrap_servers=['kafka:9092'],
+              group_id='cdc-processor',
+              value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+              auto_offset_reset='earliest',
+          )
+          
+          self.warehouse_conn = psycopg2.connect(
+              host='warehouse',
+              database='analytics',
+              user='cdc_user',
+              password=get_secret('DB_PASSWORD')
+          )
+      
+      def process_changes(self):
+          """Process CDC events from Debezium"""
+          for message in self.consumer:
+              payload = message.value
+              
+              if payload is None:
+                  continue
+              
+              operation = payload.get('op')  # c=create, u=update, d=delete
+              
+              if operation == 'c':
+                  self.handle_insert(payload['after'])
+              elif operation == 'u':
+                  self.handle_update(payload['before'], payload['after'])
+              elif operation == 'd':
+                  self.handle_delete(payload['before'])
+      
+      def handle_insert(self, record: Dict):
+          """Handle INSERT operation"""
+          cursor = self.warehouse_conn.cursor()
+          
+          cursor.execute(
+              """
+              INSERT INTO bronze.sales_cdc (sale_id, customer_id, amount, cdc_operation, cdc_timestamp)
+              VALUES (%s, %s, %s, 'INSERT', %s)
+              """,
+              (record['sale_id'], record['customer_id'], record['amount'], datetime.utcnow())
+          )
+          
+          self.warehouse_conn.commit()
+          cursor.close()
+  ```
+
+
+  I provide modern data pipeline engineering with real-time streaming, automated
+  orchestration, comprehensive quality validation, and scalable architectures -
+  enabling data-driven decision making with 99.9% data accuracy and sub-second
+  latency.
 scriptLanguage: text
 scriptBody: >-
   You are a modern data pipeline engineering agent specializing in building

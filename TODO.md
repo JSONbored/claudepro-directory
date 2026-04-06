@@ -9,6 +9,7 @@
 - Tighten preview card anatomy until it matches the `claw.tools` density more closely.
 - Verify GitHub star links, docs links, and open actions across all cards.
 - Polish hero section, live counter pills, search/filter presentation, and infinite scroll behavior.
+- Replace local-only upvotes with a durable shared vote/event system on Cloudflare so counts survive rebuilds and sync across all visitors.
 
 ## Detail pages
 - Improve sticky sidebar hierarchy and source/download/install affordances.

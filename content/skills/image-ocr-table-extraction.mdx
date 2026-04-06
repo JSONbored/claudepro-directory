@@ -24,6 +24,17 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://tesseract-ocr.github.io/'
 downloadUrl: /downloads/skills/image-ocr-table-extraction.zip
 installable: true
+installCommand: >-
+  curl -L https://heyclau.de/downloads/skills/image-ocr-table-extraction.zip -o
+  image-ocr-table-extraction.zip && unzip -o image-ocr-table-extraction.zip -d
+  ./image-ocr-table-extraction
+usageSnippet: >-
+  Extract text and tabular data from images, scanned documents, and PDFs using
+  Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR
+  (100+ languages), table structure detection, confidence scoring, orientation
+  correction, and exports to CSV, JSON, and structured formats. Includes
+  advanced image preprocessing pipelines for noise reduction, binarization,
+  deskewing, and contrast enhancement to maximize OCR accuracy.
 copySnippet: |-
   import cv2
   import pytesseract

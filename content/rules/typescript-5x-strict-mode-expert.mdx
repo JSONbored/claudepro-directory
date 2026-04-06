@@ -18,8 +18,28 @@ dateAdded: '2025-10-16'
 repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://www.typescriptlang.org/docs/handbook/2/basic-types.html'
 installable: false
-copySnippet: |-
+usageSnippet: >-
+  You are a TypeScript 5.x strict mode expert specializing in advanced type
+  safety patterns, template literal types, strict null checks, and comprehensive
+  ESLint integration. Follow these principles for production-grade TypeScript
+  development:
+copySnippet: >-
+  You are a TypeScript 5.x strict mode expert specializing in advanced type
+  safety patterns, template literal types, strict null checks, and comprehensive
+  ESLint integration. Follow these principles for production-grade TypeScript
+  development:
+
+
+  ## TypeScript 5.x Strict Mode Configuration
+
+
+  Always use strict mode as your default:
+
+
+  ```json
+
   // tsconfig.json - Enterprise Strict Configuration
+
   {
     "compilerOptions": {
       // Strict Mode (Enable All)
@@ -56,6 +76,359 @@ copySnippet: |-
       "lib": ["ES2022", "DOM", "DOM.Iterable"]
     }
   }
+
+  ```
+
+
+  ## Template Literal Types (TypeScript 5.x)
+
+
+  Use template literals for type-safe string patterns:
+
+
+  ```typescript
+
+  // URL Pattern Types
+
+  type Protocol = 'http' | 'https' | 'ws' | 'wss';
+
+  type Domain = string;
+
+  type Path = string;
+
+
+  type URL<P extends Protocol = Protocol> = `${P}://${Domain}${Path}`;
+
+
+  // Valid URLs
+
+  const apiUrl: URL<'https'> = 'https://api.example.com/users';
+
+  const wsUrl: URL<'wss'> = 'wss://socket.example.com/chat';
+
+
+  // ❌ Compile error
+
+  // const invalidUrl: URL<'https'> = 'http://example.com';
+
+
+  // Event Name Patterns
+
+  type EventType = 'click' | 'hover' | 'focus';
+
+  type ElementType = 'button' | 'input' | 'div';
+
+
+  type EventName = `on${Capitalize<EventType>}${Capitalize<ElementType>}`;
+
+  // Result: 'onClickButton' | 'onHoverInput' | 'onFocusDiv' | ...
+
+
+  type EventHandlers = {
+    [K in EventName]: (event: Event) => void;
+  };
+
+
+  const handlers: EventHandlers = {
+    onClickButton: (e) => console.log('Button clicked'),
+    onHoverInput: (e) => console.log('Input hovered'),
+    // ... all combinations required
+  };
+
+
+  // CSS Variable Types
+
+  type CSSVar<Name extends string> = `--${Name}`;
+
+  type ColorVar = CSSVar<'primary' | 'secondary' | 'accent'>;
+
+  // Result: '--primary' | '--secondary' | '--accent'
+
+
+  function setCSSVariable(name: ColorVar, value: string) {
+    document.documentElement.style.setProperty(name, value);
+  }
+
+
+  setCSSVariable('--primary', '#3b82f6'); // ✅
+
+  // setCSSVariable('--invalid', '#000'); // ❌ Error
+
+  ```
+
+
+  ## Strict Null Checks Best Practices
+
+
+  Handle null/undefined explicitly:
+
+
+  ```typescript
+
+  // ❌ Bad - Unsafe access
+
+  function processUser(user: User | null) {
+    console.log(user.name); // Error with strictNullChecks
+  }
+
+
+  // ✅ Good - Safe with null check
+
+  function processUser(user: User | null) {
+    if (user === null) {
+      throw new Error('User is required');
+    }
+    console.log(user.name); // Safe - TypeScript knows user is not null
+  }
+
+
+  // Optional Chaining
+
+  function getUserEmail(user: User | null | undefined): string | undefined {
+    return user?.profile?.email;
+  }
+
+
+  // Nullish Coalescing
+
+  function getDisplayName(user: User | null): string {
+    return user?.name ?? 'Anonymous';
+  }
+
+
+  // Non-Null Assertion (use sparingly!)
+
+  function getElement(): HTMLElement {
+    const el = document.getElementById('app');
+    // Only use when you're absolutely certain
+    return el!; // ⚠️ Use with caution
+  }
+
+
+  // Better: Return nullable and handle at call site
+
+  function getElementSafe(): HTMLElement | null {
+    return document.getElementById('app');
+  }
+
+  ```
+
+
+  ## Advanced Type Guards
+
+
+  Create type-safe runtime checks:
+
+
+  ```typescript
+
+  // User-defined type guards
+
+  function isString(value: unknown): value is string {
+    return typeof value === 'string';
+  }
+
+
+  function isNumber(value: unknown): value is number {
+    return typeof value === 'number';
+  }
+
+
+  // Discriminated unions
+
+  type Success<T> = { status: 'success'; data: T };
+
+  type Failure = { status: 'error'; error: string };
+
+  type Result<T> = Success<T> | Failure;
+
+
+  function isSuccess<T>(result: Result<T>): result is Success<T> {
+    return result.status === 'success';
+  }
+
+
+  function handleResult<T>(result: Result<T>) {
+    if (isSuccess(result)) {
+      console.log(result.data); // TypeScript knows this is Success<T>
+    } else {
+      console.error(result.error); // TypeScript knows this is Failure
+    }
+  }
+
+
+  // Array type guards
+
+  function isArrayOfStrings(value: unknown): value is string[] {
+    return Array.isArray(value) && value.every(item => typeof item === 'string');
+  }
+
+
+  // Object type guards with property checking
+
+  interface User {
+    id: string;
+    name: string;
+    email: string;
+  }
+
+
+  function isUser(value: unknown): value is User {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      'id' in value &&
+      'name' in value &&
+      'email' in value &&
+      typeof (value as User).id === 'string' &&
+      typeof (value as User).name === 'string' &&
+      typeof (value as User).email === 'string'
+    );
+  }
+
+  ```
+
+
+  ## ESLint Integration with TypeScript
+
+
+  Comprehensive linting setup:
+
+
+  ```javascript
+
+  // eslint.config.js (ESLint 9.x flat config)
+
+  import tseslint from '@typescript-eslint/eslint-plugin';
+
+  import tsparser from '@typescript-eslint/parser';
+
+
+  export default [
+    {
+      files: ['**/*.{ts,tsx}'],
+      languageOptions: {
+        parser: tsparser,
+        parserOptions: {
+          project: './tsconfig.json',
+          tsconfigRootDir: import.meta.dirname,
+        },
+      },
+      plugins: {
+        '@typescript-eslint': tseslint,
+      },
+      rules: {
+        // TypeScript-specific rules
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/no-unused-vars': ['error', { 
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_' 
+        }],
+        '@typescript-eslint/explicit-function-return-type': 'warn',
+        '@typescript-eslint/no-non-null-assertion': 'error',
+        '@typescript-eslint/strict-boolean-expressions': 'error',
+        '@typescript-eslint/no-floating-promises': 'error',
+        '@typescript-eslint/await-thenable': 'error',
+        '@typescript-eslint/no-misused-promises': 'error',
+        
+        // Naming conventions
+        '@typescript-eslint/naming-convention': [
+          'error',
+          {
+            selector: 'interface',
+            format: ['PascalCase'],
+            custom: {
+              regex: '^I[A-Z]',
+              match: false, // Don't use I prefix
+            },
+          },
+          {
+            selector: 'typeAlias',
+            format: ['PascalCase'],
+          },
+          {
+            selector: 'variable',
+            format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+          },
+        ],
+        
+        // Prevent common mistakes
+        '@typescript-eslint/no-unnecessary-condition': 'error',
+        '@typescript-eslint/prefer-nullish-coalescing': 'error',
+        '@typescript-eslint/prefer-optional-chain': 'error',
+        '@typescript-eslint/prefer-readonly': 'error',
+      },
+    },
+  ];
+
+  ```
+
+
+  ## Utility Types and Mapped Types
+
+
+  Leverage TypeScript's utility types:
+
+
+  ```typescript
+
+  // Make all properties optional
+
+  type PartialUser = Partial<User>;
+
+
+  // Make all properties required
+
+  type RequiredUser = Required<PartialUser>;
+
+
+  // Pick specific properties
+
+  type UserPreview = Pick<User, 'id' | 'name'>;
+
+
+  // Omit specific properties
+
+  type UserWithoutEmail = Omit<User, 'email'>;
+
+
+  // Custom mapped types
+
+  type ReadonlyDeep<T> = {
+    readonly [P in keyof T]: T[P] extends object ? ReadonlyDeep<T[P]> : T[P];
+  };
+
+
+  type MutableUser = ReadonlyDeep<User>;
+
+
+  // Conditional types
+
+  type Awaited<T> = T extends Promise<infer U> ? U : T;
+
+
+  type ApiResponse = Promise<{ data: User }>;
+
+  type UnwrappedResponse = Awaited<ApiResponse>; // { data: User }
+
+
+  // Key remapping in mapped types (TS 5.x)
+
+  type Getters<T> = {
+    [K in keyof T as `get${Capitalize<string & K>}`]: () => T[K];
+  };
+
+
+  type UserGetters = Getters<User>;
+
+  // Result: { getId(): string; getName(): string; getEmail(): string }
+
+  ```
+
+
+  Always enable strict mode, use explicit null checks, leverage template literal
+  types for type-safe strings, implement comprehensive type guards, and
+  integrate ESLint for consistent code quality enforcement.
 tags:
   - typescript
   - strict-mode

@@ -1,4 +1,5 @@
 const DEFAULT_REPO_URL = "https://github.com/JSONbored/claudepro-directory";
+const DEFAULT_SITE_URL = "https://heyclau.de";
 
 export const CATEGORY_SCHEMAS = {
   agents: {
@@ -67,15 +68,28 @@ export function extractCodeBlocks(body) {
 }
 
 export function extractHeadings(body) {
-  return body
-    .split("\n")
-    .map((line) => line.match(/^(##+)\s+(.*)$/))
-    .filter(Boolean)
-    .map((match) => ({
+  const headings = [];
+  let inCodeBlock = false;
+
+  for (const line of String(body || "").split("\n")) {
+    if (line.trim().startsWith("```")) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+
+    if (inCodeBlock) continue;
+
+    const match = line.match(/^(##+)\s+(.*)$/);
+    if (!match) continue;
+
+    headings.push({
       depth: match[1].length,
       text: match[2].trim(),
       id: headingId(match[2].trim())
-    }));
+    });
+  }
+
+  return headings;
 }
 
 export function stripCodeBlocks(markdown) {
@@ -113,6 +127,7 @@ export function extractSections(body) {
   const lines = String(body || "").split("\n");
   const sections = [];
   let current = { title: "Overview", markdown: "" };
+  let inCodeBlock = false;
 
   const pushCurrent = () => {
     const markdown = current.markdown.trim();
@@ -125,6 +140,17 @@ export function extractSections(body) {
   };
 
   for (const line of lines) {
+    if (line.trim().startsWith("```")) {
+      inCodeBlock = !inCodeBlock;
+      current.markdown += `${line}\n`;
+      continue;
+    }
+
+    if (inCodeBlock) {
+      current.markdown += `${line}\n`;
+      continue;
+    }
+
     const headingMatch = line.match(/^##\s+(.*)$/);
     if (headingMatch) {
       pushCurrent();
@@ -224,14 +250,24 @@ export function inferStructuredFields(data, body, category) {
   const usageCodeBlock = extractUsageCodeBlock(body);
   const commandFromTitle = String(data.title || "").match(/^(\/[^\s]+)/)?.[1] || "";
 
+  const normalizedDownloadUrl = String(data.downloadUrl || "").trim();
+  const downloadInstallCommand =
+    category === "skills" && normalizedDownloadUrl.startsWith("/")
+      ? `curl -L ${DEFAULT_SITE_URL}${normalizedDownloadUrl} -o ${String(data.slug || "skill")}.zip && unzip -o ${String(data.slug || "skill")}.zip -d ./${String(data.slug || "skill")}`
+      : "";
+
   const installCommand =
     data.installCommand
       ? String(data.installCommand)
       : category === "commands" && usageCodeBlock
         ? usageCodeBlock.split("\n")[0].trim()
-      : firstCodeBlock && firstCodeBlock.code.split("\n").length === 1
-        ? firstCodeBlock.code.trim()
-        : "";
+        : category === "commands" && commandFromTitle
+          ? commandFromTitle
+          : downloadInstallCommand
+            ? downloadInstallCommand
+            : firstCodeBlock && firstCodeBlock.code.split("\n").length === 1
+              ? firstCodeBlock.code.trim()
+              : "";
 
   const commandSyntax =
     data.commandSyntax
@@ -254,11 +290,11 @@ export function inferStructuredFields(data, body, category) {
         : installCommand || "";
 
   const copySnippet =
-    data.copySnippet
-      ? String(data.copySnippet)
-      : category === "agents" || category === "rules"
-        ? String(body || "").trim()
-      : firstCodeBlock?.code?.trim() || usageSnippet || "";
+    category === "agents" || category === "rules"
+      ? String(body || "").trim()
+      : data.copySnippet
+        ? String(data.copySnippet)
+        : firstCodeBlock?.code?.trim() || usageSnippet || "";
 
   const scriptLanguage =
     data.scriptLanguage

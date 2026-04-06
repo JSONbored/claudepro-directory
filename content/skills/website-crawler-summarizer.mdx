@@ -28,6 +28,15 @@ repoUrl: 'https://github.com/mozilla/readability'
 documentationUrl: 'https://github.com/mozilla/readability'
 downloadUrl: /downloads/skills/website-crawler-summarizer.zip
 installable: true
+installCommand: >-
+  curl -L https://heyclau.de/downloads/skills/website-crawler-summarizer.zip -o
+  website-crawler-summarizer.zip && unzip -o website-crawler-summarizer.zip -d
+  ./website-crawler-summarizer
+usageSnippet: >-
+  Claude can crawl websites, extract content from web pages, clean HTML to
+  readable text, respect robots.txt, and generate structured summaries or
+  documentation from web content. Perfect for research, competitive analysis,
+  and content aggregation.
 copySnippet: |-
   import { JSDOM } from 'jsdom';
   import { Readability } from '@mozilla/readability';

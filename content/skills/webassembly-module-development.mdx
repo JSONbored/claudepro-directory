@@ -29,6 +29,22 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://webassembly.org/'
 downloadUrl: /downloads/skills/webassembly-module-development.zip
 installable: true
+installCommand: >-
+  curl -L https://heyclau.de/downloads/skills/webassembly-module-development.zip
+  -o webassembly-module-development.zip && unzip -o
+  webassembly-module-development.zip -d ./webassembly-module-development
+usageSnippet: >-
+  Build high-performance WebAssembly modules with WASI 0.3, multi-language
+  support, and production-ready deployments for web, serverless, and AI
+  workloads. WebAssembly (WASM) runs at near-native speeds across web browsers,
+  serverless platforms, and edge computing environments. With WASI 0.3 bringing
+  native async support and WebAssembly 2.0 complete as of March 2025, WASM has
+  transitioned from experimental to production-ready for AI workloads,
+  cloud-native applications, and high-performance web apps. Features include
+  Rust/C++/Go compilation to WASM, wasm-bindgen for JavaScript integration, WASI
+  for system calls, Component Model for interoperability, binary size
+  optimization, SIMD support for performance, and multi-runtime compatibility
+  (browser, Node.js, serverless).
 copySnippet: |-
   use wasm_bindgen::prelude::*;
 

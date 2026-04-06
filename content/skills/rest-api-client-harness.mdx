@@ -26,6 +26,15 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview'
 downloadUrl: /downloads/skills/rest-api-client-harness.zip
 installable: true
+installCommand: >-
+  curl -L https://heyclau.de/downloads/skills/rest-api-client-harness.zip -o
+  rest-api-client-harness.zip && unzip -o rest-api-client-harness.zip -d
+  ./rest-api-client-harness
+usageSnippet: >-
+  Claude can interact with REST APIs: make requests, handle authentication (API
+  keys, OAuth, JWT), paginate through results, handle rate limits with retries,
+  and process responses. Build API integration scripts, test endpoints, and
+  extract data from web services.
 copySnippet: |-
   import { setTimeout as delay } from 'node:timers/promises';
   import { fetch } from 'undici';

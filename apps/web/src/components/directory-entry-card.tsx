@@ -6,125 +6,13 @@ import { ArrowUpRight, Check, ChevronUp, Copy, FileCode2, FileText, Github } fro
 
 import { Button } from "@/components/ui/button";
 import type { ContentEntry } from "@/lib/content";
+import { compactCount, getCopyText, getPreviewLine } from "@/lib/entry-presentation";
 import { cn } from "@/lib";
 import { categoryAccentClasses, categoryLabels } from "@/lib/site";
 
 type DirectoryEntryCardProps = {
   entry: ContentEntry;
 };
-
-function compactCount(value: number) {
-  if (value >= 1000) {
-    return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)}k`;
-  }
-  return String(value);
-}
-
-function firstUsefulLine(value?: string | null) {
-  if (!value) return "";
-
-  const candidates = value
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .filter((line) => !line.startsWith("```"))
-    .filter((line) => !line.startsWith("#"))
-    .filter((line) => !line.startsWith("//"))
-    .filter((line) => !line.startsWith("/*"))
-    .filter((line) => !line.startsWith("*"))
-    .filter((line) => !line.startsWith("<!--"));
-
-  return candidates[0] ?? "";
-}
-
-function getPreviewLine(entry: ContentEntry) {
-  if (entry.installCommand) return entry.installCommand.slice(0, 96);
-  if (entry.commandSyntax) return entry.commandSyntax.slice(0, 96);
-  if (entry.usageSnippet) {
-    const line = firstUsefulLine(entry.usageSnippet) || entry.usageSnippet;
-    return line.slice(0, 96);
-  }
-  if (entry.category === "hooks" && entry.trigger) {
-    return `Claude Code hook: ${entry.trigger}`;
-  }
-  if (entry.copySnippet) {
-    const line = firstUsefulLine(entry.copySnippet);
-    if (line) return line.slice(0, 96);
-  }
-  if (entry.category === "agents" || entry.category === "rules") {
-    return "Copy the prompt and use it in Claude Code";
-  }
-  if (entry.category === "hooks" && !entry.scriptBody) {
-    return "Open source file for hook details";
-  }
-  const firstCodeBlock = entry.codeBlocks?.[0]?.code?.split("\n")?.[0]?.trim();
-
-  if (firstCodeBlock) return firstCodeBlock.slice(0, 96);
-  if (entry.documentationUrl) return "See docs for setup";
-  if (entry.downloadUrl) return "Download the package";
-  if (entry.githubUrl) return "See GitHub for instructions";
-  return "Open this entry on HeyClaude";
-}
-
-function appendLabeledBlock(lines: string[], label: string, value?: string | null) {
-  const normalized = String(value || "").trim();
-  if (!normalized) return;
-  if (lines.length) lines.push("");
-  lines.push(`${label}:`);
-  lines.push(normalized);
-}
-
-function getCopyText(entry: ContentEntry) {
-  const body = String(entry.body || "").trim();
-
-  if (entry.category === "agents" || entry.category === "rules") {
-    return body || entry.copySnippet || entry.usageSnippet || entry.description;
-  }
-
-  if (entry.category === "hooks") {
-    const lines: string[] = [];
-    appendLabeledBlock(lines, "Trigger", entry.trigger);
-    appendLabeledBlock(lines, "Install", entry.installCommand);
-    appendLabeledBlock(lines, "Claude config", entry.configSnippet);
-    appendLabeledBlock(lines, "Hook script", entry.scriptBody || entry.copySnippet);
-    if (body) appendLabeledBlock(lines, "Reference", body);
-    return lines.join("\n");
-  }
-
-  if (entry.category === "mcp") {
-    const lines: string[] = [];
-    appendLabeledBlock(lines, "Install", entry.installCommand || entry.commandSyntax);
-    appendLabeledBlock(lines, "Config", entry.configSnippet);
-    appendLabeledBlock(lines, "Usage", entry.copySnippet || entry.usageSnippet || body);
-    return lines.join("\n") || entry.documentationUrl || entry.repoUrl || entry.title;
-  }
-
-  if (entry.category === "skills" || entry.category === "statuslines") {
-    const lines: string[] = [];
-    appendLabeledBlock(lines, "Install", entry.installCommand);
-    appendLabeledBlock(lines, "Usage", entry.usageSnippet);
-    appendLabeledBlock(lines, "Asset", entry.scriptBody || entry.copySnippet || body);
-    return lines.join("\n");
-  }
-
-  if (entry.category === "commands") {
-    return entry.commandSyntax || entry.copySnippet || entry.usageSnippet || body;
-  }
-
-  if (entry.category === "collections" || entry.category === "guides") {
-    return body || entry.copySnippet || entry.usageSnippet || entry.description;
-  }
-
-  if (entry.copySnippet) return entry.copySnippet;
-  if (entry.installCommand) return entry.installCommand;
-  if (entry.usageSnippet) return entry.usageSnippet;
-  const firstCodeBlock = entry.codeBlocks?.[0]?.code?.trim();
-  if (firstCodeBlock) return firstCodeBlock;
-  if (body) return body;
-  if (entry.documentationUrl) return entry.documentationUrl;
-  if (entry.githubUrl) return entry.githubUrl;
-  return `${entry.title}\nhttps://heyclau.de/${entry.category}/${entry.slug}`;
-}
 
 function getCardDescription(entry: ContentEntry) {
   const normalized = (entry.cardDescription || entry.description).replace(/\s+/g, " ").trim();

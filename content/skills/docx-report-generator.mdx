@@ -23,6 +23,14 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://docxtpl.readthedocs.io/'
 downloadUrl: /downloads/skills/docx-report-generator.zip
 installable: true
+installCommand: >-
+  curl -L https://heyclau.de/downloads/skills/docx-report-generator.zip -o
+  docx-report-generator.zip && unzip -o docx-report-generator.zip -d
+  ./docx-report-generator
+usageSnippet: >-
+  Claude can create, edit, and format Microsoft Word documents (.docx)
+  programmatically. Generate professional reports, proposals, documentation, and
+  formatted documents with tables, charts, headers, and custom styling.
 copySnippet: |-
   from docxtpl import DocxTemplate
 

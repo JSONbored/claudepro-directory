@@ -27,6 +27,20 @@ repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 documentationUrl: 'https://www.postgresql.org/docs/current/performance-tips.html'
 downloadUrl: /downloads/skills/postgresql-query-optimization.zip
 installable: true
+installCommand: >-
+  curl -L https://heyclau.de/downloads/skills/postgresql-query-optimization.zip
+  -o postgresql-query-optimization.zip && unzip -o
+  postgresql-query-optimization.zip -d ./postgresql-query-optimization
+usageSnippet: >-
+  Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with
+  AI-assisted performance tuning, indexing strategies, and execution plan
+  analysis. Interpret EXPLAIN ANALYZE plans, identify bottlenecks (sequential
+  scans, nested loops, hash joins), design optimal indexes (B-tree, GIN, BRIN,
+  composite, partial), rewrite queries for better performance, and tune database
+  configuration parameters. Includes pg_stat_statements integration for slow
+  query identification, parallel query execution optimization, JIT compilation
+  tuning, advanced partitioning strategies, and vacuum/autovacuum configuration
+  for high-write workloads.
 copySnippet: |-
   -- Run with EXPLAIN ANALYZE to get actual execution times
   EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
