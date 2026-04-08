@@ -18,7 +18,9 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
 const contentRoot = path.join(repoRoot, "content");
 const generatedDir = path.join(repoRoot, "apps/web/src/generated");
-const outputFile = path.join(generatedDir, "content-index.json");
+const publicDataDir = path.join(repoRoot, "apps/web/public/data");
+const outputFile = path.join(publicDataDir, "content-index.json");
+const directoryOutputFile = path.join(publicDataDir, "directory-index.json");
 const siteStatsFile = path.join(generatedDir, "site-stats.json");
 const legacyVoteSeedFile = path.join(contentRoot, "data/legacy-vote-seed.json");
 const generatedLegacyVoteSeedFile = path.join(generatedDir, "legacy-vote-seed.json");
@@ -126,6 +128,7 @@ function ensureDir(dir) {
 }
 
 ensureDir(generatedDir);
+ensureDir(publicDataDir);
 ensureDir(downloadsDir);
 
 for (const fileName of fs.readdirSync(path.join(contentRoot, "skills"))) {
@@ -285,10 +288,26 @@ async function main() {
 
   entries.sort((left, right) => left.title.localeCompare(right.title));
 
+  const directoryEntries = entries.map((entry) => {
+    const {
+      body: _body,
+      sections: _sections,
+      headings: _headings,
+      codeBlocks: _codeBlocks,
+      scriptBody: _scriptBody,
+      ...directoryEntry
+    } = entry;
+    return directoryEntry;
+  });
+
   const payload = `${JSON.stringify(entries, null, 2)}\n`;
   const tempOutputFile = `${outputFile}.${process.pid}.${Date.now()}.tmp`;
   fs.writeFileSync(tempOutputFile, payload);
   fs.renameSync(tempOutputFile, outputFile);
+  const directoryPayload = `${JSON.stringify(directoryEntries, null, 2)}\n`;
+  const tempDirectoryOutputFile = `${directoryOutputFile}.${process.pid}.${Date.now()}.tmp`;
+  fs.writeFileSync(tempDirectoryOutputFile, directoryPayload);
+  fs.renameSync(tempDirectoryOutputFile, directoryOutputFile);
 
   const directoryStats = directoryRepo ? repoStats.get(directoryRepo.key) : null;
   const siteStatsPayload = {
@@ -314,6 +333,9 @@ async function main() {
   fs.renameSync(generatedSeedTmp, generatedLegacyVoteSeedFile);
 
   console.log(`Wrote ${entries.length} entries to ${path.relative(repoRoot, outputFile)}`);
+  console.log(
+    `Wrote ${directoryEntries.length} entries to ${path.relative(repoRoot, directoryOutputFile)}`
+  );
 }
 
 await main();

@@ -11,11 +11,11 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import type { ContentEntry } from "@/lib/content";
+import type { DirectoryEntry } from "@/lib/content";
 import { categoryLabels, siteConfig } from "@/lib/site";
 
 type BrowseDirectoryProps = {
-  entries: ContentEntry[];
+  entries: DirectoryEntry[];
   initialQuery?: string;
   limit?: number;
 };
@@ -25,7 +25,7 @@ export function BrowseDirectory({
   initialQuery = "",
   limit
 }: BrowseDirectoryProps) {
-  const getEntryKey = (entry: ContentEntry) => `${entry.category}:${entry.slug}`;
+  const getEntryKey = (entry: DirectoryEntry) => `${entry.category}:${entry.slug}`;
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState("all");
   const [sortMode, setSortMode] = useState("popular");
@@ -167,7 +167,7 @@ export function BrowseDirectory({
     return filteredEntries.slice(0, visibleCount);
   }, [filteredEntries, limit, visibleCount]);
 
-  const handleToggleVote = async (entry: ContentEntry, nextVote: boolean) => {
+  const handleToggleVote = async (entry: DirectoryEntry, nextVote: boolean) => {
     const key = getEntryKey(entry);
     let effectiveClientId = clientId;
     if (!effectiveClientId) {

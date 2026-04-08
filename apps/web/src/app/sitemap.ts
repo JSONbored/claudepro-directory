@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
 
-import { getAllEntries } from "@/lib/content";
+import { getDirectoryEntries } from "@/lib/content";
 import { siteConfig } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const entries = await getAllEntries();
+  const entries = await getDirectoryEntries();
 
   return [
     "",

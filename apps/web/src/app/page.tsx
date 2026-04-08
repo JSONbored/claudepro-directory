@@ -1,9 +1,12 @@
 import { BrowseDirectory } from "@/components/browse-directory";
 import siteStats from "@/generated/site-stats.json";
-import { getAllEntries, getCategorySummaries } from "@/lib/content";
+import { getCategorySummaries, getDirectoryEntries } from "@/lib/content";
 
 export default async function HomePage() {
-  const [entries, categories] = await Promise.all([getAllEntries(), getCategorySummaries()]);
+  const [directoryEntries, categories] = await Promise.all([
+    getDirectoryEntries(),
+    getCategorySummaries()
+  ]);
   const totalEntries = categories.reduce((sum, category) => sum + category.count, 0);
   const githubStars = Number(siteStats.githubStars ?? 0);
 
@@ -38,7 +41,7 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="mx-auto mt-14 max-w-[52rem] text-left">
-            <BrowseDirectory entries={entries} limit={15} />
+            <BrowseDirectory entries={directoryEntries} limit={15} />
           </div>
         </div>
       </section>

@@ -1,4 +1,4 @@
-import type { ContentEntry } from "@/lib/content";
+import type { DirectoryEntry } from "@/lib/content";
 
 export function compactCount(value: number) {
   if (value >= 1000) {
@@ -41,7 +41,7 @@ export function extractConfigCommand(value?: string | null) {
   return firstUsefulLine(normalized);
 }
 
-export function buildCollectionSequence(entry: ContentEntry) {
+export function buildCollectionSequence(entry: DirectoryEntry) {
   if (!Array.isArray(entry.items) || entry.items.length === 0) return "";
   return entry.items
     .slice(0, 3)
@@ -49,7 +49,7 @@ export function buildCollectionSequence(entry: ContentEntry) {
     .join(" -> ");
 }
 
-export function getPreviewLine(entry: ContentEntry) {
+export function getPreviewLine(entry: DirectoryEntry) {
   const firstCodeBlock = entry.codeBlocks?.[0]?.code?.split("\n")?.[0]?.trim();
 
   switch (entry.category) {
@@ -124,7 +124,7 @@ function appendLabeledBlock(lines: string[], label: string, value?: string | nul
   lines.push(normalized);
 }
 
-export function getCopyText(entry: ContentEntry) {
+export function getCopyText(entry: DirectoryEntry) {
   const body = String(entry.body || "").trim();
 
   if (entry.category === "agents" || entry.category === "rules") {

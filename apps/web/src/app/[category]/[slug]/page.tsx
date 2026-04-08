@@ -18,17 +18,14 @@ import { DetailToc } from "@/components/detail-toc";
 import { EntryCopyButton } from "@/components/entry-copy-button";
 import { EntryChecklistCard } from "@/components/entry-checklist-card";
 import { SnippetCard } from "@/components/snippet-card";
-import { getAllEntries, getEntriesByCategory, getEntry } from "@/lib/content";
+import { getDirectoryEntries, getDirectoryEntriesByCategory, getEntry } from "@/lib/content";
 import { categoryLabels } from "@/lib/site";
 
 type DetailPageProps = {
   params: Promise<{ category: string; slug: string }>;
 };
 
-export async function generateStaticParams() {
-  const entries = await getAllEntries();
-  return entries.map((entry) => ({ category: entry.category, slug: entry.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: DetailPageProps): Promise<Metadata> {
   const { category, slug } = await params;
@@ -175,8 +172,8 @@ export default async function DetailPage({ params }: DetailPageProps) {
 
   if (!entry) notFound();
 
-  const allEntries = await getAllEntries();
-  const related = (await getEntriesByCategory(category))
+  const allEntries = await getDirectoryEntries();
+  const related = (await getDirectoryEntriesByCategory(category))
     .filter((item) => item.slug !== slug)
     .slice(0, 3);
   const collectionItems =

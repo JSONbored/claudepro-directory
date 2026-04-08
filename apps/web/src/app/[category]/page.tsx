@@ -1,27 +1,24 @@
 import { notFound } from "next/navigation";
 
 import { BrowseDirectory } from "@/components/browse-directory";
-import { getEntriesByCategory } from "@/lib/content";
+import { getDirectoryEntriesByCategory } from "@/lib/content";
 import {
   categoryDescriptions,
   categoryLabels,
-  categoryUsageHints,
-  siteConfig
+  categoryUsageHints
 } from "@/lib/site";
 
 type CategoryPageProps = {
   params: Promise<{ category: string }>;
 };
 
-export async function generateStaticParams() {
-  return siteConfig.categoryOrder.map((category) => ({ category }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = await params;
-  const entries = await getEntriesByCategory(category);
+  const directoryEntries = await getDirectoryEntriesByCategory(category);
 
-  if (!entries.length) notFound();
+  if (!directoryEntries.length) notFound();
 
   return (
     <div className="container-shell space-y-8 py-12">
@@ -40,12 +37,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               Entries
             </p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-              {entries.length}
+              {directoryEntries.length}
             </p>
           </div>
         </div>
       </div>
-      <BrowseDirectory entries={entries} />
+      <BrowseDirectory entries={directoryEntries} />
     </div>
   );
 }

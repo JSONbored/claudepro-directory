@@ -1,12 +1,12 @@
 import { BrowseDirectory } from "@/components/browse-directory";
-import { getAllEntries } from "@/lib/content";
+import { getDirectoryEntries } from "@/lib/content";
 
 type BrowsePageProps = {
   searchParams?: Promise<{ q?: string }>;
 };
 
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {
-  const entries = await getAllEntries();
+  const directoryEntries = await getDirectoryEntries();
   const params = searchParams ? await searchParams : undefined;
 
   return (
@@ -19,7 +19,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
           guides, collections, and statuslines.
         </p>
       </div>
-      <BrowseDirectory entries={entries} initialQuery={params?.q ?? ""} />
+      <BrowseDirectory entries={directoryEntries} initialQuery={params?.q ?? ""} />
     </div>
   );
 }

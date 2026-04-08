@@ -6,22 +6,22 @@ import { ArrowUpRight, Check, ChevronUp, Copy, FileCode2, FileText } from "lucid
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast-provider";
-import type { ContentEntry } from "@/lib/content";
+import type { DirectoryEntry } from "@/lib/content";
 import { compactCount, getCopyText, getPreviewLine } from "@/lib/entry-presentation";
 import { cn } from "@/lib";
 import { categoryAccentClasses, categoryLabels } from "@/lib/site";
 
 type DirectoryEntryCardProps = {
-  entry: ContentEntry;
+  entry: DirectoryEntry;
   voteCount?: number;
   hasVoted?: boolean;
   onToggleVote?: (
-    entry: ContentEntry,
+    entry: DirectoryEntry,
     nextVote: boolean
   ) => Promise<{ count: number; voted: boolean }>;
 };
 
-function getCardDescription(entry: ContentEntry) {
+function getCardDescription(entry: DirectoryEntry) {
   const normalized = (entry.cardDescription || entry.description).replace(/\s+/g, " ").trim();
   if (normalized.length <= 220) return normalized;
 
@@ -46,7 +46,7 @@ function formatRelativeDate(date?: string) {
   return `${Math.round(diffDays / 365)}y ago`;
 }
 
-function getMonogram(entry: ContentEntry) {
+function getMonogram(entry: DirectoryEntry) {
   const label = categoryLabels[entry.category] ?? entry.category;
   return label
     .split(/\s+/)
