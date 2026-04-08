@@ -8,24 +8,29 @@ assignees: []
 
 ## Skill Submission
 
-- Name:
-- Slug:
+- Name: <!-- required -->
+- Slug: <!-- required; kebab-case -->
 - Category: skills
-- GitHub URL:
-- Docs URL:
-- Download URL (if any):
-- Author:
-- Contact email:
-- Tags (comma-separated):
+- GitHub URL: <!-- optional -->
+- Docs URL: <!-- optional -->
+- Download URL (if any): <!-- optional -->
+- Author: <!-- optional -->
+- Contact email: <!-- required -->
+- Tags (comma-separated): <!-- optional -->
 
-## Required content
+## Required Fields
 
-- Description (1-3 sentences):
-- Card description (short preview):
-- Install command:
-- Usage snippet:
+- Description (1-3 sentences): <!-- required -->
+- Card description (short preview): <!-- required -->
+- Install command: <!-- required unless download URL handles install -->
+- Usage snippet: <!-- required -->
 
-## Strongly recommended
+## Strongly Recommended Fields
 
 - Copy snippet (full usable asset):
 - Config snippet:
+
+## Validation Notes
+
+- If using download URL, include a practical install flow.
+- Do not include frontmatter counters; voting is DB-owned.

@@ -8,23 +8,28 @@ assignees: []
 
 ## Command Submission
 
-- Name:
-- Slug:
+- Name: <!-- required -->
+- Slug: <!-- required; kebab-case -->
 - Category: commands
-- GitHub URL:
-- Docs URL:
-- Author:
-- Contact email:
-- Tags (comma-separated):
+- GitHub URL: <!-- optional -->
+- Docs URL: <!-- optional -->
+- Author: <!-- optional -->
+- Contact email: <!-- required -->
+- Tags (comma-separated): <!-- optional -->
 
-## Required content
+## Required Fields
 
-- Description (1-3 sentences):
-- Card description (short preview):
-- Command syntax:
-- Usage snippet:
-- Full copyable command content:
+- Description (1-3 sentences): <!-- required -->
+- Card description (short preview): <!-- required -->
+- Command syntax: <!-- required -->
+- Usage snippet: <!-- required -->
+- Full copyable command content: <!-- required -->
 
-## Strongly recommended
+## Strongly Recommended Fields
 
 - Argument hints / examples:
+
+## Validation Notes
+
+- Command syntax should be copy-paste ready.
+- Include realistic usage, not pseudo examples.

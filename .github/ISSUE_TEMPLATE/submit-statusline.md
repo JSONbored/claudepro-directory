@@ -8,24 +8,29 @@ assignees: []
 
 ## Statusline Submission
 
-- Name:
-- Slug:
+- Name: <!-- required -->
+- Slug: <!-- required; kebab-case -->
 - Category: statuslines
-- GitHub URL:
-- Docs URL:
-- Author:
-- Contact email:
-- Tags (comma-separated):
+- GitHub URL: <!-- optional -->
+- Docs URL: <!-- optional -->
+- Author: <!-- optional -->
+- Contact email: <!-- required -->
+- Tags (comma-separated): <!-- optional -->
 
-## Required content
+## Required Fields
 
-- Description (1-3 sentences):
-- Card description (short preview):
-- Script language:
-- Usage snippet:
-- Full copyable statusline script/config:
+- Description (1-3 sentences): <!-- required -->
+- Card description (short preview): <!-- required -->
+- Script language: <!-- required -->
+- Usage snippet: <!-- required -->
+- Full copyable statusline script/config: <!-- required -->
 
-## Strongly recommended
+## Strongly Recommended Fields
 
 - Config snippet:
 - Testing flow:
+
+## Validation Notes
+
+- Include both config snippet and script body when possible.
+- Keep shell compatibility and dependencies explicit.

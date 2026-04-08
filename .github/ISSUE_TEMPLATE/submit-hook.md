@@ -8,25 +8,30 @@ assignees: []
 
 ## Hook Submission
 
-- Name:
-- Slug:
+- Name: <!-- required -->
+- Slug: <!-- required; kebab-case -->
 - Category: hooks
-- GitHub URL:
-- Docs URL:
-- Author:
-- Contact email:
-- Tags (comma-separated):
+- GitHub URL: <!-- optional -->
+- Docs URL: <!-- optional -->
+- Author: <!-- optional -->
+- Contact email: <!-- required -->
+- Tags (comma-separated): <!-- optional -->
 
-## Required content
+## Required Fields
 
-- Description (1-3 sentences):
-- Card description (short preview):
-- Trigger (e.g. PreToolUse, PostToolUse, Stop):
-- Usage snippet:
-- Full copyable hook script/config:
+- Description (1-3 sentences): <!-- required -->
+- Card description (short preview): <!-- required -->
+- Trigger (e.g. PreToolUse, PostToolUse, Stop): <!-- required -->
+- Usage snippet: <!-- required -->
+- Full copyable hook script/config: <!-- required -->
 
-## Strongly recommended
+## Strongly Recommended Fields
 
 - Config snippet:
 - Script language:
 - Testing flow:
+
+## Validation Notes
+
+- Include trigger + config + script so the hook can be tested immediately.
+- Keep examples runnable in Claude Code context.

@@ -72,6 +72,7 @@ export function DirectoryEntryCard({
   const previewLine = useMemo(() => getPreviewLine(entry), [entry]);
   const cardDescription = useMemo(() => getCardDescription(entry), [entry]);
   const repoHref = entry.repoUrl || entry.githubUrl;
+  const isCreatorEntry = String(entry.author ?? "").trim().toLowerCase() === "jsonbored";
   const relativeDate = useMemo(() => formatRelativeDate(entry.dateAdded), [entry.dateAdded]);
 
   useEffect(() => {
@@ -210,6 +211,21 @@ export function DirectoryEntryCard({
               {typeof entry.githubStars === "number" ? (
                 <span>{compactCount(entry.githubStars)}</span>
               ) : null}
+            </a>
+          ) : isCreatorEntry ? (
+            <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/12 px-2.5 py-1 text-[11px] font-medium tracking-[0.04em] text-primary">
+              Creator
+            </span>
+          ) : repoHref ? (
+            <a
+              href={repoHref}
+              target="_blank"
+              rel="noreferrer"
+              className="directory-github-stat"
+              aria-label="Open source on GitHub"
+            >
+              <FileCode2 className="size-4" />
+              <span>Source</span>
             </a>
           ) : null}
         </div>

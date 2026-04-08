@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { marked } from "marked";
 import {
   BookOpen,
   CalendarDays,
@@ -37,6 +38,18 @@ export async function generateMetadata({ params }: DetailPageProps): Promise<Met
     title: entry?.seoTitle ?? entry?.title,
     description: entry?.seoDescription ?? entry?.description
   };
+}
+
+function stripCodeBlocks(markdown: string) {
+  return String(markdown || "")
+    .replace(/```[\w-]*\n[\s\S]*?```/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+async function renderMarkdown(markdown: string) {
+  const output = await marked.parse(markdown);
+  return typeof output === "string" ? output : String(output);
 }
 
 function getPrimarySnippet(entry: NonNullable<Awaited<ReturnType<typeof getEntry>>>) {
@@ -196,7 +209,14 @@ export default async function DetailPage({ params }: DetailPageProps) {
   ]
     .filter(Boolean)
     .map((value) => String(value).trim());
-  const visibleSections = sectionItems.filter((section) => {
+  const renderedSections = await Promise.all(
+    sectionItems.map(async (section) => ({
+      ...section,
+      html: await renderMarkdown(section.markdown),
+      proseHtml: await renderMarkdown(stripCodeBlocks(section.markdown))
+    }))
+  );
+  const visibleSections = renderedSections.filter((section) => {
     const hasProse = section.proseHtml.replace(/<[^>]+>/g, "").trim().length > 0;
     const hasCode = section.codeBlocks.some(
       (block) => !omittedCode.includes(block.code.trim())
@@ -223,6 +243,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
   const installationOrder = Array.isArray(entry.installationOrder)
     ? entry.installationOrder
     : [];
+  const renderedBody = await renderMarkdown(entry.body || "");
 
   return (
     <div className="container-shell grid gap-10 py-12 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -319,7 +340,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
         ) : (entry.scriptBody || (primaryCodeBlock && entry.codeBlocks.length === 1 && !entry.headings.length)) ? null : (
           <div
             className="prose-entry"
-            dangerouslySetInnerHTML={{ __html: entry.html }}
+            dangerouslySetInnerHTML={{ __html: renderedBody }}
           />
         )}
 

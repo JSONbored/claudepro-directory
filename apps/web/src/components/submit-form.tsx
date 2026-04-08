@@ -11,7 +11,17 @@ import {
 } from "@/components/ui/select";
 import { categoryLabels, siteConfig } from "@/lib/site";
 
-const categories = siteConfig.categoryOrder.map((category) => ({
+const submissionCategoryOrder = [
+  "agents",
+  "rules",
+  "mcp",
+  "skills",
+  "hooks",
+  "commands",
+  "statuslines"
+] as const;
+
+const categories = submissionCategoryOrder.map((category) => ({
   value: category,
   label: categoryLabels[category] ?? category
 }));
@@ -50,7 +60,6 @@ export function SubmitForm() {
   const [installCommand, setInstallCommand] = useState("");
   const [commandSyntax, setCommandSyntax] = useState("");
   const [trigger, setTrigger] = useState("");
-  const [collectionItems, setCollectionItems] = useState("");
   const [assetContent, setAssetContent] = useState("");
   const [tags, setTags] = useState("");
 
@@ -79,9 +88,6 @@ export function SubmitForm() {
       `- Card description (short preview): ${cardDescription || "[replace me]"}`,
       category === "hooks" ? `- Trigger: ${trigger || "[replace me]"}` : "",
       category === "commands" ? `- Command syntax: ${commandSyntax || "[replace me]"}` : "",
-      category === "collections"
-        ? `- Items (category/slug list): ${collectionItems || "[replace me]"}`
-        : "",
       `- Install / usage: ${installCommand || "[optional]"}`,
       categoriesRequiringAssetContent.has(category)
         ? `- Full copyable asset content:\n\n${assetContent || "[replace me]"}`
@@ -106,7 +112,6 @@ export function SubmitForm() {
     author,
     cardDescription,
     category,
-    collectionItems,
     commandSyntax,
     description,
     docsUrl,
@@ -122,7 +127,6 @@ export function SubmitForm() {
   const categoryNeedsAsset = categoriesRequiringAssetContent.has(category);
   const categoryNeedsTrigger = category === "hooks";
   const categoryNeedsCommandSyntax = category === "commands";
-  const categoryNeedsCollectionItems = category === "collections";
 
   const hasRequiredBase =
     Boolean(toolName.trim()) &&
@@ -134,8 +138,7 @@ export function SubmitForm() {
   const hasCategoryRequired =
     (!categoryNeedsAsset || Boolean(assetContent.trim())) &&
     (!categoryNeedsTrigger || Boolean(trigger.trim())) &&
-    (!categoryNeedsCommandSyntax || Boolean(commandSyntax.trim())) &&
-    (!categoryNeedsCollectionItems || Boolean(collectionItems.trim()));
+    (!categoryNeedsCommandSyntax || Boolean(commandSyntax.trim()));
   const isReady = hasRequiredBase && hasCategoryRequired;
 
   return (
@@ -315,22 +318,6 @@ export function SubmitForm() {
         </div>
       ) : null}
 
-      {category === "collections" ? (
-        <div className="space-y-1">
-          <label htmlFor="submit-collection-items" className="submit-label">
-            Collection items <span className="text-destructive">*</span>
-          </label>
-          <textarea
-            id="submit-collection-items"
-            value={collectionItems}
-            onChange={(event) => setCollectionItems(event.target.value)}
-            placeholder={"agents/example-agent\nmcp/example-mcp\nskills/example-skill"}
-            className="submit-textarea"
-            required
-          />
-        </div>
-      ) : null}
-
       {categoryNeedsAsset ? (
         <div className="space-y-1">
           <label htmlFor="submit-asset-content" className="submit-label">
@@ -363,6 +350,29 @@ export function SubmitForm() {
       <div className="rounded-xl border border-border bg-background px-4 py-3 text-xs leading-6 text-muted-foreground">
         This opens a category-specific GitHub issue template so maintainers can import
         content with schema-aligned fields and less back-and-forth.
+      </div>
+
+      <div className="rounded-xl border border-border bg-card/80 px-4 py-3 text-xs leading-6 text-muted-foreground">
+        Guides and collections are temporarily handled via direct templates:
+        {" "}
+        <a
+          className="text-primary underline underline-offset-4"
+          href={`${siteConfig.githubUrl}/issues/new?template=submit-guide.md`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          guide
+        </a>
+        {" / "}
+        <a
+          className="text-primary underline underline-offset-4"
+          href={`${siteConfig.githubUrl}/issues/new?template=submit-collection.md`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          collection
+        </a>
+        .
       </div>
 
       <button type="submit" className="submit-primary-button" disabled={!isReady}>

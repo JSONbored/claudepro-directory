@@ -9,8 +9,8 @@ export default function SubmitPage() {
           <div className="space-y-4">
             <h1 className="section-title text-balance">Submit a tool or resource.</h1>
             <p className="max-w-xl text-base leading-8 text-muted-foreground">
-              Share an agent, MCP server, skill pack, rule set, guide, hook, command,
-              or workflow with the HeyClaude community.
+              Share an agent, MCP server, skill pack, rule set, hook, command,
+              or statusline with the HeyClaude community.
             </p>
             <p className="max-w-xl text-sm leading-7 text-muted-foreground">
               This stays intentionally lightweight. Fill out the form and we open a

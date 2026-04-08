@@ -8,22 +8,27 @@ assignees: []
 
 ## Rule Submission
 
-- Name:
-- Slug:
+- Name: <!-- required -->
+- Slug: <!-- required; kebab-case -->
 - Category: rules
-- GitHub URL:
-- Docs URL:
-- Author:
-- Contact email:
-- Tags (comma-separated):
+- GitHub URL: <!-- optional -->
+- Docs URL: <!-- optional -->
+- Author: <!-- optional -->
+- Contact email: <!-- required -->
+- Tags (comma-separated): <!-- optional -->
 
-## Required content
+## Required Fields
 
-- Description (1-3 sentences):
-- Card description (short preview):
-- Full copyable rule content:
+- Description (1-3 sentences): <!-- required -->
+- Card description (short preview): <!-- required -->
+- Full copyable rule content: <!-- required -->
 
-## Optional notes
+## Optional Fields
 
 - Recommended use context:
 - Caveats / constraints:
+
+## Validation Notes
+
+- Keep the rule complete and directly usable.
+- Do not include `viewCount`, `copyCount`, or `popularityScore`.

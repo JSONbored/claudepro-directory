@@ -11,8 +11,7 @@ import {
   headingId,
   inferSectionBooleans,
   inferStructuredFields,
-  normalizeBody,
-  stripCodeBlocks
+  normalizeBody
 } from "./content-schema.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -244,12 +243,10 @@ async function main() {
           data.downloadUrl ? String(data.downloadUrl) : ""
         ),
         body,
-        html: marked.parse(body, { renderer }),
         sections: sections.map((section) => ({
           title: section.title,
           id: section.id,
-          html: marked.parse(section.markdown, { renderer }),
-          proseHtml: marked.parse(stripCodeBlocks(section.markdown), { renderer }),
+          markdown: section.markdown,
           codeBlocks: extractCodeBlocks(section.markdown)
         })),
         headings,

@@ -1,10 +1,16 @@
 import Link from "next/link";
 
 import { BrandWordmark } from "@/components/brand-wordmark";
+import { DiscordMark } from "@/components/icons/discord-mark";
+import { GitHubMark } from "@/components/icons/github-mark";
 import { ThemeToggle } from "@/components/theme-toggle";
+import siteStats from "@/generated/site-stats.json";
+import { compactCount } from "@/lib/entry-presentation";
 import { siteConfig } from "@/lib/site";
 
 export function SiteHeader() {
+  const githubStars = Number(siteStats.githubStars ?? 0);
+
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-background/88 backdrop-blur">
       <div className="container-shell flex h-15 items-center justify-between gap-6">
@@ -21,6 +27,29 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
+          <a
+            href={siteConfig.githubUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="hidden items-center gap-1.5 rounded-full border border-border/80 bg-card/70 px-3 py-2 text-xs text-muted-foreground transition hover:border-primary/35 hover:text-foreground md:inline-flex"
+            aria-label="Open GitHub repository"
+            title="Open GitHub repository"
+          >
+            <GitHubMark className="size-3.5" />
+            <span>{githubStars > 0 ? compactCount(githubStars) : "GitHub"}</span>
+          </a>
+          {siteConfig.discordUrl ? (
+            <a
+              href={siteConfig.discordUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden size-9 items-center justify-center rounded-full border border-border/80 bg-card/70 text-muted-foreground transition hover:border-primary/35 hover:text-foreground md:inline-flex"
+              aria-label="Open Discord"
+              title="Open Discord"
+            >
+              <DiscordMark className="size-4" />
+            </a>
+          ) : null}
           <span className="hidden h-5 w-px bg-border/80 md:inline-block" aria-hidden />
           <ThemeToggle />
           <Link

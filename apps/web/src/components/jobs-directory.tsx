@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useDeferredValue, useMemo, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 
@@ -74,6 +75,7 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
                     </span>
                   ) : null}
                   <span>{job.company}</span>
+                  {job.type ? <span>· {job.type}</span> : null}
                   <span>· {job.location}</span>
                 </div>
                 <h2 className="text-2xl font-semibold tracking-tight text-foreground">
@@ -83,15 +85,20 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
                   {job.description}
                 </p>
               </div>
-              <a
-                href={job.applyUrl}
-                className="directory-link-chip"
-                target={job.applyUrl.startsWith("http") ? "_blank" : undefined}
-                rel={job.applyUrl.startsWith("http") ? "noreferrer" : undefined}
-              >
-                <ArrowUpRight className="size-3.5" />
-                View
-              </a>
+              <div className="flex items-center gap-2">
+                <Link href={`/jobs/${job.slug}`} className="directory-link-chip">
+                  Details
+                </Link>
+                <a
+                  href={job.applyUrl}
+                  className="directory-link-chip"
+                  target={job.applyUrl.startsWith("http") ? "_blank" : undefined}
+                  rel={job.applyUrl.startsWith("http") ? "noreferrer" : undefined}
+                >
+                  <ArrowUpRight className="size-3.5" />
+                  Apply
+                </a>
+              </div>
             </div>
           </article>
         ))}

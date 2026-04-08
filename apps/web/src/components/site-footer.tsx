@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { BrandWordmark } from "@/components/brand-wordmark";
+import { DiscordMark } from "@/components/icons/discord-mark";
+import { GitHubMark } from "@/components/icons/github-mark";
 import { NewsletterSignup } from "@/components/newsletter-signup";
 import { siteConfig } from "@/lib/site";
 
@@ -22,6 +24,28 @@ export function SiteFooter() {
           >
             Submit via GitHub
           </a>
+          <div className="flex items-center gap-2 pt-1">
+            <a
+              href={siteConfig.githubUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:border-primary/35 hover:text-foreground"
+              aria-label="Open GitHub repository"
+            >
+              <GitHubMark className="size-4" />
+            </a>
+            {siteConfig.discordUrl ? (
+              <a
+                href={siteConfig.discordUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:border-primary/35 hover:text-foreground"
+                aria-label="Open Discord"
+              >
+                <DiscordMark className="size-4" />
+              </a>
+            ) : null}
+          </div>
         </div>
         <div className="space-y-3 text-sm text-muted-foreground">
           <p className="font-medium text-foreground">Navigation</p>
