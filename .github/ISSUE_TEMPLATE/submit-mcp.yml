@@ -1,0 +1,130 @@
+name: Submit MCP server
+description: Submit a Claude MCP server entry for the directory.
+title: "Submit MCP: "
+labels:
+  - submission
+  - mcp
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Include a real install/config path and verification details.
+  - type: input
+    id: name
+    attributes:
+      label: Name
+      placeholder: Airtable MCP Server
+    validations:
+      required: true
+  - type: input
+    id: slug
+    attributes:
+      label: Slug
+      description: Kebab-case only
+      placeholder: airtable-mcp-server
+    validations:
+      required: true
+  - type: input
+    id: category
+    attributes:
+      label: Category
+      value: mcp
+    validations:
+      required: true
+  - type: input
+    id: github_url
+    attributes:
+      label: GitHub URL
+      placeholder: https://github.com/owner/repo
+    validations:
+      required: false
+  - type: input
+    id: docs_url
+    attributes:
+      label: Docs URL
+      placeholder: https://...
+    validations:
+      required: false
+  - type: input
+    id: author
+    attributes:
+      label: Author
+      placeholder: GitHub handle or name
+    validations:
+      required: false
+  - type: input
+    id: contact_email
+    attributes:
+      label: Contact email
+      placeholder: you@example.com
+    validations:
+      required: true
+  - type: input
+    id: tags
+    attributes:
+      label: Tags
+      description: Comma-separated
+      placeholder: mcp, integration, tools
+    validations:
+      required: false
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: 1-3 sentences
+      placeholder: Explain what this MCP server does and when to use it.
+    validations:
+      required: true
+  - type: textarea
+    id: card_description
+    attributes:
+      label: Card description
+      description: Short browse preview text
+      placeholder: Short preview users see on browse cards.
+    validations:
+      required: true
+  - type: input
+    id: install_command
+    attributes:
+      label: Install command
+      placeholder: npx -y @org/server-name
+    validations:
+      required: true
+  - type: textarea
+    id: usage_snippet
+    attributes:
+      label: Usage snippet
+      render: markdown
+      placeholder: claude mcp add ...
+    validations:
+      required: true
+  - type: textarea
+    id: full_copyable_content
+    attributes:
+      label: Copy snippet / full usable asset
+      render: markdown
+      placeholder: Optional but recommended if different from usage snippet.
+    validations:
+      required: false
+  - type: textarea
+    id: config_snippet
+    attributes:
+      label: Config snippet (optional)
+      render: markdown
+      placeholder: JSON or TOML config example.
+    validations:
+      required: false
+  - type: textarea
+    id: auth_requirements
+    attributes:
+      label: Auth requirements / env vars (optional)
+      placeholder: List required tokens and env vars.
+    validations:
+      required: false
+  - type: textarea
+    id: verification_steps
+    attributes:
+      label: Verification steps (optional)
+      placeholder: How to verify the server is correctly connected.
+    validations:
+      required: false

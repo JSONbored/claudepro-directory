@@ -27,13 +27,13 @@ const categories = submissionCategoryOrder.map((category) => ({
 }));
 
 const categoryTemplateMap: Record<string, string> = {
-  agents: "submit-agent.md",
-  rules: "submit-rule.md",
-  mcp: "submit-mcp.md",
-  skills: "submit-skill.md",
-  hooks: "submit-hook.md",
-  commands: "submit-command.md",
-  statuslines: "submit-statusline.md",
+  agents: "submit-agent.yml",
+  rules: "submit-rule.yml",
+  mcp: "submit-mcp.yml",
+  skills: "submit-skill.yml",
+  hooks: "submit-hook.yml",
+  commands: "submit-command.yml",
+  statuslines: "submit-statusline.yml",
   collections: "submit-collection.md",
   guides: "submit-guide.md"
 };
@@ -67,44 +67,28 @@ export function SubmitForm() {
     const template = categoryTemplateMap[category] ?? "submit-entry.md";
     const categoryLabel = categoryLabels[category] ?? "Entry";
     const title = `Submit ${categoryLabel}: ${toolName || "New directory entry"}`;
-    const labels = ["submission"];
-    if (category) labels.push(category);
-
-    const issueBodyParts = [
-      `## ${categoryLabel} Submission`,
-      "",
-      `- Name: ${toolName || "[replace me]"}`,
-      `- Slug: ${slug || "[replace me]"}`,
-      `- Category: ${category || "[replace me]"}`,
-      `- GitHub URL: ${githubUrl || "[optional]"}`,
-      `- Docs URL: ${docsUrl || "[optional]"}`,
-      `- Author: ${author || "[optional]"}`,
-      `- Contact email: ${email || "[replace me]"}`,
-      `- Tags (comma-separated): ${tags || "[optional]"}`,
-      "",
-      "## Required content",
-      "",
-      `- Description (1-3 sentences): ${description || "[replace me]"}`,
-      `- Card description (short preview): ${cardDescription || "[replace me]"}`,
-      category === "hooks" ? `- Trigger: ${trigger || "[replace me]"}` : "",
-      category === "commands" ? `- Command syntax: ${commandSyntax || "[replace me]"}` : "",
-      `- Install / usage: ${installCommand || "[optional]"}`,
-      categoriesRequiringAssetContent.has(category)
-        ? `- Full copyable asset content:\n\n${assetContent || "[replace me]"}`
-        : "",
-      "",
-      "## Optional notes",
-      "",
-      "- Anything maintainers should know",
-      "- Screenshots or examples if relevant"
-    ];
 
     const params = new URLSearchParams({
       template,
-      labels: labels.join(","),
-      title,
-      body: issueBodyParts.filter(Boolean).join("\n")
+      title
     });
+
+    if (toolName) params.set("name", toolName);
+    if (slug) params.set("slug", slug);
+    if (category) params.set("category", category);
+    if (githubUrl) params.set("github_url", githubUrl);
+    if (docsUrl) params.set("docs_url", docsUrl);
+    if (author) params.set("author", author);
+    if (email) params.set("contact_email", email);
+    if (tags) params.set("tags", tags);
+    if (description) params.set("description", description);
+    if (cardDescription) params.set("card_description", cardDescription);
+    if (installCommand) params.set("install_command", installCommand);
+    if (installCommand) params.set("install_or_usage", installCommand);
+    if (commandSyntax) params.set("command_syntax", commandSyntax);
+    if (trigger) params.set("trigger", trigger);
+    if (assetContent) params.set("full_copyable_content", assetContent);
+    if (assetContent) params.set("guide_content_markdown", assetContent);
 
     return `${siteConfig.githubUrl}/issues/new?${params.toString()}`;
   }, [
@@ -128,18 +112,7 @@ export function SubmitForm() {
   const categoryNeedsTrigger = category === "hooks";
   const categoryNeedsCommandSyntax = category === "commands";
 
-  const hasRequiredBase =
-    Boolean(toolName.trim()) &&
-    Boolean(slug.trim()) &&
-    Boolean(email.trim()) &&
-    Boolean(description.trim()) &&
-    Boolean(cardDescription.trim()) &&
-    Boolean(category);
-  const hasCategoryRequired =
-    (!categoryNeedsAsset || Boolean(assetContent.trim())) &&
-    (!categoryNeedsTrigger || Boolean(trigger.trim())) &&
-    (!categoryNeedsCommandSyntax || Boolean(commandSyntax.trim()));
-  const isReady = hasRequiredBase && hasCategoryRequired;
+  const isReady = Boolean(category);
 
   return (
     <form className="submit-form-card" action={issueUrl} method="get" target="_blank">
@@ -153,7 +126,6 @@ export function SubmitForm() {
           onChange={(event) => setToolName(event.target.value)}
           placeholder="e.g. Airtable MCP Server"
           className="submit-input"
-          required
         />
       </div>
 
@@ -167,7 +139,6 @@ export function SubmitForm() {
           onChange={(event) => setSlug(event.target.value)}
           placeholder="e.g. airtable-mcp-server"
           className="submit-input"
-          required
         />
       </div>
 
@@ -191,7 +162,7 @@ export function SubmitForm() {
 
       <div className="space-y-1">
         <label htmlFor="submit-email" className="submit-label">
-          Email <span className="text-destructive">*</span>
+          Email
         </label>
         <input
           id="submit-email"
@@ -200,7 +171,6 @@ export function SubmitForm() {
           onChange={(event) => setEmail(event.target.value)}
           placeholder="you@example.com"
           className="submit-input"
-          required
         />
       </div>
 
@@ -219,7 +189,7 @@ export function SubmitForm() {
 
       <div className="space-y-1">
         <label htmlFor="submit-description" className="submit-label">
-          Description <span className="text-destructive">*</span>
+          Description
         </label>
         <textarea
           id="submit-description"
@@ -227,13 +197,12 @@ export function SubmitForm() {
           onChange={(event) => setDescription(event.target.value)}
           placeholder="Describe what this is, why it matters, and how someone would use it."
           className="submit-textarea"
-          required
         />
       </div>
 
       <div className="space-y-1">
         <label htmlFor="submit-card-description" className="submit-label">
-          Card description <span className="text-destructive">*</span>
+          Card description
         </label>
         <input
           id="submit-card-description"
@@ -241,7 +210,6 @@ export function SubmitForm() {
           onChange={(event) => setCardDescription(event.target.value)}
           placeholder="Short summary shown in browse cards."
           className="submit-input"
-          required
         />
       </div>
 
@@ -289,7 +257,7 @@ export function SubmitForm() {
       {category === "commands" ? (
         <div className="space-y-1">
           <label htmlFor="submit-command-syntax" className="submit-label">
-            Command syntax <span className="text-destructive">*</span>
+            Command syntax
           </label>
           <input
             id="submit-command-syntax"
@@ -297,7 +265,6 @@ export function SubmitForm() {
             onChange={(event) => setCommandSyntax(event.target.value)}
             placeholder="/command-name [arguments]"
             className="submit-input"
-            required
           />
         </div>
       ) : null}
@@ -305,7 +272,7 @@ export function SubmitForm() {
       {category === "hooks" ? (
         <div className="space-y-1">
           <label htmlFor="submit-trigger" className="submit-label">
-            Hook trigger <span className="text-destructive">*</span>
+            Hook trigger
           </label>
           <input
             id="submit-trigger"
@@ -313,7 +280,6 @@ export function SubmitForm() {
             onChange={(event) => setTrigger(event.target.value)}
             placeholder="PreToolUse, PostToolUse, Stop, etc."
             className="submit-input"
-            required
           />
         </div>
       ) : null}
@@ -321,7 +287,7 @@ export function SubmitForm() {
       {categoryNeedsAsset ? (
         <div className="space-y-1">
           <label htmlFor="submit-asset-content" className="submit-label">
-            Full copyable asset content <span className="text-destructive">*</span>
+            Full copyable asset content
           </label>
           <textarea
             id="submit-asset-content"
@@ -329,7 +295,6 @@ export function SubmitForm() {
             onChange={(event) => setAssetContent(event.target.value)}
             placeholder="Paste the exact prompt/config/script/markdown to publish."
             className="submit-textarea min-h-56"
-            required
           />
         </div>
       ) : null}
@@ -348,8 +313,8 @@ export function SubmitForm() {
       </div>
 
       <div className="rounded-xl border border-border bg-background px-4 py-3 text-xs leading-6 text-muted-foreground">
-        This opens a category-specific GitHub issue template so maintainers can import
-        content with schema-aligned fields and less back-and-forth.
+        This opens a category-specific GitHub issue form. Required fields are enforced
+        on GitHub, and anything you entered here is used as prefill where supported.
       </div>
 
       <div className="rounded-xl border border-border bg-card/80 px-4 py-3 text-xs leading-6 text-muted-foreground">

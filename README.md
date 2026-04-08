@@ -20,9 +20,16 @@ HeyClaude is a fast, GitHub-native directory for Claude assets.
 
 ### For contributors
 
+Option A (easiest): open [Submit](https://heyclau.de/submit) and use the category issue form.
+
+Option B (direct): open a category issue form in GitHub under `.github/ISSUE_TEMPLATE`.
+
+Option C (advanced): commit content files directly.
+
 1. Add or update a file under `content/<category>/`
 2. Run `pnpm generate:readme`
-3. Commit the README alongside your content changes
+3. Run `pnpm validate:content` and `pnpm audit:content`
+4. Commit the README alongside your content changes
 
 ---
 
