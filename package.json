@@ -11,9 +11,15 @@
     "build": "pnpm --filter web build",
     "preview": "pnpm --filter web preview",
     "type-check": "pnpm --filter web type-check",
+    "validate:content": "node scripts/validate-content.mjs",
+    "validate:content:strict": "node scripts/validate-content.mjs --strict-recommended",
     "generate:readme": "node scripts/generate-readme.mjs",
     "migrate:content": "node scripts/migrate-content.mjs",
     "audit:content": "node scripts/audit-content.mjs",
+    "export:legacy-votes": "node scripts/export-legacy-vote-seed.mjs --ref=HEAD",
+    "cleanup:legacy-counters": "node scripts/remove-legacy-counters.mjs",
+    "sync:votes:d1": "node scripts/sync-votes-to-d1.mjs --mode=both",
+    "verify:votes:d1": "node scripts/verify-d1-votes.mjs --mode=both",
     "restore:hooks": "node scripts/restore-hooks-from-history.mjs",
     "restore:collections": "node scripts/restore-collections-from-history.mjs"
   }

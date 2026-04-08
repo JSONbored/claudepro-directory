@@ -27,10 +27,29 @@ export async function POST(request: Request) {
   const { env } = getCloudflareContext();
   const envRecord = env as unknown as Record<string, unknown>;
   const resendApiKey = String(envRecord["RESEND_API_KEY"] ?? "");
+  const resendSegmentId = String(envRecord["RESEND_SEGMENT_ID"] ?? "");
   const resendAudienceId = String(envRecord["RESEND_AUDIENCE_ID"] ?? "");
 
-  if (!resendApiKey || !resendAudienceId) {
+  if (!resendApiKey || (!resendSegmentId && !resendAudienceId)) {
     return NextResponse.json({ error: "newsletter_not_configured" }, { status: 503 });
+  }
+
+  const requestBody: Record<string, unknown> = {
+    email,
+    unsubscribed: false,
+    first_name: "",
+    last_name: "",
+    metadata: {
+      source
+    }
+  };
+
+  // Prefer the current Resend contacts+segments model.
+  if (resendSegmentId) {
+    requestBody.segments = [{ id: resendSegmentId }];
+  } else if (resendAudienceId) {
+    // Backward-compatible fallback for older audience-based setups.
+    requestBody.audience_id = resendAudienceId;
   }
 
   const response = await fetch("https://api.resend.com/contacts", {
@@ -39,16 +58,7 @@ export async function POST(request: Request) {
       Authorization: `Bearer ${resendApiKey}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({
-      email,
-      unsubscribed: false,
-      audience_id: resendAudienceId,
-      first_name: "",
-      last_name: "",
-      metadata: {
-        source
-      }
-    })
+    body: JSON.stringify(requestBody)
   });
 
   if (response.ok) {

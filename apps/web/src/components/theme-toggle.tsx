@@ -23,10 +23,13 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="inline-flex size-11 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition hover:bg-accent"
+      className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border/90 bg-card px-3.5 text-foreground shadow-sm transition hover:bg-accent"
       aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
     >
       {theme === "dark" ? <SunMedium className="size-4" /> : <MoonStar className="size-4" />}
+      <span className="hidden text-[11px] font-medium uppercase tracking-[0.14em] lg:inline">
+        {theme === "dark" ? "Light" : "Dark"}
+      </span>
     </button>
   );
 }

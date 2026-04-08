@@ -125,9 +125,9 @@ export function BrowseDirectory({
       const rightKey = getEntryKey(right);
       const leftKey = getEntryKey(left);
       const rightVotes =
-        popularSortSnapshot[rightKey] ?? right.popularityScore ?? right.viewCount ?? 0;
+        popularSortSnapshot[rightKey] ?? 0;
       const leftVotes =
-        popularSortSnapshot[leftKey] ?? left.popularityScore ?? left.viewCount ?? 0;
+        popularSortSnapshot[leftKey] ?? 0;
 
       if (sortMode === "newest") {
         return String(right.dateAdded ?? "").localeCompare(String(left.dateAdded ?? ""));
@@ -169,17 +169,14 @@ export function BrowseDirectory({
 
   const handleToggleVote = async (entry: ContentEntry, nextVote: boolean) => {
     const key = getEntryKey(entry);
-
-    if (!clientId) {
-      return {
-        count: voteCounts[key] ?? entry.popularityScore ?? entry.viewCount ?? 0,
-        voted: votedByMe[key] ?? false
-      };
+    let effectiveClientId = clientId;
+    if (!effectiveClientId) {
+      effectiveClientId = window.localStorage.getItem("heyclaude-client-id") ?? crypto.randomUUID();
+      window.localStorage.setItem("heyclaude-client-id", effectiveClientId);
+      setClientId(effectiveClientId);
     }
 
-    const previousCount = votesAvailable
-      ? (voteCounts[key] ?? 0)
-      : (entry.popularityScore ?? entry.viewCount ?? 0);
+    const previousCount = votesAvailable ? (voteCounts[key] ?? 0) : 0;
     const previousVoted = votedByMe[key] ?? false;
     const optimisticCount = Math.max(0, previousCount + (nextVote ? 1 : -1));
 
@@ -192,7 +189,7 @@ export function BrowseDirectory({
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           key,
-          clientId,
+          clientId: effectiveClientId,
           vote: nextVote
         })
       });
@@ -208,6 +205,7 @@ export function BrowseDirectory({
 
       setVoteCounts((current) => ({ ...current, [key]: Number(payload.count ?? 0) }));
       setVotedByMe((current) => ({ ...current, [key]: Boolean(payload.voted) }));
+      window.dispatchEvent(new CustomEvent("heyclaude:intent", { detail: { type: "vote" } }));
 
       return {
         count: Number(payload.count ?? 0),
@@ -273,9 +271,7 @@ export function BrowseDirectory({
             key={`${entry.category}-${entry.slug}`}
             entry={entry}
             voteCount={
-              votesAvailable
-                ? (voteCounts[getEntryKey(entry)] ?? 0)
-                : (entry.popularityScore ?? entry.viewCount ?? 0)
+              votesAvailable ? (voteCounts[getEntryKey(entry)] ?? 0) : 0
             }
             hasVoted={votedByMe[getEntryKey(entry)] ?? false}
             onToggleVote={handleToggleVote}

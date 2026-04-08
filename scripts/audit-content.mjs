@@ -6,6 +6,7 @@ import matter from "gray-matter";
 import {
   CATEGORY_SCHEMAS,
   DEFAULT_DIRECTORY_REPO_URL,
+  FORBIDDEN_CONTENT_FIELDS,
   inferSectionBooleans,
   inferStructuredFields,
   normalizeBody,
@@ -44,6 +45,12 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
 
     if (parsed.data.category && String(parsed.data.category).trim() !== category) {
       issues.push("category_mismatch");
+    }
+
+    for (const field of FORBIDDEN_CONTENT_FIELDS) {
+      if (parsed.data[field] !== undefined) {
+        issues.push(`forbidden_field_${field}`);
+      }
     }
 
     if (

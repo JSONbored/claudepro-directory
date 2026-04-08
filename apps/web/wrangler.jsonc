@@ -1,12 +1,28 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "heyclaude",
+  "name": "heyclaude-website",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-04-05",
   "compatibility_flags": [
     "nodejs_compat",
     "global_fetch_strictly_public"
   ],
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "head_sampling_rate": 1
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 1
+    }
+  },
+  "logpush": true,
+  "placement": {
+    "mode": "smart"
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
@@ -14,7 +30,7 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "heyclaude"
+      "service": "heyclaude-website"
     }
   ],
   "d1_databases": [

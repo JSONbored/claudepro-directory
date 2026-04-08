@@ -488,8 +488,8 @@
 }
 
 .directory-stack-card:hover {
-  border-color: color-mix(in oklab, var(--primary) 18%, var(--border));
-  box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 18%, transparent);
+  border-color: color-mix(in oklab, var(--primary) 26%, var(--border));
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 22%, transparent);
 }
 
 .directory-vote-rail {
@@ -732,4 +732,53 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+@keyframes toast-enter-kf {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-exit-kf {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+}
+
+@keyframes copy-check-kf {
+  0% {
+    transform: scale(0.72);
+    opacity: 0.45;
+  }
+  65% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.toast-enter {
+  animation: toast-enter-kf 180ms cubic-bezier(0.21, 0.98, 0.35, 1);
+}
+
+.toast-exit {
+  animation: toast-exit-kf 180ms ease-in forwards;
+}
+
+.copy-check-icon {
+  animation: copy-check-kf 190ms cubic-bezier(0.2, 1, 0.3, 1);
 }

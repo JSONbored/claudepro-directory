@@ -1,0 +1,50 @@
+name: Content Validation
+
+on:
+  pull_request:
+    paths:
+      - "content/**"
+      - "scripts/**"
+      - "examples/content/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+  push:
+    branches:
+      - main
+    paths:
+      - "content/**"
+      - "scripts/**"
+      - "examples/content/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+
+jobs:
+  validate-content:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate content schema
+        run: pnpm validate:content
+
+      - name: Audit content report
+        run: pnpm audit:content
+
+      - name: Build web app
+        run: pnpm build

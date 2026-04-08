@@ -40,6 +40,8 @@ export const CATEGORY_SCHEMAS = {
   }
 };
 
+export const FORBIDDEN_CONTENT_FIELDS = ["viewCount", "copyCount", "popularityScore"];
+
 export function headingId(text) {
   return text
     .toLowerCase()
@@ -445,10 +447,7 @@ export function orderFrontmatter(data) {
     "prerequisites",
     "tags",
     "keywords",
-    "readingTime",
-    "viewCount",
-    "copyCount",
-    "popularityScore"
+    "readingTime"
   ];
 
   const ordered = {};

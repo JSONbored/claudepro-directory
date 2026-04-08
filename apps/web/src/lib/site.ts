@@ -8,8 +8,7 @@ export const siteConfig = {
   nav: [
     { href: "/browse", label: "Browse" },
     { href: "/jobs", label: "Jobs" },
-    { href: "/about", label: "About" },
-    { href: "/submit", label: "Submit" }
+    { href: "/about", label: "About" }
   ],
   categoryOrder: [
     "agents",

@@ -5,6 +5,8 @@ import Script from "next/script";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { NewsletterPrompt } from "@/components/newsletter-prompt";
+import { ToastProvider } from "@/components/ui/toast-provider";
 import { siteConfig } from "@/lib/site";
 
 import "./globals.css";
@@ -36,9 +38,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           data-website-id="b734c138-2949-4527-9160-7fe5d0e81121"
           strategy="afterInteractive"
         />
-        <SiteHeader />
-        <main>{children}</main>
-        <SiteFooter />
+        <ToastProvider>
+          <SiteHeader />
+          <main>{children}</main>
+          <SiteFooter />
+          <NewsletterPrompt />
+        </ToastProvider>
       </body>
     </html>
   );

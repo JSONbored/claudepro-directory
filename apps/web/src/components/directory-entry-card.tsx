@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, Check, ChevronUp, Copy, FileCode2, FileText, Github } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast-provider";
 import type { ContentEntry } from "@/lib/content";
 import { compactCount, getCopyText, getPreviewLine } from "@/lib/entry-presentation";
 import { cn } from "@/lib";
@@ -61,11 +62,12 @@ export function DirectoryEntryCard({
   hasVoted: hasVotedProp = false,
   onToggleVote
 }: DirectoryEntryCardProps) {
-  const baseVotes = entry.popularityScore ?? entry.viewCount ?? 0;
+  const baseVotes = 0;
   const [hasVoted, setHasVoted] = useState(hasVotedProp);
   const [displayedVotes, setDisplayedVotes] = useState(voteCount ?? baseVotes);
   const [isVoting, setIsVoting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { pushToast } = useToast();
 
   const previewLine = useMemo(() => getPreviewLine(entry), [entry]);
   const cardDescription = useMemo(() => getCardDescription(entry), [entry]);
@@ -117,8 +119,22 @@ export function DirectoryEntryCard({
   };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(getCopyText(entry));
-    setCopied(true);
+    try {
+      await navigator.clipboard.writeText(getCopyText(entry));
+      setCopied(true);
+      window.dispatchEvent(new CustomEvent("heyclaude:intent", { detail: { type: "copy" } }));
+      pushToast({
+        variant: "success",
+        title: "Copied to clipboard",
+        description: entry.title
+      });
+    } catch {
+      pushToast({
+        variant: "error",
+        title: "Copy failed",
+        description: "Clipboard access was blocked by the browser."
+      });
+    }
   };
 
   return (
@@ -211,9 +227,17 @@ export function DirectoryEntryCard({
             variant="outline"
             size="sm"
             onClick={handleCopy}
-            className="h-8 rounded-lg border-border bg-background px-3 text-[11px]"
+            className={cn(
+              "h-8 rounded-lg border-border bg-background px-3 text-[11px]",
+              copied &&
+                "border-emerald-500/45 bg-[color-mix(in_oklab,var(--background)_88%,oklch(0.85_0.08_154)_12%)] text-emerald-600 dark:text-emerald-300"
+            )}
           >
-            <Copy className="mr-1.5 size-3.5" />
+            {copied ? (
+              <Check className="copy-check-icon mr-1.5 size-3.5 text-emerald-500" />
+            ) : (
+              <Copy className="mr-1.5 size-3.5" />
+            )}
             {copied ? "Copied" : "Copy"}
           </Button>
         </div>

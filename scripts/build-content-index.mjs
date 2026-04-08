@@ -185,10 +185,6 @@ async function main() {
         keywords: Array.isArray(data.keywords) ? data.keywords.map(String) : [],
         readingTime:
           typeof data.readingTime === "number" ? data.readingTime : undefined,
-        viewCount: typeof data.viewCount === "number" ? data.viewCount : undefined,
-        copyCount: typeof data.copyCount === "number" ? data.copyCount : undefined,
-        popularityScore:
-          typeof data.popularityScore === "number" ? data.popularityScore : undefined,
         difficultyScore:
           typeof data.difficultyScore === "number" ? data.difficultyScore : undefined,
         documentationUrl: data.documentationUrl
@@ -288,11 +284,7 @@ async function main() {
     entry.repoUpdatedAt = stats.updatedAt ?? null;
   }
 
-  entries.sort((left, right) => {
-    const popularity = (right.popularityScore ?? 0) - (left.popularityScore ?? 0);
-    if (popularity !== 0) return popularity;
-    return left.title.localeCompare(right.title);
-  });
+  entries.sort((left, right) => left.title.localeCompare(right.title));
 
   const payload = `${JSON.stringify(entries, null, 2)}\n`;
   const tempOutputFile = `${outputFile}.${process.pid}.${Date.now()}.tmp`;
