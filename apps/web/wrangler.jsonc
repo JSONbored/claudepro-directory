@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "heyclaude-website",
+  "name": "heyclaude-prod",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-04-05",
   "compatibility_flags": [
@@ -30,7 +30,7 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "heyclaude-website"
+      "service": "heyclaude-prod"
     }
   ],
   "d1_databases": [
@@ -40,5 +40,24 @@
       "database_id": "2897db33-c0c7-4d15-af73-618cb83a0a33",
       "migrations_dir": "migrations"
     }
-  ]
+  ],
+  "env": {
+    "dev": {
+      "name": "heyclaude-dev",
+      "services": [
+        {
+          "binding": "WORKER_SELF_REFERENCE",
+          "service": "heyclaude-dev"
+        }
+      ],
+      "d1_databases": [
+        {
+          "binding": "VOTES_DB",
+          "database_name": "heyclaude-votes",
+          "database_id": "2897db33-c0c7-4d15-af73-618cb83a0a33",
+          "migrations_dir": "migrations"
+        }
+      ]
+    }
+  }
 }
