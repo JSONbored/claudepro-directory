@@ -23,8 +23,8 @@
     "clsx": "^2.1.1",
     "geist": "^1.7.0",
     "gray-matter": "^4.0.3",
-    "lucide-react": "^0.542.0",
-    "marked": "^17.0.0",
+    "lucide-react": "^1.7.0",
+    "marked": "^18.0.0",
     "next": "16.2.2",
     "radix-ui": "^1.4.3",
     "react": "19.2.4",
@@ -32,13 +32,13 @@
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "^1.18.0",
+    "@opennextjs/cloudflare": "^1.18.1",
     "@tailwindcss/postcss": "^4.1.12",
-    "@types/node": "^24.3.0",
+    "@types/node": "^25.5.2",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "tailwindcss": "^4.1.12",
     "typescript": "6.0.2",
-    "wrangler": "4.80.0"
+    "wrangler": "4.81.0"
   }
 }

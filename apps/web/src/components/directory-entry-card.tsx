@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, Check, ChevronUp, Copy, FileCode2, FileText, Github } from "lucide-react";
+import { ArrowUpRight, Check, ChevronUp, Copy, FileCode2, FileText } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast-provider";
@@ -206,7 +206,7 @@ export function DirectoryEntryCard({
               className="directory-github-stat"
               aria-label="Open repository on GitHub"
             >
-              <Github className="size-4" />
+              <FileCode2 className="size-4" />
               {typeof entry.githubStars === "number" ? (
                 <span>{compactCount(entry.githubStars)}</span>
               ) : null}
@@ -273,7 +273,7 @@ export function DirectoryEntryCard({
                 aria-label="Open repository"
                 title="Open repository"
               >
-                <Github className="size-3.5" />
+                <FileCode2 className="size-3.5" />
               </a>
             ) : null}
             {entry.githubUrl && entry.githubUrl !== repoHref ? (

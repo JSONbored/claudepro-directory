@@ -1,4 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import legacyVoteSeed from "@/generated/legacy-vote-seed.json";
 
 type D1RunResult = {
   success?: boolean;
@@ -32,12 +33,19 @@ export function getVotesDb(): D1DatabaseLike | null {
   }
 }
 
+function getSeedCount(entryKey: string) {
+  const value = (legacyVoteSeed as Record<string, unknown>)[entryKey];
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? Math.max(0, Math.trunc(parsed)) : 0;
+}
+
 async function ensureEntry(db: D1DatabaseLike, entryKey: string) {
+  const baseline = getSeedCount(entryKey);
   await db
     .prepare(
-      "INSERT OR IGNORE INTO votes_entries (entry_key, upvote_count, updated_at) VALUES (?, 0, CURRENT_TIMESTAMP)"
+      "INSERT OR IGNORE INTO votes_entries (entry_key, upvote_count, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)"
     )
-    .bind(entryKey)
+    .bind(entryKey, baseline)
     .run();
 }
 
@@ -51,7 +59,7 @@ export async function queryVoteCounts(db: D1DatabaseLike, keys: string[]) {
     .all<{ entry_key: string; upvote_count: number }>();
 
   const counts: Record<string, number> = {};
-  for (const key of keys) counts[key] = 0;
+  for (const key of keys) counts[key] = getSeedCount(key);
   for (const row of results) counts[row.entry_key] = Number(row.upvote_count ?? 0);
   return counts;
 }

@@ -21,6 +21,8 @@ const contentRoot = path.join(repoRoot, "content");
 const generatedDir = path.join(repoRoot, "apps/web/src/generated");
 const outputFile = path.join(generatedDir, "content-index.json");
 const siteStatsFile = path.join(generatedDir, "site-stats.json");
+const legacyVoteSeedFile = path.join(contentRoot, "data/legacy-vote-seed.json");
+const generatedLegacyVoteSeedFile = path.join(generatedDir, "legacy-vote-seed.json");
 const downloadsDir = path.join(repoRoot, "apps/web/public/downloads/skills");
 const DIRECTORY_REPO_URL = "https://github.com/JSONbored/claudepro-directory";
 const categories = fs
@@ -302,6 +304,17 @@ async function main() {
   const siteStatsTmp = `${siteStatsFile}.${process.pid}.${Date.now()}.tmp`;
   fs.writeFileSync(siteStatsTmp, `${JSON.stringify(siteStatsPayload, null, 2)}\n`);
   fs.renameSync(siteStatsTmp, siteStatsFile);
+
+  const rawLegacySeed = fs.existsSync(legacyVoteSeedFile)
+    ? JSON.parse(fs.readFileSync(legacyVoteSeedFile, "utf8"))
+    : { votes: {} };
+  const votes =
+    rawLegacySeed && typeof rawLegacySeed === "object" && typeof rawLegacySeed.votes === "object"
+      ? rawLegacySeed.votes
+      : {};
+  const generatedSeedTmp = `${generatedLegacyVoteSeedFile}.${process.pid}.${Date.now()}.tmp`;
+  fs.writeFileSync(generatedSeedTmp, `${JSON.stringify(votes, null, 2)}\n`);
+  fs.renameSync(generatedSeedTmp, generatedLegacyVoteSeedFile);
 
   console.log(`Wrote ${entries.length} entries to ${path.relative(repoRoot, outputFile)}`);
 }

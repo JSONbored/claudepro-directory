@@ -6,7 +6,6 @@ import {
   CalendarDays,
   FileCode2,
   FolderTree,
-  Github,
   Link as LinkIcon,
   Sparkles,
   Tag,
@@ -440,7 +439,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 rel="noreferrer"
                 className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 transition hover:border-primary/40"
               >
-                <Github className="size-4 text-muted-foreground" />
+                <FileCode2 className="size-4 text-muted-foreground" />
                 <span>Repository</span>
               </a>
             ) : null}

@@ -40,6 +40,12 @@ function getToastIcon(variant: ToastVariant) {
   return <Info className="size-4 text-primary" />;
 }
 
+function getToastTitleClass(variant: ToastVariant) {
+  if (variant === "success") return "text-emerald-500";
+  if (variant === "error") return "text-destructive";
+  return "text-primary";
+}
+
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
@@ -70,17 +76,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={toast.id}
             className={cn(
-              "pointer-events-auto flex items-start gap-2.5 rounded-xl border bg-card/95 px-4 py-3 shadow-xl backdrop-blur transition toast-enter",
+              "pointer-events-auto flex items-start gap-2.5 rounded-xl border border-border/90 bg-card/95 px-4 py-3 shadow-xl backdrop-blur transition toast-enter",
               toast.leaving && "toast-exit",
-              toast.variant === "success" &&
-                "border-emerald-500/35 bg-[color-mix(in_oklab,var(--card)_86%,oklch(0.85_0.08_154)_14%)]",
-              toast.variant === "error" && "border-red-500/35",
-              toast.variant === "info" && "border-border/90"
+              toast.variant === "info" && "bg-card/95"
             )}
           >
             {getToastIcon(toast.variant)}
             <div className="min-w-0">
-              <p className="text-sm font-medium text-foreground">{toast.title}</p>
+              <p className={cn("text-sm font-medium", getToastTitleClass(toast.variant))}>
+                {toast.title}
+              </p>
               {toast.description ? (
                 <p className="mt-0.5 text-xs text-muted-foreground">{toast.description}</p>
               ) : null}

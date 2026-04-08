@@ -782,3 +782,52 @@
 .copy-check-icon {
   animation: copy-check-kf 190ms cubic-bezier(0.2, 1, 0.3, 1);
 }
+
+.theme-toggle-utility {
+  @apply inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-card/70 text-muted-foreground transition;
+}
+
+.theme-toggle-utility:hover {
+  border-color: color-mix(in oklab, var(--primary) 34%, var(--border));
+  color: color-mix(in oklab, var(--foreground) 88%, var(--primary) 12%);
+  background: color-mix(in oklab, var(--card) 86%, var(--primary) 14%);
+}
+
+.theme-toggle-utility:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 26%, transparent);
+}
+
+.theme-toggle-icon-wrap {
+  @apply relative inline-flex size-5 items-center justify-center;
+}
+
+.theme-toggle-icon-wrap-light {
+  transform: rotate(0deg);
+}
+
+.theme-toggle-icon-wrap-dark {
+  transform: rotate(-20deg);
+}
+
+.theme-toggle-icon {
+  @apply absolute size-4 transition-all duration-200 ease-out;
+}
+
+.theme-toggle-icon-visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.theme-toggle-icon-hidden {
+  opacity: 0;
+  transform: scale(0.6) rotate(22deg);
+}
+
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+  transition-duration: 180ms;
+  transition-timing-function: ease-out;
+}

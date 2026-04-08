@@ -21,6 +21,7 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
+          <span className="hidden h-5 w-px bg-border/80 md:inline-block" aria-hidden />
           <ThemeToggle />
           <Link
             href="/submit"

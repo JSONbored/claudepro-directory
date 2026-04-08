@@ -19,6 +19,7 @@ export function NewsletterPrompt() {
   const [hasIntent, setHasIntent] = useState(false);
   const [dwellReady, setDwellReady] = useState(false);
   const [scrollReady, setScrollReady] = useState(false);
+  const [suppressed, setSuppressed] = useState(false);
 
   const canDisplay = useMemo(() => {
     if (status === "success") return true;
@@ -58,12 +59,12 @@ export function NewsletterPrompt() {
   }, []);
 
   useEffect(() => {
-    if (!canDisplay || open) return;
+    if (suppressed || !canDisplay || open) return;
     setOpen(true);
     try {
       window.sessionStorage.setItem(SHOWN_SESSION_KEY, "1");
     } catch {}
-  }, [canDisplay, open]);
+  }, [canDisplay, open, suppressed]);
 
   const dismiss = (persist: boolean) => {
     if (persist) {
@@ -71,6 +72,7 @@ export function NewsletterPrompt() {
         window.localStorage.setItem(DISMISS_KEY, String(Date.now() + DISMISS_MS));
       } catch {}
     }
+    setSuppressed(true);
     setOpen(false);
   };
 
@@ -99,6 +101,7 @@ export function NewsletterPrompt() {
       try {
         window.localStorage.setItem(SUBSCRIBED_KEY, "1");
       } catch {}
+      setSuppressed(true);
 
       window.setTimeout(() => {
         setOpen(false);
