@@ -20,6 +20,8 @@ type D1DatabaseLike = {
   prepare: (query: string) => D1PreparedStatement;
 };
 
+const D1_SAFE_VARIABLE_BATCH_SIZE = 25;
+
 export function isValidEntryKey(key: string) {
   return /^[a-z0-9-]+:[a-z0-9-]+$/.test(key);
 }
@@ -52,32 +54,44 @@ async function ensureEntry(db: D1DatabaseLike, entryKey: string) {
 export async function queryVoteCounts(db: D1DatabaseLike, keys: string[]) {
   if (!keys.length) return {};
 
-  const placeholders = keys.map(() => "?").join(", ");
-  const { results } = await db
-    .prepare(`SELECT entry_key, upvote_count FROM votes_entries WHERE entry_key IN (${placeholders})`)
-    .bind(...keys)
-    .all<{ entry_key: string; upvote_count: number }>();
-
   const counts: Record<string, number> = {};
   for (const key of keys) counts[key] = getSeedCount(key);
-  for (const row of results) counts[row.entry_key] = Number(row.upvote_count ?? 0);
+
+  for (let index = 0; index < keys.length; index += D1_SAFE_VARIABLE_BATCH_SIZE) {
+    const batch = keys.slice(index, index + D1_SAFE_VARIABLE_BATCH_SIZE);
+    const placeholders = batch.map(() => "?").join(", ");
+    const { results } = await db
+      .prepare(
+        `SELECT entry_key, upvote_count FROM votes_entries WHERE entry_key IN (${placeholders})`
+      )
+      .bind(...batch)
+      .all<{ entry_key: string; upvote_count: number }>();
+
+    for (const row of results) counts[row.entry_key] = Number(row.upvote_count ?? 0);
+  }
+
   return counts;
 }
 
 export async function queryVotesByClient(db: D1DatabaseLike, keys: string[], clientId: string) {
   if (!keys.length || !clientId) return {};
 
-  const placeholders = keys.map(() => "?").join(", ");
-  const { results } = await db
-    .prepare(
-      `SELECT entry_key FROM votes_by_client WHERE client_id = ? AND entry_key IN (${placeholders})`
-    )
-    .bind(clientId, ...keys)
-    .all<{ entry_key: string }>();
-
   const voted: Record<string, boolean> = {};
   for (const key of keys) voted[key] = false;
-  for (const row of results) voted[row.entry_key] = true;
+
+  for (let index = 0; index < keys.length; index += D1_SAFE_VARIABLE_BATCH_SIZE) {
+    const batch = keys.slice(index, index + D1_SAFE_VARIABLE_BATCH_SIZE);
+    const placeholders = batch.map(() => "?").join(", ");
+    const { results } = await db
+      .prepare(
+        `SELECT entry_key FROM votes_by_client WHERE client_id = ? AND entry_key IN (${placeholders})`
+      )
+      .bind(clientId, ...batch)
+      .all<{ entry_key: string }>();
+
+    for (const row of results) voted[row.entry_key] = true;
+  }
+
   return voted;
 }
 

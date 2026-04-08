@@ -20,6 +20,10 @@ type BrowseDirectoryProps = {
   limit?: number;
 };
 
+const VOTE_QUERY_BATCH_SIZE = 120;
+const VOTE_QUERY_MAX_ATTEMPTS = 3;
+const VOTE_QUERY_RETRY_DELAYS_MS = [250, 900, 1800] as const;
+
 export function BrowseDirectory({
   entries,
   initialQuery = "",
@@ -66,34 +70,64 @@ export function BrowseDirectory({
     const keys = entries.map(getEntryKey);
     let cancelled = false;
 
-    const loadVotes = async () => {
-      try {
-        const response = await fetch("/api/votes/query", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            keys,
-            clientId
-          })
-        });
-        if (!response.ok) return;
-
-        const payload = (await response.json()) as {
-          counts?: Record<string, number>;
-          voted?: Record<string, boolean>;
-          available?: boolean;
-        };
-        if (cancelled) return;
-
-        setVotesAvailable(Boolean(payload.available));
-        setVoteCounts(payload.counts ?? {});
-        setVotedByMe(payload.voted ?? {});
-        if (payload.available) {
-          setPopularSortSnapshot(payload.counts ?? {});
-        }
-      } catch {
-        setVotesAvailable(false);
+    const loadVotesBatch = async (batchKeys: string[]) => {
+      const response = await fetch("/api/votes/query", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          keys: batchKeys,
+          clientId
+        })
+      });
+      if (!response.ok) {
+        throw new Error(`votes query failed: ${response.status}`);
       }
+      return (await response.json()) as {
+        counts?: Record<string, number>;
+        voted?: Record<string, boolean>;
+        available?: boolean;
+      };
+    };
+
+    const loadVotesAllBatches = async () => {
+      const counts: Record<string, number> = {};
+      const voted: Record<string, boolean> = {};
+      let available = true;
+
+      for (let index = 0; index < keys.length; index += VOTE_QUERY_BATCH_SIZE) {
+        const batch = keys.slice(index, index + VOTE_QUERY_BATCH_SIZE);
+        const payload = await loadVotesBatch(batch);
+        Object.assign(counts, payload.counts ?? {});
+        Object.assign(voted, payload.voted ?? {});
+        available = available && payload.available !== false;
+      }
+
+      return { counts, voted, available };
+    };
+
+    const loadVotes = async () => {
+      for (let attempt = 1; attempt <= VOTE_QUERY_MAX_ATTEMPTS; attempt += 1) {
+        try {
+          const payload = await loadVotesAllBatches();
+          if (cancelled) return;
+
+          setVotesAvailable(Boolean(payload.available));
+          setVoteCounts(payload.counts ?? {});
+          setVotedByMe(payload.voted ?? {});
+          if (payload.available) {
+            setPopularSortSnapshot(payload.counts ?? {});
+          }
+          return;
+        } catch {
+          if (attempt >= VOTE_QUERY_MAX_ATTEMPTS || cancelled) break;
+          const delay =
+            VOTE_QUERY_RETRY_DELAYS_MS[Math.min(attempt - 1, VOTE_QUERY_RETRY_DELAYS_MS.length - 1)];
+          await new Promise((resolve) => window.setTimeout(resolve, delay));
+        }
+      }
+
+      if (cancelled) return;
+      setVotesAvailable(false);
     };
 
     void loadVotes();
