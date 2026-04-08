@@ -1,41 +1,41 @@
-const DEFAULT_REPO_URL = "https://github.com/JSONbored/claudepro-directory";
+const DEFAULT_DIRECTORY_REPO_URL = "https://github.com/JSONbored/claudepro-directory";
 const DEFAULT_SITE_URL = "https://heyclau.de";
 
 export const CATEGORY_SCHEMAS = {
   agents: {
-    required: ["title", "slug", "description", "cardDescription", "repoUrl"],
+    required: ["title", "slug", "description", "cardDescription"],
     recommended: ["usageSnippet", "copySnippet"]
   },
   collections: {
-    required: ["title", "slug", "description", "cardDescription", "repoUrl"],
-    recommended: ["items", "copySnippet"]
+    required: ["title", "slug", "description", "cardDescription"],
+    recommended: ["items"]
   },
   commands: {
-    required: ["title", "slug", "description", "cardDescription", "repoUrl"],
+    required: ["title", "slug", "description", "cardDescription"],
     recommended: ["commandSyntax", "usageSnippet", "copySnippet"]
   },
   guides: {
-    required: ["title", "slug", "description", "cardDescription", "repoUrl"],
+    required: ["title", "slug", "description", "cardDescription"],
     recommended: ["usageSnippet"]
   },
   hooks: {
-    required: ["title", "slug", "description", "cardDescription", "repoUrl"],
+    required: ["title", "slug", "description", "cardDescription"],
     recommended: ["trigger", "usageSnippet", "copySnippet", "configSnippet", "scriptBody"]
   },
   mcp: {
-    required: ["title", "slug", "description", "cardDescription", "repoUrl"],
+    required: ["title", "slug", "description", "cardDescription"],
     recommended: ["installCommand", "usageSnippet", "copySnippet", "configSnippet"]
   },
   rules: {
-    required: ["title", "slug", "description", "cardDescription", "repoUrl"],
+    required: ["title", "slug", "description", "cardDescription"],
     recommended: ["copySnippet"]
   },
   skills: {
-    required: ["title", "slug", "description", "cardDescription", "repoUrl"],
+    required: ["title", "slug", "description", "cardDescription"],
     recommended: ["installCommand", "usageSnippet", "copySnippet", "downloadUrl"]
   },
   statuslines: {
-    required: ["title", "slug", "description", "cardDescription", "repoUrl"],
+    required: ["title", "slug", "description", "cardDescription"],
     recommended: ["scriptLanguage", "usageSnippet", "copySnippet", "configSnippet", "scriptBody"]
   }
 };
@@ -214,7 +214,7 @@ export function normalizeBody(body, category) {
 }
 
 export function inferRepoUrl(data = {}) {
-  if (data.repoUrl && String(data.repoUrl).trim() !== DEFAULT_REPO_URL) {
+  if (data.repoUrl && String(data.repoUrl).trim() !== DEFAULT_DIRECTORY_REPO_URL) {
     return String(data.repoUrl);
   }
 
@@ -225,7 +225,20 @@ export function inferRepoUrl(data = {}) {
     return String(data.documentationUrl).trim();
   }
 
-  return data.repoUrl ? String(data.repoUrl) : DEFAULT_REPO_URL;
+  return "";
+}
+
+export function inferSectionBooleans(body = "") {
+  const normalized = String(body || "");
+
+  return {
+    hasPrerequisites: /^##\s+Prerequisites\b|^##\s+Prerequisites\s+&|^##\s+Prerequisites\s+and\b/i.test(
+      normalized
+    ),
+    hasTroubleshooting: /^##\s+Troubleshooting\b|^##\s+Troubleshooting\s+Guide\b|^##\s+Troubleshooting\s+Common\b/im.test(
+      normalized
+    )
+  };
 }
 
 export function inferHookTrigger(text = "") {
@@ -290,7 +303,9 @@ export function inferStructuredFields(data, body, category) {
         : installCommand || "";
 
   const copySnippet =
-    category === "agents" || category === "rules"
+    category === "guides" || category === "collections"
+      ? ""
+      : category === "agents" || category === "rules"
       ? String(body || "").trim()
       : data.copySnippet
         ? String(data.copySnippet)
@@ -453,4 +468,4 @@ export function orderFrontmatter(data) {
   return ordered;
 }
 
-export { DEFAULT_REPO_URL };
+export { DEFAULT_DIRECTORY_REPO_URL };

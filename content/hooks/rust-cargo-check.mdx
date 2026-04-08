@@ -2,92 +2,7 @@
 title: Rust Cargo Check - Hooks
 slug: rust-cargo-check
 category: hooks
-description: >-
-  Automatically runs cargo check and clippy when Rust files are modified. This
-  PostToolUse hook provides comprehensive Rust code validation with fast
-  compilation checking including cargo check integration (cargo check command
-  execution with fast compilation validation, incremental compilation with
-  target directory caching, compilation error detection with detailed error
-  reporting, compilation warning detection with warning messages), compilation
-  optimization (incremental compilation optimization with caching, parallel
-  compilation with job scheduling, compilation performance with build
-  optimization, compilation caching with target directory), compilation
-  validation (compilation syntax validation, compilation type checking,
-  compilation borrow checking, compilation lifetime checking), and compilation
-  reporting (compilation error reporting with detailed errors, compilation
-  warning reporting with warnings, compilation success reporting with success
-  messages, compilation statistics with build statistics), code linting with
-  clippy including clippy integration (clippy command execution with
-  comprehensive linting, clippy rule enforcement with configurable rules, clippy
-  warning detection with detailed warnings, clippy suggestion detection with
-  code suggestions), clippy configuration (clippy rule configuration with
-  clippy.toml, clippy allow/deny attributes with code annotations, clippy lint
-  groups with pedantic/nursery/cargo, clippy custom rules with custom lints),
-  clippy analysis (clippy code analysis with comprehensive checking, clippy
-  pattern detection with common patterns, clippy optimization suggestions with
-  performance tips, clippy best practices with Rust idioms), and clippy
-  reporting (clippy warning reporting with detailed warnings, clippy suggestion
-  reporting with code suggestions, clippy error reporting with errors, clippy
-  statistics with lint statistics), Rust best practices enforcement including
-  best practices (Rust best practices enforcement with clippy, Rust idiom
-  enforcement with idiomatic code, Rust style enforcement with consistent style,
-  Rust pattern enforcement with common patterns), code quality (Rust code
-  quality checking with quality metrics, Rust code maintainability with
-  maintainable code, Rust code readability with readable code, Rust code safety
-  with safe code), performance optimization (Rust performance optimization with
-  performance tips, Rust memory optimization with efficient memory, Rust
-  algorithm optimization with efficient algorithms, Rust resource optimization
-  with efficient resources), and Rust standards (Rust coding standards with
-  standard practices, Rust documentation standards with documentation, Rust
-  testing standards with testing practices, Rust error handling standards with
-  error handling), dependency validation including dependency checking
-  (Cargo.toml dependency validation, dependency version checking with version
-  constraints, dependency compatibility checking with compatibility validation,
-  dependency security checking with security audits), dependency management
-  (dependency resolution with Cargo resolver, dependency update checking with
-  outdated dependencies, dependency conflict detection with conflict resolution,
-  dependency optimization with dependency optimization), dependency security
-  (dependency vulnerability scanning with cargo-audit, dependency license
-  checking with license validation, dependency supply chain security with supply
-  chain validation, dependency update recommendations with update suggestions),
-  and dependency reporting (dependency validation reporting with validation
-  results, dependency security reporting with security issues, dependency update
-  reporting with update recommendations, dependency statistics with dependency
-  metrics), performance optimization suggestions including performance analysis
-  (Rust performance analysis with performance profiling, Rust performance
-  bottlenecks with bottleneck detection, Rust performance optimization with
-  optimization suggestions, Rust performance benchmarking with benchmarking),
-  optimization suggestions (Rust optimization suggestions with performance tips,
-  Rust memory optimization with memory efficiency, Rust algorithm optimization
-  with algorithm efficiency, Rust resource optimization with resource
-  efficiency), performance monitoring (Rust performance monitoring with
-  performance metrics, Rust performance tracking with performance tracking, Rust
-  performance regression detection with regression detection, Rust performance
-  reporting with performance reports), and performance best practices (Rust
-  performance best practices with performance guidelines, Rust memory best
-  practices with memory guidelines, Rust concurrency best practices with
-  concurrency guidelines, Rust I/O best practices with I/O guidelines), and
-  security vulnerability detection including security scanning (Rust security
-  vulnerability scanning with cargo-audit, Rust dependency vulnerability
-  detection with vulnerability scanning, Rust code vulnerability detection with
-  code analysis, Rust supply chain security with supply chain validation),
-  security analysis (Rust security analysis with comprehensive analysis, Rust
-  vulnerability assessment with vulnerability assessment, Rust security
-  recommendations with security suggestions, Rust security best practices with
-  security guidelines), security reporting (Rust security reporting with
-  security reports, Rust vulnerability reporting with vulnerability reports,
-  Rust security recommendations with security suggestions, Rust security
-  statistics with security metrics), and security best practices (Rust security
-  best practices with security guidelines, Rust memory safety with memory
-  safety, Rust concurrency safety with concurrency safety, Rust I/O safety with
-  I/O safety). The hook automatically detects Rust file changes (.rs files,
-  Cargo.toml, Cargo.lock), runs cargo check for fast compilation validation
-  (cargo check --message-format=short), runs clippy for code linting (cargo
-  clippy with pedantic/nursery warnings), checks code formatting with rustfmt
-  (cargo fmt --check), runs security audit with cargo-audit (cargo audit),
-  provides project analysis (Rust file count, test file count, dependency count,
-  unsafe block detection), and integrates seamlessly with Rust development
-  workflow.
+description: Automatically runs cargo check and clippy when Rust files are modified.
 cardDescription: Automatically runs cargo check and clippy when Rust files are modified.
 seoTitle: Rust Cargo Check - Hooks
 seoDescription: >-
@@ -97,7 +12,6 @@ seoDescription: >-
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-09-19'
-repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/rust-cargo-check.sh && chmod +x

@@ -5,22 +5,7 @@ category: hooks
 description: >-
   Closes all database connections and cleans up resources when Claude Code
   session ends using PostgreSQL pg_terminate_backend, MySQL KILL, MongoDB
-  connection management, and Redis CLIENT KILL commands. This hook runs on
-  session stop and automatically identifies active database connections,
-  terminates idle connections exceeding timeout thresholds, monitors connection
-  counts, and reports resource usage. Features include automatic database
-  connection cleanup on session end using Stop hook with intelligent connection
-  detection, multi-database support for PostgreSQL 17+, MySQL 8.0+, MongoDB 7.0+
-  (mongosh), and Redis 7.0+ with automatic database type detection, idle
-  connection termination for PostgreSQL using pg_terminate_backend with
-  configurable timeout thresholds (default: 5 minutes), connection monitoring
-  and reporting showing active, idle, and total connection counts for each
-  database type, safe cleanup with error handling preventing accidental
-  termination of critical connections, resource leak prevention automatically
-  closing orphaned connections and cleaning up connection pools, connection
-  string detection from environment variables (.env files) for automatic
-  database discovery, and detailed reporting with connection statistics and
-  cleanup results for each database type.
+  connection management, and Redis CLIENT KILL commands.
 cardDescription: >-
   Closes all database connections and cleans up resources when Claude Code
   session ends using PostgreSQL pg_terminate_backend, MySQL KILL,...
@@ -32,7 +17,6 @@ seoDescription: >-
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-09-19'
-repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/database-connection-cleanup.sh

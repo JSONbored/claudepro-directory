@@ -9,6 +9,7 @@ import {
   extractHeadings,
   extractSections,
   headingId,
+  inferSectionBooleans,
   inferStructuredFields,
   normalizeBody,
   stripCodeBlocks
@@ -20,8 +21,6 @@ const contentRoot = path.join(repoRoot, "content");
 const generatedDir = path.join(repoRoot, "apps/web/src/generated");
 const outputFile = path.join(generatedDir, "content-index.json");
 const downloadsDir = path.join(repoRoot, "apps/web/public/downloads/skills");
-const defaultRepoUrl = "https://github.com/JSONbored/claudepro-directory";
-
 const categories = fs
   .readdirSync(contentRoot, { withFileTypes: true })
   .filter((entry) => entry.isDirectory() && entry.name !== "data")
@@ -155,7 +154,8 @@ async function main() {
       const codeBlocks = extractCodeBlocks(body);
       const sections = extractSections(body);
       const inferred = inferStructuredFields(data, body, category);
-      const repoUrl = inferred.repoUrl ? String(inferred.repoUrl) : defaultRepoUrl;
+      const sectionFlags = inferSectionBooleans(body);
+      const repoUrl = inferred.repoUrl ? String(inferred.repoUrl) : "";
       const githubRepo = parseGitHubRepo(repoUrl);
 
       if (githubRepo) {
@@ -182,6 +182,8 @@ async function main() {
         copyCount: typeof data.copyCount === "number" ? data.copyCount : undefined,
         popularityScore:
           typeof data.popularityScore === "number" ? data.popularityScore : undefined,
+        difficultyScore:
+          typeof data.difficultyScore === "number" ? data.difficultyScore : undefined,
         documentationUrl: data.documentationUrl
           ? String(data.documentationUrl)
           : undefined,
@@ -217,6 +219,22 @@ async function main() {
         prerequisites: Array.isArray(data.prerequisites)
           ? data.prerequisites.map(String)
           : undefined,
+        hasPrerequisites:
+          typeof data.hasPrerequisites === "boolean"
+            ? data.hasPrerequisites
+            : sectionFlags.hasPrerequisites,
+        hasTroubleshooting:
+          typeof data.hasTroubleshooting === "boolean"
+            ? data.hasTroubleshooting
+            : sectionFlags.hasTroubleshooting,
+        hasBreakingChanges:
+          typeof data.hasBreakingChanges === "boolean"
+            ? data.hasBreakingChanges
+            : undefined,
+        robotsIndex:
+          typeof data.robotsIndex === "boolean" ? data.robotsIndex : undefined,
+        robotsFollow:
+          typeof data.robotsFollow === "boolean" ? data.robotsFollow : undefined,
         downloadUrl: normalizeDownloadUrl(
           data.downloadUrl ? String(data.downloadUrl) : ""
         ),

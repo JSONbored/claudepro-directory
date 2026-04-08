@@ -5,21 +5,7 @@ category: hooks
 description: >-
   Performs a comprehensive security audit of all dependencies when Claude Code
   session ends using npm audit (npm 10.x+), yarn audit (Yarn 4.x+), pip-audit
-  2.7.x+, safety, bundler-audit, and OWASP dep-scan. This Stop hook
-  automatically detects package managers, runs security vulnerability scans,
-  identifies outdated packages, generates detailed audit reports, and provides
-  remediation recommendations. Features include comprehensive security audit for
-  multiple package managers (npm, Yarn, pnpm, pip, Poetry, bundler) with
-  automatic detection, support for NPM 10.x+, Yarn 4.x+, Python (pip-audit
-  2.7.x+, safety), and Ruby (bundler-audit) dependency scanning, vulnerability
-  detection with severity levels (critical, high, moderate, low) and CVSS
-  scores, outdated package identification showing current vs latest versions
-  with update recommendations, detailed audit report generation with timestamped
-  logs and vulnerability details, integration with popular security tools (npm
-  audit, pip-audit, safety, bundler-audit, OWASP dep-scan), SBOM (Software Bill
-  of Materials) generation support for compliance and supply chain security, and
-  automated remediation suggestions with fix commands and version
-  recommendations.
+  2.7.x+, safety, bundler-audit, and OWASP dep-scan.
 cardDescription: >-
   Performs a comprehensive security audit of all dependencies when Claude Code
   session ends using npm audit (npm 10.x+), yarn audit (Yarn 4...
@@ -31,7 +17,6 @@ seoDescription: >-
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-09-19'
-repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch

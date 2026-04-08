@@ -4,25 +4,7 @@ slug: jest-snapshot-auto-updater
 category: hooks
 description: >-
   Automatically updates Jest snapshots when component files are modified
-  significantly. This PostToolUse hook provides comprehensive Jest snapshot
-  management with intelligent Jest snapshot detection and updating for modified
-  components with automatic snapshot file discovery in __snapshots__
-  directories, test file detection using pattern matching (.test.*, .spec.*),
-  and component-to-test mapping, multi-framework support (React, Vue, Angular,
-  vanilla JS) with framework-specific test file detection, snapshot change
-  analysis and impact assessment with git diff analysis to detect significant
-  changes (configurable threshold), test suite validation before snapshot
-  updates with test execution and failure detection, orphaned snapshot cleanup
-  and maintenance with automatic orphaned snapshot detection, interactive
-  confirmation for significant snapshot changes with change threshold
-  configuration, test coverage analysis and reporting with coverage metrics, and
-  parallel test execution optimization for large codebases with --maxWorkers
-  configuration. The hook automatically detects component files (.jsx, .tsx,
-  .js, .ts, .vue, .component.ts), finds related test files and snapshot files,
-  analyzes component changes using git diff, runs tests to detect snapshot
-  mismatches, updates snapshots when needed using --updateSnapshot flag, and
-  provides comprehensive snapshot management reports with actionable
-  recommendations.
+  significantly.
 cardDescription: >-
   Automatically updates Jest snapshots when component files are modified
   significantly.
@@ -34,7 +16,6 @@ seoDescription: >-
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-09-19'
-repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/jest-snapshot-auto-updater.sh &&

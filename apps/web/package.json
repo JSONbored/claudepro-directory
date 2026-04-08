@@ -8,10 +8,13 @@
     "prebuild": "node ../../scripts/build-content-index.mjs",
     "pretype-check": "node ../../scripts/build-content-index.mjs && next typegen",
     "prepreview": "node ../../scripts/build-content-index.mjs",
+    "predeploy": "node ../../scripts/build-content-index.mjs",
     "dev": "next dev",
     "build": "next build",
     "type-check": "tsc --noEmit",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv worker-configuration.d.ts",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

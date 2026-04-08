@@ -4,33 +4,7 @@ slug: json-schema-validator
 category: hooks
 description: >-
   Validates JSON files against their schemas when modified to ensure data
-  integrity. This PostToolUse hook provides comprehensive JSON schema validation
-  with comprehensive JSON schema validation using AJV (Another JSON Schema
-  Validator) and multiple validators including AJV CLI for command-line
-  validation, jq for basic JSON syntax validation, Python json module for
-  fallback validation, and custom validation rule support, intelligent schema
-  discovery with multiple search strategies including same directory with
-  .schema.json suffix, schema/ subdirectory search, root-level schema
-  directories (./schema/, ./schemas/, ./json-schemas/), common schema file
-  names, and embedded $schema property detection, JSON syntax validation and
-  format verification with jq validation, Python json module fallback, JSON
-  structure analysis (object keys, array length), and JSON type detection,
-  schema version compatibility checking and migration guidance with JSON Schema
-  draft version detection (draft-07, draft-06, draft-04), schema version
-  reporting, and compatibility recommendations, custom validation rule support
-  and error reporting with AJV validation error reporting, required property
-  checking, and detailed error location reporting, JSON-LD and specialized
-  format validation with JSON-LD context detection, GeoJSON format detection,
-  package.json format validation, and tsconfig.json format validation,
-  performance optimization for large JSON files with file size checking
-  (warnings for files >10MB), nesting depth analysis, and optimization
-  recommendations, and detailed error location and suggestion reporting with
-  line number reporting, property path reporting, and actionable error messages.
-  The hook automatically detects JSON files (excluding schema files), validates
-  JSON syntax, discovers schema files using multiple strategies, validates
-  against schemas using AJV, performs format-specific validation (JSON-LD,
-  GeoJSON, package.json, tsconfig.json), checks security and best practices, and
-  provides comprehensive validation reports with actionable recommendations.
+  integrity.
 cardDescription: >-
   Validates JSON files against their schemas when modified to ensure data
   integrity.
@@ -42,7 +16,6 @@ seoDescription: >-
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-09-19'
-repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/json-schema-validator.sh &&

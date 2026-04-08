@@ -5,19 +5,8 @@ category: hooks
 description: >-
   Detects unused CSS selectors when stylesheets are modified to keep CSS lean
   using PurgeCSS, PostCSS, and content analysis. This hook runs on CSS/SCSS file
-  write/edit operations and automatically analyzes stylesheets to identify
-  unused selectors, generate optimized CSS output, and provide before/after
-  comparison metrics. Features include automatic unused CSS selector detection
-  with PurgeCSS ^6.0.0+ for comprehensive content scanning, support for CSS,
-  SCSS, SASS, and modern CSS frameworks (Tailwind CSS, Bootstrap, Material UI),
-  content analysis across HTML, JS, JSX, TS, TSX, Vue, and Svelte files using
-  multiple content path patterns, before/after comparison with line count
-  reduction and byte size savings calculation, optimized CSS output generation
-  with safelist support for critical framework classes, integration with modern
-  build workflows supporting Vite, Webpack, Rollup, and PostCSS pipelines,
-  safelist configuration to protect dynamically-generated classes and framework
-  utilities, and detailed reporting with percentage reduction metrics and file
-  size savings.
+  write/edit operations and analyzes stylesheets to identify unused selectors,
+  generate optimized output, and report before/after size metrics.
 cardDescription: >-
   Detects unused CSS selectors when stylesheets are modified to keep CSS lean
   using PurgeCSS, PostCSS, and content analysis.
@@ -29,7 +18,6 @@ seoDescription: >-
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-09-19'
-repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/css-unused-selector-detector.sh

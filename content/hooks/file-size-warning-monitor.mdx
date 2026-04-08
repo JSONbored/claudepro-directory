@@ -7,20 +7,7 @@ description: >-
   PostToolUse hook provides comprehensive file size monitoring when files are
   created or modified, automatically detecting files that exceed recommended
   size thresholds for different file types and providing optimization
-  suggestions. Features include real-time file size monitoring during write/edit
-  operations with automatic file size detection across platforms, configurable
-  size thresholds for different file types (source code 500KB, images 2MB,
-  videos 50MB, JSON 1MB) with environment variable overrides, file type-specific
-  recommendations (images, JSON, code, etc.) with optimization suggestions for
-  each file type, performance impact warnings for large files with impact
-  assessment (high/medium/low), Git repository size impact analysis with size
-  change tracking and Git LFS recommendations, compression suggestions for media
-  files including JPEG optimization, WebP format, and video compression, size
-  comparison with previous versions using Git history to track file size growth,
-  and multi-platform file size detection (macOS, Linux, Windows) with
-  cross-platform stat command compatibility. The hook automatically detects file
-  types and provides appropriate optimization suggestions, helping maintain
-  optimal file sizes for performance and repository health.
+  suggestions.
 cardDescription: Alerts when files exceed size thresholds that could impact performance.
 seoTitle: File Size Warning Monitor - Hooks
 seoDescription: >-
@@ -30,7 +17,6 @@ seoDescription: >-
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-09-19'
-repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/file-size-warning-monitor.sh &&

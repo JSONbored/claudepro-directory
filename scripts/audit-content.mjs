@@ -5,6 +5,8 @@ import matter from "gray-matter";
 
 import {
   CATEGORY_SCHEMAS,
+  DEFAULT_DIRECTORY_REPO_URL,
+  inferSectionBooleans,
   inferStructuredFields,
   normalizeBody,
   validateEntry
@@ -29,6 +31,44 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
     const normalizedBody = normalizeBody(parsed.content, category);
     const inferred = inferStructuredFields(parsed.data, normalizedBody, category);
     const validation = validateEntry(category, parsed.data, inferred);
+    const sectionFlags = inferSectionBooleans(normalizedBody);
+    const issues = [];
+
+    if (parsed.data.repoUrl === DEFAULT_DIRECTORY_REPO_URL) {
+      issues.push("uses_default_directory_repo_url");
+    }
+
+    if (String(parsed.data.description ?? "").trim().length > 320) {
+      issues.push("description_too_long");
+    }
+
+    if (parsed.data.category && String(parsed.data.category).trim() !== category) {
+      issues.push("category_mismatch");
+    }
+
+    if (
+      category === "guides" &&
+      parsed.data.copySnippet &&
+      String(parsed.data.copySnippet).trim()
+    ) {
+      issues.push("guide_copy_snippet_present");
+    }
+
+    if (
+      category === "collections" &&
+      parsed.data.copySnippet &&
+      String(parsed.data.copySnippet).trim()
+    ) {
+      issues.push("collection_copy_snippet_present");
+    }
+
+    if (parsed.data.hasPrerequisites === false && sectionFlags.hasPrerequisites) {
+      issues.push("hasPrerequisites_false_but_section_exists");
+    }
+
+    if (parsed.data.hasTroubleshooting === false && sectionFlags.hasTroubleshooting) {
+      issues.push("hasTroubleshooting_false_but_section_exists");
+    }
 
     report.push({
       category,
@@ -36,7 +76,8 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       slug: String(parsed.data.slug ?? fileName.replace(/\.mdx$/, "")),
       metadataOnly: !normalizedBody.trim(),
       missingRequired: validation.missingRequired,
-      missingRecommended: validation.missingRecommended
+      missingRecommended: validation.missingRecommended,
+      issues
     });
   }
 }
@@ -46,8 +87,10 @@ fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
 const requiredIssues = report.filter((item) => item.missingRequired.length > 0).length;
 const recommendedIssues = report.filter((item) => item.missingRecommended.length > 0).length;
 const metadataOnly = report.filter((item) => item.metadataOnly).length;
+const semanticIssues = report.filter((item) => item.issues.length > 0).length;
 
 console.log(`Wrote ${path.relative(repoRoot, reportPath)}`);
 console.log(`Entries with missing required fields: ${requiredIssues}`);
 console.log(`Entries with missing recommended fields: ${recommendedIssues}`);
 console.log(`Metadata-only entries: ${metadataOnly}`);
+console.log(`Entries with semantic issues: ${semanticIssues}`);

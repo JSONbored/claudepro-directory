@@ -4,23 +4,7 @@ slug: go-module-tidy
 category: hooks
 description: >-
   Automatically runs go mod tidy when Go files or go.mod are modified to keep
-  dependencies clean. This PostToolUse hook provides comprehensive Go module
-  management with automatic go mod tidy execution for Go file and go.mod changes
-  with automatic module root detection and dependency cleanup, Go vet
-  integration for static analysis and error detection with comprehensive code
-  quality checking, module dependency validation and inconsistency detection
-  with go.mod syntax validation and build verification, unused dependency
-  cleanup and missing import resolution with automatic dependency addition and
-  removal, Go workspace and multi-module project support with go.work file
-  detection and workspace synchronization, dependency vulnerability scanning
-  with go list and govulncheck integration for security checking, module cache
-  optimization and cleanup suggestions with dependency count analysis and cache
-  management recommendations, and build constraint and Go version compatibility
-  checking with Go version detection and compatibility validation. The hook
-  automatically detects Go module roots, runs go mod tidy to clean dependencies,
-  verifies go.sum checksums, scans for vulnerabilities, runs go vet for code
-  quality, checks formatting with gofmt, and provides comprehensive module
-  maintenance reports with actionable recommendations.
+  dependencies clean.
 cardDescription: >-
   Automatically runs go mod tidy when Go files or go.mod are modified to keep
   dependencies clean.
@@ -32,7 +16,6 @@ seoDescription: >-
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-09-19'
-repoUrl: 'https://github.com/JSONbored/claudepro-directory'
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/go-module-tidy.sh && chmod +x

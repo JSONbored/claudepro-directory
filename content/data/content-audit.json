@@ -5,7 +5,8 @@
     "slug": "agent-skills-framework-engineer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -13,7 +14,8 @@
     "slug": "ai-code-review-security-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -21,7 +23,8 @@
     "slug": "ai-devops-automation-engineer-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -29,7 +32,8 @@
     "slug": "api-builder-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -37,7 +41,8 @@
     "slug": "autogen-conversation-agent-builder",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -45,7 +50,8 @@
     "slug": "backend-architect-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -53,7 +59,8 @@
     "slug": "claude-haiku-45-speed-optimizer-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -61,7 +68,8 @@
     "slug": "claude-mcp-skills-integration-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -69,7 +77,8 @@
     "slug": "claude-md-knowledge-manager-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -77,7 +86,8 @@
     "slug": "cloud-infrastructure-architect-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -85,7 +95,8 @@
     "slug": "code-reviewer-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -93,7 +104,8 @@
     "slug": "codebase-migration-refactoring-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -101,7 +113,8 @@
     "slug": "context-window-optimizer-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -109,7 +122,8 @@
     "slug": "data-pipeline-engineering-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -117,7 +131,8 @@
     "slug": "database-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -125,7 +140,8 @@
     "slug": "database-specialist-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -133,7 +149,8 @@
     "slug": "debugging-assistant-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -141,7 +158,8 @@
     "slug": "devops-sre-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -149,7 +167,8 @@
     "slug": "domain-specialist-ai-agents",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -157,7 +176,8 @@
     "slug": "extended-thinking-orchestrator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -165,7 +185,8 @@
     "slug": "frontend-specialist-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -173,7 +194,8 @@
     "slug": "full-stack-ai-development-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -181,7 +203,8 @@
     "slug": "github-copilot-interop-bridge",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -189,7 +212,8 @@
     "slug": "life-sciences-research-specialist",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -197,7 +221,8 @@
     "slug": "multi-agent-orchestration-specialist",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -205,7 +230,8 @@
     "slug": "parallel-subagent-distributor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -213,7 +239,8 @@
     "slug": "performance-optimizer-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -221,7 +248,8 @@
     "slug": "plugin-ecosystem-architect",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -229,7 +257,8 @@
     "slug": "product-management-ai-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -237,7 +266,8 @@
     "slug": "production-reliability-engineer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -245,7 +275,8 @@
     "slug": "prompt-optimization-specialist",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -253,7 +284,8 @@
     "slug": "semantic-kernel-enterprise-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -261,7 +293,8 @@
     "slug": "slash-command-orchestrator-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -269,7 +302,8 @@
     "slug": "subagent-factory-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -277,7 +311,8 @@
     "slug": "technical-documentation-writer-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -285,7 +320,8 @@
     "slug": "test-automation-engineer-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -293,7 +329,8 @@
     "slug": "token-cost-budget-optimizer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -301,7 +338,8 @@
     "slug": "ui-ux-design-expert-agent",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "agents",
@@ -309,7 +347,8 @@
     "slug": "web-async-agent-coordinator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "collections",
@@ -317,7 +356,8 @@
     "slug": "api-development-starter-kit",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "collections",
@@ -325,7 +365,8 @@
     "slug": "aws-cloud-infrastructure-bundle",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "collections",
@@ -333,7 +374,8 @@
     "slug": "backend-development-suite",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "collections",
@@ -341,7 +383,8 @@
     "slug": "code-quality-toolkit",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "collections",
@@ -349,7 +392,8 @@
     "slug": "content-creation-workflow",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "collections",
@@ -357,7 +401,8 @@
     "slug": "data-engineering-suite",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "collections",
@@ -365,7 +410,8 @@
     "slug": "debugging-troubleshooting-system",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "collections",
@@ -373,7 +419,8 @@
     "slug": "developer-productivity-booster",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "collections",
@@ -381,7 +428,8 @@
     "slug": "production-readiness-toolkit",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -389,7 +437,8 @@
     "slug": "autogen-workflow",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -397,7 +446,8 @@
     "slug": "checkpoint-manager",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -405,7 +455,8 @@
     "slug": "claudemd-builder",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -413,7 +464,8 @@
     "slug": "context-analyzer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -421,7 +473,8 @@
     "slug": "cursor-rules",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -429,7 +482,8 @@
     "slug": "debug",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -437,7 +491,8 @@
     "slug": "docs",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -445,7 +500,8 @@
     "slug": "explain",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -453,7 +509,8 @@
     "slug": "generate-tests",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -461,7 +518,8 @@
     "slug": "git-smart-commit",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -469,7 +527,8 @@
     "slug": "hooks-generator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -477,7 +536,8 @@
     "slug": "mcp-setup",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -485,7 +545,8 @@
     "slug": "mintlify-docs",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -493,7 +554,8 @@
     "slug": "optimize",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -501,7 +563,8 @@
     "slug": "plan-mode",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -509,7 +572,8 @@
     "slug": "refactor-code",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -517,7 +581,8 @@
     "slug": "refactor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -525,7 +590,8 @@
     "slug": "review",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -533,7 +599,8 @@
     "slug": "security-audit",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -541,7 +608,8 @@
     "slug": "security",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -549,7 +617,8 @@
     "slug": "skills-installer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -557,7 +626,8 @@
     "slug": "slash-command-gen",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -565,7 +635,8 @@
     "slug": "subagent-create",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -573,7 +644,8 @@
     "slug": "tdd-workflow",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -581,7 +653,8 @@
     "slug": "test-advanced",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -589,7 +662,8 @@
     "slug": "v0-generate",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "commands",
@@ -597,7 +671,8 @@
     "slug": "zod-audit",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -605,7 +680,8 @@
     "slug": "build-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -613,7 +689,8 @@
     "slug": "business-process-automation",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -621,7 +698,8 @@
     "slug": "chatgpt-migration-guide",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -629,7 +707,8 @@
     "slug": "claude-4-extended-thinking-tutorial",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -637,7 +716,8 @@
     "slug": "claude-agent-development-framework",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -645,7 +725,8 @@
     "slug": "claude-mcp-server-setup-guide",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -653,7 +734,8 @@
     "slug": "claude-rate-limits-fix",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -661,7 +743,8 @@
     "slug": "claude-vs-codewhisperer-gemini",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -669,7 +752,8 @@
     "slug": "claude-vs-copilot-python",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -677,7 +761,8 @@
     "slug": "claude-vs-cursor-codeium",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -685,7 +770,8 @@
     "slug": "financial-services-guide",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -693,7 +779,8 @@
     "slug": "fix-environment-variables",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -701,7 +788,8 @@
     "slug": "fix-installation-errors",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -709,7 +797,8 @@
     "slug": "fix-mcp-connection-errors",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -717,7 +806,8 @@
     "slug": "fix-memory-leak-performance",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -725,7 +815,8 @@
     "slug": "healthcare-hipaa-guide",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -733,7 +824,8 @@
     "slug": "migration-workflow-guide",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -741,7 +833,8 @@
     "slug": "multi-directory-setup",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "guides",
@@ -749,7 +842,8 @@
     "slug": "wsl-setup-guide",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -757,7 +851,8 @@
     "slug": "accessibility-checker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -765,7 +860,8 @@
     "slug": "api-endpoint-documentation-generator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -773,7 +869,8 @@
     "slug": "auto-code-formatter-hook",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -781,7 +878,8 @@
     "slug": "auto-save-backup",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -789,7 +887,8 @@
     "slug": "aws-cloudformation-validator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -797,7 +896,8 @@
     "slug": "cloud-backup-on-session-stop",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -805,7 +905,8 @@
     "slug": "code-complexity-alert-monitor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -813,7 +914,8 @@
     "slug": "code-test-runner-hook",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -821,7 +923,8 @@
     "slug": "css-unused-selector-detector",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -829,7 +932,8 @@
     "slug": "database-connection-cleanup",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -837,7 +941,8 @@
     "slug": "database-migration-runner",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -845,7 +950,8 @@
     "slug": "database-query-performance-logger",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -853,7 +959,8 @@
     "slug": "dead-code-eliminator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -861,7 +968,8 @@
     "slug": "dependency-security-audit-on-stop",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -869,7 +977,8 @@
     "slug": "dependency-security-scanner",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -877,7 +986,8 @@
     "slug": "dependency-update-checker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -885,7 +995,8 @@
     "slug": "discord-activity-notifier",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -893,7 +1004,8 @@
     "slug": "docker-container-auto-rebuild",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -901,7 +1013,8 @@
     "slug": "docker-image-security-scanner",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -909,7 +1022,8 @@
     "slug": "documentation-auto-generator-on-stop",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -917,7 +1031,8 @@
     "slug": "documentation-coverage-checker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -925,7 +1040,8 @@
     "slug": "documentation-generator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -933,7 +1049,8 @@
     "slug": "environment-cleanup-handler",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -941,7 +1058,8 @@
     "slug": "environment-variable-validator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -949,7 +1067,8 @@
     "slug": "error-rate-monitor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -957,7 +1076,8 @@
     "slug": "file-size-warning-monitor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -965,7 +1085,8 @@
     "slug": "final-bundle-size-reporter",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -973,7 +1094,8 @@
     "slug": "git-auto-commit-on-stop",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -981,7 +1103,8 @@
     "slug": "git-branch-protection",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -989,7 +1112,8 @@
     "slug": "git-pre-commit-validator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -997,7 +1121,8 @@
     "slug": "github-actions-workflow-validator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1005,7 +1130,8 @@
     "slug": "go-module-tidy",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1013,7 +1139,8 @@
     "slug": "graphql-schema-validator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1021,7 +1148,8 @@
     "slug": "i18n-translation-validator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1029,7 +1157,8 @@
     "slug": "jest-snapshot-auto-updater",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1037,7 +1166,8 @@
     "slug": "json-schema-validator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1045,7 +1175,8 @@
     "slug": "kubernetes-manifest-validator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1053,7 +1184,8 @@
     "slug": "markdown-link-checker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1061,7 +1193,8 @@
     "slug": "memory-usage-monitor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1069,7 +1202,8 @@
     "slug": "nextjs-route-analyzer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1077,7 +1211,8 @@
     "slug": "package-vulnerability-scanner",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1085,7 +1220,8 @@
     "slug": "performance-benchmark-report",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1093,7 +1229,8 @@
     "slug": "performance-impact-monitor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1101,7 +1238,8 @@
     "slug": "performance-monitor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1109,7 +1247,8 @@
     "slug": "playwright-test-runner",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1117,7 +1256,8 @@
     "slug": "prisma-schema-sync",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1125,7 +1265,8 @@
     "slug": "python-import-optimizer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1133,7 +1274,8 @@
     "slug": "python-linter-integration",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1141,7 +1283,8 @@
     "slug": "react-component-test-generator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1149,7 +1292,8 @@
     "slug": "real-time-activity-tracker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1157,7 +1301,8 @@
     "slug": "redis-cache-invalidator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1165,7 +1310,8 @@
     "slug": "rust-cargo-check",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1173,7 +1319,8 @@
     "slug": "scss-auto-compiler",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1181,7 +1328,8 @@
     "slug": "security-scanner-hook",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1189,7 +1337,8 @@
     "slug": "sensitive-data-alert-scanner",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1197,7 +1346,8 @@
     "slug": "session-metrics-collector",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1205,7 +1355,8 @@
     "slug": "slack-progress-notifier",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1213,7 +1364,8 @@
     "slug": "svelte-component-compiler",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1221,7 +1373,8 @@
     "slug": "team-summary-email-generator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1229,7 +1382,8 @@
     "slug": "terraform-plan-executor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1237,7 +1391,8 @@
     "slug": "test-coverage-final-report",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1245,7 +1400,8 @@
     "slug": "test-runner-hook",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1253,7 +1409,8 @@
     "slug": "typescript-compilation-checker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1261,7 +1418,8 @@
     "slug": "vue-composition-api-linter",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1269,7 +1427,8 @@
     "slug": "webpack-bundle-analyzer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "hooks",
@@ -1277,7 +1436,8 @@
     "slug": "workflow-completion-report",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1285,7 +1445,8 @@
     "slug": "airtable-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1293,7 +1454,8 @@
     "slug": "asana-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1301,7 +1463,8 @@
     "slug": "aws-services-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1309,7 +1472,8 @@
     "slug": "box-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1317,7 +1481,8 @@
     "slug": "canva-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1325,7 +1490,8 @@
     "slug": "clickup-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1333,7 +1499,8 @@
     "slug": "cloudflare-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1341,7 +1508,8 @@
     "slug": "cloudinary-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1349,7 +1517,8 @@
     "slug": "daloopa-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1357,7 +1526,8 @@
     "slug": "desktop-mcp-setup",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1365,7 +1535,8 @@
     "slug": "discord-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1373,7 +1544,8 @@
     "slug": "docker-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1381,7 +1553,8 @@
     "slug": "figma-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1389,7 +1562,8 @@
     "slug": "filesystem-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1397,7 +1571,8 @@
     "slug": "fireflies-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1405,7 +1580,8 @@
     "slug": "git-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1413,7 +1589,8 @@
     "slug": "github-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1421,7 +1598,8 @@
     "slug": "heyclaude-mcp",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1429,7 +1607,8 @@
     "slug": "hubspot-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1437,7 +1616,8 @@
     "slug": "hugging-face-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1445,7 +1625,8 @@
     "slug": "intercom-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1453,7 +1634,8 @@
     "slug": "invideo-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1461,7 +1643,8 @@
     "slug": "jam-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1469,7 +1652,8 @@
     "slug": "jira-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1477,7 +1661,8 @@
     "slug": "kubernetes-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1485,7 +1670,8 @@
     "slug": "linear-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1493,7 +1679,8 @@
     "slug": "monday-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1501,7 +1688,8 @@
     "slug": "netlify-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1509,7 +1697,8 @@
     "slug": "notion-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1517,7 +1706,8 @@
     "slug": "paypal-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1525,7 +1715,8 @@
     "slug": "plaid-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1533,7 +1724,8 @@
     "slug": "postgresql-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1541,7 +1733,8 @@
     "slug": "reddit-mcp-buddy",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1549,7 +1742,8 @@
     "slug": "redis-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1557,7 +1751,8 @@
     "slug": "sentry-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1565,7 +1760,8 @@
     "slug": "socket-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1573,7 +1769,8 @@
     "slug": "square-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1581,7 +1778,8 @@
     "slug": "stripe-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1589,7 +1787,8 @@
     "slug": "stytch-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1597,7 +1796,8 @@
     "slug": "vercel-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1605,7 +1805,8 @@
     "slug": "workato-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "mcp",
@@ -1613,7 +1814,8 @@
     "slug": "zapier-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1621,7 +1823,8 @@
     "slug": "ai-prompt-engineering-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1629,7 +1832,8 @@
     "slug": "api-design-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1637,7 +1841,8 @@
     "slug": "api-first-development-architect",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1645,7 +1850,8 @@
     "slug": "aws-cloud-architect",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1653,7 +1859,8 @@
     "slug": "biome-strict-linting-rules",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1661,7 +1868,8 @@
     "slug": "code-review-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1669,7 +1877,8 @@
     "slug": "go-golang-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1677,7 +1886,8 @@
     "slug": "golang-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1685,7 +1895,8 @@
     "slug": "graphql-federation-specialist",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1693,7 +1904,8 @@
     "slug": "kubernetes-devsecops-engineer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1701,7 +1913,8 @@
     "slug": "mobile-app-developer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1709,7 +1922,8 @@
     "slug": "mobile-app-development-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1717,7 +1931,8 @@
     "slug": "monorepo-workspace-manager",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1725,7 +1940,8 @@
     "slug": "nextjs-15-performance-architect",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1733,7 +1949,8 @@
     "slug": "production-codebase-auditor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1741,7 +1958,8 @@
     "slug": "python-data-science-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1749,7 +1967,8 @@
     "slug": "python-data-science",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1757,7 +1976,8 @@
     "slug": "react-19-concurrent-features-specialist",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1765,7 +1985,8 @@
     "slug": "react-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1773,7 +1994,8 @@
     "slug": "react-next-js-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1781,7 +2003,8 @@
     "slug": "react-server-components-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1789,7 +2012,8 @@
     "slug": "security-auditor-penetration-tester",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1797,7 +2021,8 @@
     "slug": "security-auditor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1805,7 +2030,8 @@
     "slug": "security-first-react-components",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1813,7 +2039,8 @@
     "slug": "terraform-infrastructure-architect",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1821,7 +2048,8 @@
     "slug": "test-driven-development-enforcer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1829,7 +2057,8 @@
     "slug": "typescript-5x-strict-mode-expert",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1837,7 +2066,8 @@
     "slug": "wcag-accessibility-auditor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "rules",
@@ -1845,7 +2075,8 @@
     "slug": "windsurf-ai-native-ide-patterns",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1853,7 +2084,8 @@
     "slug": "audio-transcription-summarization",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1861,7 +2093,8 @@
     "slug": "bun-runtime-modern-javascript",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1869,7 +2102,8 @@
     "slug": "cli-data-viz-quickstart",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1877,7 +2111,8 @@
     "slug": "cloudflare-workers-ai-edge",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1885,7 +2120,8 @@
     "slug": "csv-excel-data-wrangler",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1893,7 +2129,8 @@
     "slug": "cursor-windsurf-ai-ide-setup",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1901,7 +2138,8 @@
     "slug": "docx-report-generator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1909,7 +2147,8 @@
     "slug": "fastapi-python-backend",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1917,7 +2156,8 @@
     "slug": "github-actions-ai-cicd",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1925,7 +2165,8 @@
     "slug": "image-ocr-table-extraction",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1933,7 +2174,8 @@
     "slug": "json-schema-validation-transformation",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1941,7 +2183,8 @@
     "slug": "log-parsing-incident-timeline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1949,7 +2192,8 @@
     "slug": "markdown-knowledge-base-composer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1957,7 +2201,8 @@
     "slug": "mintlify-documentation-automation",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1965,7 +2210,8 @@
     "slug": "playwright-e2e-testing",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1973,7 +2219,8 @@
     "slug": "postgresql-query-optimization",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1981,7 +2228,8 @@
     "slug": "rest-api-client-harness",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1989,7 +2237,8 @@
     "slug": "supabase-realtime-database",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -1997,7 +2246,8 @@
     "slug": "svelte-sveltekit-fullstack",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -2005,7 +2255,8 @@
     "slug": "trpc-type-safe-api",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -2013,7 +2264,8 @@
     "slug": "v0-rapid-prototyping",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -2021,7 +2273,8 @@
     "slug": "vite-build-optimization",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -2029,7 +2282,8 @@
     "slug": "webassembly-module-development",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -2037,7 +2291,8 @@
     "slug": "website-crawler-summarizer",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -2045,7 +2300,8 @@
     "slug": "windsurf-collaborative-development",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "skills",
@@ -2053,7 +2309,8 @@
     "slug": "zod-schema-validator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2061,7 +2318,8 @@
     "slug": "accessibility-first-statusline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2069,7 +2327,8 @@
     "slug": "ai-model-performance-dashboard",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2077,7 +2336,8 @@
     "slug": "api-latency-breakdown",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2085,7 +2345,8 @@
     "slug": "block-timer-tracker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2093,7 +2354,8 @@
     "slug": "burn-rate-monitor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2101,7 +2363,8 @@
     "slug": "cache-efficiency-monitor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2109,7 +2372,8 @@
     "slug": "catppuccin-mocha-theme",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2117,7 +2381,8 @@
     "slug": "daily-usage-percentage-tracker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2125,7 +2390,8 @@
     "slug": "docker-health-statusline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2133,7 +2399,8 @@
     "slug": "five-hour-window-tracker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2141,7 +2408,8 @@
     "slug": "git-status-statusline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2149,7 +2417,8 @@
     "slug": "lines-per-minute-tracker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2157,7 +2426,8 @@
     "slug": "mcp-server-status-monitor",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2165,7 +2435,8 @@
     "slug": "minimal-powerline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2173,7 +2444,8 @@
     "slug": "model-switch-history-tracker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2181,7 +2453,8 @@
     "slug": "multi-line-statusline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2189,7 +2462,8 @@
     "slug": "multi-provider-token-counter",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2197,7 +2471,8 @@
     "slug": "multi-session-overlap-indicator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2205,7 +2480,8 @@
     "slug": "oh-my-zsh-robbyrussell",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2213,7 +2489,8 @@
     "slug": "python-rich-statusline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2221,7 +2498,8 @@
     "slug": "real-time-cost-tracker",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2229,7 +2507,8 @@
     "slug": "session-health-score",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2237,7 +2516,8 @@
     "slug": "session-timer-statusline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2245,7 +2525,8 @@
     "slug": "simple-text-statusline",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2253,7 +2534,8 @@
     "slug": "starship-powerline-theme",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   },
   {
     "category": "statuslines",
@@ -2261,6 +2543,7 @@
     "slug": "workspace-project-depth-indicator",
     "metadataOnly": false,
     "missingRequired": [],
-    "missingRecommended": []
+    "missingRecommended": [],
+    "issues": []
   }
 ]
