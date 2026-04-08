@@ -9,6 +9,7 @@ body:
     attributes:
       value: |
         Submit a reusable skill with practical install and usage details.
+        For community submissions, provide external source/release links rather than uploading local binaries.
   - type: input
     id: name
     attributes:

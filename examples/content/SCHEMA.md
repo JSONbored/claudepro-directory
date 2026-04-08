@@ -33,6 +33,13 @@ Do not include these in content files:
 
 Upvotes are now owned by D1 (`votes_entries`) and not contributor metadata.
 
+## Downloadable package policy
+
+- Local package URLs (`/downloads/...`) are maintainer-only.
+- Community submissions should provide external source/release URLs.
+- Skills local packages must be `.zip` under `/downloads/skills/...`.
+- MCP local packages must be `.mcpb` under `/downloads/mcp/...`.
+
 ## Validation workflow
 
 Run before merging content changes:

@@ -68,6 +68,8 @@ export type ContentEntry = {
   robotsIndex?: boolean;
   robotsFollow?: boolean;
   downloadUrl?: string;
+  downloadTrust?: "first-party" | "external" | null;
+  downloadSha256?: string | null;
   body: string;
   sections: ContentSection[];
   headings: ContentHeading[];

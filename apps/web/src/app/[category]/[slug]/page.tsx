@@ -3,11 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { marked } from "marked";
 import {
+  AlertTriangle,
   BookOpen,
   CalendarDays,
   FileCode2,
   FolderTree,
   Link as LinkIcon,
+  ShieldCheck,
   Sparkles,
   Tag,
   UserRound
@@ -462,13 +464,39 @@ export default async function DetailPage({ params }: DetailPageProps) {
               </a>
             ) : null}
             {entry.downloadUrl ? (
-              <a
-                href={entry.downloadUrl}
-                className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 transition hover:border-primary/40"
-              >
-                <LinkIcon className="size-4 text-muted-foreground" />
-                <span>Download package</span>
-              </a>
+              <div className="space-y-2">
+                <a
+                  href={entry.downloadUrl}
+                  className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 transition hover:border-primary/40"
+                >
+                  <LinkIcon className="size-4 text-muted-foreground" />
+                  <span>Download package</span>
+                </a>
+
+                {entry.downloadTrust === "first-party" ? (
+                  <div className="rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-4 py-3 text-xs leading-6 text-emerald-100">
+                    <p className="flex items-center gap-2 font-medium text-emerald-200">
+                      <ShieldCheck className="size-3.5" />
+                      <span>Maintainer-verified package</span>
+                    </p>
+                    {entry.downloadSha256 ? (
+                      <p className="mt-1 break-all text-[11px] text-emerald-100/90">
+                        SHA256: {entry.downloadSha256}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-xs leading-6 text-amber-100">
+                    <p className="flex items-center gap-2 font-medium text-amber-200">
+                      <AlertTriangle className="size-3.5" />
+                      <span>External package (unverified)</span>
+                    </p>
+                    <p className="mt-1 text-[11px] text-amber-100/90">
+                      Review source code and permissions before running downloadable files.
+                    </p>
+                  </div>
+                )}
+              </div>
             ) : null}
 
             <div className="grid gap-3 pt-1 text-sm text-muted-foreground">

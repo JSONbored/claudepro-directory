@@ -31,6 +31,12 @@ Option C (advanced): commit content files directly.
 3. Run `pnpm validate:content` and `pnpm audit:content`
 4. Commit the README alongside your content changes
 
+### Package security
+
+For skills and MCP package downloads, review:
+
+- [`docs/package-security-policy.md`](docs/package-security-policy.md)
+
 ---
 
 ## Content Catalog

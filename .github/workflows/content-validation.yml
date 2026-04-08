@@ -43,6 +43,9 @@ jobs:
       - name: Validate content schema
         run: pnpm validate:content
 
+      - name: Validate downloadable packages
+        run: pnpm validate:packages
+
       - name: Audit content report
         run: pnpm audit:content
 

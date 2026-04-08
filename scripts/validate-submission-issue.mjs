@@ -94,7 +94,10 @@ function parseIssueFormBody(body) {
     const firstLine = lines.shift() ?? "";
     const rawLabel = firstLine.replace(/^###\s+/, "").trim();
     const rawValue = lines.join("\n");
-    const key = HEADING_KEY_MAP[normalizeHeading(rawLabel)] ?? normalizeHeading(rawLabel);
+    const normalized = normalizeHeading(rawLabel);
+    const key =
+      HEADING_KEY_MAP[normalized] ??
+      (normalized.startsWith("download-url") ? "download_url" : normalized);
     sections[key] = normalizeValue(rawValue);
   }
   return sections;
@@ -148,6 +151,10 @@ function validateSubmission(issue) {
 
   if (fields.category && fields.category.trim().toLowerCase() !== category) {
     errors.push(`Category mismatch: expected "${category}" but got "${fields.category}"`);
+  }
+
+  if (String(fields.download_url ?? "").trim().startsWith("/downloads/")) {
+    errors.push("Community submissions cannot request local /downloads hosting");
   }
 
   if (category === "skills" && !normalizeValue(fields.install_command) && !normalizeValue(fields.download_url)) {

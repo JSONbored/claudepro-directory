@@ -9,6 +9,7 @@ body:
     attributes:
       value: |
         Include a real install/config path and verification details.
+        Do not attach binary MCPB files here. For community submissions, provide external source/release links.
   - type: input
     id: name
     attributes:

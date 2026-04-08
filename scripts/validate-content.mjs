@@ -15,10 +15,21 @@ import {
 const repoRoot = process.cwd();
 const contentRoot = path.join(repoRoot, "content");
 const strictRecommended = process.argv.includes("--strict-recommended");
+const maintainerHandle = "jsonbored";
 
 const failures = [];
 const warnings = [];
 let filesChecked = 0;
+
+function isMaintainerEntry(data = {}) {
+  const author = String(data.author ?? "").trim().toLowerCase();
+  const profile = String(data.authorProfileUrl ?? "").trim().toLowerCase();
+  return (
+    author === maintainerHandle ||
+    author === "jsonbored" ||
+    profile.includes(`github.com/${maintainerHandle}`)
+  );
+}
 
 for (const category of Object.keys(CATEGORY_SCHEMAS)) {
   const categoryDir = path.join(contentRoot, category);
@@ -92,6 +103,20 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
 
     if (parsed.data.hasTroubleshooting === false && sectionFlags.hasTroubleshooting) {
       failures.push(`${entry}: hasTroubleshooting=false but Troubleshooting section exists`);
+    }
+
+    const downloadUrl = String(parsed.data.downloadUrl ?? "").trim();
+    if (downloadUrl) {
+      const localDownload = downloadUrl.startsWith("/downloads/");
+      if (category === "skills" && !downloadUrl.endsWith(".zip")) {
+        failures.push(`${entry}: skills downloadUrl must end with .zip`);
+      }
+      if (category === "mcp" && !downloadUrl.endsWith(".mcpb")) {
+        failures.push(`${entry}: mcp downloadUrl must end with .mcpb`);
+      }
+      if (localDownload && !isMaintainerEntry(parsed.data)) {
+        failures.push(`${entry}: local /downloads package hosting is maintainer-only`);
+      }
     }
   }
 }

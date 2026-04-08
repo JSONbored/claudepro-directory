@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 import matter from "gray-matter";
@@ -24,8 +25,10 @@ const directoryOutputFile = path.join(publicDataDir, "directory-index.json");
 const siteStatsFile = path.join(generatedDir, "site-stats.json");
 const legacyVoteSeedFile = path.join(contentRoot, "data/legacy-vote-seed.json");
 const generatedLegacyVoteSeedFile = path.join(generatedDir, "legacy-vote-seed.json");
-const downloadsDir = path.join(repoRoot, "apps/web/public/downloads/skills");
+const skillsDownloadsDir = path.join(repoRoot, "apps/web/public/downloads/skills");
+const mcpDownloadsDir = path.join(repoRoot, "apps/web/public/downloads/mcp");
 const DIRECTORY_REPO_URL = "https://github.com/JSONbored/claudepro-directory";
+const MAINTAINER_GITHUB_HANDLE = "jsonbored";
 const categories = fs
   .readdirSync(contentRoot, { withFileTypes: true })
   .filter((entry) => entry.isDirectory() && entry.name !== "data")
@@ -123,19 +126,61 @@ function normalizeDownloadUrl(downloadUrl) {
   return downloadUrl;
 }
 
+function isMaintainerEntry(data = {}) {
+  const author = String(data.author ?? "").trim().toLowerCase();
+  const profile = String(data.authorProfileUrl ?? "").trim().toLowerCase();
+  return (
+    author === MAINTAINER_GITHUB_HANDLE ||
+    author === "jsonbored" ||
+    profile.includes(`github.com/${MAINTAINER_GITHUB_HANDLE}`)
+  );
+}
+
+function isLocalDownloadUrl(downloadUrl) {
+  return String(downloadUrl || "").startsWith("/downloads/");
+}
+
+function localDownloadSourcePath(downloadUrl) {
+  const normalized = String(downloadUrl || "");
+  if (normalized.startsWith("/downloads/skills/")) {
+    return path.join(contentRoot, "skills", path.basename(normalized));
+  }
+
+  if (normalized.startsWith("/downloads/mcp/")) {
+    return path.join(contentRoot, "mcp", path.basename(normalized));
+  }
+
+  return null;
+}
+
+function sha256File(filePath) {
+  const hash = crypto.createHash("sha256");
+  hash.update(fs.readFileSync(filePath));
+  return hash.digest("hex");
+}
+
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
 ensureDir(generatedDir);
 ensureDir(publicDataDir);
-ensureDir(downloadsDir);
+ensureDir(skillsDownloadsDir);
+ensureDir(mcpDownloadsDir);
 
 for (const fileName of fs.readdirSync(path.join(contentRoot, "skills"))) {
   if (!fileName.endsWith(".zip")) continue;
   fs.copyFileSync(
     path.join(contentRoot, "skills", fileName),
-    path.join(downloadsDir, fileName)
+    path.join(skillsDownloadsDir, fileName)
+  );
+}
+
+for (const fileName of fs.readdirSync(path.join(contentRoot, "mcp"))) {
+  if (!fileName.endsWith(".mcpb")) continue;
+  fs.copyFileSync(
+    path.join(contentRoot, "mcp", fileName),
+    path.join(mcpDownloadsDir, fileName)
   );
 }
 
@@ -168,6 +213,20 @@ async function main() {
       const sectionFlags = inferSectionBooleans(body);
       const repoUrl = inferred.repoUrl ? String(inferred.repoUrl) : "";
       const githubRepo = parseGitHubRepo(repoUrl);
+      const downloadUrl = normalizeDownloadUrl(data.downloadUrl ? String(data.downloadUrl) : "");
+      const localDownloadPath = isLocalDownloadUrl(downloadUrl)
+        ? localDownloadSourcePath(downloadUrl)
+        : null;
+      const maintainerEntry = isMaintainerEntry(data);
+      const downloadTrust = downloadUrl
+        ? localDownloadPath && maintainerEntry
+          ? "first-party"
+          : "external"
+        : null;
+      const downloadSha256 =
+        localDownloadPath && fs.existsSync(localDownloadPath)
+          ? sha256File(localDownloadPath)
+          : null;
 
       if (githubRepo) {
         reposToFetch.set(githubRepo.key, githubRepo);
@@ -242,9 +301,9 @@ async function main() {
           typeof data.robotsIndex === "boolean" ? data.robotsIndex : undefined,
         robotsFollow:
           typeof data.robotsFollow === "boolean" ? data.robotsFollow : undefined,
-        downloadUrl: normalizeDownloadUrl(
-          data.downloadUrl ? String(data.downloadUrl) : ""
-        ),
+        downloadUrl,
+        downloadTrust,
+        downloadSha256,
         body,
         sections: sections.map((section) => ({
           title: section.title,
