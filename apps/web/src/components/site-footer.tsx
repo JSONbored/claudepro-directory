@@ -1,12 +1,13 @@
 import Link from "next/link";
 
 import { BrandWordmark } from "@/components/brand-wordmark";
+import { NewsletterSignup } from "@/components/newsletter-signup";
 import { siteConfig } from "@/lib/site";
 
 export function SiteFooter() {
   return (
     <footer className="border-t border-border/80 py-14">
-      <div className="container-shell grid gap-10 md:grid-cols-[1.8fr_1fr_1fr]">
+      <div className="container-shell grid gap-10 md:grid-cols-[1.6fr_1fr_1fr_1.1fr]">
         <div className="space-y-4">
           <BrandWordmark />
           <p className="max-w-xl text-sm leading-7 text-muted-foreground">
@@ -38,6 +39,7 @@ export function SiteFooter() {
             Issues
           </a>
         </div>
+        <NewsletterSignup />
       </div>
     </footer>
   );

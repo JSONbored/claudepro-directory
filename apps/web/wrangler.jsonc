@@ -16,5 +16,13 @@
       "binding": "WORKER_SELF_REFERENCE",
       "service": "heyclaude"
     }
+  ],
+  "d1_databases": [
+    {
+      "binding": "VOTES_DB",
+      "database_name": "heyclaude-votes",
+      "database_id": "2897db33-c0c7-4d15-af73-618cb83a0a33",
+      "migrations_dir": "migrations"
+    }
   ]
 }

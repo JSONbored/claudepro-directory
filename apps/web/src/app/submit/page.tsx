@@ -13,8 +13,8 @@ export default function SubmitPage() {
               or workflow with the HeyClaude community.
             </p>
             <p className="max-w-xl text-sm leading-7 text-muted-foreground">
-              This first version stays intentionally lightweight. Fill out the form and
-              we will open a prefilled GitHub issue using the proper submission template.
+              This stays intentionally lightweight. Fill out the form and we open a
+              category-specific GitHub issue template with schema-aligned fields.
             </p>
           </div>
 
@@ -29,8 +29,8 @@ export default function SubmitPage() {
               Submit to HeyClaude
             </h2>
             <p className="text-sm leading-7 text-muted-foreground">
-              GitHub is the backend here. The form below opens a clean submission issue
-              so maintainers can review and import it without email back-and-forth.
+              GitHub is the backend here. The form below opens a clean category template
+              so maintainers can review and import submissions without email back-and-forth.
             </p>
           </div>
 

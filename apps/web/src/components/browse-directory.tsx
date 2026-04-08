@@ -25,13 +25,82 @@ export function BrowseDirectory({
   initialQuery = "",
   limit
 }: BrowseDirectoryProps) {
+  const getEntryKey = (entry: ContentEntry) => `${entry.category}:${entry.slug}`;
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState("all");
   const [sortMode, setSortMode] = useState("popular");
   const [visibleCount, setVisibleCount] = useState(limit ?? entries.length);
+  const [clientId, setClientId] = useState("");
+  const [votesAvailable, setVotesAvailable] = useState(true);
+  const [voteCounts, setVoteCounts] = useState<Record<string, number>>({});
+  const [popularSortSnapshot, setPopularSortSnapshot] = useState<Record<string, number>>({});
+  const [votedByMe, setVotedByMe] = useState<Record<string, boolean>>({});
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const deferredQuery = useDeferredValue(query);
   const normalizedQuery = deferredQuery.trim().toLowerCase();
+
+  useEffect(() => {
+    const storageKey = "heyclaude-client-id";
+    const existing = window.localStorage.getItem(storageKey);
+    if (existing) {
+      setClientId(existing);
+      return;
+    }
+
+    const generated = crypto.randomUUID();
+    window.localStorage.setItem(storageKey, generated);
+    setClientId(generated);
+  }, []);
+
+  useEffect(() => {
+    const baseScores: Record<string, number> = {};
+    for (const entry of entries) {
+      const key = getEntryKey(entry);
+      baseScores[key] = 0;
+    }
+    setPopularSortSnapshot(baseScores);
+  }, [entries]);
+
+  useEffect(() => {
+    if (!clientId || !entries.length) return;
+    const keys = entries.map(getEntryKey);
+    let cancelled = false;
+
+    const loadVotes = async () => {
+      try {
+        const response = await fetch("/api/votes/query", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            keys,
+            clientId
+          })
+        });
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as {
+          counts?: Record<string, number>;
+          voted?: Record<string, boolean>;
+          available?: boolean;
+        };
+        if (cancelled) return;
+
+        setVotesAvailable(Boolean(payload.available));
+        setVoteCounts(payload.counts ?? {});
+        setVotedByMe(payload.voted ?? {});
+        if (payload.available) {
+          setPopularSortSnapshot(payload.counts ?? {});
+        }
+      } catch {
+        setVotesAvailable(false);
+      }
+    };
+
+    void loadVotes();
+    return () => {
+      cancelled = true;
+    };
+  }, [clientId, entries]);
 
   const filteredEntries = useMemo(() => {
     const matched = entries.filter((entry) => {
@@ -53,17 +122,24 @@ export function BrowseDirectory({
     });
 
     const sorted = [...matched].sort((left, right) => {
+      const rightKey = getEntryKey(right);
+      const leftKey = getEntryKey(left);
+      const rightVotes =
+        popularSortSnapshot[rightKey] ?? right.popularityScore ?? right.viewCount ?? 0;
+      const leftVotes =
+        popularSortSnapshot[leftKey] ?? left.popularityScore ?? left.viewCount ?? 0;
+
       if (sortMode === "newest") {
         return String(right.dateAdded ?? "").localeCompare(String(left.dateAdded ?? ""));
       }
       if (sortMode === "title") {
         return left.title.localeCompare(right.title);
       }
-      return (right.popularityScore ?? 0) - (left.popularityScore ?? 0);
+      return rightVotes - leftVotes;
     });
 
     return sorted;
-  }, [category, entries, limit, normalizedQuery, sortMode]);
+  }, [category, entries, limit, normalizedQuery, popularSortSnapshot, sortMode]);
 
   useEffect(() => {
     setVisibleCount(limit ?? filteredEntries.length);
@@ -90,6 +166,62 @@ export function BrowseDirectory({
     if (!limit) return filteredEntries;
     return filteredEntries.slice(0, visibleCount);
   }, [filteredEntries, limit, visibleCount]);
+
+  const handleToggleVote = async (entry: ContentEntry, nextVote: boolean) => {
+    const key = getEntryKey(entry);
+
+    if (!clientId) {
+      return {
+        count: voteCounts[key] ?? entry.popularityScore ?? entry.viewCount ?? 0,
+        voted: votedByMe[key] ?? false
+      };
+    }
+
+    const previousCount = votesAvailable
+      ? (voteCounts[key] ?? 0)
+      : (entry.popularityScore ?? entry.viewCount ?? 0);
+    const previousVoted = votedByMe[key] ?? false;
+    const optimisticCount = Math.max(0, previousCount + (nextVote ? 1 : -1));
+
+    setVoteCounts((current) => ({ ...current, [key]: optimisticCount }));
+    setVotedByMe((current) => ({ ...current, [key]: nextVote }));
+
+    try {
+      const response = await fetch("/api/votes/toggle", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          key,
+          clientId,
+          vote: nextVote
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`toggle failed with ${response.status}`);
+      }
+
+      const payload = (await response.json()) as {
+        count: number;
+        voted: boolean;
+      };
+
+      setVoteCounts((current) => ({ ...current, [key]: Number(payload.count ?? 0) }));
+      setVotedByMe((current) => ({ ...current, [key]: Boolean(payload.voted) }));
+
+      return {
+        count: Number(payload.count ?? 0),
+        voted: Boolean(payload.voted)
+      };
+    } catch {
+      setVoteCounts((current) => ({ ...current, [key]: previousCount }));
+      setVotedByMe((current) => ({ ...current, [key]: previousVoted }));
+      return {
+        count: previousCount,
+        voted: previousVoted
+      };
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -137,7 +269,17 @@ export function BrowseDirectory({
 
       <div className="space-y-4">
         {displayedEntries.map((entry) => (
-          <DirectoryEntryCard key={`${entry.category}-${entry.slug}`} entry={entry} />
+          <DirectoryEntryCard
+            key={`${entry.category}-${entry.slug}`}
+            entry={entry}
+            voteCount={
+              votesAvailable
+                ? (voteCounts[getEntryKey(entry)] ?? 0)
+                : (entry.popularityScore ?? entry.viewCount ?? 0)
+            }
+            hasVoted={votedByMe[getEntryKey(entry)] ?? false}
+            onToggleVote={handleToggleVote}
+          />
         ))}
 
         {filteredEntries.length === 0 ? (

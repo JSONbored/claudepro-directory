@@ -1,14 +1,11 @@
 import { BrowseDirectory } from "@/components/browse-directory";
+import siteStats from "@/generated/site-stats.json";
 import { getAllEntries, getCategorySummaries } from "@/lib/content";
-import { siteConfig } from "@/lib/site";
 
 export default async function HomePage() {
   const [entries, categories] = await Promise.all([getAllEntries(), getCategorySummaries()]);
   const totalEntries = categories.reduce((sum, category) => sum + category.count, 0);
-  const githubStars =
-    entries.find(
-      (entry) => entry.repoUrl === siteConfig.githubUrl && typeof entry.githubStars === "number"
-    )?.githubStars ?? 0;
+  const githubStars = Number(siteStats.githubStars ?? 0);
 
   return (
     <div className="pb-24">

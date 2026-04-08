@@ -13,6 +13,8 @@
     "build": "next build",
     "type-check": "tsc --noEmit",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv worker-configuration.d.ts",
+    "db:migrate:local": "wrangler d1 migrations apply VOTES_DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply VOTES_DB --remote",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },

@@ -12,6 +12,12 @@ import { categoryAccentClasses, categoryLabels } from "@/lib/site";
 
 type DirectoryEntryCardProps = {
   entry: ContentEntry;
+  voteCount?: number;
+  hasVoted?: boolean;
+  onToggleVote?: (
+    entry: ContentEntry,
+    nextVote: boolean
+  ) => Promise<{ count: number; voted: boolean }>;
 };
 
 function getCardDescription(entry: ContentEntry) {
@@ -49,22 +55,30 @@ function getMonogram(entry: ContentEntry) {
     .toUpperCase();
 }
 
-export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
-  const storageKey = `heyclaude-vote:${entry.category}:${entry.slug}`;
-  const [hasVoted, setHasVoted] = useState(false);
+export function DirectoryEntryCard({
+  entry,
+  voteCount,
+  hasVoted: hasVotedProp = false,
+  onToggleVote
+}: DirectoryEntryCardProps) {
+  const baseVotes = entry.popularityScore ?? entry.viewCount ?? 0;
+  const [hasVoted, setHasVoted] = useState(hasVotedProp);
+  const [displayedVotes, setDisplayedVotes] = useState(voteCount ?? baseVotes);
+  const [isVoting, setIsVoting] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const baseVotes = entry.popularityScore ?? entry.viewCount ?? 0;
-  const displayedVotes = useMemo(() => baseVotes + (hasVoted ? 1 : 0), [baseVotes, hasVoted]);
   const previewLine = useMemo(() => getPreviewLine(entry), [entry]);
   const cardDescription = useMemo(() => getCardDescription(entry), [entry]);
   const repoHref = entry.repoUrl || entry.githubUrl;
   const relativeDate = useMemo(() => formatRelativeDate(entry.dateAdded), [entry.dateAdded]);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(storageKey);
-    setHasVoted(stored === "1");
-  }, [storageKey]);
+    setHasVoted(hasVotedProp);
+  }, [hasVotedProp]);
+
+  useEffect(() => {
+    setDisplayedVotes(voteCount ?? baseVotes);
+  }, [baseVotes, voteCount]);
 
   useEffect(() => {
     if (!copied) return;
@@ -72,10 +86,34 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
     return () => window.clearTimeout(timer);
   }, [copied]);
 
-  const handleVote = () => {
+  const handleVote = async () => {
+    if (isVoting) return;
     const nextValue = !hasVoted;
+    const previousValue = hasVoted;
+    const previousCount = displayedVotes;
+    const optimisticCount = Math.max(0, previousCount + (nextValue ? 1 : -1));
+
+    setIsVoting(true);
     setHasVoted(nextValue);
-    window.localStorage.setItem(storageKey, nextValue ? "1" : "0");
+
+    if (!onToggleVote) {
+      setDisplayedVotes(optimisticCount);
+      setIsVoting(false);
+      return;
+    }
+
+    setDisplayedVotes(optimisticCount);
+
+    try {
+      const persisted = await onToggleVote(entry, nextValue);
+      setHasVoted(persisted.voted);
+      setDisplayedVotes(persisted.count);
+    } catch {
+      setHasVoted(previousValue);
+      setDisplayedVotes(previousCount);
+    } finally {
+      setIsVoting(false);
+    }
   };
 
   const handleCopy = async () => {
@@ -100,6 +138,7 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
           aria-pressed={hasVoted}
           aria-label={hasVoted ? "Remove upvote" : "Upvote entry"}
           onClick={handleVote}
+          disabled={isVoting}
           className={cn("vote-button", hasVoted && "vote-button-active")}
         >
           <ChevronUp className="size-4" />
@@ -143,7 +182,7 @@ export function DirectoryEntryCard({ entry }: DirectoryEntryCardProps) {
             </div>
           </div>
 
-          {repoHref ? (
+          {repoHref && typeof entry.githubStars === "number" && entry.githubStars > 0 ? (
             <a
               href={repoHref}
               target="_blank"

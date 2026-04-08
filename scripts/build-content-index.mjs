@@ -20,7 +20,9 @@ const repoRoot = path.resolve(scriptDir, "..");
 const contentRoot = path.join(repoRoot, "content");
 const generatedDir = path.join(repoRoot, "apps/web/src/generated");
 const outputFile = path.join(generatedDir, "content-index.json");
+const siteStatsFile = path.join(generatedDir, "site-stats.json");
 const downloadsDir = path.join(repoRoot, "apps/web/public/downloads/skills");
+const DIRECTORY_REPO_URL = "https://github.com/JSONbored/claudepro-directory";
 const categories = fs
   .readdirSync(contentRoot, { withFileTypes: true })
   .filter((entry) => entry.isDirectory() && entry.name !== "data")
@@ -137,6 +139,11 @@ async function main() {
   const entries = [];
   const repoStats = new Map();
   const reposToFetch = new Map();
+  const directoryRepo = parseGitHubRepo(DIRECTORY_REPO_URL);
+
+  if (directoryRepo) {
+    reposToFetch.set(directoryRepo.key, directoryRepo);
+  }
 
   for (const category of categories) {
     const categoryDir = path.join(contentRoot, category);
@@ -291,6 +298,19 @@ async function main() {
   const tempOutputFile = `${outputFile}.${process.pid}.${Date.now()}.tmp`;
   fs.writeFileSync(tempOutputFile, payload);
   fs.renameSync(tempOutputFile, outputFile);
+
+  const directoryStats = directoryRepo ? repoStats.get(directoryRepo.key) : null;
+  const siteStatsPayload = {
+    directoryRepo: DIRECTORY_REPO_URL,
+    githubStars: directoryStats?.stars ?? null,
+    githubForks: directoryStats?.forks ?? null,
+    repoUpdatedAt: directoryStats?.updatedAt ?? null,
+    generatedAt: new Date().toISOString()
+  };
+  const siteStatsTmp = `${siteStatsFile}.${process.pid}.${Date.now()}.tmp`;
+  fs.writeFileSync(siteStatsTmp, `${JSON.stringify(siteStatsPayload, null, 2)}\n`);
+  fs.renameSync(siteStatsTmp, siteStatsFile);
+
   console.log(`Wrote ${entries.length} entries to ${path.relative(repoRoot, outputFile)}`);
 }
 

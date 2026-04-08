@@ -351,11 +351,23 @@
 }
 
 .detail-nav-link {
-  @apply flex items-center gap-3 rounded-xl border border-border/70 bg-background/88 px-3 py-2.5 text-sm text-muted-foreground transition hover:border-primary/30 hover:text-foreground;
+  @apply flex items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 text-sm text-muted-foreground transition hover:text-foreground;
 }
 
-.detail-nav-index {
-  @apply inline-flex size-6 shrink-0 items-center justify-center rounded-full border border-border bg-card text-[11px] text-muted-foreground;
+.detail-nav-link-active {
+  border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+  background: color-mix(in oklab, var(--primary) 12%, transparent);
+  color: var(--foreground);
+}
+
+.detail-nav-dot {
+  @apply inline-flex size-2.5 shrink-0 rounded-full border border-border;
+  background: color-mix(in oklab, var(--card) 80%, transparent);
+}
+
+.detail-nav-dot-active {
+  border-color: color-mix(in oklab, var(--primary) 72%, var(--border));
+  background: color-mix(in oklab, var(--primary) 72%, white 28%);
 }
 
 .detail-related-card {
@@ -660,11 +672,14 @@
 }
 
 .prose-entry pre {
-  @apply overflow-x-auto rounded-2xl border border-border bg-card p-4;
+  @apply overflow-x-hidden rounded-2xl border border-border bg-card p-4;
 }
 
 .prose-entry pre code {
-  @apply bg-transparent p-0;
+  @apply block bg-transparent p-0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .prose-entry blockquote {
@@ -709,5 +724,12 @@
 }
 
 .detail-code-block {
-  @apply m-0 overflow-x-auto bg-background px-5 py-5 text-sm leading-7 text-foreground;
+  @apply m-0 overflow-x-hidden bg-background px-5 py-5 text-sm leading-7 text-foreground;
+}
+
+.detail-code-block code {
+  @apply block;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
