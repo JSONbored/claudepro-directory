@@ -15,21 +15,10 @@ import {
 const repoRoot = process.cwd();
 const contentRoot = path.join(repoRoot, "content");
 const strictRecommended = process.argv.includes("--strict-recommended");
-const maintainerHandle = "jsonbored";
 
 const failures = [];
 const warnings = [];
 let filesChecked = 0;
-
-function isMaintainerEntry(data = {}) {
-  const author = String(data.author ?? "").trim().toLowerCase();
-  const profile = String(data.authorProfileUrl ?? "").trim().toLowerCase();
-  return (
-    author === maintainerHandle ||
-    author === "jsonbored" ||
-    profile.includes(`github.com/${maintainerHandle}`)
-  );
-}
 
 for (const category of Object.keys(CATEGORY_SCHEMAS)) {
   const categoryDir = path.join(contentRoot, category);
@@ -114,8 +103,8 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       if (category === "mcp" && !downloadUrl.endsWith(".mcpb")) {
         failures.push(`${entry}: mcp downloadUrl must end with .mcpb`);
       }
-      if (localDownload && !isMaintainerEntry(parsed.data)) {
-        failures.push(`${entry}: local /downloads package hosting is maintainer-only`);
+      if (localDownload && parsed.data.packageVerified !== true) {
+        failures.push(`${entry}: local /downloads package must set packageVerified: true`);
       }
     }
   }

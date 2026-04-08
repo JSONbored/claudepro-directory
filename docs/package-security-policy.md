@@ -7,7 +7,7 @@ This project distinguishes between:
 
 ## Trust model
 
-- Local `downloadUrl` paths under `/downloads/...` are maintainer-only.
+- Local `downloadUrl` paths under `/downloads/...` require `packageVerified: true`.
 - Community submissions should link to external canonical sources (for example, GitHub releases).
 - Binary package hosting for community submissions is not allowed by default.
 
@@ -15,6 +15,7 @@ This project distinguishes between:
 
 - First-party skills packages may be hosted locally at `/downloads/skills/<slug>.zip`.
 - Source archives must exist in `content/skills/<slug>.zip`.
+- Entry frontmatter must include `packageVerified: true`.
 - Validation enforces:
   - `.zip` extension
   - maintainer-only local hosting
@@ -26,6 +27,7 @@ This project distinguishes between:
 
 - First-party MCP packages may be hosted locally at `/downloads/mcp/<slug>.mcpb`.
 - Source archives must exist in `content/mcp/<slug>.mcpb`.
+- Entry frontmatter must include `packageVerified: true`.
 - Validation enforces:
   - `.mcpb` extension
   - maintainer-only local hosting

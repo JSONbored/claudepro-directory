@@ -28,7 +28,6 @@ const generatedLegacyVoteSeedFile = path.join(generatedDir, "legacy-vote-seed.js
 const skillsDownloadsDir = path.join(repoRoot, "apps/web/public/downloads/skills");
 const mcpDownloadsDir = path.join(repoRoot, "apps/web/public/downloads/mcp");
 const DIRECTORY_REPO_URL = "https://github.com/JSONbored/claudepro-directory";
-const MAINTAINER_GITHUB_HANDLE = "jsonbored";
 const categories = fs
   .readdirSync(contentRoot, { withFileTypes: true })
   .filter((entry) => entry.isDirectory() && entry.name !== "data")
@@ -126,14 +125,8 @@ function normalizeDownloadUrl(downloadUrl) {
   return downloadUrl;
 }
 
-function isMaintainerEntry(data = {}) {
-  const author = String(data.author ?? "").trim().toLowerCase();
-  const profile = String(data.authorProfileUrl ?? "").trim().toLowerCase();
-  return (
-    author === MAINTAINER_GITHUB_HANDLE ||
-    author === "jsonbored" ||
-    profile.includes(`github.com/${MAINTAINER_GITHUB_HANDLE}`)
-  );
+function isFirstPartyPackage(data = {}) {
+  return data.packageVerified === true;
 }
 
 function isLocalDownloadUrl(downloadUrl) {
@@ -217,9 +210,9 @@ async function main() {
       const localDownloadPath = isLocalDownloadUrl(downloadUrl)
         ? localDownloadSourcePath(downloadUrl)
         : null;
-      const maintainerEntry = isMaintainerEntry(data);
+      const firstPartyPackage = isFirstPartyPackage(data);
       const downloadTrust = downloadUrl
-        ? localDownloadPath && maintainerEntry
+        ? localDownloadPath && firstPartyPackage
           ? "first-party"
           : "external"
         : null;
@@ -301,6 +294,8 @@ async function main() {
           typeof data.robotsIndex === "boolean" ? data.robotsIndex : undefined,
         robotsFollow:
           typeof data.robotsFollow === "boolean" ? data.robotsFollow : undefined,
+        packageVerified:
+          typeof data.packageVerified === "boolean" ? data.packageVerified : undefined,
         downloadUrl,
         downloadTrust,
         downloadSha256,

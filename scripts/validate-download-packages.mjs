@@ -6,18 +6,11 @@ import matter from "gray-matter";
 
 const repoRoot = process.cwd();
 const contentRoot = path.join(repoRoot, "content");
-const maintainerHandle = "jsonbored";
 const failures = [];
 const warnings = [];
 
-function isMaintainerEntry(data = {}) {
-  const author = String(data.author ?? "").trim().toLowerCase();
-  const profile = String(data.authorProfileUrl ?? "").trim().toLowerCase();
-  return (
-    author === maintainerHandle ||
-    author === "jsonbored" ||
-    profile.includes(`github.com/${maintainerHandle}`)
-  );
+function isFirstPartyPackage(data = {}) {
+  return data.packageVerified === true;
 }
 
 function normalizeDownloadUrl(downloadUrl) {
@@ -107,7 +100,7 @@ for (const category of ["skills", "mcp"]) {
 
     if (!downloadUrl) continue;
 
-    const maintainerEntry = isMaintainerEntry(data);
+    const firstPartyPackage = isFirstPartyPackage(data);
 
     if (category === "skills" && !downloadUrl.endsWith(".zip")) {
       failures.push(`${entry}: skills downloadUrl must end with .zip`);
@@ -119,8 +112,10 @@ for (const category of ["skills", "mcp"]) {
 
     if (!isLocalDownloadUrl(downloadUrl)) continue;
 
-    if (!maintainerEntry) {
-      failures.push(`${entry}: local /downloads hosting is restricted to maintainer-owned entries`);
+    if (!firstPartyPackage) {
+      failures.push(
+        `${entry}: local /downloads hosting requires packageVerified: true`
+      );
       continue;
     }
 

@@ -67,6 +67,7 @@ export type ContentEntry = {
   hasBreakingChanges?: boolean;
   robotsIndex?: boolean;
   robotsFollow?: boolean;
+  packageVerified?: boolean;
   downloadUrl?: string;
   downloadTrust?: "first-party" | "external" | null;
   downloadSha256?: string | null;
