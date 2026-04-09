@@ -6,8 +6,8 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 function isAllowedAssetPath(asset: string) {
   const normalized = String(asset || "").trim();
   return (
-    (normalized.startsWith("/downloads/skills/") && normalized.endsWith(".zip")) ||
-    (normalized.startsWith("/downloads/mcp/") && normalized.endsWith(".mcpb"))
+    /^\/downloads\/skills\/[a-z0-9-]+\.zip$/.test(normalized) ||
+    /^\/downloads\/mcp\/[a-z0-9-]+\.mcpb$/.test(normalized)
   );
 }
 

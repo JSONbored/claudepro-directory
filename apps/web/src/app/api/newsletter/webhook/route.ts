@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { Webhook } from "svix";
 
 type ResendEvent = {
   type?: string;
@@ -43,13 +44,31 @@ function toDiscordContent(event: ResendEvent) {
   return `Resend event: \`${type}\` (\`${email}\`)`;
 }
 
-function verifyWebhookIfConfigured(request: Request, secret: string) {
+function verifyWebhookSignature(params: {
+  rawBody: string;
+  request: Request;
+  secret: string;
+}) {
+  const { rawBody, request, secret } = params;
   if (!secret) return true;
-  const url = new URL(request.url);
-  const queryKey = url.searchParams.get("key");
-  const headerKey = request.headers.get("x-webhook-secret");
-  const authBearer = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-  return queryKey === secret || headerKey === secret || authBearer === secret;
+
+  const svixId = request.headers.get("svix-id");
+  const svixTimestamp = request.headers.get("svix-timestamp");
+  const svixSignature = request.headers.get("svix-signature");
+
+  if (!svixId || !svixTimestamp || !svixSignature) return false;
+
+  try {
+    const webhook = new Webhook(secret);
+    webhook.verify(rawBody, {
+      "svix-id": svixId,
+      "svix-timestamp": svixTimestamp,
+      "svix-signature": svixSignature
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function POST(request: Request) {
@@ -67,7 +86,11 @@ export async function POST(request: Request) {
   const discordWebhookUrl = String(envRecord["DISCORD_WEBHOOK_URL"] ?? "");
   const resendWebhookSecret = String(envRecord["RESEND_WEBHOOK_SECRET"] ?? "");
 
-  const verified = verifyWebhookIfConfigured(request, resendWebhookSecret);
+  const verified = verifyWebhookSignature({
+    rawBody,
+    request,
+    secret: resendWebhookSecret
+  });
   if (!verified) {
     return NextResponse.json({ error: "invalid_signature" }, { status: 401 });
   }
