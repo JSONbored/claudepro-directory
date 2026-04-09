@@ -11,13 +11,17 @@ type EntryCopyButtonProps = {
   text?: string;
   label?: string;
   className?: string;
+  iconOnly?: boolean;
+  title?: string;
 };
 
 export function EntryCopyButton({
   entry,
   text,
   label = "Copy full asset",
-  className
+  className,
+  iconOnly = false,
+  title
 }: EntryCopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
@@ -35,9 +39,15 @@ export function EntryCopyButton({
   };
 
   return (
-    <button type="button" onClick={handleCopy} className={className}>
+    <button
+      type="button"
+      onClick={handleCopy}
+      className={className}
+      title={title ?? label}
+      aria-label={title ?? label}
+    >
       {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-      {copied ? "Copied" : label}
+      {iconOnly ? <span className="sr-only">{copied ? "Copied" : label}</span> : copied ? "Copied" : label}
     </button>
   );
 }

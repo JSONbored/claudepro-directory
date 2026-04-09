@@ -6,8 +6,9 @@ import {
   AlertTriangle,
   BookOpen,
   CalendarDays,
+  CheckCircle2,
   Download,
-  FileCode2,
+  ExternalLink,
   FolderTree,
   ShieldCheck,
   Sparkles,
@@ -19,6 +20,7 @@ import { ContentSections } from "@/components/content-sections";
 import { DetailToc } from "@/components/detail-toc";
 import { EntryCopyButton } from "@/components/entry-copy-button";
 import { EntryChecklistCard } from "@/components/entry-checklist-card";
+import { GitHubMark } from "@/components/icons/github-mark";
 import { SnippetCard } from "@/components/snippet-card";
 import { getDirectoryEntries, getDirectoryEntriesByCategory, getEntry } from "@/lib/content";
 import { categoryLabels } from "@/lib/site";
@@ -201,7 +203,6 @@ export default async function DetailPage({ params }: DetailPageProps) {
   const hasBody = Boolean(entry.body?.trim());
   const primaryCodeBlock = entry.codeBlocks?.[0];
   const metadataOnly = !hasBody;
-  const sourceLabel = entry.filePath?.replace(/^content\//, "");
   const sectionItems = Array.isArray(entry.sections) ? entry.sections : [];
   const metadataFallback = getMetadataFallback(entry);
   const primarySnippetBlock = getPrimarySnippet(entry);
@@ -230,7 +231,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
 
     return hasProse || hasCode;
   });
-  const sidebarSections = visibleSections.slice(0, 8);
+  const sidebarSections = visibleSections.slice(0, 6);
   const topFacts: Array<{ label: string; value: string }> = [
     entry.author ? { label: "Author", value: entry.author } : null,
     entry.dateAdded ? { label: "Added", value: entry.dateAdded } : null,
@@ -403,11 +404,11 @@ export default async function DetailPage({ params }: DetailPageProps) {
         ) : null}
       </article>
 
-      <aside className="hidden lg:sticky lg:top-24 lg:flex lg:h-[calc(100vh-7.5rem)] lg:flex-col lg:gap-4 lg:self-start lg:overflow-hidden">
+      <aside className="hidden space-y-4 lg:sticky lg:top-24 lg:block lg:self-start">
         {sidebarSections.length ? (
           <div className="rounded-2xl border border-border/70 bg-transparent p-4">
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">On this page</p>
-            <div className="mt-3 max-h-56 overflow-y-auto pr-1">
+            <div className="mt-3">
               <DetailToc sections={sidebarSections} />
               {visibleSections.length > sidebarSections.length ? (
                 <p className="pt-2 text-xs text-muted-foreground">
@@ -418,58 +419,56 @@ export default async function DetailPage({ params }: DetailPageProps) {
           </div>
         ) : null}
 
-        <div className="surface-panel flex-1 overflow-y-auto p-4">
+        <div className="surface-panel p-4">
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Entry overview</p>
-          <div className="mt-3 space-y-2.5 text-sm">
-            <EntryCopyButton
-              entry={entry}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground transition hover:border-primary/40"
-            />
-            {entry.installCommand ? (
+          <div className="mt-3 space-y-3 text-sm">
+            <div className="grid grid-cols-4 gap-2">
               <EntryCopyButton
-                text={entry.installCommand}
-                label="Copy install command"
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground transition hover:border-primary/40"
+                entry={entry}
+                iconOnly
+                title="Copy full asset"
+                className="flex h-9 items-center justify-center rounded-lg border border-border bg-background text-foreground transition hover:border-primary/40"
               />
-            ) : null}
-            {entry.configSnippet ? (
-              <EntryCopyButton
-                text={entry.configSnippet}
-                label="Copy Claude config"
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground transition hover:border-primary/40"
-              />
-            ) : null}
-            <a
-              href={entry.githubUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 transition hover:border-primary/40"
-            >
-              <FileCode2 className="size-4 text-muted-foreground" />
-              <span>GitHub source</span>
-            </a>
-            {entry.documentationUrl ? (
+              {entry.installCommand ? (
+                <EntryCopyButton
+                  text={entry.installCommand}
+                  label="Copy install command"
+                  iconOnly
+                  title="Copy install command"
+                  className="flex h-9 items-center justify-center rounded-lg border border-border bg-background text-foreground transition hover:border-primary/40"
+                />
+              ) : null}
+              {entry.configSnippet ? (
+                <EntryCopyButton
+                  text={entry.configSnippet}
+                  label="Copy Claude config"
+                  iconOnly
+                  title="Copy Claude config"
+                  className="flex h-9 items-center justify-center rounded-lg border border-border bg-background text-foreground transition hover:border-primary/40"
+                />
+              ) : null}
               <a
-                href={entry.documentationUrl}
+                href={entry.githubUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 transition hover:border-primary/40"
+                title="GitHub source"
+                aria-label="GitHub source"
+                className="flex h-9 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
               >
-                <BookOpen className="size-4 text-muted-foreground" />
-                <span>Documentation</span>
+                <GitHubMark className="size-4" />
               </a>
-            ) : null}
-            {entry.repoUrl ? (
               <a
-                href={entry.repoUrl}
+                href={entry.documentationUrl ?? entry.repoUrl ?? entry.githubUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 transition hover:border-primary/40"
+                title={entry.documentationUrl ? "Documentation" : "Repository"}
+                aria-label={entry.documentationUrl ? "Documentation" : "Repository"}
+                className="flex h-9 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
               >
-                <FileCode2 className="size-4 text-muted-foreground" />
-                <span>Repository</span>
+                {entry.documentationUrl ? <BookOpen className="size-4" /> : <ExternalLink className="size-4" />}
               </a>
-            ) : null}
+            </div>
+
             {entry.downloadUrl ? (
               <div className="space-y-2">
                 <a
@@ -487,29 +486,29 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 </a>
 
                 {entry.downloadTrust === "first-party" ? (
-                  <div className="rounded-xl border border-primary/35 bg-card/85 p-3 text-xs leading-6 text-foreground">
+                  <div className="rounded-xl border border-primary/35 bg-card/85 p-3 text-xs text-foreground">
                     <p className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-primary">
+                      <CheckCircle2 className="size-3.5" />
                       <ShieldCheck className="size-3.5" />
                       <span>Maintainer-verified package</span>
                     </p>
                     {entry.downloadSha256 ? (
-                      <div className="mt-2 rounded-lg border border-border/80 bg-background/90 p-2.5">
-                        <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                      <div className="mt-2 rounded-lg border border-border/80 bg-background/90 p-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                           SHA256
-                        </p>
-                        <code className="mt-1 block break-all font-mono text-[11px] text-foreground/95">
-                          {entry.downloadSha256}
-                        </code>
-                        <div className="mt-2 flex items-center justify-between gap-2">
-                          <p className="text-[10px] text-muted-foreground">
-                            Verify this hash after download.
                           </p>
                           <EntryCopyButton
                             text={entry.downloadSha256}
                             label="Copy SHA256"
-                            className="rounded-md border border-border bg-background px-2 py-1 text-[10px] text-foreground transition hover:border-primary/40"
+                            iconOnly
+                            title="Copy SHA256"
+                            className="flex h-7 w-7 items-center justify-center rounded-md border border-border bg-background text-foreground transition hover:border-primary/40"
                           />
                         </div>
+                        <code className="mt-1 block break-all font-mono text-[10px] text-foreground/95">
+                          {entry.downloadSha256}
+                        </code>
                       </div>
                     ) : null}
                   </div>
@@ -529,7 +528,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
 
             <div className="rounded-xl border border-border bg-background px-3 py-3 text-sm text-muted-foreground">
               <p className="text-[11px] uppercase tracking-[0.16em]">Details</p>
-              <div className="mt-2 space-y-2">
+              <div className="mt-2 space-y-1.5">
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Author</span>
                   <span className="flex min-w-0 items-center gap-2 text-foreground">
@@ -579,13 +578,6 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 ) : null}
               </div>
             </div>
-
-            {sourceLabel ? (
-              <div className="rounded-xl border border-border bg-background px-3 py-3 text-muted-foreground">
-                <p className="text-[11px] uppercase tracking-[0.16em]">Path</p>
-                <p className="mt-1 break-all text-xs text-foreground">{sourceLabel}</p>
-              </div>
-            ) : null}
           </div>
         </div>
 
@@ -604,7 +596,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 <p className="detail-related-title mt-2 text-sm font-medium tracking-tight">
                   {item.title}
                 </p>
-                <p className="mt-1 overflow-hidden text-xs text-muted-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+                <p className="mt-1 overflow-hidden text-xs text-muted-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:1]">
                   {item.cardDescription || item.description}
                 </p>
               </Link>

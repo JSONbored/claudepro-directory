@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, Check, ChevronUp, Copy, FileCode2, FileText } from "lucide-react";
 
+import { GitHubMark } from "@/components/icons/github-mark";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast-provider";
 import type { DirectoryEntry } from "@/lib/content";
@@ -72,6 +73,8 @@ export function DirectoryEntryCard({
   const previewLine = useMemo(() => getPreviewLine(entry), [entry]);
   const cardDescription = useMemo(() => getCardDescription(entry), [entry]);
   const repoHref = entry.repoUrl || entry.githubUrl;
+  const isGitHubRepo = Boolean(repoHref && /github\.com/i.test(repoHref));
+  const isGitHubSource = Boolean(entry.githubUrl && /github\.com/i.test(entry.githubUrl));
   const isCreatorEntry = String(entry.author ?? "").trim().toLowerCase() === "jsonbored";
   const relativeDate = useMemo(() => formatRelativeDate(entry.dateAdded), [entry.dateAdded]);
 
@@ -205,9 +208,9 @@ export function DirectoryEntryCard({
               target="_blank"
               rel="noreferrer"
               className="directory-github-stat"
-              aria-label="Open repository on GitHub"
+              aria-label={isGitHubRepo ? "Open repository on GitHub" : "Open repository"}
             >
-              <FileCode2 className="size-4" />
+              {isGitHubRepo ? <GitHubMark className="size-4" /> : <FileCode2 className="size-4" />}
               {typeof entry.githubStars === "number" ? (
                 <span>{compactCount(entry.githubStars)}</span>
               ) : null}
@@ -222,10 +225,10 @@ export function DirectoryEntryCard({
               target="_blank"
               rel="noreferrer"
               className="directory-github-stat"
-              aria-label="Open source on GitHub"
+              aria-label={isGitHubRepo ? "Open source on GitHub" : "Open source repository"}
             >
-              <FileCode2 className="size-4" />
-              <span>Source</span>
+              {isGitHubRepo ? <GitHubMark className="size-4" /> : <FileCode2 className="size-4" />}
+              <span>{isGitHubRepo ? "GitHub" : "Source"}</span>
             </a>
           ) : null}
         </div>
@@ -289,7 +292,7 @@ export function DirectoryEntryCard({
                 aria-label="Open repository"
                 title="Open repository"
               >
-                <FileCode2 className="size-3.5" />
+                {isGitHubRepo ? <GitHubMark className="size-3.5" /> : <FileCode2 className="size-3.5" />}
               </a>
             ) : null}
             {entry.githubUrl && entry.githubUrl !== repoHref ? (
@@ -301,7 +304,7 @@ export function DirectoryEntryCard({
                 aria-label="Open source content file"
                 title="Open source content file"
               >
-                <FileCode2 className="size-3.5" />
+                {isGitHubSource ? <GitHubMark className="size-3.5" /> : <FileCode2 className="size-3.5" />}
               </a>
             ) : null}
             <Link href={`/${entry.category}/${entry.slug}`} className="directory-link-chip">
