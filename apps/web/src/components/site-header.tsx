@@ -14,6 +14,7 @@ export function SiteHeader() {
   const githubRepoLabel = siteConfig.githubUrl
     .replace(/^https?:\/\/github\.com\//i, "")
     .replace(/\/$/, "");
+  const [githubOwner, githubRepo] = githubRepoLabel.split("/", 2);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-background/88 backdrop-blur">
@@ -40,7 +41,11 @@ export function SiteHeader() {
             title="Open GitHub repository"
           >
             <GitHubMark className="size-3.5 shrink-0" />
-            <span className="max-w-[12rem] truncate text-foreground/90">{githubRepoLabel}</span>
+            <span className="inline-flex min-w-0 items-center gap-1.5 text-foreground/90">
+              <span className="max-w-[6.25rem] truncate">{githubOwner ?? githubRepoLabel}</span>
+              {githubRepo ? <span className="text-muted-foreground/80">/</span> : null}
+              {githubRepo ? <span className="max-w-[7rem] truncate">{githubRepo}</span> : null}
+            </span>
             <span className="h-3 w-px bg-border/90" aria-hidden />
             <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-background/65 px-2 py-0.5 text-[11px] font-medium text-foreground/85">
               <Star className="size-3 fill-current" />
