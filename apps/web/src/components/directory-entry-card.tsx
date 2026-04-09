@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, Check, ChevronUp, Copy, FileCode2, FileText } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, Check, ChevronUp, Copy, FileCode2, FileText } from "lucide-react";
 
 import { GitHubMark } from "@/components/icons/github-mark";
 import { Button } from "@/components/ui/button";
@@ -216,8 +216,13 @@ export function DirectoryEntryCard({
               ) : null}
             </a>
           ) : isCreatorEntry ? (
-            <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/12 px-2.5 py-1 text-[11px] font-medium tracking-[0.04em] text-primary">
-              Creator
+            <span
+              className="inline-flex items-center gap-1 rounded-full border border-primary/45 bg-primary/16 px-2.5 py-1 text-[11px] font-medium tracking-[0.04em] text-primary"
+              title="Official entry from HeyClaude maintainer (JSONbored)"
+              aria-label="Official entry from HeyClaude maintainer"
+            >
+              <BadgeCheck className="size-3.5" />
+              Official
             </span>
           ) : repoHref ? (
             <a
