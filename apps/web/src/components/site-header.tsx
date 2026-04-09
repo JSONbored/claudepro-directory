@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Star } from "lucide-react";
 
 import { BrandWordmark } from "@/components/brand-wordmark";
 import { DiscordMark } from "@/components/icons/discord-mark";
@@ -10,6 +11,9 @@ import { siteConfig } from "@/lib/site";
 
 export function SiteHeader() {
   const githubStars = Number(siteStats.githubStars ?? 0);
+  const githubRepoLabel = siteConfig.githubUrl
+    .replace(/^https?:\/\/github\.com\//i, "")
+    .replace(/\/$/, "");
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-background/88 backdrop-blur">
@@ -31,12 +35,17 @@ export function SiteHeader() {
             href={siteConfig.githubUrl}
             target="_blank"
             rel="noreferrer"
-            className="hidden items-center gap-1.5 rounded-full border border-border/80 bg-card/70 px-3 py-2 text-xs text-muted-foreground transition hover:border-primary/35 hover:text-foreground md:inline-flex"
+            className="hidden items-center gap-2 rounded-full border border-border/80 bg-card/70 px-2.5 py-1.5 text-xs text-muted-foreground transition hover:border-primary/35 hover:bg-card hover:text-foreground md:inline-flex"
             aria-label="Open GitHub repository"
             title="Open GitHub repository"
           >
-            <GitHubMark className="size-3.5" />
-            <span>{githubStars > 0 ? compactCount(githubStars) : "GitHub"}</span>
+            <GitHubMark className="size-3.5 shrink-0" />
+            <span className="max-w-[12rem] truncate text-foreground/90">{githubRepoLabel}</span>
+            <span className="h-3 w-px bg-border/90" aria-hidden />
+            <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-background/65 px-2 py-0.5 text-[11px] font-medium text-foreground/85">
+              <Star className="size-3 fill-current" />
+              <span>{githubStars > 0 ? compactCount(githubStars) : "0"}</span>
+            </span>
           </a>
           {siteConfig.discordUrl ? (
             <a
