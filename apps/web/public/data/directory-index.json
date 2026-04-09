@@ -1185,8 +1185,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/airtable-mcp-server.mdx",
     "repoUrl": "https://github.com/domdomegg/airtable-mcp-server",
     "githubStars": 434,
-    "githubForks": 133,
-    "repoUpdatedAt": "2026-04-06T21:26:34Z"
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "agents",
@@ -1677,9 +1677,9 @@
     "filePath": "content/skills/audio-transcription-summarization.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/audio-transcription-summarization.mdx",
     "repoUrl": "https://github.com/openai/whisper",
-    "githubStars": 97391,
-    "githubForks": 12001,
-    "repoUpdatedAt": "2026-04-09T08:19:39Z"
+    "githubStars": 97,
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "hooks",
@@ -2155,9 +2155,9 @@
     "filePath": "content/mcp/aws-services-mcp-server.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/aws-services-mcp-server.mdx",
     "repoUrl": "https://github.com/awslabs/mcp",
-    "githubStars": 8720,
-    "githubForks": 1426,
-    "repoUpdatedAt": "2026-04-09T08:16:23Z"
+    "githubStars": 9,
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "agents",
@@ -2832,9 +2832,9 @@
     "filePath": "content/statuslines/catppuccin-mocha-theme.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/catppuccin-mocha-theme.mdx",
     "repoUrl": "https://github.com/catppuccin/catppuccin",
-    "githubStars": 18827,
-    "githubForks": 346,
-    "repoUpdatedAt": "2026-04-09T07:52:36Z"
+    "githubStars": 19,
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "guides",
@@ -3863,8 +3863,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/clickup-mcp-server.mdx",
     "repoUrl": "https://github.com/hauptsacheNet/clickup-mcp",
     "githubStars": 42,
-    "githubForks": 16,
-    "repoUpdatedAt": "2026-04-05T09:58:26Z"
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "hooks",
@@ -5546,9 +5546,9 @@
     "filePath": "content/hooks/dead-code-eliminator.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/dead-code-eliminator.mdx",
     "repoUrl": "https://github.com/nadeesha/ts-prune",
-    "githubStars": 2068,
-    "githubForks": 69,
-    "repoUpdatedAt": "2026-04-03T10:13:14Z"
+    "githubStars": 2,
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "collections",
@@ -6018,8 +6018,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/discord-mcp-server.mdx",
     "repoUrl": "https://github.com/saseq/discord-mcp",
     "githubStars": 255,
-    "githubForks": 55,
-    "repoUpdatedAt": "2026-04-09T08:11:01Z"
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "hooks",
@@ -9314,8 +9314,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/kubernetes-mcp-server.mdx",
     "repoUrl": "https://github.com/feiskyer/mcp-kubernetes-server",
     "githubStars": 16,
-    "githubForks": 9,
-    "repoUpdatedAt": "2026-02-16T01:53:10Z"
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "agents",
@@ -9561,9 +9561,9 @@
     "filePath": "content/skills/log-parsing-incident-timeline.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/log-parsing-incident-timeline.mdx",
     "repoUrl": "https://github.com/BurntSushi/ripgrep",
-    "githubStars": 62103,
-    "githubForks": 2469,
-    "repoUpdatedAt": "2026-04-09T08:02:06Z"
+    "githubStars": 62,
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "skills",
@@ -9622,9 +9622,9 @@
     "filePath": "content/skills/markdown-knowledge-base-composer.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/markdown-knowledge-base-composer.mdx",
     "repoUrl": "https://github.com/remarkjs/remark",
-    "githubStars": 8820,
-    "githubForks": 370,
-    "repoUpdatedAt": "2026-04-08T19:25:48Z"
+    "githubStars": 9,
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "hooks",
@@ -9906,9 +9906,9 @@
     "filePath": "content/statuslines/minimal-powerline.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/minimal-powerline.mdx",
     "repoUrl": "https://github.com/powerline/powerline",
-    "githubStars": 14736,
-    "githubForks": 1006,
-    "repoUpdatedAt": "2026-04-09T07:56:55Z"
+    "githubStars": 15,
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "skills",
@@ -12871,8 +12871,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/reddit-mcp-buddy.mdx",
     "repoUrl": "https://github.com/karanb192/reddit-mcp-buddy",
     "githubStars": 594,
-    "githubForks": 72,
-    "repoUpdatedAt": "2026-04-09T07:52:31Z"
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "hooks",
@@ -12994,8 +12994,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/redis-mcp-server.mdx",
     "repoUrl": "https://github.com/redis/mcp-redis",
     "githubStars": 476,
-    "githubForks": 91,
-    "repoUpdatedAt": "2026-04-08T19:13:09Z"
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "skills",
@@ -14039,8 +14039,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/socket-mcp-server.mdx",
     "repoUrl": "https://github.com/SocketDev/socket-mcp",
     "githubStars": 96,
-    "githubForks": 15,
-    "repoUpdatedAt": "2026-04-03T16:49:10Z"
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "mcp",
@@ -15932,9 +15932,9 @@
     "filePath": "content/skills/website-crawler-summarizer.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/website-crawler-summarizer.mdx",
     "repoUrl": "https://github.com/mozilla/readability",
-    "githubStars": 11080,
-    "githubForks": 704,
-    "repoUpdatedAt": "2026-04-09T07:09:47Z"
+    "githubStars": 11,
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "skills",
