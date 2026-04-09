@@ -184,7 +184,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
   const allEntries = await getDirectoryEntries();
   const related = (await getDirectoryEntriesByCategory(category))
     .filter((item) => item.slug !== slug)
-    .slice(0, 3);
+    .slice(0, 2);
   const collectionItems =
     entry.category === "collections" && Array.isArray(entry.items)
       ? entry.items
@@ -403,11 +403,11 @@ export default async function DetailPage({ params }: DetailPageProps) {
         ) : null}
       </article>
 
-      <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
+      <aside className="hidden lg:sticky lg:top-24 lg:flex lg:h-[calc(100vh-7.5rem)] lg:flex-col lg:gap-4 lg:self-start lg:overflow-hidden">
         {sidebarSections.length ? (
           <div className="rounded-2xl border border-border/70 bg-transparent p-4">
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">On this page</p>
-            <div className="mt-3">
+            <div className="mt-3 max-h-56 overflow-y-auto pr-1">
               <DetailToc sections={sidebarSections} />
               {visibleSections.length > sidebarSections.length ? (
                 <p className="pt-2 text-xs text-muted-foreground">
@@ -418,32 +418,32 @@ export default async function DetailPage({ params }: DetailPageProps) {
           </div>
         ) : null}
 
-        <div className="surface-panel p-5">
+        <div className="surface-panel flex-1 overflow-y-auto p-4">
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Entry overview</p>
-          <div className="mt-4 space-y-3 text-sm">
+          <div className="mt-3 space-y-2.5 text-sm">
             <EntryCopyButton
               entry={entry}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground transition hover:border-primary/40"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground transition hover:border-primary/40"
             />
             {entry.installCommand ? (
               <EntryCopyButton
                 text={entry.installCommand}
                 label="Copy install command"
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground transition hover:border-primary/40"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground transition hover:border-primary/40"
               />
             ) : null}
             {entry.configSnippet ? (
               <EntryCopyButton
                 text={entry.configSnippet}
                 label="Copy Claude config"
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground transition hover:border-primary/40"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground transition hover:border-primary/40"
               />
             ) : null}
             <a
               href={entry.githubUrl}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 transition hover:border-primary/40"
+              className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 transition hover:border-primary/40"
             >
               <FileCode2 className="size-4 text-muted-foreground" />
               <span>GitHub source</span>
@@ -453,7 +453,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 href={entry.documentationUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 transition hover:border-primary/40"
+                className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 transition hover:border-primary/40"
               >
                 <BookOpen className="size-4 text-muted-foreground" />
                 <span>Documentation</span>
@@ -475,7 +475,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 <a
                   href={getDownloadHref(entry.downloadUrl)}
                   download={entry.downloadUrl.startsWith("/downloads/") ? "" : undefined}
-                  className="group flex items-center justify-between gap-3 rounded-xl border border-primary/60 bg-primary px-4 py-3 text-primary-foreground shadow-sm transition hover:border-primary hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="group flex items-center justify-between gap-3 rounded-xl border border-primary/60 bg-primary px-3 py-2.5 text-primary-foreground shadow-sm transition hover:border-primary hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <span className="flex items-center gap-2">
                     <Download className="size-4 text-primary-foreground" />
@@ -527,68 +527,71 @@ export default async function DetailPage({ params }: DetailPageProps) {
               </div>
             ) : null}
 
-            <div className="grid gap-3 pt-1 text-sm text-muted-foreground">
-              <div className="rounded-xl border border-border bg-background px-4 py-3">
-                <p className="text-[11px] uppercase tracking-[0.16em]">Author</p>
-                <p className="mt-1 flex items-center gap-2 text-foreground">
-                  <UserRound className="size-3.5 text-muted-foreground" />
-                  <span>{entry.author ?? "JSONbored"}</span>
-                </p>
+            <div className="rounded-xl border border-border bg-background px-3 py-3 text-sm text-muted-foreground">
+              <p className="text-[11px] uppercase tracking-[0.16em]">Details</p>
+              <div className="mt-2 space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Author</span>
+                  <span className="flex min-w-0 items-center gap-2 text-foreground">
+                    <UserRound className="size-3.5 shrink-0 text-muted-foreground" />
+                    <span className="truncate">{entry.author ?? "JSONbored"}</span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Category</span>
+                  <span className="flex min-w-0 items-center gap-2 text-foreground">
+                    <FolderTree className="size-3.5 shrink-0 text-muted-foreground" />
+                    <span className="truncate">{categoryLabels[entry.category] ?? entry.category}</span>
+                  </span>
+                </div>
+                {entry.dateAdded ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Added</span>
+                    <span className="flex min-w-0 items-center gap-2 text-foreground">
+                      <CalendarDays className="size-3.5 shrink-0 text-muted-foreground" />
+                      <span className="truncate">{entry.dateAdded}</span>
+                    </span>
+                  </div>
+                ) : null}
+                {entry.argumentHint ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Arguments</span>
+                    <span className="flex min-w-0 items-center gap-2 text-foreground">
+                      <Tag className="size-3.5 shrink-0 text-muted-foreground" />
+                      <span className="truncate">{entry.argumentHint}</span>
+                    </span>
+                  </div>
+                ) : null}
+                {entry.trigger ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Trigger</span>
+                    <span className="flex min-w-0 items-center gap-2 text-foreground">
+                      <Sparkles className="size-3.5 shrink-0 text-muted-foreground" />
+                      <span className="truncate">{entry.trigger}</span>
+                    </span>
+                  </div>
+                ) : null}
+                {githubStars > 0 ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Stars</span>
+                    <span className="truncate text-foreground">{githubStars.toLocaleString()}</span>
+                  </div>
+                ) : null}
               </div>
-              <div className="rounded-xl border border-border bg-background px-4 py-3">
-                <p className="text-[11px] uppercase tracking-[0.16em]">Category</p>
-                <p className="mt-1 flex items-center gap-2 text-foreground">
-                  <FolderTree className="size-3.5 text-muted-foreground" />
-                  <span>{categoryLabels[entry.category] ?? entry.category}</span>
-                </p>
-              </div>
-              {entry.dateAdded ? (
-                <div className="rounded-xl border border-border bg-background px-4 py-3">
-                  <p className="text-[11px] uppercase tracking-[0.16em]">Added</p>
-                  <p className="mt-1 flex items-center gap-2 text-foreground">
-                    <CalendarDays className="size-3.5 text-muted-foreground" />
-                    <span>{entry.dateAdded}</span>
-                  </p>
-                </div>
-              ) : null}
-              {entry.argumentHint ? (
-                <div className="rounded-xl border border-border bg-background px-4 py-3">
-                  <p className="text-[11px] uppercase tracking-[0.16em]">Arguments</p>
-                  <p className="mt-1 flex items-center gap-2 text-foreground">
-                    <Tag className="size-3.5 text-muted-foreground" />
-                    <span>{entry.argumentHint}</span>
-                  </p>
-                </div>
-              ) : null}
-              {entry.trigger ? (
-                <div className="rounded-xl border border-border bg-background px-4 py-3">
-                  <p className="text-[11px] uppercase tracking-[0.16em]">Hook trigger</p>
-                  <p className="mt-1 flex items-center gap-2 text-foreground">
-                    <Sparkles className="size-3.5 text-muted-foreground" />
-                    <span>{entry.trigger}</span>
-                  </p>
-                </div>
-              ) : null}
-              {githubStars > 0 ? (
-                <div className="rounded-xl border border-border bg-background px-4 py-3">
-                  <p className="text-[11px] uppercase tracking-[0.16em]">GitHub stars</p>
-                  <p className="mt-1 text-foreground">{githubStars.toLocaleString()}</p>
-                </div>
-              ) : null}
             </div>
 
             {sourceLabel ? (
-              <div className="rounded-xl border border-border bg-background px-4 py-3 text-muted-foreground">
+              <div className="rounded-xl border border-border bg-background px-3 py-3 text-muted-foreground">
                 <p className="text-[11px] uppercase tracking-[0.16em]">Path</p>
-                <p className="mt-1 break-all text-sm text-foreground">{sourceLabel}</p>
+                <p className="mt-1 break-all text-xs text-foreground">{sourceLabel}</p>
               </div>
             ) : null}
           </div>
         </div>
 
-        <div className="surface-panel p-5">
+        <div className="surface-panel p-4">
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Related</p>
-          <div className="mt-4 space-y-3">
+          <div className="mt-3 space-y-2.5">
             {related.map((item) => (
               <Link
                 key={item.slug}
@@ -598,8 +601,10 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 <span className="detail-related-badge">
                   {categoryLabels[item.category] ?? item.category}
                 </span>
-                <p className="detail-related-title mt-2 text-sm font-medium tracking-tight">{item.title}</p>
-                <p className="detail-related-description mt-1 text-xs text-muted-foreground">
+                <p className="detail-related-title mt-2 text-sm font-medium tracking-tight">
+                  {item.title}
+                </p>
+                <p className="mt-1 overflow-hidden text-xs text-muted-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
                   {item.cardDescription || item.description}
                 </p>
               </Link>
