@@ -15,6 +15,8 @@
     "validate:content:strict": "node scripts/validate-content.mjs --strict-recommended",
     "validate:packages": "node scripts/validate-download-packages.mjs",
     "validate:submission-issue": "node scripts/validate-submission-issue.mjs",
+    "changelog:preview": "git cliff --unreleased --config .git-cliff.toml",
+    "changelog:generate": "git cliff --config .git-cliff.toml",
     "generate:readme": "node scripts/generate-readme.mjs",
     "migrate:content": "node scripts/migrate-content.mjs",
     "audit:content": "node scripts/audit-content.mjs",
