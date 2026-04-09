@@ -70,10 +70,9 @@ export default async function JobPostPage({
     <div className="container-shell space-y-8 py-12">
       <div className="space-y-4 border-b border-border/80 pb-8">
         <span className="eyebrow">Jobs</span>
-        <h1 className="section-title">Post a private B2B job listing.</h1>
+        <h1 className="section-title">Post a job to the HeyClaude board.</h1>
         <p className="max-w-3xl text-sm leading-8 text-muted-foreground">
-          Jobs are handled privately, not through public GitHub issues or PRs.
-          Choose a tier, complete checkout, then send listing details to our jobs inbox.
+          Choose a listing tier, complete checkout, and send your role details so we can publish your job quickly.
         </p>
       </div>
 
@@ -117,10 +116,10 @@ export default async function JobPostPage({
       </section>
 
       <section className="surface-panel space-y-3 p-6 text-sm leading-7 text-muted-foreground">
-        <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Workflow</p>
+        <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">How it works</p>
         <p>1. Choose your tier and complete checkout via Polar.</p>
         <p>2. Send listing details to {siteConfig.jobsEmail} using the templated email button.</p>
-        <p>3. Listings are reviewed privately and then published from D1 once approved.</p>
+        <p>3. We review your listing and publish it on the jobs board.</p>
       </section>
     </div>
   );

@@ -17,16 +17,15 @@ export function SiteFooter() {
             A GitHub-native directory for Claude agents, MCP servers, reusable skills,
             workflow hooks, commands, and practical guides.
           </p>
-          <a
-            href={`${siteConfig.githubUrl}/issues/new/choose`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground transition hover:border-primary/40"
-          >
-            Submit via GitHub
-          </a>
-          <div className="space-y-2 pt-1">
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Social</p>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <a
+              href={`${siteConfig.githubUrl}/issues/new/choose`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground transition hover:border-primary/40"
+            >
+              Submit via GitHub
+            </a>
             <div className="flex items-center gap-2">
               <a
                 href={siteConfig.githubUrl}
