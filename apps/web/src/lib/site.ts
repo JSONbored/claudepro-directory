@@ -9,6 +9,7 @@ export const siteConfig = {
   discordUrl:
     process.env.NEXT_PUBLIC_DISCORD_URL || "https://discord.com/invite/Ax3Py4YDrq",
   polarJobBoardUrl: process.env.NEXT_PUBLIC_POLAR_JOB_BOARD_URL || "/advertise",
+  polarFeaturedJobUrl: process.env.NEXT_PUBLIC_POLAR_FEATURED_JOB_URL || "/advertise",
   polarSponsoredJobUrl: process.env.NEXT_PUBLIC_POLAR_SPONSORED_JOB_URL || "/advertise",
   nav: [
     { href: "/browse", label: "Browse" },
