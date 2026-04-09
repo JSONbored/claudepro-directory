@@ -1,0 +1,55 @@
+name: README Validation
+
+on:
+  pull_request:
+    paths:
+      - "content/**"
+      - "scripts/generate-readme.mjs"
+      - "README.md"
+      - "package.json"
+      - "pnpm-lock.yaml"
+  push:
+    branches:
+      - main
+    paths:
+      - "content/**"
+      - "scripts/generate-readme.mjs"
+      - "README.md"
+      - "package.json"
+      - "pnpm-lock.yaml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Regenerate README
+        run: pnpm generate:readme
+
+      - name: Validate README is up to date
+        run: |
+          if ! git diff --quiet -- README.md; then
+            echo "README.md is out of date. Run 'pnpm generate:readme' and commit the result."
+            git --no-pager diff -- README.md
+            exit 1
+          fi
