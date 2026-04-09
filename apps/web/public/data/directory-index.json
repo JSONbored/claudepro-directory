@@ -2155,9 +2155,9 @@
     "filePath": "content/mcp/aws-services-mcp-server.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/aws-services-mcp-server.mdx",
     "repoUrl": "https://github.com/awslabs/mcp",
-    "githubStars": 8720,
-    "githubForks": 1426,
-    "repoUpdatedAt": "2026-04-09T08:16:23Z"
+    "githubStars": 9,
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "agents",
@@ -3863,8 +3863,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/clickup-mcp-server.mdx",
     "repoUrl": "https://github.com/hauptsacheNet/clickup-mcp",
     "githubStars": 42,
-    "githubForks": 16,
-    "repoUpdatedAt": "2026-04-05T09:58:26Z"
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "hooks",
@@ -6018,8 +6018,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/discord-mcp-server.mdx",
     "repoUrl": "https://github.com/saseq/discord-mcp",
     "githubStars": 255,
-    "githubForks": 55,
-    "repoUpdatedAt": "2026-04-09T08:11:01Z"
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "hooks",
@@ -12994,8 +12994,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/redis-mcp-server.mdx",
     "repoUrl": "https://github.com/redis/mcp-redis",
     "githubStars": 476,
-    "githubForks": 91,
-    "repoUpdatedAt": "2026-04-08T19:13:09Z"
+    "githubForks": null,
+    "repoUpdatedAt": null
   },
   {
     "category": "skills",
