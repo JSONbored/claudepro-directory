@@ -8,9 +8,6 @@ on:
       - "examples/content/**"
       - "package.json"
       - "pnpm-lock.yaml"
-
-permissions:
-  contents: read
   push:
     branches:
       - main
@@ -20,6 +17,9 @@ permissions:
       - "examples/content/**"
       - "package.json"
       - "pnpm-lock.yaml"
+
+permissions:
+  contents: read
 
 jobs:
   validate-content:
