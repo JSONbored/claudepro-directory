@@ -6,9 +6,9 @@ import {
   AlertTriangle,
   BookOpen,
   CalendarDays,
+  Download,
   FileCode2,
   FolderTree,
-  Link as LinkIcon,
   ShieldCheck,
   Sparkles,
   Tag,
@@ -173,11 +173,6 @@ function getDownloadHref(downloadUrl: string) {
     return `/api/download?asset=${encodeURIComponent(downloadUrl)}`;
   }
   return downloadUrl;
-}
-
-function summarizeSha256(value: string) {
-  if (value.length <= 24) return value;
-  return `${value.slice(0, 16)}...${value.slice(-12)}`;
 }
 
 export default async function DetailPage({ params }: DetailPageProps) {
@@ -480,31 +475,39 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 <a
                   href={getDownloadHref(entry.downloadUrl)}
                   download={entry.downloadUrl.startsWith("/downloads/") ? "" : undefined}
-                  className="flex items-center gap-2 rounded-xl border border-primary/50 bg-primary px-4 py-3 text-primary-foreground transition hover:brightness-105"
+                  className="group flex items-center justify-between gap-3 rounded-xl border border-primary/60 bg-primary px-4 py-3 text-primary-foreground shadow-sm transition hover:border-primary hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  <LinkIcon className="size-4 text-primary-foreground" />
-                  <span>Download package</span>
+                  <span className="flex items-center gap-2">
+                    <Download className="size-4 text-primary-foreground" />
+                    <span className="font-medium">Download package</span>
+                  </span>
+                  <span className="rounded-full border border-primary-foreground/30 bg-primary-foreground/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-primary-foreground/90">
+                    {entry.category === "skills" ? "ZIP" : "MCPB"}
+                  </span>
                 </a>
 
                 {entry.downloadTrust === "first-party" ? (
-                  <div className="rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-xs leading-6 text-foreground">
-                    <p className="flex items-center gap-2 font-medium text-primary">
+                  <div className="rounded-xl border border-primary/35 bg-card/85 p-3 text-xs leading-6 text-foreground">
+                    <p className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-primary">
                       <ShieldCheck className="size-3.5" />
                       <span>Maintainer-verified package</span>
                     </p>
                     {entry.downloadSha256 ? (
-                      <div className="mt-2 rounded-lg border border-border/70 bg-background/80 p-2">
-                        <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                      <div className="mt-2 rounded-lg border border-border/80 bg-background/90 p-2.5">
+                        <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                           SHA256
                         </p>
-                        <div className="mt-1 flex items-center justify-between gap-2">
-                          <code className="truncate text-[11px] text-foreground">
-                            {summarizeSha256(entry.downloadSha256)}
-                          </code>
+                        <code className="mt-1 block break-all font-mono text-[11px] text-foreground/95">
+                          {entry.downloadSha256}
+                        </code>
+                        <div className="mt-2 flex items-center justify-between gap-2">
+                          <p className="text-[10px] text-muted-foreground">
+                            Verify this hash after download.
+                          </p>
                           <EntryCopyButton
                             text={entry.downloadSha256}
                             label="Copy SHA256"
-                            className="rounded-md border border-border px-2 py-1 text-[10px] text-foreground transition hover:border-primary/40"
+                            className="rounded-md border border-border bg-background px-2 py-1 text-[10px] text-foreground transition hover:border-primary/40"
                           />
                         </div>
                       </div>
