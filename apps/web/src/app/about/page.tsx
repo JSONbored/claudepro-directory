@@ -64,6 +64,12 @@ export default function AboutPage() {
               <Link href="/jobs" className="block rounded-xl border border-border bg-background px-4 py-3">
                 Post or browse jobs
               </Link>
+              <a
+                href={`mailto:${siteConfig.jobsEmail}`}
+                className="block rounded-xl border border-border bg-background px-4 py-3"
+              >
+                Contact: {siteConfig.jobsEmail}
+              </a>
             </div>
           </div>
 

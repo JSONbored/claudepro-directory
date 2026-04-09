@@ -11,7 +11,7 @@
 
 Configured in [`wrangler.jsonc`](./wrangler.jsonc):
 
-- `VOTES_DB` (D1) for durable upvotes.
+- `VOTES_DB` (D1) for durable upvotes and private jobs listings.
 - Shared between `prod` and `dev` environments in the current setup.
 
 ## D1 setup
@@ -36,6 +36,29 @@ Local migration:
 pnpm --filter web db:migrate:local
 ```
 
+Current migrations include:
+- `0001_votes.sql` for upvotes
+- `0002_jobs.sql` for private jobs listing records
+
+## OpenNext build/deploy commands
+
+These are the project-standard commands:
+
+```bash
+pnpm --filter web deploy
+```
+
+That command runs:
+1. content index generation
+2. `opennextjs-cloudflare build`
+3. `opennextjs-cloudflare deploy`
+
+For local Worker-runtime preview:
+
+```bash
+pnpm --filter web preview
+```
+
 ## Newsletter (Resend)
 
 Set secrets/vars in Cloudflare:
@@ -53,11 +76,13 @@ Optional backward-compatible fallback:
 pnpm --filter web exec wrangler secret put RESEND_AUDIENCE_ID
 ```
 
-Public variable (non-secret) for social link:
+Public vars (non-secret), set in Cloudflare dashboard for each worker environment:
 
-```bash
-pnpm --filter web exec wrangler secret put NEXT_PUBLIC_DISCORD_URL
-```
+- `NEXT_PUBLIC_DISCORD_URL`
+- `NEXT_PUBLIC_TWITTER_URL`
+- `NEXT_PUBLIC_POLAR_SPONSORED_JOB_URL`
+- `NEXT_PUBLIC_POLAR_FEATURED_JOB_URL`
+- `NEXT_PUBLIC_POLAR_JOB_BOARD_URL`
 
 For local development, copy `.dev.vars.example` to `.dev.vars` and fill values.
 
@@ -66,3 +91,15 @@ For local development, copy `.dev.vars.example` to `.dev.vars` and fill values.
 - `next.config.mjs` initializes Cloudflare local development via `initOpenNextCloudflareForDev()`.
 - Route handlers avoid `export const runtime = "edge"` for OpenNext Cloudflare compatibility.
 - Static asset cache headers are set in `public/_headers`.
+
+## Git-integrated Cloudflare worker settings
+
+If configuring deployments from the Cloudflare dashboard (Workers + Git):
+
+- Build command: `pnpm --filter web deploy`
+- Root directory: repository root
+- Build system Node.js version: `22`
+- Package manager: `pnpm`
+- Production branch: `main` (for `heyclaude-prod`)
+- Dev worker (`heyclaude-dev`): map to dedicated development branch
+- Environment vars/secrets: configure per worker environment in Cloudflare dashboard

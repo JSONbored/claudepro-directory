@@ -17,6 +17,13 @@ export default function SubmitPage() {
               This stays intentionally lightweight. Fill out the form and we open a
               category-specific GitHub issue template with schema-aligned fields.
             </p>
+            <p className="max-w-xl text-sm leading-7 text-muted-foreground">
+              Job listings are private and handled separately through the{" "}
+              <a href="/jobs/post" className="text-primary underline underline-offset-4">
+                jobs intake flow
+              </a>
+              .
+            </p>
           </div>
 
           <div className="submit-orb-wrap" aria-hidden="true">

@@ -16,6 +16,10 @@ jobs:
   validate-submission:
     if: contains(join(github.event.issue.labels.*.name, ','), 'submission')
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: submission-issue-${{ github.event.issue.number }}
+      cancel-in-progress: true
 
     steps:
       - name: Checkout

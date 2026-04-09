@@ -5,6 +5,7 @@ export const siteConfig = {
     "A community-built directory for Claude agents, MCP servers, skills, rules, commands, hooks, guides, collections, and jobs.",
   url: "https://heyclau.de",
   githubUrl: "https://github.com/JSONbored/claudepro-directory",
+  jobsEmail: "jobs@heyclau.de",
   twitterUrl: process.env.NEXT_PUBLIC_TWITTER_URL || "#",
   discordUrl:
     process.env.NEXT_PUBLIC_DISCORD_URL || "https://discord.com/invite/Ax3Py4YDrq",

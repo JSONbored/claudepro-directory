@@ -73,7 +73,7 @@ export function NewsletterSignup() {
           disabled={status === "loading"}
           className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 text-sm text-foreground transition hover:border-primary/45 disabled:cursor-not-allowed disabled:opacity-65"
         >
-          {status === "loading" ? "Joining..." : status === "success" ? (<><Check className="size-4 text-emerald-500" />Subscribed</>) : "Get updates"}
+          {status === "loading" ? "Joining..." : status === "success" ? (<><Check className="size-4 text-emerald-500" />Joined</>) : "Join"}
         </button>
       </form>
     </div>

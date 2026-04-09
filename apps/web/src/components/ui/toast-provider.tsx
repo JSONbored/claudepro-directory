@@ -46,6 +46,16 @@ function getToastTitleClass(variant: ToastVariant) {
   return "text-primary";
 }
 
+function getToastSurfaceClass(variant: ToastVariant) {
+  if (variant === "success") {
+    return "border-emerald-500/45 bg-card/95 shadow-[0_10px_30px_-16px_color-mix(in_oklab,var(--chart-2)_45%,transparent)]";
+  }
+  if (variant === "error") {
+    return "border-destructive/45 bg-card/95 shadow-[0_10px_30px_-16px_color-mix(in_oklab,var(--destructive)_40%,transparent)]";
+  }
+  return "border-primary/45 bg-card/95 shadow-[0_10px_30px_-16px_color-mix(in_oklab,var(--primary)_40%,transparent)]";
+}
+
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
@@ -76,9 +86,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={toast.id}
             className={cn(
-              "pointer-events-auto flex items-start gap-2.5 rounded-xl border border-border/90 bg-card/95 px-4 py-3 shadow-xl backdrop-blur transition toast-enter",
+              "pointer-events-auto flex items-start gap-2.5 rounded-xl px-4 py-3 backdrop-blur transition toast-enter",
+              getToastSurfaceClass(toast.variant),
               toast.leaving && "toast-exit",
-              toast.variant === "info" && "bg-card/95"
             )}
           >
             {getToastIcon(toast.variant)}

@@ -4,6 +4,8 @@ import { ArrowUpRight, Building2, CalendarDays, MapPin, Wallet } from "lucide-re
 
 import { getJobBySlug } from "@/lib/jobs";
 
+export const dynamic = "force-dynamic";
+
 type JobDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
@@ -21,7 +23,7 @@ function formatDate(value?: string) {
 
 export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const { slug } = await params;
-  const job = getJobBySlug(slug);
+  const job = await getJobBySlug(slug);
   if (!job) notFound();
 
   return (
@@ -96,7 +98,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           Apply now
         </a>
         <Link
-          href="/advertise"
+          href="/jobs/post"
           className="inline-flex items-center rounded-full border border-border bg-card px-5 py-2.5 text-sm font-medium text-foreground transition hover:border-primary/35"
         >
           Post a job

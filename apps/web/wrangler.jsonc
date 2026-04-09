@@ -33,6 +33,13 @@
       "service": "heyclaude-prod"
     }
   ],
+  "vars": {
+    "NEXT_PUBLIC_DISCORD_URL": "https://discord.com/invite/Ax3Py4YDrq",
+    "NEXT_PUBLIC_TWITTER_URL": "#",
+    "NEXT_PUBLIC_POLAR_SPONSORED_JOB_URL": "/jobs/post?tier=sponsored",
+    "NEXT_PUBLIC_POLAR_FEATURED_JOB_URL": "/jobs/post?tier=featured",
+    "NEXT_PUBLIC_POLAR_JOB_BOARD_URL": "/jobs/post?tier=standard"
+  },
   "d1_databases": [
     {
       "binding": "VOTES_DB",
@@ -44,6 +51,13 @@
   "env": {
     "dev": {
       "name": "heyclaude-dev",
+      "vars": {
+        "NEXT_PUBLIC_DISCORD_URL": "https://discord.com/invite/Ax3Py4YDrq",
+        "NEXT_PUBLIC_TWITTER_URL": "#",
+        "NEXT_PUBLIC_POLAR_SPONSORED_JOB_URL": "/jobs/post?tier=sponsored",
+        "NEXT_PUBLIC_POLAR_FEATURED_JOB_URL": "/jobs/post?tier=featured",
+        "NEXT_PUBLIC_POLAR_JOB_BOARD_URL": "/jobs/post?tier=standard"
+      },
       "services": [
         {
           "binding": "WORKER_SELF_REFERENCE",

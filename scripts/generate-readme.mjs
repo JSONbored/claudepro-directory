@@ -76,6 +76,7 @@ const readme = `# HeyClaude
 
 **Discover and share the best Claude configurations**
 ${total}+ file-backed entries covering agents, MCP servers, skills, hooks, rules, commands, guides, collections, and statuslines.
+Formerly Claude Pro Directory.
 
 [🌐 Website](https://heyclau.de) • [💼 Repository](https://github.com/JSONbored/claudepro-directory) • [💬 Discussions](https://github.com/JSONbored/claudepro-directory/discussions)
 
@@ -88,15 +89,38 @@ HeyClaude is a fast, GitHub-native directory for Claude assets.
 - No paid database required for the public site
 - Content lives in-repo as files
 - Community submissions can flow through GitHub
+- Jobs are handled privately (B2B intake), not via public GitHub issues
 - The site doubles as an awesome-list and a browsable directory
 
 ## Quick Start
 
 ### For contributors
 
+Option A (easiest): open [Submit](https://heyclau.de/submit) and use the category issue form.
+
+Option B (direct): open a category issue form in GitHub under \`.github/ISSUE_TEMPLATE\`.
+
+Option C (advanced): commit content files directly.
+
 1. Add or update a file under \`content/<category>/\`
 2. Run \`pnpm generate:readme\`
-3. Commit the README alongside your content changes
+3. Run \`pnpm validate:content\` and \`pnpm audit:content\`
+4. Commit the README alongside your content changes
+
+### Schema references
+
+- Examples: [examples/content/README.md](examples/content/README.md)
+- Issue forms: [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE)
+- Jobs (private flow): [docs/jobs-listings-private-flow.md](docs/jobs-listings-private-flow.md)
+- Package trust model: [docs/package-security-policy.md](docs/package-security-policy.md)
+
+---
+
+## Project Docs
+
+- Security policy: [SECURITY.md](SECURITY.md)
+- Deployment guide: [apps/web/DEPLOYMENT.md](apps/web/DEPLOYMENT.md)
+- License: [LICENSE](LICENSE)
 
 ---
 

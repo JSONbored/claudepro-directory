@@ -25,16 +25,7 @@ export function SiteFooter() {
           >
             Submit via GitHub
           </a>
-        </div>
-        <div className="space-y-3 text-sm text-muted-foreground">
-          <p className="font-medium text-foreground">Navigation</p>
-          <Link href="/browse" className="block transition hover:text-foreground">Browse</Link>
-          <Link href="/jobs" className="block transition hover:text-foreground">Jobs</Link>
-          <Link href="/about" className="block transition hover:text-foreground">About</Link>
-          <Link href="/submit" className="block transition hover:text-foreground">Submit</Link>
-        </div>
-        <div className="space-y-3 text-sm text-muted-foreground">
-          <div className="space-y-2">
+          <div className="space-y-2 pt-1">
             <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Social</p>
             <div className="flex items-center gap-2">
               <a
@@ -66,15 +57,22 @@ export function SiteFooter() {
               </a>
             </div>
           </div>
-          <div className="space-y-2 pt-2">
-            <p className="font-medium text-foreground">Project</p>
-            <a href={siteConfig.githubUrl} target="_blank" rel="noreferrer" className="block transition hover:text-foreground">
-              GitHub
-            </a>
-            <a href={`${siteConfig.githubUrl}/issues`} target="_blank" rel="noreferrer" className="block transition hover:text-foreground">
-              Issues
-            </a>
-          </div>
+        </div>
+        <div className="space-y-3 text-sm text-muted-foreground">
+          <p className="font-medium text-foreground">Navigation</p>
+          <Link href="/browse" className="block transition hover:text-foreground">Browse</Link>
+          <Link href="/jobs" className="block transition hover:text-foreground">Jobs</Link>
+          <Link href="/about" className="block transition hover:text-foreground">About</Link>
+          <Link href="/submit" className="block transition hover:text-foreground">Submit</Link>
+        </div>
+        <div className="space-y-3 text-sm text-muted-foreground">
+          <p className="font-medium text-foreground">Project</p>
+          <a href={siteConfig.githubUrl} target="_blank" rel="noreferrer" className="block transition hover:text-foreground">
+            GitHub
+          </a>
+          <a href={`${siteConfig.githubUrl}/issues`} target="_blank" rel="noreferrer" className="block transition hover:text-foreground">
+            Issues
+          </a>
         </div>
         <NewsletterSignup />
       </div>
