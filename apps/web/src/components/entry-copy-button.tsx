@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, Copy } from "lucide-react";
 
+import { useToast } from "@/components/ui/toast-provider";
 import type { ContentEntry } from "@/lib/content";
 import { getCopyText } from "@/lib/entry-presentation";
 
@@ -24,6 +25,7 @@ export function EntryCopyButton({
   title
 }: EntryCopyButtonProps) {
   const [copied, setCopied] = useState(false);
+  const { pushToast } = useToast();
 
   useEffect(() => {
     if (!copied) return;
@@ -34,8 +36,21 @@ export function EntryCopyButton({
   const handleCopy = async () => {
     const value = text ?? (entry ? getCopyText(entry) : "");
     if (!value) return;
-    await navigator.clipboard.writeText(value);
-    setCopied(true);
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      pushToast({
+        variant: "success",
+        title: "Copied",
+        description: label
+      });
+    } catch {
+      pushToast({
+        variant: "error",
+        title: "Copy failed",
+        description: "Clipboard access was blocked by the browser."
+      });
+    }
   };
 
   return (
@@ -46,7 +61,7 @@ export function EntryCopyButton({
       title={title ?? label}
       aria-label={title ?? label}
     >
-      {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+      {copied ? <Check className="size-4 text-emerald-500 copy-check-icon" /> : <Copy className="size-4" />}
       {iconOnly ? <span className="sr-only">{copied ? "Copied" : label}</span> : copied ? "Copied" : label}
     </button>
   );

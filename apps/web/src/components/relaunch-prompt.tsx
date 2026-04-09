@@ -31,7 +31,7 @@ export function RelaunchPrompt() {
   if (!visible) return null;
 
   return (
-    <aside className="fixed bottom-4 left-4 z-[78] w-[min(26rem,calc(100vw-1.5rem))] rounded-2xl border border-primary/40 bg-card/95 p-4 shadow-2xl backdrop-blur toast-enter">
+    <aside className="fixed bottom-4 left-4 z-[78] w-[min(26rem,calc(100vw-1.5rem))] rounded-2xl border-2 border-primary/55 bg-card/95 p-4 shadow-2xl backdrop-blur toast-enter">
       <button
         type="button"
         onClick={dismiss}
@@ -45,7 +45,7 @@ export function RelaunchPrompt() {
         Relaunched
       </p>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">
-        HeyClaude is back with faster pages, persistent upvotes, and cleaner category-aware detail views.
+        HeyClaude is a rebirth of Claude Pro Directory: faster pages, persistent upvotes, and cleaner category-aware detail views.
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         <Link

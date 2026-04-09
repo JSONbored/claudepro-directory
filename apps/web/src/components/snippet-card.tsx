@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Check, ChevronDown, ChevronUp, Copy } from "lucide-react";
 
+import { useToast } from "@/components/ui/toast-provider";
+
 type SnippetCardProps = {
   eyebrow: string;
   title: string;
@@ -13,6 +15,7 @@ type SnippetCardProps = {
 export function SnippetCard({ eyebrow, title, code, language = "text" }: SnippetCardProps) {
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const { pushToast } = useToast();
   const lineCount = code.split("\n").length;
   const canCollapse = lineCount > 18;
 
@@ -23,8 +26,21 @@ export function SnippetCard({ eyebrow, title, code, language = "text" }: Snippet
   }, [copied]);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(code);
-    setCopied(true);
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      pushToast({
+        variant: "success",
+        title: "Copied",
+        description: title
+      });
+    } catch {
+      pushToast({
+        variant: "error",
+        title: "Copy failed",
+        description: "Clipboard access was blocked by the browser."
+      });
+    }
   };
 
   return (
@@ -51,7 +67,7 @@ export function SnippetCard({ eyebrow, title, code, language = "text" }: Snippet
             </button>
           ) : null}
           <button type="button" onClick={handleCopy} className="directory-link-chip">
-            {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+            {copied ? <Check className="copy-check-icon size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
             {copied ? "Copied" : "Copy"}
           </button>
         </div>

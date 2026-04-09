@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Info, TriangleAlert } from "lucide-react";
+import { CheckCircle2, Info, TriangleAlert, X } from "lucide-react";
 import {
   createContext,
   type ReactNode,
@@ -59,6 +59,15 @@ function getToastSurfaceClass(variant: ToastVariant) {
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
+  const dismissToast = useCallback((id: string) => {
+    setToasts((current) =>
+      current.map((item) => (item.id === id ? { ...item, leaving: true } : item))
+    );
+    window.setTimeout(() => {
+      setToasts((current) => current.filter((item) => item.id !== id));
+    }, 220);
+  }, []);
+
   const pushToast = useCallback((toast: ToastInput) => {
     const id = crypto.randomUUID();
     const variant = toast.variant ?? "info";
@@ -66,15 +75,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       ...current,
       { id, title: toast.title, description: toast.description, variant, leaving: false }
     ]);
-    window.setTimeout(() => {
-      setToasts((current) =>
-        current.map((item) => (item.id === id ? { ...item, leaving: true } : item))
-      );
-    }, 2200);
-    window.setTimeout(() => {
-      setToasts((current) => current.filter((item) => item.id !== id));
-    }, 2600);
-  }, []);
+    window.setTimeout(() => dismissToast(id), 2200);
+  }, [dismissToast]);
 
   const value = useMemo(() => ({ pushToast }), [pushToast]);
 
@@ -85,6 +87,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
+            role={toast.variant === "error" ? "alert" : "status"}
+            aria-live={toast.variant === "error" ? "assertive" : "polite"}
+            aria-atomic="true"
             className={cn(
               "pointer-events-auto flex items-start gap-2.5 rounded-xl px-4 py-3 backdrop-blur transition toast-enter",
               getToastSurfaceClass(toast.variant),
@@ -92,7 +97,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             )}
           >
             {getToastIcon(toast.variant)}
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className={cn("text-sm font-medium", getToastTitleClass(toast.variant))}>
                 {toast.title}
               </p>
@@ -100,6 +105,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 <p className="mt-0.5 text-xs text-muted-foreground">{toast.description}</p>
               ) : null}
             </div>
+            <button
+              type="button"
+              aria-label="Dismiss notification"
+              onClick={() => dismissToast(toast.id)}
+              className="inline-flex size-6 items-center justify-center rounded-md border border-border/70 bg-background/60 text-muted-foreground transition hover:border-primary/35 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <X className="size-3.5" />
+            </button>
           </div>
         ))}
       </div>
