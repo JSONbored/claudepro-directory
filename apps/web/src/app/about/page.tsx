@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FileText, ShieldCheck, Zap } from "lucide-react";
 
 import { siteConfig } from "@/lib/site";
 
@@ -81,6 +82,26 @@ export default function AboutPage() {
                 Strong SEO, clean metadata, and low-friction contributions.
               </li>
             </ul>
+          </div>
+
+          <div className="surface-panel p-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              Production status
+            </p>
+            <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+              <p className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3">
+                <Zap className="size-4 text-primary" />
+                Cloudflare Workers runtime with OpenNext deployment.
+              </p>
+              <p className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3">
+                <ShieldCheck className="size-4 text-primary" />
+                D1-backed persistent upvotes and package trust metadata.
+              </p>
+              <p className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3">
+                <FileText className="size-4 text-primary" />
+                GitHub Issue Forms + schema references for clean submissions.
+              </p>
+            </div>
           </div>
         </div>
       </section>

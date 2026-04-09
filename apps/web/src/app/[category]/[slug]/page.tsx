@@ -22,7 +22,7 @@ import { EntryCopyButton } from "@/components/entry-copy-button";
 import { EntryChecklistCard } from "@/components/entry-checklist-card";
 import { GitHubMark } from "@/components/icons/github-mark";
 import { SnippetCard } from "@/components/snippet-card";
-import { getDirectoryEntries, getDirectoryEntriesByCategory, getEntry } from "@/lib/content";
+import { getDirectoryEntries, getEntry } from "@/lib/content";
 import { categoryLabels } from "@/lib/site";
 
 type DetailPageProps = {
@@ -177,6 +177,15 @@ function getDownloadHref(downloadUrl: string) {
   return downloadUrl;
 }
 
+function hashString(value: string) {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(index);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
 export default async function DetailPage({ params }: DetailPageProps) {
   const { category, slug } = await params;
   const entry = await getEntry(category, slug);
@@ -184,9 +193,34 @@ export default async function DetailPage({ params }: DetailPageProps) {
   if (!entry) notFound();
 
   const allEntries = await getDirectoryEntries();
-  const related = (await getDirectoryEntriesByCategory(category))
-    .filter((item) => item.slug !== slug)
-    .slice(0, 2);
+  const relatedPool = allEntries.filter((item) => item.slug !== slug);
+  const entryTagSet = new Set((entry.tags ?? []).map((tag) => tag.toLowerCase()));
+  const anchorHash = hashString(`${entry.category}:${entry.slug}`);
+  const related = relatedPool
+    .map((item) => {
+      const sharedTagCount = (item.tags ?? []).reduce((count, tag) => {
+        return entryTagSet.has(tag.toLowerCase()) ? count + 1 : count;
+      }, 0);
+      const sameCategory = item.category === entry.category ? 1 : 0;
+      const hasDocs = item.documentationUrl ? 1 : 0;
+      const hasInstall = item.installCommand ? 1 : 0;
+      const dateScore = item.dateAdded ? new Date(item.dateAdded).getTime() : 0;
+      const closeness = Math.abs(hashString(`${item.category}:${item.slug}`) - anchorHash);
+
+      return {
+        item,
+        score: sharedTagCount * 8 + sameCategory * 3 + hasDocs + hasInstall,
+        dateScore,
+        closeness
+      };
+    })
+    .sort((left, right) => {
+      if (right.score !== left.score) return right.score - left.score;
+      if (right.dateScore !== left.dateScore) return right.dateScore - left.dateScore;
+      return left.closeness - right.closeness;
+    })
+    .slice(0, 2)
+    .map((entry) => entry.item);
   const collectionItems =
     entry.category === "collections" && Array.isArray(entry.items)
       ? entry.items

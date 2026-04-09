@@ -35,6 +35,13 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
     });
   }, [filteredJobs]);
 
+  const formatPosted = (value?: string) => {
+    if (!value) return null;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
+
   return (
     <div className="space-y-5">
       <div className="max-w-3xl">
@@ -77,6 +84,8 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
                   <span>{job.company}</span>
                   {job.type ? <span>· {job.type}</span> : null}
                   <span>· {job.location}</span>
+                  {job.compensation ? <span>· {job.compensation}</span> : null}
+                  {job.postedAt ? <span>· {formatPosted(job.postedAt)}</span> : null}
                 </div>
                 <h2 className="text-2xl font-semibold tracking-tight text-foreground">
                   {job.title}

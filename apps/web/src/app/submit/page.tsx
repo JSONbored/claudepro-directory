@@ -1,4 +1,5 @@
 import { SubmitForm } from "@/components/submit-form";
+import { siteConfig } from "@/lib/site";
 
 export default function SubmitPage() {
   return (
@@ -40,6 +41,36 @@ export default function SubmitPage() {
             If you are sharing something installable, include the real command or the
             exact config somebody would need to use it. The goal is to keep new entries
             useful on day one, not just listed.
+          </div>
+
+          <div className="rounded-2xl border border-border/80 bg-card/70 px-5 py-4 text-sm leading-7 text-muted-foreground">
+            <p className="font-medium text-foreground">Contributor references</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <a
+                href={`${siteConfig.githubUrl}/tree/main/examples/content`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-xs text-foreground transition hover:border-primary/40"
+              >
+                Content examples
+              </a>
+              <a
+                href={`${siteConfig.githubUrl}/blob/main/examples/content/SCHEMA.md`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-xs text-foreground transition hover:border-primary/40"
+              >
+                Schema reference
+              </a>
+              <a
+                href={`${siteConfig.githubUrl}/issues/new/choose`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-xs text-foreground transition hover:border-primary/40"
+              >
+                Issue templates
+              </a>
+            </div>
           </div>
         </div>
       </section>
