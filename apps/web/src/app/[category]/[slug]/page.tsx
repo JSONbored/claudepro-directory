@@ -168,6 +168,18 @@ function getMetadataFallback(entry: Awaited<ReturnType<typeof getEntry>>) {
   };
 }
 
+function getDownloadHref(downloadUrl: string) {
+  if (downloadUrl.startsWith("/downloads/")) {
+    return `/api/download?asset=${encodeURIComponent(downloadUrl)}`;
+  }
+  return downloadUrl;
+}
+
+function summarizeSha256(value: string) {
+  if (value.length <= 24) return value;
+  return `${value.slice(0, 16)}...${value.slice(-12)}`;
+}
+
 export default async function DetailPage({ params }: DetailPageProps) {
   const { category, slug } = await params;
   const entry = await getEntry(category, slug);
@@ -466,32 +478,45 @@ export default async function DetailPage({ params }: DetailPageProps) {
             {entry.downloadUrl ? (
               <div className="space-y-2">
                 <a
-                  href={entry.downloadUrl}
-                  className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 transition hover:border-primary/40"
+                  href={getDownloadHref(entry.downloadUrl)}
+                  download={entry.downloadUrl.startsWith("/downloads/") ? "" : undefined}
+                  className="flex items-center gap-2 rounded-xl border border-primary/50 bg-primary px-4 py-3 text-primary-foreground transition hover:brightness-105"
                 >
-                  <LinkIcon className="size-4 text-muted-foreground" />
+                  <LinkIcon className="size-4 text-primary-foreground" />
                   <span>Download package</span>
                 </a>
 
                 {entry.downloadTrust === "first-party" ? (
-                  <div className="rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-4 py-3 text-xs leading-6 text-emerald-100">
-                    <p className="flex items-center gap-2 font-medium text-emerald-200">
+                  <div className="rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-xs leading-6 text-foreground">
+                    <p className="flex items-center gap-2 font-medium text-primary">
                       <ShieldCheck className="size-3.5" />
                       <span>Maintainer-verified package</span>
                     </p>
                     {entry.downloadSha256 ? (
-                      <p className="mt-1 break-all text-[11px] text-emerald-100/90">
-                        SHA256: {entry.downloadSha256}
-                      </p>
+                      <div className="mt-2 rounded-lg border border-border/70 bg-background/80 p-2">
+                        <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                          SHA256
+                        </p>
+                        <div className="mt-1 flex items-center justify-between gap-2">
+                          <code className="truncate text-[11px] text-foreground">
+                            {summarizeSha256(entry.downloadSha256)}
+                          </code>
+                          <EntryCopyButton
+                            text={entry.downloadSha256}
+                            label="Copy SHA256"
+                            className="rounded-md border border-border px-2 py-1 text-[10px] text-foreground transition hover:border-primary/40"
+                          />
+                        </div>
+                      </div>
                     ) : null}
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-xs leading-6 text-amber-100">
-                    <p className="flex items-center gap-2 font-medium text-amber-200">
+                  <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-xs leading-6 text-foreground">
+                    <p className="flex items-center gap-2 font-medium text-destructive">
                       <AlertTriangle className="size-3.5" />
                       <span>External package (unverified)</span>
                     </p>
-                    <p className="mt-1 text-[11px] text-amber-100/90">
+                    <p className="mt-1 text-[11px] text-muted-foreground">
                       Review source code and permissions before running downloadable files.
                     </p>
                   </div>
