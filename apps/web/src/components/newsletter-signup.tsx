@@ -1,10 +1,20 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { Check } from "lucide-react";
+import { FormEvent, useEffect, useState } from "react";
+
+import { useToast } from "@/components/ui/toast-provider";
 
 export function NewsletterSignup() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const { pushToast } = useToast();
+
+  useEffect(() => {
+    if (status !== "success") return;
+    const timer = window.setTimeout(() => setStatus("idle"), 2200);
+    return () => window.clearTimeout(timer);
+  }, [status]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -27,8 +37,18 @@ export function NewsletterSignup() {
       if (!response.ok) throw new Error(`subscribe failed: ${response.status}`);
       setStatus("success");
       setEmail("");
+      pushToast({
+        variant: "success",
+        title: "Subscribed",
+        description: "You are on the list for launch and major updates."
+      });
     } catch {
       setStatus("error");
+      pushToast({
+        variant: "error",
+        title: "Subscription failed",
+        description: "Could not subscribe right now. Try again in a bit."
+      });
     }
   };
 
@@ -46,22 +66,16 @@ export function NewsletterSignup() {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="you@example.com"
-          className="h-10 rounded-xl border border-border bg-background px-3 text-sm outline-none transition focus:border-primary"
+          className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none transition focus:border-primary sm:min-w-[17rem]"
         />
         <button
           type="submit"
           disabled={status === "loading"}
-          className="h-10 rounded-xl border border-border bg-card px-4 text-sm text-foreground transition hover:border-primary/45 disabled:cursor-not-allowed disabled:opacity-65"
+          className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 text-sm text-foreground transition hover:border-primary/45 disabled:cursor-not-allowed disabled:opacity-65"
         >
-          {status === "loading" ? "Joining..." : "Join list"}
+          {status === "loading" ? "Joining..." : status === "success" ? (<><Check className="size-4 text-emerald-500" />Subscribed</>) : "Get updates"}
         </button>
       </form>
-      {status === "success" ? (
-        <p className="text-xs text-primary">You are on the list.</p>
-      ) : null}
-      {status === "error" ? (
-        <p className="text-xs text-destructive">Could not subscribe right now. Try again in a bit.</p>
-      ) : null}
     </div>
   );
 }
