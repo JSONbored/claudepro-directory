@@ -231,7 +231,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
 
     return hasProse || hasCode;
   });
-  const sidebarSections = visibleSections.slice(0, 6);
+  const sidebarSections = visibleSections;
   const topFacts: Array<{ label: string; value: string }> = [
     entry.author ? { label: "Author", value: entry.author } : null,
     entry.dateAdded ? { label: "Added", value: entry.dateAdded } : null,
@@ -410,11 +410,6 @@ export default async function DetailPage({ params }: DetailPageProps) {
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">On this page</p>
             <div className="mt-3">
               <DetailToc sections={sidebarSections} />
-              {visibleSections.length > sidebarSections.length ? (
-                <p className="pt-2 text-xs text-muted-foreground">
-                  {visibleSections.length - sidebarSections.length} more sections in content
-                </p>
-              ) : null}
             </div>
           </div>
         ) : null}
@@ -429,24 +424,6 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 title="Copy full asset"
                 className="flex h-9 items-center justify-center rounded-lg border border-border bg-background text-foreground transition hover:border-primary/40"
               />
-              {entry.installCommand ? (
-                <EntryCopyButton
-                  text={entry.installCommand}
-                  label="Copy install command"
-                  iconOnly
-                  title="Copy install command"
-                  className="flex h-9 items-center justify-center rounded-lg border border-border bg-background text-foreground transition hover:border-primary/40"
-                />
-              ) : null}
-              {entry.configSnippet ? (
-                <EntryCopyButton
-                  text={entry.configSnippet}
-                  label="Copy Claude config"
-                  iconOnly
-                  title="Copy Claude config"
-                  className="flex h-9 items-center justify-center rounded-lg border border-border bg-background text-foreground transition hover:border-primary/40"
-                />
-              ) : null}
               <a
                 href={entry.githubUrl}
                 target="_blank"
@@ -490,7 +467,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
                     <p className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-primary">
                       <CheckCircle2 className="size-3.5" />
                       <ShieldCheck className="size-3.5" />
-                      <span>Maintainer-verified package</span>
+                      <span>Verified package</span>
                     </p>
                     {entry.downloadSha256 ? (
                       <div className="mt-2 rounded-lg border border-border/80 bg-background/90 p-2">
@@ -527,8 +504,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
             ) : null}
 
             <div className="rounded-xl border border-border bg-background px-3 py-3 text-sm text-muted-foreground">
-              <p className="text-[11px] uppercase tracking-[0.16em]">Details</p>
-              <div className="mt-2 space-y-1.5">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Author</span>
                   <span className="flex min-w-0 items-center gap-2 text-foreground">
