@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { hasBodyWithinLimit, isAllowedOrigin, isRateLimited } from "@/lib/api-security";
 import { getVotesDb, isValidEntryKey, toggleVote } from "@/lib/votes";
 
 type TogglePayload = {
@@ -9,6 +10,18 @@ type TogglePayload = {
 };
 
 export async function POST(request: Request) {
+  if (!isAllowedOrigin(request)) {
+    return NextResponse.json({ error: "forbidden_origin" }, { status: 403 });
+  }
+
+  if (!hasBodyWithinLimit(request, 8 * 1024)) {
+    return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
+  }
+
+  if (isRateLimited({ request, scope: "votes-toggle", limit: 45, windowMs: 60_000 })) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
   let payload: TogglePayload = {};
   try {
     payload = (await request.json()) as TogglePayload;

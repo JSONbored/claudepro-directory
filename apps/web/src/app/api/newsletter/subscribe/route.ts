@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { hasBodyWithinLimit, isAllowedOrigin, isRateLimited } from "@/lib/api-security";
 
 type SubscribePayload = {
   email?: string;
@@ -9,6 +10,18 @@ type SubscribePayload = {
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
+  if (!isAllowedOrigin(request)) {
+    return NextResponse.json({ error: "forbidden_origin" }, { status: 403 });
+  }
+
+  if (!hasBodyWithinLimit(request, 8 * 1024)) {
+    return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
+  }
+
+  if (isRateLimited({ request, scope: "newsletter-subscribe", limit: 15, windowMs: 60_000 })) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
   let payload: SubscribePayload = {};
 
   try {

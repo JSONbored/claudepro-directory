@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { Webhook } from "svix";
+import { hasBodyWithinLimit } from "@/lib/api-security";
 
 type ResendEvent = {
   type?: string;
@@ -72,6 +73,10 @@ function verifyWebhookSignature(params: {
 }
 
 export async function POST(request: Request) {
+  if (!hasBodyWithinLimit(request, 256 * 1024)) {
+    return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
+  }
+
   const rawBody = await request.text();
   let payload: ResendEvent = {};
 

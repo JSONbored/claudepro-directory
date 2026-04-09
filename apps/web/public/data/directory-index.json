@@ -1678,7 +1678,7 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/audio-transcription-summarization.mdx",
     "repoUrl": "https://github.com/openai/whisper",
     "githubStars": 97400,
-    "githubForks": 12000,
+    "githubForks": 12001,
     "repoUpdatedAt": "2026-04-09T09:09:09Z"
   },
   {
@@ -2832,9 +2832,9 @@
     "filePath": "content/statuslines/catppuccin-mocha-theme.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/catppuccin-mocha-theme.mdx",
     "repoUrl": "https://github.com/catppuccin/catppuccin",
-    "githubStars": 18828,
+    "githubStars": 18829,
     "githubForks": 346,
-    "repoUpdatedAt": "2026-04-09T08:58:37Z"
+    "repoUpdatedAt": "2026-04-09T09:21:09Z"
   },
   {
     "category": "guides",
@@ -9561,9 +9561,9 @@
     "filePath": "content/skills/log-parsing-incident-timeline.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/log-parsing-incident-timeline.mdx",
     "repoUrl": "https://github.com/BurntSushi/ripgrep",
-    "githubStars": 62105,
+    "githubStars": 62106,
     "githubForks": 2469,
-    "repoUpdatedAt": "2026-04-09T08:43:33Z"
+    "repoUpdatedAt": "2026-04-09T09:23:02Z"
   },
   {
     "category": "skills",
