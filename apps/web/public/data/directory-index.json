@@ -1677,9 +1677,9 @@
     "filePath": "content/skills/audio-transcription-summarization.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/audio-transcription-summarization.mdx",
     "repoUrl": "https://github.com/openai/whisper",
-    "githubStars": 97482,
+    "githubStars": 97485,
     "githubForks": 12015,
-    "repoUpdatedAt": "2026-04-10T06:28:49Z"
+    "repoUpdatedAt": "2026-04-10T08:07:39Z"
   },
   {
     "category": "hooks",
@@ -2155,9 +2155,9 @@
     "filePath": "content/mcp/aws-services-mcp-server.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/aws-services-mcp-server.mdx",
     "repoUrl": "https://github.com/awslabs/mcp",
-    "githubStars": 8730,
+    "githubStars": 8731,
     "githubForks": 1431,
-    "repoUpdatedAt": "2026-04-10T06:05:51Z"
+    "repoUpdatedAt": "2026-04-10T07:04:36Z"
   },
   {
     "category": "agents",
@@ -2832,9 +2832,9 @@
     "filePath": "content/statuslines/catppuccin-mocha-theme.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/catppuccin-mocha-theme.mdx",
     "repoUrl": "https://github.com/catppuccin/catppuccin",
-    "githubStars": 18843,
+    "githubStars": 18846,
     "githubForks": 346,
-    "repoUpdatedAt": "2026-04-10T06:06:31Z"
+    "repoUpdatedAt": "2026-04-10T08:07:13Z"
   },
   {
     "category": "guides",
@@ -9561,9 +9561,9 @@
     "filePath": "content/skills/log-parsing-incident-timeline.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/log-parsing-incident-timeline.mdx",
     "repoUrl": "https://github.com/BurntSushi/ripgrep",
-    "githubStars": 62174,
+    "githubStars": 62180,
     "githubForks": 2471,
-    "repoUpdatedAt": "2026-04-10T06:30:31Z"
+    "repoUpdatedAt": "2026-04-10T07:59:04Z"
   },
   {
     "category": "skills",
@@ -12872,7 +12872,7 @@
     "repoUrl": "https://github.com/karanb192/reddit-mcp-buddy",
     "githubStars": 597,
     "githubForks": 73,
-    "repoUpdatedAt": "2026-04-09T20:26:44Z"
+    "repoUpdatedAt": "2026-04-10T06:35:35Z"
   },
   {
     "category": "hooks",
@@ -15934,7 +15934,7 @@
     "repoUrl": "https://github.com/mozilla/readability",
     "githubStars": 11079,
     "githubForks": 704,
-    "repoUpdatedAt": "2026-04-10T05:47:48Z"
+    "repoUpdatedAt": "2026-04-10T07:04:14Z"
   },
   {
     "category": "skills",
