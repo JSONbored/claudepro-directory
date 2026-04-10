@@ -14,12 +14,16 @@ export async function GET() {
     "",
     `Base URL: ${siteConfig.url}`,
     "Primary browse page: " + `${siteConfig.url}/browse`,
+    `Full corpus export: ${siteConfig.url}/llms-full.txt`,
     "",
     "## Category Pages",
     ...categoryPages,
     "",
     "## Directory Entries",
-    ...detailPages
+    ...detailPages,
+    "",
+    "## Per-Entry LLM Exports",
+    ...entries.map((entry) => `${siteConfig.url}/${entry.category}/${entry.slug}/llms.txt`)
   ];
 
   return new Response(lines.join("\n"), {
