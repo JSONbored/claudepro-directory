@@ -14,23 +14,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/jobs/post",
     "/submit",
     "/advertise",
+    "/llms.txt",
+    "/llms-full.txt",
     ...siteConfig.categoryOrder.map((category) => `/${category}`)
   ];
 
   const staticItems = staticPaths.map((pathname) => ({
-    url: `${siteConfig.url}${pathname}`,
-    lastModified: new Date()
+    url: `${siteConfig.url}${pathname}`
   }));
 
   const entryItems = entries.map((entry) => ({
     url: `${siteConfig.url}/${entry.category}/${entry.slug}`,
-    lastModified: entry.dateAdded ? new Date(entry.dateAdded) : undefined
+    lastModified:
+      entry.dateAdded && !Number.isNaN(new Date(entry.dateAdded).getTime())
+        ? new Date(entry.dateAdded)
+        : undefined
+  }));
+  const entryLlmsItems = entries.map((entry) => ({
+    url: `${siteConfig.url}/${entry.category}/${entry.slug}/llms.txt`
   }));
 
   const jobItems = jobs.map((job) => ({
     url: `${siteConfig.url}/jobs/${job.slug}`,
-    lastModified: job.postedAt ? new Date(job.postedAt) : undefined
+    lastModified:
+      job.postedAt && !Number.isNaN(new Date(job.postedAt).getTime())
+        ? new Date(job.postedAt)
+        : undefined
   }));
 
-  return [...staticItems, ...entryItems, ...jobItems];
+  return [...staticItems, ...entryItems, ...entryLlmsItems, ...jobItems];
 }

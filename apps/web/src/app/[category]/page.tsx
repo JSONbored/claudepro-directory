@@ -1,7 +1,9 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { BrowseDirectory } from "@/components/browse-directory";
 import { getDirectoryEntriesByCategory } from "@/lib/content";
+import { buildPageMetadata } from "@/lib/seo";
 import {
   categoryDescriptions,
   categoryLabels,
@@ -13,6 +15,28 @@ type CategoryPageProps = {
 };
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+  const { category } = await params;
+  const label = categoryLabels[category];
+  const description = categoryDescriptions[category];
+
+  if (!label || !description) {
+    return buildPageMetadata({
+      title: "Category not found",
+      description: "The requested category could not be found.",
+      path: `/${category}`,
+      robots: { index: false, follow: false }
+    });
+  }
+
+  return buildPageMetadata({
+    title: `${label} directory`,
+    description,
+    path: `/${category}`,
+    keywords: [label.toLowerCase(), "claude", "directory", "heyclaude"]
+  });
+}
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = await params;

@@ -8,3 +8,7 @@ coverage
 .dev.vars
 .dev.vars.*
 AGENTS.md
+
+# Ensure first-party package assets remain tracked even if a global ignore has *.zip
+!content/skills/*.zip
+!content/mcp/*.mcpb

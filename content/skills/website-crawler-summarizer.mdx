@@ -2,18 +2,10 @@
 title: Website Crawler + Summarizer Skill
 slug: website-crawler-summarizer
 category: skills
-description: >-
-  Crawl domains respectfully, extract readable content, dedupe, and generate
-  structured summaries. Perfect for research, competitive analysis, and content
-  aggregation.
-cardDescription: >-
-  Crawl domains respectfully, extract readable content, dedupe, and generate
-  structured summaries.
+description: 'Crawl domains respectfully, extract readable content, dedupe, and generate structured summaries. Perfect for research, competitive analysis, and content aggregation.'
+cardDescription: 'Crawl domains respectfully, extract readable content, dedupe, and generate structured summaries.'
 seoTitle: Website Crawler + Summarizer Skill
-seoDescription: >-
-  Crawl domains respectfully, extract readable content, dedupe, and generate
-  structured summaries. Perfect for research, competitive analysis, and content
-  aggr...
+seoDescription: 'Crawl domains respectfully, extract readable content, dedupe, and generate structured summaries. Perfect for research, competitive analysis, and content aggr...'
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-15'
@@ -22,15 +14,8 @@ documentationUrl: 'https://github.com/mozilla/readability'
 downloadUrl: /downloads/skills/website-crawler-summarizer.zip
 packageVerified: true
 installable: true
-installCommand: >-
-  curl -L https://heyclau.de/downloads/skills/website-crawler-summarizer.zip -o
-  website-crawler-summarizer.zip && unzip -o website-crawler-summarizer.zip -d
-  ./website-crawler-summarizer
-usageSnippet: >-
-  Claude can crawl websites, extract content from web pages, clean HTML to
-  readable text, respect robots.txt, and generate structured summaries or
-  documentation from web content. Perfect for research, competitive analysis,
-  and content aggregation.
+installCommand: 'curl -L https://heyclau.de/downloads/skills/website-crawler-summarizer.zip -o website-crawler-summarizer.zip && unzip -o website-crawler-summarizer.zip -d ./website-crawler-summarizer'
+usageSnippet: 'Claude can crawl websites, extract content from web pages, clean HTML to readable text, respect robots.txt, and generate structured summaries or documentation from web content. Perfect for research, competitive analysis, and content aggregation.'
 copySnippet: |-
   import { JSDOM } from 'jsdom';
   import { Readability } from '@mozilla/readability';
@@ -47,9 +32,7 @@ prerequisites:
   - readability or newspaper3k (for content extraction)
   - BeautifulSoup or Cheerio (for HTML parsing)
   - Network access to target websites for crawling and fetching web content
-  - >-
-    HTML parsing library (Cheerio for Node.js, BeautifulSoup for Python) for
-    extracting and processing web page content
+  - 'HTML parsing library (Cheerio for Node.js, BeautifulSoup for Python) for extracting and processing web page content'
 tags:
   - crawler
   - scraping
@@ -79,6 +62,18 @@ robotsFollow: true
 ## What This Skill Enables
 
 Claude can crawl websites, extract content from web pages, clean HTML to readable text, respect robots.txt, and generate structured summaries or documentation from web content. Perfect for research, competitive analysis, and content aggregation.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
 
 ## Prerequisites
 

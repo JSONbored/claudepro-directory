@@ -1,7 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { FileText, ShieldCheck, Zap } from "lucide-react";
 
+import { buildPageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "About HeyClaude",
+  description:
+    "Read the maintainer note, project principles, and architecture choices behind HeyClaude.",
+  path: "/about",
+  keywords: ["about heyclaude", "claude directory project", "open source claude resources"]
+});
 
 export default function AboutPage() {
   return (

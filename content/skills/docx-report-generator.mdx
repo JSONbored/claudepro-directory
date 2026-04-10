@@ -2,19 +2,10 @@
 title: DOCX Report Generator Skill
 slug: docx-report-generator
 category: skills
-description: >-
-  Fill templated DOCX with data to produce reports, invoices, and formatted
-  documents. Generate professional Word documents programmatically with
-  python-docx or use Jinja2 templates with docxtpl for dynamic content
-  insertion. Support tables, images, headers, footers, and custom styling.
-cardDescription: >-
-  Fill templated DOCX with data to produce reports, invoices, and formatted
-  documents.
+description: 'Fill templated DOCX with data to produce reports, invoices, and formatted documents. Generate professional Word documents programmatically with python-docx or use Jinja2 templates with docxtpl for dynamic content insertion. Support tables, images, headers, footers, and custom styling.'
+cardDescription: 'Fill templated DOCX with data to produce reports, invoices, and formatted documents.'
 seoTitle: DOCX Report Generator Skill
-seoDescription: >-
-  Fill templated DOCX with data to produce reports, invoices, and formatted
-  documents. Generate professional Word documents programmatically with
-  python-docx o...
+seoDescription: 'Fill templated DOCX with data to produce reports, invoices, and formatted documents. Generate professional Word documents programmatically with python-docx o...'
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-15'
@@ -22,14 +13,8 @@ documentationUrl: 'https://docxtpl.readthedocs.io/'
 downloadUrl: /downloads/skills/docx-report-generator.zip
 packageVerified: true
 installable: true
-installCommand: >-
-  curl -L https://heyclau.de/downloads/skills/docx-report-generator.zip -o
-  docx-report-generator.zip && unzip -o docx-report-generator.zip -d
-  ./docx-report-generator
-usageSnippet: >-
-  Claude can create, edit, and format Microsoft Word documents (.docx)
-  programmatically. Generate professional reports, proposals, documentation, and
-  formatted documents with tables, charts, headers, and custom styling.
+installCommand: 'curl -L https://heyclau.de/downloads/skills/docx-report-generator.zip -o docx-report-generator.zip && unzip -o docx-report-generator.zip -d ./docx-report-generator'
+usageSnippet: 'Claude can create, edit, and format Microsoft Word documents (.docx) programmatically. Generate professional reports, proposals, documentation, and formatted documents with tables, charts, headers, and custom styling.'
 copySnippet: |-
   from docxtpl import DocxTemplate
 
@@ -41,13 +26,9 @@ prerequisites:
   - Python 3.11+
   - docxtpl
   - docx2pdf or libreoffice for PDF
-  - >-
-    File system read/write access for template files and generated DOCX
-    documents
+  - File system read/write access for template files and generated DOCX documents
   - Python environment with pip for installing python-docx and docxtpl packages
-  - >-
-    Optional: LibreOffice or docx2pdf for PDF conversion (requires system
-    installation of LibreOffice for cross-platform PDF export)
+  - 'Optional: LibreOffice or docx2pdf for PDF conversion (requires system installation of LibreOffice for cross-platform PDF export)'
 tags:
   - docx
   - reports
@@ -75,6 +56,18 @@ robotsFollow: true
 ## What This Skill Enables
 
 Claude can create, edit, and format Microsoft Word documents (.docx) programmatically. Generate professional reports, proposals, documentation, and formatted documents with tables, charts, headers, and custom styling.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
 
 ## Prerequisites
 

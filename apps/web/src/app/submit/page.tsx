@@ -1,5 +1,16 @@
+import type { Metadata } from "next";
+
 import { SubmitForm } from "@/components/submit-form";
+import { buildPageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Submit a new directory entry",
+  description:
+    "Submit agents, MCP servers, skills, rules, hooks, commands, and statuslines through schema-aligned GitHub issue templates.",
+  path: "/submit",
+  keywords: ["submit claude skill", "submit mcp server", "heyclaude contribution"]
+});
 
 export default function SubmitPage() {
   return (

@@ -2,19 +2,10 @@
 title: CSV/Excel Data Wrangler Skill
 slug: csv-excel-data-wrangler
 category: skills
-description: >-
-  Clean, filter, join, pivot, and export CSV/XLSX data reliably with
-  reproducible steps. Transform messy spreadsheets into production-ready
-  datasets with pandas. Handle encoding issues, data type conversion, missing
-  values, duplicates, and complex merges.
-cardDescription: >-
-  Clean, filter, join, pivot, and export CSV/XLSX data reliably with
-  reproducible steps.
+description: 'Clean, filter, join, pivot, and export CSV/XLSX data reliably with reproducible steps. Transform messy spreadsheets into production-ready datasets with pandas. Handle encoding issues, data type conversion, missing values, duplicates, and complex merges.'
+cardDescription: 'Clean, filter, join, pivot, and export CSV/XLSX data reliably with reproducible steps.'
 seoTitle: CSV/Excel Data Wrangler Skill
-seoDescription: >-
-  Clean, filter, join, pivot, and export CSV/XLSX data reliably with
-  reproducible steps. Transform messy spreadsheets into production-ready
-  datasets with panda...
+seoDescription: 'Clean, filter, join, pivot, and export CSV/XLSX data reliably with reproducible steps. Transform messy spreadsheets into production-ready datasets with panda...'
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-15'
@@ -24,29 +15,19 @@ packageVerified: true
 installable: true
 installCommand: pip install pandas openpyxl
 usageSnippet: pip install pandas openpyxl
-copySnippet: >-
+copySnippet: |-
   import pandas as pd
 
-
   customers = pd.read_csv('customers.csv', dtype=str)
-
   orders = pd.read_excel('orders.xlsx')
 
-
   # Normalize and dedupe
-
   customers['email'] = customers['email'].str.strip().str.lower()
-
   customers = customers.drop_duplicates(subset=['email'])
 
-
   # Join and summarize
-
   df = orders.merge(customers, on='customer_id', how='left')
-
-  sales_by_region = df.groupby('region',
-  dropna=False)['total'].sum().reset_index()
-
+  sales_by_region = df.groupby('region', dropna=False)['total'].sum().reset_index()
 
   sales_by_region.to_excel('sales_by_region.xlsx', index=False)
 prerequisites:
@@ -54,12 +35,8 @@ prerequisites:
   - pandas
   - openpyxl
   - pyarrow (optional for Parquet)
-  - >-
-    File system read/write access for input CSV/Excel files and output processed
-    files
-  - >-
-    Sufficient memory for data processing (minimum 2GB RAM recommended for large
-    files, use chunked processing for files >100MB)
+  - File system read/write access for input CSV/Excel files and output processed files
+  - 'Sufficient memory for data processing (minimum 2GB RAM recommended for large files, use chunked processing for files >100MB)'
 tags:
   - csv
   - xlsx
@@ -90,6 +67,18 @@ robotsFollow: true
 ## What This Skill Enables
 
 Claude can clean, transform, analyze, and merge CSV and Excel files with pandas. Upload messy spreadsheets and get production-ready data pipelines, statistical summaries, and formatted exports.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
 
 ## Prerequisites
 

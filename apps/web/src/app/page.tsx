@@ -1,6 +1,24 @@
+import type { Metadata } from "next";
+
 import { BrowseDirectory } from "@/components/browse-directory";
 import siteStats from "@/generated/site-stats.json";
 import { getCategorySummaries, getDirectoryEntries } from "@/lib/content";
+import { buildPageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Discover Claude tools, skills, MCP servers, and workflows",
+  description:
+    "Explore a GitHub-native directory of Claude agents, MCP servers, skills, commands, hooks, rules, and practical guides.",
+  path: "/",
+  keywords: [
+    "claude",
+    "claude code",
+    "mcp servers",
+    "ai skills",
+    "claude agents",
+    "ai workflows"
+  ]
+});
 
 export default async function HomePage() {
   const [directoryEntries, categories] = await Promise.all([

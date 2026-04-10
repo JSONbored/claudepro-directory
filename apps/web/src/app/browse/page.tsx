@@ -1,5 +1,16 @@
+import type { Metadata } from "next";
+
 import { BrowseDirectory } from "@/components/browse-directory";
 import { getDirectoryEntries } from "@/lib/content";
+import { buildPageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Browse the HeyClaude directory",
+  description:
+    "Search and filter across Claude agents, MCP servers, skills, commands, hooks, rules, guides, and collections.",
+  path: "/browse",
+  keywords: ["browse claude tools", "claude directory", "mcp server directory", "ai workflow library"]
+});
 
 type BrowsePageProps = {
   searchParams?: Promise<{ q?: string }>;

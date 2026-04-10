@@ -1,14 +1,45 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight, Building2, CalendarDays, MapPin, Wallet } from "lucide-react";
 
 import { getJobBySlug } from "@/lib/jobs";
+import { buildPageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
 type JobDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
+
+export async function generateMetadata({ params }: JobDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const job = await getJobBySlug(slug);
+
+  if (!job) {
+    return buildPageMetadata({
+      title: "Job listing not found",
+      description: "The requested job listing could not be found.",
+      path: `/jobs/${slug}`,
+      robots: { index: false, follow: false }
+    });
+  }
+
+  const keywords = [
+    "claude jobs",
+    "ai jobs",
+    job.company,
+    job.location,
+    job.type
+  ].filter((value): value is string => Boolean(value));
+
+  return buildPageMetadata({
+    title: `${job.title} at ${job.company}`,
+    description: job.description,
+    path: `/jobs/${job.slug}`,
+    keywords
+  });
+}
 
 function formatDate(value?: string) {
   if (!value) return null;

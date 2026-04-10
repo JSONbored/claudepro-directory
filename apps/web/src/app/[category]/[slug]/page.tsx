@@ -23,6 +23,7 @@ import { EntryChecklistCard } from "@/components/entry-checklist-card";
 import { GitHubMark } from "@/components/icons/github-mark";
 import { SnippetCard } from "@/components/snippet-card";
 import { getDirectoryEntries, getEntry } from "@/lib/content";
+import { buildPageMetadata } from "@/lib/seo";
 import { categoryLabels } from "@/lib/site";
 
 type DetailPageProps = {
@@ -35,10 +36,32 @@ export async function generateMetadata({ params }: DetailPageProps): Promise<Met
   const { category, slug } = await params;
   const entry = await getEntry(category, slug);
 
-  return {
-    title: entry?.seoTitle ?? entry?.title,
-    description: entry?.seoDescription ?? entry?.description
-  };
+  if (!entry) {
+    return buildPageMetadata({
+      title: "Entry not found",
+      description: "The requested directory entry could not be found.",
+      path: `/${category}/${slug}`,
+      robots: { index: false, follow: false }
+    });
+  }
+
+  const title = entry.seoTitle ?? entry.title;
+  const description = entry.seoDescription ?? entry.description;
+  const keywords = [...(entry.keywords ?? []), ...(entry.tags ?? []), entry.category];
+
+  return buildPageMetadata({
+    title,
+    description,
+    path: `/${entry.category}/${entry.slug}`,
+    keywords,
+    robots:
+      entry.robotsIndex !== undefined || entry.robotsFollow !== undefined
+        ? {
+            index: entry.robotsIndex ?? true,
+            follow: entry.robotsFollow ?? true
+          }
+        : undefined
+  });
 }
 
 function stripCodeBlocks(markdown: string) {

@@ -1,6 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Mail, ArrowUpRight } from "lucide-react";
 
+import { buildPageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
 const tierMap = {
@@ -22,6 +24,14 @@ const tierMap = {
 } as const;
 
 type TierKey = keyof typeof tierMap;
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Post a job on HeyClaude",
+  description:
+    "Choose a listing tier, complete checkout, and submit role details to publish on the HeyClaude jobs board.",
+  path: "/jobs/post",
+  keywords: ["post ai job", "post claude job", "heyclaude jobs listing"]
+});
 
 function getTier(value?: string): TierKey {
   if (value === "sponsored" || value === "featured") return value;

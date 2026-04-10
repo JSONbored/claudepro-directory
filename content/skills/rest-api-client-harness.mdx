@@ -2,20 +2,10 @@
 title: REST API Client Harness Skill
 slug: rest-api-client-harness
 category: skills
-description: >-
-  Explore and script against REST APIs with comprehensive authentication support
-  (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagination utilities
-  (cursor-based, offset-based, page-based), retry logic with exponential backoff
-  and jitter, error handling for HTTP status codes, rate limiting with
-  Retry-After hea...
-cardDescription: >-
-  Explore and script against REST APIs with comprehensive authentication support
-  (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagi...
+description: 'Explore and script against REST APIs with comprehensive authentication support (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagination utilities (cursor-based, offset-based, page-based), retry logic with exponential backoff and jitter, error handling for HTTP status codes, rate limiting with Retry-After hea...'
+cardDescription: 'Explore and script against REST APIs with comprehensive authentication support (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagi...'
 seoTitle: REST API Client Harness Skill
-seoDescription: >-
-  Explore and script against REST APIs with comprehensive authentication support
-  (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagination utilities
-  (cu...
+seoDescription: 'Explore and script against REST APIs with comprehensive authentication support (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagination utilities (cu...'
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-15'
@@ -23,15 +13,8 @@ documentationUrl: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview'
 downloadUrl: /downloads/skills/rest-api-client-harness.zip
 packageVerified: true
 installable: true
-installCommand: >-
-  curl -L https://heyclau.de/downloads/skills/rest-api-client-harness.zip -o
-  rest-api-client-harness.zip && unzip -o rest-api-client-harness.zip -d
-  ./rest-api-client-harness
-usageSnippet: >-
-  Claude can interact with REST APIs: make requests, handle authentication (API
-  keys, OAuth, JWT), paginate through results, handle rate limits with retries,
-  and process responses. Build API integration scripts, test endpoints, and
-  extract data from web services.
+installCommand: 'curl -L https://heyclau.de/downloads/skills/rest-api-client-harness.zip -o rest-api-client-harness.zip && unzip -o rest-api-client-harness.zip -d ./rest-api-client-harness'
+usageSnippet: 'Claude can interact with REST APIs: make requests, handle authentication (API keys, OAuth, JWT), paginate through results, handle rate limits with retries, and process responses. Build API integration scripts, test endpoints, and extract data from web services.'
 copySnippet: |-
   import { setTimeout as delay } from 'node:timers/promises';
   import { fetch } from 'undici';
@@ -56,12 +39,8 @@ prerequisites:
   - undici or axios HTTP client library
   - API credentials (if required)
   - Network access for API requests
-  - >-
-    Network access to target API endpoints for making HTTP requests and testing
-    API functionality
-  - >-
-    API documentation or OpenAPI/Swagger specification (optional but
-    recommended) for automatic client generation and type safety
+  - Network access to target API endpoints for making HTTP requests and testing API functionality
+  - API documentation or OpenAPI/Swagger specification (optional but recommended) for automatic client generation and type safety
 tags:
   - rest
   - http
@@ -91,6 +70,18 @@ robotsFollow: true
 ## What This Skill Enables
 
 Claude can interact with REST APIs: make requests, handle authentication (API keys, OAuth, JWT), paginate through results, handle rate limits with retries, and process responses. Build API integration scripts, test endpoints, and extract data from web services.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
 
 ## Prerequisites
 

@@ -14,11 +14,30 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
+  applicationName: siteConfig.name,
   title: {
     default: `${siteConfig.name} | Claude Directory`,
     template: `%s | ${siteConfig.name}`
   },
-  description: siteConfig.description
+  description: siteConfig.description,
+  alternates: {
+    canonical: siteConfig.url
+  },
+  openGraph: {
+    type: "website",
+    url: siteConfig.url,
+    title: `${siteConfig.name} | Claude Directory`,
+    description: siteConfig.description,
+    siteName: siteConfig.name
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${siteConfig.name} | Claude Directory`,
+    description: siteConfig.description
+  },
+  icons: {
+    icon: "/icon.svg"
+  }
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

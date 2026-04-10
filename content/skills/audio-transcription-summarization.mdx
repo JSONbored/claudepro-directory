@@ -2,19 +2,10 @@
 title: Audio Transcription + Summarization Skill
 slug: audio-transcription-summarization
 category: skills
-description: >-
-  Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and
-  ffmpeg to produce structured, timestamped transcripts with automatic
-  summarization and action item extraction. Supports multilingual transcription,
-  speaker diarization, and meeting minutes generation.
-cardDescription: >-
-  Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and
-  ffmpeg to produce structured, timestamped transcripts with autom...
+description: 'Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with automatic summarization and action item extraction. Supports multilingual transcription, speaker diarization, and meeting minutes generation.'
+cardDescription: 'Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with autom...'
 seoTitle: Audio Transcription + Summarization Skill
-seoDescription: >-
-  Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and
-  ffmpeg to produce structured, timestamped transcripts with automatic
-  summarization a...
+seoDescription: 'Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with automatic summarization a...'
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-15'
@@ -35,15 +26,9 @@ prerequisites:
   - ffmpeg
   - Python 3.11+ or whisper.cpp
   - openai-whisper (pip) or whisper.cpp binary
-  - >-
-    Sufficient disk space for model downloads (Whisper models range from 39MB
-    small to 1.5GB large model)
-  - >-
-    Audio file access permissions - read access to input audio files and write
-    access for transcription output files
-  - >-
-    System resources: Minimum 4GB RAM for small model, 8GB+ recommended for
-    medium/large models, GPU optional but recommended for faster processing
+  - Sufficient disk space for model downloads (Whisper models range from 39MB small to 1.5GB large model)
+  - Audio file access permissions - read access to input audio files and write access for transcription output files
+  - 'System resources: Minimum 4GB RAM for small model, 8GB+ recommended for medium/large models, GPU optional but recommended for faster processing'
 tags:
   - audio
   - transcription
@@ -71,6 +56,18 @@ robotsFollow: true
 ## What This Skill Enables
 
 Claude can transcribe audio files (MP3, WAV, M4A, etc.) and generate structured summaries with timestamps, action items, and speaker identification. This skill leverages Whisper AI and ffmpeg through Claude's Code Interpreter to process audio locally.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
 
 ## Prerequisites
 

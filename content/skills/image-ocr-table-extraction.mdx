@@ -2,19 +2,10 @@
 title: Image OCR + Table Extraction Skill
 slug: image-ocr-table-extraction
 category: skills
-description: >-
-  Extract text and tabular data from images, scanned documents, and PDFs using
-  Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR
-  (100+ languages), table structure detection, confidence scoring, orientation
-  correction, and exports to CSV, JSON, and structured formats.
-cardDescription: >-
-  Extract text and tabular data from images, scanned documents, and PDFs using
-  Tesseract OCR engine with OpenCV preprocessing.
+description: 'Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR (100+ languages), table structure detection, confidence scoring, orientation correction, and exports to CSV, JSON, and structured formats.'
+cardDescription: 'Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing.'
 seoTitle: Image OCR + Table Extraction Skill
-seoDescription: >-
-  Extract text and tabular data from images, scanned documents, and PDFs using
-  Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR
-  (100...
+seoDescription: 'Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR (100...'
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-15'
@@ -22,17 +13,8 @@ documentationUrl: 'https://tesseract-ocr.github.io/'
 downloadUrl: /downloads/skills/image-ocr-table-extraction.zip
 packageVerified: true
 installable: true
-installCommand: >-
-  curl -L https://heyclau.de/downloads/skills/image-ocr-table-extraction.zip -o
-  image-ocr-table-extraction.zip && unzip -o image-ocr-table-extraction.zip -d
-  ./image-ocr-table-extraction
-usageSnippet: >-
-  Extract text and tabular data from images, scanned documents, and PDFs using
-  Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR
-  (100+ languages), table structure detection, confidence scoring, orientation
-  correction, and exports to CSV, JSON, and structured formats. Includes
-  advanced image preprocessing pipelines for noise reduction, binarization,
-  deskewing, and contrast enhancement to maximize OCR accuracy.
+installCommand: 'curl -L https://heyclau.de/downloads/skills/image-ocr-table-extraction.zip -o image-ocr-table-extraction.zip && unzip -o image-ocr-table-extraction.zip -d ./image-ocr-table-extraction'
+usageSnippet: 'Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR (100+ languages), table structure detection, confidence scoring, orientation correction, and exports to CSV, JSON, and structured formats. Includes advanced image preprocessing pipelines for noise reduction, binarization, deskewing, and contrast enhancement to maximize OCR accuracy.'
 copySnippet: |-
   import cv2
   import pytesseract
@@ -50,12 +32,8 @@ prerequisites:
   - opencv-python
   - pytesseract
   - Tesseract OCR binary with language data
-  - >-
-    Image file access permissions - read access to input image files and write
-    access for OCR output files
-  - >-
-    System libraries: Tesseract OCR binary installed system-wide (not just
-    Python package) with language data packs for target languages
+  - Image file access permissions - read access to input image files and write access for OCR output files
+  - 'System libraries: Tesseract OCR binary installed system-wide (not just Python package) with language data packs for target languages'
 tags:
   - ocr
   - image
@@ -92,6 +70,18 @@ Extract text and tabular data from images, scanned documents, and PDFs using Tes
 ## What This Skill Enables
 
 Claude can extract text and tables from images, screenshots, scanned documents, and PDFs using OCR (Optical Character Recognition). Convert images of receipts, invoices, forms, and tables into editable text and structured data.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
 
 ## Prerequisites
 

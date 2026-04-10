@@ -2,19 +2,10 @@
 title: V0 Rapid UI Prototyping Workflow Skill
 slug: v0-rapid-prototyping
 category: skills
-description: >-
-  Build production-ready React components and full pages in minutes using V0.dev
-  AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integration. V0.dev is
-  Vercel's breakthrough AI UI generator that has transformed frontend
-  development in 2025.
-cardDescription: >-
-  Build production-ready React components and full pages in minutes using V0.dev
-  AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integrat...
+description: 'Build production-ready React components and full pages in minutes using V0.dev AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integration. V0.dev is Vercel''s breakthrough AI UI generator that has transformed frontend development in 2025.'
+cardDescription: 'Build production-ready React components and full pages in minutes using V0.dev AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integrat...'
 seoTitle: V0 Rapid UI Prototyping Workflow Skill
-seoDescription: >-
-  Build production-ready React components and full pages in minutes using V0.dev
-  AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integration. V0.dev is
-  Verce...
+seoDescription: 'Build production-ready React components and full pages in minutes using V0.dev AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integration. V0.dev is Verce...'
 author: JSONbored
 authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-16'
@@ -24,21 +15,14 @@ packageVerified: true
 installable: true
 installCommand: npx shadcn-ui@latest init
 usageSnippet: npx shadcn-ui@latest init
-copySnippet: >-
+copySnippet: |-
   'use client';
 
-
   import { useState } from 'react';
-
   import { Check } from 'lucide-react';
-
   import { Button } from '@/components/ui/button';
-
-  import { Card, CardContent, CardFooter, CardHeader, CardTitle } from
-  '@/components/ui/card';
-
+  import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
   import { Switch } from '@/components/ui/switch';
-
 
   interface PricingTier {
     name: string;
@@ -48,12 +32,10 @@ copySnippet: >-
     popular?: boolean;
   }
 
-
   const tiers: PricingTier[] = [
     { name: 'Basic', price: { monthly: 9, annual: 90 }, features: ['5 projects', '1GB storage'], cta: 'Get Started' },
     { name: 'Pro', price: { monthly: 29, annual: 290 }, features: ['Unlimited projects', '10GB storage'], cta: 'Start Free Trial', popular: true },
   ];
-
 
   export function PricingTable() {
     const [isAnnual, setIsAnnual] = useState(false);
@@ -104,12 +86,8 @@ prerequisites:
   - React 19+
   - TailwindCSS v4.1+
   - shadcn/ui components installed
-  - >-
-    V0.dev account and API access (free tier available) for generating React
-    components from natural language descriptions
-  - >-
-    React 18+ or Next.js 13+ project setup for integrating generated components
-    into existing applications
+  - V0.dev account and API access (free tier available) for generating React components from natural language descriptions
+  - React 18+ or Next.js 13+ project setup for integrating generated components into existing applications
 tags:
   - v0
   - prototyping
@@ -137,6 +115,18 @@ robotsFollow: true
 ## What This Skill Enables
 
 Claude can generate production-ready React components and complete page layouts using V0.dev patterns - Vercel's breakthrough AI UI generator that has transformed frontend development in 2025. This skill enables instant component creation with shadcn/ui integration, TailwindCSS v4 styling, full TypeScript support, and seamless Next.js 15 App Router compatibility.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
 
 ## Prerequisites
 
