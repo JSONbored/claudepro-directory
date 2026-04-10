@@ -6,7 +6,7 @@ export const siteConfig = {
   url: "https://heyclau.de",
   githubUrl: "https://github.com/JSONbored/claudepro-directory",
   jobsEmail: "jobs@heyclau.de",
-  twitterUrl: process.env.NEXT_PUBLIC_TWITTER_URL || "#",
+  twitterUrl: process.env.NEXT_PUBLIC_TWITTER_URL || "https://x.com/jsonbored",
   discordUrl:
     process.env.NEXT_PUBLIC_DISCORD_URL || "https://discord.com/invite/Ax3Py4YDrq",
   polarJobBoardUrl: process.env.NEXT_PUBLIC_POLAR_JOB_BOARD_URL || "/advertise",
