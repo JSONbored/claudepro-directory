@@ -1185,8 +1185,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/airtable-mcp-server.mdx",
     "repoUrl": "https://github.com/domdomegg/airtable-mcp-server",
     "githubStars": 434,
-    "githubForks": null,
-    "repoUpdatedAt": null
+    "githubForks": 133,
+    "repoUpdatedAt": "2026-04-06T21:26:34Z"
   },
   {
     "category": "agents",
@@ -2155,9 +2155,9 @@
     "filePath": "content/mcp/aws-services-mcp-server.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/aws-services-mcp-server.mdx",
     "repoUrl": "https://github.com/awslabs/mcp",
-    "githubStars": 9,
-    "githubForks": null,
-    "repoUpdatedAt": null
+    "githubStars": 8728,
+    "githubForks": 1431,
+    "repoUpdatedAt": "2026-04-10T02:52:34Z"
   },
   {
     "category": "agents",
@@ -2832,9 +2832,9 @@
     "filePath": "content/statuslines/catppuccin-mocha-theme.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/catppuccin-mocha-theme.mdx",
     "repoUrl": "https://github.com/catppuccin/catppuccin",
-    "githubStars": 19,
-    "githubForks": null,
-    "repoUpdatedAt": null
+    "githubStars": 18840,
+    "githubForks": 346,
+    "repoUpdatedAt": "2026-04-09T18:17:51Z"
   },
   {
     "category": "guides",
@@ -5546,9 +5546,9 @@
     "filePath": "content/hooks/dead-code-eliminator.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/dead-code-eliminator.mdx",
     "repoUrl": "https://github.com/nadeesha/ts-prune",
-    "githubStars": 2,
-    "githubForks": null,
-    "repoUpdatedAt": null
+    "githubStars": 2068,
+    "githubForks": 69,
+    "repoUpdatedAt": "2026-04-03T10:13:14Z"
   },
   {
     "category": "collections",
@@ -6018,8 +6018,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/discord-mcp-server.mdx",
     "repoUrl": "https://github.com/saseq/discord-mcp",
     "githubStars": 257,
-    "githubForks": null,
-    "repoUpdatedAt": null
+    "githubForks": 55,
+    "repoUpdatedAt": "2026-04-09T17:18:51Z"
   },
   {
     "category": "hooks",
@@ -9314,8 +9314,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/kubernetes-mcp-server.mdx",
     "repoUrl": "https://github.com/feiskyer/mcp-kubernetes-server",
     "githubStars": 16,
-    "githubForks": null,
-    "repoUpdatedAt": null
+    "githubForks": 9,
+    "repoUpdatedAt": "2026-02-16T01:53:10Z"
   },
   {
     "category": "agents",
@@ -9561,9 +9561,9 @@
     "filePath": "content/skills/log-parsing-incident-timeline.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/log-parsing-incident-timeline.mdx",
     "repoUrl": "https://github.com/BurntSushi/ripgrep",
-    "githubStars": 62,
-    "githubForks": null,
-    "repoUpdatedAt": null
+    "githubStars": 62169,
+    "githubForks": 2470,
+    "repoUpdatedAt": "2026-04-10T04:38:10Z"
   },
   {
     "category": "skills",
@@ -9906,9 +9906,9 @@
     "filePath": "content/statuslines/minimal-powerline.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/minimal-powerline.mdx",
     "repoUrl": "https://github.com/powerline/powerline",
-    "githubStars": 15,
-    "githubForks": null,
-    "repoUpdatedAt": null
+    "githubStars": 14735,
+    "githubForks": 1006,
+    "repoUpdatedAt": "2026-04-10T04:02:52Z"
   },
   {
     "category": "skills",
@@ -12871,8 +12871,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/reddit-mcp-buddy.mdx",
     "repoUrl": "https://github.com/karanb192/reddit-mcp-buddy",
     "githubStars": 597,
-    "githubForks": null,
-    "repoUpdatedAt": null
+    "githubForks": 73,
+    "repoUpdatedAt": "2026-04-09T20:26:44Z"
   },
   {
     "category": "hooks",
@@ -12994,8 +12994,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/redis-mcp-server.mdx",
     "repoUrl": "https://github.com/redis/mcp-redis",
     "githubStars": 477,
-    "githubForks": null,
-    "repoUpdatedAt": null
+    "githubForks": 91,
+    "repoUpdatedAt": "2026-04-09T12:25:32Z"
   },
   {
     "category": "skills",
@@ -14039,8 +14039,8 @@
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/socket-mcp-server.mdx",
     "repoUrl": "https://github.com/SocketDev/socket-mcp",
     "githubStars": 96,
-    "githubForks": null,
-    "repoUpdatedAt": null
+    "githubForks": 15,
+    "repoUpdatedAt": "2026-04-03T16:49:10Z"
   },
   {
     "category": "mcp",

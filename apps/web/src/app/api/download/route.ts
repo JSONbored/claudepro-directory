@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { isRateLimited } from "@/lib/api-security";
 
 function isAllowedAssetPath(asset: string) {
   const normalized = String(asset || "").trim();
@@ -36,8 +37,16 @@ async function readAssetBuffer(asset: string, requestUrl: string) {
 }
 
 export async function GET(request: Request) {
+  if (isRateLimited({ request, scope: "asset-download", limit: 180, windowMs: 60_000 })) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
   const url = new URL(request.url);
   const asset = url.searchParams.get("asset") ?? "";
+
+  if (asset.length > 256) {
+    return NextResponse.json({ error: "invalid_asset" }, { status: 400 });
+  }
 
   if (!isAllowedAssetPath(asset)) {
     return NextResponse.json({ error: "invalid_asset" }, { status: 400 });

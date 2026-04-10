@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { hasBodyWithinLimit, isAllowedOrigin, isRateLimited } from "@/lib/api-security";
+import {
+  hasBodyWithinLimit,
+  hasJsonContentType,
+  isAllowedOrigin,
+  isRateLimited
+} from "@/lib/api-security";
 import { getVotesDb, isValidEntryKey, toggleVote } from "@/lib/votes";
 
 type TogglePayload = {
@@ -16,6 +21,10 @@ export async function POST(request: Request) {
 
   if (!hasBodyWithinLimit(request, 8 * 1024)) {
     return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
+  }
+
+  if (!hasJsonContentType(request)) {
+    return NextResponse.json({ error: "invalid_content_type" }, { status: 415 });
   }
 
   if (isRateLimited({ request, scope: "votes-toggle", limit: 45, windowMs: 60_000 })) {
@@ -46,16 +55,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "votes_db_not_configured" }, { status: 503 });
   }
 
-  const result = await toggleVote({
-    db,
-    entryKey: key,
-    clientId,
-    vote
-  });
+  try {
+    const result = await toggleVote({
+      db,
+      entryKey: key,
+      clientId,
+      vote
+    });
 
-  return NextResponse.json({
-    key,
-    count: result.count,
-    voted: result.voted
-  });
+    return NextResponse.json(
+      {
+        key,
+        count: result.count,
+        voted: result.voted
+      },
+      {
+        headers: {
+          "cache-control": "no-store"
+        }
+      }
+    );
+  } catch {
+    return NextResponse.json({ error: "internal_error" }, { status: 500 });
+  }
 }

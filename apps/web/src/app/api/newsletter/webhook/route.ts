@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { Webhook } from "svix";
-import { hasBodyWithinLimit } from "@/lib/api-security";
+import { hasBodyWithinLimit, hasJsonContentType, isRateLimited } from "@/lib/api-security";
 
 type ResendEvent = {
   type?: string;
@@ -77,19 +77,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
   }
 
-  const rawBody = await request.text();
-  let payload: ResendEvent = {};
-
-  try {
-    payload = JSON.parse(rawBody) as ResendEvent;
-  } catch {
-    return NextResponse.json({ error: "invalid_json" }, { status: 400 });
+  if (!hasJsonContentType(request)) {
+    return NextResponse.json({ error: "invalid_content_type" }, { status: 415 });
   }
+
+  if (isRateLimited({ request, scope: "newsletter-webhook", limit: 120, windowMs: 60_000 })) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
+  const rawBody = await request.text();
 
   const { env } = getCloudflareContext();
   const envRecord = env as unknown as Record<string, unknown>;
   const discordWebhookUrl = String(envRecord["DISCORD_WEBHOOK_URL"] ?? "");
   const resendWebhookSecret = String(envRecord["RESEND_WEBHOOK_SECRET"] ?? "");
+
+  if (!resendWebhookSecret) {
+    return NextResponse.json({ error: "webhook_not_configured" }, { status: 503 });
+  }
 
   const verified = verifyWebhookSignature({
     rawBody,
@@ -100,17 +105,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_signature" }, { status: 401 });
   }
 
+  let payload: ResendEvent = {};
+  try {
+    payload = JSON.parse(rawBody) as ResendEvent;
+  } catch {
+    return NextResponse.json({ error: "invalid_json" }, { status: 400 });
+  }
+
   if (!discordWebhookUrl || !shouldNotify(payload)) {
     return NextResponse.json({ ok: true, forwarded: false });
   }
 
-  await fetch(discordWebhookUrl, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      content: toDiscordContent(payload)
-    })
-  });
+  try {
+    await fetch(discordWebhookUrl, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        content: toDiscordContent(payload)
+      }),
+      signal: AbortSignal.timeout(8000)
+    });
+  } catch {
+    return NextResponse.json({ error: "notification_failed" }, { status: 502 });
+  }
 
   return NextResponse.json({ ok: true, forwarded: true });
 }

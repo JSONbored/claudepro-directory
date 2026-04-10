@@ -35,6 +35,12 @@ export function hasBodyWithinLimit(request: Request, maxBytes: number) {
   return parsed <= maxBytes;
 }
 
+export function hasJsonContentType(request: Request) {
+  const header = request.headers.get("content-type");
+  if (!header) return false;
+  return header.toLowerCase().startsWith("application/json");
+}
+
 export function isRateLimited(params: {
   request: Request;
   scope: string;
@@ -57,4 +63,3 @@ export function isRateLimited(params: {
   rateBuckets.set(bucketKey, current);
   return false;
 }
-

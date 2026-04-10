@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { hasBodyWithinLimit, isAllowedOrigin, isRateLimited } from "@/lib/api-security";
+import {
+  hasBodyWithinLimit,
+  hasJsonContentType,
+  isAllowedOrigin,
+  isRateLimited
+} from "@/lib/api-security";
 import { getVotesDb, isValidEntryKey, queryVoteCounts, queryVotesByClient } from "@/lib/votes";
 
 type QueryPayload = {
@@ -15,6 +20,10 @@ export async function POST(request: Request) {
 
   if (!hasBodyWithinLimit(request, 16 * 1024)) {
     return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
+  }
+
+  if (!hasJsonContentType(request)) {
+    return NextResponse.json({ error: "invalid_content_type" }, { status: 415 });
   }
 
   if (isRateLimited({ request, scope: "votes-query", limit: 120, windowMs: 60_000 })) {
@@ -51,14 +60,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ counts, voted, available: false });
   }
 
-  const [counts, voted] = await Promise.all([
-    queryVoteCounts(db, keys),
-    clientId ? queryVotesByClient(db, keys, clientId) : Promise.resolve({})
-  ]);
+  try {
+    const [counts, voted] = await Promise.all([
+      queryVoteCounts(db, keys),
+      clientId ? queryVotesByClient(db, keys, clientId) : Promise.resolve({})
+    ]);
 
-  return NextResponse.json({
-    counts,
-    voted,
-    available: true
-  });
+    return NextResponse.json(
+      {
+        counts,
+        voted,
+        available: true
+      },
+      {
+        headers: {
+          "cache-control": "no-store"
+        }
+      }
+    );
+  } catch {
+    return NextResponse.json({ error: "internal_error" }, { status: 500 });
+  }
 }

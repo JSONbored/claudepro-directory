@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { hasBodyWithinLimit, isAllowedOrigin, isRateLimited } from "@/lib/api-security";
+import {
+  hasBodyWithinLimit,
+  hasJsonContentType,
+  isAllowedOrigin,
+  isRateLimited
+} from "@/lib/api-security";
 
 type SubscribePayload = {
   email?: string;
@@ -16,6 +21,10 @@ export async function POST(request: Request) {
 
   if (!hasBodyWithinLimit(request, 8 * 1024)) {
     return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
+  }
+
+  if (!hasJsonContentType(request)) {
+    return NextResponse.json({ error: "invalid_content_type" }, { status: 415 });
   }
 
   if (isRateLimited({ request, scope: "newsletter-subscribe", limit: 15, windowMs: 60_000 })) {
@@ -65,22 +74,42 @@ export async function POST(request: Request) {
     requestBody.audience_id = resendAudienceId;
   }
 
-  const response = await fetch("https://api.resend.com/contacts", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${resendApiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(requestBody)
-  });
+  let response: Response;
+  try {
+    response = await fetch("https://api.resend.com/contacts", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestBody),
+      signal: AbortSignal.timeout(8000)
+    });
+  } catch {
+    return NextResponse.json({ error: "provider_unavailable" }, { status: 502 });
+  }
 
   if (response.ok) {
-    return NextResponse.json({ ok: true });
+    return NextResponse.json(
+      { ok: true },
+      {
+        headers: {
+          "cache-control": "no-store"
+        }
+      }
+    );
   }
 
   if (response.status === 409) {
     // Treat duplicate as success to keep UX simple and avoid account enumeration.
-    return NextResponse.json({ ok: true });
+    return NextResponse.json(
+      { ok: true },
+      {
+        headers: {
+          "cache-control": "no-store"
+        }
+      }
+    );
   }
 
   return NextResponse.json({ error: "provider_error" }, { status: 502 });
