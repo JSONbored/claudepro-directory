@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
 
 import { getDirectoryEntries } from "@/lib/content";
+import { getJobs } from "@/lib/jobs";
 import { siteConfig } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const entries = await getDirectoryEntries();
+  const [entries, jobs] = await Promise.all([getDirectoryEntries(), getJobs()]);
   const staticPaths = [
     "",
     "/browse",
@@ -26,5 +27,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: entry.dateAdded ? new Date(entry.dateAdded) : undefined
   }));
 
-  return [...staticItems, ...entryItems];
+  const jobItems = jobs.map((job) => ({
+    url: `${siteConfig.url}/jobs/${job.slug}`,
+    lastModified: job.postedAt ? new Date(job.postedAt) : undefined
+  }));
+
+  return [...staticItems, ...entryItems, ...jobItems];
 }
