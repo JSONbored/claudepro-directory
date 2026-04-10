@@ -6,6 +6,7 @@ import {
   isAllowedOrigin,
   isRateLimited
 } from "@/lib/api-security";
+import { logApiError, logApiInfo, logApiWarn, redactEmail } from "@/lib/api-logs";
 
 type SubscribePayload = {
   email?: string;
@@ -16,18 +17,22 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
   if (!isAllowedOrigin(request)) {
+    logApiWarn(request, "newsletter.subscribe.forbidden_origin");
     return NextResponse.json({ error: "forbidden_origin" }, { status: 403 });
   }
 
   if (!hasBodyWithinLimit(request, 8 * 1024)) {
+    logApiWarn(request, "newsletter.subscribe.payload_too_large");
     return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
   }
 
   if (!hasJsonContentType(request)) {
+    logApiWarn(request, "newsletter.subscribe.invalid_content_type");
     return NextResponse.json({ error: "invalid_content_type" }, { status: 415 });
   }
 
   if (isRateLimited({ request, scope: "newsletter-subscribe", limit: 15, windowMs: 60_000 })) {
+    logApiWarn(request, "newsletter.subscribe.rate_limited");
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 
@@ -36,6 +41,7 @@ export async function POST(request: Request) {
   try {
     payload = (await request.json()) as SubscribePayload;
   } catch {
+    logApiWarn(request, "newsletter.subscribe.invalid_json");
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
@@ -43,6 +49,7 @@ export async function POST(request: Request) {
   const source = String(payload.source ?? "site").trim().slice(0, 64);
 
   if (!emailRegex.test(email) || email.length > 320) {
+    logApiWarn(request, "newsletter.subscribe.invalid_email");
     return NextResponse.json({ error: "invalid_email" }, { status: 400 });
   }
 
@@ -53,6 +60,7 @@ export async function POST(request: Request) {
   const resendAudienceId = String(envRecord["RESEND_AUDIENCE_ID"] ?? "");
 
   if (!resendApiKey || (!resendSegmentId && !resendAudienceId)) {
+    logApiError(request, "newsletter.subscribe.not_configured");
     return NextResponse.json({ error: "newsletter_not_configured" }, { status: 503 });
   }
 
@@ -86,10 +94,12 @@ export async function POST(request: Request) {
       signal: AbortSignal.timeout(8000)
     });
   } catch {
+    logApiError(request, "newsletter.subscribe.provider_unavailable");
     return NextResponse.json({ error: "provider_unavailable" }, { status: 502 });
   }
 
   if (response.ok) {
+    logApiInfo(request, "newsletter.subscribe.success", { email: redactEmail(email), source });
     return NextResponse.json(
       { ok: true },
       {
@@ -102,6 +112,7 @@ export async function POST(request: Request) {
 
   if (response.status === 409) {
     // Treat duplicate as success to keep UX simple and avoid account enumeration.
+    logApiInfo(request, "newsletter.subscribe.duplicate", { email: redactEmail(email), source });
     return NextResponse.json(
       { ok: true },
       {
@@ -112,5 +123,10 @@ export async function POST(request: Request) {
     );
   }
 
+  logApiError(request, "newsletter.subscribe.provider_error", {
+    status: response.status,
+    email: redactEmail(email),
+    source
+  });
   return NextResponse.json({ error: "provider_error" }, { status: 502 });
 }

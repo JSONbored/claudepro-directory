@@ -3,6 +3,7 @@ import path from "node:path";
 import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isRateLimited } from "@/lib/api-security";
+import { logApiError, logApiInfo, logApiWarn, sample } from "@/lib/api-logs";
 
 function isAllowedAssetPath(asset: string) {
   const normalized = String(asset || "").trim();
@@ -38,6 +39,7 @@ async function readAssetBuffer(asset: string, requestUrl: string) {
 
 export async function GET(request: Request) {
   if (isRateLimited({ request, scope: "asset-download", limit: 180, windowMs: 60_000 })) {
+    logApiWarn(request, "download.rate_limited");
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 
@@ -45,10 +47,12 @@ export async function GET(request: Request) {
   const asset = url.searchParams.get("asset") ?? "";
 
   if (asset.length > 256) {
+    logApiWarn(request, "download.invalid_asset_length");
     return NextResponse.json({ error: "invalid_asset" }, { status: 400 });
   }
 
   if (!isAllowedAssetPath(asset)) {
+    logApiWarn(request, "download.invalid_asset_pattern");
     return NextResponse.json({ error: "invalid_asset" }, { status: 400 });
   }
 
@@ -56,6 +60,9 @@ export async function GET(request: Request) {
 
   try {
     const body = await readAssetBuffer(asset, request.url);
+    if (sample(0.02)) {
+      logApiInfo(request, "download.sample", { asset });
+    }
     return new NextResponse(body, {
       status: 200,
       headers: {
@@ -66,6 +73,7 @@ export async function GET(request: Request) {
       }
     });
   } catch {
+    logApiError(request, "download.not_found", { asset });
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 }
