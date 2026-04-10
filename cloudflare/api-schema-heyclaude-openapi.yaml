@@ -172,3 +172,40 @@ paths:
           description: Not found
         "429":
           description: Rate limited
+  /api/github-stats:
+    get:
+      responses:
+        "200":
+          description: GitHub repository stats
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  repo:
+                    type: string
+                    example: "JSONbored/claudepro-directory"
+                  stars:
+                    type: integer
+                    minimum: 0
+                    nullable: true
+                  forks:
+                    type: integer
+                    minimum: 0
+                    nullable: true
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    nullable: true
+                required:
+                  - repo
+                  - stars
+                  - forks
+                  - updatedAt
+        "429":
+          description: Rate limited
+        "500":
+          description: Invalid repo configuration
+        "502":
+          description: Upstream unavailable

@@ -7,6 +7,7 @@ import { siteConfig } from "@/lib/site";
 
 const GITHUB_API_VERSION = "2022-11-28";
 const REQUEST_TIMEOUT_MS = 5000;
+const GITHUB_USER_AGENT = "heyclau.de-github-stats";
 
 type GitHubStats = {
   stars: number | null;
@@ -39,7 +40,8 @@ function getGithubToken() {
 async function fetchGitHubStats(owner: string, repo: string): Promise<GitHubStats> {
   const headers: HeadersInit = {
     accept: "application/vnd.github+json",
-    "x-github-api-version": GITHUB_API_VERSION
+    "x-github-api-version": GITHUB_API_VERSION,
+    "user-agent": GITHUB_USER_AGENT
   };
 
   const token = getGithubToken();
@@ -64,6 +66,22 @@ async function fetchGitHubStats(owner: string, repo: string): Promise<GitHubStat
   return { stars, forks, updatedAt };
 }
 
+async function fetchShieldsFallback(owner: string, repo: string): Promise<GitHubStats | null> {
+  try {
+    const response = await fetch(`https://img.shields.io/github/stars/${owner}/${repo}.json`, {
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+    });
+    if (!response.ok) return null;
+    const payload = (await response.json()) as { value?: string; message?: string };
+    const raw = String(payload.value ?? payload.message ?? "").trim();
+    const numeric = Number.parseFloat(raw.replace(/[^\d.]/g, ""));
+    if (!Number.isFinite(numeric)) return null;
+    return { stars: Math.round(numeric), forks: null, updatedAt: null };
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(request: Request) {
   if (isRateLimited({ request, scope: "github-stats", limit: 120, windowMs: 60_000 })) {
     logApiWarn(request, "github.stats.rate_limited");
@@ -77,7 +95,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    const payload = await fetchGitHubStats(repo.owner, repo.repo);
+    let payload = await fetchGitHubStats(repo.owner, repo.repo).catch(async () => {
+      const fallback = await fetchShieldsFallback(repo.owner, repo.repo);
+      if (!fallback) throw new Error("github_and_shields_failed");
+      return fallback;
+    });
 
     if (sample(0.05)) {
       logApiInfo(request, "github.stats.sample", {
@@ -104,4 +126,3 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "upstream_unavailable" }, { status: 502 });
   }
 }
-
