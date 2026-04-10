@@ -28,6 +28,7 @@ const generatedLegacyVoteSeedFile = path.join(generatedDir, "legacy-vote-seed.js
 const skillsDownloadsDir = path.join(repoRoot, "apps/web/public/downloads/skills");
 const mcpDownloadsDir = path.join(repoRoot, "apps/web/public/downloads/mcp");
 const DIRECTORY_REPO_URL = "https://github.com/JSONbored/claudepro-directory";
+const ENABLE_GITHUB_REPO_STATS = process.env.ENABLE_GITHUB_REPO_STATS === "1";
 const categories = fs
   .readdirSync(contentRoot, { withFileTypes: true })
   .filter((entry) => entry.isDirectory() && entry.name !== "data")
@@ -318,15 +319,17 @@ async function main() {
     }
   }
 
-  await Promise.all(
-    [...reposToFetch.values()].map(async (repo) => {
-      try {
-        repoStats.set(repo.key, await fetchGitHubRepoStats(repo));
-      } catch (error) {
-        console.warn(`Could not fetch GitHub stats for ${repo.key}: ${error.message}`);
-      }
-    })
-  );
+  if (ENABLE_GITHUB_REPO_STATS) {
+    await Promise.all(
+      [...reposToFetch.values()].map(async (repo) => {
+        try {
+          repoStats.set(repo.key, await fetchGitHubRepoStats(repo));
+        } catch (error) {
+          console.warn(`Could not fetch GitHub stats for ${repo.key}: ${error.message}`);
+        }
+      })
+    );
+  }
 
   for (const entry of entries) {
     const githubRepo = parseGitHubRepo(entry.repoUrl);
@@ -368,8 +371,7 @@ async function main() {
     directoryRepo: DIRECTORY_REPO_URL,
     githubStars: directoryStats?.stars ?? null,
     githubForks: directoryStats?.forks ?? null,
-    repoUpdatedAt: directoryStats?.updatedAt ?? null,
-    generatedAt: new Date().toISOString()
+    repoUpdatedAt: directoryStats?.updatedAt ?? null
   };
   const siteStatsTmp = `${siteStatsFile}.${process.pid}.${Date.now()}.tmp`;
   fs.writeFileSync(siteStatsTmp, `${JSON.stringify(siteStatsPayload, null, 2)}\n`);

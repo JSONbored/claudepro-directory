@@ -2,15 +2,13 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 
 import { BrandWordmark } from "@/components/brand-wordmark";
+import { GitHubStarsLive } from "@/components/github-stars-live";
 import { DiscordMark } from "@/components/icons/discord-mark";
 import { GitHubMark } from "@/components/icons/github-mark";
 import { ThemeToggle } from "@/components/theme-toggle";
-import siteStats from "@/generated/site-stats.json";
-import { compactCount } from "@/lib/entry-presentation";
 import { siteConfig } from "@/lib/site";
 
 export function SiteHeader() {
-  const githubStars = Number(siteStats.githubStars ?? 0);
   const githubRepoLabel = siteConfig.githubUrl
     .replace(/^https?:\/\/github\.com\//i, "")
     .replace(/\/$/, "");
@@ -59,7 +57,9 @@ export function SiteHeader() {
             <span className="h-3 w-px bg-border/90" aria-hidden />
             <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-background/65 px-2 py-0.5 text-[11px] font-medium text-foreground/85">
               <Star className="size-3 fill-current" />
-              <span>{githubStars > 0 ? compactCount(githubStars) : "0"}</span>
+              <span>
+                <GitHubStarsLive />
+              </span>
             </span>
           </a>
           {siteConfig.discordUrl ? (

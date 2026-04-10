@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { BrowseDirectory } from "@/components/browse-directory";
-import siteStats from "@/generated/site-stats.json";
+import { GitHubStarsLive } from "@/components/github-stars-live";
 import { getCategorySummaries, getDirectoryEntries } from "@/lib/content";
 import { buildPageMetadata } from "@/lib/seo";
 
@@ -27,7 +27,6 @@ export default async function HomePage() {
   ]);
   const initialEntries = directoryEntries.slice(0, 15);
   const totalEntries = categories.reduce((sum, category) => sum + category.count, 0);
-  const githubStars = Number(siteStats.githubStars ?? 0);
 
   return (
     <div className="pb-24">
@@ -44,9 +43,7 @@ export default async function HomePage() {
             </p>
             <div className="hero-stats-grid">
               <div className="hero-stat-block">
-                <div className="hero-stat-number">
-                  {githubStars > 0 ? `${githubStars.toLocaleString()}+` : "GitHub"}
-                </div>
+                <div className="hero-stat-number"><GitHubStarsLive withPlus fallback={0} /></div>
                 <div className="hero-stat-label">GitHub Stars</div>
               </div>
               <div className="hero-stat-block">
