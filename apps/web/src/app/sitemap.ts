@@ -10,6 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/browse",
     "/about",
     "/jobs",
+    "/jobs/post",
     "/submit",
     "/advertise",
     ...siteConfig.categoryOrder.map((category) => `/${category}`)
