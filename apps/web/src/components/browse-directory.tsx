@@ -31,11 +31,16 @@ export function BrowseDirectory({
   limit,
   entriesUrl
 }: BrowseDirectoryProps) {
+  const isDefaultQuery = initialQuery.trim().length === 0;
+  const initialSortMode = "popular";
+  const initialCategory = "all";
   const [allEntries, setAllEntries] = useState(entries);
+  const [hasLoadedFullEntries, setHasLoadedFullEntries] = useState(false);
+  const [isLoadingFullEntries, setIsLoadingFullEntries] = useState(false);
   const getEntryKey = (entry: DirectoryEntry) => `${entry.category}:${entry.slug}`;
   const [query, setQuery] = useState(initialQuery);
-  const [category, setCategory] = useState("all");
-  const [sortMode, setSortMode] = useState("popular");
+  const [category, setCategory] = useState(initialCategory);
+  const [sortMode, setSortMode] = useState(initialSortMode);
   const [visibleCount, setVisibleCount] = useState(limit ?? allEntries.length);
   const [clientId, setClientId] = useState("");
   const [votesAvailable, setVotesAvailable] = useState(true);
@@ -48,32 +53,40 @@ export function BrowseDirectory({
 
   useEffect(() => {
     setAllEntries(entries);
+    setHasLoadedFullEntries(false);
+    setIsLoadingFullEntries(false);
   }, [entries]);
+
+  const loadFullEntriesIfNeeded = async () => {
+    if (!entriesUrl || hasLoadedFullEntries || isLoadingFullEntries) return;
+
+    setIsLoadingFullEntries(true);
+    try {
+      const response = await fetch(entriesUrl, {
+        method: "GET",
+        cache: "force-cache"
+      });
+      if (!response.ok) return;
+
+      const payload = (await response.json()) as DirectoryEntry[];
+      if (!Array.isArray(payload) || payload.length === 0) return;
+
+      setAllEntries(payload);
+      setHasLoadedFullEntries(true);
+    } catch {
+      // Keep initial entries on fetch failure.
+    } finally {
+      setIsLoadingFullEntries(false);
+    }
+  };
 
   useEffect(() => {
     if (!entriesUrl) return;
-    let cancelled = false;
-
-    const loadAllEntries = async () => {
-      try {
-        const response = await fetch(entriesUrl, {
-          method: "GET",
-          cache: "force-cache"
-        });
-        if (!response.ok) return;
-        const payload = (await response.json()) as DirectoryEntry[];
-        if (cancelled || !Array.isArray(payload) || payload.length === 0) return;
-        setAllEntries(payload);
-      } catch {
-        // Keep initial entries on fetch failure.
-      }
-    };
-
-    void loadAllEntries();
-    return () => {
-      cancelled = true;
-    };
-  }, [entriesUrl]);
+    if (!isDefaultQuery) {
+      void loadFullEntriesIfNeeded();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entriesUrl, isDefaultQuery]);
 
   useEffect(() => {
     const storageKey = "heyclaude-client-id";
@@ -219,6 +232,10 @@ export function BrowseDirectory({
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries[0]?.isIntersecting) return;
+        if (entriesUrl && !hasLoadedFullEntries && !isLoadingFullEntries) {
+          void loadFullEntriesIfNeeded();
+          return;
+        }
         setVisibleCount((current) => Math.min(current + limit, filteredEntries.length));
       },
       { rootMargin: "400px 0px" }
@@ -226,7 +243,15 @@ export function BrowseDirectory({
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [filteredEntries.length, limit]);
+  }, [entriesUrl, filteredEntries.length, hasLoadedFullEntries, isLoadingFullEntries, limit]);
+
+  useEffect(() => {
+    if (!entriesUrl) return;
+    if (category !== initialCategory || sortMode !== initialSortMode || query.trim().length > 0) {
+      void loadFullEntriesIfNeeded();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entriesUrl, category, sortMode, query]);
 
   const displayedEntries = useMemo(() => {
     if (!limit) return filteredEntries;
