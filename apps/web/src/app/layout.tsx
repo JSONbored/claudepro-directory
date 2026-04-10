@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           id="umami-analytics"
           src="https://umami.heyclau.de/script.js"
           data-website-id="b734c138-2949-4527-9160-7fe5d0e81121"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
         <ToastProvider>
           <SiteHeader />

@@ -18,6 +18,7 @@ type BrowseDirectoryProps = {
   entries: DirectoryEntry[];
   initialQuery?: string;
   limit?: number;
+  entriesUrl?: string;
 };
 
 const VOTE_QUERY_BATCH_SIZE = 120;
@@ -27,13 +28,15 @@ const VOTE_QUERY_RETRY_DELAYS_MS = [250, 900, 1800] as const;
 export function BrowseDirectory({
   entries,
   initialQuery = "",
-  limit
+  limit,
+  entriesUrl
 }: BrowseDirectoryProps) {
+  const [allEntries, setAllEntries] = useState(entries);
   const getEntryKey = (entry: DirectoryEntry) => `${entry.category}:${entry.slug}`;
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState("all");
   const [sortMode, setSortMode] = useState("popular");
-  const [visibleCount, setVisibleCount] = useState(limit ?? entries.length);
+  const [visibleCount, setVisibleCount] = useState(limit ?? allEntries.length);
   const [clientId, setClientId] = useState("");
   const [votesAvailable, setVotesAvailable] = useState(true);
   const [voteCounts, setVoteCounts] = useState<Record<string, number>>({});
@@ -42,6 +45,35 @@ export function BrowseDirectory({
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const deferredQuery = useDeferredValue(query);
   const normalizedQuery = deferredQuery.trim().toLowerCase();
+
+  useEffect(() => {
+    setAllEntries(entries);
+  }, [entries]);
+
+  useEffect(() => {
+    if (!entriesUrl) return;
+    let cancelled = false;
+
+    const loadAllEntries = async () => {
+      try {
+        const response = await fetch(entriesUrl, {
+          method: "GET",
+          cache: "force-cache"
+        });
+        if (!response.ok) return;
+        const payload = (await response.json()) as DirectoryEntry[];
+        if (cancelled || !Array.isArray(payload) || payload.length === 0) return;
+        setAllEntries(payload);
+      } catch {
+        // Keep initial entries on fetch failure.
+      }
+    };
+
+    void loadAllEntries();
+    return () => {
+      cancelled = true;
+    };
+  }, [entriesUrl]);
 
   useEffect(() => {
     const storageKey = "heyclaude-client-id";
@@ -58,16 +90,16 @@ export function BrowseDirectory({
 
   useEffect(() => {
     const baseScores: Record<string, number> = {};
-    for (const entry of entries) {
+    for (const entry of allEntries) {
       const key = getEntryKey(entry);
       baseScores[key] = 0;
     }
     setPopularSortSnapshot(baseScores);
-  }, [entries]);
+  }, [allEntries]);
 
   useEffect(() => {
-    if (!clientId || !entries.length) return;
-    const keys = entries.map(getEntryKey);
+    if (!clientId || !allEntries.length) return;
+    const keys = allEntries.map(getEntryKey);
     let cancelled = false;
 
     const loadVotesBatch = async (batchKeys: string[]) => {
@@ -134,10 +166,10 @@ export function BrowseDirectory({
     return () => {
       cancelled = true;
     };
-  }, [clientId, entries]);
+  }, [allEntries, clientId]);
 
   const filteredEntries = useMemo(() => {
-    const matched = entries.filter((entry) => {
+    const matched = allEntries.filter((entry) => {
       if (category !== "all" && entry.category !== category) return false;
       if (!normalizedQuery) return true;
 
@@ -173,7 +205,7 @@ export function BrowseDirectory({
     });
 
     return sorted;
-  }, [category, entries, limit, normalizedQuery, popularSortSnapshot, sortMode]);
+  }, [allEntries, category, normalizedQuery, popularSortSnapshot, sortMode]);
 
   useEffect(() => {
     setVisibleCount(limit ?? filteredEntries.length);

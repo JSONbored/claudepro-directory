@@ -7,6 +7,7 @@ export default async function HomePage() {
     getDirectoryEntries(),
     getCategorySummaries()
   ]);
+  const initialEntries = directoryEntries.slice(0, 15);
   const totalEntries = categories.reduce((sum, category) => sum + category.count, 0);
   const githubStars = Number(siteStats.githubStars ?? 0);
 
@@ -41,7 +42,7 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="mx-auto mt-14 max-w-[52rem] text-left">
-            <BrowseDirectory entries={directoryEntries} limit={15} />
+            <BrowseDirectory entries={initialEntries} limit={15} entriesUrl="/data/directory-index.json" />
           </div>
         </div>
       </section>
