@@ -1677,9 +1677,9 @@
     "filePath": "content/skills/audio-transcription-summarization.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/audio-transcription-summarization.mdx",
     "repoUrl": "https://github.com/openai/whisper",
-    "githubStars": 97456,
-    "githubForks": 12005,
-    "repoUpdatedAt": "2026-04-09T22:20:35Z"
+    "githubStars": 97459,
+    "githubForks": 12006,
+    "repoUpdatedAt": "2026-04-10T00:54:30Z"
   },
   {
     "category": "hooks",
@@ -2155,9 +2155,9 @@
     "filePath": "content/mcp/aws-services-mcp-server.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/aws-services-mcp-server.mdx",
     "repoUrl": "https://github.com/awslabs/mcp",
-    "githubStars": 8725,
+    "githubStars": 8726,
     "githubForks": 1429,
-    "repoUpdatedAt": "2026-04-09T21:45:33Z"
+    "repoUpdatedAt": "2026-04-10T01:02:32Z"
   },
   {
     "category": "agents",
@@ -9561,9 +9561,9 @@
     "filePath": "content/skills/log-parsing-incident-timeline.mdx",
     "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/log-parsing-incident-timeline.mdx",
     "repoUrl": "https://github.com/BurntSushi/ripgrep",
-    "githubStars": 62145,
-    "githubForks": 2469,
-    "repoUpdatedAt": "2026-04-09T21:49:28Z"
+    "githubStars": 62162,
+    "githubForks": 2470,
+    "repoUpdatedAt": "2026-04-10T00:29:40Z"
   },
   {
     "category": "skills",
