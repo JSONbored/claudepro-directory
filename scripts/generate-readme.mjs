@@ -89,7 +89,7 @@ HeyClaude is a fast, GitHub-native directory for Claude assets.
 - No paid database required for the public site
 - Content lives in-repo as files
 - Community submissions can flow through GitHub
-- Jobs are handled privately (B2B intake), not via public GitHub issues
+- Jobs are reviewed and published by maintainers
 - The site doubles as an awesome-list and a browsable directory
 
 ## Quick Start
@@ -111,7 +111,6 @@ Option C (advanced): commit content files directly.
 
 - Examples: [examples/content/README.md](examples/content/README.md)
 - Issue forms: [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE)
-- Jobs (private flow): [docs/jobs-listings-private-flow.md](docs/jobs-listings-private-flow.md)
 - Package trust model: [docs/package-security-policy.md](docs/package-security-policy.md)
 
 ---

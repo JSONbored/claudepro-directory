@@ -1,7 +1,7 @@
 # HeyClaude
 
 **Discover and share the best Claude configurations**
-313+ file-backed entries covering agents, MCP servers, skills, hooks, rules, commands, guides, collections, and statuslines.
+324+ file-backed entries covering agents, MCP servers, skills, hooks, rules, commands, guides, collections, and statuslines.
 Formerly Claude Pro Directory.
 
 [🌐 Website](https://heyclau.de) • [💼 Repository](https://github.com/JSONbored/claudepro-directory) • [💬 Discussions](https://github.com/JSONbored/claudepro-directory/discussions)
@@ -15,7 +15,7 @@ HeyClaude is a fast, GitHub-native directory for Claude assets.
 - No paid database required for the public site
 - Content lives in-repo as files
 - Community submissions can flow through GitHub
-- Jobs are handled privately (B2B intake), not via public GitHub issues
+- Jobs are reviewed and published by maintainers
 - The site doubles as an awesome-list and a browsable directory
 
 ## Quick Start
@@ -37,7 +37,6 @@ Option C (advanced): commit content files directly.
 
 - Examples: [examples/content/README.md](examples/content/README.md)
 - Issue forms: [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE)
-- Jobs (private flow): [docs/jobs-listings-private-flow.md](docs/jobs-listings-private-flow.md)
 - Package trust model: [docs/package-security-policy.md](docs/package-security-policy.md)
 
 ---
@@ -94,8 +93,9 @@ Option C (advanced): commit content files directly.
 - **[UI UX Design Expert Agent - Agents](https://heyclau.de/agents/ui-ux-design-expert-agent)** - Specialized in creating beautiful, intuitive user interfaces and exceptional user experiences
 - **[Web Async Agent Coordinator - Agents](https://heyclau.de/agents/web-async-agent-coordinator)** - Web-based asynchronous agent coordinator leveraging Claude Code for Web's browser interface for managing long-running autonomous coding tasks with async workflows.
 
-## 📦 Collections (9)
+## 📦 Collections (10)
 
+- **[Agent Operator Growth Master Pack](https://heyclau.de/collections/agent-operator-growth-master-pack)** - High-leverage collection for operators building AI-driven products: secure code review, release governance, automation orchestration, skill authoring, growth execution, and Unraid/n8n operational readiness.
 - **[API Development Kit](https://heyclau.de/collections/api-development-starter-kit)** - Complete toolkit for building and documenting RESTful APIs with automated testing and documentation generation. Perfect for backend developers starting new API projects.
 - **[AWS Infra Bundle](https://heyclau.de/collections/aws-cloud-infrastructure-bundle)** - Complete AWS infrastructure management toolkit combining cloud architecture expertise, CloudFormation validation, and AWS services integration. Perfect for teams building and maintaining cloud-native applications on AWS.
 - **[Backend Development](https://heyclau.de/collections/backend-development-suite)** - Full-featured backend development environment combining architecture planning, database design, and cloud services integration. Perfect for building scalable server-side applications.
@@ -304,10 +304,11 @@ Option C (advanced): commit content files directly.
 - **[WCAG 2.2 Accessibility Auditor for Claude](https://heyclau.de/rules/wcag-accessibility-auditor)** - Expert in WCAG 2.2 Level AA accessibility compliance, automated testing tools, ARIA patterns, and inclusive design for web applications
 - **[Windsurf AI-Native IDE Patterns for Claude](https://heyclau.de/rules/windsurf-ai-native-ide-patterns)** - Windsurf AI-native IDE specialist with Cascade AI, multi-file context awareness, and Flow collaboration patterns for Claude integration
 
-## 🧠 Skills (56)
+## 🧠 Skills (66)
 
 - **[Agent Evals Regression Gate Skill](https://heyclau.de/skills/agent-evals-regression-gate)** - Build repeatable eval suites that catch quality regressions in AI agent behavior before merge or release.
 - **[AI Agent Observability and Incident Response Skill](https://heyclau.de/skills/ai-agent-observability-incident-response)** - Instrument AI agent systems with high-signal telemetry and runbook-driven incident response for reliability and safety.
+- **[AI Business Idea Validation Capability Pack Skill](https://heyclau.de/skills/ai-business-idea-validation-capability-pack)** - Expert business-validation capability pack for testing AI product ideas, market demand, pricing readiness, and launch feasibility.
 - **[AI Search Ranking Content Cluster Strategy Skill](https://heyclau.de/skills/ai-search-ranking-content-cluster-strategy)** - Build SEO-forward content clusters that align with search intent, topical authority, and conversion pathways for AI tooling niches.
 - **[Audio Transcription + Summarization Skill](https://heyclau.de/skills/audio-transcription-summarization)** - Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with automatic summarization and action item extraction. Supports multilingual transcription, speaker diarization, and meeting minutes generation.
 - **[Base L2 Smart Contract Launchpad Skill](https://heyclau.de/skills/base-l2-smart-contract-launchpad)** - Ship smart contracts on Base with secure deployment, verification, environment management, and production-readiness checklists.
@@ -316,6 +317,9 @@ Option C (advanced): commit content files directly.
 - **[CLI Data Visualization Quickstart Skill](https://heyclau.de/skills/cli-data-viz-quickstart)** - Create publication-ready charts and visualizations from CSV, JSON, and Excel data using Python (matplotlib/seaborn) or Node.js (vega/vega-lite). Generate bar charts, line plots, scatter plots, heatmaps, and statistical visualizations with custom styling.
 - **[Cloudflare Workers AI Edge Functions Skill](https://heyclau.de/skills/cloudflare-workers-ai-edge)** - Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share. Access 50+ open-source AI models (Llama-2, Whisper, Stable Diffusion) with pay-per-use pricing.
 - **[Cloudflare Workers D1 KV R2 Capability Pack Skill](https://heyclau.de/skills/cloudflare-workers-d1-kv-r2-capability-pack)** - Expert Cloudflare capability skill for designing workers that combine D1, KV, and R2 with clear consistency, caching, and security boundaries.
+- **[Code Review Automation Capability Pack Skill](https://heyclau.de/skills/coderabbit-lite-pr-review-capability-pack)** - Expert code-review capability pack for deterministic PR audits, risk-ranked findings, and low-noise fix planning without SaaS lock-in.
+- **[Codex Automations Orchestrator Capability Pack Skill](https://heyclau.de/skills/codex-automations-orchestrator-capability-pack)** - Expert automation-orchestration capability pack for designing safe, low-noise recurring Codex workflows with clear runbooks.
+- **[Codex Plugin Creator Capability Pack Skill](https://heyclau.de/skills/codex-plugin-creator-capability-pack)** - Expert Codex plugin capability pack for safe plugin scaffolding, manifest quality, MCP integration, and maintainable distribution.
 - **[CSV/Excel Data Wrangler Skill](https://heyclau.de/skills/csv-excel-data-wrangler)** - Clean, filter, join, pivot, and export CSV/XLSX data reliably with reproducible steps. Transform messy spreadsheets into production-ready datasets with pandas. Handle encoding issues, data type conversion, missing values, duplicates, and complex merges.
 - **[Cursor Windsurf AI Code Editor Skill - Claude Code Skills](https://heyclau.de/skills/cursor-windsurf-ai-ide-setup)** - Configure and optimize Cursor and Windsurf AI code editors for maximum productivity. Set up agent mode, composer features, keybindings, and AI-powered refactoring workflows. Customize with .cursorrules and .windsurfrules for project-specific guidance.
 - **[Docker Compose Production Blueprints Skill](https://heyclau.de/skills/docker-compose-production-blueprints)** - Create production-grade Docker Compose stacks with healthchecks, secrets handling, network isolation, and safe rollout patterns.
@@ -323,9 +327,11 @@ Option C (advanced): commit content files directly.
 - **[Ethereum Base Smart Contract Security Capability Pack Skill](https://heyclau.de/skills/ethereum-base-smart-contract-security-capability-pack)** - Expert EVM capability skill for secure contract architecture across Ethereum and Base, including Foundry testing and operational controls.
 - **[Ethereum Solidity Security Foundry Skill](https://heyclau.de/skills/ethereum-solidity-security-foundry)** - Build and harden Ethereum smart contracts with Foundry, invariant testing, and battle-tested OpenZeppelin security patterns.
 - **[FastAPI Python API Development Skill](https://heyclau.de/skills/fastapi-python-backend)** - Build high-performance async REST APIs with FastAPI, Python's fastest-growing web framework. Automatic OpenAPI/Swagger documentation, type-safe validation with Pydantic, native async/await support, and dependency injection for clean architecture.
+- **[Git-Cliff Release Changelog Capability Pack Skill](https://heyclau.de/skills/git-cliff-release-changelog-capability-pack)** - Expert release-changelog capability pack for git-cliff with conventional commits, deterministic release notes, and low-maintenance versioning.
 - **[GitHub Actions AI-Powered CI/CD Automation Skill](https://heyclau.de/skills/github-actions-ai-cicd)** - Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration.
 - **[GitHub Actions Secure CI/CD Capability Pack Skill](https://heyclau.de/skills/github-actions-secure-cicd-capability-pack)** - Expert GitHub Actions capability skill for secure workflow architecture, token minimization, supply-chain controls, and CI reliability.
 - **[Google Workspace Gemini Automation Skill](https://heyclau.de/skills/google-workspace-gemini-automation)** - Create useful Gemini-powered Google Workspace automations for docs, sheets, email triage, and internal workflow productivity.
+- **[Husky Commit Governance Capability Pack Skill](https://heyclau.de/skills/husky-commit-governance-capability-pack)** - Expert husky capability pack for lightweight local quality gates, commit message enforcement, and low-friction contributor workflows.
 - **[Image OCR + Table Extraction Skill](https://heyclau.de/skills/image-ocr-table-extraction)** - Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR (100+ languages), table structure detection, confidence scoring, orientation correction, and exports to CSV, JSON, and structured formats.
 - **[IndexNow Search Indexing Accelerator Skill](https://heyclau.de/skills/indexnow-search-indexing-accelerator)** - Accelerate search discovery and indexing updates with IndexNow-aware publishing workflows and crawl-efficient update signaling.
 - **[JSON Schema Validate + Transform Skill](https://heyclau.de/skills/json-schema-validation-transformation)** - Validate JSON data against JSON Schema specifications (draft-07, 2019-09, 2020-12) and perform safe, lossless schema migrations and transformations using Ajv (fastest JSON Schema validator) and Zod (TypeScript-first validation).
@@ -337,9 +343,11 @@ Option C (advanced): commit content files directly.
 - **[Mintlify AI Documentation Automation Skill](https://heyclau.de/skills/mintlify-documentation-automation)** - Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform.
 - **[Model Routing Cost and Latency Optimizer Skill](https://heyclau.de/skills/model-routing-cost-latency-optimizer)** - Design and validate model routing strategies that reduce cost and latency while preserving output quality.
 - **[n8n AI Agent Workflow Architect Skill](https://heyclau.de/skills/n8n-ai-agent-workflow-architect)** - Design production-safe n8n automations with AI agents, retries, human approval gates, and observable error handling.
+- **[n8n Operations Resilience Capability Pack Skill](https://heyclau.de/skills/n8n-operations-resilience-capability-pack)** - Expert n8n operations capability pack for resilient workflow execution, incident recovery, credential safety, and production reliability.
 - **[n8n Production Security Capability Pack Skill](https://heyclau.de/skills/n8n-production-security-capability-pack)** - Expert n8n capability skill focused on secure production operation, workflow isolation, secret hygiene, and abuse-resistant automation design.
 - **[OpenClaw Agent Ops Hardening Skill](https://heyclau.de/skills/openclaw-agent-ops-hardening)** - Harden OpenClaw agent environments with secure defaults, policy boundaries, tool governance, and incident response playbooks.
 - **[OpenClaw Operator Capability Pack Skill](https://heyclau.de/skills/openclaw-operator-capability-pack)** - Expert OpenClaw operator capability skill for secure deployment, policy governance, tool boundaries, and production observability.
+- **[OpenClaw Skill Authoring Factory Capability Pack Skill](https://heyclau.de/skills/openclaw-skill-authoring-factory-capability-pack)** - Expert OpenClaw skill-authoring capability pack for repeatable research, validation, packaging, and distribution workflows.
 - **[OpenNext Cloudflare Capability Pack Skill](https://heyclau.de/skills/opennext-cloudflare-capability-pack)** - Expert OpenNext + Cloudflare capability skill for Next.js on Workers, runtime constraints, cache strategy, and production-safe deploy architecture.
 - **[PageSpeed Insights Optimization Skill for AI Agents](https://heyclau.de/skills/pagespeed-insights-optimizer)** - Structured optimization workflow for PageSpeed Insights and Lighthouse that improves Core Web Vitals without changing UI/UX.
 - **[Playwright E2E Testing Automation Skill](https://heyclau.de/skills/playwright-e2e-testing)** - Automate end-to-end testing with Playwright - the modern browser automation framework that supports Chromium, Firefox, and WebKit with a single API.
@@ -356,11 +364,13 @@ Option C (advanced): commit content files directly.
 - **[tRPC Type-Safe API Builder Skill](https://heyclau.de/skills/trpc-type-safe-api)** - Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications. tRPC provides end-to-end type safety without code generation, schema stitching, or serialization layers - delivering a lighter, more intuitive developer experience than REST or GraphQL.
 - **[Unraid API Automation Operator Skill](https://heyclau.de/skills/unraid-api-automation-operator)** - Build practical Unraid API automations for server operations, health checks, and routine maintenance with safe execution controls.
 - **[Unraid API v2 Capability Pack Skill](https://heyclau.de/skills/unraid-api-v2-capability-pack)** - Deep, version-pinned Unraid API capability skill covering auth, schema patterns, safe mutations, and operational automation design.
+- **[Unraid CA Template Authoring Capability Pack Skill](https://heyclau.de/skills/unraid-ca-template-authoring-capability-pack)** - Expert Unraid Community Apps template capability pack for high-quality XML metadata, safer defaults, and CA submission readiness.
 - **[V0 Rapid UI Prototyping Workflow Skill](https://heyclau.de/skills/v0-rapid-prototyping)** - Build production-ready React components and full pages in minutes using V0.dev AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integration. V0.dev is Vercel's breakthrough AI UI generator that has transformed frontend development in 2025.
 - **[Vite Frontend Build Performance Optimization Skill](https://heyclau.de/skills/vite-build-optimization)** - Optimize frontend build performance with Vite's lightning-fast HMR, code splitting, and tree-shaking. Modern build tooling that has replaced Webpack as the developer favorite.
 - **[WebAssembly WASM Module Development Skill](https://heyclau.de/skills/webassembly-module-development)** - Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads. WebAssembly (WASM) runs at near-native speeds across web browsers, serverless platforms, and edge computing environments.
 - **[Website Crawler + Summarizer Skill](https://heyclau.de/skills/website-crawler-summarizer)** - Crawl domains respectfully, extract readable content, dedupe, and generate structured summaries. Perfect for research, competitive analysis, and content aggregation.
 - **[Windsurf AI-Native Collaborative Development Skill](https://heyclau.de/skills/windsurf-collaborative-development)** - Master collaborative AI-assisted development with Windsurf IDE's Cascade AI, multi-file context awareness, and Flow patterns for team workflows.
+- **[Zero-Budget SaaS Launch Capability Pack Skill](https://heyclau.de/skills/zero-budget-saas-launch-capability-pack)** - Expert zero-budget launch capability pack for building and shipping SaaS using free-tier infrastructure and constrained execution plans.
 - **[Zod Schema Validation Skill](https://heyclau.de/skills/zod-schema-validator)** - Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference.
 
 ## 📟 Statuslines (26)
