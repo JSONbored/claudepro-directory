@@ -10,6 +10,8 @@
     "dev": "pnpm --filter web dev",
     "build": "pnpm --filter web build",
     "preview": "pnpm --filter web preview",
+    "deploy:dev": "pnpm --filter web run deploy -- --env dev",
+    "deploy:prod": "pnpm --filter web run deploy -- --env \"\"",
     "type-check": "pnpm --filter web type-check",
     "validate:content": "node scripts/validate-content.mjs",
     "validate:content:strict": "node scripts/validate-content.mjs --strict-recommended",
@@ -26,6 +28,13 @@
     "sync:votes:d1": "node scripts/sync-votes-to-d1.mjs --mode=both",
     "verify:votes:d1": "node scripts/verify-d1-votes.mjs --mode=both",
     "restore:hooks": "node scripts/restore-hooks-from-history.mjs",
-    "restore:collections": "node scripts/restore-collections-from-history.mjs"
+    "restore:collections": "node scripts/restore-collections-from-history.mjs",
+    "commitlint": "commitlint --edit",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
+    "husky": "^9.1.7"
   }
 }
