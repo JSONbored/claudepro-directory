@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   validate-submission:
-    if: contains(join(github.event.issue.labels.*.name, ','), 'submission')
+    if: contains(github.event.issue.labels.*.name, 'submission')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     concurrency:
@@ -39,11 +39,14 @@ jobs:
 
       - name: Validate submission issue
         id: validate
-        continue-on-error: true
         run: |
           node scripts/validate-submission-issue.mjs \
             --issue-json .github/tmp/issue.json \
             --output .github/tmp/submission-validation.json
+
+      - name: Ensure validation report exists
+        run: |
+          test -f .github/tmp/submission-validation.json
 
       - name: Post validation report comment
         uses: actions/github-script@v7

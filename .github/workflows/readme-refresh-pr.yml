@@ -18,6 +18,9 @@ jobs:
   refresh-readme:
     if: ${{ github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'docs(readme):') }}
     runs-on: ubuntu-latest
+    concurrency:
+      group: refresh-readme-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
       - name: Checkout

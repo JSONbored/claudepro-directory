@@ -47,7 +47,7 @@ jobs:
           docker run --rm \
             -v "${PWD}:/repo" \
             -w /repo \
-            orhunp/git-cliff:latest \
+            orhunp/git-cliff:v2.12.0 \
             --config .git-cliff.toml \
             --tag "${{ steps.version.outputs.next }}" \
             --output CHANGELOG.md

@@ -28,14 +28,20 @@ jobs:
       - name: Parse version from commit message
         id: version
         shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           set -euo pipefail
-          msg=""
-          raw="${{ inputs.version }}"
+          raw="${INPUT_VERSION:-}"
           if [ -z "$raw" ]; then
-            msg="${{ github.event.head_commit.message }}"
-            raw="$(echo "$msg" | sed -E 's/^chore\(release\):[[:space:]]*//')"
-            raw="$(echo "$raw" | tr -d '[:space:]')"
+            msg="${COMMIT_MSG:-}"
+            raw="$(printf '%s' "$msg" | sed -E 's/^chore\(release\):[[:space:]]*//')"
+            raw="$(printf '%s' "$raw" | tr -d '[:space:]')"
+          fi
+          if [ -z "$raw" ]; then
+            echo "Release version is empty."
+            exit 1
           fi
           if [[ "$raw" == v* ]]; then
             tag="$raw"
